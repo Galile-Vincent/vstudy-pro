@@ -1,3 +1,4 @@
+import { statusSchema } from "./status";
 import { libraryContract } from "./library";
 import { z } from "zod";
 import {
@@ -23,6 +24,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  "settings:appearance": { request: empty, response: z.object({ reducedTransparency:z.boolean() }).strict() },
   "settings:systemLocale": { request: empty, response: z.string().max(100) },
   ...libraryContract,
   "usage:dashboard": { request: z.object({ period: usagePeriodSchema }).strict(), response: usageDashboardSchema },
@@ -126,7 +128,7 @@ export type IpcResponse<C extends IpcChannel> = z.infer<
   (typeof ipcContract)[C]["response"]
 >;
 export const documentProgressChannel = "documents:progress";
-export const documentProgressSchema = z.object({ documentId: documentIdSchema, message: z.string().min(1).max(200) }).strict();
+export const documentProgressSchema = z.object({ documentId: documentIdSchema, code:statusSchema.shape.code.optional(), params:statusSchema.shape.params.optional(), message: z.string().min(1).max(200) }).strict();
 export const chatEventChannel = "chat:events";
 export const chatEnvelopeSchema = z
   .object({ requestId: requestIdSchema, event: chatEventSchema })
