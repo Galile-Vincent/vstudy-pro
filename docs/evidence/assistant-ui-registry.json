@@ -1,0 +1,163 @@
+{
+  "date": "2026-11-03",
+  "shadcn": "4.23.0",
+  "command": "ELECTRON_SKIP_BINARY_DOWNLOAD=1 npx --yes shadcn@latest add https://r.assistant-ui.com/thread https://r.assistant-ui.com/model-selector https://r.assistant-ui.com/thread-list --yes --overwrite -c apps/desktop",
+  "sourceCheckout": "/Users/vc/.t3/projects/vstudy-aui-setup",
+  "upstreamFiles": [
+    {
+      "path": "components/assistant-ui/elements/attachment-state.ts",
+      "sha256": "8718cfac67e6afff2cc21981ebd934ea40c02abcf96c6d74be441a11dc37709d"
+    },
+    {
+      "path": "components/assistant-ui/elements/attachment.aui.tsx",
+      "sha256": "ec4275215b826173f428ec95b94e150b4ca21124f9094eec8a28dbd87033710d"
+    },
+    {
+      "path": "components/assistant-ui/elements/collapsible-root.tsx",
+      "sha256": "ebea1fff3af62e619a63680227b3c4b89cec449fac059f5fcd6695cc128f38b8"
+    },
+    {
+      "path": "components/assistant-ui/elements/file.tsx",
+      "sha256": "af6c5c38b0409f168e1bcebacffa9efaf7ff17ecc3cc0b5fab8d4770df0454a0"
+    },
+    {
+      "path": "components/assistant-ui/elements/follow-up-suggestions.aui.tsx",
+      "sha256": "f0db1e9cfc5f648adeb57c8ac61fbeca4ebbb4d55267a9c107709af01b73abb4"
+    },
+    {
+      "path": "components/assistant-ui/elements/image.tsx",
+      "sha256": "916b2ca0f1097a2eb22e6e5c3ffd39a918dec71abff424b6b8795939733d53fb"
+    },
+    {
+      "path": "components/assistant-ui/elements/markdown-text.tsx",
+      "sha256": "7d20bd8fe709a1a6aeee24ba82531309e374740ba6181e092592275ffd6ff8ac"
+    },
+    {
+      "path": "components/assistant-ui/elements/media-player.tsx",
+      "sha256": "64a43a3554e9a3de056bcc756dd022a342a45450fa1b41a87836896d0c86dd55"
+    },
+    {
+      "path": "components/assistant-ui/elements/model-selector.aui.tsx",
+      "sha256": "fa58d6cb2392e7d57d58d7d560008953f95025b1bd0a58b7539a61f7283557c1"
+    },
+    {
+      "path": "components/assistant-ui/elements/model-selector.tsx",
+      "sha256": "eeee32542590ef726200994a681e704b4903e22c06ebf5d0fb8959e5ef8514c7"
+    },
+    {
+      "path": "components/assistant-ui/elements/reasoning.aui.tsx",
+      "sha256": "3ae8bcf0d84fcb9ac37a40c2046abbf46d7b8f3967b482eec84f0a743aefce65"
+    },
+    {
+      "path": "components/assistant-ui/elements/reasoning.tsx",
+      "sha256": "02c42a1cad5fd56f4479fe65c779e9f9934c03a6e935ac92ebf98cbb46ef3cc7"
+    },
+    {
+      "path": "components/assistant-ui/elements/surfaces.tsx",
+      "sha256": "5d81fbb669e67ae20026cd30ed57efc51a5e3ee0f4f5d265e1723de75359b8fa"
+    },
+    {
+      "path": "components/assistant-ui/elements/thread-list.aui.tsx",
+      "sha256": "56af673ffdff7365cb07d94dda204c606d39991dcc54a89092bddf76e2e624d0"
+    },
+    {
+      "path": "components/assistant-ui/elements/thread.aui.tsx",
+      "sha256": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da"
+    },
+    {
+      "path": "components/assistant-ui/elements/tool-fallback.aui.tsx",
+      "sha256": "31720ad79fe332a5999cc1873108da740e63c05f4b8f322bde75f8d495cbf853"
+    },
+    {
+      "path": "components/assistant-ui/elements/tool-group.aui.tsx",
+      "sha256": "757caf28ee232d4f500c8af7d6837fe7d6d2b144774a6a0bcdaff8c0c517bd9e"
+    },
+    {
+      "path": "components/assistant-ui/elements/tooltip-icon-button.tsx",
+      "sha256": "1ec2af97d22c34c955588c866aba5ddbfc579b1fd9218f68f75010b10e5a7868"
+    },
+    {
+      "path": "components/assistant-ui/utils/href.ts",
+      "sha256": "edcbea291ec6c5d506be4ddd76c6e0b6cabba4a14193f389a44fb6bfa8d81c40"
+    },
+    {
+      "path": "components/assistant-ui/utils/model-selection.ts",
+      "sha256": "019d3dca2d33724de16b9eb54757344cd05bd5c89f2fc3cb2885cdcc2590f4d9"
+    },
+    {
+      "path": "components/assistant-ui/utils/useIsomorphicLayoutEffect.ts",
+      "sha256": "8db117d730e640655e5099e086af4e00d545c283839d9ef5885ca93419d51893"
+    },
+    {
+      "path": "components/ui/avatar.tsx",
+      "sha256": "f757031690c648e3b115907bff6ded599076ea7245715d32b98dad2bd2153899"
+    },
+    {
+      "path": "components/ui/button.tsx",
+      "sha256": "79dd6f75f8136394442202d6b8b922fb269eaad0a5dba579397c9d5b41f893bb"
+    },
+    {
+      "path": "components/ui/command.tsx",
+      "sha256": "1c06a2f77764d7a3b9210aec7201d14a48f7900841a249ef6369b5eb61e0f6b0"
+    },
+    {
+      "path": "components/ui/dialog.tsx",
+      "sha256": "dcd488cc5d713da215ce2037efd644f35904df755c70f31534706643db488514"
+    },
+    {
+      "path": "components/ui/input.tsx",
+      "sha256": "0c9457181f6ddc80969bcf854e92c362903a55b6e889fbef3fd85343ecc4af5b"
+    },
+    {
+      "path": "components/ui/popover.tsx",
+      "sha256": "d8bfac795e9750a8994836b9f773ddceb4892730f9ee1e02e498fb6892c3be44"
+    },
+    {
+      "path": "components/ui/skeleton.tsx",
+      "sha256": "f51ce0fcd31e5c31437382e80ea0af94b4fc3d64221d27091d36824546780a43"
+    },
+    {
+      "path": "components/ui/textarea.tsx",
+      "sha256": "5cafcfeeee29534f449387a16b585f5923d2faab1a0cdc50a874416b175f59ce"
+    },
+    {
+      "path": "components/ui/tooltip.tsx",
+      "sha256": "611e4305879b2773eafe76bf3c5caa69d8e47367fd97887a71634a27828f4433"
+    },
+    {
+      "path": "hooks/use-attachment-src.ts",
+      "sha256": "dfb621f1a18f4013994aa29815beddb436020105164526ab7c86b0b0a32040a1"
+    },
+    {
+      "path": "hooks/use-copy-to-clipboard.ts",
+      "sha256": "1f3b8a1bab79cef961f62eb25d6b58a0d16c957d63ba1faf086ad09c99712c0a"
+    }
+  ],
+  "dependencies": {
+    "@assistant-ui/react": "0.15.32",
+    "@assistant-ui/react-markdown": "0.14.24",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "cmdk": "1.1.1",
+    "decode-named-character-reference": "1.3.0",
+    "katex": "0.16.47",
+    "lucide-react": "1.67.0",
+    "radix-ui": "1.8.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-markdown": "10.1.0",
+    "react-resizable-panels": "2.1.9",
+    "rehype-highlight": "7.0.2",
+    "rehype-katex": "7.0.1",
+    "rehype-sanitize": "6.0.0",
+    "remark-gfm": "4.0.1",
+    "remark-math": "6.0.0",
+    "remark-parse": "11.0.0",
+    "tailwind-merge": "3.6.0",
+    "tw-animate-css": "1.4.0",
+    "tw-shimmer": "0.4.14",
+    "unified": "11.0.5",
+    "zod": "3.24.2",
+    "zustand": "5.0.16"
+  }
+}
