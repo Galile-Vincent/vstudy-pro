@@ -97,7 +97,7 @@ describe("DocumentService", () => {
     await writeFile(oversized, "");
     await truncate(oversized, MAX_SOURCE_BYTES + 1);
     await expect(service.importPath(oversized)).rejects.toThrow("50 MiB");
-    await truncate(oversized, 8 * 1024 * 1024 + 1);
+    await writeFile(oversized, "a".repeat(8 * 1024 * 1024 + 1));
     const document = await service.importPath(oversized);
     await service.waitForIdle();
     expect(service.get(document.id)).toMatchObject({ status: "failed", error: "Markdown exceeds 8 MiB" });

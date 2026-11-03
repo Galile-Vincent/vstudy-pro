@@ -1,3 +1,9 @@
+import { chmodSync, mkdirSync } from "node:fs";
+import { resolve } from "node:path";
+import { validateImport } from "./import-security";
+import { containedPath } from "./library";
+import { SearchService } from "./search";
+import { ActivityService } from "./activity";
 import { profileStage } from "../../../resources/converter/profile";
 import { decodeHtmlEntities } from "../../shared/html";
 import { createHash, randomUUID } from "node:crypto";
@@ -33,6 +39,8 @@ export class DocumentService {
     onProgress?: (documentId: Document["id"], message: string) => void;
   }) {
     this.library = join(options.userData, "library");
+    mkdirSync(this.library, { recursive: true, mode: 0o700 });
+    chmodSync(this.library, 0o700);
     for (const document of this.list()) {
       if (document.status === "converting") this.enqueue(document);
     }
@@ -55,9 +63,11 @@ export class DocumentService {
       const extension = extname(path).slice(1).toLowerCase();
       const mime = documentFormats[extension];
       if (!Object.hasOwn(documentFormats, extension) || !mime) throw new Error("Unsupported document type");
+      path = resolve(path);
       const metadata = await stat(path);
       if (!metadata.isFile()) throw new Error("Import requires a regular file");
       if (metadata.size > MAX_SOURCE_BYTES) throw new Error("Document exceeds 50 MiB");
+      validateImport(path, extension);
       await mkdir(this.library, { recursive: true, mode: 0o700 });
       const staging = await mkdtemp(join(this.library, ".import-"));
       try {
@@ -93,6 +103,8 @@ export class DocumentService {
           sourceHash, sourcePath: join(directory, `source.${extension}`), mime,
           markdownPath: join(directory, "content.md"), status: "converting", createdAt: new Date().toISOString(),
         }));
+        this.options.store.db.prepare("UPDATE documents SET sizeBytes=? WHERE id=?").run(size, document.id);
+        new ActivityService(this.options.store).record("import", document.id, 0, document.id);
         inserted();
         this.enqueue(document);
         return document;
@@ -103,7 +115,8 @@ export class DocumentService {
   async read(id: Document["id"]): Promise<string> {
     const document = this.require(id);
     if (document.status !== "ready" && document.status !== "converting") throw new Error("Document is not ready");
-    const path = document.status === "converting" ? `${document.markdownPath}.partial` : document.markdownPath;
+    const path = containedPath(this.library, document.status === "converting" ? `${document.markdownPath}.partial` : document.markdownPath);
+    new ActivityService(this.options.store).opened(id);
     if ((await stat(path)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
     return readFile(path, "utf8");
   }
@@ -154,6 +167,9 @@ export class DocumentService {
         if (!this.stopped) {
           const saved = profileStage("DB ready transition");
           this.options.store.documents.transition(document.id, { status: "ready", converter });
+          const content = await readFile(containedPath(this.library, document.markdownPath), "utf8");
+          this.options.store.db.prepare("UPDATE documents SET contentChars=?,pageCount=? WHERE id=?").run(content.length, (content.match(/<!--\s*page\b/gi) ?? []).length || null, document.id);
+          new SearchService(this.options.store.db).update(document.id, content);
           saved();
           this.options.onProgress?.(document.id, "Conversion complete");
         }

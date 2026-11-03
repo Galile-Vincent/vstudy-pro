@@ -17,6 +17,7 @@ export interface Encryption {
   decryptString(value: Buffer): string;
 }
 export function createSecretStore(file: string, encryption: Encryption) {
+  if (existsSync(file)) chmodSync(file, 0o600);
   function read(): Record<string, string> {
     if (!existsSync(file)) return {};
     chmodSync(file, 0o600);
