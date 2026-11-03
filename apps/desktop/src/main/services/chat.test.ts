@@ -445,3 +445,13 @@ it('reloads only edited turns and regenerates without duplicating the user, reta
   expect(restarted.usage.forConversation(request.conversationId)).toHaveLength(4);
   restarted.close();
 });
+
+it.each(['messages', 'activity_events'])('rolls back a failed edit when %s insertion aborts', async (table) => {
+  const { chat, store, request, owner } = await setup({ ...available, async *stream() { yield { type: 'done' }; } });
+  const user = store.messages.insert({id: randomUUID() as never, conversationId: request.conversationId, role:'user', parts:[{type:'text',text:'original'}], createdAt:new Date().toISOString()});
+  store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'assistant',parts:[{type:'text',text:'valuable answer'}],createdAt:new Date(Date.now()+1).toISOString()});
+  const before = store.messages.list(request.conversationId);
+  store.db.exec(`CREATE TRIGGER reject_edit BEFORE INSERT ON ${table} BEGIN SELECT RAISE(ABORT,'simulated storage failure'); END`);
+  expect(() => chat.start({...request,turnId:user.id,userMessage:'edited'},owner)).toThrow('simulated storage failure');
+  expect(store.messages.list(request.conversationId)).toEqual(before);
+});
