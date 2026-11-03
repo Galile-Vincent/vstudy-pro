@@ -26,6 +26,12 @@ interface ActiveRequest {
   text: string;
 }
 export class ChatService {
+  private readonly deleting = new Set<string>();
+  async deleteDocument(id: ChatRequest["documentId"], remove: () => Promise<void>): Promise<void> {
+    if (this.deleting.has(id)) throw new Error("Document is deleting");
+    this.deleting.add(id);
+    try { this.abortDocument(id); await remove(); } finally { this.deleting.delete(id); }
+  }
   private readonly active = new Map<string, ActiveRequest>();
   constructor(
     private readonly store: Store,
@@ -34,6 +40,7 @@ export class ChatService {
   createConversation(
     input: Pick<Conversation, "documentId" | "providerId" | "modelId">,
   ): Conversation {
+    if (this.deleting.has(input.documentId)) throw new Error("Document is deleting");
     if (!this.store.documents.get(input.documentId))
       throw new Error("Document not found");
     this.providers.get(input.providerId);
@@ -52,6 +59,7 @@ export class ChatService {
     this.store.conversations.delete(id);
   }
   start(request: ChatRequest, owner: ChatOwner): void {
+    if (this.deleting.has(request.documentId)) throw new Error("Document is deleting");
     if (owner.isDestroyed()) throw new Error("Chat window unavailable");
     if (this.active.has(request.requestId))
       throw new Error("Request already active");

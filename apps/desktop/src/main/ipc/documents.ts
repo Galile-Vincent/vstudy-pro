@@ -11,7 +11,7 @@ export function registerDocumentsIpc(
   registrar: ReturnType<typeof createIpcRegistrar>,
   store: Store,
   implemented: Set<IpcChannel>,
-  abortDocument: (id: import("../../shared/domain").Document["id"]) => void = () => {},
+  deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(),
 ): void {
   const userData = app.getPath("userData");
   const converter = createConverter({
@@ -40,8 +40,7 @@ export function registerDocumentsIpc(
   registrar.handle("documents:read", ({ documentId }) => documents.read(documentId));
   registrar.handle("documents:retry", ({ documentId }, event) => { owners.set(documentId, event.sender); return documents.retry(documentId); });
   registrar.handle("documents:delete", async ({ documentId }) => {
-    abortDocument(documentId);
-    await documents.delete(documentId);
+    await deleteDocument(documentId, () => documents.delete(documentId));
     return { ok: true };
   });
   const dispose = registrar.dispose;

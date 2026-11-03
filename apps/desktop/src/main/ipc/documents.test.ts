@@ -31,7 +31,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
   }, () => true);
   const implemented = new Set<IpcChannel>();
   const abort = vi.fn();
-  registerDocumentsIpc(registrar, store, implemented, abort);
+  registerDocumentsIpc(registrar, store, implemented, async (id, remove) => { abort(id); await remove(); });
   const send = vi.fn();
   const sender = { isDestroyed: () => false, send };
   const invoke = async (channel: string, payload: unknown) => {

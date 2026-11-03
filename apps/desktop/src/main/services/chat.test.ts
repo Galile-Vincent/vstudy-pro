@@ -304,3 +304,12 @@ it("persists structured selection and partial status, excludes incomplete turns 
   expect(prompt).not.toContain("partial answer");
   expect(prompt).not.toContain("Explain this");
 });
+it("rejects new streams and conversations throughout document deletion", async () => {
+  const { chat, request, owner } = await setup({ ...available, async *stream() { yield { type: "done" }; } });
+  let release!: () => void;
+  const deletion = chat.deleteDocument(request.documentId, () => new Promise<void>(resolve => { release = resolve; }));
+  expect(() => chat.start(request, owner)).toThrow("Document is deleting");
+  expect(() => chat.createConversation(request)).toThrow("Document is deleting");
+  release(); await deletion;
+  expect(() => chat.start(request, owner)).not.toThrow();
+});

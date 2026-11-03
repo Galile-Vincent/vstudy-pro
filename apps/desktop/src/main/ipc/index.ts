@@ -42,7 +42,7 @@ export function registerIpc(
     return { ok: true };
   });
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
-  registerDocumentsIpc(registrar, store, implemented, id => chat.abortDocument(id));
+  registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove));
   for (const channel of Object.keys(ipcContract) as IpcChannel[]) {
     if (!implemented.has(channel))
       registrar.handle(channel, () => {
