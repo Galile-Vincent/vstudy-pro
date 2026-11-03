@@ -132,7 +132,7 @@ it("kills a real subprocess on abort and on timeout", async () => {
           50,
         ),
       ),
-    ).rejects.toThrow("provider unavailable");
+    ).rejects.toThrow("Provider unavailable");
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -180,9 +180,25 @@ it("allows loopback compatible providers without credentials", async () => {
   expect(await collect(adapter.stream(request, new AbortController().signal))).toEqual([{ type: "usage", usage: { inputTokens: Math.ceil(request.prompt.length / 4), outputTokens: 0, costSource: "estimated" } }, { type: "done" }]);
   expect(fetcher.mock.calls[0]?.[1]?.headers).toEqual({ "content-type": "application/json" });
 });
-it.each([[401, "auth failed"], [429, "rate limited"], [400, "bad request"]] as const)("categorizes HTTP %s without exposing response or key", async (status, category) => {
-  const adapter = createApiAdapter(() => ({ kind: "api", id: "openai-api", enabled: true }), { getInMainOnly: () => "private-key" }, async () => new Response("private-key", { status }));
-  await expect(collect(adapter.stream(request, new AbortController().signal))).rejects.toThrow(`Provider ${category}`);
+it.each([
+  [401, 'Authentication failed. Check the API key in Settings.'],
+  [429, 'Provider rate limited. Try again shortly.'],
+  [529, 'Provider rate limited. Try again shortly.'],
+  [400, 'Provider rejected the request. Check the model and settings.'],
+  [500, 'Provider server error (HTTP 500). Try again.'],
+  [408, 'Provider request timed out (HTTP 408). Try again.'],
+  [409, 'Provider temporarily unavailable (HTTP 409). Try again.'],
+  [425, 'Provider temporarily unavailable (HTTP 425). Try again.'],
+] as const)('categorizes HTTP %s without exposing response or key', async (status, message) => {
+  const adapter = createApiAdapter(() => ({ kind: 'api', id: 'openai-api', enabled: true }), { getInMainOnly: () => 'private-key' }, async () => new Response('private-key', { status }));
+  await expect(collect(adapter.stream(request, new AbortController().signal))).rejects.toThrow(message);
+});
+it.each([
+  ['claude', { type: 'assistant', error: 'authentication_failed', message: { content: [{ type: 'text', text: 'Not logged in · Please run /login' }] } }, 'Authentication failed. Run `claude` and /login.'],
+  ['claude', { type: 'result', is_error: true, result: 'Not logged in · Please run /login' }, 'Authentication failed. Run `claude` and /login.'],
+  ['codex', { type: 'error', message: 'unexpected status 401 Unauthorized' }, 'Authentication failed. Run `codex login`.'],
+] as const)('classifies %s JSON stdout authentication failures with empty stderr', async (kind, fixture, message) => {
+  await expect(collect(runCli(process.execPath, ['-e', `console.log(${JSON.stringify(JSON.stringify(fixture))})`], '', tmpdir(), kind, new AbortController().signal))).rejects.toThrow(message);
 });
 it("returns availability while remote models are pending and caches arriving models", async () => {
   const { ProviderRegistry } = await import("./index");

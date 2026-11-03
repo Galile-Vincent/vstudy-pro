@@ -5,8 +5,25 @@ import type { Usage, ProviderConfig } from "../../shared/domain";
 import type { SecretStore } from "../services/secrets";
 import type { ProviderAdapter } from "./index";
 import { parseStream } from "./parsers";
+const errorMessages = {
+  'auth failed': 'Authentication failed. Check the API key in Settings.',
+  'rate limited': 'Provider rate limited. Try again shortly.',
+  network: 'Network error. Check your connection and try again.',
+  'bad request': 'Provider rejected the request. Check the model and settings.',
+  'provider unavailable': 'Provider unavailable. Check provider configuration and try again.',
+  'server error': 'Provider server error. Try again.',
+  budget: 'Provider budget exceeded. Check your quota or billing.',
+};
 export class ProviderError extends Error {
-  constructor(readonly category: "auth failed" | "rate limited" | "network" | "bad request" | "provider unavailable" | "budget") { super(`Provider ${category}`); }
+  constructor(readonly category: keyof typeof errorMessages, message = errorMessages[category]) { super(message); }
+}
+export function httpError(status: number): ProviderError {
+  if (status === 401 || status === 403) return new ProviderError('auth failed');
+  if ([429, 529].includes(status)) return new ProviderError('rate limited');
+  if (status === 408) return new ProviderError('network', 'Provider request timed out (HTTP 408). Try again.');
+  if ([409, 425].includes(status)) return new ProviderError('server error', `Provider temporarily unavailable (HTTP ${status}). Try again.`);
+  if (status >= 500) return new ProviderError('server error', `Provider server error (HTTP ${status}). Try again.`);
+  return new ProviderError('bad request');
 }
 export function isLoopback(value: string): boolean { return ["localhost", "[::1]"].includes(new URL(value).hostname) || /^127\.\d+\.\d+\.\d+$/.test(new URL(value).hostname); }
 export function validateBaseUrl(value: string): string {
@@ -120,7 +137,7 @@ export function createApiAdapter(
       ).catch(() => { throw new ProviderError("network"); });
       if (!response.ok || !response.body) {
         await response.body?.cancel();
-        throw new ProviderError(response.status === 401 || response.status === 403 ? "auth failed" : response.status === 429 ? "rate limited" : "bad request");
+        throw httpError(response.status);
       }
       let terminal = false;
       let usage: Usage | undefined;

@@ -139,9 +139,28 @@ export async function* runCli(
   child.stdin.on("error", () => {});
   child.stdin.end(prompt);
   child.stdout.setEncoding("utf8");
+  let stdoutDiagnostic = '';
+  async function* checkedOutput() {
+    let buffer = '';
+    for await (const chunk of child.stdout) {
+      buffer += String(chunk);
+      if (buffer.length > 2_000_000) throw new Error('CLI event too large');
+      let newline: number;
+      while ((newline = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, newline);
+        buffer = buffer.slice(newline + 1);
+        stdoutDiagnostic = line.slice(-8192);
+        let record: Record<string, unknown> | undefined;
+        try { record = JSON.parse(line) as Record<string, unknown>; } catch { /* Some CLIs print plain diagnostics. */ }
+        if (record?.is_error || record?.error || record?.type === 'error' || record?.type === 'turn.failed' || /not logged in|please run \/login/i.test(line)) throw new Error('CLI request failed');
+        yield line + '\n';
+      }
+    }
+    if (buffer) { stdoutDiagnostic = buffer.slice(-8192); yield buffer; }
+  }
   try {
     let terminal = false;
-    for await (const event of parseStream(child.stdout, kind, false, snapshot)) {
+    for await (const event of parseStream(checkedOutput(), kind, false, snapshot)) {
       signal.throwIfAborted();
       if (event.type === "error") throw new Error("CLI request failed");
       if (event.type === "done") {
@@ -157,6 +176,8 @@ export async function* runCli(
     yield { type: "done" } as const;
   } catch {
     signal.throwIfAborted();
+    diagnostic += '\n' + stdoutDiagnostic;
+    if (/auth|login|logged.?in|unauthorized|401|403/i.test(diagnostic)) throw new ProviderError('auth failed', kind === 'claude' ? 'Authentication failed. Run `claude` and /login.' : 'Authentication failed. Run `codex login`.');
     throw new ProviderError(/auth|login|unauthorized|401|403/i.test(diagnostic) ? 'auth failed' : /rate.limit|429/i.test(diagnostic) ? 'rate limited' : /budget|quota|credit/i.test(diagnostic) ? 'budget' : /network|ECONN|ENOTFOUND|fetch failed/i.test(diagnostic) ? 'network' : 'provider unavailable');
   } finally {
     clearTimeout(timer);
