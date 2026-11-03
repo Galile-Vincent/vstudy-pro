@@ -561,7 +561,7 @@ h3 {
 .hljs-literal {
   color: var(--palette-14);
 }
-.section-action {
+.section-action,.paragraph-action {
   position: absolute;
   right: 0;
   bottom: 100%;
@@ -573,7 +573,7 @@ h3 {
   padding: 3px 7px;
 }
 .markdown :is(h1, h2, h3, h4, h5, h6):hover .section-action,
-.section-action:focus-visible {
+.section-action:focus-visible,.paragraph-action:focus-visible {
   opacity: 1;
   pointer-events: auto;
 }

@@ -275,7 +275,7 @@ export function Workspace() {
     selectedModel?.availability.available &&
     selectedModel.config.enabled;
   useEffect(() => {
-    if (selection) setCompactPane("chat");
+    if (selection) { setCompactPane("chat"); requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>(".aui-composer-input")?.focus()); }
     if (selection && !conversation && canChat && !busy) void newConversation();
   }, [selection, conversation, canChat, busy]);
   const chatControls = (
@@ -426,7 +426,7 @@ export function Workspace() {
         } catch (error) { report(error); }
       }}
     >
-      <a className="skip-link" href="#reading-content">{tr('common:skip_content')}</a><header className="app-header">
+      <h1 className="sr-only">{tr("common:document_library")}</h1><header className="app-header">
         <div className="row">
           <button className="ghost" onClick={() => navigate("library")}>{tr("common:library")}</button>
           <button data-testid="import-document" aria-label={tr('common:import_document')} disabled={busy||!connected} onClick={()=>void importDocument()}><Plus size={16}/></button>

@@ -11,8 +11,14 @@ export interface Heading {
   start: number;
   end: number;
 }
+let cachedSource: string | undefined;
+let cachedTree: MdRoot;
+function selectionTree(source: string) {
+  if (cachedSource !== source) { cachedSource = source; cachedTree = unified().use(remarkParse).parse(source) as MdRoot; }
+  return cachedTree;
+}
 export function headingsIn(source: string): Heading[] {
-  const tree = unified().use(remarkParse).parse(source) as MdRoot;
+  const tree = selectionTree(source);
   const text = (node: MdNode): string =>
     "value" in node
       ? node.value
@@ -48,7 +54,7 @@ export function pageAt(source: string, offset: number): number | undefined {
     }
     if ("children" in node) node.children.forEach(visit);
   };
-  visit(unified().use(remarkParse).parse(source) as MdRoot);
+  visit(selectionTree(source));
   return page;
 }
 

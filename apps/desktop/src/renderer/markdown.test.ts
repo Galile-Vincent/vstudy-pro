@@ -94,7 +94,7 @@ describe("Document Markdown", () => {
     );
   });
 });
-it("offers keyboard selections on selectionchange and supports the ask shortcut", async () => {
+it("offers keyboard selections on keyboard selection completion and supports the ask shortcut", async () => {
   const container = document.createElement("div"); document.body.append(container);
   const root = createRoot(container);
   const select = vi.fn();
@@ -103,11 +103,16 @@ it("offers keyboard selections on selectionchange and supports the ask shortcut"
   const range = document.createRange(); range.setStart(text, 0); range.setEnd(text, 8);
   Object.defineProperty(range, "getBoundingClientRect", { value: () => ({ left: 0, bottom: 80 }) });
   window.getSelection()!.removeAllRanges(); window.getSelection()!.addRange(range);
-  await act(async () => document.dispatchEvent(new Event("selectionchange")));
+  await act(async () => document.dispatchEvent(new Event("keyup")));
   expect(container.querySelector(".floating-action")?.textContent).toBe("Ask about this");
+  expect(window.getSelection()?.toString()).toBe("Keyboard");
   expect(container.querySelector<HTMLButtonElement>(".floating-action")?.tabIndex).toBe(0);
   await act(async () => document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, shiftKey: true })));
   expect(select.mock.calls[0]?.[0]).toEqual({ documentId: id, startOffset: 0, endOffset: 8, text: "Keyboard", headingPath: [] });
+  await act(async () => document.dispatchEvent(new Event("mouseup")));
+  const action = container.querySelector<HTMLButtonElement>(".floating-action")!;
+  await act(async () => { action.dispatchEvent(new MouseEvent("mouseup", {bubbles:true})); action.click(); });
+  expect(select).toHaveBeenCalledTimes(2);
   await act(async () => root.unmount()); container.remove();
 });
 it("renders partial and complete assistant Markdown safely", async () => {

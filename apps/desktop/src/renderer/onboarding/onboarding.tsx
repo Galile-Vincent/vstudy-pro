@@ -31,7 +31,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
     dialog.current?.showModal();
     void desktop.invoke('settings:get', {}).then(s => { setLanguage(s.language); setName(s.displayName ?? ''); }).catch(() => setError(tr('errors:generic')));
     void refresh();
-    return () => { if (previous?.isConnected) previous.focus(); };
+    return () => { if (previous?.isConnected && previous !== document.body) previous.focus(); else document.getElementById("shell-content")?.focus(); };
   }, []);
   useEffect(() => { heading.current?.focus(); setError(''); setNotice(''); }, [step]);
   const finish = async (tour = false) => {

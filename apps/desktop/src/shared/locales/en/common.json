@@ -352,5 +352,12 @@
   "menu_minimize": "Minimize",
   "menu_zoom": "Zoom",
   "menu_front": "Bring All to Front",
-  "delete_all_data": "Delete all data"
+  "delete_all_data": "Delete all data",
+  "answer_streaming": "Assistant is answering",
+  "answer_complete": "Answer complete",
+  "answer_stopped": "Answer stopped",
+  "ask_about_paragraph": "Ask about this paragraph",
+  "chat_author_you": "You",
+  "chat_author_assistant": "Assistant",
+  "answer_error": "Answer failed"
 }

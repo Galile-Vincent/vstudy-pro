@@ -36,12 +36,15 @@ export function ProviderSettings({
   const [tab,setTab] = useState(initialTab);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
     dialog.current?.showModal();
     void desktop.invoke('settings:get',{}).then(s => setStructuredTables(s.enableGenerativeUI)).catch(() => {});
+    return () => { if (previous?.isConnected) previous.focus(); else document.getElementById('shell-content')?.focus(); };
   }, []);
   return (
     <dialog
       ref={dialog}
+      aria-label={tr("common:settings")}
       className={`settings-dialog ${tab === "usage" ? "usage-dashboard-dialog" : ""}`}
       onCancel={onClose}
       onClick={(e) => {

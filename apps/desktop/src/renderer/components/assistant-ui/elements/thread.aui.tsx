@@ -233,6 +233,18 @@ export const Thread: FC<ThreadProps> = ({
   );
 };
 
+export function ChatAnnouncement() {
+  useTranslation();
+  const announcement = useAuiState(s => {
+    if (s.thread.isRunning) return tr('common:answer_streaming');
+    const last = s.thread.messages.at(-1);
+    if (!last || last.role !== 'assistant') return '';
+    const text = last.content.filter(p => p.type === 'text').map(p => p.text).join('\n');
+    return `${tr(last.status?.type === 'incomplete' ? last.status.reason === 'error' ? 'common:answer_error' : 'common:answer_stopped' : 'common:answer_complete')}: ${text}`;
+  });
+  return <span data-testid="chat-announcement" role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</span>;
+}
+
 const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
   isEmpty,
   autoFocus,
@@ -251,6 +263,7 @@ const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
         ["--composer-padding" as string]: "8px",
       }}
     >
+      <ChatAnnouncement />
       <ThreadPrimitive.Viewport
         turnAnchor="top"
         data-slot="aui_thread-viewport"
@@ -726,6 +739,8 @@ const AssistantMessage: FC = () => {
   return (
     <MessagePrimitive.Root
       data-slot="aui_assistant-message-root"
+      role="article"
+      aria-label={tr("common:chat_author_assistant")}
       data-role="assistant"
       className="fade-in slide-in-from-bottom-1 animate-in relative -mb-7.5 pb-7.5 duration-150"
     >
@@ -920,6 +935,8 @@ const UserMessage: FC = () => {
     <MessagePrimitive.Root
       data-slot="aui_user-message-root"
       className="fade-in slide-in-from-bottom-1 animate-in grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] content-start gap-y-2 px-2 duration-150 [&:where(>*)]:col-start-2"
+      role="article"
+      aria-label={tr("common:chat_author_you")}
       data-role="user"
     >
       <UserMessageAttachments />

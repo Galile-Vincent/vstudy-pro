@@ -352,5 +352,12 @@
   "menu_minimize": "縮小視窗",
   "menu_zoom": "縮放視窗",
   "menu_front": "將所有視窗移至最前方",
-  "delete_all_data": "刪除所有資料"
+  "delete_all_data": "刪除所有資料",
+  "answer_streaming": "助理正在回答",
+  "answer_complete": "回答完成",
+  "answer_stopped": "回答已停止",
+  "ask_about_paragraph": "詢問此段落",
+  "chat_author_you": "你",
+  "chat_author_assistant": "助理",
+  "answer_error": "回答失敗"
 }

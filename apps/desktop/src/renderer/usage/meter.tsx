@@ -13,8 +13,8 @@ export function useUsage(conversationId: Conversation['id'], modelId?: string) {
   useEffect(() => {
     let active = true;
     const refresh = () => { void Promise.all([desktop.invoke('settings:get', {}), desktop.invoke('usage:summary', { period: 'month' }), desktop.invoke('usage:forConversation', { conversationId }), desktop.invoke('usage:estimate',{conversationId,userMessage:'.'})]).then(([settings,month,records,estimate]) => { if (active) { setData({ settings, month, records }); setPriceUnknown(estimate.costUsd === undefined); setError(''); } }).catch(() => { if (active) setError(tr('common:usage_unavailable')); }); };
-    refresh(); window.addEventListener('usage-updated', refresh); window.addEventListener('focus', refresh);
-    return () => { active = false; window.removeEventListener('usage-updated',refresh); window.removeEventListener('focus',refresh); };
+    refresh(); window.addEventListener('usage-updated', refresh);
+    return () => { active = false; window.removeEventListener('usage-updated',refresh); };
   }, [conversationId,modelId]);
   return { data,error,priceUnknown };
 }

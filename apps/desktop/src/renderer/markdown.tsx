@@ -73,6 +73,9 @@ export function DocumentMarkdown({
 }) {
   useTranslation();
   const root = useRef<HTMLDivElement>(null);
+  const selectCallback = useRef(onSelect);
+  selectCallback.current = onSelect;
+  const selectedSnapshot = useRef<Selection | null>(null);
   const [floating, setFloating] = useState<{
     selection: Selection;
     x: number;
@@ -91,18 +94,22 @@ export function DocumentMarkdown({
   },[source,documentId]);
   const headings = useMemo(() => headingsIn(source), [source]);
   useEffect(() => {
-    const update = () => {
+    const update = (event: Event) => {
+          if (event.target instanceof Element && event.target.closest(".floating-action,.section-action,.paragraph-action")) return;
           const selected = window.getSelection();
           if (!root.current || !selected?.rangeCount) {
+            selectedSnapshot.current = null;
             setFloating(null);
             return;
           }
           const range = selected.getRangeAt(0),
             selection = rangeSelection(root.current, range, source, documentId);
           if (!selection) {
+            selectedSnapshot.current = null;
             setFloating(null);
             return;
           }
+          selectedSnapshot.current = selection;
           const rect = range.getBoundingClientRect();
           setFloating({
             selection,
@@ -114,18 +121,20 @@ export function DocumentMarkdown({
     const shortcut = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "k") {
         const selected = window.getSelection();
-        const selection = root.current && selected?.rangeCount ? rangeSelection(root.current, selected.getRangeAt(0), source, documentId) : null;
-        if (selection) { event.preventDefault(); onSelect(selection); setFloating(null); }
+        const selection = selectedSnapshot.current ?? (root.current && selected?.rangeCount ? rangeSelection(root.current, selected.getRangeAt(0), source, documentId) : null);
+        if (selection) { event.preventDefault(); selectCallback.current(selection); setFloating(null); }
       }
     };
-    document.addEventListener("selectionchange", update);
+    document.addEventListener("mouseup", update);
+    document.addEventListener("keyup", update);
     document.addEventListener("keydown", shortcut);
-    return () => { document.removeEventListener("selectionchange", update); document.removeEventListener("keydown", shortcut); };
+    return () => { document.removeEventListener("mouseup", update); document.removeEventListener("keyup", update); document.removeEventListener("keydown", shortcut); };
   }, [source, documentId, onSelect]);
   return (
     <div className="reading-scroll" onScroll={() => setFloating(null)}>
       <div
         ref={root}
+        tabIndex={0} role="document"
         className="markdown" lang={contentLanguage(source)}
         data-testid="document-markdown"
 
@@ -146,7 +155,11 @@ export function DocumentMarkdown({
                 ? url
                 : ""
           }
-          components={{
+          components={useMemo(() => ({
+            p: ({ children, node, ...props }) => <p {...props}>{children}{!decorative && node?.position && <button className="paragraph-action" aria-label={tr('common:ask_about_paragraph')} onClick={() => {
+              const start = node.position!.start.offset!, end = node.position!.end.offset!;
+              selectCallback.current({documentId,startOffset:start,endOffset:end,text:source.slice(start,end),headingPath:headingPath(headings,start),page:pageAt(source,start)});
+            }}>{tr('common:ask_about_this')}</button>}</p>,
             input: ({ checked, ...props }) => <input {...props} checked={checked} aria-label={tr(checked ? 'chat:completed_task' : 'chat:incomplete_task')} />,
             a: ({ children, href }) => (
               <a
@@ -190,7 +203,7 @@ export function DocumentMarkdown({
                           className="section-action"
                           aria-label={tr('chat:section_label',{title:heading.text})}
                           onClick={() => {
-                            onSelect({
+                            selectCallback.current({
                               documentId,
                               page: pageAt(source, heading.start),
                               startOffset: heading.start,
@@ -210,7 +223,7 @@ export function DocumentMarkdown({
                 },
               ]),
             ),
-          }}
+          }), [source, documentId, headings, decorative, onNotice])}
         >
           {source}
         </Markdown>
@@ -221,7 +234,7 @@ export function DocumentMarkdown({
           style={{ left: floating.x, top: floating.y }}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
-            onSelect(floating.selection);
+            selectCallback.current(floating.selection);
             setFloating(null);
             window.getSelection()?.removeAllRanges();
           }}
