@@ -1,0 +1,126 @@
+import { EventEmitter } from "node:events";
+import { randomUUID } from "node:crypto";
+import { expect, it, vi } from "vitest";
+import type { IpcMainInvokeEvent } from "electron";
+import { documentSchema } from "../../shared/domain";
+import { openStore } from "../db";
+import { ProviderRegistry, fakeAdapter } from "../providers";
+import { createIpcRegistrar } from "./register";
+import type { IpcChannel } from "../../shared/ipc";
+vi.mock("electron", () => ({ app: { getPath: () => "/unused" } }));
+import { registerChatIpc } from "./chat";
+it("registers every chat handler with validated repository round trips and disposes them", async () => {
+  const store = openStore(":memory:");
+  const registry = new ProviderRegistry();
+  registry.register("anthropic-api", fakeAdapter);
+  const callbacks = new Map<
+    string,
+    (event: IpcMainInvokeEvent, payload: unknown) => unknown
+  >();
+  const registrar = createIpcRegistrar(
+    {
+      handle: (channel, callback) => {
+        callbacks.set(channel, callback);
+      },
+      removeHandler: (channel) => {
+        callbacks.delete(channel);
+      },
+    },
+    () => true,
+  );
+  const implemented = new Set<IpcChannel>();
+  registerChatIpc(
+    registrar,
+    store,
+    {
+      getInMainOnly: () => null,
+      has: () => false,
+      set: () => {},
+      delete: () => {},
+    },
+    implemented,
+    registry,
+  );
+  const event = {
+    sender: Object.assign(new EventEmitter(), {
+      isDestroyed: () => false,
+      send: () => {},
+    }),
+  } as unknown as IpcMainInvokeEvent;
+  const invoke = async (channel: string, payload: unknown) => {
+    const callback = callbacks.get(channel);
+    if (!callback) throw new Error("Missing handler");
+    return callback(event, payload);
+  };
+  try {
+    expect(implemented.size).toBe(8);
+    const doc = store.documents.insert(
+      documentSchema.parse({
+        id: randomUUID(),
+        title: "Doc",
+        sourceHash: "f".repeat(64),
+        sourceName: "doc.md",
+        sourcePath: "/unused",
+        markdownPath: "/unused",
+        mime: "text/markdown",
+        status: "ready",
+        createdAt: new Date().toISOString(),
+      }),
+    );
+    const created = await invoke("conversations:create", {
+      documentId: doc.id,
+      providerId: "anthropic-api",
+      modelId: "fake",
+    });
+    const conversations = store.conversations.list(doc.id);
+    const conversation = conversations[0];
+    if (!conversation) throw new Error("Missing conversation");
+    expect(created).toEqual(conversation);
+    expect(await invoke("conversations:list", { documentId: doc.id })).toEqual(
+      conversations,
+    );
+    expect(
+      await invoke("messages:list", { conversationId: conversation.id }),
+    ).toEqual([]);
+    expect(await invoke("providers:list", {})).toHaveLength(6);
+    expect(
+      await invoke("providers:configure", {
+        id: "anthropic-api",
+        kind: "api",
+        enabled: false,
+      }),
+    ).toEqual({ ok: true });
+    await expect(
+      invoke("chat:start", {
+        requestId: randomUUID(),
+        conversationId: conversation.id,
+        documentId: doc.id,
+        providerId: "anthropic-api",
+        modelId: "fake",
+        userMessage: "Hi",
+      }),
+    ).rejects.toThrow("disabled");
+    await expect(
+      invoke("providers:configure", {
+        id: "openai-compatible",
+        kind: "compatible",
+        enabled: true,
+        baseUrl: "http://remote.example/v1",
+      }),
+    ).rejects.toThrow("HTTPS");
+    await expect(
+      invoke("messages:list", { conversationId: "invalid" }),
+    ).rejects.toThrow();
+    expect(await invoke("chat:abort", { requestId: randomUUID() })).toEqual({
+      ok: true,
+    });
+    expect(
+      await invoke("conversations:delete", { conversationId: conversation.id }),
+    ).toEqual({ ok: true });
+    expect(store.conversations.list(doc.id)).toEqual([]);
+  } finally {
+    registrar.dispose();
+    store.close();
+  }
+  expect(callbacks.size).toBe(0);
+});
