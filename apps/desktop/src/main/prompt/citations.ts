@@ -11,9 +11,9 @@ export function citationCatalog(documentId: Document['id'], markdown: string): D
     const offset = node.position?.start.offset ?? 0;
     if (node.type === 'html') {
       const match = node.value.match(/<!-- page (\d+) -->/);
-      if (match) page = Number(match[1]);
+      if (match) {const value=Number(match[1]);page=Number.isSafeInteger(value) && value > 0 ? value : undefined;}
     }
-    if (node.type === 'heading') candidates.push(documentCitationSchema.parse({ id:`s${offset}`,documentId,offset,title:text(node).slice(0,300),quote:markdown.slice(offset,offset+300),...(page ? {page} : {}) }));
+    if (node.type === 'heading') candidates.push(documentCitationSchema.parse({ id:`s${offset}`,documentId,offset,title:text(node).slice(0,300) || 'Untitled section',quote:markdown.slice(offset,offset+300),...(page ? {page} : {}) }));
     if ('children' in node) node.children.forEach(visit);
   };
   visit(unified().use(remarkParse).parse(markdown));

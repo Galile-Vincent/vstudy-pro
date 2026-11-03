@@ -41,8 +41,9 @@ export function registerChatIpc(
   );
   registrar.handle("conversations:model", async ({conversationId,providerId,modelId}) => {
     if (!store.conversations.get(conversationId)) throw new Error('Conversation unavailable');
-    const provider = (await providers.list()).find(p => p.config.id === providerId);
-    if (!provider?.config.enabled || !provider.availability.available || !provider.models.some(m => m.id === modelId || m.resolvedId === modelId)) throw new Error('Model unavailable');
+    const adapter = providers.get(providerId);
+    const models = await adapter.listModels();
+    if (!(await adapter.detect()).available || !models.some(m => m.id === modelId || m.resolvedId === modelId)) throw new Error('Model unavailable');
     return store.conversations.setModel(conversationId,providerId,modelId);
   });
   registrar.handle("conversations:options", async ({ conversationId, options }) => {

@@ -148,7 +148,8 @@ export function createApiAdapter(
       let text = '';
       const rateLimit = headerRateLimit(response.headers, isAnthropic);
       const snapshot = (value: Usage) => { usage = { ...value, ...(rateLimit ? { rateLimit } : {}) }; request.onUsageSnapshot?.(usage); };
-      const finalUsage = (): Usage => usage ?? { inputTokens: Math.ceil(request.prompt.length / 4), outputTokens: Math.ceil(text.length / 4), costSource: 'estimated', ...(rateLimit ? { rateLimit } : {}) };
+      const inputChars = request.prompt.length + (request.allowPresentation ? JSON.stringify(presentationTool).length : 0);
+      const finalUsage = (): Usage => usage ?? { inputTokens: Math.ceil(inputChars / 4), outputTokens: Math.ceil(text.length / 4), costSource: 'estimated', ...(rateLimit ? { rateLimit } : {}) };
       for await (const event of parseStream(
         responseText(response.body),
         isAnthropic ? "anthropic" : "openai",
@@ -157,6 +158,10 @@ export function createApiAdapter(
         signal.throwIfAborted();
         if (event.type === 'usage') { snapshot(event.usage); continue; }
         if (event.type === 'text-delta') { text += event.text; if (!usage) request.onUsageSnapshot?.(finalUsage()); }
+        if (event.type === 'reasoning-delta' || event.type === 'tool-call') {
+          text += event.type === 'reasoning-delta' ? event.text : JSON.stringify(event.call.args);
+          if (!usage) request.onUsageSnapshot?.(finalUsage());
+        }
         if (event.type === 'done' || event.type === 'error') { terminal = true; yield { type: 'usage', usage: finalUsage() }; }
         yield event;
       }

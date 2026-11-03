@@ -13,6 +13,7 @@ it("registers every chat handler with validated repository round trips and dispo
   const store = openStore(":memory:");
   const registry = new ProviderRegistry();
   registry.register("anthropic-api", fakeAdapter);
+  registry.configure({kind:"api",id:"anthropic-api",enabled:true});
   const callbacks = new Map<
     string,
     (event: IpcMainInvokeEvent, payload: unknown) => unknown
@@ -85,6 +86,10 @@ it("registers every chat handler with validated repository round trips and dispo
     expect(await invoke("conversations:options", { conversationId: conversation.id, options: { effort: 'high' } })).toEqual({ ok: true });
     expect(store.conversations.get(conversation.id)?.options).toEqual({ effort: 'high' });
     await expect(invoke("conversations:options", { conversationId: conversation.id, options: { effort: 'ultra' } })).rejects.toThrow('Unsupported model option');
+    expect(await invoke('conversations:model',{conversationId:conversation.id,providerId:'anthropic-api',modelId:'fake'})).toEqual({...conversation,options:{}});
+    expect(store.conversations.list(doc.id)).toHaveLength(1);
+    store.messages.insert({id:randomUUID() as import('../../shared').Message['id'],conversationId:conversation.id,role:'user',parts:[{type:'text',text:'Started'}],createdAt:new Date().toISOString()});
+    await expect(invoke('conversations:model',{conversationId:conversation.id,providerId:'anthropic-api',modelId:'fake'})).rejects.toThrow('Only empty conversations');
     expect(await invoke("providers:list", {})).toHaveLength(6);
     expect(
       await invoke("providers:configure", {
