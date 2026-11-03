@@ -40,7 +40,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     return handler({ sender } as unknown as IpcMainInvokeEvent, payload);
   };
   try {
-    expect(implemented.size).toBe(7);
+    expect(implemented).toContain("documents:importSample");
     mock.dialog.mockResolvedValueOnce({ canceled: true, filePaths: [] });
     expect(await invoke("documents:import", {})).toBeNull();
     mock.dialog.mockResolvedValueOnce({ canceled: false, filePaths: [resolve("test-fixtures/converter/sample.md")] });
@@ -65,6 +65,10 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     await expect(invoke("documents:importPaths", { paths: [12] })).rejects.toThrow();
     await expect(invoke("documents:importPaths", { paths: ["file.md"], extra: true })).rejects.toThrow();
     await expect(invoke("documents:retry", { documentId: document.id })).rejects.toThrow("VSTUDY_STATUS:");
+    const sample = documentSchema.parse(await invoke("documents:importSample", { language: "ja" }));
+    await vi.waitFor(() => expect(store.documents.get(sample.id)?.status).toBe("ready"));
+    expect(await invoke("documents:read", { documentId: sample.id })).toContain("小さな疑問");
+    await expect(invoke("documents:importSample", { language: "../../escape" })).rejects.toThrow();
     expect(await invoke("documents:delete", { documentId: document.id })).toEqual({ ok: true });
     expect(abort.mock.calls[0]).toEqual([document.id]);
     expect(await invoke("documents:get", { documentId: document.id })).toBeNull();

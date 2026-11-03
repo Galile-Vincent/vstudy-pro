@@ -1,3 +1,4 @@
+import { BlankChat } from './motion/blank-chat';
 import { useTranslation } from "react-i18next";
 import { tr } from '../shared/i18n';
 import { ModelPicker } from "./model-picker";
@@ -168,7 +169,8 @@ function DocumentMessageFooter() {
 }
 function useComposerBindings() {
   useTranslation(); const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
-const documentComponents = { WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
+function DocumentWelcome() { const { selection, usage } = useDocumentChat(); return <BlankChat documentOpen hasSelection={!!selection} replyLanguage={usage.data?.settings.replyLanguage ?? 'auto'}/>; }
+const documentComponents = { Welcome:DocumentWelcome, WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 
 export function SelectionPreview({ selection }: { selection: Selection }) {
   useTranslation();

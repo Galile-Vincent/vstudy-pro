@@ -1,4 +1,4 @@
-.home-page { padding:var(--space-8); overflow:auto; width:100%; color:var(--ink); background:var(--subtle); }
+.home-page { height:100%; padding:var(--space-8); overflow:auto; width:100%; color:var(--ink); background:var(--subtle); }
 .home-greeting { margin-block-end:var(--space-8); max-width:100%; }
 .home-greeting h1 { font-size:var(--type-display); margin:0 0 var(--space-3); overflow-wrap:anywhere; }
 .home-greeting p { color:var(--muted); font-size:var(--type-md); margin:0; }
@@ -28,3 +28,8 @@
 @media(min-width:900px) { .home-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(min-width:1200px) { .home-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(prefers-reduced-transparency:reduce) { .home-card { background:var(--surface); backdrop-filter:none; } }
+.home-card button.primary { background:var(--ink); color:var(--surface); }
+.home-card button.primary:hover { background:var(--muted); }
+.home-upload summary { cursor:pointer; color:var(--muted); font-size:var(--type-sm); }
+.home-card .home-list { max-height:calc(var(--space-8) * 6); overflow:auto; }
+.home-card:first-child .home-list { max-height:none; }

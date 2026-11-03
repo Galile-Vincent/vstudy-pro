@@ -38,7 +38,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
   const advance = () => { if (step < 3) setStep(step + 1); else void finish(); };
   const titles = ['welcome', 'connect', 'bring', 'coach'];
   return <dialog ref={dialog} className="onboarding" aria-labelledby="onboarding-title" onCancel={e => { e.preventDefault(); if (!busy) void finish(); }}>
-    <div className="onboarding-progress" aria-label={tr('onboarding:progress', { current: step + 1, total: 4 })}>{titles.map((title, index) => <span key={title} data-current={index === step} aria-hidden="true" />)}</div>
+    <div className="onboarding-progress" role="group" aria-label={tr('onboarding:progress', { current: step + 1, total: 4 })}>{titles.map((title, index) => <span key={title} data-current={index === step} aria-hidden="true" />)}</div>
     <h1 ref={heading} tabIndex={-1} id="onboarding-title">{tr(`onboarding:${titles[step]}`)}</h1>
     <p className="onboarding-intro"><AnimatedText texts={[tr(`onboarding:${titles[step]}_body`)]}/></p>
     <div className="onboarding-content">
