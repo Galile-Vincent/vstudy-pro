@@ -8,7 +8,9 @@ export default async ({ appOutDir, packager }) => {
     [F.RunAsNode]: false,
     [F.EnableNodeOptionsEnvironmentVariable]: false,
     [F.EnableNodeCliInspectArguments]: false,
-    [F.EnableCookieEncryption]: true,
+    // The renderer uses no cookies. Chromium OSCrypt otherwise reads Safe Storage before ready.
+    // This fuse does not disable safeStorage encryption for explicitly saved API keys.
+    [F.EnableCookieEncryption]: false,
     [F.OnlyLoadAppFromAsar]: true,
     [F.EnableEmbeddedAsarIntegrityValidation]: true,
     [F.GrantFileProtocolExtraPrivileges]: false,

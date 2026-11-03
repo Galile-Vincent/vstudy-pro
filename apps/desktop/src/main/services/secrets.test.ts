@@ -89,3 +89,23 @@ it('binds compatible unlocks to their configured origin',async()=>{
  store.bindCompatibleOrigin('https://new.example/v1');gate.resolve({result:'old-origin'});
  expect(await pending).toBeNull();expect(store.isUnlocked('openai-compatible')).toBe(false);expect(store.has('openai-compatible')).toBe(false);
 });
+it('only invokes OS encryption on an explicit save or unlock, even with a persisted key', async () => {
+  const { file } = fixture();
+  const calls: string[] = [];
+  const encryption: Encryption = {
+    isAsyncEncryptionAvailable: async () => { calls.push('available'); return true; },
+    encryptStringAsync: async () => { calls.push('encrypt'); return Buffer.from('ciphertext'); },
+    decryptStringAsync: async () => { calls.push('decrypt'); return {result:'test-key'}; },
+  };
+  const first = createSecretStore(file, encryption);
+  expect(calls).toEqual([]);
+  await first.set('openai-api','test-key');
+  expect(calls).toEqual(['available','encrypt']);
+  calls.length = 0;
+  const restarted = createSecretStore(file, encryption);
+  expect(restarted.has('openai-api')).toBe(true);
+  expect(restarted.isUnlocked('openai-api')).toBe(false);
+  expect(calls).toEqual([]);
+  expect(await restarted.getInMainOnly('openai-api')).toBe('test-key');
+  expect(calls).toEqual(['available','decrypt']);
+});

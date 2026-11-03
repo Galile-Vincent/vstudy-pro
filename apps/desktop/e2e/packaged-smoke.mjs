@@ -19,10 +19,10 @@ try {
   assert.ok(!entitlements.includes('allow-jit')&&!entitlements.includes('disable-library-validation'));
   const {getCurrentFuseWire,FuseV1Options:F}=await import('@electron/fuses');
   const fuses=await getCurrentFuseWire(app);
-  for(const key of [F.RunAsNode,F.EnableNodeOptionsEnvironmentVariable,F.EnableNodeCliInspectArguments,F.GrantFileProtocolExtraPrivileges]) assert.equal(fuses[key],48);
-  for(const key of [F.EnableCookieEncryption,F.OnlyLoadAppFromAsar,F.EnableEmbeddedAsarIntegrityValidation]) assert.equal(fuses[key],49);
+  for(const key of [F.EnableCookieEncryption,F.RunAsNode,F.EnableNodeOptionsEnvironmentVariable,F.EnableNodeCliInspectArguments,F.GrantFileProtocolExtraPrivileges]) assert.equal(fuses[key],48);
+  for(const key of [F.OnlyLoadAppFromAsar,F.EnableEmbeddedAsarIntegrityValidation]) assert.equal(fuses[key],49);
   let log='';
-  child=spawn(join(app,'Contents/MacOS/VStudy Pro'),['--use-mock-keychain'],{env:{...process.env,ELECTRON_RUN_AS_NODE:'',ELECTRON_ENABLE_LOGGING:'1',VSTUDY_PACKAGED_SMOKE_DIR:root,VSTUDY_FAKE_PROVIDER:'1'},stdio:['ignore','pipe','pipe']});
+  child=spawn(join(app,'Contents/MacOS/VStudy Pro'),[],{env:{...process.env,ELECTRON_RUN_AS_NODE:'',ELECTRON_ENABLE_LOGGING:'1',VSTUDY_PACKAGED_SMOKE_DIR:root,VSTUDY_FAKE_PROVIDER:'1'},stdio:['ignore','pipe','pipe']});
   child.stdout.on('data',d=>{log+=d;});child.stderr.on('data',d=>{log+=d;});
   const exit=await Promise.race([new Promise(resolve=>child.once('exit',(code,signal)=>resolve({code,signal}))),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Packaged app timed out')),90000).unref())]).catch(async error=>{
     try {execFileSync('/usr/bin/sample',[String(child.pid),'2','-file','/tmp/vstudy-packaged-hang.sample.txt']);}catch{ /* A terminated process cannot be sampled. */ }
