@@ -27,12 +27,25 @@ class PasswordProtected(ValueError):
 
 
 def tokens(text):
-    return Counter(
-        re.findall(
-            r"[\u2e80-\u9fff\uf900-\ufaff]|[A-Za-z0-9]+",
-            unicodedata.normalize("NFKC", html.unescape(text)).lower(),
-        )
-    )
+    text = unicodedata.normalize("NFKC", html.unescape(text)).lower()
+    words, word = [], ""
+    for char in text:
+        if cjk(char) or "\uac00" <= char <= "\ud7af" or "\u3040" <= char <= "\u30ff":
+            if word:
+                words.append(word)
+                word = ""
+            words.append(char)
+        elif unicodedata.category(char)[0] in "LN" or (
+            word and unicodedata.category(char)[0] == "M"
+        ):
+            word += char
+        else:
+            if word:
+                words.append(word)
+                word = ""
+    if word:
+        words.append(word)
+    return Counter(words)
 
 
 def preservation(source, output, removed, diagnostics):
@@ -48,10 +61,23 @@ def preservation(source, output, removed, diagnostics):
 
 
 @contextmanager
-def extraction_limits(seconds=72, stream_bytes=16 * 1024 * 1024):
+def extraction_limits(seconds=72, stream_bytes=64 * 1024 * 1024):
     import pdfminer.pdftypes as types
     import zlib
 
+    from pdfminer.converter import PDFLayoutAnalyzer
+
+    original_path = PDFLayoutAnalyzer.paint_path
+
+    def bounded_path(device, *args, **kwargs):
+        count = getattr(device, "_pdf_md_paths", 0)
+        device._pdf_md_paths = count + 1
+        # Background maps/grids must not allocate millions of layout edge objects.
+        # Text extraction continues; uncertain geometry falls back to plain text.
+        if count < 20000:
+            return original_path(device, *args, **kwargs)
+
+    PDFLayoutAnalyzer.paint_path = bounded_path
     original = types.zlib
 
     class BoundedZlib:
@@ -77,6 +103,7 @@ def extraction_limits(seconds=72, stream_bytes=16 * 1024 * 1024):
         signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, old_handler)
         types.zlib = original
+        PDFLayoutAnalyzer.paint_path = original_path
 
 
 def dedupe_chars(chars):
@@ -590,7 +617,7 @@ def convert_pdf(path, diagnostics=None):
             return _convert_pdf(path, diagnostics)
         except Exception as error:
             for cause in (error, error.__cause__, error.__context__):
-                if isinstance(cause, ResourceLimit):
+                if isinstance(cause, (ResourceLimit, ExtractionTimeout)):
                     raise cause from None
             from pdfminer.pdfdocument import PDFPasswordIncorrect
 
