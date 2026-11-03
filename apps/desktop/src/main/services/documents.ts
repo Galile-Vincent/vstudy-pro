@@ -40,7 +40,9 @@ export class DocumentService {
     this.library = join(options.userData, "library");
     mkdirSync(this.library, { recursive: true, mode: 0o700 });
     chmodSync(this.library, 0o700);
-    this.metadata = backfillMetadata(options.store.db, this.library, () => this.stopped);
+    this.metadata = backfillMetadata(options.store.db, this.library, () => this.stopped).catch(() => {
+      console.error("Metadata backfill interrupted; pending startup recovery");
+    });
     for (const document of this.list()) {
       if (document.status === "converting") this.enqueue(document);
     }
