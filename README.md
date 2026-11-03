@@ -42,7 +42,11 @@ Selection offsets are UTF-16 positions in the stored Markdown. Generated math do
 
 ## Conversion limits
 
-PDF conversion uses MarkItDown's text extraction. Layout, tables, images, and heading hierarchy may be lost; numbered lines such as “1. Background” are plain extracted text and may render as Markdown lists rather than headings. Consult the original PDF when structure matters.
+PDFs use the pinned pdfplumber-based `pdf_md` converter first, with MarkItDown as automatic fallback. Tables require a ruled grid; text alignment alone never creates one. Font sizes determine heading ranks, repeated margins are removed, and PDF text annotations become `> note:` blocks. Hidden `<!-- page N -->` markers remain in stored Markdown and provide page metadata for selections. The reader header shows the parser that ran; existing records default to `markitdown`.
+
+This is text-layer extraction, without OCR. If both parsers produce no text, import reports “no text layer; OCR not supported yet”. Raster images currently use an explicit omission placeholder. Complex equations, interleaved columns, and document-specific line wrapping may lose layout. Sources retain their original bytes in the library.
+
+Python golden tests: install `apps/desktop/resources/converter/requirements.txt` into a Python environment, then run `python -m unittest discover -s apps/desktop/resources/converter -p 'test_*.py'`. Development-only comparisons: `scripts/pdf-compare.py` (see its module docstring for isolated dependencies); PyMuPDF is never a shipped requirement. `node e2e/pdf-reader.mjs SOURCE.pdf` from `apps/desktop` imports through the built Electron app and captures reader pages 3/5 under `/tmp/vstudy-pdf-evidence`.
 
 Single-file imports do not copy neighboring image files. Relative images in imported Markdown/HTML may be unavailable; embedded images extracted by the converter are supported.
 

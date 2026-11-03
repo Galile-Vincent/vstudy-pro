@@ -133,6 +133,19 @@ class PdfTests(unittest.TestCase):
             "# Title\n\n## Subtitle\n\nImportant",
         )
 
+    def test_single_marker_stays_literal(self):
+        blocks = [Block((Line("- isolated highlight", 0, 0, 100, 12, 12),))]
+        self.assertEqual(
+            blocks_to_markdown(classify_blocks(blocks, 12)), r"\- isolated highlight"
+        )
+
+    def test_math_is_not_an_annotation(self):
+        body = Line(
+            "A long paragraph of ordinary body text underneath.", 50, 50, 400, 62, 12
+        )
+        equation = Line("𝑥 + 𝑦", 80, 51, 140, 60, 9, math=True)
+        self.assertFalse(any(l.note for l in mark_annotations([body, equation])))
+
     def test_pdf_routes_to_pdf_md(self):
         text, parser = convert_document(str(FIXTURES / "heading-list.pdf"))
         self.assertEqual(parser, "pdf_md")

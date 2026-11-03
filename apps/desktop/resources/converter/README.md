@@ -1,6 +1,13 @@
 # Local document converter
 
-`convert.py <input> <output.md>` converts a local file with MarkItDown 0.1.9.
+`convert.py <input> <temporary-output.md> <library-output.md>` converts a local file.
+PDFs use pdfplumber 0.11.9 with the pure stages in `pdf_md/`; exceptions and absent
+text layers fall back automatically to MarkItDown 0.1.9. Other formats use
+MarkItDown. A `<temporary-output.md>.json` sidecar records the successful parser;
+main validates it before marking the document ready. No-text errors use the
+structured `NO_TEXT_LAYER` code only after fallback also produces no text.
+PDF raster images use omission placeholders; Office embedded images are exported
+to content-addressed library assets. PyMuPDF is development-only.
 Failures emit a JSON object on stderr and exit nonzero. Office archives are
 checked for expansion limits; Markdown output is capped at 8 MiB.
 

@@ -44,6 +44,12 @@ def join_text(left, right):
     )
 
 
+def normalize_line(text):
+    text = re.sub(r"(?<=[\u2e80-\u9fff]) +(?=[\u2e80-\u9fff])", "", text.strip())
+    text = re.sub(r"([\u3400-\u9fff])([A-Za-z0-9])", r"\1 \2", text)
+    return re.sub(r"([A-Za-z0-9])([\u3400-\u9fff])", r"\1 \2", text)
+
+
 def chars_to_lines(chars):
     groups = []
     for char in sorted(chars, key=lambda c: (c["top"], c["x0"])):
@@ -82,9 +88,7 @@ def chars_to_lines(chars):
             size = median(c["size"] for c in run)
             result.append(
                 Line(
-                    re.sub(
-                        r"(?<=[\u2e80-\u9fff]) +(?=[\u2e80-\u9fff])", "", text.strip()
-                    ),
+                    normalize_line(text),
                     min(c["x0"] for c in run),
                     min(c["top"] for c in run),
                     max(c["x1"] for c in run),
@@ -147,6 +151,7 @@ def mark_annotations(lines):
 
 
 MARKER = re.compile(r"^(?:[•●▪*-]|\d+[.)])\s+")
+SUBQUESTION = re.compile(r"^[a-z][.)]\s+")
 QUESTION = re.compile(r"^[RP]\d+[.．:]?\s*")
 TERMINAL = re.compile(r"[.!?。！？:：;；]$")
 
@@ -178,6 +183,7 @@ def lines_to_blocks(lines):
             and previous.kind == "paragraph"
             and not MARKER.match(line.text)
             and not QUESTION.match(line.text)
+            and not SUBQUESTION.match(line.text)
             and 0 <= line.top - previous.lines[-1].bottom < line.size * 1.1
             and abs(line.x0 - previous.lines[-1].x0) <= line.size * 1.6
             and abs(line.size - previous.lines[-1].size) < 1
@@ -232,7 +238,7 @@ def classify_blocks(blocks, body_size, heading_sizes=None):
 def literal(text):
     text = text.replace("\\", "\\\\").replace("|", "\\|")
     text = re.sub(r"([`*_\[\]<])", r"\\\1", text)
-    text = re.sub(r"^>", r"\\>", text)
+    text = re.sub(r"^([>#+-])(?=\s|$)", r"\\\1", text)
     return re.sub(r"^(\d+)([.)])\s", r"\1\\\2 ", text)
 
 

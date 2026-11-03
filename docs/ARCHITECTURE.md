@@ -1,6 +1,6 @@
 # vstudy-pro architecture
 
-A macOS desktop app. Import documents (PDF, DOCX, PPTX, XLSX, HTML, CSV, MD, ...), convert them to Markdown with Microsoft MarkItDown, read the Markdown on the right, chat with an AI agent on the left. The user can select a passage and the agent answers grounded in that selection.
+A macOS desktop app. Import documents (PDF, DOCX, PPTX, XLSX, HTML, CSV, MD, ...), convert them to Markdown with a conservative pdfplumber pipeline for PDF and Microsoft MarkItDown for other formats or PDF fallback, read the Markdown on the right, chat with an AI agent on the left. The user can select a passage and the agent answers grounded in that selection.
 
 ## Decision: Electron + React + TypeScript (not native SwiftUI)
 
@@ -32,9 +32,9 @@ Security rules (non-negotiable):
 
 ## Domain model (organizing structures)
 
-- `Document { id, title, sourceName, sourceHash, sourcePath, mime, status: 'converting'|'ready'|'failed', error?, markdownPath, createdAt }`
+- `Document { id, title, sourceName, sourceHash, sourcePath, mime, status: 'converting'|'ready'|'failed', error?, markdownPath, converter: 'pdf_md'|'markitdown', createdAt }`
   Status is a closed union driven by a reducer-style transition table, not scattered booleans.
-- `Selection { documentId, startOffset, endOffset, text, headingPath: string[] }`
+- `Selection { documentId, startOffset, endOffset, text, headingPath: string[], page?: number }`
   Offsets are into the stored Markdown source, resolved from rendered DOM through `data-sourcepos` line/column attributes emitted by the renderer plugin. Section selection = a heading node range.
 - `Conversation { id, documentId, providerId, modelId, createdAt }`, `Message { id, conversationId, role, parts(json), createdAt }`.
 - `ProviderConfig` is a registry (table), keyed by id, not branching:
@@ -52,6 +52,7 @@ Security rules (non-negotiable):
 
 ## Converter
 
+- PDFs run the pure `pdf_md` geometry stages first (characters → lines → blocks → classification → Markdown). Only ruling lines/rectangles produce tables. PDF FreeText annotations stay separate from page text. `NO_TEXT_LAYER` and parser exceptions trigger MarkItDown fallback. Page comments are hidden by the existing raw-HTML-disabled renderer and retained for source offsets. Raster images currently produce an explicit omission placeholder. Parser identity is returned in a temporary JSON sidecar, validated by main, and persisted with an additive SQLite migration.
 - `resources/converter/`: pinned `requirements.txt` (`markitdown[all]` pinned version), a small `convert.py` CLI (`convert.py <in> <out.md>` exits non-zero with a JSON error on stderr).
 - Python resolved in order: bundled venv at `userData/converter-venv` created on first run via `python3 -m venv` + `pip install -r`, or `uvx`/`uv` if present. First-run bootstrap shows progress and a retry path in the UI.
 - Native `.md`/`.txt` files skip conversion (copy through).
