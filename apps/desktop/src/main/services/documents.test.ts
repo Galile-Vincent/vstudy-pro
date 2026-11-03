@@ -125,3 +125,17 @@ it.each([false,true])('finalizes hidden conversion before undo (failure=%s)', as
   store.db.prepare('UPDATE documents SET deletedAt=NULL WHERE id=?').run(document.id);
   expect(service.get(document.id)?.status).toBe(fail ? 'failed' : 'ready');
 });
+
+it('recovers the scheduler after failed terminal-state persistence', async () => {
+  let calls = 0;
+  const { service, store } = await setup(async (_source, output) => { calls++; if(calls===1) throw new Error('converter failed'); await writeFile(output,'recovered'); });
+  store.db.exec("CREATE TRIGGER reject_failure BEFORE UPDATE OF status ON documents WHEN NEW.status='failed' BEGIN SELECT RAISE(ABORT,'storage unavailable'); END");
+  const first = await service.importPath(fixture('html'));
+  await expect(service.waitForIdle()).resolves.toBeUndefined();
+  store.db.exec('DROP TRIGGER reject_failure');
+  const second = await service.importPath(fixture('csv'));
+  await service.waitForIdle();
+  expect(calls).toBe(2);
+  expect(service.get(second.id)?.status).toBe('ready');
+  expect(service.get(first.id)?.status).toBe('converting');
+});
