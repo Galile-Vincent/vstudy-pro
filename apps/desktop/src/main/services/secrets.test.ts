@@ -57,3 +57,20 @@ it("does not touch Keychain on construction or presence checks and bounds a slow
   encryption.isAsyncEncryptionAvailable = async () => true;
   await expect(store.set('openai-api', 'key')).rejects.toThrow('keychain_unavailable');
 });
+
+it.each(['delete', 'session', 'replace'] as const)('invalidates delayed decrypt on %s', async (change) => {
+  const { file, encryption, store: initial } = fixture();
+  await initial.set('openai-compatible', 'old-key');
+  const gate = Promise.withResolvers<{result:string}>();
+  const started = Promise.withResolvers<void>();
+  encryption.decryptStringAsync = () => { started.resolve(); return gate.promise; };
+  const store = createSecretStore(file, encryption);
+  const pending = store.getInMainOnly('openai-compatible');
+  await started.promise;
+  if (change === 'delete') store.delete('openai-compatible');
+  else if (change === 'session') store.useInSession('openai-compatible','new-key');
+  else await store.set('openai-compatible','new-key');
+  gate.resolve({result:'old-key'});
+  expect(await pending).toBeNull();
+  expect(await store.getInMainOnly('openai-compatible')).toBe(change === 'delete' ? null : 'new-key');
+});
