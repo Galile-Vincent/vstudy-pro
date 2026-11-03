@@ -1,3 +1,4 @@
+import { profileStage } from "../../../resources/converter/profile";
 import { decodeHtmlEntities } from "../../shared/html";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
@@ -63,6 +64,7 @@ export class DocumentService {
         const source = join(staging, `source.${extension}`);
         const hash = createHash("sha256");
         let size = 0;
+        const copied = profileStage("SHA-256 + source copy");
         await pipeline(createReadStream(path), new Transform({
           transform(chunk: Buffer, _encoding, callback) {
             size += chunk.length;
@@ -71,6 +73,7 @@ export class DocumentService {
             callback(null, chunk);
           },
         }), createWriteStream(source, { flags: "wx", mode: 0o600 }));
+        copied();
         const sourceHash = hash.digest("hex");
         const existing = this.options.store.documents.findByHash(sourceHash);
         if (existing) return existing;
@@ -84,11 +87,13 @@ export class DocumentService {
           const raw = /<title\b[^>]*>([\s\S]*?)<\/title\s*>/i.exec(html)?.[1];
           if (raw?.trim()) title = decodeHtmlEntities(raw).replace(/\s+/g, " ").trim();
         }
+        const inserted = profileStage("DB insert");
         const document = this.options.store.documents.insert(documentSchema.parse({
           id: randomUUID(), title, sourceName: basename(path),
           sourceHash, sourcePath: join(directory, `source.${extension}`), mime,
           markdownPath: join(directory, "content.md"), status: "converting", createdAt: new Date().toISOString(),
         }));
+        inserted();
         this.enqueue(document);
         return document;
       } finally { await rm(staging, { recursive: true, force: true }); }
@@ -97,9 +102,10 @@ export class DocumentService {
 
   async read(id: Document["id"]): Promise<string> {
     const document = this.require(id);
-    if (document.status !== "ready") throw new Error("Document is not ready");
-    if ((await stat(document.markdownPath)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
-    return readFile(document.markdownPath, "utf8");
+    if (document.status !== "ready" && document.status !== "converting") throw new Error("Document is not ready");
+    const path = document.status === "converting" ? `${document.markdownPath}.partial` : document.markdownPath;
+    if ((await stat(path)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
+    return readFile(path, "utf8");
   }
 
   retry(id: Document["id"]): Promise<Document> {
@@ -131,7 +137,9 @@ export class DocumentService {
 
   private enqueue(document: Document): void {
     if (this.jobs.has(document.id)) return;
+    const queued = profileStage("Queue wait");
     const job = this.queue.then(async () => {
+      queued();
       if (this.stopped) return;
       try {
         let converter: Document["converter"] = "markitdown";
@@ -143,7 +151,12 @@ export class DocumentService {
           await rename(`${document.markdownPath}.tmp`, document.markdownPath);
         } else converter = await this.options.convert(document.sourcePath, document.markdownPath, message => this.options.onProgress?.(document.id, message)) ?? "markitdown";
         if ((await stat(document.markdownPath)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
-        if (!this.stopped) this.options.store.documents.transition(document.id, { status: "ready", converter });
+        if (!this.stopped) {
+          const saved = profileStage("DB ready transition");
+          this.options.store.documents.transition(document.id, { status: "ready", converter });
+          saved();
+          this.options.onProgress?.(document.id, "Conversion complete");
+        }
       } catch (error) {
         if (!this.stopped) this.options.store.documents.transition(document.id, {
           status: "failed", error: error instanceof Error && error.message.trim() ? error.message.slice(0, 2000) : "Conversion failed",

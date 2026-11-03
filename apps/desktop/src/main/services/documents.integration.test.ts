@@ -26,10 +26,12 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     expect(await converter.ensureReady()).toBe(python);
     expect(progress).toContain("Converter ready");
     progress.length = 0;
-    expect(await createConverter(options).ensureReady()).toBe(python);
+    const cached = createConverter(options);
+    expect(await cached.ensureReady()).toBe(python);
+    cached.dispose();
     expect(progress).toEqual([]);
   }, 900_000);
-  afterAll(async () => { if (directory) await rm(directory, { recursive: true, force: true }); });
+  afterAll(async () => { converter?.dispose(); if (directory) await rm(directory, { recursive: true, force: true }); });
   it.each(["docx", "pptx", "xlsx", "html", "pdf", "csv"])("converts a real %s fixture", async (extension) => {
     const output = join(directory, `result-${extension}.md`);
     const parser = await converter.convert(resolve(`test-fixtures/converter/sample.${extension}`), output);
@@ -62,7 +64,7 @@ with zipfile.ZipFile(sys.argv[1]) as original, zipfile.ZipFile(sys.argv[2], 'w',
     const result = spawnSync(executable, [join(directory, "resources/convert.py"), invalid, join(directory, "invalid.md"), join(directory, "invalid.md")], { cwd: directory, env: scrubbedEnvironment(directory), encoding: "utf8" });
     expect(result.status).not.toBe(0);
     expect(JSON.parse(result.stderr.trim())).toMatchObject({ error: "Conversion failed", type: "FileNotFoundError" });
-    await expect(converter.convert(invalid, join(directory, "invalid.md"))).rejects.toThrow("Conversion failed (");
+    await expect(converter.convert(invalid, join(directory, "invalid.md"))).rejects.toThrow("Document conversion failed");
     await converter.convert(resolve("test-fixtures/converter/sample.pdf"), join(directory, "retried.md"));
     expect(await readFile(join(directory, "retried.md"), "utf8")).toContain("VStudy fixture");
   });

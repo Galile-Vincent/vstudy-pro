@@ -18,6 +18,7 @@ export function registerDocumentsIpc(
     userData,
     resources: app.isPackaged ? join(process.resourcesPath, "converter") : join(app.getAppPath(), "resources/converter"),
   });
+  void converter.ensureReady().catch(() => undefined);
   const owners = new Map<string, Electron.WebContents>();
   const documents = new DocumentService({ store, userData, convert: converter.convert, onProgress: (documentId, message) => {
     const owner = owners.get(documentId);
@@ -44,5 +45,5 @@ export function registerDocumentsIpc(
     return { ok: true };
   });
   const dispose = registrar.dispose;
-  registrar.dispose = () => { documents.dispose(); dispose(); };
+  registrar.dispose = () => { documents.dispose(); converter.dispose(); dispose(); };
 }

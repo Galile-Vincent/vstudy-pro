@@ -16,7 +16,7 @@ vi.mock("electron", () => ({
 }));
 vi.mock("../../../resources/converter", async (original) => ({
   ...await original<typeof import("../../../resources/converter")>(),
-  createConverter: () => ({ convert: async (_source: string, output: string, progress?: (message: string) => void) => { await new Promise<void>(resolve => { mock.resume = resolve; }); progress?.("Installing markitdown…"); await writeFile(output, "converted"); } }),
+  createConverter: () => ({ ensureReady: async () => "python", dispose: () => undefined, convert: async (_source: string, output: string, progress?: (message: string) => void) => { await new Promise<void>(resolve => { mock.resume = resolve; }); progress?.("Installing markitdown…"); await writeFile(output, "converted"); } }),
 }));
 import { registerDocumentsIpc } from "./documents";
 
@@ -59,9 +59,8 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     const converted = await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.docx")] }) as { document: { id: string } }[];
     await vi.waitFor(() => expect(mock.resume).toBeTypeOf("function"));
     mock.resume!();
-    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
-    expect(send.mock.calls[0]?.[0]).toBe("documents:progress");
-    expect(documentProgressSchema.parse(send.mock.calls[0]?.[1])).toEqual({ documentId: converted[0]!.document.id, message: "Installing markitdown…" });
+    await vi.waitFor(() => expect(send).toHaveBeenCalledWith("documents:progress", { documentId: converted[0]!.document.id, message: "Installing markitdown…" }));
+    for (const call of send.mock.calls) expect(() => documentProgressSchema.parse(call[1])).not.toThrow();
     await expect(invoke("documents:importPaths", { paths: [] })).rejects.toThrow();
     await expect(invoke("documents:importPaths", { paths: [12] })).rejects.toThrow();
     await expect(invoke("documents:importPaths", { paths: ["file.md"], extra: true })).rejects.toThrow();

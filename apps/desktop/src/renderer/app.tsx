@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type {
   Conversation,
@@ -36,8 +36,29 @@ export function App() {
   const activeConversation = useRef(conversation);
   activeConversation.current = conversation;
   const [progress, setProgress] = useState<Record<string, string>>({});
-  useEffect(() => desktop.onDocumentProgress?.(event => setProgress(current => ({ ...current, [event.documentId]: event.message }))), []);
+  const [partialSource, setPartialSource] = useState("");
+  useEffect(() => {
+    setPartialSource("");
+    let active = true;
+    const unsubscribe = desktop.onDocumentProgress?.(event => {
+      setProgress(current => ({ ...current, [event.documentId]: event.message }));
+      if (event.message === "Conversion complete") {
+        void desktop.invoke("documents:list", {}).then(list => { if (active) setDocuments(list); }).catch(() => undefined);
+      }
+      const page = /^Converting page (\d+)\/(\d+)/.exec(event.message);
+      if (event.documentId === documentId && page && (Number(page[1]) === 1 || Number(page[1]) === 5)) {
+        void desktop.invoke("documents:read", { documentId: event.documentId }).then(text => {
+          if (active) setPartialSource(text);
+        }).catch(() => undefined);
+      }
+    });
+    return () => { active = false; unsubscribe?.(); };
+  }, [documentId]);
+  const partialPreview = useMemo(() => partialSource && documentId ? <DocumentMarkdown source={partialSource} documentId={documentId}
+    onSelect={() => setNotice("Selection and chat are available when conversion finishes")}
+    onNotice={setNotice} /> : null, [partialSource, documentId]);
   const doc = documents.find((d) => d.id === documentId);
+  const pageProgress = /^Converting page (\d+)\/(\d+)/.exec(doc ? progress[doc.id] ?? "" : "");
   const report = useCallback(
     (error: unknown) =>
       setNotice(
@@ -331,11 +352,14 @@ export function App() {
           </small>
         </div>
       ) : doc.status === "converting" ? (
-        <div className="empty" role="status">
-          <div className="spinner" />
-          <h3>Preparing your document</h3>
-          <p>{progress[doc.id] ?? "Converting…"} {doc.sourceName} to Markdown…</p>
-        </div>
+        <>
+          <div role="status" className={partialSource ? "pane-toolbar" : "empty"}>
+            <p>{progress[doc.id] ?? "Preparing converter…"}</p>
+            {pageProgress && <progress aria-label="Conversion progress" value={Number(pageProgress[1])} max={Number(pageProgress[2])} />}
+            {partialSource && <small>Preview of first pages · selection and chat available when conversion finishes</small>}
+          </div>
+          {partialPreview}
+        </>
       ) : doc.status === "failed" ? (
         <div className="empty" role="alert">
           <h3>Couldn’t prepare this document</h3>
