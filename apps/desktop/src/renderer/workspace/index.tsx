@@ -81,6 +81,14 @@ export function Workspace() {
     onNotice={setNotice} /> : null, [partialSource, documentId]);
   useEffect(() => { if (route.documentId) setDocumentId(route.documentId); }, [route.documentId]);
   const doc = documents.find((d) => d.id === documentId);
+  const [chatDocument,setChatDocument] = useState<Document['id'] | null>(null);
+  useEffect(()=>{
+    if(!doc) return;
+    let second=0;
+    // Cached chat code can still have an expensive first mount; paint metadata first.
+    const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>setChatDocument(doc.id));});
+    return ()=>{cancelAnimationFrame(first);cancelAnimationFrame(second);};
+  },[doc?.id]);
   useReadingActivity(doc?.id ?? null, doc?.status === "ready" && !loadingSource);
   const pageProgress = /^Converting page (\d+)\/(\d+)/.exec(doc ? progress[doc.id] ?? "" : "");
   const report = useCallback(
@@ -301,7 +309,7 @@ export function Workspace() {
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
       {conversation && history ? (
-        <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}><Chat
+        <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}>{chatDocument === documentId ? <Chat
           documentPageCount={documentPageCount}
           documentTitle={doc?.sourceName ?? tr('common:document')}
             onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
@@ -317,7 +325,7 @@ export function Workspace() {
           onModel={chooseModel}
           onSettings={() => { setSettingsTab("providers"); setShowSettings(true); }}
           onProvidersChanged={refreshProviders}
-        /></Suspense>
+        /> : <p role="status">{tr("common:loading_conversation")}</p>}</Suspense>
       ) : (
         <div className="chat-start">
           <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onStart={() => void newConversation()} onQuestion={text => { setDraft(text); void newConversation(); }} />

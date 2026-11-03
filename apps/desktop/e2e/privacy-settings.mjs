@@ -1,7 +1,7 @@
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 const output='/tmp/vstudy-final/screens';await mkdir(output,{recursive:true});
@@ -28,5 +28,19 @@ try {
   }
   await page.keyboard.press('Escape');
  }
+ await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language:'en'});});await page.reload();
+ await app.evaluate(({safeStorage})=>{safeStorage.isAsyncEncryptionAvailable=async()=>{await new Promise(resolve=>globalThis.setTimeout(resolve,1000));return false;};});
+ await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[open]').waitFor();
+ const copy=JSON.parse(await readFile('src/shared/locales/en/settings.json','utf8'));
+ const keyInput=page.getByLabel('Anthropic API key',{exact:true});const row=page.locator('.provider-row').filter({has:keyInput});
+ await keyInput.fill('test-session-only-key');await row.getByRole('button',{name:'Save key',exact:true}).click();
+ await row.getByRole('status').filter({hasText:copy.waiting}).waitFor();
+ await page.evaluate(()=>window.desktop.invoke('settings:get',{}));
+ await page.screenshot({path:`${output}/en-keychain-waiting.png`});
+ await row.getByRole('alert').filter({hasText:copy.keychain_failed}).waitFor();await row.getByRole('button',{name:copy.retry,exact:true}).waitFor();
+ await page.screenshot({path:`${output}/en-keychain-denied.png`});
+ const keychainAxe=await new AxeBuilder({page}).setLegacyMode(true).analyze();await writeFile(`${output}/keychain-axe.json`,JSON.stringify(keychainAxe.violations,null,2));assert.deepEqual(keychainAxe.violations,[]);
+ await row.getByRole('button',{name:copy.session_key,exact:true}).click();await page.waitForFunction(()=>window.document.querySelector('input[aria-label="Anthropic API key"]')?.value==='');
+ assert.equal((await page.evaluate(()=>window.desktop.invoke('secrets:has',{providerId:'anthropic-api'}))).hasKey,false,'session-only key is never persisted');
 } finally {await writeFile(`${output}/axe.json`,JSON.stringify(results,null,2));await app?.close();await rm(directory,{recursive:true,force:true});}
 assert.equal(results.length,36);assert.deepEqual(results.filter(r=>r.violations.length),[]);

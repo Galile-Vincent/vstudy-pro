@@ -122,23 +122,26 @@ try {
   assert.ok(gridMounted<60,`grid mounts bounded visible cards: ${gridMounted}`);
   await page.evaluate(async()=>{window.document.querySelector('.library-results').scrollTop=0;await new Promise(window.requestAnimationFrame);});
   const profiler=process.env.VSTUDY_PERF_TRACE ? await page.context().newCDPSession(page) : null;
-  if(profiler) {await profiler.send('Profiler.enable');await profiler.send('Profiler.start');}
+  if(profiler) await app.evaluate(async()=>{const inspector=process.getBuiltinModule('node:inspector');const session=new inspector.Session();session.connect();globalThis.vstudyMetadataProfile=session;await new Promise((resolve,reject)=>session.post('Profiler.enable',error=>error?reject(error):resolve()));await new Promise((resolve,reject)=>session.post('Profiler.start',error=>error?reject(error):resolve()));});
+  const trace=[];if(profiler) {profiler.on('Tracing.dataCollected',event=>trace.push(...event.value));await profiler.send('Tracing.start',{categories:'devtools.timeline,blink.user_timing,blink,disabled-by-default-devtools.timeline',transferMode:'ReportEvents'});await profiler.send('Profiler.enable');await profiler.send('Profiler.start');}
   const metadata=[];
   for(let n=0;n<10;n++) {
     metadata.push(await page.evaluate(()=>new Promise(resolve=>{
       const timeout=window.setTimeout(()=>{observer.disconnect();resolve(-1);},3000);
-      const start=performance.now(),observer=new window.MutationObserver(()=>{
+      const start=performance.now();window.vstudyOpenStart=start;window.performance.mark('metadata-open-start');const observer=new window.MutationObserver(()=>{
         if(window.document.querySelector('.reading-pane .eyebrow')?.textContent==='study.md') {
-          window.clearTimeout(timeout);observer.disconnect();window.requestAnimationFrame(()=>resolve(performance.now()-start));
+          window.clearTimeout(timeout);observer.disconnect();window.requestAnimationFrame(()=>{window.performance.mark('metadata-open-end');resolve(performance.now()-start);});
         }
       });observer.observe(window.document.getElementById('shell-content'),{subtree:true,childList:true,characterData:true});
       window.document.querySelector('.library-document').dispatchEvent(new window.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
     })));
     console.log('metadataPaintMs',metadata.at(-1));
+    if(n===0) {await page.getByTestId('document-markdown').waitFor();evidence.coldFirstDocumentOpenMs=await page.evaluate(()=>new Promise(resolve=>window.requestAnimationFrame(()=>resolve(window.performance.now()-window.vstudyOpenStart))));}
     if(n===0 && profiler) {const {profile}=await profiler.send('Profiler.stop');await mkdir('/tmp/vstudy-final',{recursive:true});await writeFile('/tmp/vstudy-final/metadata-first-open.cpuprofile',JSON.stringify(profile));}
     if(metadata.at(-1)<0) break;
     await page.locator('.app-header').getByRole('button',{name:'Library',exact:true}).click();await page.locator('.library-document').first().waitFor();
   }
+  if(profiler) {const profile=await app.evaluate(async()=>{const session=globalThis.vstudyMetadataProfile;const result=await new Promise((resolve,reject)=>session.post('Profiler.stop',(error,result)=>error?reject(error):resolve(result.profile)));session.disconnect();delete globalThis.vstudyMetadataProfile;return result;});await writeFile('/tmp/vstudy-final/metadata-main.cpuprofile',JSON.stringify(profile));const complete=new Promise(resolve=>profiler.once('Tracing.tracingComplete',resolve));await profiler.send('Tracing.end');await complete;await writeFile(process.env.VSTUDY_PERF_TRACE_FILE ?? '/tmp/vstudy-final/metadata-timeline.json',JSON.stringify({traceEvents:trace}));}
   const validMetadata=metadata.filter(value=>value>=0).sort((a,b)=>a-b);Object.assign(evidence,{metadataPaintSamples:validMetadata.length,metadataPaintTimeouts:metadata.length-validMetadata.length,metadataPaintP50:validMetadata[Math.floor(validMetadata.length/2)],metadataPaintMax:validMetadata.at(-1)});
   await mkdir("/tmp/vstudy-library", { recursive: true });
   await writeFile(
