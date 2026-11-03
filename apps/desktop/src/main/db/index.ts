@@ -1,3 +1,5 @@
+import { chmodSync, copyFileSync, existsSync } from "node:fs";
+import { libraryMigration } from "./library-migration";
 import { usageMigration, usageRepository } from "./usage";
 import { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
@@ -30,6 +32,7 @@ const migrations = [
   { version: 2, sql: "ALTER TABLE documents ADD COLUMN converter TEXT NOT NULL DEFAULT 'markitdown' CHECK(converter IN ('pdf_md','markitdown'));" },
   { version: 3, sql: usageMigration },
   { version: 4, sql: "ALTER TABLE conversations ADD COLUMN options TEXT;" },
+  { version: 5, sql: libraryMigration },
 ];
 const documentRow = z
   .object({
@@ -62,10 +65,13 @@ const messageRow = z
   );
 
 export function openStore(path: string) {
+  const fresh = path === ":memory:" || !existsSync(path);
   const db = new DatabaseSync(path);
+  if (path !== ":memory:") chmodSync(path, 0o600);
   try {
+    if (fresh) db.exec("PRAGMA auto_vacuum=INCREMENTAL");
     db.exec(
-      "PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;",
+      "PRAGMA synchronous=NORMAL; PRAGMA temp_store=MEMORY; PRAGMA mmap_size=268435456; PRAGMA cache_size=-16384; PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;",
     );
     db.exec(
       "CREATE TABLE IF NOT EXISTS migrations (version INTEGER PRIMARY KEY, appliedAt TEXT NOT NULL)",
@@ -82,6 +88,11 @@ export function openStore(path: string) {
       throw new Error("Database version is newer than this application");
     for (const migration of migrations) {
       if (versions.includes(migration.version)) continue;
+      if (!fresh && migration.version === 5) {
+        db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
+        copyFileSync(path, `${path}.before-v5.bak`);
+        chmodSync(`${path}.before-v5.bak`, 0o600);
+      }
       db.exec("BEGIN IMMEDIATE");
       try {
         db.exec(migration.sql);
@@ -119,7 +130,7 @@ export function openStore(path: string) {
       return d;
     },
     get(id: Document["id"]): Document | null {
-      const row = db.prepare("SELECT * FROM documents WHERE id=?").get(id);
+      const row = db.prepare("SELECT * FROM documents WHERE id=? AND deletedAt IS NULL").get(id);
       return row ? documentRow.parse(row) : null;
     },
     findByHash(hash: string): Document | null {
@@ -132,7 +143,7 @@ export function openStore(path: string) {
       return z
         .array(documentRow)
         .parse(
-          db.prepare("SELECT * FROM documents ORDER BY createdAt,id").all(),
+          db.prepare("SELECT * FROM documents WHERE deletedAt IS NULL ORDER BY createdAt,id").all(),
         );
     },
     transition(id: Document["id"], next: DocumentTransition): Document {
@@ -151,8 +162,11 @@ export function openStore(path: string) {
       db.prepare("DELETE FROM documents WHERE id=?").run(id);
     },
   };
+  const maintenance = setInterval(() => { db.exec("PRAGMA optimize; PRAGMA incremental_vacuum(128)"); }, 300_000);
+  maintenance.unref();
   return {
-    close: () => db.close(),
+    db,
+    close: () => { clearInterval(maintenance); db.exec("PRAGMA optimize"); db.close(); },
     usage: usageRepository(db),
     documents,
     conversations: {
