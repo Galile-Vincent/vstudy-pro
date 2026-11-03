@@ -1,42 +1,84 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { RadioGroup as Radio, Switch } from 'radix-ui';
+import { Star, Zap, Check } from 'lucide-react';
+import { ModelSelector } from './components/assistant-ui/elements/model-selector.aui';
 import { desktop } from './bridge';
 import { providerName, type Providers } from './providers';
-export function ModelPicker({ providers, model, onModel, onSettings }: { providers: Providers; model: string; onModel: (value: string) => void; onSettings: () => void; onProvidersChanged?: () => Promise<void> }) {
-  const [open, setOpen] = useState(false), [search, setSearch] = useState(''), [active, setActive] = useState(0);
+
+export const effortLabel = (id: string) => ({ low: 'Low', medium: 'Medium', high: 'High', xhigh: 'Extra high', max: 'Max', ultra: 'Ultra', ultracode: 'Ultracode', ultrathink: 'Ultrathink' })[id] ?? id;
+export function pickerModels(providers: Providers) {
+  return providers.flatMap(p => {
+    const seen = new Set<string>();
+    return [...p.models].sort((a, b) => Number(b.id === 'default') - Number(a.id === 'default') || Number(a.id === a.resolvedId) - Number(b.id === b.resolvedId)).filter(m => {
+      const key = m.id === 'default' ? 'default' : m.resolvedId ?? m.id;
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    }).map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id, provider: providerName[p.config.id], available: p.config.enabled && p.availability.available, reason: !p.config.enabled ? 'Provider disabled' : p.availability.available ? 'Available' : p.availability.reason }));
+  });
+}
+function traitKeys(event: KeyboardEvent<HTMLElement>) {
+  const target = event.target as HTMLElement;
+  if (target.getAttribute('role') !== 'radio') return;
+  const radios = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role=radio]'));
+  const direction = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+  if (direction === undefined && !['Home','End','Enter',' '].includes(event.key)) return;
+  // Command owns arrow/Enter navigation; keep trait keystrokes within the Radix radio group.
+  event.preventDefault(); event.stopPropagation();
+  const index = radios.indexOf(target as HTMLButtonElement);
+  const next = event.key === 'Home' ? 0 : event.key === 'End' ? radios.length - 1 : (index + (direction ?? 0) + radios.length) % radios.length;
+  radios[next]?.focus(); radios[next]?.click();
+}
+export function ModelPicker({ providers, model, onModel, onSettings, values = {}, onChange }: { providers: Providers; model: string; onModel: (value: string) => void; onSettings: () => void; onProvidersChanged?: () => Promise<void>; values?: Record<string,string|boolean>; onChange?: (values: Record<string,string|boolean>) => void }) {
+  const [open, setOpen] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]), [recent, setRecent] = useState<string[]>([]);
   const root = useRef<HTMLDivElement>(null);
-  useEffect(() => { void desktop.invoke('settings:get', {}).then(s => { setFavorites(s.favoriteModels ?? []); setRecent(s.recentModels ?? []); }).catch(() => {}); }, []);
-  useEffect(() => { const close = (e: PointerEvent) => { if (!root.current?.contains(e.target as Node)) setOpen(false); }; document.addEventListener('pointerdown', close); return () => document.removeEventListener('pointerdown', close); }, []);
-  const all = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, provider: providerName[p.config.id], available: p.config.enabled && p.availability.available, status: p.availability.available ? 'Available' : p.availability.reason })));
-  const rows = all.filter(m => `${m.name} ${m.id} ${m.provider}`.toLowerCase().includes(search.toLowerCase())).sort((a,b) => (favorites.includes(b.value) ? 2 : recent.includes(b.value) ? 1 : 0) - (favorites.includes(a.value) ? 2 : recent.includes(a.value) ? 1 : 0));
-  const enabled = rows.filter(m => m.available);
-  useEffect(() => { const row = root.current?.querySelector('[aria-activedescendant]')?.getAttribute('aria-activedescendant'); if (row) document.getElementById(row)?.scrollIntoView?.({ block: 'nearest' }); }, [active, search]);
-  const persist = async (nextFavorites: string[], nextRecent: string[]) => { try { const s = await desktop.invoke('settings:get', {}); await desktop.invoke('settings:set', { ...s, favoriteModels: nextFavorites, recentModels: nextRecent }); } catch { /* Picker remains usable if settings cannot be saved. */ } };
-  const choose = (value: string) => { const next = [value, ...recent.filter(x => x !== value)].slice(0,8); setRecent(next); void persist(favorites,next).then(() => onModel(value)); setOpen(false); };
+  const [boundary, setBoundary] = useState<Element | null>(null);
+  useEffect(() => { setBoundary(root.current?.closest('.pane') ?? null); void desktop.invoke('settings:get', {}).then(s => { setFavorites(s.favoriteModels ?? []); setRecent(s.recentModels ?? []); }).catch(() => {}); }, []);
+  const all = pickerModels(providers);
+  const original = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id }))).find(m => m.value === model);
+  const selected = all.find(m => m.value === model) ?? all.find(m => m.providerId === original?.providerId && m.resolvedId === original?.resolvedId && m.id !== 'default');
+  const effort = selected?.options?.find(o => /effort/i.test(o.id));
+  const speed = selected?.options?.find(o => o.id === 'fastMode' || (o.id === 'serviceTier' && o.values.some(v => v.id === 'priority')));
+  const fast = speed && ['true', 'priority'].includes(String(values[speed.id] ?? speed.default));
+  const entries = all.map(m => ({ id: m.value, name: m.name, description: `${m.resolvedId ?? m.id}${m.available ? '' : ` · ${m.reason}`}`, disabled: !m.available, keywords: [m.provider, m.id], icon: <span className={`availability-dot ${m.available ? 'available' : ''}`} title={m.reason} /> }));
+  const persist = async (f: string[], r: string[]) => { try { const s = await desktop.invoke('settings:get', {}); await desktop.invoke('settings:set', { ...s, favoriteModels: f, recentModels: r }); } catch { /* Selection stays usable when settings storage is unavailable. */ } };
+  const choose = (value: string) => { const r = [value, ...recent.filter(x => x !== value)].slice(0,8); setRecent(r); void persist(favorites,r).then(() => onModel(value)); };
+  const groups = ['Favorites', 'Recent', ...providers.map(p => providerName[p.config.id])];
   return <div className="model-picker" ref={root}>
-    <button type="button" aria-label="Model" aria-haspopup="listbox" aria-expanded={open} onClick={() => { setOpen(!open); setSearch(''); setActive(0); }}>{all.find(m => m.value === model)?.name ?? (model.split('/').slice(1).join('/') || 'Choose a model')} <span aria-hidden>⌄</span></button>
-    {open && <div className="model-popover">
-      <input autoFocus role="combobox" aria-label="Search models" aria-expanded="true" aria-controls="model-list" aria-activedescendant={enabled[active] ? `model-${all.findIndex(m => m.value === enabled[active]?.value)}` : undefined} placeholder="Search models or providers…" value={search} onChange={e => { setSearch(e.target.value); setActive(0); }} onKeyDown={e => {
-        if (e.key === 'Escape') { setOpen(false); root.current?.querySelector('button')?.focus(); }
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); setActive(i => Math.max(0, Math.min(enabled.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)))); }
-        if (e.key === 'Enter') { e.preventDefault(); if (enabled[active]) choose(enabled[active].value); }
-      }} />
-      <div id="model-list" role="listbox" aria-label="Models">
-        {!rows.length && <p className="muted">No matching models</p>}
-        {rows.map((m,i) => { const group = favorites.includes(m.value) ? 'Favorites' : recent.includes(m.value) ? 'Recent' : m.provider; const prev = rows[i-1]; const prevGroup = prev && (favorites.includes(prev.value) ? 'Favorites' : recent.includes(prev.value) ? 'Recent' : prev.provider); return <div key={m.value}>
-          {group !== prevGroup && <div className="model-group">{group}</div>}
-          <div className={`model-row ${enabled[active]?.value === m.value ? 'active' : ''}`}>
-            <button type="button" id={`model-${all.findIndex(x => x.value === m.value)}`} role="option" aria-selected={m.value === model} disabled={!m.available} onClick={() => choose(m.value)}><span>{m.name} {m.value === model && <small>Current</small>}</span><small>{m.provider} · {m.status}</small></button>
-            <button type="button" aria-label={`${favorites.includes(m.value) ? 'Unfavorite' : 'Favorite'} ${m.name}`} aria-pressed={favorites.includes(m.value)} onClick={() => { const next = favorites.includes(m.value) ? favorites.filter(x => x !== m.value) : [...favorites,m.value]; setFavorites(next); void persist(next,recent); }}>{favorites.includes(m.value) ? '★' : '☆'}</button>
-          </div></div>; })}
-      </div>
-      <button type="button" className="text-button" onClick={onSettings}>API keys & provider settings</button>
-    </div>}
+    <ModelSelector.Root models={entries} value={selected?.value ?? model} onValueChange={choose} open={open} onOpenChange={setOpen}>
+      <ModelSelector.Trigger aria-label="Model" className="model-trigger" title={selected?.name}>
+        <span className="provider-initial" aria-hidden>{selected?.provider[0] ?? 'M'}</span>
+        <span className="model-trigger-name">{selected?.name ?? (model.split('/').slice(1).join('/') || 'Choose a model')}</span>
+        {effort && <span className="model-trigger-effort">· {effortLabel(String(values[effort.id] ?? effort.default))}</span>}
+        {fast && <Zap size={12} aria-label="Fast mode on" />}
+      </ModelSelector.Trigger>
+      <ModelSelector.Content side="top" align="start" searchable collisionBoundary={boundary} collisionPadding={12} className="model-popover" onKeyDown={e => {
+        if (e.key !== 'Tab') return;
+        const nodes = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('input, button:not(:disabled), [tabindex="0"]')).filter(n => n.getAttribute('tabindex') !== '-1');
+        const first = nodes[0], last = nodes.at(-1);
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }}>
+        <ModelSelector.Search aria-label="Search models" placeholder="Search models or providers…" onKeyDown={e => { if (e.key === 'Tab' && !e.shiftKey && effort) { e.preventDefault(); e.currentTarget.closest('[cmdk-root]')?.querySelector<HTMLElement>('[role=radio][data-state=checked]')?.focus(); } }} />
+        <div className="model-picker-body">
+          <ModelSelector.List id="model-list" aria-label="Models">
+            <ModelSelector.Empty>No matching models</ModelSelector.Empty>
+            {groups.map(group => {
+              const rows = all.filter(m => (favorites.includes(m.value) ? 'Favorites' : recent.includes(m.value) ? 'Recent' : m.provider) === group);
+              return rows.length > 0 && <ModelSelector.Group key={group} heading={group}>{rows.map(m => <div className="model-row" key={m.value}>
+                <ModelSelector.Item model={entries.find(x => x.id === m.value)!} title={m.reason} />
+                <button type="button" className="model-favorite" aria-label={`${favorites.includes(m.value) ? 'Unfavorite' : 'Favorite'} ${m.name}`} aria-pressed={favorites.includes(m.value)} onClick={() => { const f = favorites.includes(m.value) ? favorites.filter(x => x !== m.value) : [...favorites,m.value]; setFavorites(f); void persist(f,recent); }}><Star size={14} fill={favorites.includes(m.value) ? 'currentColor' : 'none'} /></button>
+              </div>)}</ModelSelector.Group>;
+            })}
+          </ModelSelector.List>
+          {onChange && <div className="model-traits">
+            {effort && <section aria-label="Effort" onKeyDownCapture={traitKeys}><h4>Effort</h4><Radio.Root value={String(values[effort.id] ?? effort.default)} onValueChange={value => onChange({ ...values, [effort.id]: value })} aria-label="Effort" className="effort-list">{effort.values.map(v => <Radio.Item key={v.id} value={v.id} className="effort-item"><span className="effort-check">{String(values[effort.id] ?? effort.default) === v.id && <Check size={13} />}</span>{effortLabel(v.id)}{v.id === effort.default && <small>default</small>}</Radio.Item>)}</Radio.Root></section>}
+            {speed && <section className="speed-section"><h4>Speed</h4><label className="fast-mode">Fast mode (priority tier)<Switch.Root aria-label="Fast mode (priority tier)" checked={!!fast} onCheckedChange={checked => onChange({ ...values, [speed.id]: speed.id === 'fastMode' ? checked : checked ? 'priority' : 'default' })}><Switch.Thumb /></Switch.Root></label><p>Faster responses.</p></section>}
+            {selected?.options?.filter(o => !/effort/i.test(o.id) && o.id !== speed?.id).map(o => <section className="speed-section" key={o.id} onKeyDownCapture={traitKeys}><h4>{o.label}</h4><Radio.Root aria-label={o.label} value={String(values[o.id] ?? o.default)} onValueChange={value => onChange({ ...values, [o.id]: value })} className="effort-list">{o.values.map(v => <Radio.Item key={v.id} value={v.id} className="effort-item">{v.label.charAt(0).toUpperCase() + v.label.slice(1)}</Radio.Item>)}</Radio.Root></section>)}
+          </div>}
+        </div>
+        <button type="button" className="picker-settings" onClick={() => { setOpen(false); onSettings(); }}>API keys & provider settings</button>
+      </ModelSelector.Content>
+    </ModelSelector.Root>
   </div>;
-}
-export function ModelOptions({ providers, model, values, onChange }: { providers: Providers; model: string; values: Record<string,string|boolean>; onChange: (values: Record<string,string|boolean>) => void }) {
-  const selected = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}` }))).find(m => m.value === model);
-  return <div className="model-options">{selected?.options?.map(option => /effort/i.test(option.id)
-    ? <fieldset key={option.id} className="effort-control" aria-label={option.label}><legend>{option.label}</legend><div role="radiogroup" aria-label={option.label}>{option.values.map(v => <button type="button" role="radio" aria-checked={String(values[option.id] ?? option.default) === v.id} key={v.id} onClick={() => onChange({ ...values, [option.id]: v.id })}>{v.label}</button>)}</div></fieldset>
-    : <label key={option.id}>{option.label}<select aria-label={option.label} value={String(values[option.id] ?? option.default)} onChange={e => onChange({ ...values, [option.id]: e.target.value })}>{option.values.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}</select></label>)}</div>;
 }

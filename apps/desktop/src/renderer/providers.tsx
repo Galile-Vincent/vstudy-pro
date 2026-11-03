@@ -15,12 +15,14 @@ export function ProviderSettings({
   providers,
   onClose,
   onRefresh,
+  initialTab = "providers",
 }: {
   providers: Providers;
   onClose: () => void;
   onRefresh: () => Promise<void>;
+  initialTab?: string;
 }) {
-  const [tab,setTab] = useState("providers");
+  const [tab,setTab] = useState(initialTab);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     dialog.current?.showModal();

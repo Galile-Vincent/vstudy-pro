@@ -14,13 +14,20 @@ export function useUsage(conversationId: Conversation['id']) {
   }, [conversationId]);
   return { data,error };
 }
-export function UsageMeter({ data, error }: ReturnType<typeof useUsage>) {
-  if (!data) return <small className="usage-meter">{error || 'Loading usage…'}</small>;
-  const { records,settings,month } = data;
-  const state = budgetState(settings,month);
+export function UsageButton({ data, error, onClick }: ReturnType<typeof useUsage> & { onClick: () => void }) {
+  const records = data?.records ?? [];
+  const tokens = records.reduce((n,r) => n + r.inputTokens + r.outputTokens,0);
   const known = records.filter(r => r.costUsd !== undefined);
+  const cost = known.reduce((n,r) => n + r.costUsd!,0);
+  return <button type="button" className="composer-usage" onClick={onClick} aria-label="Conversation usage" title="View usage and budget settings">{error || (!data ? 'Usage…' : `${compactTokens(tokens)} tokens${known.length ? ` · ${money(cost)}` : ''}`)}</button>;
+}
+export function UsageMeter({ data, error }: ReturnType<typeof useUsage>) {
+  if (!data) return error ? <small className="usage-meter">{error}</small> : null;
+  const { settings,month } = data;
+  const state = budgetState(settings,month);
+  if (!state.percent && !month.unknownPrices) return null;
   return <div className={`usage-meter ${state.tone}`}>
-    <span>Conversation · {compactTokens(records.reduce((n,r) => n + r.inputTokens + r.outputTokens,0))} tokens · {money(known.length ? known.reduce((n,r) => n + r.costUsd!,0) : undefined)}{records.some(r => r.providerId.endsWith("-cli")) && " · API-equivalent (subscription)"}</span>
+
     {(settings.monthlyBudgetUsd || settings.monthlyTokenBudget) && <><span>Month · {money(month.costUsd ?? (month.calls ? undefined : 0))}{settings.monthlyBudgetUsd ? ` / $${settings.monthlyBudgetUsd} · $${Math.max(0,settings.monthlyBudgetUsd - (month.costUsd ?? 0)).toFixed(2)} left` : ''}{settings.monthlyTokenBudget ? ` · ${compactTokens(state.tokens)} / ${compactTokens(settings.monthlyTokenBudget)} tokens · ${compactTokens(Math.max(0,settings.monthlyTokenBudget - state.tokens))} left` : ''}</span><progress aria-label="Monthly budget used" value={Math.min(100,state.percent)} max={100} /></>}
     {month.unknownPrices > 0 && <span>Some prices unknown; spending is a lower bound.</span>}
   </div>;

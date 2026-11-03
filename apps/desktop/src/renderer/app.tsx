@@ -23,6 +23,7 @@ export function App() {
     [source, setSource] = useState("");
   const [providers, setProviders] = useState<Providers>([]),
     [model, setModel] = useState("");
+  const [settingsTab, setSettingsTab] = useState("providers");
   const [conversations, setConversations] = useState<Conversation[]>([]),
     [conversation, setConversation] = useState<Conversation | null>(null),
     [history, setHistory] = useState<Message[] | null>(null);
@@ -274,6 +275,7 @@ export function App() {
       </div>
       {conversation && history ? (
         <Chat
+            onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
           key={conversation.id}
           draft={draft}
           onDraft={setDraft}
@@ -284,7 +286,7 @@ export function App() {
           providers={providers}
           model={`${conversation.providerId}/${conversation.modelId}`}
           onModel={chooseModel}
-          onSettings={() => setShowSettings(true)}
+          onSettings={() => { setSettingsTab("providers"); setShowSettings(true); }}
           onProvidersChanged={refreshProviders}
         />
       ) : (
@@ -320,7 +322,7 @@ export function App() {
             providers={providers}
             model={model}
             onModel={chooseModel}
-            onSettings={() => setShowSettings(true)}
+            onSettings={() => { setSettingsTab("providers"); setShowSettings(true); }}
             onProvidersChanged={refreshProviders}
           />
         </div>
@@ -543,6 +545,7 @@ export function App() {
       </div>
       {showSettings && (
         <ProviderSettings
+          initialTab={settingsTab}
           providers={providers}
           onClose={() => setShowSettings(false)}
           onRefresh={refreshProviders}

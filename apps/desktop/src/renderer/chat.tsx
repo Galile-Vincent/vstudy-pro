@@ -1,62 +1,21 @@
-import { ModelPicker, ModelOptions } from "./model-picker";
+import { ModelPicker } from "./model-picker";
 export { ModelPicker } from "./model-picker";
 import { MessageUsage } from "./usage/chip";
-import { UsageMeter, useUsage, useBudgetGuard } from "./usage/meter";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { UsageButton, UsageMeter, useUsage, useBudgetGuard } from "./usage/meter";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   AssistantRuntimeProvider,
   ComposerPrimitive,
-  ThreadPrimitive,
-  MessagePrimitive,
-  ErrorPrimitive,
-  ActionBarPrimitive,
   useLocalRuntime,
   useAuiState,
 } from "@assistant-ui/react";
 import type { Conversation, Message, Selection } from "../shared";
-import { ReplyMarkdown } from "./markdown";
+import { Thread } from "./components/assistant-ui/elements/thread.aui";
 import { plainSelection } from "./selection-preview";
 import { desktop } from "./bridge";
 import { createChatAdapter } from "./chat-adapter";
 import { type Providers } from "./providers";
 
-function ChatMessage({ selections, statuses, subscription }: { subscription: boolean; selections: Map<string, Selection>; statuses: Map<string, string> }) {
-  const id = useAuiState((s) => s.message.id);
-  const selected = selections.get(id);
-  const copied = useAuiState(s => s.message.isCopied);
-  const editing = useAuiState(s => s.message.composer.isEditing);
-  const running = useAuiState(s => s.message.status?.type === "running");
-  const role = useAuiState((s) => s.message.role);
-  return (
-    <MessagePrimitive.Root className={`message ${role}`}>
-      <div className="message-label">
-        {role === "user" ? "You" : "Assistant"}
-      </div>
-      {selected && <SelectionPreview selection={selected} />}
-      {editing ? <ComposerPrimitive.Root className="edit-composer">
-        <ComposerPrimitive.Input aria-label="Edit message" />
-        <ComposerPrimitive.Cancel>Cancel edit</ComposerPrimitive.Cancel>
-        <ComposerPrimitive.Send>Save & resend</ComposerPrimitive.Send>
-      </ComposerPrimitive.Root> : <div className="message-text">
-        <MessagePrimitive.Parts components={role === "assistant" ? { Text: AssistantText } : undefined} />
-      </div>}
-      {role === "user" && !editing && <ActionBarPrimitive.Root className="message-actions"><ActionBarPrimitive.Edit>Edit</ActionBarPrimitive.Edit></ActionBarPrimitive.Root>}
-      {role === "assistant" && <>
-        {running && <div role="status" className="thinking">Thinking<span aria-hidden> ● ● ●</span></div>}
-        <MessageUsage subscription={subscription} />
-        <ActionBarPrimitive.Root className="message-actions" hideWhenRunning>
-          <ActionBarPrimitive.Copy>{copied ? 'Copied' : 'Copy'}</ActionBarPrimitive.Copy>
-          <ActionBarPrimitive.Reload>Regenerate</ActionBarPrimitive.Reload>
-        </ActionBarPrimitive.Root>
-      </>}
-      {statuses.get(id) && <p role="status">Response {statuses.get(id)}. This turn is excluded from future context.</p>}
-      <MessagePrimitive.Error><ErrorPrimitive.Root className="chat-error">
-        <ErrorPrimitive.Message />
-        <ActionBarPrimitive.Reload>Retry</ActionBarPrimitive.Reload>
-      </ErrorPrimitive.Root></MessagePrimitive.Error>
-    </MessagePrimitive.Root>
-  );
-}
 export function Chat({
   conversation,
   draft,
@@ -69,6 +28,7 @@ export function Chat({
   onModel,
   onSettings,
   onProvidersChanged,
+  onUsage,
 }: {
   conversation: Conversation;
   draft: string;
@@ -81,6 +41,7 @@ export function Chat({
   onModel: (value: string) => void;
   onSettings: () => void;
   onProvidersChanged: () => Promise<void>;
+  onUsage: () => void;
 }) {
   const [options, setOptions] = useState<Record<string,string|boolean>>(conversation.options ?? {});
   const declared = providers.find(p => p.config.id === conversation.providerId)?.models.find(m => m.id === conversation.modelId)?.options ?? [];
@@ -127,83 +88,48 @@ export function Chat({
   useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
   const statuses = new Map(history.flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
-  return (
-    <AssistantRuntimeProvider runtime={runtime}>
-      <ThreadPrimitive.Root className="thread">
-        <ThreadPrimitive.Viewport className="transcript">
-          <ThreadPrimitive.Empty>
-            <div className="empty">
-              <div className="empty-symbol">✦</div>
-              <h3>Make room for a question</h3>
-              <p>Select a passage, or ask about the whole document.</p>
-              <ThreadPrimitive.Suggestion prompt="Summarize this document" method="replace">Summarize this document</ThreadPrimitive.Suggestion>
-              <ThreadPrimitive.Suggestion prompt="Explain the selected passage" method="replace">Explain the selected passage</ThreadPrimitive.Suggestion>
-            </div>
-          </ThreadPrimitive.Empty>
-          <ThreadPrimitive.Messages>
-            {() => <ChatMessage subscription={conversation.providerId.endsWith("-cli")} selections={selections.current} statuses={statuses} />}
-          </ThreadPrimitive.Messages>
-        </ThreadPrimitive.Viewport>
-        <ThreadPrimitive.ScrollToBottom className="scroll-bottom" aria-label="Scroll to bottom">↓ Latest</ThreadPrimitive.ScrollToBottom>
-        {unavailable && <p role="alert">This conversation’s provider is unavailable. Add an API key or enable it in Settings.</p>}
-        <ComposerPrimitive.Root
-          className="composer"
-          onSubmitCapture={budget.guard}
-        >
-          {selection && (
-            <div className="selection-chip">
-              <SelectionPreview selection={selection} />
-              <button
-                type="button"
-                aria-label="Remove selection"
-                onClick={onClearSelection}
-              >
-                ×
-              </button>
-            </div>
-          )}
-          <ChatComposerInput />
-          <div className="composer-footer">
-            <ModelPicker
-              providers={providers}
-              model={model}
-              onModel={onModel}
-              onSettings={onSettings}
-              onProvidersChanged={onProvidersChanged}
-            />
-            <ModelOptions providers={providers} model={model} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />
-            <div className="row">
-              <ComposerPrimitive.Cancel className="stop-button">
-                Stop
-              </ComposerPrimitive.Cancel>
-              <ComposerPrimitive.Send
-                onClick={budget.guard}
-                disabled={unavailable}
-                className="send-button"
-                aria-label="Send message"
-              >
-                ↑
-              </ComposerPrimitive.Send>
-            </div>
-          </div>
-          <UsageMeter {...usage} />
-          {budget.warning && <div className="usage-warning" role="alert">{budget.reason} The estimate allows 1,024 output tokens; actual usage can be higher.
-            <button type="button" onClick={budget.approve}>Send anyway</button>
-            <button type="button" onClick={budget.dismiss}>Cancel</button>
-          </div>}
-        </ComposerPrimitive.Root>
-        <p className="composer-note">
-          Grounded in your document. Check important details.
-        </p>
-      </ThreadPrimitive.Root>
-    </AssistantRuntimeProvider>
-  );
+  const extensions = {
+    selection, onClearSelection, usage, budget, unavailable, onUsage,
+    picker: <ModelPicker providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
+    selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
+  };
+  return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
+    {unavailable && <p role="alert">This conversation’s provider is unavailable. Add an API key or enable it in Settings.</p>}
+    <Thread components={documentComponents} />
+    <p className="composer-note">Grounded in your document. Check important details.</p>
+  </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }
 
-function AssistantText() {
-  const text = useAuiState(s => s.message.content.filter(p => p.type === "text").map(p => p.text).join("\n"));
-  return <div className="markdown"><ReplyMarkdown text={text} /></div>;
+type DocumentChat = {
+  selection: Selection | null; onClearSelection: () => void;
+  usage: ReturnType<typeof useUsage>; budget: ReturnType<typeof useBudgetGuard>;
+  unavailable: boolean; onUsage: () => void; picker: React.ReactNode;
+  selections: Map<string, Selection>; statuses: Map<string, string>; subscription: boolean;
+};
+const DocumentChatContext = createContext<DocumentChat | null>(null);
+const useDocumentChat = () => useContext(DocumentChatContext)!;
+function ComposerSelection() {
+  const {selection,onClearSelection} = useDocumentChat();
+  return selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label="Remove selection" onClick={onClearSelection}>×</button></div>;
 }
+function ComposerBanner() {
+  const {usage,budget} = useDocumentChat();
+  return <><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert">{budget.reason} The estimate allows 1,024 output tokens; actual usage can be higher.<button type="button" onClick={budget.approve}>Send anyway</button><button type="button" onClick={budget.dismiss}>Cancel</button></div>}</>;
+}
+function ComposerModel() { return useDocumentChat().picker; }
+function ComposerUsage() { const {usage,onUsage} = useDocumentChat(); return <UsageButton {...usage} onClick={onUsage} />; }
+function MessageSelection() {
+  const id = useAuiState(s => s.message.id), {selections} = useDocumentChat();
+  const selected = selections.get(id);
+  return selected && <SelectionPreview selection={selected} />;
+}
+function DocumentMessageFooter() {
+  const id = useAuiState(s => s.message.id), {statuses,subscription} = useDocumentChat();
+  return <><MessageUsage subscription={subscription} />{statuses.get(id) && <p role="status">Response {statuses.get(id)}. This turn is excluded from future context.</p>}</>;
+}
+function useComposerBindings() { const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
+const documentComponents = { ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
+
 export function SelectionPreview({ selection }: { selection: Selection }) {
   const plain = plainSelection(selection.text.replace(/^#{1,6} .*\n?/, ""));
   return <details className="selection-preview"><summary><strong>{selection.headingPath.join(" › ") || "Selected passage"}</strong><span>{plain.slice(0, 160)}{plain.length > 160 ? "…" : ""}</span></summary><div>{plain}</div></details>;
@@ -211,7 +137,7 @@ export function SelectionPreview({ selection }: { selection: Selection }) {
 
 export function ChatComposerInput() {
   const composing = useRef(false);
-  return <ComposerPrimitive.Input aria-label="Ask about your document" placeholder="Ask about your document…" rows={2}
+  return <ComposerPrimitive.Input className="aui-composer-input" aria-label="Ask about your document" placeholder="Ask about your document…" rows={2}
     onCompositionStart={() => { composing.current = true; }}
     onCompositionEnd={() => { composing.current = false; }}
     onKeyDown={e => { if (e.key === 'Enter' && (composing.current || e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229)) { e.preventDefault(); e.stopPropagation(); } }} />;
