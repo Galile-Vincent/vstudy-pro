@@ -231,3 +231,14 @@ it('discovers saved-key availability without unlocking the Keychain or fetching 
   expect(getInMainOnly).not.toHaveBeenCalled();
   expect(fetcher).not.toHaveBeenCalled();
 });
+it('kills a TERM-resistant descendant even when its CLI parent exits on TERM',async()=>{
+ const cwd=await mkdtemp(join(tmpdir(),'vstudy-cli-descendant-'));let pid:number|undefined;
+ const line={type:'stream_event',event:{type:'content_block_delta',delta:{type:'text_delta',text:'tick'}}};
+ const script=`const child=require('node:child_process').spawn(process.execPath,['-e',"process.on('SIGTERM',()=>{});process.send('ready');setInterval(()=>{},1000)"],{stdio:['ignore','ignore','ignore','ipc']});require('node:fs').writeFileSync('pid',String(child.pid));child.on('message',()=>console.log(${JSON.stringify(JSON.stringify(line))}));setInterval(()=>{},1000);`;
+ const controller=new AbortController();
+ try {
+  await expect((async()=>{for await(const event of runCli(process.execPath,['-e',script],'',cwd,'claude',controller.signal)){if(event.type==='text-delta')controller.abort();}})()).rejects.toThrow();
+  const {readFile}=await import('node:fs/promises');pid=Number(await readFile(join(cwd,'pid'),'utf8'));
+  await vi.waitFor(()=>expect(()=>process.kill(pid!,0)).toThrow(),{timeout:500});
+ } finally {if(pid)try{process.kill(pid,'SIGKILL');}catch{/* Already reaped. */}await rm(cwd,{recursive:true,force:true});}
+});
