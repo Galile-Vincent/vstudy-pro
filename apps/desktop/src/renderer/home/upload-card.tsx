@@ -40,7 +40,7 @@ export function UploadCard({ folders = [], onImported, showSample = true }: { sh
     <label>{tr('home:destination')}<Select value={folderId} onChange={e => setFolderId(e.target.value)} disabled={busy}><option value="">{tr('library:unfiled')}</option>{folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</Select></label>
     <button className="primary" disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</button>
     {showSample && <button className="ghost" disabled={busy} onClick={() => { setBusy(true); void desktop.invoke('documents:importSample', {language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}).then(d => { onImported?.(d); window.dispatchEvent(new Event('activity-updated')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</button>}
-    <details><summary>{tr('home:paste_path')}</summary><label><span className="motion-sr">{tr('home:paste_path')}</span><input disabled={busy} onPaste={e => { const path = e.clipboardData.getData('text').trim(); if (path) { e.preventDefault(); void upload([path]); } }} /></label></details>
+
     {busy && <progress aria-label={tr('home:importing')}/>}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
   </div>;
 }

@@ -71,7 +71,7 @@ export function DocumentMarkdown({
   onSelect: (selection: Selection) => void;
   onNotice: (message: string) => void;
 }) {
-  useTranslation();
+  const { i18n } = useTranslation();
   const root = useRef<HTMLDivElement>(null);
   const selectCallback = useRef(onSelect);
   selectCallback.current = onSelect;
@@ -130,32 +130,7 @@ export function DocumentMarkdown({
     document.addEventListener("keydown", shortcut);
     return () => { document.removeEventListener("mouseup", update); document.removeEventListener("keyup", update); document.removeEventListener("keydown", shortcut); };
   }, [source, documentId, onSelect]);
-  return (
-    <div className="reading-scroll" onScroll={() => setFloating(null)}>
-      <div
-        ref={root}
-        tabIndex={0} role="document"
-        className="markdown" lang={contentLanguage(source)}
-        data-testid="document-markdown"
-
-      >
-        <Markdown
-          remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[
-            sourceOffsets,
-            [rehypeSanitize, schema],
-            rehypeKatex,
-            rehypeHighlight,
-          ]}
-          skipHtml
-          urlTransform={(url, key) =>
-            key === "src"
-              ? (safeImage(url) ?? "")
-              : (url.startsWith("#") || externalUrlSchema.safeParse(url).success)
-                ? url
-                : ""
-          }
-          components={useMemo(() => ({
+  const components = useMemo(() => ({
             p: ({ children, node, ...props }) => <p {...props}>{children}{!decorative && node?.position && <button className="paragraph-action" aria-label={tr('common:ask_about_paragraph')} onClick={() => {
               const start = node.position!.start.offset!, end = node.position!.end.offset!;
               selectCallback.current({documentId,startOffset:start,endOffset:end,text:source.slice(start,end),headingPath:headingPath(headings,start),page:pageAt(source,start)});
@@ -223,10 +198,37 @@ export function DocumentMarkdown({
                 },
               ]),
             ),
-          }), [source, documentId, headings, decorative, onNotice])}
+          }), [source, documentId, headings, decorative, onNotice, i18n.language]);
+  const rendered = useMemo(() => (        <Markdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[
+            sourceOffsets,
+            [rehypeSanitize, schema],
+            rehypeKatex,
+            rehypeHighlight,
+          ]}
+          skipHtml
+          urlTransform={(url, key) =>
+            key === "src"
+              ? (safeImage(url) ?? "")
+              : (url.startsWith("#") || externalUrlSchema.safeParse(url).success)
+                ? url
+                : ""
+          }
+          components={components}
         >
           {source}
-        </Markdown>
+        </Markdown>), [source, components, documentId, onNotice]);
+  return (
+    <div className="reading-scroll" onScroll={() => setFloating(null)}>
+      <div
+        ref={root}
+        tabIndex={0} role="document"
+        className="markdown" lang={contentLanguage(source)}
+        data-testid="document-markdown"
+
+      >
+        {rendered}
       </div>
       {floating && (
         <button

@@ -237,11 +237,13 @@ export function rangeSelection(
     endOffset = boundary(range.endContainer, range.endOffset, true);
   if (startOffset === null || endOffset === null || endOffset <= startOffset)
     return null;
+  const fragment = range.cloneContents();
+  fragment.querySelectorAll("button").forEach(button => button.remove());
   return {
     documentId,
     startOffset,
     endOffset,
-    text: range.toString(),
+    text: fragment.textContent ?? "",
     ...(pageAt(source, startOffset) ? { page: pageAt(source, startOffset) } : {}),
     headingPath: headingPath(headingsIn(source), startOffset),
   };

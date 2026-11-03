@@ -98,7 +98,9 @@ export function Workspace() {
     let active = true;
     void Promise.all([
       desktop.invoke("settings:get", {}),
-      desktop.invoke("documents:list", {}),
+      (route.documentId
+        ? desktop.invoke("documents:get", {documentId:route.documentId}).then(doc => doc ? [doc] : [])
+        : desktop.invoke("documents:list", {})).then(rows => { if (active) setDocuments(rows); return rows; }),
       desktop.invoke("providers:list", {}),
     ])
       .then(([s, d, p]) => {
