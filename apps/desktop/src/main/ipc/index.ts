@@ -2,7 +2,7 @@ import { updateApplicationMenu } from "../i18n";
 import { registerLibraryIpc } from "./library";
 import { registerUsageIpc } from "./usage";
 import { createProviderRegistry } from "../providers";
-import { app, nativeTheme, shell, ipcMain, type IpcMainInvokeEvent } from "electron";
+import { app, dialog, nativeTheme, shell, ipcMain, type IpcMainInvokeEvent } from "electron";
 import type { Store } from "../db";
 import type { SecretStore } from "../services/secrets";
 import { ipcContract, type IpcChannel } from "../../shared/ipc";
@@ -28,7 +28,9 @@ export function registerIpc(
     "secrets:delete",
   ]);
   registrar.handle("shell:openExternal", async ({ url }) => {
-    await shell.openExternal(url);
+    const target = new URL(url);
+    const result = await dialog.showMessageBox({ type: 'question', message: `Open external link to ${target.hostname || target.protocol}?`, detail: url, buttons: ['Cancel', 'Open'], defaultId: 0, cancelId: 0 });
+    if (result.response === 1) await shell.openExternal(url);
     return { ok: true };
   });
   updateApplicationMenu(store.settings.get().language);

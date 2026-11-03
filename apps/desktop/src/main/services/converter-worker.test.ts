@@ -48,7 +48,7 @@ it('cancels bootstrap, reaps its process group and allows immediate venv removal
   await mkdir(bin);
   const pidFile = join(directory, 'pids');
   const uv = join(bin, 'uv');
-  await writeFile(join(directory, 'requirements.txt'), 'fixture');
+  await writeFile(join(directory, 'requirements.lock.txt'), 'fixture');
   await writeFile(uv, `#!/bin/sh
 mkdir -p "$4"
 ${JSON.stringify(process.execPath)} -e 'require("fs").writeFileSync(${JSON.stringify(pidFile)}, String(process.pid)); process.on("SIGTERM",()=>{}); setInterval(()=>{},100)' &

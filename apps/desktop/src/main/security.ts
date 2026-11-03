@@ -19,3 +19,10 @@ export function developmentCsp(entryUrl: string): string {
   const socketOrigin = origin.replace(/^http/, "ws");
   return `default-src 'none'; script-src 'self' 'nonce-vstudy-development'; style-src 'self' 'unsafe-inline'; img-src 'self' data: vstudy-asset:; font-src 'self' data:; connect-src ${origin} ${socketOrigin}; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'`;
 }
+
+export function safeFilename(name: string): string {
+  return Array.from(name).filter(char => {
+    const code = char.codePointAt(0)!;
+    return code > 31 && code !== 127 && !(code >= 0x202a && code <= 0x202e) && !(code >= 0x2066 && code <= 0x2069) && !'/\\:'.includes(char);
+  }).join('').slice(0, 180).replace(/^\.+/, '') || 'export';
+}

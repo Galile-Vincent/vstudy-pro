@@ -18,7 +18,7 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     const options = { userData: directory, resources, onProgress: (message: string) => { progress.push(message); } };
     converter = createConverter(options);
     await expect(converter.ensureReady()).rejects.toThrow();
-    await copyFile(resolve("resources/converter/requirements.txt"), join(resources, "requirements.txt"));
+    await copyFile(resolve("resources/converter/requirements.lock.txt"), join(resources, "requirements.lock.txt"));
     await copyFile(resolve("resources/converter/convert.py"), join(resources, "convert.py"));
     await cp(resolve("resources/converter/pdf_md"), join(resources, "pdf_md"), { recursive: true });
     const python = await converter.ensureReady();

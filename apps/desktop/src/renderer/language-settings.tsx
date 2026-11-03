@@ -23,6 +23,7 @@ export function LanguageSettings() {
         <option value="en" lang="en">English</option><option value="zh-Hant" lang="zh-Hant">繁體中文</option><option value="ja" lang="ja">日本語</option>
         {field === 'language' && import.meta.env.DEV && <option value="en-XA">{tr('common:pseudo')}</option>}
       </Select></label>)}
+    <button type="button" onClick={() => void desktop.invoke("settings:deleteAllData", {}).catch(() => setError(tr("errors:generic")))}>{tr("common:delete_all_data")}</button>
     <p className="muted">{tr('common:reply_note')}</p>{error && <p role="alert">{error}</p>}
   </section>;
 }

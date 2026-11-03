@@ -1,6 +1,7 @@
 import { documentIdSchema } from '../../shared/domain';
 import { app, dialog, shell } from 'electron';
-import { copyFile } from 'node:fs/promises';
+import { safeFilename } from "../security";
+import { chmod, copyFile } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
 import type { Store } from '../db';
 import type { IpcChannel } from '../../shared/ipc';
@@ -51,10 +52,11 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
                 throw new Error('Export rate limited');
             exports.set(event.sender.id, now);
             const d = library.require(r.documentId), path = containedPath(library.root, channel === 'library:exportMarkdown' ? d.markdownPath : d.sourcePath);
-            const result = await dialog.showSaveDialog({ defaultPath: channel === 'library:exportMarkdown' ? `${basename(d.sourceName, extname(d.sourceName))}.md` : basename(d.sourceName) });
+            const result = await dialog.showSaveDialog({ defaultPath: channel === 'library:exportMarkdown' ? safeFilename(`${basename(d.sourceName, extname(d.sourceName))}.md`) : safeFilename(basename(d.sourceName)) });
             if (result.canceled || !result.filePath)
                 return { saved: false };
             await copyFile(path, result.filePath);
+            await chmod(result.filePath, 0o600);
             return { saved: true };
         });
     handle('library:reveal', r => { shell.showItemInFolder(containedPath(library.root, library.require(r.documentId).sourcePath)); return { ok: true }; });

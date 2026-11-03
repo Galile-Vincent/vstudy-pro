@@ -1,5 +1,6 @@
 import { containedPath } from "./services/file-paths";
-import { readFile } from "node:fs/promises";
+import { productionCsp } from "./security";
+import { readFile, stat } from "node:fs/promises";
 import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { documentIdSchema } from "../shared/domain";
 import type { Store } from "./db";
@@ -38,8 +39,11 @@ export function assetHandler(store: Store, userData: string) {
       const path = await resolveAssetPath(join(userData, "library", document.sourceHash), url.pathname.slice(1));
       const type = imageTypes[extname(path).toLowerCase()];
       if (!type) return new Response(null, { status: 415 });
-      return new Response(new Uint8Array(await readFile(path)), {
-        headers: { "Content-Type": type, "X-Content-Type-Options": "nosniff", "Cache-Control": "no-store" },
+      if ((await stat(path)).size > 12 * 1024 * 1024) return new Response(null, { status: 413 });
+      const data = await readFile(path);
+      if (data.length > 12 * 1024 * 1024) return new Response(null, { status: 413 });
+      return new Response(new Uint8Array(data), {
+        headers: { "Content-Type": type, "Content-Security-Policy": productionCsp, "X-Content-Type-Options": "nosniff", "Cache-Control": "no-store" },
       });
     } catch { return new Response(null, { status: 404 }); }
   };

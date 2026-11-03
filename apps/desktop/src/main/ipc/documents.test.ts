@@ -60,7 +60,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     expect(await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.md")] })).toHaveLength(1);
     const mixed = await invoke("documents:importPaths", { paths: ["missing.unsupported", resolve("test-fixtures/converter/sample.md")] }) as { ok: boolean; error?: string }[];
     expect(mixed.map(r => r.ok)).toEqual([false, true]);
-    expect(mixed[0]?.error).toBe("Unsupported document type");
+    expect(mixed[0]?.error).toBe("Import failed");
     const converted = await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.docx")] }) as { document: { id: string } }[];
     await vi.waitFor(() => expect(mock.resume).toBeTypeOf("function"));
     mock.resume!();

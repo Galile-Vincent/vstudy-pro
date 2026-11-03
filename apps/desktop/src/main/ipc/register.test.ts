@@ -57,3 +57,27 @@ it("rejects malformed responses before they cross the bridge", async () => {
   if (!invoke) throw new Error("Missing handler");
   await expect(invoke({} as IpcMainInvokeEvent, {})).rejects.toThrow();
 });
+
+it('rejects iframe and alternate URL senders for EVERY registered contract channel', async () => {
+  const { ipcContract } = await import('../../shared/ipc');
+  for (const channel of Object.keys(ipcContract) as (keyof typeof ipcContract)[]) {
+    let invoke: ((event: IpcMainInvokeEvent, payload: unknown) => unknown) | undefined;
+    let calls = 0;
+    const registrar = createIpcRegistrar({ handle: (_channel, listener) => { invoke = listener; }, removeHandler: () => {} }, event => event.senderFrame === event.sender.mainFrame && event.senderFrame.url === 'file:///app/index.html');
+    registrar.handle(channel, () => { calls++; throw new Error('Must never run'); });
+    const mainFrame = { url: 'file:///app/index.html' };
+    for (const frame of [{ url: 'https://evil.example/' }, { url: mainFrame.url }]) {
+      await expect(invoke!({ sender: { id: 1, mainFrame }, senderFrame: frame } as unknown as IpcMainInvokeEvent, {})).rejects.toThrow('Untrusted IPC sender');
+    }
+    expect(calls).toBe(0);
+  }
+});
+it('caps payload bytes and per-channel budgets before side effects', async () => {
+  let invoke: ((event: IpcMainInvokeEvent, payload: unknown) => unknown) | undefined;
+  const registrar = createIpcRegistrar({ handle: (_channel, listener) => { invoke = listener; }, removeHandler: () => {} }, () => true);
+  registrar.handle('welcome:sampleDocument', () => 'sample');
+  const event = {} as IpcMainInvokeEvent;
+  await expect(invoke!(event, { language: 'x'.repeat(600_000) })).rejects.toThrow('too large');
+  for (let i = 0; i < 600; i++) await invoke!(event, { language: 'en' });
+  await expect(invoke!(event, { language: 'en' })).rejects.toThrow('rate limited');
+});

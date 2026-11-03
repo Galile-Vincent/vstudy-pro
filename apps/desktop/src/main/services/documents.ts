@@ -159,6 +159,8 @@ export class DocumentService {
       queued();
       if (this.stopped) return;
       try {
+        const source = containedPath(this.library, document.sourcePath);
+        validateImport(source, extname(source).slice(1).toLowerCase());
         let converter: Document["converter"] = "markitdown";
         const extension = extname(document.sourcePath).toLowerCase();
         if (extension === ".md" || extension === ".txt") {
@@ -181,9 +183,9 @@ export class DocumentService {
           saved();
           this.options.onProgress?.(document.id, "Conversion complete");
         }
-      } catch (error) {
+      } catch {
         if (!this.stopped && this.get(document.id)) this.options.store.documents.transition(document.id, {
-          status: "failed", error: error instanceof Error && error.message.trim() ? error.message.slice(0, 2000) : "Conversion failed",
+          status: "failed", error: "Conversion failed",
         });
       }
     }).finally(() => { this.jobs.delete(document.id); activeConversions.delete(document.id); });

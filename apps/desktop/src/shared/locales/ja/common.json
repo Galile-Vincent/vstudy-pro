@@ -351,5 +351,6 @@
   "menu_togglefullscreen": "フルスクリーンを切り替え",
   "menu_minimize": "最小化",
   "menu_zoom": "拡大・縮小",
-  "menu_front": "すべてを手前に移動"
+  "menu_front": "すべてを手前に移動",
+  "delete_all_data": "すべてのデータを削除"
 }

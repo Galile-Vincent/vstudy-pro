@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, safeStorage, protocol } from "electron";
+import { app, BrowserWindow, session, safeStorage, protocol, dialog, ipcMain } from "electron";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { mkdirSync } from "node:fs";
@@ -7,10 +7,22 @@ import { registerIpc } from "./ipc";
 import { createSecretStore } from "./services/secrets";
 import { developmentCsp, isAppUrl, productionCsp } from "./security";
 
+import { deleteAllData } from "./services/delete-data";
+import { createIpcRegistrar } from "./ipc/register";
 import { assetHandler } from "./assets";
 
 protocol.registerSchemesAsPrivileged([{ scheme: "vstudy-asset", privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 
+app.enableSandbox();
+if (app.isPackaged) {
+  for (const name of ['remote-debugging-port', 'remote-debugging-pipe', 'inspect', 'inspect-brk']) app.commandLine.removeSwitch(name);
+}
+app.on('web-contents-created', (_event, contents) => {
+  contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  contents.on('will-navigate', event => event.preventDefault());
+  contents.on('will-redirect', event => event.preventDefault());
+  contents.on('will-attach-webview', event => event.preventDefault());
+});
 let store: Store | undefined;
 let disposeIpc: (() => Promise<void>) | undefined;
 let window: BrowserWindow | null = null;
@@ -35,6 +47,7 @@ function createWindow(): void {
       sandbox: true,
       nodeIntegration: false,
       webSecurity: true,
+      webviewTag: false,
     },
   });
   window = current;
@@ -64,6 +77,13 @@ void app.whenReady().then(() => {
     join(userData, "secrets.json"),
     safeStorage,
   );
+  session.defaultSession.setDevicePermissionHandler(() => false);
+  session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+    const url = new URL(details.url);
+    const local = ['file:', 'vstudy-asset:', 'data:', 'devtools:'].includes(url.protocol);
+    const dev = developmentUrl && ['http:', 'ws:'].includes(url.protocol) && url.host === new URL(developmentUrl).host;
+    callback({ cancel: !local && !dev });
+  });
   session.defaultSession.setPermissionRequestHandler(
     (webContents, permission, callback) => callback(permission === "clipboard-sanitized-write" && isAppUrl(webContents.getURL(), entryUrl)),
   );
@@ -87,6 +107,20 @@ void app.whenReady().then(() => {
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
   );
+  const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
+  ipcMain.removeHandler('settings:deleteAllData');
+  deletion.handle('settings:deleteAllData', async () => {
+    const result = await dialog.showMessageBox({ type: 'warning', message: 'Delete all VStudy data?', detail: 'Documents, conversations, keys, caches and the converter environment will be permanently removed. The app will quit.', buttons: ['Cancel', 'Delete all data'], defaultId: 0, cancelId: 0 });
+    if (result.response !== 1) return { ok: true };
+    await deleteAllData(userData, async () => {
+      window?.destroy();
+      await disposeIpc?.();
+      store?.close();
+      store = undefined;
+    });
+    app.exit();
+    return { ok: true };
+  });
   createWindow();
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

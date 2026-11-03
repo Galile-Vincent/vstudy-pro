@@ -351,5 +351,6 @@
   "menu_togglefullscreen": "切換全螢幕",
   "menu_minimize": "縮小視窗",
   "menu_zoom": "縮放視窗",
-  "menu_front": "將所有視窗移至最前方"
+  "menu_front": "將所有視窗移至最前方",
+  "delete_all_data": "刪除所有資料"
 }

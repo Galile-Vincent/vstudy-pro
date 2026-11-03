@@ -351,5 +351,6 @@
   "menu_togglefullscreen": "Toggle Full Screen",
   "menu_minimize": "Minimize",
   "menu_zoom": "Zoom",
-  "menu_front": "Bring All to Front"
+  "menu_front": "Bring All to Front",
+  "delete_all_data": "Delete all data"
 }

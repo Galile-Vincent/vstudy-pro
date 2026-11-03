@@ -1,7 +1,8 @@
 import { readFileSync, lstatSync } from 'node:fs';
 export function validateImport(path: string, extension: string) {
-    if (lstatSync(path).isSymbolicLink())
+    if (!lstatSync(path).isFile() || lstatSync(path).isSymbolicLink() || lstatSync(path).nlink !== 1)
         throw new Error('Symlink imports are not allowed');
+    if (lstatSync(path).size > 50 * 1024 * 1024) throw new Error("Document exceeds 50 MiB");
     const data = readFileSync(path);
     if (data.subarray(0, 2).toString() === 'MZ' || data.subarray(0, 4).equals(Buffer.from([0x7f, 0x45, 0x4c, 0x46])) || ['feedface', 'feedfacf', 'cefaedfe', 'cffaedfe', 'cafebabe'].includes(data.subarray(0, 4).toString('hex')))
         throw new Error('Executable import rejected');

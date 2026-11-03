@@ -24,6 +24,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  "settings:deleteAllData": { request: empty, response: ack },
   "settings:appearance": { request: empty, response: z.object({ reducedTransparency:z.boolean() }).strict() },
   "settings:systemLocale": { request: empty, response: z.string().max(100) },
   ...libraryContract,

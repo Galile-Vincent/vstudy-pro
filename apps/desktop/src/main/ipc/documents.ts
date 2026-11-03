@@ -47,7 +47,7 @@ export function registerDocumentsIpc(
     if (result.canceled || !path) return null;
     const document = await documents.importPath(path); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return document;
   });
-  registrar.handle("documents:importPaths", ({ paths, folderId }, event) => Promise.all(paths.map(async (path) => { try { const document = await documents.importPath(path); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return { ok: true as const, document }; } catch (error) { return { ok: false as const, path, error: error instanceof Error ? error.message : "Import failed" }; } })));
+  registrar.handle("documents:importPaths", ({ paths, folderId }, event) => Promise.all(paths.map(async (path) => { try { const document = await documents.importPath(path); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return { ok: true as const, document }; } catch { return { ok: false as const, path, error: "Import failed" }; } })));
   registrar.handle("documents:list", () => documents.list());
   registrar.handle("documents:get", ({ documentId }) => documents.get(documentId));
   registrar.handle("documents:read", ({ documentId }) => documents.read(documentId));
