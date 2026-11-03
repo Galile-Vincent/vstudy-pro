@@ -25,6 +25,6 @@ it('announces a 5k-token answer once at completion and never announces token del
  await act(async()=>{await finished;await new Promise(resolve=>setTimeout(resolve,20));});
  expect(texts.filter(t=>t.startsWith('Answer complete'))).toHaveLength(1);
  expect(texts.filter(t=>t==='Assistant is answering')).toHaveLength(1);
- expect(texts).toHaveLength(2);expect(region.textContent?.split('word').length).toBe(5001);
+ expect(texts).toHaveLength(2);expect(region.textContent).toBe('Answer complete: ' + ('word '.repeat(48)).trim());
  observer.disconnect();await act(async()=>root.unmount());host.remove();
 });
