@@ -543,7 +543,7 @@ def classify_blocks(blocks, body_size, heading_sizes=None):
                 )
             ):
                 kind, level = "heading", min(4, sizes.index(round(line.size, 1)) + 1)
-            elif re.match(r"^(?:\d+(?:\.\d+)+|\([A-Za-z]+\))\s", line.text):
+            elif re.match(r"^(?:\d+(?:\.\d+)+|\([A-Za-z]+\)|[A-Za-z][.)])\s", line.text):
                 kind = "clause"
             elif MARKER.match(line.text):
                 neighbors = [

@@ -92,7 +92,7 @@ def test_all_clause_markers_start_blocks():
     ]
     assert (
         render(lines)
-        == "1.1.1 First\n\n1.1.2 Second\n\n(a) Third\n\n(b) Fourth\n\n(i) Fifth\n\na. Sixth\nA. Seventh\n\n4.1 Eighth\n\n4.2 Ninth"
+        == "1.1.1 First\n\n1.1.2 Second\n\n(a) Third\n\n(b) Fourth\n\n(i) Fifth\n\na. Sixth\n\nA. Seventh\n\n4.1 Eighth\n\n4.2 Ninth"
     )
 
 
