@@ -11,7 +11,7 @@ import { AnimatedText } from '../motion/animated-text';
 import { UploadCard } from './upload-card';
 import './home.css';
 import { ProductPreview } from '../onboarding/product-preview';
-export type HomeNavigate = (view: 'home' | 'library' | 'workspace', documentId?: Document['id']) => void;
+export type HomeNavigate = (view: 'home' | 'library' | 'workspace' | 'welcome', documentId?: Document['id']) => void;
 export type Dashboard = z.infer<typeof dashboardSchema>;
 export function Card({ title, children }: { title: string; children: ReactNode }) {
   const id = useId();
@@ -22,7 +22,7 @@ export function sparklinePoints(values: number[]) {
   return values.map((v, i) => `${values.length < 2 ? 50 : i / (values.length - 1) * 100},${28 - Math.max(0, v) / max * 26}`).join(' ');
 }
 export function Sparkline({ series }: { series: Dashboard['series'] }) {
-  return <svg className="home-sparkline" viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label={tr('home:sparkline')}>{series.length === 1 ? <circle cx="50" cy="15" r="2" fill="currentColor"/> : <polyline points={sparklinePoints(series.map(d => d.inputTokens + d.outputTokens))} fill="none" stroke="currentColor" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}</svg>;
+  return <svg className="home-sparkline" viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label={tr('home:sparkline')}>{series.length === 1 ? <circle cx="50" cy="15" r="2" fill="currentColor"/> : <polyline pathLength={1} points={sparklinePoints(series.map(d => d.inputTokens + d.outputTokens))} fill="none" stroke="currentColor" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}</svg>;
 }
 export function Streak({ streak }: { streak: Dashboard['streak'] }) {
   const fmt = useFormat();
@@ -61,7 +61,7 @@ export function Home({ navigate, onUsage, name, initialData }: { navigate: HomeN
   const percent = Math.max(settings?.monthlyBudgetUsd ? (data?.month.costUsd ?? 0) / settings.monthlyBudgetUsd * 100 : 0, settings?.monthlyTokenBudget ? tokens / settings.monthlyTokenBudget * 100 : 0);
   const displayName = name ?? settings?.displayName;
   return <main className="home-page">
-    <header className="home-greeting"><h1>{tr(`home:${hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'}`)}{displayName ? tr('home:greeting_name', { name: displayName }) : ''}</h1><p><AnimatedText texts={[tr('home:prompt_1'), tr('home:prompt_2'), tr('home:prompt_3')]} /></p></header>
+    <header className="home-greeting"><h1>{tr(`home:${hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'}`)}{displayName ? tr('home:greeting_name', { name: displayName }) : ''}</h1><p><AnimatedText texts={[tr('home:prompt_1'), tr('home:prompt_2'), tr('home:prompt_3')]} /></p><button id="welcome-entry" className="ghost" onClick={() => navigate("welcome")}><Info size={14}/>{tr("welcome:entry")}</button></header>
     {error && <div role="alert">{error}<button onClick={refresh}>{tr('common:retry')}</button></div>}
     {!data ? !error && <div className="home-grid" role="status" aria-busy="true" aria-label={tr('home:loading')}>{Array.from({ length: 6 }, (_, i) => <div className="home-card home-skeleton" key={i}/>)}</div> : <div className="home-grid">
       {!!data.recentDocuments.length && <Card title={tr('home:continue')}><ul className="home-list">{data.recentDocuments.slice(0, 3).map(d => <li key={d.document.id}><button className="home-row" onClick={() => navigate('workspace', d.document.id)}><strong title={d.document.title}>{d.document.title}</strong><small>{d.lastOpenedAt ? fmt.date(d.lastOpenedAt) : fmt.date(d.document.createdAt)}</small>{d.lastChat && <small>{d.lastChat}</small>}</button></li>)}</ul><button className="primary" onClick={() => navigate('workspace', data.recentDocuments[0]!.document.id)}>{tr('home:continue')}</button></Card>}

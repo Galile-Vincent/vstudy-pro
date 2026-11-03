@@ -1,3 +1,4 @@
+import { useOptionalNavigation } from "../shell";
 import { Select } from "../components/select";
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,7 @@ import './onboarding.css';
 import { ProductPreview } from './product-preview';
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
   useTranslation();
+  const navigation = useOptionalNavigation();
   const [step, setStep] = useState(0);
   const [providers, setProviders] = useState<IpcResponse<'providers:list'>>([]);
   const [language, setLanguage] = useState<Settings['language']>('auto');
@@ -32,9 +34,9 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
     return () => { if (previous?.isConnected) previous.focus(); };
   }, []);
   useEffect(() => { heading.current?.focus(); setError(''); setNotice(''); }, [step]);
-  const finish = async () => {
+  const finish = async (tour = false) => {
     setBusy(true);
-    try { const settings = await desktop.invoke('settings:get', {}); await desktop.invoke('settings:set', { ...settings, displayName: name.trim() || undefined, onboardingCompleted: true }); onComplete(); }
+    try { const settings = await desktop.invoke('settings:get', {}); await desktop.invoke('settings:set', { ...settings, displayName: name.trim() || undefined, onboardingCompleted: true }); onComplete(); if (tour) navigation?.navigate("welcome"); }
     catch { setError(tr('errors:generic')); } finally { setBusy(false); }
   };
   const advance = () => { if (step < 3) setStep(step + 1); else void finish(); };
@@ -50,6 +52,6 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
       {step === 3 && <ol className="onboarding-tips">{['select', 'pin', 'usage'].map(tip => <li key={tip}>{tr(`onboarding:tip_${tip}`)}</li>)}</ol>}
     </div>
     {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
-    <footer>{step > 0 && <button disabled={busy} onClick={() => setStep(step - 1)}>{tr('onboarding:back')}</button>}{step < 3 && <button className="ghost" disabled={busy} onClick={advance}>{tr('onboarding:skip')}</button>}<button className="primary" disabled={busy} onClick={advance}>{tr(step === 3 ? 'onboarding:finish' : 'onboarding:next')}</button></footer>
+    <footer>{step === 3 && <button className="ghost" disabled={busy} onClick={() => void finish(true)}>{tr("welcome:tour")}</button>}{step > 0 && <button disabled={busy} onClick={() => setStep(step - 1)}>{tr('onboarding:back')}</button>}{step < 3 && <button className="ghost" disabled={busy} onClick={advance}>{tr('onboarding:skip')}</button>}<button className="primary" disabled={busy} onClick={advance}>{tr(step === 3 ? 'onboarding:finish' : 'onboarding:next')}</button></footer>
   </dialog>;
 }

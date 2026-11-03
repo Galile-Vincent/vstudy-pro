@@ -115,3 +115,22 @@ h1,h2,h3 { text-wrap:balance; font-weight:600; }
 h1:lang(ja),h2:lang(ja),h3:lang(ja),h1:lang(zh-Hant),h2:lang(zh-Hant),h3:lang(zh-Hant) { line-height:1.35; }
 button:lang(ja),button:lang(zh-Hant) { line-height:1.2; }
 html:lang(ja),html:lang(zh-Hant) { --type-xs:13px; --type-sm:13px; }
+
+:root {
+ --motion-story:600ms; --motion-hero:800ms;
+ --ease-out-soft:cubic-bezier(.22,1,.36,1); --ease-in-out-soft:cubic-bezier(.65,0,.35,1);
+ --ease-standard:cubic-bezier(.2,0,0,1); --ease-exit:cubic-bezier(.4,0,1,1);
+ --type-hero:clamp(28px,2.2rem + 1.2cqi,40px);
+ --spotlight-size:260px; --spotlight-tint:color-mix(in oklab,var(--ink) 5%,transparent);
+ --edge-lit:color-mix(in oklab,var(--ink) 32%,transparent);
+ --welcome-marquee:24s; --welcome-float:6000ms;
+}
+.shell-sidebar { view-transition-name:vt-sidebar; }
+.shell-topbar { view-transition-name:vt-topbar; }
+::view-transition-old(root) { animation:vt-out var(--motion-fast) var(--ease-exit) both; }
+::view-transition-new(root) { animation:vt-in var(--motion-base) var(--ease-out-soft) 40ms both; }
+::view-transition-group(vt-document) { animation-duration:var(--motion-slow); animation-timing-function:var(--ease-in-out-soft); }
+@keyframes vt-out { to { opacity:0; } }
+@keyframes vt-in { from { opacity:0; transform:translateY(8px); } }
+:root { --type-hero-compact:clamp(28px,6cqi,40px); }
+:root { --citation-pulse-start:0 0 0 0 var(--edge-lit); --citation-pulse-end:0 0 0 var(--inset) transparent; }

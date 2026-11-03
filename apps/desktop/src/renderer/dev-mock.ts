@@ -70,6 +70,9 @@ export function createMockBridge(): DesktopApi {
     const input = request as Record<string, unknown>;
     let result: unknown = { ok: true };
     switch (channel) {
+      case "welcome:sampleDocument":
+        result = mockMarkdown;
+        break;
       case "settings:get":
         result = settings;
         break;

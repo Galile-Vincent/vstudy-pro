@@ -1,9 +1,11 @@
+import { transitionTo } from "./view-transition";
 import { desktop } from "../bridge";
 import { applyLanguage } from "../i18n";
 import {
   createContext,
   useContext,
   useState,
+  useRef,
   useEffect,
   type ReactNode,
 } from "react";
@@ -13,15 +15,16 @@ import { tr } from "../../shared/i18n";
 import type { Document } from "../../shared";
 import type { LibraryQuery } from "../../shared/library";
 import "./shell.css";
-export type View = "home" | "library" | "workspace";
+export type View = "home" | "library" | "workspace" | "welcome";
 export type Route = {
   view: View;
   documentId?: Document["id"] | undefined;
   query?: Partial<LibraryQuery> | undefined;
   title?: string | undefined;
 };
-type Navigation = { route: Route; navigate: (route: Route | View) => void };
+type Navigation = { route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void };
 const NavigationContext = createContext<Navigation | null>(null);
+export function useOptionalNavigation() { return useContext(NavigationContext); }
 export function useNavigate() {
   const value = useContext(NavigationContext);
   if (!value) throw new Error("Navigation provider missing");
@@ -64,13 +67,17 @@ export function AppShell({
     update(); media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, [route.view]);
+  const previous = useRef<Route>({ view: "home" });
+  const returnSettings = useRef(false);
+  const returnFocus = useRef<HTMLElement | null>(null);
   const navigate: Navigation["navigate"] = (value) => {
     const next = typeof value === "string" ? { view: value } : value;
-    setRoute(next);
-    localStorage.setItem("vstudy-route", JSON.stringify(next));
+    if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = route; returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
+    transitionTo(() => setRoute(next), next.view === 'workspace' && !!next.documentId);
+    try { localStorage.setItem("vstudy-route", JSON.stringify(next)); } catch { /* Route persistence is optional. */ }
   };
   return (
-    <NavigationContext.Provider value={{ route, navigate }}>
+    <NavigationContext.Provider value={{ route, navigate, closeWelcome: () => { navigate(previous.current); setTimeout(() => { const target = returnFocus.current; if (returnSettings.current) { window.dispatchEvent(new Event("vstudy:open-settings")); setTimeout(() => document.getElementById("welcome-settings-entry")?.focus(), 100); } else if (target?.isConnected) target.focus(); else document.getElementById("welcome-entry")?.focus(); }, 350); } }}>
       <div className="app-shell" data-view={route.view}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
@@ -127,7 +134,7 @@ export function AppShell({
               <span>
                 {route.view === "home"
                   ? tr("library:home")
-                  : tr("common:library")}
+                  : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
               </span>
             )}
           </header>

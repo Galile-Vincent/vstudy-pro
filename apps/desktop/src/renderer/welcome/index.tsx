@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState, type ReactNode } from 'react';
+import { memo, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GraduationCap, Microscope, Briefcase, Languages, FileText, TextSelect, Quote, Info, Terminal, KeyRound, Link2, Copy, Check, ArrowLeftRight } from 'lucide-react';
 import { tr, systemLanguage } from '../../shared/i18n';
@@ -47,17 +47,31 @@ function Demo({ source, playing, reduced, side }: { source: string; playing: boo
   const player = useRef<DemoPlayer | null>(null);
   useEffect(() => { player.current = new DemoPlayer(setStep); return () => player.current?.dispose(); }, []);
   useEffect(() => { if (reduced) player.current?.finish(); else player.current?.setPlaying(playing && visible); }, [reduced, playing, visible]);
+  const question = tr('welcome:demo_question');
+  const graphemes = Intl.Segmenter ? [...new Intl.Segmenter(document.documentElement.lang || 'en', { granularity: 'grapheme' }).segment(question)].length : question.length;
   const index = script.findIndex(([name]) => name === step);
   useEffect(() => {
     const target = stage.current?.querySelector('.demo-reader-content h2');
     if (target instanceof HTMLElement) stage.current?.style.setProperty('--demo-jump', `${target.offsetTop - 24}px`);
   }, [source]);
+  useEffect(() => {
+    const animations = stage.current?.getAnimations?.({ subtree: true }) ?? [];
+    for (const animation of animations) {
+      if (!playing || !visible) animation.pause();
+      else if (animation.playState === 'paused') animation.play();
+    }
+  }, [playing, visible]);
+  useEffect(() => {
+    const heading = stage.current?.querySelector('.demo-reader-content h2');
+    if (step === 'highlight') heading?.setAttribute('data-citation-highlight', '');
+    else heading?.removeAttribute('data-citation-highlight');
+  }, [step]);
   const caption = index < 1 || index > 10 ? 0 : index < 3 ? 1 : index < 5 ? 2 : index < 7 ? 3 : 4;
   return <><div className="w-demo-layout"><ol className="w-demo-steps" aria-label={tr('welcome:demo_steps_label')}>{[1, 2, 3, 4].map(n => <li key={n} data-active={caption === n}><span>{n}</span>{tr(`welcome:demo_step_${n}`)}</li>)}</ol>
-    <div ref={stage} className="demo-stage" aria-hidden="true" inert data-step={step} data-index={index} data-playing={playing && visible && !reduced} data-side={side}>
+    <div ref={stage} className="demo-stage" style={{ '--typing-duration': `${Math.min(1200, graphemes * 45)}ms`, '--typing-steps': graphemes } as CSSProperties} aria-hidden="true" inert data-step={step} data-index={index} data-playing={playing && visible && !reduced} data-side={side}>
       <div className="w-badge">{tr('welcome:example_badge')}</div>
       <div className="reading-pane w-demo-reader"><div className="pane-toolbar">{tr('welcome:sample_filename')}<small>{tr('welcome:sample_format')}</small></div><div className="w-reader-clip"><div className="demo-reader-content"><MemoReader source={source} documentId={sampleId} onSelect={ignore} onNotice={ignore}/></div></div></div>
-      <div className="w-demo-chat"><div className="aui-user-message-content w-demo-question">{tr('welcome:demo_question')}</div><div className="w-thinking"><span/><span/><span/></div><div className="aui-assistant-message-content w-demo-answer"><ReplyMarkdown text={tr('welcome:demo_answer')}/><CitationChip/></div><div className="w-demo-composer"><span className="selection-chip">{tr('welcome:demo_step_1')}</span><p className="w-typed">{tr('welcome:demo_question')}</p><small>{tr('welcome:demo_model_chip')}</small></div></div>
+      <div className="w-demo-chat"><div className="aui-user-message-content w-demo-question">{tr('welcome:demo_question')}</div><div className="w-thinking"><span/><span/><span/></div><div className="aui-assistant-message-content w-demo-answer"><ReplyMarkdown text={tr('welcome:demo_answer')} revealWords/><CitationChip/></div><div className="w-demo-composer"><span className="selection-chip">{tr('welcome:demo_step_1')}</span><div className="w-draft"><p className="w-placeholder">{tr("common:ask_document_placeholder")}</p><p className="w-typed">{tr("welcome:demo_question")}</p></div><small>{tr('welcome:demo_model_chip')}</small></div></div>
     </div></div><div className="w-demo-footer"><p><ArrowLeftRight size={16}/>{tr('welcome:demo_swap_hint')}</p><button className="ghost" onClick={() => { player.current?.replay(); if (reduced) player.current?.finish(); else player.current?.setPlaying(playing && visible); }}>{tr('welcome:demo_replay')}</button></div></>;
 }
 function ProviderCard({ id }: { id: typeof PROVIDER_KINDS[number] }) {

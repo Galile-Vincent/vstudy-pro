@@ -3,7 +3,7 @@ import { errorText } from "./status";
 import { contentLanguage } from "../shared/content-language";
 import { useTranslation } from "react-i18next";
 import { tr } from '../shared/i18n';
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Children, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -230,11 +230,16 @@ export function DocumentMarkdown({
   );
 }
 
-export function ReplyMarkdown({ text }: { text: string }) {
+export function ReplyMarkdown({ text, revealWords = false }: { text: string; revealWords?: boolean }) {
   useTranslation();
   return <div lang={contentLanguage(text)}><Markdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeSanitize, schema], rehypeKatex, rehypeHighlight]} skipHtml
     urlTransform={(url) => externalUrlSchema.safeParse(url).success ? url : ""}
-    components={{ pre: ({ children }) => <CodeBlock>{children}</CodeBlock>, a: ({ href, children }) => <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a> }}>{text}</Markdown></div>;
+    components={{ ...(revealWords ? { p: ({ children }: { children?: React.ReactNode }) => <p>{Children.map(children, child => {
+      if (typeof child !== 'string') return child;
+      const words = Intl.Segmenter ? [...new Intl.Segmenter(contentLanguage(text), { granularity: 'word' }).segment(child)].map(part => part.segment) : [child];
+      const size = Math.max(1, Math.ceil(words.length / 36));
+      return Array.from({ length: Math.ceil(words.length / size) }, (_, i) => <span className="w-answer-word" key={i} style={{ '--i': i } as CSSProperties}>{words.slice(i * size, (i + 1) * size).join('')}</span>);
+    })}</p> } : {}), pre: ({ children }) => <CodeBlock>{children}</CodeBlock>, a: ({ href, children }) => <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a> }}>{text}</Markdown></div>;
 }
 
 function CodeBlock({ children }: { children: React.ReactNode }) {

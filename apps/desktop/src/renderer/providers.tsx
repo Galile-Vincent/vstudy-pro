@@ -1,3 +1,4 @@
+import { useOptionalNavigation } from "./shell";
 import { Onboarding } from './onboarding/onboarding';
 import { errorText } from "./status";
 import { useTranslation } from "react-i18next";
@@ -28,6 +29,7 @@ export function ProviderSettings({
   initialTab?: string;
 }) {
   useTranslation();
+  const navigation = useOptionalNavigation();
   const [guide, setGuide] = useState(false);
   const [structuredTables, setStructuredTables] = useState(false);
   const [featureError,setFeatureError] = useState('');
@@ -54,6 +56,7 @@ export function ProviderSettings({
       </div>
       <LanguageSettings />
       <button onClick={() => setGuide(true)}>{tr("onboarding:replay")}</button>
+      <button id="welcome-settings-entry" onClick={() => { navigation?.navigate("welcome"); onClose(); }}>{tr("welcome:entry")}</button>
       {guide && <Onboarding onComplete={() => setGuide(false)}/>}
       <div className="settings-tabs" role="tablist" aria-label={tr('common:settings')}><button role="tab" aria-selected={tab === "providers"} onClick={() => setTab("providers")}>{tr('common:providers')}</button><button role="tab" aria-selected={tab === "usage"} onClick={() => setTab("usage")}>{tr('common:usage')}</button></div>
       {tab === "usage" ? <UsageSettings /> : <>
