@@ -7,7 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { Home, Library, ArrowLeft, Menu } from "lucide-react";
+import { Home, BookOpen, ArrowLeft, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
 import type { Document } from "../../shared";
@@ -58,6 +58,12 @@ export function AppShell({
     }
     return { view: "home" };
   });
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 999px)');
+    const update = () => { if (route.view === 'workspace' && media.matches) setSidebarVisible(false); };
+    update(); media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, [route.view]);
   const navigate: Navigation["navigate"] = (value) => {
     const next = typeof value === "string" ? { view: value } : value;
     setRoute(next);
@@ -65,7 +71,7 @@ export function AppShell({
   };
   return (
     <NavigationContext.Provider value={{ route, navigate }}>
-      <div className="app-shell">
+      <div className="app-shell" data-view={route.view}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
         </a>
@@ -87,7 +93,7 @@ export function AppShell({
               aria-current={route.view === "library" ? "page" : undefined}
               onClick={() => navigate("library")}
             >
-              <Library />
+              <BookOpen />
               {tr("common:library")}
             </button>
           </nav>

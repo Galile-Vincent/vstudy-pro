@@ -26,7 +26,7 @@ import { ConversationList } from "../conversation-list";
 import { ProviderSettings, type Providers } from "../providers";
 
 export function Workspace() {
-  const { route } = useNavigate();
+  const { route, navigate } = useNavigate();
   useTranslation();
   const [settings, setSettings] = useState<Settings>(defaultSettings),
     [connected, setConnected] = useState(false);
@@ -45,6 +45,8 @@ export function Workspace() {
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [loadingSource, setLoadingSource] = useState(false);
+  const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
+  useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   const [draft, setDraft] = useState("");
   const activeConversation = useRef(conversation);
   activeConversation.current = conversation;
@@ -250,6 +252,7 @@ export function Workspace() {
         modelId: value.slice(slash + 1),
       });
       setConversations((list) => [created, ...list]);
+      setCompactPane("chat");
       setConversation(created);
       setHistory([]);
     } catch (error) {
@@ -267,21 +270,15 @@ export function Workspace() {
     selectedModel?.availability.available &&
     selectedModel.config.enabled;
   useEffect(() => {
+    if (selection) setCompactPane("chat");
     if (selection && !conversation && canChat && !busy) void newConversation();
   }, [selection, conversation, canChat, busy]);
-  const chat = (
-    <section className="pane chat-pane" aria-label={tr('common:chat')}>
-      <div className="pane-toolbar">
-        <span className="eyebrow">{tr('common:conversation')}</span>
+  const chatControls = (
+      <div className="workspace-conversations">
+
         <div className="row">
           <ConversationList conversations={conversations} current={conversation} providers={providers} canCreate={!!canChat && !busy} onSelect={c => {setConversation(c);setModel(`${c.providerId}/${c.modelId}`);}} onNew={() => newConversation()} onDelete={async id => {if (!window.confirm(tr('common:delete_this_conversation'))) return; await desktop.invoke('conversations:delete',{conversationId:id});setConversations(list=>list.filter(c=>c.id!==id));if(conversation?.id===id){setConversation(null);setHistory(null);}}}/>
 
-          {conversation && <button className="icon-button" title={tr('common:delete_conversation')} aria-label={tr('common:delete_conversation')} onClick={() => {
-            if (!window.confirm(tr('common:delete_this_conversation'))) return;
-            void desktop.invoke("conversations:delete", { conversationId: conversation.id }).then(() => {
-              setConversations(list => list.filter(c => c.id !== conversation.id)); setConversation(null); setHistory(null);
-            }).catch(report);
-          }}><Trash2 size={16} /></button>}
           <button
             disabled={!canChat || busy}
             onClick={() => void newConversation()}
@@ -291,6 +288,9 @@ export function Workspace() {
           </button>
         </div>
       </div>
+  );
+  const chat = (
+    <section className="pane chat-pane" aria-label={tr('common:chat')}>
       {conversation && history ? (
         <Chat
           documentPageCount={documentPageCount}
@@ -311,7 +311,7 @@ export function Workspace() {
         />
       ) : (
         <div className="chat-start">
-          <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onStart={() => void newConversation()} />
+          <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onStart={() => void newConversation()} onQuestion={text => { setDraft(text); void newConversation(); }} />
           {selection && (
             <div className="selection-chip">
               <SelectionPreview selection={selection} />
@@ -407,7 +407,7 @@ export function Workspace() {
   );
   return (
     <main
-      className="workspace"
+      className="workspace" data-compact-pane={compactPane}
       onDragOver={(e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";
@@ -423,17 +423,15 @@ export function Workspace() {
     >
       <a className="skip-link" href="#reading-content">{tr('common:skip_content')}</a><header className="app-header">
         <div className="row">
+          <button className="ghost" onClick={() => navigate("library")}>{tr("common:library")}</button>
           <button data-testid="import-document" aria-label={tr('common:import_document')} disabled={busy||!connected} onClick={()=>void importDocument()}><Plus size={16}/></button>
-          <h1>
-            VStudy <span>Pro</span>
-          </h1>
-          <span className="header-divider" />
           <span className="muted workspace-title">
             {doc?.title ?? tr('common:your_workspace')}
           </span>
         </div>
+        {chatControls}
         <div className="row">
-          <span className="connection-status" data-testid="bridge-status">
+          <span className={`connection-status ${connected && !isMock ? "motion-sr" : ""}`} data-testid="bridge-status">
             {isMock
               ? tr('common:preview_mock_bridge')
               : connected
@@ -471,6 +469,10 @@ export function Workspace() {
           </button>
         </div>
       )}
+      <div className="workspace-tabs" role="tablist" aria-label={tr('common:your_workspace')}>
+        <button role="tab" aria-selected={compactPane === 'reading'} onClick={() => setCompactPane('reading')}>{tr('common:document')}</button>
+        <button role="tab" aria-selected={compactPane === 'chat'} onClick={() => setCompactPane('chat')}>{tr('common:chat')}</button>
+      </div>
       <div className="workspace-body">
         <PanelGroup direction="horizontal" className="panels">
           {(settings.chatSide === "left"

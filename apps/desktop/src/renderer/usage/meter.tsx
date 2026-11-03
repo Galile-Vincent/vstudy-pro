@@ -25,14 +25,14 @@ export function UsageButton({ data, error, onClick }: Omit<ReturnType<typeof use
   const known = records.filter(r => r.costUsd !== undefined);
   const cost = known.reduce((n,r) => n + r.costUsd!,0);
   const description = `${tr('usage:token_count',{count:tokens,formatted:compactTokens(tokens)})}${known.length ? ` · ${money(cost)}` : ''}${records.some(r => r.aborted) ? tr('common:includes_aborted_turns') : ''}`;
-  return <button type="button" className="composer-usage" onClick={onClick} aria-label={tr('common:conversation_usage')} title={data ? `${description} · ${tr('common:view_usage_and_budget_settings')}` : tr('common:view_usage_and_budget_settings')}>{error || (!data ? tr('usage:usage_loading') : <><span className="usage-full">{tr('usage:token_count',{count:tokens,formatted:compactTokens(tokens)})}{known.length ? ` · ${money(cost)}` : ''}</span><span className="usage-compact" aria-hidden>{compactTokens(tokens)}</span></>)}</button>;
+  return <button type="button" className="composer-usage" onClick={onClick} aria-label={tr('common:conversation_usage')} title={data ? `${tr('common:conversation_usage')} · ${description} · ${tr('common:view_usage_and_budget_settings')}` : tr('common:view_usage_and_budget_settings')}>{error || (!data ? tr('usage:usage_loading') : <><span className="usage-full">{tr('usage:token_count',{count:tokens,formatted:compactTokens(tokens)})}{known.length ? ` · ${money(cost)}` : ''}</span><span className="usage-compact" aria-hidden>{compactTokens(tokens)}</span></>)}</button>;
 }
 export function UsageMeter({ data, error, priceUnknown }: Omit<ReturnType<typeof useUsage>, 'priceUnknown'> & {priceUnknown?: boolean}) {
   useTranslation();
   if (!data) return error ? <small className="usage-meter">{error}</small> : null;
   const { settings,month } = data;
   const state = budgetState(settings,month);
-  if (!state.percent && !priceUnknown) return null;
+  if (state.tone === "normal") return null;
   return <div className={`usage-meter ${state.tone}`}>
 
     {(settings.monthlyBudgetUsd || settings.monthlyTokenBudget) && <><span>{tr('common:month')}{money(month.costUsd ?? (month.calls ? undefined : 0))}{settings.monthlyBudgetUsd ? tr('usage:money_left',{used:'',budget:money(settings.monthlyBudgetUsd),left:money(Math.max(0,settings.monthlyBudgetUsd - (month.costUsd ?? 0)))}) : ''}{settings.monthlyTokenBudget ? tr('usage:token_left',{used:compactTokens(state.tokens),budget:compactTokens(settings.monthlyTokenBudget),left:compactTokens(Math.max(0,settings.monthlyTokenBudget - state.tokens))}) : ''}</span><progress aria-label={tr('common:monthly_budget_used')} value={Math.min(100,state.percent)} max={100} /></>}

@@ -40,3 +40,39 @@
   .composer-usage .usage-full { display: inline; }
   .composer-usage .usage-compact { display: none; }
 }
+
+.workspace .app-header { min-height:44px; height:44px; padding-block:var(--space-1); border-color:var(--hairline); }
+.workspace .app-header .row { min-width:0; }
+.workspace-title { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:var(--ink); font-weight:600; }
+.chat-pane .pane-toolbar { min-height:40px; height:40px; flex-direction:row; }
+.chat-pane .pane-toolbar > .eyebrow { display:none; }
+.chat-pane .pane-toolbar > .row { flex:1; min-width:0; }
+.conversation-trigger { flex:1; min-width:0; }
+.workspace-tabs { display:none; }
+@media(max-width:819px) {
+ .workspace-tabs { display:flex; padding:var(--space-1) var(--space-3); gap:var(--space-1); border-bottom:1px solid var(--hairline); }
+ .workspace-tabs button { flex:1; border:0; background:transparent; border-radius:var(--r-sm); }
+ .workspace-tabs button[aria-selected=true] { background:var(--active); font-weight:600; }
+ .workspace[data-compact-pane=reading] [data-panel-id=chat],.workspace[data-compact-pane=chat] [data-panel-id=reading],.workspace .resize-handle { display:none; }
+ .workspace [data-panel] { flex:1!important; }
+}
+.model-popover .model-search { border:0; border-bottom:1px solid var(--hairline); border-radius:0; }
+.markdown table,.markdown th,.markdown td,.markdown pre { border-color:var(--hairline); }
+.markdown th { background:var(--subtle); }
+.markdown td,.markdown th { padding:var(--space-3); }
+.markdown pre { overflow-x:auto; }
+.selection-chip > button { min-width:24px; min-height:24px; }
+
+.workspace-conversations { margin-left:auto; min-width:0; max-width:45%; }
+.workspace-conversations .row { min-width:0; }
+.workspace .app-header { gap:var(--space-2); }
+.workspace .app-header > .row:first-child { flex:1; }
+.workspace .app-header .workspace-title { font-size:var(--type-md); }
+@media(max-width:819px) { .workspace-conversations { max-width:45%; } .workspace .app-header > .row:first-child { flex:1; } }
+.model-popover [data-slot=model-selector-search] { border:0; border-bottom:1px solid var(--hairline); border-radius:0; min-height:36px; }
+.model-popover { border-radius:var(--r-md); overflow:hidden; }
+
+.workspace .conversation-trigger { display:flex; align-items:center; gap:var(--space-1); min-width:0; max-width:220px; height:28px; font-size:var(--type-base); }
+.document-welcome { display:grid; justify-items:center; gap:var(--space-3); }
+[data-slot=suggestions] button { border:1px solid var(--hairline); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:var(--type-base); }
+.effort-item[data-state=checked] { background:var(--ink); color:var(--surface); }

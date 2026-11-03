@@ -61,7 +61,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
   const effort = selected?.options?.find(o => /effort/i.test(o.id));
   const speed = selected?.options?.find(o => o.id === 'fastMode' || (o.id === 'serviceTier' && o.values.some(v => v.id === 'priority')));
   const fast = speed && ['true', 'priority'].includes(String(values[speed.id] ?? speed.default));
-  const entries = all.map(m => ({ id: m.value, name: m.name, description: `${!m.available && m.providerId.endsWith("api") ? "" : m.resolvedId ?? m.id}${m.available ? '' : `${m.providerId.endsWith('api') ? '' : ' · '}${m.reason}`}`, disabled: !m.available, keywords: [m.provider, m.id], icon: <span className={`availability-dot ${m.available ? 'available' : ''}`} title={m.reason} /> }));
+  const entries = all.map(m => ({ id: m.value, name: m.name, description: m.available ? '' : m.reason, disabled: !m.available, keywords: [m.provider, m.id], icon: !m.available ? <span className="availability-dot" title={m.reason} /> : undefined }));
   const canonical = (value: string) => {
     const raw = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id }))).find(m => m.value === value || (m.providerId === value.split('/')[0] && m.resolvedId === value.split('/').slice(1).join('/') && m.id !== 'default'));
     return all.find(m => m.value === value)?.value ?? all.find(m => m.providerId === raw?.providerId && m.resolvedId === raw?.resolvedId && m.id !== 'default')?.value ?? value;
@@ -94,7 +94,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
               const rows = all.filter(m => (isFavorite(m.value) ? 'Favorites' : isRecent(m.value) ? 'Recent' : m.provider) === group).sort((a,b) => group === 'Recent' ? recent.map(canonical).indexOf(a.value) - recent.map(canonical).indexOf(b.value) : compareModels(a,b));
               return rows.length > 0 && <ModelSelector.Group key={group} heading={group === 'Favorites' ? tr('common:favorites') : group === 'Recent' ? tr('common:recent') : group}>{rows.map(m => <div className="model-row" key={m.value}>
                 <ModelSelector.Item model={entries.find(x => x.id === m.value)!} title={m.reason} />
-                {m.available && <button type="button" className="model-favorite" aria-label={tr(isFavorite(m.value) ? 'picker:unfavorite_model' : 'picker:favorite_model',{model:m.name})} aria-pressed={isFavorite(m.value)} onClick={() => { const f = isFavorite(m.value) ? favorites.filter(x => canonical(x) !== m.value) : [...favorites,m.value]; setFavorites(f); void persist(f,recent); }}><Star size={14} fill={isFavorite(m.value) ? 'currentColor' : 'none'} /></button>}
+
               </div>)}</ModelSelector.Group>;
             })}
           </ModelSelector.List>
@@ -104,6 +104,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
             {selected?.options?.filter(o => !/effort/i.test(o.id) && o.id !== speed?.id).map(o => <section className="speed-section" key={o.id} onKeyDownCapture={traitKeys}><h4>{o.label}</h4><Radio.Root aria-label={o.label} value={String(values[o.id] ?? o.default)} onValueChange={value => onChange({ ...values, [o.id]: value })} className="effort-list">{o.values.map(v => <Radio.Item key={v.id} value={v.id} className="effort-item">{v.label.charAt(0).toUpperCase() + v.label.slice(1)}</Radio.Item>)}</Radio.Root></section>)}
           </div>}
         </div>
+        {selected?.available && <button type="button" className="picker-settings" aria-label={tr(isFavorite(selected.value) ? 'picker:unfavorite_model' : 'picker:favorite_model',{model:selected.name})} aria-pressed={isFavorite(selected.value)} onClick={() => { const f = isFavorite(selected.value) ? favorites.filter(x => canonical(x) !== selected.value) : [...favorites,selected.value]; setFavorites(f); void persist(f,recent); }}><Star size={14}/>{tr(isFavorite(selected.value) ? 'picker:unfavorite_model' : 'picker:favorite_model',{model:selected.name})}</button>}
         <button type="button" className="picker-settings" onClick={() => { setOpen(false); onSettings(); }}>{tr('common:api_keys_provider_settings')}</button>
       </ModelSelector.Content>
     </ModelSelector.Root>

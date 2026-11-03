@@ -86,3 +86,13 @@
   background: transparent;
   padding: var(--space-1);
 }
+
+.shell-sidebar,.shell-topbar { border-color:var(--hairline); }
+.shell-topbar { min-height:44px; background:var(--surface); }
+.shell-sidebar svg { stroke-width:1.75; }
+.app-shell[data-view=workspace] .shell-topbar { min-height:36px; }
+@media(max-width:999px) { .app-shell[data-view=workspace] .shell-sidebar { position:absolute; z-index:40; top:36px; bottom:0; width:var(--sidebar-width); background:var(--surface); box-shadow:var(--elevation-floating); } }
+
+.app-shell[data-view=workspace] .shell-topbar { display:none; }
+
+.app-shell[data-view=library] .shell-topbar > span { display:none; }

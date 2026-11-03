@@ -151,7 +151,7 @@ function MessageSelection() {
 function DocumentSuggestions() {
   useTranslation();
   const aui = useAui();
-  return <Suggestions suggestions={[tr('common:summarize_this_document'),tr('common:explain_the_key_ideas'),tr('common:compare_the_main_arguments')]} selectedSuggestion={null} cycle={0} onSuggestion={prompt => aui.composer().setText(prompt)} variant="list" />;
+  return <Suggestions suggestions={[tr('common:summarize_this_document'),tr('common:explain_the_key_ideas'),tr('common:compare_the_main_arguments')]} selectedSuggestion={null} cycle={0} onSuggestion={prompt => aui.composer().setText(prompt)} variant="pills" />;
 }
 function DocumentMessageFooter() {
   useTranslation();
@@ -169,7 +169,7 @@ function DocumentMessageFooter() {
 }
 function useComposerBindings() {
   useTranslation(); const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
-function DocumentWelcome() { const { selection, usage } = useDocumentChat(); return <BlankChat documentOpen hasSelection={!!selection} replyLanguage={usage.data?.settings.replyLanguage ?? 'auto'}/>; }
+function DocumentWelcome() { const { selection, usage } = useDocumentChat(); return <div className="document-welcome"><BlankChat documentOpen hasSelection={!!selection} replyLanguage={usage.data?.settings.replyLanguage ?? 'auto'}/><DocumentSuggestions/></div>; }
 const documentComponents = { Welcome:DocumentWelcome, WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 
 export function SelectionPreview({ selection }: { selection: Selection }) {

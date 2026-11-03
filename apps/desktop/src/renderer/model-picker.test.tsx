@@ -68,10 +68,10 @@ it('orders Recent by recency and searches punctuation-independent tokens out of 
  const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
  await act(async()=>root.render(<ModelPicker providers={catalog} model="codex-cli/gpt-6.1-sol" onModel={()=>{}} onSettings={()=>{}}/>));
  await act(async()=> (host.querySelector('[aria-label="Model"]') as HTMLButtonElement).click());
- expect(Array.from(document.querySelectorAll('[role=option]')).map(x=>x.textContent)).toEqual(['Otherother','GPT-6.1 Solgpt-6.1-sol']);
+ expect(Array.from(document.querySelectorAll('[role=option]')).map(x=>x.textContent)).toEqual(['Other','GPT-6.1 Sol']);
  const input=document.querySelector('input')!;
  await act(async()=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(input,'6 GPT');input.dispatchEvent(new Event('input',{bubbles:true}));});
- expect(Array.from(document.querySelectorAll('[role=option]')).map(x=>x.textContent)).toEqual(['GPT-6.1 Solgpt-6.1-sol']);
+ expect(Array.from(document.querySelectorAll('[role=option]')).map(x=>x.textContent)).toEqual(['GPT-6.1 Sol']);
  await act(async()=>root.unmount());host.remove();
 });
 it('collapses disabled API models below usable CLI groups', () => {
