@@ -64,3 +64,11 @@ it('counts descendant documents and excludes deleted documents throughout the tr
  lib.softDelete(doc.id); expect(lib.folders().find(f=>f.id===parent.id)?.count).toBe(0);
  lib.restore(doc.id); lib.move([doc.id],null); expect(lib.folders().find(f=>f.id===parent.id)?.count).toBe(0);
 });
+
+it.each(['asc','desc'])('paginates unknown and known sizes without dropping rows (%s)',direction=>{
+ const {s,lib,doc}=fixture();
+ for(let i=0;i<3;i++) {const d=s.documents.insert({...doc,id:randomUUID() as never,sourceHash:randomUUID().replaceAll('-','').repeat(2)});if(i===2)s.db.prepare('UPDATE documents SET sizeBytes=10 WHERE id=?').run(d.id);}
+ const ids:string[]=[];let cursor:unknown;
+ do {const page=lib.list(libraryQuerySchema.parse({sort:'size',direction,limit:1,...(cursor?{cursor}:{})}));ids.push(...page.items.map(i=>i.document.id));cursor=page.nextCursor;}while(cursor);
+ expect(ids).toHaveLength(4);expect(new Set(ids).size).toBe(4);
+});
