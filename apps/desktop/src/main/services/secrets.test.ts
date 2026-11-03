@@ -80,3 +80,12 @@ function deferred<T>() {
   const promise = new Promise<T>(done => { resolve = done; });
   return {promise,resolve};
 }
+it('binds compatible unlocks to their configured origin',async()=>{
+ const {file,encryption,store:initial}=fixture();await initial.set('openai-compatible','old-origin');
+ const gate=deferred<{result:string}>(),started=deferred<void>();
+ encryption.decryptStringAsync=()=>{started.resolve();return gate.promise;};
+ const store=createSecretStore(file,encryption);store.bindCompatibleOrigin('https://old.example/v1');
+ const pending=store.getInMainOnly('openai-compatible');await started.promise;
+ store.bindCompatibleOrigin('https://new.example/v1');gate.resolve({result:'old-origin'});
+ expect(await pending).toBeNull();expect(store.isUnlocked('openai-compatible')).toBe(false);expect(store.has('openai-compatible')).toBe(false);
+});

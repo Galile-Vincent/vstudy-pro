@@ -156,3 +156,12 @@ function deferred<T>() {
   const promise = new Promise<T>(done => { resolve = done; });
   return {promise,resolve};
 }
+it('recovers a source published before a disk-full insert without removing its bytes',async()=>{
+ const {service,store,userData}=await setup();const a=join(userData,'disk.md'),b=join(userData,'disk.txt');await writeFile(a,'durable');await writeFile(b,'durable');
+ store.db.exec("CREATE TRIGGER disk_full BEFORE INSERT ON documents BEGIN SELECT RAISE(ABORT,'disk full'); END");
+ await expect(service.importPath(a)).rejects.toThrow('disk full');
+ const {createHash}=await import('node:crypto');const oldPath=join(userData,'library',createHash('sha256').update('durable').digest('hex'),'source.md');
+ expect(await readFile(oldPath,'utf8')).toBe('durable');
+ store.db.exec('DROP TRIGGER disk_full');const recovered=await service.importPath(b);await service.waitForIdle();
+ expect(await readFile(oldPath,'utf8')).toBe('durable');expect(service.get(recovered.id)?.status).toBe('ready');
+});
