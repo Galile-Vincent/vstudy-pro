@@ -88,6 +88,7 @@ it("only enables fake in explicit E2E mode", async () => {
     getInMainOnly: async () => null,
     has: () => false,
     set: async () => {},
+      bindCompatibleOrigin: () => {},
       useInSession: () => {},
       isUnlocked: () => false,
     delete: () => {},

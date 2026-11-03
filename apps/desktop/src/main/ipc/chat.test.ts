@@ -38,6 +38,7 @@ it("registers every chat handler with validated repository round trips and dispo
       getInMainOnly: async () => null,
       has: () => false,
       set: async () => {},
+      bindCompatibleOrigin: () => {},
       useInSession: () => {},
       isUnlocked: () => false,
       delete: deletedKeys,

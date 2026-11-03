@@ -42,9 +42,19 @@ export function createSecretStore(file: string, encryption: Encryption, timeoutM
     finally { clearTimeout(timer); }
   }
   const unlocked = new Map<ProviderId, string>();
+  let compatibleOrigin: string | undefined;
   const generations = new Map<ProviderId, number>();
   const bump = (id: ProviderId) => { const next = (generations.get(id) ?? 0) + 1; generations.set(id, next); unlocked.delete(id); return next; };
   return {
+    bindCompatibleOrigin(origin: string): void {
+      const canonical = new URL(origin).origin;
+      if (compatibleOrigin === canonical) return;
+      bump('openai-compatible');
+      if (compatibleOrigin !== undefined) {
+        const values = read(); delete values['openai-compatible']; write(values);
+      }
+      compatibleOrigin = canonical;
+    },
     async set(providerId: ProviderId, key: string): Promise<void> {
       providerIdSchema.parse(providerId);
       z.string().min(1).max(16384).parse(key);

@@ -80,7 +80,16 @@ export class ChatService {
         this.abort(entry.request.requestId, entry.owner);
     this.store.conversations.delete(id);
   }
-  start(request: ChatRequest, owner: ChatOwner): void {
+  start(request: ChatRequest, owner: ChatOwner): void | Promise<void> {
+    if (this.stopped) throw new Error("Chat service is closed");
+    if (!Object.keys(request.options ?? {}).length) return this.accept(request, owner);
+    const adapter = this.providers.get(request.providerId);
+    return adapter.listModels().then(models => {
+      validateOptions(models.find(m => m.id === request.modelId || m.resolvedId === request.modelId), request.options);
+      this.accept(request, owner);
+    });
+  }
+  private accept(request: ChatRequest, owner: ChatOwner): void {
     if (this.stopped) throw new Error("Chat service is closed");
     if (this.deleting.has(request.documentId)) throw new Error("Document is deleting");
     if (owner.isDestroyed()) throw new Error("Chat window unavailable");
@@ -167,6 +176,7 @@ export class ChatService {
     for (const entry of this.active.values())
       if (entry.request.documentId === documentId) this.abort(entry.request.requestId, entry.owner);
   }
+  async waitForIdle(): Promise<void> { await Promise.all(this.producers); }
   async dispose(): Promise<void> {
     this.stopped = true;
     for (const entry of this.active.values())
@@ -261,7 +271,6 @@ export class ChatService {
   ) {
     try {
       entry.controller.signal.throwIfAborted();
-      if (Object.keys(entry.request.options ?? {}).length) validateOptions((await adapter.listModels()).find(m => m.id === entry.request.modelId || m.resolvedId === entry.request.modelId), entry.request.options);
       this.store.conversations.setOptions(entry.request.conversationId, entry.request.options);
       entry.controller.signal.throwIfAborted();
       const file = await open(containedPath(dirname(document.sourcePath), document.markdownPath), "r");

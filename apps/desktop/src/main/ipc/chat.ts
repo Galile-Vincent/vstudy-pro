@@ -17,6 +17,8 @@ export function registerChatIpc(
     join(app.getPath("userData"), "providers.json"),
   ),
 ): ChatService {
+  const compatible = providers.config('openai-compatible');
+  if (compatible.kind === 'compatible') secrets.bindCompatibleOrigin(compatible.baseUrl);
   const chat = new ChatService(store, providers);
   const channels = [
     "providers:list",
@@ -35,6 +37,7 @@ export function registerChatIpc(
   registrar.handle("providers:configure", (config) => {
     const previous = providers.config(config.id);
     if (config.kind === 'compatible' && previous.kind === 'compatible' && new URL(config.baseUrl).origin !== new URL(previous.baseUrl).origin) secrets.delete(config.id);
+    if (config.kind === 'compatible') secrets.bindCompatibleOrigin(config.baseUrl);
     providers.configure(config);
     return { ok: true };
   });
@@ -69,8 +72,8 @@ export function registerChatIpc(
   registrar.handle("messages:list", ({ conversationId }) =>
     store.messages.list(conversationId),
   );
-  registrar.handle("chat:start", (request, event) => {
-    chat.start(request, event.sender);
+  registrar.handle("chat:start", async (request, event) => {
+    await chat.start(request, event.sender);
     return { ok: true };
   });
   registrar.handle("chat:abort", ({ requestId }, event) => {
