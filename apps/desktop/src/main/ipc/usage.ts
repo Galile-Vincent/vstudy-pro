@@ -1,3 +1,4 @@
+import { readUsageHistory, readUsageCsv } from "../db/usage-reader";
 import { tr } from "../i18n";
 import { createRateLimitProbe } from "../providers/rate-limits";
 import { dialog } from 'electron';
@@ -11,10 +12,10 @@ import type { IpcChannel } from '../../shared/ipc';
 import type { UsageRecord } from '../../shared/domain';
 export function usageCsv(records: UsageRecord[]): string {
   const keys = ['id','createdAt','providerId','modelId','kind','conversationId','documentId','messageId','inputTokens','outputTokens','cacheReadTokens','cacheWriteTokens','reasoningTokens','costUsd','costSource','aborted'] as const;
-  const cell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""').replace(/^[=+@-]/, "'$&")}"`;
+  const cell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""').replace(/^(?:[=+@\-\t\r]|\s+(?=[=+@-]))/, "'$&")}"`;
   return [keys.join(','), ...records.map(r => keys.map(k => cell(r[k])).join(','))].join('\r\n');
 }
-export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemented: Set<IpcChannel>) {
+export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemented: Set<IpcChannel>, codexEnabled: () => boolean = () => false) {
   const probe = createRateLimitProbe();
   registrar.handle('usage:estimate', async ({ conversationId, userMessage }) => {
     const c = store.conversations.get(conversationId);
@@ -27,17 +28,17 @@ export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemen
   });
   registrar.handle('usage:dashboard', ({period}) => store.usage.dashboard(period));
   registrar.handle('usage:summary' , ({ period }) => store.usage.summary(period));
-  registrar.handle('usage:forConversation', ({ conversationId }) => store.usage.forConversation(conversationId));
-  registrar.handle('usage:forDocument', ({ documentId }) => store.usage.forDocument(documentId));
+  registrar.handle('usage:forConversation', ({ conversationId }) => readUsageHistory(store, "conversation", conversationId));
+  registrar.handle('usage:forDocument', ({ documentId }) => readUsageHistory(store, "document", documentId));
   registrar.handle('usage:rateLimits', async () => {
     const rows = store.usage.rateLimits();
-    const rateLimit = await probe();
+    const rateLimit = codexEnabled() ? await probe() : undefined;
     return rateLimit ? [...rows.filter(r => r.providerId !== 'codex-cli'), { providerId: 'codex-cli' as const, createdAt: new Date().toISOString(), rateLimit }] : rows;
   });
   registrar.handle('usage:export', async () => {
     const result = await dialog.showSaveDialog({ title:tr('usage:export_title'), defaultPath: 'vstudy-usage.csv', filters: [{ name: 'CSV', extensions: ['csv'] }] });
     if (result.canceled || !result.filePath) return { saved: false };
-    await exportText(usageCsv(store.usage.list()), result.filePath);
+    await exportText(await readUsageCsv(store), result.filePath);
     return { saved: true };
   });
   for (const channel of ['usage:dashboard','usage:estimate','usage:summary','usage:forConversation','usage:forDocument','usage:rateLimits','usage:export'] as const) implemented.add(channel);

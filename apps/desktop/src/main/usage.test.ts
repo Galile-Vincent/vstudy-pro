@@ -6,7 +6,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { parseStream } from './providers/parsers';
 import { extractUsage, headerRateLimit } from './providers/usage';
 import { estimateCost } from './pricing';
-import { openStore } from './db';
+import { openStore, migrations } from './db';
 import { defaultSettings, usageRecordSchema, chatEventSchema } from '../shared/domain';
 import { ipcContract } from '../shared/ipc';
 import { budgetState } from '../renderer/usage/budget';
@@ -43,9 +43,10 @@ it('normalizes rate limit headers and validates usage/IPC payloads', () => {
 });
 it('migrates an existing database, aggregates periods and retains spend independently of document deletion', () => {
   const dir=mkdtempSync(join(tmpdir(),'usage-db-')); const path=join(dir,'db');
-  let store=openStore(path); store.settings.set({...defaultSettings,monthlyBudgetUsd:10}); store.close();
-  const raw=new DatabaseSync(path);raw.exec('DROP TABLE usage_events; DELETE FROM migrations WHERE version=3');raw.close();
-  store=openStore(path);
+  const raw=new DatabaseSync(path); raw.exec('CREATE TABLE migrations(version INTEGER PRIMARY KEY,appliedAt TEXT NOT NULL)');
+  for(const migration of migrations.filter(m=>m.version<3)) { raw.exec(migration.sql); raw.prepare('INSERT INTO migrations VALUES(?,?)').run(migration.version,new Date().toISOString()); }
+  raw.prepare('INSERT INTO settings VALUES(?,?)').run('settings',JSON.stringify({...defaultSettings,monthlyBudgetUsd:10}));raw.close();
+  const store=openStore(path);store.settings.set({...defaultSettings,monthlyBudgetUsd:10});
   try {
     expect(store.settings.get().monthlyBudgetUsd).toBe(10);
     const r=usageRecordSchema.parse({id:'00000000-0000-4000-8000-000000000001',createdAt:'2026-11-03T00:00:00.000Z',providerId:'codex-cli',modelId:'gpt-6.1-sol',kind:'chat',inputTokens:1200,outputTokens:340,costUsd:.012,costSource:'estimated',conversationId:'00000000-0000-4000-8000-000000000002',documentId:'00000000-0000-4000-8000-000000000003'});

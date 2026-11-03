@@ -1,6 +1,6 @@
 import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
 import { libraryMigration } from "./library-migration";
-import { usageMigration, usageRepository } from "./usage";
+import { usageMigration, usageRollupMigration, usageRepository } from "./usage";
 import { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
 import {
@@ -49,6 +49,7 @@ export const migrations = [
     ALTER TABLE messages ADD COLUMN supersededBy TEXT DEFAULT NULL;
     CREATE INDEX messages_active ON messages(conversationId,createdAt,id) WHERE supersededBy IS NULL;
   ` },
+  { version: 8, sql: usageRollupMigration },
 ];
 const documentRow = z
   .object({
@@ -81,6 +82,9 @@ const messageRow = z
   );
 
 export function openStore(path: string) {
+  if (path !== ':memory:') for (const suffix of ['', '-wal', '-shm', '.before-v5.bak']) {
+    if (existsSync(path + suffix)) chmodSync(path + suffix, 0o600);
+  }
   const recovering = path !== ":memory:" && existsSync(`${path}-wal`) && statSync(`${path}-wal`).size > 0;
   const fresh = path === ":memory:" || !existsSync(path);
   const db = new DatabaseSync(path);
@@ -105,10 +109,10 @@ export function openStore(path: string) {
       throw new Error("Database version is newer than this application");
     for (const migration of migrations) {
       if (versions.includes(migration.version)) continue;
-      if (!fresh && migration.version === 5) {
+      if (!fresh && [5,8].includes(migration.version)) {
         db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-        copyFileSync(path, `${path}.before-v5.bak`);
-        chmodSync(`${path}.before-v5.bak`, 0o600);
+        copyFileSync(path, `${path}.before-v${migration.version}.bak`);
+        chmodSync(`${path}.before-v${migration.version}.bak`, 0o600);
       }
       db.exec("BEGIN IMMEDIATE");
       try {
@@ -126,6 +130,7 @@ export function openStore(path: string) {
     db.close();
     throw error;
   }
+  if (path !== ':memory:') for (const suffix of ['-wal', '-shm']) if (existsSync(path + suffix)) chmodSync(path + suffix, 0o600);
   if (recovering && db.prepare("PRAGMA integrity_check").get()?.integrity_check !== "ok") { db.close(); throw new Error("Database integrity check failed"); }
   const documents = {
     insert(input: Document): Document {
