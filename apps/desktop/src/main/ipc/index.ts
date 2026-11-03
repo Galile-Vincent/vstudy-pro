@@ -1,3 +1,5 @@
+import { updateApplicationMenu } from "../i18n";
+import { registerLibraryIpc } from "./library";
 import { registerUsageIpc } from "./usage";
 import { createProviderRegistry } from "../providers";
 import { app, shell, ipcMain, type IpcMainInvokeEvent } from "electron";
@@ -17,6 +19,7 @@ export function registerIpc(
   const registrar = createIpcRegistrar(ipcMain, isTrusted);
   const implemented = new Set<IpcChannel>([
     "shell:openExternal",
+    "settings:systemLocale",
     "settings:get",
     "settings:set",
     "secrets:set",
@@ -27,8 +30,10 @@ export function registerIpc(
     await shell.openExternal(url);
     return { ok: true };
   });
+  updateApplicationMenu(store.settings.get().language);
+  registrar.handle("settings:systemLocale", () => process.env.VSTUDY_LOCALE ?? app.getLocale());
   registrar.handle("settings:get", () => store.settings.get());
-  registrar.handle("settings:set", (settings) => store.settings.set(settings));
+  registrar.handle("settings:set", (settings) => { const saved = store.settings.set(settings); updateApplicationMenu(saved.language); return saved; });
   registrar.handle("secrets:set", ({ providerId, key }) => {
     secrets.set(providerId, key);
     providers.configure({ ...providers.config(providerId), enabled: true });
@@ -42,6 +47,7 @@ export function registerIpc(
     secrets.delete(providerId);
     return { ok: true };
   });
+  const disposeLibrary = registerLibraryIpc(registrar, store, implemented);
   registerUsageIpc(registrar, store, implemented);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
   const disposeDocuments = registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove));
@@ -51,5 +57,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { registrar.dispose(); await disposeDocuments(); };
+  return async () => { disposeLibrary(); registrar.dispose(); await disposeDocuments(); };
 }
