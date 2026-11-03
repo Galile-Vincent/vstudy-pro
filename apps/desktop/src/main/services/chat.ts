@@ -240,6 +240,10 @@ export class ChatService {
           entry.usage = usageSchema.parse(event.usage);
           continue;
         }
+        if (event.type === 'reasoning-delta' || event.type === 'citations' || event.type === 'tool-call') {
+          this.send(entry, event);
+          continue;
+        }
         if (event.type !== "text-delta") {
           this.finish(
             entry,

@@ -86,7 +86,7 @@ export function createChatAdapter(
           if (event.type === "error") throw new Error(event.message);
           if (event.type === "done") return;
           if (event.type === "usage") { usage = event.usage; window.dispatchEvent(new Event("usage-updated")); }
-          else text += event.text;
+          else if (event.type === 'text-delta') text += event.text;
           yield { content: [{ type: "text", text }], ...(usage ? { metadata: { custom: { usage, modelId: details.modelId, options: details.options } } } : {}) };
         }
       } finally {
