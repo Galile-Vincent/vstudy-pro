@@ -96,6 +96,7 @@ export function createConverter(options: {
   userData: string;
   resources: string;
   onProgress?: Progress;
+  idleMinutes?: () => number;
   authorizeDownload?: () => Promise<boolean>;
 }): { convert: ConverterRunner; ensureReady: () => Promise<string>; dispose: () => Promise<void> } {
   const scope = new ProcessScope();
@@ -105,6 +106,12 @@ export function createConverter(options: {
   const venv = join(options.userData, "converter-venv");
   const python = join(venv, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   let worker: WarmWorker | undefined;
+  let idleTimer: ReturnType<typeof setTimeout> | undefined;
+  function scheduleIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { worker?.stop(); worker = undefined; bootstrap = undefined; }, (options.idleMinutes?.() ?? 5) * 60_000);
+    idleTimer.unref();
+  }
   let bootstrap: Promise<string> | undefined;
   let progress: Progress | undefined;
   const report = (message: string) => { options.onProgress?.(message); progress?.(message); };
@@ -124,7 +131,7 @@ export function createConverter(options: {
         }
       } catch { /* An interrupted installation is rebuilt on the next attempt. */ }
       if (!await options.authorizeDownload?.()) throw new Error('Converter offline: allow the dependency download and retry');
-      recordEgress('First-run converter dependency installation', 'pypi.org, files.pythonhosted.org; github.com for Python if needed');
+      recordEgress('converter_install', 'pypi.org, files.pythonhosted.org; github.com for Python if needed');
       report("Setting up converter (one time; download size depends on platform)…");
       const uv = await findExecutable("uv");
       // Cache wheels across private bootstrap directories without inheriting user configuration.
@@ -163,9 +170,10 @@ export function createConverter(options: {
     bootstrap ??= install().then(async executable => {
       checkOpen();
       const warmed = profileStage("Python spawn + warm imports");
-      worker = new WarmWorker(executable, join(options.resources, "convert.py"), options.userData, scope);
+      worker = new WarmWorker(executable, join(options.resources, "convert.py"), options.userData, scope, options.idleMinutes);
       await worker.start();
       warmed();
+      scheduleIdle();
       return executable;
     }).catch((error: unknown) => { bootstrap = undefined; throw error; });
     return bootstrap;
@@ -174,6 +182,7 @@ export function createConverter(options: {
     ensureReady,
     async dispose() {
       disposed = true;
+      clearTimeout(idleTimer);
       const stopping = scope.dispose();
       await stopping;
       worker?.stop();
@@ -182,13 +191,14 @@ export function createConverter(options: {
     async convert(source, output, onProgress) {
       progress = onProgress;
       await ensureReady();
+      clearTimeout(idleTimer);
       report("Converting…");
       const cwd = await mkdtemp(join(tmpdir(), "vstudy-convert-"));
       try {
         const temporaryOutput = join(cwd, "content.md");
         await rm(`${output}.partial`, { force: true });
         let publishPreview = Promise.resolve();
-        worker ??= new WarmWorker(python, join(options.resources, "convert.py"), options.userData, scope);
+        worker ??= new WarmWorker(python, join(options.resources, "convert.py"), options.userData, scope, options.idleMinutes);
         const extracted = profileStage("Worker conversion + preview delivery");
         await worker.run(source, temporaryOutput, output, message => {
           publishPreview = publishPreview.then(async () => {
@@ -215,7 +225,7 @@ export function createConverter(options: {
         const metadata: unknown = JSON.parse(await readFile(`${temporaryOutput}.json`, "utf8"));
         if (typeof metadata !== "object" || metadata === null || !("converter" in metadata) || (metadata.converter !== "pdf_md" && metadata.converter !== "markitdown")) throw new Error("Invalid converter metadata");
         return metadata.converter;
-      } finally { progress = undefined; await rm(`${output}.partial`, { force: true }); await rm(cwd, { recursive: true, force: true }); }
+      } finally { scheduleIdle(); progress = undefined; await rm(`${output}.partial`, { force: true }); await rm(cwd, { recursive: true, force: true }); }
     },
   };
 }

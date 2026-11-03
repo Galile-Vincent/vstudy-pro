@@ -44,7 +44,7 @@ interface Options { findBinary?: () => Promise<string | null>; timeoutMs?: numbe
 
 export async function* runAgy(binary: string, args: string[], cwd: string, request: ProviderRequest | undefined, signal: AbortSignal, timeoutMs: number): AsyncIterable<ChatEvent | Model[]> {
   if (signal.aborted) { yield { type: "done" }; return; }
-  recordEgress(request ? 'Enabled Antigravity chat' : 'Enabled Antigravity discovery', 'Google / Antigravity CLI managed endpoints');
+  recordEgress(request ? 'agy_chat' : 'agy_discovery', 'Google / Antigravity CLI managed endpoints');
   const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, detached: process.platform !== "win32", stdio: ["pipe", "pipe", "pipe"] });
   let failure: AgyError | undefined;
   let sessionId: string | undefined;

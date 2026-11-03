@@ -24,6 +24,9 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  "secrets:unlock": {request:z.object({providerId:providerIdSchema}).strict(),response:ack},
+  "secrets:session": {request:z.object({providerId:providerIdSchema,key:z.string().min(1).max(16384)}).strict(),response:ack},
+  "converter:mode": {request:z.object({offline:z.boolean()}).strict(),response:ack},
   "settings:networkActivity": {request:empty,response:z.array(z.object({at:z.string().datetime(),what:z.string(),to:z.string()}).strict())},
   "providers:chooseExecutable": {request:z.object({binary:z.enum(['claude','codex','agy'])}).strict(),response:z.object({path:z.string().nullable()}).strict()},
   "settings:deleteAllData": { request: empty, response: ack },

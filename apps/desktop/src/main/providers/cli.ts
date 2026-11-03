@@ -85,7 +85,7 @@ export async function* runCli(
   onRecord: (record: Record<string, unknown>) => void = () => {},
 ) {
   signal.throwIfAborted();
-  recordEgress('Enabled CLI request (CLI may also contact its own telemetry services)', kind === 'claude' ? 'Anthropic / Claude CLI managed endpoints' : 'OpenAI / Codex CLI managed endpoints');
+  recordEgress('cli_request', kind === 'claude' ? 'Anthropic / Claude CLI managed endpoints' : 'OpenAI / Codex CLI managed endpoints');
   const child = spawn(binary, args, {
     cwd,
     env: { ...cliEnvironment(), ...environment },

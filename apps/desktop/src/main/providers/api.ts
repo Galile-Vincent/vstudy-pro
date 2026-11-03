@@ -81,7 +81,7 @@ export function createApiAdapter(
   const noKeyRequired = () => getConfig().kind === "compatible" && isLoopback(base());
   return {
     async detect() {
-      return (secrets.has ? secrets.has(getConfig().id) : await key()) || noKeyRequired()
+      return secrets.isUnlocked?.(getConfig().id) || (secrets.has ? secrets.has(getConfig().id) : await key()) || noKeyRequired()
         ? { available: true }
         : { available: false, reason: "Add an API key" };
     },
@@ -94,7 +94,7 @@ export function createApiAdapter(
       const token = await key();
       if (!token && !noKeyRequired()) return [];
       try {
-        recordEgress('Provider request', new URL(base()).origin);
+        recordEgress('provider_request', new URL(base()).origin);
       const response = await fetcher(`${base()}/models`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           signal: AbortSignal.timeout(2500),
@@ -114,7 +114,7 @@ export function createApiAdapter(
       const token = await key();
       if (!token && !noKeyRequired()) throw new ProviderError("auth failed");
       const isAnthropic = anthropic();
-      recordEgress('Provider request', new URL(base()).origin);
+      recordEgress('provider_request', new URL(base()).origin);
       const response = await fetcher(
         `${base()}/${isAnthropic ? "messages" : "chat/completions"}`,
         {

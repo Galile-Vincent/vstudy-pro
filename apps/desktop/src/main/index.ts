@@ -1,3 +1,4 @@
+import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { runPackagedSmoke } from './packaged-smoke';
@@ -139,7 +140,7 @@ void app.whenReady().then(() => {
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deleteAllData');
   deletion.handle('settings:deleteAllData', async () => {
-    const result = await dialog.showMessageBox({ type: 'warning', message: 'Delete all VStudy data?', detail: 'Documents, conversations, keys, caches and the converter environment will be permanently removed. The app will quit.', buttons: ['Cancel', 'Delete all data'], defaultId: 0, cancelId: 0 });
+    const result = await dialog.showMessageBox({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 });
     if (result.response !== 1) return { ok: true };
     await deleteAllData(userData, async () => {
       window?.destroy();

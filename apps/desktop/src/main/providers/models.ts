@@ -36,7 +36,7 @@ export function claudeModels(input: unknown): Model[] {
 async function capture(binary: string, args: string[], input = '', initialize = false): Promise<string> {
   const cwd = await mkdtemp(join(tmpdir(), 'vstudy-models-'));
   try { return await new Promise<string>((resolve, reject) => {
-    recordEgress('Enabled CLI model discovery', 'CLI managed service endpoints');
+    recordEgress('cli_discovery', 'CLI managed service endpoints');
     const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '';
     const timer = setTimeout(() => { child.kill(); reject(new Error('Model discovery timed out')); }, 8000);

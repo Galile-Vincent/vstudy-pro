@@ -10,7 +10,7 @@ export class WarmWorker {
   private idle?: NodeJS.Timeout;
   private timer?: NodeJS.Timeout;
 
-  constructor(private readonly python: string, private readonly script: string, private readonly cwd: string, private readonly scope?: ProcessScope) {}
+  constructor(private readonly python: string, private readonly script: string, private readonly cwd: string, private readonly scope?: ProcessScope, private readonly idleMinutes: () => number = () => 5) {}
 
   start(): Promise<void> {
     if (this.ready) return this.ready;
@@ -68,7 +68,7 @@ export class WarmWorker {
   }
 
   private finish(): void { clearTimeout(this.timer); this.pending = undefined; this.scheduleIdle(); }
-  private scheduleIdle(): void { clearTimeout(this.idle); this.idle = setTimeout(() => this.stop(), 300_000); this.idle.unref(); }
+  private scheduleIdle(): void { clearTimeout(this.idle); this.idle = setTimeout(() => this.stop(), this.idleMinutes() * 60_000); this.idle.unref(); }
   stop(error = new Error("Converter closed")): void {
     clearTimeout(this.timer); clearTimeout(this.idle);
     this.pending?.reject(error); this.pending = undefined;

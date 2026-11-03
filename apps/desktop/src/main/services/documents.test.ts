@@ -47,7 +47,7 @@ describe("DocumentService", () => {
     const first = await service.importPath(fixture("html"));
     const second = await service.importPath(fixture("csv"));
     await service.waitForIdle();
-    expect(service.get(first.id)).toMatchObject({ status: "failed", error: "Conversion failed" });
+    expect(service.get(first.id)).toMatchObject({ status: "failed", error: expect.stringContaining("errors.converter_failed") });
     await expect(service.read(first.id)).rejects.toThrow("not ready");
     fail = false;
     expect((await service.retry(first.id)).status).toBe("converting");
@@ -100,7 +100,7 @@ describe("DocumentService", () => {
     await writeFile(oversized, "a".repeat(8 * 1024 * 1024 + 1));
     const document = await service.importPath(oversized);
     await service.waitForIdle();
-    expect(service.get(document.id)).toMatchObject({ status: "failed", error: "Conversion failed" });
+    expect(service.get(document.id)).toMatchObject({ status: "failed", error: expect.stringContaining("errors.converter_failed") });
   });
 });
 it("uses the decoded HTML title instead of the import filename", async () => {

@@ -184,9 +184,9 @@ export class DocumentService {
           saved();
           this.options.onProgress?.(document.id, "Conversion complete");
         }
-      } catch {
+      } catch (error) {
         if (!this.stopped && this.get(document.id)) this.options.store.documents.transition(document.id, {
-          status: "failed", error: "Conversion failed",
+          status: "failed", error: 'VSTUDY_STATUS:' + JSON.stringify({code: error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed',params:{}}),
         });
       }
     }).finally(() => { this.jobs.delete(document.id); activeConversions.delete(document.id); });

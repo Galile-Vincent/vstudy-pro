@@ -210,6 +210,8 @@ export const settingsSchema = z
     language: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
     replyLanguage: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
     chatSide: z.enum(["left", "right"]),
+    converterIdleMinutes: z.number().int().min(1).max(60).default(5),
+    converterOffline: z.boolean().default(false),
     enableGenerativeUI: z.boolean().default(false),
     monthlyBudgetUsd: z.number().finite().positive().optional(),
     monthlyTokenBudget: z.number().int().positive().optional(),
@@ -227,7 +229,7 @@ export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
   language: "auto", replyLanguage: "auto", welcomeSeen: false,
   chatSide: "left",
-  enableGenerativeUI: false, modelDisplayNames: {},
+  converterIdleMinutes: 5, converterOffline: false, enableGenerativeUI: false, modelDisplayNames: {},
   warnAtPercent: 80, priceOverrides: {},
   lastProviderId: null,
   lastModelId: null,

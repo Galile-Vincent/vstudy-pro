@@ -23,11 +23,19 @@ export function registerDocumentsIpc(
   const userData = app.getPath("userData");
   const converter = createConverter({
     userData,
+    idleMinutes: () => store.settings.get().converterIdleMinutes,
     authorizeDownload: async () => {
-      const result = await dialog.showMessageBox({type:'question',message:'Download the document converter?',detail:'First-run conversion installs locked Python packages from pypi.org and files.pythonhosted.org. uv may download Python from GitHub. Choose Offline to keep reading Markdown and text without installing; retry conversion to ask again.',buttons:['Offline','Download and retry'],defaultId:0,cancelId:0});
+      if (store.settings.get().converterOffline) return false;
+      const result = await dialog.showMessageBox({type:'question',message:tr('settings:download'),detail:tr('settings:converter_copy'),buttons:[tr('settings:offline'),tr('settings:download_retry')],defaultId:0,cancelId:0});
       return result.response === 1;
     },
     resources: app.isPackaged ? join(process.resourcesPath, "converter") : join(app.getAppPath(), "resources/converter"),
+  });
+  implemented.add('converter:mode');
+  registrar.handle('converter:mode', async ({offline}) => {
+    store.settings.set({...store.settings.get(),converterOffline:offline});
+    if (!offline) await converter.ensureReady();
+    return {ok:true};
   });
   const owners = new Map<string, Electron.WebContents>();
   const documents = new DocumentService({ store, userData, convert: converter.convert, onProgress: (documentId, message) => {
