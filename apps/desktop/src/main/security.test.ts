@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { isAppUrl } from "./security";
+import { isAppUrl, productionCsp } from "./security";
 it("denies external origins and alternate local files", () => {
   for (const entry of [
     "file:///app/out/index.html",
@@ -11,4 +11,11 @@ it("denies external origins and alternate local files", () => {
     expect(isAppUrl("http://localhost:5173/other", entry)).toBe(false);
     expect(isAppUrl("javascript:alert(1)", entry)).toBe(false);
   }
+});
+
+it("permits required style and font sources while keeping scripts strict", () => {
+  const directives = productionCsp.split("; ");
+  expect(directives.find(d => d.startsWith("script-src"))).toBe("script-src 'self'");
+  expect(directives.find(d => d.startsWith("style-src"))).toBe("style-src 'self' 'unsafe-inline'");
+  expect(directives.find(d => d.startsWith("font-src"))).toBe("font-src 'self' data:");
 });
