@@ -134,3 +134,5 @@ html:lang(ja),html:lang(zh-Hant) { --type-xs:13px; --type-sm:13px; }
 @keyframes vt-in { from { opacity:0; transform:translateY(8px); } }
 :root { --type-hero-compact:clamp(28px,6cqi,40px); }
 :root { --citation-pulse-start:0 0 0 0 var(--edge-lit); --citation-pulse-end:0 0 0 var(--inset) transparent; }
+
+:root { --welcome-header-height:40px; --welcome-body-delay:240ms; --welcome-cta-delay:320ms; --welcome-type-duration:1200ms; --welcome-citation-duration:1600ms; --welcome-chip-delay:900ms; --welcome-float-delay:1120ms; --welcome-answer-stagger:45ms; }

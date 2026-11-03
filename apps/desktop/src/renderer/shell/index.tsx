@@ -73,7 +73,8 @@ export function AppShell({
   const navigate: Navigation["navigate"] = (value) => {
     const next = typeof value === "string" ? { view: value } : value;
     if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = route; returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
-    transitionTo(() => setRoute(next), next.view === 'workspace' && !!next.documentId);
+    if (next.view === 'welcome' || route.view === 'welcome') setRoute(next);
+    else transitionTo(() => setRoute(next), next.view === 'workspace' && !!next.documentId);
     try { localStorage.setItem("vstudy-route", JSON.stringify(next)); } catch { /* Route persistence is optional. */ }
   };
   return (

@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 export function splitGroups(text: string, language: string): string[] {
+  if (text.includes('\u200b')) return text.split('\u200b');
   if (!Intl.Segmenter) return [text];
   const words: string[] = [];
   for (const part of new Intl.Segmenter(language, { granularity: 'word' }).segment(text)) {
