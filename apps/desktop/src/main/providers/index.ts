@@ -10,6 +10,7 @@ import { z } from "zod";
 import {
   providerConfigSchema,
   type ChatEvent,
+  type Usage,
   type ChatRequest,
   type ProviderConfig,
 } from "../../shared/domain";
@@ -23,7 +24,7 @@ export interface Model {
   id: string;
   name: string;
 }
-export type ProviderRequest = ChatRequest & { prompt: string };
+export type ProviderRequest = ChatRequest & { prompt: string; onUsageSnapshot?: (usage: Usage) => void };
 export interface ProviderAdapter {
   detect(): Promise<Availability>;
   listModels(): Promise<Model[]>;
@@ -47,6 +48,7 @@ export const fakeAdapter: ProviderAdapter = {
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
     }
     signal.throwIfAborted();
+    yield { type: "usage", usage: { inputTokens: 1200, outputTokens: 340, cacheReadTokens: 200, reasoningTokens: 40, costUsd: .012, costSource: "reported" } };
     yield { type: "done" };
   },
 };

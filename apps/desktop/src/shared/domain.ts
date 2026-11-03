@@ -81,8 +81,32 @@ export const conversationSchema = z
   })
   .strict();
 export type Conversation = z.infer<typeof conversationSchema>;
+export const rateLimitSchema = z.object({
+  label: z.string().min(1), usedPercent: z.number().min(0).max(100).optional(),
+  remainingTokens: z.number().nonnegative().optional(), remainingRequests: z.number().nonnegative().optional(),
+  resetsAt: z.string().datetime().optional(),
+}).strict();
+export const usageSchema = z.object({
+  inputTokens: z.number().int().nonnegative(), outputTokens: z.number().int().nonnegative(),
+  cacheReadTokens: z.number().int().nonnegative().optional(), cacheWriteTokens: z.number().int().nonnegative().optional(),
+  reasoningTokens: z.number().int().nonnegative().optional(), costUsd: z.number().finite().nonnegative().optional(),
+  costSource: z.enum(['reported', 'estimated', 'unknown']), rateLimit: rateLimitSchema.optional(),
+}).strict();
+export type Usage = z.infer<typeof usageSchema>;
+export const priceSchema = z.object({ input: z.number().finite().nonnegative(), output: z.number().finite().nonnegative(), cacheRead: z.number().finite().nonnegative(), cacheWrite: z.number().finite().nonnegative() }).strict();
+export type Price = z.infer<typeof priceSchema>;
+export const usageRecordSchema = usageSchema.extend({
+  id: z.string().uuid(), createdAt: timestamp, providerId: providerIdSchema, modelId: z.string().min(1),
+  kind: z.enum(['chat', 'parse']), conversationId: conversationIdSchema.optional(), documentId: documentIdSchema.optional(), messageId: messageIdSchema.optional(),
+});
+export type UsageRecord = z.infer<typeof usageRecordSchema>;
+export const usageSummarySchema = z.object({
+  inputTokens: z.number(), outputTokens: z.number(), costUsd: z.number().optional(), unknownPrices: z.number(), calls: z.number(),
+  groups: z.array(z.object({ providerId: providerIdSchema, modelId: z.string(), documentId: documentIdSchema.optional(), inputTokens: z.number(), outputTokens: z.number(), costUsd: z.number().optional(), unknownPrices: z.number(), calls: z.number() })),
+});
+export type UsageSummary = z.infer<typeof usageSummarySchema>;
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .object({ type: z.literal("text"), text: z.string(), usage: usageSchema.optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .strict();
 export const messageSchema = z
   .object({
@@ -139,6 +163,7 @@ export const chatRequestSchema = z
   );
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 export const chatEventSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("usage"), usage: usageSchema }).strict(),
   z.object({ type: z.literal("text-delta"), text: z.string(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() }).strict(),
   z.object({ type: z.literal("done") }).strict(),
   z.object({ type: z.literal("error"), message: z.string() }).strict(),
@@ -147,6 +172,10 @@ export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
   .object({
     chatSide: z.enum(["left", "right"]),
+    monthlyBudgetUsd: z.number().finite().positive().optional(),
+    monthlyTokenBudget: z.number().int().positive().optional(),
+    warnAtPercent: z.number().min(1).max(100).default(80),
+    priceOverrides: z.record(z.string().min(1), priceSchema).default({}),
     lastProviderId: providerIdSchema.nullable(),
     lastModelId: z.string().nullable(),
     lastDocumentId: documentIdSchema.nullable().default(null),
@@ -155,6 +184,7 @@ export const settingsSchema = z
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
   chatSide: "left",
+  warnAtPercent: 80, priceOverrides: {},
   lastProviderId: null,
   lastModelId: null,
   lastDocumentId: null,

@@ -1,3 +1,4 @@
+import { registerUsageIpc } from "./usage";
 import { createProviderRegistry } from "../providers";
 import { app, shell, ipcMain, type IpcMainInvokeEvent } from "electron";
 import type { Store } from "../db";
@@ -41,6 +42,7 @@ export function registerIpc(
     secrets.delete(providerId);
     return { ok: true };
   });
+  registerUsageIpc(registrar, store, implemented);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
   registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove));
   for (const channel of Object.keys(ipcContract) as IpcChannel[]) {

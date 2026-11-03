@@ -1,8 +1,10 @@
+import { priceUsage } from "../pricing";
 import { randomUUID } from "node:crypto";
 import { open } from "node:fs/promises";
 import {
   conversationSchema,
   messageSchema,
+  usageSchema, type Usage,
   type ChatRequest,
   type ChatEvent,
   type Conversation,
@@ -24,6 +26,8 @@ interface ActiveRequest {
   controller: AbortController;
   onDestroyed: () => void;
   text: string;
+  usage?: Usage;
+  usageEmitted?: boolean;
 }
 export class ChatService {
   private readonly deleting = new Set<string>();
@@ -122,6 +126,8 @@ export class ChatService {
     role: "user" | "assistant",
     text: string,
     status: "complete" | "aborted" | "error" = "complete",
+    usage?: Usage,
+    id = randomUUID(),
   ) {
     const previous = this.store.messages.list(request.conversationId).at(-1);
     const createdAt = new Date(
@@ -129,10 +135,10 @@ export class ChatService {
     ).toISOString();
     this.store.messages.insert(
       messageSchema.parse({
-        id: randomUUID(),
+        id,
         conversationId: request.conversationId,
         role,
-        parts: [{ type: "text", text, status, ...(role === "user" && request.selection ? { selection: request.selection } : {}) }],
+        parts: [{ type: "text", text, status, ...(usage ? { usage } : {}), ...(role === "user" && request.selection ? { selection: request.selection } : {}) }],
         createdAt,
       }),
     );
@@ -153,13 +159,19 @@ export class ChatService {
   }
   private finish(
     entry: ActiveRequest,
-    event: Exclude<ChatEvent, { type: "text-delta" }>,
+    event: Extract<ChatEvent, { type: "done" | "error" }>,
   ) {
     if (this.active.get(entry.request.requestId) !== entry) return;
     this.active.delete(entry.request.requestId);
     entry.owner.removeListener("destroyed", entry.onDestroyed);
     try {
-      if (entry.text) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete");
+      const messageId = randomUUID();
+      if (entry.usage) {
+        entry.usage = priceUsage(entry.request.modelId, entry.usage, this.store.settings.get().priceOverrides);
+        this.store.usage.record({ ...entry.usage, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: entry.request.modelId, kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
+        this.send(entry, { type: 'usage', usage: entry.usage });
+      }
+      if (entry.text || entry.usage) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId);
     } catch {
       if (!entry.controller.signal.aborted)
         event = { type: "error", message: "Chat could not be saved" };
@@ -193,7 +205,7 @@ export class ChatService {
           : {}),
       });
       for await (const event of adapter.stream(
-        { ...entry.request, prompt },
+        { ...entry.request, prompt, onUsageSnapshot: usage => { if (this.active.get(entry.request.requestId) === entry) entry.usage = usageSchema.parse(usage); } },
         entry.controller.signal,
       )) {
         if (
@@ -201,6 +213,12 @@ export class ChatService {
           entry.controller.signal.aborted
         )
           return;
+        if (event.type === 'usage') {
+          if (entry.usageEmitted) throw new Error('Duplicate usage event');
+          entry.usageEmitted = true;
+          entry.usage = usageSchema.parse(event.usage);
+          continue;
+        }
         if (event.type !== "text-delta") {
           this.finish(
             entry,

@@ -10,7 +10,7 @@ import {
   providerConfigSchema,
   providerIdSchema,
   requestIdSchema,
-  settingsSchema,
+  settingsSchema, usageSchema, usageSummarySchema, usageRecordSchema, rateLimitSchema,
 } from "./domain";
 
 const empty = z.object({}).strict();
@@ -21,6 +21,12 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  "usage:estimate": { request: z.object({ conversationId: conversationIdSchema, userMessage: z.string().max(2_000_000) }).strict(), response: usageSchema },
+  "usage:summary": { request: z.object({ period: z.enum(['day', 'month', 'last30days']) }).strict(), response: usageSummarySchema },
+  "usage:forConversation": { request: z.object({ conversationId: conversationIdSchema }).strict(), response: z.array(usageRecordSchema) },
+  "usage:forDocument": { request: z.object({ documentId: documentIdSchema }).strict(), response: z.array(usageRecordSchema) },
+  "usage:rateLimits": { request: empty, response: z.array(z.object({ providerId: providerIdSchema, createdAt: z.string().datetime(), rateLimit: rateLimitSchema })) },
+  "usage:export": { request: empty, response: z.object({ saved: z.boolean() }).strict() },
   "shell:openExternal": {
     request: z.object({ url: externalUrlSchema }).strict(),
     response: ack,

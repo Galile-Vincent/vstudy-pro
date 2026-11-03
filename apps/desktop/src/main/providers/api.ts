@@ -1,5 +1,6 @@
 import { z } from "zod";
-import type { ProviderConfig } from "../../shared/domain";
+import { headerRateLimit } from "./usage";
+import type { Usage, ProviderConfig } from "../../shared/domain";
 import type { SecretStore } from "../services/secrets";
 import type { ProviderAdapter } from "./index";
 import { parseStream } from "./parsers";
@@ -110,7 +111,7 @@ export function createApiAdapter(
           body: JSON.stringify({
             model: request.modelId,
             stream: true,
-            ...(isAnthropic ? { max_tokens: 8192 } : {}),
+            ...(isAnthropic ? { max_tokens: 8192 } : { stream_options: { include_usage: true } }),
             messages: [{ role: "user", content: request.prompt }],
           }),
         },
@@ -120,13 +121,20 @@ export function createApiAdapter(
         throw new ProviderError(response.status === 401 || response.status === 403 ? "auth failed" : response.status === 429 ? "rate limited" : "bad request");
       }
       let terminal = false;
+      let usage: Usage | undefined;
+      let text = '';
+      const rateLimit = headerRateLimit(response.headers, isAnthropic);
+      const snapshot = (value: Usage) => { usage = { ...value, ...(rateLimit ? { rateLimit } : {}) }; request.onUsageSnapshot?.(usage); };
+      const finalUsage = (): Usage => usage ?? { inputTokens: Math.ceil(request.prompt.length / 4), outputTokens: Math.ceil(text.length / 4), costSource: 'estimated', ...(rateLimit ? { rateLimit } : {}) };
       for await (const event of parseStream(
         responseText(response.body),
         isAnthropic ? "anthropic" : "openai",
-        true,
+        true, snapshot,
       )) {
         signal.throwIfAborted();
-        if (event.type !== "text-delta") terminal = true;
+        if (event.type === 'usage') { snapshot(event.usage); continue; }
+        if (event.type === 'text-delta') text += event.text;
+        if (event.type === 'done' || event.type === 'error') { terminal = true; yield { type: 'usage', usage: finalUsage() }; }
         yield event;
       }
       if (!terminal) throw new Error("Provider stream ended unexpectedly");

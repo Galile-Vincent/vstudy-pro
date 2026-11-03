@@ -4,6 +4,7 @@ import { constants } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { delimiter, join, isAbsolute } from "node:path";
 import { parseStream, type ParserKind } from "./parsers";
+import type { Usage } from "../../shared/domain";
 import type { ProviderAdapter } from "./index";
 export function cliEnvironment(
   source: NodeJS.ProcessEnv = process.env,
@@ -85,6 +86,7 @@ export async function* runCli(
   kind: ParserKind,
   signal: AbortSignal,
   timeoutMs = 120_000,
+  snapshot: (usage: Usage) => void = () => {},
 ) {
   signal.throwIfAborted();
   const child = spawn(binary, args, {
@@ -131,7 +133,7 @@ export async function* runCli(
   child.stdout.setEncoding("utf8");
   try {
     let terminal = false;
-    for await (const event of parseStream(child.stdout, kind)) {
+    for await (const event of parseStream(child.stdout, kind, false, snapshot)) {
       signal.throwIfAborted();
       if (event.type === "error") throw new Error("CLI request failed");
       if (event.type === "done") {
@@ -196,6 +198,7 @@ export function createCliAdapter(
           cwd,
           binary,
           signal,
+          120_000, request.onUsageSnapshot,
         );
       } finally {
         await rm(cwd, { recursive: true, force: true });

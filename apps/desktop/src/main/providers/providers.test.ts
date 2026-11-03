@@ -68,7 +68,7 @@ it("sends assembled prompt and key only in main HTTP request and lists custom mo
   ]);
   expect(
     await collect(adapter.stream(request, new AbortController().signal)),
-  ).toEqual([{ type: "text-delta", text: "yes" }, { type: "done" }]);
+  ).toEqual([{ type: "text-delta", text: "yes" }, { type: "usage", usage: { inputTokens: Math.ceil(request.prompt.length / 4), outputTokens: 1, costSource: "estimated" } }, { type: "done" }]);
   expect(fetcher.mock.calls[1]?.[1]?.body).toContain("Selected passage");
 });
 it("rejects truncated HTTP streams", async () => {
@@ -177,7 +177,7 @@ it("allows loopback compatible providers without credentials", async () => {
   const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response('data: [DONE]\n\n'));
   const adapter = createApiAdapter(() => ({ kind: "compatible", id: "openai-compatible", enabled: true, baseUrl: "http://127.0.0.2:123/v1" }), { getInMainOnly: () => null }, fetcher);
   expect(await adapter.detect()).toEqual({ available: true });
-  expect(await collect(adapter.stream(request, new AbortController().signal))).toEqual([{ type: "done" }]);
+  expect(await collect(adapter.stream(request, new AbortController().signal))).toEqual([{ type: "usage", usage: { inputTokens: Math.ceil(request.prompt.length / 4), outputTokens: 0, costSource: "estimated" } }, { type: "done" }]);
   expect(fetcher.mock.calls[0]?.[1]?.headers).toEqual({ "content-type": "application/json" });
 });
 it.each([[401, "auth failed"], [429, "rate limited"], [400, "bad request"]] as const)("categorizes HTTP %s without exposing response or key", async (status, category) => {

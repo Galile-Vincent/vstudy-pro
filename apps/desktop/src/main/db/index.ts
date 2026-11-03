@@ -1,3 +1,4 @@
+import { usageMigration, usageRepository } from "./usage";
 import { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
 import {
@@ -27,6 +28,7 @@ const migrations = [
 `,
   },
   { version: 2, sql: "ALTER TABLE documents ADD COLUMN converter TEXT NOT NULL DEFAULT 'markitdown' CHECK(converter IN ('pdf_md','markitdown'));" },
+  { version: 3, sql: usageMigration },
 ];
 const documentRow = z
   .object({
@@ -149,6 +151,7 @@ export function openStore(path: string) {
   };
   return {
     close: () => db.close(),
+    usage: usageRepository(db),
     documents,
     conversations: {
       insert(input: Conversation): Conversation {
@@ -216,7 +219,7 @@ export function openStore(path: string) {
             )
           : { ...defaultSettings };
       },
-      set(input: Settings): Settings {
+      set(input: import("zod").input<typeof settingsSchema>): Settings {
         const value = settingsSchema.parse(input);
         db.prepare(
           "INSERT INTO settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",

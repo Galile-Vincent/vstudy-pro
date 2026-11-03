@@ -1,5 +1,6 @@
 import { z } from "zod";
-import type { ChatEvent } from "../../shared/domain";
+import { extractUsage } from "./usage";
+import type { Usage, ChatEvent } from "../../shared/domain";
 const wireEvent = z
   .object({
     type: z.string().optional(),
@@ -65,11 +66,22 @@ export async function* parseStream(
   chunks: AsyncIterable<string>,
   kind: ParserKind,
   sse = false,
+  snapshot: (usage: Usage) => void = () => {},
 ): AsyncIterable<ChatEvent> {
+  let usage: Usage | undefined;
+  let emitted = false;
+  function events(payload: string): ChatEvent[] {
+    usage = extractUsage(payload, kind, usage);
+    if (usage) snapshot(usage);
+    return parseProviderEvent(kind, payload).flatMap(event => {
+      if ((event.type === "done" || event.type === "error") && usage && !emitted) { emitted = true; return [{ type: "usage", usage }, event] as ChatEvent[]; }
+      return [event];
+    });
+  }
   let buffer = "";
   let data: string[] = [];
   function parseLine(line: string): ChatEvent[] {
-    if (!sse) return line.trim() ? parseProviderEvent(kind, line) : [];
+    if (!sse) return line.trim() ? events(line) : [];
     if (line.startsWith("data:")) {
       data.push(line.slice(5).trimStart());
       if (data.reduce((size, part) => size + part.length, 0) > 2_000_000)
@@ -78,7 +90,7 @@ export async function* parseStream(
     if (line !== "" || data.length === 0) return [];
     const payload = data.join("\n");
     data = [];
-    return parseProviderEvent(kind, payload);
+    return events(payload);
   }
   for await (const chunk of chunks) {
     buffer += chunk;
@@ -89,13 +101,13 @@ export async function* parseStream(
       buffer = buffer.slice(newline + 1);
       for (const event of parseLine(line)) {
         yield event;
-        if (event.type !== "text-delta") return;
+        if (event.type === "done" || event.type === "error") return;
       }
     }
   }
   for (const event of parseLine(buffer.replace(/\r$/, ""))) {
     yield event;
-    if (event.type !== "text-delta") return;
+    if (event.type === "done" || event.type === "error") return;
   }
   if (sse) for (const event of parseLine("")) yield event;
 }
