@@ -21,7 +21,7 @@ try {
  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();
+  await page.getByTestId("bridge-status").waitFor({state:"attached"});
   await page.getByText("Workspace connected", { exact: true }).waitFor();
   for (const extension of ["docx", "xlsx", "pdf"]) {
     const path = join(fixtures, `sample.${extension}`);

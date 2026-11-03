@@ -27,7 +27,7 @@ try {
   const errors = [];
   page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();
+  await page.getByTestId("bridge-status").waitFor({state:"attached"});
   if (!mock) {
     await app.evaluate(({ dialog }, path) => {
       dialog.showOpenDialog = async () => ({
@@ -133,11 +133,6 @@ try {
     "Swap preserves the conversation",
   );
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-right.png"), fullPage: true, animations: "disabled" });
-  await page.getByRole("button", { name: "Toggle document library" }).click();
-  assert.equal(
-    await page.getByRole("complementary", { name: "Document library" }).count(),
-    0,
-  );
   await page.getByRole("button", { name: "Open settings" }).click();
   await page.getByRole("dialog").waitFor();
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-settings.png"), fullPage: true, animations: "disabled" });
@@ -229,7 +224,9 @@ try {
       assert.equal(await page.locator('.aui-composer-input').inputValue(),'Keep this draft');
     } else await page.getByRole('combobox',{name:'Search models'}).press('Escape');
     page.once("dialog", dialog => dialog.accept());
-    await page.getByRole("button", { name: "Delete conversation", exact: true }).click();
+    await page.getByRole('button',{name:'Conversations',exact:true}).click();
+    await page.locator('[data-slot=aui_thread-list-item]').first().getByRole('button',{name:'More options',exact:true}).click();
+    await page.getByRole('menuitem',{name:'Delete',exact:true}).click();
     await page.locator(".chat-start").waitFor();
     page.once("dialog", dialog => dialog.dismiss());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();

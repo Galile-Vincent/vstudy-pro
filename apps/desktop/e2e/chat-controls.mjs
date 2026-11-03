@@ -9,7 +9,7 @@ try {
  app = await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});
  const page = await app.firstWindow();
  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload(); const errors=[]; page.on('pageerror',e=>{errors.push(e.message); console.log('PAGEERROR',e.message);}); page.on('console', m=>{if(m.type()==='error') {errors.push(`console: ${m.text()}`);console.log('CONSOLE',m.text());}});
- await page.getByRole('heading',{name:'VStudy Pro'}).waitFor();
+ await page.getByTestId('bridge-status').waitFor({state:'attached'});
  await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
  await page.getByTestId('import-document').click();
  await page.getByTestId('document-markdown').waitFor();

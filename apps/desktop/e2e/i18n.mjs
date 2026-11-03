@@ -13,7 +13,7 @@ for(const language of ['en','zh-Hant','ja']) {
   const page=await app.firstWindow();
  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.waitForFunction(lang=>window.document.documentElement.lang===lang,language);
-  await page.getByRole('heading',{name:'VStudy Pro'}).waitFor();
+  await page.getByTestId('bridge-status').waitFor({state:'attached'});
   assert.ok((await app.evaluate(({Menu})=>Menu.getApplicationMenu().items.map(i=>i.label))).includes(catalog.file));
   await page.waitForFunction(()=>!window.document.querySelector('[data-testid=import-document]')?.disabled);
   await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
@@ -22,8 +22,8 @@ for(const language of ['en','zh-Hant','ja']) {
   await page.getByRole('button',{name:catalog.start_a_conversation,exact:true}).click();
   await page.locator('.aui-composer-input').waitFor();
   await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();
-  await page.getByTestId('language').selectOption(language);
-  await page.waitForFunction(lang=>window.document.querySelector('[data-testid=language]')?.value===lang,language);
+  await page.getByTestId('language').click();await page.getByRole('option',{name:language==='en'?'English':language==='ja'?'日本語':'繁體中文',exact:true}).click();
+  await page.waitForFunction(lang=>window.document.querySelector('[data-testid=language]')?.dataset.value===lang,language);
   await page.getByRole('button',{name:catalog.close_settings}).click();
   for(const width of [720,900,1200]) {
    await app.evaluate(({BrowserWindow},width)=>BrowserWindow.getAllWindows()[0].setSize(width,800),width);
@@ -38,14 +38,14 @@ for(const language of ['en','zh-Hant','ja']) {
     await page.keyboard.press('Escape');
     await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();
     await page.waitForFunction(()=>!window.document.querySelector('[data-testid=language]')?.disabled);
-    assert.equal(await page.getByTestId('language').inputValue(),language);
+    assert.equal(await page.getByTestId('language').getAttribute('data-value'),language);
     await page.screenshot({path:`${evidence}/${language}-${width}-${colorScheme}-settings.png`,animations:'disabled'});
     await page.getByRole('button',{name:catalog.close_settings}).click();
    }
   }
   // Change language in the same running window, retaining the workspace.
   await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();
-  const next=language==='en'?'ja':'en';await page.getByTestId('language').selectOption(next);
+  const next=language==='en'?'ja':'en';await page.getByTestId('language').click();await page.getByRole('option',{name:next==='en'?'English':'日本語',exact:true}).click();
   await page.waitForFunction(lang=>window.document.documentElement.lang===lang,next);
   assert.deepEqual(errors,[]);console.log(`${language}: live language switch, chat/picker/settings, 720/900/1200 light/dark passed`);
  } finally {await app?.close();await rm(directory,{recursive:true,force:true});}

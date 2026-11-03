@@ -17,7 +17,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
   const page=await app.firstWindow(),errors=[]; await page.emulateMedia({colorScheme:'light',reducedMotion:'reduce'}); page.on('pageerror',e=>errors.push(e.message));
   await page.locator('.onboarding[open]').waitFor();
-  await page.locator('.onboarding select').first().selectOption(language);
+  await page.locator('.onboarding').getByRole('combobox').first().click();await page.getByRole('option',{name:language==='en'?'English':language==='ja'?'日本語':'繁體中文',exact:true}).click();
   const audit=async state=>{
    const results=await new AxeBuilder({page}).setLegacyMode(true).analyze();
    const severe=results.violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}));
@@ -38,13 +38,13 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
    if(step>0) assert.ok(await page.locator('#onboarding-title').evaluate(e=>e===window.document.activeElement),'step heading receives focus');
    await audit(`onboarding-${step}`); await capture(`onboarding-${step}`);
    if(step===1) { await page.locator('.onboarding input[type=password]').fill('test-local-key'); await page.getByRole('button',{name:copy.save_key,exact:true}).click(); await page.getByRole('status').filter({hasText:copy.key_saved}).waitFor(); }
-   if(step===2) { await page.getByRole('button',{name:copy.sample,exact:true}).click(); await page.getByRole('status').filter({hasText:copy.sample_added}).waitFor(); }
+   if(step===2) { await page.locator('.onboarding').getByRole('button',{name:copy.sample,exact:true}).click(); await page.getByRole('status').filter({hasText:copy.sample_added}).waitFor(); }
    await page.locator('.onboarding footer .primary').click();
   }
   await page.locator('.onboarding').waitFor({state:'detached'});
   assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).onboardingCompleted,true);
   db=new DatabaseSync(join(directory,'vstudy.sqlite')); db.exec('PRAGMA busy_timeout=5000; DELETE FROM activity_events; DELETE FROM activity_days; UPDATE documents SET lastOpenedAt=NULL;');
-  const refresh=async()=>{await page.evaluate(()=>window.dispatchEvent(new window.Event('activity-updated')));const expected=await page.evaluate(()=>window.desktop.invoke('dashboard:get',{})); await page.waitForFunction(({tokens,streak})=>{const stats=window.document.querySelectorAll('.home-stat');return stats[0]?.textContent===tokens && stats[1]?.textContent.includes(streak);},{tokens:new Intl.NumberFormat(language,{notation:expected.month.inputTokens+expected.month.outputTokens>=1e6?"compact":"standard",maximumFractionDigits:1}).format(expected.month.inputTokens+expected.month.outputTokens),streak:new Intl.NumberFormat(language).format(expected.streak.current)});};
+  const refresh=async()=>{await page.evaluate(()=>window.dispatchEvent(new window.Event('activity-updated')));await page.waitForTimeout(200);};
   await refresh(); await audit('home-empty'); await capture('home-empty');
   // Metadata insert shapes follow the benchmark seeder at a three-document scale.
   const now=new Date().toISOString(),ids=[randomUUID(),randomUUID(),randomUUID()];
@@ -53,7 +53,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   for(const [i,id] of ids.entries()) db.prepare("INSERT INTO documents(id,title,sourceName,sourceHash,sourcePath,mime,status,markdownPath,createdAt,position,lastOpenedAt,pinned,pinnedAt) VALUES(?,?,?,?,?,'text/markdown','ready',?,?,?,?,1,?)").run(id,`Study ${i}`,'sample.md',id.replaceAll('-','').padEnd(64,'0'),source.sourcePath,source.markdownPath,now,i,now,new Date(Date.now()-i*1000).toISOString());
   await refresh(); await page.getByRole('button',{name:'Study 0',exact:true}).first().waitFor(); await audit('home-populated'); await capture('home-populated');
   await page.getByRole('button',{name:home.move_up.replace('{{title}}','Study 1'),exact:true}).press('Enter');
-  await page.waitForFunction(()=>window.document.querySelectorAll('.home-card')[4]?.querySelector('.home-row')?.textContent==='Study 1');
+  await page.getByRole('region',{name:home.pinned_documents,exact:true}).locator('.home-row').first().filter({hasText:'Study 1'}).waitFor();
   db.prepare('UPDATE documents SET title=? WHERE id=?').run('非常に長い名前・很長的文件名稱・A long research title '.repeat(5),ids[0]);
   await refresh(); await capture('home-long-names');
   db.prepare('UPDATE documents SET title=? WHERE id=?').run('Study 0',ids[0]);

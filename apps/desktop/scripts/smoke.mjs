@@ -34,7 +34,7 @@ try {
   await page
     .getByTestId("bridge-status")
     .filter({ hasText: "Workspace connected" })
-    .waitFor();
+    .waitFor({state:"attached"});
   const settings = await page.evaluate(() =>
     window.desktop.invoke("settings:get", {}),
   );

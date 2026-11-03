@@ -14,7 +14,7 @@ const launch = async () => {
  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   page.on("pageerror", error => errors.push(error.message));
   page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
-  await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();
+  await page.getByTestId("bridge-status").waitFor({state:"attached"});
 };
 try {
   await launch();
@@ -44,7 +44,7 @@ try {
   assert.deepEqual(await page.locator("[data-role=assistant] li").allTextContents(), ["First", "Second"]);
   await page.locator("[data-role=assistant] strong").scrollIntoViewIfNeeded();
   await page.screenshot({path: "/tmp/vstudy-visual-markdown.png", animations:'disabled'});
-  for (const name of ["Delete conversation", "Delete document"]) {
+  for (const name of ["Delete document"]) {
     const button = page.getByRole("button", { name, exact: true });
     assert.equal(Math.round((await button.boundingBox()).width), 28);
     assert.equal(await button.getAttribute("class"), "icon-button");

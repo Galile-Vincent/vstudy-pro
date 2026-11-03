@@ -230,16 +230,13 @@ try {
   await page.getByRole("button", { name: "Lesson 0", exact: true }).waitFor();
   const row = page.locator("article[role=row]").first();
   await row.click({ button: "right" });
-  await page.getByRole("dialog").waitFor();
+  await page.getByRole("menu").waitFor().catch(async e => { await page.screenshot({path:"/tmp/vstudy-design1/menu-failure.png"}); console.log(await page.locator("body").innerText()); throw e; });
   await shot("context-menu");
   await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Pin", exact: true })
+    .getByRole("menu")
+    .getByRole("menuitem", { name: "Pin", exact: true })
     .click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Close", exact: true })
-    .click();
+  await page.keyboard.press("Escape");
   await row.focus();
   await page.keyboard.press("Space");
   await page
@@ -296,12 +293,10 @@ try {
         );
         await page.emulateMedia({ colorScheme });
         await shot(`${lang}-${width}-${colorScheme}-populated`);
-        await page.locator(".filter-popover summary").click();
-        await page
-          .locator(".filter-panel")
-          .getByLabel(catalog.status, { exact: true })
-          .selectOption("ready");
-        await page.locator(".filter-popover summary").click();
+        await page.getByTestId("library-filters").click();
+        await page.locator('.filter-panel').getByRole('combobox',{name:catalog.status,exact:true}).click();
+        await page.getByRole('option',{name:catalog.ready,exact:true}).click();
+        await page.getByTestId("library-filters").click();
         await shot(`${lang}-${width}-${colorScheme}-filters`);
         const axe = await new AxeBuilder({ page })
           .setLegacyMode()
@@ -329,10 +324,7 @@ try {
         await page.keyboard.press("Escape");
         await currentRow.click({ button: "right" });
         await shot(`${lang}-${width}-${colorScheme}-context-menu`);
-        await page
-          .getByRole("dialog")
-          .getByRole("button", { name: catalog.close, exact: true })
-          .click();
+        await page.keyboard.press('Escape');
         const target = page.getByRole("treeitem", {
           name: "Study",
           exact: true,
@@ -349,7 +341,7 @@ try {
           .getByRole("textbox", { name: catalog.search, exact: true })
           .fill("no-matching-document-999");
         await page
-          .getByRole("heading", { name: catalog.empty_search, exact: true })
+          .getByRole("heading", { name: catalog.empty_search.replace("{{query}}","no-matching-document-999"), exact: true })
           .waitFor();
         await shot(`${lang}-${width}-${colorScheme}-empty`);
         await page
