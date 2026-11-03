@@ -2,7 +2,7 @@
 
 R12. How can websites keep track of users? Do they always need to use cookies?
 
-HTTP 是無狀態的，網站需要明確地做一些事情來 track user。（ 一種方是是使用 cookie。（ cookie 允許網站在不同會話中跟蹤使用者（即瀏覽器關閉和重啟時）。如果在單一會話中追蹤使用者就足夠了，則網站可以在伺服器端生成唯一 ID 並製作網頁，以便將此類 ID 附加到所有後續請求中。（
+HTTP 是無狀態的，網站需要明確地做一些事情來 track user。（一種方是是使用 cookie。（cookie 允許網站在不同會話中跟蹤使用者（即瀏覽器關閉和重啟時）。如果在單一會話中追蹤使用者就足夠了，則網站可以在伺服器端生成唯一 ID 並製作網頁，以便將此類 ID 附加到所有後續請求中。（
 
 R13. Describe how Web caching can reduce the delay in receiving a requested object. Will Web caching reduce the delay for all objects requested by a user or for only some of the objects? Why?
 
@@ -19,7 +19,7 @@ R14. Telnet into a Web server and send a multiline request message. Include in t
 
 > note: 控制台->程式集
 
-預設情況下，Telnet 在 Windows 7 中不可用。若要使其可用，請前往「控制台」、「程式和功能」、「開啟或關閉 Windows 功能」、檢查 Telnet 用戶端。若要啟動 Telnet，（ 請在 Windows 命令提示字元中發出以下 command
+預設情況下，Telnet 在 Windows 7 中不可用。若要使其可用，請前往「控制台」、「程式和功能」、「開啟或關閉 Windows 功能」、檢查 Telnet 用戶端。若要啟動 Telnet，（請在 Windows 命令提示字元中發出以下 command
 
 > note: 在cmd輸入指令就可使用
 

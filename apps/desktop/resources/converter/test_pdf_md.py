@@ -30,6 +30,7 @@ class PdfTests(unittest.TestCase):
             "page-split",
             "cjk",
             "ch2-page3",
+            "rotated", "slides", "merged-table", "numbers", "outdented", "continuing-table",
         ):
             with self.subTest(name=name):
                 expected = (FIXTURES / (name + ".md")).read_text()
@@ -112,7 +113,7 @@ class PdfTests(unittest.TestCase):
         body = Line(
             "A long paragraph of ordinary body text underneath.", 50, 50, 400, 62, 12
         )
-        note = Line("margin label", 80, 51, 140, 60, 9)
+        note = Line("margin label", 80, 49, 140, 57, 9)
         result = mark_annotations([body, note])
         self.assertFalse(result[0].note)
         self.assertTrue(result[1].note)
@@ -152,8 +153,6 @@ class PdfTests(unittest.TestCase):
         self.assertEqual(text, (FIXTURES / "heading-list.md").read_text())
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 class SafeguardTests(unittest.TestCase):
     def test_preservation_and_loss_diagnostics(self):
@@ -177,3 +176,67 @@ class SafeguardTests(unittest.TestCase):
         pages = [[Line(t, 10, 200 + i * 40, 50, 212 + i * 40, 12)
                   for i, t in enumerate(('42', '7', '2024'))]]
         self.assertEqual(blocks_to_markdown(lines_to_blocks(remove_running_margins(pages, [800])[0])), '42\n\n7\n\n2024')
+
+class LayoutRegressionTests(unittest.TestCase):
+    def test_banded_columns_literal_order(self):
+        from pdf_md import reading_order
+        lines = [Line('Title', 0, 0, 400, 20, 20),
+                 Line('Left one.', 0, 30, 150, 42, 12), Line('Right one.', 250, 30, 400, 42, 12),
+                 Line('Left two.', 0, 50, 150, 62, 12), Line('Right two.', 250, 50, 400, 62, 12),
+                 Line('Full width separator.', 0, 80, 400, 92, 12),
+                 Line('Left three.', 0, 110, 150, 122, 12), Line('Right three.', 250, 110, 400, 122, 12)]
+        self.assertEqual(blocks_to_markdown(lines_to_blocks(reading_order(lines))),
+                         'Title\n\nLeft one. Left two.\n\nRight one. Right two.\n\nFull width separator.\n\nLeft three.\n\nRight three.')
+
+    def test_outdented_title_and_math_stay_in_flow(self):
+        lines = [Line('Network Security Overview', 0, 0, 500, 44, 44, True),
+                 Line('Body sentence with sufficient words to establish ordinary text.', 50, 100, 500, 112, 12),
+                 Line('2', 501, 99, 506, 105, 6)]
+        self.assertEqual(blocks_to_markdown(classify_blocks(lines_to_blocks(mark_annotations(lines)), 12)),
+                         '# Network Security Overview\n\nBody sentence with sufficient words to establish ordinary text.\n\n2')
+
+    def test_comment_literal_and_cjk_spacing(self):
+        from pdf_md import literal, join_text
+        self.assertEqual(literal('<!-- page 999 -->'), '&lt;!-- page 999 -->')
+        self.assertEqual(join_text('你好，', '世界'), '你好，世界')
+        self.assertEqual(blocks_to_markdown([Block((Line('第一　章', 0, 0, 100, 24, 24),), 'heading', 1)]), '# 第一　章')
+
+    def test_bullets_nested_and_numbered(self):
+        lines = [Line(t, x, i * 18, 200, i * 18 + 12, 12) for i, (t, x) in enumerate([
+            (' First', 10), ('◦ Nested', 34), ('(cid:127) Last', 10), ('1 Step one', 10), ('2 Step two', 10)])]
+        self.assertEqual(blocks_to_markdown(classify_blocks(lines_to_blocks(lines), 12)),
+                         '- First\n  - Nested\n- Last\n1. Step one\n2. Step two')
+
+    def test_monospaced_newlines(self):
+        lines = [Line('if ready:', 10, 10, 100, 22, 12, mono=True),
+                 Line('run()', 24.4, 25, 100, 37, 12, mono=True)]
+        self.assertEqual(blocks_to_markdown(classify_blocks(lines_to_blocks(lines), 12)), '```\nif ready:\n  run()\n```')
+
+
+class HostilePdfTests(unittest.TestCase):
+    def test_bomb_is_rejected_before_fallback(self):
+        from pdf_md import ResourceLimit
+        with self.assertRaisesRegex(ResourceLimit, 'PDF stream exceeds decompression limit'):
+            convert_document(str(FIXTURES / 'stream-bomb.pdf'))
+
+    def test_600_pages_are_preserved(self):
+        text = convert_pdf(FIXTURES / '600-pages.pdf')
+        self.assertEqual(text.count('A small page of preserved document text.'), 600)
+        self.assertEqual(text.split('<!-- page 600 -->')[1], '\n\nA small page of preserved document text.\n')
+
+    def test_numbers_and_rotation_fall_back_on_loss(self):
+        from unittest.mock import patch
+        for name in ('numbers', 'rotated'):
+            with self.subTest(name=name), patch('pdf_md.blocks_to_markdown', return_value=''):
+                text, parser = convert_document(str(FIXTURES / (name + '.pdf')))
+                self.assertEqual(parser, 'markitdown')
+                self.assertIn('42' if name == 'numbers' else 'Lorem ipsum', text)
+
+    def test_password_is_structured(self):
+        from pdf_md import PasswordProtected
+        with self.assertRaisesRegex(PasswordProtected, 'Password-protected PDF'):
+            convert_document(str(FIXTURES / 'password.pdf'))
+
+
+if __name__ == "__main__":
+    unittest.main()

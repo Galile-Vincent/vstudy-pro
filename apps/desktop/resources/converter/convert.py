@@ -14,6 +14,7 @@ MAX_OUTPUT = 8 * 1024 * 1024
 
 
 def convert_document(source):
+    DIAGNOSTICS.clear()
     no_text = False
     if os.path.splitext(source)[1].lower() == ".pdf":
         from pdf_md import convert_pdf, NoTextLayer, PasswordProtected, ResourceLimit
