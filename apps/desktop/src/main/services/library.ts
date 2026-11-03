@@ -1,3 +1,4 @@
+import { activeConversions } from "./conversion-state";
 import { randomUUID } from 'node:crypto';
 import { readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -143,6 +144,7 @@ export class LibraryService {
         catch { /* Rebuild retries unavailable content at startup. */ }
     } }); }
     purge() { for (const d of this.store.db.prepare('SELECT id,sourceHash FROM documents WHERE deletedAt<=?').all(new Date(Date.now() - 30000).toISOString())) {
+        if (activeConversions.has(String(d.id))) continue;
         const path = join(this.root, String(d.sourceHash));
         try {
             containedPath(this.root, path);

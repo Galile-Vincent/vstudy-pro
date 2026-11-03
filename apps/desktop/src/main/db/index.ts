@@ -1,4 +1,4 @@
-import { chmodSync, copyFileSync, existsSync } from "node:fs";
+import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
 import { libraryMigration } from "./library-migration";
 import { usageMigration, usageRepository } from "./usage";
 import { DatabaseSync } from "node:sqlite";
@@ -76,6 +76,7 @@ const messageRow = z
   );
 
 export function openStore(path: string) {
+  const recovering = path !== ":memory:" && existsSync(`${path}-wal`) && statSync(`${path}-wal`).size > 0;
   const fresh = path === ":memory:" || !existsSync(path);
   const db = new DatabaseSync(path);
   if (path !== ":memory:") chmodSync(path, 0o600);
@@ -120,6 +121,7 @@ export function openStore(path: string) {
     db.close();
     throw error;
   }
+  if (recovering && db.prepare("PRAGMA integrity_check").get()?.integrity_check !== "ok") { db.close(); throw new Error("Database integrity check failed"); }
   const documents = {
     insert(input: Document): Document {
       const d = documentSchema.parse(input);
@@ -177,6 +179,7 @@ export function openStore(path: string) {
   maintenance.unref();
   return {
     db,
+    integrityCheck: () => db.prepare("PRAGMA integrity_check").all(),
     close: () => { clearInterval(maintenance); db.exec("PRAGMA optimize"); db.close(); },
     usage: usageRepository(db),
     documents,
@@ -190,8 +193,8 @@ export function openStore(path: string) {
       insert(input: Conversation): Conversation {
         const c = conversationSchema.parse(input);
         db.prepare(
-          "INSERT INTO conversations(id,documentId,providerId,modelId,createdAt,options) VALUES (?,?,?,?,?,?)",
-        ).run(c.id, c.documentId, c.providerId, c.modelId, c.createdAt, c.options ? JSON.stringify(c.options) : null);
+          "INSERT INTO conversations(id,documentId,providerId,modelId,createdAt,options,updatedAt) VALUES (?,?,?,?,?,?,?)",
+        ).run(c.id, c.documentId, c.providerId, c.modelId, c.createdAt, c.options ? JSON.stringify(c.options) : null, c.createdAt);
         return c;
       },
       get(id: Conversation["id"]): Conversation | null {

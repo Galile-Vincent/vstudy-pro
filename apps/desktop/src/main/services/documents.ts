@@ -1,3 +1,4 @@
+import { activeConversions } from "./conversion-state";
 import { chmodSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { validateImport } from "./import-security";
@@ -87,7 +88,10 @@ export class DocumentService {
         validateImport(source, extension);
         const sourceHash = hash.digest("hex");
         const existing = this.options.store.documents.findByHash(sourceHash);
-        if (existing) return existing;
+        if (existing) {
+          if (!this.get(existing.id)) throw new Error("Document is pending deletion");
+          return existing;
+        }
         const directory = join(this.library, sourceHash);
         // Recover a directory left behind between publishing a source and inserting its row.
         await rm(directory, { recursive: true, force: true });
@@ -151,6 +155,7 @@ export class DocumentService {
 
   private enqueue(document: Document): void {
     if (this.jobs.has(document.id)) return;
+    activeConversions.add(document.id);
     const queued = profileStage("Queue wait");
     const job = this.queue.then(async () => {
       queued();
@@ -183,7 +188,7 @@ export class DocumentService {
           status: "failed", error: error instanceof Error && error.message.trim() ? error.message.slice(0, 2000) : "Conversion failed",
         });
       }
-    }).finally(() => { this.jobs.delete(document.id); });
+    }).finally(() => { this.jobs.delete(document.id); activeConversions.delete(document.id); });
     this.jobs.set(document.id, job);
     this.queue = job;
   }
