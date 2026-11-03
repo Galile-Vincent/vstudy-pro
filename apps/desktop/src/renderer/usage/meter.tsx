@@ -18,14 +18,14 @@ export function useUsage(conversationId: Conversation['id'], modelId?: string) {
   }, [conversationId,modelId]);
   return { data,error,priceUnknown };
 }
-export function UsageButton({ data, error, onClick }: Omit<ReturnType<typeof useUsage>, 'priceUnknown'> & { onClick: () => void }) {
+export function UsageButton({ data, error, priceUnknown, onClick }: Omit<ReturnType<typeof useUsage>, 'priceUnknown'> & {priceUnknown?: boolean} & { onClick: () => void }) {
   useTranslation();
   const records = data?.records ?? [];
   const tokens = records.reduce((n,r) => n + r.inputTokens + r.outputTokens,0);
   const known = records.filter(r => r.costUsd !== undefined);
   const cost = known.reduce((n,r) => n + r.costUsd!,0);
   const description = `${tr('usage:token_count',{count:tokens,formatted:compactTokens(tokens)})}${known.length ? ` · ${money(cost)}` : ''}${records.some(r => r.aborted) ? tr('common:includes_aborted_turns') : ''}`;
-  return <button type="button" className="composer-usage" onClick={onClick} aria-label={tr('common:conversation_usage')} title={data ? `${tr('common:conversation_usage')} · ${description} · ${tr('common:view_usage_and_budget_settings')}` : tr('common:view_usage_and_budget_settings')}>{error || (!data ? tr('usage:usage_loading') : <><span className="usage-full">{tr('usage:token_count',{count:tokens,formatted:compactTokens(tokens)})}{known.length ? ` · ${money(cost)}` : ''}</span><span className="usage-compact" aria-hidden>{compactTokens(tokens)}</span></>)}</button>;
+  return <button type="button" className="composer-usage" onClick={onClick} aria-label={tr('common:conversation_usage')} title={data ? `${tr('common:conversation_usage')} · ${description}${priceUnknown ? ` · ${tr('usage:current_price_unknown')}` : ''} · ${tr('common:view_usage_and_budget_settings')}` : tr('common:view_usage_and_budget_settings')}>{error || (!data ? tr('usage:usage_loading') : <><span className="usage-full">{tr('usage:token_count',{count:tokens,formatted:compactTokens(tokens)})}{known.length ? ` · ${money(cost)}` : ''}</span><span className="usage-compact" aria-hidden>{compactTokens(tokens)}</span></>)}</button>;
 }
 export function UsageMeter({ data, error, priceUnknown }: Omit<ReturnType<typeof useUsage>, 'priceUnknown'> & {priceUnknown?: boolean}) {
   useTranslation();

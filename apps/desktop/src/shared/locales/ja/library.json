@@ -75,7 +75,7 @@
   "clearSelection": "選択を解除",
   "error": "ライブラリを読み込めませんでした",
   "loading": "ドキュメントを読み込み中…",
-  "empty_search": "ドキュメントが見つかりません",
+  "empty_search": "「{{query}}」の検索結果はありません",
   "empty_filter": "条件に一致するドキュメントがありません",
   "empty_folder": "新しいアイデアをここに",
   "empty_library": "ここから読書を始めましょう",
@@ -122,5 +122,6 @@
   "documentCount_one": "{{formatted}} 件の資料",
   "documentCount_other": "{{formatted}} 件の資料",
   "pages": "{{formatted}} ページ",
-  "noFolders": "フォルダはまだありません"
+  "noFolders": "フォルダはまだありません",
+  "customDates": "期間を指定…"
 }

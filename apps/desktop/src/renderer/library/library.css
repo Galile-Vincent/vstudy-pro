@@ -412,3 +412,5 @@ mark {
 .document-title:lang(ja),.document-title:lang(zh-Hant) { line-height:1.35; }
 .library-toolbar > button:not(.app-select),.home-card button:not(.primary):not(.home-row),.onboarding button:not(.primary):not(.app-select) { border-color:var(--hairline); }
 .library-toolbar > button { min-height:32px; }
+
+.filter-chips button.ghost,.library-empty > button.ghost { border:0; background:transparent; color:var(--muted); }

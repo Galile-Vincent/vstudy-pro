@@ -75,7 +75,7 @@
   "clearSelection": "Clear selection",
   "error": "Couldn’t load your library",
   "loading": "Loading documents…",
-  "empty_search": "No documents found",
+  "empty_search": "No results for “{{query}}”",
   "empty_filter": "No matching documents",
   "empty_folder": "Room for a new idea",
   "empty_library": "Your reading starts here",
@@ -122,5 +122,6 @@
   "documentCount_one": "{{formatted}} document",
   "documentCount_other": "{{formatted}} documents",
   "pages": "{{formatted}} pages",
-  "noFolders": "No folders yet"
+  "noFolders": "No folders yet",
+  "customDates": "Custom dates…"
 }

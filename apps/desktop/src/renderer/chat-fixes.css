@@ -76,3 +76,4 @@
 .document-welcome { display:grid; justify-items:center; gap:var(--space-3); }
 [data-slot=suggestions] button { border:1px solid var(--hairline); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:var(--type-base); }
 .effort-item[data-state=checked] { background:var(--ink); color:var(--surface); }
+.model-popover .effort-list .effort-item[data-state=checked] { background:var(--ink); color:var(--surface); }

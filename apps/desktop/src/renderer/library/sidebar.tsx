@@ -204,8 +204,8 @@ export function LibrarySidebar() {
           <Plus />
         </button>
       </div>
-      <div role="tree" aria-label={tr("library:folders")}>
-        {!folders.length && <p className="sidebar-empty">{tr("library:noFolders")}</p>}
+      {!folders.length && <p className="sidebar-empty">{tr("library:noFolders")}</p>}
+      <div role={folders.length ? "tree" : undefined} aria-label={folders.length ? tr("library:folders") : undefined}>
       {visible.map(({ folder: f, level }, index) => (
           <div
             key={f.id}

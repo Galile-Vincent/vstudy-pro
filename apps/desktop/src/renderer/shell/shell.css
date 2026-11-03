@@ -96,3 +96,5 @@
 .app-shell[data-view=workspace] .shell-topbar { display:none; }
 
 .app-shell[data-view=library] .shell-topbar > span { display:none; }
+
+.shell-sidebar nav button[data-parent=true][aria-current=page] { background:transparent; color:var(--muted); }

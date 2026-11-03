@@ -90,6 +90,7 @@ export function AppShell({
               {tr("library:home")}
             </button>
             <button
+              data-parent={!!route.query?.folderId}
               aria-current={route.view === "library" ? "page" : undefined}
               onClick={() => navigate("library")}
             >

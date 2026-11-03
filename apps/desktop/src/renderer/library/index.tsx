@@ -34,6 +34,11 @@ import {
 } from "./model";
 import "./library.css";
 export { LibrarySidebar } from "./sidebar";
+function folderPath(folders: Folder[], id: string | null | undefined) {
+  const names: string[] = [];
+  for (let level = 0; id && level < 8; level++) { const folder = folders.find(f => f.id === id); if (!folder) break; names.unshift(folder.name); id = folder.parentId; }
+  return names.join(' › ');
+}
 export function formatSize(bytes: number, locale: string) {
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
   const exponent = Math.min(3, Math.max(0, Math.floor(Math.log10(Math.max(1, bytes)) / 3)));
@@ -70,6 +75,7 @@ export function LibraryView() {
     ...JSON.parse(localStorage.getItem(`library-sort:${viewKey}`) ?? "{}"),
     ...route.query,
   }));
+  const [customDates,setCustomDates] = useState(false);
   const [filtersOpen,setFiltersOpen] = useState(false);
   const [text, setText] = useState(route.query?.text ?? ""),
     [items, setItems] = useState<Item[]>([]),
@@ -338,8 +344,8 @@ export function LibraryView() {
     >
       <div className="library-title">
         <div>
-          <h1>{route.title ?? folders.find(f => f.id === query.folderId)?.name ?? tr("common:library")}</h1>
-          <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) })}</p>
+          <h1>{route.title ?? (folderPath(folders, query.folderId) || tr("common:library"))}</h1>
+          <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) + (cursor ? "+" : "") })}</p>
         </div>
         <button
           hidden={!loading && !items.length && !text && !filters.length}
@@ -427,9 +433,10 @@ export function LibraryView() {
                 {tr(`library:${key}`)}
               </label>
             ))}
-            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={query.addedAfter ? 'custom' : ''} onChange={e => setQuery(q => ({...q, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined}))}>
-              <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option>{query.addedAfter && <option value="custom">{format.date(query.addedAfter)}</option>}
+            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setCustomDates(true);return;} setCustomDates(false); setQuery(q => ({...q, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
+              <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
             </Select></label>
+            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<input type="date" aria-label={tr(`library:${key}`)} value={query[key]?.slice(0,10) ?? ''} onChange={e => setQuery(q => ({...q,[key]:e.target.value ? new Date(e.target.value).toISOString() : undefined}))}/></label>)}
             <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select></label>
@@ -495,10 +502,10 @@ export function LibraryView() {
         ))}
         {filters.length > 0 && (
           <>
-            <button onClick={() => setQuery({ ...defaults, ...route.query })}>
+            <button className="ghost" onClick={() => setQuery({ ...defaults, ...route.query })}>
               {tr("library:clearFilters")}
             </button>
-            <button
+            <button className="ghost"
               onClick={async () => {
                 const name = await prompt(tr("library:saveFilter"));
                 if (name)
@@ -575,7 +582,7 @@ export function LibraryView() {
           <h2>
             {tr(
               `library:empty_${text ? "search" : filters.length ? "filter" : query.folderId ? "folder" : "library"}`,
-            )}
+              { query: text })}
           </h2>
           <p>{tr(text ? "library:searchHint" : filters.length ? "library:filterHint" : "library:emptyHint")}</p>
           <button
@@ -595,6 +602,7 @@ export function LibraryView() {
                   : "common:import_document",
             )}
           </button>
+          {!text && !filters.length && <button className="ghost" onClick={() => void run(async () => { await desktop.invoke('documents:importSample',{language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}); changed(); })}>{tr('onboarding:sample')}</button>}
         </div>
       ) : (
         <div
@@ -800,7 +808,7 @@ export function LibraryView() {
                         {d.title}
                       </button>
                       <div className="document-meta" title={`${d.sourceName} · ${d.converter}`}>
-                        {!query.folderId && <span>{folders.find(f => f.id === item.folderId)?.name ?? tr("library:unfiled")}</span>}
+                        {!query.folderId && <span>{folderPath(folders, item.folderId) || tr("library:unfiled")}</span>}
                         <span>{d.sourceName.split('.').pop()?.toUpperCase()}</span>
                         {item.pageCount != null && <span>{tr("library:pages", {count:item.pageCount, formatted:format.number(item.pageCount)})}</span>}
                         <span>{formatSize(item.sizeBytes, document.documentElement.lang)}</span>

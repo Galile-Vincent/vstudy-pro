@@ -75,7 +75,7 @@
   "clearSelection": "取消選取",
   "error": "無法載入文件庫",
   "loading": "正在載入文件…",
-  "empty_search": "找不到文件",
+  "empty_search": "找不到「{{query}}」的搜尋結果",
   "empty_filter": "沒有符合條件的文件",
   "empty_folder": "放進一個新靈感",
   "empty_library": "從這裡開始閱讀",
@@ -122,5 +122,6 @@
   "documentCount_one": "{{formatted}} 份文件",
   "documentCount_other": "{{formatted}} 份文件",
   "pages": "{{formatted}} 頁",
-  "noFolders": "尚無資料夾"
+  "noFolders": "尚無資料夾",
+  "customDates": "自訂日期⋯"
 }
