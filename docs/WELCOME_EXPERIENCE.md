@@ -1,6 +1,8 @@
 # Welcome experience: "What is VStudy Pro?"
 
-Status: design spec for a builder. Author: design sub-agent. Scope: one new in-app view plus the small hooks that open it. Nothing here is implemented yet.
+Status: design reference for the implemented Welcome view. Author: design sub-agent. Scope: one new in-app view plus the small hooks that open it. Implementation evidence and remaining acceptance gates are recorded in `docs/design-reviews/welcome.md`.
+
+Implementation decisions (lead-approved, 2026-11-03): the new motion/type tokens, including the 40 px hero, are approved. CLI commands are `claude auth login`, `codex login`, and `agy`. The read-only `welcome:sampleDocument` IPC reads only a locale-enumerated bundled Markdown file. Onboarding does **not** automatically open Welcome: its final step offers “Take a 30-second tour”; Home and Settings offer the existing entry copy. Visiting records `welcomeSeen`. Reveal-once sections, CSS marquee, the three-loop demo limit, the pause toggle, and no motion dependency remain the implementation direction. All zh-Hant and ja copy, including the added tour link, still requires native-speaker review. See [implementation review](design-reviews/welcome.md) for evidence and remaining acceptance gaps. The original storyboard and copy below are retained as the design reference; these decisions supersede conflicting placement and command instructions.
 
 A new user reads this page right after first-run onboarding. They can reopen it from Home and from Settings as **What is VStudy Pro?**. In under 30 seconds it should answer three questions: **what the app is for**, **what it does**, and **who it is for**. It uses the visual language that already exists (calm, monochrome ink on neutral surfaces, concentric radii 6/10/14/20, translucent card material with hairlines). It adds a small set of motion moments that a reader can ignore or turn off.
 

@@ -53,3 +53,15 @@ Single-file imports do not copy neighboring image files. Relative images in impo
 `node e2e/visual-regressions.mjs` additionally checks compact selection previews, Markdown replies, toolbar buttons, draft preservation on model changes, and restart behavior in the built app. This check requires a detected Claude CLI for its model picker option; it never sends a request to that CLI.
 
 Language preferences and reply language are in Settings. Interface languages: English, Traditional Chinese and Japanese; switching is live. See [the localization glossary](docs/i18n-glossary.md) and [verification guide](docs/i18n-verification.md). The Electron locale matrix is `node e2e/i18n.mjs` from `apps/desktop` after building.
+
+The optional Welcome tour opens from Home, Settings, or the last onboarding step. Its implementation review and acceptance gaps are in [the Welcome design review](docs/design-reviews/welcome.md). After a normal build, run from `apps/desktop`:
+
+```sh
+VSTUDY_ANIMATION_MATRIX=1 node e2e/welcome.mjs
+node e2e/welcome-details.mjs
+node e2e/welcome-supplement.mjs
+node e2e/welcome-pseudo.mjs
+node e2e/welcome-performance.mjs
+```
+
+These save screenshots, animation frames and measurements under `/tmp/vstudy-welcome/`. The pseudo-locale check starts and closes its own development renderer with the real Electron bridge. The performance check enforces p95 ≤16.7 ms, zero CLS and no long animation frames over 50 ms; it currently fails the p95 gate on the verification host. Native translation review and VoiceOver remain required.
