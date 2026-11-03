@@ -14,7 +14,7 @@ export function useReadingActivity(documentId: Document['id'] | null, visible: b
       const now = performance.now();
       const elapsed = Math.min(1, (now - previous) / 1000);
       previous = now;
-      if (document.visibilityState === 'visible' && document.hasFocus() && now - interacted <= 30_000) seconds += elapsed;
+      if (document.visibilityState === 'visible' && document.hasFocus() && !document.querySelector('dialog[open]') && now - interacted <= 30_000) seconds += elapsed;
       if (seconds >= 15) {
         const counted = Math.min(60, Math.floor(seconds)); seconds -= counted;
         void desktop.invoke('activity:heartbeat', { documentId, seconds: counted }).then(() => window.dispatchEvent(new Event('activity-updated'))).catch(() => {});

@@ -23,7 +23,7 @@ export function AnimatedText({ texts, variant = 'cross-fade' }: { texts: string[
     const timer = window.setTimeout(() => setIndex(i => i + 1), 6500);
     return () => window.clearTimeout(timer);
   }, [index, paused, reduced, texts.length]);
-  return <span className="animated-text" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+  return <span className="animated-text" tabIndex={texts.length > 1 ? 0 : undefined} onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
     <span className="motion-sr">{texts[0]}</span>
     <span aria-hidden="true" className="animated-stack">{texts.map((text, i) => <span key={text} className={i === index % texts.length ? `motion-current motion-${variant}` : 'motion-reserve'}>{text}</span>)}</span>
   </span>;

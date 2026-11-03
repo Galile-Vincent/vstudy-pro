@@ -1,7 +1,7 @@
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -35,6 +35,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
    }
   };
   for(let step=0;step<4;step++) {
+   if(step>0) assert.ok(await page.locator('#onboarding-title').evaluate(e=>e===window.document.activeElement),'step heading receives focus');
    await audit(`onboarding-${step}`); await capture(`onboarding-${step}`);
    if(step===1) { await page.locator('.onboarding input[type=password]').fill('test-local-key'); await page.getByRole('button',{name:copy.save_key,exact:true}).click(); await page.getByRole('status').filter({hasText:copy.key_saved}).waitFor(); }
    if(step===2) { await page.getByRole('button',{name:copy.sample,exact:true}).click(); await page.getByRole('status').filter({hasText:copy.sample_added}).waitFor(); }
@@ -43,7 +44,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   await page.locator('.onboarding').waitFor({state:'detached'});
   assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).onboardingCompleted,true);
   db=new DatabaseSync(join(directory,'vstudy.sqlite')); db.exec('PRAGMA busy_timeout=5000; DELETE FROM activity_events; DELETE FROM activity_days; UPDATE documents SET lastOpenedAt=NULL;');
-  const refresh=async()=>{await page.evaluate(()=>window.dispatchEvent(new window.Event('activity-updated')));const expected=await page.evaluate(()=>window.desktop.invoke('dashboard:get',{})); await page.waitForFunction(({tokens,streak})=>{const stats=window.document.querySelectorAll('.home-stat');return stats[0]?.textContent===tokens && stats[1]?.textContent.includes(streak);},{tokens:new Intl.NumberFormat(language).format(expected.month.inputTokens+expected.month.outputTokens),streak:new Intl.NumberFormat(language).format(expected.streak.current)});};
+  const refresh=async()=>{await page.evaluate(()=>window.dispatchEvent(new window.Event('activity-updated')));const expected=await page.evaluate(()=>window.desktop.invoke('dashboard:get',{})); await page.waitForFunction(({tokens,streak})=>{const stats=window.document.querySelectorAll('.home-stat');return stats[0]?.textContent===tokens && stats[1]?.textContent.includes(streak);},{tokens:new Intl.NumberFormat(language,{notation:expected.month.inputTokens+expected.month.outputTokens>=1e6?"compact":"standard",maximumFractionDigits:1}).format(expected.month.inputTokens+expected.month.outputTokens),streak:new Intl.NumberFormat(language).format(expected.streak.current)});};
   await refresh(); await audit('home-empty'); await capture('home-empty');
   // Metadata insert shapes follow the benchmark seeder at a three-document scale.
   const now=new Date().toISOString(),ids=[randomUUID(),randomUUID(),randomUUID()];
@@ -51,7 +52,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   const source=(await page.evaluate(()=>window.desktop.invoke('documents:list',{})))[0];
   for(const [i,id] of ids.entries()) db.prepare("INSERT INTO documents(id,title,sourceName,sourceHash,sourcePath,mime,status,markdownPath,createdAt,position,lastOpenedAt,pinned,pinnedAt) VALUES(?,?,?,?,?,'text/markdown','ready',?,?,?,?,1,?)").run(id,`Study ${i}`,'sample.md',id.replaceAll('-','').padEnd(64,'0'),source.sourcePath,source.markdownPath,now,i,now,new Date(Date.now()-i*1000).toISOString());
   await refresh(); await page.getByRole('button',{name:'Study 0',exact:true}).first().waitFor(); await audit('home-populated'); await capture('home-populated');
-  await page.getByRole('button',{name:home.move_up.replace('{{title}}','Study 1'),exact:true}).click();
+  await page.getByRole('button',{name:home.move_up.replace('{{title}}','Study 1'),exact:true}).press('Enter');
   await page.waitForFunction(()=>window.document.querySelectorAll('.home-card')[4]?.querySelector('.home-row')?.textContent==='Study 1');
   db.prepare('UPDATE documents SET title=? WHERE id=?').run('非常に長い名前・很長的文件名稱・A long research title '.repeat(5),ids[0]);
   await refresh(); await capture('home-long-names');
@@ -71,7 +72,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   assert.equal(await page.locator('.home-upload [role=alert]').count(),0);
   await page.getByRole('button',{name:'Study 0',exact:true}).first().click();
   await page.locator('.blank-chat').waitFor(); await capture('chat-document');
-  await page.getByTestId('document-markdown').locator('p').first().evaluate(element=>{const walker=window.document.createTreeWalker(element,window.NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode())){if(node.textContent.trim().length>25){const range=window.document.createRange();range.setStart(node,0);range.setEnd(node,25);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);window.document.dispatchEvent(new window.Event('selectionchange'));return;}}});
+  await page.getByTestId('document-markdown').locator('p').first().evaluate(element=>{const walker=window.document.createTreeWalker(element,window.NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode())){if(node.textContent.trim().length>3){const range=window.document.createRange();range.setStart(node,0);range.setEnd(node,Math.min(25,node.textContent.length));const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);window.document.dispatchEvent(new window.Event('selectionchange'));return;}}});
   await page.keyboard.press('Control+Shift+k');
   await page.locator('.aui-composer-input').waitFor();await page.locator('.blank-chat').waitFor();await capture('chat-selection');
   const settings=await page.evaluate(()=>window.desktop.invoke('settings:get',{}));
@@ -82,5 +83,6 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   assert.deepEqual(errors,[]);console.log(`${language}: onboarding, sample, Home states, reorder and axe passed`);
  } finally {db?.close();await app?.close();await rm(directory,{recursive:true,force:true});}
 }
-await mkdir('../../docs/evidence',{recursive:true});await writeFile('../../docs/evidence/home-screenshots.json',JSON.stringify({screenshots,checks},null,2)+'\n');
+const reviewRounds=[]; for(const round of ['round-1','round-2']) { const files=await readdir(`${evidence}/${round}`).catch(()=>[]); for(const file of files.filter(f=>f.endsWith('.png')))reviewRounds.push({round,path:`${evidence}/${round}/${file}`}); }
+await mkdir('../../docs/evidence',{recursive:true});await writeFile('../../docs/evidence/home-screenshots.json',JSON.stringify({screenshots,checks,reviewRounds},null,2)+'\n');
 console.log(`Evidence: ${evidence}; ${screenshots.length} screenshots`);
