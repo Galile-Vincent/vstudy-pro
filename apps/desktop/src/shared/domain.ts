@@ -133,6 +133,7 @@ export const toolCallSchema = z.object({
 export type ToolCall = z.infer<typeof toolCallSchema>;
 export const messagePartSchema = z
   .object({ type: z.literal("text"), text: z.string(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .extend({ contextExcluded: z.boolean().optional() })
   .strict();
 export const messageSchema = z
   .object({

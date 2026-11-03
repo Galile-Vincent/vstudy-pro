@@ -141,3 +141,9 @@ it("migrates existing documents with MarkItDown as their default parser", () => 
   const migrated = openStore(path); stores.push(migrated);
   expect(migrated.documents.get(document.id)?.converter).toBe("markitdown");
 });
+it('excludes superseded responses from context without relabelling them as stopped',()=>{
+ const {store,document,conversation,message}=fixture();store.documents.insert(document);store.conversations.insert(conversation);
+ const answer={...message,role:'assistant' as const,parts:[{type:'text' as const,text:'Finished answer',status:'complete' as const}]};
+ store.messages.insert(answer);store.messages.excludeFromContext([answer.id]);
+ expect(store.messages.list(conversation.id)[0]?.parts).toEqual([{type:'text',text:'Finished answer',status:'complete',contextExcluded:true}]);
+});

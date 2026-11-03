@@ -193,7 +193,7 @@ export function openStore(path: string) {
     messages: {
       excludeFromContext(ids: Message['id'][]) {
         const update = db.prepare("UPDATE messages SET parts=? WHERE id=?");
-        for (const id of ids) { const row = db.prepare("SELECT * FROM messages WHERE id=?").get(id); if (row) { const m = messageRow.parse(row); update.run(JSON.stringify(m.parts.map(p => ({ ...p, status: 'aborted' }))), id); } }
+        for (const id of ids) { const row = db.prepare("SELECT * FROM messages WHERE id=?").get(id); if (row) { const m = messageRow.parse(row); update.run(JSON.stringify(m.parts.map(p => ({ ...p, contextExcluded: true }))), id); } }
       },
       insert(input: Message): Message {
         const m = messageSchema.parse(input);
