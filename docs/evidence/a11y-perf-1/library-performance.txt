@@ -1,0 +1,30 @@
+metadataPaintMs 32.90000009536743
+metadataPaintMs 6.199999928474426
+metadataPaintMs 20.799999952316284
+metadataPaintMs 98
+metadataPaintMs 15.800000071525574
+metadataPaintMs 9
+metadataPaintMs 14.600000023841858
+metadataPaintMs 26.699999928474426
+metadataPaintMs 18.899999976158142
+metadataPaintMs 15
+{
+  frameP50: 16.699999999999818,
+  frameP95: 17.800000000000182,
+  frameMax: 18.699999999999818,
+  documents: 5000,
+  pages: 100,
+  maxRendered: 14,
+  scrollDurationMs: 6338.341542,
+  twoFrameP50: 30.5,
+  twoFrameP95: 32.299999952316284,
+  twoFrameMax: 32.5,
+  gridFrameP50: 16.700000047683716,
+  gridFrameP95: 18.299999952316284,
+  gridFrameMax: 19.899999976158142,
+  gridMounted: 27,
+  metadataPaintSamples: 10,
+  metadataPaintTimeouts: 0,
+  metadataPaintP50: 18.899999976158142,
+  metadataPaintMax: 98
+}

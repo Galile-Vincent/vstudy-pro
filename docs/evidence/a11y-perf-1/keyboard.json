@@ -1,0 +1,38 @@
+[
+  {
+    "query": {
+      "view": "all"
+    },
+    "count": 4
+  },
+  {
+    "query": {
+      "view": "recent"
+    },
+    "count": 4
+  },
+  {
+    "query": {
+      "view": "pinned"
+    },
+    "count": 4
+  },
+  {
+    "query": {
+      "view": "unfiled"
+    },
+    "count": 2
+  },
+  {
+    "query": {
+      "text": "Keyboard"
+    },
+    "count": 4
+  },
+  {
+    "query": {
+      "folderId": "d339d682-abac-45c9-9093-3787b670d3c5"
+    },
+    "count": 2
+  }
+]

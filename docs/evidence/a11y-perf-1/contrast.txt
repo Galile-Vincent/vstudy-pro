@@ -1,0 +1,15 @@
+light ink/surface: 14.59 (minimum 4.5)
+light muted/surface: 6.54 (minimum 4.5)
+light line/surface: 3.23 (minimum 3)
+light focus/surface: 6.54 (minimum 3)
+dark ink/surface: 12.98 (minimum 4.5)
+dark muted/surface: 6.88 (minimum 4.5)
+dark line/surface: 4.34 (minimum 3)
+dark focus/surface: 6.88 (minimum 3)
+light syntax palette-12: 4.61
+light syntax palette-13: 4.73
+light syntax palette-14: 5.92
+dark syntax palette-27: 8.55
+dark syntax palette-28: 8.61
+dark syntax palette-29: 8.90
+dark syntax palette-14: 6.91

@@ -1,0 +1,86 @@
+[
+  {
+    "script": "assistant-elements.mjs",
+    "code": 1
+  },
+  {
+    "script": "chat-controls.mjs",
+    "code": 0
+  },
+  {
+    "script": "codex-chat.mjs",
+    "code": 0
+  },
+  {
+    "script": "composer-visual-qa.mjs",
+    "code": 1
+  },
+  {
+    "script": "conversion.mjs",
+    "code": 1
+  },
+  {
+    "script": "design1.mjs",
+    "code": 1
+  },
+  {
+    "script": "home-onboarding.mjs",
+    "code": 1
+  },
+  {
+    "script": "i18n.mjs",
+    "code": 0
+  },
+  {
+    "script": "packaged-smoke.mjs",
+    "code": 1
+  },
+  {
+    "script": "pdf-reader.mjs",
+    "timeout_seconds": 100
+  },
+  {
+    "script": "security-delete-data.mjs",
+    "code": 1
+  },
+  {
+    "script": "selection-chat.mjs",
+    "code": 1
+  },
+  {
+    "script": "visual-regressions.mjs",
+    "code": 1
+  },
+  {
+    "script": "welcome-axe.mjs",
+    "code": 0
+  },
+  {
+    "script": "welcome-details.mjs",
+    "code": 1
+  },
+  {
+    "script": "welcome-layout.mjs",
+    "code": 1
+  },
+  {
+    "script": "welcome-performance.mjs",
+    "code": 0
+  },
+  {
+    "script": "welcome-pseudo.mjs",
+    "code": 0
+  },
+  {
+    "script": "welcome-supplement.mjs",
+    "code": 1
+  },
+  {
+    "script": "welcome-trace.mjs",
+    "code": 0
+  },
+  {
+    "script": "welcome.mjs",
+    "code": 1
+  }
+]
