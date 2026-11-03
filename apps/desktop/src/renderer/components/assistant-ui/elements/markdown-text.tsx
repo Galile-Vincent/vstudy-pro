@@ -267,7 +267,7 @@ const defaultComponents = memoizeMarkdownComponents({
     />
   ),
   pre: ({ className, ...props }) => (
-    <pre
+    <pre tabIndex={0}
       className={cn(
         "aui-md-pre border-border/50 bg-muted/30 overflow-x-auto rounded-t-none rounded-b-xl border border-t-0 p-3.5 text-[13px] leading-relaxed",
         className,

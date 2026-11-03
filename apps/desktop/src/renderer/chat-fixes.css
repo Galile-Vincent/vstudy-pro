@@ -1,6 +1,6 @@
 /* Keep model controls outside the model list's scroll area. */
 .model-popover.model-popover { width: 560px; max-width: min(560px, var(--radix-popover-content-available-width)); overflow: hidden; }
-.model-popover.model-popover > [cmdk-root] { height: min(580px, var(--radix-popover-content-available-height)); min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.model-popover.model-popover > [cmdk-root] { height: calc(min(580px, var(--radix-popover-content-available-height)) - 2px); min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 .model-popover.model-popover .model-picker-body { flex: 1; min-height: 0; overflow: hidden; flex-direction: column; }
 .model-popover.model-popover [cmdk-list] { flex: 1 1 0; min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; }
 .model-popover.model-popover .model-traits { width: auto; flex: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border-left: 0; border-top: 1px solid var(--line); }
@@ -22,10 +22,21 @@
 .aui-thread-viewport { scrollbar-gutter: stable; }
 .aui-message-error-root button { margin-top: 8px; }
 .usage-meter > small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-[data-citation-highlight] { outline: 2px solid var(--accent); outline-offset: 4px; }
+[data-citation-highlight] { outline: 2px solid var(--focus); outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) { [data-citation-highlight] { animation: none !important; } }
 @media (max-height: 520px) {
   [data-radix-popper-content-wrapper]:has(> .model-popover) { position: fixed !important; inset: 12px !important; transform: none !important; width: auto !important; }
   .model-popover.model-popover { width: 100%; max-width: none; height: calc(100dvh - 24px); max-height: none; }
-  .model-popover.model-popover > [cmdk-root] { height: 100%; max-height: none; }
+  .model-popover.model-popover > [cmdk-root] { height: calc(100% - 2px); max-height: none; }
+}
+
+.aui-thread-followup-suggestions.aui-thread-followup-suggestions { display: block; }
+.aui-composer-action-start { flex: 1 1 auto; min-width: 0; }
+@container (max-width: 320px) {
+  .aui-composer-action-wrapper { flex-wrap: wrap; row-gap: 4px; }
+  .aui-composer-action-wrapper .aui-composer-action-start { flex-basis: 100%; }
+  .aui-composer-action-start .model-trigger { width: 100%; }
+  .aui-composer-action-wrapper > div:last-child { width: 100%; justify-content: space-between; }
+  .composer-usage .usage-full { display: inline; }
+  .composer-usage .usage-compact { display: none; }
 }

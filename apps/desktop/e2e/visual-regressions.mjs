@@ -53,7 +53,7 @@ try {
   await page.getByRole("combobox", { name: "Model", exact: true }).click();
   await page.getByRole("combobox", { name: "Search models" }).fill("haiku");
   await page.getByRole("option").filter({hasText:"Haiku 5.5"}).first().click();
-  await page.waitForFunction(() => window.document.querySelector('[aria-label="Conversations"]')?.textContent.includes("Haiku"));
+  await page.waitForFunction(() => window.document.querySelector('.model-trigger')?.textContent.includes("Haiku"));
   assert.equal(await input.inputValue(), "Preserved draft");
   await app.close();
   await launch();

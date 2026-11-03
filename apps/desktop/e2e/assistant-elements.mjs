@@ -28,7 +28,7 @@ try {
  await page.getByText('Reviewing the reported document sections.',{exact:true}).waitFor();
  for(const [width,height] of [[1200,800],[900,700],[720,480]])for(const scheme of ['light','dark']){await page.setViewportSize({width,height});await page.emulateMedia({colorScheme:scheme});await page.waitForTimeout(200);await page.locator('.document-presentation').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));await page.waitForTimeout(100);await page.screenshot({path:`${evidence}/${width}-${height}-${scheme}-elements.png`,animations:'disabled'});}
  await page.getByRole('button',{name:'Conversations',exact:true}).click();await page.getByRole('button',{name:'New Thread',exact:true}).click();await input.waitFor();
- await page.getByRole('button',{name:'Conversations',exact:true}).click();await page.getByRole('searchbox',{name:'Search threads'}).fill('Chat 1');await page.locator('[data-slot=aui_thread-list-item-trigger]').filter({hasText:'Chat 1'}).click();
+ await page.getByRole('button',{name:'Conversations',exact:true}).click();await page.getByRole('searchbox',{name:'Search threads'}).fill('test enriched');await page.locator('[data-slot=aui_thread-list-item-trigger]').filter({hasText:'test enriched'}).click();
  await page.locator('.document-presentation').waitFor();await page.screenshot({path:`${evidence}/720-480-dark-thread-restored.png`,animations:'disabled'});
  await page.reload();await page.locator('.document-presentation').waitFor();await page.getByRole('button',{name:'Go to E2E reading document',exact:true}).waitFor();
  const stored=await page.evaluate(id=>window.desktop.invoke('messages:list',{conversationId:id}),conversations[0].id);
@@ -41,5 +41,17 @@ try {
  await page.locator('[data-slot=aui_thread-viewport]').evaluate(el=>el.scrollTo({top:el.scrollHeight,behavior:'instant'}));await page.waitForTimeout(250);
  await page.screenshot({path:`${evidence}/720-480-dark-stopped.png`,animations:'disabled'});
  await page.reload();await page.getByRole('status').filter({hasText:'Stopped. Partial response'}).waitFor();
+ await page.getByRole('button',{name:'Conversations',exact:true}).click();
+ await page.getByRole('searchbox',{name:'Search threads'}).fill('test enriched');
+ const row=page.locator('[data-slot=aui_thread-list-item]').filter({hasText:'test enriched'}).first();
+ await row.getByRole('button',{name:'More options',exact:true}).click();
+ await page.getByRole('menuitem',{name:'Rename',exact:true}).click();
+ await page.getByRole('textbox',{name:'Rename thread',exact:true}).fill('Study notes');
+ await page.getByRole('textbox',{name:'Rename thread',exact:true}).press('Enter');
+ await page.getByRole('searchbox',{name:'Search threads'}).fill('Study notes');
+ await page.locator('[data-slot=aui_thread-list-item-trigger]').filter({hasText:'Study notes'}).waitFor();
+ await page.screenshot({path:'/tmp/vstudy-chatfix/renamed-thread.png',animations:'disabled'});
+ await page.reload();await page.getByRole('button',{name:'Conversations',exact:true}).click();
+ await page.locator('[data-slot=aui_thread-list-item-trigger]').filter({hasText:'Study notes'}).waitFor();
  assert.deepEqual(errors,[]);console.log(JSON.stringify({result:'PASS',emptyConversationReuse:true,reasoning:true,citations:true,presentation:true,threadList:true,reload:true,consoleErrors:errors}));
 } catch(error){if(app){const page=await app.firstWindow();console.log(await page.locator('body').innerText());await page.screenshot({path:`${evidence}/elements-failure.png`});}throw error;}finally{await app?.close();await rm(directory,{recursive:true,force:true});}

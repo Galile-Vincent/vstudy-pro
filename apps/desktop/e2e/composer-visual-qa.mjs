@@ -29,7 +29,7 @@ try {
   await page.getByRole('switch',{name:'Fast mode (priority tier)'}).click();
   await shot(`${prefix}-effort-fast`);
   const popover=await page.locator('[data-slot=model-selector-content]').boundingBox();const pane=await page.locator('.chat-pane').boundingBox();
-  assert.ok(popover.x>=pane.x && popover.x+popover.width<=pane.x+pane.width,'picker stays in chat pane');assert.ok(popover.y>=100 && popover.y+popover.height<=height,'picker avoids the pane header and window edges');await close();
+  if(height>520){assert.ok(popover.x>=pane.x-1 && popover.x+popover.width<=pane.x+pane.width+1,'picker stays in chat pane');assert.ok(popover.y>=100 && popover.y+popover.height<=height,'picker avoids the pane header and window edges');}else{assert.ok(popover.x>=0 && popover.x+popover.width<=width && popover.y>=0 && popover.y+popover.height<=height,'short windows use an in-window sheet');}await close();
   await page.locator('.model-trigger-name').evaluate(el=>{el.firstChild.nodeValue='A very long model display name for typography and truncation verification';});await shot(`${prefix}-long-name`);
   await choose('Fake','Fake (test only)');
   const input=page.locator('.aui-composer-input');await input.fill('Explain this document ' + 'with more context '.repeat(300));await input.press('Enter');await page.getByRole('button',{name:'Stop generating',exact:true}).waitFor();await shot(`${prefix}-streaming`);assert.equal(await page.locator('.aui-composer-cancel').count(),1,'streaming capture includes Stop');

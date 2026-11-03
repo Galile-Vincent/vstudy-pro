@@ -79,7 +79,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
         {effort && <span className="model-trigger-effort">· {effortLabel(String(values[effort.id] ?? effort.default))}</span>}
         {fast && <Zap size={12} aria-label={tr('common:fast_mode_on')} />}
       </ModelSelector.Trigger>
-      <ModelSelector.Content side="top" align="start" searchable filter={(value, search, keywords) => { const haystack = [value, ...(keywords ?? [])].join(" ").toLowerCase().replace(/[^a-z0-9]+/g," "); return search.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).every(token => haystack.includes(token) || haystack.replace(/ /g, "").includes(token)) ? 1 : 0; }} collisionBoundary={boundary} collisionPadding={12} className="model-popover" onKeyDown={e => {
+      <ModelSelector.Content aria-label={tr('common:choose_a_model')} side="top" align="start" searchable filter={(value, search, keywords) => { const haystack = [value, ...(keywords ?? [])].join(" ").toLowerCase().replace(/[^a-z0-9]+/g," "); return search.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).every(token => haystack.includes(token) || haystack.replace(/ /g, "").includes(token)) ? 1 : 0; }} collisionBoundary={boundary} collisionPadding={12} className="model-popover" onKeyDown={e => {
         if (e.key !== 'Tab') return;
         const nodes = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('input, button:not(:disabled), [tabindex="0"]')).filter(n => n.getAttribute('tabindex') !== '-1');
         const first = nodes[0], last = nodes.at(-1);

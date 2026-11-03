@@ -145,6 +145,7 @@ export function DocumentMarkdown({
                 : ""
           }
           components={{
+            input: ({ checked, ...props }) => <input {...props} checked={checked} aria-label={tr(checked ? 'chat:completed_task' : 'chat:incomplete_task')} />,
             a: ({ children, href }) => (
               <a
                 href={href}
