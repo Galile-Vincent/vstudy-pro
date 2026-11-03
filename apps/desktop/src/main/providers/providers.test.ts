@@ -201,3 +201,18 @@ it("returns availability while remote models are pending and caches arriving mod
   await Promise.resolve();
   expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([{ id: "refreshed", name: "Refreshed" }]);
 });
+for (const kind of ["claude", "codex"] as const) it(`drops buffered ${kind} output and kills a process that writes after SIGTERM`, async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "vstudy-stubborn-cli-"));
+  const controller = new AbortController();
+  const line = kind === "codex" ? { type: "item.completed", item: { type: "agent_message", text: "tick" } } : { type: "stream_event", event: { type: "content_block_delta", delta: { type: "text_delta", text: "tick" } } };
+  const script = `process.stdout.on('error', () => {}); process.on('SIGTERM', () => {}); setInterval(() => process.stdout.write(${JSON.stringify(JSON.stringify(line) + '\n')}), 10);`;
+  const events: unknown[] = [];
+  try {
+    await expect((async () => {
+      for await (const event of runCli(process.execPath, ["-e", script], "", cwd, kind, controller.signal)) {
+        events.push(event); controller.abort();
+      }
+    })()).rejects.toThrow();
+    expect(events).toEqual([{ type: "text-delta", text: "tick" }]);
+  } finally { await rm(cwd, { recursive: true, force: true }); }
+});
