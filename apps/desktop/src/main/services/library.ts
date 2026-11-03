@@ -21,7 +21,7 @@ export class LibraryService {
         db.exec('ROLLBACK TO library; RELEASE library');
         throw e;
     } }
-    folders() { return this.store.db.prepare('SELECT f.*,(SELECT count(*) FROM documents d WHERE d.folderId=f.id AND d.deletedAt IS NULL) AS count FROM folders f ORDER BY position,id').all().map(r => folderSchema.parse(r)); }
+    folders() { return this.store.db.prepare('SELECT f.*,(WITH RECURSIVE subtree(id) AS (SELECT f.id UNION ALL SELECT child.id FROM folders child JOIN subtree s ON child.parentId=s.id) SELECT count(*) FROM documents d WHERE d.folderId IN (SELECT id FROM subtree) AND d.deletedAt IS NULL) AS count FROM folders f ORDER BY position,id').all().map(r => folderSchema.parse(r)); }
     private folder(id: string) { const f = this.store.db.prepare('SELECT * FROM folders WHERE id=?').get(id); if (!f)
         throw new Error('Folder not found'); return folderSchema.parse(f); }
     private ancestors(id: string | null) { const result: string[] = []; while (id) {

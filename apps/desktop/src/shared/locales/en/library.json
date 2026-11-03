@@ -109,5 +109,18 @@
   "loaded_one": "{{formatted}} document loaded",
   "loaded_other": "{{formatted}} documents loaded",
   "deleted_one": "{{formatted}} document deleted · Undo within 30 seconds",
-  "deleted_other": "{{formatted}} documents deleted · Undo within 30 seconds"
+  "deleted_other": "{{formatted}} documents deleted · Undo within 30 seconds",
+  "searchHint": "Check the spelling or clear your filters.",
+  "filterHint": "Try removing a filter to see more documents.",
+  "documentCount": "{{formatted}} documents",
+  "past7": "Past 7 days",
+  "past30": "Past 30 days",
+  "pastYear": "Past year",
+  "sizeSmall": "Under 1 MB",
+  "sizeMedium": "1–10 MB",
+  "sizeLarge": "Over 10 MB",
+  "documentCount_one": "{{formatted}} document",
+  "documentCount_other": "{{formatted}} documents",
+  "pages": "{{formatted}} pages",
+  "noFolders": "No folders yet"
 }

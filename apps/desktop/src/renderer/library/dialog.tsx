@@ -3,8 +3,9 @@ import { tr } from "../../shared/i18n";
 export function LibraryDialog({
   title,
   children,
-  onClose,
+  onClose, menu = false, anchor,
 }: {
+  menu?: boolean; anchor?: HTMLElement | null;
   title: string;
   children: ReactNode;
   onClose: () => void;
@@ -12,24 +13,48 @@ export function LibraryDialog({
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const previous = document.activeElement;
-    ref.current?.showModal();
+    if (menu) {
+      const node = ref.current!;
+      node.showPopover();
+      const rect = anchor?.getBoundingClientRect();
+      node.style.left = `${Math.max(8, Math.min(window.innerWidth - 240, rect?.right ?? 240) - 224)}px`;
+      node.style.top = `${Math.min(window.innerHeight - node.offsetHeight - 8, rect?.bottom ?? 160)}px`;
+      const buttons = node.querySelectorAll('button');
+      buttons.forEach(button => button.setAttribute('role', 'menuitem'));
+      buttons[0]?.focus();
+    } else ref.current?.showModal();
+    const outside = (event: PointerEvent) => { if (menu && event.target instanceof Node && !ref.current?.contains(event.target) && !anchor?.contains(event.target)) onClose(); };
+    document.addEventListener('pointerdown',outside);
     return () => {
-      if (previous instanceof HTMLElement) previous.focus();
+      document.removeEventListener('pointerdown',outside);
+      if (menu && anchor?.isConnected) anchor.focus(); else if (previous instanceof HTMLElement) previous.focus();
     };
   }, []);
   return (
     <dialog
       ref={ref}
-      className="settings-dialog library-dialog"
+      popover={menu ? 'manual' : undefined}
+      role={menu ? 'menu' : undefined}
+      onToggle={e => { if (menu && e.newState === 'closed') onClose(); }}
+      onKeyDown={e => {
+        if (!menu) return;
+        const buttons = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+        const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
+        if (['ArrowDown','ArrowUp','Home','End'].includes(e.key)) {
+          e.preventDefault(); buttons[e.key === 'Home' ? 0 : e.key === 'End' ? buttons.length - 1 : (i + (e.key === 'ArrowUp' ? -1 : 1) + buttons.length) % buttons.length]?.focus();
+        }
+        if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+      }}
+      className={`settings-dialog library-dialog ${menu ? 'anchored-menu' : ''}`}
       aria-label={title}
       onCancel={onClose}
     >
-      <div className="dialog-title">
+      {!menu && <div className="dialog-title">
         <h2>{title}</h2>
         <button aria-label={tr("library:close")} onClick={onClose}>
           ×
         </button>
-      </div>
+      </div>}
       {children}
     </dialog>
   );

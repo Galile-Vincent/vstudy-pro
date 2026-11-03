@@ -109,5 +109,18 @@
   "loaded_one": "已載入 {{formatted}} 份文件",
   "loaded_other": "已載入 {{formatted}} 份文件",
   "deleted_one": "已刪除 {{formatted}} 份文件，30 秒內可復原",
-  "deleted_other": "已刪除 {{formatted}} 份文件，30 秒內可復原"
+  "deleted_other": "已刪除 {{formatted}} 份文件，30 秒內可復原",
+  "searchHint": "請檢查關鍵字，或清除篩選條件。",
+  "filterHint": "試著移除篩選條件，查看更多文件。",
+  "documentCount": "{{formatted}} 份文件",
+  "past7": "過去 7 天",
+  "past30": "過去 30 天",
+  "pastYear": "過去一年",
+  "sizeSmall": "小於 1 MB",
+  "sizeMedium": "1–10 MB",
+  "sizeLarge": "大於 10 MB",
+  "documentCount_one": "{{formatted}} 份文件",
+  "documentCount_other": "{{formatted}} 份文件",
+  "pages": "{{formatted}} 頁",
+  "noFolders": "尚無資料夾"
 }

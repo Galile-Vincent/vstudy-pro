@@ -56,3 +56,11 @@ it('orders Pinned by pinnedAt and Recent by lastOpenedAt with stable cursors',()
 it('hydrates a metadata page and its tags in two queries regardless of page size',()=>{const {s,lib,doc}=fixture();for(let i=0;i<99;i++)s.documents.insert({...doc,id:documentSchema.parse({...doc,id:randomUUID()}).id,sourceHash:randomUUID().replaceAll('-','').repeat(2)});const spy=vi.spyOn(s.db,'prepare');try{const page=lib.list(libraryQuerySchema.parse({limit:100}));expect(page.items).toHaveLength(100);expect(spy).toHaveBeenCalledTimes(2);}finally{spy.mockRestore();}});
 
 it('returns highlighted snippets on every filtered keyset page',()=>{const {s,lib,doc}=fixture();for(let i=0;i<3;i++){const next={...doc,id:documentSchema.parse({...doc,id:randomUUID()}).id,sourceHash:randomUUID().replaceAll('-','').repeat(2)};s.documents.insert(next);lib.search.update(next.id,'資料 通信 science learning');}let cursor:unknown;let count=0;do{const page=lib.list(libraryQuerySchema.parse({text:'science',limit:1,...(cursor?{cursor}:{})}));expect(page.items[0]?.snippet).toContain('[mark]science[/mark]');count+=page.items.length;cursor=page.nextCursor;}while(cursor);expect(count).toBe(4);});
+
+it('counts descendant documents and excludes deleted documents throughout the tree', () => {
+ const {lib,doc}=fixture(); const parent=lib.createFolder('Parent',null),child=lib.createFolder('Child',parent.id),leaf=lib.createFolder('Leaf',child.id);
+ lib.move([doc.id],leaf.id);
+ for(const id of [parent.id,child.id,leaf.id]) expect(lib.folders().find(f=>f.id===id)?.count).toBe(1);
+ lib.softDelete(doc.id); expect(lib.folders().find(f=>f.id===parent.id)?.count).toBe(0);
+ lib.restore(doc.id); lib.move([doc.id],null); expect(lib.folders().find(f=>f.id===parent.id)?.count).toBe(0);
+});

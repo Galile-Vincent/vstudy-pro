@@ -1,3 +1,4 @@
+import { Select } from "../components/select";
 import { useEffect, useState, useRef, type DragEvent } from "react";
 import {
   Folder as FolderIcon,
@@ -6,7 +7,7 @@ import {
   Plus,
   MoreHorizontal,
   BookOpen,
-  Star,
+  Star, Files, Clock, Inbox, AlertTriangle, ListFilter,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
@@ -141,17 +142,18 @@ export function LibrarySidebar() {
             }
             onClick={() => go({ view }, tr(`library:${view}`))}
           >
-            {tr(`library:${view}`)}
+            {view === "all" ? <Files/> : view === "recent" ? <Clock/> : view === "pinned" ? <Pin/> : view === "unfiled" ? <Inbox/> : <AlertTriangle/>}{tr(`library:${view}`)}
             {counts[view] !== undefined && (
               <small>{format.number(counts[view] ?? 0)}</small>
             )}
           </button>
         ))}
       </nav>
-      <h2 className="sidebar-label">{tr("library:pinnedFolders")}</h2>
+      {!!pins.length && <h2 className="sidebar-label">{tr("library:pinnedFolders")}</h2>}
       {pins.map((f, index) => (
         <div
           className="folder-pin"
+          onKeyDown={e => { if (e.altKey && ['ArrowUp','ArrowDown'].includes(e.key)) { e.preventDefault(); reorderPin(index,index+(e.key==='ArrowUp'?-1:1)); } }}
           key={f.id}
           draggable
           onDragStart={(e) =>
@@ -203,7 +205,8 @@ export function LibrarySidebar() {
         </button>
       </div>
       <div role="tree" aria-label={tr("library:folders")}>
-        {visible.map(({ folder: f, level }, index) => (
+        {!folders.length && <p className="sidebar-empty">{tr("library:noFolders")}</p>}
+      {visible.map(({ folder: f, level }, index) => (
           <div
             key={f.id}
             role="treeitem"
@@ -340,10 +343,10 @@ export function LibrarySidebar() {
           </div>
         ))}
       </div>
-      <h2 className="sidebar-label">{tr("library:savedFilters")}</h2>
+      {!!saved.length && <h2 className="sidebar-label">{tr("library:savedFilters")}</h2>}
       {saved.map((s) => (
         <button key={s.id} onClick={() => go(JSON.parse(s.queryJson), s.name)}>
-          {s.name}
+          <ListFilter/>{s.name}
         </button>
       ))}
       {error && (
@@ -408,7 +411,7 @@ export function LibrarySidebar() {
           </button>
           <label>
             {tr("library:move")}
-            <select
+            <Select
               value={menu.parentId ?? ""}
               onChange={(e) =>
                 void run(() =>
@@ -428,11 +431,11 @@ export function LibrarySidebar() {
                     {f.name}
                   </option>
                 ))}
-            </select>
+            </Select>
           </label>
           <label>
             {tr("library:icon")}
-            <select
+            <Select
               aria-label={tr("library:icon")}
               value={menu.icon ?? ""}
               onChange={(e) => {
@@ -451,11 +454,11 @@ export function LibrarySidebar() {
                   {tr(`library:icon_${icon || "folder"}`)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label>
             {tr("library:color")}
-            <select
+            <Select
               value={menu.color ?? ""}
               onChange={(e) => {
                 setMenu({ ...menu, color: e.target.value || null });
@@ -472,7 +475,7 @@ export function LibrarySidebar() {
                   {tr(`library:color_${c || "none"}`)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           {(["parent", "unfiled"] as const).map((destination) => (
             <button
