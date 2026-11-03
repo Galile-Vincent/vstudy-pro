@@ -102,8 +102,10 @@ export function ProviderRow({
         .then((value) => setHasKey(value.hasKey))
         .catch(() => setError(tr('common:could_not_check_key_status')));
   }, [provider.config.id, provider.config.kind]);
-  const perform = async (action: () => Promise<unknown>) => {
+  const [waitingKeychain,setWaitingKeychain] = useState(false);
+  const perform = async (action: () => Promise<unknown>, waitForKeychain = false) => {
     setBusy(true);
+    setWaitingKeychain(waitForKeychain);
     setError("");
     try {
       await action();
@@ -111,6 +113,7 @@ export function ProviderRow({
     } catch (e) {
       setError(errorText(e));
     } finally {
+      setWaitingKeychain(false);
       setBusy(false);
     }
   };
@@ -120,7 +123,9 @@ export function ProviderRow({
         <strong>{providerName[provider.config.id]}</strong>
         <span className="muted">
           {provider.config.kind === "cli"
-            ? provider.availability.available
+            ? !provider.config.enabled
+              ? tr(provider.resolvedPath ? "settings:found" : "settings:not_found")
+              : provider.availability.available
               ? tr('common:detected')
               : tr('errors:provider_unavailable')
             : hasKey
@@ -146,7 +151,7 @@ export function ProviderRow({
                 });
                 setKey("");
                 setHasKey(true);
-              });
+              }, true);
             }}
           >
             <input
@@ -157,9 +162,9 @@ export function ProviderRow({
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
-            <button disabled={busy || !key.trim()}>{tr('common:save_key')}</button>
+            <button disabled={busy || !key.trim()}>{tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}</button>
             <button type="button" disabled={busy || !key.trim()} onClick={() => void perform(async () => { await desktop.invoke('secrets:session',{providerId:provider.config.id,key}); setKey(''); })}>{tr('settings:session_key')}</button>
-            {hasKey && <button type="button" disabled={busy} onClick={() => void perform(() => desktop.invoke('secrets:unlock',{providerId:provider.config.id}))}>{tr('settings:unlock')}</button>}
+            {hasKey && <button type="button" disabled={busy} onClick={() => void perform(() => desktop.invoke('secrets:unlock',{providerId:provider.config.id}), true)}>{tr(error && !key.trim() ? 'settings:retry' : 'settings:unlock')}</button>}
             {hasKey && (
               <button
                 type="button"
@@ -202,7 +207,7 @@ export function ProviderRow({
           )}
         </>
       )}
-      {busy && provider.config.kind !== "cli" && <p role="status">{tr("settings:waiting")}</p>}
+      {waitingKeychain && <p role="status">{tr("settings:waiting")}</p>}
       {error && <p role="alert">{error}</p>}
     </section>
   );

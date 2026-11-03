@@ -13,7 +13,7 @@
   "retry": "Retry",
   "offline": "Offline mode",
   "delete": "Delete all data",
-  "delete_copy": "Permanently remove documents, conversations, saved keys, caches and the converter environment, then quit. Original source files outside the library are kept.",
+  "delete_copy": "Permanently remove this app’s documents, conversations, saved keys, app caches and converter environment, then quit. Original files outside the library, CLI logins and shared Python download caches are kept.",
   "confirm": "Type DELETE to confirm",
   "waiting": "Waiting for Keychain access…",
   "keychain_failed": "Couldn’t access the Keychain. Retry or use without saving keys.",
@@ -39,5 +39,6 @@
   "event_provider_request": "Provider request",
   "event_cli_request": "CLI request (may include CLI telemetry)",
   "event_codex_quota": "Codex quota check",
-  "event_converter_install": "Converter dependency installation"
+  "event_converter_install": "Converter dependency installation",
+  "found": "Found on disk — login not checked"
 }

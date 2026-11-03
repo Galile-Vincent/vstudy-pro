@@ -13,7 +13,7 @@
   "retry": "重試",
   "offline": "離線模式",
   "delete": "刪除所有資料",
-  "delete_copy": "永久移除文件、對話、儲存的金鑰、快取及轉換器環境，然後結束程式。資料庫外的原始檔案會保留。",
+  "delete_copy": "永久移除本應用程式的文件、對話、儲存的金鑰、應用程式快取及轉換器環境，然後結束程式。資料庫外的原始檔案、CLI 登入與共用的 Python 下載快取會保留。",
   "confirm": "輸入 DELETE 以確認",
   "waiting": "正在等待鑰匙圈存取…",
   "keychain_failed": "無法存取鑰匙圈。請重試，或使用但不儲存金鑰。",
@@ -39,5 +39,6 @@
   "event_provider_request": "供應商請求",
   "event_cli_request": "CLI 請求（可能包含 CLI 遙測）",
   "event_codex_quota": "Codex 額度查詢",
-  "event_converter_install": "安裝轉換器相依套件"
+  "event_converter_install": "安裝轉換器相依套件",
+  "found": "已找到執行檔 — 尚未檢查登入"
 }
