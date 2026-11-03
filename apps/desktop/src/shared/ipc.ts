@@ -1,3 +1,4 @@
+import { libraryContract } from "./library";
 import { z } from "zod";
 import {
   modelSchema, modelOptionsSchema,
@@ -22,6 +23,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  ...libraryContract,
   "usage:dashboard": { request: z.object({ period: usagePeriodSchema }).strict(), response: usageDashboardSchema },
   "usage:estimate": { request: z.object({ conversationId: conversationIdSchema, userMessage: z.string().max(2_000_000) }).strict(), response: usageSchema },
   "usage:summary": { request: z.object({ period: z.enum(['day', 'month', 'last30days']) }).strict(), response: usageSummarySchema },
