@@ -189,7 +189,7 @@ export class ChatService {
         outputTokens: Math.max(entry.usage?.outputTokens ?? 0, Math.ceil(entry.text.length / 4)),
         costUsd: undefined, costSource: 'estimated',
       };
-      if (entry.usage && !entry.text && !reported && !entry.usage.inputTokens && !entry.usage.outputTokens && !entry.usage.cacheReadTokens && !entry.usage.cacheWriteTokens && !entry.usage.reasoningTokens) entry.usage = undefined;
+      if (entry.usage && !entry.text && !reported && !entry.usage.inputTokens && !entry.usage.outputTokens && !entry.usage.cacheReadTokens && !entry.usage.cacheWriteTokens && !entry.usage.reasoningTokens) delete entry.usage;
       if (entry.usage) {
         entry.usage = priceUsage(modelId, entry.usage, this.store.settings.get().priceOverrides);
         for (const model of reported && entry.usageModels?.length ? entry.usageModels : [{ modelId, usage: entry.usage }]) this.store.usage.record({ ...priceUsage(model.modelId, model.usage, this.store.settings.get().priceOverrides), aborted: entry.controller.signal.aborted, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: canonicalModelId(model.modelId), kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
