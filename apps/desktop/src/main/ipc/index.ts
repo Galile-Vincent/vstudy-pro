@@ -1,3 +1,4 @@
+import { disposeDiscovery } from '../providers/models';
 import { networkActivity, recordEgress } from '../services/egress';
 import { ExecutablePins, setExecutablePins } from '../providers/executable-pins';
 import { tr, updateApplicationMenu } from "../i18n";
@@ -78,5 +79,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { registrar.dispose(); disposeLibrary(); await chat.dispose(); await disposeDocuments(); };
+  return async () => { registrar.dispose(); disposeLibrary(); await chat.dispose(); await disposeDiscovery(); await disposeDocuments(); };
 }

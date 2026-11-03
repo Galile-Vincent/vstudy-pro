@@ -2,7 +2,7 @@ import { recordEgress } from '../services/egress';
 import claudeFallback from './fixtures/claude-models.json';
 import codexFallback from './fixtures/codex-models.json';
 import patterns from './fixtures/claude-t3-patterns.json';
-import { spawn } from 'node:child_process';
+import { ProcessScope } from '../../../resources/converter/process-scope';
 import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -33,24 +33,37 @@ export function claudeModels(input: unknown): Model[] {
 
   }).filter((m, i, all) => all.findIndex(x => x.id === m.id) === i);
 }
-async function capture(binary: string, args: string[], input = '', initialize = false): Promise<string> {
+const discovery = new Set<ProcessScope>();
+let discoveryStopped = false;
+export async function disposeDiscovery(): Promise<void> {
+  discoveryStopped = true;
+  await Promise.all([...discovery].map(scope => scope.dispose()));
+}
+export async function capture(binary: string, args: string[], input = '', initialize = false, timeoutMs = 8000): Promise<string> {
+  if (discoveryStopped) throw new Error('Model discovery closed');
+  const scope = new ProcessScope();
+  discovery.add(scope);
   const cwd = await mkdtemp(join(tmpdir(), 'vstudy-models-'));
   try { return await new Promise<string>((resolve, reject) => {
     recordEgress('cli_discovery', 'CLI managed service endpoints');
-    const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
+    const child = scope.spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '';
-    const timer = setTimeout(() => { child.kill(); reject(new Error('Model discovery timed out')); }, 8000);
-    child.on('error', reject); child.stderr.resume(); child.stdin.on('error', () => {});
-    child.stdout.on('data', data => {
+    const timer = setTimeout(() => reject(new Error('Model discovery timed out')), timeoutMs);
+    child.on('error', reject); child.stderr!.resume(); child.stdin!.on('error', () => {});
+    child.stdout!.on('data', data => {
       out += String(data);
-      if (out.length > 4_000_000) { child.kill(); reject(new Error('Catalog too large')); }
+      if (out.length > 4_000_000) reject(new Error('Catalog too large'));
       if (initialize && out.includes('"control_response"')) {
-        try { const line = out.split('\n').find(l => l.includes('"control_response"')); const models = JSON.parse(line!).response.response.models; resolve(JSON.stringify(models)); child.kill(); } catch { /* Wait for the complete JSON line. */ }
+        try { const line = out.split('\n').find(l => l.includes('"control_response"')); const models = JSON.parse(line!).response.response.models; resolve(JSON.stringify(models)); } catch { /* Wait for the complete JSON line. */ }
       }
     });
     child.once('close', code => { clearTimeout(timer); if (code === 0) resolve(out); else reject(new Error('Model discovery failed')); });
-    child.stdin.end(input);
-  }); } finally { await rm(cwd, {recursive:true,force:true}); }
+    child.stdin!.end(input);
+  }); } finally {
+    await scope.dispose();
+    discovery.delete(scope);
+    await rm(cwd, {recursive:true,force:true});
+  }
 }
 const catalogs = new Map<string, { expires: number; result: Promise<Model[]> }>();
 export function discoverModels(kind: 'claude' | 'codex'): Promise<Model[]> {
