@@ -83,3 +83,16 @@ it('sorts family versions descending with a stable name tie break', async () => 
  const {compareModels}=await import('./model-picker');
  expect(['GPT-6 Sol','GPT-6.1 Sol','GPT-5 Sol','Gemini 3'].map(name=>({name})).sort(compareModels).map(m=>m.name)).toEqual(['Gemini 3','GPT-6.1 Sol','GPT-6 Sol','GPT-5 Sol']);
 });
+
+it.each([['en','Thinking','Enabled','Disabled'],['zh-Hant','思考','啟用','停用'],['ja','思考','有効','無効']])('localizes app-owned thinking controls in %s', async (locale,label,on,off) => {
+ const {i18n}=await import('../shared/i18n');await i18n.changeLanguage(locale);
+ invoke.mockResolvedValue(defaultSettings);
+ const catalog:Providers=[{config:{kind:'cli',id:'claude-cli',enabled:true},availability:{available:true},models:claudeModels([{value:'test',displayName:'Test',supportsThinkingOff:true}])}];
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ try {
+  await act(async()=>root.render(<ModelPicker providers={catalog} model="claude-cli/test" onChange={()=>{}} onModel={()=>{}} onSettings={()=>{}}/>));
+  await act(async()=> (host.querySelector('.model-trigger') as HTMLButtonElement).click());
+  expect(document.querySelector('[role=radiogroup]')?.getAttribute('aria-label')).toBe(label);
+  expect(Array.from(document.querySelectorAll('[role=radio]')).map(e=>e.textContent)).toEqual([on,off]);
+ } finally {await act(async()=>root.unmount());host.remove();await i18n.changeLanguage('en');}
+});
