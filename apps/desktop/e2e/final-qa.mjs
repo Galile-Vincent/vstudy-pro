@@ -15,6 +15,11 @@ try {
   await page.getByRole('button',{name:'Settings',exact:true}).first().click();
   await page.getByRole('dialog',{name:'Settings',exact:true}).waitFor();
   await page.getByRole('button',{name:'Close settings',exact:true}).click();
+  if(route.view==='library') {
+   await page.getByRole('textbox',{name:'Search your documents',exact:true}).fill('信');
+   await page.getByRole('status').filter({hasText:'Refine your query: use at least two distinct characters.'}).waitFor();
+   assert.equal(await page.getByRole('heading',{name:"Couldn't load your library",exact:true}).count(),0);
+  }
  }
  const menu=await app.evaluate(({Menu,BrowserWindow})=>{
   const item=Menu.getApplicationMenu().items[0].submenu.items.find(i=>i.accelerator==='CommandOrControl+,');

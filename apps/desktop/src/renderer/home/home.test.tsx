@@ -33,3 +33,9 @@ it('names the document in recent activity', async () => {
  const markup=renderToStaticMarkup(<Home initialData={{...empty,recentActivity:[{id:'event',documentId:'00000000-0000-4000-8000-000000000001' as Dashboard['recentActivity'][number]['documentId'],kind:'chat',createdAt:'2026-11-04T00:00:00Z',documentTitle:'Networking notes'}]}} navigate={() => {}} onUsage={() => {}}/>);
  expect(markup).toContain('Conversation explored<strong>Networking notes</strong>');
 });
+
+it('uses singular English study and unpriced-call labels', async () => {
+ await i18n.changeLanguage('en');
+ expect(renderToStaticMarkup(<Streak streak={{current:1,best:1,today:true,days:[]}}/>)).toContain('>1 day</strong>');
+ expect(i18n.t('usage:unknown_calls',{count:1})).toBe('1 call unpriced; total is a lower bound.');
+});
