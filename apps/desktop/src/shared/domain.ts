@@ -119,8 +119,19 @@ export const usageDashboardSchema = z.object({
   days: z.array(z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), inputTokens: z.number().nonnegative(), outputTokens: z.number().nonnegative() })),
 });
 export type UsageSummary = z.infer<typeof usageSummarySchema>;
+export const documentCitationSchema = z.object({
+  id: z.string().regex(/^s\d+$/), documentId: documentIdSchema,
+  title: z.string().max(300), offset: z.number().int().nonnegative(),
+  page: z.number().int().positive().optional(), quote: z.string().max(300),
+}).strict();
+export type DocumentCitation = z.infer<typeof documentCitationSchema>;
+export const toolCallSchema = z.object({
+  toolCallId: z.string().min(1).max(200), toolName: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/),
+  args: z.record(z.unknown()), result: z.unknown().optional(), isError: z.boolean().optional(),
+}).strict();
+export type ToolCall = z.infer<typeof toolCallSchema>;
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .object({ type: z.literal("text"), text: z.string(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .strict();
 export const messageSchema = z
   .object({
@@ -180,6 +191,9 @@ export const chatRequestSchema = z
   );
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 export const chatEventSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("reasoning-delta"), text: z.string().max(2_000_000) }).strict(),
+  z.object({ type: z.literal("citations"), citations: z.array(documentCitationSchema).max(128) }).strict(),
+  z.object({ type: z.literal("tool-call"), call: toolCallSchema }).strict(),
   z.object({ type: z.literal("usage"), usage: usageSchema }).strict(),
   z.object({ type: z.literal("text-delta"), text: z.string(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() }).strict(),
   z.object({ type: z.literal("done") }).strict(),
@@ -189,6 +203,7 @@ export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
   .object({
     chatSide: z.enum(["left", "right"]),
+    enableGenerativeUI: z.boolean().default(false),
     monthlyBudgetUsd: z.number().finite().positive().optional(),
     monthlyTokenBudget: z.number().int().positive().optional(),
     warnAtPercent: z.number().min(1).max(100).default(80),
@@ -197,12 +212,14 @@ export const settingsSchema = z
     lastModelId: z.string().nullable(),
     favoriteModels: z.array(z.string()).optional(),
     recentModels: z.array(z.string()).optional(),
+    modelDisplayNames: z.record(z.string()).default({}),
     lastDocumentId: documentIdSchema.nullable().default(null),
   })
   .strict();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
   chatSide: "left",
+  enableGenerativeUI: false, modelDisplayNames: {},
   warnAtPercent: 80, priceOverrides: {},
   lastProviderId: null,
   lastModelId: null,
