@@ -73,7 +73,7 @@ export const selectionSchema = z
 export type Selection = z.infer<typeof selectionSchema>;
 export const modelOptionsSchema = z.record(z.string().min(1), z.union([z.string(), z.boolean()]));
 export const modelSchema = z.object({
-  id: z.string(), name: z.string(),
+  id: z.string(), name: z.string(), resolvedId: z.string().optional(),
   options: z.array(z.object({ id: z.string(), label: z.string(), values: z.array(z.object({ id: z.string(), label: z.string() })), default: z.string() })).optional(),
 });
 export type Model = z.infer<typeof modelSchema>;

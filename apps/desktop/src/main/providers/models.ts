@@ -18,14 +18,20 @@ export function codexModels(input: unknown): Model[] {
 }
 const claudeCatalog = z.array(z.object({ value: z.string(), resolvedModel: z.string().optional(), displayName: z.string(), supportedEffortLevels: z.array(z.string()).optional(), supportsFastMode: z.boolean().optional(), supportsThinkingOff: z.boolean().optional() }));
 export function claudeModels(input: unknown): Model[] {
-  return claudeCatalog.parse(input).flatMap(m => {
+  const catalog = claudeCatalog.parse(input);
+  return catalog.flatMap(m => {
     const options = [
       ...(m.supportedEffortLevels?.length ? [option('effort', 'Effort', [...m.supportedEffortLevels, ...((patterns as Record<string,string[]>)[m.resolvedModel ?? m.value] ?? [])], m.supportedEffortLevels.includes('high') ? 'high' : m.supportedEffortLevels[0])] : []),
       ...(m.supportsFastMode ? [option('fastMode', 'Fast mode', ['false', 'true'], 'false')] : []),
       ...(m.supportsThinkingOff ? [option('thinking', 'Thinking', ['enabled', 'disabled'], 'enabled')] : []),
     ];
     for (const o of options) for (const v of o.values) if (v.id === 'ultrathink' || v.id === 'ultracode') v.label += ' (T3 pattern)';
-    return [...new Set([m.value, m.resolvedModel ?? m.value])].map(id => ({ id, name: id === m.value ? m.displayName : id, options }));
+    const resolvedName = catalog.find(x => x.value !== 'default' && x.resolvedModel === m.resolvedModel)?.displayName ?? m.resolvedModel ?? 'recommended';
+    return [...new Set([m.value, m.resolvedModel ?? m.value])].map(id => ({
+      id, resolvedId: m.resolvedModel ?? m.value,
+      name: m.value === 'default' ? (id === 'default' ? `Default · ${resolvedName}` : resolvedName) : m.displayName,
+      options,
+    }));
   }).filter((m, i, all) => all.findIndex(x => x.id === m.id) === i);
 }
 function capture(binary: string, args: string[], input = '', initialize = false): Promise<string> {
