@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, rm, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-const evidence='/tmp/vstudy-welcome'; await mkdir(evidence,{recursive:true});
+const evidence='/tmp/vstudy-welcome2'; await mkdir(evidence,{recursive:true});
 const screenshots=[],audits=[],errors=[],checks=[];
 const full=process.env.VSTUDY_FULL_MATRIX!=='0';
 for(const language of full?['en','zh-Hant','ja']:['en']) {
@@ -17,10 +17,15 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language,onboardingCompleted:true});},language);
   await page.reload();await page.locator('#welcome-entry').click();await page.locator('.welcome').waitFor();
   const copy=JSON.parse(await readFile(`src/shared/locales/${language}/welcome.json`,'utf8'));
-  assert.equal(await page.locator('#welcome-title').textContent(),copy.hero_title.repeat(2));
+  assert.equal((await page.locator('#welcome-title').textContent()).replaceAll('\u200b', ''),copy.hero_title.replaceAll('\u200b', '').repeat(2));
   assert.equal(await page.locator('.w-content>section').count(),7);
   assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).welcomeSeen,true);
-  const capture=async(width,theme,section)=>{await page.locator(`#welcome-${section}`).evaluate(e=>e.scrollIntoView({behavior:'instant',block:'start'}));await page.waitForTimeout(100);const path=`${evidence}/${language}-${width}-${theme}-${section}.png`;await page.screenshot({path});screenshots.push({language,width,theme,section,path});assert.equal(await page.locator('.welcome').evaluate(e=>e.scrollWidth<=e.clientWidth),true,`${language}-${width}-${section} overflow`);};
+  const capture=async(width,theme,section)=>{await page.locator(`#welcome-${section}`).evaluate(e=>e.scrollIntoView({behavior:'instant',block:'start'}));await page.waitForTimeout(100);const path=`${evidence}/${language}-${width}-${theme}-${section}.png`;await page.screenshot({path});screenshots.push({language,width,theme,section,path});if(section==='hero') {
+   const geometry=await page.locator('.hero-stack').evaluate(e=>{const cards=[...e.querySelectorAll('.w-glass')];return cards.slice(0,-1).map((card,i)=>({textBottom:Math.max(...[...card.children].map(c=>c.getBoundingClientRect().bottom)),nextTop:cards[i+1].getBoundingClientRect().top}));});
+   assert.ok(geometry.every(g=>g.textBottom<=g.nextTop),JSON.stringify({language,width,theme,geometry}));
+  }
+  if(section==='who')assert.ok(await page.locator('.w-first strong').evaluateAll(nodes=>nodes.every(n=>parseFloat(window.getComputedStyle(n).fontSize)>= (window.document.documentElement.lang==='en'?12:13))));
+  assert.equal(await page.locator('.welcome').evaluate(e=>e.scrollWidth<=e.clientWidth),true,`${language}-${width}-${section} overflow`);};
   for(const width of full?[720,900,1200]:[1200]) {
    await app.evaluate(({BrowserWindow},w)=>BrowserWindow.getAllWindows()[0].setSize(w,900),width);
    for(const theme of full?['light','dark']:['light']) {
@@ -87,9 +92,9 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
     }
    }
   }
- } finally {await mkdir('../../docs/evidence',{recursive:true});await writeFile('../../docs/evidence/welcome-screenshots.json',JSON.stringify({screenshots,audits,errors,checks},null,2));await app?.close();await rm(directory,{recursive:true,force:true});}
+ } finally {await mkdir('../../docs/evidence',{recursive:true});await writeFile('../../docs/evidence/welcome2-screenshots.json',JSON.stringify({screenshots,audits,errors,checks},null,2));await app?.close();await rm(directory,{recursive:true,force:true});}
 }
 await mkdir('../../docs/evidence',{recursive:true});
-await writeFile('../../docs/evidence/welcome-screenshots.json',JSON.stringify({screenshots,audits,errors,checks},null,2));
+await writeFile('../../docs/evidence/welcome2-screenshots.json',JSON.stringify({screenshots,audits,errors,checks},null,2));
 const severe=audits.flatMap(a=>a.violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>({language:a.language,theme:a.theme,motion:a.reducedMotion,id:v.id,nodes:v.nodes.map(n=>n.target)})));
 console.log(JSON.stringify({screenshots:screenshots.length,severe,errors,checks},null,2));assert.deepEqual(errors,[]);assert.deepEqual(severe,[]);
