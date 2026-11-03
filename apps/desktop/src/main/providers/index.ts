@@ -66,6 +66,7 @@ export class ProviderRegistry {
   private modelRevision = 0;
   private modelCache = new Map<string, { models: Model[]; expires: number }>();
   private loading = new Set<string>();
+  private availabilityCache = new Map<string, Availability>();
   private configs: ProviderConfig[] = [
     { kind: "api", id: "anthropic-api", enabled: true },
     { kind: "api", id: "openai-api", enabled: true },
@@ -133,16 +134,17 @@ export class ProviderRegistry {
     this.modelRevision++;
     this.modelCache.clear();
   }
-  private models(config: ProviderConfig, adapter: ProviderAdapter): Model[] {
+  private async models(config: ProviderConfig, adapter: ProviderAdapter, discover: boolean): Promise<Model[]> {
     const key = `${this.modelRevision}:${JSON.stringify(config)}`;
     const cached = this.modelCache.get(key);
-    if ((!cached || cached.expires < Date.now()) && !this.loading.has(key)) {
-      this.loading.add(key);
-      void adapter.listModels().then(models => { this.modelCache.set(key, { models, expires: Date.now() + 60_000 }); }).catch(() => {}).finally(() => this.loading.delete(key));
+    if (discover && (!cached || cached.expires < Date.now())) {
+      const models = await adapter.listModels();
+      this.modelCache.set(key, {models, expires: Date.now() + 60_000});
+      return models;
     }
     return cached?.models ?? [];
   }
-  async list() {
+  async list(discover = true) {
     return Promise.all(
       this.configs.map(async (config) => {
         const adapter = this.adapters.get(config.id);
@@ -150,13 +152,14 @@ export class ProviderRegistry {
           const availability: Availability = !config.enabled
             ? { available: false, reason: "Provider disabled" }
             : adapter
-              ? await adapter.detect()
+              ? config.kind === 'cli' && !discover ? this.availabilityCache.get(config.id) ?? {available:false,reason:'Provider discovery required'} : await adapter.detect()
               : { available: false, reason: "Provider unavailable" };
+          if (discover) this.availabilityCache.set(config.id, availability);
           return {
             config,
             ...(config.kind === 'cli' ? {resolvedPath:await configuredCliPath(config.id.replace('-cli',''))} : {}),
             availability,
-            models: adapter && config.enabled ? this.models(config, adapter) : [],
+            models: adapter && config.enabled ? await this.models(config, adapter, discover) : [],
             modelsLoading: !!adapter && config.enabled && this.loading.has(`${this.modelRevision}:${JSON.stringify(config)}`),
           };
         } catch {

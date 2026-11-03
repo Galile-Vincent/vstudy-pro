@@ -187,24 +187,18 @@ it.each([
 ] as const)('classifies %s JSON stdout authentication failures with empty stderr', async (kind, fixture, message) => {
   await expect(collect(runCli(process.execPath, ['-e', `console.log(${JSON.stringify(JSON.stringify(fixture))})`], '', tmpdir(), kind, new AbortController().signal))).rejects.toThrow(message);
 });
-it("returns availability while remote models are pending and caches arriving models", async () => {
+it("discovers only on request, awaits results, and observes the TTL without background refresh", async () => {
   const { ProviderRegistry } = await import("./index");
   const registry = new ProviderRegistry();
-  let release: (value: { id: string; name: string }[]) => void = () => {};
-  registry.register("openai-api", { async detect() { return { available: true }; }, listModels: () => new Promise(resolve => { release = resolve; }), async *stream() { yield { type: "done" }; } });
-  const first = (await registry.list()).find(p => p.config.id === "openai-api")!;
-  expect(first.availability).toEqual({ available: true });
-  expect(first.models).toEqual([]);
-  expect(first.modelsLoading).toBe(true);
-  release([{ id: "arrived", name: "Arrived" }]);
-  await Promise.resolve();
-  expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([{ id: "arrived", name: "Arrived" }]);
-  expect((await registry.list()).find(p => p.config.id === "openai-api")?.modelsLoading).toBe(false);
-  registry.configure({ kind: "api", id: "openai-api", enabled: true });
-  expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([]);
-  release([{ id: "refreshed", name: "Refreshed" }]);
-  await Promise.resolve();
-  expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([{ id: "refreshed", name: "Refreshed" }]);
+  let calls = 0, detects = 0;
+  registry.register("claude-cli", { async detect() { detects++; return {available:true}; }, async listModels() { calls++; return [{id:'arrived',name:'Arrived'}]; }, async *stream() { yield {type:'done'}; } });
+  registry.configure({kind:'cli',id:'claude-cli',enabled:true});
+  await registry.list(false);
+  expect([calls,detects]).toEqual([0,0]);
+  expect((await registry.list()).find(p => p.config.id === 'claude-cli')?.models).toEqual([{id:'arrived',name:'Arrived'}]);
+  await registry.list(false);
+  await registry.list();
+  expect(calls).toBe(1);
 });
 for (const kind of ["claude", "codex"] as const) it(`drops buffered ${kind} output and kills a process that writes after SIGTERM`, async () => {
   const cwd = await mkdtemp(join(tmpdir(), "vstudy-stubborn-cli-"));

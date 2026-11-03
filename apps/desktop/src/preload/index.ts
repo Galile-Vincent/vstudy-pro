@@ -18,6 +18,7 @@ if (process.isMainFrame) {
   });
   new MutationObserver(removeFrames).observe(document, {childList:true,subtree:true,attributes:true,attributeFilter:['sandbox','src','srcdoc']});
 }
+ipcRenderer.on('vstudy:open-settings', () => window.dispatchEvent(new Event('vstudy:open-settings')));
 const dropTokens = new Map<string, string>();
 if (process.isMainFrame) window.addEventListener('drop', event => {
   if (!event.isTrusted || !event.dataTransfer) return;

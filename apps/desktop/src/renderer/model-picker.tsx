@@ -42,7 +42,7 @@ function traitKeys(event: KeyboardEvent<HTMLElement>) {
   const next = event.key === 'Home' ? 0 : event.key === 'End' ? radios.length - 1 : (index + (direction ?? 0) + radios.length) % radios.length;
   radios[next]?.focus(); radios[next]?.click();
 }
-export function ModelPicker({ providers, model, onModel, onSettings, values = {}, onChange }: { providers: Providers; model: string; onModel: (value: string) => void; onSettings: () => void; onProvidersChanged?: () => Promise<void>; values?: Record<string,string|boolean>; onChange?: (values: Record<string,string|boolean>) => void }) {
+export function ModelPicker({ providers, model, onModel, onSettings, onProvidersChanged, values = {}, onChange }: { providers: Providers; model: string; onModel: (value: string) => void; onSettings: () => void; onProvidersChanged?: () => Promise<void>; values?: Record<string,string|boolean>; onChange?: (values: Record<string,string|boolean>) => void }) {
   useTranslation();
   const [open, setOpen] = useState(false);
   const [displayNames, setDisplayNames] = useState<Record<string,string>>(cachedDisplayNames);
@@ -72,7 +72,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
   const choose = (value: string) => { const r = [value, ...recent.filter(x => canonical(x) !== value)].slice(0,8); setRecent(r); void persist(favorites,r).then(() => onModel(value)); };
   const groups = ['Favorites', 'Recent', ...[...new Set(all.map(m => m.provider))]];
   return <div className="model-picker" ref={root}>
-    <ModelSelector.Root models={entries} value={selected?.value ?? model} onValueChange={choose} open={open} onOpenChange={setOpen}>
+    <ModelSelector.Root models={entries} value={selected?.value ?? model} onValueChange={choose} open={open} onOpenChange={next => { setOpen(next); if (next) void onProvidersChanged?.(); }}>
       <ModelSelector.Trigger aria-label={tr('common:model')} className="model-trigger" title={selected?.name}>
         <span className="provider-initial" aria-hidden>{selected?.providerId.includes("claude") || selected?.providerId.includes("anthropic") ? <ClaudeLogo className="provider-logo" /> : selected?.providerId.includes("codex") || selected?.providerId.includes("openai") ? <OpenAILogo className="provider-logo" /> : selected?.providerId === "agy-cli" ? <GeminiLogo className="provider-logo" /> : "M"}</span>
         <span className="model-trigger-name">{selected?.name ?? (displayNames[model] ?? (model ? tr('common:loading_model') : tr('common:choose_a_model')))}</span>

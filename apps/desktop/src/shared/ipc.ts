@@ -90,7 +90,7 @@ export const ipcContract = {
   "settings:get": { request: empty, response: settingsSchema },
   "settings:set": { request: settingsSchema, response: settingsSchema },
   "providers:list": {
-    request: empty,
+    request: z.object({ discover: z.boolean().optional() }).strict(),
     response: z.array(
       z.object({
         config: providerConfigSchema,

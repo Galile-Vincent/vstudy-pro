@@ -133,6 +133,7 @@ export function LibrarySidebar() {
   const treeEnd = treeStart + Math.ceil((treeRef.current?.clientHeight || 400)/32)+4;
   return (
     <>
+      <button onClick={() => window.dispatchEvent(new Event('vstudy:open-settings'))}>{tr('common:settings')}</button>
       <nav className="library-smart" aria-label={tr("library:smartViews")}>
         {(
           ["all", "recent", "pinned", "unfiled", "converting-failed"] as const

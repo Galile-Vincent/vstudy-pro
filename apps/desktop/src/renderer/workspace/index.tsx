@@ -47,11 +47,7 @@ export function Workspace() {
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [loadingSource, setLoadingSource] = useState(false);
-  useEffect(() => {
-    const open = () => setShowSettings(true);
-    window.addEventListener('vstudy:open-settings', open);
-    return () => window.removeEventListener('vstudy:open-settings', open);
-  }, []);
+
   const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
   useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   const [draft, setDraft] = useState("");
@@ -103,7 +99,6 @@ export function Workspace() {
     setProviders(list);
     if (!activeConversation.current) setModel(current => resolveModel(current, list));
   }, []);
-  useEffect(() => { const timer = setInterval(() => { void refreshProviders().catch(report); }, 2000); return () => clearInterval(timer); }, [refreshProviders, report]);
   useEffect(() => {
     let active = true;
     void Promise.all([
@@ -111,7 +106,7 @@ export function Workspace() {
       (route.documentId
         ? desktop.invoke("documents:get", {documentId:route.documentId}).then(doc => doc ? [doc] : [])
         : desktop.invoke("documents:list", {})).then(rows => { if (active) setDocuments(rows); return rows; }),
-      desktop.invoke("providers:list", {}),
+      desktop.invoke("providers:list", {discover:false}),
     ])
       .then(([s, d, p]) => {
         if (!active) return;

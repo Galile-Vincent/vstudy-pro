@@ -10,7 +10,6 @@ export function HomeView() {
   const [onboarding, setOnboarding] = useState(false);
   const [usage, setUsage] = useState(false);
   const [providers, setProviders] = useState<Providers>([]);
-  useEffect(() => { const open = () => { void desktop.invoke('providers:list', {}).then(setProviders); setUsage(true); }; window.addEventListener('vstudy:open-settings', open); return () => window.removeEventListener('vstudy:open-settings', open); }, []);
   useEffect(() => { void desktop.invoke('settings:get', {}).then(async s => { await applyLanguage(s.language); setOnboarding(!s.onboardingCompleted); }).catch(() => {}); }, []);
   return <><Home navigate={(view, documentId) => navigate(documentId ? { view, documentId } : { view })} onFolder={folderId => navigate({ view:'library', query:{folderId}, title:undefined })} onUsage={() => { void desktop.invoke('providers:list', {}).then(setProviders); setUsage(true); }}/>{onboarding && <Onboarding onComplete={() => setOnboarding(false)}/>} {usage && <ProviderSettings providers={providers} initialTab="usage" onClose={() => setUsage(false)} onRefresh={async () => setProviders(await desktop.invoke('providers:list', {}))}/>}</>;
 }

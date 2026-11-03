@@ -33,7 +33,7 @@ export function registerChatIpc(
     "messages:list",
   ] as const;
   for (const channel of channels) implemented.add(channel);
-  registrar.handle("providers:list", () => providers.list());
+  registrar.handle("providers:list", ({discover}) => providers.list(discover));
   registrar.handle("providers:configure", (config) => {
     const previous = providers.config(config.id);
     if (config.kind === 'compatible' && previous.kind === 'compatible' && new URL(config.baseUrl).origin !== new URL(previous.baseUrl).origin) secrets.delete(config.id);
