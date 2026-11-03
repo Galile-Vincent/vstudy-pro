@@ -15,7 +15,8 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     handle('messages:page',r=>store.messages.page(r.conversationId,r.limit,r.cursor));
     handle('usage:page',r=>store.usage.page(r.limit,r.cursor));
     handle('library:folders:list', () => library.folders());
-    handle('library:tree', () => library.folders());
+    handle('library:counts', () => { const r=store.db.prepare("SELECT count(*) AS 'all',sum(lastOpenedAt IS NOT NULL) AS recent,sum(pinned=1) AS pinned,sum(folderId IS NULL) AS unfiled,sum(status IN('converting','failed')) AS 'converting-failed' FROM documents WHERE deletedAt IS NULL").get(); return Object.fromEntries(Object.entries(r??{}).map(([k,v])=>[k,Number(v??0)])); });
+    handle('library:tree' , () => library.folders());
     handle('library:folders:create', r => library.createFolder(r.name, r.parentId));
     handle('library:folders:update', r => library.updateFolder(r.folderId, r));
     handle('library:folders:move', r => { library.moveFolder(r.folderId, r.parentId, r.beforeId); return { ok: true }; });

@@ -87,3 +87,5 @@ html[data-reduced-transparency=true] { --material-card:var(--surface); --materia
 .skip-link:focus { transform:translateY(0); }
 
 :root { --sidebar-width:232px; --sidebar-compact-width:180px; --topbar-height:52px; }
+
+:root { --filter-width:300px; --library-row-height:104px; }

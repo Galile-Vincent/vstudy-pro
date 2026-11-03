@@ -9,7 +9,7 @@ const ack = z.object({ ok: z.literal(true) }).strict();
 const id = z.object({ documentId: documentIdSchema }).strict();
 export const folderSchema = z.object({ id: folderIdSchema, parentId: folderIdSchema.nullable(), name, color: z.string().max(32).nullable(), icon: z.string().max(64).nullable(), position: z.number(), pinned: z.number().int(), pinnedAt: z.string().nullable(), createdAt: z.string(), updatedAt: z.string(), count: z.number().optional() });
 export const tagSchema = z.object({ id: tagIdSchema, name, color: z.string().max(32).nullable() });
-export const libraryDocumentSchema = z.object({ document: documentSchema, folderId: folderIdSchema.nullable(), position: z.number(), pinned: z.boolean(), pinnedAt: z.string().nullable(), lastOpenedAt: z.string().nullable(), pageCount: z.number().nullable(), sizeBytes: z.number(), contentChars: z.number() });
+export const libraryDocumentSchema = z.object({ document: documentSchema, folderId: folderIdSchema.nullable(), position: z.number(), pinned: z.boolean(), pinnedAt: z.string().nullable(), lastOpenedAt: z.string().nullable(), pageCount: z.number().nullable(), sizeBytes: z.number(), contentChars: z.number(), tags:z.array(tagSchema).default([]) });
 export const libraryQuerySchema = z.object({
     view: z.enum(['all', 'recent', 'pinned', 'unfiled', 'converting-failed']).optional(),
     folderId: folderIdSchema.nullable().optional(), subfolders: z.boolean().optional(),
@@ -33,6 +33,7 @@ export const libraryContract = {
     'library:folders:update': { request: z.object({ folderId: folderIdSchema, name: name.optional(), color: z.string().max(32).nullable().optional(), icon: z.string().max(64).nullable().optional(), pinned: z.boolean().optional() }).strict(), response: folderSchema },
     'library:folders:move': { request: z.object({ folderId: folderIdSchema, parentId: folderIdSchema.nullable(), beforeId: folderIdSchema.optional() }).strict(), response: ack },
     'library:folders:delete': { request: z.object({ folderId: folderIdSchema, destination: z.enum(['parent', 'unfiled']) }).strict(), response: ack },
+    'library:counts': { request: empty, response: z.record(z.number()) },
     'library:tree': { request: empty, response: z.array(folderSchema) },
     'library:documents:list': { request: libraryQuerySchema, response: page },
     'library:documents:move': { request: z.object({ documentIds: z.array(documentIdSchema).min(1).max(500), folderId: folderIdSchema.nullable(), beforeId: documentIdSchema.optional() }).strict(), response: ack },

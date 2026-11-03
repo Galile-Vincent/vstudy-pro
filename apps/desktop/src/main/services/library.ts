@@ -129,6 +129,10 @@ export class LibraryService {
             add(`(${column} ${op} ? OR (${column}=? AND d.id ${op} ?))`, q.cursor.value, q.cursor.value, q.cursor.id);
         const rows = this.store.db.prepare(`SELECT d.* FROM documents d WHERE ${where.join(' AND ')} ORDER BY ${column} ${direction},d.id ${direction} LIMIT ?`).all(...args, q.limit + 1);
         const items = rows.slice(0, q.limit).map(r => this.item(r));
+        if (items.length) {
+            const assignments=this.store.db.prepare(`SELECT dt.documentId,t.* FROM document_tags dt JOIN tags t ON t.id=dt.tagId WHERE dt.documentId IN(${items.map(()=>'?').join(',')})`).all(...items.map(i=>i.document.id));
+            for(const item of items) item.tags=assignments.filter(t=>t.documentId===item.document.id).map(t=>tagSchema.parse(t));
+        }
         const last = rows[Math.min(q.limit, rows.length) - 1];
         const key = pinOrder ? 'pinnedAt' : recentOrder ? 'lastOpenedAt' : { manual: 'position', name: 'title', createdAt: 'createdAt', lastOpenedAt: 'lastOpenedAt', size: 'sizeBytes', type: 'mime' }[q.sort];
         return { items, nextCursor: rows.length > q.limit && last ? { value: (last[key] ?? '') as string | number, id: documentIdSchema.parse(last.id) } : null };
