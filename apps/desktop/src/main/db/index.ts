@@ -161,6 +161,10 @@ export function openStore(path: string) {
       const row = db.prepare("SELECT * FROM documents WHERE id=? AND deletedAt IS NULL").get(id);
       return row ? documentRow.parse(row) : null;
     },
+    getIncludingDeleted(id: Document["id"]): Document | null {
+      const row = db.prepare("SELECT * FROM documents WHERE id=?").get(id);
+      return row ? documentRow.parse(row) : null;
+    },
     findByHash(hash: string): Document | null {
       const row = db
         .prepare("SELECT * FROM documents WHERE sourceHash=?")
@@ -175,7 +179,7 @@ export function openStore(path: string) {
         );
     },
     transition(id: Document["id"], next: DocumentTransition): Document {
-      const current = documents.get(id);
+      const current = documents.getIncludingDeleted(id);
       if (!current) throw new Error("Document not found");
       const updated = transitionDocument(current, next);
       db.prepare("UPDATE documents SET status=?,error=?,converter=? WHERE id=?").run(

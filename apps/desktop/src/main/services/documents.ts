@@ -171,7 +171,7 @@ export class DocumentService {
           await rename(`${document.markdownPath}.tmp`, document.markdownPath);
         } else converter = await this.options.convert(document.sourcePath, document.markdownPath, message => this.options.onProgress?.(document.id, message)) ?? "markitdown";
         if ((await stat(document.markdownPath)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
-        if (!this.stopped && this.get(document.id)) {
+        if (!this.stopped && this.options.store.documents.getIncludingDeleted(document.id)) {
           const saved = profileStage("DB ready transition");
           const content = await readFile(containedPath(this.library, document.markdownPath), "utf8");
           this.options.store.db.exec("SAVEPOINT finalize");
@@ -185,7 +185,7 @@ export class DocumentService {
           this.options.onProgress?.(document.id, "Conversion complete");
         }
       } catch (error) {
-        if (!this.stopped && this.get(document.id)) this.options.store.documents.transition(document.id, {
+        if (!this.stopped && this.options.store.documents.getIncludingDeleted(document.id)) this.options.store.documents.transition(document.id, {
           status: "failed", error: 'VSTUDY_STATUS:' + JSON.stringify({code: error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed',params:{}}),
         });
       }
