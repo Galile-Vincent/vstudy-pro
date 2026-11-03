@@ -9,7 +9,7 @@ export function UsageChip({ usage, subscription = false, aborted = false }: { us
     {usage.costSource === "unknown" && usage.inputTokens === 0 && usage.outputTokens === 0 ? "tokens unavailable" : `in ${compactTokens(usage.inputTokens)} · out ${compactTokens(usage.outputTokens)}`} · {money(usage.costUsd)}{subscription && ' · API-equivalent (subscription)'}{aborted && ' · aborted'}
   </span>;
 }
-export function MessageUsage({ subscription, models = [] }: { subscription: boolean; models?: Model[] }) {
+export function MessageUsage({ subscription, models = [], fallbackUsage }: { subscription: boolean; models?: Model[]; fallbackUsage?: Usage | undefined }) {
   const aborted = useAuiState(s => s.message.status?.type === "incomplete" && s.message.status.reason === "cancelled");
   const value = useAuiState(s => s.message.metadata.custom.usage);
   const modelId = useAuiState(s => s.message.metadata.custom.modelId);
@@ -24,5 +24,6 @@ export function MessageUsage({ subscription, models = [] }: { subscription: bool
   });
   const label = [model?.name, ...labels].filter(Boolean).join(' · ');
   const parsed = usageSchema.safeParse(value);
-  return parsed.success ? <><small className="usage-chip">{label && `${label} · `}</small><UsageChip usage={parsed.data} subscription={subscription} aborted={aborted} /></> : null;
+  const usage = parsed.success ? parsed.data : fallbackUsage;
+  return usage ? <><small className="usage-chip">{label && `${label} · `}</small><UsageChip usage={usage} subscription={subscription} aborted={aborted} /></> : null;
 }
