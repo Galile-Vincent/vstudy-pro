@@ -3,6 +3,8 @@ import { tr } from '../shared/i18n';
 import { useEffect, useRef, useState } from 'react';
 import { AssistantRuntimeProvider, useExternalStoreRuntime, type ThreadMessage } from '@assistant-ui/react';
 import { ChevronDown } from 'lucide-react';
+import { plainSelection } from './selection-preview';
+import { copyAnswer } from './copy-answer';
 import { desktop } from './bridge';
 import type { Conversation } from '../shared';
 import type { Providers } from './providers';
@@ -20,7 +22,7 @@ export function ConversationList({conversations,current,onSelect,onNew,onDelete,
    const messages=await desktop.invoke('messages:list',{conversationId:c.id});
    const first=messages.find(m=>m.role==='user')?.parts.map(p=>p.text).join(' ').replace(/\s+/g,' ').trim() ?? '';
    const last=messages.at(-1);
-   return [c.id,{title:first.slice(0,40),preview:last?.parts.map(p=>p.text).join(' ').replace(/\s+/g,' ').slice(0,120) ?? '',createdAt:last?.createdAt ?? c.createdAt}] as const;
+   return [c.id,{title:first.slice(0,40),preview:last ? plainSelection(copyAnswer(last.parts.map(p=>p.text).join(' '),last.parts.flatMap(p=>p.citations ?? []))).slice(0,120) : '',createdAt:last?.createdAt ?? c.createdAt}] as const;
   })).then(rows=>{if(active)setSummaries(Object.fromEntries(rows));}).catch(()=>{});};
   refresh();window.addEventListener('usage-updated',refresh);
   return ()=>{active=false;window.removeEventListener('usage-updated',refresh);};

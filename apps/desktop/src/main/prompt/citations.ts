@@ -4,6 +4,7 @@ import type { Nodes } from 'mdast';
 import { documentCitationSchema, type DocumentCitation, type Document } from '../../shared/domain';
 
 export function citationCatalog(documentId: Document['id'], markdown: string): DocumentCitation[] {
+  if (!markdown.trim()) return [];
   const candidates: DocumentCitation[] = [];
   let page: number | undefined;
   const pages: DocumentCitation[] = [];
