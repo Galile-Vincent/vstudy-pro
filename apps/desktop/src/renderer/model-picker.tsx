@@ -112,7 +112,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
 }
 
 export function optionLabel(id: string, fallback: string) {
-  const key = ({thinking:'picker:thinking',serviceTier:'picker:service_tier',fastMode:'common:fast_mode_on',effort:'common:effort',reasoningEffort:'common:effort'} as Record<string,string>)[id];
+  const key = ({thinking:'picker:thinking',serviceTier:'picker:service_tier',fastMode:'common:fast_mode_on',effort:'common:effort',reasoningEffort:'common:effort',reasoning_effort:'common:effort'} as Record<string,string>)[id];
   return key ? tr(key) : fallback;
 }
 export function optionValueLabel(option: string, id: string, fallback: string) {
