@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  modelSchema, modelOptionsSchema,
   chatEventSchema,
   chatRequestSchema,
   conversationIdSchema,
@@ -58,6 +59,7 @@ export const ipcContract = {
     request: conversationSchema.omit({ id: true, createdAt: true }),
     response: conversationSchema,
   },
+  "conversations:options": { request: z.object({ conversationId: conversationIdSchema, options: modelOptionsSchema }).strict(), response: ack },
   "conversations:list": {
     request: z.object({ documentId: documentIdSchema }).strict(),
     response: z.array(conversationSchema),
@@ -82,7 +84,7 @@ export const ipcContract = {
           z.object({ available: z.literal(false), reason: z.string() }),
         ]),
         modelsLoading: z.boolean().optional(),
-        models: z.array(z.object({ id: z.string(), name: z.string() })),
+        models: z.array(modelSchema),
       }),
     ),
   },

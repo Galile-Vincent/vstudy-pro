@@ -132,7 +132,7 @@ it("kills a real subprocess on abort and on timeout", async () => {
           50,
         ),
       ),
-    ).rejects.toThrow("CLI request failed");
+    ).rejects.toThrow("provider unavailable");
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

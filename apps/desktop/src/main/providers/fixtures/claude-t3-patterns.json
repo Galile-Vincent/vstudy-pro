@@ -1,0 +1,40 @@
+{
+  "claude-opus-5-5": [
+    "ultracode",
+    "ultrathink"
+  ],
+  "claude-sonnet-5-5": [
+    "ultrathink"
+  ],
+  "claude-fable-5-1": [
+    "ultracode",
+    "ultrathink"
+  ],
+  "claude-fable-5": [
+    "ultracode",
+    "ultrathink"
+  ],
+  "claude-opus-5": [
+    "ultracode",
+    "ultrathink"
+  ],
+  "claude-opus-4-8": [
+    "ultracode",
+    "ultrathink"
+  ],
+  "claude-opus-4-7": [
+    "ultrathink"
+  ],
+  "claude-opus-4-6": [
+    "ultrathink"
+  ],
+  "claude-sonnet-5": [
+    "ultrathink"
+  ],
+  "claude-sonnet-4-6": [
+    "ultrathink"
+  ],
+  "claude-haiku-5-5": [
+    "ultrathink"
+  ]
+}

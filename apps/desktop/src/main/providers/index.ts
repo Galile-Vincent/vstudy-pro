@@ -21,10 +21,7 @@ import { AgyAdapter } from "./agy";
 export type Availability =
   | { available: true }
   | { available: false; reason: string };
-export interface Model {
-  id: string;
-  name: string;
-}
+export type Model = import("../../shared/domain").Model;
 export type ProviderRequest = ChatRequest & { prompt: string; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
 export interface ProviderAdapter {
   detect(): Promise<Availability>;
@@ -34,19 +31,21 @@ export interface ProviderAdapter {
     signal: AbortSignal,
   ): AsyncIterable<ChatEvent>;
 }
+const fakeFailures = new Set<string>();
 export const fakeAdapter: ProviderAdapter = {
   async detect() {
     return { available: true };
   },
   async listModels() {
-    return [{ id: "fake", name: "Fake (test only)" }];
+    return [{ id: "fake", name: "Fake (test only)", options: [{ id: "effort", label: "Effort", values: [{ id: "low", label: "low" }, { id: "high", label: "high" }], default: "low" }] }];
   },
   async *stream(request, signal) {
+    if (request.userMessage === 'test error' && !fakeFailures.has(request.turnId ?? request.requestId)) { fakeFailures.add(request.turnId ?? request.requestId); yield { type: 'error', message: 'Provider rate limited' }; return; }
     const response = `**bold**\n\n- First\n- Second\n\n\`\`\`text\n${request.prompt}\n\`\`\``;
     for (let i = 0; i < response.length; i += 128) {
       signal.throwIfAborted();
       yield { type: "text-delta", text: response.slice(i, i + 128) };
-      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      await new Promise<void>((resolve) => setTimeout(resolve, 20));
     }
     signal.throwIfAborted();
     yield { type: "usage", usage: { inputTokens: 1200, outputTokens: 340, cacheReadTokens: 200, reasoningTokens: 40, costUsd: .012, costSource: "reported" } };

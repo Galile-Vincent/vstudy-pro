@@ -1,3 +1,4 @@
+import { option } from "./models";
 import { z } from "zod";
 import { headerRateLimit } from "./usage";
 import type { Usage, ProviderConfig } from "../../shared/domain";
@@ -5,7 +6,7 @@ import type { SecretStore } from "../services/secrets";
 import type { ProviderAdapter } from "./index";
 import { parseStream } from "./parsers";
 export class ProviderError extends Error {
-  constructor(readonly category: "auth failed" | "rate limited" | "network" | "bad request") { super(`Provider ${category}`); }
+  constructor(readonly category: "auth failed" | "rate limited" | "network" | "bad request" | "provider unavailable" | "budget") { super(`Provider ${category}`); }
 }
 export function isLoopback(value: string): boolean { return ["localhost", "[::1]"].includes(new URL(value).hostname) || /^127\.\d+\.\d+\.\d+$/.test(new URL(value).hostname); }
 export function validateBaseUrl(value: string): string {
@@ -83,7 +84,7 @@ export function createApiAdapter(
           .object({ data: z.array(z.object({ id: z.string() })) })
           .parse(await response.json())
           .data.slice(0, 500)
-          .map(({ id }) => ({ id, name: id }));
+          .map(({ id }) => ({ id, name: id, ...(getConfig().id === 'openai-api' && /^(o1|o3|o4-mini)(-|$)/.test(id) ? { options: [option('reasoning_effort', 'Effort', ['low', 'medium', 'high'], 'medium')] } : {}) }));
       } catch {
         return [];
       }
@@ -111,6 +112,7 @@ export function createApiAdapter(
           body: JSON.stringify({
             model: request.modelId,
             stream: true,
+            ...(request.options?.reasoning_effort ? { reasoning_effort: request.options.reasoning_effort } : {}),
             ...(isAnthropic ? { max_tokens: 8192 } : { stream_options: { include_usage: true } }),
             messages: [{ role: "user", content: request.prompt }],
           }),

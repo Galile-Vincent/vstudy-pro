@@ -1,3 +1,5 @@
+import { ProviderError } from "./api";
+import { discoverModels } from "./models";
 import { spawn } from "node:child_process";
 import { access, mkdtemp, rm, stat } from "node:fs/promises";
 import { constants } from "node:fs";
@@ -45,7 +47,10 @@ export async function findCli(binary: string): Promise<string | null> {
   }
   return null;
 }
-export function cliArgs(kind: "claude" | "codex", modelId: string): string[] {
+export function cliArgs(kind: "claude" | "codex", modelId: string, options: Record<string, string | boolean> = {}): string[] {
+  const extra = kind === "codex"
+    ? Object.entries(options).map(([id, value]) => ['-c', `${id === 'reasoningEffort' ? 'model_reasoning_effort' : 'service_tier'}=${JSON.stringify(value)}`]).flat()
+    : [ ...(options.effort && options.effort !== 'ultrathink' ? ['--effort', options.effort === 'ultracode' ? 'xhigh' : String(options.effort)] : []), ...(options.fastMode !== undefined || options.thinking !== undefined || options.effort === 'ultracode' ? ['--settings', JSON.stringify({ ...(options.effort === 'ultracode' ? { ultracode: true } : {}), ...(options.fastMode !== undefined ? { fastMode: String(options.fastMode) === 'true' } : {}), ...(options.thinking !== undefined ? { alwaysThinkingEnabled: options.thinking === 'enabled' } : {}) })] : []) ];
   const model = modelId === "default" ? [] : ["--model", modelId];
   return kind === "claude"
     ? [
@@ -64,6 +69,7 @@ export function cliArgs(kind: "claude" | "codex", modelId: string): string[] {
         "",
         "--no-session-persistence",
         ...model,
+        ...extra,
       ]
     : [
         "exec",
@@ -75,6 +81,7 @@ export function cliArgs(kind: "claude" | "codex", modelId: string): string[] {
         "--ignore-user-config",
         "--ignore-rules",
         ...model,
+        ...extra,
         "-",
       ];
 }
@@ -127,7 +134,8 @@ export async function* runCli(
     kill();
   }, timeoutMs);
   signal.addEventListener("abort", kill, { once: true });
-  child.stderr.resume();
+  let diagnostic = '';
+  child.stderr.on('data', chunk => { diagnostic = (diagnostic + String(chunk)).slice(-8192); });
   child.stdin.on("error", () => {});
   child.stdin.end(prompt);
   child.stdout.setEncoding("utf8");
@@ -149,7 +157,7 @@ export async function* runCli(
     yield { type: "done" } as const;
   } catch {
     signal.throwIfAborted();
-    throw new Error("CLI request failed");
+    throw new ProviderError(/auth|login|unauthorized|401|403/i.test(diagnostic) ? 'auth failed' : /rate.limit|429/i.test(diagnostic) ? 'rate limited' : /budget|quota|credit/i.test(diagnostic) ? 'budget' : /network|ECONN|ENOTFOUND|fetch failed/i.test(diagnostic) ? 'network' : 'provider unavailable');
   } finally {
     clearTimeout(timer);
     signal.removeEventListener("abort", kill);
@@ -173,16 +181,7 @@ export function createCliAdapter(
       return { available: true };
     },
     async listModels() {
-      const ids =
-        binary === "claude"
-          ? ["default", "opus", "sonnet", "haiku"]
-          : binary === "codex"
-            ? ["default", "gpt-6.1-sol", "gpt-6-sol"]
-            : [];
-      return ids.map((id) => ({
-        id,
-        name: id === "default" ? "CLI default" : id,
-      }));
+      return binary === 'agy' ? [] : discoverModels(binary);
     },
     async *stream(request, signal) {
       const file = await findCli(binary);
@@ -193,8 +192,8 @@ export function createCliAdapter(
       try {
         yield* runCli(
           file,
-          cliArgs(binary, request.modelId),
-          request.prompt,
+          cliArgs(binary, request.modelId, request.options),
+          request.options?.effort === 'ultrathink' ? `ultrathink\n\n${request.prompt}` : request.prompt,
           cwd,
           binary,
           signal,

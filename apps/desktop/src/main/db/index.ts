@@ -29,6 +29,7 @@ const migrations = [
   },
   { version: 2, sql: "ALTER TABLE documents ADD COLUMN converter TEXT NOT NULL DEFAULT 'markitdown' CHECK(converter IN ('pdf_md','markitdown'));" },
   { version: 3, sql: usageMigration },
+  { version: 4, sql: "ALTER TABLE conversations ADD COLUMN options TEXT;" },
 ];
 const documentRow = z
   .object({
@@ -47,6 +48,7 @@ const documentRow = z
   .transform(({ error, ...rest }) =>
     documentSchema.parse(error === null ? rest : { ...rest, error }),
   );
+const conversationRow = z.object({ options: z.string().nullable() }).passthrough().transform(({ options, ...row }) => conversationSchema.parse({ ...row, ...(options ? { options: JSON.parse(options) } : {}) }));
 const messageRow = z
   .object({
     id: z.string(),
@@ -154,22 +156,23 @@ export function openStore(path: string) {
     usage: usageRepository(db),
     documents,
     conversations: {
+      setOptions(id: Conversation["id"], options: Conversation["options"]) { db.prepare("UPDATE conversations SET options=? WHERE id=?").run(JSON.stringify(options ?? {}), id); },
       insert(input: Conversation): Conversation {
         const c = conversationSchema.parse(input);
         db.prepare(
-          "INSERT INTO conversations(id,documentId,providerId,modelId,createdAt) VALUES (?,?,?,?,?)",
-        ).run(c.id, c.documentId, c.providerId, c.modelId, c.createdAt);
+          "INSERT INTO conversations(id,documentId,providerId,modelId,createdAt,options) VALUES (?,?,?,?,?,?)",
+        ).run(c.id, c.documentId, c.providerId, c.modelId, c.createdAt, c.options ? JSON.stringify(c.options) : null);
         return c;
       },
       get(id: Conversation["id"]): Conversation | null {
         const row = db
           .prepare("SELECT * FROM conversations WHERE id=?")
           .get(id);
-        return row ? conversationSchema.parse(row) : null;
+        return row ? conversationRow.parse(row) : null;
       },
       list(documentId: Document["id"]): Conversation[] {
         return z
-          .array(conversationSchema)
+          .array(conversationRow)
           .parse(
             db
               .prepare(
@@ -183,6 +186,10 @@ export function openStore(path: string) {
       },
     },
     messages: {
+      excludeFromContext(ids: Message['id'][]) {
+        const update = db.prepare("UPDATE messages SET parts=? WHERE id=?");
+        for (const id of ids) { const row = db.prepare("SELECT * FROM messages WHERE id=?").get(id); if (row) { const m = messageRow.parse(row); update.run(JSON.stringify(m.parts.map(p => ({ ...p, status: 'aborted' }))), id); } }
+      },
       insert(input: Message): Message {
         const m = messageSchema.parse(input);
         db.prepare(

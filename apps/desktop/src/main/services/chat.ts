@@ -1,3 +1,4 @@
+import { validateOptions } from "../providers/models";
 import { priceUsage } from "../pricing";
 import { randomUUID } from "node:crypto";
 import { open } from "node:fs/promises";
@@ -89,9 +90,20 @@ export class ChatService {
       throw new Error("Document is not ready");
     const adapter = this.providers.get(request.providerId);
     const messages = this.store.messages.list(request.conversationId);
-    const history = messages.filter((message, index) => message.role === "assistant"
+    const replayIndex = request.turnId ? messages.findIndex(m => m.role === 'user' && m.parts.some(p => p.turnId === request.turnId)) : -1;
+    if (replayIndex >= 0) this.store.messages.excludeFromContext(messages.slice(replayIndex).filter(m => m.role === 'assistant').map(m => m.id));
+    const beforeReplay = replayIndex < 0 ? messages : messages.slice(0, replayIndex);
+    const contextMessages = request.contextTurnIds ? beforeReplay.filter((m, index) => {
+      const turnId = m.parts[0]?.turnId ?? (m.role === 'user' ? m.id : beforeReplay[index - 1]?.id);
+      return !!turnId && request.contextTurnIds!.includes(turnId);
+    }) : beforeReplay;
+    const latestTurns = contextMessages.filter((m, i, all) => {
+      const turn = m.parts[0]?.turnId;
+      return !turn || !all.slice(i + 1).some(next => next.role === m.role && next.parts[0]?.turnId === turn);
+    });
+    const history = latestTurns.filter((message, index) => message.role === "assistant"
       ? message.parts.every(p => !p.status || p.status === "complete")
-      : messages[index + 1]?.role === "assistant" && messages[index + 1]!.parts.every(p => !p.status || p.status === "complete"));
+      : latestTurns[index + 1]?.role === "assistant" && latestTurns[index + 1]!.parts.every(p => !p.status || p.status === "complete"));
     this.persist(request, "user", request.userMessage);
     const entry: ActiveRequest = {
       owner,
@@ -140,7 +152,7 @@ export class ChatService {
         id,
         conversationId: request.conversationId,
         role,
-        parts: [{ type: "text", text, status, ...(usage ? { usage } : {}), ...(role === "user" && request.selection ? { selection: request.selection } : {}) }],
+        parts: [{ type: "text", text, status, modelId: request.modelId, options: request.options, turnId: request.turnId, ...(usage ? { usage } : {}), ...(role === "user" && request.selection ? { selection: request.selection } : {}) }],
         createdAt,
       }),
     );
@@ -190,6 +202,8 @@ export class ChatService {
     adapter: ReturnType<ProviderRegistry["get"]>,
   ) {
     try {
+      if (Object.keys(entry.request.options ?? {}).length) validateOptions((await adapter.listModels()).find(m => m.id === entry.request.modelId), entry.request.options);
+      this.store.conversations.setOptions(entry.request.conversationId, entry.request.options);
       entry.controller.signal.throwIfAborted();
       const file = await open(document.markdownPath, "r");
       let markdown: string;
@@ -229,7 +243,7 @@ export class ChatService {
           this.finish(
             entry,
             event.type === "error"
-              ? { type: "error", message: "Provider request failed" }
+              ? { type: "error", message: /auth failed|rate limited|network|provider unavailable|budget/i.test(event.message) ? event.message.match(/auth failed|rate limited|network|provider unavailable|budget/i)![0] : "Provider unavailable" }
               : event,
           );
           return;

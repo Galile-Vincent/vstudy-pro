@@ -71,12 +71,19 @@ export const selectionSchema = z
   .strict()
   .refine((s) => s.endOffset >= s.startOffset, "Selection end precedes start");
 export type Selection = z.infer<typeof selectionSchema>;
+export const modelOptionsSchema = z.record(z.string().min(1), z.union([z.string(), z.boolean()]));
+export const modelSchema = z.object({
+  id: z.string(), name: z.string(),
+  options: z.array(z.object({ id: z.string(), label: z.string(), values: z.array(z.object({ id: z.string(), label: z.string() })), default: z.string() })).optional(),
+});
+export type Model = z.infer<typeof modelSchema>;
 export const conversationSchema = z
   .object({
     id: conversationIdSchema,
     documentId: documentIdSchema,
     providerId: providerIdSchema,
     modelId: z.string().min(1),
+    options: modelOptionsSchema.optional(),
     createdAt: timestamp,
   })
   .strict();
@@ -113,7 +120,7 @@ export const usageDashboardSchema = z.object({
 });
 export type UsageSummary = z.infer<typeof usageSummarySchema>;
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string(), usage: usageSchema.optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .object({ type: z.literal("text"), text: z.string(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .strict();
 export const messageSchema = z
   .object({
@@ -161,6 +168,9 @@ export const chatRequestSchema = z
     providerId: providerIdSchema,
     modelId: z.string().min(1),
     userMessage: z.string().min(1),
+    options: modelOptionsSchema.optional(),
+    turnId: z.string().max(200).optional(),
+    contextTurnIds: z.array(z.string().max(200)).max(10000).optional(),
     selection: selectionSchema.optional(),
   })
   .strict()
@@ -185,6 +195,8 @@ export const settingsSchema = z
     priceOverrides: z.record(z.string().min(1), priceSchema).default({}),
     lastProviderId: providerIdSchema.nullable(),
     lastModelId: z.string().nullable(),
+    favoriteModels: z.array(z.string()).optional(),
+    recentModels: z.array(z.string()).optional(),
     lastDocumentId: documentIdSchema.nullable().default(null),
   })
   .strict();

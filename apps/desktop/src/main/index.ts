@@ -65,9 +65,9 @@ void app.whenReady().then(() => {
     safeStorage,
   );
   session.defaultSession.setPermissionRequestHandler(
-    (_webContents, _permission, callback) => callback(false),
+    (webContents, permission, callback) => callback(permission === "clipboard-sanitized-write" && isAppUrl(webContents.getURL(), entryUrl)),
   );
-  session.defaultSession.setPermissionCheckHandler(() => false);
+  session.defaultSession.setPermissionCheckHandler((webContents, permission) => permission === "clipboard-sanitized-write" && !!webContents && isAppUrl(webContents.getURL(), entryUrl));
   session.defaultSession.webRequest.onHeadersReceived((details, callback) =>
     callback({
       responseHeaders: {

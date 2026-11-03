@@ -1,3 +1,4 @@
+import { validateOptions } from "../providers/models";
 import { app } from "electron";
 import { join } from "node:path";
 import type { Store } from "../db";
@@ -23,6 +24,7 @@ export function registerChatIpc(
     "chat:start",
     "chat:abort",
     "conversations:create",
+    "conversations:options",
     "conversations:list",
     "conversations:delete",
     "messages:list",
@@ -36,6 +38,14 @@ export function registerChatIpc(
   registrar.handle("conversations:create", (input) =>
     chat.createConversation(input),
   );
+  registrar.handle("conversations:options", async ({ conversationId, options }) => {
+    const conversation = store.conversations.get(conversationId);
+    if (!conversation) throw new Error('Conversation unavailable');
+    const models = await providers.get(conversation.providerId).listModels();
+    validateOptions(models.find(m => m.id === conversation.modelId), options);
+    store.conversations.setOptions(conversationId, options);
+    return { ok: true };
+  });
   registrar.handle("conversations:list", ({ documentId }) =>
     store.conversations.list(documentId),
   );
