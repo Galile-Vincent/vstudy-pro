@@ -85,17 +85,18 @@ describe("SQLite repositories", () => {
     expect(first.settings.get()).toEqual({
       chatSide: "left",
       lastProviderId: null,
-      lastModelId: null,
+      lastModelId: null, lastDocumentId: null,
     });
     first.settings.set({
       chatSide: "right",
       lastProviderId: "claude-cli",
-      lastModelId: "test",
+      lastModelId: "test", lastDocumentId: "00000000-0000-4000-8000-000000000001" as import("../../shared").Document["id"],
     });
     first.close();
     const second = openStore(file);
     stores.push(second);
     expect(second.settings.get().chatSide).toBe("right");
+    expect(second.settings.get().lastDocumentId).toBe("00000000-0000-4000-8000-000000000001");
     const raw = new DatabaseSync(file);
     expect(raw.prepare("PRAGMA journal_mode").get()).toEqual({
       journal_mode: "wal",

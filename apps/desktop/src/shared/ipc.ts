@@ -74,6 +74,7 @@ export const ipcContract = {
           z.object({ available: z.literal(true) }),
           z.object({ available: z.literal(false), reason: z.string() }),
         ]),
+        modelsLoading: z.boolean().optional(),
         models: z.array(z.object({ id: z.string(), name: z.string() })),
       }),
     ),

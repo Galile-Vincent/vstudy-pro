@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import {
-  chatRequestSchema,
+  chatRequestSchema, settingsSchema,
   documentSchema,
   documentTransitions,
   selectionSchema,
@@ -76,4 +76,8 @@ describe("document lifecycle", () => {
       }).success,
     ).toBe(false);
   });
+});
+
+it("loads preexisting settings with a default last document", () => {
+  expect(settingsSchema.parse({ chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku" })).toEqual({ chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku", lastDocumentId: null });
 });

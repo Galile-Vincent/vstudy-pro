@@ -147,6 +147,7 @@ export const settingsSchema = z
     chatSide: z.enum(["left", "right"]),
     lastProviderId: providerIdSchema.nullable(),
     lastModelId: z.string().nullable(),
+    lastDocumentId: documentIdSchema.nullable().default(null),
   })
   .strict();
 export type Settings = z.infer<typeof settingsSchema>;
@@ -154,4 +155,5 @@ export const defaultSettings: Settings = {
   chatSide: "left",
   lastProviderId: null,
   lastModelId: null,
+  lastDocumentId: null,
 };
