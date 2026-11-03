@@ -1,9 +1,9 @@
-import { tr } from '../shared/i18n';
+import { i18n, tr } from '../shared/i18n';
 import { statusSchema, type Status } from '../shared/status';
 export function statusText(status: Status): string {
  const index=status.code.indexOf('.');
  const key=index<0?'errors:generic':`${status.code.slice(0,index)}:${status.code.slice(index+1)}`;
- return tr(key,status.params);
+ return i18n.exists(key) ? tr(key,status.params) : tr('errors:generic');
 }
 export function errorText(error: unknown): string {
  const structured=statusSchema.safeParse(error);
