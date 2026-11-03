@@ -1,4 +1,4 @@
-import { decodeNamedCharacterReference } from "decode-named-character-reference";
+import { decodeHtmlEntities } from "../../shared/html";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
 import { mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
@@ -82,11 +82,7 @@ export class DocumentService {
         if (mime === "text/html") {
           const html = await readFile(join(directory, `source.${extension}`), "utf8");
           const raw = /<title\b[^>]*>([\s\S]*?)<\/title\s*>/i.exec(html)?.[1];
-          if (raw?.trim()) title = raw.replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]+);/gi, (entity, name: string) => {
-            if (name[0] !== "#") return decodeNamedCharacterReference(name) || entity;
-            const point = name[1]?.toLowerCase() === "x" ? parseInt(name.slice(2), 16) : Number(name.slice(1));
-            return point > 0 && point <= 0x10ffff ? String.fromCodePoint(point) : "�";
-          }).replace(/\s+/g, " ").trim();
+          if (raw?.trim()) title = decodeHtmlEntities(raw).replace(/\s+/g, " ").trim();
         }
         const document = this.options.store.documents.insert(documentSchema.parse({
           id: randomUUID(), title, sourceName: basename(path),

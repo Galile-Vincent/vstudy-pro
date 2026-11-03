@@ -1,3 +1,4 @@
+import { decodeHtmlEntities } from "../../shared/html";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import type { RootContent } from "mdast";
@@ -10,6 +11,7 @@ export interface PromptInput {
   userMessage: string;
 }
 export function omitDataUris(text: string): string {
+  text = decodeHtmlEntities(text);
   const tree = unified().use(remarkParse).parse(text);
   const ranges: [number, number][] = [];
   const visit = (node: RootContent) => {

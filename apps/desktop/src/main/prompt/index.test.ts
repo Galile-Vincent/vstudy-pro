@@ -63,3 +63,7 @@ it("removes entity encoded destinations and multiline base64 payloads", () => {
   expect(omitDataUris("[x](data&colon;text/plain;base64,AAAA)")).toBe("[x](image omitted)");
   expect(omitDataUris(`![x](data:image/png;base64,\n${"A".repeat(220)}\n${"B".repeat(220)})`)).toBe("![x](image omitted)");
 });
+
+it("removes entity encoded schemes combined with wrapped short base64 lines", () => {
+  expect(omitDataUris(`![x](d&#x61;ta&colon;image/png;base64,\n${"AAAA".repeat(15)}\n${"BBBB".repeat(15)})`)).toBe("![x](image omitted)");
+});
