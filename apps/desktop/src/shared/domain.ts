@@ -80,7 +80,7 @@ export const conversationSchema = z
   .strict();
 export type Conversation = z.infer<typeof conversationSchema>;
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string() })
+  .object({ type: z.literal("text"), text: z.string(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .strict();
 export const messageSchema = z
   .object({
@@ -137,7 +137,7 @@ export const chatRequestSchema = z
   );
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 export const chatEventSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("text-delta"), text: z.string() }).strict(),
+  z.object({ type: z.literal("text-delta"), text: z.string(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() }).strict(),
   z.object({ type: z.literal("done") }).strict(),
   z.object({ type: z.literal("error"), message: z.string() }).strict(),
 ]);

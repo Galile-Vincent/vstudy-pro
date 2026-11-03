@@ -4,7 +4,7 @@ export type ChatContext = Omit<ChatRequest, "requestId" | "userMessage">;
 export function createChatAdapter(
   bridge: DesktopApi,
   context: () => Promise<ChatContext>,
-  started: () => void = () => {},
+  started: (messageId: string) => void = () => {},
 ) {
   const active = new Set<() => void>();
   let generation = 0;
@@ -60,7 +60,7 @@ export function createChatAdapter(
                 error instanceof Error ? error.message : "Could not start chat",
             }),
           );
-        started();
+        started(messages.filter(m => m.role === "user").at(-1)?.id ?? "");
         let text = "";
         while (true) {
           if (!queue.length)

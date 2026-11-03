@@ -13,16 +13,20 @@ import { desktop } from "./bridge";
 import { createChatAdapter } from "./chat-adapter";
 import { providerName, type Providers } from "./providers";
 
-function ChatMessage() {
+function ChatMessage({ selections, statuses }: { selections: Map<string, Selection>; statuses: Map<string, string> }) {
+  const id = useAuiState((s) => s.message.id);
+  const selected = selections.get(id);
   const role = useAuiState((s) => s.message.role);
   return (
     <MessagePrimitive.Root className={`message ${role}`}>
       <div className="message-label">
         {role === "user" ? "You" : "Assistant"}
       </div>
+      {selected && <blockquote className="selection-chip">{selected.text}</blockquote>}
       <div className="message-text">
         <MessagePrimitive.Parts />
       </div>
+      {statuses.get(id) && <p role="status">Response {statuses.get(id)}. This turn is excluded from future context.</p>}
       <ErrorPrimitive.Root className="chat-error">
         <ErrorPrimitive.Message />
       </ErrorPrimitive.Root>
@@ -50,6 +54,8 @@ export function Chat({
   onSettings: () => void;
   onProvidersChanged: () => Promise<void>;
 }) {
+  const available = providers.find(p => p.config.id === conversation.providerId);
+  const unavailable = !available?.config.enabled || !available.availability.available;
   const current = useRef({ conversation, selection, onClearSelection });
   current.current = { conversation, selection, onClearSelection };
   const connection = useMemo(
@@ -66,7 +72,10 @@ export function Chat({
             ...(s ? { selection: s } : {}),
           };
         },
-        () => current.current.onClearSelection(),
+        id => {
+          if (current.current.selection) selections.current.set(id, current.current.selection);
+          current.current.onClearSelection();
+        },
       ),
     [],
   );
@@ -75,18 +84,12 @@ export function Chat({
     initialMessages: history.map((m) => ({
       id: m.id,
       role: m.role,
-      content: m.parts,
+      content: m.parts.map(p => ({ type: "text" as const, text: p.text })),
       createdAt: new Date(m.createdAt),
     })),
   });
-  const prepareMessage = () => {
-    const selected = current.current.selection;
-    if (!selected) return;
-    const text = runtime.thread.composer.getState().text;
-    const quote = `Selected passage${selected.headingPath.length ? ` · ${selected.headingPath.join(" / ")}` : ""}:\n${selected.text}`;
-    if (!text.endsWith(quote))
-      runtime.thread.composer.setText(`${text}\n\n${quote}`);
-  };
+  const statuses = new Map(history.flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
+  const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <ThreadPrimitive.Root className="thread">
@@ -99,12 +102,12 @@ export function Chat({
             </div>
           </ThreadPrimitive.Empty>
           <ThreadPrimitive.Messages>
-            {() => <ChatMessage />}
+            {() => <ChatMessage selections={selections.current} statuses={statuses} />}
           </ThreadPrimitive.Messages>
         </ThreadPrimitive.Viewport>
+        {unavailable && <p role="alert">This conversation’s provider is unavailable. Add an API key or enable it in Settings.</p>}
         <ComposerPrimitive.Root
           className="composer"
-          onSubmitCapture={prepareMessage}
         >
           {selection && (
             <div className="selection-chip">
@@ -127,14 +130,7 @@ export function Chat({
             aria-label="Ask about your document"
             placeholder="Ask about your document…"
             rows={2}
-            onKeyDownCapture={(event) => {
-              if (
-                event.key === "Enter" &&
-                !event.shiftKey &&
-                !event.nativeEvent.isComposing
-              )
-                prepareMessage();
-            }}
+
           />
           <div className="composer-footer">
             <ModelPicker
@@ -149,9 +145,9 @@ export function Chat({
                 Stop
               </ComposerPrimitive.Cancel>
               <ComposerPrimitive.Send
+                disabled={unavailable}
                 className="send-button"
                 aria-label="Send message"
-                onClickCapture={prepareMessage}
               >
                 ↑
               </ComposerPrimitive.Send>

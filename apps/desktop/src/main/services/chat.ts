@@ -10,6 +10,7 @@ import {
 import { chatEnvelopeSchema, chatEventChannel } from "../../shared/ipc";
 import type { Store } from "../db";
 import type { ProviderRegistry } from "../providers";
+import { ProviderError } from "../providers/api";
 import { buildPrompt } from "../prompt";
 export interface ChatOwner {
   isDestroyed(): boolean;
@@ -73,7 +74,10 @@ export class ChatService {
     if (!document || document.status !== "ready")
       throw new Error("Document is not ready");
     const adapter = this.providers.get(request.providerId);
-    const history = this.store.messages.list(request.conversationId);
+    const messages = this.store.messages.list(request.conversationId);
+    const history = messages.filter((message, index) => message.role === "assistant"
+      ? message.parts.every(p => !p.status || p.status === "complete")
+      : messages[index + 1]?.role === "assistant" && messages[index + 1]!.parts.every(p => !p.status || p.status === "complete"));
     this.persist(request, "user", request.userMessage);
     const entry: ActiveRequest = {
       owner,
@@ -97,6 +101,10 @@ export class ChatService {
     entry.controller.abort();
     this.finish(entry, { type: "done" });
   }
+  abortDocument(documentId: ChatRequest["documentId"]): void {
+    for (const entry of this.active.values())
+      if (entry.request.documentId === documentId) this.abort(entry.request.requestId, entry.owner);
+  }
   dispose(): void {
     for (const entry of this.active.values())
       this.abort(entry.request.requestId, entry.owner);
@@ -105,6 +113,7 @@ export class ChatService {
     request: ChatRequest,
     role: "user" | "assistant",
     text: string,
+    status: "complete" | "aborted" | "error" = "complete",
   ) {
     const previous = this.store.messages.list(request.conversationId).at(-1);
     const createdAt = new Date(
@@ -115,7 +124,7 @@ export class ChatService {
         id: randomUUID(),
         conversationId: request.conversationId,
         role,
-        parts: [{ type: "text", text }],
+        parts: [{ type: "text", text, status, ...(role === "user" && request.selection ? { selection: request.selection } : {}) }],
         createdAt,
       }),
     );
@@ -142,7 +151,7 @@ export class ChatService {
     this.active.delete(entry.request.requestId);
     entry.owner.removeListener("destroyed", entry.onDestroyed);
     try {
-      this.persist(entry.request, "assistant", entry.text);
+      if (entry.text) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete");
     } catch {
       if (!entry.controller.signal.aborted)
         event = { type: "error", message: "Chat could not be saved" };
@@ -202,7 +211,7 @@ export class ChatService {
         type: "error",
         message: "Provider stream ended unexpectedly",
       });
-    } catch {
+    } catch (error) {
       this.finish(
         entry,
         entry.controller.signal.aborted
@@ -210,7 +219,7 @@ export class ChatService {
           : {
               type: "error",
               message:
-                "Chat request failed. Check provider configuration and try again.",
+                error instanceof ProviderError ? error.message : "Chat request failed. Check provider configuration and try again.",
             },
       );
     } finally {

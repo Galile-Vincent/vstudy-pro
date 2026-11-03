@@ -206,7 +206,7 @@ it("sanitizes provider exceptions and rejects inconsistent context before persis
     },
   ]);
 });
-it("an immediate abort never starts the provider and persists an empty assistant", async () => {
+it("an immediate abort never starts the provider and does not persist an empty assistant", async () => {
   let called = false;
   const { chat, store, request, owner } = await setup({
     ...available,
@@ -220,7 +220,7 @@ it("an immediate abort never starts the provider and persists an empty assistant
   await new Promise((r) => setTimeout(r, 10));
   expect(called).toBe(false);
   expect(owner.events).toEqual([{ type: "done" }]);
-  expect(store.messages.list(request.conversationId)).toHaveLength(2);
+  expect(store.messages.list(request.conversationId)).toHaveLength(1);
 });
 it("loads the repository Markdown path and supplies stored history on subsequent turns", async () => {
   const prompts: string[] = [];
@@ -266,4 +266,41 @@ it("releases a request if its window transport fails during a delta", async () =
   expect(owner.events).toEqual([{ type: "done" }]);
   expect(() => chat.start(request, owner)).not.toThrow();
   await until(() => owner.events.filter((e) => e.type === "done").length === 2);
+});
+it.each(["document", "conversation"])("aborts before deleting %s without late save errors", async kind => {
+  let signal: AbortSignal | undefined;
+  const { chat, store, request, owner } = await setup({ ...available, async *stream(_req, s) {
+    signal = s;
+    yield { type: "text-delta", text: "partial" };
+    await new Promise<void>(resolve => s.addEventListener("abort", () => resolve(), { once: true }));
+    yield { type: "done" };
+  } });
+  chat.start(request, owner);
+  await until(() => owner.events.length === 1);
+  if (kind === "document") { chat.abortDocument(request.documentId); store.documents.delete(request.documentId); }
+  else chat.deleteConversation(request.conversationId);
+  await new Promise(resolve => setTimeout(resolve, 10));
+  expect(signal?.aborted).toBe(true);
+  expect(owner.events).toEqual([{ type: "text-delta", text: "partial" }, { type: "done" }]);
+  expect(store.messages.list(request.conversationId)).toEqual([]);
+});
+it("persists structured selection and partial status, excludes incomplete turns from prompts", async () => {
+  let second = false;
+  let prompt = "";
+  const { chat, store, request, owner } = await setup({ ...available, async *stream(req) {
+    prompt = req.prompt;
+    yield { type: "text-delta", text: "partial answer" };
+    yield second ? { type: "done" } : { type: "error", message: "failure" };
+  } });
+  chat.start(request, owner);
+  await until(() => owner.events.some(e => e.type === "error"));
+  const messages = store.messages.list(request.conversationId);
+  expect(messages[0]?.parts[0]?.text).toBe("Explain this");
+  expect(messages[0]?.parts[0]?.selection?.text).toBe("Exact selected passage");
+  expect(messages[1]?.parts[0]?.status).toBe("error");
+  second = true;
+  chat.start({ ...request, userMessage: "Next question" }, owner);
+  await until(() => owner.events.some(e => e.type === "done"));
+  expect(prompt).not.toContain("partial answer");
+  expect(prompt).not.toContain("Explain this");
 });

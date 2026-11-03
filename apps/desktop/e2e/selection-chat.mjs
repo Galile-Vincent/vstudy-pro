@@ -60,9 +60,7 @@ try {
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(range);
-      element.dispatchEvent(
-        new window.MouseEvent("mouseup", { bubbles: true }),
-      );
+      window.document.dispatchEvent(new window.Event("selectionchange"));
       return;
     }
     throw new Error("Fixture text missing");
@@ -82,6 +80,12 @@ try {
     .filter({ hasText: selectedText })
     .waitFor({ timeout: 15000 });
   await page.waitForFunction(() => window.document.querySelector(".stop-button")?.disabled === true);
+  const prompt = await page.locator(".message.assistant .message-text").innerText();
+  assert.equal(prompt.split(selectedText).length - 1, 1, "passage occurs exactly once");
+  const block = prompt.split("<untrusted_document_content>")[1].split("</untrusted_document_content>")[0];
+  assert.ok(block.includes(selectedText), "passage is inside untrusted boundary");
+  assert.ok(!block.includes("Explain this passage."), "question is outside boundary");
+  assert.ok(prompt.split("</untrusted_document_content>")[1].includes("User question:"));
   assert.ok(
     (await page.locator(".message.user").textContent()).includes(selectedText),
     "Selection is visible in the user message",

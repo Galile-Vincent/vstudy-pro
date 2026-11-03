@@ -6,7 +6,11 @@ export interface PromptInput {
   history: Pick<Message, "role" | "parts">[];
   userMessage: string;
 }
+export function omitDataUris(text: string): string {
+  return text.replace(/data:[^\s)<>"']+/gi, "image omitted");
+}
 export function buildPrompt(input: PromptInput): string {
+  input = { ...input, document: { ...input.document, markdown: omitDataUris(input.document.markdown) }, ...(input.selection ? { selection: { ...input.selection, text: omitDataUris(input.selection.text) } } : {}) };
   const context = input.selection
     ? `Selected text:\n${input.selection.text.slice(0, 16_000)}`
     : `Outline:\n${
@@ -28,7 +32,7 @@ export function buildPrompt(input: PromptInput): string {
     .map(
       (m) =>
         `${m.role}: ${m.parts
-          .map((p) => p.text)
+          .map((p) => omitDataUris(p.text))
           .join("\n")
           .slice(0, 4_000)}`,
     )

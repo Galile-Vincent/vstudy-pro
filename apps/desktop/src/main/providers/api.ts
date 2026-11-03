@@ -3,6 +3,10 @@ import type { ProviderConfig } from "../../shared/domain";
 import type { SecretStore } from "../services/secrets";
 import type { ProviderAdapter } from "./index";
 import { parseStream } from "./parsers";
+export class ProviderError extends Error {
+  constructor(readonly category: "auth failed" | "rate limited" | "network" | "bad request") { super(`Provider ${category}`); }
+}
+export function isLoopback(value: string): boolean { return ["localhost", "[::1]"].includes(new URL(value).hostname) || /^127\.\d+\.\d+\.\d+$/.test(new URL(value).hostname); }
 export function validateBaseUrl(value: string): string {
   const url = new URL(value);
   if (
@@ -13,7 +17,7 @@ export function validateBaseUrl(value: string): string {
     !(
       url.protocol === "https:" ||
       (url.protocol === "http:" &&
-        ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname))
+        isLoopback(value))
     )
   )
     throw new Error(
@@ -53,9 +57,10 @@ export function createApiAdapter(
         : "https://api.openai.com/v1";
   };
   const key = () => secrets.getInMainOnly(getConfig().id);
+  const noKeyRequired = () => getConfig().kind === "compatible" && isLoopback(base());
   return {
     async detect() {
-      return key()
+      return key() || noKeyRequired()
         ? { available: true }
         : { available: false, reason: "Add an API key" };
     },
@@ -65,11 +70,11 @@ export function createApiAdapter(
           (id) => ({ id, name: id }),
         );
       const token = key();
-      if (!token) return [];
+      if (!token && !noKeyRequired()) return [];
       try {
         const response = await fetcher(`${base()}/models`, {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: AbortSignal.timeout(10_000),
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          signal: AbortSignal.timeout(2500),
           redirect: "error",
         });
         if (!response.ok) return [];
@@ -84,7 +89,7 @@ export function createApiAdapter(
     },
     async *stream(request, signal) {
       const token = key();
-      if (!token) throw new Error("API key unavailable");
+      if (!token && !noKeyRequired()) throw new ProviderError("auth failed");
       const isAnthropic = anthropic();
       const response = await fetcher(
         `${base()}/${isAnthropic ? "messages" : "chat/completions"}`,
@@ -95,12 +100,12 @@ export function createApiAdapter(
           headers: isAnthropic
             ? {
                 "content-type": "application/json",
-                "x-api-key": token,
+                "x-api-key": token ?? "",
                 "anthropic-version": "2023-06-01",
               }
             : {
                 "content-type": "application/json",
-                Authorization: `Bearer ${token}`,
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
               },
           body: JSON.stringify({
             model: request.modelId,
@@ -109,10 +114,10 @@ export function createApiAdapter(
             messages: [{ role: "user", content: request.prompt }],
           }),
         },
-      );
+      ).catch(() => { throw new ProviderError("network"); });
       if (!response.ok || !response.body) {
         await response.body?.cancel();
-        throw new Error("Provider HTTP request failed");
+        throw new ProviderError(response.status === 401 || response.status === 403 ? "auth failed" : response.status === 429 ? "rate limited" : "bad request");
       }
       let terminal = false;
       for await (const event of parseStream(

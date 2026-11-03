@@ -38,3 +38,18 @@ it("uses headings and a bounded excerpt without selection and bounds the total",
   expect(prompt).toContain("User question:");
   expect(prompt).not.toContain("b".repeat(100));
 });
+it("includes one selected passage inside the boundary and question outside", () => {
+  const prompt = buildPrompt({ document: { title: "Study", markdown: "PASSAGE" }, history: [], userMessage: "Explain?", selection: selectionSchema.parse({ documentId: "00000000-0000-4000-8000-000000000001", startOffset: 0, endOffset: 7, text: "PASSAGE", headingPath: [] }) });
+  expect(prompt.split("PASSAGE").length - 1).toBe(1);
+  expect(prompt.split("<untrusted_document_content>\n")[1]!.split("\n</untrusted_document_content>")[0]).toBe("Selected text:\nPASSAGE");
+  expect(prompt.split("</untrusted_document_content>")[1]).toContain("User question:\nExplain?");
+});
+it("omits data URIs before truncating selection, outline and excerpt", () => {
+  const markdown = `# ![alt](data:image/png;base64,${"A".repeat(100000)})\nAfter image`;
+  const prompt = buildPrompt({ document: { title: "Study", markdown }, history: [], userMessage: "Explain" });
+  expect(prompt).toContain("# ![alt](image omitted)\nAfter image");
+  expect(prompt).not.toContain("data:");
+  expect(prompt).not.toContain("AAAA");
+  const selected = buildPrompt({ document: { title: "Study", markdown: "" }, history: [], userMessage: "Explain", selection: selectionSchema.parse({ documentId: "00000000-0000-4000-8000-000000000001", startOffset: 0, endOffset: markdown.length, text: markdown, headingPath: [] }) });
+  expect(selected).toContain("![alt](image omitted)\nAfter image");
+});
