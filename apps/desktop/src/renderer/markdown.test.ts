@@ -110,3 +110,20 @@ it("offers keyboard selections on selectionchange and supports the ask shortcut"
   expect(select.mock.calls[0]?.[0]).toEqual({ documentId: id, startOffset: 0, endOffset: 8, text: "Keyboard", headingPath: [] });
   await act(async () => root.unmount()); container.remove();
 });
+it("renders partial and complete assistant Markdown safely", async () => {
+  const { ReplyMarkdown } = await import("./markdown");
+  const container = document.createElement("div");
+  const root = createRoot(container);
+  await act(async () => root.render(createElement(ReplyMarkdown, { text: "**bo" })));
+  expect(container.textContent).toBe("**bo");
+  await act(async () => root.render(createElement(ReplyMarkdown, { text: "**bold**\n\n- First\n- Second\n\n```js\nconst x = 1;\n```\n\n<script>bad()</script>" })));
+  expect(container.querySelector("strong")?.textContent).toBe("bold");
+  expect([...container.querySelectorAll("li")].map(li => li.textContent)).toEqual(["First", "Second"]);
+  expect(container.querySelector("pre code")?.textContent).toBe("const x = 1;\n");
+  expect(container.querySelector("script")).toBeNull();
+  await act(async () => root.unmount());
+});
+it("previews plain selection text without markdown or image bytes", async () => {
+  const { plainSelection } = await import("./selection-preview");
+  expect(plainSelection("# Results\n\n**Blue** [fern](https://example.com) ![image](data:image/png;base64,AAAA)\n\n- One\n- Two")).toBe("Results Blue fern One Two");
+});

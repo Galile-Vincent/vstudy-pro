@@ -16,7 +16,7 @@ import { externalUrlSchema } from "../shared/ipc";
 import type { Document, Selection } from "../shared";
 import "katex/dist/katex.min.css";
 
-const schema = {
+export const schema = {
   ...defaultSchema,
   protocols: { ...defaultSchema.protocols, src: ["data"] },
   attributes: {
@@ -209,4 +209,10 @@ export function DocumentMarkdown({
       )}
     </div>
   );
+}
+
+export function ReplyMarkdown({ text }: { text: string }) {
+  return <Markdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeSanitize, schema], rehypeKatex, rehypeHighlight]} skipHtml
+    urlTransform={(url) => externalUrlSchema.safeParse(url).success ? url : ""}
+    components={{ a: ({ href, children }) => <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a> }}>{text}</Markdown>;
 }

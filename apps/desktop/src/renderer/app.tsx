@@ -10,7 +10,8 @@ import type {
 } from "../shared";
 import { defaultSettings } from "../shared";
 import { desktop, isMock } from "./bridge";
-import { Chat, ModelPicker } from "./chat";
+import { resolveModel } from "./model";
+import { Chat, ModelPicker, SelectionPreview } from "./chat";
 import { DocumentMarkdown } from "./markdown";
 import { ProviderSettings, type Providers } from "./providers";
 
@@ -31,6 +32,9 @@ export function App() {
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [loadingSource, setLoadingSource] = useState(false);
+  const [draft, setDraft] = useState("");
+  const activeConversation = useRef(conversation);
+  activeConversation.current = conversation;
   const [progress, setProgress] = useState<Record<string, string>>({});
   useEffect(() => desktop.onDocumentProgress?.(event => setProgress(current => ({ ...current, [event.documentId]: event.message }))), []);
   const doc = documents.find((d) => d.id === documentId);
@@ -44,7 +48,7 @@ export function App() {
   const refreshProviders = useCallback(async () => {
     const list = await desktop.invoke("providers:list", {});
     setProviders(list);
-    setModel(current => current || (() => { const p = list.find(p => p.config.enabled && p.availability.available && p.models.length); return p ? `${p.config.id}/${p.models[0]!.id}` : ""; })());
+    if (!activeConversation.current) setModel(current => resolveModel(current, list));
   }, []);
   useEffect(() => { const timer = setInterval(() => { void refreshProviders().catch(report); }, 2000); return () => clearInterval(timer); }, [refreshProviders, report]);
   useEffect(() => {
@@ -60,26 +64,8 @@ export function App() {
         setDocuments(d);
         setProviders(p);
         setConnected(true);
-        setDocumentId(d[0]?.id ?? null);
-        const saved = p.find(
-          (item) =>
-            item.config.id === s.lastProviderId &&
-            item.availability.available &&
-            item.models.some((m) => m.id === s.lastModelId),
-        );
-        const first = p.find(
-          (item) =>
-            item.config.enabled &&
-            item.availability.available &&
-            item.models.length,
-        );
-        setModel(
-          saved
-            ? `${saved.config.id}/${s.lastModelId}`
-            : first
-              ? `${first.config.id}/${first.models[0]!.id}`
-              : "",
-        );
+        setDocumentId(d.find(item => item.id === s.lastDocumentId)?.id ?? d[0]?.id ?? null);
+        setModel(resolveModel(s.lastProviderId && s.lastModelId ? `${s.lastProviderId}/${s.lastModelId}` : "", p));
       })
       .catch(report);
     return () => {
@@ -158,6 +144,9 @@ export function App() {
       report(error);
     }
   };
+  useEffect(() => {
+    if (connected && settings.lastDocumentId !== documentId) void saveSettings({ ...settings, lastDocumentId: documentId });
+  }, [documentId, connected]);
   const chooseModel = (value: string) => {
     setModel(value);
     const slash = value.indexOf("/"),
@@ -168,13 +157,8 @@ export function App() {
       lastProviderId: providerId,
       lastModelId: modelId,
     });
-    if (
-      conversation &&
-      (conversation.providerId !== providerId ||
-        conversation.modelId !== modelId)
-    ) {
-      setNotice("Model will be used for the next conversation. Your current conversation and draft are kept.");
-    }
+    if (conversation && `${conversation.providerId}/${conversation.modelId}` !== value) void newConversation(value);
+
   };
   const importing = useRef(false);
   const importDocument = async (paths?: string[]) => {
@@ -197,15 +181,15 @@ export function App() {
       setBusy(false);
     }
   };
-  const newConversation = async () => {
+  const newConversation = async (value = model) => {
     if (!doc || !model) return;
     setBusy(true);
     try {
-      const slash = model.indexOf("/");
+      const slash = value.indexOf("/");
       const created = await desktop.invoke("conversations:create", {
         documentId: doc.id,
-        providerId: model.slice(0, slash) as ProviderConfig["id"],
-        modelId: model.slice(slash + 1),
+        providerId: value.slice(0, slash) as ProviderConfig["id"],
+        modelId: value.slice(slash + 1),
       });
       setConversations((list) => [created, ...list]);
       setConversation(created);
@@ -250,12 +234,12 @@ export function App() {
               </option>
             ))}
           </select>
-          {conversation && <button aria-label="Delete conversation" onClick={() => {
+          {conversation && <button className="icon-button" title="Delete conversation" aria-label="Delete conversation" onClick={() => {
             if (!window.confirm("Delete this conversation?")) return;
             void desktop.invoke("conversations:delete", { conversationId: conversation.id }).then(() => {
               setConversations(list => list.filter(c => c.id !== conversation.id)); setConversation(null); setHistory(null);
             }).catch(report);
-          }}>Delete chat</button>}
+          }}>⌫</button>}
           <button
             disabled={!canChat || busy}
             onClick={() => void newConversation()}
@@ -268,12 +252,14 @@ export function App() {
       {conversation && history ? (
         <Chat
           key={conversation.id}
+          draft={draft}
+          onDraft={setDraft}
           conversation={conversation}
           history={history}
           selection={selection}
           onClearSelection={() => setSelection(null)}
           providers={providers}
-          model={model}
+          model={`${conversation.providerId}/${conversation.modelId}`}
           onModel={chooseModel}
           onSettings={() => setShowSettings(true)}
           onProvidersChanged={refreshProviders}
@@ -298,7 +284,7 @@ export function App() {
           </div>
           {selection && (
             <div className="selection-chip">
-              <span>{selection.text}</span>
+              <SelectionPreview selection={selection} />
               <button
                 onClick={() => setSelection(null)}
                 aria-label="Remove selection"
@@ -322,12 +308,12 @@ export function App() {
     <section className="pane reading-pane" aria-label="Document">
       <div className="pane-toolbar">
         <span className="eyebrow">{doc?.sourceName ?? "Reading space"}</span>
-        {doc && <button aria-label="Delete document" onClick={() => {
+        {doc && <button className="icon-button" title="Delete document" aria-label="Delete document" onClick={() => {
           if (!window.confirm(`Delete ${doc.title} and its conversations?`)) return;
           void desktop.invoke("documents:delete", { documentId: doc.id }).then(async () => {
             const list = await desktop.invoke("documents:list", {}); setDocuments(list); setDocumentId(list[0]?.id ?? null);
           }).catch(report);
-        }}>Delete document</button>}
+        }}>⌫</button>}
         <span className="muted">
           {doc?.status === "ready" ? "Markdown" : ""}
         </span>

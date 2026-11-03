@@ -775,3 +775,17 @@ h3 {
   color: #b55;
   font-size: 11px;
 }
+.icon-button { width: 28px; height: 28px; padding: 3px; border: 0; background: transparent; font-size: 17px; flex-shrink: 0; }
+.selection-preview { min-width: 0; max-width: 100%; overflow-wrap: anywhere; font-size: 11px; }
+.selection-preview summary { cursor: pointer; }
+.selection-preview summary strong, .selection-preview summary span { display: block; }
+.selection-preview > div { margin-top: 8px; max-height: 240px; overflow: auto; white-space: pre-wrap; }
+.message .selection-preview { padding: 8px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 10px; }
+.message-text .markdown { padding: 0; font-size: inherit; }
+.message-text pre { overflow-x: auto; padding: 12px; background: var(--subtle); border-radius: 6px; }
+.message-text .markdown ul { list-style: disc; padding-left: 24px; }
+.message-text .markdown ol { list-style: decimal; padding-left: 24px; }
+.selection-preview summary strong { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.message-text .markdown { white-space: normal; }
+.message-text .markdown pre { white-space: pre; }
+.message-text .markdown p, .message-text .markdown ul, .message-text .markdown ol { margin: 8px 0; }

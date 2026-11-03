@@ -9,6 +9,8 @@ import {
   useAuiState,
 } from "@assistant-ui/react";
 import type { Conversation, Message, Selection } from "../shared";
+import { ReplyMarkdown } from "./markdown";
+import { plainSelection } from "./selection-preview";
 import { desktop } from "./bridge";
 import { createChatAdapter } from "./chat-adapter";
 import { providerName, type Providers } from "./providers";
@@ -22,9 +24,9 @@ function ChatMessage({ selections, statuses }: { selections: Map<string, Selecti
       <div className="message-label">
         {role === "user" ? "You" : "Assistant"}
       </div>
-      {selected && <blockquote className="selection-chip">{selected.text}</blockquote>}
+      {selected && <SelectionPreview selection={selected} />}
       <div className="message-text">
-        <MessagePrimitive.Parts />
+        <MessagePrimitive.Parts components={role === "assistant" ? { Text: AssistantText } : undefined} />
       </div>
       {statuses.get(id) && <p role="status">Response {statuses.get(id)}. This turn is excluded from future context.</p>}
       <ErrorPrimitive.Root className="chat-error">
@@ -35,6 +37,8 @@ function ChatMessage({ selections, statuses }: { selections: Map<string, Selecti
 }
 export function Chat({
   conversation,
+  draft,
+  onDraft,
   history,
   selection,
   onClearSelection,
@@ -45,6 +49,8 @@ export function Chat({
   onProvidersChanged,
 }: {
   conversation: Conversation;
+  draft: string;
+  onDraft: (value: string) => void;
   history: Message[];
   selection: Selection | null;
   onClearSelection: () => void;
@@ -88,6 +94,7 @@ export function Chat({
       createdAt: new Date(m.createdAt),
     })),
   });
+  useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
   const statuses = new Map(history.flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   return (
@@ -111,12 +118,7 @@ export function Chat({
         >
           {selection && (
             <div className="selection-chip">
-              <span>
-                <strong>
-                  {selection.headingPath.at(-1) ?? "Selected passage"}
-                </strong>
-                <span>{selection.text}</span>
-              </span>
+              <SelectionPreview selection={selection} />
               <button
                 type="button"
                 aria-label="Remove selection"
@@ -205,6 +207,7 @@ export function ModelPicker({
         <option value="" disabled>
           Choose a model
         </option>
+        {model && !providers.some(p => p.models.some(m => `${p.config.id}/${m.id}` === model)) && <option value={model}>{model.slice(model.indexOf("/") + 1)}</option>}
         {providers.map((p) => (
           <optgroup
             key={p.config.id}
@@ -282,4 +285,13 @@ export function ModelPicker({
       )}
     </div>
   );
+}
+
+function AssistantText() {
+  const text = useAuiState(s => s.message.content.filter(p => p.type === "text").map(p => p.text).join("\n"));
+  return <div className="markdown"><ReplyMarkdown text={text} /></div>;
+}
+export function SelectionPreview({ selection }: { selection: Selection }) {
+  const plain = plainSelection(selection.text.replace(/^#{1,6} .*\n?/, ""));
+  return <details className="selection-preview"><summary><strong>{selection.headingPath.join(" › ") || "Selected passage"}</strong><span>{plain.slice(0, 160)}{plain.length > 160 ? "…" : ""}</span></summary><div>{plain}</div></details>;
 }
