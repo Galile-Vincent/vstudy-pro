@@ -1,5 +1,5 @@
 import type { DatabaseSync } from 'node:sqlite';
-import { usageRecordSchema, type UsageRecord, type UsageSummary } from '../../shared/domain';
+import { usageRecordSchema, type UsagePeriod, type UsageRecord, type UsageSummary } from '../../shared/domain';
 export function summarize(records: UsageRecord[]): UsageSummary {
   const total = (rows: UsageRecord[]) => ({
     inputTokens: rows.reduce((n,r) => n + r.inputTokens, 0), outputTokens: rows.reduce((n,r) => n + r.outputTokens, 0),
@@ -12,7 +12,27 @@ export function summarize(records: UsageRecord[]): UsageSummary {
 }
 export function usageRepository(db: DatabaseSync) {
   const list = (where = '', args: string[] = []): UsageRecord[] => db.prepare(`SELECT payload FROM usage_events ${where} ORDER BY createdAt,id`).all(...args).map(row => usageRecordSchema.parse(JSON.parse(String(row.payload))));
+  const periodRecords = (period: UsagePeriod, now: Date) => {
+    if (period === 'all') return list('WHERE createdAt<=?', [now.toISOString()]);
+    const start = new Date(now);
+    if (period === 'last30days') start.setDate(start.getDate() - 29);
+    start.setHours(0,0,0,0);
+    if (period === 'month') start.setDate(1);
+    return list('WHERE createdAt>=? AND createdAt<=?', [start.toISOString(), now.toISOString()]);
+  };
+  const localDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
   return {
+    dashboard(period: UsagePeriod, now = new Date()) {
+      const records = periodRecords(period, now);
+      const start = new Date(now);
+      start.setHours(0,0,0,0);
+      if (period === 'month') start.setDate(1);
+      else if (period !== 'day') start.setDate(start.getDate() - 29);
+      const days = new Map<string, {date:string; inputTokens:number; outputTokens:number}>();
+      for (const cursor = new Date(start); cursor <= now; cursor.setDate(cursor.getDate()+1)) { const date=localDate(cursor); days.set(date,{date,inputTokens:0,outputTokens:0}); }
+      for (const r of records) { const day=days.get(localDate(new Date(r.createdAt))); if(day) { day.inputTokens+=r.inputTokens; day.outputTokens+=r.outputTokens; } }
+      return { summary:summarize(records), cacheReadTokens:records.reduce((n,r)=>n+(r.cacheReadTokens??0),0), cacheWriteTokens:records.reduce((n,r)=>n+(r.cacheWriteTokens??0),0), reasoningTokens:records.reduce((n,r)=>n+(r.reasoningTokens??0),0), days:[...days.values()] };
+    },
     record(input: UsageRecord) {
       const r = usageRecordSchema.parse(input);
       db.prepare('INSERT INTO usage_events(id,createdAt,providerId,modelId,kind,conversationId,documentId,messageId,inputTokens,outputTokens,cacheReadTokens,cacheWriteTokens,reasoningTokens,costUsd,costSource,payload) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(r.id,r.createdAt,r.providerId,r.modelId,r.kind,r.conversationId ?? null,r.documentId ?? null,r.messageId ?? null,r.inputTokens,r.outputTokens,r.cacheReadTokens ?? 0,r.cacheWriteTokens ?? 0,r.reasoningTokens ?? 0,r.costUsd ?? null,r.costSource,JSON.stringify(r));

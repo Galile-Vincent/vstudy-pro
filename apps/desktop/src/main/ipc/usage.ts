@@ -22,6 +22,7 @@ export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemen
     const usage = { inputTokens: Math.ceil((Math.min(bytes,100_000) + Math.min(history,100_000) + userMessage.length + 2000) / 4), outputTokens: 1024, costSource: 'estimated' as const };
     return { ...usage, costUsd: estimateCost(c.modelId, usage, store.settings.get().priceOverrides) };
   });
+  registrar.handle('usage:dashboard', ({period}) => store.usage.dashboard(period));
   registrar.handle('usage:summary' , ({ period }) => store.usage.summary(period));
   registrar.handle('usage:forConversation', ({ conversationId }) => store.usage.forConversation(conversationId));
   registrar.handle('usage:forDocument', ({ documentId }) => store.usage.forDocument(documentId));
@@ -32,5 +33,5 @@ export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemen
     await writeFile(result.filePath, usageCsv(store.usage.list()), 'utf8');
     return { saved: true };
   });
-  for (const channel of ['usage:estimate','usage:summary','usage:forConversation','usage:forDocument','usage:rateLimits','usage:export'] as const) implemented.add(channel);
+  for (const channel of ['usage:dashboard','usage:estimate','usage:summary','usage:forConversation','usage:forDocument','usage:rateLimits','usage:export'] as const) implemented.add(channel);
 }

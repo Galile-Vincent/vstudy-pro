@@ -13,7 +13,7 @@ it('registers usage handlers through trusted sender and strict payload/response 
   const store=openStore(':memory:');
   try {
     const implemented=new Set<IpcChannel>();registerUsageIpc(registrar,store,implemented);
-    expect(implemented.size).toBe(6);
+    expect(implemented.size).toBe(7);
     const invoke=(channel:string,payload:unknown)=>handlers.get(channel)!({} as IpcMainInvokeEvent,payload);
     await expect(invoke('usage:summary',{period:'month'})).resolves.toMatchObject({calls:0,unknownPrices:0});
     await expect(invoke('usage:summary',{period:'month',rawSql:'secret'})).rejects.toThrow();

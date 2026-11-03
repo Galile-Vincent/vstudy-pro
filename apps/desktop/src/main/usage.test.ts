@@ -73,3 +73,18 @@ it('reads OpenAI usage-only chunks, cache details and reasoning details',async()
   const result=[];for await(const event of parseStream(chunks(),'openai',true))result.push(event);
   expect(result).toEqual([{type:'usage',usage:{inputTokens:1200,outputTokens:340,cacheReadTokens:200,reasoningTokens:40,costSource:'unknown'}},{type:'done'}]);
 });
+it('dashboard aggregates all-time usage and zero-fills calendar days without counting cache or reasoning twice',()=>{
+  const store=openStore(':memory:');
+  try {
+    const base=usageRecordSchema.parse({id:'00000000-0000-4000-8000-000000000001',createdAt:'2026-11-03T00:00:00.000Z',providerId:'codex-cli',modelId:'gpt-6.1-sol',kind:'chat',inputTokens:1200,outputTokens:340,cacheReadTokens:200,cacheWriteTokens:100,reasoningTokens:40,costUsd:.012,costSource:'reported'});
+    store.usage.record(base);store.usage.record({...base,id:'00000000-0000-4000-8000-000000000002',createdAt:'2026-10-01T00:00:00.000Z',inputTokens:800,outputTokens:60,costUsd:undefined,costSource:'unknown'});
+    store.usage.record({...base,id:'00000000-0000-4000-8000-000000000003',createdAt:'2026-12-01T00:00:00.000Z'});
+    const all=store.usage.dashboard('all',new Date('2026-11-03T12:00:00Z'));
+    expect(all.summary).toMatchObject({inputTokens:2000,outputTokens:400,calls:2,costUsd:.012,unknownPrices:1});
+    expect(all.cacheReadTokens).toBe(400);expect(all.cacheWriteTokens).toBe(200);expect(all.reasoningTokens).toBe(80);
+    expect(all.days).toHaveLength(30);expect(all.days.at(-1)).toEqual({date:'2026-11-03',inputTokens:1200,outputTokens:340});
+    expect(all.days.filter(d=>d.inputTokens===0)).toHaveLength(29);
+    expect(store.usage.dashboard('month',new Date('2026-11-03T12:00:00Z')).summary.calls).toBe(1);
+    expect(store.usage.dashboard('day',new Date('2026-11-03T12:00:00Z')).days).toHaveLength(1);
+  }finally{store.close();}
+});

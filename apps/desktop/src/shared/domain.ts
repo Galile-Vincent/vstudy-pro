@@ -104,6 +104,13 @@ export const usageSummarySchema = z.object({
   inputTokens: z.number(), outputTokens: z.number(), costUsd: z.number().optional(), unknownPrices: z.number(), calls: z.number(),
   groups: z.array(z.object({ providerId: providerIdSchema, modelId: z.string(), documentId: documentIdSchema.optional(), inputTokens: z.number(), outputTokens: z.number(), costUsd: z.number().optional(), unknownPrices: z.number(), calls: z.number() })),
 });
+export const usagePeriodSchema = z.enum(['day', 'month', 'last30days', 'all']);
+export type UsagePeriod = z.infer<typeof usagePeriodSchema>;
+export const usageDashboardSchema = z.object({
+  summary: usageSummarySchema,
+  cacheReadTokens: z.number().nonnegative(), cacheWriteTokens: z.number().nonnegative(), reasoningTokens: z.number().nonnegative(),
+  days: z.array(z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), inputTokens: z.number().nonnegative(), outputTokens: z.number().nonnegative() })),
+});
 export type UsageSummary = z.infer<typeof usageSummarySchema>;
 export const messagePartSchema = z
   .object({ type: z.literal("text"), text: z.string(), usage: usageSchema.optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
