@@ -59,8 +59,8 @@
 .demo-reader-content .markdown { padding:var(--space-4); font-size:var(--type-base); }
 .w-demo-reader .pane-toolbar { padding:var(--space-2) var(--space-3); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-1); height:auto; min-height:var(--topbar-height); font-size:var(--type-xs); background:var(--surface); position:relative; z-index:1; }
 .w-demo-reader .pane-toolbar small { font-size:inherit; color:var(--muted); }
-.w-demo-reader h1 { font-size:var(--type-lg); }
-.w-demo-reader h2 { font-size:var(--type-md); }
+.w-demo-reader [data-demo-depth="1"] { font-size:var(--type-lg); }
+.w-demo-reader [data-demo-depth="2"] { font-size:var(--type-md); }
 .w-demo-question { align-self:flex-end; background:var(--active); padding:var(--space-2); border-radius:var(--r-sm); }
 .w-demo-question,.w-demo-answer,.w-demo-composer .selection-chip,.w-typed { opacity:0; transition:opacity var(--motion-base) var(--ease-out-soft); }
 .w-demo-answer { flex:1; overflow:hidden; }
@@ -74,7 +74,7 @@
 .w-demo-answer .document-citation { opacity:0; }
 .demo-stage[data-index="7"] .document-citation,.demo-stage[data-index="8"] .document-citation,.demo-stage[data-index="9"] .document-citation,.demo-stage[data-index="10"] .document-citation { opacity:1; animation:w-card-in var(--motion-base) var(--ease-standard); }
 .demo-stage[data-index="9"] .demo-reader-content,.demo-stage[data-index="10"] .demo-reader-content { transform:translateY(calc(-1*var(--demo-jump,0px))); }
-.demo-stage[data-index="1"] .markdown>p:nth-of-type(2),.demo-stage[data-index="2"] .markdown>p:nth-of-type(2),.demo-stage[data-index="10"] .markdown h2 { background:var(--active); }
+.demo-stage[data-index="1"] .markdown>p:nth-of-type(2),.demo-stage[data-index="2"] .markdown>p:nth-of-type(2),.demo-stage[data-index="10"] .markdown [data-demo-depth="2"] { background:var(--active); }
 .w-thinking { display:flex; gap:var(--space-1); opacity:0; }
 .w-thinking span { width:var(--space-1); height:var(--space-1); background:var(--muted); border-radius:var(--r-pill); }
 .demo-stage[data-index="5"] .w-thinking { animation:w-pulse var(--motion-story) var(--ease-in-out-soft); }
@@ -167,7 +167,7 @@ html[data-reduced-transparency=true] #welcome-start { background:none; }
 .welcome[data-motion=paused] .w-marquee>div,.welcome[data-motion=paused] .hero-stack .w-front,.welcome[data-motion=paused] .demo-stage * { animation-play-state:paused!important; }
 .w-demo-reader .pane-toolbar { flex-shrink:0; }
 .w-demo-chat { overflow:hidden; }
-.demo-stage[data-index="10"] .markdown h2:not(:first-of-type) { background:transparent; }
+.demo-stage[data-index="10"] .markdown [data-demo-depth="2"]:not(:first-of-type) { background:transparent; }
 .w-progress::before { content:''; position:absolute; left:12px; top:12px; bottom:12px; width:1px; background:var(--line); transform:scaleY(0); transform-origin:top; z-index:-1; }
 @supports(animation-timeline:--welcome) { .w-progress::before { animation:w-progress linear both; animation-timeline:--welcome; } }
 @keyframes w-progress { to { transform:scaleY(1); } }
@@ -230,7 +230,7 @@ html[data-reduced-transparency=true] .w-glass { border-color:var(--line); }
 .demo-stage[data-index="7"] .document-citation { animation:w-card-in var(--motion-base) var(--ease-standard) both,w-cite-pulse var(--motion-story) var(--ease-out-soft) var(--motion-base) 2; }
 @keyframes w-cite-pulse { from { box-shadow:var(--citation-pulse-start); } to { box-shadow:var(--citation-pulse-end); } }
 .demo-stage[data-index="8"] .document-citation { background:var(--active); transform:scale(.98); }
-.demo-stage[data-index="10"] .markdown h2[data-citation-highlight] { animation:w-citation-highlight var(--welcome-citation-duration) var(--ease-exit) both; }
+.demo-stage[data-index="10"] .markdown [data-demo-depth="2"][data-citation-highlight] { animation:w-citation-highlight var(--welcome-citation-duration) var(--ease-exit) both; }
 @keyframes w-citation-highlight { 0%,80% { outline-color:var(--focus); } 100% { outline-color:transparent; } }
 @media(prefers-reduced-motion:reduce) { .welcome *,.welcome *::before,.welcome *::after { animation:none!important; transition:none!important; } }
 
@@ -253,3 +253,5 @@ html[data-reduced-transparency=true] .w-glass { border-color:var(--line); }
 
 .w-demo-hint { color:var(--muted); font-size:var(--type-xs); }
 .demo-stage[data-index]:not([data-index="0"]):not([data-index="1"]):not([data-index="2"]) .w-demo-hint { visibility:hidden; }
+
+.w-demo-reader [data-demo-depth] { font-weight:600; margin-block:var(--space-4) var(--space-3); }

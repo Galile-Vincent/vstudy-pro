@@ -63,8 +63,10 @@ export function DocumentMarkdown({
   documentId,
   onSelect,
   onNotice,
+  decorative = false,
 }: {
   source: string;
+  decorative?: boolean;
   documentId: Document["id"];
   onSelect: (selection: Selection) => void;
   onNotice: (message: string) => void;
@@ -179,11 +181,11 @@ export function DocumentMarkdown({
                   React.HTMLAttributes<HTMLHeadingElement>) => {
                   const start = node?.position?.start.offset;
                   const heading = headings.find((h) => h.start === start);
-                  const Tag = `h${depth}` as "h1";
+                  const Tag = decorative ? "div" : `h${depth}` as "h1";
                   return (
-                    <Tag {...props}>
+                    <Tag {...props} data-demo-depth={decorative ? depth : undefined}>
                       {children}
-                      {heading && (
+                      {heading && !decorative && (
                         <button
                           className="section-action"
                           aria-label={tr('chat:section_label',{title:heading.text})}
