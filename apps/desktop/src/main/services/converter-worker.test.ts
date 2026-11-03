@@ -105,3 +105,17 @@ for line in sys.stdin:
     expect(progress).toEqual(['NETWORK_DENIED']);
   } finally { worker.stop(); await rm(directory, { recursive: true, force: true }); }
 });
+it('sets kernel file/core limits before accepting converter jobs', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const { resolve } = await import('node:path');
+  const result = spawnSync('python3', ['-c', `import importlib.util, json, resource, sys
+spec=importlib.util.spec_from_file_location('converter',sys.argv[1])
+module=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+sys.argv=['convert.py','--warm-worker']
+module.warm_worker=lambda: print(json.dumps([resource.getrlimit(resource.RLIMIT_NOFILE)[0],resource.getrlimit(resource.RLIMIT_FSIZE)[0],resource.getrlimit(resource.RLIMIT_CORE)[0]]))
+module.main()
+`, resolve('resources/converter/convert.py')], { encoding: 'utf8' });
+  expect(result.status).toBe(0);
+  expect(JSON.parse(result.stdout)).toEqual([128, 64 * 1024 * 1024, 0]);
+});

@@ -14,3 +14,13 @@ export async function exportFile(sourcePath: string, destinationPath: string): P
     } finally { await destination.close(); }
   } finally { await source.close(); }
 }
+export async function exportText(text: string, destinationPath: string): Promise<void> {
+  const destination = await open(destinationPath, constants.O_WRONLY | constants.O_CREAT | constants.O_NOFOLLOW, 0o600);
+  try {
+    const metadata = await destination.stat();
+    if (!metadata.isFile() || metadata.nlink !== 1) throw new Error('Unsafe export destination');
+    await destination.chmod(0o600);
+    await destination.truncate(0);
+    await destination.writeFile(text, 'utf8');
+  } finally { await destination.close(); }
+}

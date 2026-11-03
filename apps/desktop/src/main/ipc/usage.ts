@@ -3,7 +3,7 @@ import { createRateLimitProbe } from "../providers/rate-limits";
 import { dialog } from 'electron';
 import { estimateCost } from '../pricing';
 import { stat } from 'node:fs/promises';
-import { writeFile } from 'node:fs/promises';
+import { exportText } from '../services/export-file';
 import type { Store } from '../db';
 import type { createIpcRegistrar } from './register';
 type IpcRegistrar = ReturnType<typeof createIpcRegistrar>;
@@ -37,7 +37,7 @@ export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemen
   registrar.handle('usage:export', async () => {
     const result = await dialog.showSaveDialog({ title:tr('usage:export_title'), defaultPath: 'vstudy-usage.csv', filters: [{ name: 'CSV', extensions: ['csv'] }] });
     if (result.canceled || !result.filePath) return { saved: false };
-    await writeFile(result.filePath, usageCsv(store.usage.list()), 'utf8');
+    await exportText(usageCsv(store.usage.list()), result.filePath);
     return { saved: true };
   });
   for (const channel of ['usage:dashboard','usage:estimate','usage:summary','usage:forConversation','usage:forDocument','usage:rateLimits','usage:export'] as const) implemented.add(channel);
