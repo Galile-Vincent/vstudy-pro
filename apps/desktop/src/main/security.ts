@@ -5,6 +5,7 @@ export function isAppUrl(candidate: string, entryUrl: string): boolean {
     return (
       url.protocol === entry.protocol &&
       url.origin === entry.origin &&
+      url.hostname === entry.hostname && url.port === entry.port && !url.username && !url.password &&
       url.pathname === entry.pathname &&
       url.search === entry.search
     );

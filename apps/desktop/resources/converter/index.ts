@@ -21,6 +21,9 @@ export function scrubbedEnvironment(cwd: string): NodeJS.ProcessEnv {
     PYTHONIOENCODING: "utf-8",
     PYTHONNOUSERSITE: "1",
     PIP_DISABLE_PIP_VERSION_CHECK: "1",
+    PIP_CONFIG_FILE: "/dev/null",
+    PIP_NO_INPUT: "1",
+    UV_NO_CONFIG: "1",
     UV_NO_PROGRESS: "1",
   };
 }
@@ -59,7 +62,7 @@ export async function runProcess(
       stderr = (stderr + chunk.toString("utf8")).slice(-4000);
       if (cacheDirectory) {
         for (const match of stderr.matchAll(/Downloading ([^\n\r]{1,160})/g)) {
-          if (!downloads.has(match[1]!)) { downloads.add(match[1]!); onProgress?.(`Downloading ${match[1]}`); }
+          if (!downloads.has(match[1]!)) { downloads.add(match[1]!); onProgress?.("Downloading converter dependencies…"); }
         }
       }
       if (!fallbackReported && stderr.includes("PDF_FALLBACK")) {
@@ -77,15 +80,7 @@ export async function runProcess(
           reject(new Error("This PDF is too large or complex to convert"));
           return;
         }
-        const errorType = [...stderr.matchAll(/"type":\s*"([A-Za-z0-9_]+)"/g)].at(-1)?.[1];
-        let detail = stderr;
-        try {
-          const record: unknown = JSON.parse(stderr.trim().split("\n").at(-1) ?? "");
-          if (typeof record === "object" && record !== null && "error" in record && typeof record.error === "string") detail = record.error;
-        } catch { /* Third-party tools can emit plain stderr instead of JSON. */ }
-        // eslint-disable-next-line no-control-regex
-        const tail = detail.replace(/\x1b\[[0-9;]*m/g, "").replace(/https?:\/\/\S+/g, "[URL]").replace(/(?:\/[^\s"']+)+/g, "[path]").replace(/(?:sk-|Bearer\s+)\S+/gi, "[redacted]").replace(/[\x00-\x08\x0b-\x1f]/g, "").slice(-1200);
-        reject(new Error(`${errorType ? `Conversion failed (${errorType})` : `Converter process failed (exit ${code})`}: ${tail}`));
+        reject(new Error(`Converter process failed (exit ${code})`));
       } else resolve();
     });
   });

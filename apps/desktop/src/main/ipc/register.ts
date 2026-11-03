@@ -33,10 +33,8 @@ export function createIpcRegistrar(
         const budget = budgets.get(key);
         if (!budget || now - budget.start >= policy.windowMs) budgets.set(key, { start: now, count: 1 });
         else if (++budget.count > policy.requests) throw new Error('IPC rate limited');
-        const request = ipcContract[channel].request.parse(
-          payload,
-        ) as IpcRequest<C>;
         try {
+          const request = ipcContract[channel].request.parse(payload) as IpcRequest<C>;
           const response = await handler(request, event);
           return ipcContract[channel].response.parse(response);
         } catch (error) {

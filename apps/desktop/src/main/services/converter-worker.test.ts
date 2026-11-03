@@ -82,3 +82,26 @@ it('reaps descendants when an installer exits before its child',async()=>{
   await scope.dispose();await new Promise(r=>setTimeout(r,50));
   expect(Number(pid)).toBeGreaterThan(0);expect(()=>process.kill(Number(pid),0)).toThrow();
 });
+
+it('denies native network access in the macOS converter sandbox', async () => {
+  if (process.platform !== 'darwin') return;
+  const directory = await mkdtemp(join(tmpdir(), 'vstudy-network-test-'));
+  const script = join(directory, 'worker.py');
+  await writeFile(script, `import json, socket, sys
+print(json.dumps({'ready': True}), flush=True)
+for line in sys.stdin:
+ try:
+  socket.create_connection(('127.0.0.1', 9), timeout=1)
+  result='NETWORK_ALLOWED'
+ except PermissionError:
+  result='NETWORK_DENIED'
+ print(json.dumps({'progress': result}), flush=True)
+ print(json.dumps({'done': True}), flush=True)
+`);
+  const worker = new WarmWorker('python3', script, directory);
+  try {
+    const progress: string[] = [];
+    await worker.run('probe', '', '', message => progress.push(message));
+    expect(progress).toEqual(['NETWORK_DENIED']);
+  } finally { worker.stop(); await rm(directory, { recursive: true, force: true }); }
+});

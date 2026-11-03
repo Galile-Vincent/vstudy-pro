@@ -8,6 +8,7 @@ import { safeFilename } from './security';
 import { cliArgs, cliEnvironment } from './providers/cli';
 import { validateImport } from './services/import-security';
 import { containedPath } from './services/file-paths';
+import { exportFile } from './services/export-file';
 import { deleteAllData } from './services/delete-data';
 it('redacts secrets and home paths centrally', () => {
   const result = redact(`sk-secret Bearer token x-api-key: abc ${homedir()}/Documents/book`);
@@ -34,7 +35,12 @@ it('rejects symlinks, hardlinks and signature mismatches; deletes every data tre
     const file = join(root, 'source.md'); await writeFile(file, 'safe', { mode: 0o600 });
     await symlink(file, join(root, 'sym.md'));
     expect(() => validateImport(join(root, 'sym.md'), 'md')).toThrow();
+    await expect(exportFile(file, join(root, 'sym.md'))).rejects.toThrow();
+    await expect(exportFile(file, file)).rejects.toThrow();
+    await exportFile(file, join(root, 'export.md'));
+    expect((await stat(join(root, 'export.md'))).mode & 0o777).toBe(0o600);
     await link(file, join(root, 'hard.md'));
+    await expect(exportFile(file, join(root, 'hard.md'))).rejects.toThrow();
     expect(() => validateImport(file, 'md')).toThrow();
     expect(() => containedPath(root, file)).toThrow();
     await writeFile(join(root, 'bad.pdf'), 'not PDF');
@@ -47,4 +53,26 @@ it('rejects symlinks, hardlinks and signature mismatches; deletes every data tre
     expect(stopped).toBe(true);
     await expect(access(root)).rejects.toThrow();
   } finally { await import('node:fs/promises').then(fs => fs.rm(root, { recursive: true, force: true })); }
+});
+it('repairs DB, library and secret file permissions on every start', async () => {
+  const { chmod, rm } = await import('node:fs/promises');
+  const { openStore } = await import('./db');
+  const { DocumentService } = await import('./services/documents');
+  const { createSecretStore } = await import('./services/secrets');
+  const root = await mkdtemp(join(tmpdir(), 'vstudy-permissions-'));
+  const database = join(root, 'vstudy.sqlite'), library = join(root, 'library'), secrets = join(root, 'secrets.json');
+  await mkdir(library); await writeFile(secrets, '{}');
+  try {
+    for (let startup = 0; startup < 2; startup++) {
+      if (startup) await chmod(database, 0o666);
+      await chmod(library, 0o777); await chmod(secrets, 0o666);
+      const store = openStore(database);
+      const documents = new DocumentService({ store, userData: root, convert: async () => {} });
+      createSecretStore(secrets, { isEncryptionAvailable: () => false, encryptString: () => { throw new Error('unused'); }, decryptString: () => { throw new Error('unused'); } });
+      expect((await stat(database)).mode & 0o777).toBe(0o600);
+      expect((await stat(library)).mode & 0o777).toBe(0o700);
+      expect((await stat(secrets)).mode & 0o777).toBe(0o600);
+      documents.dispose(); store.close();
+    }
+  } finally { await rm(root, { recursive: true, force: true }); }
 });

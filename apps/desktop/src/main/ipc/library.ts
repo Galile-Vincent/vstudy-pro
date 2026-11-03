@@ -1,7 +1,7 @@
 import { documentIdSchema } from '../../shared/domain';
 import { app, dialog, shell } from 'electron';
 import { safeFilename } from "../security";
-import { chmod, copyFile } from 'node:fs/promises';
+import { exportFile } from '../services/export-file';
 import { basename, extname, join } from 'node:path';
 import type { Store } from '../db';
 import type { IpcChannel } from '../../shared/ipc';
@@ -55,8 +55,7 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
             const result = await dialog.showSaveDialog({ defaultPath: channel === 'library:exportMarkdown' ? safeFilename(`${basename(d.sourceName, extname(d.sourceName))}.md`) : safeFilename(basename(d.sourceName)) });
             if (result.canceled || !result.filePath)
                 return { saved: false };
-            await copyFile(path, result.filePath);
-            await chmod(result.filePath, 0o600);
+            await exportFile(path, result.filePath);
             return { saved: true };
         });
     handle('library:reveal', r => { shell.showItemInFolder(containedPath(library.root, library.require(r.documentId).sourcePath)); return { ok: true }; });

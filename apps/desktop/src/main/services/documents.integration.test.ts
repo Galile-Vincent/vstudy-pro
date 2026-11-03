@@ -75,7 +75,7 @@ it("caps subprocess output, times out, and scrubs inherited secrets", async () =
   try {
     await expect(runProcess(process.execPath, ["-e", "setInterval(() => {}, 1000)"], cwd, 50)).rejects.toThrow("timed out");
     await expect(runProcess(process.execPath, ["-e", "process.stdout.write('x'.repeat(10000))"], cwd, 1000, 100)).rejects.toThrow("output exceeds");
-    await expect(runProcess(process.execPath, ["-e", "process.stderr.write('certificate verify failed https://user:password@example.com/private /private/path sk-secret'); process.exit(1)"], cwd)).rejects.toThrow("certificate verify failed [URL] [path] [redacted]");
+    await expect(runProcess(process.execPath, ["-e", "process.stderr.write('certificate verify failed https://user:password@example.com/private /private/path sk-secret'); process.exit(1)"], cwd)).rejects.toThrow("Converter process failed (exit 1)");
     process.env.VSTUDY_TEST_SECRET = "private";
     expect(scrubbedEnvironment(cwd)).not.toHaveProperty("VSTUDY_TEST_SECRET");
     await runProcess(process.execPath, ["-e", "if (process.env.VSTUDY_TEST_SECRET || require('node:fs').realpathSync(process.env.HOME) !== process.cwd()) process.exit(1)"], cwd);

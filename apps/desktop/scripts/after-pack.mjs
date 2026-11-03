@@ -4,6 +4,7 @@ export default async ({ appOutDir, packager }) => {
   const { flipFuses, FuseVersion, FuseV1Options: F } = await import('@electron/fuses');
   await flipFuses(join(appOutDir, `${packager.appInfo.productFilename}.app`), {
     version: FuseVersion.V1,
+    resetAdHocDarwinSignature: true,
     [F.RunAsNode]: false,
     [F.EnableNodeOptionsEnvironmentVariable]: false,
     [F.EnableNodeCliInspectArguments]: false,

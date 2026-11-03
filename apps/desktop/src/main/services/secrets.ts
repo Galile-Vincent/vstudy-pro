@@ -56,7 +56,8 @@ export function createSecretStore(file: string, encryption: Encryption) {
       if (value === undefined) return null;
       if (!encryption.isEncryptionAvailable())
         throw new Error("Secure key storage is unavailable");
-      return encryption.decryptString(Buffer.from(value, "base64"));
+      const ciphertext = Buffer.from(value, "base64");
+      try { return encryption.decryptString(ciphertext); } finally { ciphertext.fill(0); }
     },
   };
 }

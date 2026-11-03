@@ -2,6 +2,7 @@ import { app, BrowserWindow, session, safeStorage, protocol, dialog, ipcMain } f
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { mkdirSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { openStore, type Store } from "./db";
 import { registerIpc } from "./ipc";
 import { createSecretStore } from "./services/secrets";
@@ -11,7 +12,7 @@ import { deleteAllData } from "./services/delete-data";
 import { createIpcRegistrar } from "./ipc/register";
 import { assetHandler } from "./assets";
 
-protocol.registerSchemesAsPrivileged([{ scheme: "vstudy-asset", privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
+protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({ scheme, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } })));
 
 app.enableSandbox();
 if (app.isPackaged) {
@@ -31,7 +32,7 @@ const developmentUrl = !app.isPackaged
   : undefined;
 const entryUrl =
   developmentUrl ??
-  pathToFileURL(join(__dirname, "../renderer/index.html")).href;
+  (app.isPackaged ? "vstudy://app/index.html" : pathToFileURL(join(__dirname, "../renderer/index.html")).href);
 
 function createWindow(): void {
   const current = new BrowserWindow({
@@ -48,6 +49,7 @@ function createWindow(): void {
       nodeIntegration: false,
       webSecurity: true,
       webviewTag: false,
+      devTools: !app.isPackaged,
     },
   });
   window = current;
@@ -73,6 +75,18 @@ void app.whenReady().then(() => {
   mkdirSync(userData, { recursive: true });
   store = openStore(join(userData, "vstudy.sqlite"));
   protocol.handle("vstudy-asset", assetHandler(store, userData));
+  protocol.handle('vstudy', async request => {
+    const url = new URL(request.url);
+    if (request.method !== 'GET' || url.hostname !== 'app' || url.port || url.username || url.password || url.search || !/^\/(?:index\.html|assets\/[a-zA-Z0-9_.-]+)$/.test(url.pathname)) return new Response(null, { status: 404 });
+    const types: Record<string, string> = { html: 'text/html', js: 'text/javascript', css: 'text/css', woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', png: 'image/png', svg: 'image/svg+xml' };
+    const type = types[url.pathname.split('.').at(-1)!];
+    if (!type) return new Response(null, { status: 415 });
+    try {
+      const body = await readFile(join(__dirname, '../renderer', url.pathname.slice(1)));
+      if (body.length > 16 * 1024 * 1024) return new Response(null, { status: 413 });
+      return new Response(body, { headers: { 'Content-Type': type, 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': productionCsp } });
+    } catch { return new Response(null, { status: 404 }); }
+  });
   const secrets = createSecretStore(
     join(userData, "secrets.json"),
     safeStorage,
@@ -80,14 +94,14 @@ void app.whenReady().then(() => {
   session.defaultSession.setDevicePermissionHandler(() => false);
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
     const url = new URL(details.url);
-    const local = ['file:', 'vstudy-asset:', 'data:', 'devtools:'].includes(url.protocol);
+    const local = ['file:', 'vstudy:', 'vstudy-asset:', 'data:', 'devtools:'].includes(url.protocol);
     const dev = developmentUrl && ['http:', 'ws:'].includes(url.protocol) && url.host === new URL(developmentUrl).host;
     callback({ cancel: !local && !dev });
   });
   session.defaultSession.setPermissionRequestHandler(
-    (webContents, permission, callback) => callback(permission === "clipboard-sanitized-write" && isAppUrl(webContents.getURL(), entryUrl)),
+    (webContents, permission, callback, details) => callback(permission === "clipboard-sanitized-write" && details.isMainFrame && isAppUrl(details.requestingUrl, entryUrl) && isAppUrl(webContents.getURL(), entryUrl)),
   );
-  session.defaultSession.setPermissionCheckHandler((webContents, permission) => permission === "clipboard-sanitized-write" && !!webContents && isAppUrl(webContents.getURL(), entryUrl));
+  session.defaultSession.setPermissionCheckHandler((webContents, permission, _origin, details) => permission === "clipboard-sanitized-write" && !!webContents && details.isMainFrame && isAppUrl(webContents.getURL(), entryUrl));
   session.defaultSession.webRequest.onHeadersReceived((details, callback) =>
     callback({
       responseHeaders: {

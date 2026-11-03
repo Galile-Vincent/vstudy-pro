@@ -1,4 +1,5 @@
 "use client";
+import DOMPurify from "dompurify";
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
 
@@ -136,7 +137,8 @@ function MermaidSvg({ svg, ...props }: MermaidSvgProps) {
     supportsAdoptedStyles,
     () => false,
   );
-  const { markup, css } = useMemo(() => splitSvgStyles(svg), [svg]);
+  const safeSvg = useMemo(() => DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true }, FORBID_TAGS: ["foreignObject", "image", "a"] }), [svg]);
+  const { markup, css } = useMemo(() => splitSvgStyles(safeSvg), [safeSvg]);
 
   useLayoutEffect(() => {
     const container = ref.current;
@@ -166,7 +168,7 @@ function MermaidSvg({ svg, ...props }: MermaidSvgProps) {
       ref={ref}
       {...props}
       data-aui-mermaid-svg=""
-      dangerouslySetInnerHTML={{ __html: constructable ? markup : svg }}
+      dangerouslySetInnerHTML={{ __html: constructable ? markup : safeSvg }}
     />
   );
 }
