@@ -54,6 +54,8 @@ it('ignores a fake CLI in PATH and rejects writable binaries',async()=>{
     await chmod(file,0o700);
     expect(await resolveInstalledExecutable('claude',[root])).toBe(await realpath(file));
     expect(await resolveInstalledExecutable('claude')).not.toBe(await realpath(file));
+    await chmod(file,0o100);
+    expect(await resolveInstalledExecutable('claude',[root])).toBe(await realpath(file));
   } finally {await rm(root,{recursive:true,force:true});}
 });
 it('pins the real executable and requires confirmation after its contents change',async()=>{
@@ -71,6 +73,7 @@ it('pins the real executable and requires confirmation after its contents change
     expect(await approved.resolve('claude')).toBe(await realpath(binary));
     const remembered=new ExecutablePins(join(root,'pins.json'),async()=>{throw new Error('Already approved');});
     expect(await remembered.resolve('claude')).toBe(await realpath(binary));
+    await rm(binary);expect(await remembered.describe('claude')).toBeNull();
   }finally{await rm(root,{recursive:true,force:true});}
 });
 it('does not detect or discover CLI providers before explicit enablement',async()=>{

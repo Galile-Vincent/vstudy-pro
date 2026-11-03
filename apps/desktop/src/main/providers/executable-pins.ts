@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, renameSync, existsSync } from 'node:fs';
 import { z } from 'zod';
-import { executableIdentity, resolveInstalledExecutable, type ExecutableIdentity } from './trusted-executable';
+import { executableMetadata, executableIdentity, resolveInstalledExecutable, type ExecutableIdentity } from './trusted-executable';
 const identitySchema = z.object({ path:z.string(), mtime:z.number(), hash:z.string() });
 const pinsSchema = z.record(identitySchema);
 export class ExecutablePins {
@@ -19,7 +19,7 @@ export class ExecutablePins {
     this.save();
     return identity.path;
   }
-  describe(binary: string): Promise<string | null> { return this.pins[binary] ? Promise.resolve(this.pins[binary]!.path) : resolveInstalledExecutable(binary); }
+  describe(binary: string): Promise<string | null> { return this.pins[binary] ? executableMetadata(this.pins[binary]!.path).then(metadata=>metadata.path).catch(()=>null) : resolveInstalledExecutable(binary); }
   resolve(binary: string): Promise<string | null> {
     const pending = this.pending.get(binary);
     if (pending) return pending;
