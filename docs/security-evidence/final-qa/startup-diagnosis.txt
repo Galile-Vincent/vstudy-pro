@@ -1,0 +1,35 @@
+Before cookie fuse change: packaged process 52871, sampled after five seconds.
+    +                                   1515 node::crypto::TLSWrap::GetALPNNegotiatedProto(v8::FunctionCallbackInfo<v8::Value> const&)  (in Electron Framework) + 62512  [0x11094e864]
+    +                                     1515 v8::api_internal::GetFunctionTemplateData(v8::Isolate*, v8::Local<v8::Data>)  (in Electron Framework) + 420  [0x10eaec3e0]
+    +                                       1515 v8::internal::ThreadIsolation::RegisterJitAllocation(unsigned long, unsigned long, v8::internal::ThreadIsolation::JitAllocationType, bool)  (in Electron Framework) + 21452  [0x11013c5e0]
+    +                                         1515 uv_thread_setname  (in Electron Framework) + 119456  [0x1107ed1ac]
+    +                                           1515 rust_bmp$cxxbridge1$194$Reader$alpha  (in Electron Framework) + 947760  [0x114125738]
+    +                                             1515 rust_bmp$cxxbridge1$194$Reader$alpha  (in Electron Framework) + 948676  [0x114125acc]
+    +                                               1515 temporal_rs_PlainDateTime_second  (in Electron Framework) + 527068  [0x1117c4abc]
+    +                                                 1515 rust_bmp$cxxbridge1$194$Reader$width  (in Electron Framework) + 744448  [0x113e35904]
+    +                                                   1515 SecItemCopyMatching  (in Security) + 344  [0x18d57eb80]
+    +                                                     1515 SecItemCopyMatching_osx(__CFDictionary const*, void const**)  (in Security) + 2140  [0x18d57dd20]
+    +                                                       1515 AddItemResults(__SecKeychainItem*, __SecIdentity*, SecItemParams*, __CFAllocator const*, __CFArray**, void const**)  (in Security) + 548  [0x18d581c54]
+    +                                                         1515 SecKeychainItemCopyContent  (in Security) + 316  [0x18d5a0894]
+    +                                                           1515 Security::KeychainCore::ItemImpl::getContent(SecItemClass*, SecKeychainAttributeList*, unsigned int*, void**)  (in Security) + 760  [0x18d55b898]
+    +                                                             1515 Security::KeychainCore::ItemImpl::getContent(Security::CssmClient::DbAttributes*, Security::CssmDataContainer*)  (in Security) + 552  [0x18d5553e0]
+    +                                                               1515 Security::CssmClient::SSDbUniqueRecordImpl::get(Security::CssmClient::DbAttributes*, Security::CssmDataContainer*, cssm_access_credentials const*)  (in Security) + 288  [0x18d2ef250]
+    +                                                                 1515 Security::CssmClient::SSGroupImpl::decodeDataBlob(cssm_data const&, cssm_access_credentials const*, Security::Allocator&, cssm_data&)  (in Security) + 640  [0x18d49b828]
+    +                                                                   1515 CSSM_DecryptDataFinal  (in Security) + 172  [0x18d53446c]
+    +                                                                     1515 cssm_DecryptDataFinal(long, unsigned long long, cssm_data*)  (in Security) + 188  [0x18d4a0134]
+    +                                                                       1515 Security::CSPFullPluginSession::CSPContext::final(Security::CssmData&, Security::Allocator&)  (in Security) + 68  [0x18d2f39a4]
+    +                                                                         1515 SSCryptContext::outputSize(bool, unsigned long)  (in Security) + 332  [0x18d478204]
+    +                                                                           1515 Security::SecurityServer::ClientSession::decrypt(Security::Context const&, unsigned int, Security::CssmData const&, Security::CssmData&, Security::Allocator&)  (in Security) + 764  [0x18d606108]
+    +                                                                             1515 mach_msg  (in libsystem_kernel.dylib) + 24  [0x189873fa0]
+    +                                                                               1515 mach_msg_overwrite  (in libsystem_kernel.dylib) + 480  [0x18987c710]
+    +                                                                                 1515 mach_msg2_internal  (in libsystem_kernel.dylib) + 76  [0x1898864d0]
+    +                                                                                   1515 mach_msg2_trap  (in libsystem_kernel.dylib) + 8  [0x189873c14]
+    1515 Thread_21576564
+
+Securityd corroboration (truncated after item name):
+2026-11-04 05:56:16.904 Df securityd[397:148fb9d] [com.apple.securityd:kcacl] displaying keychain prompt for /Users/vc/.t3/projects/vstudy-pro/apps/desktop/release/mac-arm64/VStudy Pro.app(52871); ACL: <AclValidationContext(action:24)SUBJECT[<ThresholdAclSubject(1 of 2)[<CodeSignatureAclSubject[legacyHash:e7b4005f57fc44c3c20e80db9d2db44ca7fa3249][path:/Users/vc/.t3/projects/vstudy-pro/apps/desktop/release/mac-arm64/VStudy Pro.app][requirement:cdhash H"e91802558c1a27aa21c705c1c6063f52299d0dd4"]>][<KeychainPromptAclSubject(flags: 0x0, desc:@vstudy/desktop Safe Storage)>]>]OBJECT[<ObjectAcl[ENTRY()[<AclEntry[tag:]AUTH[35]SUBJECT[<ThresholdAclSubject(1 of 2)[AnyAclSubject][<KeychainPromptAclSubject(flags: 0x0, desc:@vstudy/desktop Safe Storage)>]>]>] ENTRY()[<AclEntry[tag:]AUTH[24]AUTH[28]AUTH[37]AUTH[38]AUTH[59]AUTH[115]SUBJECT[<ThresholdAclSubject(1 of 2)[<CodeSignatureAclSubject[legacyHash:e7b4005f57fc44c3c20e80db9d2db44ca7fa3249][path:/Users/vc/.t3/projects/vstudy-pro/apps/desktop/release/mac-arm64/VStudy Pro.app][requirement:cdhash H"e91802558c1a27aa21c705c1c6063f52299d0dd4"]>][<KeychainPromptAclSubject(fla<…>
+
+After cookie fuse change: process 56437, real Keychain, no mock switch.
+SecItemCopyMatching stack occurrences: 0
+The first post-repackage launch was 1.861 seconds. Three subsequent fresh-profile timings are in launch-times.json.
+Raw streams remain in /tmp/vstudy-final-qa; no full user-document output is committed.

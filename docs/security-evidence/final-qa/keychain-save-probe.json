@@ -1,0 +1,32 @@
+{
+  "pid": 4639,
+  "root": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-packaged-smoke-2iogzxro",
+  "spawnAt": 1793745360591.312,
+  "visibleSeconds": 0.5638720989227295,
+  "timedOut": true,
+  "exit": null,
+  "keychain-visible": {
+    "at": 1793745361152,
+    "visible": true
+  },
+  "keychain-save-start": {
+    "at": 1793745363154
+  },
+  "keychain-save-result": {
+    "at": 1793745373167,
+    "saved": false,
+    "error": "Error: Error invoking remote method 'secrets:set': Error: VSTUDY_STATUS:{\"code\":\"errors.keychain_unavailable\",\"params\":{}}"
+  },
+  "smoke-result": {
+    "ok": true,
+    "windowVisible": true,
+    "imports": 2,
+    "chatPersisted": true,
+    "userData": "/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-packaged-smoke-2iogzxro/user-data"
+  },
+  "appAttributedItemEventsBeforeWindow": 0,
+  "appAttributedItemEventsBetweenWindowAndSave": 0,
+  "firstItemEventAfterSaveMs": 3,
+  "firstItemEvent": "2026-11-04 06:36:03.157 Df VStudy Pro[4639:14c0b29] [com.apple.securityd:keychain] Enabling System Keychain Always due to platform",
+  "saveTimeoutMs": 10013
+}

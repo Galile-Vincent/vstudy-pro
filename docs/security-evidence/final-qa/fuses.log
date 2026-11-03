@@ -1,0 +1,11 @@
+Analyzing app: VStudy Pro.app
+Fuse Version: v1
+  RunAsNode is Disabled
+  EnableCookieEncryption is Disabled
+  EnableNodeOptionsEnvironmentVariable is Disabled
+  EnableNodeCliInspectArguments is Disabled
+  EnableEmbeddedAsarIntegrityValidation is Enabled
+  OnlyLoadAppFromAsar is Enabled
+  LoadBrowserProcessSpecificV8Snapshot is Disabled
+  GrantFileProtocolExtraPrivileges is Disabled
+  WasmTrapHandlers is Enabled
