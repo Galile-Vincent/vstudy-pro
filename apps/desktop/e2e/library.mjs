@@ -297,6 +297,14 @@ try {
         await page.locator('.filter-panel').getByRole('combobox',{name:catalog.status,exact:true}).click();
         await page.getByRole('option',{name:catalog.ready,exact:true}).click();
         await page.getByTestId("library-filters").click();
+        if (lang === 'en' && width === 720 && colorScheme === 'light') {
+          await page.getByRole('button',{name:catalog.saveFilter,exact:true}).click();
+          await page.getByRole('dialog').getByRole('textbox').fill('Ready study');
+          await page.getByRole('dialog').getByRole('button',{name:catalog.save,exact:true}).click();
+          await page.getByRole('button',{name:'Ready study',exact:true}).waitFor();
+          const saved=await call('library:savedFilters:list',{});
+          assert.equal(JSON.parse(saved.find(f=>f.name==='Ready study').queryJson).status,'ready');
+        }
         await shot(`${lang}-${width}-${colorScheme}-filters`);
         const axe = await new AxeBuilder({ page })
           .setLegacyMode()
