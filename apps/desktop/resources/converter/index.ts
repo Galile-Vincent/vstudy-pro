@@ -40,6 +40,7 @@ export async function runProcess(
     let bytes = 0;
     let stderr = "";
     let fallbackReported = false;
+    const downloads = new Set<string>();
     let failure: Error | undefined;
     const stop = (message: string) => {
       failure ??= new Error(message);
@@ -54,6 +55,11 @@ export async function runProcess(
       bytes += chunk.length;
       if (bytes > maxOutputBytes) stop("Converter process output exceeds limit");
       stderr = (stderr + chunk.toString("utf8")).slice(-4000);
+      if (cacheDirectory) {
+        for (const match of stderr.matchAll(/Downloading ([^\n\r]{1,160})/g)) {
+          if (!downloads.has(match[1]!)) { downloads.add(match[1]!); onProgress?.(`Downloading ${match[1]}`); }
+        }
+      }
       if (!fallbackReported && stderr.includes("PDF_FALLBACK")) {
         fallbackReported = true;
         onProgress?.("PDF too complex or large for the built-in parser; trying fallback…");
@@ -120,10 +126,11 @@ export function createConverter(options: {
           return python;
         }
       } catch { /* An interrupted installation is rebuilt on the next attempt. */ }
-      const cache = join(options.userData, "converter-cache");
-      await mkdir(cache, { recursive: true, mode: 0o700 });
       report("Setting up converter (one time; download size depends on platform)…");
       const uv = await findExecutable("uv");
+      // Cache wheels across private bootstrap directories without inheriting user configuration.
+      const cache = join(homedir(), ".cache", uv ? "uv" : "pip");
+      await mkdir(cache, { recursive: true, mode: 0o700 });
       let systemPython: string | undefined;
       for (const name of ["python3.12", "python3.11", "python3.10", "python3"]) {
         const candidate = await findExecutable(name);
@@ -139,11 +146,11 @@ export function createConverter(options: {
       if (uv) {
         await runProcess(uv, ["venv", "--python", systemPython ?? "3.12", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await runProcess(uv, ["pip", "install", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, undefined, cache);
+        await runProcess(uv, ["pip", "install", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       } else if (systemPython) {
         await runProcess(systemPython, ["-m", "venv", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await runProcess(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, undefined, cache);
+        await runProcess(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       }
       await runProcess(python, ["-c", "import markitdown, pdfplumber"], cwd);
       await writeFile(marker, fingerprint);
