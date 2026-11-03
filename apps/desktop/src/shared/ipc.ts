@@ -17,6 +17,10 @@ const empty = z.object({}).strict();
 const ack = z.object({ ok: z.literal(true) }).strict();
 export const ipcContract = {
   "documents:import": { request: empty, response: documentSchema.nullable() },
+  "documents:importPaths": {
+    request: z.object({ paths: z.array(z.string().min(1).max(4096)).min(1).max(100) }).strict(),
+    response: z.array(documentSchema),
+  },
   "documents:list": { request: empty, response: z.array(documentSchema) },
   "documents:get": {
     request: z.object({ documentId: documentIdSchema }).strict(),
@@ -104,6 +108,7 @@ export const chatEnvelopeSchema = z
   .strict();
 export type ChatEnvelope = z.infer<typeof chatEnvelopeSchema>;
 export interface DesktopApi {
+  getPathForFile?(file: File): string;
   invoke<C extends IpcChannel>(
     channel: C,
     request: IpcRequest<C>,

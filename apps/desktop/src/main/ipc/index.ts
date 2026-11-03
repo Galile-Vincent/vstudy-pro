@@ -3,6 +3,7 @@ import type { Store } from "../db";
 import type { SecretStore } from "../services/secrets";
 import { ipcContract, type IpcChannel } from "../../shared/ipc";
 import { createIpcRegistrar } from "./register";
+import { registerDocumentsIpc } from "./documents";
 import { registerChatIpc } from "./chat";
 
 export function registerIpc(
@@ -32,6 +33,7 @@ export function registerIpc(
     secrets.delete(providerId);
     return { ok: true };
   });
+  registerDocumentsIpc(registrar, store, implemented);
   registerChatIpc(registrar, store, secrets, implemented);
   for (const channel of Object.keys(ipcContract) as IpcChannel[]) {
     if (!implemented.has(channel))

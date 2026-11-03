@@ -1,1 +1,150 @@
-export {};
+import { createHash, randomUUID } from "node:crypto";
+import { createReadStream, createWriteStream } from "node:fs";
+import { mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { basename, extname, join } from "node:path";
+import { Transform } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import { documentSchema, type Document } from "../../shared/domain";
+import type { Store } from "../db";
+import { MAX_MARKDOWN_BYTES, type ConverterRunner } from "../../../resources/converter";
+
+export const MAX_SOURCE_BYTES = 50 * 1024 * 1024;
+export const documentFormats: Readonly<Record<string, string>> = {
+  md: "text/markdown", txt: "text/plain", pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  html: "text/html", htm: "text/html", csv: "text/csv",
+};
+
+export class DocumentService {
+  private readonly library: string;
+  private operations: Promise<unknown> = Promise.resolve();
+  private readonly jobs = new Map<Document["id"], Promise<void>>();
+  private queue: Promise<void> = Promise.resolve();
+  private stopped = false;
+
+  constructor(private readonly options: {
+    store: Store;
+    userData: string;
+    convert: ConverterRunner;
+  }) {
+    this.library = join(options.userData, "library");
+    for (const document of this.list()) {
+      if (document.status === "converting") this.enqueue(document);
+    }
+  }
+
+  list(): Document[] { return this.options.store.documents.list(); }
+  get(id: Document["id"]): Document | null { return this.options.store.documents.get(id); }
+
+  private serialize<T>(operation: () => Promise<T>): Promise<T> {
+    const result = this.operations.then(() => {
+      if (this.stopped) throw new Error("Document service is closed");
+      return operation();
+    });
+    this.operations = result.catch(() => undefined);
+    return result;
+  }
+
+  importPath(path: string): Promise<Document> {
+    return this.serialize(async () => {
+      const extension = extname(path).slice(1).toLowerCase();
+      const mime = documentFormats[extension];
+      if (!Object.hasOwn(documentFormats, extension) || !mime) throw new Error("Unsupported document type");
+      const metadata = await stat(path);
+      if (!metadata.isFile()) throw new Error("Import requires a regular file");
+      if (metadata.size > MAX_SOURCE_BYTES) throw new Error("Document exceeds 50 MiB");
+      await mkdir(this.library, { recursive: true, mode: 0o700 });
+      const staging = await mkdtemp(join(this.library, ".import-"));
+      try {
+        const source = join(staging, `source.${extension}`);
+        const hash = createHash("sha256");
+        let size = 0;
+        await pipeline(createReadStream(path), new Transform({
+          transform(chunk: Buffer, _encoding, callback) {
+            size += chunk.length;
+            if (size > MAX_SOURCE_BYTES) return callback(new Error("Document exceeds 50 MiB"));
+            hash.update(chunk);
+            callback(null, chunk);
+          },
+        }), createWriteStream(source, { flags: "wx", mode: 0o600 }));
+        const sourceHash = hash.digest("hex");
+        const existing = this.options.store.documents.findByHash(sourceHash);
+        if (existing) return existing;
+        const directory = join(this.library, sourceHash);
+        // Recover a directory left behind between publishing a source and inserting its row.
+        await rm(directory, { recursive: true, force: true });
+        await rename(staging, directory);
+        const document = this.options.store.documents.insert(documentSchema.parse({
+          id: randomUUID(), title: basename(path, extname(path)), sourceName: basename(path),
+          sourceHash, sourcePath: join(directory, `source.${extension}`), mime,
+          markdownPath: join(directory, "content.md"), status: "converting", createdAt: new Date().toISOString(),
+        }));
+        this.enqueue(document);
+        return document;
+      } finally { await rm(staging, { recursive: true, force: true }); }
+    });
+  }
+
+  async read(id: Document["id"]): Promise<string> {
+    const document = this.require(id);
+    if (document.status !== "ready") throw new Error("Document is not ready");
+    if ((await stat(document.markdownPath)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
+    return readFile(document.markdownPath, "utf8");
+  }
+
+  retry(id: Document["id"]): Promise<Document> {
+    return this.serialize(async () => {
+      const document = this.require(id);
+      if (document.status !== "failed") throw new Error("Only failed documents can be retried");
+      const updated = this.options.store.documents.transition(id, { status: "converting" });
+      this.enqueue(updated);
+      return updated;
+    });
+  }
+
+  delete(id: Document["id"]): Promise<void> {
+    return this.serialize(async () => {
+      const document = this.get(id);
+      if (!document) return;
+      // Let an in-flight writer finish before removing its directory.
+      await this.jobs.get(id);
+      await rm(join(this.library, document.sourceHash), { recursive: true, force: true });
+      this.options.store.documents.delete(id);
+    });
+  }
+
+  private require(id: Document["id"]): Document {
+    const document = this.get(id);
+    if (!document) throw new Error("Document not found");
+    return document;
+  }
+
+  private enqueue(document: Document): void {
+    if (this.jobs.has(document.id)) return;
+    const job = this.queue.then(async () => {
+      if (this.stopped) return;
+      try {
+        const extension = extname(document.sourcePath).toLowerCase();
+        if (extension === ".md" || extension === ".txt") {
+          const content = await readFile(document.sourcePath);
+          if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
+          await writeFile(`${document.markdownPath}.tmp`, content, { mode: 0o600 });
+          await rename(`${document.markdownPath}.tmp`, document.markdownPath);
+        } else await this.options.convert(document.sourcePath, document.markdownPath);
+        if ((await stat(document.markdownPath)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
+        if (!this.stopped) this.options.store.documents.transition(document.id, { status: "ready" });
+      } catch (error) {
+        if (!this.stopped) this.options.store.documents.transition(document.id, {
+          status: "failed", error: error instanceof Error && error.message.trim() ? error.message.slice(0, 2000) : "Conversion failed",
+        });
+      }
+    }).finally(() => { this.jobs.delete(document.id); });
+    this.jobs.set(document.id, job);
+    this.queue = job;
+  }
+
+  async waitForIdle(): Promise<void> { await this.operations; await this.queue; }
+  dispose(): void { this.stopped = true; }
+}

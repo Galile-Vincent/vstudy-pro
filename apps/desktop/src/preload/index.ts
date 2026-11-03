@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 import {
   chatEnvelopeSchema,
   chatEventChannel,
@@ -11,6 +11,7 @@ import {
 } from "../shared";
 
 const api: DesktopApi = {
+  getPathForFile: (file) => webUtils.getPathForFile(file),
   async invoke<C extends IpcChannel>(
     channel: C,
     request: IpcRequest<C>,
