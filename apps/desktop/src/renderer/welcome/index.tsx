@@ -115,6 +115,22 @@ export default function WelcomeView() {
     void desktop.invoke('dashboard:get', {}).then(d => setRecent(d.recentDocuments[0]?.document)).catch(() => setError(tr('errors:generic')));
     return () => { observer?.disconnect(); document.removeEventListener('visibilitychange', update); };
   }, []);
+  useEffect(() => {
+    if (!paused) return;
+    // Complete finite reading reveals; pause keeps looping motion and the demo in place.
+    const finishReveals = () => {
+      for (const animation of root.current?.getAnimations({ subtree: true }) ?? []) {
+        const effect = animation.effect;
+        const target = effect instanceof KeyframeEffect ? effect.target : null;
+        if (target instanceof Element && target.closest('.demo-stage')) continue;
+        if (effect?.getComputedTiming().iterations === 1 && typeof animation.currentTime === 'number') animation.finish();
+      }
+    };
+    finishReveals();
+    const observer = new MutationObserver(finishReveals);
+    if (root.current) observer.observe(root.current, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-seen'] });
+    return () => observer.disconnect();
+  }, [paused, reduced]);
   const go = (id: typeof sections[number]) => { root.current?.querySelector(`#welcome-${id}`)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }); root.current?.querySelector<HTMLElement>(id === 'hero' ? 'h1' : `#w-${id}-title`)?.focus({ preventScroll: true }); };
   const importDocument = async (sample: boolean) => {
     if (busy) return; setBusy(true); setError('');
