@@ -518,3 +518,9 @@ it('rejects invalid edit options before committing any branch or activity change
  expect(store.messages.list(request.conversationId)).toEqual(before);
  expect(store.db.prepare('SELECT * FROM activity_events').all()).toHaveLength(0);
 });
+it('restores the old active branch when an accepted edit fails before output',async()=>{
+ const {chat,store,request,owner}=await setup({...available,async *stream(){throw new Error('network unavailable');yield {type:'done'};}});
+ const user=store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'user',parts:[{type:'text',text:'original'}],createdAt:new Date().toISOString()});
+ store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'assistant',parts:[{type:'text',text:'valuable answer'}],createdAt:new Date(Date.now()+1).toISOString()});
+ const before=store.messages.list(request.conversationId);chat.start({...request,userMessage:'edited',turnId:user.id},owner);await chat.waitForIdle();expect(store.messages.list(request.conversationId)).toEqual(before);
+});
