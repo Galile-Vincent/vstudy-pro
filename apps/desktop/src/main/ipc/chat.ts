@@ -33,12 +33,17 @@ export function registerChatIpc(
   for (const channel of channels) implemented.add(channel);
   registrar.handle("providers:list", () => providers.list());
   registrar.handle("providers:configure", (config) => {
+    const previous = providers.config(config.id);
+    if (config.kind === 'compatible' && previous.kind === 'compatible' && new URL(config.baseUrl).origin !== new URL(previous.baseUrl).origin) secrets.delete(config.id);
     providers.configure(config);
     return { ok: true };
   });
-  registrar.handle("conversations:create", (input) =>
-    chat.createConversation(input),
-  );
+  registrar.handle("conversations:create", async (input) => {
+    const adapter = providers.get(input.providerId);
+    const models = await adapter.listModels();
+    if (!models.some(m => m.id === input.modelId || m.resolvedId === input.modelId)) throw new Error('Model unavailable');
+    return chat.createConversation(input);
+  });
   registrar.handle("conversations:model", async ({conversationId,providerId,modelId}) => {
     if (!store.conversations.get(conversationId)) throw new Error('Conversation unavailable');
     const adapter = providers.get(providerId);

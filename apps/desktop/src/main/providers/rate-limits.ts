@@ -1,3 +1,4 @@
+import { recordEgress } from '../services/egress';
 import { createInterface } from 'node:readline';
 import { z } from 'zod';
 import { ProcessScope } from '../../../resources/converter/process-scope';
@@ -5,6 +6,7 @@ import { cliEnvironment, findCli } from './cli';
 import type { Usage } from '../../shared/domain';
 const windowSchema = z.object({ usedPercent: z.number().min(0).max(100), windowDurationMins: z.number().nullable().optional(), resetsAt: z.number().nullable().optional() });
 export async function probeCodexRateLimits(binary: string, args = ['app-server'], timeoutMs = 2500): Promise<Usage['rateLimit']> {
+  recordEgress('Enabled Codex quota check', 'OpenAI / Codex CLI managed endpoints');
   const scope = new ProcessScope();
   const child = scope.spawn(binary, args, { cwd: process.env.TMPDIR ?? '/tmp', env: cliEnvironment(), shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
   child.stdin!.on('error', () => {});

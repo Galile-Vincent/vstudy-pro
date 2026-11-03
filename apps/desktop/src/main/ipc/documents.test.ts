@@ -11,6 +11,7 @@ import { createIpcRegistrar } from "./register";
 
 const mock = vi.hoisted(() => ({ userData: "", dialog: vi.fn(), resume: undefined as (() => void) | undefined }));
 vi.mock("electron", () => ({
+  ipcMain: {on:vi.fn(),removeListener:vi.fn()},
   app: { getPath: () => mock.userData, getAppPath: () => process.cwd(), isPackaged: false },
   dialog: { showOpenDialog: mock.dialog },
 }));
@@ -18,6 +19,7 @@ vi.mock("../../../resources/converter", async (original) => ({
   ...await original<typeof import("../../../resources/converter")>(),
   createConverter: () => ({ ensureReady: async () => "python", dispose: () => undefined, convert: async (_source: string, output: string, progress?: (message: string) => void) => { await new Promise<void>(resolve => { mock.resume = resolve; }); progress?.("Installing markitdown…"); await writeFile(output, "converted"); } }),
 }));
+import { ipcMain } from "electron";
 import { registerDocumentsIpc } from "./documents";
 
 afterEach(() => { vi.clearAllMocks(); });
@@ -33,11 +35,18 @@ it("registers document routes, validates drop paths, owns the native dialog and 
   const abort = vi.fn();
   registerDocumentsIpc(registrar, store, implemented, async (id, remove) => { abort(id); await remove(); });
   const send = vi.fn();
-  const sender = { isDestroyed: () => false, send };
+  const mainFrame = {};
+  const sender = { mainFrame, isDestroyed: () => false, send };
   const invoke = async (channel: string, payload: unknown) => {
     const handler = handlers.get(channel);
     if (!handler) throw new Error("Missing handler");
-    return handler({ sender } as unknown as IpcMainInvokeEvent, payload);
+    return handler({ sender, senderFrame:mainFrame } as unknown as IpcMainInvokeEvent, payload);
+  };
+  const token = (path:string) => {
+    const listener=vi.mocked(ipcMain.on).mock.calls.find(c=>c[0]==='vstudy:preload-drop')![1];
+    const event={sender,senderFrame:mainFrame,returnValue:[]};
+    listener(event as unknown as Electron.IpcMainEvent,[path]);
+    return (event.returnValue as string[])[0]!;
   };
   try {
     expect(implemented).toContain("documents:importSample");
@@ -57,11 +66,11 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     expect(await invoke("documents:read", { documentId: document.id })).toContain("VStudy fixture");
     expect(await invoke("documents:get", { documentId: document.id })).toMatchObject({ id: document.id });
     expect(await invoke("documents:list", {})).toHaveLength(1);
-    expect(await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.md")] })).toHaveLength(1);
-    const mixed = await invoke("documents:importPaths", { paths: ["missing.unsupported", resolve("test-fixtures/converter/sample.md")] }) as { ok: boolean; error?: string }[];
+    expect(await invoke("documents:importPaths", { paths: [token(resolve("test-fixtures/converter/sample.md"))] })).toHaveLength(1);
+    const mixed = await invoke("documents:importPaths", { paths: [token("missing.unsupported"), token(resolve("test-fixtures/converter/sample.md"))] }) as { ok: boolean; error?: string }[];
     expect(mixed.map(r => r.ok)).toEqual([false, true]);
     expect(mixed[0]?.error).toBe("Import failed");
-    const converted = await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.docx")] }) as { document: { id: string } }[];
+    const converted = await invoke("documents:importPaths", { paths: [token(resolve("test-fixtures/converter/sample.docx"))] }) as { document: { id: string } }[];
     await vi.waitFor(() => expect(mock.resume).toBeTypeOf("function"));
     mock.resume!();
     await vi.waitFor(() => expect(send).toHaveBeenCalledWith("documents:progress", { documentId: converted[0]!.document.id, message: "Installing markitdown…", code:"library.conversion_preparing", params:{} }));

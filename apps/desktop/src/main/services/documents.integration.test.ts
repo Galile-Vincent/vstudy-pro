@@ -15,7 +15,7 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     const resources = join(directory, "resources");
     await mkdir(resources);
     const progress: string[] = [];
-    const options = { userData: directory, resources, onProgress: (message: string) => { progress.push(message); } };
+    const options = { authorizeDownload: async () => true, userData: directory, resources, onProgress: (message: string) => { progress.push(message); } };
     converter = createConverter(options);
     await expect(converter.ensureReady()).rejects.toThrow();
     await copyFile(resolve("resources/converter/requirements.lock.txt"), join(resources, "requirements.lock.txt"));

@@ -7,5 +7,7 @@
   "network": "Check your connection and try again.",
   "budget": "Provider quota exceeded. Check your billing settings.",
   "bad_request": "Check the selected model and provider settings.",
-  "server_error": "The provider encountered an error. Try again later."
+  "server_error": "The provider encountered an error. Try again later.",
+  "search_refine": "Refine your query: use at least two distinct characters.",
+  "search_too_long": "Search took too long; refine your query."
 }

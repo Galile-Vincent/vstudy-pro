@@ -1,3 +1,4 @@
+import { recordEgress } from '../services/egress';
 import { option } from "./models";
 import { z } from "zod";
 import { headerRateLimit } from "./usage";
@@ -92,7 +93,8 @@ export function createApiAdapter(
       const token = key();
       if (!token && !noKeyRequired()) return [];
       try {
-        const response = await fetcher(`${base()}/models`, {
+        recordEgress('Provider request', new URL(base()).origin);
+      const response = await fetcher(`${base()}/models`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           signal: AbortSignal.timeout(2500),
           redirect: "error",
@@ -111,6 +113,7 @@ export function createApiAdapter(
       const token = key();
       if (!token && !noKeyRequired()) throw new ProviderError("auth failed");
       const isAnthropic = anthropic();
+      recordEgress('Provider request', new URL(base()).origin);
       const response = await fetcher(
         `${base()}/${isAnthropic ? "messages" : "chat/completions"}`,
         {

@@ -1,8 +1,9 @@
+import { DropTokens } from '../services/drop-tokens';
 import { readFile } from "node:fs/promises";
 import { LibraryService } from '../services/library';
 import { tr } from "../i18n";
 import { conversionStatus } from "../../shared/status";
-import { app, dialog } from "electron";
+import { app, dialog, ipcMain } from "electron";
 import { join } from "node:path";
 import type { Store } from "../db";
 import { DocumentService, documentFormats } from "../services/documents";
@@ -17,18 +18,28 @@ export function registerDocumentsIpc(
   implemented: Set<IpcChannel>,
   deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(),
 ): () => Promise<void> {
+  const drops = new DropTokens();
   const library = new LibraryService(store, join(app.getPath("userData"), "library"));
   const userData = app.getPath("userData");
   const converter = createConverter({
     userData,
+    authorizeDownload: async () => {
+      const result = await dialog.showMessageBox({type:'question',message:'Download the document converter?',detail:'First-run conversion installs locked Python packages from pypi.org and files.pythonhosted.org. uv may download Python from GitHub. Choose Offline to keep reading Markdown and text without installing; retry conversion to ask again.',buttons:['Offline','Download and retry'],defaultId:0,cancelId:0});
+      return result.response === 1;
+    },
     resources: app.isPackaged ? join(process.resourcesPath, "converter") : join(app.getAppPath(), "resources/converter"),
   });
-  void converter.ensureReady().catch(() => undefined);
   const owners = new Map<string, Electron.WebContents>();
   const documents = new DocumentService({ store, userData, convert: converter.convert, onProgress: (documentId, message) => {
     const owner = owners.get(documentId);
     if (owner && !owner.isDestroyed()) owner.send(documentProgressChannel, documentProgressSchema.parse({ documentId, message, ...conversionStatus(message) }));
   } });
+  const captureDrop = (event: Electron.IpcMainEvent, paths: unknown) => {
+    event.returnValue = [];
+    if (event.senderFrame !== event.sender.mainFrame || !Array.isArray(paths) || paths.length > 100 || !paths.every(p => typeof p === 'string' && p.length < 4096)) return;
+    event.returnValue = paths.map(path => drops.issue(path, event.senderFrame!));
+  };
+  ipcMain.on('vstudy:preload-drop', captureDrop);
   const channels = ["welcome:sampleDocument","documents:importSample", "documents:import", "documents:importPaths", "documents:list", "documents:get", "documents:read", "documents:retry", "documents:reconvert", "documents:delete"] as const;
   for (const channel of channels) implemented.add(channel);
   registrar.handle("welcome:sampleDocument", ({ language }) => readFile(
@@ -47,7 +58,7 @@ export function registerDocumentsIpc(
     if (result.canceled || !path) return null;
     const document = await documents.importPath(path); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return document;
   });
-  registrar.handle("documents:importPaths", ({ paths, folderId }, event) => Promise.all(paths.map(async (path) => { try { const document = await documents.importPath(path); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return { ok: true as const, document }; } catch { return { ok: false as const, path, error: "Import failed" }; } })));
+  registrar.handle("documents:importPaths", ({ paths, folderId }, event) => Promise.all(paths.map(async (path) => { try { const document = await documents.importPath(drops.consume(path, event.senderFrame!)); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return { ok: true as const, document }; } catch { return { ok: false as const, path, error: "Import failed" }; } })));
   registrar.handle("documents:list", () => documents.list());
   registrar.handle("documents:get", ({ documentId }) => documents.get(documentId));
   registrar.handle("documents:read", ({ documentId }) => documents.read(documentId));
@@ -58,5 +69,5 @@ export function registerDocumentsIpc(
     return { ok: true };
   });
   const dispose = registrar.dispose;
-  return async () => { documents.dispose(); dispose(); await converter.dispose(); };
+  return async () => { ipcMain.removeListener('vstudy:preload-drop', captureDrop); documents.dispose(); dispose(); await converter.dispose(); };
 }

@@ -26,7 +26,7 @@ export function createIpcRegistrar(
       ) => IpcResponse<C> | Promise<IpcResponse<C>>,
     ): void {
       ipc.handle(channel, async (event, payload: unknown) => {
-        if (!isTrusted(event)) throw new Error("Untrusted IPC sender");
+        if (!isTrusted(event) || (event.sender?.mainFrame && event.senderFrame !== event.sender.mainFrame)) throw new Error("Untrusted IPC sender");
         const policy = channelPolicy(channel);
         if (Buffer.byteLength(JSON.stringify(payload) ?? '') > policy.bytes) throw new Error('IPC payload too large');
         const now = Date.now(), key = `${event.sender?.id ?? 0}:${channel}`;
@@ -38,6 +38,7 @@ export function createIpcRegistrar(
           const response = await handler(request, event);
           return ipcContract[channel].response.parse(response);
         } catch (error) {
+          if (error instanceof Error && /Search took too long|Refine your query/.test(error.message)) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message.startsWith('Search took too long') ? 'errors.search_too_long' : 'errors.search_refine',params:{}}));
           const code=error instanceof Error && error.message.includes('Only empty conversations') ? 'errors.conversation_not_empty' : 'errors.generic';
           // Electron strips custom Error fields, so keep the stable payload in its message.
           throw new Error('VSTUDY_STATUS:' + JSON.stringify({code,params:{}}));

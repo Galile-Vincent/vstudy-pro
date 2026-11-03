@@ -27,3 +27,8 @@ it('exports CSV with unknown costs blank and neutralizes spreadsheet formulas',(
   const csv=usageCsv([record]);
   expect(csv).toContain('"\'=DANGEROUS,""model"""');expect(csv).toContain('"1200","340","","","","","unknown"');
 });
+
+it.each(['=cmd','+cmd','-cmd','@cmd','\tcmd','\rcmd','  =cmd'])('quotes hostile CSV cell %j', modelId=>{
+ const record=usageRecordSchema.parse({id:'00000000-0000-4000-8000-000000000001',createdAt:'2026-11-03T00:00:00Z',providerId:'openai-compatible',modelId,kind:'chat',inputTokens:0,outputTokens:0,costSource:'unknown'});
+ expect(usageCsv([record]).split('\r\n')[1]).toContain(`"'${modelId}"`);
+});

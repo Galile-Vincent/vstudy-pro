@@ -24,6 +24,8 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  "settings:networkActivity": {request:empty,response:z.array(z.object({at:z.string().datetime(),what:z.string(),to:z.string()}).strict())},
+  "providers:chooseExecutable": {request:z.object({binary:z.enum(['claude','codex','agy'])}).strict(),response:z.object({path:z.string().nullable()}).strict()},
   "settings:deleteAllData": { request: empty, response: ack },
   "settings:appearance": { request: empty, response: z.object({ reducedTransparency:z.boolean() }).strict() },
   "settings:systemLocale": { request: empty, response: z.string().max(100) },
@@ -43,7 +45,7 @@ export const ipcContract = {
   "documents:importSample": { request: z.object({ language: z.enum(["en", "zh-Hant", "ja"]) }).strict(), response: documentSchema },
   "documents:import": { request: z.object({ folderId: folderIdSchema.nullable().optional() }).strict(), response: documentSchema.nullable() },
   "documents:importPaths": {
-    request: z.object({ paths: z.array(z.string().min(1).max(4096)).min(1).max(100), folderId: folderIdSchema.nullable().optional() }).strict(),
+    request: z.object({ paths: z.array(z.string().regex(/^drop:[a-f0-9]{64}$/)).min(1).max(100), folderId: folderIdSchema.nullable().optional() }).strict(),
     response: z.array(z.discriminatedUnion("ok", [z.object({ ok: z.literal(true), document: documentSchema }), z.object({ ok: z.literal(false), path: z.string(), error: z.string() })])),
   },
   "documents:list": { request: empty, response: z.array(documentSchema) },
@@ -93,6 +95,7 @@ export const ipcContract = {
           z.object({ available: z.literal(true) }),
           z.object({ available: z.literal(false), reason: z.string() }),
         ]),
+        resolvedPath: z.string().nullable().optional(),
         modelsLoading: z.boolean().optional(),
         models: z.array(modelSchema),
       }),

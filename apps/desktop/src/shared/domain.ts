@@ -82,7 +82,7 @@ export const conversationSchema = z
     id: conversationIdSchema,
     documentId: documentIdSchema,
     providerId: providerIdSchema,
-    modelId: z.string().min(1),
+    modelId: z.string().min(1).max(300),
     options: modelOptionsSchema.optional(),
     createdAt: timestamp,
   })
@@ -104,7 +104,7 @@ export const priceSchema = z.object({ input: z.number().finite().nonnegative(), 
 export type Price = z.infer<typeof priceSchema>;
 export const usageRecordSchema = usageSchema.extend({
   aborted: z.boolean().optional(),
-  id: z.string().uuid(), createdAt: timestamp, providerId: providerIdSchema, modelId: z.string().min(1),
+  id: z.string().uuid(), createdAt: timestamp, providerId: providerIdSchema, modelId: z.string().min(1).max(300),
   kind: z.enum(['chat', 'parse']), conversationId: conversationIdSchema.optional(), documentId: documentIdSchema.optional(), messageId: messageIdSchema.optional(),
 });
 export type UsageRecord = z.infer<typeof usageRecordSchema>;
@@ -179,7 +179,7 @@ export const chatRequestSchema = z
     conversationId: conversationIdSchema,
     documentId: documentIdSchema,
     providerId: providerIdSchema,
-    modelId: z.string().min(1),
+    modelId: z.string().min(1).max(300),
     userMessage: z.string().min(1),
     options: modelOptionsSchema.optional(),
     turnId: z.string().max(200).optional(),

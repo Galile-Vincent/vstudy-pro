@@ -1,3 +1,4 @@
+import { configuredCliPath } from './executable-pins';
 import {
   existsSync,
   readFileSync,
@@ -74,9 +75,9 @@ export class ProviderRegistry {
       enabled: false,
       baseUrl: "http://localhost:11434/v1",
     },
-    { kind: "cli", id: "claude-cli", enabled: true },
-    { kind: "cli", id: "codex-cli", enabled: true },
-    { kind: "cli", id: "agy-cli", enabled: true },
+    { kind: "cli", id: "claude-cli", enabled: false },
+    { kind: "cli", id: "codex-cli", enabled: false },
+    { kind: "cli", id: "agy-cli", enabled: false },
   ];
   constructor(private readonly configFile?: string) {
     if (configFile && existsSync(configFile)) {
@@ -153,6 +154,7 @@ export class ProviderRegistry {
               : { available: false, reason: "Provider unavailable" };
           return {
             config,
+            ...(config.kind === 'cli' ? {resolvedPath:await configuredCliPath(config.id.replace('-cli',''))} : {}),
             availability,
             models: adapter && config.enabled ? this.models(config, adapter) : [],
             modelsLoading: !!adapter && config.enabled && this.loading.has(`${this.modelRevision}:${JSON.stringify(config)}`),
@@ -165,6 +167,7 @@ export class ProviderRegistry {
               reason: "Provider detection failed",
             } satisfies Availability,
             models: [],
+            modelsLoading: false,
           };
         }
       }),

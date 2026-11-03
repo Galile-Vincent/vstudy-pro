@@ -1,9 +1,10 @@
+import { recordEgress } from '../services/egress';
 import claudeFallback from './fixtures/claude-models.json';
 import codexFallback from './fixtures/codex-models.json';
 import patterns from './fixtures/claude-t3-patterns.json';
 import { spawn } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
-import { homedir } from 'node:os';
+import { mkdtemp, rm, readFile } from 'node:fs/promises';
+import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { z } from 'zod';
 import type { Model } from '../../shared/domain';
@@ -32,9 +33,11 @@ export function claudeModels(input: unknown): Model[] {
 
   }).filter((m, i, all) => all.findIndex(x => x.id === m.id) === i);
 }
-function capture(binary: string, args: string[], input = '', initialize = false): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(binary, args, { cwd: homedir(), env: cliEnvironment(), shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
+async function capture(binary: string, args: string[], input = '', initialize = false): Promise<string> {
+  const cwd = await mkdtemp(join(tmpdir(), 'vstudy-models-'));
+  try { return await new Promise<string>((resolve, reject) => {
+    recordEgress('Enabled CLI model discovery', 'CLI managed service endpoints');
+    const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '';
     const timer = setTimeout(() => { child.kill(); reject(new Error('Model discovery timed out')); }, 8000);
     child.on('error', reject); child.stderr.resume(); child.stdin.on('error', () => {});
@@ -47,7 +50,7 @@ function capture(binary: string, args: string[], input = '', initialize = false)
     });
     child.once('close', code => { clearTimeout(timer); if (code === 0) resolve(out); else reject(new Error('Model discovery failed')); });
     child.stdin.end(input);
-  });
+  }); } finally { await rm(cwd, {recursive:true,force:true}); }
 }
 const catalogs = new Map<string, { expires: number; result: Promise<Model[]> }>();
 export function discoverModels(kind: 'claude' | 'codex'): Promise<Model[]> {
@@ -61,7 +64,7 @@ async function readCatalog(kind: 'claude' | 'codex'): Promise<Model[]> {
   const binary = await findCli(kind);
   if (binary) try {
     if (kind === 'codex') return codexModels(JSON.parse(await capture(binary, ['debug', 'models'])));
-    return claudeModels(JSON.parse(await capture(binary, ['-p', '--input-format', 'stream-json', '--output-format', 'stream-json', '--verbose', '--tools', '', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--setting-sources', '', '--no-session-persistence'], JSON.stringify({ type: 'control_request', request_id: 'models', request: { subtype: 'initialize' } }) + '\n', true)));
+    return claudeModels(JSON.parse(await capture(binary, ['-p', '--safe-mode', '--input-format', 'stream-json', '--output-format', 'stream-json', '--verbose', '--tools', '', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--setting-sources', '', '--no-session-persistence'], JSON.stringify({ type: 'control_request', request_id: 'models', request: { subtype: 'initialize' } }) + '\n', true)));
   } catch { /* Older CLIs may not expose a catalog. */ }
   if (kind === 'codex') try { return codexModels(JSON.parse(await readFile(join(homedir(), '.codex/models_cache.json'), 'utf8'))).map(m => ({ ...m, name: `${m.name} (cached)` })); } catch { /* Cache is optional. */ }
   return (kind === 'claude' ? claudeModels(claudeFallback) : codexModels(codexFallback)).map(m => ({ ...m, name: `${m.name} (static fallback)` }));

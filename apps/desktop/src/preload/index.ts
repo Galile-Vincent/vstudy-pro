@@ -11,6 +11,22 @@ import {
   type IpcResponse,
 } from "../shared";
 
+if (process.isMainFrame) {
+  const removeFrames = () => document.querySelectorAll('iframe,frame,object,embed').forEach(frame => {
+    frame.setAttribute('sandbox', '');
+    frame.remove();
+  });
+  new MutationObserver(removeFrames).observe(document, {childList:true,subtree:true,attributes:true,attributeFilter:['sandbox','src','srcdoc']});
+}
+const dropTokens = new Map<string, string>();
+if (process.isMainFrame) window.addEventListener('drop', event => {
+  if (!event.isTrusted || !event.dataTransfer) return;
+  const files = [...event.dataTransfer.files].slice(0, 100);
+  const paths = files.map(file => webUtils.getPathForFile(file));
+  const tokens: string[] = ipcRenderer.sendSync('vstudy:preload-drop', paths);
+  dropTokens.clear();
+  paths.forEach((path, index) => { if (tokens[index]) dropTokens.set(path, tokens[index]!); });
+}, true);
 const api: DesktopApi = {
   onDocumentProgress(listener) {
     const receive = (_event: Electron.IpcRendererEvent, payload: unknown) => {
@@ -20,7 +36,7 @@ const api: DesktopApi = {
     ipcRenderer.on(documentProgressChannel, receive);
     return () => ipcRenderer.removeListener(documentProgressChannel, receive);
   },
-  getPathForFile: (file) => webUtils.getPathForFile(file),
+  getPathForFile: (file) => dropTokens.get(webUtils.getPathForFile(file)) ?? "",
   async invoke<C extends IpcChannel>(
     channel: C,
     request: IpcRequest<C>,
@@ -46,4 +62,4 @@ const api: DesktopApi = {
     return () => ipcRenderer.removeListener(chatEventChannel, receive);
   },
 };
-contextBridge.exposeInMainWorld("desktop", api);
+if (process.isMainFrame) contextBridge.exposeInMainWorld("desktop", api);

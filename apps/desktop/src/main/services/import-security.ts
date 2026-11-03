@@ -12,7 +12,7 @@ export function validateImport(path: string, extension: string) {
         return;
     }
     if (['docx', 'xlsx', 'pptx'].includes(extension)) {
-        if (data.readUInt32LE(0) !== 0x04034b50)
+        if (data.length < 4 || data.readUInt32LE(0) !== 0x04034b50)
             throw new Error('Office signature mismatch');
         let end = -1;
         for (let i = data.length - 22; i >= Math.max(0, data.length - 65557); i--)

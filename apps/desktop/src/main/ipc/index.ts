@@ -1,3 +1,5 @@
+import { networkActivity, recordEgress } from '../services/egress';
+import { ExecutablePins, setExecutablePins } from '../providers/executable-pins';
 import { updateApplicationMenu } from "../i18n";
 import { registerLibraryIpc } from "./library";
 import { registerUsageIpc } from "./usage";
@@ -15,6 +17,11 @@ export function registerIpc(
   secrets: SecretStore,
   isTrusted: (event: IpcMainInvokeEvent) => boolean,
 ): () => Promise<void> {
+  const pins = new ExecutablePins(`${app.getPath('userData')}/executable-pins.json`, async (previous, current) => {
+    const result = await dialog.showMessageBox({type:'warning', message:'Provider executable changed', detail:`Previous: ${previous.path}\nCurrent: ${current.path}\nSHA-256: ${current.hash}\nModified: ${new Date(current.mtime).toISOString()}\nAllow this executable?`, buttons:['Cancel','Allow'],defaultId:0,cancelId:0});
+    return result.response === 1;
+  });
+  setExecutablePins(pins);
   const providers = createProviderRegistry(secrets, `${app.getPath("userData")}/providers.json`);
   const registrar = createIpcRegistrar(ipcMain, isTrusted);
   const implemented = new Set<IpcChannel>([
@@ -29,10 +36,17 @@ export function registerIpc(
   ]);
   registrar.handle("shell:openExternal", async ({ url }) => {
     const target = new URL(url);
-    const result = await dialog.showMessageBox({ type: 'question', message: `Open external link to ${target.hostname || target.protocol}?`, detail: url, buttons: ['Cancel', 'Open'], defaultId: 0, cancelId: 0 });
-    if (result.response === 1) await shell.openExternal(url);
+    const result = await dialog.showMessageBox({ type: 'question', message: `Open external link to ${target.hostname || target.protocol}?`, detail: target.protocol === 'mailto:' ? `Address: ${decodeURIComponent(target.pathname)}\nSubject: ${target.searchParams.get('subject') ?? ''}\nBody length: ${(target.searchParams.get('body') ?? '').length} characters\n\n${url}` : url, buttons: ['Cancel', 'Open'], defaultId: 0, cancelId: 0 });
+    if (result.response === 1) { recordEgress('Open link in external application', target.protocol === 'mailto:' ? 'Default mail application' : target.origin); await shell.openExternal(url); }
     return { ok: true };
   });
+  implemented.add('providers:chooseExecutable');
+  registrar.handle('providers:chooseExecutable', async ({binary}) => {
+    const result = await dialog.showOpenDialog({title:`Choose ${binary} executable`,properties:['openFile']});
+    return {path: result.canceled || !result.filePaths[0] ? null : await pins.choose(binary,result.filePaths[0])};
+  });
+  implemented.add('settings:networkActivity');
+  registrar.handle('settings:networkActivity', () => networkActivity());
   updateApplicationMenu(store.settings.get().language);
   registrar.handle("settings:appearance", () => ({reducedTransparency:nativeTheme.prefersReducedTransparency}));
   registrar.handle("settings:systemLocale", () => process.env.VSTUDY_LOCALE ?? app.getLocale());
@@ -51,7 +65,7 @@ export function registerIpc(
     secrets.delete(providerId);
     return { ok: true };
   });
-  registerUsageIpc(registrar, store, implemented);
+  registerUsageIpc(registrar, store, implemented, () => providers.config('codex-cli').enabled);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
   const disposeLibrary = registerLibraryIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove));
   const disposeDocuments = registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove));

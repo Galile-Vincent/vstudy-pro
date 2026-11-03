@@ -1,11 +1,13 @@
+import { recordEgress } from '../services/egress';
+import { pinnedCli } from './executable-pins';
+import { installDirectories } from './trusted-executable';
 import { assertCodexChatEvent, createCodexAdapter } from './codex';
 import { ProviderError } from "./api";
 import { discoverModels } from "./models";
 import { spawn } from "node:child_process";
-import { access, mkdtemp, rm, stat } from "node:fs/promises";
-import { constants } from "node:fs";
-import { homedir, tmpdir } from "node:os";
-import { delimiter, join, isAbsolute } from "node:path";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { delimiter, join } from "node:path";
 import { parseStream, type ParserKind } from "./parsers";
 import type { Usage } from "../../shared/domain";
 import type { ProviderAdapter } from "./index";
@@ -24,29 +26,13 @@ export function cliEnvironment(
     "SYSTEMROOT",
   ])
     if (source[key]) env[key] = source[key];
-  env.PATH = [
-    ...new Set([
-      ...(source.PATH ?? "").split(delimiter),
-      join(homedir(), ".local/bin"),
-      "/opt/homebrew/bin",
-      "/usr/local/bin",
-    ]),
-  ]
-    .filter(isAbsolute)
-    .join(delimiter);
+  env.PATH = [...installDirectories(), '/usr/bin', '/bin'].join(delimiter);
+  env.DISABLE_TELEMETRY = '1';
+  env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';
   return env;
 }
 export async function findCli(binary: string): Promise<string | null> {
-  for (const directory of (cliEnvironment().PATH ?? "").split(delimiter)) {
-    const file = join(directory, binary);
-    try {
-      await access(file, constants.X_OK);
-      if ((await stat(file)).isFile()) return file;
-    } catch {
-      continue;
-    }
-  }
-  return null;
+  return pinnedCli(binary);
 }
 export function cliArgs(kind: "claude" | "codex", modelId: string, options: Record<string, string | boolean> = {}): string[] {
   const extra = kind === "codex"
@@ -99,6 +85,7 @@ export async function* runCli(
   onRecord: (record: Record<string, unknown>) => void = () => {},
 ) {
   signal.throwIfAborted();
+  recordEgress('Enabled CLI request (CLI may also contact its own telemetry services)', kind === 'claude' ? 'Anthropic / Claude CLI managed endpoints' : 'OpenAI / Codex CLI managed endpoints');
   const child = spawn(binary, args, {
     cwd,
     env: { ...cliEnvironment(), ...environment },

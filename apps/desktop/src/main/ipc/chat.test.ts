@@ -30,6 +30,7 @@ it("registers every chat handler with validated repository round trips and dispo
     () => true,
   );
   const implemented = new Set<IpcChannel>();
+  const deletedKeys = vi.fn();
   registerChatIpc(
     registrar,
     store,
@@ -37,7 +38,7 @@ it("registers every chat handler with validated repository round trips and dispo
       getInMainOnly: () => null,
       has: () => false,
       set: () => {},
-      delete: () => {},
+      delete: deletedKeys,
     },
     implemented,
     registry,
@@ -55,6 +56,10 @@ it("registers every chat handler with validated repository round trips and dispo
   };
   try {
     expect(implemented.size).toBe(10);
+    await invoke('providers:configure',{kind:'compatible',id:'openai-compatible',baseUrl:'http://localhost:11434/v1',enabled:true});
+    expect(deletedKeys).not.toHaveBeenCalled();
+    await invoke('providers:configure',{kind:'compatible',id:'openai-compatible',baseUrl:'https://new-host.example/v1',enabled:true});
+    expect(deletedKeys).toHaveBeenCalledExactlyOnceWith('openai-compatible');
     const doc = store.documents.insert(
       documentSchema.parse({
         id: randomUUID(),
@@ -68,6 +73,8 @@ it("registers every chat handler with validated repository round trips and dispo
         createdAt: new Date().toISOString(),
       }),
     );
+    await expect(invoke('conversations:create', {documentId:doc.id,providerId:'anthropic-api',modelId:'--dangerously-skip-permissions'})).rejects.toThrow();
+    expect(store.conversations.list(doc.id)).toEqual([]);
     const created = await invoke("conversations:create", {
       documentId: doc.id,
       providerId: "anthropic-api",

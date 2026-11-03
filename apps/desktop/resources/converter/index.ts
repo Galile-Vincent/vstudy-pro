@@ -1,3 +1,5 @@
+import { recordEgress } from '../../src/main/services/egress';
+import { resolveInstalledExecutable, installDirectories } from '../../src/main/providers/trusted-executable';
 import { ProcessScope } from "./process-scope";
 import { profileStage } from "./profile";
 import { WarmWorker } from "./warm-worker";
@@ -5,7 +7,7 @@ import { spawn } from "node:child_process";
 import { access, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { homedir, tmpdir } from "node:os";
-import { delimiter, join } from "node:path";
+import { join } from "node:path";
 import { createHash } from "node:crypto";
 
 export const MAX_MARKDOWN_BYTES = 8 * 1024 * 1024;
@@ -87,20 +89,14 @@ export async function runProcess(
 }
 
 async function findExecutable(name: string): Promise<string | undefined> {
-  const paths = (process.env.PATH ?? "").split(delimiter);
-  paths.push("/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", join(homedir(), ".local/bin"));
-  for (const directory of paths) {
-    if (!directory) continue;
-    const candidate = join(directory, name);
-    try { await access(candidate, constants.X_OK); return candidate; } catch { /* An executable can disappear while resolving PATH. */ }
-  }
-  return undefined;
+  return (await resolveInstalledExecutable(name, [...installDirectories(), '/usr/bin', '/bin'])) ?? undefined;
 }
 
 export function createConverter(options: {
   userData: string;
   resources: string;
   onProgress?: Progress;
+  authorizeDownload?: () => Promise<boolean>;
 }): { convert: ConverterRunner; ensureReady: () => Promise<string>; dispose: () => Promise<void> } {
   const scope = new ProcessScope();
   let disposed = false;
@@ -127,6 +123,8 @@ export function createConverter(options: {
           return python;
         }
       } catch { /* An interrupted installation is rebuilt on the next attempt. */ }
+      if (!await options.authorizeDownload?.()) throw new Error('Converter offline: allow the dependency download and retry');
+      recordEgress('First-run converter dependency installation', 'pypi.org, files.pythonhosted.org; github.com for Python if needed');
       report("Setting up converter (one time; download size depends on platform)…");
       const uv = await findExecutable("uv");
       // Cache wheels across private bootstrap directories without inheriting user configuration.

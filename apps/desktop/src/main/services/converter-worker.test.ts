@@ -55,8 +55,9 @@ ${JSON.stringify(process.execPath)} -e 'require("fs").writeFileSync(${JSON.strin
 wait
 `);
   await chmod(uv, 0o700);
-  vi.stubEnv('PATH', bin + ':' + process.env.PATH);
-  const converter = createConverter({ userData: join(directory, 'data'), resources: directory });
+  const resolver = await import('../providers/trusted-executable');
+  const resolveExecutable = vi.spyOn(resolver, 'resolveInstalledExecutable').mockImplementation(async name => name === 'uv' ? uv : null);
+  const converter = createConverter({ userData: join(directory, 'data'), resources: directory, authorizeDownload: async () => true });
   const boot = converter.ensureReady();
   const rejected = expect(boot).rejects.toThrow();
   try {
@@ -69,7 +70,7 @@ wait
     expect(() => process.kill(pid, 0)).toThrow();
     await rm(join(directory,'data','converter-venv'), {recursive:true,force:true});
     await expect(converter.ensureReady()).rejects.toThrow('Converter closed');
-  } finally { await converter.dispose(); vi.unstubAllEnvs(); await rm(directory,{recursive:true,force:true}); }
+  } finally { await converter.dispose(); resolveExecutable.mockRestore(); vi.unstubAllEnvs(); await rm(directory,{recursive:true,force:true}); }
 });
 
 it('reaps descendants when an installer exits before its child',async()=>{
