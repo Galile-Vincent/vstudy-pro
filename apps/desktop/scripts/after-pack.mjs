@@ -13,7 +13,7 @@ export default async ({ appOutDir, packager }) => {
     [F.EnableEmbeddedAsarIntegrityValidation]: true,
     [F.GrantFileProtocolExtraPrivileges]: false,
   });
-  if (!process.env.CSC_LINK && !packager.platformSpecificBuildOptions.identity && process.env.CSC_IDENTITY_AUTO_DISCOVERY === 'false') {
+  if (!process.env.CSC_LINK && !process.env.CSC_NAME && !packager.platformSpecificBuildOptions.identity) {
     const { execFileSync } = await import('node:child_process');
     execFileSync('/usr/bin/codesign', ['--force', '--deep', '--sign', '-', join(appOutDir, `${packager.appInfo.productFilename}.app`)]);
   }

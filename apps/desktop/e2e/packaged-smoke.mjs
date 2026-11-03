@@ -25,7 +25,7 @@ try {
   child=spawn(join(app,'Contents/MacOS/VStudy Pro'),['--use-mock-keychain'],{env:{...process.env,ELECTRON_RUN_AS_NODE:'',ELECTRON_ENABLE_LOGGING:'1',VSTUDY_PACKAGED_SMOKE_DIR:root,VSTUDY_FAKE_PROVIDER:'1'},stdio:['ignore','pipe','pipe']});
   child.stdout.on('data',d=>{log+=d;});child.stderr.on('data',d=>{log+=d;});
   const exit=await Promise.race([new Promise(resolve=>child.once('exit',(code,signal)=>resolve({code,signal}))),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Packaged app timed out')),90000).unref())]).catch(async error=>{
-    try {execFileSync('/usr/bin/sample',[String(child.pid),'2','-file',join(root,'hang.sample.txt')]);}catch{ /* A terminated process cannot be sampled. */ }
+    try {execFileSync('/usr/bin/sample',[String(child.pid),'2','-file','/tmp/vstudy-packaged-hang.sample.txt']);}catch{ /* A terminated process cannot be sampled. */ }
     await writeFile('/tmp/vstudy-packaged-hang.log',log);
     throw error;
   });

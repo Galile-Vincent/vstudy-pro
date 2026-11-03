@@ -1,4 +1,4 @@
-import { realpathSync } from 'node:fs';
+import { realpathSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { runPackagedSmoke } from './packaged-smoke';
 import { app, BrowserWindow, session, safeStorage, protocol, dialog, ipcMain } from "electron";
@@ -21,8 +21,10 @@ const smokeRoot = process.env.VSTUDY_PACKAGED_SMOKE_DIR;
 if (smokeRoot) {
   const canonical = realpathSync(smokeRoot), temporary = realpathSync(tmpdir());
   if (!canonical.startsWith(temporary + '/vstudy-packaged-smoke-') || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
-  app.setPath('userData', join(canonical, 'user-data'));
-  mkdirSync(app.getPath('userData'), {recursive:true,mode:0o700});
+  const isolated = join(canonical, 'user-data');
+  mkdirSync(isolated, {recursive:true,mode:0o700});
+  if (lstatSync(isolated).isSymbolicLink() || realpathSync(isolated) !== isolated) throw new Error('Smoke user data must be an isolated directory');
+  app.setPath('userData', isolated);
 }
 process.umask(0o077);
 app.enableSandbox();
@@ -141,6 +143,10 @@ void app.whenReady().then(() => {
     if (result.response !== 1) return { ok: true };
     await deleteAllData(userData, async () => {
       window?.destroy();
+      await session.defaultSession.clearStorageData();
+      await session.defaultSession.clearCache();
+      await session.defaultSession.closeAllConnections();
+      session.defaultSession.flushStorageData();
       await disposeIpc?.();
       store?.close();
       store = undefined;
