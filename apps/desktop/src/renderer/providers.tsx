@@ -28,7 +28,7 @@ export function ProviderSettings({
   return (
     <dialog
       ref={dialog}
-      className="settings-dialog"
+      className={`settings-dialog ${tab === "usage" ? "usage-dashboard-dialog" : ""}`}
       onCancel={onClose}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();

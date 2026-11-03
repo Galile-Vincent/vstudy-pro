@@ -1,20 +1,18 @@
 import { useEffect, useState } from 'react';
-import { priceSchema, type Settings, type UsageSummary, type IpcResponse } from '../../shared';
+import { priceSchema, type Settings, type IpcResponse } from '../../shared';
 import { z } from 'zod';
 import { desktop } from '../bridge';
-import { money, compactTokens } from './chip';
+import { UsageDashboard } from './dashboard';
 const balanceNote = 'No provider exposes an account balance for API keys. “Left” means your user-set monthly budget or token cap. Provider rate limits are separate and appear only when reported.';
 export function UsageSettings() {
   const [settings,setSettings] = useState<Settings>();
-  const [month,setMonth] = useState<UsageSummary>();
-  const [recent,setRecent] = useState<UsageSummary>();
   const [limits,setLimits] = useState<IpcResponse<'usage:rateLimits'>>([]);
   const [documents,setDocuments] = useState<IpcResponse<'documents:list'>>([]);
   const [overrides,setOverrides] = useState('{}');
   const [status,setStatus] = useState('');
   useEffect(() => {
     let active = true;
-    void Promise.all([desktop.invoke('settings:get',{}),desktop.invoke('usage:summary',{period:'month'}),desktop.invoke('usage:summary',{period:'last30days'}),desktop.invoke('usage:rateLimits',{}), desktop.invoke('documents:list',{})]).then(([s,m,r,l,d]) => { if (active) { setSettings(s); setOverrides(JSON.stringify(s.priceOverrides,null,2)); setMonth(m); setRecent(r); setLimits(l); setDocuments(d); } }).catch(() => { if (active) setStatus('Could not load usage'); });
+    void Promise.all([desktop.invoke('settings:get',{}),desktop.invoke('usage:rateLimits',{}), desktop.invoke('documents:list',{})]).then(([s,l,d]) => { if (active) { setSettings(s); setOverrides(JSON.stringify(s.priceOverrides,null,2)); setLimits(l); setDocuments(d); } }).catch(() => { if (active) setStatus('Could not load usage'); });
     return () => { active = false; };
   },[]);
   const save = async () => {
@@ -28,8 +26,7 @@ export function UsageSettings() {
   };
   return <section className="usage-settings" aria-label="Usage settings">
     <p className="muted">{balanceNote}</p>
-    <div className="row">{[['This month',month],['Last 30 days',recent]].map(([label,value]) => { const s = value as UsageSummary | undefined; return <div key={String(label)}><strong>{String(label)}</strong><p>{s ? `${compactTokens(s.inputTokens + s.outputTokens)} tokens · ${money(s.costUsd ?? (s.calls ? undefined : 0))} · ${s.calls} calls` : 'Loading…'}</p>{!!s?.unknownPrices && <small>{s.unknownPrices} calls with price unknown; total is a lower bound.</small>}</div>; })}</div>
-    <div className="usage-breakdown"><table><caption>Month by provider, model and document</caption><thead><tr><th>Provider / model</th><th>Document</th><th>In / out</th><th>Cost</th></tr></thead><tbody>{month?.groups.map((g,i) => <tr key={i}><td>{g.providerId}<br/>{g.modelId}</td><td>{documents.find(d => d.id === g.documentId)?.title ?? g.documentId ?? '—'}</td><td>{compactTokens(g.inputTokens)} / {compactTokens(g.outputTokens)}</td><td>{money(g.costUsd)}{g.unknownPrices > 0 && ' + unknown'}{g.providerId.endsWith('-cli') && <small> API-equivalent (subscription)</small>}</td></tr>)}</tbody></table></div>
+    <UsageDashboard documents={documents} />
     <div><strong>Provider rate limits</strong>{!limits.length && <p className="muted">No rate-limit information reported yet.</p>}{limits.map(l => <p key={l.providerId}>{l.providerId}: {l.rateLimit.usedPercent === undefined ? '' : `${l.rateLimit.usedPercent}% of `}{l.rateLimit.label}{l.rateLimit.remainingTokens !== undefined ? ` · ${l.rateLimit.remainingTokens} tokens left` : ''}{l.rateLimit.remainingRequests !== undefined ? ` · ${l.rateLimit.remainingRequests} requests left` : ''}{l.rateLimit.resetsAt ? ` · resets ${new Date(l.rateLimit.resetsAt).toLocaleString()}` : ''}<small> · reported {new Date(l.createdAt).toLocaleString()}</small></p>)}</div>
     {settings && <><div className="usage-budget-inputs">
       <label>Monthly budget (USD)<input aria-label="Monthly budget (USD)" type="number" min="0.01" step="0.01" value={settings.monthlyBudgetUsd ?? ''} onChange={e => setSettings({...settings,monthlyBudgetUsd:e.target.value ? Number(e.target.value) : undefined})}/></label>

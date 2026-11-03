@@ -150,6 +150,17 @@ try {
   );
   if (!mock) {
     await page.getByRole('tab',{name:'Usage',exact:true}).click();
+    const dashboard = page.getByRole('region',{name:'Overall token dashboard',exact:true});
+    await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
+    assert.equal(await page.getByRole('combobox',{name:'Usage period',exact:true}).inputValue(),'all');
+    await page.getByRole('combobox',{name:'Group usage by',exact:true}).selectOption('model');
+    await page.locator('.usage-dashboard table').filter({hasText:'anthropic-api/fake'}).waitFor();
+    await page.getByRole('combobox',{name:'Usage period',exact:true}).selectOption('day');
+    await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
+    await page.getByRole('combobox',{name:'Usage period',exact:true}).selectOption('all');
+    await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
+    await dashboard.screenshot({path:screenshot.replace(/\.png$/, '-token-dashboard.png')});
+
     await page.getByRole('spinbutton',{name:'Monthly budget (USD)',exact:true}).fill('0.01');
     await page.getByRole('button',{name:'Save usage settings',exact:true}).click();
     await page.getByRole('status').filter({hasText:'Usage settings saved'}).waitFor();
