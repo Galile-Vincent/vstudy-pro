@@ -320,7 +320,7 @@ export function App() {
             Import document
           </button>
           <small className="muted">
-            Drop a file anywhere to choose it for import
+            Drop a file anywhere to import it
           </small>
         </div>
       ) : doc.status === "converting" ? (

@@ -62,7 +62,7 @@ try {
   }));
   if (
     exposed.node !== "undefined" ||
-    exposed.methods.join(",") !== "invoke,onChatEvent"
+    exposed.methods.join(",") !== "getPathForFile,invoke,onChatEvent"
   )
     throw new Error("Unexpected bridge surface");
   console.log(

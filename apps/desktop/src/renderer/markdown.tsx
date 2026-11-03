@@ -130,7 +130,7 @@ export function DocumentMarkdown({
             ),
             img: ({ src, alt }) =>
               src && safeImage(src) ? (
-                <img src={src.startsWith("data:") ? src : `vstudy-asset://${documentId}/${src}`} alt={alt ?? ""} loading="lazy" />
+                <img src={/^data:/i.test(src) ? src : `vstudy-asset://${documentId}/${src}`} alt={alt ?? ""} loading="lazy" />
               ) : (
                 <span className="muted">[Image unavailable: {alt}]</span>
               ),

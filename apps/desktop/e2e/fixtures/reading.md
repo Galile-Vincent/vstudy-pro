@@ -15,3 +15,5 @@ const selected = true;
 ```
 
 Math: $a^2 + b^2 = c^2$.
+
+[Reference website](https://example.com)

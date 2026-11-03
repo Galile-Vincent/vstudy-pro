@@ -39,6 +39,7 @@ try {
     .click();
   const viewer = page.getByTestId("document-markdown");
   await viewer.waitFor({ timeout: 15000 });
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-document.png"), fullPage: true });
   const selectedText = mock
     ? "a closer look"
     : "This selected passage reaches the fake provider.";
@@ -69,21 +70,18 @@ try {
   await page
     .getByRole("button", { name: "Ask about this", exact: true })
     .click();
-  const start = page.getByRole("button", {
-    name: "Start a conversation",
-    exact: true,
-  });
-  if (await start.isVisible()) await start.click();
   const input = page.getByRole("textbox", {
     name: "Ask about your document",
     exact: true,
   });
   await input.fill("Explain this passage.");
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-selection.png"), fullPage: true });
   await page.getByRole("button", { name: "Send message", exact: true }).click();
   await page
     .locator(".message.assistant")
     .filter({ hasText: selectedText })
     .waitFor({ timeout: 15000 });
+  await page.waitForFunction(() => window.document.querySelector(".stop-button")?.disabled === true);
   assert.ok(
     (await page.locator(".message.user").textContent()).includes(selectedText),
     "Selection is visible in the user message",
@@ -95,6 +93,11 @@ try {
     fullPage: true,
   });
   await page.getByRole("button", { name: "Swap chat side" }).click();
+  await page.waitForFunction(() => {
+    const chat = window.document.querySelector('[aria-label="Chat"]');
+    const reading = window.document.querySelector('[aria-label="Document"]');
+    return chat && reading && chat.getBoundingClientRect().x > reading.getBoundingClientRect().x;
+  });
   const chatBox = await page
     .getByRole("region", { name: "Chat", exact: true })
     .boundingBox();
@@ -106,6 +109,7 @@ try {
     (await page.locator(".message.user").textContent()).includes(selectedText),
     "Swap preserves the conversation",
   );
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-right.png"), fullPage: true });
   await page.getByRole("button", { name: "Toggle document library" }).click();
   assert.equal(
     await page.getByRole("complementary", { name: "Document library" }).count(),
@@ -113,6 +117,7 @@ try {
   );
   await page.getByRole("button", { name: "Open settings" }).click();
   await page.getByRole("dialog").waitFor();
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-settings.png"), fullPage: true });
   assert.equal(
     await page
       .getByRole("textbox", { name: "OpenAI API key", exact: true })
@@ -130,6 +135,14 @@ try {
       .fill("preview-only-key");
     await form.getByRole("button", { name: "Save key", exact: true }).click();
     await form.waitFor({ state: "hidden" });
+  }
+  if (!mock) {
+    await assert.rejects(page.evaluate(() => window.desktop.invoke("shell:openExternal", { url: "file:///etc/passwd" })));
+    await app.evaluate(({ shell }) => {
+      shell.openExternal = async (url) => { globalThis.vstudyOpenedUrl = url; };
+    });
+    await viewer.getByRole("link", { name: "Reference website" }).click();
+    assert.equal(await app.evaluate(() => globalThis.vstudyOpenedUrl), "https://example.com");
   }
   assert.deepEqual(errors, []);
   console.log(
