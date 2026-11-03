@@ -359,5 +359,7 @@
   "ask_about_paragraph": "この段落について質問",
   "chat_author_you": "あなた",
   "chat_author_assistant": "アシスタント",
-  "answer_error": "回答に失敗しました"
+  "answer_error": "回答に失敗しました",
+  "sample_title": "読書サンプル",
+  "checking_provider": "プロバイダーを確認中…"
 }

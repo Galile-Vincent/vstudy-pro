@@ -19,5 +19,7 @@
   "day_window": "the {{count}} d window",
   "hour_window": "the {{count}} h window",
   "minute_window": "the {{count}} min window",
-  "provider_window": "the provider window"
+  "provider_window": "the provider window",
+  "unknown_calls_one": "{{count}} call unpriced; total is a lower bound.",
+  "unknown_calls_other": "{{count}} calls unpriced; total is a lower bound."
 }

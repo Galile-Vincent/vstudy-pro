@@ -359,5 +359,7 @@
   "ask_about_paragraph": "詢問此段落",
   "chat_author_you": "你",
   "chat_author_assistant": "助理",
-  "answer_error": "回答失敗"
+  "answer_error": "回答失敗",
+  "sample_title": "閱讀範例",
+  "checking_provider": "正在檢查提供者…"
 }

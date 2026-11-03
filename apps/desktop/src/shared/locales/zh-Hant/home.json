@@ -51,5 +51,9 @@
   "question_document_2": "這和我已經知道的事，有什麼關聯？",
   "question_selection_1": "可以用一個例子解釋這段話嗎？",
   "question_selection_2": "這段話背後，有什麼假設？",
-  "question_language": "用我設定的回覆語言，說明這個想法。"
+  "question_language": "用我設定的回覆語言，說明這個想法。",
+  "streak_days_one": "{{formatted}} 天",
+  "streak_days_other": "{{formatted}} 天",
+  "best_one": "最長連續：{{formatted}} 天",
+  "best_other": "最長連續：{{formatted}} 天"
 }

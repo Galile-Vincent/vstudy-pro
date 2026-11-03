@@ -73,7 +73,7 @@
   "key_anthropic": "在設定中貼上金鑰。",
   "key_openai": "在設定中貼上金鑰。",
   "key_compatible": "適用於提供 OpenAI 相容端點的服務。",
-  "models_note": "VStudy Pro 會自動偵測哪些 CLI 已登入。API 金鑰透過 macOS 鑰匙圈加密保存。CLI 模型不會取得任何工具權限，只看得到 VStudy Pro 傳送的文字。",
+  "models_note": "VStudy Pro 只檢查已安裝的 CLI，不會自動啟動。啟用提供者後，開啟模型選單或在設定重新整理才會探索模型。API 金鑰透過 macOS 鑰匙圈加密。CLI 模型沒有工具權限，只看得到 VStudy Pro 傳送的文字。",
   "models_cta": "設定模型",
   "data_title": "你的文件庫，就在你的 Mac 上",
   "data_body": "匯入的所有文件都存放在這台 Mac 的文件庫裡，用你習慣的方式整理。",

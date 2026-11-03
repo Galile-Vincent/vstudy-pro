@@ -73,7 +73,7 @@
   "key_anthropic": "設定でキーを貼り付けます。",
   "key_openai": "設定でキーを貼り付けます。",
   "key_compatible": "OpenAI 互換のエンドポイントを提供するサービス向けです。",
-  "models_note": "VStudy Pro はサインイン済みの CLI を自動で検出します。API キーは macOS のキーチェーンで暗号化して保存されます。CLI のモデルにはツールの権限を与えず、VStudy Pro が送るテキストだけを渡します。",
+  "models_note": "VStudy Pro は CLI を起動せずにインストール状況を確認します。有効にした後、モデル選択を開くか設定で更新するとモデルを検出します。API キーは macOS キーチェーンで暗号化します。CLI モデルはツールを使用せず、VStudy Pro が送信した文章だけを受け取ります。",
   "models_cta": "モデルを設定",
   "data_title": "ライブラリは Mac の中に",
   "data_body": "インポートしたものはすべて、この Mac のライブラリに保存され、考えやすい形で整理できます。",

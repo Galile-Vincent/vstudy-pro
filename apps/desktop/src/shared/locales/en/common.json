@@ -211,7 +211,7 @@
   "price_unknown": "price unknown",
   "tokens_unavailable": "tokens unavailable",
   "daily_tokens": "Daily tokens",
-  "input": "input,",
+  "input": "Input",
   "output_peak": "Output · peak",
   "daily_input_and_output_tokens_exact_values_are_available_in_the_daily_totals_table": "Daily input and output tokens. Exact values are available in the daily totals table.",
   "output": "Output",
@@ -280,7 +280,7 @@
   "reply_note": "Documents are translated only when you ask.",
   "pseudo": "Pseudo-language (layout testing)",
   "menu_app": "VStudy Pro",
-  "file": "file",
+  "file": "File",
   "edit_menu": "Edit",
   "view": "View",
   "window": "Window",
@@ -359,5 +359,7 @@
   "ask_about_paragraph": "Ask about this paragraph",
   "chat_author_you": "You",
   "chat_author_assistant": "Assistant",
-  "answer_error": "Answer failed"
+  "answer_error": "Answer failed",
+  "sample_title": "Reading sample",
+  "checking_provider": "Checking provider…"
 }

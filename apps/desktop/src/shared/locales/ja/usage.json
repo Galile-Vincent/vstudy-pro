@@ -19,5 +19,7 @@
   "day_window": "{{count}} 日間の上限",
   "hour_window": "{{count}} 時間の上限",
   "minute_window": "{{count}} 分間の上限",
-  "provider_window": "プロバイダーの上限"
+  "provider_window": "プロバイダーの上限",
+  "unknown_calls_one": "{{count}} 件は料金不明のため、合計は最低額です。",
+  "unknown_calls_other": "{{count}} 件は料金不明のため、合計は最低額です。"
 }

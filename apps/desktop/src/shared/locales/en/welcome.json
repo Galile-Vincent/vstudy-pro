@@ -73,7 +73,7 @@
   "key_anthropic": "Paste your key in Settings.",
   "key_openai": "Paste your key in Settings.",
   "key_compatible": "For services that offer an OpenAI-compatible endpoint.",
-  "models_note": "VStudy Pro checks which CLIs are signed in. API keys are encrypted with the macOS Keychain. CLI models get no tools: they see only the text VStudy Pro sends.",
+  "models_note": "VStudy Pro finds installed CLIs without launching them. After you enable a provider, opening the model picker or refreshing Settings checks its models. API keys are encrypted with the macOS Keychain. CLI models get no tools: they see only the text VStudy Pro sends.",
   "models_cta": "Set up a model",
   "data_title": "Your library, on your Mac",
   "data_body": "Everything you import lives in a library on this Mac, organised the way you think.",

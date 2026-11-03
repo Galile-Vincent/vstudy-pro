@@ -42,7 +42,8 @@ export function ProviderRow({
     }
   };
   return (
-    <section className="provider-row">
+    <section className="provider-row" aria-busy={busy}>
+      {busy && !waitingKeychain && <p role="status">{tr('common:checking_provider')}</p>}
       <div className="row">
         <strong>{providerName[provider.config.id]}</strong>
         <span className="muted">

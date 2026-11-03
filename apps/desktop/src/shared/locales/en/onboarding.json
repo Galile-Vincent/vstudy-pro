@@ -3,7 +3,7 @@
   "welcome_body": "Read your own documents and ask about the passages that matter. Your library stays on this Mac.",
   "language": "Choose your language",
   "connect": "Use your Claude Code / Codex / Antigravity login",
-  "connect_body": "CLI providers start disabled. Enable one in Settings to use its login; its client may contact its own services. You can read without connecting.",
+  "connect_body": "CLI providers start disabled. Enable one here to use its login. Discovery and chat may contact provider services and CLI telemetry endpoints. Chat sends questions, conversation history, document metadata and selected text to your chosen provider. You can read without connecting.",
   "signin": "Not ready yet? Install the CLI and sign in in Terminal, then check again.",
   "refresh": "Check again",
   "ready": "Ready",

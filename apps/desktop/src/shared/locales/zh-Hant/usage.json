@@ -19,5 +19,7 @@
   "day_window": "{{count}} 天額度",
   "hour_window": "{{count}} 小時額度",
   "minute_window": "{{count}} 分鐘額度",
-  "provider_window": "服務供應商額度"
+  "provider_window": "服務供應商額度",
+  "unknown_calls_one": "{{count}} 次呼叫價格不明；合計僅為已知費用。",
+  "unknown_calls_other": "{{count}} 次呼叫價格不明；合計僅為已知費用。"
 }

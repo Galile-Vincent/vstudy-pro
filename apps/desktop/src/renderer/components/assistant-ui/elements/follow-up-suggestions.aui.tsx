@@ -74,6 +74,7 @@ export const ThreadFollowupSuggestions: FC = () => (
     condition={(s) =>
       !s.thread.isEmpty &&
       !s.thread.isRunning &&
+      s.thread.messages.at(-1)?.status?.type !== "incomplete" &&
       s.thread.suggestions.length > 0
     }
   >

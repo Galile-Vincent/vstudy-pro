@@ -571,7 +571,7 @@ export function LibraryView() {
           </button>
         </div>
       )}
-      {error ? (
+      {text.trim().length === 1 ? <p role="status">{tr('errors:search_refine')}</p> : error ? (
         <div className="empty" role="alert">
           <h2>{tr("library:error")}</h2>
           <p>{error}</p>

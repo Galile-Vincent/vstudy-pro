@@ -51,5 +51,9 @@
   "question_document_2": "How does this connect to what I already know?",
   "question_selection_1": "Could you explain this passage with an example?",
   "question_selection_2": "What assumption is this passage making?",
-  "question_language": "Explain the idea in my chosen reply language."
+  "question_language": "Explain the idea in my chosen reply language.",
+  "streak_days_one": "{{formatted}} day",
+  "streak_days_other": "{{formatted}} days",
+  "best_one": "Best rhythm: {{formatted}} day",
+  "best_other": "Best rhythm: {{formatted}} days"
 }
