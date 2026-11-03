@@ -81,6 +81,13 @@ try {
     .filter({ hasText: selectedText })
     .waitFor({ timeout: 15000 });
   await page.waitForFunction(() => window.document.querySelector(".stop-button")?.disabled === true);
+  if (!mock) {
+    await page.locator('.message.assistant .usage-chip').filter({hasText:'in 1.2k · out 340 · $0.012'}).waitFor();
+    await page.locator('.usage-meter').filter({hasText:'1.5k tokens · $0.012'}).waitFor();
+    const usage = await page.evaluate(() => window.desktop.invoke('usage:summary',{period:'month'}));
+    assert.equal(usage.inputTokens,1200); assert.equal(usage.outputTokens,340); assert.equal(usage.costUsd,.012);
+    await page.screenshot({path:screenshot.replace(/\.png$/, '-usage.png'),fullPage:true});
+  }
   assert.equal(await page.locator(".message.assistant strong").innerText(), "bold");
   assert.deepEqual(await page.locator(".message.assistant li").allTextContents(), ["First", "Second"]);
   await page.locator(".message.assistant strong").scrollIntoViewIfNeeded();
@@ -100,7 +107,7 @@ try {
   assert.ok(!block.includes("Explain this passage."), "question is outside boundary");
   assert.ok(prompt.split("</untrusted_document_content>")[1].includes("User question:"));
   assert.ok(
-    (await page.locator(".message.user").textContent()).includes(selectedText),
+    (await page.locator(".message.user").first().textContent()).includes(selectedText),
     "Selection is visible in the user message",
   );
   await page.screenshot({ path: screenshot, fullPage: true });
@@ -123,7 +130,7 @@ try {
     .boundingBox();
   assert.ok(chatBox.x > documentBox.x, "Pane order swaps");
   assert.ok(
-    (await page.locator(".message.user").textContent()).includes(selectedText),
+    (await page.locator(".message.user").first().textContent()).includes(selectedText),
     "Swap preserves the conversation",
   );
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-right.png"), fullPage: true });
@@ -141,7 +148,28 @@ try {
       .getAttribute("type"),
     "password",
   );
+  if (!mock) {
+    await page.getByRole('tab',{name:'Usage',exact:true}).click();
+    await page.getByRole('spinbutton',{name:'Monthly budget (USD)',exact:true}).fill('0.01');
+    await page.getByRole('button',{name:'Save usage settings',exact:true}).click();
+    await page.getByRole('status').filter({hasText:'Usage settings saved'}).waitFor();
+    await page.screenshot({path:screenshot.replace(/\.png$/, '-usage-settings.png'),fullPage:true});
+  }
   await page.getByRole("button", { name: "Close settings" }).click();
+  if (!mock) {
+    await input.fill('Check budget warning');
+    await page.getByRole('button',{name:'Send message',exact:true}).click();
+    await page.getByRole('button',{name:'Send anyway',exact:true}).waitFor();
+    assert.equal(await page.locator('.message.user').count(),1);
+    await page.screenshot({path:screenshot.replace(/\.png$/, '-budget-warning.png'),fullPage:true});
+    await page.getByRole('button',{name:'Send anyway',exact:true}).click();
+    await page.waitForFunction(() => window.document.querySelectorAll('.message.user').length === 2);
+    await page.waitForFunction(() => window.document.querySelector('.stop-button')?.disabled === true);
+    const settings = await page.evaluate(() => window.desktop.invoke('settings:get',{}));
+    await page.evaluate(s => window.desktop.invoke('settings:set',{...s,monthlyBudgetUsd:undefined}),settings);
+    await input.fill('');
+  }
+
   if (mock) {
     await page
       .getByRole("button", { name: "Add API key", exact: true })

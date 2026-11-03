@@ -1,5 +1,5 @@
 import type { ChatModelAdapter } from "@assistant-ui/react";
-import type { ChatRequest, ChatEvent, DesktopApi } from "../shared";
+import type { Usage, ChatRequest, ChatEvent, DesktopApi } from "../shared";
 export type ChatContext = Omit<ChatRequest, "requestId" | "userMessage">;
 export function createChatAdapter(
   bridge: DesktopApi,
@@ -28,7 +28,7 @@ export function createChatAdapter(
       const push = (event: ChatEvent) => {
         if (terminal || abortSignal.aborted || runGeneration !== generation) return;
         queue.push(event);
-        if (event.type !== "text-delta") {
+        if (event.type === "done" || event.type === "error") {
           terminal = true;
           unsubscribe();
         }
@@ -62,6 +62,7 @@ export function createChatAdapter(
           );
         started(messages.filter(m => m.role === "user").at(-1)?.id ?? "");
         let text = "";
+        let usage: Usage | undefined;
         while (true) {
           if (!queue.length)
             await new Promise<void>((resolve) => {
@@ -72,8 +73,9 @@ export function createChatAdapter(
           if (!event) continue;
           if (event.type === "error") throw new Error(event.message);
           if (event.type === "done") return;
-          text += event.text;
-          yield { content: [{ type: "text", text }] };
+          if (event.type === "usage") { usage = event.usage; window.dispatchEvent(new Event("usage-updated")); }
+          else text += event.text;
+          yield { content: [{ type: "text", text }], ...(usage ? { metadata: { custom: { usage } } } : {}) };
         }
       } finally {
         unsubscribe();

@@ -1,3 +1,5 @@
+import { MessageUsage } from "./usage/chip";
+import { UsageMeter, useUsage, useBudgetGuard } from "./usage/meter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AssistantRuntimeProvider,
@@ -15,7 +17,7 @@ import { desktop } from "./bridge";
 import { createChatAdapter } from "./chat-adapter";
 import { providerName, type Providers } from "./providers";
 
-function ChatMessage({ selections, statuses }: { selections: Map<string, Selection>; statuses: Map<string, string> }) {
+function ChatMessage({ selections, statuses, subscription }: { subscription: boolean; selections: Map<string, Selection>; statuses: Map<string, string> }) {
   const id = useAuiState((s) => s.message.id);
   const selected = selections.get(id);
   const role = useAuiState((s) => s.message.role);
@@ -28,6 +30,7 @@ function ChatMessage({ selections, statuses }: { selections: Map<string, Selecti
       <div className="message-text">
         <MessagePrimitive.Parts components={role === "assistant" ? { Text: AssistantText } : undefined} />
       </div>
+      {role === "assistant" && <MessageUsage subscription={subscription} />}
       {statuses.get(id) && <p role="status">Response {statuses.get(id)}. This turn is excluded from future context.</p>}
       <ErrorPrimitive.Root className="chat-error">
         <ErrorPrimitive.Message />
@@ -60,6 +63,8 @@ export function Chat({
   onSettings: () => void;
   onProvidersChanged: () => Promise<void>;
 }) {
+  const usage = useUsage(conversation.id);
+  const budget = useBudgetGuard(usage.data, conversation.id, draft);
   const available = providers.find(p => p.config.id === conversation.providerId);
   const unavailable = !available?.config.enabled || !available.availability.available;
   const current = useRef({ conversation, selection, onClearSelection });
@@ -92,6 +97,7 @@ export function Chat({
       role: m.role,
       content: m.parts.map(p => ({ type: "text" as const, text: p.text })),
       createdAt: new Date(m.createdAt),
+      metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage } },
     })),
   });
   useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
@@ -109,12 +115,13 @@ export function Chat({
             </div>
           </ThreadPrimitive.Empty>
           <ThreadPrimitive.Messages>
-            {() => <ChatMessage selections={selections.current} statuses={statuses} />}
+            {() => <ChatMessage subscription={conversation.providerId.endsWith("-cli")} selections={selections.current} statuses={statuses} />}
           </ThreadPrimitive.Messages>
         </ThreadPrimitive.Viewport>
         {unavailable && <p role="alert">This conversation’s provider is unavailable. Add an API key or enable it in Settings.</p>}
         <ComposerPrimitive.Root
           className="composer"
+          onSubmitCapture={budget.guard}
         >
           {selection && (
             <div className="selection-chip">
@@ -147,6 +154,7 @@ export function Chat({
                 Stop
               </ComposerPrimitive.Cancel>
               <ComposerPrimitive.Send
+                onClick={budget.guard}
                 disabled={unavailable}
                 className="send-button"
                 aria-label="Send message"
@@ -155,6 +163,11 @@ export function Chat({
               </ComposerPrimitive.Send>
             </div>
           </div>
+          <UsageMeter {...usage} />
+          {budget.warning && <div className="usage-warning" role="alert">{budget.reason} The estimate allows 1,024 output tokens; actual usage can be higher.
+            <button type="button" onClick={budget.approve}>Send anyway</button>
+            <button type="button" onClick={budget.dismiss}>Cancel</button>
+          </div>}
         </ComposerPrimitive.Root>
         <p className="composer-note">
           Grounded in your document. Check important details.

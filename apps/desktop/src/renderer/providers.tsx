@@ -1,3 +1,4 @@
+import { UsageSettings } from "./usage/settings";
 import { useEffect, useRef, useState } from "react";
 import { desktop } from "./bridge";
 import type { IpcResponse, ProviderConfig } from "../shared";
@@ -19,6 +20,7 @@ export function ProviderSettings({
   onClose: () => void;
   onRefresh: () => Promise<void>;
 }) {
+  const [tab,setTab] = useState("providers");
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     dialog.current?.showModal();
@@ -33,11 +35,13 @@ export function ProviderSettings({
       }}
     >
       <div className="dialog-title">
-        <h2>Providers & API keys</h2>
+        <h2>{tab === "usage" ? "Usage" : "Providers & API keys"}</h2>
         <button onClick={onClose} aria-label="Close settings">
           ×
         </button>
       </div>
+      <div className="settings-tabs" role="tablist" aria-label="Settings"><button role="tab" aria-selected={tab === "providers"} onClick={() => setTab("providers")}>Providers</button><button role="tab" aria-selected={tab === "usage"} onClick={() => setTab("usage")}>Usage</button></div>
+      {tab === "usage" ? <UsageSettings /> : <>
       <p className="muted">
         Keys are saved securely in the desktop app and never read back.
       </p>
@@ -48,6 +52,7 @@ export function ProviderSettings({
           onRefresh={onRefresh}
         />
       ))}
+      </>}
     </dialog>
   );
 }
