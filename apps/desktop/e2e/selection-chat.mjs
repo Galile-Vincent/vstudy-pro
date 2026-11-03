@@ -174,6 +174,13 @@ try {
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
     await page.locator(".document-item").waitFor({ state: "detached" });
+    await page.getByRole("button", { name: "Add API key", exact: true }).click();
+    const keyForm = page.getByRole("group", { name: "Add API key" });
+    await keyForm.getByRole("combobox", { name: "Key provider" }).selectOption("openai-compatible");
+    await keyForm.getByRole("textbox", { name: "API key", exact: true }).fill("local-test-key");
+    await keyForm.getByRole("button", { name: "Save key", exact: true }).click();
+    await keyForm.waitFor({ state: "hidden" });
+    assert.equal(await page.evaluate(async () => (await window.desktop.invoke("providers:list", {})).find(p => p.config.id === "openai-compatible").config.enabled), true, "saving compatible key enables provider");
   }
   assert.deepEqual(errors, []);
   console.log(

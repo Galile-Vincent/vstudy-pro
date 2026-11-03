@@ -195,4 +195,9 @@ it("returns availability while remote models are pending and caches arriving mod
   release([{ id: "arrived", name: "Arrived" }]);
   await Promise.resolve();
   expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([{ id: "arrived", name: "Arrived" }]);
+  registry.configure({ kind: "api", id: "openai-api", enabled: true });
+  expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([]);
+  release([{ id: "refreshed", name: "Refreshed" }]);
+  await Promise.resolve();
+  expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([{ id: "refreshed", name: "Refreshed" }]);
 });

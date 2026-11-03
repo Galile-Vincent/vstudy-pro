@@ -56,7 +56,6 @@ export async function runProcess(
       if (failure) reject(failure);
       else if (code !== 0) {
         const errorType = /"type":\s*"([A-Za-z0-9_]+)"/.exec(stderr)?.[1];
-        // Strip terminal controls and redact paths, URLs and credential-shaped tokens.
         // eslint-disable-next-line no-control-regex
         const tail = stderr.replace(/\x1b\[[0-9;]*m/g, "").replace(/https?:\/\/\S+/g, "[URL]").replace(/(?:\/[^\s"']+)+/g, "[path]").replace(/(?:sk-|Bearer\s+)\S+/gi, "[redacted]").replace(/[\x00-\x08\x0b-\x1f]/g, "").slice(-1200);
         reject(new Error(`${errorType ? `Conversion failed (${errorType})` : `Converter process failed (exit ${code})`}: ${tail}`));
