@@ -1,6 +1,6 @@
 import { _electron as electron } from "playwright";
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { fileURLToPath, URL } from "node:url";
 import { join, resolve } from "node:path";
@@ -154,6 +154,13 @@ try {
     await page.getByRole('button',{name:'Save usage settings',exact:true}).click();
     await page.getByRole('status').filter({hasText:'Usage settings saved'}).waitFor();
     await page.screenshot({path:screenshot.replace(/\.png$/, '-usage-settings.png'),fullPage:true});
+    const csvPath = join(directory, 'usage.csv');
+    await app.evaluate(({ dialog }, path) => { dialog.showSaveDialog = async () => ({ canceled:false,filePath:path }); }, csvPath);
+    await page.getByRole('button',{name:'Export CSV',exact:true}).click();
+    await page.getByRole('status').filter({hasText:'CSV exported'}).waitFor();
+    const csv = await readFile(csvPath,'utf8');
+    assert.ok(csv.includes('"1200","340","200","","40","0.012","reported"'));
+
   }
   await page.getByRole("button", { name: "Close settings" }).click();
   if (!mock) {
