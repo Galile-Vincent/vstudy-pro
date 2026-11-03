@@ -81,3 +81,9 @@ it('caps payload bytes and per-channel budgets before side effects', async () =>
   for (let i = 0; i < 600; i++) await invoke!(event, { language: 'en' });
   await expect(invoke!(event, { language: 'en' })).rejects.toThrow('rate limited');
 });
+it('gives searches a read budget independent of import and export', async () => {
+  const { channelPolicy } = await import('./register');
+  expect(channelPolicy('library:search').requests).toBe(600);
+  expect(channelPolicy('documents:import').requests).toBe(12);
+  expect(channelPolicy('library:export').requests).toBe(12);
+});

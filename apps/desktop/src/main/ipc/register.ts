@@ -1,3 +1,4 @@
+import { importError } from '../../shared/import-error';
 import type { IpcMain, IpcMainInvokeEvent } from "electron";
 import {
   ipcContract,
@@ -7,7 +8,7 @@ import {
 } from "../../shared/ipc";
 
 export function channelPolicy(channel: string) {
-  const expensive = /import|reconvert|retry|chat:start|export|search/i.test(channel);
+  const expensive = /import|reconvert|retry|chat:start|export/i.test(channel);
   return { bytes: channel === 'chat:start' || channel === 'usage:estimate' ? 8 * 1024 * 1024 : 512 * 1024,
     requests: expensive ? 12 : channel === 'activity:heartbeat' ? 120 : 600, windowMs: 60_000 };
 }
@@ -38,6 +39,7 @@ export function createIpcRegistrar(
           const response = await handler(request, event);
           return ipcContract[channel].response.parse(response);
         } catch (error) {
+          if (/^documents:import/.test(channel)) throw new Error('VSTUDY_STATUS:' + JSON.stringify(importError(error)));
           if (error instanceof Error && /Search took too long|Refine your query/.test(error.message)) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message.startsWith('Search took too long') ? 'errors.search_too_long' : 'errors.search_refine',params:{}}));
           if (error instanceof Error && error.message === 'errors.keychain_unavailable') throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message,params:{}}));
           if (channel === 'converter:mode') throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed',params:{}}));

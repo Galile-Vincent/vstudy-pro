@@ -9,7 +9,10 @@ export async function importFiles(
 ) {
   if (files) {
     const paths = files.map((file) => desktop.getPathForFile?.(file) ?? "");
-    await desktop.invoke("documents:importPaths", { paths, folderId });
+    const results = await desktop.invoke("documents:importPaths", { paths, folderId });
+    changed();
+    const failed = results.find(result => !result.ok);
+    if (failed && !failed.ok) throw new Error(failed.error);
   } else await desktop.invoke("documents:import", { folderId });
   changed();
 }

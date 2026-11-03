@@ -4,6 +4,7 @@ export function validateImport(path: string, extension: string) {
         throw new Error('Symlink imports are not allowed');
     if (lstatSync(path).size > 50 * 1024 * 1024) throw new Error("Document exceeds 50 MiB");
     const data = readFileSync(path);
+    if (!data.length) throw new Error('empty file');
     if (data.subarray(0, 2).toString() === 'MZ' || data.subarray(0, 4).equals(Buffer.from([0x7f, 0x45, 0x4c, 0x46])) || ['feedface', 'feedfacf', 'cefaedfe', 'cffaedfe', 'cafebabe'].includes(data.subarray(0, 4).toString('hex')))
         throw new Error('Executable import rejected');
     if (extension === 'pdf') {
@@ -43,12 +44,26 @@ export function validateImport(path: string, extension: string) {
             throw new Error('Office content mismatch');
         return;
     }
+    if (extension === 'csv' && ['UTF-16LE','UTF-16BE'].includes(sniffTextEncoding(data))) throw new Error('Text encoding: ' + sniffTextEncoding(data));
     if (data.includes(0) || data.subarray(0, 4).toString() === 'PK\x03\x04')
         throw new Error('Text signature mismatch');
     try {
         new TextDecoder('utf-8', { fatal: true }).decode(data);
     }
     catch {
-        throw new Error('Text must be UTF-8');
+        throw new Error('Text encoding: ' + sniffTextEncoding(data));
     }
+}
+
+export function sniffTextEncoding(data: Uint8Array): string {
+    const sample = data.subarray(0, 64 * 1024);
+    if (sample[0] === 0xff && sample[1] === 0xfe) return 'UTF-16LE';
+    if (sample[0] === 0xfe && sample[1] === 0xff) return 'UTF-16BE';
+    try { new TextDecoder('utf-8', {fatal:true}).decode(sample, {stream: data.length > sample.length}); return 'UTF-8'; }
+    catch { /* Legacy encodings are ambiguous; only report a possible encoding. */ }
+    try {
+        const decoded = new TextDecoder('shift_jis', {fatal:true}).decode(sample, {stream:data.length > sample.length});
+        if (/[\u3040-\u30ff\u4e00-\u9fff]/.test(decoded)) return 'Shift_JIS';
+    } catch { /* Unknown encodings receive the same UTF-8 export guidance. */ }
+    return 'unknown';
 }

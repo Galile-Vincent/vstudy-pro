@@ -13,5 +13,12 @@
   "keychain_unavailable": "無法存取鑰匙圈。請重試，或使用但不儲存金鑰。",
   "converter_offline": "轉換器處於離線模式。請至設定 > 隱私重試並允許安裝，或繼續離線閱讀 Markdown 與純文字。",
   "converter_python": "請安裝 uv 或 Python 3.10 以上版本，再至設定 > 隱私重試。離線模式支援 Markdown 與純文字。",
-  "converter_failed": "無法準備此文件。請重試轉換，或至設定 > 隱私檢查轉換器。離線模式支援 Markdown 與純文字。"
+  "converter_failed": "無法準備此文件。請重試轉換，或至設定 > 隱私檢查轉換器。離線模式支援 Markdown 與純文字。",
+  "empty_file": "檔案是空的，請選擇有內容的檔案。",
+  "file_too_large": "檔案超過 {{limit}} MiB 的限制。",
+  "unsupported_type": "不支援此檔案類型。",
+  "type_mismatch": "檔案內容與副檔名不符。",
+  "unsafe_archive": "此封存檔或檔案可能不安全，無法匯入。",
+  "text_encoding": "文字不是 UTF-8（可能的編碼：{{encoding}}）。請另存為 UTF-8 後再匯入。",
+  "pdf_no_text": "此 PDF 沒有文字層。目前不支援 OCR，請匯入可選取文字的 PDF。"
 }

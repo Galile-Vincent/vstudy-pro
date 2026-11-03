@@ -60,6 +60,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     mock.dialog.mockResolvedValueOnce({ canceled: false, filePaths: [resolve("test-fixtures/converter/sample.md")] });
     const document = documentSchema.parse(await invoke("documents:import", {}));
     expect(mock.dialog).toHaveBeenLastCalledWith(expect.objectContaining({
+      properties: ["openFile","multiSelections"],
       filters: [expect.objectContaining({ extensions: expect.arrayContaining(["docx", "pdf", "md", "csv"]) })],
     }));
     await vi.waitFor(() => { expect(store.documents.get(document.id)?.status).toBe("ready"); });
@@ -69,7 +70,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     expect(await invoke("documents:importPaths", { paths: [token(resolve("test-fixtures/converter/sample.md"))] })).toHaveLength(1);
     const mixed = await invoke("documents:importPaths", { paths: [token("missing.unsupported"), token(resolve("test-fixtures/converter/sample.md"))] }) as { ok: boolean; error?: string }[];
     expect(mixed.map(r => r.ok)).toEqual([false, true]);
-    expect(mixed[0]?.error).toBe("Import failed");
+    expect(mixed[0]?.error).toBe('VSTUDY_STATUS:{"code":"errors.unsupported_type","params":{}}');
     const converted = await invoke("documents:importPaths", { paths: [token(resolve("test-fixtures/converter/sample.docx"))] }) as { document: { id: string } }[];
     await vi.waitFor(() => expect(mock.resume).toBeTypeOf("function"));
     mock.resume!();
@@ -80,6 +81,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     await expect(invoke("documents:importPaths", { paths: ["file.md"], extra: true })).rejects.toThrow();
     await expect(invoke("documents:retry", { documentId: document.id })).rejects.toThrow("VSTUDY_STATUS:");
     const sample = documentSchema.parse(await invoke("documents:importSample", { language: "ja" }));
+    expect(sample.title).toBe("Reading sample");
     await vi.waitFor(() => expect(store.documents.get(sample.id)?.status).toBe("ready"));
     expect(await invoke("documents:read", { documentId: sample.id })).toContain("小さな疑問");
     await expect(invoke("documents:importSample", { language: "../../escape" })).rejects.toThrow();

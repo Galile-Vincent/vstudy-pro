@@ -1,3 +1,5 @@
+import { importError } from '../../shared/import-error';
+import { showAttachedMessage } from '../dialogs';
 import { DropTokens } from '../services/drop-tokens';
 import { readFile } from "node:fs/promises";
 import { LibraryService } from '../services/library';
@@ -26,7 +28,7 @@ export function registerDocumentsIpc(
     idleMinutes: () => store.settings.get().converterIdleMinutes,
     authorizeDownload: async () => {
       if (store.settings.get().converterOffline) return false;
-      const result = await dialog.showMessageBox({type:'question',message:tr('settings:download'),detail:tr('settings:converter_copy'),buttons:[tr('settings:offline'),tr('settings:download_retry')],defaultId:0,cancelId:0});
+      const result = await showAttachedMessage({type:'question',message:tr('settings:download'),detail:tr('settings:converter_copy'),buttons:[tr('settings:offline'),tr('settings:download_retry')],defaultId:0,cancelId:0});
       return result.response === 1;
     },
     resources: app.isPackaged ? join(process.resourcesPath, "converter") : join(app.getAppPath(), "resources/converter"),
@@ -54,19 +56,25 @@ export function registerDocumentsIpc(
     app.isPackaged ? join(process.resourcesPath, "samples", `${language}.md`) : join(app.getAppPath(), "resources/samples", `${language}.md`), "utf8"));
   registrar.handle("documents:importSample", async ({ language }, event) => {
     const path = app.isPackaged ? join(process.resourcesPath, "samples", `${language}.md`) : join(app.getAppPath(), "resources/samples", `${language}.md`);
-    const document = await documents.importPath(path); owners.set(document.id, event.sender); return document;
+    const document = await documents.importPath(path); store.db.prepare('UPDATE documents SET title=? WHERE id=?').run(tr('common:sample_title'),document.id); owners.set(document.id, event.sender); return documents.get(document.id)!;
   });
   registrar.handle("documents:import", async ({ folderId }, event) => {
     const result = await dialog.showOpenDialog({
       title:tr("picker:import_title"), buttonLabel:tr("picker:import_title"),
-      properties: ["openFile"],
+      properties: ["openFile", "multiSelections"],
       filters: [{ name: tr("picker:documents"), extensions: Object.keys(documentFormats) }],
     });
     const path = result.filePaths[0];
     if (result.canceled || !path) return null;
-    const document = await documents.importPath(path); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return document;
+    const imported = []; const errors: unknown[] = [];
+    for (const selected of result.filePaths.slice(0,100)) {
+      try { const document = await documents.importPath(selected); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); imported.push(document); }
+      catch (error) { errors.push(error); }
+    }
+    if (errors.length) throw errors[0];
+    return imported[0] ?? null;
   });
-  registrar.handle("documents:importPaths", ({ paths, folderId }, event) => Promise.all(paths.map(async (path) => { try { const document = await documents.importPath(drops.consume(path, event.senderFrame!)); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return { ok: true as const, document }; } catch { return { ok: false as const, path, error: "Import failed" }; } })));
+  registrar.handle("documents:importPaths", ({ paths, folderId }, event) => Promise.all(paths.map(async (path) => { try { const document = await documents.importPath(drops.consume(path, event.senderFrame!)); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return { ok: true as const, document }; } catch (error) { return { ok: false as const, path, error: 'VSTUDY_STATUS:' + JSON.stringify(importError(error)) }; } })));
   registrar.handle("documents:list", () => documents.list());
   registrar.handle("documents:get", ({ documentId }) => documents.get(documentId));
   registrar.handle("documents:read", ({ documentId }) => documents.read(documentId));

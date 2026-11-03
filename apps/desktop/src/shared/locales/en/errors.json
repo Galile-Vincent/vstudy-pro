@@ -13,5 +13,12 @@
   "keychain_unavailable": "Couldn’t access the Keychain. Retry or use without saving keys.",
   "converter_offline": "Converter is offline. Retry in Settings > Privacy to allow installation, or keep reading Markdown and text in Offline mode.",
   "converter_python": "Install uv or Python 3.10+, then Retry in Settings > Privacy. Offline mode supports Markdown and text.",
-  "converter_failed": "Could not prepare this document. Retry conversion or check Settings > Privacy. Offline mode supports Markdown and text."
+  "converter_failed": "Could not prepare this document. Retry conversion or check Settings > Privacy. Offline mode supports Markdown and text.",
+  "empty_file": "This file is empty. Choose a file with content.",
+  "file_too_large": "This file exceeds the {{limit}} MiB limit.",
+  "unsupported_type": "This file type is not supported.",
+  "type_mismatch": "The file contents do not match its type.",
+  "unsafe_archive": "This archive or file looks unsafe and cannot be imported.",
+  "text_encoding": "This text is not UTF-8 (possible encoding: {{encoding}}). Export it as UTF-8 and import again.",
+  "pdf_no_text": "This PDF has no text layer. OCR is not supported; import a PDF with selectable text."
 }

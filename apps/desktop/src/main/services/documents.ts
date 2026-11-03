@@ -68,6 +68,7 @@ export class DocumentService {
       path = resolve(path);
       const metadata = await stat(path);
       if (!metadata.isFile()) throw new Error("Import requires a regular file");
+      if (metadata.size === 0) throw new Error('empty file');
       if (metadata.size > MAX_SOURCE_BYTES) throw new Error("Document exceeds 50 MiB");
       validateImport(path, extension);
       await mkdir(this.library, { recursive: true, mode: 0o700 });
@@ -208,7 +209,7 @@ export class DocumentService {
         }
       } catch (error) {
         if (!this.stopped && this.options.store.documents.getIncludingDeleted(document.id)) this.options.store.documents.transition(document.id, {
-          status: "failed", error: 'VSTUDY_STATUS:' + JSON.stringify({code: error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed',params:{}}),
+          status: "failed", error: 'VSTUDY_STATUS:' + JSON.stringify({code: error instanceof Error && /NO_TEXT_LAYER|no text layer|OCR/.test(error.message) ? 'errors.pdf_no_text' : error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed',params:{}}),
         });
       }
     }).finally(() => { this.jobs.delete(document.id); activeConversions.delete(document.id); });

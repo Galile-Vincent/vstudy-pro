@@ -33,7 +33,7 @@ export class WarmWorker {
           else if (record.code === "PDF_FALLBACK") this.pending?.progress?.("PDF too complex or large for the built-in parser; trying fallback…");
           else if (record.error) {
             const message = ["PDF_RESOURCE_LIMIT", "PDF_TIME_LIMIT"].includes(record.code ?? "")
-              ? "This PDF is too large or complex to convert" : "Document conversion failed";
+              ? "This PDF is too large or complex to convert" : record.code === "NO_TEXT_LAYER" ? "NO_TEXT_LAYER: OCR not supported" : "Document conversion failed";
             if (!this.pending) { const error = new Error(message); reject(error); this.stop(error); }
             else { this.pending.reject(new Error(message)); this.finish(); }
           } else if (record.done) { this.pending?.resolve(); this.finish(); }
