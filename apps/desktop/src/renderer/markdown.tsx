@@ -4,7 +4,7 @@ import { contentLanguage } from "../shared/content-language";
 import { useTranslation } from "react-i18next";
 import { tr } from '../shared/i18n';
 import { Children, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import Markdown from "react-markdown";
+import Markdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -130,7 +130,7 @@ export function DocumentMarkdown({
     document.addEventListener("keydown", shortcut);
     return () => { document.removeEventListener("mouseup", update); document.removeEventListener("keyup", update); document.removeEventListener("keydown", shortcut); };
   }, [source, documentId, onSelect]);
-  const components = useMemo(() => ({
+  const components = useMemo<Components>(() => ({
             p: ({ children, node, ...props }) => <p {...props}>{children}{!decorative && node?.position && <button className="paragraph-action" aria-label={tr('common:ask_about_paragraph')} onClick={() => {
               const start = node.position!.start.offset!, end = node.position!.end.offset!;
               selectCallback.current({documentId,startOffset:start,endOffset:end,text:source.slice(start,end),headingPath:headingPath(headings,start),page:pageAt(source,start)});

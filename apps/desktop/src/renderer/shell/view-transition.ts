@@ -1,15 +1,19 @@
 import { flushSync } from 'react-dom';
 let active: ViewTransition | undefined;
-export function transitionTo(apply: () => void, morph = false) {
+let generation = 0;
+export function transitionTo(apply: () => void, morph = false, immediate = false) {
+  const current = ++generation;
+  active?.skipTransition();
+  active = undefined;
+  if (immediate) { apply(); return; }
   const source = morph ? (document.activeElement as HTMLElement | null)?.closest<HTMLElement>('.library-document, .home-row') : null;
   let applied = false;
   const update = () => {
-    if (applied) return;
+    if (applied || current !== generation) return;
     applied = true; flushSync(apply);
     if (source) document.querySelector<HTMLElement>('.reading-pane')?.style.setProperty('view-transition-name', 'vt-document');
   };
   if (!document.startViewTransition || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || document.visibilityState !== 'visible') { apply(); return; }
-  active?.skipTransition();
   source?.style.setProperty('view-transition-name', 'vt-document');
   try {
     const transition = document.startViewTransition(update); active = transition;

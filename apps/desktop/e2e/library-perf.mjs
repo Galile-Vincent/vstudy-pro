@@ -109,7 +109,7 @@ try {
     evidence.twoFrameP95 < 100,
     `frame responsiveness: ${evidence.twoFrameP95}`,
   );
-  await page.evaluate(()=>{window.localStorage.setItem('library-grid','true');});await page.reload();await page.locator('.library-results').waitFor();
+  await page.evaluate(()=>{window.localStorage.setItem('library-grid','true');window.sessionStorage.removeItem('library-scroll:all');});await page.reload();await page.locator('.library-results').waitFor();
   await page.locator('.library-results').press('Meta+a');
   await page.waitForFunction(()=>window.document.querySelector('.library-live')?.textContent?.replaceAll(',','').includes('5000'));
   const gridFrames=await page.evaluate(async()=>{
@@ -120,11 +120,12 @@ try {
   const gridMounted=await page.locator('.library-document').count();
   Object.assign(evidence,{gridFrameP50:gridFrames[90],gridFrameP95:gridFrames[170],gridFrameMax:gridFrames.at(-1),gridMounted});
   assert.ok(gridMounted<60,`grid mounts bounded visible cards: ${gridMounted}`);
+  await page.evaluate(async()=>{window.document.querySelector('.library-results').scrollTop=0;await new Promise(window.requestAnimationFrame);});
   const metadata=[];
   for(let n=0;n<10;n++) {
     metadata.push(await page.evaluate(()=>new Promise(resolve=>{
       const timeout=window.setTimeout(()=>{observer.disconnect();resolve(-1);},3000);
-      const start=performance.now(),observer=new MutationObserver(()=>{
+      const start=performance.now(),observer=new window.MutationObserver(()=>{
         if(window.document.querySelector('.reading-pane .eyebrow')?.textContent==='study.md') {
           window.clearTimeout(timeout);observer.disconnect();window.requestAnimationFrame(()=>resolve(performance.now()-start));
         }

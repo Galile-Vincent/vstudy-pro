@@ -19,3 +19,12 @@ it('skips the API under reduced motion', () => {
   document.startViewTransition = vi.fn();
   const apply = vi.fn(); transitionTo(apply); expect(apply).toHaveBeenCalledTimes(1); expect(document.startViewTransition).not.toHaveBeenCalled();
 });
+
+it('a pending snapshot cannot replace a newer immediate document navigation',()=>{
+ Object.defineProperty(document,'visibilityState',{configurable:true,value:'visible'});
+ vi.stubGlobal('matchMedia',()=>({matches:false}));
+ let update!:()=>void;
+ document.startViewTransition=vi.fn(callback=>{update=callback as ()=>void;return {ready:Promise.resolve(),finished:Promise.resolve(),skipTransition:vi.fn()} as unknown as ViewTransition;});
+ const routes:string[]=[];transitionTo(()=>routes.push('library'));transitionTo(()=>routes.push('document'),false,true);update();
+ expect(routes).toEqual(['document']);
+});
