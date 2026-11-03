@@ -10,6 +10,7 @@ try {
  const page=await app.firstWindow();
  await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true,language:'en'});});
  await page.reload();
+ await page.evaluate(()=>window.desktop.invoke('documents:importSample',{language:'en'}));
  for (const route of [{view:'home'},{view:'library'},{view:'workspace'}]) {
   await page.evaluate(route=>window.localStorage.setItem('vstudy-route',JSON.stringify(route)),route);await page.reload();
   await page.getByRole('button',{name:'Settings',exact:true}).first().click();
@@ -32,7 +33,7 @@ try {
  await app.evaluate(({dialog},files)=>{dialog.showOpenDialog=async options=>{if(JSON.stringify(options.properties)!==JSON.stringify(['openFile','multiSelections']))throw new Error('Missing multiSelections');return {canceled:false,filePaths:files};};},files);
  await page.evaluate(()=>window.desktop.invoke('documents:import',{}));
  const docs=await page.evaluate(()=>window.desktop.invoke('documents:list',{}));
- assert.deepEqual(docs.map(d=>d.title).sort(),['one','two']);
+ assert.deepEqual(docs.map(d=>d.title).sort(),['Reading sample','one','two']);
  const sample=await page.evaluate(()=>window.desktop.invoke('documents:importSample',{language:'en'}));
  assert.equal(sample.title,'Reading sample');
  const empty=join(root,'empty.md');await writeFile(empty,'');
