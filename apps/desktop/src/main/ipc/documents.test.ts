@@ -9,14 +9,14 @@ import type { IpcChannel } from "../../shared/ipc";
 import { openStore } from "../db";
 import { createIpcRegistrar } from "./register";
 
-const mock = vi.hoisted(() => ({ userData: "", dialog: vi.fn() }));
+const mock = vi.hoisted(() => ({ userData: "", dialog: vi.fn(), resume: undefined as (() => void) | undefined }));
 vi.mock("electron", () => ({
   app: { getPath: () => mock.userData, getAppPath: () => process.cwd(), isPackaged: false },
   dialog: { showOpenDialog: mock.dialog },
 }));
 vi.mock("../../../resources/converter", async (original) => ({
   ...await original<typeof import("../../../resources/converter")>(),
-  createConverter: () => ({ convert: async (_source: string, output: string, progress?: (message: string) => void) => { await new Promise(resolve => setTimeout(resolve, 5)); progress?.("Installing markitdown…"); await writeFile(output, "converted"); } }),
+  createConverter: () => ({ convert: async (_source: string, output: string, progress?: (message: string) => void) => { await new Promise<void>(resolve => { mock.resume = resolve; }); progress?.("Installing markitdown…"); await writeFile(output, "converted"); } }),
 }));
 import { registerDocumentsIpc } from "./documents";
 
@@ -57,6 +57,8 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     expect(mixed.map(r => r.ok)).toEqual([false, true]);
     expect(mixed[0]?.error).toBe("Unsupported document type");
     const converted = await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.docx")] }) as { document: { id: string } }[];
+    await vi.waitFor(() => expect(mock.resume).toBeTypeOf("function"));
+    mock.resume!();
     await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
     expect(send.mock.calls[0]?.[0]).toBe("documents:progress");
     expect(documentProgressSchema.parse(send.mock.calls[0]?.[1])).toEqual({ documentId: converted[0]!.document.id, message: "Installing markitdown…" });
