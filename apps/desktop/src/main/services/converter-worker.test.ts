@@ -14,7 +14,9 @@ for line in sys.stdin:
  source = request['source']
  if source == 'crash': os._exit(1)
  if source == 'hang': time.sleep(1000)
- if source == 'error':
+ if source == 'scan':
+  print(json.dumps({'error': 'no text layer', 'code': 'NO_TEXT_LAYER'}), flush=True)
+ elif source == 'error':
   print(json.dumps({'error': 'bad', 'code': 'PDF_TIME_LIMIT'}), flush=True)
  else:
   print(json.dumps({'progress': str(os.getpid())}), flush=True)
@@ -25,6 +27,7 @@ for line in sys.stdin:
     const pids: string[] = [];
     await worker.run("one", "", "", pid => pids.push(pid));
     await expect(worker.run("error", "", "")).rejects.toThrow("too large or complex");
+    await expect(worker.run("scan", "", "")).rejects.toThrow("NO_TEXT_LAYER: OCR not supported");
     await worker.run("two", "", "", pid => pids.push(pid));
     expect(pids[0]).toBe(pids[1]);
     await expect(worker.run("crash", "", "")).rejects.toThrow("stopped");

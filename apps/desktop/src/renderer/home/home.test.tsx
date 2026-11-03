@@ -27,3 +27,9 @@ it('gives every empty card meaningful content and actions', async () => {
   expect(markup).not.toContain('home-marker');
   expect(markup.match(/aria-labelledby/g)).toHaveLength(1);
 });
+
+it('names the document in recent activity', async () => {
+ await i18n.changeLanguage('en');
+ const markup=renderToStaticMarkup(<Home initialData={{...empty,recentActivity:[{id:'event',documentId:'00000000-0000-4000-8000-000000000001' as Dashboard['recentActivity'][number]['documentId'],kind:'chat',createdAt:'2026-11-04T00:00:00Z',documentTitle:'Networking notes'}]}} navigate={() => {}} onUsage={() => {}}/>);
+ expect(markup).toContain('Conversation explored<strong>Networking notes</strong>');
+});

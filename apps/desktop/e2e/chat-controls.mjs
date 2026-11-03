@@ -62,6 +62,7 @@ try {
  await input.fill('test error'); await input.press('Enter');
  const error=page.locator('.aui-message-error-root'); await error.getByRole('button',{name:'Retry',exact:true}).waitFor();
  assert.match(await error.innerText(),/rate limit/i);
+ assert.equal(await page.locator('.aui-thread-followup-suggestions').count(),0);
  await page.locator('[data-slot=aui_thread-viewport]').evaluate(el=>el.scrollTo({top:el.scrollHeight,behavior:'instant'}));
  await page.screenshot({path: '/tmp/vstudy-error-retry.png', animations:'disabled'});
  await page.reload();
