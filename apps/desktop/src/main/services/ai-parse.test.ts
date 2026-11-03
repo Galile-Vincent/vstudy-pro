@@ -83,3 +83,12 @@ it('refuses admission above the explicit per-job cap',async()=>{
  const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'fixture'}],async *stream(){throw new Error('must not call');yield {type:'done'};}};
  const x=await setup(adapter);try{await expect(x.service.start({...x.request,options:{...x.request.options,hardCapUsd:0.000000001}})).rejects.toThrow('ai_parse.cap');expect(x.store.usage.forDocument(x.imported.id)).toHaveLength(0);}finally{await x.cleanup();}
 });
+it('drains an active job through the shutdown coordinator before flushing',async()=>{
+ const {coordinateShutdown}=await import('../shutdown');
+ let started=false;
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'fixture'}],async *stream(_r,signal){started=true;await new Promise<void>(resolve=>signal.addEventListener('abort',()=>resolve(),{once:true}));signal.throwIfAborted();yield {type:'done'};}};
+ const x=await setup(adapter);try {
+  await x.service.start(x.request);await new Promise(resolve=>setTimeout(resolve,20));expect(started).toBe(true);
+  let flushed=false;await coordinateShutdown({stopWork:()=>x.service.dispose(),flush:()=>{expect(x.service.status(x.imported.id).status).toBe('cancelled');flushed=true;},close:()=>{},quit:()=>{},forceExit:()=>{throw new Error('forced exit');}})();expect(flushed).toBe(true);
+ }finally{await x.cleanup();}
+});
