@@ -1,7 +1,7 @@
 import { ProcessScope } from "./process-scope";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
-import { scrubbedEnvironment, type Progress } from "./index";
+import { scrubbedEnvironment, type Progress } from "./contracts";
 
 export class WarmWorker {
   private child: ChildProcessWithoutNullStreams | undefined;

@@ -7,7 +7,7 @@ import { Star, Zap, Check } from 'lucide-react';
 import { ModelSelector } from './components/assistant-ui/elements/model-selector.aui';
 import { ClaudeLogo, OpenAILogo, GeminiLogo } from "./components/assistant-ui/elements/logos";
 import { desktop } from './bridge';
-import { providerName, type Providers } from './providers';
+import { providerName, type Providers } from './provider-metadata';
 
 function cachedDisplayNames(): Record<string,string> {
   try { return JSON.parse(localStorage.getItem('vstudy-model-display-names') ?? '{}'); } catch { return {}; }

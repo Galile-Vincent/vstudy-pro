@@ -8,8 +8,9 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { z } from 'zod';
 import type { Model } from '../../shared/domain';
-import { cliEnvironment, findCli } from './cli';
-export const option = (id: string, label: string, values: string[], initial = values[0] ?? '') => ({ id, label, values: values.map(id => ({ id, label: id })), default: initial });
+import { cliEnvironment, findCli } from './cli-transport';
+import { option } from './model-options';
+export { option } from './model-options';
 const codexCatalog = z.object({ models: z.array(z.object({ slug: z.string(), visibility: z.string().optional(), display_name: z.string().optional(), default_reasoning_level: z.string().optional(), supported_reasoning_levels: z.array(z.object({ effort: z.string() })).optional(), service_tiers: z.array(z.object({ id: z.string() })).optional() })) });
 export function codexModels(input: unknown): Model[] {
   return codexCatalog.parse(input).models.filter(m => m.visibility !== 'hide').map(m => ({ id: m.slug, name: m.display_name ?? m.slug, options: [

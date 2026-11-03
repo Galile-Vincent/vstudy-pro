@@ -3,8 +3,8 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { writeFile } from 'node:fs/promises';
 import { codexChatModel, codexChatConfig, codexForkProfile, assertCodexChatEvent, probeCodexChat } from './codex';
-import { findCli } from './cli';
-import * as cli from './cli';
+import { findCli } from './cli-transport';
+import * as cli from './cli-transport';
 import { createCodexAdapter } from './codex';
 afterEach(() => vi.restoreAllMocks());
 it('keeps detection and model listing unavailable without a CLI', async () => {

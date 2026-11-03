@@ -1,5 +1,5 @@
 import { recordEgress } from '../services/egress';
-import { option } from "./models";
+import { option } from "./model-options";
 import { z } from "zod";
 import { headerRateLimit } from "./usage";
 import type { Usage, ProviderConfig } from "../../shared/domain";

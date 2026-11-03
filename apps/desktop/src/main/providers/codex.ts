@@ -7,7 +7,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import packageInfo from '../../../package.json';
 import template from './fixtures/codex-chat-model.json';
-import { cliArgs, findCli, runCli } from './cli';
+import { cliArgs, findCli, runCli } from './cli-transport';
 import { discoverModels } from './models';
 import type { Availability, ProviderAdapter } from './index';
 
@@ -31,11 +31,8 @@ export function codexChatModel(model: string) {
   // Unknown slugs must still resolve to our metadata, never the CLI's tool-enabled fallback.
   return { ...template, slug: model, display_name: model };
 }
-export function assertCodexChatEvent(record: Record<string, unknown>) {
-  const item = record.item as { type?: string } | undefined;
-  if (item && !['agent_message', 'reasoning'].includes(item.type ?? ''))
-    throw new Error(`Unexpected Codex item: ${item.type}`);
-}
+import { assertCodexChatEvent } from './codex-events';
+export { assertCodexChatEvent } from './codex-events';
 export async function createCodexChatContext(model: string) {
   const cwd = await mkdtemp(join(tmpdir(), 'vstudy-codex-chat-'));
   const cleanup = () => rm(cwd, { recursive: true, force: true });
