@@ -455,3 +455,23 @@ it.each(['messages', 'activity_events'])('rolls back a failed edit when %s inser
   expect(() => chat.start({...request,turnId:user.id,userMessage:'edited'},owner)).toThrow('simulated storage failure');
   expect(store.messages.list(request.conversationId)).toEqual(before);
 });
+
+it('awaits provider cleanup and persists partial text and usage before disposal resolves', async () => {
+  const exited = Promise.withResolvers<void>();
+  const started = Promise.withResolvers<void>();
+  const fixture = await setup({...available,async *stream(_req,signal) {
+    try {
+      yield {type:'text-delta',text:'partial answer'};
+      yield {type:'usage',usage:{inputTokens:10,outputTokens:3,costSource:'reported'}};
+      started.resolve();
+      await new Promise<void>(resolve=>signal.addEventListener('abort',()=>resolve(),{once:true}));
+    } finally { await exited.promise; }
+  }});
+  fixture.chat.start(fixture.request,fixture.owner);await started.promise;
+  let disposed=false;
+  const disposal=Promise.resolve(fixture.chat.dispose()).then(()=>{disposed=true;});
+  await new Promise<void>(resolve=>setImmediate(resolve));
+  expect(disposed).toBe(false);
+  expect(fixture.store.messages.list(fixture.request.conversationId).at(-1)?.parts[0]).toMatchObject({text:'partial answer',status:'aborted',usage:{inputTokens:10,outputTokens:3}});
+  exited.resolve();await disposal;
+});
