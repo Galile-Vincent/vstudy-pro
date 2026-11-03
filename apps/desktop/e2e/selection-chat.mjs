@@ -23,6 +23,7 @@ try {
     },
   });
   page = await app.firstWindow();
+ await page.evaluate(async()=>{await window.desktop.invoke('providers:configure',{kind:'api',id:'anthropic-api',enabled:true});const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,lastProviderId:'anthropic-api',lastModelId:'fake'});});
  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   const errors = [];
   page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
@@ -62,7 +63,7 @@ try {
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(range);
-      window.document.dispatchEvent(new window.Event("selectionchange"));
+      window.document.dispatchEvent(new window.Event("mouseup"));
       return;
     }
     throw new Error("Fixture text missing");
@@ -208,7 +209,8 @@ try {
   }
   if (!mock) {
     const originalId = await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => s.lastDocumentId));
-    await page.evaluate(path => window.desktop.invoke("documents:importPaths", { paths: [path] }), fileURLToPath(new URL("../test-fixtures/converter/sample.md", import.meta.url)));
+    await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},fileURLToPath(new URL("../test-fixtures/converter/sample.md", import.meta.url)));
+    await page.evaluate(()=>window.desktop.invoke("documents:import",{}));
     await page.reload();
     await page.getByTestId("document-markdown").filter({ hasText: "E2E reading document" }).waitFor();
     assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => s.lastDocumentId)), originalId);

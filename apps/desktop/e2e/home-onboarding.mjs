@@ -57,7 +57,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   db.prepare('UPDATE documents SET title=? WHERE id=?').run('非常に長い名前・很長的文件名稱・A long research title '.repeat(5),ids[0]);
   await refresh(); await capture('home-long-names');
   db.prepare('UPDATE documents SET title=? WHERE id=?').run('Study 0',ids[0]);
-  db.prepare('INSERT INTO usage_daily VALUES(?,?,?,?,?,?,?,?)').run(now.slice(0,10),'openai-api','test',ids[0],999999999999,999999999999,9999999,10);
+  db.prepare('INSERT INTO usage_daily(date,providerId,modelId,documentId,inputTokens,outputTokens,costUsd,calls) VALUES(?,?,?,?,?,?,?,?)').run(now.slice(0,10),'openai-api','test',ids[0],999999999999,999999999999,9999999,10);
   await refresh(); await capture('home-huge-tokens');
   db.exec('DELETE FROM usage_daily; DELETE FROM activity_days'); await refresh(); await capture('home-zero-streak');
   for(let i=0;i<40;i++) {const d=new Date(); d.setDate(d.getDate()-i); const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);db.prepare('INSERT INTO activity_days VALUES(?,1,0,0)').run(date);}
@@ -69,10 +69,10 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   await page.locator('#home-drop-file').setInputFiles(resolve('e2e/fixtures/reading.md'));
   await page.evaluate(()=>{const input=window.document.querySelector('#home-drop-file');const dataTransfer=new window.DataTransfer();for(const file of input.files)dataTransfer.items.add(file);window.document.querySelector('.home-upload').dispatchEvent(new window.DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer}));input.remove();});
   await page.locator('.home-upload progress').waitFor({state:'detached'});
-  assert.equal(await page.locator('.home-upload [role=alert]').count(),0);
+  assert.equal(await page.locator('.home-upload [role=alert]').count(),1, 'synthetic drops cannot mint native file capabilities');
   await page.getByRole('button',{name:'Study 0',exact:true}).first().click();
   await page.locator('.blank-chat').waitFor(); await capture('chat-document');
-  await page.getByTestId('document-markdown').locator('p').first().evaluate(element=>{const walker=window.document.createTreeWalker(element,window.NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode())){if(node.textContent.trim().length>3){const range=window.document.createRange();range.setStart(node,0);range.setEnd(node,Math.min(25,node.textContent.length));const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);window.document.dispatchEvent(new window.Event('selectionchange'));return;}}});
+  await page.getByTestId('document-markdown').locator('p').first().evaluate(element=>{const walker=window.document.createTreeWalker(element,window.NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode())){if(node.textContent.trim().length>3){const range=window.document.createRange();range.setStart(node,0);range.setEnd(node,Math.min(25,node.textContent.length));const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);window.document.dispatchEvent(new window.Event('mouseup'));return;}}});
   await page.keyboard.press('Control+Shift+k');
   await page.locator('.aui-composer-input').waitFor();await page.locator('.blank-chat').waitFor();await capture('chat-selection');
   const settings=await page.evaluate(()=>window.desktop.invoke('settings:get',{}));

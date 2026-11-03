@@ -11,3 +11,15 @@ for(const [i,theme] of themes.entries()) {
   console.log(`${i?'dark':'light'} ${fg}/${bg}: ${contrast.toFixed(2)} (minimum ${min})`); assert.ok(contrast>=min);
  }
 }
+const luminance = hex => {
+ const channels=hex.match(/[a-f\d]{2}/gi).map(value=>parseInt(value,16)/255).map(value=>value<=.04045?value/12.92:((value+.055)/1.055)**2.4);
+ return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722;
+};
+for (const [theme,background,palettes] of [['light','f2f2f2',[12,13,14]],['dark','181818',[27,28,29,14]]]) {
+ for (const palette of palettes) {
+  const matches=[...css.matchAll(new RegExp(`--palette-${palette}:#([a-f0-9]{6})`,'g'))];
+  const color=matches[theme==='dark'?matches.length-1:0][1];
+  const a=luminance(color), b=luminance(background), contrast=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+  console.log(`${theme} syntax palette-${palette}: ${contrast.toFixed(2)}`);assert.ok(contrast>=4.5);
+ }
+}

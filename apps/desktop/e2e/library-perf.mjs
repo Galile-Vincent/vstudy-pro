@@ -8,7 +8,7 @@ const directory = await mkdtemp(join(tmpdir(), "vstudy-library-perf-"));
 let app;
 try {
   await copyFile(
-    "/tmp/vstudy-library-bench/bench.sqlite",
+    process.env.VSTUDY_BENCH_DB ?? "/tmp/vstudy-library-bench/bench.sqlite",
     join(directory, "vstudy.sqlite"),
   );
   app = await electron.launch({
@@ -54,7 +54,7 @@ try {
     );
     maxRendered = Math.max(
       maxRendered,
-      await page.locator("article[role=row]").count(),
+      await page.locator(".library-document[role=listitem]").count(),
     );
     const frame = await page.evaluate(async () => {
       const scroller = window.document.querySelector(".library-results");
@@ -109,6 +109,33 @@ try {
     evidence.twoFrameP95 < 100,
     `frame responsiveness: ${evidence.twoFrameP95}`,
   );
+  await page.evaluate(()=>{window.localStorage.setItem('library-grid','true');});await page.reload();await page.locator('.library-results').waitFor();
+  await page.locator('.library-results').press('Meta+a');
+  await page.waitForFunction(()=>window.document.querySelector('.library-live')?.textContent?.replaceAll(',','').includes('5000'));
+  const gridFrames=await page.evaluate(async()=>{
+    const scroller=window.document.querySelector('.library-results'),frames=[];let previous=performance.now();
+    for(let i=0;i<180;i++){await new Promise(window.requestAnimationFrame);const now=performance.now();frames.push(now-previous);previous=now;scroller.scrollTop+=40;}
+    return frames.sort((a,b)=>a-b);
+  });
+  const gridMounted=await page.locator('.library-document').count();
+  Object.assign(evidence,{gridFrameP50:gridFrames[90],gridFrameP95:gridFrames[170],gridFrameMax:gridFrames.at(-1),gridMounted});
+  assert.ok(gridMounted<60,`grid mounts bounded visible cards: ${gridMounted}`);
+  const metadata=[];
+  for(let n=0;n<10;n++) {
+    metadata.push(await page.evaluate(()=>new Promise(resolve=>{
+      const timeout=window.setTimeout(()=>{observer.disconnect();resolve(-1);},3000);
+      const start=performance.now(),observer=new MutationObserver(()=>{
+        if(window.document.querySelector('.reading-pane .eyebrow')?.textContent==='study.md') {
+          window.clearTimeout(timeout);observer.disconnect();window.requestAnimationFrame(()=>resolve(performance.now()-start));
+        }
+      });observer.observe(window.document.getElementById('shell-content'),{subtree:true,childList:true,characterData:true});
+      window.document.querySelector('.library-document').dispatchEvent(new window.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+    })));
+    console.log('metadataPaintMs',metadata.at(-1));
+    if(metadata.at(-1)<0) break;
+    await page.locator('.app-header').getByRole('button',{name:'Library',exact:true}).click();await page.locator('.library-document').first().waitFor();
+  }
+  const validMetadata=metadata.filter(value=>value>=0).sort((a,b)=>a-b);Object.assign(evidence,{metadataPaintSamples:validMetadata.length,metadataPaintTimeouts:metadata.length-validMetadata.length,metadataPaintP50:validMetadata[Math.floor(validMetadata.length/2)],metadataPaintMax:validMetadata.at(-1)});
   await mkdir("/tmp/vstudy-library", { recursive: true });
   await writeFile(
     "/tmp/vstudy-library/performance.json",
