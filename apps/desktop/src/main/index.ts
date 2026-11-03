@@ -169,7 +169,7 @@ app.on("window-all-closed", () => {
 let quitting = false;
 const shutdown = coordinateShutdown({
   stopWork: async () => { await disposeIpc?.(); },
-  flush: () => session.defaultSession.flushStorageData(),
+  flush: () => { if (app.isReady()) session.defaultSession.flushStorageData(); },
   close: () => { store?.close(); store = undefined; },
   quit: () => { quitting = true; app.quit(); },
   forceExit: () => app.exit(),

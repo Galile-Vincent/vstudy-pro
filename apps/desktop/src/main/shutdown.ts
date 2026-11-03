@@ -13,6 +13,7 @@ export function coordinateShutdown(phases: {
       phases.flush();
       phases.close();
       phases.quit();
-    } finally { clearTimeout(timeout); }
+    } catch { phases.forceExit(); }
+    finally { clearTimeout(timeout); }
   })();
 }

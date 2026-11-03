@@ -108,6 +108,11 @@ export class DocumentService {
           const raw = /<title\b[^>]*>([\s\S]*?)<\/title\s*>/i.exec(html)?.[1];
           if (raw?.trim()) title = decodeHtmlEntities(raw).replace(/\s+/g, " ").trim();
         }
+        const raced = this.options.store.documents.findByHash(sourceHash);
+        if (raced) {
+          if (!this.get(raced.id)) throw new Error("Document is pending deletion");
+          return raced;
+        }
         const inserted = profileStage("DB insert");
         const document = this.options.store.documents.insert(documentSchema.parse({
           id: randomUUID(), title: safeDocumentLabel(title), sourceName: safeDocumentLabel(basename(path)),
