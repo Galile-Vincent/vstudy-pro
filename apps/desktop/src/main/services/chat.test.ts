@@ -116,7 +116,7 @@ it("persists both messages and streams selection-grounded prompt only to origin"
   await until(() => owner.events.some((e) => e.type === "done"));
   expect(received?.prompt).toContain("Exact selected passage");
   expect(received?.prompt).toContain("Document: Study");
-  expect(owner.events).toEqual([
+  expect(owner.events.filter(e => e.type !== "usage")).toEqual([
     { type: "text-delta", text: "Answer" },
     { type: "done" },
   ]);
@@ -158,7 +158,7 @@ it("rejects duplicate ids and foreign aborts; abort emits exactly done despite l
   release?.();
   await new Promise((r) => setTimeout(r, 15));
   expect(aborted).toBe(true);
-  expect(owner.events).toEqual([
+  expect(owner.events.filter(e => e.type !== "usage")).toEqual([
     { type: "text-delta", text: "first" },
     { type: "done" },
   ]);
@@ -182,7 +182,7 @@ it("aborts all window-owned requests on destruction and suppresses late deltas",
   owner.destroy();
   await new Promise((r) => setTimeout(r, 10));
   expect(signal?.aborted).toBe(true);
-  expect(owner.events).toEqual([{ type: "text-delta", text: "first" }]);
+  expect(owner.events.filter(e => e.type !== "usage")).toEqual([{ type: "text-delta", text: "first" }]);
 });
 it("sanitizes provider exceptions and rejects inconsistent context before persistence", async () => {
   const { chat, store, request, owner } = await setup({
@@ -198,7 +198,7 @@ it("sanitizes provider exceptions and rejects inconsistent context before persis
   expect(store.messages.list(request.conversationId)).toEqual([]);
   chat.start(request, owner);
   await until(() => owner.events.length > 0);
-  expect(owner.events).toEqual([
+  expect(owner.events.filter(e => e.type !== "usage")).toEqual([
     {
       type: "error",
       message:
@@ -219,7 +219,7 @@ it("an immediate abort never starts the provider and does not persist an empty a
   chat.abort(request.requestId, owner);
   await new Promise((r) => setTimeout(r, 10));
   expect(called).toBe(false);
-  expect(owner.events).toEqual([{ type: "done" }]);
+  expect(owner.events.filter(e => e.type !== "usage")).toEqual([{ type: "done" }]);
   expect(store.messages.list(request.conversationId)).toHaveLength(1);
 });
 it("loads the repository Markdown path and supplies stored history on subsequent turns", async () => {
@@ -263,7 +263,7 @@ it("releases a request if its window transport fails during a delta", async () =
   };
   chat.start(request, owner);
   await until(() => owner.events.some((e) => e.type === "done"));
-  expect(owner.events).toEqual([{ type: "done" }]);
+  expect(owner.events.filter(e => e.type !== "usage")).toEqual([{ type: "done" }]);
   expect(() => chat.start(request, owner)).not.toThrow();
   await until(() => owner.events.filter((e) => e.type === "done").length === 2);
 });
@@ -281,7 +281,7 @@ it.each(["document", "conversation"])("aborts before deleting %s without late sa
   else chat.deleteConversation(request.conversationId);
   await new Promise(resolve => setTimeout(resolve, 10));
   expect(signal?.aborted).toBe(true);
-  expect(owner.events).toEqual([{ type: "text-delta", text: "partial" }, { type: "done" }]);
+  expect(owner.events.filter(e => e.type !== "usage")).toEqual([{ type: "text-delta", text: "partial" }, { type: "done" }]);
   expect(store.messages.list(request.conversationId)).toEqual([]);
 });
 it("persists structured selection and partial status, excludes incomplete turns from prompts", async () => {
@@ -348,4 +348,11 @@ it('records CLI auxiliary model usage separately while displaying aggregate mess
   chat.start(request,owner);await until(()=>owner.events.at(-1)?.type==='done');
   expect(store.usage.forConversation(request.conversationId).map(r=>[r.modelId,r.inputTokens,r.outputTokens]).sort()).toEqual([['claude-haiku-5-5',1180,17],['claude-sonnet-5-5',2050,4]]);
   expect(owner.events.filter(e=>e.type==='usage')).toHaveLength(1);
+});
+it('records an unreported failed attempt with unknown price instead of a zero-dollar claim',async()=>{
+  const {chat,store,request,owner}=await setup({...available,async *stream(){throw new Error('No usage');yield {type:'done'};}});
+  chat.start(request,owner);await until(()=>owner.events.at(-1)?.type==='error');
+  expect(store.usage.forConversation(request.conversationId)).toMatchObject([{inputTokens:0,outputTokens:0,costSource:'unknown'}]);
+  expect(store.usage.forConversation(request.conversationId)[0]?.costUsd).toBeUndefined();
+  expect(owner.events.map(e=>e.type)).toEqual(['usage','error']);
 });

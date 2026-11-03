@@ -29,6 +29,7 @@ interface ActiveRequest {
   usage?: Usage;
   usageModels?: { modelId: string; usage: Usage }[];
   usageEmitted?: boolean;
+  promptChars?: number;
 }
 export class ChatService {
   private readonly deleting = new Set<string>();
@@ -167,8 +168,11 @@ export class ChatService {
     entry.owner.removeListener("destroyed", entry.onDestroyed);
     try {
       const messageId = randomUUID();
+      if (!entry.usage && entry.promptChars !== undefined) entry.usage = entry.text
+        ? { inputTokens: Math.ceil(entry.promptChars / 4), outputTokens: Math.ceil(entry.text.length / 4), costSource: 'estimated' }
+        : { inputTokens: 0, outputTokens: 0, costSource: 'unknown' };
       if (entry.usage) {
-        entry.usage = priceUsage(entry.request.modelId, entry.usage, this.store.settings.get().priceOverrides);
+        if (entry.usage.inputTokens || entry.usage.outputTokens || entry.usage.costUsd !== undefined) entry.usage = priceUsage(entry.request.modelId, entry.usage, this.store.settings.get().priceOverrides);
         for (const model of entry.usageModels?.length ? entry.usageModels : [{ modelId: entry.request.modelId, usage: entry.usage }]) this.store.usage.record({ ...model.usage, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: model.modelId, kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
@@ -205,6 +209,7 @@ export class ChatService {
           ? { selection: entry.request.selection }
           : {}),
       });
+      entry.promptChars = prompt.length;
       for await (const event of adapter.stream(
         { ...entry.request, prompt, onUsageSnapshot: (usage, models) => { if (this.active.get(entry.request.requestId) === entry) { entry.usage = usageSchema.parse(usage); if (models) entry.usageModels = models.map(m => ({modelId: m.modelId, usage: usageSchema.parse(m.usage)})); } } },
         entry.controller.signal,
