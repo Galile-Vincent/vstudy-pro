@@ -1,3 +1,4 @@
+import { assertCodexChatEvent, createCodexAdapter } from './codex';
 import { ProviderError } from "./api";
 import { discoverModels } from "./models";
 import { spawn } from "node:child_process";
@@ -94,11 +95,13 @@ export async function* runCli(
   signal: AbortSignal,
   timeoutMs = 120_000,
   snapshot: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void = () => {},
+  environment: NodeJS.ProcessEnv = {},
+  onRecord: (record: Record<string, unknown>) => void = () => {},
 ) {
   signal.throwIfAborted();
   const child = spawn(binary, args, {
     cwd,
-    env: cliEnvironment(),
+    env: { ...cliEnvironment(), ...environment },
     shell: false,
     detached: process.platform !== "win32",
     stdio: ["pipe", "pipe", "pipe"],
@@ -153,12 +156,17 @@ export async function* runCli(
         stdoutDiagnostic = line.slice(-8192);
         let record: Record<string, unknown> | undefined;
         try { record = JSON.parse(line) as Record<string, unknown>; } catch { /* Some CLIs print plain diagnostics. */ }
+        if (record) { if (kind === 'codex') assertCodexChatEvent(record); onRecord(record); }
         if (record?.type === 'system' && record.subtype === 'init' && typeof record.model === 'string') resolvedModel = record.model;
         if (record?.is_error || record?.error || record?.type === 'error' || record?.type === 'turn.failed' || /not logged in|please run \/login/i.test(line)) throw new Error('CLI request failed');
         yield line + '\n';
       }
     }
-    if (buffer) { stdoutDiagnostic = buffer.slice(-8192); yield buffer; }
+    if (buffer) {
+      stdoutDiagnostic = buffer.slice(-8192);
+      if (kind === 'codex') { const record = JSON.parse(buffer) as Record<string, unknown>; assertCodexChatEvent(record); onRecord(record); }
+      yield buffer;
+    }
   }
   try {
     let terminal = false;
@@ -192,10 +200,9 @@ export async function* runCli(
 export function createCliAdapter(
   binary: "claude" | "codex" | "agy",
 ): ProviderAdapter {
+  if (binary === 'codex') return createCodexAdapter();
   return {
     async detect() {
-      // Read-only sandboxing still exposes shell/read tools; fail closed until a tool-free transport is verified.
-      if (binary === 'codex') return { available: false, reason: 'Codex CLI is disabled until a tool-free mode is verified' };
       if (!(await findCli(binary)))
         return { available: false, reason: `${binary} CLI not found` };
       if (binary === "agy")
@@ -206,11 +213,11 @@ export function createCliAdapter(
       return { available: true };
     },
     async listModels() {
-      return binary === 'agy' || binary === 'codex' ? [] : discoverModels(binary);
+      return binary === 'agy' ? [] : discoverModels(binary);
     },
     async *stream(request, signal) {
       const file = await findCli(binary);
-      if (!file || binary === "agy" || binary === "codex") throw new Error("CLI unavailable");
+      if (!file || binary === "agy") throw new Error("CLI unavailable");
       const cwd = await mkdtemp(
         join(tmpdir(), `vstudy-${request.conversationId}-`),
       );

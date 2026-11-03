@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a1a27a-77fe-7523-9504-52a46baffa76"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I don’t have shell, file-reading, apply_patch, MCP, web, image, or agent tools available in this session, so I can’t read those files, list `$HOME`, write the file, or run `curl`. The environment also prohibits file writes and restricts network access."}}
+{"type":"turn.completed","usage":{"input_tokens":968,"cached_input_tokens":0,"cache_write_input_tokens":0,"output_tokens":63,"reasoning_output_tokens":0}}

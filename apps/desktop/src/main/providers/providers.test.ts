@@ -138,35 +138,19 @@ it("kills a real subprocess on abort and on timeout", async () => {
   }
 });
 for (const kind of ["claude", "codex"] as const)
-  it.skipIf(process.env.VSTUDY_REAL_CLI_SMOKE !== "1")(
-    `real ${kind} smoke`,
-    async () => {
-      const binary = await findCli(kind);
-      if (!binary) return;
-      const cwd = await mkdtemp(join(tmpdir(), `vstudy-${kind}-smoke-`));
-      try {
-        const events = await collect(
-          runCli(
-            binary,
-            cliArgs(kind, "default"),
-            "Reply with exactly VSTUDY_OK. Do not use any tools.",
-            cwd,
-            kind,
-            new AbortController().signal,
-          ),
-        );
-        expect(
-          events
-            .flatMap((e) => (e.type === "text-delta" ? [e.text] : []))
-            .join(""),
-        ).toContain("VSTUDY_OK");
-        expect(events.at(-1)).toEqual({ type: "done" });
-      } finally {
-        await rm(cwd, { recursive: true, force: true });
-      }
-    },
-    140_000,
-  );
+  it.skipIf(process.env.VSTUDY_REAL_CLI_SMOKE !== "1")(`real ${kind} smoke`, async context => {
+    if (!(await findCli(kind))) { context.skip(); return; }
+    const adapter = createCliAdapter(kind);
+    if (!(await adapter.detect()).available) { context.skip(); return; }
+    const events = await collect(adapter.stream({ ...request, providerId: kind === 'codex' ? 'codex-cli' : 'claude-cli', modelId: 'default', prompt: 'Reply with exactly VSTUDY_OK. Do not use any tools.' }, new AbortController().signal));
+    expect(events.flatMap(e => e.type === 'text-delta' ? [e.text] : []).join('')).toContain('VSTUDY_OK');
+    expect(events.at(-1)).toEqual({ type: 'done' });
+  }, 140_000);
+
+for (const newline of ['', '\n']) it(`rejects native Codex tool events with ${newline ? 'a' : 'no'} final newline`, async () => {
+  const record = JSON.stringify({ type: 'item.completed', item: { type: 'command_execution', command: 'cat secret' } }) + newline;
+  await expect(collect(runCli(process.execPath, ['-e', `process.stdout.write(${JSON.stringify(record)})`], '', tmpdir(), 'codex', new AbortController().signal))).rejects.toThrow('Provider unavailable');
+});
 
 async function collect<T>(source: AsyncIterable<T>): Promise<T[]> {
   const result: T[] = [];
@@ -233,11 +217,4 @@ for (const kind of ["claude", "codex"] as const) it(`drops buffered ${kind} outp
     })()).rejects.toThrow();
     expect(events).toEqual([{ type: "text-delta", text: "tick" }]);
   } finally { await rm(cwd, { recursive: true, force: true }); }
-});
-
-it('fails closed for Codex until native tools can be disabled', async () => {
- const adapter = createCliAdapter('codex');
- expect(await adapter.detect()).toMatchObject({ available: false });
- expect(await adapter.listModels()).toEqual([]);
- await expect(collect(adapter.stream(request, new AbortController().signal))).rejects.toThrow('CLI unavailable');
 });

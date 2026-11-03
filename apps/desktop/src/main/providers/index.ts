@@ -5,7 +5,7 @@ import {
   writeFileSync,
   renameSync,
 } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { z } from "zod";
 import {
   providerConfigSchema,
@@ -16,6 +16,7 @@ import {
 } from "../../shared/domain";
 import type { SecretStore } from "../services/secrets";
 import { createApiAdapter, validateBaseUrl } from "./api";
+import { createCodexAdapter } from './codex';
 import { createCliAdapter } from "./cli";
 import { AgyAdapter } from "./agy";
 export type Availability =
@@ -185,7 +186,7 @@ export function createProviderRegistry(
     "openai-compatible": () =>
       createApiAdapter(() => registry.config("openai-compatible"), secrets),
     "claude-cli": () => createCliAdapter("claude"),
-    "codex-cli": () => createCliAdapter("codex"),
+    "codex-cli": () => createCodexAdapter(configFile ? join(dirname(configFile), "codex-chat-proof.json") : undefined),
     "agy-cli": () => new AgyAdapter(),
   } satisfies Record<ProviderConfig["id"], () => ProviderAdapter>;
   for (const config of [
