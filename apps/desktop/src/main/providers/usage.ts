@@ -13,7 +13,7 @@ const counts = z.object({
 const windowSchema = z.object({ used_percent: z.number().min(0).max(100), window_minutes: z.number().optional(), resets_at: z.number().optional() });
 export function extractUsage(data: string, kind: string, previous?: Usage): Usage | undefined {
   if (data === '[DONE]') return previous;
-  const wire = z.object({ type: z.string().optional(), event: z.unknown().optional(), message: z.object({ usage: counts.optional() }).optional(), usage: counts.nullable().optional(), total_cost_usd: z.number().finite().nonnegative().optional(),
+  const wire = z.object({ rate_limit_info: z.object({ rateLimitType: z.string().optional(), utilization: z.number().nonnegative().optional(), resetsAt: z.number().optional() }).optional(), type: z.string().optional(), event: z.unknown().optional(), message: z.object({ usage: counts.optional() }).optional(), usage: counts.nullable().optional(), total_cost_usd: z.number().finite().nonnegative().optional(),
     info: z.object({ total_token_usage: counts.optional(), last_token_usage: counts.optional() }).nullable().optional(),
     rate_limits: z.object({ primary: windowSchema.nullable().optional(), secondary: windowSchema.nullable().optional() }).nullable().optional(),
     payload: z.unknown().optional(),
@@ -33,6 +33,10 @@ export function extractUsage(data: string, kind: string, previous?: Usage): Usag
       reasoningTokens: c.reasoning_output_tokens ?? c.completion_tokens_details?.reasoning_tokens ?? c.output_tokens_details?.thinking_tokens ?? previous?.reasoningTokens,
       costUsd: wire.total_cost_usd ?? previous?.costUsd, costSource: wire.total_cost_usd === undefined ? previous?.costSource ?? 'unknown' : 'reported',
     });
+  }
+  if (wire.type === 'rate_limit_event' && wire.rate_limit_info) {
+    const info = wire.rate_limit_info;
+    usage = usageSchema.parse({inputTokens:0,outputTokens:0,costSource:'unknown',...usage,rateLimit:{label:info.rateLimitType ?? 'Claude rate limit', ...(info.utilization === undefined ? {} : {usedPercent:Math.min(100,info.utilization*100)}), ...(info.resetsAt ? {resetsAt:new Date(info.resetsAt*1000).toISOString()} : {})}});
   }
   const windows = [wire.rate_limits?.primary, wire.rate_limits?.secondary].filter(w => w != null);
   if (windows.length) {

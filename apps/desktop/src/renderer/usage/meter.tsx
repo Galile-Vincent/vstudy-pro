@@ -19,17 +19,19 @@ export function UsageButton({ data, error, onClick }: ReturnType<typeof useUsage
   const tokens = records.reduce((n,r) => n + r.inputTokens + r.outputTokens,0);
   const known = records.filter(r => r.costUsd !== undefined);
   const cost = known.reduce((n,r) => n + r.costUsd!,0);
-  return <button type="button" className="composer-usage" onClick={onClick} aria-label="Conversation usage" title="View usage and budget settings">{error || (!data ? 'Usage…' : `${compactTokens(tokens)} tokens${known.length ? ` · ${money(cost)}` : ''}`)}</button>;
+  return <button type="button" className="composer-usage" onClick={onClick} aria-label="Conversation usage" title="View usage and budget settings">{error || (!data ? 'Usage…' : `${compactTokens(tokens)} tokens${known.length ? ` · ${money(cost)}` : ''}${records.some(r => r.aborted) ? ' · includes aborted turns' : ''}`)}</button>;
 }
 export function UsageMeter({ data, error }: ReturnType<typeof useUsage>) {
+  const [priceUnknown,setPriceUnknown] = useState(false);
+  useEffect(() => { const update = (event: Event) => setPriceUnknown(Boolean((event as CustomEvent).detail)); window.addEventListener('usage-price-unknown',update); return () => window.removeEventListener('usage-price-unknown',update); },[]);
   if (!data) return error ? <small className="usage-meter">{error}</small> : null;
   const { settings,month } = data;
   const state = budgetState(settings,month);
-  if (!state.percent && !month.unknownPrices) return null;
+  if (!state.percent && !month.unknownPrices && !priceUnknown) return null;
   return <div className={`usage-meter ${state.tone}`}>
 
     {(settings.monthlyBudgetUsd || settings.monthlyTokenBudget) && <><span>Month · {money(month.costUsd ?? (month.calls ? undefined : 0))}{settings.monthlyBudgetUsd ? ` / $${settings.monthlyBudgetUsd} · $${Math.max(0,settings.monthlyBudgetUsd - (month.costUsd ?? 0)).toFixed(2)} left` : ''}{settings.monthlyTokenBudget ? ` · ${compactTokens(state.tokens)} / ${compactTokens(settings.monthlyTokenBudget)} tokens · ${compactTokens(Math.max(0,settings.monthlyTokenBudget - state.tokens))} left` : ''}</span><progress aria-label="Monthly budget used" value={Math.min(100,state.percent)} max={100} /></>}
-    {month.unknownPrices > 0 && <span>Some prices unknown; spending is a lower bound.</span>}
+    {(priceUnknown || month.unknownPrices > 0) && <small>Price unknown: this call isn't counted toward the USD budget</small>}
   </div>;
 }
 export function useBudgetGuard(data: ReturnType<typeof useUsage>['data'], conversationId: Conversation['id'], draft: string) {
@@ -48,8 +50,9 @@ export function useBudgetGuard(data: ReturnType<typeof useUsage>['data'], conver
     checking.current = true;
     void Promise.all([desktop.invoke('usage:estimate',{conversationId,userMessage:draft}), desktop.invoke('usage:summary',{period:'month'}), desktop.invoke('settings:get',{})]).then(([next,month,settings]) => {
       const exceeds = budgetState(settings,month,{tokens:next.inputTokens + next.outputTokens,costUsd:next.costUsd ?? 0}).exceeds;
-      if (exceeds || (settings.monthlyBudgetUsd && (next.costUsd === undefined || month.unknownPrices > 0))) {
-        setReason(exceeds ? 'The next request may exceed your monthly budget.' : 'Some prices are unknown, so the next request cannot be checked against your USD budget.'); setWarning(true);
+      window.dispatchEvent(new CustomEvent('usage-price-unknown',{detail:next.costUsd === undefined}));
+      if (exceeds) {
+        setReason('The next request may exceed your monthly budget.'); setWarning(true);
       } else approve();
     }).catch(() => { setReason('Could not check your budget.'); setWarning(true); }).finally(() => { checking.current = false; });
   };

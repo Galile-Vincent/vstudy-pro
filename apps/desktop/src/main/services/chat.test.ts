@@ -334,7 +334,7 @@ it('records the latest reported partial snapshot on abort without post-terminal 
   }});
   chat.start(request,owner);await until(()=>owner.events.length>0);chat.abort(request.requestId,owner);
   expect(owner.events.map(e=>e.type)).toEqual(['text-delta','usage','done']);
-  expect(store.usage.forConversation(request.conversationId)).toMatchObject([{inputTokens:240,outputTokens:3,costSource:'unknown'}]);
+  expect(store.usage.forConversation(request.conversationId)).toMatchObject([{inputTokens:240,outputTokens:3,costSource:'estimated',aborted:true}]);
   await new Promise(resolve=>setTimeout(resolve,10));expect(owner.events).toHaveLength(3);
 });
 it('records CLI auxiliary model usage separately while displaying aggregate message usage',async()=>{
@@ -349,10 +349,27 @@ it('records CLI auxiliary model usage separately while displaying aggregate mess
   expect(store.usage.forConversation(request.conversationId).map(r=>[r.modelId,r.inputTokens,r.outputTokens]).sort()).toEqual([['claude-haiku-5-5',1180,17],['claude-sonnet-5-5',2050,4]]);
   expect(owner.events.filter(e=>e.type==='usage')).toHaveLength(1);
 });
-it('records an unreported failed attempt with unknown price instead of a zero-dollar claim',async()=>{
+it('does not record a failed attempt before any output or reported usage',async()=>{
   const {chat,store,request,owner}=await setup({...available,async *stream(){throw new Error('No usage');yield {type:'done'};}});
   chat.start(request,owner);await until(()=>owner.events.at(-1)?.type==='error');
-  expect(store.usage.forConversation(request.conversationId)).toMatchObject([{inputTokens:0,outputTokens:0,costSource:'unknown'}]);
-  expect(store.usage.forConversation(request.conversationId)[0]?.costUsd).toBeUndefined();
-  expect(owner.events.map(e=>e.type)).toEqual(['usage','error']);
+  expect(store.usage.forConversation(request.conversationId)).toEqual([]);
+  expect(owner.events.map(e=>e.type)).toEqual(['error']);
+});
+
+it('estimates 1300 streamed characters on Stop, resolves the init model, and prices the aborted row',async()=>{
+  const {chat,store,request,owner}=await setup({...available,async *stream(req,signal){
+    req.onUsageSnapshot?.({inputTokens:10,outputTokens:4,costSource:'unknown'},[{modelId:'claude-haiku-5-5',usage:{inputTokens:10,outputTokens:4,costSource:'unknown'}}]);
+    yield {type:'text-delta',text:'a'.repeat(1300)};
+    await new Promise<void>(resolve=>signal.addEventListener('abort',()=>resolve(),{once:true}));
+  }});
+  chat.start(request,owner);await until(()=>owner.events.length>0);chat.abort(request.requestId,owner);
+  const row=store.usage.forConversation(request.conversationId)[0]!;
+  expect(row).toMatchObject({modelId:'claude-haiku-5-5',outputTokens:325,costSource:'estimated',aborted:true});
+  expect(row.inputTokens).toBeGreaterThan(10);
+  expect(row.costUsd).toBe((row.inputTokens*.1+162.5)/1000000);
+});
+it('retains explicitly reported zero usage on a completed call',async()=>{
+  const {chat,store,request,owner}=await setup({...available,async *stream(){yield {type:'usage',usage:{inputTokens:0,outputTokens:0,costSource:'reported',costUsd:0}};yield {type:'done'};}});
+  chat.start(request,owner);await until(()=>owner.events.at(-1)?.type==='done');
+  expect(store.usage.forConversation(request.conversationId)).toMatchObject([{inputTokens:0,outputTokens:0,costUsd:0,costSource:'reported',aborted:false}]);
 });

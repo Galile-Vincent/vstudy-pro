@@ -97,3 +97,7 @@ it('prices verified Luna, Astra and Terra list rates and Claude aliases literall
   expect(estimateCost('haiku', usage)).toBe(.015);
   expect(estimateCost('agy-unverified', usage)).toBeUndefined();
 });
+
+it('parses Claude stream-json rate_limit_event utilization and reset',()=>{
+  expect(extractUsage('{"type":"rate_limit_event","rate_limit_info":{"rateLimitType":"five_hour","utilization":0.62,"resetsAt":1793715000}}','claude')).toEqual({inputTokens:0,outputTokens:0,costSource:'unknown',rateLimit:{label:'five_hour',usedPercent:62,resetsAt:'2026-11-03T14:10:00.000Z'}});
+});
