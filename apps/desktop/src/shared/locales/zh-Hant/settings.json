@@ -40,5 +40,6 @@
   "event_cli_request": "CLI 請求（可能包含 CLI 遙測）",
   "event_codex_quota": "Codex 額度查詢",
   "event_converter_install": "安裝轉換器相依套件",
-  "found": "已找到執行檔 — 尚未檢查登入"
+  "found": "已找到執行檔 — 尚未檢查登入",
+  "session_ready": "金鑰僅供本次工作階段使用。"
 }

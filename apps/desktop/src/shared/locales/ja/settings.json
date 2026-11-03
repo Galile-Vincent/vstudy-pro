@@ -40,5 +40,6 @@
   "event_cli_request": "CLI リクエスト（CLI のテレメトリを含む場合あり）",
   "event_codex_quota": "Codex 利用枠確認",
   "event_converter_install": "コンバーター依存パッケージのインストール",
-  "found": "実行ファイルあり — ログインは未確認"
+  "found": "実行ファイルあり — ログインは未確認",
+  "session_ready": "キーはこのセッションでのみ使用できます。"
 }

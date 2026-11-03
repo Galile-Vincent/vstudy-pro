@@ -40,5 +40,6 @@
   "event_cli_request": "CLI request (may include CLI telemetry)",
   "event_codex_quota": "Codex quota check",
   "event_converter_install": "Converter dependency installation",
-  "found": "Found on disk — login not checked"
+  "found": "Found on disk — login not checked",
+  "session_ready": "Key is available for this session only."
 }
