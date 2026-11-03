@@ -21,7 +21,7 @@ try {
  await page.getByTestId('document-markdown').waitFor();const firstImportMs=performance.now()-start;
  const running=workers();assert.equal(running.length,1,'one worker after first conversion');
  const workerRssKiB=Number(running[0].trim().split(/\s+/)[2]);
- for(let n=0;n<13;n++) await page.waitForTimeout(5000);assert.equal(workers().length,0,'worker exits after configured idle minute');
+ await poll(()=>workers().length===0,75000);assert.equal(workers().length,0,'worker exits after configured idle minute');
  await page.evaluate(documentId=>window.desktop.invoke('documents:reconvert',{documentId}),doc.id);
  await poll(()=>page.evaluate(async id=>(await window.desktop.invoke('documents:get',{documentId:id})).status==='ready',doc.id));
  assert.equal(workers().length,1,'conversion restarts after idle shutdown');

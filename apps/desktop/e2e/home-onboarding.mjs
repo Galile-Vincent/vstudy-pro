@@ -44,7 +44,10 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   await page.locator('.onboarding').waitFor({state:'detached'});
   assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).onboardingCompleted,true);
   db=new DatabaseSync(join(directory,'vstudy.sqlite')); db.exec('PRAGMA busy_timeout=5000; DELETE FROM activity_events; DELETE FROM activity_days; UPDATE documents SET lastOpenedAt=NULL;');
-  const refresh=async()=>{await page.evaluate(()=>window.dispatchEvent(new window.Event('activity-updated')));await page.waitForTimeout(200);};
+  const refresh=async()=>{
+   const expected=await page.evaluate(async()=>{window.dispatchEvent(new window.Event('activity-updated'));const data=await window.desktop.invoke('dashboard:get',{});return [...data.recentDocuments.slice(0,3).map(d=>d.document.title),...data.pinnedDocuments.slice(0,5).map(d=>d.document.title)].sort();});
+   await page.waitForFunction(expected=>{const actual=[...window.document.querySelectorAll('.home-card:not(.home-activity) .home-row')].map(row=>row.querySelector('strong')?.textContent??row.textContent).sort();return JSON.stringify(actual)===JSON.stringify(expected);},expected);
+  };
   await refresh(); await audit('home-empty'); await capture('home-empty');
   // Metadata insert shapes follow the benchmark seeder at a three-document scale.
   const now=new Date().toISOString(),ids=[randomUUID(),randomUUID(),randomUUID()];
