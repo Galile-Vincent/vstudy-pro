@@ -41,7 +41,7 @@ export const documentTransitions: Record<
   readonly Document["status"][]
 > = {
   converting: ["ready", "failed"],
-  ready: [],
+  ready: ["converting"],
   failed: ["converting"],
 };
 export type DocumentTransition =

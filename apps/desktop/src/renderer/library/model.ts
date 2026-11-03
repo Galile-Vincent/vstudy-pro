@@ -35,3 +35,16 @@ export function selectedRange(items: Item[], anchor: string, id: string) {
     .slice(Math.min(a < 0 ? b : a, b), Math.max(a, b) + 1)
     .map((i) => i.document.id);
 }
+
+export async function moveDocuments(
+  documentIds: Item["document"]["id"][],
+  folderId: Folder["id"] | null,
+  beforeId?: Item["document"]["id"],
+) {
+  for (let offset = 0; offset < documentIds.length; offset += 500)
+    await desktop.invoke("library:documents:move", {
+      documentIds: documentIds.slice(offset, offset + 500),
+      folderId,
+      ...(beforeId ? { beforeId } : {}),
+    });
+}

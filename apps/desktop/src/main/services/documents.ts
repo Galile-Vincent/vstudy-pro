@@ -126,6 +126,9 @@ export class DocumentService {
     return readFile(path, "utf8");
   }
 
+  reconvert(id: Document["id"]): Promise<Document> {
+    return this.serialize(async()=>{const document=this.require(id);if(document.status==='converting')throw new Error('errors.conversion_in_progress');const updated=this.options.store.documents.transition(id,{status:'converting'});this.enqueue(updated);return updated;});
+  }
   retry(id: Document["id"]): Promise<Document> {
     return this.serialize(async () => {
       const document = this.require(id);

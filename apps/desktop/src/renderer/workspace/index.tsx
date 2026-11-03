@@ -1,7 +1,7 @@
 import { useReadingActivity } from '../home/use-reading-activity';
 import { BlankChat } from '../motion/blank-chat';
 import { useNavigate } from '../shell';
-import { Menu, Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, FileText } from "lucide-react";
+import { Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, FileText } from "lucide-react";
 import { errorText, statusText } from "../status";
 import { conversionStatus } from "../../shared/status";
 import { useTranslation } from "react-i18next";
@@ -41,7 +41,6 @@ export function Workspace() {
     [conversation, setConversation] = useState<Conversation | null>(null),
     [history, setHistory] = useState<Message[] | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null),
-    [library, setLibrary] = useState(false),
     [showSettings, setShowSettings] = useState(false),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
@@ -424,13 +423,7 @@ export function Workspace() {
     >
       <a className="skip-link" href="#reading-content">{tr('common:skip_content')}</a><header className="app-header">
         <div className="row">
-          <button
-            aria-label={tr('common:toggle_document_library')}
-            aria-expanded={library}
-            onClick={() => setLibrary(!library)}
-          >
-            <Menu size={16} />
-          </button>
+          <button data-testid="import-document" aria-label={tr('common:import_document')} disabled={busy||!connected} onClick={()=>void importDocument()}><Plus size={16}/></button>
           <h1>
             VStudy <span>Pro</span>
           </h1>
@@ -479,44 +472,6 @@ export function Workspace() {
         </div>
       )}
       <div className="workspace-body">
-        {library && (
-          <aside className="library" aria-label={tr('common:document_library')}>
-            <div className="library-heading">
-              <span className="eyebrow">{tr('common:library')}</span>
-              <span className="muted">{documents.length}</span>
-            </div>
-            <button
-              className="import-button" data-testid="import-document"
-              disabled={busy || !connected}
-              onClick={() => void importDocument()}
-            >
-              {tr('common:import_document')}</button>
-            <div className="document-list">
-              {documents.length ? (
-                documents.map((d) => (
-                  <button
-                    className={`document-item ${d.id === documentId ? "active" : ""}`}
-                    key={d.id}
-                    onClick={() => setDocumentId(d.id)}
-                  >
-                    <span>▤</span>
-                    <span>
-                      <strong>{d.title}</strong>
-                      <small>
-                        {d.status === "ready" ? d.sourceName : d.status}
-                      </small>
-                    </span>
-                  </button>
-                ))
-              ) : (
-                <p className="library-empty">
-                  {tr('common:keep_your_reading_in_one_place')}<br />
-                  {tr('common:import_a_file_to_begin')}</p>
-              )}
-            </div>
-            <div className="library-footer">{tr('common:documents_stay_on_this_mac')}</div>
-          </aside>
-        )}
         <PanelGroup direction="horizontal" className="panels">
           {(settings.chatSide === "left"
             ? ["chat", "divider", "reading"]

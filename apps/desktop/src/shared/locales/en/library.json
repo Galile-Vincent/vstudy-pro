@@ -96,5 +96,14 @@
   "reveal": "Reveal in Finder",
   "exportMarkdown": "Export Markdown",
   "exportOriginal": "Export original",
-  "convertedFrom": "From {{name}} · {{converter}}"
+  "convertedFrom": "From {{name}} · {{converter}}",
+  "moveUp": "Move {{name}} up",
+  "moveDown": "Move {{name}} down",
+  "icon": "Icon",
+  "icon_folder": "Folder",
+  "icon_book": "Book",
+  "icon_star": "Star",
+  "reconvert": "Re-convert",
+  "save": "Save",
+  "newTag": "New tag"
 }

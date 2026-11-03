@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { tr } from "../../shared/i18n";
 export function LibraryDialog({
   title,
@@ -21,6 +21,7 @@ export function LibraryDialog({
     <dialog
       ref={ref}
       className="settings-dialog library-dialog"
+      aria-label={title}
       onCancel={onClose}
     >
       <div className="dialog-title">
@@ -32,4 +33,42 @@ export function LibraryDialog({
       {children}
     </dialog>
   );
+}
+export function useLibraryPrompt() {
+  const [request, setRequest] = useState<{
+    title: string;
+    value: string;
+    resolve: (value: string | null) => void;
+  } | null>(null);
+  const ask = (title: string, value = "") =>
+    new Promise<string | null>((resolve) =>
+      setRequest({ title, value, resolve }),
+    );
+  const close = (value: string | null) => {
+    request?.resolve(value);
+    setRequest(null);
+  };
+  const dialog = request ? (
+    <LibraryDialog title={request.title} onClose={() => close(null)}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          close(request.value.trim() || null);
+        }}
+      >
+        <label>
+          {request.title}
+          <input
+            autoFocus
+            required
+            maxLength={200}
+            value={request.value}
+            onChange={(e) => setRequest({ ...request, value: e.target.value })}
+          />
+        </label>
+        <button>{tr("library:save")}</button>
+      </form>
+    </LibraryDialog>
+  ) : null;
+  return [ask, dialog] as const;
 }

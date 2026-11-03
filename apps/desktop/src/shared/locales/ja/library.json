@@ -96,5 +96,14 @@
   "reveal": "Finder で表示",
   "exportMarkdown": "Markdown をエクスポート",
   "exportOriginal": "オリジナルをエクスポート",
-  "convertedFrom": "変換元：{{name}} · {{converter}}"
+  "convertedFrom": "変換元：{{name}} · {{converter}}",
+  "moveUp": "{{name}} を上へ",
+  "moveDown": "{{name}} を下へ",
+  "icon": "アイコン",
+  "icon_folder": "フォルダ",
+  "icon_book": "本",
+  "icon_star": "スター",
+  "reconvert": "再変換",
+  "save": "保存",
+  "newTag": "新しいタグ"
 }

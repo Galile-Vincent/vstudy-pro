@@ -1,4 +1,4 @@
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { mkdtempSync, writeFileSync, existsSync, rmSync, symlinkSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -52,3 +52,7 @@ it('paginates repeated sort values without duplicates and tracks rollups atomica
 import { activeConversions } from './conversion-state';
 it('defers physical purge until every converter writer settles',()=>{const {lib,s,doc}=fixture();lib.softDelete(doc.id);s.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(new Date(Date.now()-31_000).toISOString(),doc.id);activeConversions.add(doc.id);try{lib.purge();expect(s.db.prepare('SELECT id FROM documents WHERE id=?').get(doc.id)).toBeDefined();}finally{activeConversions.delete(doc.id);}lib.purge();expect(s.db.prepare('SELECT id FROM documents WHERE id=?').get(doc.id)).toBeUndefined();});
 it('orders Pinned by pinnedAt and Recent by lastOpenedAt with stable cursors',()=>{const {s,lib,doc}=fixture();const second=s.documents.insert({...doc,id:documentSchema.parse({...doc,id:randomUUID()}).id,sourceHash:'c'.repeat(64)});for(const [id,date] of [[doc.id,'2026-01-01T00:00:00Z'],[second.id,'2026-02-01T00:00:00Z']])s.db.prepare('UPDATE documents SET pinned=1,pinnedAt=?,lastOpenedAt=? WHERE id=?').run(date!,date!,id!);for(const view of ['pinned','recent']){const first=lib.list(libraryQuerySchema.parse({view,limit:1}));expect(first.items[0]?.document.id).toBe(second.id);const next=lib.list(libraryQuerySchema.parse({view,limit:1,cursor:first.nextCursor}));expect(next.items[0]?.document.id).toBe(doc.id);}});
+
+it('hydrates a metadata page and its tags in two queries regardless of page size',()=>{const {s,lib,doc}=fixture();for(let i=0;i<99;i++)s.documents.insert({...doc,id:documentSchema.parse({...doc,id:randomUUID()}).id,sourceHash:randomUUID().replaceAll('-','').repeat(2)});const spy=vi.spyOn(s.db,'prepare');try{const page=lib.list(libraryQuerySchema.parse({limit:100}));expect(page.items).toHaveLength(100);expect(spy).toHaveBeenCalledTimes(2);}finally{spy.mockRestore();}});
+
+it('returns highlighted snippets on every filtered keyset page',()=>{const {s,lib,doc}=fixture();for(let i=0;i<3;i++){const next={...doc,id:documentSchema.parse({...doc,id:randomUUID()}).id,sourceHash:randomUUID().replaceAll('-','').repeat(2)};s.documents.insert(next);lib.search.update(next.id,'資料 通信 science learning');}let cursor:unknown;let count=0;do{const page=lib.list(libraryQuerySchema.parse({text:'science',limit:1,...(cursor?{cursor}:{})}));expect(page.items[0]?.snippet).toContain('[mark]science[/mark]');count+=page.items.length;cursor=page.nextCursor;}while(cursor);expect(count).toBe(4);});

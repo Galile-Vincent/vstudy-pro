@@ -9,7 +9,7 @@ const ack = z.object({ ok: z.literal(true) }).strict();
 const id = z.object({ documentId: documentIdSchema }).strict();
 export const folderSchema = z.object({ id: folderIdSchema, parentId: folderIdSchema.nullable(), name, color: z.string().max(32).nullable(), icon: z.string().max(64).nullable(), position: z.number(), pinned: z.number().int(), pinnedAt: z.string().nullable(), createdAt: z.string(), updatedAt: z.string(), count: z.number().optional() });
 export const tagSchema = z.object({ id: tagIdSchema, name, color: z.string().max(32).nullable() });
-export const libraryDocumentSchema = z.object({ document: documentSchema, folderId: folderIdSchema.nullable(), position: z.number(), pinned: z.boolean(), pinnedAt: z.string().nullable(), lastOpenedAt: z.string().nullable(), pageCount: z.number().nullable(), sizeBytes: z.number(), contentChars: z.number(), tags:z.array(tagSchema).default([]) });
+export const libraryDocumentSchema = z.object({ document: documentSchema, folderId: folderIdSchema.nullable(), position: z.number(), pinned: z.boolean(), pinnedAt: z.string().nullable(), lastOpenedAt: z.string().nullable(), pageCount: z.number().nullable(), sizeBytes: z.number(), contentChars: z.number(), tags:z.array(tagSchema).default([]), snippet:z.string().optional() });
 export const libraryQuerySchema = z.object({
     view: z.enum(['all', 'recent', 'pinned', 'unfiled', 'converting-failed']).optional(),
     folderId: folderIdSchema.nullable().optional(), subfolders: z.boolean().optional(),

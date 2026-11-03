@@ -4,7 +4,7 @@ import { readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import type { SQLInputValue } from 'node:sqlite';
 import type { Store } from '../db';
-import { documentIdSchema } from '../../shared/domain';
+import { documentIdSchema, documentSchema } from '../../shared/domain';
 import { folderSchema, libraryDocumentSchema, libraryQuerySchema, savedFilterSchema, tagSchema, type LibraryQuery } from '../../shared/library';
 import { SearchService } from './search';
 import { containedPath } from "./file-paths";
@@ -70,7 +70,7 @@ export class LibraryService {
     } }); }
     require(id: string) { const d = this.store.documents.get(documentIdSchema.parse(id)); if (!d)
         throw new Error('Document not found'); return d; }
-    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: this.require(String(row.id)), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: Number(row.sizeBytes), contentChars: Number(row.contentChars) }); }
+    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: Number(row.sizeBytes), contentChars: Number(row.contentChars) }); }
     list(input: LibraryQuery) {
         const q = libraryQuerySchema.parse(input), args: SQLInputValue[] = [], where = ['d.deletedAt IS NULL'];
         const add = (sql: string, ...values: SQLInputValue[]) => { where.push(sql); args.push(...values); };
@@ -132,6 +132,12 @@ export class LibraryService {
         if (items.length) {
             const assignments=this.store.db.prepare(`SELECT dt.documentId,t.* FROM document_tags dt JOIN tags t ON t.id=dt.tagId WHERE dt.documentId IN(${items.map(()=>'?').join(',')})`).all(...items.map(i=>i.document.id));
             for(const item of items) item.tags=assignments.filter(t=>t.documentId===item.document.id).map(t=>tagSchema.parse(t));
+        }
+        if(q.text&&items.length){
+            const text=q.text,short=[...text].length<3,match='"'+text.replaceAll('"','""')+'"';
+            const snippet=short?"substr(content,max(1,instr(lower(content),lower(?))-80),240)":"snippet(document_fts,3,'[mark]','[/mark]',' … ',32)";
+            const snippets=this.store.db.prepare(`SELECT documentId,${snippet} AS snippet FROM document_fts WHERE documentId IN(${items.map(()=>'?').join(',')}) ${short?'':'AND document_fts MATCH ?'}`).all(...(short?[text]:[]),...items.map(i=>i.document.id),...(short?[]:[match]));
+            for(const item of items){const value=String(snippets.find(s=>s.documentId===item.document.id)?.snippet??'');item.snippet=short?value.replaceAll(text,`[mark]${text}[/mark]`):value;}
         }
         const last = rows[Math.min(q.limit, rows.length) - 1];
         const key = pinOrder ? 'pinnedAt' : recentOrder ? 'lastOpenedAt' : { manual: 'position', name: 'title', createdAt: 'createdAt', lastOpenedAt: 'lastOpenedAt', size: 'sizeBytes', type: 'mime' }[q.sort];

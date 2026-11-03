@@ -7,7 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { Home, Library, ArrowLeft } from "lucide-react";
+import { Home, Library, ArrowLeft, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
 import type { Document } from "../../shared";
@@ -35,6 +35,7 @@ export function AppShell({
   sidebar?: ReactNode;
 }) {
   useTranslation();
+  const [sidebarVisible, setSidebarVisible] = useState(true);
   useEffect(() => {
     void desktop
       .invoke("settings:get", {})
@@ -69,6 +70,7 @@ export function AppShell({
           {tr("common:skip_content")}
         </a>
         <aside
+          hidden={!sidebarVisible}
           className="shell-sidebar"
           aria-label={tr("common:document_library")}
         >
@@ -93,6 +95,14 @@ export function AppShell({
         </aside>
         <div className="shell-main">
           <header className="shell-topbar">
+            <button
+              className="shell-toggle"
+              aria-label={tr("common:toggle_document_library")}
+              aria-expanded={sidebarVisible}
+              onClick={() => setSidebarVisible((v) => !v)}
+            >
+              <Menu />
+            </button>
             {route.view === "workspace" ? (
               <button
                 onClick={() =>

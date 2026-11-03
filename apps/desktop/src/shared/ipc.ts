@@ -53,6 +53,7 @@ export const ipcContract = {
     request: z.object({ documentId: documentIdSchema }).strict(),
     response: z.string(),
   },
+  "documents:reconvert": {request:z.object({documentId:documentIdSchema}).strict(),response:documentSchema},
   "documents:retry": {
     request: z.object({ documentId: documentIdSchema }).strict(),
     response: documentSchema,

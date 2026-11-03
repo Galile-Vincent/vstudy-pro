@@ -110,3 +110,5 @@ it("uses the decoded HTML title instead of the import filename", async () => {
   const doc = await service.importPath(source);
   expect(doc.title).toBe("Quantum & Gardening 1");
 });
+
+it('re-converts a ready document while retaining its original and identity',async()=>{const {service}=await setup();const doc=await service.importPath(fixture('md'));await service.waitForIdle();expect((await service.reconvert(doc.id)).id).toBe(doc.id);await service.waitForIdle();expect(service.get(doc.id)?.status).toBe('ready');expect(await service.read(doc.id)).toContain('VStudy fixture');});

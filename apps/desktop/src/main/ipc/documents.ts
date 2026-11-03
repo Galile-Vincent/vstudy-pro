@@ -28,7 +28,7 @@ export function registerDocumentsIpc(
     const owner = owners.get(documentId);
     if (owner && !owner.isDestroyed()) owner.send(documentProgressChannel, documentProgressSchema.parse({ documentId, message, ...conversionStatus(message) }));
   } });
-  const channels = ["documents:importSample", "documents:import", "documents:importPaths", "documents:list", "documents:get", "documents:read", "documents:retry", "documents:delete"] as const;
+  const channels = ["documents:importSample", "documents:import", "documents:importPaths", "documents:list", "documents:get", "documents:read", "documents:retry", "documents:reconvert", "documents:delete"] as const;
   for (const channel of channels) implemented.add(channel);
   registrar.handle("documents:importSample", async ({ language }, event) => {
     const path = app.isPackaged ? join(process.resourcesPath, "samples", `${language}.md`) : join(app.getAppPath(), "resources/samples", `${language}.md`);
@@ -48,6 +48,7 @@ export function registerDocumentsIpc(
   registrar.handle("documents:list", () => documents.list());
   registrar.handle("documents:get", ({ documentId }) => documents.get(documentId));
   registrar.handle("documents:read", ({ documentId }) => documents.read(documentId));
+  registrar.handle("documents:reconvert",({documentId},event)=>{owners.set(documentId,event.sender);return documents.reconvert(documentId);});
   registrar.handle("documents:retry", ({ documentId }, event) => { owners.set(documentId, event.sender); return documents.retry(documentId); });
   registrar.handle("documents:delete", async ({ documentId }) => {
     await deleteDocument(documentId, () => documents.delete(documentId));

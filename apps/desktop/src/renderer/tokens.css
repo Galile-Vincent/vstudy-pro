@@ -89,3 +89,8 @@ html[data-reduced-transparency=true] { --material-card:var(--surface); --materia
 :root { --sidebar-width:232px; --sidebar-compact-width:180px; --topbar-height:52px; }
 
 :root { --filter-width:300px; --library-row-height:104px; }
+
+:root { --hairline:color-mix(in oklab,var(--ink) 14%,transparent); --folder-sage:oklch(.47 .08 145); --folder-blue:oklch(.48 .12 250); --folder-amber:oklch(.48 .09 70); }
+@media(prefers-color-scheme:dark) { :root { --folder-sage:oklch(.78 .08 145); --folder-blue:oklch(.78 .1 250); --folder-amber:oklch(.78 .09 70); } }
+
+:root { --library-card-height:216px; }

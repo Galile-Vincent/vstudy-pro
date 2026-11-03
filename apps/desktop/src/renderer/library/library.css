@@ -288,3 +288,76 @@ mark {
     flex-wrap: wrap;
   }
 }
+
+.library-empty h2 {
+  font-size: var(--type-xl);
+  font-weight: 600;
+  color: var(--ink);
+}
+.library-empty > button {
+  background: var(--ink);
+  color: var(--surface);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--r-sm);
+}
+.library-results,
+.library-document {
+  border-color: var(--hairline);
+}
+.status-badge,
+.tag-chip {
+  border-radius: var(--r-xs);
+  padding-inline: var(--space-1);
+  background: var(--subtle);
+  color: var(--ink);
+}
+.library-document[draggable="true"]:active,
+.folder-node[draggable="true"]:active {
+  cursor: grabbing;
+}
+.folder-node[data-color="sage"] svg {
+  color: var(--folder-sage);
+}
+.folder-node[data-color="blue"] svg {
+  color: var(--folder-blue);
+}
+.folder-node[data-color="amber"] svg {
+  color: var(--folder-amber);
+}
+.folder-pin {
+  display: flex;
+  align-items: center;
+}
+.folder-pin > button:not(:first-child) {
+  width: auto;
+  padding: var(--space-1);
+}
+.folder-node input {
+  min-width: 0;
+  width: 100%;
+}
+.document-cell {
+  display: contents;
+}
+.document-card {
+  display: block;
+}
+.document-card .document-glyph {
+  margin-bottom: var(--space-3);
+}
+.document-card .document-cell > button {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-2);
+}
+.document-card .document-cell > button:nth-last-child(2) {
+  right: calc(var(--space-8) + var(--space-2));
+}
+.library-results[data-view="grid"] {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.library-results[data-view="grid"] .document-card {
+  box-shadow: var(--elevation-raised);
+}

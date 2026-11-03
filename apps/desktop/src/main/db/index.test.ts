@@ -9,7 +9,7 @@ import {
   documentSchema,
   messageSchema,
 } from "../../shared";
-import { openStore, type Store } from "./index";
+import { openStore, migrations, type Store } from "./index";
 const stores: Store[] = [];
 const paths: string[] = [];
 afterEach(() => {
@@ -71,9 +71,7 @@ describe("SQLite repositories", () => {
     ).not.toHaveProperty("error");
     store.documents.transition(document.id, { status: "ready", converter: "pdf_md" });
     expect(store.documents.get(document.id)?.converter).toBe("pdf_md");
-    expect(() =>
-      store.documents.transition(document.id, { status: "converting" }),
-    ).toThrow();
+    expect(store.documents.transition(document.id, { status: "converting" }).status).toBe('converting');
     store.documents.delete(document.id);
     expect(store.conversations.get(conversation.id)).toBeNull();
     expect(store.messages.list(conversation.id)).toEqual([]);
@@ -105,7 +103,7 @@ describe("SQLite repositories", () => {
     });
     expect(
       raw.prepare("SELECT count(*) AS count FROM migrations").get(),
-    ).toEqual({ count: 6 });
+    ).toEqual({ count: migrations.length });
     raw.close();
   });
   it("rejects duplicate content and invalid domain data", () => {

@@ -5,6 +5,8 @@ import {
   Pin,
   Plus,
   MoreHorizontal,
+  BookOpen,
+  Star,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
@@ -13,10 +15,17 @@ import { errorText } from "../status";
 import { useNavigate } from "../shell";
 import type { LibraryQuery } from "../../shared/library";
 import type { IpcResponse } from "../../shared/ipc";
-import { changed, importFiles, visibleFolders, type Folder } from "./model";
-import { LibraryDialog } from "./dialog";
+import {
+  changed,
+  importFiles,
+  moveDocuments,
+  visibleFolders,
+  type Folder,
+} from "./model";
+import { LibraryDialog, useLibraryPrompt } from "./dialog";
 export function LibrarySidebar() {
   useTranslation();
+  const [prompt, promptDialog] = useLibraryPrompt();
   const { route, navigate } = useNavigate();
   const [folders, setFolders] = useState<Folder[]>([]),
     [saved, setSaved] = useState<IpcResponse<"library:savedFilters:list">>([]),
@@ -26,9 +35,16 @@ export function LibrarySidebar() {
   );
   const [focus, setFocus] = useState(""),
     [menu, setMenu] = useState<Folder | null>(null),
+    [editing, setEditing] = useState(""),
     [rename, setRename] = useState(""),
     [over, setOver] = useState("");
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [undo, setUndo] = useState<(() => Promise<void>) | null>(null);
+  useEffect(() => {
+    if (!undo) return;
+    const timer = setTimeout(() => setUndo(null), 30000);
+    return () => clearTimeout(timer);
+  }, [undo]);
   const typed = useRef("");
   const typedAt = useRef(0);
   const refresh = () => {
@@ -74,18 +90,38 @@ export function LibrarySidebar() {
     await run(async () => {
       const doc = e.dataTransfer.getData("application/vstudy-documents"),
         source = e.dataTransfer.getData("application/vstudy-folder");
-      if (doc)
-        await desktop.invoke("library:documents:move", {
-          documentIds: JSON.parse(doc),
-          folderId: folder.id,
-        });
-      else if (source)
+      if (doc) {
+        await moveDocuments(JSON.parse(doc), folder.id);
+        const origins = JSON.parse(
+          e.dataTransfer.getData("application/vstudy-origin") || "[]",
+        ) as {
+          id: import("../../shared").Document["id"];
+          folderId: Folder["id"] | null;
+        }[];
+        if (origins.length)
+          setUndo(() => async () => {
+            for (const origin of origins)
+              await moveDocuments([origin.id], origin.folderId);
+            changed();
+          });
+      } else if (source)
         await desktop.invoke("library:folders:move", {
           folderId: JSON.parse(source),
           parentId: folder.id,
         });
       else await importFiles(folder.id, Array.from(e.dataTransfer.files));
     });
+  };
+  const pins = folders
+    .filter((f) => f.pinned)
+    .sort((a, b) => (b.pinnedAt ?? "").localeCompare(a.pinnedAt ?? ""));
+  const reorderPin = (from: number, to: number) => {
+    if (to < 0 || to >= pins.length) return;
+    const ids = pins.map((f) => f.id);
+    ids.splice(to, 0, ids.splice(from, 1)[0]!);
+    void run(() =>
+      desktop.invoke("library:pins:reorder", { kind: "folders", ids }),
+    );
   };
   const visible = visibleFolders(folders, expanded);
   return (
@@ -109,21 +145,47 @@ export function LibrarySidebar() {
         ))}
       </nav>
       <h2 className="sidebar-label">{tr("library:pinnedFolders")}</h2>
-      {folders
-        .filter((f) => f.pinned)
-        .sort((a, b) => (b.pinnedAt ?? "").localeCompare(a.pinnedAt ?? ""))
-        .map((f) => (
-          <button key={f.id} onClick={() => go({ folderId: f.id }, f.name)}>
+      {pins.map((f, index) => (
+        <div
+          className="folder-pin"
+          key={f.id}
+          draggable
+          onDragStart={(e) =>
+            e.dataTransfer.setData("application/vstudy-pin", String(index))
+          }
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const source = e.dataTransfer.getData("application/vstudy-pin");
+            if (source) reorderPin(Number(source), index);
+          }}
+        >
+          <button onClick={() => go({ folderId: f.id }, f.name)}>
             <Pin />
             {f.name}
           </button>
-        ))}
+          <button
+            aria-label={tr("library:moveUp", { name: f.name })}
+            disabled={index === 0}
+            onClick={() => reorderPin(index, index - 1)}
+          >
+            ↑
+          </button>
+          <button
+            aria-label={tr("library:moveDown", { name: f.name })}
+            disabled={index === pins.length - 1}
+            onClick={() => reorderPin(index, index + 1)}
+          >
+            ↓
+          </button>
+        </div>
+      ))}
       <div className="sidebar-label">
         <h2>{tr("library:folders")}</h2>
         <button
           aria-label={tr("library:newFolder")}
-          onClick={() => {
-            const name = window.prompt(tr("library:newFolder"));
+          onClick={async () => {
+            const name = await prompt(tr("library:newFolder"));
             if (name)
               void run(() =>
                 desktop.invoke("library:folders:create", {
@@ -147,6 +209,7 @@ export function LibrarySidebar() {
             aria-selected={route.query?.folderId === f.id}
             tabIndex={focus === f.id || (!focus && index === 0) ? 0 : -1}
             className="folder-node"
+            data-color={f.color}
             data-over={over === f.id}
             style={{
               paddingInlineStart: `calc(var(--space-3) * ${level - 1})`,
@@ -166,6 +229,13 @@ export function LibrarySidebar() {
             onDragLeave={() => setOver("")}
             onDrop={(e) => void drop(e, f)}
             onKeyDown={(e) => {
+              if (e.target !== e.currentTarget) return;
+              if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
+                e.preventDefault();
+                setMenu(f);
+                setRename(f.name);
+                return;
+              }
               let target = index;
               if (e.key === "ArrowDown")
                 target = Math.min(visible.length - 1, index + 1);
@@ -180,7 +250,7 @@ export function LibrarySidebar() {
                   target = visible.findIndex((n) => n.folder.id === f.parentId);
               } else if (e.key === "Enter") go({ folderId: f.id }, f.name);
               else if (e.key === "F2") {
-                setMenu(f);
+                setEditing(f.id);
                 setRename(f.name);
               } else if (e.key.length === 1 && !e.metaKey) {
                 typed.current =
@@ -215,18 +285,46 @@ export function LibrarySidebar() {
                 className={expanded.includes(f.id) ? "expanded" : ""}
               />
             </button>
+            {editing === f.id && (
+              <input
+                aria-label={tr("library:name")}
+                autoFocus
+                value={rename}
+                onChange={(e) => setRename(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setEditing("");
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    void run(() =>
+                      desktop.invoke("library:folders:update", {
+                        folderId: f.id,
+                        name: rename,
+                      }),
+                    );
+                    setEditing("");
+                  }
+                }}
+              />
+            )}
             <button
               tabIndex={-1}
               onClick={() => go({ folderId: f.id }, f.name)}
             >
-              <FolderIcon />
+              {f.icon === "book" ? (
+                <BookOpen />
+              ) : f.icon === "star" ? (
+                <Star />
+              ) : (
+                <FolderIcon />
+              )}
               {f.name}
               <small>{f.count}</small>
             </button>
             <button
               aria-label={tr("library:folderActions", { name: f.name })}
               tabIndex={-1}
-              onClick={() => {
+              onClick={async () => {
                 setMenu(f);
                 setRename(f.name);
               }}
@@ -289,8 +387,8 @@ export function LibrarySidebar() {
             {tr("library:pin")}
           </button>
           <button
-            onClick={() => {
-              const name = window.prompt(tr("library:newFolder"));
+            onClick={async () => {
+              const name = await prompt(tr("library:newFolder"));
               if (name)
                 void run(() =>
                   desktop.invoke("library:folders:create", {
@@ -327,17 +425,41 @@ export function LibrarySidebar() {
             </select>
           </label>
           <label>
+            {tr("library:icon")}
+            <select
+              aria-label={tr("library:icon")}
+              value={menu.icon ?? ""}
+              onChange={(e) => {
+                const icon = e.target.value;
+                setMenu({ ...menu, icon });
+                void run(() =>
+                  desktop.invoke("library:folders:update", {
+                    folderId: menu.id,
+                    icon,
+                  }),
+                );
+              }}
+            >
+              {["", "book", "star"].map((icon) => (
+                <option key={icon} value={icon}>
+                  {tr(`library:icon_${icon || "folder"}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
             {tr("library:color")}
             <select
               value={menu.color ?? ""}
-              onChange={(e) =>
+              onChange={(e) => {
+                setMenu({ ...menu, color: e.target.value || null });
                 void run(() =>
                   desktop.invoke("library:folders:update", {
                     folderId: menu.id,
                     color: e.target.value || null,
                   }),
-                )
-              }
+                );
+              }}
             >
               {["", "sage", "blue", "amber"].map((c) => (
                 <option key={c} value={c}>
@@ -349,7 +471,7 @@ export function LibrarySidebar() {
           {(["parent", "unfiled"] as const).map((destination) => (
             <button
               key={destination}
-              onClick={() => {
+              onClick={async () => {
                 void run(() =>
                   desktop.invoke("library:folders:delete", {
                     folderId: menu.id,
@@ -364,6 +486,22 @@ export function LibrarySidebar() {
           ))}
         </LibraryDialog>
       )}
+      {undo && (
+        <div className="library-toast" role="status">
+          {tr("library:moved")}
+          <button
+            onClick={() =>
+              void run(async () => {
+                await undo();
+                setUndo(null);
+              })
+            }
+          >
+            {tr("library:undo")}
+          </button>
+        </div>
+      )}
+      {promptDialog}
     </>
   );
 }

@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   FileText,
   Search,
@@ -16,10 +22,11 @@ import { desktop } from "../bridge";
 import { useFormat } from "../i18n";
 import { errorText } from "../status";
 import { useNavigate } from "../shell";
-import { LibraryDialog } from "./dialog";
+import { LibraryDialog, useLibraryPrompt } from "./dialog";
 import {
   changed,
   importFiles,
+  moveDocuments,
   selectedRange,
   type Item,
   type Folder,
@@ -45,13 +52,16 @@ export function Snippet({ text }: { text: string }) {
 }
 export function LibraryView() {
   useTranslation();
+  const [prompt, promptDialog] = useLibraryPrompt();
   const { route, navigate } = useNavigate(),
     format = useFormat();
+  const viewKey = route.query?.folderId ?? route.query?.view ?? "all";
+  const restoreTop = useRef(
+    Number(sessionStorage.getItem(`library-scroll:${viewKey}`) ?? 0),
+  );
   const [query, setQuery] = useState<LibraryQuery>(() => ({
     ...defaults,
-    ...JSON.parse(
-      localStorage.getItem(`library-sort:${route.title ?? "all"}`) ?? "{}",
-    ),
+    ...JSON.parse(localStorage.getItem(`library-sort:${viewKey}`) ?? "{}"),
     ...route.query,
   }));
   const [text, setText] = useState(route.query?.text ?? ""),
@@ -60,6 +70,20 @@ export function LibraryView() {
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
     [revision, setRevision] = useState(0);
+  const [progress, setProgress] = useState<
+    Record<string, { page: number; total: number }>
+  >({});
+  useEffect(
+    () =>
+      desktop.onDocumentProgress?.((event) => {
+        const page = Number(event.params?.page),
+          total = Number(event.params?.total);
+        if (page && total)
+          setProgress((p) => ({ ...p, [event.documentId]: { page, total } }));
+        if (event.code === "library.conversion_complete") changed();
+      }),
+    [],
+  );
   const [grid, setGrid] = useState(
       () => localStorage.getItem("library-grid") === "true",
     ),
@@ -67,15 +91,16 @@ export function LibraryView() {
     [selected, setSelected] = useState<Item["document"]["id"][]>([]),
     [menu, setMenu] = useState<Item | null>(null),
     [move, setMove] = useState(false),
+    [tagging, setTagging] = useState(false),
     [folders, setFolders] = useState<Folder[]>([]),
     [tags, setTags] = useState<IpcResponse<"library:tags:list">>([]),
-    [snippets, setSnippets] = useState<Record<string, string>>({}),
     [undo, setUndo] = useState<(() => Promise<void>) | null>(null),
     [notice, setNotice] = useState("");
   const scroller = useRef<HTMLDivElement>(null),
     anchor = useRef(""),
     generation = useRef(0),
     fetching = useRef(false);
+  const previousQuery = useRef(JSON.stringify(query));
   const refresh = useCallback(() => {
     setRevision((v) => v + 1);
   }, []);
@@ -86,11 +111,11 @@ export function LibraryView() {
   useEffect(() => {
     const timer = setTimeout(
       () =>
-        setQuery((q) => ({
-          ...q,
-          text: text.trim() || undefined,
-          cursor: undefined,
-        })),
+        setQuery((q) =>
+          q.text === (text.trim() || undefined)
+            ? q
+            : { ...q, text: text.trim() || undefined, cursor: undefined },
+        ),
       250,
     );
     return () => clearTimeout(timer);
@@ -103,11 +128,17 @@ export function LibraryView() {
   }, [items, refresh]);
   useEffect(() => {
     localStorage.setItem(
-      `library-sort:${route.title ?? "all"}`,
+      `library-sort:${viewKey}`,
       JSON.stringify({ sort: query.sort, direction: query.direction }),
     );
     const id = ++generation.current;
     fetching.current = false;
+    if (previousQuery.current === JSON.stringify(query)) {
+      restoreTop.current = scroller.current?.scrollTop ?? restoreTop.current;
+    } else {
+      restoreTop.current = 0;
+      previousQuery.current = JSON.stringify(query);
+    }
     setLoading(true);
     setError("");
     setSelected([]);
@@ -115,21 +146,35 @@ export function LibraryView() {
       desktop.invoke("library:documents:list", { ...query, cursor: undefined }),
       desktop.invoke("library:tree", {}),
       desktop.invoke("library:tags:list", {}),
-      query.text
-        ? desktop.invoke("library:search", { text: query.text, limit: 100 })
-        : Promise.resolve(null),
     ])
-      .then(([page, f, t, search]) => {
+      .then(async ([page, f, t]) => {
         if (id !== generation.current) return;
-        setItems(page.items);
+        const rows = page.items;
+        const multiplier = grid
+          ? Math.max(
+              1,
+              Math.floor(
+                (document.getElementById("shell-content")?.clientWidth ?? 700) /
+                  260,
+              ),
+            )
+          : 1;
+        while (
+          page.nextCursor &&
+          (rows.length * 104) / multiplier < restoreTop.current + 800
+        ) {
+          const next = await desktop.invoke("library:documents:list", {
+            ...query,
+            cursor: page.nextCursor,
+          });
+          if (id !== generation.current) return;
+          rows.push(...next.items);
+          page.nextCursor = next.nextCursor;
+        }
+        setItems(rows);
         setCursor(page.nextCursor ?? undefined);
         setFolders(f);
         setTags(t);
-        setSnippets(
-          Object.fromEntries(
-            search?.items.map((s) => [s.documentId, s.snippet]) ?? [],
-          ),
-        );
       })
       .catch((e) => {
         if (id === generation.current) setError(errorText(e));
@@ -138,13 +183,13 @@ export function LibraryView() {
         if (id === generation.current) setLoading(false);
       });
   }, [query, revision, route.title]);
-  useEffect(() => {
-    const value = Number(
-      sessionStorage.getItem(`library-scroll:${route.title ?? "all"}`) ?? 0,
-    );
-    if (scroller.current) scroller.current.scrollTop = value;
-    setTop(value);
-  }, [route.title]);
+  useLayoutEffect(() => {
+    if (!loading && scroller.current) {
+      scroller.current.scrollTop = restoreTop.current;
+      setTop(scroller.current.scrollTop);
+      restoreTop.current = 0;
+    }
+  }, [loading]);
   useEffect(() => {
     if (!undo) return;
     const timer = setTimeout(() => {
@@ -180,6 +225,21 @@ export function LibraryView() {
       fetching.current = false;
     }
   };
+  const selectAll = async () => {
+    let all = items;
+    let next = cursor;
+    while (next) {
+      const page = await desktop.invoke("library:documents:list", {
+        ...query,
+        cursor: next,
+      });
+      all = [...all, ...page.items];
+      next = page.nextCursor ?? undefined;
+    }
+    setItems(all);
+    setCursor(undefined);
+    setSelected(all.map((i) => i.document.id));
+  };
   const open = (item: Item) =>
     navigate({
       view: "workspace",
@@ -206,9 +266,7 @@ export function LibraryView() {
   };
   const moveTo = async (folderId: Folder["id"] | null) => {
     const previous = items.filter((i) => ids.includes(i.document.id));
-    await run(() =>
-      desktop.invoke("library:documents:move", { documentIds: ids, folderId }),
-    );
+    await run(() => moveDocuments(ids, folderId));
     setNotice(tr("library:moved"));
     setUndo(() => async () => {
       for (const i of previous)
@@ -238,7 +296,7 @@ export function LibraryView() {
       !["sort", "direction", "limit", "cursor", "view", "text"].includes(key) &&
       value !== undefined,
   );
-  const rowHeight = grid ? 216 : 104,
+  const rowHeight = grid ? 216 : query.text ? 128 : 104,
     columns = grid
       ? Math.max(1, Math.floor((scroller.current?.clientWidth ?? 700) / 260))
       : 1,
@@ -297,6 +355,7 @@ export function LibraryView() {
               <label key={key}>
                 {tr(`library:${key}`)}
                 <select
+                  aria-label={tr(`library:${key}`)}
                   value={String(query[key] ?? "")}
                   onChange={(e) =>
                     setQuery((q) => ({
@@ -444,8 +503,8 @@ export function LibraryView() {
               {tr("library:clearFilters")}
             </button>
             <button
-              onClick={() => {
-                const name = window.prompt(tr("library:saveFilter"));
+              onClick={async () => {
+                const name = await prompt(tr("library:saveFilter"));
                 if (name)
                   void run(() =>
                     desktop.invoke("library:savedFilters:save", {
@@ -467,7 +526,7 @@ export function LibraryView() {
             {tr("library:selected", { count: selected.length })}
           </span>
           <button
-            onClick={() => {
+            onClick={async () => {
               setMenu(null);
               setMove(true);
             }}
@@ -542,7 +601,10 @@ export function LibraryView() {
         <div
           ref={scroller}
           className="library-results"
-          role="listbox"
+          data-view={grid ? "grid" : "list"}
+          role="grid"
+          aria-colcount={1}
+          aria-rowcount={items.length}
           aria-label={tr("library:documents")}
           aria-multiselectable="true"
           tabIndex={0}
@@ -550,7 +612,7 @@ export function LibraryView() {
             const el = e.currentTarget;
             setTop(el.scrollTop);
             sessionStorage.setItem(
-              `library-scroll:${route.title ?? "all"}`,
+              `library-scroll:${viewKey}`,
               String(el.scrollTop),
             );
             if (el.scrollTop + el.clientHeight >= el.scrollHeight - 600)
@@ -573,7 +635,7 @@ export function LibraryView() {
           onKeyDown={(e) => {
             if ((e.metaKey || e.ctrlKey) && e.key === "a") {
               e.preventDefault();
-              setSelected(items.map((i) => i.document.id));
+              void selectAll().catch((e) => setError(errorText(e)));
             }
             if (e.key === "Escape") setSelected([]);
           }}
@@ -590,19 +652,41 @@ export function LibraryView() {
               return (
                 <article
                   key={d.id}
-                  role="option"
+                  data-index={index}
+                  role="row"
+                  aria-rowindex={index + 1}
                   aria-selected={selected.includes(d.id)}
                   tabIndex={0}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: rowHeight,
+                    height: grid
+                      ? "calc(var(--library-card-height) - var(--space-3))"
+                      : rowHeight,
                     position: "absolute",
                     top: Math.floor(index / columns) * rowHeight,
                     left: `${((index % columns) * 100) / columns}%`,
-                    width: `${100 / columns}%`,
+                    width: grid
+                      ? `calc(${100 / columns}% - var(--space-3))`
+                      : `${100 / columns}%`,
                   }}
                   draggable
                   onDragStart={(e) => {
+                    e.dataTransfer.setData(
+                      "application/vstudy-origin",
+                      JSON.stringify(
+                        items
+                          .filter((i) =>
+                            (selected.includes(d.id)
+                              ? selected
+                              : [d.id]
+                            ).includes(i.document.id),
+                          )
+                          .map((i) => ({
+                            id: i.document.id,
+                            folderId: i.folderId,
+                          })),
+                      ),
+                    );
                     e.dataTransfer.setData(
                       "application/vstudy-documents",
                       JSON.stringify(
@@ -649,6 +733,39 @@ export function LibraryView() {
                   }}
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return;
+                    if (
+                      ["ArrowUp", "ArrowDown", "Home", "End"].includes(e.key) &&
+                      !e.altKey &&
+                      !e.metaKey &&
+                      !e.ctrlKey
+                    ) {
+                      e.preventDefault();
+                      const next =
+                        e.key === "Home"
+                          ? 0
+                          : e.key === "End"
+                            ? items.length - 1
+                            : Math.max(
+                                0,
+                                Math.min(
+                                  items.length - 1,
+                                  index + (e.key === "ArrowUp" ? -1 : 1),
+                                ),
+                              );
+                      if (scroller.current) {
+                        scroller.current.scrollTop =
+                          Math.floor(next / columns) * rowHeight;
+                        setTop(scroller.current.scrollTop);
+                        requestAnimationFrame(() =>
+                          scroller.current
+                            ?.querySelector<HTMLElement>(
+                              `[data-index="${next}"]`,
+                            )
+                            ?.focus(),
+                        );
+                      }
+                      return;
+                    }
                     if (e.key === "Enter") open(item);
                     if (e.key === " ") {
                       e.preventDefault();
@@ -671,97 +788,99 @@ export function LibraryView() {
                     }
                   }}
                 >
-                  <FileText className="document-glyph" aria-hidden="true" />
-                  <div className="document-info">
-                    <button
-                      className="document-title"
-                      onClick={() => open(item)}
-                    >
-                      {d.title}
-                    </button>
-                    <div className="document-meta">
-                      <span>
-                        {folders.find((f) => f.id === item.folderId)?.name ??
-                          tr("library:unfiled")}
-                      </span>
-                      <span>
-                        {format.number(item.sizeBytes)} {tr("library:bytes")}
-                      </span>
-                      <span>
-                        {tr("library:convertedFrom", {
-                          name: d.sourceName,
-                          converter: d.converter,
-                        })}
-                      </span>
-                      <span className="status-badge">
-                        {tr(`library:${d.status}`)}
-                      </span>
-                    </div>
-                    {snippets[d.id] && (
-                      <p className="search-snippet">
-                        <Snippet text={snippets[d.id] ?? ""} />
-                      </p>
-                    )}
-                    <div className="document-forms">
-                      {item.tags?.map((t) => (
-                        <span className="tag-chip" key={t.id}>
-                          {t.name}
-                        </span>
-                      ))}
-                      <button onClick={() => open(item)}>
-                        {tr("library:markdown")}
-                      </button>
+                  <div role="gridcell" className="document-cell">
+                    <FileText className="document-glyph" aria-hidden="true" />
+                    <div className="document-info">
                       <button
-                        onClick={() =>
-                          void run(() =>
-                            desktop.invoke("library:openOriginal", {
-                              documentId: d.id,
-                            }),
-                          )
-                        }
+                        className="document-title"
+                        onClick={() => open(item)}
                       >
-                        {tr("library:original")}
+                        {d.title}
                       </button>
-                      {d.status === "failed" && (
+                      <div className="document-meta">
+                        <span>
+                          {folders.find((f) => f.id === item.folderId)?.name ??
+                            tr("library:unfiled")}
+                        </span>
+                        <span>
+                          {format.number(item.sizeBytes)} {tr("library:bytes")}
+                        </span>
+                        <span>
+                          {tr("library:convertedFrom", {
+                            name: d.sourceName,
+                            converter: d.converter,
+                          })}
+                        </span>
+                        <span className="status-badge">
+                          {tr(`library:${d.status}`)}
+                        </span>
+                      </div>
+                      {item.snippet && (
+                        <p className="search-snippet">
+                          <Snippet text={item.snippet ?? ""} />
+                        </p>
+                      )}
+                      <div className="document-forms">
+                        {item.tags?.map((t) => (
+                          <span className="tag-chip" key={t.id}>
+                            {t.name}
+                          </span>
+                        ))}
+                        <button onClick={() => open(item)}>
+                          {tr("library:markdown")}
+                        </button>
                         <button
                           onClick={() =>
                             void run(() =>
-                              desktop.invoke("documents:retry", {
+                              desktop.invoke("library:openOriginal", {
                                 documentId: d.id,
                               }),
                             )
                           }
                         >
-                          {tr("library:retry")}
+                          {tr("library:original")}
                         </button>
-                      )}
-                      {d.status === "converting" && (
-                        <progress
-                          aria-label={tr("common:conversion_progress")}
-                        />
-                      )}
+                        {d.status === "failed" && (
+                          <button
+                            onClick={() =>
+                              void run(() =>
+                                desktop.invoke("documents:retry", {
+                                  documentId: d.id,
+                                }),
+                              )
+                            }
+                          >
+                            {tr("library:retry")}
+                          </button>
+                        )}
+                        {d.status === "converting" && (
+                          <progress value={progress[d.id]?.page} max={progress[d.id]?.total}
+                            aria-label={tr("common:conversion_progress")}
+                          />
+                        )}
+                      </div>
                     </div>
+                    <button
+                      aria-label={tr("library:pin")}
+                      aria-pressed={item.pinned}
+                      onClick={() =>
+                        void run(() =>
+                          desktop.invoke("library:documents:pin", {
+                            documentId: d.id,
+                            pinned: !item.pinned,
+                          }),
+                        )
+                      }
+                    >
+                      <Pin />
+                    </button>
+                    <button
+                      aria-label={tr("library:actions", { name: d.title })}
+                      onClick={() => setMenu(item)}
+                    >
+                      <MoreHorizontal />
+                    </button>
                   </div>
-                  <button
-                    aria-label={tr("library:pin")}
-                    aria-pressed={item.pinned}
-                    onClick={() =>
-                      void run(() =>
-                        desktop.invoke("library:documents:pin", {
-                          documentId: d.id,
-                          pinned: !item.pinned,
-                        }),
-                      )
-                    }
-                  >
-                    <Pin />
-                  </button>
-                  <button
-                    aria-label={tr("library:actions", { name: d.title })}
-                    onClick={() => setMenu(item)}
-                  >
-                    <MoreHorizontal />
-                  </button>
                 </article>
               );
             })}
@@ -794,7 +913,7 @@ export function LibraryView() {
           )}
         </div>
       )}
-      {menu && !move && (
+      {menu && !move && !tagging && (
         <LibraryDialog
           title={tr("library:actions", { name: menu.document.title })}
           onClose={() => setMenu(null)}
@@ -802,8 +921,8 @@ export function LibraryView() {
           <div className="document-menu">
             <button onClick={() => open(menu)}>{tr("library:open")}</button>
             <button
-              onClick={() => {
-                const title = window.prompt(
+              onClick={async () => {
+                const title = await prompt(
                   tr("library:rename"),
                   menu.document.title,
                 );
@@ -832,23 +951,7 @@ export function LibraryView() {
             >
               {tr("library:pin")}
             </button>
-            <button
-              onClick={() => {
-                const name = window.prompt(tr("library:tag"));
-                if (name)
-                  void run(async () => {
-                    const tag = await desktop.invoke("library:tags:save", {
-                      name,
-                      color: null,
-                    });
-                    await desktop.invoke("library:documents:tag", {
-                      documentId: menu.document.id,
-                      tagId: tag.id,
-                      assigned: true,
-                    });
-                  });
-              }}
-            >
+            <button onClick={() => setTagging(true)}>
               {tr("library:tag")}
             </button>
             {(
@@ -856,7 +959,7 @@ export function LibraryView() {
                 "library:reveal",
                 "library:exportMarkdown",
                 "library:exportOriginal",
-                "documents:retry",
+                "documents:reconvert",
               ] as const
             ).map((channel) => (
               <button
@@ -898,6 +1001,66 @@ export function LibraryView() {
           </div>
         </LibraryDialog>
       )}
+      {menu && tagging && (
+        <LibraryDialog
+          title={tr("library:tag")}
+          onClose={() => {
+            setTagging(false);
+            setMenu(null);
+          }}
+        >
+          <div className="folder-picker">
+            {tags.map((tag) => (
+              <label key={tag.id}>
+                <input
+                  type="checkbox"
+                  checked={
+                    items
+                      .find((i) => i.document.id === menu.document.id)
+                      ?.tags.some((t) => t.id === tag.id) ?? false
+                  }
+                  onChange={(e) =>
+                    void run(() =>
+                      desktop.invoke("library:documents:tag", {
+                        documentId: menu.document.id,
+                        tagId: tag.id,
+                        assigned: e.target.checked,
+                      }),
+                    )
+                  }
+                />
+                {tag.name}
+              </label>
+            ))}
+            <button
+              onClick={async () => {
+                const name = await prompt(tr("library:tag"));
+                if (name)
+                  void run(async () => {
+                    const tag =
+                      tags.find(
+                        (t) =>
+                          t.name.toLocaleLowerCase() ===
+                          name.toLocaleLowerCase(),
+                      ) ??
+                      (await desktop.invoke("library:tags:save", {
+                        name,
+                        color: null,
+                      }));
+                    await desktop.invoke("library:documents:tag", {
+                      documentId: menu.document.id,
+                      tagId: tag.id,
+                      assigned: true,
+                    });
+                  });
+              }}
+            >
+              {tr("library:newTag")}
+            </button>
+          </div>
+        </LibraryDialog>
+      )}
+      {promptDialog}
     </section>
   );
 }

@@ -96,5 +96,14 @@
   "reveal": "在 Finder 中顯示",
   "exportMarkdown": "匯出 Markdown",
   "exportOriginal": "匯出原始檔",
-  "convertedFrom": "來源：{{name}} · {{converter}}"
+  "convertedFrom": "來源：{{name}} · {{converter}}",
+  "moveUp": "將 {{name}} 上移",
+  "moveDown": "將 {{name}} 下移",
+  "icon": "圖示",
+  "icon_folder": "資料夾",
+  "icon_book": "書本",
+  "icon_star": "星號",
+  "reconvert": "重新轉換",
+  "save": "儲存",
+  "newTag": "新增標籤"
 }
