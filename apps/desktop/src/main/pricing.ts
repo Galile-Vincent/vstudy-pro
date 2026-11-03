@@ -8,14 +8,25 @@ export const prices: Record<string, Price> = {
   'claude-haiku-5-5': { input: .1, output: .5, cacheRead: .01, cacheWrite: .125 },
   'gpt-6.1-sol': { input: 2, output: 10, cacheRead: .1, cacheWrite: 2.5 },
   'gpt-6-sol': { input: 2, output: 10, cacheRead: .2, cacheWrite: 2.5 },
+  // https://developers.openai.com/api/docs/models/gpt-6-luna — verified 2026-11-03, Standard short context.
+  'gpt-6-luna': { input: .1, output: .5, cacheRead: .01, cacheWrite: .125 },
+  // https://developers.openai.com/api/docs/models/gpt-6-astra — verified 2026-11-03, Standard short context.
+  'gpt-6-astra': { input: 10, output: 50, cacheRead: 1, cacheWrite: 12.5 },
+  // https://developers.openai.com/api/docs/models/gpt-6.1-terra — verified 2026-11-03, Standard short context.
+  'gpt-6.1-terra': { input: 1, output: 5, cacheRead: .05, cacheWrite: 1.25 },
   'gpt-5.4': { input: 2.5, output: 15, cacheRead: .25, cacheWrite: 2.5 },
 };
+export function canonicalModelId(model: string): string {
+  return ({ haiku: 'claude-haiku-5-5', sonnet: 'claude-sonnet-5-5', opus: 'claude-opus-5-5', fable: 'claude-fable-5-1' } as Record<string,string>)[model] ?? model;
+}
 export function estimateCost(model: string, usage: Usage, overrides: Record<string, Price> = {}): number | undefined {
+  model = canonicalModelId(model);
   let p = overrides[model] ?? prices[model];
   if (!p) return undefined;
   if (model === 'claude-haiku-5-5' && !overrides[model] && usage.inputTokens > 100_000)
     p = { input: .5, output: 2.5, cacheRead: .05, cacheWrite: .625 };
-  if (['gpt-6.1-sol', 'gpt-6-sol', 'gpt-5.4'].includes(model) && usage.inputTokens > 272_000 && !overrides[model]) p = { input: p.input * 2, output: p.output * 1.5, cacheRead: p.cacheRead * 2, cacheWrite: p.cacheWrite * 2 };
+  if (['gpt-6.1-sol', 'gpt-6-sol', 'gpt-5.4', 'gpt-6-luna', 'gpt-6-astra', 'gpt-6.1-terra'].includes(model) && usage.inputTokens > 272_000 && !overrides[model]) p = { input: p.input * 2, output: p.output * 1.5, cacheRead: p.cacheRead * 2, cacheWrite: p.cacheWrite * 2 };
+  // Claude 1-hour cache writes cost more than this 5-minute table; estimates are approximate. Prefer reported cost.
   // Input includes cache tokens; reasoning tokens are already included in output.
   return (Math.max(0, usage.inputTokens - (usage.cacheReadTokens ?? 0) - (usage.cacheWriteTokens ?? 0)) * p.input + usage.outputTokens * p.output + (usage.cacheReadTokens ?? 0) * p.cacheRead + (usage.cacheWriteTokens ?? 0) * p.cacheWrite) / 1_000_000;
 }

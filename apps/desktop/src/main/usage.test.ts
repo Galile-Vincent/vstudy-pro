@@ -88,3 +88,12 @@ it('dashboard aggregates all-time usage and zero-fills calendar days without cou
     expect(store.usage.dashboard('day',new Date('2026-11-03T12:00:00Z')).days).toHaveLength(1);
   }finally{store.close();}
 });
+
+it('prices verified Luna, Astra and Terra list rates and Claude aliases literally', () => {
+  const usage = {inputTokens:100000,outputTokens:10000,costSource:'estimated' as const};
+  expect(estimateCost('gpt-6-luna', usage)).toBe(.015);
+  expect(estimateCost('gpt-6-astra', usage)).toBe(1.5);
+  expect(estimateCost('gpt-6.1-terra', usage)).toBe(.15);
+  expect(estimateCost('haiku', usage)).toBe(.015);
+  expect(estimateCost('agy-unverified', usage)).toBeUndefined();
+});
