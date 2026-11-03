@@ -112,3 +112,16 @@ it("uses the decoded HTML title instead of the import filename", async () => {
 });
 
 it('re-converts a ready document while retaining its original and identity',async()=>{const {service}=await setup();const doc=await service.importPath(fixture('md'));await service.waitForIdle();expect((await service.reconvert(doc.id)).id).toBe(doc.id);await service.waitForIdle();expect(service.get(doc.id)?.status).toBe('ready');expect(await service.read(doc.id)).toContain('VStudy fixture');});
+
+it.each([false,true])('finalizes hidden conversion before undo (failure=%s)', async (fail) => {
+  const gate = Promise.withResolvers<void>();
+  const { service, store } = await setup(async (_source, output) => { await gate.promise; if (fail) throw new Error('offline'); await writeFile(output,'finished'); });
+  const document = await service.importPath(fixture('html'));
+  store.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(new Date().toISOString(),document.id);
+  gate.resolve();
+  await service.waitForIdle();
+  expect(store.db.prepare('SELECT status FROM documents WHERE id=?').get(document.id)?.status).toBe(fail ? 'failed' : 'ready');
+  expect(store.db.prepare('SELECT * FROM document_fts WHERE documentId=?').all(document.id)).toHaveLength(0);
+  store.db.prepare('UPDATE documents SET deletedAt=NULL WHERE id=?').run(document.id);
+  expect(service.get(document.id)?.status).toBe(fail ? 'failed' : 'ready');
+});
