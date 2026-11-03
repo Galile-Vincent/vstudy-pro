@@ -15,7 +15,7 @@ let app, page;
 try {
   app = await electron.launch({
     args: [resolve("."), `--user-data-dir=${join(directory, "user-data")}`],
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: "", VSTUDY_FAKE_PROVIDER: "1" },
+    env: { ...process.env, ELECTRON_RUN_AS_NODE: "", VSTUDY_LOCALE:"en", VSTUDY_FAKE_PROVIDER: "1" },
   });
   page = await app.firstWindow();
   const errors = [];
@@ -47,7 +47,7 @@ try {
         input.remove();
       });
     } else {
-      await page.getByRole("button", { name: "＋ Import document", exact: true }).click();
+      await page.getByTestId("import-document").click();
     }
     await page.getByRole("region", { name: "Document", exact: true })
       .locator(".pane-toolbar .eyebrow").filter({ hasText: `sample.${extension}` }).waitFor();
@@ -59,7 +59,7 @@ try {
     }, `sample.${extension}`);
     assert.equal(importedDocument.status, "ready", importedDocument.error ?? "Document must finish conversion");
     if (extension === "docx") {
-      assert.ok((await page.locator(".notice").innerText()).includes("Unsupported document type"), "per-file import failure is reported while successful file opens");
+      assert.ok((await page.locator(".notice").innerText()).includes("Could not convert this file. Please retry."), "per-file import failure is reported while successful file opens");
       await viewer.locator("img").waitFor();
       await page.waitForFunction(() => {
         const image = window.document.querySelector('[data-testid="document-markdown"] img');
@@ -78,7 +78,7 @@ try {
   await app.evaluate(({ dialog }, path) => {
     dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] });
   }, imageFixture);
-  await page.getByRole("button", { name: "＋ Import document", exact: true }).click();
+  await page.getByTestId("import-document").click();
   await page.getByTestId("document-markdown").filter({ hasText: "Image rendering" }).waitFor();
   const imageDocument = await page.evaluate(async () =>
     (await window.desktop.invoke("documents:list", {})).find((document) => document.sourceName === "images.md"));

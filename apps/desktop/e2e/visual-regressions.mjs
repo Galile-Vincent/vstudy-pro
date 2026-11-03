@@ -9,7 +9,7 @@ await writeFile(fixture, `# ${"Long heading path ".repeat(20)}\n\n**Blue** [fern
 let app, page;
 const errors = [];
 const launch = async () => {
-  app = await electron.launch({ args: [resolve("."), `--user-data-dir=${join(directory, "user-data")}`], env: { ...process.env, ELECTRON_RUN_AS_NODE: "", VSTUDY_FAKE_PROVIDER: "1" } });
+  app = await electron.launch({ args: [resolve("."), `--user-data-dir=${join(directory, "user-data")}`], env: { ...process.env, ELECTRON_RUN_AS_NODE: "", VSTUDY_LOCALE:"en", VSTUDY_FAKE_PROVIDER: "1" } });
   page = await app.firstWindow();
   page.on("pageerror", error => errors.push(error.message));
   page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
@@ -18,14 +18,14 @@ const launch = async () => {
 try {
   await launch();
   await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, fixture);
-  await page.getByRole("button", { name: "＋ Import document", exact: true }).click();
+  await page.getByTestId("import-document").click();
   const viewer = page.getByTestId("document-markdown");
   await viewer.waitFor();
   assert.equal(await viewer.locator('h1').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'long document headings wrap within the reader');
   await viewer.locator("h1").hover();
   await viewer.locator(".section-action").focus();
   await viewer.locator(".section-action").press("Enter");
-  const input = page.getByRole("textbox", { name: "Ask about your document", exact: true });
+  const input = page.locator('.aui-composer-input');
   await input.waitFor();
   const chip = page.locator(".aui-composer-root .selection-preview");
   assert.ok(!(await chip.innerText()).includes("**Blue**"));
@@ -56,7 +56,7 @@ try {
   assert.equal(await input.inputValue(), "Preserved draft");
   await app.close();
   await launch();
-  await page.getByRole("textbox", { name: "Ask about your document", exact: true }).waitFor();
+  await page.locator('.aui-composer-input').waitFor();
   await page.getByRole("combobox", { name: "Model", exact: true }).filter({ hasText: "Haiku 5.5" }).waitFor();
   assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => `${s.lastProviderId}/${s.lastModelId}`)), "claude-cli/haiku");
   assert.deepEqual(errors, []);

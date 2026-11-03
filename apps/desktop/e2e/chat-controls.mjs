@@ -15,7 +15,7 @@ try {
  await page.getByRole('combobox',{name:'Model',exact:true}).click();
  await page.locator('[data-slot=model-selector-list] [role=option]').filter({hasText:'Fake'}).click();
  await page.getByRole('button',{name:'Start a conversation',exact:true}).click();
- const input=page.getByRole('textbox',{name:'Ask about your document',exact:true}); await input.waitFor();
+ const input=page.locator('.aui-composer-input'); await input.waitFor();
  await page.getByRole('combobox',{name:'Model',exact:true}).click();
  await page.screenshot({path: '/tmp/vstudy-picker-open.png', animations:'disabled'});
  await page.getByRole('combobox',{name:'Search models'}).fill('Fake');

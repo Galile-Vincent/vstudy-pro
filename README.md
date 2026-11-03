@@ -51,3 +51,5 @@ Python golden tests: install `apps/desktop/resources/converter/requirements.txt`
 Single-file imports do not copy neighboring image files. Relative images in imported Markdown/HTML may be unavailable; embedded images extracted by the converter are supported.
 
 `node e2e/visual-regressions.mjs` additionally checks compact selection previews, Markdown replies, toolbar buttons, draft preservation on model changes, and restart behavior in the built app. This check requires a detected Claude CLI for its model picker option; it never sends a request to that CLI.
+
+Language preferences and reply language are in Settings. Interface languages: English, Traditional Chinese and Japanese; switching is live. See [the localization glossary](docs/i18n-glossary.md) and [verification guide](docs/i18n-verification.md). The Electron locale matrix is `node e2e/i18n.mjs` from `apps/desktop` after building.

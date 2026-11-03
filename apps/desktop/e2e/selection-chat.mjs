@@ -18,7 +18,7 @@ try {
     args: [resolve("."), `--user-data-dir=${directory}`],
     env: {
       ...process.env,
-      ELECTRON_RUN_AS_NODE: "",
+      ELECTRON_RUN_AS_NODE: "", VSTUDY_LOCALE:"en",
       VSTUDY_FAKE_PROVIDER: "1",
     },
   });
@@ -36,7 +36,7 @@ try {
     }, fixture);
   }
   await page
-    .getByRole("button", { name: "＋ Import document", exact: true })
+    .getByTestId("import-document")
     .click();
   const viewer = page.getByTestId("document-markdown");
   await viewer.waitFor({ timeout: 15000 });
@@ -69,10 +69,7 @@ try {
   await page
     .getByRole("button", { name: "Ask about this", exact: true })
     .click();
-  const input = page.getByRole("textbox", {
-    name: "Ask about your document",
-    exact: true,
-  });
+  const input = page.locator('.aui-composer-input');
   await input.fill("Explain this passage.");
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-selection.png"), fullPage: true, animations: "disabled" });
   await page.getByRole("button", { name: "Send message", exact: true }).click();
@@ -223,12 +220,12 @@ try {
     assert.equal(await page.getByRole("button", { name: "Send message", exact: true }).isDisabled(), true);
     await page.evaluate(() => window.desktop.invoke("providers:configure", { kind: "api", id: "anthropic-api", enabled: true }));
     await page.getByRole("alert").filter({ hasText: "This conversation’s provider is unavailable" }).waitFor({ state: "hidden" });
-    await page.getByRole("textbox", { name: "Ask about your document", exact: true }).fill("Keep this draft");
+    await page.locator('.aui-composer-input').fill("Keep this draft");
     await page.getByRole('combobox',{name:'Model',exact:true}).click();
     const alternative = page.getByRole('option').filter({hasText:'CLI'}).filter({hasNotText:'static fallback'}).first();
     if (await alternative.count()) {
       await alternative.click();
-      assert.equal(await page.getByRole('textbox',{name:'Ask about your document',exact:true}).inputValue(),'Keep this draft');
+      assert.equal(await page.locator('.aui-composer-input').inputValue(),'Keep this draft');
     } else await page.getByRole('combobox',{name:'Search models'}).press('Escape');
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete conversation", exact: true }).click();

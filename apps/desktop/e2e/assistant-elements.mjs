@@ -17,7 +17,7 @@ try {
  const conversations=await page.evaluate(async()=>{const [doc]=await window.desktop.invoke('documents:list',{});return window.desktop.invoke('conversations:list',{documentId:doc.id});});
  assert.equal(conversations.length,1,'model changes reuse the empty conversation');
  await page.evaluate(async()=>{const settings=await window.desktop.invoke('settings:get',{});return window.desktop.invoke('settings:set',{...settings,enableGenerativeUI:true});});
- const input=page.getByRole('textbox',{name:'Ask about your document',exact:true});await input.fill('test enriched');await input.press('Enter');
+ const input=page.locator('.aui-composer-input');await input.fill('test enriched');await input.press('Enter');
  await page.locator('.document-presentation').waitFor();await page.locator('.aui-composer-cancel').waitFor({state:'hidden'});
  assert.match(await page.locator('.document-presentation table').innerText(),/Topic\s+Summary\s+Document\s+Grounded answer/);
  await page.getByRole('button',{name:'Source 1: E2E reading document',exact:true}).click();
