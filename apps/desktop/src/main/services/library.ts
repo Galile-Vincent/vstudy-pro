@@ -120,7 +120,7 @@ export class LibraryService {
             else
                 add('d.id IN(SELECT documentId FROM document_fts WHERE document_fts MATCH ?)', '"' + text.replaceAll('"', '""') + '"');
         }
-        const columns = { manual: 'd.position', name: 'd.title COLLATE NOCASE', createdAt: 'd.createdAt', lastOpenedAt: "coalesce(d.lastOpenedAt,'')", size: 'd.sizeBytes', type: 'd.mime' };
+        const columns = { manual: 'd.position', name: 'd.title COLLATE NOCASE', createdAt: 'd.createdAt', lastOpenedAt: "coalesce(d.lastOpenedAt,'')", size: 'coalesce(d.sizeBytes,-1)', type: 'd.mime' };
         const pinOrder = q.view === 'pinned' && q.sort === 'manual';
         const recentOrder = q.view === 'recent' && q.sort === 'manual';
         const direction = pinOrder || recentOrder ? 'desc' : q.direction;
@@ -141,7 +141,7 @@ export class LibraryService {
         }
         const last = rows[Math.min(q.limit, rows.length) - 1];
         const key = pinOrder ? 'pinnedAt' : recentOrder ? 'lastOpenedAt' : { manual: 'position', name: 'title', createdAt: 'createdAt', lastOpenedAt: 'lastOpenedAt', size: 'sizeBytes', type: 'mime' }[q.sort];
-        return { items, nextCursor: rows.length > q.limit && last ? { value: (last[key] ?? '') as string | number, id: documentIdSchema.parse(last.id) } : null };
+        return { items, nextCursor: rows.length > q.limit && last ? { value: (last[key] ?? (key === 'sizeBytes' ? -1 : '')) as string | number, id: documentIdSchema.parse(last.id) } : null };
     }
     pin(id: string, pinned: boolean) { this.require(id); this.store.db.prepare('UPDATE documents SET pinned=?,pinnedAt=CASE WHEN ? THEN coalesce(pinnedAt,?) ELSE NULL END WHERE id=?').run(Number(pinned), Number(pinned), new Date().toISOString(), id); }
     reorderPins(table: 'documents' | 'folders', ids: string[]) { this.transaction(() => ids.forEach((id, i) => this.store.db.prepare(`UPDATE ${table} SET pinnedAt=? WHERE id=? AND pinned=1`).run(new Date(Date.now() - i).toISOString(), id))); }
