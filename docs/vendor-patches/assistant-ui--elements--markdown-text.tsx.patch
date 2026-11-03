@@ -1,0 +1,43 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/markdown-text.tsx
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/markdown-text.tsx
+@@ -1,5 +1,6 @@
+-"use client";
++import { tr } from "../../../../shared/i18n";
+ 
++
+ import "@assistant-ui/react-markdown/styles/dot.css";
+ 
+ import {
+@@ -19,6 +20,7 @@
+ import { cn } from "@/lib/utils";
+ 
+ type MarkdownTextProps = Partial<TextMessagePartProps> & {
++  markdownProps?: Partial<MarkdownTextPrimitiveProps>;
+   components?: Parameters<typeof memoizeMarkdownComponents>[0];
+   componentsByLanguage?: MarkdownTextPrimitiveProps["componentsByLanguage"];
+ };
+@@ -42,6 +44,7 @@
+ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
+   components,
+   componentsByLanguage,
++  markdownProps,
+ }) => {
+   const stableComponents = useShallowStable(components);
+   const stableComponentsByLanguage = useShallowStable(componentsByLanguage);
+@@ -60,6 +63,7 @@
+       components={markdownComponents}
+       componentsByLanguage={stableComponentsByLanguage}
+       defer
++      {...markdownProps}
+     />
+   );
+ };
+@@ -78,7 +82,7 @@
+       <span className="aui-code-header-language text-muted-foreground font-medium lowercase">
+         {language}
+       </span>
+-      <TooltipIconButton tooltip="Copy" onClick={onCopy}>
++      <TooltipIconButton tooltip={tr("common:copy")} onClick={onCopy}>
+         {!isCopied && (
+           <CopyIcon className="animate-in zoom-in-75 fade-in duration-150" />
+         )}

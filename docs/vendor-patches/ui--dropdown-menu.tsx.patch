@@ -1,0 +1,11 @@
+--- a/apps/desktop/src/renderer/components/ui/dropdown-menu.tsx
++++ b/apps/desktop/src/renderer/components/ui/dropdown-menu.tsx
+@@ -1,7 +1,7 @@
+ "use client"
+ 
+ import * as React from "react"
+-import { cn } from "cn"
++import { cn } from "@/lib/utils"
+ import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+ import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
+ 

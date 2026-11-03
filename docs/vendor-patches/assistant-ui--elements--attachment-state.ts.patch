@@ -1,0 +1,26 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/attachment-state.ts
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/attachment-state.ts
+@@ -1,4 +1,5 @@
+ "use client";
++import { tr } from '../../../../shared/i18n';
+ 
+ import { useAui, useAuiState } from "@assistant-ui/react";
+ import { useAttachmentSrc } from "@/hooks/use-attachment-src";
+@@ -16,7 +17,7 @@
+       case "image":
+         return "Image";
+       case "document":
+-        return "Document";
++        return tr('common:document');
+       case "file":
+         return "File";
+       default:
+@@ -42,7 +43,7 @@
+   const errorMessage = useAuiState((s) =>
+     s.attachment.status.type === "incomplete" &&
+     s.attachment.status.reason === "error"
+-      ? (s.attachment.status.message ?? "Upload failed")
++      ? (s.attachment.status.message ?? tr('common:upload_failed'))
+       : undefined,
+   );
+ 

@@ -1,7 +1,7 @@
-import { plainText } from '../../../../shared/plain-text';
 
-import { copyAnswer } from "../../../copy-answer";
-import { documentCitationSchema } from "../../../../shared";
+
+
+
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
 
@@ -71,8 +71,8 @@ import {
 import {
   createContext,
   useContext,
-  useLayoutEffect,
   useRef,
+  useLayoutEffect,
   useState,
   type ComponentType,
   type FC,
@@ -135,6 +135,9 @@ export type ThreadComponents = {
   TaskGroup?: ComponentType<{ group: ThreadGroupPart }> | undefined;
   Source?: SourceMessagePartComponent | undefined;
   WelcomeExtra?: ComponentType | undefined;
+  Announcement?: ComponentType | undefined;
+  CopyAction?: ComponentType | undefined;
+  Text?: ComponentType | undefined;
   ComposerExtra?: ComponentType | undefined;
   ComposerPrefix?: ComponentType | undefined;
   ComposerBanner?: ComponentType | undefined;
@@ -234,24 +237,12 @@ export const Thread: FC<ThreadProps> = ({
   );
 };
 
-export function ChatAnnouncement() {
-  useTranslation();
-  const announcement = useAuiState(s => {
-    if (s.thread.isRunning) return tr('common:answer_streaming');
-    const last = s.thread.messages.at(-1);
-    if (!last || last.role !== 'assistant') return '';
-    const text = last.content.filter(p => p.type === 'text').map(p => p.text).join('\n');
-    return `${tr(last.status?.type === 'incomplete' ? last.status.reason === 'error' ? 'common:answer_error' : 'common:answer_stopped' : 'common:answer_complete')}: ${plainText(text, documentCitationSchema.array().safeParse(last.metadata.custom.citations).data ?? []).slice(0,240).trimEnd()}`;
-  });
-  return <span data-testid="chat-announcement" role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</span>;
-}
-
 const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
   isEmpty,
   autoFocus,
 }) => {
   useTranslation();
-  const { Welcome = ThreadWelcome } = useContext(ThreadComponentsContext);
+  const { Announcement, Welcome = ThreadWelcome } = useContext(ThreadComponentsContext);
 
   return (
     <ThreadPrimitive.Root
@@ -264,7 +255,7 @@ const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
         ["--composer-padding" as string]: "8px",
       }}
     >
-      <ChatAnnouncement />
+      {Announcement && <Announcement />}
       <ThreadPrimitive.Viewport
         turnAnchor="top"
         data-slot="aui_thread-viewport"
@@ -730,6 +721,7 @@ const AssistantMessage: FC = () => {
     TaskGroup: TaskGroupComponent,
     MessageFooter,
     Source: SourceComponent = Sources,
+    Text: TextComponent = MarkdownText,
   } = useContext(ThreadComponentsContext);
   const groupBy = TaskGroupComponent ? taskAwareGroupBy : messageGroupBy;
 
@@ -785,7 +777,7 @@ const AssistantMessage: FC = () => {
                 );
               }
               case "text":
-                return <MarkdownText />;
+                return <TextComponent />;
               case "reasoning":
                 return <Reasoning {...part} />;
               case "tool-call":
@@ -807,7 +799,7 @@ const AssistantMessage: FC = () => {
                   </div>
                 );
               case "indicator":
-                return <ThinkingIndicator role="status" aria-label={tr('common:assistant_is_working')} label="Thinking" />;
+                return <ThinkingIndicator role="status" aria-label={tr('common:assistant_is_working')} label={tr('common:thinking')} />;
               default:
                 return null;
             }
@@ -828,20 +820,8 @@ const AssistantMessage: FC = () => {
   );
 };
 
-const CopyAnswerButton: FC = () => {
-  useTranslation();
-  const text = useAuiState(s => s.message.content.filter(p => p.type === 'text').map(p => p.text).join('\n'));
-  const raw = useAuiState(s => s.message.metadata.custom.citations);
-  const [copied,setCopied] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useLayoutEffect(() => () => clearTimeout(timer.current), []);
-  return <TooltipIconButton tooltip={tr('common:copy')} onClick={() => {
-    const parsed = documentCitationSchema.array().safeParse(raw);
-    void navigator.clipboard.writeText(copyAnswer(text, parsed.success ? parsed.data : [])).then(() => {setCopied(true);clearTimeout(timer.current);timer.current = setTimeout(() => setCopied(false),2000);});
-  }}>{copied ? <CheckIcon /> : <CopyIcon />}</TooltipIconButton>;
-};
-
 const AssistantActionBar: FC = () => {
+  const { CopyAction } = useContext(ThreadComponentsContext);
   useTranslation();
   return (
     <ActionBarPrimitive.Root
@@ -849,7 +829,7 @@ const AssistantActionBar: FC = () => {
       autohide="not-last"
       className="aui-assistant-action-bar-root text-muted-foreground animate-in fade-in col-start-3 row-start-2 -ms-1 flex gap-1 duration-200"
     >
-      <CopyAnswerButton />
+      {CopyAction ? <CopyAction /> : <ActionBarPrimitive.Copy asChild><TooltipIconButton tooltip={tr("common:copy")}><CopyIcon /></TooltipIconButton></ActionBarPrimitive.Copy>}
       <AuiIf condition={(s) => s.thread.capabilities.feedback}>
         <ActionBarPrimitive.FeedbackPositive asChild>
           <TooltipIconButton

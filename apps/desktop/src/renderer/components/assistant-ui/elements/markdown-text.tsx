@@ -1,8 +1,5 @@
-"use client";
-import { useMarkdownPlugins } from '../../../markdown-plugins';
-import { contentLanguage } from "../../../../shared/content-language";
-import { useTranslation } from "react-i18next";
-import { tr } from '../../../../shared/i18n';
+import { tr } from "../../../../shared/i18n";
+
 
 import "@assistant-ui/react-markdown/styles/dot.css";
 
@@ -13,14 +10,7 @@ import {
   memoizeMarkdownComponents,
   useIsMarkdownCodeBlock,
 } from "@assistant-ui/react-markdown";
-import { DocumentCitationLink } from "../../../document-elements";
-import { useAuiState } from "@assistant-ui/react";
-import { documentCitationSchema } from "../../../../shared";
 import remarkGfm from "remark-gfm";
-import rehypeSanitize from "rehype-sanitize";
-import { schema } from "../../../markdown";
-import { desktop } from "../../../bridge";
-import { externalUrlSchema } from "../../../../shared/ipc";
 import { type FC, memo, useMemo, useRef } from "react";
 import type { TextMessagePartProps } from "@assistant-ui/react";
 import { CheckIcon, CopyIcon } from "lucide-react";
@@ -30,6 +20,7 @@ import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
 
 type MarkdownTextProps = Partial<TextMessagePartProps> & {
+  markdownProps?: Partial<MarkdownTextPrimitiveProps>;
   components?: Parameters<typeof memoizeMarkdownComponents>[0];
   componentsByLanguage?: MarkdownTextPrimitiveProps["componentsByLanguage"];
 };
@@ -37,7 +28,6 @@ type MarkdownTextProps = Partial<TextMessagePartProps> & {
 const useShallowStable = <T extends Record<string, unknown> | undefined>(
   value: T,
 ): T => {
-  useTranslation();
   const ref = useRef(value);
   if (value !== ref.current) {
     const prev = ref.current;
@@ -54,13 +44,8 @@ const useShallowStable = <T extends Record<string, unknown> | undefined>(
 const MarkdownTextImpl: FC<MarkdownTextProps> = ({
   components,
   componentsByLanguage,
+  markdownProps,
 }) => {
-  useTranslation();
-  const text = useAuiState(s => s.message.content.filter(p => p.type === "text").map(p => p.type === "text" ? p.text : "").join(""));
-  const plugins = useMarkdownPlugins(text);
-  const rawCitations = useAuiState(s => s.message.metadata.custom.citations);
-  const citations = documentCitationSchema.array().safeParse(rawCitations);
-  const references = citations.success ? citations.data : [];
   const stableComponents = useShallowStable(components);
   const stableComponentsByLanguage = useShallowStable(componentsByLanguage);
   const markdownComponents = useMemo(() => {
@@ -73,16 +58,12 @@ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
 
   return (
     <MarkdownTextPrimitive
-      remarkPlugins={[remarkGfm, ...plugins.remark]}
-      rehypePlugins={[[rehypeSanitize, schema], ...plugins.rehype]}
-      skipHtml
-      preprocess={text => text.replace(/\[\[cite:(s\d+)\]\]/g,(marker,id:string) => references.some(c => c.id === id) ? `[source](#vstudy-cite-${id})` : marker)}
-      urlTransform={url => /^#vstudy-cite-s\d+$/.test(url) || externalUrlSchema.safeParse(url).success ? url : ""}
-      className="aui-md" containerProps={{lang:contentLanguage(text)}}
+      remarkPlugins={[remarkGfm]}
+      className="aui-md"
       components={markdownComponents}
       componentsByLanguage={stableComponentsByLanguage}
       defer
-      smooth={false}
+      {...markdownProps}
     />
   );
 };
@@ -90,7 +71,6 @@ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
 export const MarkdownText = memo(MarkdownTextImpl);
 
 const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
-  useTranslation();
   const { isCopied, copyToClipboard } = useCopyToClipboard();
   const onCopy = () => {
     if (!code || isCopied) return;
@@ -102,7 +82,7 @@ const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
       <span className="aui-code-header-language text-muted-foreground font-medium lowercase">
         {language}
       </span>
-      <TooltipIconButton tooltip={tr('common:copy_code')} onClick={onCopy}>
+      <TooltipIconButton tooltip={tr("common:copy")} onClick={onCopy}>
         {!isCopied && (
           <CopyIcon className="animate-in zoom-in-75 fade-in duration-150" />
         )}
@@ -115,8 +95,6 @@ const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
 };
 
 const defaultComponents = memoizeMarkdownComponents({
-  img: ({ alt }) => <span>{alt}</span>,
-  a: ({ href, children }) => href?.startsWith("#vstudy-cite-") ? <DocumentCitationLink id={href.slice(13)}>{children}</DocumentCitationLink> : <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a>,
   h1: ({ className, ...props }) => (
     <h1
       className={cn(
@@ -175,6 +153,15 @@ const defaultComponents = memoizeMarkdownComponents({
     <p
       className={cn(
         "aui-md-p my-3 leading-relaxed first:mt-0 last:mb-0",
+        className,
+      )}
+      {...props}
+    />
+  ),
+  a: ({ className, ...props }) => (
+    <a
+      className={cn(
+        "aui-md-a text-primary hover:text-primary/80 underline underline-offset-2",
         className,
       )}
       {...props}
@@ -267,7 +254,7 @@ const defaultComponents = memoizeMarkdownComponents({
     />
   ),
   pre: ({ className, ...props }) => (
-    <pre tabIndex={0}
+    <pre
       className={cn(
         "aui-md-pre border-border/50 bg-muted/30 overflow-x-auto rounded-t-none rounded-b-xl border border-t-0 p-3.5 text-[13px] leading-relaxed",
         className,

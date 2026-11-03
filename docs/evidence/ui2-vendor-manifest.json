@@ -1,0 +1,365 @@
+{
+  "registry": "https://r.assistant-ui.com/",
+  "shadcnRegistry": "https://ui.shadcn.com/r/styles/new-york/",
+  "cli": "shadcn@4.23.0",
+  "retrievedAt": "2026-11-04",
+  "files": [
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/attachment-state.ts",
+      "registrySha256": "8718cfac67e6afff2cc21981ebd934ea40c02abcf96c6d74be441a11dc37709d",
+      "patchedSha256": "97987bc364b1b7b431100a8c0cbb3b036770d83899e872795ccea84079c4472c",
+      "patch": "docs/vendor-patches/assistant-ui--elements--attachment-state.ts.patch",
+      "reason": "Preserve reviewed URL/blob allowlist and inert media policy; translate labels."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/attachment.aui.tsx",
+      "registrySha256": "ec4275215b826173f428ec95b94e150b4ca21124f9094eec8a28dbd87033710d",
+      "patchedSha256": "dd5c50898b34f43a465dd10718709e6790cc66ca3cb6dc946c1b14525a8f1511",
+      "patch": "docs/vendor-patches/assistant-ui--elements--attachment.aui.tsx.patch",
+      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/collapsible-root.tsx",
+      "registrySha256": "ebea1fff3af62e619a63680227b3c4b89cec449fac059f5fcd6695cc128f38b8"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/data-table.tsx",
+      "registrySha256": "ec802e2f48ae1ad2a83512fedebb98e070ab34b03eb43153f1a7efd451d40fdd"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/document-reference.tsx",
+      "registrySha256": "d045bc4a135297b2f1b4a512e842c51a87d62a90e4e78dfa2fad0f5266f00bfb",
+      "patchedSha256": "7e52a17469a65607761fe337bf3da9b483695de7bee0e4c76f400ccfc0e9a9d2",
+      "patch": "docs/vendor-patches/assistant-ui--elements--document-reference.tsx.patch",
+      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/file.tsx",
+      "registrySha256": "af6c5c38b0409f168e1bcebacffa9efaf7ff17ecc3cc0b5fab8d4770df0454a0",
+      "patchedSha256": "148b9d860652feece1d71feffacd988a81e276ab1a50f57b6b858da2e487bc9c",
+      "patch": "docs/vendor-patches/assistant-ui--elements--file.tsx.patch",
+      "reason": "Preserve reviewed URL/blob allowlist and inert media policy; translate labels."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/follow-up-suggestions.aui.tsx",
+      "registrySha256": "f0db1e9cfc5f648adeb57c8ac61fbeca4ebbb4d55267a9c107709af01b73abb4",
+      "patchedSha256": "b93a21927710d2ef57fadc3493e0aa41a4b4d99948b83fc4e46ccf658497a747",
+      "patch": "docs/vendor-patches/assistant-ui--elements--follow-up-suggestions.aui.tsx.patch",
+      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/image.tsx",
+      "registrySha256": "916b2ca0f1097a2eb22e6e5c3ffd39a918dec71abff424b6b8795939733d53fb",
+      "patchedSha256": "cb6247a212e4dd100ad15e7be84cbe160dec75e7dcf16eb16dbd913900addf02",
+      "patch": "docs/vendor-patches/assistant-ui--elements--image.tsx.patch",
+      "reason": "Preserve reviewed URL/blob allowlist and inert media policy; translate labels."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/inline-citation.tsx",
+      "registrySha256": "e70551e72d0bb8cb16e9552b22ca31f8b1ed30c062217e98ecef6d86843ac64a",
+      "patchedSha256": "9232efaddb6fb8c8f96818b1ab1d7945e4a6f2f34af9f252e9a3d5f5f82c2552",
+      "patch": "docs/vendor-patches/assistant-ui--elements--inline-citation.tsx.patch",
+      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/logos.tsx",
+      "registrySha256": "63ecebfd780689f9af364ea107398dbaf0fc116df06989a8ce4a81d9cd6bea51"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/markdown-text.tsx",
+      "registrySha256": "7d20bd8fe709a1a6aeee24ba82531309e374740ba6181e092592275ffd6ff8ac",
+      "patchedSha256": "a245ac5cc8b80b60c543d4c358f3c741c32103da5920f9273a40d57ebf0efe93",
+      "patch": "docs/vendor-patches/assistant-ui--elements--markdown-text.tsx.patch",
+      "reason": "Expose Markdown primitive pass-through props for the app sanitizer adapter; translate code-copy label."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/media-player.tsx",
+      "registrySha256": "64a43a3554e9a3de056bcc756dd022a342a45450fa1b41a87836896d0c86dd55",
+      "patchedSha256": "e4f867942a55e14a247aaf3f360d4ae3027a97a2f842f090b919833ade938c25",
+      "patch": "docs/vendor-patches/assistant-ui--elements--media-player.tsx.patch",
+      "reason": "Preserve reviewed URL/blob allowlist and inert media policy; translate labels."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/model-selector.aui.tsx",
+      "registrySha256": "fa58d6cb2392e7d57d58d7d560008953f95025b1bd0a58b7539a61f7283557c1"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/model-selector.tsx",
+      "registrySha256": "eeee32542590ef726200994a681e704b4903e22c06ebf5d0fb8959e5ef8514c7",
+      "patchedSha256": "54ed57ff69d5761a202fcbba6414adc8d56d03d27ce55eb3527c47765dc32e89",
+      "patch": "docs/vendor-patches/assistant-ui--elements--model-selector.tsx.patch",
+      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/reasoning.aui.tsx",
+      "registrySha256": "3ae8bcf0d84fcb9ac37a40c2046abbf46d7b8f3967b482eec84f0a743aefce65",
+      "patchedSha256": "59ad8a97a6745ceb52a2a4222e519c0cba0711f75e7f6f6991e327ed376d6bf0",
+      "patch": "docs/vendor-patches/assistant-ui--elements--reasoning.aui.tsx.patch",
+      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/reasoning.tsx",
+      "registrySha256": "02c42a1cad5fd56f4479fe65c779e9f9934c03a6e935ac92ebf98cbb46ef3cc7",
+      "patchedSha256": "8896f424d037181c7a8eba64bc85a2eb612615d8d455408d7a982a0cbda014db",
+      "patch": "docs/vendor-patches/assistant-ui--elements--reasoning.tsx.patch",
+      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/sources.aui.tsx",
+      "registrySha256": "032a55cdcb9e9067c10667c21f09f4d17efdd1ca4bba58c8e11601f50480b354"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/suggestions.tsx",
+      "registrySha256": "6cc8d4e06028e9c3f3c233d57efc4f4960b473d3c8fa2930ace56d6e7835c99c"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/surfaces.tsx",
+      "registrySha256": "5d81fbb669e67ae20026cd30ed57efc51a5e3ee0f4f5d265e1723de75359b8fa"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thinking-indicator.tsx",
+      "registrySha256": "dc85ba3e84c99deb63ec7285dbd12d05f4c28e168ed4ae034a22a662f53eb71b"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread-list.aui.tsx",
+      "registrySha256": "56af673ffdff7365cb07d94dda204c606d39991dcc54a89092bddf76e2e624d0",
+      "patchedSha256": "255ada82189410317ccb186df993b042eb03b3181871dbe0da0c4087dc3eb6e6",
+      "patch": "docs/vendor-patches/assistant-ui--elements--thread-list.aui.tsx.patch",
+      "reason": "Translate labels; expose application-supported list actions without unsupported archive/rename actions."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx",
+      "registrySha256": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da",
+      "patchedSha256": "88acc5e13a310472640a03501234feedb8f5c26a26b7edffb529e5e5dbd39482",
+      "patch": "docs/vendor-patches/assistant-ui--elements--thread.aui.tsx.patch",
+      "reason": "Add composition slots for app-owned document selection, usage/budget guard, IME input, safe Markdown, citations, clipboard and announcements; translate labels; omit unsupported durable branch switching. Styling stays upstream."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-approval-questions.tsx",
+      "registrySha256": "8c5ea3315a2234d9c932993cf1423d8ae3d327a0bc682df827cca594c2bb9d88"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback-parts.tsx",
+      "registrySha256": "82bc62c1a0745b2c9c8e30765af9266511b1fb2b8f7307727acb22535652b44e"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback.aui.tsx",
+      "registrySha256": "31720ad79fe332a5999cc1873108da740e63c05f4b8f322bde75f8d495cbf853",
+      "patchedSha256": "7a9f600e17c1598a972afe5715f994c76822697afaf49789c5acbcac641d7230",
+      "patch": "docs/vendor-patches/assistant-ui--elements--tool-fallback.aui.tsx.patch",
+      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-group.aui.tsx",
+      "registrySha256": "757caf28ee232d4f500c8af7d6837fe7d6d2b144774a6a0bcdaff8c0c517bd9e"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tooltip-icon-button.tsx",
+      "registrySha256": "1ec2af97d22c34c955588c866aba5ddbfc579b1fd9218f68f75010b10e5a7868"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/generative-ui.css",
+      "registrySha256": "f9408bde84aea14f9b27a9d36abf24b81109a869304af08b93219177ae878ba2"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/utils/href.ts",
+      "registrySha256": "edcbea291ec6c5d506be4ddd76c6e0b6cabba4a14193f389a44fb6bfa8d81c40"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/utils/model-selection.ts",
+      "registrySha256": "019d3dca2d33724de16b9eb54757344cd05bd5c89f2fc3cb2885cdcc2590f4d9"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/utils/range.ts",
+      "registrySha256": "555d880ea1ac3a2b8f0cdbe76bece147e72f6748a07a643dbe404957c64d451d"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/utils/useIsomorphicLayoutEffect.ts",
+      "registrySha256": "8db117d730e640655e5099e086af4e00d545c283839d9ef5885ca93419d51893"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/alert-dialog.tsx",
+      "registrySha256": "e68ead222534ebb6cefe5ca6cfdcd42f1a7851e96eff0074306cf51454826570",
+      "patchedSha256": "003810dd96fa9b29b83562d04cb14687e12b53e68ae6ddb9db07582ea089807f",
+      "patch": "docs/vendor-patches/ui--alert-dialog.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/avatar.tsx",
+      "registrySha256": "0c5c48b8a1dff4fdc5ff9b6cb79cc9cd138682b7d86868068f571befe9675e88",
+      "patchedSha256": "d6b19fe40f7e7d5fd4ba8a4dc38632defa4df0e2a82adde6347773427148f882",
+      "patch": "docs/vendor-patches/ui--avatar.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/badge.tsx",
+      "registrySha256": "d8386d947b8a8c6d965de680503e6af5ed66068cd61b4d9ecc722a4cee1d6ffc"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/button.tsx",
+      "registrySha256": "79dd6f75f8136394442202d6b8b922fb269eaad0a5dba579397c9d5b41f893bb",
+      "patchedSha256": "557e27d5d3159c338da761c5aec138dcd32d313b5a55774ea8001c3f3bfc620c",
+      "patch": "docs/vendor-patches/ui--button.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/card.tsx",
+      "registrySha256": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059",
+      "patchedSha256": "39480d5b63e46554f1cfcedaa91052c848bda5c45d7a5dda80fe91e7be604fb0",
+      "patch": "docs/vendor-patches/ui--card.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/checkbox.tsx",
+      "registrySha256": "d3da4d7c35a3e3ebc80724fca69407e892127851d3c89d707ae1cc0d4d13dfb6",
+      "patchedSha256": "6b11e8c6c0898ab3c8b8e248cab30f12e1f3db69663c7d1293298c46bca5fc9c",
+      "patch": "docs/vendor-patches/ui--checkbox.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/command.tsx",
+      "registrySha256": "8063fbe58e0c7ca013403cb58871b7c2ce104dbf3d8f7b4162d4e7107db9abfa",
+      "patchedSha256": "47f33e1a635a0236d4a0c6f905e0d03b37ca08a6c8dde6c1f4bc0249bc9e07e3",
+      "patch": "docs/vendor-patches/ui--command.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/context-menu.tsx",
+      "registrySha256": "674445eaa0232db233f6a26dbc5f96504991a182a7db9458e6f08038036452d9",
+      "patchedSha256": "e5f09b2d58bc730d75467fc86da96edff1fbada410db1eb7d4a286bfdb67a674",
+      "patch": "docs/vendor-patches/ui--context-menu.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/dialog.tsx",
+      "registrySha256": "0d2e82ed5e7040abda714a0471aff54535e05bad6249da049cc0c3bf3ae024e5",
+      "patchedSha256": "9e3076edb0d8349806572c868134af3e7e4753e580a303124bedc6cf59457837",
+      "patch": "docs/vendor-patches/ui--dialog.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility. Translate accessible labels."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/dropdown-menu.tsx",
+      "registrySha256": "d954efb735f13734751207ad22cb0cddd7f6ec53c59d16675d103dae08cb61fb",
+      "patchedSha256": "c84b54bc6c8ae8f3ec5a8999000623b25776318739f2e91de3c70d85bb56e95a",
+      "patch": "docs/vendor-patches/ui--dropdown-menu.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/input.tsx",
+      "registrySha256": "0c9457181f6ddc80969bcf854e92c362903a55b6e889fbef3fd85343ecc4af5b",
+      "patchedSha256": "7bfd0eff6c53a38c99184394a09f55e7a86c725de12d6a300fa46b3765114091",
+      "patch": "docs/vendor-patches/ui--input.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/popover.tsx",
+      "registrySha256": "d8bfac795e9750a8994836b9f773ddceb4892730f9ee1e02e498fb6892c3be44",
+      "patchedSha256": "d5ebc8cb60ef8a8aa283cff6b642bf8e63512b76bfaae3cb4b0c735a550d6a61",
+      "patch": "docs/vendor-patches/ui--popover.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/progress.tsx",
+      "registrySha256": "cf5de49b1c6d9ba6753d1d2f62820c543935cf426b8af8b49b277cfda6cc2c5b",
+      "patchedSha256": "8a61b1b60ca25beac02305bce36dc0ee0d168a1f3c4d0d5ce6f1dac928da9884",
+      "patch": "docs/vendor-patches/ui--progress.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/scroll-area.tsx",
+      "registrySha256": "8b73bb9be51300079c7f561bafbe43ee10f6f464cf39c8c1b25123cd4edb94dd",
+      "patchedSha256": "55264573642c8d9182c15434638a3007b6e03e9b929bf05fbb6db8b55d5fcd36",
+      "patch": "docs/vendor-patches/ui--scroll-area.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/select.tsx",
+      "registrySha256": "9293fd75923693411cd443049fba313135014c4ad6997cfcde1e37693fc85b04",
+      "patchedSha256": "6d3a0333c0f2dd5bd4ffc4e1a68369d8cb29bed161b3cdd3410a9a1274e0b991",
+      "patch": "docs/vendor-patches/ui--select.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/separator.tsx",
+      "registrySha256": "7d943e8c309f8d530f25433ffc9167f771e635f2eeb1c3b55fa16955068c1657",
+      "patchedSha256": "27e605bf54abe12bf878318ed5bd0e8b475c7fdaa15519df05d0e44b5c7b5720",
+      "patch": "docs/vendor-patches/ui--separator.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/sheet.tsx",
+      "registrySha256": "7e4e3e2a5976ad75c1e0f63624fb3748ad84b27ca1ec85c0a6d33e6f300dc80d",
+      "patchedSha256": "f85d549c986492dcbcdf89367686dc78d1ca2bf96b0a7cd3153fd8a08438b35a",
+      "patch": "docs/vendor-patches/ui--sheet.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility. Translate accessible labels."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/sidebar.tsx",
+      "registrySha256": "546f6900af7d9102bdcb6157c0e52c289cdede0e9d624c506fda66d3d8039be0",
+      "patchedSha256": "b8ac6c4ec774665e190cd6459a91cc15e705efa9f761c206ce826c26c6e52e61",
+      "patch": "docs/vendor-patches/ui--sidebar.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility. Translate accessible labels."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/skeleton.tsx",
+      "registrySha256": "f51ce0fcd31e5c31437382e80ea0af94b4fc3d64221d27091d36824546780a43",
+      "patchedSha256": "ba48dd5be5a6a1378bd4e011028654b5bf419f1e7d20ee4b9f8330c1264e7239",
+      "patch": "docs/vendor-patches/ui--skeleton.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/switch.tsx",
+      "registrySha256": "743676f33f823ffa8008bbd5eb94cb68e227599447d60e132a202291a395f8e4",
+      "patchedSha256": "62bd507d11a7abe5d0fc0b0bb805c794dcff5f75cff8c63e7dd58aec763d9cf5",
+      "patch": "docs/vendor-patches/ui--switch.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/tabs.tsx",
+      "registrySha256": "e1df6e2f95ece373ca909c1d54b8ba8cf4c47dd425c1784bbb9a01c38dd0936b",
+      "patchedSha256": "bc6b1c115fcc9d63d8f14cecd4fcb43cd0b8b201a5d295419296fe9e0ba1623f",
+      "patch": "docs/vendor-patches/ui--tabs.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/textarea.tsx",
+      "registrySha256": "5cafcfeeee29534f449387a16b585f5923d2faab1a0cdc50a874416b175f59ce",
+      "patchedSha256": "7c7122fc969c62228c691388aa1fe8b1eafe787ac25305a7a768f77d87d3c567",
+      "patch": "docs/vendor-patches/ui--textarea.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/toggle-group.tsx",
+      "registrySha256": "659d8d40849a9b23e86682e5cbb3dfef6cbd5a8536a5f50eecef8d60a5f66b63",
+      "patchedSha256": "f9d2c8102caef32186085a6e60fac79af27e9566f429b3fac85ccbb8f02383c6",
+      "patch": "docs/vendor-patches/ui--toggle-group.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/toggle.tsx",
+      "registrySha256": "28ae7d72730890a3ba6c668fd511c63a358ad26534c2c25d5922748d47e1fa99",
+      "patchedSha256": "05a7ea1345d08b6d61b78b95407ec67af9ede7cd090ecdf7736ddde5363a534d",
+      "patch": "docs/vendor-patches/ui--toggle.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/tooltip.tsx",
+      "registrySha256": "908d99c8aaea79508c94b48c3278a08856f32d1d4ce531860fde038fdacb7c9d",
+      "patchedSha256": "8b1a0c07f276ccc4982134938e6989d60b2e31f5e661a9e19b1d551d30b8ed93",
+      "patch": "docs/vendor-patches/ui--tooltip.tsx.patch",
+      "reason": "Resolve the registry cn helper to the existing local utility."
+    },
+    {
+      "path": "apps/desktop/src/renderer/hooks/use-attachment-src.ts",
+      "registrySha256": "4a77bf6c1256070a2469265d73aba534f3a462eb4444cd4b1def35f4b79a2a93"
+    },
+    {
+      "path": "apps/desktop/src/renderer/hooks/use-copy-to-clipboard.ts",
+      "registrySha256": "1f3b8a1bab79cef961f62eb25d6b58a0d16c957d63ba1faf086ad09c99712c0a"
+    },
+    {
+      "path": "apps/desktop/src/renderer/hooks/use-mobile.ts",
+      "registrySha256": "ad0936f84f1df79d3697bfbff9c18f8ad58431c1cbaf2359c6a853b0fcc9f28b"
+    }
+  ]
+}

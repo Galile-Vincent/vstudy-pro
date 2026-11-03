@@ -16,7 +16,8 @@
     "security:check": "node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test",
     "e2e": "node apps/desktop/scripts/e2e.mjs",
     "knip": "knip --include files,dependencies,unlisted,binaries",
-    "package:signed": "node apps/desktop/scripts/package-signed.mjs"
+    "package:signed": "node apps/desktop/scripts/package-signed.mjs",
+    "vendor:check": "node apps/desktop/scripts/vendor-check.mjs"
   },
   "devDependencies": {
     "knip": "6.44.1"

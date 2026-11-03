@@ -1,0 +1,224 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback.aui.tsx
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback.aui.tsx
+@@ -1,5 +1,6 @@
+-"use client";
++import { tr } from '../../../../shared/i18n';
+ 
++
+ import {
+   forwardRef,
+   memo,
+@@ -157,14 +158,14 @@
+   const Icon = statusIconMap[statusType];
+   const label =
+     responseDeliveryStatus === "queued"
+-      ? "Reply queued, not sent yet"
++      ? tr('common:reply_queued_not_sent_yet')
+       : statusType === "running"
+-        ? "Running tool"
++        ? tr('common:running_tool')
+         : statusType === "requires-action"
+-          ? "Waiting on tool"
++          ? tr('common:waiting_on_tool')
+           : statusType === "incomplete"
+-            ? `${isCancelled ? "Cancelled" : "Failed"} tool`
+-            : "Used tool";
++            ? tr(isCancelled ? 'common:tool_cancelled_label' : 'common:tool_failed_label')
++            : tr('common:used_tool');
+ 
+   return (
+     <CollapsibleTrigger
+@@ -297,8 +298,7 @@
+       {...props}
+     >
+       <p className="aui-tool-fallback-result-header text-muted-foreground text-xs font-medium">
+-        Result:
+-      </p>
++        {tr('common:result')}</p>
+       <pre className="aui-tool-fallback-result-content bg-muted/50 text-foreground/90 mt-1 rounded-md p-2.5 text-xs break-words whitespace-pre-wrap">
+         {formatUnknownValue(result, 2)}
+       </pre>
+@@ -322,7 +322,7 @@
+   if (!errorText) return null;
+ 
+   const isCancelled = status.reason === "cancelled";
+-  const headerText = isCancelled ? "Cancelled reason:" : "Error:";
++  const headerText = isCancelled ? tr('common:cancelled_reason') : tr('common:error_label');
+ 
+   return (
+     <div
+@@ -340,14 +340,14 @@
+   );
+ }
+ 
+-const APPROVED_RESULT = "Approved by user";
+-const DENIED_RESULT = "User denied tool execution";
++const APPROVED_RESULT = tr('common:approved_by_user');
++const DENIED_RESULT = tr('common:user_denied_tool_execution');
+ 
+ const APPROVAL_OPTION_DEFAULT_LABELS: Record<string, string> = {
+-  "allow-once": "Allow",
+-  "allow-always": "Always allow",
+-  "reject-once": "Deny",
+-  "reject-always": "Always deny",
++  "allow-once": "common:allow",
++  "allow-always": "common:always_allow",
++  "reject-once": "common:deny",
++  "reject-always": "common:always_deny",
+ };
+ 
+ const isKnownKind = (kind: string) =>
+@@ -359,7 +359,7 @@
+ const approvalOptionLabel = (option: ToolApprovalOption) =>
+   option.label ??
+   (isKnownKind(option.kind)
+-    ? APPROVAL_OPTION_DEFAULT_LABELS[option.kind]
++    ? tr(APPROVAL_OPTION_DEFAULT_LABELS[option.kind]!)
+     : undefined) ??
+   option.id;
+ 
+@@ -408,8 +408,8 @@
+       outcome: "closed",
+       label:
+         approval.resolution === "cancelled"
+-          ? "Cancelled before a decision"
+-          : "Expired before a decision",
++          ? tr('common:cancelled_before_a_decision')
++          : tr('common:expired_before_a_decision'),
+     };
+ 
+   const chosen =
+@@ -424,17 +424,17 @@
+         : approval.optionId;
+   const answered =
+     isQuestion(approval) || (chosen !== undefined && !isKnownKind(chosen.kind));
+-  const automatic = approval.isAutomatic ? " automatically" : "";
++  const automatic = approval.isAutomatic ? tr('common:automatically') : "";
+ 
+   if (approval.approved)
+     return {
+       outcome: "allowed",
+-      label: `${answered ? "Answered" : "Allowed"}${automatic}`,
++      label: `${answered ? tr('common:answered') : tr('common:allowed')}${automatic}`,
+       option,
+     };
+   return {
+     outcome: "refused",
+-    label: `${answered ? "Dismissed" : "Denied"}${automatic}`,
++    label: `${answered ? tr('common:dismissed') : tr('common:denied')}${automatic}`,
+     option,
+   };
+ };
+@@ -656,8 +656,8 @@
+                 aria-label={question.prompt}
+                 placeholder={
+                   question.options?.length
+-                    ? "Or type an answer"
+-                    : "Type your answer"
++                    ? tr('common:or_type_an_answer')
++                    : tr('common:type_your_answer')
+                 }
+               />
+             ) : null}
+@@ -671,8 +671,7 @@
+           onClick={send}
+           disabled={locked || !complete}
+         >
+-          Send
+-        </Button>
++          {tr('common:send')}</Button>
+         {dismissible ? (
+           <Button
+             size="sm"
+@@ -681,8 +680,7 @@
+             onClick={onDismiss}
+             disabled={locked}
+           >
+-            Dismiss
+-          </Button>
++            {tr('common:dismiss')}</Button>
+         ) : null}
+       </div>
+     </>
+@@ -955,8 +953,7 @@
+       onClick={dismiss}
+       disabled={locked}
+     >
+-      Dismiss
+-    </Button>
++      {tr('common:dismiss')}</Button>
+   ) : null;
+ 
+   const errorText = error ? (
+@@ -974,9 +971,9 @@
+         value={answer}
+         onChange={(event) => setAnswer(event.target.value)}
+         disabled={locked}
+-        aria-label={question ? (approval?.prompt ?? "Answer") : "Note"}
++        aria-label={question ? (approval?.prompt ?? tr('common:answer')) : tr('common:note')}
+         placeholder={
+-          question ? "Type your answer" : "Add a note to your decision"
++          question ? tr('common:type_your_answer') : tr('common:add_a_note_to_your_decision')
+         }
+       />
+       {question && (
+@@ -987,8 +984,7 @@
+             onClick={submitAnswer}
+             disabled={locked}
+           >
+-            Send
+-          </Button>
++            {tr('common:send')}</Button>
+           {dismissButton}
+         </div>
+       )}
+@@ -1062,8 +1058,7 @@
+             onClick={() => respondWithOption(confirming)}
+             disabled={locked}
+           >
+-            Confirm
+-          </Button>
++            {tr('common:confirm')}</Button>
+           <Button
+             size="sm"
+             variant="outline"
+@@ -1074,8 +1069,7 @@
+             }}
+             disabled={locked}
+           >
+-            Back
+-          </Button>
++            {tr('common:back')}</Button>
+         </div>
+       </div>
+     );
+@@ -1122,8 +1116,7 @@
+               onClick={() => respond(false)}
+               disabled={locked}
+             >
+-              Deny
+-            </Button>
++              {tr('common:deny')}</Button>
+           )}
+           {!acceptsText && dismissButton}
+         </div>
+@@ -1176,8 +1169,7 @@
+           onClick={() => respond(true)}
+           disabled={locked}
+         >
+-          Allow
+-        </Button>
++          {tr('common:allow')}</Button>
+         <Button
+           size="sm"
+           variant="outline"
+@@ -1185,8 +1177,7 @@
+           onClick={() => respond(false)}
+           disabled={locked}
+         >
+-          Deny
+-        </Button>
++          {tr('common:deny')}</Button>
+       </div>
+       {answerField}
+       {errorText}
