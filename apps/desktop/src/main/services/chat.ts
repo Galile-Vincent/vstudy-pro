@@ -1,3 +1,4 @@
+import { ActivityService } from "./activity";
 import { validateOptions } from "../providers/models";
 import { canonicalModelId, priceUsage } from "../pricing";
 import { randomUUID } from "node:crypto";
@@ -112,6 +113,7 @@ export class ChatService {
       ? message.parts.every(p => !p.contextExcluded && (!p.status || p.status === "complete"))
       : latestTurns[index + 1]?.role === "assistant" && latestTurns[index + 1]!.parts.every(p => !p.contextExcluded && (!p.status || p.status === "complete")));
     this.persist(request, "user", request.userMessage);
+    new ActivityService(this.store).record("chat", request.documentId, 0, request.requestId);
     const entry: ActiveRequest = {
       owner,
       request,
@@ -236,6 +238,7 @@ export class ChatService {
       entry.citationCatalog = citationCatalog(entry.request.documentId, markdown);
       const allowPresentation = this.store.settings.get().enableGenerativeUI && ['anthropic-api','openai-api'].includes(entry.request.providerId);
       const prompt = buildPrompt({
+        replyLanguage: this.store.settings.get().replyLanguage,
         citations: entry.citationCatalog,
         document: { title: document.title, markdown },
         history,

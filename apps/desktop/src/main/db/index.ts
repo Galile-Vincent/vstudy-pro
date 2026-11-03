@@ -17,7 +17,7 @@ import {
   type Settings,
 } from "../../shared/domain";
 
-const migrations = [
+export const migrations = [
   {
     version: 1,
     sql: `
@@ -51,7 +51,7 @@ const documentRow = z
   .transform(({ error, ...rest }) =>
     documentSchema.parse(error === null ? rest : { ...rest, error }),
   );
-const conversationRow = z.object({ options: z.string().nullable() }).passthrough().transform(({ options, ...row }) => conversationSchema.parse({ ...row, ...(options ? { options: JSON.parse(options) } : {}) }));
+const conversationRow = z.object({ options: z.string().nullable(), updatedAt: z.string().nullable() }).passthrough().transform(({ options, updatedAt: _updatedAt, ...row }) => conversationSchema.parse({ ...row, ...(options ? { options: JSON.parse(options) } : {}) }));
 const messageRow = z
   .object({
     id: z.string(),

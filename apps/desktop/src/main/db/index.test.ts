@@ -104,7 +104,7 @@ describe("SQLite repositories", () => {
     });
     expect(
       raw.prepare("SELECT count(*) AS count FROM migrations").get(),
-    ).toEqual({ count: 4 });
+    ).toEqual({ count: 5 });
     raw.close();
   });
   it("rejects duplicate content and invalid domain data", () => {
