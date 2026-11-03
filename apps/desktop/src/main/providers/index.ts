@@ -159,7 +159,7 @@ export class ProviderRegistry {
             config,
             ...(config.kind === 'cli' ? {resolvedPath:await configuredCliPath(config.id.replace('-cli',''))} : {}),
             availability,
-            models: adapter && config.enabled ? await this.models(config, adapter, discover) : [],
+            models: adapter && config.enabled ? await this.models(config, adapter, discover || config.kind !== 'cli') : [],
             modelsLoading: !!adapter && config.enabled && this.loading.has(`${this.modelRevision}:${JSON.stringify(config)}`),
           };
         } catch {
