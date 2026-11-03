@@ -103,6 +103,7 @@ export type Usage = z.infer<typeof usageSchema>;
 export const priceSchema = z.object({ input: z.number().finite().nonnegative(), output: z.number().finite().nonnegative(), cacheRead: z.number().finite().nonnegative(), cacheWrite: z.number().finite().nonnegative() }).strict();
 export type Price = z.infer<typeof priceSchema>;
 export const usageRecordSchema = usageSchema.extend({
+  aborted: z.boolean().optional(),
   id: z.string().uuid(), createdAt: timestamp, providerId: providerIdSchema, modelId: z.string().min(1),
   kind: z.enum(['chat', 'parse']), conversationId: conversationIdSchema.optional(), documentId: documentIdSchema.optional(), messageId: messageIdSchema.optional(),
 });

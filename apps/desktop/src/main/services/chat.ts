@@ -1,5 +1,5 @@
 import { validateOptions } from "../providers/models";
-import { priceUsage } from "../pricing";
+import { canonicalModelId, priceUsage } from "../pricing";
 import { randomUUID } from "node:crypto";
 import { open } from "node:fs/promises";
 import {
@@ -181,12 +181,18 @@ export class ChatService {
     entry.owner.removeListener("destroyed", entry.onDestroyed);
     try {
       const messageId = randomUUID();
-      if (!entry.usage && entry.promptChars !== undefined) entry.usage = entry.text
-        ? { inputTokens: Math.ceil(entry.promptChars / 4), outputTokens: Math.ceil(entry.text.length / 4), costSource: 'estimated' }
-        : { inputTokens: 0, outputTokens: 0, costSource: 'unknown' };
+      const modelId = canonicalModelId(entry.usageModels?.[0]?.modelId ?? entry.request.modelId);
+      const reported = entry.usage?.costSource === 'reported' || entry.usageEmitted;
+      if (entry.text && !reported) entry.usage = {
+        ...entry.usage,
+        inputTokens: Math.max(entry.usage?.inputTokens ?? 0, Math.ceil((entry.promptChars ?? 0) / 4)),
+        outputTokens: Math.max(entry.usage?.outputTokens ?? 0, Math.ceil(entry.text.length / 4)),
+        costUsd: undefined, costSource: 'estimated',
+      };
+      if (entry.usage && !entry.text && !reported && !entry.usage.inputTokens && !entry.usage.outputTokens && !entry.usage.cacheReadTokens && !entry.usage.cacheWriteTokens && !entry.usage.reasoningTokens) entry.usage = undefined;
       if (entry.usage) {
-        if (entry.usage.inputTokens || entry.usage.outputTokens || entry.usage.costUsd !== undefined) entry.usage = priceUsage(entry.request.modelId, entry.usage, this.store.settings.get().priceOverrides);
-        for (const model of entry.usageModels?.length ? entry.usageModels : [{ modelId: entry.request.modelId, usage: entry.usage }]) this.store.usage.record({ ...model.usage, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: model.modelId, kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
+        entry.usage = priceUsage(modelId, entry.usage, this.store.settings.get().priceOverrides);
+        for (const model of reported && entry.usageModels?.length ? entry.usageModels : [{ modelId, usage: entry.usage }]) this.store.usage.record({ ...priceUsage(model.modelId, model.usage, this.store.settings.get().priceOverrides), aborted: entry.controller.signal.aborted, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: canonicalModelId(model.modelId), kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
       if (entry.text || entry.usage || event.type === "error") this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined);
@@ -248,7 +254,7 @@ export class ChatService {
           this.finish(
             entry,
             event.type === "error"
-              ? { type: "error", message: /auth failed|rate limited|network|provider unavailable|budget/i.test(event.message) ? event.message.match(/auth failed|rate limited|network|provider unavailable|budget/i)![0] : "Provider unavailable" }
+              ? { type: "error", message: new ProviderError(/auth failed/i.test(event.message) ? "auth failed" : /rate limited/i.test(event.message) ? "rate limited" : "provider unavailable").message }
               : event,
           );
           return;

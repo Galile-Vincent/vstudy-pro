@@ -140,6 +140,7 @@ export async function* runCli(
   child.stdin.end(prompt);
   child.stdout.setEncoding("utf8");
   let stdoutDiagnostic = '';
+  let resolvedModel: string | undefined;
   async function* checkedOutput() {
     let buffer = '';
     for await (const chunk of child.stdout) {
@@ -152,6 +153,7 @@ export async function* runCli(
         stdoutDiagnostic = line.slice(-8192);
         let record: Record<string, unknown> | undefined;
         try { record = JSON.parse(line) as Record<string, unknown>; } catch { /* Some CLIs print plain diagnostics. */ }
+        if (record?.type === 'system' && record.subtype === 'init' && typeof record.model === 'string') resolvedModel = record.model;
         if (record?.is_error || record?.error || record?.type === 'error' || record?.type === 'turn.failed' || /not logged in|please run \/login/i.test(line)) throw new Error('CLI request failed');
         yield line + '\n';
       }
@@ -160,7 +162,7 @@ export async function* runCli(
   }
   try {
     let terminal = false;
-    for await (const event of parseStream(checkedOutput(), kind, false, snapshot)) {
+    for await (const event of parseStream(checkedOutput(), kind, false, (usage, models) => snapshot(usage, models ?? (resolvedModel ? [{ modelId: resolvedModel, usage }] : undefined)))) {
       signal.throwIfAborted();
       if (event.type === "error") throw new Error("CLI request failed");
       if (event.type === "done") {
