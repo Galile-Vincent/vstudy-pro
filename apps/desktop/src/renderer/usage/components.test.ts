@@ -31,3 +31,32 @@ it('renders overall tokens once and exposes exact chart values accessibly',async
   expect(container.querySelector('details table')?.textContent).toContain('1,540');
   await act(async()=>root.unmount());
 });
+
+it('allows repeated unpriced requests with one inline note while still enforcing the token budget',async()=>{
+  const {useBudgetGuard}=await import('./meter');const {desktop}=await import('../bridge');
+  const month={inputTokens:0,outputTokens:0,costUsd:0,calls:0,unknownPrices:0,groups:[]};
+  const settings={...defaultSettings,monthlyBudgetUsd:10,monthlyTokenBudget:1000};
+  const data={settings,month,records:[]};let tokens=100;let submitted=0;
+  vi.mocked(desktop.invoke).mockImplementation((channel)=>Promise.resolve(channel==='settings:get'?settings:channel==='usage:summary'?month:{inputTokens:tokens,outputTokens:0,costSource:'estimated'}) as ReturnType<typeof desktop.invoke>);
+  function Harness(){
+    const state=useBudgetGuard(data,'00000000-0000-4000-8000-000000000001' as Parameters<typeof useBudgetGuard>[1],'question');
+    return createElement('form',{onSubmit:(event)=>{state.guard(event);if(!event.defaultPrevented)submitted++;}},createElement(UsageMeter,{data,error:''}),state.warning?createElement('p',{role:'alert'},state.reason):null);
+  }
+  const container=document.createElement('div');document.body.append(container);const root=createRoot(container);
+  await act(async()=>root.render(createElement(Harness)));
+  const form=container.querySelector('form')!;
+  form.requestSubmit=()=>{form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));};
+  await act(async()=>form.requestSubmit());await act(async()=>form.requestSubmit());
+  expect(submitted).toBe(2);expect(container.querySelector('[role="alert"]')).toBeNull();
+  expect(container.querySelectorAll('small')).toHaveLength(1);
+  expect(container.querySelector('small')?.textContent).toBe("Price unknown: this call isn't counted toward the USD budget");
+  tokens=1200;await act(async()=>form.requestSubmit());
+  expect(submitted).toBe(2);expect(container.querySelector('[role="alert"]')?.textContent).toBe('The next request may exceed your monthly budget.');
+  await act(async()=>root.unmount());container.remove();vi.mocked(desktop.invoke).mockReset();
+});
+it('marks aborted usage explicitly',async()=>{
+  const container=document.createElement('div');const root=createRoot(container);
+  await act(async()=>root.render(createElement(UsageChip,{usage:{inputTokens:100,outputTokens:325,costUsd:.0002,costSource:'estimated'},aborted:true})));
+  expect(container.textContent).toBe('in 100 · out 325 · <$0.001 · aborted');
+  await act(async()=>root.unmount());
+});
