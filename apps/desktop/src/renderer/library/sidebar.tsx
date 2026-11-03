@@ -127,6 +127,10 @@ export function LibrarySidebar() {
     );
   };
   const visible = visibleFolders(folders, expanded);
+  const [treeTop,setTreeTop] = useState(0);
+  const treeRef = useRef<HTMLDivElement>(null);
+  const treeStart = Math.max(0,Math.floor(treeTop / 32)-2);
+  const treeEnd = treeStart + Math.ceil((treeRef.current?.clientHeight || 400)/32)+4;
   return (
     <>
       <nav className="library-smart" aria-label={tr("library:smartViews")}>
@@ -205,20 +209,25 @@ export function LibrarySidebar() {
         </button>
       </div>
       {!folders.length && <p className="sidebar-empty">{tr("library:noFolders")}</p>}
-      <div role={folders.length ? "tree" : undefined} aria-label={folders.length ? tr("library:folders") : undefined}>
-      {visible.map(({ folder: f, level }, index) => (
+      <div ref={treeRef} className="folder-tree" onScroll={e => setTreeTop(e.currentTarget.scrollTop)} role={folders.length ? "tree" : undefined} aria-label={folders.length ? tr("library:folders") : undefined}>
+      <div role="presentation" style={{height:visible.length*32,position:"relative"}}>
+      {visible.slice(treeStart,treeEnd).map(({ folder: f, level }, offset) => { const index=treeStart+offset; const siblings=folders.filter(row=>row.parentId===f.parentId); return (
           <div
             key={f.id}
+            id={`folder-tree-${f.id}`}
             role="treeitem"
             aria-label={f.name}
             aria-level={level}
-            aria-expanded={expanded.includes(f.id)}
+            aria-expanded={folders.some(row=>row.parentId===f.id) ? expanded.includes(f.id) : undefined}
+            aria-setsize={siblings.length}
+            aria-posinset={siblings.findIndex(row=>row.id===f.id)+1}
             aria-selected={route.query?.folderId === f.id}
             tabIndex={focus === f.id || (!focus && index === 0) ? 0 : -1}
             className="folder-node"
             data-color={f.color}
             data-over={over === f.id}
             style={{
+              position:"absolute",top:index*32,width:"100%",
               paddingInlineStart: `calc(var(--space-3) * ${level - 1})`,
             }}
             draggable
@@ -275,11 +284,8 @@ export function LibrarySidebar() {
               const next = visible[target];
               if (next) {
                 setFocus(next.folder.id);
-                const nodes =
-                  e.currentTarget.parentElement?.querySelectorAll<HTMLElement>(
-                    "[role=treeitem]",
-                  );
-                nodes?.[target]?.focus();
+                if (treeRef.current) { treeRef.current.scrollTop=target*32; setTreeTop(target*32); }
+                requestAnimationFrame(()=>document.getElementById(`folder-tree-${next.folder.id}`)?.focus());
               }
             }}
           >
@@ -341,8 +347,8 @@ export function LibrarySidebar() {
               <MoreHorizontal />
             </button>
           </div>
-        ))}
-      </div>
+        ); })}
+      </div></div>
       {!!saved.length && <h2 className="sidebar-label">{tr("library:savedFilters")}</h2>}
       {saved.map((s) => (
         <button key={s.id} onClick={() => go(JSON.parse(s.queryJson), s.name)}>

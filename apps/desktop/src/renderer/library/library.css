@@ -116,7 +116,7 @@
   border-bottom: 1px solid var(--line);
   overflow: hidden;
 }
-.library-document[aria-selected="true"] {
+.library-document[data-selected="true"] {
   background: var(--active);
   box-shadow: inset var(--space-1) 0 var(--focus);
 }
@@ -414,3 +414,6 @@ mark {
 .library-toolbar > button { min-height:32px; }
 
 .filter-chips button.ghost,.library-empty > button.ghost { border:0; background:transparent; color:var(--muted); }
+
+.folder-tree { max-height:40vh; overflow:auto; position:relative; }
+.folder-node { height:var(--space-8); box-sizing:border-box; }

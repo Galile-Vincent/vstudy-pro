@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi } from "vitest";
 import { Snippet } from "./index";
-import { selectedRange, visibleFolders, type Item, type Folder } from "./model";
+import { reorderDestination, selectedRange, visibleFolders, type Item, type Folder } from "./model";
 vi.mock("../bridge", () => ({ desktop: { invoke: vi.fn() } }));
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -42,4 +42,11 @@ describe("library interaction rules", () => {
     expect(host.textContent).toContain("通信");
     await act(async () => root.unmount());
   });
+});
+
+it.each(['all','recent','pinned','unfiled','search','folder'])('reorders safely in %s views with an anchor in the destination folder',()=>{
+ const items=[{document:{id:'a'},folderId:'x'},{document:{id:'b'},folderId:'y'},{document:{id:'c'},folderId:'z'},{document:{id:'d'},folderId:'y'}] as Item[];
+ expect(reorderDestination(items,1,-1)).toEqual({folderId:'x',beforeId:'a'});
+ expect(reorderDestination(items,0,1)).toEqual({folderId:'y',beforeId:'d'});
+ expect(reorderDestination(items,3,1)).toBeNull();
 });

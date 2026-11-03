@@ -1,3 +1,4 @@
+import { contentLanguage } from "../../shared/content-language";
 import { Select } from "../components/select";
 import {
   useCallback,
@@ -26,6 +27,7 @@ import { useNavigate } from "../shell";
 import { LibraryDialog, useLibraryPrompt } from "./dialog";
 import {
   changed,
+  reorderDestination,
   importFiles,
   moveDocuments,
   selectedRange,
@@ -77,6 +79,9 @@ export function LibraryView() {
   }));
   const [customDates,setCustomDates] = useState(false);
   const [filtersOpen,setFiltersOpen] = useState(false);
+  useEffect(() => {
+    if (filtersOpen) document.querySelector<HTMLElement>('.filter-panel input,.filter-panel button')?.focus();
+  }, [filtersOpen]);
   const [text, setText] = useState(route.query?.text ?? ""),
     [items, setItems] = useState<Item[]>([]),
     [cursor, setCursor] = useState<LibraryQuery["cursor"]>(),
@@ -130,7 +135,7 @@ export function LibraryView() {
             ? q
             : { ...q, text: text.trim() || undefined, cursor: undefined },
         ),
-      250,
+      150,
     );
     return () => clearTimeout(timer);
   }, [text]);
@@ -212,12 +217,23 @@ export function LibraryView() {
     }, 30000);
     return () => clearTimeout(timer);
   }, [undo]);
+  const focusAfter = useRef<string | null>(null);
+  const [activeRow, setActiveRow] = useState<string>();
+  useLayoutEffect(() => {
+    if (!loading && focusAfter.current) {
+      const target = document.getElementById(focusAfter.current);
+      (target ?? scroller.current ?? document.getElementById("shell-content"))?.focus();
+      focusAfter.current = null;
+    }
+  }, [loading, items]);
   const run = async (action: () => Promise<unknown>) => {
+    const focused = document.activeElement as HTMLElement | null;
+    focusAfter.current = focused?.closest<HTMLElement>("[data-index]")?.id ?? menuAnchor.current?.closest<HTMLElement>("[data-index]")?.id ?? "shell-content";
     try {
       await action();
       changed();
     } catch (e) {
-      setError(errorText(e));
+      setNotice(errorText(e));
     }
   };
   const more = async () => {
@@ -299,16 +315,9 @@ export function LibraryView() {
     setMenu(null);
   };
   const reorder = async (item: Item, delta: number) => {
-    const index = items.indexOf(item),
-      before = items[index + (delta < 0 ? -1 : 2)];
-    if (index + delta < 0 || index + delta >= items.length) return;
-    await run(() =>
-      desktop.invoke("library:documents:move", {
-        documentIds: [item.document.id],
-        folderId: item.folderId,
-        ...(before ? { beforeId: before.document.id } : {}),
-      }),
-    );
+    const destination = reorderDestination(items, items.indexOf(item), delta);
+    if (!destination) return;
+    await run(() => desktop.invoke("library:documents:move", { documentIds: [item.document.id], ...destination }));
   };
   const filters = Object.entries(query).filter(
     ([key, value]) =>
@@ -367,8 +376,8 @@ export function LibraryView() {
           />
         </label>
         <div className="filter-popover">
-          <button className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(v => !v)}><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</button>
-          <div className="filter-panel" hidden={!filtersOpen}>
+          <button className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel" onClick={() => setFiltersOpen(v => !v)}><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</button>
+          <div id="library-filter-panel" className="filter-panel" hidden={!filtersOpen} onKeyDown={e => { if (e.key === "Escape") { setFiltersOpen(false); document.querySelector<HTMLButtonElement>('[data-testid="library-filters"]')?.focus(); } }}>
             {(
               ["type", "status", "converter", "tagId", "folderId"] as const
             ).map((key) => (
@@ -566,7 +575,7 @@ export function LibraryView() {
           <p>{error}</p>
           <button onClick={refresh}>{tr("library:retry")}</button>
         </div>
-      ) : loading ? (
+      ) : loading && !items.length ? (
         <div
           className="library-skeleton"
           role="status"
@@ -609,11 +618,8 @@ export function LibraryView() {
           ref={scroller}
           className="library-results"
           data-view={grid ? "grid" : "list"}
-          role="grid"
-          aria-colcount={1}
-          aria-rowcount={items.length}
+          role="list"
           aria-label={tr("library:documents")}
-          aria-multiselectable="true"
           tabIndex={0}
           onScroll={(e) => {
             const el = e.currentTarget;
@@ -649,35 +655,35 @@ export function LibraryView() {
         >
           <div
             style={{
-              height: grid ? "auto" : Math.ceil(items.length / columns) * rowHeight,
-              display: grid ? "grid" : undefined,
+              height: Math.ceil(items.length / columns) * rowHeight,
+              display: undefined,
               gridTemplateColumns: grid ? "repeat(auto-fill,minmax(220px,1fr))" : undefined,
               gap: grid ? "var(--space-4)" : undefined,
               position: "relative",
             }}
           >
-            {items.slice(grid ? 0 : start, grid ? items.length : end).map((item, offset) => {
+            {items.slice(start, end).map((item, offset) => {
               const d = item.document,
-                index = (grid ? 0 : start) + offset;
+                index = start + offset;
               return (
-                <article
+                <div
                   key={d.id}
+                  id={`library-document-${d.id}`}
                   data-index={index}
-                  role="row"
-                  aria-rowindex={index + 1}
-                  aria-selected={selected.includes(d.id)}
-                  tabIndex={0}
+                  role="listitem"
+                  aria-posinset={index + 1}
+                  aria-setsize={items.length}
+                  data-selected={selected.includes(d.id)}
+                  tabIndex={activeRow === d.id || (!activeRow && index === 0) ? 0 : -1}
+                  onFocus={() => { setActiveRow(d.id); void import("../document-presentation"); }}
+                  onMouseEnter={() => { void import("../document-presentation"); }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: grid
-                      ? "auto"
-                      : rowHeight,
-                    position: grid ? "relative" : "absolute",
-                    top: grid ? undefined : Math.floor(index / columns) * rowHeight,
-                    left: grid ? undefined : `${((index % columns) * 100) / columns}%`,
-                    width: grid
-                      ? "100%"
-                      : `${100 / columns}%`,
+                    height: rowHeight,
+                    position: "absolute",
+                    top: Math.floor(index / columns) * rowHeight,
+                    left: `${((index % columns) * 100) / columns}%`,
+                    width: `${100 / columns}%`,
                   }}
                   draggable
                   onDragStart={(e) => {
@@ -762,6 +768,8 @@ export function LibraryView() {
                                   index + (e.key === "ArrowUp" ? -1 : 1),
                                 ),
                               );
+                      if (e.shiftKey) setSelected(selectedRange(items, anchor.current ?? d.id, items[next]!.document.id));
+                      if (!anchor.current) anchor.current = d.id;
                       if (scroller.current) {
                         scroller.current.scrollTop =
                           Math.floor(next / columns) * rowHeight;
@@ -798,11 +806,13 @@ export function LibraryView() {
                     }
                   }}
                 >
-                  <div role="gridcell" className="document-cell">
+                  <div className="document-cell">
                     <FileText className="document-glyph" aria-hidden="true" />
                     <div className="document-info">
                       <button
                         className="document-title"
+                        tabIndex={-1}
+                        lang={contentLanguage(d.title)}
                         onClick={() => open(item)}
                       >
                         {d.title}
@@ -849,7 +859,8 @@ export function LibraryView() {
                       </div>
                     </div>
                     <button
-                      aria-label={tr("library:pin")}
+                      aria-label={`${tr("library:pin")}: ${d.title}`}
+                      tabIndex={-1}
                       aria-pressed={item.pinned}
                       onClick={() =>
                         void run(() =>
@@ -864,12 +875,13 @@ export function LibraryView() {
                     </button>
                     <button
                       aria-label={tr("library:actions", { name: d.title })}
+                      tabIndex={-1}
                       onClick={(e) => { menuAnchor.current = e.currentTarget; setMenu(item); }}
                     >
                       <MoreHorizontal />
                     </button>
                   </div>
-                </article>
+                </div>
               );
             })}
           </div>

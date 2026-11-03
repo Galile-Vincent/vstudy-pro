@@ -22,12 +22,16 @@ export function LibraryDialog({
       const buttons = node.querySelectorAll('button');
       buttons.forEach(button => button.setAttribute('role', 'menuitem'));
       buttons[0]?.focus();
-    } else ref.current?.showModal();
+    } else {
+      ref.current?.showModal();
+      ref.current?.querySelector<HTMLInputElement>("input[autofocus], input, textarea")?.focus();
+    }
     const outside = (event: PointerEvent) => { if (menu && event.target instanceof Node && !ref.current?.contains(event.target) && !anchor?.contains(event.target)) onClose(); };
     document.addEventListener('pointerdown',outside);
     return () => {
       document.removeEventListener('pointerdown',outside);
-      if (menu && anchor?.isConnected) anchor.focus(); else if (previous instanceof HTMLElement) previous.focus();
+      if (menu && anchor?.isConnected) anchor.focus(); else if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+      else (document.querySelector<HTMLElement>(".library-document[tabindex=\"0\"]") ?? document.getElementById("shell-content"))?.focus();
     };
   }, []);
   return (

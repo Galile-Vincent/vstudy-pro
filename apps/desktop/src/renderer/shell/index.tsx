@@ -64,10 +64,14 @@ export function AppShell({
   });
   useEffect(() => {
     const media = window.matchMedia('(max-width: 999px)');
-    const update = () => { if (route.view === 'workspace' && media.matches) setSidebarVisible(false); };
+    const update = () => { if (media.matches && (route.view === 'workspace' || window.innerWidth < 720)) setSidebarVisible(false); };
     update(); media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, [route.view]);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => { document.getElementById("shell-content")?.focus(); });
+    return () => cancelAnimationFrame(frame);
+  }, [route.view, route.documentId]);
   const previous = useRef<Route>({ view: "home" });
   const returnSettings = useRef(false);
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -140,7 +144,7 @@ export function AppShell({
               </span>
             )}
           </header>
-          <div id="shell-content" className="shell-content" tabIndex={-1}>
+          <div id="shell-content" role={route.view === "library" ? "main" : undefined} className="shell-content" tabIndex={-1}>
             {children}
           </div>
         </div>

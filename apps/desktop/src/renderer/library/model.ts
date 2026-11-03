@@ -48,3 +48,10 @@ export async function moveDocuments(
       ...(beforeId ? { beforeId } : {}),
     });
 }
+
+export function reorderDestination(items: Item[], index: number, delta: number) {
+  const target = items[index + delta];
+  if (!target) return null;
+  const before = delta < 0 ? target : items.slice(index + delta + 1).find(row => row.folderId === target.folderId);
+  return { folderId: target.folderId, ...(before ? { beforeId: before.document.id } : {}) };
+}
