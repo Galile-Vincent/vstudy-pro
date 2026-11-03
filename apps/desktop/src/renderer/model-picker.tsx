@@ -41,8 +41,14 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
   const speed = selected?.options?.find(o => o.id === 'fastMode' || (o.id === 'serviceTier' && o.values.some(v => v.id === 'priority')));
   const fast = speed && ['true', 'priority'].includes(String(values[speed.id] ?? speed.default));
   const entries = all.map(m => ({ id: m.value, name: m.name, description: `${m.resolvedId ?? m.id}${m.available ? '' : ` · ${m.reason}`}`, disabled: !m.available, keywords: [m.provider, m.id], icon: <span className={`availability-dot ${m.available ? 'available' : ''}`} title={m.reason} /> }));
+  const canonical = (value: string) => {
+    const raw = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id }))).find(m => m.value === value);
+    return all.find(m => m.value === value)?.value ?? all.find(m => m.providerId === raw?.providerId && m.resolvedId === raw?.resolvedId && m.id !== 'default')?.value ?? value;
+  };
+  const isFavorite = (value: string) => favorites.some(x => canonical(x) === value);
+  const isRecent = (value: string) => recent.some(x => canonical(x) === value);
   const persist = async (f: string[], r: string[]) => { try { const s = await desktop.invoke('settings:get', {}); await desktop.invoke('settings:set', { ...s, favoriteModels: f, recentModels: r }); } catch { /* Selection stays usable when settings storage is unavailable. */ } };
-  const choose = (value: string) => { const r = [value, ...recent.filter(x => x !== value)].slice(0,8); setRecent(r); void persist(favorites,r).then(() => onModel(value)); };
+  const choose = (value: string) => { const r = [value, ...recent.filter(x => canonical(x) !== value)].slice(0,8); setRecent(r); void persist(favorites,r).then(() => onModel(value)); };
   const groups = ['Favorites', 'Recent', ...providers.map(p => providerName[p.config.id])];
   return <div className="model-picker" ref={root}>
     <ModelSelector.Root models={entries} value={selected?.value ?? model} onValueChange={choose} open={open} onOpenChange={setOpen}>
@@ -64,10 +70,10 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
           <ModelSelector.List id="model-list" aria-label="Models">
             <ModelSelector.Empty>No matching models</ModelSelector.Empty>
             {groups.map(group => {
-              const rows = all.filter(m => (favorites.includes(m.value) ? 'Favorites' : recent.includes(m.value) ? 'Recent' : m.provider) === group);
+              const rows = all.filter(m => (isFavorite(m.value) ? 'Favorites' : isRecent(m.value) ? 'Recent' : m.provider) === group);
               return rows.length > 0 && <ModelSelector.Group key={group} heading={group}>{rows.map(m => <div className="model-row" key={m.value}>
                 <ModelSelector.Item model={entries.find(x => x.id === m.value)!} title={m.reason} />
-                <button type="button" className="model-favorite" aria-label={`${favorites.includes(m.value) ? 'Unfavorite' : 'Favorite'} ${m.name}`} aria-pressed={favorites.includes(m.value)} onClick={() => { const f = favorites.includes(m.value) ? favorites.filter(x => x !== m.value) : [...favorites,m.value]; setFavorites(f); void persist(f,recent); }}><Star size={14} fill={favorites.includes(m.value) ? 'currentColor' : 'none'} /></button>
+                <button type="button" className="model-favorite" aria-label={`${isFavorite(m.value) ? 'Unfavorite' : 'Favorite'} ${m.name}`} aria-pressed={isFavorite(m.value)} onClick={() => { const f = isFavorite(m.value) ? favorites.filter(x => canonical(x) !== m.value) : [...favorites,m.value]; setFavorites(f); void persist(f,recent); }}><Star size={14} fill={isFavorite(m.value) ? 'currentColor' : 'none'} /></button>
               </div>)}</ModelSelector.Group>;
             })}
           </ModelSelector.List>

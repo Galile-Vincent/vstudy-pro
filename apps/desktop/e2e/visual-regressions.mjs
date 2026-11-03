@@ -26,7 +26,7 @@ try {
   await viewer.locator(".section-action").press("Enter");
   const input = page.getByRole("textbox", { name: "Ask about your document", exact: true });
   await input.waitFor();
-  const chip = page.locator(".composer .selection-preview");
+  const chip = page.locator(".aui-composer-root .selection-preview");
   assert.ok(!(await chip.innerText()).includes("**Blue**"));
   assert.ok(!(await chip.innerText()).includes("image.png"));
   assert.equal(await chip.evaluate(el => el.scrollWidth <= el.clientWidth + 1), true);
@@ -36,11 +36,11 @@ try {
   assert.ok((await chip.innerText()).includes("Blue fern"));
   await input.fill("Explain");
   await page.getByRole("button", { name: "Send message", exact: true }).click();
-  await page.locator(".message.assistant strong").waitFor();
-  await page.waitForFunction(() => window.document.querySelector(".stop-button")?.disabled === true);
-  assert.equal(await page.locator(".message.assistant strong").innerText(), "bold");
-  assert.deepEqual(await page.locator(".message.assistant li").allTextContents(), ["First", "Second"]);
-  await page.locator(".message.assistant strong").scrollIntoViewIfNeeded();
+  await page.locator("[data-role=assistant] strong").waitFor();
+  await page.waitForFunction(() => !window.document.querySelector(".aui-composer-cancel"));
+  assert.equal(await page.locator("[data-role=assistant] strong").innerText(), "bold");
+  assert.deepEqual(await page.locator("[data-role=assistant] li").allTextContents(), ["First", "Second"]);
+  await page.locator("[data-role=assistant] strong").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "/tmp/vstudy-visual-markdown.png" });
   for (const name of ["Delete conversation", "Delete document"]) {
     const button = page.getByRole("button", { name, exact: true });
@@ -48,7 +48,7 @@ try {
     assert.equal(await button.getAttribute("class"), "icon-button");
   }
   await input.fill("Preserved draft");
-  await page.getByRole("button", { name: "Model", exact: true }).click();
+  await page.getByRole("combobox", { name: "Model", exact: true }).click();
   await page.getByRole("combobox", { name: "Search models" }).fill("haiku");
   await page.getByRole("option").filter({hasText:"Haiku 5.5"}).first().click();
   await page.waitForFunction(() => window.document.querySelector('select[aria-label="Conversation"] option:checked')?.textContent.includes("haiku"));
@@ -56,7 +56,7 @@ try {
   await app.close();
   await launch();
   await page.getByRole("textbox", { name: "Ask about your document", exact: true }).waitFor();
-  await page.getByRole("button", { name: "Model", exact: true }).filter({ hasText: "Haiku 5.5" }).waitFor();
+  await page.getByRole("combobox", { name: "Model", exact: true }).filter({ hasText: "Haiku 5.5" }).waitFor();
   assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => `${s.lastProviderId}/${s.lastModelId}`)), "claude-cli/haiku");
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ result: "PASS", screenshots: ["/tmp/vstudy-visual-section.png", "/tmp/vstudy-visual-markdown.png"], consoleErrors: errors }));

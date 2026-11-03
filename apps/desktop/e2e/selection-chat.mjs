@@ -77,37 +77,38 @@ try {
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-selection.png"), fullPage: true });
   await page.getByRole("button", { name: "Send message", exact: true }).click();
   await page
-    .locator(".message.assistant")
+    .locator("[data-role=assistant]")
     .filter({ hasText: selectedText })
     .waitFor({ timeout: 15000 });
-  await page.waitForFunction(() => window.document.querySelector(".stop-button")?.disabled === true);
+  await page.waitForFunction(() => !window.document.querySelector(".aui-composer-cancel"));
   if (!mock) {
-    await page.locator('.message.assistant .usage-chip').filter({hasText:'in 1.2k · out 340 · $0.012'}).waitFor();
-    await page.locator('.usage-meter').filter({hasText:'1.5k tokens · $0.012'}).waitFor();
+    await page.locator('[data-role=assistant] .usage-chip').filter({hasText:'in 1.2k · out 340 · $0.012'}).waitFor();
+    await page.getByRole('button',{name:'Conversation usage'}).filter({hasText:'1.5k tokens · $0.012'}).waitFor();
     const usage = await page.evaluate(() => window.desktop.invoke('usage:summary',{period:'month'}));
     assert.equal(usage.inputTokens,1200); assert.equal(usage.outputTokens,340); assert.equal(usage.costUsd,.012);
     await page.screenshot({path:screenshot.replace(/\.png$/, '-usage.png'),fullPage:true});
   }
-  assert.equal(await page.locator(".message.assistant strong").innerText(), "bold");
-  assert.deepEqual(await page.locator(".message.assistant li").allTextContents(), ["First", "Second"]);
-  await page.locator(".message.assistant strong").scrollIntoViewIfNeeded();
+  assert.equal(await page.locator("[data-role=assistant] strong").innerText(), "bold");
+  assert.deepEqual(await page.locator("[data-role=assistant] li").allTextContents(), ["First", "Second"]);
+  await page.locator("[data-role=assistant] strong").scrollIntoViewIfNeeded();
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-markdown.png"), fullPage: true });
   await viewer.locator("h2").first().hover();
   await viewer.locator("h2").first().getByRole("button", { name: "Use section Details" }).click();
-  const chip = page.locator(".composer .selection-preview");
+  const chip = page.locator(".aui-composer-root .selection-preview");
   assert.ok(!(await chip.innerText()).includes("| Topic |"), "preview removes table syntax");
   await chip.locator("summary").click();
   assert.equal(await chip.getAttribute("open"), "");
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-section.png"), fullPage: true });
   await page.getByRole("button", { name: "Remove selection" }).click();
-  const prompt = await page.locator(".message.assistant .message-text").innerText();
+  await page.waitForFunction(() => window.document.querySelector("[data-slot=aui_assistant-message-content]")?.textContent.includes("User question:"));
+  const prompt = await page.locator("[data-slot=aui_assistant-message-content]").innerText();
   assert.equal(prompt.split(selectedText).length - 1, 1, "passage occurs exactly once");
   const block = prompt.split("<untrusted_document_content>")[1].split("</untrusted_document_content>")[0];
   assert.ok(block.includes(selectedText), "passage is inside untrusted boundary");
   assert.ok(!block.includes("Explain this passage."), "question is outside boundary");
-  assert.ok(prompt.split("</untrusted_document_content>")[1].includes("User question:"));
+  assert.ok(prompt.split("</untrusted_document_content>")[1].includes("User question:"), JSON.stringify(prompt));
   assert.ok(
-    (await page.locator(".message.user").first().textContent()).includes(selectedText),
+    (await page.locator("[data-role=user]").first().textContent()).includes(selectedText),
     "Selection is visible in the user message",
   );
   await page.screenshot({ path: screenshot, fullPage: true });
@@ -130,7 +131,7 @@ try {
     .boundingBox();
   assert.ok(chatBox.x > documentBox.x, "Pane order swaps");
   assert.ok(
-    (await page.locator(".message.user").first().textContent()).includes(selectedText),
+    (await page.locator("[data-role=user]").first().textContent()).includes(selectedText),
     "Swap preserves the conversation",
   );
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-right.png"), fullPage: true });
@@ -178,11 +179,11 @@ try {
     await input.fill('Check budget warning');
     await page.getByRole('button',{name:'Send message',exact:true}).click();
     await page.getByRole('button',{name:'Send anyway',exact:true}).waitFor();
-    assert.equal(await page.locator('.message.user').count(),1);
+    assert.equal(await page.locator('[data-role=user]').count(),1);
     await page.screenshot({path:screenshot.replace(/\.png$/, '-budget-warning.png'),fullPage:true});
     await page.getByRole('button',{name:'Send anyway',exact:true}).click();
-    await page.waitForFunction(() => window.document.querySelectorAll('.message.user').length === 2);
-    await page.waitForFunction(() => window.document.querySelector('.stop-button')?.disabled === true);
+    await page.waitForFunction(() => window.document.querySelectorAll('[data-role=user]').length === 2);
+    await page.waitForFunction(() => !window.document.querySelector('.aui-composer-cancel'));
     const settings = await page.evaluate(() => window.desktop.invoke('settings:get',{}));
     await page.evaluate(s => window.desktop.invoke('settings:set',{...s,monthlyBudgetUsd:undefined}),settings);
     await input.fill('');
@@ -214,15 +215,15 @@ try {
     await page.getByTestId("document-markdown").filter({ hasText: "E2E reading document" }).waitFor();
     assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => s.lastDocumentId)), originalId);
     await page.reload();
-    await page.locator(".message.user .selection-preview").waitFor();
-    assert.ok((await page.locator(".message.user .selection-preview").innerText()).includes(selectedText), "structured selection survives reload");
+    await page.locator("[data-role=user] .selection-preview").waitFor();
+    assert.ok((await page.locator("[data-role=user] .selection-preview").textContent()).includes(selectedText), "structured selection survives reload");
     await page.evaluate(() => window.desktop.invoke("providers:configure", { kind: "api", id: "anthropic-api", enabled: false }));
     await page.getByRole("alert").filter({ hasText: "This conversation’s provider is unavailable" }).waitFor();
     assert.equal(await page.getByRole("button", { name: "Send message", exact: true }).isDisabled(), true);
     await page.evaluate(() => window.desktop.invoke("providers:configure", { kind: "api", id: "anthropic-api", enabled: true }));
     await page.getByRole("alert").filter({ hasText: "This conversation’s provider is unavailable" }).waitFor({ state: "hidden" });
     await page.getByRole("textbox", { name: "Ask about your document", exact: true }).fill("Keep this draft");
-    await page.getByRole('button',{name:'Model',exact:true}).click();
+    await page.getByRole('combobox',{name:'Model',exact:true}).click();
     const alternative = page.getByRole('option').filter({hasText:'CLI'}).filter({hasNotText:'static fallback'}).first();
     if (await alternative.count()) {
       await alternative.click();
@@ -237,7 +238,7 @@ try {
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
     await page.waitForFunction(() => window.document.querySelectorAll(".document-item").length === 1);
-    await page.getByRole('button',{name:'Model',exact:true}).click();
+    await page.getByRole('combobox',{name:'Model',exact:true}).click();
     await page.getByRole('button',{name:'API keys & provider settings'}).click();
     const keyForm = page.locator('.provider-row').filter({hasText:'OpenAI compatible'});
     await keyForm.getByRole('textbox',{name:'OpenAI compatible API key',exact:true}).fill('local-test-key');
