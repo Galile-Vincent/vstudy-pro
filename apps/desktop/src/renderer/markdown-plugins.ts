@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import type { PluggableList } from 'unified';
 export function useMarkdownPlugins(source: string) {
   const math = /\$|\\\[|\\\(/.test(source);
-  const code = /```|~~~/.test(source);
+  const languages = [...new Set([...source.matchAll(/^(?:```|~~~)([a-z0-9+-]+)/gim)].map(match=>match[1]!.toLowerCase()))].sort().join(',');
   const [plugins,setPlugins] = useState<{remark:PluggableList;rehype:PluggableList}>({remark:[],rehype:[]});
   useEffect(() => {
     let active=true;
-    void Promise.all([math ? import('./math-plugins') : null, code ? import('rehype-highlight') : null]).then(([m,c]) => {
-      if(active) setPlugins({remark:m ? [m.remarkMath] : [],rehype:[...(m ? [m.rehypeKatex] : []),...(c ? [[c.default,{detect:false}]] as PluggableList : [])]});
+    void Promise.all([math ? import('./math-plugins') : null, languages ? import('./highlight-plugin').then(module=>module.highlightPlugin(languages.split(','))) : null]).then(([m,c]) => {
+      if(active) setPlugins({remark:m ? [m.remarkMath] : [],rehype:[...(m ? [m.rehypeKatex] : []),...(c ? [c] : [])]});
     });
     return () => {active=false;};
-  },[math,code]);
+  },[math,languages]);
   return plugins;
 }
