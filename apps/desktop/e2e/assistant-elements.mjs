@@ -6,10 +6,11 @@ import {tmpdir} from 'node:os';
 const directory=await mkdtemp(join(tmpdir(),'vstudy-elements-'));const evidence='/tmp/vstudy-composer-redesign';await mkdir(evidence,{recursive:true});let app;
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});
- const page=await app.firstWindow();page.setDefaultTimeout(20000);const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+ const page=await app.firstWindow();
+ await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();page.setDefaultTimeout(20000);const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.getByText('Workspace connected',{exact:true}).waitFor();
  await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
- await page.getByRole('button',{name:'＋ Import document',exact:true}).click();await page.getByTestId('document-markdown').waitFor();
+ await page.getByTestId('import-document').click();await page.getByTestId('document-markdown').waitFor();
  await page.getByRole('button',{name:'Start a conversation',exact:true}).click();
  const selected=page.getByRole('combobox',{name:'Model',exact:true});const search=page.getByRole('combobox',{name:'Search models'});
  await selected.click();await search.fill('6 gpt');await page.getByRole('option').filter({hasText:'GPT-6.1-Sol'}).first().click();await selected.filter({hasText:'GPT-6.1-Sol'}).waitFor();
@@ -32,7 +33,7 @@ try {
  await page.reload();await page.locator('.document-presentation').waitFor();await page.getByRole('button',{name:'Go to E2E reading document',exact:true}).waitFor();
  const stored=await page.evaluate(id=>window.desktop.invoke('messages:list',{conversationId:id}),conversations[0].id);
  assert.equal(stored.at(-1).parts[0].reasoning,'Reviewing the reported document sections.');assert.equal(stored.at(-1).parts[0].citations[0].id,'s0');assert.equal(stored.at(-1).parts[0].toolCalls[0].result.rendered,true);
- await page.getByRole('button',{name:'New chat',exact:true}).click();await input.waitFor();await input.fill('Please continue ' + 'context '.repeat(1200));await input.press('Enter');
+ await page.getByRole('button',{name:'New Chat',exact:true}).click();await input.waitFor();await input.fill('Please continue ' + 'context '.repeat(1200));await input.press('Enter');
  await page.getByRole('button',{name:'Stop generating',exact:true}).waitFor();await page.locator('[data-role=assistant] strong').waitFor();await page.getByRole('button',{name:'Stop generating',exact:true}).click();
  await page.getByRole('status').filter({hasText:'Stopped. Partial response'}).waitFor();
  await page.getByRole('status').filter({hasText:'Stopped. Partial response'}).scrollIntoViewIfNeeded();

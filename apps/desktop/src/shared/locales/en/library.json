@@ -70,7 +70,7 @@
   "yes": "Yes",
   "clearFilters": "Clear filters",
   "saveFilter": "Save filter",
-  "selected": "{{count}} selected",
+  "selected": "{{formatted}} selected",
   "delete": "Delete",
   "clearSelection": "Clear selection",
   "error": "Couldn’t load your library",
@@ -87,9 +87,9 @@
   "original": "Original",
   "actions": "Document options: {{name}}",
   "loadMore": "Load more documents",
-  "loaded": "{{count}} documents loaded",
+  "loaded": "{{formatted}} documents loaded",
   "undo": "Undo",
-  "deleted": "{{count}} documents deleted · Undo within 30 seconds",
+  "deleted": "{{formatted}} documents deleted · Undo within 30 seconds",
   "moved": "Documents moved · Undo within 30 seconds",
   "open": "Open",
   "tag": "Tag…",
@@ -105,5 +105,9 @@
   "icon_star": "Star",
   "reconvert": "Re-convert",
   "save": "Save",
-  "newTag": "New tag"
+  "newTag": "New tag",
+  "loaded_one": "{{formatted}} document loaded",
+  "loaded_other": "{{formatted}} documents loaded",
+  "deleted_one": "{{formatted}} document deleted · Undo within 30 seconds",
+  "deleted_other": "{{formatted}} documents deleted · Undo within 30 seconds"
 }

@@ -70,7 +70,7 @@
   "yes": "是",
   "clearFilters": "清除篩選",
   "saveFilter": "儲存篩選",
-  "selected": "已選取 {{count}} 份",
+  "selected": "已選取 {{formatted}} 份",
   "delete": "刪除",
   "clearSelection": "取消選取",
   "error": "無法載入文件庫",
@@ -87,9 +87,9 @@
   "original": "原始檔",
   "actions": "文件選項：{{name}}",
   "loadMore": "載入更多文件",
-  "loaded": "已載入 {{count}} 份文件",
+  "loaded": "已載入 {{formatted}} 份文件",
   "undo": "復原",
-  "deleted": "已刪除 {{count}} 份文件，30 秒內可復原",
+  "deleted": "已刪除 {{formatted}} 份文件，30 秒內可復原",
   "moved": "已移動文件，30 秒內可復原",
   "open": "開啟",
   "tag": "加上標籤…",
@@ -105,5 +105,9 @@
   "icon_star": "星號",
   "reconvert": "重新轉換",
   "save": "儲存",
-  "newTag": "新增標籤"
+  "newTag": "新增標籤",
+  "loaded_one": "已載入 {{formatted}} 份文件",
+  "loaded_other": "已載入 {{formatted}} 份文件",
+  "deleted_one": "已刪除 {{formatted}} 份文件，30 秒內可復原",
+  "deleted_other": "已刪除 {{formatted}} 份文件，30 秒內可復原"
 }

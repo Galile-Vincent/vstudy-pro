@@ -13,9 +13,10 @@ let app;
 try {
   app = await electron.launch({ args: [resolve('.'), `--user-data-dir=${directory}`], env: { ...process.env, ELECTRON_RUN_AS_NODE: '', VSTUDY_FAKE_PROVIDER: '1' } });
   const page = await app.firstWindow();
+ await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   await page.getByRole('heading', { name: 'VStudy Pro' }).waitFor();
   await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, resolve(source));
-  await page.getByRole('button', { name: '＋ Import document', exact: true }).click();
+  await page.getByTestId('import-document').click();
   await page.getByTestId('document-markdown').filter({ hasText: 'R12.' }).waitFor({ timeout: 660_000 });
   await page.locator('.pane-toolbar').filter({ hasText: 'Markdown · pdf_md' }).waitFor({ timeout: 660_000 });
   const document = await page.evaluate(async () => (await window.desktop.invoke('documents:list', {}))[0]);

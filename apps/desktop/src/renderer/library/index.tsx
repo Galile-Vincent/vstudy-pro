@@ -255,7 +255,12 @@ export function LibraryView() {
     await run(async () => {
       for (const documentId of targets)
         await desktop.invoke("library:documents:softDelete", { documentId });
-      setNotice(tr("library:deleted", { count: targets.length }));
+      setNotice(
+        tr("library:deleted", {
+          count: targets.length,
+          formatted: format.number(targets.length),
+        }),
+      );
       setUndo(() => async () => {
         for (const documentId of targets)
           await desktop.invoke("library:documents:restore", { documentId });
@@ -523,7 +528,10 @@ export function LibraryView() {
       {selected.length > 0 && (
         <div className="bulk-bar">
           <span role="status">
-            {tr("library:selected", { count: selected.length })}
+            {tr("library:selected", {
+              count: selected.length,
+              formatted: format.number(selected.length),
+            })}
           </span>
           <button
             onClick={async () => {
@@ -854,7 +862,9 @@ export function LibraryView() {
                           </button>
                         )}
                         {d.status === "converting" && (
-                          <progress value={progress[d.id]?.page} max={progress[d.id]?.total}
+                          <progress
+                            value={progress[d.id]?.page}
+                            max={progress[d.id]?.total}
                             aria-label={tr("common:conversion_progress")}
                           />
                         )}
@@ -893,7 +903,10 @@ export function LibraryView() {
         </div>
       )}
       <div className="library-live" aria-live="polite">
-        {tr("library:loaded", { count: items.length })}
+        {tr("library:loaded", {
+          count: items.length,
+          formatted: format.number(items.length),
+        })}
       </div>
       {notice && (
         <div className="library-toast" role="status">

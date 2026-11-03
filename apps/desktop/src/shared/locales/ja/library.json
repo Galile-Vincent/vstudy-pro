@@ -70,7 +70,7 @@
   "yes": "はい",
   "clearFilters": "フィルターを解除",
   "saveFilter": "フィルターを保存",
-  "selected": "{{count}} 件を選択中",
+  "selected": "{{formatted}} 件を選択中",
   "delete": "削除",
   "clearSelection": "選択を解除",
   "error": "ライブラリを読み込めませんでした",
@@ -87,9 +87,9 @@
   "original": "オリジナル",
   "actions": "ドキュメントの操作：{{name}}",
   "loadMore": "さらに読み込む",
-  "loaded": "{{count}} 件を読み込みました",
+  "loaded": "{{formatted}} 件を読み込みました",
   "undo": "元に戻す",
-  "deleted": "{{count}} 件を削除しました。30 秒以内に元に戻せます",
+  "deleted": "{{formatted}} 件を削除しました。30 秒以内に元に戻せます",
   "moved": "移動しました。30 秒以内に元に戻せます",
   "open": "開く",
   "tag": "タグを付ける…",
@@ -105,5 +105,9 @@
   "icon_star": "スター",
   "reconvert": "再変換",
   "save": "保存",
-  "newTag": "新しいタグ"
+  "newTag": "新しいタグ",
+  "loaded_one": "{{formatted}} 件を読み込みました",
+  "loaded_other": "{{formatted}} 件を読み込みました",
+  "deleted_one": "{{formatted}} 件を削除しました。30 秒以内に元に戻せます",
+  "deleted_other": "{{formatted}} 件を削除しました。30 秒以内に元に戻せます"
 }

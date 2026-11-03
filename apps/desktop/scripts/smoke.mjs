@@ -30,6 +30,7 @@ try {
     console.log(JSON.stringify({ result: 'PASS', closeMs: Number(process.env.VSTUDY_SMOKE_CLOSE_MS) }));
   } else {
   const page = await app.firstWindow();
+  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'})));await page.reload();
   await page
     .getByTestId("bridge-status")
     .filter({ hasText: "Workspace connected" })

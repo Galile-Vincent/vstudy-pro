@@ -10,11 +10,12 @@ for(const language of ['en','zh-Hant','ja']) {
  let app;
  try {
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
-  const page=await app.firstWindow();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const page=await app.firstWindow();
+ await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.waitForFunction(lang=>window.document.documentElement.lang===lang,language);
   await page.getByRole('heading',{name:'VStudy Pro'}).waitFor();
   assert.ok((await app.evaluate(({Menu})=>Menu.getApplicationMenu().items.map(i=>i.label))).includes(catalog.file));
-  await page.waitForFunction(()=>!window.document.querySelector('.library button')?.disabled);
+  await page.waitForFunction(()=>!window.document.querySelector('[data-testid=import-document]')?.disabled);
   await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
   await page.getByTestId('import-document').click();
   await page.getByTestId('document-markdown').waitFor();

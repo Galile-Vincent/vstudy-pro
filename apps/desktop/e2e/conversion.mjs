@@ -18,6 +18,7 @@ try {
     env: { ...process.env, ELECTRON_RUN_AS_NODE: "", VSTUDY_LOCALE:"en", VSTUDY_FAKE_PROVIDER: "1" },
   });
   page = await app.firstWindow();
+ await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();
@@ -87,7 +88,7 @@ try {
   await mkdir(join(dirname(imageDocument.markdownPath), "assets"));
   await writeFile(join(dirname(imageDocument.markdownPath), "assets/pixel.png"), Buffer.from(png, "base64"));
   await page.reload();
-  await page.locator(".document-item").filter({ hasText: "images.md" }).click();
+  await page.getByTestId("document-markdown").filter({hasText:"Image rendering"}).waitFor();
   await page.waitForFunction(() => {
     const images = Array.from(window.document.querySelectorAll('[data-testid="document-markdown"] img'));
     return images.length === 2 && images.every((image) => image.complete && image.naturalWidth === 1);

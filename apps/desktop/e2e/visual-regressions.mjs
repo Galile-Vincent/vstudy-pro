@@ -11,6 +11,7 @@ const errors = [];
 const launch = async () => {
   app = await electron.launch({ args: [resolve("."), `--user-data-dir=${join(directory, "user-data")}`], env: { ...process.env, ELECTRON_RUN_AS_NODE: "", VSTUDY_LOCALE:"en", VSTUDY_FAKE_PROVIDER: "1" } });
   page = await app.firstWindow();
+ await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   page.on("pageerror", error => errors.push(error.message));
   page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
   await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();

@@ -11,6 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
+import { useFormat } from "../i18n";
 import { errorText } from "../status";
 import { useNavigate } from "../shell";
 import type { LibraryQuery } from "../../shared/library";
@@ -25,6 +26,7 @@ import {
 import { LibraryDialog, useLibraryPrompt } from "./dialog";
 export function LibrarySidebar() {
   useTranslation();
+  const format = useFormat();
   const [prompt, promptDialog] = useLibraryPrompt();
   const { route, navigate } = useNavigate();
   const [folders, setFolders] = useState<Folder[]>([]),
@@ -140,7 +142,9 @@ export function LibrarySidebar() {
             onClick={() => go({ view }, tr(`library:${view}`))}
           >
             {tr(`library:${view}`)}
-            {counts[view] !== undefined && <small>{counts[view]}</small>}
+            {counts[view] !== undefined && (
+              <small>{format.number(counts[view] ?? 0)}</small>
+            )}
           </button>
         ))}
       </nav>
@@ -319,7 +323,9 @@ export function LibrarySidebar() {
                 <FolderIcon />
               )}
               {f.name}
-              <small>{f.count}</small>
+              <small>
+                {typeof f.count === "number" ? format.number(f.count) : ""}
+              </small>
             </button>
             <button
               aria-label={tr("library:folderActions", { name: f.name })}

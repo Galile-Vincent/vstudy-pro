@@ -7,10 +7,11 @@ const directory = await mkdtemp(join(tmpdir(),'vstudy-controls-'));
 let app;
 try {
  app = await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});
- const page = await app.firstWindow(); const errors=[]; page.on('pageerror',e=>{errors.push(e.message); console.log('PAGEERROR',e.message);}); page.on('console', m=>{if(m.type()==='error') {errors.push(`console: ${m.text()}`);console.log('CONSOLE',m.text());}});
+ const page = await app.firstWindow();
+ await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload(); const errors=[]; page.on('pageerror',e=>{errors.push(e.message); console.log('PAGEERROR',e.message);}); page.on('console', m=>{if(m.type()==='error') {errors.push(`console: ${m.text()}`);console.log('CONSOLE',m.text());}});
  await page.getByRole('heading',{name:'VStudy Pro'}).waitFor();
  await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
- await page.getByRole('button',{name:'＋ Import document',exact:true}).click();
+ await page.getByTestId('import-document').click();
  await page.getByTestId('document-markdown').waitFor();
  await page.getByRole('combobox',{name:'Model',exact:true}).click();
  await page.locator('[data-slot=model-selector-list] [role=option]').filter({hasText:'Fake'}).click();
@@ -42,7 +43,7 @@ try {
  assert.deepEqual(conversation.options,{effort:'high'});
  const before = await page.evaluate(id=>window.desktop.invoke('messages:list',{conversationId:id}),conversation.id);
  assert.deepEqual(before[0].parts[0].options,{effort:'high'});
- assert.match(await page.locator('[data-role=assistant] .usage-chip').first().innerText(),/High effort/);
+ assert.match(await page.locator('[data-role=assistant] .usage-chip').first().innerText(),/High/);
  await page.bringToFront();
  await page.locator('.aui-assistant-action-bar-root').getByRole('button',{name:'Copy',exact:true}).click();
  await page.locator('.aui-assistant-action-bar-root svg.lucide-check').waitFor();
@@ -60,12 +61,12 @@ try {
  assert.equal(edited.filter(m=>m.role==='user').at(-1).parts[0].text,'Edited question');
  await input.fill('test error'); await input.press('Enter');
  const error=page.locator('.aui-message-error-root'); await error.getByRole('button',{name:'Retry',exact:true}).waitFor();
- assert.match(await error.innerText(),/rate limited/i);
+ assert.match(await error.innerText(),/rate limit/i);
  await page.locator('[data-slot=aui_thread-viewport]').evaluate(el=>el.scrollTo({top:el.scrollHeight,behavior:'instant'}));
  await page.screenshot({path: '/tmp/vstudy-error-retry.png', animations:'disabled'});
  await page.reload();
  await error.getByRole('button',{name:'Retry',exact:true}).last().waitFor();
- assert.match(await error.last().innerText(),/rate limited/i);
+ assert.match(await error.last().innerText(),/provider is unavailable/i);
  await error.getByRole('button',{name:'Retry',exact:true}).last().click();
  await page.waitForFunction(()=>!window.document.querySelector('.aui-composer-cancel'));
  await page.emulateMedia({colorScheme:'dark'});

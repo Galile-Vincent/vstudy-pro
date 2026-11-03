@@ -8,10 +8,11 @@ const evidence='/tmp/vstudy-composer-redesign'; await mkdir(evidence,{recursive:
 let app; const shots=[];
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});
- const page=await app.firstWindow();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const page=await app.firstWindow();
+ await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.getByText('Workspace connected',{exact:true}).waitFor();
  await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
- await page.getByRole('button',{name:'＋ Import document',exact:true}).click();await page.getByTestId('document-markdown').waitFor();
+ await page.getByTestId('import-document').click();await page.getByTestId('document-markdown').waitFor();
  await page.getByRole('button',{name:'Start a conversation',exact:true}).click();
  const model=page.getByRole('combobox',{name:'Model',exact:true}); const search=page.getByRole('combobox',{name:'Search models'});
  const close=async()=>{await page.keyboard.press('Escape');await page.locator('[data-slot=model-selector-content]').waitFor({state:'hidden'});};

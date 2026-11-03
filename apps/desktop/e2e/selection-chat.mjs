@@ -23,6 +23,7 @@ try {
     },
   });
   page = await app.firstWindow();
+ await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   const errors = [];
   page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
   page.on("pageerror", (error) => errors.push(error.message));
@@ -232,10 +233,10 @@ try {
     await page.locator(".chat-start").waitFor();
     page.once("dialog", dialog => dialog.dismiss());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
-    assert.equal(await page.locator(".document-item").count(), 2, "cancel keeps document");
+    assert.equal(await page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length), 2, "cancel keeps document");
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
-    await page.waitForFunction(() => window.document.querySelectorAll(".document-item").length === 1);
+    await page.waitForFunction(async()=>(await window.desktop.invoke("documents:list",{})).length === 1);
     await page.getByRole('combobox',{name:'Model',exact:true}).click();
     await page.getByRole('button',{name:'API keys & provider settings'}).click();
     const keyForm = page.locator('.provider-row').filter({hasText:'OpenAI compatible'});
