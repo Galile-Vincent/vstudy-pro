@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "package": "pnpm build && electron-builder --mac dmg dir",
-    "smoke": "pnpm build && node scripts/smoke.mjs"
+    "smoke": "pnpm build && node scripts/smoke.mjs",
+    "package:verify": "npx --no-install @electron/fuses read --app \"release/mac-arm64/VStudy Pro.app\" && python3 scripts/verify-packaged.py"
   },
   "dependencies": {
     "@assistant-ui/generative-ui": "0.0.8",

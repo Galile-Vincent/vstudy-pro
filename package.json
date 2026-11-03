@@ -12,6 +12,7 @@
     "typecheck": "pnpm --filter @vstudy/desktop typecheck",
     "package": "pnpm --filter @vstudy/desktop package",
     "lint": "pnpm --filter @vstudy/desktop lint",
-    "smoke": "pnpm --filter @vstudy/desktop smoke"
+    "smoke": "pnpm --filter @vstudy/desktop smoke",
+    "security:check": "node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test"
   }
 }
