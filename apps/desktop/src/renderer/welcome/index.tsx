@@ -58,11 +58,15 @@ function Demo({ source, playing, reduced, side }: { source: string; playing: boo
   useEffect(() => {
     const update = () => {
       const target = stage.current?.querySelector('.demo-reader-content [data-demo-depth="2"]');
-      if (target instanceof HTMLElement) stage.current?.style.setProperty('--demo-jump', `${target.offsetTop}px`);
+      const content = stage.current?.querySelector('.demo-reader-content');
+      const clip = stage.current?.querySelector('.w-reader-clip');
+      if (target instanceof HTMLElement && content && clip) stage.current?.style.setProperty('--demo-jump', `${target.getBoundingClientRect().top-content.getBoundingClientRect().top+parseFloat(getComputedStyle(clip).paddingTop)}px`);
     };
     update();
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update);
     if (stage.current) observer?.observe(stage.current);
+    const content=stage.current?.querySelector('.demo-reader-content');
+    if(content) observer?.observe(content);
     return () => observer?.disconnect();
   }, [source]);
   useEffect(() => {

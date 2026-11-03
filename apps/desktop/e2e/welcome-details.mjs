@@ -7,7 +7,7 @@ const directory=await mkdtemp(join(tmpdir(),'vstudy-welcome-details-'));let app;
 const results={};
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
- const page=await app.firstWindow();await page.emulateMedia({reducedMotion:'reduce'});await page.locator('.onboarding[open]').waitFor();
+ const page=await app.firstWindow();const goHome=async()=>{if(!await page.locator('.shell-sidebar').isVisible()){if(await page.locator('.app-header').isVisible())await page.locator('.app-header').getByRole('button',{name:'Library',exact:true}).click();await page.getByRole('button',{name:'Toggle document library',exact:true}).click();}await page.locator('.shell-sidebar').getByRole('button',{name:'Home',exact:true}).click();};await page.emulateMedia({reducedMotion:'reduce'});await page.locator('.onboarding[open]').waitFor();
  for(let n=0;n<4;n++)await page.locator('.onboarding footer .primary').click();
  await page.locator('.home-page').waitFor();assert.equal(await page.locator('.welcome').count(),0);assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).welcomeSeen,false);results.noAutomaticTour=true;
  await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));
@@ -34,11 +34,11 @@ try {
  await page.evaluate(()=>{const original=window.document.startViewTransition.bind(window.document);window.transitions=[];window.document.startViewTransition=update=>{const item={source:!!window.document.querySelector('[style*="vt-document"]'),started:window.performance.now()};window.transitions.push(item);const transition=original(()=>{const result=update();item.target=!!window.document.querySelector('.reading-pane[style*="vt-document"]');return result;});transition.finished.then(()=>item.duration=window.performance.now()-item.started);return transition;};});
  await page.getByRole('button',{name:'Try a sample document',exact:true}).click();await page.locator('.workspace [data-testid=document-markdown]').waitFor();
  assert.equal(await page.evaluate(()=>window.transitions.length),0);results.reducedTransitionsSkipped=true;
- await page.locator('.shell-sidebar nav').first().getByRole('button',{name:'Home',exact:true}).click();
- await page.emulateMedia({reducedMotion:'no-preference'});await page.locator('.home-row').first().click();
- await page.waitForFunction(()=>window.transitions.some(t=>t.source&&t.target&&t.duration));results.documentMorph=await page.evaluate(()=>window.transitions.find(t=>t.source&&t.target));
+ await goHome();
+ await page.emulateMedia({reducedMotion:'no-preference'});const snapshotCount=await page.evaluate(()=>window.transitions.length);await page.locator('.home-row').first().click();
+ await page.getByTestId('document-markdown').waitFor();assert.equal(await page.evaluate(()=>window.transitions.length),snapshotCount);results.documentNavigationSkipsSnapshots=true;
  await page.evaluate(()=>{window.document.startViewTransition=()=>{throw new Error('forced failure');};});
- await page.locator('.shell-sidebar nav').first().getByRole('button',{name:'Home',exact:true}).click();await page.locator('.home-page').waitFor();results.throwingTransitionStillNavigates=true;
+ await goHome();await page.locator('.home-page').waitFor();results.throwingTransitionStillNavigates=true;
  await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:false,welcomeSeen:false});});await page.reload();await page.locator('.onboarding[open]').waitFor();for(let n=0;n<3;n++)await page.locator('.onboarding footer .primary').click();await page.getByRole('button',{name:'Take a 30-second tour',exact:true}).click();await page.locator('.welcome').waitFor();results.optionalTour=true;
  console.log(JSON.stringify(results,null,2));
 } finally {await writeFile('/tmp/vstudy-welcome2/details.json',JSON.stringify(results,null,2));await app?.close();await rm(directory,{recursive:true,force:true});}

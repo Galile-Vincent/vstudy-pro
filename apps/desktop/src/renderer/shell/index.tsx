@@ -69,6 +69,7 @@ export function AppShell({
     return () => media.removeEventListener('change', update);
   }, [route.view]);
   useEffect(() => {
+    if (route.view === 'welcome') return;
     const frame = requestAnimationFrame(() => { document.getElementById("shell-content")?.focus(); });
     return () => cancelAnimationFrame(frame);
   }, [route.view, route.documentId]);
