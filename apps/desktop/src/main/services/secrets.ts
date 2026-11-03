@@ -42,35 +42,43 @@ export function createSecretStore(file: string, encryption: Encryption, timeoutM
     finally { clearTimeout(timer); }
   }
   const unlocked = new Map<ProviderId, string>();
+  const generations = new Map<ProviderId, number>();
+  const bump = (id: ProviderId) => { const next = (generations.get(id) ?? 0) + 1; generations.set(id, next); unlocked.delete(id); return next; };
   return {
     async set(providerId: ProviderId, key: string): Promise<void> {
       providerIdSchema.parse(providerId);
       z.string().min(1).max(16384).parse(key);
+      const generation = bump(providerId);
       if (!await access(() => encryption.isAsyncEncryptionAvailable()))
         throw new Error("errors.keychain_unavailable");
+      if (generations.get(providerId) !== generation) return;
       const ciphertext = await access(() => encryption.encryptStringAsync(key));
+      if (generations.get(providerId) !== generation) return;
       write({ ...read(), [providerId]: ciphertext.toString("base64") });
       unlocked.set(providerId, key);
     },
-    useInSession(providerId: ProviderId, key: string): void { unlocked.set(providerIdSchema.parse(providerId), z.string().min(1).max(16384).parse(key)); },
+    useInSession(providerId: ProviderId, key: string): void { bump(providerId); unlocked.set(providerIdSchema.parse(providerId), z.string().min(1).max(16384).parse(key)); },
     isUnlocked(providerId: ProviderId): boolean { return unlocked.has(providerId); },
     has(providerId: ProviderId): boolean {
       return Object.hasOwn(read(), providerIdSchema.parse(providerId));
     },
     delete(providerId: ProviderId): void {
-      unlocked.delete(providerId);
+      bump(providerId);
       const values = read();
       delete values[providerIdSchema.parse(providerId)];
       write(values);
     },
     async getInMainOnly(providerId: ProviderId): Promise<string | null> {
       if (unlocked.has(providerId)) return unlocked.get(providerId)!;
+      const generation = generations.get(providerId) ?? 0;
+      const current = () => (generations.get(providerId) ?? 0) === generation;
       const value = read()[providerIdSchema.parse(providerId)];
       if (value === undefined) return null;
       if (!await access(() => encryption.isAsyncEncryptionAvailable()))
         throw new Error("errors.keychain_unavailable");
+      if (!current()) return null;
       const ciphertext = Buffer.from(value, "base64");
-      try { const result = (await access(() => encryption.decryptStringAsync(ciphertext))).result; unlocked.set(providerId, result); return result; } finally { ciphertext.fill(0); }
+      try { const result = (await access(() => encryption.decryptStringAsync(ciphertext))).result; if (!current()) return null; unlocked.set(providerId, result); return result; } finally { ciphertext.fill(0); }
     },
   };
 }
