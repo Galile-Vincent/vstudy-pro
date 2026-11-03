@@ -63,3 +63,5 @@ spctl --assess --type execute --verbose 'apps/desktop/release/mac-arm64/VStudy P
 ```
 
 Verify first-open Gatekeeper behavior on a quarantined copy on a clean Mac before distributing. An ad-hoc build passing smoke checks does not prove Developer ID trust or notarization.
+
+An opt-in AI document-improvement backend and isolated reader panel are available for integration. It creates `content.ai.md` beside the original, with page-level fallback, cost estimates and provenance. The panel is not yet mounted in the reader. See [AI improvement design and remaining limits](docs/AI_PARSE.md) and [the real CH2 evaluation](docs/ai-parse-evaluation.md), including the current admission-cap billing limitation.

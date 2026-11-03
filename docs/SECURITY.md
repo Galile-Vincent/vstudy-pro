@@ -217,3 +217,18 @@ E2E details:
 `assistant-elements.mjs` initially timed out while the updated Electron executable was being installed; the retry passed. `selection-chat.mjs` initially waited on the newly required external-link confirmation; its test now checks that confirmation and restores the native dialog function, and the final complete run passed. `design1.mjs` failed with “Execution context was destroyed, most likely because of a navigation”. `welcome-performance.mjs` failed its timing/long-frame assertions (as recorded in that snapshot). Neither failure was represented as a pass in that snapshot. Current repaired-suite results, including retained Welcome first-attempt frame failures and permitted retries, are in the final implementation response.
 
 Not proven: resistance to arbitrary same-user malware, model obedience to language instructions, exhaustive malformed-archive fuzzing, least-privilege converter filesystem access, signed hardened-runtime execution with the empty entitlements file, notarization/stapling, Gatekeeper, and complete Python-license/SBOM coverage. A signed release must close or explicitly accept these release risks. Source references: [Electron fuses](https://www.electronjs.org/docs/latest/tutorial/fuses), [ASAR integrity](https://www.electronjs.org/docs/latest/tutorial/asar-integrity).
+
+## AI document improvement
+
+Explicitly started AI improvement sends selected PDF page PNGs and parser Markdown (or text-only Markdown for other formats) to the chosen provider. These are untrusted data, with separate system instructions and no tools. Main rejects raw HTML, images, unsafe links, oversized output and pages outside conservative token-coverage thresholds. Originals remain immutable; rejected pages retain original text. Rendering runs in a bounded, cancellable converter subprocess with network denied on macOS. API calls and CLI launches enter the existing session egress inventory. CLI provider-managed traffic retains the transport limits above.
+
+The token gate does not verify equation operators, semantics or annotations absent from the PDF text layer. Cost estimates and admission/abort caps cannot guarantee an external provider's final bill. The reader panel remains unmounted pending integration. See [the design and precise limitations](AI_PARSE.md) and [private-document evaluation results](ai-parse-evaluation.md).
+
+| New IPC channel | Request / response validator | Sender | Requests/minute | Request cap | Side effect |
+|---|---|---|---:|---|---|
+| `aiParse:estimate` | shared/ai-parse contract | M | 12 | 512 KiB | Local estimate; model discovery |
+| `aiParse:start` | shared/ai-parse contract | M; one live owner per document | 12 | 512 KiB | Render, provider egress, usage and second-version writes |
+| `aiParse:status` | shared/ai-parse contract | M | 600 | 512 KiB | Read job metadata |
+| `aiParse:cancel` | shared/ai-parse contract | M plus job owner | 600 | 512 KiB | Abort child processes and preserve partial state |
+| `aiParse:use` | shared/ai-parse contract | M | 12 | 512 KiB | Switch active version; reindex FTS |
+| `aiParse:discard` | shared/ai-parse contract | M | 12 | 512 KiB | Revert and remove the AI output/job |

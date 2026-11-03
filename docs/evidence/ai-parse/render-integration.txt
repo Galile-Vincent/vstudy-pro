@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/projects/vstudy-pro/apps/desktop
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  07:57:04
+   Duration  428ms (transform 52ms, setup 0ms, import 69ms, tests 299ms, environment 0ms)
+

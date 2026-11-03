@@ -1,0 +1,70 @@
+
+> vstudy-pro@ e2e /Users/vc/.t3/projects/vstudy-pro
+> node apps/desktop/scripts/e2e.mjs
+
+PASS    a11y-regressions.mjs (23s)
+PASS    assistant-elements.mjs (8s)
+FAIL    chat-controls.mjs (2s)
+SKIP    codex-chat.mjs (0s)
+FAIL    composer-visual-qa.mjs (18s)
+PASS    conversion.mjs (9s)
+PASS    converter-lifecycle.mjs (69s)
+FAIL    design1.mjs (75s)
+FAIL    final-qa.mjs (31s)
+FAIL    home-onboarding.mjs (3s)
+FAIL    i18n.mjs (33s)
+FAIL    library-perf.mjs (40s)
+PASS    library.mjs (20s)
+PASS    ownership-shutdown.mjs (1s)
+PASS    packaged-smoke.mjs (6s)
+PASS    pdf-reader.mjs (8s)
+FAIL    privacy-settings.mjs (11s)
+PASS    security-audit.mjs (1s)
+PASS    security-delete-data.mjs (1s)
+PASS    selection-chat.mjs (7s)
+FAIL    ui2-design.mjs (96s)
+PASS    visual-regressions.mjs (4s)
+PASS    welcome-axe.mjs (25s)
+PASS    welcome-details.mjs (7s)
+PASS    welcome-layout.mjs (61s)
+Retrying welcome-performance once; first attempt retained
+PASS    welcome-performance.mjs (65s)
+PASS    welcome-pseudo.mjs (3s)
+PASS    welcome-supplement.mjs (117s)
+PASS    welcome-trace.mjs (3s)
+PASS    welcome.mjs (91s)
+┌─────────┬────────────────────────────┬────────┬─────────┬──────┐
+│ (index) │ script                     │ status │ seconds │ code │
+├─────────┼────────────────────────────┼────────┼─────────┼──────┤
+│ 0       │ 'a11y-regressions.mjs'     │ 'PASS' │ 23      │ 0    │
+│ 1       │ 'assistant-elements.mjs'   │ 'PASS' │ 8       │ 0    │
+│ 2       │ 'chat-controls.mjs'        │ 'FAIL' │ 2       │ 1    │
+│ 3       │ 'codex-chat.mjs'           │ 'SKIP' │ 0       │ 0    │
+│ 4       │ 'composer-visual-qa.mjs'   │ 'FAIL' │ 18      │ 1    │
+│ 5       │ 'conversion.mjs'           │ 'PASS' │ 9       │ 0    │
+│ 6       │ 'converter-lifecycle.mjs'  │ 'PASS' │ 69      │ 0    │
+│ 7       │ 'design1.mjs'              │ 'FAIL' │ 75      │ 1    │
+│ 8       │ 'final-qa.mjs'             │ 'FAIL' │ 31      │ 1    │
+│ 9       │ 'home-onboarding.mjs'      │ 'FAIL' │ 3       │ 1    │
+│ 10      │ 'i18n.mjs'                 │ 'FAIL' │ 33      │ 1    │
+│ 11      │ 'library-perf.mjs'         │ 'FAIL' │ 40      │ 1    │
+│ 12      │ 'library.mjs'              │ 'PASS' │ 20      │ 0    │
+│ 13      │ 'ownership-shutdown.mjs'   │ 'PASS' │ 1       │ 0    │
+│ 14      │ 'packaged-smoke.mjs'       │ 'PASS' │ 6       │ 0    │
+│ 15      │ 'pdf-reader.mjs'           │ 'PASS' │ 8       │ 0    │
+│ 16      │ 'privacy-settings.mjs'     │ 'FAIL' │ 11      │ 1    │
+│ 17      │ 'security-audit.mjs'       │ 'PASS' │ 1       │ 0    │
+│ 18      │ 'security-delete-data.mjs' │ 'PASS' │ 1       │ 0    │
+│ 19      │ 'selection-chat.mjs'       │ 'PASS' │ 7       │ 0    │
+│ 20      │ 'ui2-design.mjs'           │ 'FAIL' │ 96      │ 1    │
+│ 21      │ 'visual-regressions.mjs'   │ 'PASS' │ 4       │ 0    │
+│ 22      │ 'welcome-axe.mjs'          │ 'PASS' │ 25      │ 0    │
+│ 23      │ 'welcome-details.mjs'      │ 'PASS' │ 7       │ 0    │
+│ 24      │ 'welcome-layout.mjs'       │ 'PASS' │ 61      │ 0    │
+│ 25      │ 'welcome-performance.mjs'  │ 'PASS' │ 65      │ 0    │
+│ 26      │ 'welcome-pseudo.mjs'       │ 'PASS' │ 3       │ 0    │
+│ 27      │ 'welcome-supplement.mjs'   │ 'PASS' │ 117     │ 0    │
+│ 28      │ 'welcome-trace.mjs'        │ 'PASS' │ 3       │ 0    │
+│ 29      │ 'welcome.mjs'              │ 'PASS' │ 91      │ 0    │
+└─────────┴────────────────────────────┴────────┴─────────┴──────┘
+ ELIFECYCLE  Command failed with exit code 1.
