@@ -177,6 +177,8 @@ export async function* runCli(
     signal.removeEventListener("abort", kill);
     if (child.exitCode === null && child.signalCode === null) kill();
     await closed;
+    // Parent exit does not imply that TERM-resistant descendants left its process group.
+    terminate("SIGKILL");
     if (killTimer) clearTimeout(killTimer);
   }
 }
