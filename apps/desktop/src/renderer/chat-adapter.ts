@@ -1,4 +1,5 @@
 import type { ChatModelAdapter } from "@assistant-ui/react";
+import { modelOptionsSchema, selectionSchema } from "../shared";
 import type { Usage, ChatRequest, ChatEvent, DesktopApi } from "../shared";
 export type ChatContext = Omit<ChatRequest, "requestId" | "userMessage">;
 export function createChatAdapter(
@@ -6,12 +7,23 @@ export function createChatAdapter(
   context: () => Promise<ChatContext>,
   started: (messageId: string) => void = () => {},
 ) {
+  const contexts = new Map<string, ChatContext>();
   const active = new Set<() => void>();
   let generation = 0;
   const adapter: ChatModelAdapter = {
     async *run({ messages, abortSignal }) {
       const runGeneration = generation;
-      const details = await context();
+      const user = messages.filter(m => m.role === 'user').at(-1);
+      const turnId = String(user?.metadata?.custom?.turnId ?? user?.id ?? crypto.randomUUID());
+      const details = contexts.get(turnId) ?? await context();
+      const saved = user?.metadata?.custom;
+      if (saved?.turnId) {
+        const selection = selectionSchema.safeParse(saved.selection);
+        const options = modelOptionsSchema.safeParse(saved.options);
+        if (selection.success) details.selection = selection.data;
+        if (options.success) details.options = options.data;
+      }
+      contexts.set(turnId, details);
       if (abortSignal.aborted || runGeneration !== generation) return;
       const requestId = crypto.randomUUID() as ChatRequest["requestId"];
       const userMessage =
@@ -52,7 +64,7 @@ export function createChatAdapter(
         }
         // Main may emit the entire response before its start acknowledgement resolves.
         void bridge
-          .invoke("chat:start", { ...details, requestId, userMessage })
+          .invoke("chat:start", { ...details, requestId, userMessage, turnId, contextTurnIds: messages.filter(m => m.role === "user").slice(0, -1).map(m => String(m.metadata?.custom?.turnId ?? m.id)) })
           .catch((error) =>
             push({
               type: "error",
@@ -75,7 +87,7 @@ export function createChatAdapter(
           if (event.type === "done") return;
           if (event.type === "usage") { usage = event.usage; window.dispatchEvent(new Event("usage-updated")); }
           else text += event.text;
-          yield { content: [{ type: "text", text }], ...(usage ? { metadata: { custom: { usage } } } : {}) };
+          yield { content: [{ type: "text", text }], ...(usage ? { metadata: { custom: { usage, modelId: details.modelId, options: details.options } } } : {}) };
         }
       } finally {
         unsubscribe();

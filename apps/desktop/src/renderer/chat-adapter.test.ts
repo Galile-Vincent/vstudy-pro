@@ -112,3 +112,19 @@ it("drops queued deltas even if done was already queued when aborted", async () 
   test.controller.abort();
   expect(await test.stream.next()).toEqual({ value: undefined, done: true });
 });
+it('retry and regenerate reuse the original selection and options with a fresh request ID', async () => {
+  const original = { ...context, options: { reasoningEffort:'ultra' }, selection: { documentId:context.documentId, startOffset:0, endOffset:4, text:'text', headingPath:[] } } as ChatContext;
+  let current = original;
+  let listener: (event: ChatEvent) => void = () => {};
+  const invoke = vi.fn(async () => { listener({type:'done'}); return {ok:true}; });
+  const connection = createChatAdapter({ invoke, onChatEvent: (_id: string, cb: typeof listener) => { listener=cb; return () => {}; } } as unknown as DesktopApi, async () => current);
+  const options = { messages:[{id:'turn',role:'user',content:[{type:'text',text:'Explain'}]}],abortSignal:new AbortController().signal } as unknown as ChatModelRunOptions;
+  for await (const _value of connection.adapter.run(options) as AsyncGenerator) { void _value; }
+  current = { ...context, options:{reasoningEffort:'low'} };
+  for await (const _value of connection.adapter.run(options) as AsyncGenerator) { void _value; }
+  const first = invoke.mock.calls[0] as unknown as [string,Record<string,unknown>];
+  const second = invoke.mock.calls[1] as unknown as [string,Record<string,unknown>];
+  expect(first).toEqual(['chat:start',{...original,userMessage:'Explain',turnId:'turn',contextTurnIds:[],requestId:expect.any(String)}]);
+  expect(second).toEqual(['chat:start',{...original,userMessage:'Explain',turnId:'turn',contextTurnIds:[],requestId:expect.any(String)}]);
+  expect(first[1].requestId).not.toBe(second[1].requestId);
+});

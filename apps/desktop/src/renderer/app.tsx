@@ -159,7 +159,8 @@ export function App() {
   }, [conversation?.id, report]);
   const saveSettings = async (next: Settings) => {
     try {
-      const saved = await desktop.invoke("settings:set", next);
+      const latest = await desktop.invoke("settings:get", {});
+      const saved = await desktop.invoke("settings:set", { ...next, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels });
       setSettings(saved);
     } catch (error) {
       report(error);
@@ -183,6 +184,7 @@ export function App() {
   };
   const importing = useRef(false);
   const importDocument = async (paths?: string[]) => {
+    if (!connected) { setNotice("Workspace is still connecting. Try importing again in a moment."); return; }
     if (importing.current) return;
     importing.current = true;
     setBusy(true);
@@ -344,7 +346,7 @@ export function App() {
           <div className="empty-symbol">▤</div>
           <h3>Your next idea starts here</h3>
           <p>Import a document to read, select, and ask questions.</p>
-          <button onClick={() => void importDocument()} disabled={busy}>
+          <button onClick={() => void importDocument()} disabled={busy || !connected}>
             Import document
           </button>
           <small className="muted">
@@ -365,7 +367,7 @@ export function App() {
           <h3>Couldn’t prepare this document</h3>
           <p>{doc.error}</p>
           <button
-            disabled={busy}
+            disabled={busy || !connected}
             onClick={() => {
               setBusy(true);
               void desktop
@@ -481,7 +483,7 @@ export function App() {
             </div>
             <button
               className="import-button"
-              disabled={busy}
+              disabled={busy || !connected}
               onClick={() => void importDocument()}
             >
               ＋ Import document

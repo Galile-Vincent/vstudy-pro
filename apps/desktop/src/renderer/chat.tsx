@@ -1,3 +1,5 @@
+import { ModelPicker, ModelOptions } from "./model-picker";
+export { ModelPicker } from "./model-picker";
 import { MessageUsage } from "./usage/chip";
 import { UsageMeter, useUsage, useBudgetGuard } from "./usage/meter";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -7,6 +9,7 @@ import {
   ThreadPrimitive,
   MessagePrimitive,
   ErrorPrimitive,
+  ActionBarPrimitive,
   useLocalRuntime,
   useAuiState,
 } from "@assistant-ui/react";
@@ -15,11 +18,14 @@ import { ReplyMarkdown } from "./markdown";
 import { plainSelection } from "./selection-preview";
 import { desktop } from "./bridge";
 import { createChatAdapter } from "./chat-adapter";
-import { providerName, type Providers } from "./providers";
+import { type Providers } from "./providers";
 
 function ChatMessage({ selections, statuses, subscription }: { subscription: boolean; selections: Map<string, Selection>; statuses: Map<string, string> }) {
   const id = useAuiState((s) => s.message.id);
   const selected = selections.get(id);
+  const copied = useAuiState(s => s.message.isCopied);
+  const editing = useAuiState(s => s.message.composer.isEditing);
+  const running = useAuiState(s => s.message.status?.type === "running");
   const role = useAuiState((s) => s.message.role);
   return (
     <MessagePrimitive.Root className={`message ${role}`}>
@@ -27,14 +33,27 @@ function ChatMessage({ selections, statuses, subscription }: { subscription: boo
         {role === "user" ? "You" : "Assistant"}
       </div>
       {selected && <SelectionPreview selection={selected} />}
-      <div className="message-text">
+      {editing ? <ComposerPrimitive.Root className="edit-composer">
+        <ComposerPrimitive.Input aria-label="Edit message" />
+        <ComposerPrimitive.Cancel>Cancel edit</ComposerPrimitive.Cancel>
+        <ComposerPrimitive.Send>Save & resend</ComposerPrimitive.Send>
+      </ComposerPrimitive.Root> : <div className="message-text">
         <MessagePrimitive.Parts components={role === "assistant" ? { Text: AssistantText } : undefined} />
-      </div>
-      {role === "assistant" && <MessageUsage subscription={subscription} />}
+      </div>}
+      {role === "user" && !editing && <ActionBarPrimitive.Root className="message-actions"><ActionBarPrimitive.Edit>Edit</ActionBarPrimitive.Edit></ActionBarPrimitive.Root>}
+      {role === "assistant" && <>
+        {running && <div role="status" className="thinking">Thinking<span aria-hidden> ● ● ●</span></div>}
+        <MessageUsage subscription={subscription} />
+        <ActionBarPrimitive.Root className="message-actions" hideWhenRunning>
+          <ActionBarPrimitive.Copy>{copied ? 'Copied' : 'Copy'}</ActionBarPrimitive.Copy>
+          <ActionBarPrimitive.Reload>Regenerate</ActionBarPrimitive.Reload>
+        </ActionBarPrimitive.Root>
+      </>}
       {statuses.get(id) && <p role="status">Response {statuses.get(id)}. This turn is excluded from future context.</p>}
-      <ErrorPrimitive.Root className="chat-error">
+      <MessagePrimitive.Error><ErrorPrimitive.Root className="chat-error">
         <ErrorPrimitive.Message />
-      </ErrorPrimitive.Root>
+        <ActionBarPrimitive.Reload>Retry</ActionBarPrimitive.Reload>
+      </ErrorPrimitive.Root></MessagePrimitive.Error>
     </MessagePrimitive.Root>
   );
 }
@@ -63,12 +82,15 @@ export function Chat({
   onSettings: () => void;
   onProvidersChanged: () => Promise<void>;
 }) {
+  const [options, setOptions] = useState<Record<string,string|boolean>>(conversation.options ?? {});
+  const declared = providers.find(p => p.config.id === conversation.providerId)?.models.find(m => m.id === conversation.modelId)?.options ?? [];
+  const effectiveOptions = Object.fromEntries(declared.map(o => [o.id, options[o.id] ?? o.default]));
   const usage = useUsage(conversation.id);
   const budget = useBudgetGuard(usage.data, conversation.id, draft);
   const available = providers.find(p => p.config.id === conversation.providerId);
   const unavailable = !available?.config.enabled || !available.availability.available;
   const current = useRef({ conversation, selection, onClearSelection });
-  current.current = { conversation, selection, onClearSelection };
+  current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, onClearSelection };
   const connection = useMemo(
     () =>
       createChatAdapter(
@@ -80,6 +102,7 @@ export function Chat({
             documentId: c.documentId,
             providerId: c.providerId,
             modelId: c.modelId,
+            options: c.options,
             ...(s ? { selection: s } : {}),
           };
         },
@@ -97,7 +120,7 @@ export function Chat({
       role: m.role,
       content: m.parts.map(p => ({ type: "text" as const, text: p.text })),
       createdAt: new Date(m.createdAt),
-      metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage } },
+      metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage, modelId: m.parts[0]?.modelId, options: m.parts[0]?.options, selection: m.parts[0]?.selection, turnId: m.parts[0]?.turnId } },
     })),
   });
   useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
@@ -112,12 +135,15 @@ export function Chat({
               <div className="empty-symbol">✦</div>
               <h3>Make room for a question</h3>
               <p>Select a passage, or ask about the whole document.</p>
+              <ThreadPrimitive.Suggestion prompt="Summarize this document" method="replace">Summarize this document</ThreadPrimitive.Suggestion>
+              <ThreadPrimitive.Suggestion prompt="Explain the selected passage" method="replace">Explain the selected passage</ThreadPrimitive.Suggestion>
             </div>
           </ThreadPrimitive.Empty>
           <ThreadPrimitive.Messages>
             {() => <ChatMessage subscription={conversation.providerId.endsWith("-cli")} selections={selections.current} statuses={statuses} />}
           </ThreadPrimitive.Messages>
         </ThreadPrimitive.Viewport>
+        <ThreadPrimitive.ScrollToBottom className="scroll-bottom" aria-label="Scroll to bottom">↓ Latest</ThreadPrimitive.ScrollToBottom>
         {unavailable && <p role="alert">This conversation’s provider is unavailable. Add an API key or enable it in Settings.</p>}
         <ComposerPrimitive.Root
           className="composer"
@@ -135,12 +161,7 @@ export function Chat({
               </button>
             </div>
           )}
-          <ComposerPrimitive.Input
-            aria-label="Ask about your document"
-            placeholder="Ask about your document…"
-            rows={2}
-
-          />
+          <ChatComposerInput />
           <div className="composer-footer">
             <ModelPicker
               providers={providers}
@@ -149,6 +170,7 @@ export function Chat({
               onSettings={onSettings}
               onProvidersChanged={onProvidersChanged}
             />
+            <ModelOptions providers={providers} model={model} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />
             <div className="row">
               <ComposerPrimitive.Cancel className="stop-button">
                 Stop
@@ -176,129 +198,6 @@ export function Chat({
     </AssistantRuntimeProvider>
   );
 }
-export function ModelPicker({
-  providers,
-  model,
-  onModel,
-  onSettings,
-  onProvidersChanged,
-}: {
-  providers: Providers;
-  model: string;
-  onModel: (value: string) => void;
-  onSettings: () => void;
-  onProvidersChanged: () => Promise<void>;
-}) {
-  const [adding, setAdding] = useState(false),
-    [providerId, setProviderId] = useState<
-      "openai-api" | "anthropic-api" | "openai-compatible"
-    >("openai-api"),
-    [key, setKey] = useState(""),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
-  const save = async () => {
-    setBusy(true);
-    setError("");
-    try {
-      await desktop.invoke("secrets:set", { providerId, key });
-      setKey("");
-      await onProvidersChanged();
-      setAdding(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not save key");
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <div className="model-picker">
-      <select
-        aria-label="Model"
-        value={model}
-        onChange={(e) => onModel(e.target.value)}
-      >
-        <option value="" disabled>
-          Choose a model
-        </option>
-        {model && !providers.some(p => p.models.some(m => `${p.config.id}/${m.id}` === model)) && <option value={model}>{model.slice(model.indexOf("/") + 1)}</option>}
-        {providers.map((p) => (
-          <optgroup
-            key={p.config.id}
-            label={`${providerName[p.config.id]}${p.availability.available ? "" : ` · ${p.availability.reason}`}`}
-          >
-            {p.models.map((m) => (
-              <option
-                disabled={!p.config.enabled || !p.availability.available}
-                key={m.id}
-                value={`${p.config.id}/${m.id}`}
-              >
-                {m.name}
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
-      <button
-        type="button"
-        className="text-button"
-        onClick={() => setAdding(!adding)}
-      >
-        Add API key
-      </button>
-      {adding && (
-        <div className="inline-key" role="group" aria-label="Add API key">
-          <div className="row">
-            <strong>Add API key</strong>
-            <button
-              type="button"
-              aria-label="Close key form"
-              onClick={() => {
-                setAdding(false);
-                setKey("");
-              }}
-            >
-              ×
-            </button>
-          </div>
-          <select
-            aria-label="Key provider"
-            value={providerId}
-            onChange={(e) => setProviderId(e.target.value as typeof providerId)}
-          >
-            {providers
-              .filter((p) => p.config.kind !== "cli")
-              .map((p) => (
-                <option key={p.config.id} value={p.config.id}>
-                  {providerName[p.config.id]}
-                </option>
-              ))}
-          </select>
-          <input
-            aria-label="API key"
-            type="password"
-            autoComplete="off"
-            placeholder="Enter API key"
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-          />
-          <div className="row">
-            <button
-              type="button"
-              disabled={busy || !key.trim()}
-              onClick={() => void save()}
-            >
-              Save key
-            </button>
-            <button type="button" className="text-button" onClick={onSettings}>
-              All provider settings
-            </button>
-          </div>
-          {error && <p role="alert">{error}</p>}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function AssistantText() {
   const text = useAuiState(s => s.message.content.filter(p => p.type === "text").map(p => p.text).join("\n"));
@@ -307,4 +206,12 @@ function AssistantText() {
 export function SelectionPreview({ selection }: { selection: Selection }) {
   const plain = plainSelection(selection.text.replace(/^#{1,6} .*\n?/, ""));
   return <details className="selection-preview"><summary><strong>{selection.headingPath.join(" › ") || "Selected passage"}</strong><span>{plain.slice(0, 160)}{plain.length > 160 ? "…" : ""}</span></summary><div>{plain}</div></details>;
+}
+
+export function ChatComposerInput() {
+  const composing = useRef(false);
+  return <ComposerPrimitive.Input aria-label="Ask about your document" placeholder="Ask about your document…" rows={2}
+    onCompositionStart={() => { composing.current = true; }}
+    onCompositionEnd={() => { composing.current = false; }}
+    onKeyDown={e => { if (e.key === 'Enter' && (composing.current || e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229)) { e.preventDefault(); e.stopPropagation(); } }} />;
 }

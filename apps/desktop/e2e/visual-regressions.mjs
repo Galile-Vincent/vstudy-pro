@@ -22,7 +22,8 @@ try {
   const viewer = page.getByTestId("document-markdown");
   await viewer.waitFor();
   await viewer.locator("h1").hover();
-  await viewer.locator(".section-action").click();
+  await viewer.locator(".section-action").focus();
+  await viewer.locator(".section-action").press("Enter");
   const input = page.getByRole("textbox", { name: "Ask about your document", exact: true });
   await input.waitFor();
   const chip = page.locator(".composer .selection-preview");
@@ -47,13 +48,15 @@ try {
     assert.equal(await button.getAttribute("class"), "icon-button");
   }
   await input.fill("Preserved draft");
-  await page.getByRole("combobox", { name: "Model", exact: true }).selectOption("claude-cli/haiku");
+  await page.getByRole("button", { name: "Model", exact: true }).click();
+  await page.getByRole("combobox", { name: "Search models" }).fill("haiku");
+  await page.getByRole("option").filter({hasText:"Haiku 5.5"}).first().click();
   await page.waitForFunction(() => window.document.querySelector('select[aria-label="Conversation"] option:checked')?.textContent.includes("haiku"));
   assert.equal(await input.inputValue(), "Preserved draft");
   await app.close();
   await launch();
   await page.getByRole("textbox", { name: "Ask about your document", exact: true }).waitFor();
-  assert.equal(await page.getByRole("combobox", { name: "Model", exact: true }).inputValue(), "claude-cli/haiku");
+  await page.getByRole("button", { name: "Model", exact: true }).filter({ hasText: "Haiku 5.5" }).waitFor();
   assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => `${s.lastProviderId}/${s.lastModelId}`)), "claude-cli/haiku");
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ result: "PASS", screenshots: ["/tmp/vstudy-visual-section.png", "/tmp/vstudy-visual-markdown.png"], consoleErrors: errors }));

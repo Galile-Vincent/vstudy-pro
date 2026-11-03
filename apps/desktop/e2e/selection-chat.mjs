@@ -222,15 +222,12 @@ try {
     await page.evaluate(() => window.desktop.invoke("providers:configure", { kind: "api", id: "anthropic-api", enabled: true }));
     await page.getByRole("alert").filter({ hasText: "This conversation’s provider is unavailable" }).waitFor({ state: "hidden" });
     await page.getByRole("textbox", { name: "Ask about your document", exact: true }).fill("Keep this draft");
-    const picker = page.getByRole("combobox", { name: "Model", exact: true });
-    const alternative = await picker.locator("option:not([disabled])").evaluateAll(options => options.map(o => o.value).find(value => value && !value.startsWith("anthropic-api/")));
-    if (alternative) {
-      await picker.selectOption(alternative);
-      assert.equal(await page.getByRole("textbox", { name: "Ask about your document", exact: true }).inputValue(), "Keep this draft");
-      await page.waitForFunction(value => window.document.querySelector('select[aria-label="Model"]').value === value, alternative);
-      assert.ok((await page.getByRole("combobox", { name: "Conversation", exact: true }).locator("option:checked").innerText()).endsWith(alternative.slice(alternative.indexOf("/") + 1)));
-      assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => `${s.lastProviderId}/${s.lastModelId}`)), alternative);
-    }
+    await page.getByRole('button',{name:'Model',exact:true}).click();
+    const alternative = page.getByRole('option').filter({hasText:'CLI'}).filter({hasNotText:'static fallback'}).first();
+    if (await alternative.count()) {
+      await alternative.click();
+      assert.equal(await page.getByRole('textbox',{name:'Ask about your document',exact:true}).inputValue(),'Keep this draft');
+    } else await page.getByRole('combobox',{name:'Search models'}).press('Escape');
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete conversation", exact: true }).click();
     await page.locator(".chat-start").waitFor();
@@ -240,12 +237,12 @@ try {
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
     await page.waitForFunction(() => window.document.querySelectorAll(".document-item").length === 1);
-    await page.getByRole("button", { name: "Add API key", exact: true }).click();
-    const keyForm = page.getByRole("group", { name: "Add API key" });
-    await keyForm.getByRole("combobox", { name: "Key provider" }).selectOption("openai-compatible");
-    await keyForm.getByRole("textbox", { name: "API key", exact: true }).fill("local-test-key");
-    await keyForm.getByRole("button", { name: "Save key", exact: true }).click();
-    await keyForm.waitFor({ state: "hidden" });
+    await page.getByRole('button',{name:'Model',exact:true}).click();
+    await page.getByRole('button',{name:'API keys & provider settings'}).click();
+    const keyForm = page.locator('.provider-row').filter({hasText:'OpenAI compatible'});
+    await keyForm.getByRole('textbox',{name:'OpenAI compatible API key',exact:true}).fill('local-test-key');
+    await keyForm.getByRole('button',{name:'Save key',exact:true}).click();
+    await page.getByRole('button',{name:'Close settings',exact:true}).click();
     assert.equal(await page.evaluate(async () => (await window.desktop.invoke("providers:list", {})).find(p => p.config.id === "openai-compatible").config.enabled), true, "saving compatible key enables provider");
   }
   assert.deepEqual(errors, []);

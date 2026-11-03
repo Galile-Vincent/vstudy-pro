@@ -10,6 +10,9 @@ export function UsageChip({ usage, subscription = false }: { usage: Usage; subsc
 }
 export function MessageUsage({ subscription }: { subscription: boolean }) {
   const value = useAuiState(s => s.message.metadata.custom.usage);
+  const modelId = useAuiState(s => s.message.metadata.custom.modelId);
+  const options = useAuiState(s => s.message.metadata.custom.options);
+  const label = typeof modelId === "string" ? [modelId, ...Object.values((options ?? {}) as Record<string,string|boolean>)].join(" · ") : "";
   const parsed = usageSchema.safeParse(value);
-  return parsed.success ? <UsageChip usage={parsed.data} subscription={subscription} /> : null;
+  return parsed.success ? <><small className="usage-chip">{label && `${label} · `}</small><UsageChip usage={parsed.data} subscription={subscription} /></> : null;
 }

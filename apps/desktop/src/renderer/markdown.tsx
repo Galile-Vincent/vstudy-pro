@@ -216,5 +216,11 @@ export function DocumentMarkdown({
 export function ReplyMarkdown({ text }: { text: string }) {
   return <Markdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeSanitize, schema], rehypeKatex, rehypeHighlight]} skipHtml
     urlTransform={(url) => externalUrlSchema.safeParse(url).success ? url : ""}
-    components={{ a: ({ href, children }) => <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a> }}>{text}</Markdown>;
+    components={{ pre: ({ children }) => <CodeBlock>{children}</CodeBlock>, a: ({ href, children }) => <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a> }}>{text}</Markdown>;
+}
+
+function CodeBlock({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLPreElement>(null);
+  const [copied, setCopied] = useState(false);
+  return <div className="code-block"><button type="button" aria-label="Copy code" onClick={() => { void navigator.clipboard.writeText(ref.current?.textContent ?? '').then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); }}>{copied ? 'Copied' : 'Copy code'}</button><pre ref={ref}>{children}</pre></div>;
 }
