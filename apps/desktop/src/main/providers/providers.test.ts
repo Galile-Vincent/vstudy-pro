@@ -220,3 +220,13 @@ for (const kind of ["claude", "codex"] as const) it(`drops buffered ${kind} outp
     expect(events).toEqual([{ type: "text-delta", text: "tick" }]);
   } finally { await rm(cwd, { recursive: true, force: true }); }
 });
+
+it('discovers saved-key availability without unlocking the Keychain or fetching models', async () => {
+  const getInMainOnly = vi.fn(async () => { throw new Error('Keychain must remain lazy'); });
+  const fetcher = vi.fn<typeof fetch>();
+  const adapter = createApiAdapter(() => ({kind:'api',id:'openai-api',enabled:true}), {getInMainOnly,has:()=>true,isUnlocked:()=>false}, fetcher);
+  expect(await adapter.detect()).toEqual({available:true});
+  expect(await adapter.listModels()).toEqual([]);
+  expect(getInMainOnly).not.toHaveBeenCalled();
+  expect(fetcher).not.toHaveBeenCalled();
+});

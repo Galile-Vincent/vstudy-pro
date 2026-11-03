@@ -29,7 +29,7 @@ export const ipcContract = {
   "converter:mode": {request:z.object({offline:z.boolean()}).strict(),response:ack},
   "settings:networkActivity": {request:empty,response:z.array(z.object({at:z.string().datetime(),what:z.string(),to:z.string()}).strict())},
   "providers:chooseExecutable": {request:z.object({binary:z.enum(['claude','codex','agy'])}).strict(),response:z.object({path:z.string().nullable()}).strict()},
-  "settings:deleteAllData": { request: empty, response: ack },
+  "settings:deleteAllData": { request: z.object({confirmation:z.literal("DELETE")}).strict(), response: ack },
   "settings:appearance": { request: empty, response: z.object({ reducedTransparency:z.boolean() }).strict() },
   "settings:systemLocale": { request: empty, response: z.string().max(100) },
   ...libraryContract,

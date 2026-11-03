@@ -10,13 +10,13 @@ try {
   const page = await app.firstWindow();
   await page.waitForFunction(() => !!window.desktop);
   await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 0, checkboxChecked: false }); });
-  await page.evaluate(() => window.desktop.invoke('settings:deleteAllData', {}));
+  await page.evaluate(() => window.desktop.invoke('settings:deleteAllData', {confirmation:'DELETE'}));
   await access(join(root, 'vstudy.sqlite'));
   for (const name of ['library', 'Cache', 'converter-venv']) { await mkdir(join(root, name), { recursive: true }); await writeFile(join(root, name, 'deletion-probe'), 'private'); }
   await writeFile(join(root, 'secrets.json'), '{}');
   await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
   const closed = app.waitForEvent('close');
-  await Promise.all([closed, page.evaluate(() => window.desktop.invoke('settings:deleteAllData', {})).catch(() => undefined)]);
+  await Promise.all([closed, page.evaluate(() => window.desktop.invoke('settings:deleteAllData', {confirmation:'DELETE'})).catch(() => undefined)]);
   app = undefined;
   await assert.rejects(access(root));
   console.log(JSON.stringify({ result: 'PASS', cancelledKeepsDatabase: true, confirmedRemovesUserData: true }));

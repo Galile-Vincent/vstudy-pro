@@ -40,6 +40,7 @@ export function createIpcRegistrar(
         } catch (error) {
           if (error instanceof Error && /Search took too long|Refine your query/.test(error.message)) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message.startsWith('Search took too long') ? 'errors.search_too_long' : 'errors.search_refine',params:{}}));
           if (error instanceof Error && error.message === 'errors.keychain_unavailable') throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message,params:{}}));
+          if (channel === 'converter:mode') throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed',params:{}}));
           const code=error instanceof Error && error.message.includes('Only empty conversations') ? 'errors.conversation_not_empty' : 'errors.generic';
           // Electron strips custom Error fields, so keep the stable payload in its message.
           throw new Error('VSTUDY_STATUS:' + JSON.stringify({code,params:{}}));
