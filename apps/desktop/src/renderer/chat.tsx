@@ -5,6 +5,8 @@ import { UsageButton, UsageMeter, useUsage, useBudgetGuard } from "./usage/meter
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   AssistantRuntimeProvider,
+  WebSpeechSynthesisAdapter,
+  useAui,
   ComposerPrimitive,
   useLocalRuntime,
   useAuiState,
@@ -13,6 +15,10 @@ import type { Conversation, Message, Selection } from "../shared";
 import { Thread } from "./components/assistant-ui/elements/thread.aui";
 import { plainSelection } from "./selection-preview";
 import { desktop } from "./bridge";
+import { documentCitationSchema } from "../shared";
+import { Suggestions } from "./components/assistant-ui/elements/suggestions";
+import { DocumentReference } from "./components/assistant-ui/elements/document-reference";
+import { DocumentSource, DocumentTool, jumpToCitation } from './document-elements';
 import { assistantContent } from './chat-content';
 import { createChatAdapter } from "./chat-adapter";
 import { type Providers } from "./providers";
@@ -30,6 +36,8 @@ export function Chat({
   onSettings,
   onProvidersChanged,
   onUsage,
+  documentPageCount = 0,
+  documentTitle = "Document",
 }: {
   conversation: Conversation;
   draft: string;
@@ -43,6 +51,7 @@ export function Chat({
   onSettings: () => void;
   onProvidersChanged: () => Promise<void>;
   onUsage: () => void;
+  documentPageCount?: number; documentTitle?: string;
 }) {
   const [options, setOptions] = useState<Record<string,string|boolean>>(conversation.options ?? {});
   useEffect(() => setOptions(conversation.options ?? {}), [conversation.providerId,conversation.modelId]);
@@ -77,7 +86,10 @@ export function Chat({
     [],
   );
   useEffect(() => () => connection.dispose(), [connection]);
+  const speech = useMemo(() => typeof window !== 'undefined' && 'speechSynthesis' in window ? new WebSpeechSynthesisAdapter() : undefined, []);
+  const suggestion = useMemo(() => ({generate: async () => [{prompt:'Which passages support this answer?'},{prompt:'Explain this more simply'}]}), []);
   const runtime = useLocalRuntime(connection.adapter, {
+    adapters: { suggestion, ...(speech ? {speech} : {}) },
     initialMessages: history.map((m) => ({
       id: m.id,
       role: m.role,
@@ -94,7 +106,7 @@ export function Chat({
   const extensions = {
     selection, onClearSelection, usage, budget, unavailable, onUsage,
     picker: <ModelPicker providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
-    models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
+    documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
     {unavailable && <p role="alert">This conversation’s provider is unavailable. Add an API key or enable it in Settings.</p>}
@@ -107,7 +119,7 @@ type DocumentChat = {
   selection: Selection | null; onClearSelection: () => void;
   usage: ReturnType<typeof useUsage>; budget: ReturnType<typeof useBudgetGuard>;
   unavailable: boolean; onUsage: () => void; picker: React.ReactNode;
-  models: Providers[number]["models"]; selections: Map<string, Selection>; statuses: Map<string, string>; subscription: boolean;
+  documentPageCount: number; documentTitle: string; models: Providers[number]["models"]; selections: Map<string, Selection>; statuses: Map<string, string>; subscription: boolean;
 };
 const DocumentChatContext = createContext<DocumentChat | null>(null);
 const useDocumentChat = () => useContext(DocumentChatContext)!;
@@ -126,13 +138,25 @@ function MessageSelection() {
   const selected = selections.get(id);
   return selected && <SelectionPreview selection={selected} />;
 }
+function DocumentSuggestions() {
+  const aui = useAui();
+  return <Suggestions suggestions={['Summarize this document','Explain the key ideas','Compare the main arguments']} selectedSuggestion={null} cycle={0} onSuggestion={prompt => aui.composer().setText(prompt)} variant="list" />;
+}
 function DocumentMessageFooter() {
+  const rawCitations = useAuiState(s => s.message.metadata.custom.citations);
+  const parsedCitations = documentCitationSchema.array().safeParse(rawCitations);
+  const {documentPageCount,documentTitle,usage,models,statuses,subscription} = useDocumentChat();
+  const citations = parsedCitations.success ? parsedCitations.data.filter(c => c.page) : [];
+  const [activePage,setActivePage] = useState(0);
   const stopped = useAuiState(s => s.message.status?.type === "incomplete" && s.message.status.reason === "cancelled");
-  const id = useAuiState(s => s.message.id), {statuses,subscription} = useDocumentChat();
-  return <><MessageUsage subscription={subscription} models={useDocumentChat().models} />{(stopped || statuses.get(id) === "aborted") && <p role="status" className="muted">Stopped. Partial response excluded from future context.</p>}{statuses.get(id) && statuses.get(id) !== "aborted" && <p role="status">Response {statuses.get(id)}. This turn is excluded from future context.</p>}</>;
+  const createdAt = useAuiState(s => s.message.createdAt);
+  const isLast = useAuiState(s => s.message.index === s.thread.messages.length - 1);
+  const fallbackUsage = stopped && isLast ? usage.data?.records.find(record => Date.parse(record.createdAt) >= (createdAt?.getTime() ?? Infinity)) : undefined;
+  const id = useAuiState(s => s.message.id);
+  return <div className="document-message-footer">{documentPageCount > 0 && citations.length > 0 && <details><summary>Document references</summary><DocumentReference title={documentTitle} pages={documentPageCount} anchors={citations.map(c => ({page:c.page!,quote:c.quote}))} activePage={activePage || citations[0]!.page!} onJump={page => {setActivePage(page);const citation=citations.find(c => c.page === page);if(citation) jumpToCitation(citation);}} /></details>}<MessageUsage subscription={subscription} models={models} fallbackUsage={fallbackUsage} />{(stopped || statuses.get(id) === "aborted") && <p role="status" className="muted">Stopped. Partial response excluded from future context.</p>}{statuses.get(id) && statuses.get(id) !== "aborted" && <p role="status">Response {statuses.get(id)}. This turn is excluded from future context.</p>}</div>;
 }
 function useComposerBindings() { const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
-const documentComponents = { ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
+const documentComponents = { WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 
 export function SelectionPreview({ selection }: { selection: Selection }) {
   const plain = plainSelection(selection.text.replace(/^#{1,6} .*\n?/, ""));

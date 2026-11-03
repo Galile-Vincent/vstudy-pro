@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./components/assistant-ui/generative-ui.css";
 @layer base {
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -26,7 +27,7 @@ textarea,
 select {
   font: inherit;
 }
-button {
+button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *)) {
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--surface);
@@ -34,10 +35,10 @@ button {
   padding: 6px 10px;
   cursor: pointer;
 }
-button:hover {
+button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *)):hover {
   background: var(--active);
 }
-button:disabled {
+button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *)):disabled {
   cursor: default;
   opacity: 0.4;
 }
@@ -877,6 +878,36 @@ h3 {
 .fast-mode [role=switch][data-state=checked] span { transform: translateX(10px); }
 .speed-section p { font-size: 11px; line-height: 1.4; color: var(--muted); margin-top: 6px; }
 .picker-settings { width: 100%; text-align: left; border: 0; border-top: 1px solid var(--line); background: transparent; padding: 10px 12px; color: var(--muted); font-size: 12px; }
-@media (max-width: 950px) { .model-picker-body { flex-direction: column; } .model-traits { width: auto; border-left: 0; border-top: 1px solid var(--line); } .effort-list { grid-template-columns: repeat(3,minmax(0,1fr)); } .speed-section { margin-top: 10px; } .fast-mode { justify-content: flex-start; gap: 12px; } .model-popover [cmdk-list] { max-height: 180px; } }
+@media (max-width: 950px) { .model-picker-body { flex-direction: column; } .model-traits { width: auto; border-left: 0; border-top: 1px solid var(--line); } .speed-section { margin-top: 10px; } .fast-mode { justify-content: space-between; gap: 12px; } .model-popover [cmdk-list] { max-height: 180px; } }
 @media (prefers-reduced-motion: reduce) { .aui-root *, .model-popover { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 .aui-composer-action-wrapper > div:last-child { max-width: 48%; flex-shrink: 0; }
+:root { --foreground: var(--ink); --background: var(--surface); --aui-panel: var(--subtle); --aui-success: #54835c; --aui-warning: #ad7b26; }
+.document-source { border: 0; background: transparent; padding: 3px 0; margin: 4px 4px 0 0; min-height: 28px; }
+.document-presentation { margin-top: 12px; max-width: 100%; overflow-x: auto; }
+.document-presentation h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+[data-citation-highlight] { outline: 2px solid var(--muted); outline-offset: 4px; border-radius: 4px; }
+.provider-logo { width: 13px; height: 13px; flex-shrink: 0; }
+.generative-setting { display: flex; align-items: center; gap: 8px; font-size: 12px; padding-block: 12px; }
+.pane-toolbar .conversation-trigger { display: flex; align-items: center; gap: 6px; max-width: 185px; min-width: 0; height: 28px; padding: 0 4px; font-size: 12px; }
+.conversation-trigger > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conversation-trigger > svg { flex-shrink: 0; }
+.conversation-list-popover { padding: 8px; max-width: min(360px,var(--radix-popover-content-available-width)); max-height: var(--radix-popover-content-available-height); overflow: auto; }
+@media(max-width:950px) { .pane-toolbar .conversation-trigger {max-width:120px;} }
+@layer base { * { border-color: var(--line); } }
+[data-slot=thinking-indicator] > span:first-child { background: var(--muted); }
+.model-popover > [cmdk-root] { max-height: var(--radix-popover-content-available-height); height: auto; }
+.model-popover [data-slot=command-input-wrapper], .picker-settings { flex-shrink: 0; }
+.model-picker-body { overflow: auto; overscroll-behavior: contain; }
+@media (max-width:950px) { .model-picker-body > [cmdk-list] { min-height: 120px; flex-shrink: 0; overscroll-behavior: auto; } }
+@media(max-height:600px) { .aui-thread-followup-suggestions { display: none; } .aui-composer-input { min-height: 44px; max-height: 100px; } }
+.aui-thread-root { container-type: inline-size; }
+.usage-compact { display: none; }
+@container (max-width: 280px) {
+  .usage-full { display: none; }
+  .usage-compact { display: inline; }
+  .aui-composer-action-wrapper { gap: 5px; }
+  .aui-composer-action-wrapper > div:last-child { max-width: none; gap: 5px; }
+  .composer-usage { flex-shrink: 0; padding-inline: 2px; }
+  .model-trigger { gap: 3px; padding-inline: 5px; }
+  .model-trigger-name { min-width: 20px; }
+}

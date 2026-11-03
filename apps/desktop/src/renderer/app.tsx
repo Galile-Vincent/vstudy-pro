@@ -13,6 +13,7 @@ import { desktop, isMock } from "./bridge";
 import { resolveModel } from "./model";
 import { Chat, ModelPicker, SelectionPreview } from "./chat";
 import { DocumentMarkdown } from "./markdown";
+import { ConversationList } from "./conversation-list";
 import { ProviderSettings, type Providers } from "./providers";
 
 export function App() {
@@ -21,6 +22,7 @@ export function App() {
   const [documents, setDocuments] = useState<Document[]>([]),
     [documentId, setDocumentId] = useState<Document["id"] | null>(null),
     [source, setSource] = useState("");
+  const documentPageCount = useMemo(() => {let pages=0;for(const match of source.matchAll(/<!-- page (\d+) -->/g)){const value=Number(match[1]);if(Number.isSafeInteger(value)&&value>pages)pages=value;}return pages;},[source]);
   const [providers, setProviders] = useState<Providers>([]),
     [model, setModel] = useState("");
   const [settingsTab, setSettingsTab] = useState("providers");
@@ -117,8 +119,11 @@ export function App() {
       .then((list) => {
         if (active) {
           setConversations(list);
-          setConversation(list[0] ?? null);
-          if (list[0]) setModel(`${list[0].providerId}/${list[0].modelId}`);
+          let remembered: string | null = null;
+          try { remembered = localStorage.getItem(`vstudy-conversation:${documentId}`); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
+          const selected = list.find(c => c.id === remembered) ?? list[0] ?? null;
+          setConversation(selected);
+          if (selected) setModel(`${selected.providerId}/${selected.modelId}`);
         }
       })
       .catch(report);
@@ -126,6 +131,10 @@ export function App() {
       active = false;
     };
   }, [documentId, report]);
+  useEffect(() => {
+    if (!conversation) return;
+    try { localStorage.setItem(`vstudy-conversation:${conversation.documentId}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
+  }, [conversation?.id]);
   useEffect(() => {
     let active = true;
     setSource("");
@@ -161,7 +170,7 @@ export function App() {
   const saveSettings = async (next: Settings) => {
     try {
       const latest = await desktop.invoke("settings:get", {});
-      const saved = await desktop.invoke("settings:set", { ...next, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels });
+      const saved = await desktop.invoke("settings:set", { ...next, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, modelDisplayNames: latest.modelDisplayNames });
       setSettings(saved);
     } catch (error) {
       report(error);
@@ -181,8 +190,16 @@ export function App() {
       lastModelId: modelId,
     });
     if (conversation && `${conversation.providerId}/${conversation.modelId}` !== value) {
-      if (history?.length === 0) void desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId}).then(next => { setConversation(next); setConversations(list => list.map(c => c.id === next.id ? next : c)); }).catch(report);
-      else void newConversation(value);
+      void desktop.invoke('messages:list',{conversationId:conversation.id}).then(async messages => {
+        if (messages.length) { await newConversation(value); return; }
+        try {
+          const next = await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId});
+          setConversation(next); setConversations(list => list.map(c => c.id === next.id ? next : c));
+        } catch (error) {
+          if (error instanceof Error && error.message.includes('Only empty conversations')) await newConversation(value);
+          else throw error;
+        }
+      }).catch(report);
     }
 
   };
@@ -243,24 +260,8 @@ export function App() {
       <div className="pane-toolbar">
         <span className="eyebrow">Conversation</span>
         <div className="row">
-          <select
-            aria-label="Conversation"
-            value={conversation?.id ?? ""}
-            onChange={(e) => {
-              const c =
-                conversations.find((item) => item.id === e.target.value) ??
-                null;
-              setConversation(c);
-              if (c) setModel(`${c.providerId}/${c.modelId}`);
-            }}
-          >
-            <option value="">Choose conversation</option>
-            {conversations.map((c, index) => (
-              <option key={c.id} value={c.id}>
-                Chat {conversations.length - index} · {c.modelId}
-              </option>
-            ))}
-          </select>
+          <ConversationList conversations={conversations} current={conversation} providers={providers} canCreate={!!canChat && !busy} onSelect={c => {setConversation(c);setModel(`${c.providerId}/${c.modelId}`);}} onNew={() => newConversation()} onDelete={async id => {if (!window.confirm('Delete this conversation?')) return; await desktop.invoke('conversations:delete',{conversationId:id});setConversations(list=>list.filter(c=>c.id!==id));if(conversation?.id===id){setConversation(null);setHistory(null);}}}/>
+
           {conversation && <button className="icon-button" title="Delete conversation" aria-label="Delete conversation" onClick={() => {
             if (!window.confirm("Delete this conversation?")) return;
             void desktop.invoke("conversations:delete", { conversationId: conversation.id }).then(() => {
@@ -278,6 +279,8 @@ export function App() {
       </div>
       {conversation && history ? (
         <Chat
+          documentPageCount={documentPageCount}
+          documentTitle={doc?.sourceName ?? "Document"}
             onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
           key={conversation.id}
           draft={draft}

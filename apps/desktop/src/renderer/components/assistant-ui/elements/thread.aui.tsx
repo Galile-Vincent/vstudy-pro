@@ -23,6 +23,8 @@ import {
   ToolGroupTrigger,
 } from "@/components/assistant-ui/elements/tool-group.aui";
 import { TooltipIconButton } from "@/components/assistant-ui/elements/tooltip-icon-button";
+import { Sources } from "./sources.aui";
+import { ThinkingIndicator } from "./thinking-indicator";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -38,6 +40,7 @@ import {
   SuggestionPrimitive,
   ThreadPrimitive,
   type FileMessagePartComponent,
+  type SourceMessagePartComponent,
   type ImageMessagePartComponent,
   type TextMessagePartComponent,
   type ToolCallMessagePartComponent,
@@ -124,6 +127,8 @@ export type ThreadComponents = {
     | ComponentType<PropsWithChildren<{ group: ThreadGroupPart }>>
     | undefined;
   TaskGroup?: ComponentType<{ group: ThreadGroupPart }> | undefined;
+  Source?: SourceMessagePartComponent | undefined;
+  WelcomeExtra?: ComponentType | undefined;
   ComposerExtra?: ComponentType | undefined;
   ComposerPrefix?: ComponentType | undefined;
   ComposerBanner?: ComponentType | undefined;
@@ -137,6 +142,7 @@ export type ThreadComponents = {
 const messageGroupBy = groupPartByType({
   reasoning: ["group-chainOfThought", "group-reasoning"],
   "tool-call": ["group-chainOfThought", "group-tool"],
+  "tool-call:present": [],
   "standalone-tool-call": [],
 });
 
@@ -484,11 +490,13 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const ThreadWelcome: FC = () => {
+  const {WelcomeExtra} = useContext(ThreadComponentsContext);
   return (
     <div className="aui-thread-welcome-root mb-6 flex flex-col px-2">
       <p className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-2xl font-medium tracking-tight duration-200">
-        How can I help you today?
+        Explore your document
       </p>
+      {WelcomeExtra && <WelcomeExtra />}
     </div>
   );
 };
@@ -688,6 +696,7 @@ const AssistantMessage: FC = () => {
     ReasoningGroup,
     TaskGroup: TaskGroupComponent,
     MessageFooter,
+    Source: SourceComponent = Sources,
   } = useContext(ThreadComponentsContext);
   const groupBy = TaskGroupComponent ? taskAwareGroupBy : messageGroupBy;
 
@@ -746,6 +755,8 @@ const AssistantMessage: FC = () => {
                 return <Reasoning {...part} />;
               case "tool-call":
                 return part.toolUI ?? <ToolFallbackComponent {...part} />;
+              case "source":
+                return <SourceComponent {...part} />;
               case "data":
                 return part.dataRendererUI;
               case "file":
@@ -761,16 +772,7 @@ const AssistantMessage: FC = () => {
                   </div>
                 );
               case "indicator":
-                return (
-                  <span
-                    data-slot="aui_assistant-message-indicator"
-                    className="animate-pulse font-sans"
-                    role="status"
-                    aria-label="Assistant is working"
-                  >
-                    {"●"}
-                  </span>
-                );
+                return <ThinkingIndicator role="status" aria-label="Assistant is working" label="Thinking" />;
               default:
                 return null;
             }
@@ -831,6 +833,8 @@ const AssistantActionBar: FC = () => {
           <RefreshCwIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Reload>
+      <AuiIf condition={s => s.thread.capabilities.speech && s.message.speech?.status.type !== 'running'}><ActionBarPrimitive.Speak asChild><TooltipIconButton tooltip="Read aloud"><AudioLinesIcon /></TooltipIconButton></ActionBarPrimitive.Speak></AuiIf>
+      <AuiIf condition={s => s.message.speech?.status.type === 'running'}><ActionBarPrimitive.StopSpeaking asChild><TooltipIconButton tooltip="Stop reading"><SquareIcon /></TooltipIconButton></ActionBarPrimitive.StopSpeaking></AuiIf>
       <ActionBarMorePrimitive.Root>
         <ActionBarMorePrimitive.Trigger asChild>
           <TooltipIconButton

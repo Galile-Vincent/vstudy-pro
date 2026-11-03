@@ -19,7 +19,8 @@ export function UsageButton({ data, error, onClick }: ReturnType<typeof useUsage
   const tokens = records.reduce((n,r) => n + r.inputTokens + r.outputTokens,0);
   const known = records.filter(r => r.costUsd !== undefined);
   const cost = known.reduce((n,r) => n + r.costUsd!,0);
-  return <button type="button" className="composer-usage" onClick={onClick} aria-label="Conversation usage" title="View usage and budget settings">{error || (!data ? 'Usage…' : `${compactTokens(tokens)} tokens${known.length ? ` · ${money(cost)}` : ''}${records.some(r => r.aborted) ? ' · includes aborted turns' : ''}`)}</button>;
+  const description = `${compactTokens(tokens)} tokens${known.length ? ` · ${money(cost)}` : ''}${records.some(r => r.aborted) ? ' · includes aborted turns' : ''}`;
+  return <button type="button" className="composer-usage" onClick={onClick} aria-label="Conversation usage" title={data ? `${description} · View usage and budget settings` : 'View usage and budget settings'}>{error || (!data ? 'Usage…' : <><span className="usage-full">{description}</span><span className="usage-compact" aria-hidden>{compactTokens(tokens)}</span></>)}</button>;
 }
 export function UsageMeter({ data, error }: ReturnType<typeof useUsage>) {
   const [priceUnknown,setPriceUnknown] = useState(false);

@@ -22,10 +22,13 @@ export function ProviderSettings({
   onRefresh: () => Promise<void>;
   initialTab?: string;
 }) {
+  const [structuredTables, setStructuredTables] = useState(false);
+  const [featureError,setFeatureError] = useState('');
   const [tab,setTab] = useState(initialTab);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     dialog.current?.showModal();
+    void desktop.invoke('settings:get',{}).then(s => setStructuredTables(s.enableGenerativeUI)).catch(() => {});
   }, []);
   return (
     <dialog
@@ -47,6 +50,9 @@ export function ProviderSettings({
       <p className="muted">
         Keys are saved securely in the desktop app and never read back.
       </p>
+      <label className="generative-setting"><input type="checkbox" checked={structuredTables} onChange={e => { const enabled=e.target.checked; setStructuredTables(enabled); void desktop.invoke('settings:get',{}).then(s => desktop.invoke('settings:set',{...s,enableGenerativeUI:enabled})).catch(() => {setStructuredTables(!enabled);setFeatureError('Could not save structured table setting.');}); }} />Read-only structured tables (API providers only)</label>
+      <p className="muted">Optional table presentations. Off by default. CLI tools remain disabled.</p>
+      {featureError && <p role="alert">{featureError}</p>}
       {providers.map((provider) => (
         <ProviderRow
           key={provider.config.id}

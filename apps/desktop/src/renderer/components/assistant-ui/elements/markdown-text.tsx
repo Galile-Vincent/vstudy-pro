@@ -9,6 +9,9 @@ import {
   memoizeMarkdownComponents,
   useIsMarkdownCodeBlock,
 } from "@assistant-ui/react-markdown";
+import { DocumentCitationLink } from "../../../document-elements";
+import { useAuiState } from "@assistant-ui/react";
+import { documentCitationSchema } from "../../../../shared";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeSanitize from "rehype-sanitize";
@@ -50,6 +53,9 @@ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
   components,
   componentsByLanguage,
 }) => {
+  const rawCitations = useAuiState(s => s.message.metadata.custom.citations);
+  const citations = documentCitationSchema.array().safeParse(rawCitations);
+  const references = citations.success ? citations.data : [];
   const stableComponents = useShallowStable(components);
   const stableComponentsByLanguage = useShallowStable(componentsByLanguage);
   const markdownComponents = useMemo(() => {
@@ -65,7 +71,8 @@ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[[rehypeSanitize, schema], rehypeKatex, rehypeHighlight]}
       skipHtml
-      urlTransform={url => externalUrlSchema.safeParse(url).success ? url : ""}
+      preprocess={text => text.replace(/\[\[cite:(s\d+)\]\]/g,(marker,id:string) => references.some(c => c.id === id) ? `[source](#vstudy-cite-${id})` : marker)}
+      urlTransform={url => /^#vstudy-cite-s\d+$/.test(url) || externalUrlSchema.safeParse(url).success ? url : ""}
       className="aui-md"
       components={markdownComponents}
       componentsByLanguage={stableComponentsByLanguage}
@@ -89,7 +96,7 @@ const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
       <span className="aui-code-header-language text-muted-foreground font-medium lowercase">
         {language}
       </span>
-      <TooltipIconButton tooltip="Copy" onClick={onCopy}>
+      <TooltipIconButton tooltip="Copy code" onClick={onCopy}>
         {!isCopied && (
           <CopyIcon className="animate-in zoom-in-75 fade-in duration-150" />
         )}
@@ -102,7 +109,7 @@ const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
 };
 
 const defaultComponents = memoizeMarkdownComponents({
-  a: ({ href, children }) => <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a>,
+  a: ({ href, children }) => href?.startsWith("#vstudy-cite-") ? <DocumentCitationLink id={href.slice(13)}>{children}</DocumentCitationLink> : <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a>,
   h1: ({ className, ...props }) => (
     <h1
       className={cn(

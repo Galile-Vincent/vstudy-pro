@@ -14,6 +14,7 @@ import {
 } from "./selection";
 import { desktop } from "./bridge";
 import { externalUrlSchema } from "../shared/ipc";
+import { documentCitationSchema } from "../shared";
 import type { Document, Selection } from "../shared";
 import "katex/dist/katex.min.css";
 
@@ -69,6 +70,22 @@ export function DocumentMarkdown({
     x: number;
     y: number;
   } | null>(null);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let highlighted: HTMLElement | undefined;
+    const jump = (event: Event) => {
+      const citation = documentCitationSchema.safeParse((event as CustomEvent).detail);
+      if (!citation.success || citation.data.documentId !== documentId || citation.data.offset > source.length) return;
+      const nodes = Array.from(root.current?.querySelectorAll<HTMLElement>('[data-start]') ?? []);
+      const target = nodes.find(node => Number(node.dataset.start) === citation.data.offset) ?? nodes.find(node => Number(node.dataset.start) <= citation.data.offset && Number(node.dataset.end) > citation.data.offset);
+      if (!target) return;
+      highlighted?.removeAttribute('data-citation-highlight'); highlighted = target;
+      target.setAttribute('data-citation-highlight',''); target.scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
+      clearTimeout(timer); timer = setTimeout(() => target.removeAttribute('data-citation-highlight'),2000);
+    };
+    window.addEventListener('vstudy:document-citation',jump);
+    return () => { window.removeEventListener('vstudy:document-citation',jump); clearTimeout(timer); highlighted?.removeAttribute('data-citation-highlight'); };
+  },[source,documentId]);
   const headings = useMemo(() => headingsIn(source), [source]);
   useEffect(() => {
     const update = () => {

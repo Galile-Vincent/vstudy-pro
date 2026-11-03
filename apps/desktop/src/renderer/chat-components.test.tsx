@@ -34,3 +34,18 @@ it.each(['auth failed','rate limited','network','provider unavailable','budget']
  expect(host.textContent).toContain(category);expect(Array.from(host.querySelectorAll('button')).some(b=>b.textContent==='Retry')).toBe(true);
  await act(async()=>root.unmount());host.remove();
 });
+it('releases stale composition on blur and after the last composition update expires',async()=>{
+ vi.useFakeTimers();
+ try {
+  const run=vi.fn(async function*(){yield {content:[{type:'text' as const,text:'done'}]};});
+  const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+  await act(async()=>root.render(<Harness adapter={{run}}/>));const input=host.querySelector('textarea')!;
+  await type(input,'Recovered');
+  await act(async()=>{input.focus();input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));input.blur();input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));});
+  expect(run).toHaveBeenCalledTimes(1);
+  await type(input,'Recovered again');
+  await act(async()=>{input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));input.dispatchEvent(new CompositionEvent('compositionupdate',{bubbles:true}));vi.advanceTimersByTime(1501);input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));});
+  expect(run).toHaveBeenCalledTimes(2);
+  await act(async()=>root.unmount());host.remove();
+ } finally {vi.useRealTimers();}
+});

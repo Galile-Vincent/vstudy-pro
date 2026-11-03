@@ -119,6 +119,14 @@ export function createMockBridge(): DesktopApi {
         result = item;
         break;
       }
+      case "conversations:model": {
+        const index=conversations.findIndex(c=>c.id===input.conversationId);
+        if(index<0 || messages.some(m=>m.conversationId===input.conversationId)) throw new Error('Only empty conversations can change models');
+        const current=conversations[index]!;
+        result=conversationSchema.parse({...current,providerId:input.providerId,modelId:input.modelId,options:{}});
+        conversations[index]=result as Conversation;
+        break;
+      }
       case "conversations:list":
         result = conversations.filter((c) => c.documentId === input.documentId);
         break;

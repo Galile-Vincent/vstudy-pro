@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { RadioGroup as Radio, Switch } from 'radix-ui';
 import { Star, Zap, Check } from 'lucide-react';
 import { ModelSelector } from './components/assistant-ui/elements/model-selector.aui';
+import { ClaudeLogo, OpenAILogo, GeminiLogo } from "./components/assistant-ui/elements/logos";
 import { desktop } from './bridge';
 import { providerName, type Providers } from './providers';
 
@@ -37,7 +38,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
   const [favorites, setFavorites] = useState<string[]>([]), [recent, setRecent] = useState<string[]>([]);
   const root = useRef<HTMLDivElement>(null);
   const [boundary, setBoundary] = useState<Element | null>(null);
-  useEffect(() => { setBoundary(root.current?.closest('.pane') ?? null); void desktop.invoke('settings:get', {}).then(s => { setDisplayNames(names => ({...names,...s.modelDisplayNames})); setFavorites(s.favoriteModels ?? []); setRecent(s.recentModels ?? []); }).catch(() => {}); }, []);
+  useEffect(() => { setBoundary(root.current?.closest('.aui-thread-root, .chat-start') ?? root.current?.closest('.pane') ?? null); void desktop.invoke('settings:get', {}).then(s => { setDisplayNames(names => ({...names,...s.modelDisplayNames})); setFavorites(s.favoriteModels ?? []); setRecent(s.recentModels ?? []); }).catch(() => {}); }, []);
   const all = pickerModels(providers);
   const original = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id }))).find(m => m.value === model || (m.providerId === model.split('/')[0] && m.resolvedId === model.split('/').slice(1).join('/') && m.id !== 'default'));
   const selected = all.find(m => m.value === model) ?? all.find(m => m.providerId === original?.providerId && m.resolvedId === original?.resolvedId && m.id !== 'default');
@@ -62,7 +63,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
   return <div className="model-picker" ref={root}>
     <ModelSelector.Root models={entries} value={selected?.value ?? model} onValueChange={choose} open={open} onOpenChange={setOpen}>
       <ModelSelector.Trigger aria-label="Model" className="model-trigger" title={selected?.name}>
-        <span className="provider-initial" aria-hidden>{selected?.provider[0] ?? 'M'}</span>
+        <span className="provider-initial" aria-hidden>{selected?.providerId.includes("claude") || selected?.providerId.includes("anthropic") ? <ClaudeLogo className="provider-logo" /> : selected?.providerId.includes("codex") || selected?.providerId.includes("openai") ? <OpenAILogo className="provider-logo" /> : selected?.providerId === "agy-cli" ? <GeminiLogo className="provider-logo" /> : "M"}</span>
         <span className="model-trigger-name">{selected?.name ?? (displayNames[model] ?? (model ? 'Loading model…' : 'Choose a model'))}</span>
         {effort && <span className="model-trigger-effort">· {effortLabel(String(values[effort.id] ?? effort.default))}</span>}
         {fast && <Zap size={12} aria-label="Fast mode on" />}

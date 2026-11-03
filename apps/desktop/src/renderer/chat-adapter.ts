@@ -53,7 +53,7 @@ export function createChatAdapter(
         unsubscribe();
         queue.push({ type: "done" });
         wake?.();
-        void bridge.invoke("chat:abort", { requestId }).catch(() => {});
+        void bridge.invoke("chat:abort", { requestId }).then(() => window.dispatchEvent(new Event("usage-updated"))).catch(() => {});
       };
       unsubscribe = bridge.onChatEvent(requestId, push);
       active.add(cancel);

@@ -2,9 +2,9 @@
 import { createElement, act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { expect,it,vi } from 'vitest';
-import { UsageChip } from './chip';
-import { UsageMeter } from './meter';
-import { defaultSettings } from '../../shared';
+import { UsageChip, money } from './chip';
+import { UsageButton, UsageMeter } from './meter';
+import { defaultSettings, usageRecordSchema } from '../../shared';
 vi.mock('../bridge',()=>({desktop:{invoke:vi.fn()}}));
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT=true;
 it('renders literal chip values, details and honest subscription cost label',async()=>{
@@ -58,5 +58,17 @@ it('marks aborted usage explicitly',async()=>{
   const container=document.createElement('div');const root=createRoot(container);
   await act(async()=>root.render(createElement(UsageChip,{usage:{inputTokens:100,outputTokens:325,costUsd:.0002,costSource:'estimated'},aborted:true})));
   expect(container.textContent).toBe('in 100 · out 325 · <$0.001 · aborted');
+  await act(async()=>root.unmount());
+});
+
+it('keeps tiny positive costs visibly nonzero',()=>{expect(money(.0000005)).toBe('<$0.001');expect(money(.00125)).toBe('$0.00125');expect(money(0)).toBe('$0.000');});
+
+it('keeps the full usage description available when narrow panes show the token count',async()=>{
+  const host=document.createElement('div');const root=createRoot(host);
+  const record=usageRecordSchema.parse({kind:'chat',id:'00000000-0000-4000-8000-000000000001',conversationId:'00000000-0000-4000-8000-000000000002',documentId:'00000000-0000-4000-8000-000000000003',providerId:'openai-api',modelId:'model',createdAt:'2026-11-03T12:00:00Z',inputTokens:1200,outputTokens:340,costUsd:.012,costSource:'reported',aborted:true});
+  await act(async()=>root.render(createElement(UsageButton,{onClick:()=>{},error:'',data:{settings:defaultSettings,month:{inputTokens:0,outputTokens:0,calls:0,unknownPrices:0,groups:[]},records:[record]}})));
+  expect(host.querySelector('.usage-full')?.textContent).toBe('1.5k tokens · $0.012 · includes aborted turns');
+  expect(host.querySelector('.usage-compact')?.textContent).toBe('1.5k');
+  expect(host.querySelector('button')?.title).toBe('1.5k tokens · $0.012 · includes aborted turns · View usage and budget settings');
   await act(async()=>root.unmount());
 });
