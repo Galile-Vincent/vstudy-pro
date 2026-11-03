@@ -56,8 +56,14 @@ function Demo({ source, playing, reduced, side }: { source: string; playing: boo
   const graphemes = Intl.Segmenter ? [...new Intl.Segmenter(document.documentElement.lang || 'en', { granularity: 'grapheme' }).segment(question)].length : question.length;
   const index = script.findIndex(([name]) => name === step);
   useEffect(() => {
-    const target = stage.current?.querySelector('.demo-reader-content [data-demo-depth="2"]');
-    if (target instanceof HTMLElement) stage.current?.style.setProperty('--demo-jump', `${target.offsetTop}px`);
+    const update = () => {
+      const target = stage.current?.querySelector('.demo-reader-content [data-demo-depth="2"]');
+      if (target instanceof HTMLElement) stage.current?.style.setProperty('--demo-jump', `${target.offsetTop}px`);
+    };
+    update();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update);
+    if (stage.current) observer?.observe(stage.current);
+    return () => observer?.disconnect();
   }, [source]);
   useEffect(() => {
     const animations = stage.current?.getAnimations?.({ subtree: true }) ?? [];
@@ -76,7 +82,7 @@ function Demo({ source, playing, reduced, side }: { source: string; playing: boo
     <div ref={stage} className="demo-stage" style={{ '--typing-duration': `${Math.min(1200, graphemes * 45)}ms`, '--typing-steps': graphemes } as CSSProperties} aria-hidden="true" inert data-step={step} data-index={index} data-playing={playing && visible && !reduced} data-side={side}>
 
       <div className="reading-pane w-demo-reader"><div className="pane-toolbar">{tr('welcome:sample_filename')}<small>{tr('welcome:sample_format')}</small></div><div className="w-reader-clip"><div className="demo-reader-content"><MemoReader decorative source={source} documentId={sampleId} onSelect={ignore} onNotice={ignore}/></div></div></div>
-      <div className="w-demo-chat"><span className="w-demo-hint">{tr('welcome:demo_step_1')}</span><div className="aui-user-message-content w-demo-question">{tr('welcome:demo_question')}</div><div className="w-thinking"><span/><span/><span/></div><div className="aui-assistant-message-content w-demo-answer"><ReplyMarkdown text={tr('welcome:demo_answer')} revealWords/><CitationChip/></div><div className="w-demo-composer"><span className="selection-chip">{tr('welcome:demo_selection')}</span><div className="w-draft"><p className="w-placeholder">{tr("common:ask_document_placeholder")}</p><p className="w-typed">{tr("welcome:demo_question")}</p></div><small>{tr('welcome:demo_model_chip')}</small></div></div>
+      <div className="w-demo-chat"><span className="w-demo-hint">{tr('welcome:demo_step_1')}</span><div className="aui-user-message-content w-demo-question">{tr('welcome:demo_question')}</div><div className="w-thinking"><span/><span/><span/></div><div className="aui-assistant-message-content w-demo-answer"><ReplyMarkdown text={tr('welcome:demo_answer')} revealWords/><CitationChip/></div><div className="w-demo-composer"><span className="selection-chip">{source.split('\n\n')[2]}</span><div className="w-draft"><p className="w-placeholder">{tr("common:ask_document_placeholder")}</p><p className="w-typed">{tr("welcome:demo_question")}</p></div><small>{tr('welcome:demo_model_chip')}</small></div></div>
     </div></div><div className="w-demo-footer"><span>{tr('welcome:example_badge')}</span><p><ArrowLeftRight size={16}/>{tr('welcome:demo_swap_hint')}</p><button className="ghost w-replay" onClick={() => { player.current?.replay(); if (reduced) player.current?.finish(); else { if (wasReduced.current) player.current?.replay(); player.current?.setPlaying(playing && visible); } wasReduced.current = reduced; }}>{tr('welcome:demo_replay')}</button></div></>;
 }
 function ProviderCard({ id }: { id: typeof PROVIDER_KINDS[number] }) {
