@@ -8,16 +8,20 @@ import os
 import sys
 import zipfile
 
+DIAGNOSTICS = {}
+
 MAX_OUTPUT = 8 * 1024 * 1024
 
 
 def convert_document(source):
     no_text = False
     if os.path.splitext(source)[1].lower() == ".pdf":
-        from pdf_md import convert_pdf, NoTextLayer
+        from pdf_md import convert_pdf, NoTextLayer, PasswordProtected, ResourceLimit
 
         try:
-            return convert_pdf(source), "pdf_md"
+            return convert_pdf(source, DIAGNOSTICS), "pdf_md"
+        except (PasswordProtected, ResourceLimit):
+            raise
         except NoTextLayer:
             no_text = True
         except Exception:
@@ -36,7 +40,7 @@ def convert_document(source):
 
             raise NoTextLayer("no text layer; OCR not supported yet") from None
         raise
-    if no_text and not text.strip():
+    if no_text and len(text.strip()) < 40:
         from pdf_md import NoTextLayer
 
         raise NoTextLayer("no text layer; OCR not supported yet")
@@ -47,6 +51,21 @@ def main():
     if len(sys.argv) != 4:
         raise ValueError("Usage: convert.py <input> <output.md>")
     source, target, library_target = sys.argv[1:]
+    import resource
+    import threading
+    import time
+
+    def monitor_memory():
+        while True:
+            rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            if sys.platform != "darwin":
+                rss *= 1024
+            if rss > 1500 * 1024 * 1024:
+                os.write(2, b'{"code":"PDF_RESOURCE_LIMIT","error":"Converter memory limit exceeded"}\n')
+                os._exit(1)
+            time.sleep(0.05)
+
+    threading.Thread(target=monitor_memory, daemon=True).start()
     # Office/EPUB containers can expand far beyond their on-disk size.
     if zipfile.is_zipfile(source):
         with zipfile.ZipFile(source) as archive:
@@ -81,7 +100,7 @@ def main():
     with open(target, "wb") as output:
         output.write(content)
     with open(target + ".json", "w") as metadata:
-        json.dump({"converter": converter}, metadata)
+        json.dump({"converter": converter, **DIAGNOSTICS}, metadata)
 
 
 if __name__ == "__main__":

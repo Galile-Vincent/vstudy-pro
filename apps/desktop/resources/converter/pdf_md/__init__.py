@@ -4,6 +4,87 @@ from collections import Counter
 from dataclasses import dataclass, replace
 from statistics import median
 import re
+import html
+import signal
+from contextlib import contextmanager
+
+
+class ContentLoss(ValueError):
+    code = "CONTENT_LOSS"
+
+
+class ExtractionTimeout(ValueError):
+    code = "PDF_TIME_LIMIT"
+
+
+class ResourceLimit(ValueError):
+    code = "PDF_RESOURCE_LIMIT"
+
+
+class PasswordProtected(ValueError):
+    code = "PASSWORD_PROTECTED"
+
+
+def tokens(text):
+    return Counter(re.findall(r"[\u2e80-\u9fff\uf900-\ufaff]|[A-Za-z0-9]+", html.unescape(text).lower()))
+
+
+def preservation(source, output, removed, diagnostics):
+    expected = tokens(source) - tokens(removed)
+    actual = tokens(re.sub(r"<!-- page \d+ -->|> note:", "", output))
+    missing = sum((expected - actual).values())
+    ratio = missing / max(1, sum(expected.values()))
+    diagnostics.update(loss_ratio=ratio, missing_tokens=missing, source_tokens=sum(expected.values()))
+    if not output.strip() or not actual or ratio > 0.03:
+        raise ContentLoss("PDF extraction lost source content")
+
+
+@contextmanager
+def extraction_limits(seconds=72, stream_bytes=16 * 1024 * 1024):
+    import pdfminer.pdftypes as types
+    import zlib
+    original = types.zlib
+
+    class BoundedZlib:
+        error = zlib.error
+
+        @staticmethod
+        def decompress(data):
+            decoder = zlib.decompressobj()
+            result = decoder.decompress(data, stream_bytes + 1)
+            if len(result) > stream_bytes or decoder.unconsumed_tail:
+                raise ResourceLimit("PDF stream exceeds decompression limit")
+            return result
+
+    def expired(*_):
+        raise ExtractionTimeout("PDF extraction time budget exceeded")
+
+    old_handler = signal.signal(signal.SIGALRM, expired)
+    types.zlib = BoundedZlib
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, old_handler)
+        types.zlib = original
+
+
+def dedupe_chars(chars):
+    buckets = {}
+    result = []
+    for c in chars:
+        x, y = round(c["x0"]), round(c["top"])
+        key = (c["text"], c.get("fontname"), round(c["size"], 1))
+        duplicate = any(
+            abs(c["x0"] - o["x0"]) <= 0.5 and abs(c["top"] - o["top"]) <= 0.5
+            for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+            for o in buckets.get((key, x + dx, y + dy), ())
+        )
+        if not duplicate:
+            result.append(c)
+            buckets.setdefault((key, x, y), []).append(c)
+    return result
 
 
 class NoTextLayer(ValueError):
@@ -280,7 +361,7 @@ def blocks_to_markdown(blocks):
     return output
 
 
-def remove_running_margins(pages, heights):
+def remove_running_margins(pages, heights, removed=None):
     counts = Counter()
     for lines, height in zip(pages, heights):
         counts.update(
@@ -290,17 +371,22 @@ def remove_running_margins(pages, heights):
                 if l.top < height * 0.1 or l.bottom > height * 0.9
             }
         )
-    return [
-        [
-            l
-            for l in lines
-            if not re.fullmatch(r"\s*[-–]?\s*\d+\s*[-–]?\s*", l.text)
-            and not (
-                len(pages) >= 3 and counts[(l.text, round(l.top / 4))] > len(pages) / 2
-            )
-        ]
-        for lines in pages
-    ]
+    result = []
+    for lines, height in zip(pages, heights):
+        kept = []
+        for line in lines:
+            margin = line.top < height * 0.1 or line.bottom > height * 0.9
+            repeated = len(pages) >= 3 and counts[(line.text, round(line.top / 4))] > len(pages) / 2
+            numeric = re.fullmatch(r"\s*[-–]?\s*\d+\s*[-–]?\s*", line.text)
+            peers = [l for page in pages for l in page if numeric and re.fullmatch(r"\s*[-–]?\s*\d+\s*[-–]?\s*", l.text) and abs(l.top - line.top) < 4]
+            sequence = len(pages) >= 2 and len(peers) == len(pages) and len({l.text for l in peers}) == len(pages)
+            if margin and (repeated or numeric and sequence):
+                if removed is not None:
+                    removed.append(line.text)
+            else:
+                kept.append(line)
+        result.append(kept)
+    return result
 
 
 def ruled_tables(page):
@@ -325,14 +411,31 @@ def ruled_tables(page):
     return tables
 
 
-def convert_pdf(path):
+def convert_pdf(path, diagnostics=None):
+    diagnostics = diagnostics if diagnostics is not None else {}
+    with extraction_limits():
+        try:
+            return _convert_pdf(path, diagnostics)
+        except Exception as error:
+            from pdfminer.pdfdocument import PDFPasswordIncorrect
+            if isinstance(error, PDFPasswordIncorrect):
+                raise PasswordProtected("Password-protected PDF") from None
+            raise
+
+
+def _convert_pdf(path, diagnostics):
     import pdfplumber
 
     pages, heights, tables, images = [], [], [], []
     text_chars = 0
+    raw_text = []
+    removed = []
     with pdfplumber.open(path) as pdf:
+        if len(pdf.pages) > 1000:
+            raise ResourceLimit("PDF exceeds 1000-page limit")
         for page in pdf.pages:
-            chars = page.dedupe_chars().chars
+            chars = dedupe_chars(page.chars)
+            raw_text.append(page.extract_text() or "")
             text_chars += sum(len(c["text"].strip()) for c in chars)
             # Annotation fonts are a separate text layer on many digitally marked worksheets.
             chars = [
@@ -372,9 +475,10 @@ def convert_pdf(path):
             heights.append(page.height)
             tables.append(grids)
             images.append(len(page.images))
-        if text_chars < 12:
+            page.flush_cache()
+        if text_chars == 0:
             raise NoTextLayer("no text layer; OCR not supported yet")
-        pages = remove_running_margins(pages, heights)
+        pages = remove_running_margins(pages, heights, removed)
         body = (
             median(l.size for p in pages for l in p if not l.note)
             if any(not l.note for p in pages for l in p)
@@ -415,4 +519,6 @@ def convert_pdf(path):
             if images[n]:
                 output[-1] += f"\n\n[Embedded images omitted: {images[n]}]"
             previous = next((b for b in reversed(blocks) if b.kind != "note"), None)
-    return "".join(output).lstrip() + "\n"
+    result = "".join(output).lstrip() + "\n"
+    preservation("\n".join(raw_text), result, "\n".join(removed), diagnostics)
+    return result

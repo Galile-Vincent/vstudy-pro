@@ -154,3 +154,26 @@ class PdfTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class SafeguardTests(unittest.TestCase):
+    def test_preservation_and_loss_diagnostics(self):
+        from pdf_md import preservation, ContentLoss
+        diagnostics = {}
+        preservation('中文 42 words', '<!-- page 1 -->\n中文 42 words', '', diagnostics)
+        self.assertEqual(diagnostics, {'loss_ratio': 0.0, 'missing_tokens': 0, 'source_tokens': 4})
+        with self.assertRaisesRegex(ContentLoss, 'PDF extraction lost source content'):
+            preservation('42 7 2024', '<!-- page 1 -->', '', diagnostics)
+        self.assertEqual(diagnostics, {'loss_ratio': 1.0, 'missing_tokens': 3, 'source_tokens': 3})
+
+    def test_stream_limit(self):
+        import zlib
+        import pdfminer.pdftypes as types
+        from pdf_md import extraction_limits, ResourceLimit
+        with extraction_limits(stream_bytes=100):
+            with self.assertRaisesRegex(ResourceLimit, 'PDF stream exceeds decompression limit'):
+                types.zlib.decompress(zlib.compress(b'%' * 101))
+
+    def test_numbers_inside_body_survive(self):
+        pages = [[Line(t, 10, 200 + i * 40, 50, 212 + i * 40, 12)
+                  for i, t in enumerate(('42', '7', '2024'))]]
+        self.assertEqual(blocks_to_markdown(lines_to_blocks(remove_running_margins(pages, [800])[0])), '42\n\n7\n\n2024')
