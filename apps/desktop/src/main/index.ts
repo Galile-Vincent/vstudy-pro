@@ -1,0 +1,96 @@
+import { app, BrowserWindow, session, safeStorage } from "electron";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
+import { mkdirSync } from "node:fs";
+import { openStore, type Store } from "./db";
+import { registerIpc } from "./ipc";
+import { createSecretStore } from "./services/secrets";
+import { developmentCsp, isAppUrl, productionCsp } from "./security";
+
+let store: Store | undefined;
+let disposeIpc: (() => void) | undefined;
+let window: BrowserWindow | null = null;
+const developmentUrl = !app.isPackaged
+  ? process.env.ELECTRON_RENDERER_URL
+  : undefined;
+const entryUrl =
+  developmentUrl ??
+  pathToFileURL(join(__dirname, "../renderer/index.html")).href;
+
+function createWindow(): void {
+  const current = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    minWidth: 720,
+    minHeight: 480,
+    show: false,
+    title: "VStudy Pro",
+    webPreferences: {
+      preload: join(__dirname, "../preload/index.js"),
+      contextIsolation: true,
+      sandbox: true,
+      nodeIntegration: false,
+      webSecurity: true,
+    },
+  });
+  window = current;
+  current.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  current.webContents.on("will-navigate", (event, url) => {
+    if (!isAppUrl(url, entryUrl)) event.preventDefault();
+  });
+  current.webContents.on("will-redirect", (event, url) => {
+    if (!isAppUrl(url, entryUrl)) event.preventDefault();
+  });
+  current.webContents.on("will-attach-webview", (event) =>
+    event.preventDefault(),
+  );
+  current.once("ready-to-show", () => current.show());
+  current.on("closed", () => {
+    if (window === current) window = null;
+  });
+  void current.loadURL(entryUrl);
+}
+
+void app.whenReady().then(() => {
+  const userData = app.getPath("userData");
+  mkdirSync(userData, { recursive: true });
+  store = openStore(join(userData, "vstudy.sqlite"));
+  const secrets = createSecretStore(
+    join(userData, "secrets.json"),
+    safeStorage,
+  );
+  session.defaultSession.setPermissionRequestHandler(
+    (_webContents, _permission, callback) => callback(false),
+  );
+  session.defaultSession.setPermissionCheckHandler(() => false);
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) =>
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        "Content-Security-Policy": [
+          developmentUrl ? developmentCsp(entryUrl) : productionCsp,
+        ],
+      },
+    }),
+  );
+  disposeIpc = registerIpc(
+    store,
+    secrets,
+    (event) =>
+      !!window &&
+      event.sender === window.webContents &&
+      event.senderFrame === window.webContents.mainFrame &&
+      isAppUrl(event.senderFrame.url, entryUrl),
+  );
+  createWindow();
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
+});
+app.on("will-quit", () => {
+  disposeIpc?.();
+  store?.close();
+});
