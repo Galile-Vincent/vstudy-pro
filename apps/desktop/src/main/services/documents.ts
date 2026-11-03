@@ -190,8 +190,12 @@ export class DocumentService {
         });
       }
     }).finally(() => { this.jobs.delete(document.id); activeConversions.delete(document.id); });
-    this.jobs.set(document.id, job);
-    this.queue = job;
+    const recovered = job.catch(() => {
+      // Leave the durable converting marker for startup recovery; never log paths or converter output.
+      console.error("Conversion finalization failed; pending startup recovery");
+    });
+    this.jobs.set(document.id, recovered);
+    this.queue = recovered;
   }
 
   async waitForIdle(): Promise<void> { await this.operations; await this.queue; }
