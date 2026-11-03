@@ -100,6 +100,11 @@ export function Workspace() {
     if (!activeConversation.current) setModel(current => resolveModel(current, list));
   }, []);
   useEffect(() => {
+    const refresh = () => { void desktop.invoke('providers:list',{discover:false}).then(setProviders).catch(report); };
+    window.addEventListener('vstudy:providers-changed',refresh);
+    return () => window.removeEventListener('vstudy:providers-changed',refresh);
+  },[report]);
+  useEffect(() => {
     let active = true;
     void Promise.all([
       desktop.invoke("settings:get", {}),

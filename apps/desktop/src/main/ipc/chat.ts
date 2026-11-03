@@ -34,11 +34,12 @@ export function registerChatIpc(
   ] as const;
   for (const channel of channels) implemented.add(channel);
   registrar.handle("providers:list", ({discover}) => providers.list(discover));
-  registrar.handle("providers:configure", (config) => {
+  registrar.handle("providers:configure", (config, event) => {
     const previous = providers.config(config.id);
     if (config.kind === 'compatible' && previous.kind === 'compatible' && new URL(config.baseUrl).origin !== new URL(previous.baseUrl).origin) secrets.delete(config.id);
     if (config.kind === 'compatible') secrets.bindCompatibleOrigin(config.baseUrl);
     providers.configure(config);
+    event.sender?.send?.('vstudy:providers-changed');
     return { ok: true };
   });
   registrar.handle("conversations:create", async (input) => {

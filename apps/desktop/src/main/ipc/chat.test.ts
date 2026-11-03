@@ -46,10 +46,11 @@ it("registers every chat handler with validated repository round trips and dispo
     implemented,
     registry,
   );
+  const notify = vi.fn();
   const event = {
     sender: Object.assign(new EventEmitter(), {
       isDestroyed: () => false,
-      send: () => {},
+      send: notify,
     }),
   } as unknown as IpcMainInvokeEvent;
   const invoke = async (channel: string, payload: unknown) => {
@@ -108,6 +109,7 @@ it("registers every chat handler with validated repository round trips and dispo
         enabled: false,
       }),
     ).toEqual({ ok: true });
+    expect(notify).toHaveBeenLastCalledWith("vstudy:providers-changed");
     await expect(
       invoke("chat:start", {
         requestId: randomUUID(),
