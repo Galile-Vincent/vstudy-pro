@@ -1,6 +1,6 @@
 # Library design review
 
-Implementation: persistent shell, folder sidebar, Library and extracted reader/chat workspace. Home and onboarding belong to B2. The shell shipped first in `81767ab`; Library first shipped in `6ca6a75`. Both commits are local: GitHub SSH rejected the available key (`Permission denied (publickey)`).
+Implementation: persistent shell, folder sidebar, Library and extracted reader/chat workspace. Home and onboarding belong to B2. The shell shipped first in `81767ab`; Library first shipped in `6ca6a75`. The initial SSH push failed (`Permission denied (publickey)`); the complete commit series was subsequently pushed to `main` using existing HTTPS credentials.
 
 ## Round 1 — inspect, revise
 

@@ -246,7 +246,7 @@ try {
     .locator(".bulk-bar")
     .getByRole("button", { name: "Delete", exact: true })
     .click();
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await page.locator('.library-view').getByRole("button", { name: "Undo", exact: true }).click();
   await page.getByRole("button", { name: "Lesson 0", exact: true }).waitFor();
   await app.evaluate(
     ({ dialog }, path) => {

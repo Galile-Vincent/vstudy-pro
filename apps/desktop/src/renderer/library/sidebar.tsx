@@ -93,13 +93,13 @@ export function LibrarySidebar() {
       const doc = e.dataTransfer.getData("application/vstudy-documents"),
         source = e.dataTransfer.getData("application/vstudy-folder");
       if (doc) {
-        await moveDocuments(JSON.parse(doc), folder.id);
         const origins = JSON.parse(
           e.dataTransfer.getData("application/vstudy-origin") || "[]",
         ) as {
           id: import("../../shared").Document["id"];
           folderId: Folder["id"] | null;
         }[];
+        await moveDocuments(JSON.parse(doc), folder.id);
         if (origins.length)
           setUndo(() => async () => {
             for (const origin of origins)
