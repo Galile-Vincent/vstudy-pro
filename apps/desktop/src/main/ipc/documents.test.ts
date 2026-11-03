@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { IpcMainInvokeEvent } from "electron";
 import { documentSchema } from "../../shared/domain";
+import { documentProgressSchema } from "../../shared/ipc";
 import type { IpcChannel } from "../../shared/ipc";
 import { openStore } from "../db";
 import { createIpcRegistrar } from "./register";
@@ -15,7 +16,7 @@ vi.mock("electron", () => ({
 }));
 vi.mock("../../../resources/converter", async (original) => ({
   ...await original<typeof import("../../../resources/converter")>(),
-  createConverter: () => ({ convert: async (_source: string, output: string) => { await writeFile(output, "converted"); } }),
+  createConverter: () => ({ convert: async (_source: string, output: string, progress?: (message: string) => void) => { await new Promise(resolve => setTimeout(resolve, 5)); progress?.("Installing markitdown…"); await writeFile(output, "converted"); } }),
 }));
 import { registerDocumentsIpc } from "./documents";
 
@@ -29,11 +30,14 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     removeHandler: (channel) => { handlers.delete(channel); },
   }, () => true);
   const implemented = new Set<IpcChannel>();
-  registerDocumentsIpc(registrar, store, implemented);
+  const abort = vi.fn();
+  registerDocumentsIpc(registrar, store, implemented, abort);
+  const send = vi.fn();
+  const sender = { isDestroyed: () => false, send };
   const invoke = async (channel: string, payload: unknown) => {
     const handler = handlers.get(channel);
     if (!handler) throw new Error("Missing handler");
-    return handler({} as IpcMainInvokeEvent, payload);
+    return handler({ sender } as unknown as IpcMainInvokeEvent, payload);
   };
   try {
     expect(implemented.size).toBe(7);
@@ -49,11 +53,19 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     expect(await invoke("documents:get", { documentId: document.id })).toMatchObject({ id: document.id });
     expect(await invoke("documents:list", {})).toHaveLength(1);
     expect(await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.md")] })).toHaveLength(1);
+    const mixed = await invoke("documents:importPaths", { paths: ["missing.unsupported", resolve("test-fixtures/converter/sample.md")] }) as { ok: boolean; error?: string }[];
+    expect(mixed.map(r => r.ok)).toEqual([false, true]);
+    expect(mixed[0]?.error).toBe("Unsupported document type");
+    const converted = await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.docx")] }) as { document: { id: string } }[];
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+    expect(send.mock.calls[0]?.[0]).toBe("documents:progress");
+    expect(documentProgressSchema.parse(send.mock.calls[0]?.[1])).toEqual({ documentId: converted[0]!.document.id, message: "Installing markitdown…" });
     await expect(invoke("documents:importPaths", { paths: [] })).rejects.toThrow();
     await expect(invoke("documents:importPaths", { paths: [12] })).rejects.toThrow();
     await expect(invoke("documents:importPaths", { paths: ["file.md"], extra: true })).rejects.toThrow();
     await expect(invoke("documents:retry", { documentId: document.id })).rejects.toThrow("Only failed");
     expect(await invoke("documents:delete", { documentId: document.id })).toEqual({ ok: true });
+    expect(abort.mock.calls[0]).toEqual([document.id]);
     expect(await invoke("documents:get", { documentId: document.id })).toBeNull();
   } finally {
     registrar.dispose();

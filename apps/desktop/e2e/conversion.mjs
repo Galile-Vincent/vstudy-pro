@@ -8,6 +8,8 @@ import { join, resolve } from "node:path";
 
 const directory = await mkdtemp(join(tmpdir(), "vstudy-conversion-e2e-"));
 const fixtures = join(directory, "fixtures");
+const unsupported = join(directory, "unsupported.exe");
+await writeFile(unsupported, "unsupported");
 execFileSync("python3", ["test-fixtures/converter/generate.py", fixtures]);
 let app, page;
 try {
@@ -30,15 +32,16 @@ try {
       await page.evaluate(() => {
         const input = window.document.createElement("input");
         input.type = "file";
+        input.multiple = true;
         input.id = "e2e-drop-file";
         input.hidden = true;
         window.document.body.append(input);
       });
-      await page.locator("#e2e-drop-file").setInputFiles(path);
+      await page.locator("#e2e-drop-file").setInputFiles([unsupported, path]);
       await page.evaluate(() => {
         const input = window.document.querySelector("#e2e-drop-file");
         const dataTransfer = new window.DataTransfer();
-        dataTransfer.items.add(input.files[0]);
+        for (const file of input.files) dataTransfer.items.add(file);
         window.document.querySelector(".workspace").dispatchEvent(new window.DragEvent("drop", { bubbles: true, dataTransfer }));
         input.remove();
       });
@@ -55,6 +58,7 @@ try {
     }, `sample.${extension}`);
     assert.equal(importedDocument.status, "ready", importedDocument.error ?? "Document must finish conversion");
     if (extension === "docx") {
+      assert.ok((await page.locator(".notice").innerText()).includes("Unsupported document type"), "per-file import failure is reported while successful file opens");
       await viewer.locator("img").waitFor();
       await page.waitForFunction(() => {
         const image = window.document.querySelector('[data-testid="document-markdown"] img');

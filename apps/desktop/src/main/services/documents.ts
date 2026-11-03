@@ -28,6 +28,7 @@ export class DocumentService {
     store: Store;
     userData: string;
     convert: ConverterRunner;
+    onProgress?: (documentId: Document["id"], message: string) => void;
   }) {
     this.library = join(options.userData, "library");
     for (const document of this.list()) {
@@ -132,7 +133,7 @@ export class DocumentService {
           if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
           await writeFile(`${document.markdownPath}.tmp`, content, { mode: 0o600 });
           await rename(`${document.markdownPath}.tmp`, document.markdownPath);
-        } else await this.options.convert(document.sourcePath, document.markdownPath);
+        } else await this.options.convert(document.sourcePath, document.markdownPath, message => this.options.onProgress?.(document.id, message));
         if ((await stat(document.markdownPath)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
         if (!this.stopped) this.options.store.documents.transition(document.id, { status: "ready" });
       } catch (error) {

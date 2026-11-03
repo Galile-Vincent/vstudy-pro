@@ -15,7 +15,7 @@ export function registerChatIpc(
     secrets,
     join(app.getPath("userData"), "providers.json"),
   ),
-): void {
+): ChatService {
   const chat = new ChatService(store, providers);
   const channels = [
     "providers:list",
@@ -59,4 +59,5 @@ export function registerChatIpc(
     chat.dispose();
     dispose();
   };
+  return chat;
 }

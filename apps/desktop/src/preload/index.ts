@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 import {
+  documentProgressChannel, documentProgressSchema,
   chatEnvelopeSchema,
   chatEventChannel,
   ipcContract,
@@ -11,6 +12,14 @@ import {
 } from "../shared";
 
 const api: DesktopApi = {
+  onDocumentProgress(listener) {
+    const receive = (_event: Electron.IpcRendererEvent, payload: unknown) => {
+      const parsed = documentProgressSchema.safeParse(payload);
+      if (parsed.success) listener(parsed.data);
+    };
+    ipcRenderer.on(documentProgressChannel, receive);
+    return () => ipcRenderer.removeListener(documentProgressChannel, receive);
+  },
   getPathForFile: (file) => webUtils.getPathForFile(file),
   async invoke<C extends IpcChannel>(
     channel: C,

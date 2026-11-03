@@ -1,4 +1,5 @@
-import { shell, ipcMain, type IpcMainInvokeEvent } from "electron";
+import { createProviderRegistry } from "../providers";
+import { app, shell, ipcMain, type IpcMainInvokeEvent } from "electron";
 import type { Store } from "../db";
 import type { SecretStore } from "../services/secrets";
 import { ipcContract, type IpcChannel } from "../../shared/ipc";
@@ -11,6 +12,7 @@ export function registerIpc(
   secrets: SecretStore,
   isTrusted: (event: IpcMainInvokeEvent) => boolean,
 ): () => void {
+  const providers = createProviderRegistry(secrets, `${app.getPath("userData")}/providers.json`);
   const registrar = createIpcRegistrar(ipcMain, isTrusted);
   const implemented = new Set<IpcChannel>([
     "shell:openExternal",
@@ -28,6 +30,7 @@ export function registerIpc(
   registrar.handle("settings:set", (settings) => store.settings.set(settings));
   registrar.handle("secrets:set", ({ providerId, key }) => {
     secrets.set(providerId, key);
+    providers.configure({ ...providers.config(providerId), enabled: true });
     return { ok: true };
   });
   registrar.handle("secrets:has", ({ providerId }) => ({
@@ -38,8 +41,8 @@ export function registerIpc(
     secrets.delete(providerId);
     return { ok: true };
   });
-  registerDocumentsIpc(registrar, store, implemented);
-  registerChatIpc(registrar, store, secrets, implemented);
+  const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
+  registerDocumentsIpc(registrar, store, implemented, id => chat.abortDocument(id));
   for (const channel of Object.keys(ipcContract) as IpcChannel[]) {
     if (!implemented.has(channel))
       registrar.handle(channel, () => {

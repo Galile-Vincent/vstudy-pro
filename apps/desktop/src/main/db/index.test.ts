@@ -121,3 +121,10 @@ describe("SQLite repositories", () => {
     ).toBeNull();
   });
 });
+it("lists conversations newest first", () => {
+  const { store, document, conversation } = fixture();
+  store.documents.insert(document);
+  store.conversations.insert({ ...conversation, createdAt: "2025-01-01T00:00:00.000Z", modelId: "older" });
+  store.conversations.insert({ ...conversation, id: randomUUID() as typeof conversation.id, createdAt: "2026-01-01T00:00:00.000Z", modelId: "newest" });
+  expect(store.conversations.list(document.id).map(c => c.modelId)).toEqual(["newest", "older"]);
+});

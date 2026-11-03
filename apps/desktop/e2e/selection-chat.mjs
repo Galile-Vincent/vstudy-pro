@@ -148,6 +148,33 @@ try {
     await viewer.getByRole("link", { name: "Reference website" }).click();
     assert.equal(await app.evaluate(() => globalThis.vstudyOpenedUrl), "https://example.com");
   }
+  if (!mock) {
+    await page.reload();
+    await page.locator(".message.user blockquote").waitFor();
+    assert.equal(await page.locator(".message.user blockquote").innerText(), selectedText, "structured selection survives reload");
+    await page.evaluate(() => window.desktop.invoke("providers:configure", { kind: "api", id: "anthropic-api", enabled: false }));
+    await page.getByRole("alert").filter({ hasText: "This conversation’s provider is unavailable" }).waitFor();
+    assert.equal(await page.getByRole("button", { name: "Send message", exact: true }).isDisabled(), true);
+    await page.evaluate(() => window.desktop.invoke("providers:configure", { kind: "api", id: "anthropic-api", enabled: true }));
+    await page.getByRole("alert").filter({ hasText: "This conversation’s provider is unavailable" }).waitFor({ state: "hidden" });
+    await page.getByRole("textbox", { name: "Ask about your document", exact: true }).fill("Keep this draft");
+    const picker = page.getByRole("combobox", { name: "Model", exact: true });
+    const alternative = await picker.locator("option:not([disabled])").evaluateAll(options => options.map(o => o.value).find(value => value && !value.startsWith("anthropic-api/")));
+    if (alternative) {
+      await picker.selectOption(alternative);
+      assert.equal(await page.getByRole("textbox", { name: "Ask about your document", exact: true }).inputValue(), "Keep this draft");
+      assert.ok((await page.locator(".notice").innerText()).includes("next conversation"));
+    }
+    page.once("dialog", dialog => dialog.accept());
+    await page.getByRole("button", { name: "Delete conversation", exact: true }).click();
+    await page.locator(".chat-start").waitFor();
+    page.once("dialog", dialog => dialog.dismiss());
+    await page.getByRole("button", { name: "Delete document", exact: true }).click();
+    assert.equal(await page.locator(".document-item").count(), 1, "cancel keeps document");
+    page.once("dialog", dialog => dialog.accept());
+    await page.getByRole("button", { name: "Delete document", exact: true }).click();
+    await page.locator(".document-item").waitFor({ state: "detached" });
+  }
   assert.deepEqual(errors, []);
   console.log(
     JSON.stringify({

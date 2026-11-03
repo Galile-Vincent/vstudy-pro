@@ -31,6 +31,8 @@ export function App() {
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [loadingSource, setLoadingSource] = useState(false);
+  const [progress, setProgress] = useState<Record<string, string>>({});
+  useEffect(() => desktop.onDocumentProgress?.(event => setProgress(current => ({ ...current, [event.documentId]: event.message }))), []);
   const doc = documents.find((d) => d.id === documentId);
   const report = useCallback(
     (error: unknown) =>
@@ -40,8 +42,11 @@ export function App() {
     [],
   );
   const refreshProviders = useCallback(async () => {
-    setProviders(await desktop.invoke("providers:list", {}));
+    const list = await desktop.invoke("providers:list", {});
+    setProviders(list);
+    setModel(current => current || (() => { const p = list.find(p => p.config.enabled && p.availability.available && p.models.length); return p ? `${p.config.id}/${p.models[0]!.id}` : ""; })());
   }, []);
+  useEffect(() => { const timer = setInterval(() => { void refreshProviders().catch(report); }, 2000); return () => clearInterval(timer); }, [refreshProviders, report]);
   useEffect(() => {
     let active = true;
     void Promise.all([
@@ -105,6 +110,7 @@ export function App() {
         if (active) {
           setConversations(list);
           setConversation(list[0] ?? null);
+          if (list[0]) setModel(`${list[0].providerId}/${list[0].modelId}`);
         }
       })
       .catch(report);
@@ -167,8 +173,7 @@ export function App() {
       (conversation.providerId !== providerId ||
         conversation.modelId !== modelId)
     ) {
-      setConversation(null);
-      setHistory(null);
+      setNotice("Model will be used for the next conversation. Your current conversation and draft are kept.");
     }
   };
   const importing = useRef(false);
@@ -177,9 +182,9 @@ export function App() {
     importing.current = true;
     setBusy(true);
     try {
-      const imported = paths
-        ? (await desktop.invoke("documents:importPaths", { paths }))[0]
-        : await desktop.invoke("documents:import", {});
+      const results = paths ? await desktop.invoke("documents:importPaths", { paths }) : null;
+      const imported = results ? results.find(r => r.ok)?.document : await desktop.invoke("documents:import", {});
+      if (results) setNotice(results.filter(r => !r.ok).map(r => `${r.path}: ${r.error}`).join("\n"));
       if (imported) {
         setDocuments(await desktop.invoke("documents:list", {}));
         setDocumentId(imported.id);
@@ -187,6 +192,7 @@ export function App() {
     } catch (error) {
       report(error);
     } finally {
+      setDocuments(await desktop.invoke("documents:list", {}));
       importing.current = false;
       setBusy(false);
     }
@@ -218,6 +224,9 @@ export function App() {
     !!model &&
     selectedModel?.availability.available &&
     selectedModel.config.enabled;
+  useEffect(() => {
+    if (selection && !conversation && canChat && !busy) void newConversation();
+  }, [selection, conversation, canChat, busy]);
   const chat = (
     <section className="pane chat-pane" aria-label="Chat">
       <div className="pane-toolbar">
@@ -241,6 +250,12 @@ export function App() {
               </option>
             ))}
           </select>
+          {conversation && <button aria-label="Delete conversation" onClick={() => {
+            if (!window.confirm("Delete this conversation?")) return;
+            void desktop.invoke("conversations:delete", { conversationId: conversation.id }).then(() => {
+              setConversations(list => list.filter(c => c.id !== conversation.id)); setConversation(null); setHistory(null);
+            }).catch(report);
+          }}>Delete chat</button>}
           <button
             disabled={!canChat || busy}
             onClick={() => void newConversation()}
@@ -307,6 +322,12 @@ export function App() {
     <section className="pane reading-pane" aria-label="Document">
       <div className="pane-toolbar">
         <span className="eyebrow">{doc?.sourceName ?? "Reading space"}</span>
+        {doc && <button aria-label="Delete document" onClick={() => {
+          if (!window.confirm(`Delete ${doc.title} and its conversations?`)) return;
+          void desktop.invoke("documents:delete", { documentId: doc.id }).then(async () => {
+            const list = await desktop.invoke("documents:list", {}); setDocuments(list); setDocumentId(list[0]?.id ?? null);
+          }).catch(report);
+        }}>Delete document</button>}
         <span className="muted">
           {doc?.status === "ready" ? "Markdown" : ""}
         </span>
@@ -327,7 +348,7 @@ export function App() {
         <div className="empty" role="status">
           <div className="spinner" />
           <h3>Preparing your document</h3>
-          <p>Converting {doc.sourceName} to Markdown…</p>
+          <p>{progress[doc.id] ?? "Converting…"} {doc.sourceName} to Markdown…</p>
         </div>
       ) : doc.status === "failed" ? (
         <div className="empty" role="alert">
@@ -362,7 +383,7 @@ export function App() {
           documentId={doc.id}
           onSelect={(value) => {
             setSelection(value);
-            if (!conversation && canChat && !busy) void newConversation();
+
           }}
           onNotice={setNotice}
         />

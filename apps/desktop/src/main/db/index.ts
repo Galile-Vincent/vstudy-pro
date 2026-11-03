@@ -166,7 +166,7 @@ export function openStore(path: string) {
           .parse(
             db
               .prepare(
-                "SELECT * FROM conversations WHERE documentId=? ORDER BY createdAt,id",
+                "SELECT * FROM conversations WHERE documentId=? ORDER BY createdAt DESC,id DESC",
               )
               .all(documentId),
           );

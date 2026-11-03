@@ -28,7 +28,7 @@ export const ipcContract = {
   "documents:import": { request: empty, response: documentSchema.nullable() },
   "documents:importPaths": {
     request: z.object({ paths: z.array(z.string().min(1).max(4096)).min(1).max(100) }).strict(),
-    response: z.array(documentSchema),
+    response: z.array(z.discriminatedUnion("ok", [z.object({ ok: z.literal(true), document: documentSchema }), z.object({ ok: z.literal(false), path: z.string(), error: z.string() })])),
   },
   "documents:list": { request: empty, response: z.array(documentSchema) },
   "documents:get": {
@@ -111,12 +111,15 @@ export type IpcRequest<C extends IpcChannel> = z.infer<
 export type IpcResponse<C extends IpcChannel> = z.infer<
   (typeof ipcContract)[C]["response"]
 >;
+export const documentProgressChannel = "documents:progress";
+export const documentProgressSchema = z.object({ documentId: documentIdSchema, message: z.string().min(1).max(200) }).strict();
 export const chatEventChannel = "chat:events";
 export const chatEnvelopeSchema = z
   .object({ requestId: requestIdSchema, event: chatEventSchema })
   .strict();
 export type ChatEnvelope = z.infer<typeof chatEnvelopeSchema>;
 export interface DesktopApi {
+  onDocumentProgress?(listener: (event: z.infer<typeof documentProgressSchema>) => void): () => void;
   getPathForFile?(file: File): string;
   invoke<C extends IpcChannel>(
     channel: C,
