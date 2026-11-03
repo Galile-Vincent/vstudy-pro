@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { AiParseState, AiParseEstimate } from '../../shared/ai-parse';
 export interface AiParsePanelProps {
  state:AiParseState; estimate:AiParseEstimate|undefined; modelPicker:ReactNode;
+ hardCapUsd:number; onHardCap:(cap:number)=>void; budgetOverride:boolean; onBudgetOverride:(confirmed:boolean)=>void;
  scope:'all'|'range'|'preview'; startPage:number; endPage:number;
  onScope:(scope:'all'|'range'|'preview')=>void; onRange:(start:number,end:number)=>void;
  onEstimate:()=>void; onStart:()=>void; onCancel:()=>void; onUse:(version:'original'|'ai')=>void; onDiscard:()=>void;
@@ -18,6 +19,8 @@ export function AiParsePanel(p:AiParsePanelProps) {
   {p.scope==='range' && <div><input type="number" min={1} value={p.startPage} aria-label={p.t('library:ai_parse.start_page')} onChange={e=>p.onRange(Number(e.target.value),p.endPage)}/><input type="number" min={p.startPage} value={p.endPage} aria-label={p.t('library:ai_parse.end_page')} onChange={e=>p.onRange(p.startPage,Number(e.target.value))}/></div>}
   <button className="rounded-md border px-3 py-1" disabled={busy} onClick={p.onEstimate}>{p.t('library:ai_parse.estimate')}</button>
   {p.estimate && <p aria-live="polite">{p.estimate.inputTokens+p.estimate.outputTokens} {p.t('library:ai_parse.tokens')} · {p.estimate.costUsd===undefined?p.t('library:ai_parse.unknown'):`USD ${p.estimate.costUsd.toFixed(4)}`} {p.estimate.billing==='api-equivalent'?p.t('library:ai_parse.equivalent'):''}{p.estimate.reason && p.t('errors.'+p.estimate.reason)}</p>}
+  <label className="block">{p.t('library:ai_parse.cap')}<input type="number" min={0.001} max={100} step={0.01} value={p.hardCapUsd} disabled={busy} onChange={e=>p.onHardCap(Number(e.target.value))} className="ml-2 rounded border px-2 py-1"/></label>
+  <label className="block"><input type="checkbox" checked={p.budgetOverride} disabled={busy} onChange={e=>p.onBudgetOverride(e.target.checked)}/>{p.t('library:ai_parse.override')}</label>
   <progress className="w-full" max={Math.max(1,p.state.pages.length)} value={done} aria-label={p.t('library:ai_parse.progress')}/>
   <ol className="flex flex-wrap gap-2">{p.state.pages.map(page=><li key={page.page} className="rounded border px-2 py-1"><span aria-hidden="true" className={`mr-1 inline-block size-2 rounded-full ${page.status==='done'?'bg-green-600':page.status==='failed'?'bg-destructive':'bg-muted-foreground'}`}/>{page.page} · {p.t('library:ai_parse.'+page.status)}</li>)}</ol>
   <div className="flex flex-wrap gap-2">{busy?<button onClick={p.onCancel}>{p.t('common:cancel')}</button>:<button disabled={!p.estimate || !!p.estimate.reason} onClick={p.onStart}>{p.t('library:ai_parse.start')}</button>}

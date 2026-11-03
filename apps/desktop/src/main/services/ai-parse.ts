@@ -128,7 +128,8 @@ export class AiParseService {
    }
   };
   try {
-   await Promise.all(Array.from({length:r.options.concurrency},async()=>{while(cursor<selected.length && !signal.aborted){const p=selected[cursor++];if(p)await page(p);}}));
+   const settled=await Promise.allSettled(Array.from({length:r.options.concurrency},async()=>{while(cursor<selected.length && !signal.aborted){const p=selected[cursor++];if(p)await page(p);}}));
+   if(settled.some(result=>result.status==='rejected'))controller.abort();
   } finally {
    this.store.db.prepare('UPDATE ai_parse_jobs SET status=?,updatedAt=? WHERE documentId=?').run(signal.aborted?'cancelled':'complete',new Date().toISOString(),d.id);
    await this.publish(d,pages);notify();
