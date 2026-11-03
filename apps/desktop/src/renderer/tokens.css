@@ -168,3 +168,6 @@ html[data-reduced-transparency=true] *,html[data-reduced-transparency=true] ::ba
 
 .markdown .section-action,.markdown .paragraph-action { position:static; margin-inline-start:var(--space-2); }
 .markdown p:hover .paragraph-action { opacity:1; pointer-events:auto; }
+
+.markdown[data-citation-layout] > * { content-visibility:visible; }
+input[type="checkbox"] { accent-color:var(--ink); }

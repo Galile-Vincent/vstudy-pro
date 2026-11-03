@@ -129,7 +129,7 @@ export function DocumentMarkdown({
     return () => { document.removeEventListener("mouseup", update); document.removeEventListener("keyup", update); document.removeEventListener("keydown", shortcut); };
   }, [source, documentId, onSelect]);
   const components = useMemo<Components>(() => ({
-            p: ({ children, node, ...props }) => <p {...props}>{children}{!decorative && node?.position && <button className="paragraph-action" aria-label={tr('common:ask_about_paragraph')} onClick={() => {
+            p: ({ children, node, ...props }) => <p {...props}>{children}{!decorative && node?.position && <button tabIndex={-1} className="paragraph-action" aria-label={tr('common:ask_about_paragraph')} onClick={() => {
               const start = node.position!.start.offset!, end = node.position!.end.offset!;
               selectCallback.current({documentId,startOffset:start,endOffset:end,text:source.slice(start,end),headingPath:headingPath(headings,start),page:pageAt(source,start)});
             }}>{tr('common:ask_about_this')}</button>}</p>,

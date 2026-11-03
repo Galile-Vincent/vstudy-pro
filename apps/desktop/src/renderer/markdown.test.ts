@@ -30,6 +30,7 @@ describe("Document Markdown", () => {
       ),
     );
     expect(container.querySelector("table")).not.toBeNull();
+    expect(container.querySelector('.paragraph-action')?.getAttribute('tabindex')).toBe('-1');
     expect(container.querySelector("input[type=checkbox]")).not.toBeNull();
     await vi.waitFor(() => expect(container.querySelector('.katex')).not.toBeNull());
     await vi.waitFor(() => expect(container.querySelector('.hljs-keyword')).not.toBeNull());

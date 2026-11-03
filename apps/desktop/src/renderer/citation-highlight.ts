@@ -1,4 +1,7 @@
 export function highlightCitation(root: HTMLElement, offset: number, reducedMotion: boolean): () => void {
+  // Resolve content-visibility estimates before measuring a distant citation target.
+  root.setAttribute('data-citation-layout', '');
+  void root.getBoundingClientRect();
   let highlighted: HTMLElement | undefined;
   let expiry = 0;
   let timer: ReturnType<typeof setTimeout>;
@@ -14,9 +17,10 @@ export function highlightCitation(root: HTMLElement, offset: number, reducedMoti
   };
   const finish = () => {
     clearTimeout(settle); clearTimeout(timer);
+    target()?.scrollIntoView({block:'center',behavior:'instant'});
     expiry = Date.now() + 2000;
     apply();
-    timer = setTimeout(() => { expiry = 0; highlighted?.removeAttribute('data-citation-highlight'); observer.disconnect(); },2000);
+    timer = setTimeout(() => { expiry = 0; highlighted?.removeAttribute('data-citation-highlight'); observer.disconnect(); root.removeAttribute('data-citation-layout'); },2000);
     root.ownerDocument.removeEventListener('scroll', scrolling, true);
     root.ownerDocument.removeEventListener('scrollend', finish, true);
   };
@@ -27,5 +31,5 @@ export function highlightCitation(root: HTMLElement, offset: number, reducedMoti
   root.ownerDocument.addEventListener('scrollend',finish,true);
   target()?.scrollIntoView({block:'center',behavior:reducedMotion ? 'instant' : 'smooth'});
   settle = setTimeout(finish,120);
-  return () => { clearTimeout(timer); clearTimeout(settle); observer.disconnect(); highlighted?.removeAttribute('data-citation-highlight'); root.ownerDocument.removeEventListener('scroll',scrolling,true); root.ownerDocument.removeEventListener('scrollend',finish,true); };
+  return () => { clearTimeout(timer); clearTimeout(settle); observer.disconnect(); root.removeAttribute('data-citation-layout'); highlighted?.removeAttribute('data-citation-highlight'); root.ownerDocument.removeEventListener('scroll',scrolling,true); root.ownerDocument.removeEventListener('scrollend',finish,true); };
 }
