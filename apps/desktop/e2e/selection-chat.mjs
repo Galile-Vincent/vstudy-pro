@@ -40,7 +40,7 @@ try {
     .click();
   const viewer = page.getByTestId("document-markdown");
   await viewer.waitFor({ timeout: 15000 });
-  await page.screenshot({ path: screenshot.replace(/\.png$/, "-document.png"), fullPage: true });
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-document.png"), fullPage: true, animations: "disabled" });
   const selectedText = mock
     ? "a closer look"
     : "This selected passage reaches the fake provider.";
@@ -74,7 +74,7 @@ try {
     exact: true,
   });
   await input.fill("Explain this passage.");
-  await page.screenshot({ path: screenshot.replace(/\.png$/, "-selection.png"), fullPage: true });
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-selection.png"), fullPage: true, animations: "disabled" });
   await page.getByRole("button", { name: "Send message", exact: true }).click();
   await page
     .locator("[data-role=assistant]")
@@ -86,19 +86,19 @@ try {
     await page.getByRole('button',{name:'Conversation usage'}).filter({hasText:'1.5k tokens · $0.012'}).waitFor();
     const usage = await page.evaluate(() => window.desktop.invoke('usage:summary',{period:'month'}));
     assert.equal(usage.inputTokens,1200); assert.equal(usage.outputTokens,340); assert.equal(usage.costUsd,.012);
-    await page.screenshot({path:screenshot.replace(/\.png$/, '-usage.png'),fullPage:true});
+    await page.screenshot({path:screenshot.replace(/\.png$/, '-usage.png'),fullPage:true,animations:"disabled"});
   }
   assert.equal(await page.locator("[data-role=assistant] strong").innerText(), "bold");
   assert.deepEqual(await page.locator("[data-role=assistant] li").allTextContents(), ["First", "Second"]);
   await page.locator("[data-role=assistant] strong").scrollIntoViewIfNeeded();
-  await page.screenshot({ path: screenshot.replace(/\.png$/, "-markdown.png"), fullPage: true });
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-markdown.png"), fullPage: true, animations: "disabled" });
   await viewer.locator("h2").first().hover();
   await viewer.locator("h2").first().getByRole("button", { name: "Use section Details" }).click();
   const chip = page.locator(".aui-composer-root .selection-preview");
   assert.ok(!(await chip.innerText()).includes("| Topic |"), "preview removes table syntax");
   await chip.locator("summary").click();
   assert.equal(await chip.getAttribute("open"), "");
-  await page.screenshot({ path: screenshot.replace(/\.png$/, "-section.png"), fullPage: true });
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-section.png"), fullPage: true, animations: "disabled" });
   await page.getByRole("button", { name: "Remove selection" }).click();
   await page.waitForFunction(() => window.document.querySelector("[data-slot=aui_assistant-message-content]")?.textContent.includes("User question:"));
   const prompt = await page.locator("[data-slot=aui_assistant-message-content]").innerText();
@@ -111,11 +111,11 @@ try {
     (await page.locator("[data-role=user]").first().textContent()).includes(selectedText),
     "Selection is visible in the user message",
   );
-  await page.screenshot({ path: screenshot, fullPage: true });
+  await page.screenshot({ path: screenshot, fullPage: true, animations: "disabled" });
   await page.emulateMedia({ colorScheme: "dark" });
   await page.screenshot({
     path: screenshot.replace(/\.png$/, "-dark.png"),
-    fullPage: true,
+    fullPage: true, animations: "disabled",
   });
   await page.getByRole("button", { name: "Swap chat side" }).click();
   await page.waitForFunction(() => {
@@ -134,7 +134,7 @@ try {
     (await page.locator("[data-role=user]").first().textContent()).includes(selectedText),
     "Swap preserves the conversation",
   );
-  await page.screenshot({ path: screenshot.replace(/\.png$/, "-right.png"), fullPage: true });
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-right.png"), fullPage: true, animations: "disabled" });
   await page.getByRole("button", { name: "Toggle document library" }).click();
   assert.equal(
     await page.getByRole("complementary", { name: "Document library" }).count(),
@@ -142,7 +142,7 @@ try {
   );
   await page.getByRole("button", { name: "Open settings" }).click();
   await page.getByRole("dialog").waitFor();
-  await page.screenshot({ path: screenshot.replace(/\.png$/, "-settings.png"), fullPage: true });
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-settings.png"), fullPage: true, animations: "disabled" });
   assert.equal(
     await page
       .getByRole("textbox", { name: "OpenAI API key", exact: true })
@@ -160,13 +160,13 @@ try {
     await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
     await page.getByRole('combobox',{name:'Usage period',exact:true}).selectOption('all');
     await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
-    await dashboard.screenshot({path:screenshot.replace(/\.png$/, '-token-dashboard.png')});
+    await dashboard.screenshot({path:screenshot.replace(/\.png$/, '-token-dashboard.png'),animations:'disabled'});
 
     await page.getByRole('spinbutton',{name:'Monthly budget (USD)',exact:true}).fill('0.01');
     await page.getByRole('spinbutton',{name:'Monthly token cap',exact:true}).fill('1541');
     await page.getByRole('button',{name:'Save usage settings',exact:true}).click();
     await page.getByRole('status').filter({hasText:'Usage settings saved'}).waitFor();
-    await page.screenshot({path:screenshot.replace(/\.png$/, '-usage-settings.png'),fullPage:true});
+    await page.screenshot({path:screenshot.replace(/\.png$/, '-usage-settings.png'),fullPage:true,animations:"disabled"});
     const csvPath = join(directory, 'usage.csv');
     await app.evaluate(({ dialog }, path) => { dialog.showSaveDialog = async () => ({ canceled:false,filePath:path }); }, csvPath);
     await page.getByRole('button',{name:'Export CSV',exact:true}).click();
@@ -181,7 +181,7 @@ try {
     await page.getByRole('button',{name:'Send message',exact:true}).click();
     await page.getByRole('button',{name:'Send anyway',exact:true}).waitFor();
     assert.equal(await page.locator('[data-role=user]').count(),1);
-    await page.screenshot({path:screenshot.replace(/\.png$/, '-budget-warning.png'),fullPage:true});
+    await page.screenshot({path:screenshot.replace(/\.png$/, '-budget-warning.png'),fullPage:true,animations:"disabled"});
     await page.getByRole('button',{name:'Send anyway',exact:true}).click();
     await page.waitForFunction(() => window.document.querySelectorAll('[data-role=user]').length === 2);
     await page.waitForFunction(() => !window.document.querySelector('.aui-composer-cancel'));
@@ -263,7 +263,7 @@ try {
     await page
       .screenshot({
         path: screenshot.replace(/\.png$/, "-failure.png"),
-        fullPage: true,
+        fullPage: true, animations: "disabled",
       })
       .catch(() => {});
     console.error(

@@ -2,7 +2,10 @@
 .usage-meter { display: grid; gap: 4px; padding: 6px 2px; font-size: 11px; color: var(--muted, #777); font-variant-numeric: tabular-nums; }
 .usage-meter progress { width: 100%; height: 4px; accent-color: #687968; }
 .usage-meter.amber progress { accent-color: #bd851e; }.usage-meter.red progress { accent-color: #c44f4f; }
-.usage-warning { border: 1px solid #bd851e; padding: 8px; border-radius: 5px; font-size: 12px; }
+.usage-warning { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; border: 1px solid #bd851e; padding: 6px 8px; border-radius: 5px; font-size: 12px; }
+.usage-warning > span { flex: 1 1 180px; }
+.usage-warning-actions { display: flex; align-items: center; gap: 4px; }
+.usage-warning-actions button { height: 28px; padding-inline: 7px; font-size: 12px; }
 .usage-settings { display: grid; gap: 12px; font-size: 12px; }.usage-settings p { margin: 0; }
 .usage-settings table { width: 100%; border-collapse: collapse; font-size: 11px; }.usage-settings td,.usage-settings th { text-align: left; border-bottom: 1px solid #8883; padding: 6px 4px; overflow-wrap: anywhere; }
 .usage-settings label { display: grid; gap: 4px; }.usage-settings input { min-width: 0; width: 100%; }.usage-settings textarea { width: 100%; font: 11px ui-monospace, monospace; }

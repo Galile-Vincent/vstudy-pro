@@ -13,6 +13,7 @@ import {
 } from "@assistant-ui/react";
 import type { Conversation, Message, Selection } from "../shared";
 import { Thread } from "./components/assistant-ui/elements/thread.aui";
+import { Button } from "./components/ui/button";
 import { plainSelection } from "./selection-preview";
 import { desktop } from "./bridge";
 import { documentCitationSchema } from "../shared";
@@ -129,7 +130,7 @@ function ComposerSelection() {
 }
 function ComposerBanner() {
   const {usage,budget} = useDocumentChat();
-  return <><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert">{budget.reason} The estimate allows 1,024 output tokens; actual usage can be higher.<button type="button" onClick={budget.approve}>Send anyway</button><button type="button" onClick={budget.dismiss}>Cancel</button></div>}</>;
+  return <><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert" title="The estimate allows 1,024 output tokens; actual usage can be higher."><span>{budget.reason}</span><div className="usage-warning-actions"><Button type="button" variant="outline" size="sm" onClick={budget.approve}>Send anyway</Button><Button type="button" variant="ghost" size="sm" onClick={budget.dismiss}>Cancel</Button></div></div>}</>;
 }
 function ComposerModel() { return useDocumentChat().picker; }
 function ComposerUsage() { const {usage,onUsage} = useDocumentChat(); return <UsageButton {...usage} onClick={onUsage} />; }
