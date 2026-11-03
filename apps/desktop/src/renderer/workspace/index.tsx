@@ -7,7 +7,7 @@ import { conversionStatus } from "../../shared/status";
 import { useTranslation } from "react-i18next";
 import { applyLanguage } from "../i18n";
 import { tr } from '../../shared/i18n';
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type {
   Conversation,
@@ -20,8 +20,10 @@ import type {
 import { defaultSettings } from "../../shared";
 import { desktop, isMock } from "../bridge";
 import { resolveModel } from "../model";
-import { Chat, ModelPicker, SelectionPreview } from "../chat";
-import { DocumentMarkdown } from "../markdown";
+import { ModelPicker } from "../model-picker";
+import { SelectionPreview } from "../selection-preview-view";
+const Chat=lazy(()=>import("../chat").then(module=>({default:module.Chat})));
+import { DocumentMarkdown } from "../lazy-reader";
 import { ConversationList } from "../conversation-list";
 import { ProviderSettings, type Providers } from "../providers";
 
@@ -299,7 +301,7 @@ export function Workspace() {
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
       {conversation && history ? (
-        <Chat
+        <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}><Chat
           documentPageCount={documentPageCount}
           documentTitle={doc?.sourceName ?? tr('common:document')}
             onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
@@ -315,7 +317,7 @@ export function Workspace() {
           onModel={chooseModel}
           onSettings={() => { setSettingsTab("providers"); setShowSettings(true); }}
           onProvidersChanged={refreshProviders}
-        />
+        /></Suspense>
       ) : (
         <div className="chat-start">
           <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onStart={() => void newConversation()} onQuestion={text => { setDraft(text); void newConversation(); }} />

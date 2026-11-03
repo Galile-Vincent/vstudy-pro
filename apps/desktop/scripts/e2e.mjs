@@ -1,4 +1,7 @@
 import { setTimeout, clearTimeout } from 'node:timers';
+import { createHash } from 'node:crypto';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { readdir, mkdir, writeFile, open, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -16,6 +19,21 @@ async function run(command,args,name,timeout) {
  clearTimeout(timer);await file.close();
  const skipped=code===0 && /^SKIP:/m.test(await readFile(`${evidence}/${name}.log`,'utf8'));
  return {script:name,status:timedOut?'TIMEOUT':skipped?'SKIP':code===0?'PASS':'FAIL',seconds:Math.round((Date.now()-start)/1000),code};
+}
+if(!process.env.VSTUDY_CONVERTER_VENV) {
+ const lock=resolve(root,'resources/converter/requirements.lock.txt');
+ const fingerprint=createHash('sha256').update(await readFile(lock)).digest('hex');
+ const venv=join(tmpdir(),`vstudy-e2e-converter-${fingerprint.slice(0,12)}`);
+ const marker=join(venv,'.requirements-sha256');
+ let installed=false;try {installed=(await readFile(marker,'utf8'))===fingerprint;}catch { /* A missing environment is prepared once for the suite. */ }
+ if(!installed) {
+  const created=await run('uv',['venv','--python','3.12',venv],'converter-environment',300000);
+  if(created.status!=='PASS')throw new Error(`Install uv or set VSTUDY_CONVERTER_VENV; see ${evidence}/converter-environment.log`);
+  const installed=await run('uv',['pip','install','--require-hashes','--python',join(venv,'bin/python'),'-r',lock],'converter-dependencies',600000);
+  if(installed.status!=='PASS')throw new Error(`Locked converter installation failed; see ${evidence}/converter-dependencies.log`);
+  await writeFile(marker,fingerprint);
+ }
+ process.env.VSTUDY_CONVERTER_VENV=venv;
 }
 const build=await run('pnpm',['package'],'build',240000);
 if(build.status!=='PASS')throw new Error(`Build failed: ${evidence}/build.log`);

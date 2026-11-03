@@ -17,7 +17,8 @@ import {
 import type { Conversation, Message, Selection } from "../shared";
 import { Thread } from "./components/assistant-ui/elements/thread.aui";
 import { Button } from "./components/ui/button";
-import { plainSelection } from "./selection-preview";
+import { SelectionPreview } from "./selection-preview-view";
+export { SelectionPreview } from "./selection-preview-view";
 import { desktop } from "./bridge";
 import { documentCitationSchema } from "../shared";
 import { Suggestions } from "./components/assistant-ui/elements/suggestions";
@@ -172,20 +173,17 @@ function useComposerBindings() {
 function DocumentWelcome() { const { selection, usage } = useDocumentChat(); return <div className="document-welcome"><BlankChat documentOpen hasSelection={!!selection} replyLanguage={usage.data?.settings.replyLanguage ?? 'auto'}/><DocumentSuggestions/></div>; }
 const documentComponents = { Welcome:DocumentWelcome, WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 
-export function SelectionPreview({ selection }: { selection: Selection }) {
-  useTranslation();
-  const plain = plainSelection(selection.text.replace(/^#{1,6} .*\n?/, ""));
-  return <details className="selection-preview"><summary><strong>{selection.headingPath.join(" › ") || tr('common:selected_passage')}</strong><span>{plain.slice(0, 160)}{plain.length > 160 ? "…" : ""}</span></summary><div>{plain}</div></details>;
-}
-
 export function ChatComposerInput() {
   useTranslation();
+  const selection=useContext(DocumentChatContext)?.selection;
+  const input=useRef<HTMLTextAreaElement>(null);
+  useEffect(()=>{if(selection) input.current?.focus();},[selection]);
   const composing = useRef(false);
   const expiry = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const clear = () => { composing.current = false; clearTimeout(expiry.current); };
   const refresh = () => { composing.current = true; clearTimeout(expiry.current); expiry.current = setTimeout(clear,1500); };
   useEffect(() => () => clearTimeout(expiry.current), []);
-  return <ComposerPrimitive.Input className="aui-composer-input" aria-label={tr('common:ask_about_your_document')} placeholder={tr('common:ask_document_placeholder')} rows={2}
+  return <ComposerPrimitive.Input ref={input} className="aui-composer-input" aria-label={tr('common:ask_about_your_document')} placeholder={tr('common:ask_document_placeholder')} rows={2}
     onCompositionStart={refresh}
     onCompositionUpdate={refresh}
     onBlur={clear}
