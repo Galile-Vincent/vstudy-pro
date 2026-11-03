@@ -165,3 +165,10 @@ it('recovers a source published before a disk-full insert without removing its b
  store.db.exec('DROP TRIGGER disk_full');const recovered=await service.importPath(b);await service.waitForIdle();
  expect(await readFile(oldPath,'utf8')).toBe('durable');expect(service.get(recovered.id)?.status).toBe('ready');
 });
+it('requeues an unfinished hidden document restored after startup',async()=>{
+ const {service,store,userData,convert}=await setup();const document=await service.importPath(fixture('html'));await service.waitForIdle();
+ store.db.prepare("UPDATE documents SET status='converting',deletedAt=? WHERE id=?").run(new Date().toISOString(),document.id);
+ const restarted=new DocumentService({store,userData,convert});
+ const {LibraryService}=await import('./library');const library=new LibraryService(store,join(userData,'library'));
+ library.restore(document.id);restarted.resume(document.id);await restarted.waitForIdle();restarted.dispose();expect(store.documents.get(document.id)?.status).toBe('ready');
+});
