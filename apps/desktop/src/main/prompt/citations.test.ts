@@ -19,3 +19,5 @@ it('gives headingless and sparsely headed PDF pages a rendered text target each'
 });
 
 it('never invents a clickable Document reference for empty content', () => {expect(citationCatalog(id,'')).toEqual([]);});
+
+it('keeps page targets beyond the former eighty-section limit', () => {const catalog=citationCatalog(id,Array.from({length:100},(_,i)=>`<!-- page ${i+1} -->\nPage text.\n`).join(''));expect(catalog).toHaveLength(100);expect(catalog.at(-1)?.page).toBe(100);});

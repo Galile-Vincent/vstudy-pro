@@ -24,7 +24,7 @@ export function citationCatalog(documentId: Document['id'], markdown: string): D
   for (const entry of pages) if (!candidates.some(c => c.page === entry.page)) candidates.push(entry);
   candidates.sort((a,b) => a.offset - b.offset);
   if (!candidates.length) candidates.push({id:'s0',documentId,offset:0,title:'Document',quote:markdown.slice(0,300)});
-  return candidates.slice(0,80);
+  return candidates;
 }
 export function citedReferences(answer: string, catalog: DocumentCitation[]): DocumentCitation[] {
   const ids = new Set(Array.from(answer.matchAll(/\[\[cite:(s\d+)\]\]/g),m => m[1]));
