@@ -1,3 +1,5 @@
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { Select } from "../components/select";
 import { useEffect, useState, useRef, type DragEvent } from "react";
 import {
@@ -133,12 +135,12 @@ export function LibrarySidebar() {
   const treeEnd = treeStart + Math.ceil((treeRef.current?.clientHeight || 400)/32)+4;
   return (
     <>
-      <button onClick={() => window.dispatchEvent(new Event('vstudy:open-settings'))}>{tr('common:settings')}</button>
+
       <nav className="library-smart" aria-label={tr("library:smartViews")}>
         {(
           ["all", "recent", "pinned", "unfiled", "converting-failed"] as const
         ).map((view) => (
-          <button
+          <Button variant="ghost"
             key={view}
             aria-current={
               route.view === "library" && route.query?.view === view
@@ -148,10 +150,10 @@ export function LibrarySidebar() {
             onClick={() => go({ view }, tr(`library:${view}`))}
           >
             {view === "all" ? <Files/> : view === "recent" ? <Clock/> : view === "pinned" ? <Pin/> : view === "unfiled" ? <Inbox/> : <AlertTriangle/>}{tr(`library:${view}`)}
-            {counts[view] !== undefined && (
+            {view === "converting-failed" && !!counts[view] && (
               <small>{format.number(counts[view] ?? 0)}</small>
             )}
-          </button>
+          </Button>
         ))}
       </nav>
       {!!pins.length && <h2 className="sidebar-label">{tr("library:pinnedFolders")}</h2>}
@@ -171,29 +173,29 @@ export function LibrarySidebar() {
             if (source) reorderPin(Number(source), index);
           }}
         >
-          <button onClick={() => go({ folderId: f.id }, f.name)}>
+          <Button variant="ghost" onClick={() => go({ folderId: f.id }, f.name)}>
             <Pin />
             {f.name}
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost"
             aria-label={tr("library:moveUp", { name: f.name })}
             disabled={index === 0}
             onClick={() => reorderPin(index, index - 1)}
           >
             ↑
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost"
             aria-label={tr("library:moveDown", { name: f.name })}
             disabled={index === pins.length - 1}
             onClick={() => reorderPin(index, index + 1)}
           >
             ↓
-          </button>
+          </Button>
         </div>
       ))}
       <div className="sidebar-label">
         <h2>{tr("library:folders")}</h2>
-        <button
+        <Button variant="ghost"
           aria-label={tr("library:newFolder")}
           onClick={async () => {
             const name = await prompt(tr("library:newFolder"));
@@ -207,7 +209,7 @@ export function LibrarySidebar() {
           }}
         >
           <Plus />
-        </button>
+        </Button>
       </div>
       {!folders.length && <p className="sidebar-empty">{tr("library:noFolders")}</p>}
       <div ref={treeRef} className="folder-tree" onScroll={e => setTreeTop(e.currentTarget.scrollTop)} role={folders.length ? "tree" : undefined} aria-label={folders.length ? tr("library:folders") : undefined}>
@@ -290,7 +292,7 @@ export function LibrarySidebar() {
               }
             }}
           >
-            <button
+            <Button variant="ghost"
               tabIndex={-1}
               aria-label={tr("library:expand")}
               onClick={() => toggle(f.id)}
@@ -298,9 +300,9 @@ export function LibrarySidebar() {
               <ChevronRight
                 className={expanded.includes(f.id) ? "expanded" : ""}
               />
-            </button>
+            </Button>
             {editing === f.id && (
-              <input
+              <Input
                 aria-label={tr("library:name")}
                 autoFocus
                 value={rename}
@@ -321,7 +323,7 @@ export function LibrarySidebar() {
                 }}
               />
             )}
-            <button
+            <Button variant="ghost"
               tabIndex={-1}
               onClick={() => go({ folderId: f.id }, f.name)}
             >
@@ -336,8 +338,8 @@ export function LibrarySidebar() {
               <small>
                 {typeof f.count === "number" ? format.number(f.count) : ""}
               </small>
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost"
               aria-label={tr("library:folderActions", { name: f.name })}
               tabIndex={-1}
               onClick={async () => {
@@ -346,20 +348,20 @@ export function LibrarySidebar() {
               }}
             >
               <MoreHorizontal />
-            </button>
+            </Button>
           </div>
         ); })}
       </div></div>
       {!!saved.length && <h2 className="sidebar-label">{tr("library:savedFilters")}</h2>}
       {saved.map((s) => (
-        <button key={s.id} onClick={() => go(JSON.parse(s.queryJson), s.name)}>
+        <Button variant="ghost" key={s.id} onClick={() => go(JSON.parse(s.queryJson), s.name)}>
           <ListFilter/>{s.name}
-        </button>
+        </Button>
       ))}
       {error && (
         <p role="alert">
           {error}
-          <button onClick={refresh}>{tr("library:retry")}</button>
+          <Button variant="ghost" onClick={refresh}>{tr("library:retry")}</Button>
         </p>
       )}
       {menu && (
@@ -381,16 +383,16 @@ export function LibrarySidebar() {
           >
             <label>
               {tr("library:name")}
-              <input
+              <Input
                 value={rename}
                 onChange={(e) => setRename(e.target.value)}
                 autoFocus
                 required
               />
             </label>
-            <button>{tr("library:rename")}</button>
+            <Button variant="ghost">{tr("library:rename")}</Button>
           </form>
-          <button
+          <Button variant="ghost"
             onClick={() =>
               void run(() =>
                 desktop.invoke("library:folders:update", {
@@ -401,8 +403,8 @@ export function LibrarySidebar() {
             }
           >
             {tr("library:pin")}
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost"
             onClick={async () => {
               const name = await prompt(tr("library:newFolder"));
               if (name)
@@ -415,7 +417,7 @@ export function LibrarySidebar() {
             }}
           >
             {tr("library:newSubfolder")}
-          </button>
+          </Button>
           <label>
             {tr("library:move")}
             <Select
@@ -485,7 +487,7 @@ export function LibrarySidebar() {
             </Select>
           </label>
           {(["parent", "unfiled"] as const).map((destination) => (
-            <button
+            <Button variant="ghost"
               key={destination}
               onClick={async () => {
                 void run(() =>
@@ -498,14 +500,14 @@ export function LibrarySidebar() {
               }}
             >
               {tr(`library:deleteFolder_${destination}`)}
-            </button>
+            </Button>
           ))}
         </LibraryDialog>
       )}
       {undo && (
         <div className="library-toast" role="status">
           {tr("library:moved")}
-          <button
+          <Button variant="ghost"
             onClick={() =>
               void run(async () => {
                 await undo();
@@ -514,7 +516,7 @@ export function LibrarySidebar() {
             }
           >
             {tr("library:undo")}
-          </button>
+          </Button>
         </div>
       )}
       {promptDialog}

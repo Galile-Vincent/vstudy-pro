@@ -1,3 +1,6 @@
+import { Checkbox } from '../components/checkbox';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { contentLanguage } from "../../shared/content-language";
 import { Select } from "../components/select";
 import {
@@ -358,18 +361,18 @@ export function LibraryView() {
           <h1>{route.title ?? (folderPath(folders, query.folderId) || tr("common:library"))}</h1>
           <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) + (cursor ? "+" : "") })}</p>
         </div>
-        <button
+        <Button variant="outline"
           hidden={!loading && !items.length && !text && !filters.length}
           data-testid="import-document"
           onClick={() => void run(() => importFiles(query.folderId ?? null))}
         >
           {tr("common:import_document")}
-        </button>
+        </Button>
       </div>
       <div className="library-toolbar" hidden={!loading && !items.length && !text && !filters.length && !query.folderId}>
         <label className="library-search">
           <Search aria-hidden="true" />
-          <input
+          <Input
             aria-label={tr("library:search")}
             placeholder={tr("library:search")}
             value={text}
@@ -378,7 +381,7 @@ export function LibraryView() {
           />
         </label>
         <div className="filter-popover">
-          <button className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel" onClick={() => setFiltersOpen(v => !v)}><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</button>
+          <Button variant="outline" className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel" onClick={() => setFiltersOpen(v => !v)}><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button>
           <div id="library-filter-panel" className="filter-panel" hidden={!filtersOpen} onKeyDown={e => { if (e.key === "Escape") { setFiltersOpen(false); document.querySelector<HTMLButtonElement>('[data-testid="library-filters"]')?.focus(); } }}>
             {(
               ["type", "status", "converter", "tagId", "folderId"] as const
@@ -431,8 +434,7 @@ export function LibraryView() {
             ))}
             {(["subfolders", "hasChats", "pinned"] as const).map((key) => (
               <label key={key}>
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={query[key] ?? false}
                   onChange={(e) =>
                     setQuery((q) => ({
@@ -447,11 +449,11 @@ export function LibraryView() {
             <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setCustomDates(true);return;} setCustomDates(false); setQuery(q => ({...q, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
             </Select></label>
-            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<input type="date" aria-label={tr(`library:${key}`)} value={query[key]?.slice(0,10) ?? ''} onChange={e => setQuery(q => ({...q,[key]:e.target.value ? new Date(e.target.value).toISOString() : undefined}))}/></label>)}
+            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} value={query[key]?.slice(0,10) ?? ''} onChange={e => setQuery(q => ({...q,[key]:e.target.value ? new Date(e.target.value).toISOString() : undefined}))}/></label>)}
             <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select></label>
-            <footer><button className="ghost" onClick={() => setQuery(defaults)}>{tr("library:clearFilters")}</button><button className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</button></footer>
+            <footer><Button variant="outline" className="ghost" onClick={() => setQuery(defaults)}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
           </div>
         </div>
         <Select
@@ -472,7 +474,7 @@ export function LibraryView() {
             ),
           )}
         </Select>
-        <button
+        <Button variant="outline"
           aria-label={tr("library:direction")}
           onClick={() =>
             setQuery((q) => ({
@@ -482,8 +484,8 @@ export function LibraryView() {
           }
         >
           {query.direction === "asc" ? "↑" : "↓"}
-        </button>
-        <button
+        </Button>
+        <Button variant="outline"
           aria-label={tr("library:viewToggle")}
           aria-pressed={grid}
           onClick={() =>
@@ -494,11 +496,11 @@ export function LibraryView() {
           }
         >
           {grid ? <LayoutGrid /> : <List />}
-        </button>
+        </Button>
       </div>
       <div className="filter-chips">
         {filters.map(([key, value]) => (
-          <button
+          <Button variant="outline"
             key={key}
             onClick={() => setQuery((q) => ({ ...q, [key]: undefined }))}
           >
@@ -509,14 +511,14 @@ export function LibraryView() {
                 tags.find((t) => t.id === value)?.name ??
                 (["status", "type"].includes(key) ? tr(`library:${value}`) : String(value)))}{" "}
             <X size={12} aria-hidden="true" />
-          </button>
+          </Button>
         ))}
         {filters.length > 0 && (
           <>
-            <button className="ghost" onClick={() => setQuery({ ...defaults, ...route.query })}>
+            <Button variant="outline" className="ghost" onClick={() => setQuery({ ...defaults, ...route.query })}>
               {tr("library:clearFilters")}
-            </button>
-            <button className="ghost"
+            </Button>
+            <Button variant="outline" className="ghost"
               onClick={async () => {
                 const name = await prompt(tr("library:saveFilter"));
                 if (name)
@@ -530,7 +532,7 @@ export function LibraryView() {
               }}
             >
               {tr("library:saveFilter")}
-            </button>
+            </Button>
           </>
         )}
       </div>
@@ -542,15 +544,15 @@ export function LibraryView() {
               formatted: format.number(selected.length),
             })}
           </span>
-          <button
+          <Button variant="outline"
             onClick={async () => {
               setMenu(null);
               setMove(true);
             }}
           >
             {tr("library:move")}
-          </button>
-          <button
+          </Button>
+          <Button variant="outline"
             onClick={() =>
               void run(async () => {
                 for (const documentId of selected)
@@ -562,20 +564,20 @@ export function LibraryView() {
             }
           >
             {tr("library:pin")}
-          </button>
-          <button onClick={() => void remove(selected)}>
+          </Button>
+          <Button variant="outline" onClick={() => void remove(selected)}>
             {tr("library:delete")}
-          </button>
-          <button onClick={() => setSelected([])}>
+          </Button>
+          <Button variant="outline" onClick={() => setSelected([])}>
             {tr("library:clearSelection")}
-          </button>
+          </Button>
         </div>
       )}
       {text.trim().length === 1 ? <p role="status">{tr('errors:search_refine')}</p> : error ? (
         <div className="empty" role="alert">
           <h2>{tr("library:error")}</h2>
           <p>{error}</p>
-          <button onClick={refresh}>{tr("library:retry")}</button>
+          <Button variant="outline" onClick={refresh}>{tr("library:retry")}</Button>
         </div>
       ) : loading && !items.length ? (
         <div
@@ -596,7 +598,7 @@ export function LibraryView() {
               { query: text })}
           </h2>
           <p>{tr(text ? "library:searchHint" : filters.length ? "library:filterHint" : "library:emptyHint")}</p>
-          <button
+          <Button variant="outline"
             onClick={() =>
               text
                 ? setText("")
@@ -612,8 +614,8 @@ export function LibraryView() {
                   ? "library:clearFilters"
                   : "common:import_document",
             )}
-          </button>
-          {!text && !filters.length && <button className="ghost" onClick={() => void run(async () => { await desktop.invoke('documents:importSample',{language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}); changed(); })}>{tr('onboarding:sample')}</button>}
+          </Button>
+          {!text && !filters.length && <Button variant="outline" className="ghost" onClick={() => void run(async () => { await desktop.invoke('documents:importSample',{language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}); changed(); })}>{tr('onboarding:sample')}</Button>}
         </div>
       ) : (
         <div
@@ -811,14 +813,14 @@ export function LibraryView() {
                   <div className="document-cell">
                     <FileText className="document-glyph" aria-hidden="true" />
                     <div className="document-info">
-                      <button
+                      <Button variant="outline"
                         className="document-title"
                         tabIndex={-1}
                         lang={contentLanguage(d.title)}
                         onClick={() => open(item)}
                       >
                         {d.title}
-                      </button>
+                      </Button>
                       <div className="document-meta" title={`${d.sourceName} · ${d.converter}`}>
                         {!query.folderId && <span>{folderPath(folders, item.folderId) || tr("library:unfiled")}</span>}
                         <span>{d.sourceName.split('.').pop()?.toUpperCase()}</span>
@@ -839,7 +841,7 @@ export function LibraryView() {
                           </span>
                         ))}
                         {d.status === "failed" && (
-                          <button
+                          <Button variant="outline"
                             onClick={() =>
                               void run(() =>
                                 desktop.invoke("documents:retry", {
@@ -849,7 +851,7 @@ export function LibraryView() {
                             }
                           >
                             {tr("library:retry")}
-                          </button>
+                          </Button>
                         )}
                         {d.status === "converting" && (
                           <progress
@@ -860,7 +862,7 @@ export function LibraryView() {
                         )}
                       </div>
                     </div>
-                    <button
+                    <Button variant="outline"
                       aria-label={`${tr("library:pin")}: ${d.title}`}
                       tabIndex={-1}
                       aria-pressed={item.pinned}
@@ -874,23 +876,23 @@ export function LibraryView() {
                       }
                     >
                       <Pin />
-                    </button>
-                    <button
+                    </Button>
+                    <Button variant="outline"
                       aria-label={tr("library:actions", { name: d.title })}
                       tabIndex={-1}
                       onClick={(e) => { menuAnchor.current = e.currentTarget; setMenu(item); }}
                     >
                       <MoreHorizontal />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               );
             })}
           </div>
           {cursor && (
-            <button className="load-more" onClick={() => void more()}>
+            <Button variant="outline" className="load-more" onClick={() => void more()}>
               {tr("library:loadMore")}
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -904,7 +906,7 @@ export function LibraryView() {
         <div className="library-toast" role="status">
           {notice}
           {undo && (
-            <button
+            <Button variant="outline"
               onClick={() =>
                 void run(async () => {
                   await undo();
@@ -914,7 +916,7 @@ export function LibraryView() {
               }
             >
               {tr("library:undo")}
-            </button>
+            </Button>
           )}
         </div>
       )}

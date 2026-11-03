@@ -1,3 +1,5 @@
+import { Checkbox } from '../components/checkbox';
+import { Button } from '../components/ui/button';
 import { FileText,Pencil,FolderInput,Tag,ExternalLink,Download,RefreshCw,Trash2 } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
@@ -20,8 +22,8 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
           onClose={() => setMenu(null)}
         >
           <div className="document-menu">
-            <button onClick={() => open(menu)}><FileText/>{tr("library:open")}</button>
-            <button
+            <Button variant="ghost" onClick={() => open(menu)}><FileText/>{tr("library:open")}</Button>
+            <Button variant="ghost"
               onClick={async () => {
                 const title = await prompt(
                   tr("library:rename"),
@@ -38,9 +40,9 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
               }}
             >
               <Pencil/>{tr("library:rename")}
-            </button>
-            <button onClick={() => setMove(true)}><FolderInput/>{tr("library:move")}</button>
-            <button
+            </Button>
+            <Button variant="ghost" onClick={() => setMove(true)}><FolderInput/>{tr("library:move")}</Button>
+            <Button variant="ghost"
               onClick={() =>
                 void run(() =>
                   desktop.invoke("library:documents:pin", {
@@ -51,10 +53,10 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
               }
             >
               {tr("library:pin")}
-            </button>
-            <button onClick={() => setTagging(true)}>
+            </Button>
+            <Button variant="ghost" onClick={() => setTagging(true)}>
               <Tag/>{tr("library:tag")}
-            </button>
+            </Button>
             {(
               [
                 "library:reveal",
@@ -63,7 +65,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
                 "documents:reconvert",
               ] as const
             ).map((channel) => (
-              <button
+              <Button variant="ghost"
                 key={channel}
                 onClick={() =>
                   void run(() =>
@@ -72,13 +74,13 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
                 }
               >
                 {channel === "documents:reconvert" ? <RefreshCw/> : channel === "library:reveal" ? <ExternalLink/> : <Download/>}{tr(`library:${channel.split(":")[1]}`)}
-              </button>
+              </Button>
             ))}
-            <button
+            <Button variant="ghost"
               onClick={() => void remove(ids.length ? ids : [menu.document.id])}
             >
               <Trash2/>{tr("library:delete")}
-            </button>
+            </Button>
           </div>
         </LibraryDialog>
       )}
@@ -91,13 +93,13 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
           }}
         >
           <div className="folder-picker">
-            <button onClick={() => void moveTo(null)}>
+            <Button variant="ghost" onClick={() => void moveTo(null)}>
               {tr("library:unfiled")}
-            </button>
+            </Button>
             {folders.map((f) => (
-              <button key={f.id} onClick={() => void moveTo(f.id)}>
+              <Button variant="ghost" key={f.id} onClick={() => void moveTo(f.id)}>
                 {f.name}
-              </button>
+              </Button>
             ))}
           </div>
         </LibraryDialog>
@@ -113,8 +115,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
           <div className="folder-picker">
             {tags.map((tag) => (
               <label key={tag.id}>
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={
                     items
                       .find((i) => i.document.id === menu.document.id)
@@ -133,7 +134,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
                 {tag.name}
               </label>
             ))}
-            <button
+            <Button variant="ghost"
               onClick={async () => {
                 const name = await prompt(tr("library:tag"));
                 if (name)
@@ -157,7 +158,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
               }}
             >
               {tr("library:newTag")}
-            </button>
+            </Button>
           </div>
         </LibraryDialog>
       )}

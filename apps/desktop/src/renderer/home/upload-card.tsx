@@ -1,3 +1,4 @@
+import { Button } from '../components/ui/button';
 import { Select } from "../components/select";
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,8 +40,8 @@ export function UploadCard({ folders = [], onImported, showSample = true }: { sh
   }}>
     <Upload aria-hidden="true"/><p>{tr('home:upload_hint')}</p>
     <label>{tr('home:destination')}<Select value={folderId} onChange={e => setFolderId(e.target.value)} disabled={busy}><option value="">{tr('library:unfiled')}</option>{folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</Select></label>
-    <button className="primary" disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</button>
-    {showSample && <button className="ghost" disabled={busy} onClick={() => { setBusy(true); void desktop.invoke('documents:importSample', {language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}).then(d => { onImported?.(d); window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</button>}
+    <Button variant="outline" className="primary" disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</Button>
+    {showSample && <Button variant="outline" className="ghost" disabled={busy} onClick={() => { setBusy(true); void desktop.invoke('documents:importSample', {language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}).then(d => { onImported?.(d); window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</Button>}
 
     {busy && <progress aria-label={tr('home:importing')}/>}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
   </div>;

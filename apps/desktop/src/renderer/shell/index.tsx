@@ -1,3 +1,4 @@
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup } from '../components/ui/sidebar';
 import { transitionTo } from "./view-transition";
 import { desktop } from "../bridge";
 import { applyLanguage } from "../i18n";
@@ -10,7 +11,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { Home, BookOpen, ArrowLeft, Menu } from "lucide-react";
+import { Home, BookOpen, ArrowLeft, Menu, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
 import type { Document } from "../../shared";
@@ -40,6 +41,12 @@ export function AppShell({
 }) {
   useTranslation();
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  useEffect(() => {
+    const pointer=()=>{document.documentElement.dataset.inputModality='pointer';};
+    const keyboard=(event:KeyboardEvent)=>{if(['Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))document.documentElement.dataset.inputModality='keyboard';};
+    document.addEventListener('pointerdown',pointer,true);document.addEventListener('keydown',keyboard,true);
+    return()=>{document.removeEventListener('pointerdown',pointer,true);document.removeEventListener('keydown',keyboard,true);};
+  }, []);
   useEffect(() => {
     void desktop
       .invoke("settings:get", {})
@@ -86,35 +93,35 @@ export function AppShell({
   };
   return (
     <NavigationContext.Provider value={{ route, navigate, closeWelcome: () => { navigate(previous.current); setTimeout(() => { const target = returnFocus.current; if (returnSettings.current) { window.dispatchEvent(new Event("vstudy:open-settings")); setTimeout(() => document.getElementById("welcome-settings-entry")?.focus(), 100); } else if (target?.isConnected) target.focus(); else document.getElementById("welcome-entry")?.focus(); }, 350); } }}>
-      <div className="app-shell" data-view={route.view}>
+      <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
         </a>
-        <aside
+        <Sidebar role="complementary" collapsible="none"
           hidden={!sidebarVisible}
           className="shell-sidebar"
           aria-label={tr("common:document_library")}
         >
-          <div className="shell-brand">{tr("library:brand")}</div>
-          <nav>
-            <button
+          <SidebarHeader className="shell-brand">{tr("library:brand")}</SidebarHeader><SidebarContent>
+          <SidebarGroup><SidebarMenu>
+            <SidebarMenuItem><SidebarMenuButton
               aria-current={route.view === "home" ? "page" : undefined}
               onClick={() => navigate("home")}
             >
               <Home />
               {tr("library:home")}
-            </button>
-            <button
+            </SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton
               data-parent={!!route.query?.folderId}
               aria-current={route.view === "library" ? "page" : undefined}
               onClick={() => navigate("library")}
             >
               <BookOpen />
               {tr("common:library")}
-            </button>
-          </nav>
-          {sidebar}
-        </aside>
+            </SidebarMenuButton></SidebarMenuItem>
+          </SidebarMenu></SidebarGroup>
+          {sidebar}</SidebarContent><SidebarFooter><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
+        </Sidebar>
         <div className="shell-main">
           <header className="shell-topbar">
             <button
@@ -150,7 +157,7 @@ export function AppShell({
             {children}
           </div>
         </div>
-      </div>
+      </div></SidebarProvider>
     </NavigationContext.Provider>
   );
 }

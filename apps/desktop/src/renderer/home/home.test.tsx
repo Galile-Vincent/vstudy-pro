@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToStaticMarkup as render } from 'react-dom/server';
+import { TooltipProvider } from '../components/ui/tooltip';
+const renderToStaticMarkup = (node:React.ReactNode) => render(<TooltipProvider>{node}</TooltipProvider>);
 import { expect, it, vi } from 'vitest';
 vi.mock('../bridge', () => ({ desktop:{} }));
 import { Home, Streak, sparklinePoints, type Dashboard } from './home';

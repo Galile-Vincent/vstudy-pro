@@ -1,67 +1,23 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { tr } from "../../shared/i18n";
-export function LibraryDialog({
-  title,
-  children,
-  onClose, menu = false, anchor,
-}: {
-  menu?: boolean; anchor?: HTMLElement | null;
-  title: string;
-  children: ReactNode;
-  onClose: () => void;
-}) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const previous = document.activeElement;
-    if (menu) {
-      const node = ref.current!;
-      node.showPopover();
-      const rect = anchor?.getBoundingClientRect();
-      node.style.left = `${Math.max(8, Math.min(window.innerWidth - 240, rect?.right ?? 240) - 224)}px`;
-      node.style.top = `${Math.min(window.innerHeight - node.offsetHeight - 8, rect?.bottom ?? 160)}px`;
-      const buttons = node.querySelectorAll('button');
-      buttons.forEach(button => button.setAttribute('role', 'menuitem'));
-      buttons[0]?.focus();
-    } else {
-      ref.current?.showModal();
-      ref.current?.querySelector<HTMLInputElement>("input[autofocus], input, textarea")?.focus();
-    }
-    const outside = (event: PointerEvent) => { if (menu && event.target instanceof Node && !ref.current?.contains(event.target) && !anchor?.contains(event.target)) onClose(); };
-    document.addEventListener('pointerdown',outside);
-    return () => {
-      document.removeEventListener('pointerdown',outside);
-      if (menu && anchor?.isConnected) anchor.focus(); else if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
-      else (document.querySelector<HTMLElement>(".library-document[tabindex=\"0\"]") ?? document.getElementById("shell-content"))?.focus();
-    };
-  }, []);
-  return (
-    <dialog
-      ref={ref}
-      popover={menu ? 'manual' : undefined}
-      role={menu ? 'menu' : undefined}
-      onToggle={e => { if (menu && e.newState === 'closed') onClose(); }}
-      onKeyDown={e => {
-        if (!menu) return;
-        const buttons = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
-        const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
-        if (['ArrowDown','ArrowUp','Home','End'].includes(e.key)) {
-          e.preventDefault(); buttons[e.key === 'Home' ? 0 : e.key === 'End' ? buttons.length - 1 : (i + (e.key === 'ArrowUp' ? -1 : 1) + buttons.length) % buttons.length]?.focus();
-        }
-        if (e.key === 'Escape') { e.preventDefault(); onClose(); }
-      }}
-      className={`settings-dialog library-dialog ${menu ? 'anchored-menu' : ''}`}
-      aria-label={title}
-      onCancel={onClose}
-    >
-      {!menu && <div className="dialog-title">
-        <h2>{title}</h2>
-        <button aria-label={tr("library:close")} onClick={onClose}>
-          ×
-        </button>
-      </div>}
-      {children}
-    </dialog>
-  );
+import { Children, cloneElement, isValidElement, useState, useEffect, useRef, type ReactNode } from 'react';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { tr } from '../../shared/i18n';
+function menuItems(children:ReactNode):ReactNode {
+ return Children.map(children,child=>{
+  if(!isValidElement<{children?:ReactNode}>(child))return child;
+  if(child.type===Button)return <DropdownMenuItem asChild onSelect={event=>event.preventDefault()}>{child}</DropdownMenuItem>;
+  return cloneElement(child,{},menuItems(child.props.children));
+ });
+}
+export function LibraryDialog({title,children,onClose,menu=false,anchor}:{title:string;children:ReactNode;onClose:()=>void;menu?:boolean;anchor?:HTMLElement|null}) {
+ const previous=useRef(document.activeElement as HTMLElement|null);
+ const restoreFocus=()=>{const target=previous.current?.isConnected&&previous.current!==document.body?previous.current:anchor?.isConnected?anchor:document.querySelector<HTMLElement>('.library-document[tabindex="0"]')??document.getElementById('shell-content');target?.focus();};
+ useEffect(()=>()=>restoreFocus(),[]);
+ const restore=(event:Event)=>{event.preventDefault();restoreFocus();};
+ if(menu){const rect=anchor?.getBoundingClientRect();return <DropdownMenu modal={false} open onOpenChange={open=>{if(!open)onClose();}}><DropdownMenuTrigger tabIndex={-1} aria-hidden="true" style={{position:'fixed',left:rect?.left??0,top:rect?.top??0,width:rect?.width??1,height:rect?.height??1,opacity:0,pointerEvents:'none'}} aria-label={title}/><DropdownMenuContent ref={node=>{if(node?.parentElement){node.parentElement.setAttribute("role","region");node.parentElement.setAttribute("aria-label",title);}}} tabIndex={0} className="library-dialog anchored-menu" aria-label={title} onCloseAutoFocus={restore}>{menuItems(children)}</DropdownMenuContent></DropdownMenu>;}
+ return <Dialog open onOpenChange={open=>{if(!open)onClose();}}><DialogContent className="settings-dialog library-dialog" aria-describedby={undefined} showCloseButton={false} aria-label={title} onCloseAutoFocus={restore}><div className="dialog-title"><DialogTitle>{title}</DialogTitle><Button variant="ghost" aria-label={tr('library:close')} onClick={onClose}>×</Button></div>{children}</DialogContent></Dialog>;
 }
 export function useLibraryPrompt() {
   const [request, setRequest] = useState<{
@@ -87,7 +43,7 @@ export function useLibraryPrompt() {
       >
         <label>
           {request.title}
-          <input
+          <Input
             autoFocus
             required
             maxLength={200}
@@ -95,7 +51,7 @@ export function useLibraryPrompt() {
             onChange={(e) => setRequest({ ...request, value: e.target.value })}
           />
         </label>
-        <button>{tr("library:save")}</button>
+        <Button variant="outline">{tr("library:save")}</Button>
       </form>
     </LibraryDialog>
   ) : null;

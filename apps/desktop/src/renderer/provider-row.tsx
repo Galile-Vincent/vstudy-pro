@@ -1,3 +1,6 @@
+import { Checkbox } from './components/checkbox';
+import { Button } from './components/ui/button';
+import { Input } from './components/ui/input';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../shared/i18n';
@@ -59,10 +62,10 @@ export function ProviderRow({
         </span>
       </div>
       {provider.config.kind === "cli" && <>
-        <label><input type="checkbox" checked={provider.config.enabled} disabled={busy} onChange={e => { const enabled=e.target.checked; void perform(() => desktop.invoke('providers:configure',{...provider.config,enabled})); }} />{tr('settings:enable_cli',{provider:providerName[provider.config.id]})}</label>
+        <label><Checkbox checked={provider.config.enabled} disabled={busy} onChange={e => { const enabled=e.target.checked; void perform(() => desktop.invoke('providers:configure',{...provider.config,enabled})); }} />{tr('settings:enable_cli',{provider:providerName[provider.config.id]})}</label>
         <p>{tr(provider.config.enabled ? 'settings:enabled' : 'settings:disabled')}</p>
         <p>{tr('settings:binary_path')}: <code>{provider.resolvedPath ?? tr('settings:not_found')}</code></p>
-        <button disabled={busy} onClick={() => void perform(() => desktop.invoke('providers:chooseExecutable',{binary:provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy'}))}>{tr('settings:change')}</button>
+        <Button variant="outline" disabled={busy} onClick={() => void perform(() => desktop.invoke('providers:chooseExecutable',{binary:provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy'}))}>{tr('settings:change')}</Button>
       </>}
       {provider.config.kind !== "cli" && (
         <>
@@ -79,7 +82,7 @@ export function ProviderRow({
               }, true);
             }}
           >
-            <input
+            <Input
               aria-label={tr('settings:api_key',{provider:providerName[provider.config.id]})}
               type="password"
               autoComplete="off"
@@ -87,11 +90,11 @@ export function ProviderRow({
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
-            <button disabled={busy || !key.trim()}>{tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}</button>
-            <button type="button" disabled={busy || !key.trim()} onClick={() => void perform(async () => { await desktop.invoke('secrets:session',{providerId:provider.config.id,key}); setKey(''); })}>{tr('settings:session_key')}</button>
-            {hasKey && <button type="button" disabled={busy} onClick={() => void perform(() => desktop.invoke('secrets:unlock',{providerId:provider.config.id}), true)}>{tr(error && !key.trim() ? 'settings:retry' : 'settings:unlock')}</button>}
+            <Button variant="outline" disabled={busy || !key.trim()}>{tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}</Button>
+            <Button variant="outline" type="button" disabled={busy || !key.trim()} onClick={() => void perform(async () => { await desktop.invoke('secrets:session',{providerId:provider.config.id,key}); setKey(''); })}>{tr('settings:session_key')}</Button>
+            {hasKey && <Button variant="outline" type="button" disabled={busy} onClick={() => void perform(() => desktop.invoke('secrets:unlock',{providerId:provider.config.id}), true)}>{tr(error && !key.trim() ? 'settings:retry' : 'settings:unlock')}</Button>}
             {hasKey && (
-              <button
+              <Button variant="outline"
                 type="button"
                 disabled={busy}
                 onClick={() =>
@@ -103,7 +106,7 @@ export function ProviderRow({
                   })
                 }
               >
-                {tr('common:remove')}</button>
+                {tr('common:remove')}</Button>
             )}
           </form>
           {provider.config.kind === "compatible" && (
@@ -120,14 +123,14 @@ export function ProviderRow({
                 );
               }}
             >
-              <input
+              <Input
                 type="url"
                 required
                 aria-label={tr('common:openai_compatible_base_url')}
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
               />
-              <button disabled={busy}>{tr('common:save_url')}</button>
+              <Button variant="outline" disabled={busy}>{tr('common:save_url')}</Button>
             </form>
           )}
         </>

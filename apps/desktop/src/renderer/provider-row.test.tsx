@@ -12,7 +12,7 @@ it('announces a pending CLI enable check until discovery finishes', async () => 
  let finish!:()=>void;const pending=new Promise<void>(resolve=>{finish=resolve;});
  try {
   await act(async()=>root.render(<ProviderRow provider={{config:{kind:'cli',id:'codex-cli',enabled:false},availability:{available:false,reason:'Provider disabled'},models:[]}} onRefresh={()=>pending}/>));
-  await act(async()=>host.querySelector<HTMLInputElement>('input[type=checkbox]')!.click());
+  await act(async()=>host.querySelector<HTMLButtonElement>('[role=checkbox]')!.click());
   expect(host.querySelector('section')?.getAttribute('aria-busy')).toBe('true');
   expect(host.querySelector('[role=status]')?.textContent).toBe('Checking provider…');
   await act(async()=>finish());

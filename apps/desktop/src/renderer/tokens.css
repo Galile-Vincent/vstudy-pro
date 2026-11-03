@@ -145,7 +145,7 @@ button,summary { min-inline-size:var(--space-6); min-block-size:var(--space-6); 
 html[data-reduced-transparency=true] *,html[data-reduced-transparency=true] ::backdrop { backdrop-filter:none!important; }
 @media(prefers-reduced-transparency:reduce) { ::backdrop { backdrop-filter:none!important; } }
 @media(prefers-contrast:more) { :root { --hairline:var(--ink); --line:var(--ink); --muted:var(--ink); --material-card:var(--surface); --material-sheet:var(--surface); } }
-.shell-sidebar button[aria-current=page] { border-inline-start:var(--space-1) solid var(--ink); font-weight:600; }
+.shell-sidebar button[aria-current=page] { border-inline-start:0; font-weight:600; }
 @media(forced-colors:active) {
  :root { --surface:Canvas; --ink:CanvasText; --muted:CanvasText; --line:CanvasText; --hairline:CanvasText; --focus:Highlight; --material-card:Canvas; --material-sheet:Canvas; }
  [aria-current=page] { border-color:Highlight; }

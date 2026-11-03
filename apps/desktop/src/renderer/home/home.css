@@ -55,3 +55,36 @@
 .home-row strong { line-height:1.35; }
 
 .home-greeting #welcome-entry { display:inline-flex; align-items:center; gap:var(--space-2); }
+
+/* UI2: one reading action, a secondary row, then quiet lists. */
+.home-page { padding:var(--space-8); }
+.home-content { max-width:1040px; margin-inline:auto; }
+.home-greeting { display:flex; align-items:start; justify-content:space-between; gap:var(--space-6); margin-bottom:var(--space-8); }
+.home-greeting h1 { white-space:normal; margin-bottom:var(--space-2); }
+.home-greeting #welcome-entry { color:var(--muted); flex-shrink:0; font-size:var(--type-sm); }
+.home-grid { display:flex; flex-direction:column; gap:var(--space-8); }
+.home-grid > * { width:100%; }
+.home-card { gap:var(--space-4); padding:var(--space-6); box-shadow:none; }
+.home-card h2 { margin:0; }
+.home-continue .home-card { padding:var(--space-8); align-items:start; }
+.home-continue h3 { font-size:var(--type-xl); line-height:1.4; overflow-wrap:anywhere; }
+.home-snippet { font-size:var(--type-md); line-height:1.8; font-weight:400; color:var(--muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; max-width:72ch; }
+.home-secondary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--space-4); align-items:start; }
+.home-secondary > :only-child { grid-column:1 / -1; max-width:100%; }
+.home-secondary .home-card { height:100%; }
+.home-secondary .home-upload { border:0; padding:0; }
+.home-secondary .home-upload > svg { display:none; }
+.home-secondary .home-upload label { display:none; }
+.home-secondary .home-upload .primary { background:var(--active); color:var(--ink); }
+.home-stat { font-size:var(--type-xl); }
+.home-sparkline { height:24px; margin:0; }
+.home-activity { border:0; background:transparent; padding:0; }
+.home-activity .home-list { margin-top:var(--space-4); }
+.home-activity li { border-bottom:1px solid var(--hairline); }
+.home-activity .home-row { font-weight:400; padding-block:var(--space-3); }
+@media(max-width:1050px) { .home-secondary { grid-template-columns:repeat(2,minmax(0,1fr)); }  .home-greeting { flex-wrap:wrap; gap:var(--space-2); } }
+@media(max-width:719px) { .home-page { padding:var(--space-4); } .home-secondary { grid-template-columns:1fr; } }
+
+.home-pins .home-card { background:transparent; border:0; padding:0; }
+.home-pins .home-list { display:flex; flex-wrap:wrap; gap:var(--space-4); margin:0; }
+.home-pins .home-list li { max-width:100%; }
