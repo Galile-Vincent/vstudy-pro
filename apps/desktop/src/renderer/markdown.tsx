@@ -1,3 +1,4 @@
+import { useMarkdownPlugins } from './markdown-plugins';
 import { highlightCitation } from "./citation-highlight";
 import { errorText } from "./status";
 import { contentLanguage } from "../shared/content-language";
@@ -6,10 +7,7 @@ import { tr } from '../shared/i18n';
 import { Children, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Markdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import rehypeHighlight from "rehype-highlight";
 import {
   headingsIn,
   headingPath,
@@ -21,7 +19,6 @@ import { desktop } from "./bridge";
 import { externalUrlSchema } from "../shared/ipc";
 import { documentCitationSchema } from "../shared";
 import type { Document, Selection } from "../shared";
-import "katex/dist/katex.min.css";
 
 export const schema = {
   ...defaultSchema,
@@ -72,6 +69,7 @@ export function DocumentMarkdown({
   onNotice: (message: string) => void;
 }) {
   const { i18n } = useTranslation();
+  const plugins = useMarkdownPlugins(source);
   const root = useRef<HTMLDivElement>(null);
   const selectCallback = useRef(onSelect);
   selectCallback.current = onSelect;
@@ -200,12 +198,11 @@ export function DocumentMarkdown({
             ),
           }), [source, documentId, headings, decorative, onNotice, i18n.language]);
   const rendered = useMemo(() => (        <Markdown
-          remarkPlugins={[remarkGfm, remarkMath]}
+          remarkPlugins={[remarkGfm, ...plugins.remark]}
           rehypePlugins={[
             sourceOffsets,
             [rehypeSanitize, schema],
-            rehypeKatex,
-            rehypeHighlight,
+            ...plugins.rehype,
           ]}
           skipHtml
           urlTransform={(url, key) =>
@@ -218,12 +215,23 @@ export function DocumentMarkdown({
           components={components}
         >
           {source}
-        </Markdown>), [source, components, documentId, onNotice]);
+        </Markdown>), [source, components, documentId, onNotice, plugins]);
   return (
     <div className="reading-scroll" onScroll={() => setFloating(null)}>
       <div
         ref={root}
         tabIndex={0} role="document"
+        onKeyDown={event => {
+          if (event.target !== event.currentTarget || event.metaKey || event.ctrlKey || event.altKey || !['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key)) return;
+          const selection = window.getSelection();
+          if (!selection) return;
+          event.preventDefault();
+          if (!selection.anchorNode || !event.currentTarget.contains(selection.anchorNode)) {
+            const text = document.createTreeWalker(event.currentTarget, NodeFilter.SHOW_TEXT).nextNode();
+            if (text) selection.collapse(text,0);
+          }
+          selection.modify(event.shiftKey ? 'extend' : 'move', ['ArrowLeft','ArrowUp','Home'].includes(event.key) ? 'backward' : 'forward', ['Home','End'].includes(event.key) ? 'lineboundary' : ['ArrowUp','ArrowDown'].includes(event.key) ? 'line' : 'character');
+        }}
         className="markdown" lang={contentLanguage(source)}
         data-testid="document-markdown"
 
@@ -249,7 +257,8 @@ export function DocumentMarkdown({
 
 export function ReplyMarkdown({ text, revealWords = false }: { text: string; revealWords?: boolean }) {
   useTranslation();
-  return <div lang={contentLanguage(text)}><Markdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeSanitize, schema], rehypeKatex, rehypeHighlight]} skipHtml
+  const plugins = useMarkdownPlugins(text);
+  return <div lang={contentLanguage(text)}><Markdown remarkPlugins={[remarkGfm, ...plugins.remark]} rehypePlugins={[[rehypeSanitize, schema], ...plugins.rehype]} skipHtml
     urlTransform={(url) => externalUrlSchema.safeParse(url).success ? url : ""}
     components={{ img: ({ alt }) => <span>{alt}</span>, ...(revealWords ? { p: ({ children }: { children?: React.ReactNode }) => <p>{Children.map(children, child => {
       if (typeof child !== 'string') return child;

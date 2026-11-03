@@ -8,7 +8,7 @@ function Views() {
   const { route } = useNavigate();
   useEffect(() => {
     // Parse the optional tour during idle, outside the click's frame budget.
-    const idle = window.requestIdleCallback(() => { void import('./welcome'); void import('./document-presentation'); });
+    const idle = window.requestIdleCallback(() => { void import('./welcome'); });
     return () => window.cancelIdleCallback(idle);
   }, []);
   return route.view === "welcome" ? (<Suspense fallback={null}><WelcomeView /></Suspense>) : route.view === "workspace" ? (

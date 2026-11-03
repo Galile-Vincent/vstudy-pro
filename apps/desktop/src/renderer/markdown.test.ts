@@ -31,6 +31,8 @@ describe("Document Markdown", () => {
     );
     expect(container.querySelector("table")).not.toBeNull();
     expect(container.querySelector("input[type=checkbox]")).not.toBeNull();
+    await vi.waitFor(() => expect(container.querySelector('.katex')).not.toBeNull());
+    await vi.waitFor(() => expect(container.querySelector('.hljs-keyword')).not.toBeNull());
     expect(container.querySelector(".katex")).not.toBeNull();
     expect(container.querySelector(".hljs-keyword")).not.toBeNull();
     expect(container.querySelector("script")).toBeNull();

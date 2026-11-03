@@ -675,8 +675,8 @@ export function LibraryView() {
                   aria-setsize={items.length}
                   data-selected={selected.includes(d.id)}
                   tabIndex={activeRow === d.id || (!activeRow && index === 0) ? 0 : -1}
-                  onFocus={() => { setActiveRow(d.id); void import("../document-presentation"); }}
-                  onMouseEnter={() => { void import("../document-presentation"); }}
+                  onFocus={() => { setActiveRow(d.id);  }}
+                  onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
                     height: rowHeight,

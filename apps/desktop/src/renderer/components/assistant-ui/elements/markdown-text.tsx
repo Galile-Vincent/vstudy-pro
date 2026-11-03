@@ -1,4 +1,5 @@
 "use client";
+import { useMarkdownPlugins } from '../../../markdown-plugins';
 import { contentLanguage } from "../../../../shared/content-language";
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
@@ -16,10 +17,7 @@ import { DocumentCitationLink } from "../../../document-elements";
 import { useAuiState } from "@assistant-ui/react";
 import { documentCitationSchema } from "../../../../shared";
 import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
 import rehypeSanitize from "rehype-sanitize";
-import rehypeKatex from "rehype-katex";
-import rehypeHighlight from "rehype-highlight";
 import { schema } from "../../../markdown";
 import { desktop } from "../../../bridge";
 import { externalUrlSchema } from "../../../../shared/ipc";
@@ -59,6 +57,7 @@ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
 }) => {
   useTranslation();
   const text = useAuiState(s => s.message.content.filter(p => p.type === "text").map(p => p.type === "text" ? p.text : "").join(""));
+  const plugins = useMarkdownPlugins(text);
   const rawCitations = useAuiState(s => s.message.metadata.custom.citations);
   const citations = documentCitationSchema.array().safeParse(rawCitations);
   const references = citations.success ? citations.data : [];
@@ -74,8 +73,8 @@ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
 
   return (
     <MarkdownTextPrimitive
-      remarkPlugins={[remarkGfm, remarkMath]}
-      rehypePlugins={[[rehypeSanitize, schema], rehypeKatex, rehypeHighlight]}
+      remarkPlugins={[remarkGfm, ...plugins.remark]}
+      rehypePlugins={[[rehypeSanitize, schema], ...plugins.rehype]}
       skipHtml
       preprocess={text => text.replace(/\[\[cite:(s\d+)\]\]/g,(marker,id:string) => references.some(c => c.id === id) ? `[source](#vstudy-cite-${id})` : marker)}
       urlTransform={url => /^#vstudy-cite-s\d+$/.test(url) || externalUrlSchema.safeParse(url).success ? url : ""}

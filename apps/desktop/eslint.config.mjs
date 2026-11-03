@@ -11,11 +11,6 @@ export default ts.config(
       { selector: "AssignmentExpression[left.property.name='innerHTML']", message: 'Use the reviewed Markdown sanitizer.' },
       { selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']", message: 'Use the reviewed Markdown sanitizer.' }]
   } },
-  { files: ['src/renderer/components/assistant-ui/elements/mermaid-diagram.tsx'], rules: {
-    'no-restricted-syntax': ['error',
-      { selector: "Property[key.name='shell'][value.value=true]", message: 'Use argv arrays.' },
-      { selector: "AssignmentExpression[left.property.name='innerHTML']", message: 'Use the reviewed sanitizer.' }]
-  } },
   js.configs.recommended,
   ...ts.configs.recommended,
   { files: ["src/renderer/components/**/*.tsx"], rules: { "no-empty": ["error", { allowEmptyCatch: true }] } },

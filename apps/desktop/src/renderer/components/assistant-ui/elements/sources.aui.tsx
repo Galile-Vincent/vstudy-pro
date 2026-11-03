@@ -3,8 +3,6 @@
 import {
   forwardRef,
   memo,
-  useCallback,
-  useState,
   type ComponentProps,
 } from "react";
 import { FileTextIcon } from "lucide-react";
@@ -48,60 +46,9 @@ const sourceVariants = cva(
   },
 );
 
-const defaultFaviconUrl = (domain: string) =>
-  `https://icons.duckduckgo.com/ip3/${domain}.ico`;
-
-const SourceIcon = forwardRef<
-  HTMLSpanElement,
-  ComponentProps<"span"> & {
-    url: string;
-    faviconUrl?: ((domain: string) => string) | undefined;
-  }
->(function SourceIcon(
-  { url, className, faviconUrl = defaultFaviconUrl, ...props },
-  ref,
-) {
-  const domain = hostOf(url);
-  const src = domain === undefined ? undefined : faviconUrl(domain);
-  const [errorSrc, setErrorSrc] = useState<string | undefined>(undefined);
-  const hasError = src === undefined || errorSrc === src;
-  const imageRef = useCallback(
-    (el: HTMLImageElement | null) => {
-      // A server-rendered image that fails before hydration never fires onError.
-      if (el?.complete && el.naturalWidth === 0) setErrorSrc(src);
-      if (typeof ref === "function") return ref(el);
-      if (ref) ref.current = el;
-    },
-    [ref, src],
-  );
-
-  if (hasError) {
-    return (
-      <span
-        ref={ref}
-        data-slot="source-icon-fallback"
-        className={cn(
-          "bg-muted flex size-3 shrink-0 items-center justify-center rounded-sm text-[10px] font-medium",
-          className,
-        )}
-        {...props}
-      >
-        {domain?.charAt(0).toUpperCase() || "?"}
-      </span>
-    );
-  }
-
-  return (
-    <img
-      data-slot="source-icon"
-      src={src}
-      alt=""
-      className={cn("size-3 shrink-0 rounded-sm", className)}
-      onError={() => setErrorSrc(src)}
-      {...(props as ComponentProps<"img">)}
-      ref={imageRef}
-    />
-  );
+const SourceIcon = forwardRef<HTMLSpanElement, ComponentProps<"span"> & {url:string;faviconUrl?: ((domain:string)=>string)|undefined}>(function SourceIcon({url: _url,faviconUrl: _faviconUrl,className,...props},ref) {
+  void _url; void _faviconUrl;
+  return <span ref={ref} className={cn("inline-flex",className)} {...props}><FileTextIcon aria-hidden="true" /></span>;
 });
 
 function SourceTitle({ className, ...props }: ComponentProps<"span">) {
