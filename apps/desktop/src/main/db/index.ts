@@ -44,6 +44,11 @@ export const migrations = [
     CREATE INDEX documents_folder_size ON documents(folderId,sizeBytes,id) WHERE deletedAt IS NULL;
     CREATE INDEX documents_folder_type ON documents(folderId,mime,id) WHERE deletedAt IS NULL;
   ` },
+  { version: 7, sql: `
+    ALTER TABLE messages ADD COLUMN parentMessageId TEXT DEFAULT NULL;
+    ALTER TABLE messages ADD COLUMN supersededBy TEXT DEFAULT NULL;
+    CREATE INDEX messages_active ON messages(conversationId,createdAt,id) WHERE supersededBy IS NULL;
+  ` },
 ];
 const documentRow = z
   .object({
@@ -221,11 +226,18 @@ export function openStore(path: string) {
     messages: {
       page(conversationId: Conversation["id"], limit: number, cursor?: { createdAt: string; id: string }) {
         const size = Math.min(100, Math.max(1, Math.floor(limit)));
-        const rows = db.prepare(`SELECT * FROM messages WHERE conversationId=? ${cursor ? 'AND (createdAt,id)>(?,?)' : ''} ORDER BY createdAt,id LIMIT ?`).all(conversationId,...(cursor ? [cursor.createdAt,cursor.id] : []),size+1);
+        const rows = db.prepare(`SELECT * FROM messages WHERE conversationId=? AND supersededBy IS NULL ${cursor ? 'AND (createdAt,id)>(?,?)' : ''} ORDER BY createdAt,id LIMIT ?`).all(conversationId,...(cursor ? [cursor.createdAt,cursor.id] : []),size+1);
         const items=rows.slice(0,size).map(r=>messageRow.parse(r));
         const last=items.at(-1);
         return {items,nextCursor:rows.length>size&&last?{createdAt:last.createdAt,id:last.id}:null};
       },
+      supersede(ids: Message['id'][], replacementId: string) {
+        const update = db.prepare('UPDATE messages SET supersededBy=? WHERE id=? AND supersededBy IS NULL');
+        db.exec('BEGIN IMMEDIATE');
+        try { for (const id of ids) update.run(replacementId,id); db.exec('COMMIT'); }
+        catch (error) { db.exec('ROLLBACK'); throw error; }
+      },
+      link(id: string, parentId: string) { db.prepare('UPDATE messages SET parentMessageId=? WHERE id=?').run(parentId,id); },
       excludeFromContext(ids: Message['id'][]) {
         const update = db.prepare("UPDATE messages SET parts=? WHERE id=?");
         for (const id of ids) { const row = db.prepare("SELECT * FROM messages WHERE id=?").get(id); if (row) { const m = messageRow.parse(row); update.run(JSON.stringify(m.parts.map(p => ({ ...p, contextExcluded: true }))), id); } }
@@ -249,7 +261,7 @@ export function openStore(path: string) {
           .parse(
             db
               .prepare(
-                "SELECT * FROM messages WHERE conversationId=? ORDER BY createdAt,id",
+                "SELECT * FROM messages WHERE conversationId=? AND supersededBy IS NULL ORDER BY createdAt,id",
               )
               .all(conversationId),
           );

@@ -67,8 +67,8 @@ describe("IPC chat adapter", () => {
     const results = [];
     for await (const item of test.stream) results.push(item);
     expect(results).toEqual([
-      { content: [{ type: "text", text: "A" }] },
-      { content: [{ type: "text", text: "AB" }] },
+      { content: [{ type: "text", text: "A" }], metadata: {custom: {modelId:"m",options:undefined,citations:[]}} },
+      { content: [{ type: "text", text: "AB" }], metadata: {custom: {modelId:"m",options:undefined,citations:[]}} },
     ]);
     expect(test.order).toEqual(["subscribe", "chat:start"]);
     expect(test.unsubscribe).toHaveBeenCalled();
@@ -108,7 +108,7 @@ it("drops queued deltas even if done was already queued when aborted", async () 
     emit({ type: "text-delta", text: "queued" });
     emit({ type: "done" });
   });
-  expect((await test.stream.next()).value).toEqual({ content: [{ type: "text", text: "first" }] });
+  expect((await test.stream.next()).value).toEqual({ content: [{ type: "text", text: "first" }], metadata: {custom: {modelId:"m",options:undefined,citations:[]}} });
   test.controller.abort();
   expect(await test.stream.next()).toEqual({ value: undefined, done: true });
 });

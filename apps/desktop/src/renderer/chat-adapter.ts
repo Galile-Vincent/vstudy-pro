@@ -96,7 +96,7 @@ export function createChatAdapter(
           else if (event.type === 'reasoning-delta') reasoning += event.text;
           else if (event.type === 'citations') citations = event.citations;
           else if (event.type === 'tool-call') { const index = toolCalls.findIndex(c => c.toolCallId === event.call.toolCallId); if (index >= 0) toolCalls[index] = event.call; else toolCalls.push(event.call); }
-          yield citations.length || reasoning || toolCalls.length ? snapshot() : {content:[{type:'text',text}],...(usage ? {metadata:{custom:{usage,modelId:details.modelId,options:details.options}}} : {})};
+          yield snapshot();
         }
       } finally {
         unsubscribe();

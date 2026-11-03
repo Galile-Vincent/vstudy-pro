@@ -412,3 +412,30 @@ it('keeps tool execution off by default and drops enrichment after abort', async
   const part=fixture.store.messages.list(fixture.request.conversationId).at(-1)!.parts[0]!;
   expect(part.reasoning).toBe('Partial summary');expect(part.status).toBe('aborted');expect(part.toolCalls).toBeUndefined();
 });
+
+it('reloads only edited turns and regenerates without duplicating the user, retaining audit and usage', async () => {
+  const prompts: string[] = [];
+  const {chat,store,request,owner} = await setup({...available, async *stream(req) {
+    prompts.push(req.prompt);
+    yield {type:'text-delta',text:`Answer ${prompts.length}`};
+    yield {type:'done'};
+  }});
+  const send = async (text: string, turnId: string, contextTurnIds: string[]) => {
+    const count = owner.events.filter(e => e.type === 'done').length;
+    chat.start({...request,requestId:randomUUID() as typeof request.requestId,userMessage:text,turnId,contextTurnIds},owner);
+    await until(() => owner.events.filter(e => e.type === 'done').length > count);
+  };
+  await send('Original question','turn-one',[]);
+  await send('Later question','turn-two',['turn-one']);
+  await send('Edited question','turn-one',[]);
+  expect(store.messages.list(request.conversationId).map(m => [m.role,m.parts[0]?.text])).toEqual([['user','Edited question'],['assistant','Answer 3']]);
+  await send('Edited question','turn-one',[]);
+  expect(store.messages.list(request.conversationId).map(m => [m.role,m.parts[0]?.text])).toEqual([['user','Edited question'],['assistant','Answer 4']]);
+  expect(prompts[2]).not.toContain('Original question');
+  expect(prompts[2]).not.toContain('Later question');
+  expect(prompts[3]).not.toContain('Answer 3');
+  expect(store.db.prepare('SELECT count(*) AS n FROM messages WHERE supersededBy IS NOT NULL').get()?.n).toBe(5);
+  expect(store.db.prepare('SELECT count(*) AS n FROM messages WHERE parentMessageId IS NOT NULL').get()?.n).toBe(4);
+  expect(store.usage.forConversation(request.conversationId)).toHaveLength(4);
+  expect(store.messages.page(request.conversationId,100).items.map(m => m.parts[0]?.text)).toEqual(['Edited question','Answer 4']);
+});

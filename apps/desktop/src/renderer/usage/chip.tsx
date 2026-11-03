@@ -19,7 +19,7 @@ export function MessageUsage({ subscription, models = [], fallbackUsage }: { sub
   const value = useAuiState(s => s.message.metadata.custom.usage);
   const modelId = useAuiState(s => s.message.metadata.custom.modelId);
   const options = useAuiState(s => s.message.metadata.custom.options);
-  const model = models.find(m => m.id === modelId || m.resolvedId === modelId);
+  const model = typeof modelId === "string" ? models.find(m => m.id === modelId || m.resolvedId === modelId) : undefined;
   const labels = Object.entries((options ?? {}) as Record<string,string|boolean>).flatMap(([id,value]) => {
     const declared = model?.options?.find(o => o.id === id);
     if (value === false || value === 'false' || value === 'default' || String(value) === declared?.default) return [];
@@ -30,5 +30,5 @@ export function MessageUsage({ subscription, models = [], fallbackUsage }: { sub
   const label = [model?.name, ...labels].filter(Boolean).join(' · ');
   const parsed = usageSchema.safeParse(value);
   const usage = parsed.success ? parsed.data : fallbackUsage;
-  return usage ? <><small className="usage-chip">{label && `${label} · `}</small><UsageChip usage={usage} subscription={subscription} aborted={aborted} /></> : null;
+  return usage ? <span className="message-usage"><small className="usage-chip">{label}</small><UsageChip usage={usage} subscription={subscription} aborted={aborted} /></span> : null;
 }

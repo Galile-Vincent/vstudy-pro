@@ -29,6 +29,8 @@ export interface ChatOwner {
 }
 interface ActiveRequest {
   owner: ChatOwner;
+  userMessageId: string;
+  assistantMessageId: string;
   request: ChatRequest;
   controller: AbortController;
   onDestroyed: () => void;
@@ -100,9 +102,15 @@ export class ChatService {
       throw new Error("Document is not ready");
     const adapter = this.providers.get(request.providerId);
     const messages = this.store.messages.list(request.conversationId);
-    const replayIndex = request.turnId ? messages.findIndex(m => m.role === 'user' && m.parts.some(p => p.turnId === request.turnId)) : -1;
-    if (replayIndex >= 0) this.store.messages.excludeFromContext(messages.slice(replayIndex).filter(m => m.role === 'assistant').map(m => m.id));
-    const beforeReplay = replayIndex < 0 ? messages : messages.slice(0, replayIndex);
+    const replayIndex = request.turnId ? messages.findIndex(m => m.role === 'user' && (m.id === request.turnId || m.parts.some(p => p.turnId === request.turnId))) : -1;
+    const replayUser = replayIndex >= 0 ? messages[replayIndex] : undefined;
+    const regenerating = replayUser?.parts.map(p => p.text).join('\n') === request.userMessage;
+    const userMessageId = regenerating ? replayUser!.id : randomUUID();
+    const assistantMessageId = randomUUID();
+    const omittedIndex = request.contextTurnIds ? messages.findIndex((m, index) => m.role === 'user' && index !== replayIndex && !request.contextTurnIds!.includes(m.parts[0]?.turnId ?? m.id)) : -1;
+    const cutoff = replayIndex >= 0 ? replayIndex : omittedIndex;
+    if (cutoff >= 0) this.store.messages.supersede(messages.slice(cutoff + (regenerating ? 1 : 0)).map(m => m.id), regenerating ? assistantMessageId : userMessageId);
+    const beforeReplay = cutoff < 0 ? messages : messages.slice(0, cutoff);
     const contextMessages = request.contextTurnIds ? beforeReplay.filter((m, index) => {
       const turnId = m.parts[0]?.turnId ?? (m.role === 'user' ? m.id : beforeReplay[index - 1]?.id);
       return !!turnId && request.contextTurnIds!.includes(turnId);
@@ -114,10 +122,12 @@ export class ChatService {
     const history = latestTurns.filter((message, index) => message.role === "assistant"
       ? message.parts.every(p => !p.contextExcluded && (!p.status || p.status === "complete"))
       : latestTurns[index + 1]?.role === "assistant" && latestTurns[index + 1]!.parts.every(p => !p.contextExcluded && (!p.status || p.status === "complete")));
-    this.persist(request, "user", request.userMessage);
+    if (!regenerating) this.persist(request, "user", request.userMessage, "complete", undefined, userMessageId);
     new ActivityService(this.store).record("chat", request.documentId, 0, request.requestId);
     const entry: ActiveRequest = {
       owner,
+      userMessageId,
+      assistantMessageId,
       request,
       controller: new AbortController(),
       text: "",
@@ -196,7 +206,7 @@ export class ChatService {
     this.active.delete(entry.request.requestId);
     entry.owner.removeListener("destroyed", entry.onDestroyed);
     try {
-      const messageId = randomUUID();
+      const messageId = entry.assistantMessageId;
       const citedIds = new Set([...(entry.citations ?? []), ...citedReferences(entry.text, entry.citationCatalog ?? [])].map(c => c.id));
       const citations = (entry.citationCatalog ?? []).filter(c => citedIds.has(c.id));
       if (citations.length && !entry.controller.signal.aborted) this.send(entry, { type: 'citations', citations });
@@ -215,6 +225,7 @@ export class ChatService {
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
       if (entry.text || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error") this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined, { ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
+      this.store.messages.link(messageId, entry.userMessageId);
     } catch {
       if (!entry.controller.signal.aborted)
         event = { type: "error", message: "Chat could not be saved" };
