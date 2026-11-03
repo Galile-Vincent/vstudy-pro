@@ -18,7 +18,7 @@
   "drop_error": "ボタンからローカルファイルを選んでください。",
   "importing": "インポート中…",
   "converting": "ドキュメントを準備中…",
-  "imported": "{{count}} 件をインポートしました。",
+  "imported": "文書をライブラリに追加しました。",
   "usage": "今月の使用量",
   "month_tokens": "トークン · 推定 {{cost}}",
   "sparkline": "過去14日間のトークン使用量",

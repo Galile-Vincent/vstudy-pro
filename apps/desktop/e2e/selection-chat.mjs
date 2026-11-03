@@ -209,7 +209,7 @@ try {
     await assert.rejects(page.evaluate(() => window.desktop.invoke("shell:openExternal", { url: "file:///etc/passwd" })));
     await app.evaluate(({ shell, dialog }) => {
       globalThis.vstudyOriginalMessageBox = dialog.showMessageBox;
-      dialog.showMessageBox = async options => { globalThis.vstudyLinkConfirmation = options; return { response: 1, checkboxChecked: false }; };
+      dialog.showMessageBox = async (parent, options) => { if (!parent.isVisible()) throw new Error('Consent requires a visible parent'); globalThis.vstudyLinkConfirmation = options; return { response: 1, checkboxChecked: false }; };
       shell.openExternal = async (url) => { globalThis.vstudyOpenedUrl = url; };
     });
     await viewer.getByRole("link", { name: "Reference website" }).click();

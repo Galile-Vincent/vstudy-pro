@@ -27,7 +27,7 @@ export function UploadCard({ folders = [], onImported, showSample = true }: { sh
       if (failed && !failed.ok) setError(errorText(new Error(failed.error)));
       if (folderId && documents.length) await desktop.invoke('library:documents:move', { documentIds: documents.map(d => d.id), folderId: folders.find(f => f.id === folderId)!.id });
       documents.forEach(d => { owned.current.add(d.id); onImported?.(d); });
-      setMessage(documents.length ? tr('home:imported', { count: documents.length }) : '');
+      setMessage(documents.length ? tr('home:imported') : '');
       window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed'));
     } catch (error) { setError(errorText(error)); setMessage(''); }
     finally { setBusy(false); lock.current = false; }

@@ -18,7 +18,7 @@
   "drop_error": "Choose a local file using the button.",
   "importing": "Importing document…",
   "converting": "Preparing your document…",
-  "imported": "Imported {{count}} document(s).",
+  "imported": "Documents added to your library.",
   "usage": "This month",
   "month_tokens": "Tokens · {{cost}} estimated",
   "sparkline": "Daily tokens over the last 14 days",

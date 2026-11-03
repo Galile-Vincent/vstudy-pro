@@ -18,7 +18,7 @@
   "drop_error": "請用按鈕選擇本機檔案。",
   "importing": "正在匯入文件…",
   "converting": "正在準備文件…",
-  "imported": "已匯入 {{count}} 份文件。",
+  "imported": "文件已加入資料庫。",
   "usage": "本月用量",
   "month_tokens": "token · 預估 {{cost}}",
   "sparkline": "近 14 天每日 token 用量",
