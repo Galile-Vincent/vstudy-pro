@@ -43,6 +43,7 @@ interface ActiveRequest {
   usageModels?: { modelId: string; usage: Usage }[];
   usageEmitted?: boolean;
   promptChars?: number;
+  supersedeOnSave?: import("../../shared/domain").Message["id"][];
 }
 export class ChatService {
   private readonly deleting = new Set<string>();
@@ -109,7 +110,7 @@ export class ChatService {
     const assistantMessageId = randomUUID();
     const omittedIndex = request.contextTurnIds ? messages.findIndex((m, index) => m.role === 'user' && index !== replayIndex && !request.contextTurnIds!.includes(m.parts[0]?.turnId ?? m.id)) : -1;
     const cutoff = replayIndex >= 0 ? replayIndex : omittedIndex;
-    if (cutoff >= 0) this.store.messages.supersede(messages.slice(cutoff + (regenerating ? 1 : 0)).map(m => m.id), regenerating ? assistantMessageId : userMessageId);
+    const superseded = cutoff >= 0 ? messages.slice(cutoff + (regenerating ? 1 : 0)).map(m => m.id) : [];
     const beforeReplay = cutoff < 0 ? messages : messages.slice(0, cutoff);
     const contextMessages = request.contextTurnIds ? beforeReplay.filter((m, index) => {
       const turnId = m.parts[0]?.turnId ?? (m.role === 'user' ? m.id : beforeReplay[index - 1]?.id);
@@ -122,10 +123,21 @@ export class ChatService {
     const history = latestTurns.filter((message, index) => message.role === "assistant"
       ? message.parts.every(p => !p.contextExcluded && (!p.status || p.status === "complete"))
       : latestTurns[index + 1]?.role === "assistant" && latestTurns[index + 1]!.parts.every(p => !p.contextExcluded && (!p.status || p.status === "complete")));
-    if (!regenerating) this.persist(request, "user", request.userMessage, "complete", undefined, userMessageId);
-    new ActivityService(this.store).record("chat", request.documentId, 0, request.requestId);
+    this.store.db.exec("SAVEPOINT accept_chat");
+    try {
+      if (!regenerating) {
+        this.persist(request, "user", request.userMessage, "complete", undefined, userMessageId);
+        this.store.messages.supersede(superseded, userMessageId);
+      }
+      new ActivityService(this.store).record("chat", request.documentId, 0, request.requestId);
+      this.store.db.exec("RELEASE accept_chat");
+    } catch (error) {
+      this.store.db.exec("ROLLBACK TO accept_chat; RELEASE accept_chat");
+      throw error;
+    }
     const entry: ActiveRequest = {
       owner,
+      supersedeOnSave: regenerating ? superseded : undefined,
       userMessageId,
       assistantMessageId,
       request,
@@ -206,6 +218,7 @@ export class ChatService {
     this.active.delete(entry.request.requestId);
     entry.owner.removeListener("destroyed", entry.onDestroyed);
     try {
+      this.store.db.exec("SAVEPOINT finish_chat");
       const messageId = entry.assistantMessageId;
       const citedIds = new Set([...(entry.citations ?? []), ...citedReferences(entry.text, entry.citationCatalog ?? [])].map(c => c.id));
       const citations = (entry.citationCatalog ?? []).filter(c => citedIds.has(c.id));
@@ -226,7 +239,10 @@ export class ChatService {
       }
       if (entry.text || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error") this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined, { ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
       this.store.messages.link(messageId, entry.userMessageId);
+      if (entry.supersedeOnSave && entry.text) this.store.messages.supersede(entry.supersedeOnSave, messageId);
+      this.store.db.exec("RELEASE finish_chat");
     } catch {
+      this.store.db.exec("ROLLBACK TO finish_chat; RELEASE finish_chat");
       if (!entry.controller.signal.aborted)
         event = { type: "error", message: "Chat could not be saved" };
     }

@@ -243,9 +243,9 @@ export function openStore(path: string) {
       },
       supersede(ids: Message['id'][], replacementId: string) {
         const update = db.prepare('UPDATE messages SET supersededBy=? WHERE id=? AND supersededBy IS NULL');
-        db.exec('BEGIN IMMEDIATE');
-        try { for (const id of ids) update.run(replacementId,id); db.exec('COMMIT'); }
-        catch (error) { db.exec('ROLLBACK'); throw error; }
+        db.exec('SAVEPOINT supersede');
+        try { for (const id of ids) update.run(replacementId,id); db.exec('RELEASE supersede'); }
+        catch (error) { db.exec('ROLLBACK TO supersede; RELEASE supersede'); throw error; }
       },
       link(id: string, parentId: string) { db.prepare('UPDATE messages SET parentMessageId=? WHERE id=?').run(parentId,id); },
       excludeFromContext(ids: Message['id'][]) {
