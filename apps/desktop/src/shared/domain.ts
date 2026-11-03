@@ -162,6 +162,7 @@ export const providerConfigSchema = z.discriminatedUnion("kind", [
     .object({
       kind: z.literal("compatible"),
       id: z.literal("openai-compatible"),
+      imageModelIds:z.array(z.string().min(1).max(300)).max(500).optional(),
       baseUrl: z
         .string()
         .url()

@@ -3,7 +3,7 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import type { Root, RootContent } from 'mdast';
 export function pageTokens(text:string):string[] {
- return text.normalize('NFKC').toLowerCase().replace(/\\[a-z]+/gi,' ').match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]|[\p{L}\p{N}]+/gu) ?? [];
+ return text.normalize('NFKC').toLowerCase().replace(/\\[a-z]+/gi,' ').replace(/([\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}])/gu,' $1 ').match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]|[\p{L}\p{N}]+/gu) ?? [];
 }
 export function validateAiPage(source:string, output:string):{accepted:boolean; missing:number; added:number} {
  if (!output.trim() || Buffer.byteLength(output)>256*1024) throw new Error('ai_parse.size');

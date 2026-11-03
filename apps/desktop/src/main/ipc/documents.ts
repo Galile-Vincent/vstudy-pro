@@ -1,3 +1,7 @@
+import { AiParseService } from '../services/ai-parse';
+import { createPageRenderer } from '../../../resources/converter/ai-pages';
+import { aiParseContract, aiParseProgressChannel } from '../../shared/ai-parse';
+import type { ProviderRegistry } from '../providers';
 import { importError } from '../../shared/import-error';
 import { showAttachedMessage } from '../dialogs';
 import { DropTokens } from '../services/drop-tokens';
@@ -19,7 +23,9 @@ export function registerDocumentsIpc(
   store: Store,
   implemented: Set<IpcChannel>,
   deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(),
-): (() => Promise<void>) & { resume: (id: import("../../shared/domain").Document["id"]) => void } {
+  providers?:ProviderRegistry,
+): (() => Promise<void>) & { resume: (id: import("../../shared/domain").Document["id"]) => void; stopAi:(id:import("../../shared/domain").Document["id"])=>Promise<void> } {
+  const aiOwners=new Map<string,Electron.WebContents>();
   const drops = new DropTokens();
   const library = new LibraryService(store, join(app.getPath("userData"), "library"));
   const userData = app.getPath("userData");
@@ -44,6 +50,16 @@ export function registerDocumentsIpc(
     const owner = owners.get(documentId);
     if (owner && !owner.isDestroyed()) owner.send(documentProgressChannel, documentProgressSchema.parse({ documentId, message, ...conversionStatus(message) }));
   } });
+  const ai=providers ? new AiParseService(store,providers,createPageRenderer(converter.ensureReady,app.isPackaged ? join(process.resourcesPath,'converter') : join(app.getAppPath(),'resources/converter')),state=>{const owner=aiOwners.get(state.documentId);if(owner && !owner.isDestroyed())owner.send(aiParseProgressChannel,state);}) : undefined;
+  if(ai) {
+    for(const channel of Object.keys(aiParseContract) as (keyof typeof aiParseContract)[])implemented.add(channel);
+    registrar.handle('aiParse:estimate',r=>ai.estimate(r));
+    registrar.handle('aiParse:start',(r,event)=>{const owner=aiOwners.get(r.documentId);if(owner && owner!==event.sender && !owner.isDestroyed())throw new Error('ai_parse.owner');aiOwners.set(r.documentId,event.sender);return ai.start(r);});
+    registrar.handle('aiParse:status',r=>ai.status(r.documentId));
+    registrar.handle('aiParse:cancel',(r,event)=>{if(aiOwners.get(r.documentId)!==event.sender)throw new Error('ai_parse.owner');ai.cancel(r.documentId);return {ok:true};});
+    registrar.handle('aiParse:use',async r=>{await ai.use(r.documentId,r.version);return {ok:true};});
+    registrar.handle('aiParse:discard',async r=>{await ai.discard(r.documentId);return {ok:true};});
+  }
   const captureDrop = (event: Electron.IpcMainEvent, paths: unknown) => {
     event.returnValue = [];
     if (event.senderFrame !== event.sender.mainFrame || !Array.isArray(paths) || paths.length > 100 || !paths.every(p => typeof p === 'string' && p.length < 4096)) return;
@@ -77,13 +93,14 @@ export function registerDocumentsIpc(
   registrar.handle("documents:importPaths", ({ paths, folderId }, event) => Promise.all(paths.map(async (path) => { try { const document = await documents.importPath(drops.consume(path, event.senderFrame!)); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return { ok: true as const, document }; } catch (error) { return { ok: false as const, path, error: 'VSTUDY_STATUS:' + JSON.stringify(importError(error)) }; } })));
   registrar.handle("documents:list", () => documents.list());
   registrar.handle("documents:get", ({ documentId }) => documents.get(documentId));
-  registrar.handle("documents:read", ({ documentId }) => documents.read(documentId));
-  registrar.handle("documents:reconvert",({documentId},event)=>{owners.set(documentId,event.sender);return documents.reconvert(documentId);});
+  registrar.handle("documents:read", ({ documentId, version }) => documents.read(documentId,version));
+  registrar.handle("documents:reconvert",async({documentId},event)=>{ai?.cancel(documentId);await ai?.waitForIdle();owners.set(documentId,event.sender);return documents.reconvert(documentId);});
   registrar.handle("documents:retry", ({ documentId }, event) => { owners.set(documentId, event.sender); return documents.retry(documentId); });
   registrar.handle("documents:delete", async ({ documentId }) => {
+    ai?.cancel(documentId); await ai?.waitForIdle();
     await deleteDocument(documentId, () => documents.delete(documentId));
     return { ok: true };
   });
   const dispose = registrar.dispose;
-  return Object.assign(async () => { ipcMain.removeListener('vstudy:preload-drop', captureDrop); documents.dispose(); dispose(); await converter.dispose(); await documents.waitForIdle(); }, {resume: (id: import("../../shared/domain").Document["id"]) => documents.resume(id)});
+  return Object.assign(async () => { await ai?.dispose(); ipcMain.removeListener('vstudy:preload-drop', captureDrop); documents.dispose(); dispose(); await converter.dispose(); await documents.waitForIdle(); }, {stopAi:async(id:import("../../shared/domain").Document["id"])=>{ai?.cancel(id);await ai?.waitForIdle();},resume: (id: import("../../shared/domain").Document["id"]) => documents.resume(id)});
 }

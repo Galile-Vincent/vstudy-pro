@@ -131,17 +131,17 @@ export class DocumentService {
     });
   }
 
-  async read(id: Document["id"]): Promise<string> {
+  async read(id: Document["id"], version?:"original"|"ai"): Promise<string> {
     const document = this.require(id);
     if (document.status !== "ready" && document.status !== "converting") throw new Error("Document is not ready");
-    const path = containedPath(this.library, document.status === "converting" ? `${document.markdownPath}.partial` : document.markdownPath);
+    const path = containedPath(this.library, document.status === "converting" ? `${document.markdownPath}.partial` : (version ?? document.activeVersion) === "ai" ? join(document.markdownPath, "..", "content.ai.md") : document.markdownPath);
     new ActivityService(this.options.store).opened(id);
     if ((await stat(path)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
     return readFile(path, "utf8");
   }
 
   reconvert(id: Document["id"]): Promise<Document> {
-    return this.serialize(async()=>{const document=this.require(id);if(document.status==='converting')throw new Error('errors.conversion_in_progress');const updated=this.options.store.documents.transition(id,{status:'converting'});this.enqueue(updated);return updated;});
+    return this.serialize(async()=>{const document=this.require(id);if(document.status==='converting')throw new Error('errors.conversion_in_progress');this.options.store.db.prepare("UPDATE documents SET activeVersion='original' WHERE id=?").run(id);const updated=this.options.store.documents.transition(id,{status:'converting'});this.enqueue(updated);return updated;});
   }
   retry(id: Document["id"]): Promise<Document> {
     return this.serialize(async () => {

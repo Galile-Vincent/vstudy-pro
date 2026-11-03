@@ -87,3 +87,15 @@ it('gives searches a read budget independent of import and export', async () => 
   expect(channelPolicy('documents:import').requests).toBe(12);
   expect(channelPolicy('library:export').requests).toBe(12);
 });
+
+it('validates all AI parse channels through the same sender and response boundary',async()=>{
+ const {aiParseContract}=await import('../../shared/ai-parse');
+ const handlers=new Map<string,(e:IpcMainInvokeEvent,p:unknown)=>unknown>();
+ let trusted=true;
+ const registrar=createIpcRegistrar({handle:(c,h)=>{handlers.set(c,h);},removeHandler:()=>{}},()=>trusted);
+ const id='00000000-0000-4000-8000-000000000001';
+ for(const channel of Object.keys(aiParseContract) as (keyof typeof aiParseContract)[])registrar.handle(channel,()=>{throw new Error('validated');});
+ const event={sender:{id:1}} as IpcMainInvokeEvent;
+ for(const [channel,handler] of handlers){await expect(handler(event,{documentId:id,extra:'forbidden'})).rejects.toThrow();trusted=false;await expect(handler(event,{documentId:id})).rejects.toThrow('Untrusted');trusted=true;expect(channel).toMatch(/^aiParse:/);}
+ registrar.dispose();
+});

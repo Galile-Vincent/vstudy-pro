@@ -13,6 +13,7 @@ it('backfills pre-v8 data, preserves unknown costs and extra counters, and order
   for(const migration of migrations.filter(m=>m.version<8)) db.exec(migration.sql);
   const usage=usageRepository(db), old=record(); usage.record(old);
   db.exec(migrations.find(m=>m.version===8)!.sql);
+  for(const migration of migrations.filter(m=>m.version>8))db.exec(migration.sql);
   const known={...record(),costUsd:0.4,costSource:'reported' as const};usage.record(known);
   usage.record({...record('2026-10-01T00:00:00Z'),rateLimit:{label:'stale',usedPercent:99}});
   expect(usage.summary('month',new Date('2026-11-03T12:00:00Z'))).toEqual(summarize([old,known]));

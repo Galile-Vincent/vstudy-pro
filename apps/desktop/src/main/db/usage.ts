@@ -46,7 +46,8 @@ export function usageRepository(db: DatabaseSync) {
         sum(cacheReadTokens) cacheReadTokens,sum(cacheWriteTokens) cacheWriteTokens,sum(reasoningTokens) reasoningTokens
         FROM usage_daily WHERE date>=? AND date<=? GROUP BY date`).all(...range(period,now));
       for (const row of rows) if (days.has(String(row.date))) days.set(String(row.date), {date:String(row.date),inputTokens:Number(row.inputTokens),outputTokens:Number(row.outputTokens)});
-      return { summary:totals(period,now), cacheReadTokens:rows.reduce((n,r)=>n+Number(r.cacheReadTokens),0),
+      const parseRow=db.prepare("SELECT coalesce(sum(calls),0) calls,coalesce(sum(inputTokens),0) inputTokens,coalesce(sum(outputTokens),0) outputTokens,sum(costUsd) costUsd FROM usage_parse_daily WHERE date>=? AND date<=?").get(...range(period,now));
+      return { parseTotals:{calls:Number(parseRow?.calls??0),inputTokens:Number(parseRow?.inputTokens??0),outputTokens:Number(parseRow?.outputTokens??0),costUsd:parseRow?.costUsd===null?null:Number(parseRow?.costUsd??0)}, summary:totals(period,now), cacheReadTokens:rows.reduce((n,r)=>n+Number(r.cacheReadTokens),0),
         cacheWriteTokens:rows.reduce((n,r)=>n+Number(r.cacheWriteTokens),0), reasoningTokens:rows.reduce((n,r)=>n+Number(r.reasoningTokens),0), days:[...days.values()] };
     },
     record(input: UsageRecord) {

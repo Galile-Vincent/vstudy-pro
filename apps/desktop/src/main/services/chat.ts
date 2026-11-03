@@ -1,4 +1,4 @@
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { containedPath } from "./file-paths";
 import { ActivityService } from "./activity";
 import { validateOptions } from "../providers/models";
@@ -114,6 +114,7 @@ export class ChatService {
       throw new Error("Chat context mismatch");
     if (!document || document.status !== "ready")
       throw new Error("Document is not ready");
+    if(request.selection && (request.selection.version ?? "original")!==document.activeVersion)throw new Error("Selection version mismatch");
     const adapter = this.providers.get(request.providerId);
     const messages = this.store.messages.list(request.conversationId);
     const replayIndex = request.turnId ? messages.findIndex(m => m.role === 'user' && (m.id === request.turnId || m.parts.some(p => p.turnId === request.turnId))) : -1;
@@ -280,7 +281,7 @@ export class ChatService {
       entry.controller.signal.throwIfAborted();
       this.store.conversations.setOptions(entry.request.conversationId, entry.request.options);
       entry.controller.signal.throwIfAborted();
-      const file = await open(containedPath(dirname(document.sourcePath), document.markdownPath), "r");
+      const file = await open(containedPath(dirname(document.sourcePath), document.activeVersion==='ai' ? join(dirname(document.markdownPath),'content.ai.md') : document.markdownPath), "r");
       let markdown: string;
       try {
         const buffer = Buffer.alloc(2_000_000);
@@ -290,7 +291,7 @@ export class ChatService {
         await file.close();
       }
       entry.controller.signal.throwIfAborted();
-      entry.citationCatalog = citationCatalog(entry.request.documentId, markdown);
+      entry.citationCatalog = citationCatalog(entry.request.documentId, markdown).map(c=>({...c,version:document.activeVersion}));
       const allowPresentation = this.store.settings.get().enableGenerativeUI && ['anthropic-api','openai-api'].includes(entry.request.providerId);
       const prompt = buildPrompt({
         replyLanguage: this.store.settings.get().replyLanguage,

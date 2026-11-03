@@ -1,4 +1,5 @@
 import { containedPath } from "./file-paths";
+import { dirname, join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import type { DatabaseSync } from 'node:sqlite';
 import { documentIdSchema } from '../../shared/domain';
@@ -43,10 +44,10 @@ export class SearchService {
             if (title !== row.title || filename !== row.filename || content !== row.content || Number(row.chars) > 1_000_000)
                 this.db.prepare('UPDATE document_fts SET title=?,filename=?,content=? WHERE rowid=?').run(title,filename,content,rowid!);
         }
-        const missing = this.db.prepare("WITH indexed AS MATERIALIZED (SELECT documentId,count(*) copies,max(length(content)) chars FROM document_fts GROUP BY documentId) SELECT d.id,d.markdownPath FROM documents d LEFT JOIN indexed f ON f.documentId=d.id WHERE d.status='ready' AND d.deletedAt IS NULL AND (coalesce(f.copies,0)!=1)").all();
+        const missing = this.db.prepare("WITH indexed AS MATERIALIZED (SELECT documentId,count(*) copies,max(length(content)) chars FROM document_fts GROUP BY documentId) SELECT d.id,d.markdownPath,d.activeVersion FROM documents d LEFT JOIN indexed f ON f.documentId=d.id WHERE d.status='ready' AND d.deletedAt IS NULL AND (coalesce(f.copies,0)!=1)").all();
         for (const d of missing) {
             try {
-                const path = String(d.markdownPath);
+                const path = d.activeVersion==='ai' ? join(dirname(String(d.markdownPath)),'content.ai.md') : String(d.markdownPath);
                 this.update(String(d.id), readFileSync(this.root ? containedPath(this.root, path) : path, 'utf8'));
             }
             catch { /* A missing source is retried on the next startup. */ }

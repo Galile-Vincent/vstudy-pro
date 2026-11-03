@@ -1,7 +1,7 @@
 import { activeConversions } from "./conversion-state";
 import { randomUUID } from 'node:crypto';
 import { readFileSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import type { SQLInputValue } from 'node:sqlite';
 import type { Store } from '../db';
 import { documentIdSchema, documentSchema } from '../../shared/domain';
@@ -70,7 +70,7 @@ export class LibraryService {
     } }); }
     require(id: string) { const d = this.store.documents.get(documentIdSchema.parse(id)); if (!d)
         throw new Error('Document not found'); return d; }
-    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: row.sizeBytes === null ? null : Number(row.sizeBytes), contentChars: row.contentChars === null ? null : Number(row.contentChars) }); }
+    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','activeVersion','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: row.sizeBytes === null ? null : Number(row.sizeBytes), contentChars: row.contentChars === null ? null : Number(row.contentChars) }); }
     list(input: LibraryQuery) {
         const q = libraryQuerySchema.parse(input), args: SQLInputValue[] = [], where = ['d.deletedAt IS NULL'];
         const add = (sql: string, ...values: SQLInputValue[]) => { where.push(sql); args.push(...values); };
@@ -147,12 +147,12 @@ export class LibraryService {
     reorderPins(table: 'documents' | 'folders', ids: string[]) { this.transaction(() => ids.forEach((id, i) => this.store.db.prepare(`UPDATE ${table} SET pinnedAt=? WHERE id=? AND pinned=1`).run(new Date(Date.now() - i).toISOString(), id))); }
     rename(id: string, title: string) { this.require(id); this.store.db.prepare('UPDATE documents SET title=? WHERE id=?').run(title, id); }
     softDelete(id: string) { this.store.db.prepare('UPDATE documents SET deletedAt=coalesce(deletedAt,?) WHERE id=?').run(new Date().toISOString(), id); }
-    restore(id: string) { this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath FROM documents WHERE id=?').get(id); if (!r)
+    restore(id: string) { this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath,activeVersion FROM documents WHERE id=?').get(id); if (!r)
         throw new Error('Document not found'); if (r.deletedAt === null)
         return; if (Date.now() - Date.parse(String(r.deletedAt)) > 30000)
         throw new Error('Undo expired'); this.store.db.prepare('UPDATE documents SET deletedAt=NULL WHERE id=?').run(id); if (r.markdownPath) {
         try {
-            this.search.update(id, readFileSync(containedPath(this.root, String(r.markdownPath)), 'utf8'));
+            this.search.update(id, readFileSync(containedPath(this.root, r.activeVersion==='ai'?join(dirname(String(r.markdownPath)),'content.ai.md'):String(r.markdownPath)), 'utf8'));
         }
         catch { /* Rebuild retries unavailable content at startup. */ }
     } }); }

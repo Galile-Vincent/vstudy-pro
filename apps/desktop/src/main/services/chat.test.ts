@@ -388,7 +388,7 @@ it('persists and forwards reasoning, validated citations and a bounded API prese
   await until(() => fixture.owner.events.some(e => e.type === 'done'));
   const parts=fixture.store.messages.list(fixture.request.conversationId).at(-1)!.parts[0]!;
   expect(parts.reasoning).toBe('Reported summary');
-  expect(parts.citations).toEqual([{id:'s0',documentId:fixture.request.documentId,title:'Study',offset:0,quote:'# Study\nExact selected passage'}]);
+  expect(parts.citations).toEqual([{version:'original',id:'s0',documentId:fixture.request.documentId,title:'Study',offset:0,quote:'# Study\nExact selected passage'}]);
   expect(parts.toolCalls).toEqual([{toolCallId:'present-1',toolName:'present',args:{title:'Comparison',columns:['Topic','Fact'],rows:[['Study','Exact passage']]},result:{rendered:true},isError:false}]);
   expect(fixture.owner.events.filter(e => e.type === 'done' || e.type === 'error')).toEqual([{type:'done'}]);
   expect(fixture.owner.events.at(-1)).toEqual({type:'done'});
