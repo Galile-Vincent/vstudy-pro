@@ -1,3 +1,4 @@
+import { createRateLimitProbe } from "../providers/rate-limits";
 import { dialog } from 'electron';
 import { estimateCost } from '../pricing';
 import { stat } from 'node:fs/promises';
@@ -13,6 +14,7 @@ export function usageCsv(records: UsageRecord[]): string {
   return [keys.join(','), ...records.map(r => keys.map(k => cell(r[k])).join(','))].join('\r\n');
 }
 export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemented: Set<IpcChannel>) {
+  const probe = createRateLimitProbe();
   registrar.handle('usage:estimate', async ({ conversationId, userMessage }) => {
     const c = store.conversations.get(conversationId);
     if (!c) throw new Error('Conversation not found');
@@ -26,7 +28,11 @@ export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemen
   registrar.handle('usage:summary' , ({ period }) => store.usage.summary(period));
   registrar.handle('usage:forConversation', ({ conversationId }) => store.usage.forConversation(conversationId));
   registrar.handle('usage:forDocument', ({ documentId }) => store.usage.forDocument(documentId));
-  registrar.handle('usage:rateLimits', () => store.usage.rateLimits());
+  registrar.handle('usage:rateLimits', async () => {
+    const rows = store.usage.rateLimits();
+    const rateLimit = await probe();
+    return rateLimit ? [...rows.filter(r => r.providerId !== 'codex-cli'), { providerId: 'codex-cli' as const, createdAt: new Date().toISOString(), rateLimit }] : rows;
+  });
   registrar.handle('usage:export', async () => {
     const result = await dialog.showSaveDialog({ defaultPath: 'vstudy-usage.csv', filters: [{ name: 'CSV', extensions: ['csv'] }] });
     if (result.canceled || !result.filePath) return { saved: false };
