@@ -172,3 +172,12 @@ it('requeues an unfinished hidden document restored after startup',async()=>{
  const {LibraryService}=await import('./library');const library=new LibraryService(store,join(userData,'library'));
  library.restore(document.id);restarted.resume(document.id);await restarted.waitForIdle();restarted.dispose();expect(store.documents.get(document.id)?.status).toBe('ready');
 });
+it('leaves interrupted startup metadata pending without rejecting service ownership',async()=>{
+ const {service,store,userData,convert}=await setup();const document=await service.importPath(fixture('html'));await service.waitForIdle();
+ store.db.prepare('UPDATE documents SET metadataBackfilled=0 WHERE id=?').run(document.id);
+ store.db.exec("CREATE TRIGGER metadata_disk_full BEFORE UPDATE OF metadataBackfilled ON documents WHEN NEW.metadataBackfilled=1 BEGIN SELECT RAISE(ABORT,'disk full'); END");
+ const interrupted=new DocumentService({store,userData,convert});await expect(interrupted.waitForIdle()).resolves.toBeUndefined();interrupted.dispose();
+ expect(store.db.prepare('SELECT metadataBackfilled FROM documents WHERE id=?').get(document.id)?.metadataBackfilled).toBe(0);
+ store.db.exec('DROP TRIGGER metadata_disk_full');const resumed=new DocumentService({store,userData,convert});await resumed.waitForIdle();resumed.dispose();
+ expect(store.db.prepare('SELECT metadataBackfilled FROM documents WHERE id=?').get(document.id)?.metadataBackfilled).toBe(1);
+});
