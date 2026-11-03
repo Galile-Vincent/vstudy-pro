@@ -64,7 +64,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     await expect(invoke("documents:importPaths", { paths: [] })).rejects.toThrow();
     await expect(invoke("documents:importPaths", { paths: [12] })).rejects.toThrow();
     await expect(invoke("documents:importPaths", { paths: ["file.md"], extra: true })).rejects.toThrow();
-    await expect(invoke("documents:retry", { documentId: document.id })).rejects.toThrow("Only failed");
+    await expect(invoke("documents:retry", { documentId: document.id })).rejects.toThrow("VSTUDY_STATUS:");
     expect(await invoke("documents:delete", { documentId: document.id })).toEqual({ ok: true });
     expect(abort.mock.calls[0]).toEqual([document.id]);
     expect(await invoke("documents:get", { documentId: document.id })).toBeNull();

@@ -1,3 +1,4 @@
+import { formatters } from "../shared/format";
 import { useTranslation } from 'react-i18next';
 import { i18n, systemLanguage } from '../shared/i18n';
 import { desktop } from './bridge';
@@ -10,13 +11,7 @@ export async function applyLanguage(language: Settings['language']): Promise<voi
 }
 export function useFormat() {
   const { i18n: instance } = useTranslation();
-  const locale = instance.language === 'en-XA' ? 'en' : instance.language;
-  return {
-    number: (value: number, options?: Intl.NumberFormatOptions) => new Intl.NumberFormat(locale, options).format(value),
-    currency: (value: number) => new Intl.NumberFormat(locale,{style:'currency',currency:'USD',maximumFractionDigits:3}).format(value),
-    date: (value: string | Date, options?: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locale,options).format(new Date(value)),
-    relative: (value: number, unit: Intl.RelativeTimeFormatUnit) => new Intl.RelativeTimeFormat(locale,{numeric:'auto'}).format(value,unit),
-  };
+  return formatters(instance.language);
 }
 export async function saveLanguage(field: 'language' | 'replyLanguage', value: Settings['language']) {
   const latest = await desktop.invoke('settings:get',{});

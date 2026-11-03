@@ -110,8 +110,8 @@ export function AudioPlayer({
         : { src, currentTime: 0, playing: false, hasError: false }),
       ...patch,
     }));
-  const displayTitle = title ?? "Audio";
-  const playbackLabel = title ? ` ${title}` : " audio";
+  const displayTitle = title ?? tr('common:audio');
+  const playbackLabel = title ? ` ${title}` : ` ${tr('common:audio')}`;
   const durationLabel =
     duration === undefined ? "--:--" : formatDuration(duration);
 
@@ -159,7 +159,7 @@ export function AudioPlayer({
       ) : null}
       <button
         type="button"
-        aria-label={`${playing ? "Pause" : "Play"}${playbackLabel}`}
+        aria-label={`${playing ? tr('common:pause') : tr('common:play')}${playbackLabel}`}
         disabled={hasError}
         onClick={togglePlayback}
         className={cn(
@@ -263,7 +263,7 @@ export function VideoPlayer({
           controls
           playsInline
           preload="metadata"
-          aria-label={title ?? "Video"}
+          aria-label={title ?? tr('common:video')}
           className={cn(
             "block max-w-full",
             ratio !== "auto" && "h-full w-full object-contain",

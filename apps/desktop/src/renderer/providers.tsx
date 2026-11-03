@@ -1,3 +1,4 @@
+import { errorText } from "./status";
 import { useTranslation } from "react-i18next";
 import { LanguageSettings } from './language-settings';
 import { tr } from '../shared/i18n';
@@ -97,7 +98,7 @@ function ProviderRow({
       await action();
       await onRefresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : tr('common:could_not_save_provider'));
+      setError(errorText(e));
     } finally {
       setBusy(false);
     }

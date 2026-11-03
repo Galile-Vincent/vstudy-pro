@@ -24,8 +24,14 @@ export function createIpcRegistrar(
         const request = ipcContract[channel].request.parse(
           payload,
         ) as IpcRequest<C>;
-        const response = await handler(request, event);
-        return ipcContract[channel].response.parse(response);
+        try {
+          const response = await handler(request, event);
+          return ipcContract[channel].response.parse(response);
+        } catch (error) {
+          const code=error instanceof Error && error.message.includes('Only empty conversations') ? 'errors.conversation_not_empty' : 'errors.generic';
+          // Electron strips custom Error fields, so keep the stable payload in its message.
+          throw new Error('VSTUDY_STATUS:' + JSON.stringify({code,params:{}}));
+        }
       });
       registered.push(channel);
     },

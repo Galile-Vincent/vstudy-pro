@@ -1,11 +1,12 @@
+import { formatters } from '../../shared/format';
 import { useTranslation } from "react-i18next";
 import { i18n, tr } from '../../shared/i18n';
 import { usageSchema, type Usage, type Model } from '../../shared';
 import { useAuiState } from '@assistant-ui/react';
 import './usage.css';
 import { effortLabel } from '../model-picker';
-export const compactTokens = (n: number) => new Intl.NumberFormat(i18n.language === 'en-XA' ? 'en' : i18n.language,{notation:'compact',maximumFractionDigits:1}).format(n);
-export const money = (n?: number): string => n === undefined ? tr('common:price_unknown') : n > 0 && n < .001 ? `<${money(.001)}` : new Intl.NumberFormat(i18n.language === 'en-XA' ? 'en' : i18n.language,{style:'currency',currency:'USD',minimumFractionDigits:n > 0 && n < .01 ? 0 : 3,maximumFractionDigits:n > 0 && n < .01 ? 5 : 3}).format(n);
+export const compactTokens = (n: number) => formatters(i18n.language === 'en-XA' ? 'en' : i18n.language).number(n,{notation:'compact',maximumFractionDigits:1});
+export const money = (n?: number): string => n === undefined ? tr('common:price_unknown') : n > 0 && n < .001 ? `<${money(.001)}` : formatters(i18n.language === 'en-XA' ? 'en' : i18n.language).number(n,{style:'currency',currency:'USD',minimumFractionDigits:n > 0 && n < .01 ? 0 : 3,maximumFractionDigits:n > 0 && n < .01 ? 5 : 3});
 export function UsageChip({ usage, subscription = false, aborted = false }: { usage: Usage; subscription?: boolean; aborted?: boolean }) {
   useTranslation();
   return <span className="usage-chip" title={tr('usage:cache_detail',{read:compactTokens(usage.cacheReadTokens ?? 0),write:compactTokens(usage.cacheWriteTokens ?? 0),reasoning:compactTokens(usage.reasoningTokens ?? 0)})}>

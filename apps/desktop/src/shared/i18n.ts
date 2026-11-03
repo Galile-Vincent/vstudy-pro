@@ -27,7 +27,6 @@ import catalog2usage from './locales/ja/usage.json';
 import catalog2errors from './locales/ja/errors.json';
 import catalog2picker from './locales/ja/picker.json';
 import i18next from 'i18next';
-import en from './locales/en/common.json';
 export type Language = 'en' | 'zh-Hant' | 'ja';
 export function systemLanguage(locale: string): Language {
   if (/^zh[-_](TW|HK|Hant)(?:[-_]|$)/i.test(locale)) return 'zh-Hant';
@@ -41,7 +40,7 @@ export const resources = {
 'en': {common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker},
 'zh-Hant': {common: catalog1common, chat: catalog1chat, library: catalog1library, home: catalog1home, onboarding: catalog1onboarding, settings: catalog1settings, usage: catalog1usage, errors: catalog1errors, picker: catalog1picker},
 'ja': {common: catalog2common, chat: catalog2chat, library: catalog2library, home: catalog2home, onboarding: catalog2onboarding, settings: catalog2settings, usage: catalog2usage, errors: catalog2errors, picker: catalog2picker},
-'en-XA': { common: Object.fromEntries(Object.entries(en).map(([k,v]) => [k,pseudo(v)])) },
+'en-XA': Object.fromEntries(Object.entries({common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker}).map(([ns,catalog]) => [ns,Object.fromEntries(Object.entries(catalog).map(([k,v]) => [k,pseudo(v)]))])),
 };
 export const i18n = i18next.createInstance();
 void i18n.use(initReactI18next).init({ resources, lng:'en', fallbackLng:'en', defaultNS:'common', keySeparator:false, interpolation:{escapeValue:false}, initImmediate:false });

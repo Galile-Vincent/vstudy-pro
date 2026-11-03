@@ -1,3 +1,4 @@
+import { useFormat } from '../i18n';
 import { useTranslation } from "react-i18next";
 import { tr } from '../../shared/i18n';
 import { useEffect, useState } from 'react';
@@ -8,6 +9,7 @@ import { UsageDashboard } from './dashboard';
 const balanceNote = tr('common:no_provider_exposes_an_account_balance_for_api_keys_left_means_your_user_set_monthly_budget_or_token_cap_provider_rate_limits_are_separate_and_appear_only_when_reported');
 export function UsageSettings() {
   useTranslation();
+  const format=useFormat();
   const [settings,setSettings] = useState<Settings>();
   const [limits,setLimits] = useState<IpcResponse<'usage:rateLimits'>>([]);
   const [documents,setDocuments] = useState<IpcResponse<'documents:list'>>([]);
@@ -30,7 +32,7 @@ export function UsageSettings() {
   return <section className="usage-settings" aria-label={tr('common:usage_settings')}>
     <p className="muted">{balanceNote}</p>
     <UsageDashboard documents={documents} />
-    <div><strong>{tr('common:provider_rate_limits')}</strong>{!limits.length && <p className="muted">{tr('common:no_rate_limit_information_reported_yet_codex_cli_does_not_report_rate_limits_through_exec_its_account_probe_may_be_unavailable_claude_limits_appear_when_reported')}</p>}{limits.map(l => <p key={l.providerId}>{l.providerId}: {l.rateLimit.usedPercent === undefined ? '' : `${l.rateLimit.usedPercent}% of `}{l.rateLimit.label}{l.rateLimit.remainingTokens !== undefined ? ` · ${l.rateLimit.remainingTokens} tokens left` : ''}{l.rateLimit.remainingRequests !== undefined ? ` · ${l.rateLimit.remainingRequests} requests left` : ''}{l.rateLimit.resetsAt ? ` · resets ${new Date(l.rateLimit.resetsAt).toLocaleString()}` : ''}<small> {tr('common:reported')}{new Date(l.createdAt).toLocaleString()}</small></p>)}</div>
+    <div><strong>{tr('common:provider_rate_limits')}</strong>{!limits.length && <p className="muted">{tr('common:no_rate_limit_information_reported_yet_codex_cli_does_not_report_rate_limits_through_exec_its_account_probe_may_be_unavailable_claude_limits_appear_when_reported')}</p>}{limits.map(l => <p key={l.providerId}>{l.providerId}: {l.rateLimit.usedPercent === undefined ? '' : tr('common:percent_of',{percent:format.number(l.rateLimit.usedPercent)})}{l.rateLimit.label}{l.rateLimit.remainingTokens !== undefined ? tr('common:tokens_left',{count:format.number(l.rateLimit.remainingTokens)}) : ''}{l.rateLimit.remainingRequests !== undefined ? tr('common:requests_left',{count:format.number(l.rateLimit.remainingRequests)}) : ''}{l.rateLimit.resetsAt ? tr('common:resets',{date:format.date(l.rateLimit.resetsAt,{dateStyle:'medium',timeStyle:'short'})}) : ''}<small> {tr('common:reported')}{format.date(l.createdAt,{dateStyle:'medium',timeStyle:'short'})}</small></p>)}</div>
     {settings && <><div className="usage-budget-inputs">
       <label>{tr('common:monthly_budget_usd')}<input aria-label={tr('common:monthly_budget_usd')} type="number" min="0.01" step="0.01" value={settings.monthlyBudgetUsd ?? ''} onChange={e => setSettings({...settings,monthlyBudgetUsd:e.target.value ? Number(e.target.value) : undefined})}/></label>
       <label>{tr('common:monthly_token_cap')}<input aria-label={tr('common:monthly_token_cap')} type="number" min="1" step="1" value={settings.monthlyTokenBudget ?? ''} onChange={e => setSettings({...settings,monthlyTokenBudget:e.target.value ? Number(e.target.value) : undefined})}/></label>

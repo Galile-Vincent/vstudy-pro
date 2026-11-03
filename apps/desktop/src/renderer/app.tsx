@@ -1,3 +1,4 @@
+import { Menu, Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, Sparkles, FileText } from "lucide-react";
 import { errorText, statusText } from "./status";
 import { conversionStatus } from "../shared/status";
 import { useTranslation } from "react-i18next";
@@ -178,7 +179,7 @@ export function App() {
   const saveSettings = async (next: Settings) => {
     try {
       const latest = await desktop.invoke("settings:get", {});
-      const saved = await desktop.invoke("settings:set", { ...next, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, modelDisplayNames: latest.modelDisplayNames });
+      const saved = await desktop.invoke("settings:set", { ...next, language:latest.language, replyLanguage:latest.replyLanguage, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, modelDisplayNames: latest.modelDisplayNames });
       setSettings(saved);
     } catch (error) {
       report(error);
@@ -204,7 +205,7 @@ export function App() {
           const next = await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId});
           setConversation(next); setConversations(list => list.map(c => c.id === next.id ? next : c));
         } catch (error) {
-          if (error instanceof Error && error.message.includes('Only empty conversations')) await newConversation(value);
+          if (error instanceof Error && error.message.includes('errors.conversation_not_empty')) await newConversation(value);
           else throw error;
         }
       }).catch(report);
@@ -220,7 +221,7 @@ export function App() {
     try {
       const results = paths ? await desktop.invoke("documents:importPaths", { paths }) : null;
       const imported = results ? results.find(r => r.ok)?.document : await desktop.invoke("documents:import", {});
-      if (results) setNotice(results.filter(r => !r.ok).map(r => `${r.path}: ${r.error}`).join("\n"));
+      if (results) setNotice(results.filter(r => !r.ok).map(r => `${r.path}: ${tr('errors:conversion_failed')}`).join("\n"));
       if (imported) {
         setDocuments(await desktop.invoke("documents:list", {}));
         setDocumentId(imported.id);
@@ -275,13 +276,13 @@ export function App() {
             void desktop.invoke("conversations:delete", { conversationId: conversation.id }).then(() => {
               setConversations(list => list.filter(c => c.id !== conversation.id)); setConversation(null); setHistory(null);
             }).catch(report);
-          }}>⌫</button>}
+          }}><Trash2 size={16} /></button>}
           <button
             disabled={!canChat || busy}
             onClick={() => void newConversation()}
             aria-label={tr('common:new_chat')}
           >
-            ＋
+            <Plus size={16} />
           </button>
         </div>
       </div>
@@ -306,7 +307,7 @@ export function App() {
       ) : (
         <div className="chat-start">
           <div className="empty">
-            <div className="empty-symbol">✦</div>
+            <div className="empty-symbol"><Sparkles size={28}/></div>
             <h3>{tr('common:a_place_to_think_together')}</h3>
             <p>
               {doc
@@ -327,7 +328,7 @@ export function App() {
                 onClick={() => setSelection(null)}
                 aria-label={tr('common:remove_selection')}
               >
-                ×
+                <X size={16} />
               </button>
             </div>
           )}
@@ -351,14 +352,14 @@ export function App() {
           void desktop.invoke("documents:delete", { documentId: doc.id }).then(async () => {
             const list = await desktop.invoke("documents:list", {}); setDocuments(list); setDocumentId(list[0]?.id ?? null);
           }).catch(report);
-        }}>⌫</button>}
+        }}><Trash2 size={16} /></button>}
         <span className="muted">
-          {doc?.status === "ready" ? `Markdown · ${doc.converter}` : ""}
+          {doc?.status === "ready" ? tr('common:converter_label',{converter:doc.converter}) : ""}
         </span>
       </div>
       {!doc ? (
         <div className="empty">
-          <div className="empty-symbol">▤</div>
+          <div className="empty-symbol"><FileText size={28}/></div>
           <h3>{tr('common:your_next_idea_starts_here')}</h3>
           <p>{tr('common:import_a_document_to_read_select_and_ask_questions')}</p>
           <button onClick={() => void importDocument()} disabled={busy || !connected}>
@@ -436,7 +437,7 @@ export function App() {
             aria-expanded={library}
             onClick={() => setLibrary(!library)}
           >
-            ☰
+            <Menu size={16} />
           </button>
           <h1>
             VStudy <span>Pro</span>
@@ -464,13 +465,13 @@ export function App() {
               })
             }
           >
-            ⇄
+            <ArrowLeftRight size={16} />
           </button>
           <button
             aria-label={tr('common:open_settings')}
             onClick={() => setShowSettings(true)}
           >
-            ⚙
+            <SettingsIcon size={16} />
           </button>
         </div>
       </header>
@@ -493,7 +494,7 @@ export function App() {
               <span className="muted">{documents.length}</span>
             </div>
             <button
-              className="import-button"
+              className="import-button" data-testid="import-document"
               disabled={busy || !connected}
               onClick={() => void importDocument()}
             >

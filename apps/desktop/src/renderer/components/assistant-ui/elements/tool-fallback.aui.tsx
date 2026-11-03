@@ -168,7 +168,7 @@ function ToolFallbackTrigger({
         : statusType === "requires-action"
           ? tr('common:waiting_on_tool')
           : statusType === "incomplete"
-            ? `${isCancelled ? "Cancelled" : "Failed"} tool`
+            ? `${isCancelled ? tr('common:cancelled') : tr('common:failed')} ${tr('common:tool')}`
             : tr('common:used_tool');
 
   return (
@@ -330,7 +330,7 @@ function ToolFallbackError({
   if (!errorText) return null;
 
   const isCancelled = status.reason === "cancelled";
-  const headerText = isCancelled ? tr('common:cancelled_reason') : "Error:";
+  const headerText = isCancelled ? tr('common:cancelled_reason') : tr('common:error_label');
 
   return (
     <div
@@ -432,17 +432,17 @@ const approvalReceipt = (
         : approval.optionId;
   const answered =
     isQuestion(approval) || (chosen !== undefined && !isKnownKind(chosen.kind));
-  const automatic = approval.isAutomatic ? " automatically" : "";
+  const automatic = approval.isAutomatic ? tr('common:automatically') : "";
 
   if (approval.approved)
     return {
       outcome: "allowed",
-      label: `${answered ? "Answered" : "Allowed"}${automatic}`,
+      label: `${answered ? tr('common:answered') : tr('common:allowed')}${automatic}`,
       option,
     };
   return {
     outcome: "refused",
-    label: `${answered ? "Dismissed" : "Denied"}${automatic}`,
+    label: `${answered ? tr('common:dismissed') : tr('common:denied')}${automatic}`,
     option,
   };
 };
@@ -982,7 +982,7 @@ function ToolFallbackApprovalImpl({
         value={answer}
         onChange={(event) => setAnswer(event.target.value)}
         disabled={locked}
-        aria-label={question ? (approval?.prompt ?? "Answer") : "Note"}
+        aria-label={question ? (approval?.prompt ?? tr('common:answer')) : tr('common:note')}
         placeholder={
           question ? tr('common:type_your_answer') : tr('common:add_a_note_to_your_decision')
         }

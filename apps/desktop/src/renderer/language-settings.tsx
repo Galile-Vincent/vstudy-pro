@@ -17,7 +17,7 @@ export function LanguageSettings() {
   };
   return <section className="language-settings">
     {(['language','replyLanguage'] as const).map(field => <label key={field}>{tr(field === 'language' ? 'common:language' : 'common:reply_language')}
-      <select data-testid={field} value={settings?.[field] ?? 'auto'} disabled={!settings} onChange={e => void update(field,e.target.value)}>
+      <select data-testid={field} value={field === 'language' && i18n.language === 'en-XA' ? 'en-XA' : settings?.[field] ?? 'auto'} disabled={!settings} onChange={e => void update(field,e.target.value)}>
         <option value="auto">{tr(field === 'language' ? 'common:auto' : 'common:reply_auto')}</option>
         <option value="en" lang="en">English</option><option value="zh-Hant" lang="zh-Hant">繁體中文</option><option value="ja" lang="ja">日本語</option>
         {field === 'language' && import.meta.env.DEV && <option value="en-XA">{tr('common:pseudo')}</option>}

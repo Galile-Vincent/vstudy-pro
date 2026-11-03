@@ -9,5 +9,7 @@
   "money_left": "{{used}} / {{budget}} · 残り {{left}}",
   "token_left": "{{used}} / {{budget}} トークン · 残り {{left}}",
   "usage_loading": "使用量…",
-  "daily_description": "{{date}}：入力 {{input}}、出力 {{output}}"
+  "daily_description": "{{date}}：入力 {{input}}、出力 {{output}}",
+  "token_count_one": "{{formatted}} トークン",
+  "token_count_other": "{{formatted}} トークン"
 }

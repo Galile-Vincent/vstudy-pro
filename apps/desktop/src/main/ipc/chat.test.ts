@@ -85,11 +85,11 @@ it("registers every chat handler with validated repository round trips and dispo
     ).toEqual([]);
     expect(await invoke("conversations:options", { conversationId: conversation.id, options: { effort: 'high' } })).toEqual({ ok: true });
     expect(store.conversations.get(conversation.id)?.options).toEqual({ effort: 'high' });
-    await expect(invoke("conversations:options", { conversationId: conversation.id, options: { effort: 'ultra' } })).rejects.toThrow('Unsupported model option');
+    await expect(invoke("conversations:options", { conversationId: conversation.id, options: { effort: 'ultra' } })).rejects.toThrow("VSTUDY_STATUS:");
     expect(await invoke('conversations:model',{conversationId:conversation.id,providerId:'anthropic-api',modelId:'fake'})).toEqual({...conversation,options:{}});
     expect(store.conversations.list(doc.id)).toHaveLength(1);
     store.messages.insert({id:randomUUID() as import('../../shared').Message['id'],conversationId:conversation.id,role:'user',parts:[{type:'text',text:'Started'}],createdAt:new Date().toISOString()});
-    await expect(invoke('conversations:model',{conversationId:conversation.id,providerId:'anthropic-api',modelId:'fake'})).rejects.toThrow('Only empty conversations');
+    await expect(invoke('conversations:model',{conversationId:conversation.id,providerId:'anthropic-api',modelId:'fake'})).rejects.toThrow("errors.conversation_not_empty");
     expect(await invoke("providers:list", {})).toHaveLength(6);
     expect(
       await invoke("providers:configure", {
@@ -107,7 +107,7 @@ it("registers every chat handler with validated repository round trips and dispo
         modelId: "fake",
         userMessage: "Hi",
       }),
-    ).rejects.toThrow("disabled");
+    ).rejects.toThrow("VSTUDY_STATUS:");
     await expect(
       invoke("providers:configure", {
         id: "openai-compatible",
@@ -115,7 +115,7 @@ it("registers every chat handler with validated repository round trips and dispo
         enabled: true,
         baseUrl: "http://remote.example/v1",
       }),
-    ).rejects.toThrow("HTTPS");
+    ).rejects.toThrow("VSTUDY_STATUS:");
     await expect(
       invoke("messages:list", { conversationId: "invalid" }),
     ).rejects.toThrow();

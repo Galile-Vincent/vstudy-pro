@@ -1,6 +1,7 @@
 "use client";
+import { formatters } from '../../../../shared/format';
 import { useTranslation } from "react-i18next";
-import { tr } from '../../../../shared/i18n';
+import { i18n, tr } from '../../../../shared/i18n';
 
 import { useEffect, useState, type ComponentProps } from "react";
 import { cn } from "@/lib/utils";
@@ -173,10 +174,7 @@ const relativeDate = (date: Date, locale: string, relativeTo: number) => {
   const [unit, amount] = units.find(
     ([, size]) => Math.abs(seconds) >= size,
   ) ?? ["second", 1];
-  return new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(
-    Math.round(seconds / amount),
-    unit,
-  );
+  return formatters(locale).relative(Math.round(seconds / amount),unit,{ numeric: "auto" });
 };
 
 const relativeRefreshDelay = (
@@ -234,10 +232,7 @@ function Value({
     const number = numericValue(value);
     if (number === undefined) return <>{textValue(value)}</>;
     const content = formatted(value, () =>
-      new Intl.NumberFormat(
-        locale,
-        numberOptions(format.decimals, format.compact === true),
-      ).format(number),
+      formatters(locale).number(number,numberOptions(format.decimals, format.compact === true)),
     );
     return <>{withUnit(content, format.unit)}</>;
   }
@@ -248,11 +243,11 @@ function Value({
     return (
       <>
         {formatted(value, () =>
-          new Intl.NumberFormat(locale, {
+          formatters(locale).number(number,{
             style: "currency",
             currency: format.currency,
             ...numberOptions(format.decimals, format.compact === true),
-          }).format(number),
+          }),
         )}
       </>
     );
@@ -264,10 +259,10 @@ function Value({
     return (
       <>
         {formatted(value, () =>
-          new Intl.NumberFormat(locale, {
+          formatters(locale).number(format.basis === "unit" ? number / 100 : number,{
             style: "percent",
             ...fractionDigits(format.decimals),
-          }).format(format.basis === "unit" ? number / 100 : number),
+          }),
         )}
       </>
     );
@@ -279,10 +274,10 @@ function Value({
     const direction = number > 0 ? "↑" : number < 0 ? "↓" : "→";
     const good = number === 0 || number > 0 === (format.upIsGood ?? true);
     const content = formatted(value, () =>
-      new Intl.NumberFormat(locale, {
+      formatters(locale).number(number,{
         signDisplay: "never",
         ...fractionDigits(format.decimals),
-      }).format(number),
+      }),
     );
     return (
       <span
@@ -306,9 +301,7 @@ function Value({
     const content = formatted(value, () =>
       style === "relative" && relativeTo !== undefined
         ? relativeDate(date, locale, relativeTo)
-        : new Intl.DateTimeFormat(
-            locale,
-            style === "datetime"
+        : formatters(locale).date(date,style === "datetime"
               ? { dateStyle: "medium", timeStyle: "short" }
               : {
                   dateStyle: "medium",
@@ -316,8 +309,7 @@ function Value({
                   (typeof value === "string" && DATE_ONLY.test(value))
                     ? { timeZone: "UTC" }
                     : {}),
-                },
-          ).format(date),
+                }),
     );
     return <span title={date.toISOString()}>{content}</span>;
   }
@@ -325,7 +317,7 @@ function Value({
   if (format.kind === "boolean") {
     if (typeof value !== "boolean") return <>{textValue(value)}</>;
     return (
-      <>{value ? (format.trueLabel ?? "Yes") : (format.falseLabel ?? "No")}</>
+      <>{value ? (format.trueLabel ?? tr('common:yes')) : (format.falseLabel ?? tr('common:no'))}</>
     );
   }
 
@@ -452,7 +444,7 @@ export function DataTable({
   defaultSort,
   sort,
   onSortChange,
-  locale = "en-US",
+  locale = i18n.language === "en-XA" ? "en" : i18n.language,
   emptyMessage = tr('common:no_rows'),
   relativeTo,
   className,

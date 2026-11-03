@@ -1,4 +1,5 @@
 "use client";
+import { formatters } from "../../../../shared/format";
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
 
@@ -27,15 +28,10 @@ export interface CitationProps extends Omit<
   className?: string | undefined;
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  year: "numeric",
-});
-
 function formatPublishedAt(publishedAt: string | undefined) {
   if (publishedAt === undefined) return undefined;
   const date = new Date(publishedAt);
-  return Number.isNaN(date.getTime()) ? undefined : dateFormatter.format(date);
+  return Number.isNaN(date.getTime()) ? undefined : formatters().date(date,{month:'short',year:'numeric'});
 }
 
 export function Citation({

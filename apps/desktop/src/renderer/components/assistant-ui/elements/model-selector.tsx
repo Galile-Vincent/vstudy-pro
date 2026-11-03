@@ -422,7 +422,7 @@ export type ModelSelectorEffortProps = ComponentPropsWithoutRef<"div"> & {
 };
 
 function ModelSelectorEffort({
-  label = "Thinking",
+  label = tr('common:thinking'),
   className,
   onKeyDown,
   ...props

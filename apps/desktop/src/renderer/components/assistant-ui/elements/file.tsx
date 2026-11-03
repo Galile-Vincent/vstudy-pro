@@ -272,7 +272,7 @@ function FileDownload({
         "text-muted-foreground hover:bg-accent hover:text-accent-foreground shrink-0 rounded-md p-1 transition-colors",
         className,
       )}
-      aria-label={!children ? `Download ${filename || "file"}` : undefined}
+      aria-label={!children ? tr('common:download_file',{name:filename || tr('common:file')}) : undefined}
       {...props}
     >
       {children || <DownloadIcon className="size-4" />}

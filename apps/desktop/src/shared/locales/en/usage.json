@@ -9,5 +9,7 @@
   "money_left": "{{used}} / {{budget}} · {{left}} left",
   "token_left": "{{used}} / {{budget}} tokens · {{left}} left",
   "usage_loading": "Usage…",
-  "daily_description": "{{date}}: {{input}} input, {{output}} output"
+  "daily_description": "{{date}}: {{input}} input, {{output}} output",
+  "token_count_one": "{{formatted}} token",
+  "token_count_other": "{{formatted}} tokens"
 }

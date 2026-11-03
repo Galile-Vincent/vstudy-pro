@@ -1,3 +1,4 @@
+import { errorText } from "./status";
 import { contentLanguage } from "../shared/content-language";
 import { useTranslation } from "react-i18next";
 import { tr } from '../shared/i18n';
@@ -157,7 +158,7 @@ export function DocumentMarkdown({
                   if (href && !href.startsWith("#")) {
                     event.preventDefault();
                     void desktop.invoke("shell:openExternal", { url: href }).catch((error: unknown) =>
-                      onNotice(error instanceof Error ? error.message : tr('common:could_not_open_link')));
+                      onNotice(errorText(error)));
                   }
                 }}
               >
