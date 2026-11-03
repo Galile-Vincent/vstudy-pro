@@ -54,7 +54,8 @@ it('refuses budgets, cancels streaming and resumes persisted pages',async()=>{
  const x=await setup(adapter);try{
   x.store.settings.set({...x.store.settings.get(),monthlyBudgetUsd:.000001});await expect(x.service.start(x.request)).rejects.toThrow('ai_parse.budget');
   x.store.settings.set({...x.store.settings.get(),monthlyBudgetUsd:1});await x.service.start(x.request);await new Promise(resolve=>setTimeout(resolve,20));x.service.cancel(x.imported.id);await x.service.waitForIdle();expect(x.service.status(x.imported.id).status).toBe('cancelled');
-  const restarted=new AiParseService(x.store,new ProviderRegistry(),async()=>{throw new Error('unused');});expect(restarted.status(x.imported.id).pages[0]?.status).toBe('pending');await restarted.dispose();
+  const resumedProviders=new ProviderRegistry();resumedProviders.register('anthropic-api',{...adapter,async *stream(){yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'done'};}});
+  const restarted=new AiParseService(x.store,resumedProviders,async()=>{throw new Error('unused');});expect(restarted.status(x.imported.id).pages[0]?.status).toBe('pending');await restarted.start(x.request);await restarted.waitForIdle();expect(restarted.status(x.imported.id).pages[0]?.status).toBe('done');await restarted.dispose();
  }finally{await x.cleanup();}
 });
 it('applies validated, bounded, sender-checked IPC',async()=>{
