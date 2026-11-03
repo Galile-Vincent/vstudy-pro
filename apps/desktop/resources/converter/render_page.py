@@ -7,12 +7,11 @@ import sys
 from pathlib import Path
 
 
-def render(source, page_number, output):
+def _render(source, page_number, output):
     import pdfplumber
     import pypdfium2
     if page_number < 1:
         raise ValueError("PAGE_RANGE")
-    signal.alarm(20)
     with pypdfium2.PdfDocument(source) as document:
         if page_number > len(document):
             raise ValueError("PAGE_RANGE")
@@ -37,7 +36,14 @@ def render(source, page_number, output):
         text = document.pages[page_number - 1].extract_text() or ""
     Path(str(output) + ".json").write_text(json.dumps({"text": text}), encoding="utf8")
     os.chmod(str(output) + ".json", 0o600)
-    signal.alarm(0)
+
+
+def render(source, page_number, output):
+    signal.alarm(20)
+    try:
+        return _render(source, page_number, output)
+    finally:
+        signal.alarm(0)
 
 
 if __name__ == '__main__':
