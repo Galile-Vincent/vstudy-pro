@@ -1,3 +1,6 @@
+import catalog2welcome from './locales/ja/welcome.json';
+import catalog1welcome from './locales/zh-Hant/welcome.json';
+import catalog0welcome from './locales/en/welcome.json';
 import { initReactI18next } from "react-i18next";
 import catalog0common from './locales/en/common.json';
 import catalog0chat from './locales/en/chat.json';
@@ -37,10 +40,10 @@ export function pseudo(text: string): string {
   return `［${text.split(/({{.*?}})/).map(part => part.startsWith('{{') ? part : part.replace(/[aeiouAEIOU]/g, c => accents[c]!)).join('')}${'～'.repeat(Math.ceil(text.length * .4))}］`;
 }
 export const resources = {
-'en': {common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker},
-'zh-Hant': {common: catalog1common, chat: catalog1chat, library: catalog1library, home: catalog1home, onboarding: catalog1onboarding, settings: catalog1settings, usage: catalog1usage, errors: catalog1errors, picker: catalog1picker},
-'ja': {common: catalog2common, chat: catalog2chat, library: catalog2library, home: catalog2home, onboarding: catalog2onboarding, settings: catalog2settings, usage: catalog2usage, errors: catalog2errors, picker: catalog2picker},
-'en-XA': Object.fromEntries(Object.entries({common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker}).map(([ns,catalog]) => [ns,Object.fromEntries(Object.entries(catalog).map(([k,v]) => [k,pseudo(v)]))])),
+'en': {common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker, welcome: catalog0welcome},
+'zh-Hant': {common: catalog1common, chat: catalog1chat, library: catalog1library, home: catalog1home, onboarding: catalog1onboarding, settings: catalog1settings, usage: catalog1usage, errors: catalog1errors, picker: catalog1picker, welcome: catalog1welcome},
+'ja': {common: catalog2common, chat: catalog2chat, library: catalog2library, home: catalog2home, onboarding: catalog2onboarding, settings: catalog2settings, usage: catalog2usage, errors: catalog2errors, picker: catalog2picker, welcome: catalog2welcome},
+'en-XA': Object.fromEntries(Object.entries({common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker, welcome: catalog0welcome}).map(([ns,catalog]) => [ns,Object.fromEntries(Object.entries(catalog).map(([k,v]) => [k,pseudo(v)]))])),
 };
 export const i18n = i18next.createInstance();
 void i18n.use(initReactI18next).init({ resources, lng:'en', fallbackLng:'en', defaultNS:'common', keySeparator:false, interpolation:{escapeValue:false}, initImmediate:false });
