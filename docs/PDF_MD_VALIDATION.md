@@ -1,5 +1,7 @@
 # PDF Markdown validation
 
+For the later defect audit and current limitations, see [PDF_MD_REVALIDATION.md](PDF_MD_REVALIDATION.md). The original results below are historical.
+
 Validated on macOS, 2026-11-03. Implementation commits: `6718a50`, `b78896f`,
 plus the final regression/documentation commit following this report.
 
