@@ -38,6 +38,7 @@ export const ipcContract = {
     request: z.object({ url: externalUrlSchema }).strict(),
     response: ack,
   },
+  "welcome:sampleDocument": { request: z.object({ language: z.enum(["en", "zh-Hant", "ja"]) }).strict(), response: z.string().max(100_000) },
   "documents:importSample": { request: z.object({ language: z.enum(["en", "zh-Hant", "ja"]) }).strict(), response: documentSchema },
   "documents:import": { request: z.object({ folderId: folderIdSchema.nullable().optional() }).strict(), response: documentSchema.nullable() },
   "documents:importPaths": {

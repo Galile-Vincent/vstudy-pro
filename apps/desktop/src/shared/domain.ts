@@ -205,6 +205,7 @@ export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
   .object({
     onboardingCompleted: z.boolean().optional(),
+    welcomeSeen: z.boolean().default(false),
     displayName: z.string().trim().max(100).optional(),
     language: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
     replyLanguage: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
@@ -224,7 +225,7 @@ export const settingsSchema = z
   .strict();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
-  language: "auto", replyLanguage: "auto",
+  language: "auto", replyLanguage: "auto", welcomeSeen: false,
   chatSide: "left",
   enableGenerativeUI: false, modelDisplayNames: {},
   warnAtPercent: 80, priceOverrides: {},

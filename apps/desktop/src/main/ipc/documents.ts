@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { LibraryService } from '../services/library';
 import { tr } from "../i18n";
 import { conversionStatus } from "../../shared/status";
@@ -28,8 +29,10 @@ export function registerDocumentsIpc(
     const owner = owners.get(documentId);
     if (owner && !owner.isDestroyed()) owner.send(documentProgressChannel, documentProgressSchema.parse({ documentId, message, ...conversionStatus(message) }));
   } });
-  const channels = ["documents:importSample", "documents:import", "documents:importPaths", "documents:list", "documents:get", "documents:read", "documents:retry", "documents:reconvert", "documents:delete"] as const;
+  const channels = ["welcome:sampleDocument","documents:importSample", "documents:import", "documents:importPaths", "documents:list", "documents:get", "documents:read", "documents:retry", "documents:reconvert", "documents:delete"] as const;
   for (const channel of channels) implemented.add(channel);
+  registrar.handle("welcome:sampleDocument", ({ language }) => readFile(
+    app.isPackaged ? join(process.resourcesPath, "samples", `${language}.md`) : join(app.getAppPath(), "resources/samples", `${language}.md`), "utf8"));
   registrar.handle("documents:importSample", async ({ language }, event) => {
     const path = app.isPackaged ? join(process.resourcesPath, "samples", `${language}.md`) : join(app.getAppPath(), "resources/samples", `${language}.md`);
     const document = await documents.importPath(path); owners.set(document.id, event.sender); return document;

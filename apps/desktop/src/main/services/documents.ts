@@ -18,13 +18,8 @@ import type { Store } from "../db";
 import { MAX_MARKDOWN_BYTES, type ConverterRunner } from "../../../resources/converter";
 
 export const MAX_SOURCE_BYTES = 50 * 1024 * 1024;
-export const documentFormats: Readonly<Record<string, string>> = {
-  md: "text/markdown", txt: "text/plain", pdf: "application/pdf",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  html: "text/html", htm: "text/html", csv: "text/csv",
-};
+export { documentFormats } from "../../shared/document-formats";
+import { documentFormats } from "../../shared/document-formats";
 
 export class DocumentService {
   private readonly library: string;

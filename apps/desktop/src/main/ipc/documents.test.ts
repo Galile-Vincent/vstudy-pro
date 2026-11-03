@@ -41,6 +41,11 @@ it("registers document routes, validates drop paths, owns the native dialog and 
   };
   try {
     expect(implemented).toContain("documents:importSample");
+    const before = store.documents.list().length;
+    expect(await invoke("welcome:sampleDocument", { language: "ja" })).toContain("小さな疑問");
+    expect(store.documents.list().length).toBe(before);
+    await expect(invoke("welcome:sampleDocument", { language: "../../escape" })).rejects.toThrow();
+    await expect(invoke("welcome:sampleDocument", { language: "en", path: "/tmp/secret" })).rejects.toThrow();
     mock.dialog.mockResolvedValueOnce({ canceled: true, filePaths: [] });
     expect(await invoke("documents:import", {})).toBeNull();
     mock.dialog.mockResolvedValueOnce({ canceled: false, filePaths: [resolve("test-fixtures/converter/sample.md")] });
