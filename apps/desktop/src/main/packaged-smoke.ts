@@ -5,6 +5,19 @@ export async function runPackagedSmoke(window: BrowserWindow, root: string) {
   try {
     await window.webContents.executeJavaScript(`new Promise(resolve => { const check=()=>window.desktop ? resolve(true) : setTimeout(check,20);check(); })`);
     const invoke = (channel: string, request: unknown) => window.webContents.executeJavaScript(`window.desktop.invoke(${JSON.stringify(channel)},${JSON.stringify(request)})`);
+    if (process.env.VSTUDY_KEYCHAIN_PROBE === '1') {
+      while (!window.isVisible()) await new Promise(resolve => setTimeout(resolve,10));
+      await writeFile(join(root,'keychain-visible.json'), JSON.stringify({at:Date.now(),visible:true}));
+      await new Promise(resolve => setTimeout(resolve,2000));
+      await writeFile(join(root,'keychain-save-start.json'), JSON.stringify({at:Date.now()}));
+      try {
+        await invoke('secrets:set',{providerId:'openai-api',key:'synthetic-packaged-keychain-probe'});
+        await invoke('secrets:delete',{providerId:'openai-api'});
+        await writeFile(join(root,'keychain-save-result.json'),JSON.stringify({at:Date.now(),saved:true}));
+      } catch (error) {
+        await writeFile(join(root,'keychain-save-result.json'),JSON.stringify({at:Date.now(),saved:false,error:String(error)}));
+      }
+    }
     const imported = [];
     for (const extension of ['md','docx']) {
       dialog.showOpenDialog = async () => ({canceled:false,filePaths:[join(root,'fixtures','sample.'+extension)]});

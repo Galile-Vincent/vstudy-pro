@@ -199,6 +199,13 @@ it("discovers only on request, awaits results, and observes the TTL without back
   await registry.list(false);
   await registry.list();
   expect(calls).toBe(1);
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 62_000);
+  try {
+    await registry.list(false);
+    expect(calls).toBe(1);
+    await registry.list(true);
+    expect(calls).toBe(2);
+  } finally { clock.mockRestore(); }
 });
 for (const kind of ["claude", "codex"] as const) it(`drops buffered ${kind} output and kills a process that writes after SIGTERM`, async () => {
   const cwd = await mkdtemp(join(tmpdir(), "vstudy-stubborn-cli-"));

@@ -65,6 +65,7 @@ export async function runProcess(
           reject(new Error("This PDF is too large or complex to convert"));
           return;
         }
+        if (errorCode === "NO_TEXT_LAYER") { reject(new Error("NO_TEXT_LAYER: OCR not supported")); return; }
         reject(new Error(`Converter process failed (exit ${code})`));
       } else resolve();
     });

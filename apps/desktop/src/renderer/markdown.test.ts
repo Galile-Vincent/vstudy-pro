@@ -13,7 +13,7 @@ const id = "00000000-0000-4000-8000-000000000001" as Document["id"];
 describe("Document Markdown", () => {
   it("renders sanitized GFM, math, code and source offsets", async () => {
     const source =
-      "# Title\n\nRead **bold &amp; clear** words.\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\n- [x] Task\n\n```typescript\nconst x = 1;\n```\n\n$x^2$\n\n<script>alert(1)</script>\n\n[bad](javascript:alert(1))\n\n![bad](https://tracker.example/pixel)\n\n![local](images/a.png)\n\n![embedded](data:image/png;base64,AAAA)\n\n[web](https://example.com)";
+      "# Title\n\n1.6 × 10${}^{6}$ and T${}_{p}$.\n\nRead **bold &amp; clear** words.\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\n- [x] Task\n\n```typescript\nconst x = 1;\n```\n\n$x^2$\n\n<script>alert(1)</script>\n\n[bad](javascript:alert(1))\n\n![bad](https://tracker.example/pixel)\n\n![local](images/a.png)\n\n![embedded](data:image/png;base64,AAAA)\n\n[web](https://example.com)";
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
@@ -35,6 +35,7 @@ describe("Document Markdown", () => {
     await vi.waitFor(() => expect(container.querySelector('.katex')).not.toBeNull());
     await vi.waitFor(() => expect(container.querySelector('.hljs-keyword')).not.toBeNull());
     expect(container.querySelector(".katex")).not.toBeNull();
+    expect(container.querySelectorAll(".katex .msupsub").length).toBe(3);
     expect(container.querySelector(".hljs-keyword")).not.toBeNull();
     expect(container.querySelector("script")).toBeNull();
     expect(container.querySelector('img[alt="bad"]')).toBeNull();

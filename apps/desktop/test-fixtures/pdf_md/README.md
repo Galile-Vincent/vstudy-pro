@@ -10,3 +10,5 @@ rectangles remain available. `scripts/pdf-fixture.py SOURCE.pdf` reproduces the
 small fixture using pypdf, fonttools, and pdfplumber as development tools. The full
 18-page source is deliberately excluded. This fixture is for extraction regression,
 not pixel comparison of the original annotation appearance.
+
+`ch2-p10-glyphs.json` and `ch2-p16-glyphs.json` contain only the compact equation glyph runs (text, font size and geometry) extracted from user-supplied CH2 pages 10 and 16. The original PDF is not in the repository. `test_ch2_geometry.py` pins readable inline fractions, script position, visual-line grouping and deterministic input order. Inline `${}^{…}$` / `${}_{…}$` scripts are rendered by the reader's existing KaTeX pipeline; the renderer regression asserts script layout nodes.

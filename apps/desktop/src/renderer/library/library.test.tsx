@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi } from "vitest";
-import { Snippet } from "./index";
+import { Snippet, formatSize } from "./index";
 import { reorderDestination, selectedRange, visibleFolders, type Item, type Folder } from "./model";
 vi.mock("../bridge", () => ({ desktop: { invoke: vi.fn() } }));
 (
@@ -49,4 +49,9 @@ it.each(['all','recent','pinned','unfiled','search','folder'])('reorders safely 
  expect(reorderDestination(items,1,-1)).toEqual({folderId:'x',beforeId:'a'});
  expect(reorderDestination(items,0,1)).toEqual({folderId:'y',beforeId:'d'});
  expect(reorderDestination(items,3,1)).toBeNull();
+});
+
+it('uses plural byte units in library metadata', () => {
+ expect(formatSize(1,'en')).toBe('1 byte');
+ expect(formatSize(800,'en')).toBe('800 bytes');
 });
