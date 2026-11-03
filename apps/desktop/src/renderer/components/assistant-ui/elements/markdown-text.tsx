@@ -116,6 +116,7 @@ const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
 };
 
 const defaultComponents = memoizeMarkdownComponents({
+  img: ({ alt }) => <span>{alt}</span>,
   a: ({ href, children }) => href?.startsWith("#vstudy-cite-") ? <DocumentCitationLink id={href.slice(13)}>{children}</DocumentCitationLink> : <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a>,
   h1: ({ className, ...props }) => (
     <h1

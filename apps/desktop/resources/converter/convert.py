@@ -120,6 +120,15 @@ def fallback_text(source):
 
 def main():
     import resource
+    resource.setrlimit(resource.RLIMIT_NOFILE, (128, 128))
+    resource.setrlimit(resource.RLIMIT_FSIZE, (64 * 1024 * 1024, 64 * 1024 * 1024))
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    import socket
+    def deny_network(*args, **kwargs):
+        raise PermissionError("Converter network disabled")
+    socket.socket.connect = deny_network
+    socket.socket.connect_ex = deny_network
+    socket.create_connection = deny_network
     import threading
     import time
 

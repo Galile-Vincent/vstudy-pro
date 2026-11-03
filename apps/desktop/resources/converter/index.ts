@@ -120,7 +120,7 @@ export function createConverter(options: {
   async function install(): Promise<string> {
     const checked = profileStage("Venv/bootstrap check");
     await mkdir(options.userData, { recursive: true, mode: 0o700 });
-    const requirements = join(options.resources, "requirements.txt");
+    const requirements = join(options.resources, "requirements.lock.txt");
     const fingerprint = createHash("sha256").update(await readFile(requirements)).digest("hex");
     const marker = join(venv, ".requirements-sha256");
     const cwd = await mkdtemp(join(tmpdir(), "vstudy-bootstrap-"));
@@ -152,11 +152,11 @@ export function createConverter(options: {
       if (uv) {
         await run(uv, ["venv", "--python", systemPython ?? "3.12", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await run(uv, ["pip", "install", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(uv, ["pip", "install", "--require-hashes", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       } else if (systemPython) {
         await run(systemPython, ["-m", "venv", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await run(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(python, ["-m", "pip", "install", "--require-hashes", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       }
       await run(python, ["-c", "import markitdown, pdfplumber"], cwd);
       checkOpen();

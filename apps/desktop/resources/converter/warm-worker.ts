@@ -15,7 +15,10 @@ export class WarmWorker {
   start(): Promise<void> {
     if (this.ready) return this.ready;
     this.ready = new Promise<void>((resolve, reject) => {
-      const child = (this.scope ? this.scope.spawn.bind(this.scope) : spawn)(this.python, [this.script, "--warm-worker"], {
+      const args = [this.script, "--warm-worker"];
+      const executable = process.platform === 'darwin' ? '/usr/bin/sandbox-exec' : this.python;
+      const launchArgs = process.platform === 'darwin' ? ['-p', '(version 1)(allow default)(deny network*)', this.python, ...args] : args;
+      const child = (this.scope ? this.scope.spawn.bind(this.scope) : spawn)(executable, launchArgs, {
         cwd: this.cwd, env: scrubbedEnvironment(this.cwd), shell: false, stdio: ["pipe", "pipe", "pipe"],
       });
       this.child = child as ChildProcessWithoutNullStreams;

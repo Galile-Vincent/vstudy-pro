@@ -236,7 +236,7 @@ export function ReplyMarkdown({ text, revealWords = false }: { text: string; rev
   useTranslation();
   return <div lang={contentLanguage(text)}><Markdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeSanitize, schema], rehypeKatex, rehypeHighlight]} skipHtml
     urlTransform={(url) => externalUrlSchema.safeParse(url).success ? url : ""}
-    components={{ ...(revealWords ? { p: ({ children }: { children?: React.ReactNode }) => <p>{Children.map(children, child => {
+    components={{ img: ({ alt }) => <span>{alt}</span>, ...(revealWords ? { p: ({ children }: { children?: React.ReactNode }) => <p>{Children.map(children, child => {
       if (typeof child !== 'string') return child;
       const words = Intl.Segmenter ? [...new Intl.Segmenter(contentLanguage(text), { granularity: 'word' }).segment(child)].map(part => part.segment) : [child];
       const size = Math.max(1, Math.ceil(words.length / 36));
