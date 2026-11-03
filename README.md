@@ -52,3 +52,14 @@ macOS only. Local packages are ad-hoc signed, unsigned by a Developer ID, and no
 For a release, configure Developer ID signing and notarization through electron-builder credentials (never commit them). Developer ID signing, notarization, stapling, Gatekeeper acceptance and manual VoiceOver review remain release verification tasks. Performance budgets and full E2E acceptance must be judged from current evidence, not historical pass counts.
 
 [Documentation index](docs/README.md) · [Security model and historical evidence](docs/SECURITY.md) · [Localization verification](docs/i18n-verification.md)
+
+To make a distribution build, install a **Developer ID Application** certificate in your build keychain. Set `CSC_NAME` to that certificate's identity; alternatively set `CSC_LINK` to a private certificate file and `CSC_KEY_PASSWORD` in the environment. For notarization, set `APPLE_API_KEY` (path to your private `.p8` file), `APPLE_API_KEY_ID`, and `APPLE_API_ISSUER`; alternatively set `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`. Keep certificate files, passwords, and API keys outside this repository. Run `pnpm package:signed`; it rejects missing signing or notarization configuration before building. Electron-builder signs with hardened runtime and requests notarization. After packaging, verify the actual artifact:
+
+```sh
+codesign --verify --deep --strict 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+xcrun stapler staple 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+xcrun stapler validate 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+spctl --assess --type execute --verbose 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+```
+
+Verify first-open Gatekeeper behavior on a quarantined copy on a clean Mac before distributing. An ad-hoc build passing smoke checks does not prove Developer ID trust or notarization.

@@ -15,7 +15,8 @@
     "smoke": "pnpm --filter @vstudy/desktop smoke",
     "security:check": "node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test",
     "e2e": "node apps/desktop/scripts/e2e.mjs",
-    "knip": "knip --include files,dependencies,unlisted,binaries"
+    "knip": "knip --include files,dependencies,unlisted,binaries",
+    "package:signed": "node apps/desktop/scripts/package-signed.mjs"
   },
   "devDependencies": {
     "knip": "6.44.1"
