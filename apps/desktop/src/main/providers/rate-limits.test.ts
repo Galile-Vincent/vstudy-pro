@@ -12,3 +12,10 @@ it('deduplicates on-demand probes and caches success or failure for 60 seconds',
   vi.spyOn(Date,'now').mockReturnValue(Date.now()+60001);
   await probe();expect(load).toHaveBeenCalledTimes(2);vi.restoreAllMocks();
 });
+
+it.skipIf(process.env.VSTUDY_REAL_RATE_LIMIT_SMOKE !== '1')('reads rate limits from the installed Codex app-server',async()=>{
+  const {findCli}=await import('./cli');const binary=await findCli('codex');
+  expect(binary).toBeTruthy();
+  const result=await probeCodexRateLimits(binary!);
+  expect(result?.usedPercent).toBeTypeOf('number');
+});
