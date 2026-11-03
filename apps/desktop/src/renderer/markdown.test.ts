@@ -127,3 +127,21 @@ it("previews plain selection text without markdown or image bytes", async () => 
   const { plainSelection } = await import("./selection-preview");
   expect(plainSelection("# Results\n\n**Blue** [fern](https://example.com) ![image](data:image/png;base64,AAAA)\n\n- One\n- Two")).toBe("Results Blue fern One Two");
 });
+
+it("hides page markers, joins page continuations, and preserves selection source/page", async () => {
+  const source = "<!-- page 1 -->\n\nFirst words <!-- page 2 -->\ncontinued here.";
+  const container = document.createElement("div");
+  document.body.append(container);
+  const root = createRoot(container);
+  await act(async () => root.render(createElement(DocumentMarkdown, { source, documentId: id, onSelect: vi.fn(), onNotice: vi.fn() })));
+  expect(container.textContent).not.toContain("page");
+  expect(container.querySelectorAll("p")).toHaveLength(1);
+  const node = [...container.querySelectorAll("[data-source-text]")].find(n => n.textContent?.includes("continued"))!.firstChild!;
+  const range = document.createRange();
+  const start = node.textContent!.indexOf("continued");
+  range.setStart(node, start); range.setEnd(node, start + 9);
+  const selection = rangeSelection(container, range, source, id)!;
+  expect(selection.page).toBe(2);
+  expect(source.slice(selection.startOffset, selection.endOffset)).toBe("continued");
+  await act(async () => root.unmount()); container.remove();
+});

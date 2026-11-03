@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 
 export const MAX_MARKDOWN_BYTES = 8 * 1024 * 1024;
 export type Progress = (message: string) => void;
-export type ConverterRunner = (source: string, output: string, onProgress?: Progress) => Promise<void>;
+export type ConverterRunner = (source: string, output: string, onProgress?: Progress) => Promise<"pdf_md" | "markitdown" | void>;
 
 export function scrubbedEnvironment(cwd: string): NodeJS.ProcessEnv {
   return {
@@ -94,7 +94,7 @@ export function createConverter(options: {
     try {
       try {
         if ((await readFile(marker, "utf8")) === fingerprint) {
-          await runProcess(python, ["-c", "import markitdown"], cwd);
+          await runProcess(python, ["-c", "import markitdown, pdfplumber"], cwd);
           return python;
         }
       } catch { /* An interrupted installation is rebuilt on the next attempt. */ }
@@ -121,7 +121,7 @@ export function createConverter(options: {
         report("Installing markitdown…");
         await runProcess(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024);
       }
-      await runProcess(python, ["-c", "import markitdown"], cwd);
+      await runProcess(python, ["-c", "import markitdown, pdfplumber"], cwd);
       await writeFile(marker, fingerprint);
       report("Converter ready");
       return python;
@@ -147,6 +147,9 @@ export function createConverter(options: {
         // The library may be on another volume, so publish via a sibling file.
         await writeFile(`${output}.tmp`, content, { mode: 0o600 });
         await rename(`${output}.tmp`, output);
+        const metadata: unknown = JSON.parse(await readFile(`${temporaryOutput}.json`, "utf8"));
+        if (typeof metadata !== "object" || metadata === null || !("converter" in metadata) || (metadata.converter !== "pdf_md" && metadata.converter !== "markitdown")) throw new Error("Invalid converter metadata");
+        return metadata.converter;
       } finally { await rm(cwd, { recursive: true, force: true }); }
     },
   };

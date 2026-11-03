@@ -134,15 +134,16 @@ export class DocumentService {
     const job = this.queue.then(async () => {
       if (this.stopped) return;
       try {
+        let converter: Document["converter"] = "markitdown";
         const extension = extname(document.sourcePath).toLowerCase();
         if (extension === ".md" || extension === ".txt") {
           const content = await readFile(document.sourcePath);
           if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
           await writeFile(`${document.markdownPath}.tmp`, content, { mode: 0o600 });
           await rename(`${document.markdownPath}.tmp`, document.markdownPath);
-        } else await this.options.convert(document.sourcePath, document.markdownPath, message => this.options.onProgress?.(document.id, message));
+        } else converter = await this.options.convert(document.sourcePath, document.markdownPath, message => this.options.onProgress?.(document.id, message)) ?? "markitdown";
         if ((await stat(document.markdownPath)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
-        if (!this.stopped) this.options.store.documents.transition(document.id, { status: "ready" });
+        if (!this.stopped) this.options.store.documents.transition(document.id, { status: "ready", converter });
       } catch (error) {
         if (!this.stopped) this.options.store.documents.transition(document.id, {
           status: "failed", error: error instanceof Error && error.message.trim() ? error.message.slice(0, 2000) : "Conversion failed",

@@ -8,6 +8,7 @@ import rehypeHighlight from "rehype-highlight";
 import {
   headingsIn,
   headingPath,
+  pageAt,
   rangeSelection,
   sourceOffsets,
 } from "./selection";
@@ -170,6 +171,7 @@ export function DocumentMarkdown({
                           onClick={() => {
                             onSelect({
                               documentId,
+                              page: pageAt(source, heading.start),
                               startOffset: heading.start,
                               endOffset: heading.end,
                               text: source

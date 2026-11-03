@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { copyFile, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, copyFile, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { createConverter, runProcess, scrubbedEnvironment } from "../../../resources/converter";
@@ -20,6 +20,7 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     await expect(converter.ensureReady()).rejects.toThrow();
     await copyFile(resolve("resources/converter/requirements.txt"), join(resources, "requirements.txt"));
     await copyFile(resolve("resources/converter/convert.py"), join(resources, "convert.py"));
+    await cp(resolve("resources/converter/pdf_md"), join(resources, "pdf_md"), { recursive: true });
     const python = await converter.ensureReady();
     executable = python;
     expect(await converter.ensureReady()).toBe(python);
@@ -31,7 +32,8 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
   afterAll(async () => { if (directory) await rm(directory, { recursive: true, force: true }); });
   it.each(["docx", "pptx", "xlsx", "html", "pdf", "csv"])("converts a real %s fixture", async (extension) => {
     const output = join(directory, `result-${extension}.md`);
-    await converter.convert(resolve(`test-fixtures/converter/sample.${extension}`), output);
+    const parser = await converter.convert(resolve(`test-fixtures/converter/sample.${extension}`), output);
+    expect(parser).toBe(extension === "pdf" ? "pdf_md" : "markitdown");
     expect(await readFile(output, "utf8")).toContain("VStudy fixture");
   }, 120_000);
   it("externalizes large DOCX images and drops oversized images before the Markdown cap", async () => {

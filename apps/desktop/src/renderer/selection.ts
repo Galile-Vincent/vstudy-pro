@@ -38,6 +38,11 @@ export function headingsIn(source: string): Heading[] {
         ?.start ?? source.length,
   }));
 }
+export function pageAt(source: string, offset: number): number | undefined {
+  const markers = [...source.slice(0, offset).matchAll(/<!-- page (\d+) -->/g)];
+  return markers.length ? Number(markers.at(-1)![1]) : undefined;
+}
+
 export function headingPath(headings: Heading[], offset: number): string[] {
   const path: Heading[] = [];
   for (const heading of headings) {
@@ -222,6 +227,7 @@ export function rangeSelection(
     startOffset,
     endOffset,
     text: range.toString(),
+    ...(pageAt(source, startOffset) ? { page: pageAt(source, startOffset) } : {}),
     headingPath: headingPath(headingsIn(source), startOffset),
   };
 }

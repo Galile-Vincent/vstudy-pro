@@ -20,6 +20,7 @@ class Line:
     size: float
     bold: bool = False
     note: bool = False
+    math: bool = False
 
 
 @dataclass(frozen=True)
@@ -92,6 +93,7 @@ def chars_to_lines(chars):
                     sum("bold" in c.get("fontname", "").lower() for c in run)
                     > len(run) * 0.7,
                     any(c.get("annotation", False) for c in run),
+                    any("math" in c.get("fontname", "").lower() for c in run),
                 )
             )
     return sorted(result, key=lambda l: (l.top, l.x0))
@@ -100,24 +102,41 @@ def chars_to_lines(chars):
 def mark_annotations(lines):
     if not lines:
         return []
-    left = (
-        median(l.x0 for l in lines if len(l.text) > 35)
-        if any(len(l.text) > 35 for l in lines)
-        else min(l.x0 for l in lines)
-    )
+    long_lines = [l for l in lines if len(l.text) > 35 and not l.math]
+    left = median(l.x0 for l in long_lines) if long_lines else min(l.x0 for l in lines)
+    right = median(l.x1 for l in long_lines) if long_lines else max(l.x1 for l in lines)
+
+    def overlap(a, b):
+        return (
+            min(a.x1, b.x1) > max(a.x0, b.x0)
+            and min(a.bottom, b.bottom) - max(a.top, b.top) > min(a.size, b.size) * 0.35
+        )
+
+    def candidate(line):
+        # Fractions, subscripts, and equation labels overlap by design.
+        if line.math or re.search(r"[=≥≤∑∫\U0001d400-\U0001d7ff]", line.text):
+            return False
+        if any(o.math and overlap(line, o) for o in lines):
+            return False
+        return 4 <= len(line.text) < 30 or (
+            2 <= len(line.text) < 30 and any(cjk(c) for c in line.text)
+        )
+
     return [
         replace(
             l,
             note=(l.note and len(l.text) < 60)
             or (
-                len(l.text) < 30
+                candidate(l)
                 and (
                     l.x0 < left - 35
+                    or l.x0 > right + 35
                     or any(
                         o is not l
                         and not o.note
-                        and min(l.x1, o.x1) > max(l.x0, o.x0)
-                        and min(l.bottom, o.bottom) - max(l.top, o.top) > l.size * 0.35
+                        and not o.math
+                        and len(o.text) > 30
+                        and overlap(l, o)
                         for o in lines
                     )
                 )
@@ -181,8 +200,8 @@ def is_heading(block, body_size):
     )
 
 
-def classify_blocks(blocks, body_size):
-    sizes = sorted(
+def classify_blocks(blocks, body_size, heading_sizes=None):
+    sizes = heading_sizes or sorted(
         {round(b.lines[0].size, 1) for b in blocks if is_heading(b, body_size)},
         reverse=True,
     )
@@ -355,10 +374,20 @@ def convert_pdf(path):
             if any(not l.note for p in pages for l in p)
             else 12
         )
+        page_blocks = [lines_to_blocks(reading_order(lines)) for lines in pages]
+        heading_sizes = sorted(
+            {
+                round(b.lines[0].size, 1)
+                for blocks in page_blocks
+                for b in blocks
+                if is_heading(b, body)
+            },
+            reverse=True,
+        )
         output = []
         previous = None
-        for n, lines in enumerate(pages):
-            blocks = classify_blocks(lines_to_blocks(reading_order(lines)), body)
+        for n, unclassified in enumerate(page_blocks):
+            blocks = classify_blocks(unclassified, body, heading_sizes)
             for bbox, text in tables[n]:
                 blocks.append(Block((Line(text, *bbox, body),), "table"))
             blocks.sort(key=lambda b: (b.lines[0].top, b.lines[0].x0))

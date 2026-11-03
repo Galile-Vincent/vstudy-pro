@@ -20,6 +20,7 @@ const documentFields = {
   sourceHash: z.string().regex(/^[a-f0-9]{64}$/),
   sourcePath: z.string().min(1),
   mime: z.string().min(1),
+  converter: z.enum(["pdf_md", "markitdown"]).default("markitdown"),
   markdownPath: z.string().min(1),
   createdAt: timestamp,
 };
@@ -44,7 +45,7 @@ export const documentTransitions: Record<
   failed: ["converting"],
 };
 export type DocumentTransition =
-  | { status: "ready" }
+  | { status: "ready"; converter?: "pdf_md" | "markitdown" }
   | { status: "failed"; error: string }
   | { status: "converting" };
 export function transitionDocument(
@@ -65,6 +66,7 @@ export const selectionSchema = z
     endOffset: z.number().int().nonnegative(),
     text: z.string(),
     headingPath: z.array(z.string()),
+    page: z.number().int().positive().optional(),
   })
   .strict()
   .refine((s) => s.endOffset >= s.startOffset, "Selection end precedes start");

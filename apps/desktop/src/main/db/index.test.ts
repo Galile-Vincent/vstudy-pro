@@ -69,7 +69,8 @@ describe("SQLite repositories", () => {
     expect(
       store.documents.transition(document.id, { status: "converting" }),
     ).not.toHaveProperty("error");
-    store.documents.transition(document.id, { status: "ready" });
+    store.documents.transition(document.id, { status: "ready", converter: "pdf_md" });
+    expect(store.documents.get(document.id)?.converter).toBe("pdf_md");
     expect(() =>
       store.documents.transition(document.id, { status: "converting" }),
     ).toThrow();
@@ -103,7 +104,7 @@ describe("SQLite repositories", () => {
     });
     expect(
       raw.prepare("SELECT count(*) AS count FROM migrations").get(),
-    ).toEqual({ count: 1 });
+    ).toEqual({ count: 2 });
     raw.close();
   });
   it("rejects duplicate content and invalid domain data", () => {
@@ -128,4 +129,15 @@ it("lists conversations newest first", () => {
   store.conversations.insert({ ...conversation, createdAt: "2025-01-01T00:00:00.000Z", modelId: "older" });
   store.conversations.insert({ ...conversation, id: randomUUID() as typeof conversation.id, createdAt: "2026-01-01T00:00:00.000Z", modelId: "newest" });
   expect(store.conversations.list(document.id).map(c => c.modelId)).toEqual(["newest", "older"]);
+});
+
+it("migrates existing documents with MarkItDown as their default parser", () => {
+  const directory = mkdtempSync(join(tmpdir(), "vstudy-migration-")); paths.push(directory);
+  const path = join(directory, "store.sqlite");
+  const first = openStore(path);
+  const { document } = fixture(); first.documents.insert(document); first.close();
+  const old = new DatabaseSync(path);
+  old.exec("ALTER TABLE documents DROP COLUMN converter; DELETE FROM migrations WHERE version=2;"); old.close();
+  const migrated = openStore(path); stores.push(migrated);
+  expect(migrated.documents.get(document.id)?.converter).toBe("markitdown");
 });

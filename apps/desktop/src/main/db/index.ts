@@ -26,6 +26,7 @@ const migrations = [
  CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL CHECK(json_valid(value)));
 `,
   },
+  { version: 2, sql: "ALTER TABLE documents ADD COLUMN converter TEXT NOT NULL DEFAULT 'markitdown' CHECK(converter IN ('pdf_md','markitdown'));" },
 ];
 const documentRow = z
   .object({
@@ -35,6 +36,7 @@ const documentRow = z
     sourceHash: z.string(),
     sourcePath: z.string(),
     mime: z.string(),
+    converter: z.enum(["pdf_md", "markitdown"]),
     status: z.string(),
     error: z.string().nullable(),
     markdownPath: z.string(),
@@ -96,7 +98,7 @@ export function openStore(path: string) {
     insert(input: Document): Document {
       const d = documentSchema.parse(input);
       db.prepare(
-        "INSERT INTO documents(id,title,sourceName,sourceHash,sourcePath,mime,status,error,markdownPath,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO documents(id,title,sourceName,sourceHash,sourcePath,mime,status,error,markdownPath,createdAt,converter) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
       ).run(
         d.id,
         d.title,
@@ -108,6 +110,7 @@ export function openStore(path: string) {
         d.status === "failed" ? d.error : null,
         d.markdownPath,
         d.createdAt,
+        d.converter,
       );
       return d;
     },
@@ -132,9 +135,10 @@ export function openStore(path: string) {
       const current = documents.get(id);
       if (!current) throw new Error("Document not found");
       const updated = transitionDocument(current, next);
-      db.prepare("UPDATE documents SET status=?,error=? WHERE id=?").run(
+      db.prepare("UPDATE documents SET status=?,error=?,converter=? WHERE id=?").run(
         updated.status,
         updated.status === "failed" ? updated.error : null,
+        updated.converter,
         id,
       );
       return updated;

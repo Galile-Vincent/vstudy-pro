@@ -315,7 +315,7 @@ export function App() {
           }).catch(report);
         }}>⌫</button>}
         <span className="muted">
-          {doc?.status === "ready" ? "Markdown" : ""}
+          {doc?.status === "ready" ? `Markdown · ${doc.converter}` : ""}
         </span>
       </div>
       {!doc ? (
