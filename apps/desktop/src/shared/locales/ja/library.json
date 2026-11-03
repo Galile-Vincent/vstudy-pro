@@ -2,5 +2,8 @@
   "conversion_pages": "{{total}} ページ中 {{page}} ページを変換中",
   "conversion_complete": "変換が完了しました",
   "conversion_preparing": "変換の準備中…",
-  "delete_document": "「{{title}}」とその会話を削除しますか？"
+  "delete_document": "「{{title}}」とその会話を削除しますか？",
+  "brand": "VStudy Pro",
+  "home": "ホーム",
+  "homePlaceholder": "次のひらめきのための、小さな場所。"
 }

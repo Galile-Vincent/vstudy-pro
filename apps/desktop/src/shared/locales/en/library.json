@@ -2,5 +2,8 @@
   "conversion_pages": "Converting page {{page}} of {{total}}",
   "conversion_complete": "Conversion complete",
   "conversion_preparing": "Preparing converter…",
-  "delete_document": "Delete {{title}} and its conversations?"
+  "delete_document": "Delete {{title}} and its conversations?",
+  "brand": "VStudy Pro",
+  "home": "Home",
+  "homePlaceholder": "A little space for your next idea."
 }

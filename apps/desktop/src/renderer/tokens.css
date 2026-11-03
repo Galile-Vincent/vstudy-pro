@@ -85,3 +85,5 @@ html[data-reduced-transparency=true] { --material-card:var(--surface); --materia
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0ms!important; transition-duration:0ms!important; scroll-behavior:auto!important; } }
 .skip-link { position:fixed; top:0; left:12px; z-index:100; padding:var(--space-2); background:var(--surface); color:var(--ink); transform:translateY(-120%); }
 .skip-link:focus { transform:translateY(0); }
+
+:root { --sidebar-width:232px; --sidebar-compact-width:180px; --topbar-height:52px; }

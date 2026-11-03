@@ -2,5 +2,8 @@
   "conversion_pages": "正在轉換第 {{page}}／{{total}} 頁",
   "conversion_complete": "轉換完成",
   "conversion_preparing": "正在準備轉換工具…",
-  "delete_document": "要刪除「{{title}}」及其對話嗎？"
+  "delete_document": "要刪除「{{title}}」及其對話嗎？",
+  "brand": "VStudy Pro",
+  "home": "首頁",
+  "homePlaceholder": "留一點空間，給下一個靈感。"
 }
