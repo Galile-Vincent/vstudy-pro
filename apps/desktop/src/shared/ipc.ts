@@ -59,6 +59,7 @@ export const ipcContract = {
     request: conversationSchema.omit({ id: true, createdAt: true }),
     response: conversationSchema,
   },
+  "conversations:model": { request: z.object({ conversationId: conversationIdSchema, providerId: providerIdSchema, modelId: z.string().min(1) }).strict(), response: conversationSchema },
   "conversations:options": { request: z.object({ conversationId: conversationIdSchema, options: modelOptionsSchema }).strict(), response: ack },
   "conversations:list": {
     request: z.object({ documentId: documentIdSchema }).strict(),

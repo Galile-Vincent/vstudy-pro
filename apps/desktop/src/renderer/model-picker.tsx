@@ -5,6 +5,9 @@ import { ModelSelector } from './components/assistant-ui/elements/model-selector
 import { desktop } from './bridge';
 import { providerName, type Providers } from './providers';
 
+function cachedDisplayNames(): Record<string,string> {
+  try { return JSON.parse(localStorage.getItem('vstudy-model-display-names') ?? '{}'); } catch { return {}; }
+}
 export const effortLabel = (id: string) => ({ low: 'Low', medium: 'Medium', high: 'High', xhigh: 'Extra high', max: 'Max', ultra: 'Ultra', ultracode: 'Ultracode', ultrathink: 'Ultrathink' })[id] ?? id;
 export function pickerModels(providers: Providers) {
   return providers.flatMap(p => {
@@ -30,19 +33,25 @@ function traitKeys(event: KeyboardEvent<HTMLElement>) {
 }
 export function ModelPicker({ providers, model, onModel, onSettings, values = {}, onChange }: { providers: Providers; model: string; onModel: (value: string) => void; onSettings: () => void; onProvidersChanged?: () => Promise<void>; values?: Record<string,string|boolean>; onChange?: (values: Record<string,string|boolean>) => void }) {
   const [open, setOpen] = useState(false);
+  const [displayNames, setDisplayNames] = useState<Record<string,string>>(cachedDisplayNames);
   const [favorites, setFavorites] = useState<string[]>([]), [recent, setRecent] = useState<string[]>([]);
   const root = useRef<HTMLDivElement>(null);
   const [boundary, setBoundary] = useState<Element | null>(null);
-  useEffect(() => { setBoundary(root.current?.closest('.pane') ?? null); void desktop.invoke('settings:get', {}).then(s => { setFavorites(s.favoriteModels ?? []); setRecent(s.recentModels ?? []); }).catch(() => {}); }, []);
+  useEffect(() => { setBoundary(root.current?.closest('.pane') ?? null); void desktop.invoke('settings:get', {}).then(s => { setDisplayNames(names => ({...names,...s.modelDisplayNames})); setFavorites(s.favoriteModels ?? []); setRecent(s.recentModels ?? []); }).catch(() => {}); }, []);
   const all = pickerModels(providers);
-  const original = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id }))).find(m => m.value === model);
+  const original = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id }))).find(m => m.value === model || (m.providerId === model.split('/')[0] && m.resolvedId === model.split('/').slice(1).join('/') && m.id !== 'default'));
   const selected = all.find(m => m.value === model) ?? all.find(m => m.providerId === original?.providerId && m.resolvedId === original?.resolvedId && m.id !== 'default');
+  useEffect(() => {
+    if (!selected || displayNames[model] === selected.name) return;
+    const name = selected.name;
+    setDisplayNames(names => { const next = {...names,[model]:name}; try { localStorage.setItem('vstudy-model-display-names',JSON.stringify(next)); } catch { /* Private renderer storage can be disabled. */ } return next; });
+  }, [selected?.name, model]);
   const effort = selected?.options?.find(o => /effort/i.test(o.id));
   const speed = selected?.options?.find(o => o.id === 'fastMode' || (o.id === 'serviceTier' && o.values.some(v => v.id === 'priority')));
   const fast = speed && ['true', 'priority'].includes(String(values[speed.id] ?? speed.default));
   const entries = all.map(m => ({ id: m.value, name: m.name, description: `${m.resolvedId ?? m.id}${m.available ? '' : ` · ${m.reason}`}`, disabled: !m.available, keywords: [m.provider, m.id], icon: <span className={`availability-dot ${m.available ? 'available' : ''}`} title={m.reason} /> }));
   const canonical = (value: string) => {
-    const raw = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id }))).find(m => m.value === value);
+    const raw = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id }))).find(m => m.value === value || (m.providerId === value.split('/')[0] && m.resolvedId === value.split('/').slice(1).join('/') && m.id !== 'default'));
     return all.find(m => m.value === value)?.value ?? all.find(m => m.providerId === raw?.providerId && m.resolvedId === raw?.resolvedId && m.id !== 'default')?.value ?? value;
   };
   const isFavorite = (value: string) => favorites.some(x => canonical(x) === value);
@@ -54,11 +63,11 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
     <ModelSelector.Root models={entries} value={selected?.value ?? model} onValueChange={choose} open={open} onOpenChange={setOpen}>
       <ModelSelector.Trigger aria-label="Model" className="model-trigger" title={selected?.name}>
         <span className="provider-initial" aria-hidden>{selected?.provider[0] ?? 'M'}</span>
-        <span className="model-trigger-name">{selected?.name ?? (model.split('/').slice(1).join('/') || 'Choose a model')}</span>
+        <span className="model-trigger-name">{selected?.name ?? (displayNames[model] ?? (model ? 'Loading model…' : 'Choose a model'))}</span>
         {effort && <span className="model-trigger-effort">· {effortLabel(String(values[effort.id] ?? effort.default))}</span>}
         {fast && <Zap size={12} aria-label="Fast mode on" />}
       </ModelSelector.Trigger>
-      <ModelSelector.Content side="top" align="start" searchable collisionBoundary={boundary} collisionPadding={12} className="model-popover" onKeyDown={e => {
+      <ModelSelector.Content side="top" align="start" searchable filter={(value, search, keywords) => { const haystack = [value, ...(keywords ?? [])].join(" ").toLowerCase().replace(/[^a-z0-9]+/g," "); return search.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).every(token => haystack.includes(token)) ? 1 : 0; }} collisionBoundary={boundary} collisionPadding={12} className="model-popover" onKeyDown={e => {
         if (e.key !== 'Tab') return;
         const nodes = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('input, button:not(:disabled), [tabindex="0"]')).filter(n => n.getAttribute('tabindex') !== '-1');
         const first = nodes[0], last = nodes.at(-1);
@@ -70,7 +79,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
           <ModelSelector.List id="model-list" aria-label="Models">
             <ModelSelector.Empty>No matching models</ModelSelector.Empty>
             {groups.map(group => {
-              const rows = all.filter(m => (isFavorite(m.value) ? 'Favorites' : isRecent(m.value) ? 'Recent' : m.provider) === group);
+              const rows = all.filter(m => (isFavorite(m.value) ? 'Favorites' : isRecent(m.value) ? 'Recent' : m.provider) === group).sort((a,b) => group === 'Recent' ? recent.map(canonical).indexOf(a.value) - recent.map(canonical).indexOf(b.value) : 0);
               return rows.length > 0 && <ModelSelector.Group key={group} heading={group}>{rows.map(m => <div className="model-row" key={m.value}>
                 <ModelSelector.Item model={entries.find(x => x.id === m.value)!} title={m.reason} />
                 <button type="button" className="model-favorite" aria-label={`${isFavorite(m.value) ? 'Unfavorite' : 'Favorite'} ${m.name}`} aria-pressed={isFavorite(m.value)} onClick={() => { const f = isFavorite(m.value) ? favorites.filter(x => canonical(x) !== m.value) : [...favorites,m.value]; setFavorites(f); void persist(f,recent); }}><Star size={14} fill={isFavorite(m.value) ? 'currentColor' : 'none'} /></button>

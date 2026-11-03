@@ -25,6 +25,7 @@ export function registerChatIpc(
     "chat:abort",
     "conversations:create",
     "conversations:options",
+    "conversations:model",
     "conversations:list",
     "conversations:delete",
     "messages:list",
@@ -38,11 +39,17 @@ export function registerChatIpc(
   registrar.handle("conversations:create", (input) =>
     chat.createConversation(input),
   );
+  registrar.handle("conversations:model", async ({conversationId,providerId,modelId}) => {
+    if (!store.conversations.get(conversationId)) throw new Error('Conversation unavailable');
+    const provider = (await providers.list()).find(p => p.config.id === providerId);
+    if (!provider?.config.enabled || !provider.availability.available || !provider.models.some(m => m.id === modelId || m.resolvedId === modelId)) throw new Error('Model unavailable');
+    return store.conversations.setModel(conversationId,providerId,modelId);
+  });
   registrar.handle("conversations:options", async ({ conversationId, options }) => {
     const conversation = store.conversations.get(conversationId);
     if (!conversation) throw new Error('Conversation unavailable');
     const models = await providers.get(conversation.providerId).listModels();
-    validateOptions(models.find(m => m.id === conversation.modelId), options);
+    validateOptions(models.find(m => m.id === conversation.modelId || m.resolvedId === conversation.modelId), options);
     store.conversations.setOptions(conversationId, options);
     return { ok: true };
   });

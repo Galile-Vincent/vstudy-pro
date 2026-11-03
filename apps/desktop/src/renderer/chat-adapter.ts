@@ -1,6 +1,7 @@
 import type { ChatModelAdapter } from "@assistant-ui/react";
 import { modelOptionsSchema, selectionSchema } from "../shared";
-import type { Usage, ChatRequest, ChatEvent, DesktopApi } from "../shared";
+import { assistantContent } from './chat-content';
+import type { DocumentCitation, ToolCall, Usage, ChatRequest, ChatEvent, DesktopApi } from "../shared";
 export type ChatContext = Omit<ChatRequest, "requestId" | "userMessage">;
 export function createChatAdapter(
   bridge: DesktopApi,
@@ -75,6 +76,10 @@ export function createChatAdapter(
         started(messages.filter(m => m.role === "user").at(-1)?.id ?? "");
         let text = "";
         let usage: Usage | undefined;
+        let reasoning = '';
+        let citations: DocumentCitation[] = [];
+        const toolCalls: ToolCall[] = [];
+        const snapshot = () => ({content:assistantContent(text,reasoning,citations,toolCalls),metadata:{custom:{...(usage ? {usage} : {}),modelId:details.modelId,options:details.options,citations}}});
         while (true) {
           if (!queue.length)
             await new Promise<void>((resolve) => {
@@ -83,11 +88,14 @@ export function createChatAdapter(
           if (abortSignal.aborted || runGeneration !== generation) return;
           const event = queue.shift();
           if (!event) continue;
-          if (event.type === "error") throw new Error(event.message);
+          if (event.type === "error") { yield {...snapshot(),status:{type:'incomplete',reason:'error',error:event.message}}; return; }
           if (event.type === "done") return;
           if (event.type === "usage") { usage = event.usage; window.dispatchEvent(new Event("usage-updated")); }
           else if (event.type === 'text-delta') text += event.text;
-          yield { content: [{ type: "text", text }], ...(usage ? { metadata: { custom: { usage, modelId: details.modelId, options: details.options } } } : {}) };
+          else if (event.type === 'reasoning-delta') reasoning += event.text;
+          else if (event.type === 'citations') citations = event.citations;
+          else if (event.type === 'tool-call') { const index = toolCalls.findIndex(c => c.toolCallId === event.call.toolCallId); if (index >= 0) toolCalls[index] = event.call; else toolCalls.push(event.call); }
+          yield citations.length || reasoning || toolCalls.length ? snapshot() : {content:[{type:'text',text}],...(usage ? {metadata:{custom:{usage,modelId:details.modelId,options:details.options}}} : {})};
         }
       } finally {
         unsubscribe();

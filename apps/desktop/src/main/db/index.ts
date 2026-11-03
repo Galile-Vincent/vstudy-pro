@@ -156,6 +156,11 @@ export function openStore(path: string) {
     usage: usageRepository(db),
     documents,
     conversations: {
+      setModel(id: Conversation['id'], providerId: Conversation['providerId'], modelId: string): Conversation {
+        if (db.prepare('SELECT 1 FROM messages WHERE conversationId=? LIMIT 1').get(id)) throw new Error('Only empty conversations can change models');
+        db.prepare('UPDATE conversations SET providerId=?,modelId=?,options=? WHERE id=?').run(providerId,modelId,'{}',id);
+        return conversationRow.parse(db.prepare('SELECT * FROM conversations WHERE id=?').get(id));
+      },
       setOptions(id: Conversation["id"], options: Conversation["options"]) { db.prepare("UPDATE conversations SET options=? WHERE id=?").run(JSON.stringify(options ?? {}), id); },
       insert(input: Conversation): Conversation {
         const c = conversationSchema.parse(input);

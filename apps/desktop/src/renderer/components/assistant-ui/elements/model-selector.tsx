@@ -200,6 +200,7 @@ export type ModelSelectorContentProps = Omit<
    */
   side?: ComponentPropsWithoutRef<typeof PopoverContent>["side"];
   searchable?: boolean;
+  filter?: ComponentPropsWithoutRef<typeof Command>["filter"];
 };
 
 /**
@@ -221,6 +222,7 @@ function ModelSelectorContent({
   side,
   sideOffset = 6,
   searchable,
+  filter,
   children,
   ...props
 }: ModelSelectorContentProps) {
@@ -248,6 +250,7 @@ function ModelSelectorContent({
       <Command
         className="bg-transparent"
         shouldFilter={!unfiltered}
+        {...(filter ? { filter } : {})}
         {...(value !== undefined ? { defaultValue: value } : {})}
       >
         {unfiltered && <ModelSelectorFocusAnchor />}
@@ -469,6 +472,7 @@ export type ModelSelectorProps = Omit<ModelSelectorRootProps, "children"> &
   VariantProps<typeof modelSelectorTriggerVariants> & {
     /** Render a search input above the model list. */
     searchable?: boolean;
+  filter?: ComponentPropsWithoutRef<typeof Command>["filter"];
     /** Alignment of the dropdown relative to the trigger. Use `"end"` when the
      * trigger sits at the right edge of its container. */
     align?: ModelSelectorContentProps["align"];

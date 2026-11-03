@@ -53,7 +53,7 @@ it("registers every chat handler with validated repository round trips and dispo
     return callback(event, payload);
   };
   try {
-    expect(implemented.size).toBe(9);
+    expect(implemented.size).toBe(10);
     const doc = store.documents.insert(
       documentSchema.parse({
         id: randomUUID(),

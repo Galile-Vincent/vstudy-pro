@@ -84,7 +84,7 @@ describe("SQLite repositories", () => {
     const file = join(path, "store.sqlite");
     const first = openStore(file);
     expect(first.settings.get()).toEqual({
-      chatSide: "left", warnAtPercent: 80, priceOverrides: {},
+      chatSide: "left", warnAtPercent: 80, priceOverrides: {}, enableGenerativeUI:false, modelDisplayNames:{},
       lastProviderId: null,
       lastModelId: null, lastDocumentId: null,
     });

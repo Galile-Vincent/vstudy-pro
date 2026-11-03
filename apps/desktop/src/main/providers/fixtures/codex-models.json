@@ -184,7 +184,8 @@
           "name": "Fast",
           "description": "1.5x speed, increased usage"
         }
-      ]
+      ],
+      "visibility": "hide"
     },
     {
       "slug": "gpt-6-luna",
@@ -362,7 +363,8 @@
           "name": "Fast",
           "description": "1.5x speed, increased usage"
         }
-      ]
+      ],
+      "visibility": "hide"
     }
   ]
 }

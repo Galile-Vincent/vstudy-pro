@@ -3,12 +3,12 @@ import codex from './fixtures/codex-models.json';
 import claude from './fixtures/claude-models.json';
 import { claudeModels, codexModels, discoverModels, validateOptions } from './models';
 import { cliArgs, findCli } from './cli';
-it('retains every discovered model and exact per-model effort values', () => {
+it('retains visible discovered models and exact per-model effort values', () => {
   const models = codexModels(codex);
-  expect(models.map(m => m.id)).toEqual(codex.models.map(m => m.slug));
+  expect(models.map(m => m.id)).toEqual(['gpt-6.1-sol','gpt-6-astra','gpt-6.1-terra','gpt-6-sol','gpt-6-luna','gpt-5.6-sol','gpt-5.6-terra','gpt-5.6-luna']);
   expect(models.find(m => m.id === 'gpt-6.1-sol')?.options?.[0]?.values.map(v => v.id)).toContain('ultra');
   expect(models.find(m => m.id === 'gpt-6-luna')?.options?.[0]?.values.map(v => v.id)).not.toContain('ultra');
-  expect(claudeModels(claude).find(m => m.id === 'claude-opus-5-5')?.options?.map(o => o.id)).toEqual(['effort','fastMode']);
+  expect(claudeModels(claude).find(m => m.id === 'opus')?.options?.map(o => o.id)).toEqual(['effort','fastMode']);
   expect(claudeModels(claude).find(m => m.id === 'claude-haiku-4-5-20251001')?.options?.some(o => o.id === 'effort')).toBe(false);
 });
 it('rejects unknown option IDs and values', () => {

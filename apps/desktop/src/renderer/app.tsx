@@ -180,7 +180,10 @@ export function App() {
       lastProviderId: providerId,
       lastModelId: modelId,
     });
-    if (conversation && `${conversation.providerId}/${conversation.modelId}` !== value) void newConversation(value);
+    if (conversation && `${conversation.providerId}/${conversation.modelId}` !== value) {
+      if (history?.length === 0) void desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId}).then(next => { setConversation(next); setConversations(list => list.map(c => c.id === next.id ? next : c)); }).catch(report);
+      else void newConversation(value);
+    }
 
   };
   const importing = useRef(false);

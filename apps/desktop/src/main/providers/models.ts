@@ -9,9 +9,9 @@ import { z } from 'zod';
 import type { Model } from '../../shared/domain';
 import { cliEnvironment, findCli } from './cli';
 export const option = (id: string, label: string, values: string[], initial = values[0] ?? '') => ({ id, label, values: values.map(id => ({ id, label: id })), default: initial });
-const codexCatalog = z.object({ models: z.array(z.object({ slug: z.string(), display_name: z.string().optional(), default_reasoning_level: z.string().optional(), supported_reasoning_levels: z.array(z.object({ effort: z.string() })).optional(), service_tiers: z.array(z.object({ id: z.string() })).optional() })) });
+const codexCatalog = z.object({ models: z.array(z.object({ slug: z.string(), visibility: z.string().optional(), display_name: z.string().optional(), default_reasoning_level: z.string().optional(), supported_reasoning_levels: z.array(z.object({ effort: z.string() })).optional(), service_tiers: z.array(z.object({ id: z.string() })).optional() })) });
 export function codexModels(input: unknown): Model[] {
-  return codexCatalog.parse(input).models.map(m => ({ id: m.slug, name: m.display_name ?? m.slug, options: [
+  return codexCatalog.parse(input).models.filter(m => m.visibility !== 'hide').map(m => ({ id: m.slug, name: m.display_name ?? m.slug, options: [
     ...(m.supported_reasoning_levels?.length ? [option('reasoningEffort', 'Effort', m.supported_reasoning_levels.map(e => e.effort), m.default_reasoning_level)] : []),
     ...(m.service_tiers?.length ? [option('serviceTier', 'Service tier', ['default', ...m.service_tiers.map(t => t.id)], 'default')] : []),
   ] }));
@@ -19,7 +19,7 @@ export function codexModels(input: unknown): Model[] {
 const claudeCatalog = z.array(z.object({ value: z.string(), resolvedModel: z.string().optional(), displayName: z.string(), supportedEffortLevels: z.array(z.string()).optional(), supportsFastMode: z.boolean().optional(), supportsThinkingOff: z.boolean().optional() }));
 export function claudeModels(input: unknown): Model[] {
   const catalog = claudeCatalog.parse(input);
-  return catalog.flatMap(m => {
+  return catalog.map(m => {
     const options = [
       ...(m.supportedEffortLevels?.length ? [option('effort', 'Effort', [...m.supportedEffortLevels, ...((patterns as Record<string,string[]>)[m.resolvedModel ?? m.value] ?? [])], m.supportedEffortLevels.includes('high') ? 'high' : m.supportedEffortLevels[0])] : []),
       ...(m.supportsFastMode ? [option('fastMode', 'Fast mode', ['false', 'true'], 'false')] : []),
@@ -27,11 +27,9 @@ export function claudeModels(input: unknown): Model[] {
     ];
     for (const o of options) for (const v of o.values) if (v.id === 'ultrathink' || v.id === 'ultracode') v.label += ' (T3 pattern)';
     const resolvedName = catalog.find(x => x.value !== 'default' && x.resolvedModel === m.resolvedModel)?.displayName ?? m.resolvedModel ?? 'recommended';
-    return [...new Set([m.value, m.resolvedModel ?? m.value])].map(id => ({
-      id, resolvedId: m.resolvedModel ?? m.value,
-      name: m.value === 'default' ? (id === 'default' ? `Default · ${resolvedName}` : resolvedName) : m.displayName,
-      options,
-    }));
+    return { id: m.value, resolvedId: m.resolvedModel ?? m.value,
+      name: m.value === 'default' ? `Default · ${resolvedName}` : m.displayName, options };
+
   }).filter((m, i, all) => all.findIndex(x => x.id === m.id) === i);
 }
 function capture(binary: string, args: string[], input = '', initialize = false): Promise<string> {
