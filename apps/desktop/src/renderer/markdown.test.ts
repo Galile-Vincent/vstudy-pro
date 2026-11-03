@@ -1,0 +1,90 @@
+// @vitest-environment jsdom
+import { createElement, act } from "react";
+import { createRoot } from "react-dom/client";
+import { describe, expect, it, vi } from "vitest";
+import { DocumentMarkdown, safeImage } from "./markdown";
+import { rangeSelection } from "./selection";
+import type { Document } from "../shared";
+const id = "00000000-0000-4000-8000-000000000001" as Document["id"];
+(
+  globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
+describe("Document Markdown", () => {
+  it("renders sanitized GFM, math, code and source offsets", async () => {
+    const source =
+      "# Title\n\nRead **bold &amp; clear** words.\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\n- [x] Task\n\n```typescript\nconst x = 1;\n```\n\n$x^2$\n\n<script>alert(1)</script>\n\n[bad](javascript:alert(1))\n\n![bad](https://tracker.example/pixel)";
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    const select = vi.fn(),
+      notice = vi.fn();
+    await act(async () =>
+      root.render(
+        createElement(DocumentMarkdown, {
+          source,
+          documentId: id,
+          onSelect: select,
+          onNotice: notice,
+        }),
+      ),
+    );
+    expect(container.querySelector("table")).not.toBeNull();
+    expect(container.querySelector("input[type=checkbox]")).not.toBeNull();
+    expect(container.querySelector(".katex")).not.toBeNull();
+    expect(container.querySelector(".hljs-keyword")).not.toBeNull();
+    expect(container.querySelector("script")).toBeNull();
+    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector('[href^="javascript"]')).toBeNull();
+    const strong = container.querySelector("strong")!;
+    expect(strong.getAttribute("data-start")).toBe(
+      String(source.indexOf("**bold")),
+    );
+    const text = strong.firstChild!.firstChild!;
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 12);
+    const selection = rangeSelection(container, range, source, id)!;
+    expect(selection.text).toBe("bold & clear");
+    expect(source.slice(selection.startOffset, selection.endOffset)).toBe(
+      "bold &amp; clear",
+    );
+    expect(selection.headingPath).toEqual(["Title"]);
+    const codeText = container.querySelector(
+      "pre code .hljs-keyword",
+    )!.firstChild!;
+    const codeRange = document.createRange();
+    codeRange.setStart(codeText, 0);
+    codeRange.setEnd(codeText, 5);
+    const codeSelection = rangeSelection(container, codeRange, source, id)!;
+    expect(
+      source.slice(codeSelection.startOffset, codeSelection.endOffset),
+    ).toBe("const");
+    const section = container.querySelector<HTMLButtonElement>(
+      '[aria-label="Use section Title"]',
+    )!;
+    await act(async () => section.click());
+    expect(select).toHaveBeenCalledWith(
+      expect.objectContaining({ startOffset: 0, endOffset: source.length }),
+    );
+    await act(async () => root.unmount());
+    container.remove();
+  });
+  it("rejects unsafe image paths and allows raster data or local relatives", () => {
+    for (const url of [
+      "https://remote/image.png",
+      "//remote/a",
+      "/etc/passwd",
+      "../secret",
+      "%2e%2e/secret",
+      "file:///secret",
+      "data:image/svg+xml;base64,AAAA",
+      "a%5cb.png",
+      "a/%00b",
+    ])
+      expect(safeImage(url)).toBeUndefined();
+    expect(safeImage("assets/figure.png")).toBe("assets/figure.png");
+    expect(safeImage("data:image/png;base64,AAAA")).toBe(
+      "data:image/png;base64,AAAA",
+    );
+  });
+});
