@@ -373,3 +373,41 @@ it('retains explicitly reported zero usage on a completed call',async()=>{
   chat.start(request,owner);await until(()=>owner.events.at(-1)?.type==='done');
   expect(store.usage.forConversation(request.conversationId)).toMatchObject([{inputTokens:0,outputTokens:0,costUsd:0,costSource:'reported',aborted:false}]);
 });
+it('persists and forwards reasoning, validated citations and a bounded API presentation before one terminal event', async () => {
+  const fixture = await setup({...available,async *stream(req) {
+    expect(req.allowPresentation).toBe(true);
+    yield {type:'reasoning-delta',text:'Reported summary'};
+    yield {type:'citations',citations:[{id:'s0',documentId:req.documentId,title:'Forged title',offset:999,quote:'Forged quote'}]};
+    yield {type:'tool-call',call:{toolCallId:'present-1',toolName:'present',args:{title:'Comparison',columns:['Topic','Fact'],rows:[['Study','Exact passage']]}}};
+    yield {type:'text-delta',text:'Supported [[cite:s0]]; unknown [[cite:s999]]'};
+    yield {type:'done'};
+    yield {type:'reasoning-delta',text:'late'};
+  }});
+  fixture.store.settings.set({...fixture.store.settings.get(),enableGenerativeUI:true});
+  fixture.chat.start(fixture.request,fixture.owner);
+  await until(() => fixture.owner.events.some(e => e.type === 'done'));
+  const parts=fixture.store.messages.list(fixture.request.conversationId).at(-1)!.parts[0]!;
+  expect(parts.reasoning).toBe('Reported summary');
+  expect(parts.citations).toEqual([{id:'s0',documentId:fixture.request.documentId,title:'Study',offset:0,quote:'# Study\nExact selected passage'}]);
+  expect(parts.toolCalls).toEqual([{toolCallId:'present-1',toolName:'present',args:{title:'Comparison',columns:['Topic','Fact'],rows:[['Study','Exact passage']]},result:{rendered:true},isError:false}]);
+  expect(fixture.owner.events.filter(e => e.type === 'done' || e.type === 'error')).toEqual([{type:'done'}]);
+  expect(fixture.owner.events.at(-1)).toEqual({type:'done'});
+});
+it('keeps tool execution off by default and drops enrichment after abort', async () => {
+  let release = () => {};
+  const fixture = await setup({...available,async *stream(req) {
+    expect(req.allowPresentation).toBe(false);
+    yield {type:'reasoning-delta',text:'Partial summary'};
+    await new Promise<void>(resolve => {release=resolve;});
+    yield {type:'tool-call',call:{toolCallId:'late',toolName:'present',args:{}}};
+    yield {type:'done'};
+  }});
+  fixture.chat.start(fixture.request,fixture.owner);
+  await until(() => fixture.owner.events.some(e => e.type === 'reasoning-delta'));
+  fixture.chat.abort(fixture.request.requestId,fixture.owner);
+  const events=[...fixture.owner.events];release();await new Promise(resolve => setTimeout(resolve,15));
+  expect(fixture.owner.events).toEqual(events);
+  expect(events.filter(e => e.type === 'done' || e.type === 'error')).toEqual([{type:'done'}]);
+  const part=fixture.store.messages.list(fixture.request.conversationId).at(-1)!.parts[0]!;
+  expect(part.reasoning).toBe('Partial summary');expect(part.status).toBe('aborted');expect(part.toolCalls).toBeUndefined();
+});

@@ -22,7 +22,7 @@ export type Availability =
   | { available: true }
   | { available: false; reason: string };
 export type Model = import("../../shared/domain").Model;
-export type ProviderRequest = ChatRequest & { prompt: string; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
+export type ProviderRequest = ChatRequest & { prompt: string; allowPresentation?: boolean; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
 export interface ProviderAdapter {
   detect(): Promise<Availability>;
   listModels(): Promise<Model[]>;
@@ -41,7 +41,14 @@ export const fakeAdapter: ProviderAdapter = {
   },
   async *stream(request, signal) {
     if (request.userMessage === 'test error' && !fakeFailures.has(request.turnId ?? request.requestId)) { fakeFailures.add(request.turnId ?? request.requestId); yield { type: 'error', message: 'Provider rate limited' }; return; }
-    const response = `**bold**\n\n- First\n- Second\n\n\`\`\`text\n${request.prompt}\n\`\`\``;
+    const enriched = request.userMessage === 'test enriched';
+    const citationId = request.prompt.match(/"id":"(s\d+)"/)?.[1];
+    if (enriched) {
+      yield {type:'reasoning-delta',text:'Reviewing the reported document sections.'};
+      yield {type:'tool-call',call:{toolCallId:'present-fixture',toolName:'present',args:{title:'Document summary',columns:['Topic','Summary'],rows:[['Document','Grounded answer']]}}};
+    }
+    const fence = '`'.repeat(Math.max(2,...Array.from(request.prompt.matchAll(/`+/g),m => m[0].length)) + 1);
+    const response = enriched ? `A grounded document summary.${citationId ? ` [[cite:${citationId}]]` : ''}` : `**bold**\n\n- First\n- Second\n\n${fence}text\n${request.prompt}\n${fence}`;
     for (let i = 0; i < response.length; i += 128) {
       signal.throwIfAborted();
       yield { type: "text-delta", text: response.slice(i, i + 128) };

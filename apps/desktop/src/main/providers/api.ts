@@ -5,6 +5,7 @@ import type { Usage, ProviderConfig } from "../../shared/domain";
 import type { SecretStore } from "../services/secrets";
 import type { ProviderAdapter } from "./index";
 import { parseStream } from "./parsers";
+import { presentationTool } from "../../shared/presentation";
 const errorMessages = {
   'auth failed': 'Authentication failed. Check the API key in Settings.',
   'rate limited': 'Provider rate limited. Try again shortly.',
@@ -129,6 +130,9 @@ export function createApiAdapter(
           body: JSON.stringify({
             model: request.modelId,
             stream: true,
+            ...(request.allowPresentation && ['anthropic-api','openai-api'].includes(getConfig().id) ? { tools: isAnthropic
+              ? [{ name:presentationTool.name,description:presentationTool.description,input_schema:presentationTool.parameters }]
+              : [{ type:'function',function:presentationTool }], ...(!isAnthropic ? {parallel_tool_calls:false} : {}) } : {}),
             ...(request.options?.reasoning_effort ? { reasoning_effort: request.options.reasoning_effort } : {}),
             ...(isAnthropic ? { max_tokens: 8192 } : { stream_options: { include_usage: true } }),
             messages: [{ role: "user", content: request.prompt }],

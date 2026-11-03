@@ -99,3 +99,22 @@ it("waits for Claude's delayed result after message_stop and honors is_error", a
   for await (const event of parseStream(fixture(), "claude")) events.push(event);
   expect(events).toEqual([{ type: "text-delta", text: "answer" }, { type: "error", message: "Provider request failed" }]);
 });
+it('surfaces only reported Claude thinking and Codex reasoning summaries', () => {
+  expect(parseProviderEvent('claude',JSON.stringify({type:'stream_event',event:{type:'content_block_delta',delta:{type:'thinking_delta',thinking:'Reported summary'}}}))).toEqual([{type:'reasoning-delta',text:'Reported summary'}]);
+  expect(parseProviderEvent('codex',JSON.stringify({type:'item.completed',item:{type:'reasoning',text:'Reported summary'}}))).toEqual([{type:'reasoning-delta',text:'Reported summary'}]);
+});
+it('assembles fragmented OpenAI tool arguments before its single terminal event', async () => {
+  const frames = [
+    {choices:[{delta:{tool_calls:[{index:0,id:'call-1',function:{name:'present',arguments:'{"title":'}}]}}]},
+    {choices:[{delta:{tool_calls:[{index:0,function:{arguments:'"Summary"}'}}]}}]},
+  ].map(frame => `data: ${JSON.stringify(frame)}\n\n`).join('')+'data: [DONE]\n\n';
+  expect(await collect(parseStream(split(frames),'openai',true))).toEqual([{type:'tool-call',call:{toolCallId:'call-1',toolName:'present',args:{title:'Summary'}}},{type:'done'}]);
+});
+it('assembles Anthropic tool input without interpreting it as executable text', async () => {
+  const frames = [
+    {type:'content_block_start',index:0,content_block:{type:'tool_use',id:'call-a',name:'present',input:{}}},
+    {type:'content_block_delta',index:0,delta:{type:'input_json_delta',partial_json:'{"title":"Summary"}'}},
+    {type:'message_stop'},
+  ].map(frame => `data: ${JSON.stringify(frame)}\n\n`).join('');
+  expect(await collect(parseStream(split(frames),'anthropic',true))).toEqual([{type:'tool-call',call:{toolCallId:'call-a',toolName:'present',args:{title:'Summary'}}},{type:'done'}]);
+});

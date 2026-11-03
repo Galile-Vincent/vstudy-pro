@@ -15,6 +15,9 @@ import type { Store } from "../db";
 import type { ProviderRegistry } from "../providers";
 import { ProviderError } from "../providers/api";
 import { buildPrompt } from "../prompt";
+import { citationCatalog, citedReferences } from "../prompt/citations";
+import { presentationSchema } from "../../shared/presentation";
+import { chatEventSchema, type DocumentCitation, type ToolCall } from "../../shared/domain";
 export interface ChatOwner {
   isDestroyed(): boolean;
   send(channel: string, payload: unknown): void;
@@ -27,6 +30,10 @@ interface ActiveRequest {
   controller: AbortController;
   onDestroyed: () => void;
   text: string;
+  reasoning?: string;
+  citations?: DocumentCitation[];
+  citationCatalog?: DocumentCitation[];
+  toolCalls?: ToolCall[];
   usage?: Usage;
   usageModels?: { modelId: string; usage: Usage }[];
   usageEmitted?: boolean;
@@ -143,6 +150,7 @@ export class ChatService {
     usage?: Usage,
     id = randomUUID(),
     error?: string,
+    extras: { reasoning?: string; citations?: DocumentCitation[]; toolCalls?: ToolCall[] } = {},
   ) {
     const previous = this.store.messages.list(request.conversationId).at(-1);
     const createdAt = new Date(
@@ -153,7 +161,7 @@ export class ChatService {
         id,
         conversationId: request.conversationId,
         role,
-        parts: [{ type: "text", text, status, modelId: request.modelId, options: request.options, turnId: request.turnId, ...(error ? { error } : {}), ...(usage ? { usage } : {}), ...(role === "user" && request.selection ? { selection: request.selection } : {}) }],
+        parts: [{ type: "text", text, status, ...extras, modelId: request.modelId, options: request.options, turnId: request.turnId, ...(error ? { error } : {}), ...(usage ? { usage } : {}), ...(role === "user" && request.selection ? { selection: request.selection } : {}) }],
         createdAt,
       }),
     );
@@ -181,6 +189,9 @@ export class ChatService {
     entry.owner.removeListener("destroyed", entry.onDestroyed);
     try {
       const messageId = randomUUID();
+      const citedIds = new Set([...(entry.citations ?? []), ...citedReferences(entry.text, entry.citationCatalog ?? [])].map(c => c.id));
+      const citations = (entry.citationCatalog ?? []).filter(c => citedIds.has(c.id));
+      if (citations.length && !entry.controller.signal.aborted) this.send(entry, { type: 'citations', citations });
       const modelId = canonicalModelId(entry.usageModels?.[0]?.modelId ?? entry.request.modelId);
       const reported = entry.usage?.costSource === 'reported' || entry.usageEmitted;
       if (entry.text && !reported) entry.usage = {
@@ -195,7 +206,7 @@ export class ChatService {
         for (const model of reported && entry.usageModels?.length ? entry.usageModels : [{ modelId, usage: entry.usage }]) this.store.usage.record({ ...priceUsage(model.modelId, model.usage, this.store.settings.get().priceOverrides), aborted: entry.controller.signal.aborted, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: canonicalModelId(model.modelId), kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
-      if (entry.text || entry.usage || event.type === "error") this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined);
+      if (entry.text || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error") this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined, { ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
     } catch {
       if (!entry.controller.signal.aborted)
         event = { type: "error", message: "Chat could not be saved" };
@@ -209,7 +220,7 @@ export class ChatService {
     adapter: ReturnType<ProviderRegistry["get"]>,
   ) {
     try {
-      if (Object.keys(entry.request.options ?? {}).length) validateOptions((await adapter.listModels()).find(m => m.id === entry.request.modelId), entry.request.options);
+      if (Object.keys(entry.request.options ?? {}).length) validateOptions((await adapter.listModels()).find(m => m.id === entry.request.modelId || m.resolvedId === entry.request.modelId), entry.request.options);
       this.store.conversations.setOptions(entry.request.conversationId, entry.request.options);
       entry.controller.signal.throwIfAborted();
       const file = await open(document.markdownPath, "r");
@@ -222,7 +233,10 @@ export class ChatService {
         await file.close();
       }
       entry.controller.signal.throwIfAborted();
+      entry.citationCatalog = citationCatalog(entry.request.documentId, markdown);
+      const allowPresentation = this.store.settings.get().enableGenerativeUI && ['anthropic-api','openai-api'].includes(entry.request.providerId);
       const prompt = buildPrompt({
+        citations: entry.citationCatalog,
         document: { title: document.title, markdown },
         history,
         userMessage: entry.request.userMessage,
@@ -231,10 +245,11 @@ export class ChatService {
           : {}),
       });
       entry.promptChars = prompt.length;
-      for await (const event of adapter.stream(
-        { ...entry.request, prompt, onUsageSnapshot: (usage, models) => { if (this.active.get(entry.request.requestId) === entry) { entry.usage = usageSchema.parse(usage); if (models) entry.usageModels = models.map(m => ({modelId: m.modelId, usage: usageSchema.parse(m.usage)})); } } },
+      for await (const rawEvent of adapter.stream(
+        { ...entry.request, prompt, allowPresentation, onUsageSnapshot: (usage, models) => { if (this.active.get(entry.request.requestId) === entry) { entry.usage = usageSchema.parse(usage); if (models) entry.usageModels = models.map(m => ({modelId: m.modelId, usage: usageSchema.parse(m.usage)})); } } },
         entry.controller.signal,
       )) {
+        const event = chatEventSchema.parse(rawEvent);
         if (
           this.active.get(entry.request.requestId) !== entry ||
           entry.controller.signal.aborted
@@ -246,8 +261,27 @@ export class ChatService {
           entry.usage = usageSchema.parse(event.usage);
           continue;
         }
-        if (event.type === 'reasoning-delta' || event.type === 'citations' || event.type === 'tool-call') {
-          this.send(entry, event);
+        if (event.type === 'reasoning-delta') {
+          if ((entry.reasoning?.length ?? 0) + event.text.length > 2_000_000) throw new Error('Reasoning summary too large');
+          entry.reasoning = (entry.reasoning ?? '') + event.text;
+          this.send(entry,event);
+          continue;
+        }
+        if (event.type === 'citations') {
+          const ids = new Set(event.citations.filter(c => c.documentId === entry.request.documentId).map(c => c.id));
+          entry.citations = entry.citationCatalog.filter(c => ids.has(c.id));
+          this.send(entry,{type:'citations',citations:entry.citations});
+          continue;
+        }
+        if (event.type === 'tool-call') {
+          if (JSON.stringify(event.call).length > 100_000) throw new Error('Tool output too large');
+          const presentation = allowPresentation && event.call.toolName === 'present' ? presentationSchema.safeParse(event.call.args) : undefined;
+          const call = { ...event.call, result: presentation?.success ? { rendered:true } : { error:'Tool execution is disabled or the presentation is invalid' }, isError: !presentation?.success };
+          entry.toolCalls ??= [];
+          const index = entry.toolCalls.findIndex(c => c.toolCallId === call.toolCallId);
+          if (index >= 0) entry.toolCalls[index] = call;
+          else { if (entry.toolCalls.length >= 16) throw new Error('Too many tool calls'); entry.toolCalls.push(call); }
+          this.send(entry,{type:'tool-call',call});
           continue;
         }
         if (event.type !== "text-delta") {
