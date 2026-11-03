@@ -768,11 +768,11 @@ def ruled_tables(page):
     return tables
 
 
-def convert_pdf(path, diagnostics=None):
+def convert_pdf(path, diagnostics=None, on_page=None):
     diagnostics = diagnostics if diagnostics is not None else {}
     with extraction_limits():
         try:
-            return _convert_pdf(path, diagnostics)
+            return _convert_pdf(path, diagnostics, on_page)
         except Exception as error:
             for cause in (error, error.__cause__, error.__context__):
                 if isinstance(cause, (ResourceLimit, ExtractionTimeout)):
@@ -788,7 +788,7 @@ def convert_pdf(path, diagnostics=None):
             raise
 
 
-def _convert_pdf(path, diagnostics):
+def _convert_pdf(path, diagnostics, on_page=None):
     import pdfplumber
 
     pages, heights, tables, images = [], [], [], []
@@ -846,6 +846,7 @@ def _convert_pdf(path, diagnostics):
                         )
                     )
                 chars = rotated
+            annotations = page.annots
             from pdfplumber.utils import extract_text
 
             raw_text.append(
@@ -862,7 +863,7 @@ def _convert_pdf(path, diagnostics):
                 )
                 for c in chars
             ]
-            for annotation in page.annots:
+            for annotation in annotations:
                 uri = annotation.get("uri")
                 if uri:
                     for c in chars:
@@ -967,7 +968,7 @@ def _convert_pdf(path, diagnostics):
                     < page.width * page.height * 0.5
                 )
             lines = mark_annotations(lines, regions)
-            for annotation in page.annots:
+            for annotation in annotations:
                 if annotation.get("contents") and getattr(
                     annotation["data"].get("Subtype"), "name", ""
                 ) in ("FreeText", "Text"):
@@ -989,6 +990,13 @@ def _convert_pdf(path, diagnostics):
             heights.append(page.height)
             tables.append(grids)
             images.append(len(page.images))
+            if on_page:
+                # Global margin/heading decisions are provisional until every page is read.
+                preview = ""
+                if len(pages) <= 5:
+                    local_body = median(l.size for l in lines if not l.note) if any(not l.note for l in lines) else 12
+                    preview = blocks_to_markdown(classify_blocks(lines_to_blocks(reading_order(pages[-1])), local_body))
+                on_page(len(pages), len(pdf.pages), f"<!-- page {len(pages)} -->\n\n{preview}\n")
             page.flush_cache()
         if text_chars == 0:
             raise NoTextLayer("no text layer; OCR not supported yet")

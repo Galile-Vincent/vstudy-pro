@@ -44,7 +44,7 @@ def run_pdf_worker(mode, source):
     return json.loads(result.stdout)
 
 
-def convert_document(source, isolated=False):
+def convert_document(source, isolated=False, warm=False, on_page=None):
     DIAGNOSTICS.clear()
     no_text = False
     if os.path.splitext(source)[1].lower() == ".pdf":
@@ -62,7 +62,7 @@ def convert_document(source, isolated=False):
                     raise
                 DIAGNOSTICS.update(payload["diagnostics"])
                 return payload["text"], "pdf_md"
-            return convert_pdf(source, DIAGNOSTICS), "pdf_md"
+            return convert_pdf(source, DIAGNOSTICS, on_page=on_page), "pdf_md"
         except (PasswordProtected, ResourceLimit):
             raise
         except NoTextLayer:
@@ -72,7 +72,7 @@ def convert_document(source, isolated=False):
                 error, "code", "PDF_EXTRACTION_FAILED"
             )
     try:
-        if isolated and os.path.splitext(source)[1].lower() == ".pdf":
+        if (isolated or warm) and os.path.splitext(source)[1].lower() == ".pdf":
             print(
                 json.dumps(
                     {
@@ -147,9 +147,16 @@ def main():
         text = convert_pdf(sys.argv[2], diagnostics)
         print(json.dumps({"text": text, "diagnostics": diagnostics}))
         return
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 4 and sys.argv[1:] != ["--warm-worker"]:
         raise ValueError("Usage: convert.py <input> <output.md> <library.md>")
+    if len(sys.argv) == 2 and sys.argv[1] == "--warm-worker":
+        warm_worker()
+        return
     source, target, library_target = sys.argv[1:]
+    publish(source, target, library_target)
+
+
+def publish(source, target, library_target, warm=False):
     os.stat(source)
     # Office/EPUB containers can expand far beyond their on-disk size.
     if zipfile.is_zipfile(source):
@@ -160,7 +167,20 @@ def main():
                 or sum(e.file_size for e in entries) > 200 * 1024 * 1024
             ):
                 raise ValueError("Document archive exceeds expansion limit")
-    text, converter = convert_document(source, isolated=True)
+    previews = []
+    def page_done(page, total, text):
+        if page > 5:
+            print(json.dumps({"progress": f"Converting page {page}/{total}…"}), flush=True)
+            return
+        previews.append(text)
+        content = "\n".join(previews).encode("utf-8")
+        if len(content) > MAX_OUTPUT:
+            raise ValueError("Converted Markdown exceeds 8 MiB")
+        with open(target + ".partial.tmp", "wb") as output:
+            output.write(content)
+        os.replace(target + ".partial.tmp", target + ".partial")
+        print(json.dumps({"progress": f"Converting page {page}/{total}…"}), flush=True)
+    text, converter = convert_document(source, isolated=not warm, warm=warm, on_page=page_done if warm else None)
 
     def image(match):
         extension = {"jpeg": "jpg", "png": "png", "gif": "gif", "webp": "webp"}.get(
@@ -186,6 +206,26 @@ def main():
         output.write(content)
     with open(target + ".json", "w") as metadata:
         json.dump({"converter": converter, **DIAGNOSTICS}, metadata)
+
+
+def warm_worker():
+    import gc
+    import pdfplumber
+    import markitdown
+
+    print(json.dumps({"ready": True}), flush=True)
+    for line in sys.stdin:
+        if len(line) > 32768:
+            raise ValueError("Worker request exceeds limit")
+        try:
+            request = json.loads(line)
+            publish(request["source"], request["target"], request["library"], warm=True)
+            print(json.dumps({"done": True}), flush=True)
+        except Exception as error:
+            print(json.dumps({"error": "Conversion failed" if not isinstance(error, ValueError) else str(error),
+                              "code": getattr(error, "code", "CONVERSION_FAILED"), "type": type(error).__name__}), flush=True)
+        finally:
+            gc.collect()
 
 
 if __name__ == "__main__":

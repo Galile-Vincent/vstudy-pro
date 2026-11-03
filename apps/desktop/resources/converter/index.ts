@@ -1,3 +1,5 @@
+import { profileStage } from "./profile";
+import { WarmWorker } from "./warm-worker";
 import { spawn } from "node:child_process";
 import { access, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
@@ -29,10 +31,11 @@ export async function runProcess(
   timeoutMs = 120_000,
   maxOutputBytes = 1024 * 1024,
   onProgress?: Progress,
+  cacheDirectory?: string,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const child = spawn(executable, args, {
-      cwd, env: scrubbedEnvironment(cwd), shell: false, stdio: ["ignore", "pipe", "pipe"],
+      cwd, env: { ...scrubbedEnvironment(cwd), ...(cacheDirectory ? { PIP_CACHE_DIR: cacheDirectory, UV_CACHE_DIR: cacheDirectory } : {}) }, shell: false, stdio: ["ignore", "pipe", "pipe"],
     });
     let bytes = 0;
     let stderr = "";
@@ -95,13 +98,15 @@ export function createConverter(options: {
   userData: string;
   resources: string;
   onProgress?: Progress;
-}): { convert: ConverterRunner; ensureReady: () => Promise<string> } {
+}): { convert: ConverterRunner; ensureReady: () => Promise<string>; dispose: () => void } {
   const venv = join(options.userData, "converter-venv");
   const python = join(venv, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
+  let worker: WarmWorker | undefined;
   let bootstrap: Promise<string> | undefined;
   let progress: Progress | undefined;
   const report = (message: string) => { options.onProgress?.(message); progress?.(message); };
   async function install(): Promise<string> {
+    const checked = profileStage("Venv/bootstrap check");
     await mkdir(options.userData, { recursive: true, mode: 0o700 });
     const requirements = join(options.resources, "requirements.txt");
     const fingerprint = createHash("sha256").update(await readFile(requirements)).digest("hex");
@@ -110,11 +115,14 @@ export function createConverter(options: {
     try {
       try {
         if ((await readFile(marker, "utf8")) === fingerprint) {
-          await runProcess(python, ["-c", "import markitdown, pdfplumber"], cwd);
+          await access(python, constants.X_OK);
+          checked();
           return python;
         }
       } catch { /* An interrupted installation is rebuilt on the next attempt. */ }
-      report("Setting up converter (first run)…");
+      const cache = join(options.userData, "converter-cache");
+      await mkdir(cache, { recursive: true, mode: 0o700 });
+      report("Setting up converter (one time; download size depends on platform)…");
       const uv = await findExecutable("uv");
       let systemPython: string | undefined;
       for (const name of ["python3.12", "python3.11", "python3.10", "python3"]) {
@@ -131,11 +139,11 @@ export function createConverter(options: {
       if (uv) {
         await runProcess(uv, ["venv", "--python", systemPython ?? "3.12", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await runProcess(uv, ["pip", "install", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024);
+        await runProcess(uv, ["pip", "install", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, undefined, cache);
       } else if (systemPython) {
         await runProcess(systemPython, ["-m", "venv", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await runProcess(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024);
+        await runProcess(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, undefined, cache);
       }
       await runProcess(python, ["-c", "import markitdown, pdfplumber"], cwd);
       await writeFile(marker, fingerprint);
@@ -144,19 +152,45 @@ export function createConverter(options: {
     } finally { await rm(cwd, { recursive: true, force: true }); }
   }
   function ensureReady(): Promise<string> {
-    bootstrap ??= install().catch((error: unknown) => { bootstrap = undefined; throw error; });
+    bootstrap ??= install().then(async executable => {
+      const warmed = profileStage("Python spawn + warm imports");
+      worker = new WarmWorker(executable, join(options.resources, "convert.py"), options.userData);
+      await worker.start();
+      warmed();
+      return executable;
+    }).catch((error: unknown) => { bootstrap = undefined; throw error; });
     return bootstrap;
   }
   return {
     ensureReady,
+    dispose: () => worker?.stop(),
     async convert(source, output, onProgress) {
       progress = onProgress;
-      const executable = await ensureReady();
+      await ensureReady();
       report("Converting…");
       const cwd = await mkdtemp(join(tmpdir(), "vstudy-convert-"));
       try {
         const temporaryOutput = join(cwd, "content.md");
-        await runProcess(executable, [join(options.resources, "convert.py"), source, temporaryOutput, output], cwd, 120_000, 1024 * 1024, report);
+        await rm(`${output}.partial`, { force: true });
+        let publishPreview = Promise.resolve();
+        worker ??= new WarmWorker(python, join(options.resources, "convert.py"), options.userData);
+        const extracted = profileStage("Worker conversion + preview delivery");
+        await worker.run(source, temporaryOutput, output, message => {
+          publishPreview = publishPreview.then(async () => {
+            if (/^Converting page [1-5]\//.test(message)) {
+              const path = `${temporaryOutput}.partial`;
+              if ((await stat(path)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
+              const content = await readFile(path);
+              if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
+              await writeFile(`${output}.partial.tmp`, content, { mode: 0o600 });
+              await rename(`${output}.partial.tmp`, `${output}.partial`);
+            }
+            report(message);
+          });
+          void publishPreview.catch(() => undefined);
+        });
+        await publishPreview;
+        extracted();
         if ((await stat(temporaryOutput)).size > MAX_MARKDOWN_BYTES) throw new Error("Converted Markdown exceeds 8 MiB");
         const content = await readFile(temporaryOutput);
         if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Converted Markdown exceeds 8 MiB");
@@ -166,7 +200,7 @@ export function createConverter(options: {
         const metadata: unknown = JSON.parse(await readFile(`${temporaryOutput}.json`, "utf8"));
         if (typeof metadata !== "object" || metadata === null || !("converter" in metadata) || (metadata.converter !== "pdf_md" && metadata.converter !== "markitdown")) throw new Error("Invalid converter metadata");
         return metadata.converter;
-      } finally { await rm(cwd, { recursive: true, force: true }); }
+      } finally { progress = undefined; await rm(`${output}.partial`, { force: true }); await rm(cwd, { recursive: true, force: true }); }
     },
   };
 }
