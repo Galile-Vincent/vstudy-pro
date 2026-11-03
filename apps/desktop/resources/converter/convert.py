@@ -25,8 +25,10 @@ def convert_document(source):
             raise
         except NoTextLayer:
             no_text = True
-        except Exception:
-            pass
+        except Exception as error:
+            DIAGNOSTICS["fallback_code"] = getattr(
+                error, "code", "PDF_EXTRACTION_FAILED"
+            )
     from markitdown import MarkItDown
 
     try:
@@ -62,7 +64,10 @@ def main():
             if sys.platform != "darwin":
                 rss *= 1024
             if rss > 1500 * 1024 * 1024:
-                os.write(2, b'{"code":"PDF_RESOURCE_LIMIT","error":"Converter memory limit exceeded"}\n')
+                os.write(
+                    2,
+                    b'{"code":"PDF_RESOURCE_LIMIT","error":"Converter memory limit exceeded"}\n',
+                )
                 os._exit(1)
             time.sleep(0.05)
 

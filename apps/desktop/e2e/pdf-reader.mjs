@@ -27,11 +27,11 @@ try {
   const viewer = page.getByTestId('document-markdown');
   assert.equal(await viewer.locator('table').count(), 0);
   assert.ok(!(await viewer.innerText()).includes('<!-- page'));
-  for (const [number, prefix] of [[3, 'R12.'], [5, 'R23.']]) {
+  for (const [number, prefix] of [[3, 'R12.'], [5, 'R23.'], [10, 'Total average delay']]) {
     await viewer.locator('p').filter({ hasText: new RegExp(`^${prefix.replace('.', '\\.')}`) }).first().evaluate(element => element.scrollIntoView({ block: 'start' }));
     await page.screenshot({ path: join(evidence, `page-${number}.png`) });
   }
-  console.log(JSON.stringify({ result: 'PASS', converter: document.converter, screenshots: [3,5], evidence }));
+  console.log(JSON.stringify({ result: 'PASS', converter: document.converter, screenshots: [3,5,10], evidence }));
 } finally {
   await app?.close();
   await rm(directory, { recursive: true, force: true });

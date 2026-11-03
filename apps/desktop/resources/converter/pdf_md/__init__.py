@@ -27,7 +27,12 @@ class PasswordProtected(ValueError):
 
 
 def tokens(text):
-    return Counter(re.findall(r"[\u2e80-\u9fff\uf900-\ufaff]|[A-Za-z0-9]+", unicodedata.normalize("NFKC", html.unescape(text)).lower()))
+    return Counter(
+        re.findall(
+            r"[\u2e80-\u9fff\uf900-\ufaff]|[A-Za-z0-9]+",
+            unicodedata.normalize("NFKC", html.unescape(text)).lower(),
+        )
+    )
 
 
 def preservation(source, output, removed, diagnostics):
@@ -35,7 +40,9 @@ def preservation(source, output, removed, diagnostics):
     actual = tokens(re.sub(r"<!-- page \d+ -->|> note:|\(cid:\d+\)", "", output))
     missing = sum((expected - actual).values())
     ratio = missing / max(1, sum(expected.values()))
-    diagnostics.update(loss_ratio=ratio, missing_tokens=missing, source_tokens=sum(expected.values()))
+    diagnostics.update(
+        loss_ratio=ratio, missing_tokens=missing, source_tokens=sum(expected.values())
+    )
     if not output.strip() or not actual or ratio > 0.03:
         raise ContentLoss("PDF extraction lost source content")
 
@@ -44,6 +51,7 @@ def preservation(source, output, removed, diagnostics):
 def extraction_limits(seconds=72, stream_bytes=16 * 1024 * 1024):
     import pdfminer.pdftypes as types
     import zlib
+
     original = types.zlib
 
     class BoundedZlib:
@@ -79,7 +87,8 @@ def dedupe_chars(chars):
         key = (c["text"], c.get("fontname"), round(c["size"], 1))
         duplicate = any(
             abs(c["x0"] - o["x0"]) <= 0.5 and abs(c["top"] - o["top"]) <= 0.5
-            for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+            for dx in (-1, 0, 1)
+            for dy in (-1, 0, 1)
             for o in buckets.get((key, x + dx, y + dy), ())
         )
         if not duplicate:
@@ -104,7 +113,7 @@ class Line:
     note: bool = False
     math: bool = False
     mono: bool = False
-    url: str = ""
+    links: tuple = ()
     columns: tuple = ()
 
 
@@ -124,15 +133,33 @@ def join_text(left, right):
         return left + right
     return (
         left.rstrip()
-        + ("" if cjk(left[-1]) and cjk(right[0]) or "\uff00" <= left[-1] <= "\uffef" else " ")
+        + (
+            ""
+            if cjk(left[-1]) and cjk(right[0]) or "\uff00" <= left[-1] <= "\uffef"
+            else " "
+        )
         + right.lstrip()
     )
 
 
 def normalize_line(text):
+    text = re.sub(r"^\s*\(cid:\d+\)\s*", "• ", text)
     text = re.sub(r"(?<=[\u2e80-\u9fff]) +(?=[\u2e80-\u9fff])", "", text.strip())
     text = re.sub(r"([\u3400-\u9fff])([A-Za-z0-9])", r"\1 \2", text)
     return re.sub(r"([A-Za-z0-9])([\u3400-\u9fff])", r"\1 \2", text)
+
+
+def char_links(chars):
+    links, group, uri = [], [], None
+    for char in chars:
+        if char.get("url") != uri:
+            if uri:
+                links.append((normalize_line("".join(group)), uri))
+            group, uri = [], char.get("url")
+        group.append(char["text"])
+    if uri:
+        links.append((normalize_line("".join(group)), uri))
+    return tuple(links)
 
 
 def chars_to_lines(chars):
@@ -144,7 +171,9 @@ def chars_to_lines(chars):
         group = next(
             (
                 g
-                for bucket in range(int(char["top"] // 4) - 2, int(char["top"] // 4) + 3)
+                for bucket in range(
+                    int(char["top"] // 4) - 2, int(char["top"] // 4) + 3
+                )
                 for g in buckets.get(bucket, ())
                 if abs(g[0]["top"] - char["top"]) < max(2, char["size"] * 0.22)
                 and g[0].get("annotation", False) == char.get("annotation", False)
@@ -186,33 +215,87 @@ def chars_to_lines(chars):
                     > len(run) * 0.7,
                     any(c.get("annotation", False) for c in run),
                     any("math" in c.get("fontname", "").lower() for c in run),
-                    all(re.search(r"mono|courier|consol", c.get("fontname", ""), re.I) for c in run),
-                    next((c["url"] for c in run if c.get("url")), ""),
+                    all(
+                        re.search(r"mono|courier|consol", c.get("fontname", ""), re.I)
+                        for c in run
+                    ),
+                    links=char_links(run),
                 )
             )
     return sorted(result, key=lambda l: (l.top, l.x0))
 
 
-def mark_annotations(lines):
+def mark_annotations(lines, figure_regions=()):
     buckets = {}
     for line in lines:
         for row in range(int(line.top // 24), int(line.bottom // 24) + 1):
             buckets.setdefault(row, []).append(line)
-    result = []
+    merged = {}
+    consumed = set()
     for line in lines:
-        nearby = {id(o): o for row in range(int(line.top // 24), int(line.bottom // 24) + 1)
-                  for o in buckets.get(row, ())}.values()
+        if len(line.text) > 3 or line.note or line.bold:
+            continue
+        for row in range(int(line.top // 24) - 1, int(line.bottom // 24) + 2):
+            for other in buckets.get(row, ()):
+                if (
+                    other is not line
+                    and id(other) not in consumed
+                    and not other.note
+                    and len(other.text) > 3
+                    and line.size < other.size * 0.85
+                    and abs(line.bottom - other.bottom) <= other.size * 0.4
+                    and 0 <= line.x0 - other.x1 < other.size * 0.8
+                ):
+                    base = merged.get(id(other), other)
+                    merged[id(other)] = replace(
+                        base, text=base.text + line.text, x1=line.x1
+                    )
+                    consumed.add(id(line))
+                    break
+            if id(line) in consumed:
+                break
+    result = []
+    for original in lines:
+        if id(original) in consumed:
+            continue
+        line = merged.get(id(original), original)
+        nearby = {
+            id(o): o
+            for row in range(int(line.top // 24), int(line.bottom // 24) + 1)
+            for o in buckets.get(row, ())
+        }.values()
         note = line.note
+        figure_label = any(
+            x0 <= line.x0
+            and line.x1 <= x1
+            and top <= line.top
+            and line.bottom <= bottom
+            for x0, top, x1, bottom in figure_regions
+        )
         for other in nearby:
             if other is line or other.note or other.math or line.math:
                 continue
-            area = max(0, min(line.x1, other.x1) - max(line.x0, other.x0)) * max(0, min(line.bottom, other.bottom) - max(line.top, other.top))
-            baseline = abs(line.bottom - other.bottom) < max(line.size, other.size) * 0.4
-            if (2 <= len(line.text) < 30 and len(other.text) > 35
+            area = max(0, min(line.x1, other.x1) - max(line.x0, other.x0)) * max(
+                0, min(line.bottom, other.bottom) - max(line.top, other.top)
+            )
+            baseline = (
+                abs(line.bottom - other.bottom) < max(line.size, other.size) * 0.4
+            )
+            if (
+                (
+                    4 <= len(line.text) < 30
+                    or 2 <= len(line.text) < 30
+                    and any(cjk(c) for c in line.text)
+                )
+                and not figure_label
+                and len(other.text) > 35
                 and not re.search(r"[+−=∑∫]", line.text)
-                and not baseline and not line.bold and line.size < other.size
+                and not baseline
+                and not line.bold
+                and line.size < other.size
                 and not re.match(r"^\d+[.)]", line.text)
-                and area > (line.x1 - line.x0) * (line.bottom - line.top) * 0.4):
+                and area > (line.x1 - line.x0) * (line.bottom - line.top) * 0.4
+            ):
                 note = True
         result.append(replace(line, note=note))
     return result
@@ -229,14 +312,18 @@ def reading_order(lines):
     if not flow:
         return lines
     middle = (min(l.x0 for l in flow) + max(l.x1 for l in flow)) / 2
+
     def column(line):
         return 0 if line.x1 < middle - 10 else 1 if line.x0 > middle + 10 else 2
+
     if not any(column(l) == 0 for l in flow) or not any(column(l) == 1 for l in flow):
         return lines
     ordered, band = [], []
+
     def flush():
         ordered.extend(sorted(band, key=lambda l: (column(l), l.top)))
         band.clear()
+
     for line in flow:
         if column(line) == 2:
             flush()
@@ -249,7 +336,11 @@ def reading_order(lines):
 
 def lines_to_blocks(lines):
     blocks = []
-    gaps = [b.top - a.bottom for a, b in zip(lines, lines[1:]) if 0 < b.top - a.bottom < a.size * 3]
+    gaps = [
+        b.top - a.bottom
+        for a, b in zip(lines, lines[1:])
+        if 0 < b.top - a.bottom < a.size * 3
+    ]
     gap = median(gaps) if gaps else 6
     notes = [Block((line,), "note") for line in lines if line.note]
     for line in lines:
@@ -266,12 +357,20 @@ def lines_to_blocks(lines):
             and not MARKER.match(line.text)
             and not QUESTION.match(line.text)
             and not SUBQUESTION.match(line.text)
-            and 0 <= line.top - previous.lines[-1].bottom < max(2, min(gap * 1.45, line.size * 1.4))
-            and abs(line.x0 - previous.lines[-1].x0) <= line.size * (2 if MARKER.match(previous.lines[0].text) else 0.7)
+            and 0
+            <= line.top - previous.lines[-1].bottom
+            < max(2, min(gap * 1.45, line.size * 1.4))
+            and abs(line.x0 - previous.lines[-1].x0)
+            <= line.size * (2 if MARKER.match(previous.lines[0].text) else 0.7)
             and abs(line.size - previous.lines[-1].size) < 1
         ):
             blocks[-1] = replace(previous, lines=previous.lines + (line,))
-        elif previous and line.mono and previous.lines[-1].mono and 0 <= line.top - previous.lines[-1].bottom < line.size * 2:
+        elif (
+            previous
+            and line.mono
+            and previous.lines[-1].mono
+            and 0 <= line.top - previous.lines[-1].bottom < line.size * 2
+        ):
             blocks[-1] = replace(previous, lines=previous.lines + (line,))
         else:
             blocks.append(Block((line,)))
@@ -288,7 +387,14 @@ def is_heading(block, body_size):
         and (
             line.size > body_size * 1.18
             or (line.bold and line.size > body_size * 1.05 and len(line.text) >= 8)
-            or (line.bold and len(line.text) >= 12 and (re.match(r"^\d+(?:\.\d+)*[ .]", line.text) or not TERMINAL.search(line.text)))
+            or (
+                line.bold
+                and (
+                    re.match(r"^\d+(?:\.\d+)*[ .]", line.text)
+                    or len(line.text) >= 12
+                    and not TERMINAL.search(line.text)
+                )
+            )
         )
     )
 
@@ -305,7 +411,13 @@ def classify_blocks(blocks, body_size, heading_sizes=None):
         if kind != "note":
             if line.mono:
                 kind = "code"
-            elif is_heading(block, body_size) and not (i and blocks[i-1].kind == "paragraph" and not TERMINAL.search(blocks[i-1].lines[-1].text) and 0 <= line.top - blocks[i-1].lines[-1].bottom < line.size and abs(line.size - blocks[i-1].lines[-1].size) < 1.5):
+            elif is_heading(block, body_size) and not (
+                i
+                and blocks[i - 1].kind == "paragraph"
+                and not TERMINAL.search(blocks[i - 1].lines[-1].text)
+                and 0 <= line.top - blocks[i - 1].lines[-1].bottom < line.size
+                and abs(line.size - blocks[i - 1].lines[-1].size) < 1.5
+            ):
                 kind, level = "heading", min(4, sizes.index(round(line.size, 1)) + 1)
                 numbering = re.match(r"^(\d+(?:\.\d+)*)[ .]", line.text)
                 if numbering:
@@ -323,7 +435,20 @@ def classify_blocks(blocks, body_size, heading_sizes=None):
                     for n in neighbors
                 ):
                     kind = "list"
-                    level = max(0, round((line.x0 - min(b.lines[0].x0 for b in blocks if MARKER.match(b.lines[0].text))) / (line.size * 2)))
+                    level = max(
+                        0,
+                        round(
+                            (
+                                line.x0
+                                - min(
+                                    b.lines[0].x0
+                                    for b in blocks
+                                    if MARKER.match(b.lines[0].text)
+                                )
+                            )
+                            / (line.size * 2)
+                        ),
+                    )
         result.append(replace(block, kind=kind, level=level))
     return result
 
@@ -347,7 +472,15 @@ def blocks_to_markdown(blocks):
             notes.append((block.lines[0].top, "> note: " + literal(text)))
             continue
         if block.kind == "code":
-            rendered = "```\n" + "\n".join(" " * max(0, round((l.x0 - block.lines[0].x0) / (l.size * 0.6))) + l.text.replace("<!--", "&lt;!--") for l in block.lines) + "\n```"
+            rendered = (
+                "```\n"
+                + "\n".join(
+                    " " * max(0, round((l.x0 - block.lines[0].x0) / (l.size * 0.6)))
+                    + l.text.replace("<!--", "&lt;!--")
+                    for l in block.lines
+                )
+                + "\n```"
+            )
         elif block.kind == "table":
             rendered = text
         elif block.kind == "heading":
@@ -363,8 +496,12 @@ def blocks_to_markdown(blocks):
             rendered = literal(text)
         if block.kind == "list":
             rendered = "  " * block.level + rendered
-        if block.lines[0].url:
-            rendered = "[" + rendered + "](" + block.lines[0].url.replace(")", "%29") + ")"
+        for line in block.lines:
+            for label, uri in line.links:
+                label = literal(label)
+                rendered = rendered.replace(
+                    label, "[" + label + "](" + uri.replace(")", "%29") + ")", 1
+                )
         entries.append([block.lines[-1].bottom, rendered, block.kind])
     for top, note in notes:
         if entries:
@@ -395,10 +532,24 @@ def remove_running_margins(pages, heights, removed=None):
         kept = []
         for line in lines:
             margin = line.top < height * 0.1 or line.bottom > height * 0.9
-            repeated = len(pages) >= 3 and counts[(line.text, round(line.top / 4))] > len(pages) / 2
+            repeated = (
+                len(pages) >= 3
+                and counts[(line.text, round(line.top / 4))] > len(pages) / 2
+            )
             numeric = re.fullmatch(r"\s*[-–]?\s*\d+\s*[-–]?\s*", line.text)
-            peers = [l for page in pages for l in page if numeric and re.fullmatch(r"\s*[-–]?\s*\d+\s*[-–]?\s*", l.text) and abs(l.top - line.top) < 4]
-            sequence = len(pages) >= 2 and len(peers) == len(pages) and sorted(int(re.search(r"\d+", l.text)[0]) for l in peers) == list(range(min(int(re.search(r"\d+", l.text)[0]) for l in peers), min(int(re.search(r"\d+", l.text)[0]) for l in peers) + len(pages)))
+            sequence = False
+            if margin and numeric and len(pages) >= 2:
+                peers = [
+                    l
+                    for page in pages
+                    for l in page
+                    if re.fullmatch(r"\s*[-–]?\s*\d+\s*[-–]?\s*", l.text)
+                    and abs(l.top - line.top) < 4
+                ]
+                numbers = [int(re.search(r"\d+", l.text)[0]) for l in peers]
+                sequence = len(numbers) == len(pages) and numbers == list(
+                    range(numbers[0], numbers[0] + len(pages))
+                )
             if margin and (repeated or numeric and sequence):
                 if removed is not None:
                     removed.append(line.text)
@@ -415,17 +566,20 @@ def ruled_tables(page):
         {"vertical_strategy": "lines", "horizontal_strategy": "lines"}
     ):
         rows = table.extract()
-        if (
-            len(rows) < 2
-            or min(map(len, rows)) < 2
-        ):
+        if len(rows) < 2 or min(map(len, rows)) < 2:
             continue
         rendered = [
             "| " + " | ".join(literal((c or "").replace("\n", " ")) for c in row) + " |"
             for row in rows
         ]
         rendered.insert(1, "| " + " | ".join("---" for _ in rows[0]) + " |")
-        tables.append((table.bbox, "\n".join(rendered), tuple(round(c.bbox[0], 1) for c in table.columns)))
+        tables.append(
+            (
+                table.bbox,
+                "\n".join(rendered),
+                tuple(round(c.bbox[0], 1) for c in table.columns),
+            )
+        )
     return tables
 
 
@@ -435,8 +589,16 @@ def convert_pdf(path, diagnostics=None):
         try:
             return _convert_pdf(path, diagnostics)
         except Exception as error:
+            for cause in (error, error.__cause__, error.__context__):
+                if isinstance(cause, ResourceLimit):
+                    raise cause from None
             from pdfminer.pdfdocument import PDFPasswordIncorrect
-            if isinstance(error, PDFPasswordIncorrect) or isinstance(error.__cause__, PDFPasswordIncorrect) or isinstance(error.__context__, PDFPasswordIncorrect):
+
+            if (
+                isinstance(error, PDFPasswordIncorrect)
+                or isinstance(error.__cause__, PDFPasswordIncorrect)
+                or isinstance(error.__context__, PDFPasswordIncorrect)
+            ):
                 raise PasswordProtected("Password-protected PDF") from None
             raise
 
@@ -456,7 +618,11 @@ def _convert_pdf(path, diagnostics):
 
             # A tiny stamp does not turn a scanned page into a useful text layer.
             count = sum(len(c["text"].strip()) for c in chars)
-            scan = count < 40 and any((im["x1"]-im["x0"])*(im["bottom"]-im["top"]) > page.width*page.height*0.8 for im in page.images)
+            scan = count < 40 and any(
+                (im["x1"] - im["x0"]) * (im["bottom"] - im["top"])
+                > page.width * page.height * 0.8
+                for im in page.images
+            )
             text_chars += 0 if scan else count
             if page.rotation:
                 rotated = []
@@ -465,17 +631,50 @@ def _convert_pdf(path, diagnostics):
                     if page.rotation == 90:
                         box = (y0, page.width - x1, y1, page.width - x0)
                     elif page.rotation == 180:
-                        box = (page.width - x1, page.height - y1, page.width - x0, page.height - y0)
+                        box = (
+                            page.width - x1,
+                            page.height - y1,
+                            page.width - x0,
+                            page.height - y0,
+                        )
                     else:
                         box = (page.height - y1, x0, page.height - y0, x1)
-                    rotated.append(dict(c, x0=box[0], top=box[1], x1=box[2], bottom=box[3], size=box[3]-box[1], upright=True))
+                    a, b, cc, d, e, f = c.get(
+                        "matrix", (1, 0, 0, 1, x0, page.height - y1)
+                    )
+                    if page.rotation == 90:
+                        matrix = (-b, a, -d, cc, page.height - f, e)
+                    elif page.rotation == 180:
+                        matrix = (-a, -b, -cc, -d, page.width - e, page.height - f)
+                    else:
+                        matrix = (b, -a, d, -cc, f, page.width - e)
+                    rotated.append(
+                        dict(
+                            c,
+                            x0=box[0],
+                            top=box[1],
+                            x1=box[2],
+                            bottom=box[3],
+                            size=box[3] - box[1],
+                            matrix=matrix,
+                            upright=abs(matrix[1]) < abs(matrix[0]),
+                        )
+                    )
                 chars = rotated
             else:
-                stamps = [c for c in chars if not c.get("upright", True) and (c["x0"] < page.width * 0.1 or c["x1"] > page.width * 0.9)]
-                removed.extend(c["text"] for c in stamps)
+                stamps = [
+                    c
+                    for c in chars
+                    if not c.get("upright", True)
+                    and (c["x0"] < page.width * 0.1 or c["x1"] > page.width * 0.9)
+                ]
+                stamp_text = "".join(c["text"] for c in stamps)
+                raw_text.append(stamp_text)
+                removed.append(stamp_text)
                 stamp_ids = {id(c) for c in stamps}
                 chars = [c for c in chars if id(c) not in stamp_ids]
             from pdfplumber.utils import extract_text
+
             raw_text.append(extract_text(chars, x_tolerance_ratio=0.18) or "")
             # Font names alone are not evidence of an annotation.
             chars = [
@@ -489,17 +688,45 @@ def _convert_pdf(path, diagnostics):
                 uri = annotation.get("uri")
                 if uri:
                     for c in chars:
-                        if annotation["x0"] <= c["x0"] <= annotation["x1"] and annotation["top"] <= c["top"] <= annotation["bottom"]:
+                        if (
+                            annotation["x0"] <= c["x0"] <= annotation["x1"]
+                            and annotation["top"] <= c["top"] <= annotation["bottom"]
+                        ):
                             c["url"] = uri
             grids = ruled_tables(page)
             chars = [
                 c
                 for c in chars
                 if not any(
-                    b[0] <= c["x0"] < b[2] and b[1] <= c["top"] < b[3] for b, _, _ in grids
+                    b[0] <= c["x0"] < b[2] and b[1] <= c["top"] < b[3]
+                    for b, _, _ in grids
                 )
             ]
-            lines = mark_annotations(chars_to_lines(chars))
+            lines = chars_to_lines(chars)
+            regions = [
+                (im["x0"], im["top"], im["x1"], im["bottom"]) for im in page.images
+            ]
+            drawings = page.rects + page.curves
+            if len(drawings) >= 3:
+                region = (
+                    min(d["x0"] for d in drawings),
+                    min(d["top"] for d in drawings),
+                    max(d["x1"] for d in drawings),
+                    max(d["bottom"] for d in drawings),
+                )
+                if (
+                    sum(
+                        len(l.text) < 30
+                        and region[0] <= l.x0
+                        and l.x1 <= region[2]
+                        and region[1] <= l.top
+                        and l.bottom <= region[3]
+                        for l in lines
+                    )
+                    >= 3
+                ):
+                    regions.append(region)
+            lines = mark_annotations(lines, regions)
             for annotation in page.annots:
                 if annotation.get("contents") and getattr(
                     annotation["data"].get("Subtype"), "name", ""
@@ -543,9 +770,16 @@ def _convert_pdf(path, diagnostics):
         for n, unclassified in enumerate(page_blocks):
             blocks = classify_blocks(unclassified, body, heading_sizes)
             for bbox, text, columns in tables[n]:
-                blocks.append(Block((Line(text, *bbox, body, columns=columns),), "table"))
+                blocks.append(
+                    Block((Line(text, *bbox, body, columns=columns),), "table")
+                )
             if tables[n]:
-                blocks = [b for line in reading_order([b.lines[0] for b in blocks]) for b in blocks if b.lines[0] is line]
+                blocks = [
+                    b
+                    for line in reading_order([b.lines[0] for b in blocks])
+                    for b in blocks
+                    if b.lines[0] is line
+                ]
             text = blocks_to_markdown(blocks)
             first = next((b for b in blocks if b.kind != "note"), None)
             # Keep the page marker inside the continuing paragraph: HTML comments render invisibly.
@@ -558,26 +792,39 @@ def _convert_pdf(path, diagnostics):
                 and not MARKER.match(first.lines[0].text)
                 and not SUBQUESTION.match(first.lines[0].text)
                 and not first.lines[0].mono
+                and not first.lines[0].bold
             )
             marker = f"<!-- page {n+1} -->"
-            table_join = previous and first and previous.kind == first.kind == "table" and previous.lines[0].columns == first.lines[0].columns
+            table_join = (
+                previous
+                and first
+                and not images[n - 1]
+                and previous.kind == first.kind == "table"
+                and previous.lines[0].columns == first.lines[0].columns
+            )
             if table_join:
                 old_rows = previous.lines[0].text.splitlines()
                 new_rows = first.lines[0].text.splitlines()
                 if old_rows[0] == new_rows[0]:
                     removed.append(new_rows[0])
-                data = new_rows[2:] if old_rows[0] == new_rows[0] else [new_rows[0]] + new_rows[2:]
+                data = (
+                    new_rows[2:]
+                    if old_rows[0] == new_rows[0]
+                    else [new_rows[0]] + new_rows[2:]
+                )
                 if data:
                     data[0] = data[0].replace("| ", "| " + marker + " ", 1)
                 text = text.replace(first.lines[0].text, "\n".join(data), 1)
                 output[-1] = output[-1].rstrip() + "\n" + text
             else:
                 output.append(
-                (" " + marker + "\n" if continuing else "\n\n" + marker + "\n\n") + text
+                    (" " + marker + "\n" if continuing else "\n\n" + marker + "\n\n")
+                    + text
                 )
             if images[n]:
                 output[-1] += f"\n\n[Embedded images omitted: {images[n]}]"
             previous = next((b for b in reversed(blocks) if b.kind != "note"), None)
     result = "".join(output).lstrip() + "\n"
+    diagnostics["intended_removals"] = removed
     preservation("\n".join(raw_text), result, "\n".join(removed), diagnostics)
     return result
