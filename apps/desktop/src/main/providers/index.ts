@@ -40,9 +40,10 @@ export const fakeAdapter: ProviderAdapter = {
     return [{ id: "fake", name: "Fake (test only)" }];
   },
   async *stream(request, signal) {
-    for (let i = 0; i < request.prompt.length; i += 128) {
+    const response = `**bold**\n\n- First\n- Second\n\n\`\`\`text\n${request.prompt}\n\`\`\``;
+    for (let i = 0; i < response.length; i += 128) {
       signal.throwIfAborted();
-      yield { type: "text-delta", text: request.prompt.slice(i, i + 128) };
+      yield { type: "text-delta", text: response.slice(i, i + 128) };
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
     }
     signal.throwIfAborted();
@@ -144,6 +145,7 @@ export class ProviderRegistry {
             config,
             availability,
             models: adapter && config.enabled ? this.models(config, adapter) : [],
+            modelsLoading: !!adapter && config.enabled && this.loading.has(`${this.modelRevision}:${JSON.stringify(config)}`),
           };
         } catch {
           return {

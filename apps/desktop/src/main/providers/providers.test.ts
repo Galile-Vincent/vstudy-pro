@@ -101,7 +101,7 @@ it("only enables fake in explicit E2E mode", async () => {
   );
   expect(events).toContainEqual({
     type: "text-delta",
-    text: "Selected passage",
+    text: "**bold**\n\n- First\n- Second\n\n```text\nSelected passage\n```",
   });
 });
 it("kills a real subprocess on abort and on timeout", async () => {
@@ -192,9 +192,11 @@ it("returns availability while remote models are pending and caches arriving mod
   const first = (await registry.list()).find(p => p.config.id === "openai-api")!;
   expect(first.availability).toEqual({ available: true });
   expect(first.models).toEqual([]);
+  expect(first.modelsLoading).toBe(true);
   release([{ id: "arrived", name: "Arrived" }]);
   await Promise.resolve();
   expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([{ id: "arrived", name: "Arrived" }]);
+  expect((await registry.list()).find(p => p.config.id === "openai-api")?.modelsLoading).toBe(false);
   registry.configure({ kind: "api", id: "openai-api", enabled: true });
   expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([]);
   release([{ id: "refreshed", name: "Refreshed" }]);
