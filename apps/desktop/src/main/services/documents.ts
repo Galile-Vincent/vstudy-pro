@@ -1,3 +1,4 @@
+import { safeDocumentLabel } from "../security";
 import { activeConversions } from "./conversion-state";
 import { chmodSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
@@ -99,7 +100,7 @@ export class DocumentService {
         }
         const inserted = profileStage("DB insert");
         const document = this.options.store.documents.insert(documentSchema.parse({
-          id: randomUUID(), title, sourceName: basename(path),
+          id: randomUUID(), title: safeDocumentLabel(title), sourceName: safeDocumentLabel(basename(path)),
           sourceHash, sourcePath: join(directory, `source.${extension}`), mime,
           markdownPath: join(directory, "content.md"), status: "converting", createdAt: new Date().toISOString(),
         }));

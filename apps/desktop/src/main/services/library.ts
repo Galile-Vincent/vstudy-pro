@@ -6,7 +6,7 @@ import type { SQLInputValue } from 'node:sqlite';
 import type { Store } from '../db';
 import { documentIdSchema, documentSchema } from '../../shared/domain';
 import { folderSchema, libraryDocumentSchema, libraryQuerySchema, savedFilterSchema, tagSchema, type LibraryQuery } from '../../shared/library';
-import { SearchService } from './search';
+import { SearchService, validateSearchQuery } from './search';
 import { containedPath } from "./file-paths";
 export { containedPath } from "./file-paths";
 export class LibraryService {
@@ -112,7 +112,7 @@ export class LibraryService {
             add(`d.mime ${q.type === 'other' ? 'NOT ' : ''}IN(${types.map(() => '?').join(',')})`, ...types);
         }
         if (q.text) {
-            const text = q.text.trim();
+            const text = validateSearchQuery(q.text);
             if ([...text].length < 3) {
                 const literal = '%' + text.replace(/[\\%_]/g, '\\$&') + '%';
                 add("d.id IN(SELECT documentId FROM document_fts WHERE title LIKE ? ESCAPE '\\' OR filename LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\')", literal, literal, literal);

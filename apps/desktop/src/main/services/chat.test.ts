@@ -115,7 +115,7 @@ it("persists both messages and streams selection-grounded prompt only to origin"
   chat.start(request, owner);
   await until(() => owner.events.some((e) => e.type === "done"));
   expect(received?.prompt).toContain("Exact selected passage");
-  expect(received?.prompt).toContain("Document: Study");
+  expect(received?.prompt).toContain('Document: "Study"');
   expect(owner.events.filter(e => e.type !== "usage")).toEqual([
     { type: "text-delta", text: "Answer" },
     { type: "done" },
