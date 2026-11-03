@@ -17,6 +17,7 @@ try {
   await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, resolve(source));
   await page.getByRole('button', { name: '＋ Import document', exact: true }).click();
   await page.getByTestId('document-markdown').filter({ hasText: 'R12.' }).waitFor({ timeout: 660_000 });
+  await page.locator('.pane-toolbar').filter({ hasText: 'Markdown · pdf_md' }).waitFor({ timeout: 660_000 });
   const document = await page.evaluate(async () => (await window.desktop.invoke('documents:list', {}))[0]);
   assert.equal(document.status, 'ready');
   assert.equal(document.converter, 'pdf_md');

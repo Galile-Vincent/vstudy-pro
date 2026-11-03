@@ -33,13 +33,35 @@ for page in range(100):
     c.showPage()
 c.save()
 subprocess.run([sys.executable, str(Path(__file__).parents[2] / 'test-fixtures/converter/generate.py'), str(output)], check=True)
+import pdf_md
 from pdf_md import convert_pdf
+stage_times = {}
+def timed(name, function):
+    def run(*args, **kwargs):
+        start = time.perf_counter()
+        try:
+            return function(*args, **kwargs)
+        finally:
+            stage_times[name] = stage_times.get(name, 0) + time.perf_counter()-start
+    return run
+for name in ['dedupe_chars', 'chars_to_lines', 'reading_order', 'ruled_tables', 'preservation', 'lines_to_blocks', 'blocks_to_markdown']:
+    setattr(pdf_md, name, timed(name, getattr(pdf_md, name)))
+from pdfplumber.page import Page
+Page.chars = property(timed('page.chars', Page.chars.fget))
 for label, path in [('ch2', source), ('100-pages', pdf), ('docx', output/'sample.docx'), ('xlsx', output/'sample.xlsx')]:
     target = output / f'{label}.md'
     start = time.perf_counter()
     subprocess.run([sys.executable, str(Path(__file__).with_name('convert.py')), str(path), str(target), str(target)], check=True)
     rows[label] = {'cli_s': time.perf_counter()-start, 'sha256': hashlib.sha256(target.read_bytes()).hexdigest()}
     if path.suffix == '.pdf':
+        for mode in ['--pdf-worker', '--fallback-worker']:
+            start = time.perf_counter()
+            worker = subprocess.run([sys.executable, str(Path(__file__).with_name('convert.py')), mode, str(path)], capture_output=True)
+            rows[label][mode+'_s'] = time.perf_counter()-start
+            rows[label][mode+'_exit'] = worker.returncode
+        stage_times.clear()
+        convert_pdf(str(path))
+        rows[label]['stages_s'] = dict(stage_times)
         profile = cProfile.Profile()
         start = time.perf_counter()
         profile.runcall(convert_pdf, str(path))
