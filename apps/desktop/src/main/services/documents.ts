@@ -1,3 +1,4 @@
+import { decodeNamedCharacterReference } from "decode-named-character-reference";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
 import { mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
@@ -77,8 +78,18 @@ export class DocumentService {
         // Recover a directory left behind between publishing a source and inserting its row.
         await rm(directory, { recursive: true, force: true });
         await rename(staging, directory);
+        let title = basename(path, extname(path));
+        if (mime === "text/html") {
+          const html = await readFile(join(directory, `source.${extension}`), "utf8");
+          const raw = /<title\b[^>]*>([\s\S]*?)<\/title\s*>/i.exec(html)?.[1];
+          if (raw?.trim()) title = raw.replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]+);/gi, (entity, name: string) => {
+            if (name[0] !== "#") return decodeNamedCharacterReference(name) || entity;
+            const point = name[1]?.toLowerCase() === "x" ? parseInt(name.slice(2), 16) : Number(name.slice(1));
+            return point > 0 && point <= 0x10ffff ? String.fromCodePoint(point) : "�";
+          }).replace(/\s+/g, " ").trim();
+        }
         const document = this.options.store.documents.insert(documentSchema.parse({
-          id: randomUUID(), title: basename(path, extname(path)), sourceName: basename(path),
+          id: randomUUID(), title, sourceName: basename(path),
           sourceHash, sourcePath: join(directory, `source.${extension}`), mime,
           markdownPath: join(directory, "content.md"), status: "converting", createdAt: new Date().toISOString(),
         }));

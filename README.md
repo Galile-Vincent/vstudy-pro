@@ -39,3 +39,9 @@ These launch real, visible Electron windows with temporary user data. The select
 For an isolated renderer preview, `VITE_MOCK_DESKTOP=1 pnpm build` explicitly bundles the mock bridge, then `VSTUDY_RENDERER_MOCK=1 node e2e/selection-chat.mjs` runs the mock variant. Rebuild without the flag before testing the real app.
 
 Selection offsets are UTF-16 positions in the stored Markdown. Generated math does not map character for character; use its containing section. Selected passages also appear in user-message history. Main owns prompt assembly and treats document content as untrusted.
+
+## Conversion limits
+
+PDF conversion uses MarkItDown's text extraction. Layout, tables, images, and heading hierarchy may be lost; numbered lines such as “1. Background” are plain extracted text and may render as Markdown lists rather than headings. Consult the original PDF when structure matters.
+
+Single-file imports do not copy neighboring image files. Relative images in imported Markdown/HTML may be unavailable; embedded images extracted by the converter are supported.

@@ -103,3 +103,10 @@ describe("DocumentService", () => {
     expect(service.get(document.id)).toMatchObject({ status: "failed", error: "Markdown exceeds 8 MiB" });
   });
 });
+it("uses the decoded HTML title instead of the import filename", async () => {
+  const { service, userData } = await setup();
+  const source = join(userData, "page.html");
+  await writeFile(source, "<html><head><title>Quantum &amp; Gardening &#49;</title></head><body>Hello</body></html>");
+  const doc = await service.importPath(source);
+  expect(doc.title).toBe("Quantum & Gardening 1");
+});
