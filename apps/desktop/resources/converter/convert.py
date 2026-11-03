@@ -18,7 +18,8 @@ def main():
             if len(entries) > 10000 or sum(e.file_size for e in entries) > 200 * 1024 * 1024:
                 raise ValueError("Document archive exceeds expansion limit")
     from markitdown import MarkItDown
-    result = MarkItDown(enable_plugins=False).convert_local(source)
+    # DOCX images otherwise become empty Markdown destinations and lose their embedded bytes.
+    result = MarkItDown(enable_plugins=False).convert_local(source, keep_data_uris=True)
     content = result.text_content.encode("utf-8")
     if len(content) > MAX_OUTPUT:
         raise ValueError("Converted Markdown exceeds 8 MiB")
