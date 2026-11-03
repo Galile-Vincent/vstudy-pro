@@ -204,6 +204,8 @@ export const chatEventSchema = z.discriminatedUnion("type", [
 export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
   .object({
+    language: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
+    replyLanguage: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
     chatSide: z.enum(["left", "right"]),
     enableGenerativeUI: z.boolean().default(false),
     monthlyBudgetUsd: z.number().finite().positive().optional(),
@@ -220,6 +222,7 @@ export const settingsSchema = z
   .strict();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
+  language: "auto", replyLanguage: "auto",
   chatSide: "left",
   enableGenerativeUI: false, modelDisplayNames: {},
   warnAtPercent: 80, priceOverrides: {},
