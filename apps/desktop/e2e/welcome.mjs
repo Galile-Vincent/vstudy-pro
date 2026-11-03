@@ -13,7 +13,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
   const page=await app.firstWindow();page.on('pageerror',e=>errors.push(e.message));
   await page.emulateMedia({colorScheme:'light',reducedMotion:'reduce'});
-  await page.locator('.onboarding[open]').waitFor();
+  await page.locator('.onboarding[data-state=open]').waitFor();
   await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language,onboardingCompleted:true});},language);
   await page.reload();await page.locator('#welcome-entry').click();await page.locator('.welcome').waitFor();
   const copy=JSON.parse(await readFile(`src/shared/locales/${language}/welcome.json`,'utf8'));

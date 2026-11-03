@@ -53,7 +53,7 @@ try {
   await page.getByRole("combobox", { name: "Model", exact: true }).click();
   await page.getByRole("combobox", { name: "Search models" }).fill("fixture");
   await page.getByRole("option").filter({hasText:"Fixture model (test only)"}).first().click();
-  await page.waitForFunction(() => window.document.querySelector('.model-trigger')?.textContent.includes("Fixture model"));
+  await page.waitForFunction(() => window.document.querySelector('[data-slot=model-selector-trigger]')?.textContent.includes("Fixture model"));
   assert.equal(await input.inputValue(), "Preserved draft");
   await app.close();
   await launch();

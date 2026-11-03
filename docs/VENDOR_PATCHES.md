@@ -43,3 +43,5 @@ Import and translation changes are portable. Optional Thread composition slots a
 - `apps/desktop/src/renderer/components/ui/toggle-group.tsx` — Resolve the registry cn helper to the existing local utility. [Exact diff](vendor-patches/ui--toggle-group.tsx.patch).
 - `apps/desktop/src/renderer/components/ui/toggle.tsx` — Resolve the registry cn helper to the existing local utility. [Exact diff](vendor-patches/ui--toggle.tsx.patch).
 - `apps/desktop/src/renderer/components/ui/tooltip.tsx` — Resolve the registry cn helper to the existing local utility. [Exact diff](vendor-patches/ui--tooltip.tsx.patch).
+
+- `apps/desktop/src/renderer/hooks/use-attachment-src.ts` — remove the unsupported upstream ESLint suppression. [Exact diff](vendor-patches/use-attachment-src.ts.patch).

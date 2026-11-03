@@ -31,7 +31,7 @@ for(const language of ['en','zh-Hant','ja']) {
     await page.emulateMedia({colorScheme});
     await page.screenshot({path:`${evidence}/${language}-${width}-${colorScheme}-chat.png`,animations:'disabled'});
     assert.equal(await page.locator('body').evaluate(e=>e.scrollWidth<=window.innerWidth),true,'window has no horizontal overflow');
-    await page.locator('.model-trigger').click();
+    if(await page.locator('.workspace-tabs').isVisible())await page.locator('.workspace-tabs button').nth(1).click();await page.locator('[data-slot=model-selector-trigger]').click();
     await page.locator('[cmdk-input]').waitFor();
     await page.locator('[cmdk-item]').first().waitFor();
     await page.screenshot({path:`${evidence}/${language}-${width}-${colorScheme}-picker.png`,animations:'disabled'});

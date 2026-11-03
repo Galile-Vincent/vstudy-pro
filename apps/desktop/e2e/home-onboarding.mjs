@@ -16,7 +16,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
  try {
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
   const page=await app.firstWindow(),errors=[]; await page.emulateMedia({colorScheme:'light',reducedMotion:'reduce'}); page.on('pageerror',e=>errors.push(e.message));
-  await page.locator('.onboarding[open]').waitFor();
+  await page.locator('.onboarding[data-state=open]').waitFor();
   await page.locator('.onboarding').getByRole('combobox').first().click();await page.getByRole('option',{name:language==='en'?'English':language==='ja'?'日本語':'繁體中文',exact:true}).click();
   const audit=async state=>{
    const results=await new AxeBuilder({page}).setLegacyMode(true).analyze();
@@ -45,8 +45,8 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).onboardingCompleted,true);
   db=new DatabaseSync(join(directory,'vstudy.sqlite')); db.exec('PRAGMA busy_timeout=5000; DELETE FROM activity_events; DELETE FROM activity_days; UPDATE documents SET lastOpenedAt=NULL;');
   const refresh=async()=>{
-   const expected=await page.evaluate(async()=>{window.dispatchEvent(new window.Event('activity-updated'));const data=await window.desktop.invoke('dashboard:get',{});return [...data.recentDocuments.slice(0,3).map(d=>d.document.title),...data.pinnedDocuments.slice(0,5).map(d=>d.document.title)].sort();});
-   await page.waitForFunction(expected=>{const actual=[...window.document.querySelectorAll('.home-card:not(.home-activity) .home-row')].map(row=>row.querySelector('strong')?.textContent??row.textContent).sort();return JSON.stringify(actual)===JSON.stringify(expected);},expected);
+   const expected=await page.evaluate(async()=>{window.dispatchEvent(new window.Event('activity-updated'));const data=await window.desktop.invoke('dashboard:get',{});return [...data.pinnedFolders.map(f=>f.name),...data.pinnedDocuments.slice(0,5).map(d=>d.document.title)].sort();});
+   await page.waitForFunction(expected=>{const actual=[...window.document.querySelectorAll('.home-card .home-row')].map(row=>row.querySelector('strong')?.textContent??row.textContent).sort();return JSON.stringify(actual)===JSON.stringify(expected);},expected);
   };
   await refresh(); await audit('home-empty'); await capture('home-empty');
   // Metadata insert shapes follow the benchmark seeder at a three-document scale.

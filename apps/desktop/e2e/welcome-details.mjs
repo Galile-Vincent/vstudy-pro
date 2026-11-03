@@ -7,12 +7,12 @@ const directory=await mkdtemp(join(tmpdir(),'vstudy-welcome-details-'));let app;
 const results={};
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
- const page=await app.firstWindow();const goHome=async()=>{if(!await page.locator('.shell-sidebar').isVisible()){if(await page.locator('.app-header').isVisible())await page.locator('.app-header').getByRole('button',{name:'Library',exact:true}).click();await page.getByRole('button',{name:'Toggle document library',exact:true}).click();}await page.locator('.shell-sidebar').getByRole('button',{name:'Home',exact:true}).click();};await page.emulateMedia({reducedMotion:'reduce'});await page.locator('.onboarding[open]').waitFor();
+ const page=await app.firstWindow();const goHome=async()=>{if(!await page.locator('.shell-sidebar').isVisible()){if(await page.locator('.app-header').isVisible())await page.locator('.app-header').getByRole('button',{name:'Library',exact:true}).click();await page.getByRole('button',{name:'Toggle document library',exact:true}).click();}await page.locator('.shell-sidebar').getByRole('button',{name:'Home',exact:true}).click();};await page.emulateMedia({reducedMotion:'reduce'});await page.locator('.onboarding[data-state=open]').waitFor();
  for(let n=0;n<4;n++)await page.locator('.onboarding footer .primary').click();
  await page.locator('.home-page').waitFor();assert.equal(await page.locator('.welcome').count(),0);assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).welcomeSeen,false);results.noAutomaticTour=true;
  await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));
  await page.locator('#welcome-settings-entry').click();await page.locator('.welcome').waitFor();
- await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('.settings-dialog[open] #welcome-settings-entry:focus').waitFor();results.settingsReturnFocus=true;
+ await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('.settings-dialog[data-state=open] #welcome-settings-entry:focus').waitFor();results.settingsReturnFocus=true;
  await page.getByRole('button',{name:'Close settings',exact:true}).click();await page.locator('#welcome-entry').click();
  await page.locator('#welcome-title').focus();await page.keyboard.press('Tab');assert.equal(await page.locator('#welcome-pause').evaluate(e=>e===window.document.activeElement),true);results.pauseFirstTab=true;
  await page.getByRole('button',{name:'Pause animations',exact:true}).click();assert.equal(await page.locator('.welcome').getAttribute('data-motion'),'paused');
@@ -35,10 +35,10 @@ try {
  await page.getByRole('button',{name:'Try a sample document',exact:true}).click();await page.locator('.workspace [data-testid=document-markdown]').waitFor();
  assert.equal(await page.evaluate(()=>window.transitions.length),0);results.reducedTransitionsSkipped=true;
  await goHome();
- await page.emulateMedia({reducedMotion:'no-preference'});const snapshotCount=await page.evaluate(()=>window.transitions.length);await page.locator('.home-row').first().click();
+ await page.emulateMedia({reducedMotion:'no-preference'});const snapshotCount=await page.evaluate(()=>window.transitions.length);await page.getByRole('button',{name:'Continue reading',exact:true}).click();
  await page.getByTestId('document-markdown').waitFor();assert.equal(await page.evaluate(()=>window.transitions.length),snapshotCount);results.documentNavigationSkipsSnapshots=true;
  await page.evaluate(()=>{window.document.startViewTransition=()=>{throw new Error('forced failure');};});
  await goHome();await page.locator('.home-page').waitFor();results.throwingTransitionStillNavigates=true;
- await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:false,welcomeSeen:false});});await page.reload();await page.locator('.onboarding[open]').waitFor();for(let n=0;n<3;n++)await page.locator('.onboarding footer .primary').click();await page.getByRole('button',{name:'Take a 30-second tour',exact:true}).click();await page.locator('.welcome').waitFor();results.optionalTour=true;
+ await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:false,welcomeSeen:false});});await page.reload();await page.locator('.onboarding[data-state=open]').waitFor();for(let n=0;n<3;n++)await page.locator('.onboarding footer .primary').click();await page.getByRole('button',{name:'Take a 30-second tour',exact:true}).click();await page.locator('.welcome').waitFor();results.optionalTour=true;
  console.log(JSON.stringify(results,null,2));
 } finally {await writeFile('/tmp/vstudy-welcome2/details.json',JSON.stringify(results,null,2));await app?.close();await rm(directory,{recursive:true,force:true});}

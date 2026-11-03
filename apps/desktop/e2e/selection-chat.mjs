@@ -250,8 +250,7 @@ try {
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
     await poll(()=>page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length === 1));
-    await page.getByRole('combobox',{name:'Model',exact:true}).click();
-    await page.getByRole('button',{name:'API keys & provider settings'}).click();
+    await page.getByRole('button',{name:'Open settings',exact:true}).click();
     const keyForm = page.locator('.provider-row').filter({hasText:'OpenAI compatible'});
     await keyForm.getByRole('textbox',{name:'OpenAI compatible API key',exact:true}).fill('local-test-key');
     await keyForm.getByRole('button',{name:'Save key',exact:true}).click();

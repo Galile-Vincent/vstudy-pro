@@ -351,7 +351,10 @@
     },
     {
       "path": "apps/desktop/src/renderer/hooks/use-attachment-src.ts",
-      "registrySha256": "4a77bf6c1256070a2469265d73aba534f3a462eb4444cd4b1def35f4b79a2a93"
+      "registrySha256": "dfb621f1a18f4013994aa29815beddb436020105164526ab7c86b0b0a32040a1",
+      "patchedSha256": "4a77bf6c1256070a2469265d73aba534f3a462eb4444cd4b1def35f4b79a2a93",
+      "reason": "Remove the upstream ESLint suppression for a rule absent from this repository; runtime unchanged.",
+      "patch": "docs/vendor-patches/use-attachment-src.ts.patch"
     },
     {
       "path": "apps/desktop/src/renderer/hooks/use-copy-to-clipboard.ts",

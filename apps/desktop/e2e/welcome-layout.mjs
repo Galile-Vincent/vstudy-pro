@@ -8,7 +8,7 @@ for(const language of ['en','zh-Hant','ja']){
  const directory=await mkdtemp(join(tmpdir(),'vstudy-layout-'));let app;
  try{
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
-  const page=await app.firstWindow();await page.emulateMedia({reducedMotion:'reduce'});await page.locator('.onboarding[open]').waitFor();
+  const page=await app.firstWindow();await page.emulateMedia({reducedMotion:'reduce'});await page.locator('.onboarding[data-state=open]').waitFor();
   await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true,language});},language);await page.reload();await page.locator('#welcome-entry').click();
   for(const width of [720,900,1200]){await app.evaluate(({BrowserWindow},width)=>BrowserWindow.getAllWindows()[0].setSize(width,900),width);
    for(const theme of ['light','dark']){await page.emulateMedia({colorScheme:theme});

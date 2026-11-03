@@ -29,7 +29,7 @@ try {
  await app.evaluate(({BrowserWindow})=>{const w=BrowserWindow.getAllWindows()[0];w.setSize(1200,800);w.webContents.setZoomFactor(1);});
  await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language:'en'});window.localStorage.setItem('vstudy-route',JSON.stringify({view:'library'}));});await page.reload();
  await page.getByRole('button',{name:'New folder',exact:true}).click();await page.waitForFunction(()=>window.document.activeElement?.tagName==='INPUT');await page.keyboard.type('Keyboard Folder');await page.keyboard.press('Enter');
- await page.waitForFunction(()=>!window.document.querySelector('.library-dialog[open]'));assert.ok(await page.evaluate(()=>window.document.activeElement!==window.document.body));
+ await page.waitForFunction(()=>!window.document.querySelector('.library-dialog[data-state=open]'));assert.ok(await page.evaluate(()=>window.document.activeElement!==window.document.body));
  const folder=(await page.evaluate(()=>window.desktop.invoke('library:tree',{}))).find(f=>f.name==='Keyboard Folder');
  const ids=[doc.id];
  for(let n=0;n<3;n++) {

@@ -22,14 +22,9 @@ try {
  await page.getByRole('combobox',{name:'Search models'}).fill('Fake');
  await page.screenshot({path: '/tmp/vstudy-picker-search.png', animations:'disabled'});
  await page.locator('[data-slot=model-selector-list] [role=option]').filter({hasText:'Fake'}).click();
- await page.getByRole('combobox',{name:'Model',exact:true}).click();
- await page.getByRole('combobox',{name:'Search models'}).press('Tab');
- assert.equal(await page.evaluate(()=>window.document.activeElement?.getAttribute('role')),'radio');
- await page.keyboard.press('ArrowRight');
- await page.waitForFunction(()=>window.document.querySelector('[role=radio][value=high]')?.getAttribute('aria-checked')==='true');
- assert.equal(await page.getByRole('radio',{name:'High',exact:true}).getAttribute('aria-checked'),'true');
- await page.keyboard.press('Escape');
- await page.locator('[data-slot=model-selector-content]').waitFor({state:'hidden'});
+ await page.getByRole('combobox',{name:'Effort',exact:true}).click();
+ await page.getByRole('option',{name:'High',exact:true}).click();
+ assert.match(await page.getByRole('combobox',{name:'Effort',exact:true}).innerText(),/High/);
  assert.equal(await page.getByRole('button',{name:'Stop generating',exact:true}).count(),0);
  await input.fill('Explain');
  await page.screenshot({path: '/tmp/vstudy-composer-effort.png', animations:'disabled'});
