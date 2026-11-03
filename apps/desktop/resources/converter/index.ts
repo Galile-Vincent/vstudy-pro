@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 
 export const MAX_MARKDOWN_BYTES = 8 * 1024 * 1024;
 export type Progress = (message: string) => void;
-export type ConverterRunner = (source: string, output: string) => Promise<void>;
+export type ConverterRunner = (source: string, output: string, onProgress?: Progress) => Promise<void>;
 
 export function scrubbedEnvironment(cwd: string): NodeJS.ProcessEnv {
   return {
@@ -48,7 +48,7 @@ export async function runProcess(
     child.stderr.on("data", (chunk: Buffer) => {
       bytes += chunk.length;
       if (bytes > maxOutputBytes) stop("Converter process output exceeds limit");
-      else stderr += chunk.toString("utf8");
+      stderr = (stderr + chunk.toString("utf8")).slice(-4000);
     });
     child.once("error", (error) => { clearTimeout(timer); reject(error); });
     child.once("close", (code) => {
@@ -56,7 +56,10 @@ export async function runProcess(
       if (failure) reject(failure);
       else if (code !== 0) {
         const errorType = /"type":\s*"([A-Za-z0-9_]+)"/.exec(stderr)?.[1];
-        reject(new Error(errorType ? `Conversion failed (${errorType})` : `Converter process failed (exit ${code})`));
+        // Strip terminal controls and redact paths, URLs and credential-shaped tokens.
+        // eslint-disable-next-line no-control-regex
+        const tail = stderr.replace(/\x1b\[[0-9;]*m/g, "").replace(/https?:\/\/\S+/g, "[URL]").replace(/(?:\/[^\s"']+)+/g, "[path]").replace(/(?:sk-|Bearer\s+)\S+/gi, "[redacted]").replace(/[\x00-\x08\x0b-\x1f]/g, "").slice(-1200);
+        reject(new Error(`${errorType ? `Conversion failed (${errorType})` : `Converter process failed (exit ${code})`}: ${tail}`));
       } else resolve();
     });
   });
@@ -81,6 +84,8 @@ export function createConverter(options: {
   const venv = join(options.userData, "converter-venv");
   const python = join(venv, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   let bootstrap: Promise<string> | undefined;
+  let progress: Progress | undefined;
+  const report = (message: string) => { options.onProgress?.(message); progress?.(message); };
   async function install(): Promise<string> {
     await mkdir(options.userData, { recursive: true, mode: 0o700 });
     const requirements = join(options.resources, "requirements.txt");
@@ -94,7 +99,7 @@ export function createConverter(options: {
           return python;
         }
       } catch { /* An interrupted installation is rebuilt on the next attempt. */ }
-      options.onProgress?.("Preparing Python converter");
+      report("Setting up converter (first run)…");
       const uv = await findExecutable("uv");
       let systemPython: string | undefined;
       for (const name of ["python3.12", "python3.11", "python3.10", "python3"]) {
@@ -110,16 +115,16 @@ export function createConverter(options: {
       await rm(venv, { recursive: true, force: true });
       if (uv) {
         await runProcess(uv, ["venv", "--python", systemPython ?? "3.12", venv], cwd, 300_000);
-        options.onProgress?.("Installing MarkItDown (first run may take several minutes)");
+        report("Installing markitdown…");
         await runProcess(uv, ["pip", "install", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024);
       } else if (systemPython) {
         await runProcess(systemPython, ["-m", "venv", venv], cwd, 300_000);
-        options.onProgress?.("Installing MarkItDown (first run may take several minutes)");
+        report("Installing markitdown…");
         await runProcess(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024);
       }
       await runProcess(python, ["-c", "import markitdown"], cwd);
       await writeFile(marker, fingerprint);
-      options.onProgress?.("Converter ready");
+      report("Converter ready");
       return python;
     } finally { await rm(cwd, { recursive: true, force: true }); }
   }
@@ -129,12 +134,14 @@ export function createConverter(options: {
   }
   return {
     ensureReady,
-    async convert(source, output) {
+    async convert(source, output, onProgress) {
+      progress = onProgress;
       const executable = await ensureReady();
+      report("Converting…");
       const cwd = await mkdtemp(join(tmpdir(), "vstudy-convert-"));
       try {
         const temporaryOutput = join(cwd, "content.md");
-        await runProcess(executable, [join(options.resources, "convert.py"), source, temporaryOutput], cwd);
+        await runProcess(executable, [join(options.resources, "convert.py"), source, temporaryOutput, output], cwd);
         if ((await stat(temporaryOutput)).size > MAX_MARKDOWN_BYTES) throw new Error("Converted Markdown exceeds 8 MiB");
         const content = await readFile(temporaryOutput);
         if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Converted Markdown exceeds 8 MiB");

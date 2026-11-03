@@ -34,9 +34,30 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     await converter.convert(resolve(`test-fixtures/converter/sample.${extension}`), output);
     expect(await readFile(output, "utf8")).toContain("VStudy fixture");
   }, 120_000);
+  it("externalizes large DOCX images and drops oversized images before the Markdown cap", async () => {
+    for (const megabytes of [7, 10]) {
+      const source = join(directory, `large-${megabytes}.docx`);
+      await runProcess(executable, ["-c", `import sys, zipfile
+with zipfile.ZipFile(sys.argv[1]) as original, zipfile.ZipFile(sys.argv[2], 'w', zipfile.ZIP_DEFLATED) as target:
+ for name in original.namelist():
+  data = original.read(name)
+  if name == 'word/media/image1.png': data += b'\\0' * (int(sys.argv[3]) * 1024 * 1024)
+  target.writestr(name, data)
+`, resolve("test-fixtures/converter/sample.docx"), source, String(megabytes)], directory);
+      const output = join(directory, `large-${megabytes}.md`);
+      await converter.convert(source, output);
+      const markdown = await readFile(output, "utf8");
+      expect(markdown).toContain("VStudy fixture");
+      expect(markdown).not.toContain("data:");
+      if (megabytes === 7) {
+        const image = /\]\((image-[a-f0-9]+\.png)\)/.exec(markdown)![1]!;
+        expect((await readFile(join(directory, image))).length).toBe(7340100);
+      } else expect(markdown).toContain("(image omitted)");
+    }
+  }, 120_000);
   it("returns a JSON error and permits another conversion after failure", async () => {
     const invalid = join(directory, "invalid.pdf");
-    const result = spawnSync(executable, [join(directory, "resources/convert.py"), invalid, join(directory, "invalid.md")], { cwd: directory, env: scrubbedEnvironment(directory), encoding: "utf8" });
+    const result = spawnSync(executable, [join(directory, "resources/convert.py"), invalid, join(directory, "invalid.md"), join(directory, "invalid.md")], { cwd: directory, env: scrubbedEnvironment(directory), encoding: "utf8" });
     expect(result.status).not.toBe(0);
     expect(JSON.parse(result.stderr.trim())).toMatchObject({ error: "Conversion failed", type: "FileNotFoundError" });
     await expect(converter.convert(invalid, join(directory, "invalid.md"))).rejects.toThrow("Conversion failed (");
@@ -50,6 +71,7 @@ it("caps subprocess output, times out, and scrubs inherited secrets", async () =
   try {
     await expect(runProcess(process.execPath, ["-e", "setInterval(() => {}, 1000)"], cwd, 50)).rejects.toThrow("timed out");
     await expect(runProcess(process.execPath, ["-e", "process.stdout.write('x'.repeat(10000))"], cwd, 1000, 100)).rejects.toThrow("output exceeds");
+    await expect(runProcess(process.execPath, ["-e", "process.stderr.write('certificate verify failed https://user:password@example.com/private /private/path sk-secret'); process.exit(1)"], cwd)).rejects.toThrow("certificate verify failed [URL] [path] [redacted]");
     process.env.VSTUDY_TEST_SECRET = "private";
     expect(scrubbedEnvironment(cwd)).not.toHaveProperty("VSTUDY_TEST_SECRET");
     await runProcess(process.execPath, ["-e", "if (process.env.VSTUDY_TEST_SECRET || require('node:fs').realpathSync(process.env.HOME) !== process.cwd()) process.exit(1)"], cwd);
