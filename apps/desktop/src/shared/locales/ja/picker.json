@@ -3,5 +3,9 @@
   "documents": "ドキュメント",
   "favorite_model": "{{model}} をお気に入りに追加",
   "unfavorite_model": "{{model}} をお気に入りから削除",
-  "add_key": "キーを追加"
+  "add_key": "キーを追加",
+  "thinking": "思考",
+  "enabled": "有効",
+  "disabled": "無効",
+  "service_tier": "サービス階層"
 }

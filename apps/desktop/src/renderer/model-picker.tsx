@@ -101,7 +101,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
           {onChange && <div className="model-traits">
             {effort && <section aria-label={tr('common:effort')} onKeyDownCapture={traitKeys}><h3>{tr('common:effort')}</h3><Radio.Root value={String(values[effort.id] ?? effort.default)} onValueChange={value => onChange({ ...values, [effort.id]: value })} aria-label={tr('common:effort')} className="effort-list">{effort.values.map(v => <Radio.Item key={v.id} value={v.id} className="effort-item"><span className="effort-check">{String(values[effort.id] ?? effort.default) === v.id && <Check size={13} />}</span>{effortLabel(v.id)}{v.id === effort.default && <small>{tr('common:default_label')}</small>}</Radio.Item>)}</Radio.Root></section>}
             {speed && <section className="speed-section"><h3>{tr('common:speed')}</h3><label className="fast-mode">{tr('common:fast_mode_priority_tier')}<Switch.Root aria-label={tr('common:fast_mode_priority_tier')} checked={!!fast} onCheckedChange={checked => onChange({ ...values, [speed.id]: speed.id === 'fastMode' ? checked : checked ? 'priority' : 'default' })}><Switch.Thumb /></Switch.Root></label><p>{tr('common:faster_responses')}</p></section>}
-            {selected?.options?.filter(o => !/effort/i.test(o.id) && o.id !== speed?.id).map(o => <section className="speed-section" key={o.id} onKeyDownCapture={traitKeys}><h3>{o.label}</h3><Radio.Root aria-label={o.label} value={String(values[o.id] ?? o.default)} onValueChange={value => onChange({ ...values, [o.id]: value })} className="effort-list">{o.values.map(v => <Radio.Item key={v.id} value={v.id} className="effort-item">{v.label.charAt(0).toUpperCase() + v.label.slice(1)}</Radio.Item>)}</Radio.Root></section>)}
+            {selected?.options?.filter(o => !/effort/i.test(o.id) && o.id !== speed?.id).map(o => <section className="speed-section" key={o.id} onKeyDownCapture={traitKeys}><h3>{optionLabel(o.id,o.label)}</h3><Radio.Root aria-label={optionLabel(o.id,o.label)} value={String(values[o.id] ?? o.default)} onValueChange={value => onChange({ ...values, [o.id]: value })} className="effort-list">{o.values.map(v => <Radio.Item key={v.id} value={v.id} className="effort-item">{optionValueLabel(o.id,v.id,v.label)}</Radio.Item>)}</Radio.Root></section>)}
           </div>}
         </div>
         {selected?.available && <button type="button" className="picker-settings" aria-label={tr(isFavorite(selected.value) ? 'picker:unfavorite_model' : 'picker:favorite_model',{model:selected.name})} aria-pressed={isFavorite(selected.value)} onClick={() => { const f = isFavorite(selected.value) ? favorites.filter(x => canonical(x) !== selected.value) : [...favorites,selected.value]; setFavorites(f); void persist(f,recent); }}><Star size={14}/>{tr(isFavorite(selected.value) ? 'picker:unfavorite_model' : 'picker:favorite_model',{model:selected.name})}</button>}
@@ -109,4 +109,14 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
       </ModelSelector.Content>
     </ModelSelector.Root>
   </div>;
+}
+
+function optionLabel(id: string, fallback: string) {
+  const key = ({thinking:'picker:thinking',serviceTier:'picker:service_tier',fastMode:'common:fast_mode_on',effort:'common:effort',reasoningEffort:'common:effort'} as Record<string,string>)[id];
+  return key ? tr(key) : fallback;
+}
+function optionValueLabel(option: string, id: string, fallback: string) {
+  if (option === 'thinking') return tr(id === 'enabled' ? 'picker:enabled' : 'picker:disabled');
+  if (option === 'serviceTier' && id === 'default') return tr('common:default_label');
+  return fallback;
 }

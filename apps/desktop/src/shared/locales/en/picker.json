@@ -3,5 +3,9 @@
   "documents": "Documents",
   "favorite_model": "Favorite {{model}}",
   "unfavorite_model": "Unfavorite {{model}}",
-  "add_key": "Add a key"
+  "add_key": "Add a key",
+  "thinking": "Thinking",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  "service_tier": "Service tier"
 }
