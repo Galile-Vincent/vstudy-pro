@@ -1,5 +1,5 @@
 import { statusSchema } from "./status";
-import { libraryContract } from "./library";
+import { folderIdSchema, libraryContract } from "./library";
 import { z } from "zod";
 import {
   modelSchema, modelOptionsSchema,
@@ -38,9 +38,10 @@ export const ipcContract = {
     request: z.object({ url: externalUrlSchema }).strict(),
     response: ack,
   },
-  "documents:import": { request: empty, response: documentSchema.nullable() },
+  "documents:importSample": { request: z.object({ language: z.enum(["en", "zh-Hant", "ja"]) }).strict(), response: documentSchema },
+  "documents:import": { request: z.object({ folderId: folderIdSchema.nullable().optional() }).strict(), response: documentSchema.nullable() },
   "documents:importPaths": {
-    request: z.object({ paths: z.array(z.string().min(1).max(4096)).min(1).max(100) }).strict(),
+    request: z.object({ paths: z.array(z.string().min(1).max(4096)).min(1).max(100), folderId: folderIdSchema.nullable().optional() }).strict(),
     response: z.array(z.discriminatedUnion("ok", [z.object({ ok: z.literal(true), document: documentSchema }), z.object({ ok: z.literal(false), path: z.string(), error: z.string() })])),
   },
   "documents:list": { request: empty, response: z.array(documentSchema) },

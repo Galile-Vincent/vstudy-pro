@@ -1,5 +1,7 @@
+import { useReadingActivity } from '../home/use-reading-activity';
+import { BlankChat } from '../motion/blank-chat';
 import { useNavigate } from '../shell';
-import { Menu, Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, Sparkles, FileText } from "lucide-react";
+import { Menu, Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, FileText } from "lucide-react";
 import { errorText, statusText } from "../status";
 import { conversionStatus } from "../../shared/status";
 import { useTranslation } from "react-i18next";
@@ -71,6 +73,7 @@ export function Workspace() {
     onNotice={setNotice} /> : null, [partialSource, documentId]);
   useEffect(() => { if (route.documentId) setDocumentId(route.documentId); }, [route.documentId]);
   const doc = documents.find((d) => d.id === documentId);
+  useReadingActivity(doc?.id ?? null, doc?.status === "ready" && !loadingSource);
   const pageProgress = /^Converting page (\d+)\/(\d+)/.exec(doc ? progress[doc.id] ?? "" : "");
   const report = useCallback(
     (error: unknown) =>
@@ -309,21 +312,7 @@ export function Workspace() {
         />
       ) : (
         <div className="chat-start">
-          <div className="empty">
-            <div className="empty-symbol"><Sparkles size={28}/></div>
-            <h3>{tr('common:a_place_to_think_together')}</h3>
-            <p>
-              {doc
-                ? tr('common:start_a_conversation_to_explore_this_document')
-                : tr('common:import_a_document_then_follow_your_curiosity')}
-            </p>
-            <button
-              className="primary"
-              disabled={!canChat || busy}
-              onClick={() => void newConversation()}
-            >
-              {tr('common:start_a_conversation')}</button>
-          </div>
+          <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onStart={() => void newConversation()} />
           {selection && (
             <div className="selection-chip">
               <SelectionPreview selection={selection} />

@@ -1,3 +1,4 @@
+import { LibraryService } from '../services/library';
 import { tr } from "../i18n";
 import { conversionStatus } from "../../shared/status";
 import { app, dialog } from "electron";
@@ -15,6 +16,7 @@ export function registerDocumentsIpc(
   implemented: Set<IpcChannel>,
   deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(),
 ): () => Promise<void> {
+  const library = new LibraryService(store, join(app.getPath("userData"), "library"));
   const userData = app.getPath("userData");
   const converter = createConverter({
     userData,
@@ -26,9 +28,13 @@ export function registerDocumentsIpc(
     const owner = owners.get(documentId);
     if (owner && !owner.isDestroyed()) owner.send(documentProgressChannel, documentProgressSchema.parse({ documentId, message, ...conversionStatus(message) }));
   } });
-  const channels = ["documents:import", "documents:importPaths", "documents:list", "documents:get", "documents:read", "documents:retry", "documents:delete"] as const;
+  const channels = ["documents:importSample", "documents:import", "documents:importPaths", "documents:list", "documents:get", "documents:read", "documents:retry", "documents:delete"] as const;
   for (const channel of channels) implemented.add(channel);
-  registrar.handle("documents:import", async (_input, event) => {
+  registrar.handle("documents:importSample", async ({ language }, event) => {
+    const path = app.isPackaged ? join(process.resourcesPath, "samples", `${language}.md`) : join(app.getAppPath(), "resources/samples", `${language}.md`);
+    const document = await documents.importPath(path); owners.set(document.id, event.sender); return document;
+  });
+  registrar.handle("documents:import", async ({ folderId }, event) => {
     const result = await dialog.showOpenDialog({
       title:tr("picker:import_title"), buttonLabel:tr("picker:import_title"),
       properties: ["openFile"],
@@ -36,9 +42,9 @@ export function registerDocumentsIpc(
     });
     const path = result.filePaths[0];
     if (result.canceled || !path) return null;
-    const document = await documents.importPath(path); owners.set(document.id, event.sender); return document;
+    const document = await documents.importPath(path); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return document;
   });
-  registrar.handle("documents:importPaths", ({ paths }, event) => Promise.all(paths.map(async (path) => { try { const document = await documents.importPath(path); owners.set(document.id, event.sender); return { ok: true as const, document }; } catch (error) { return { ok: false as const, path, error: error instanceof Error ? error.message : "Import failed" }; } })));
+  registrar.handle("documents:importPaths", ({ paths, folderId }, event) => Promise.all(paths.map(async (path) => { try { const document = await documents.importPath(path); owners.set(document.id, event.sender); if (folderId !== undefined) library.move([document.id], folderId); return { ok: true as const, document }; } catch (error) { return { ok: false as const, path, error: error instanceof Error ? error.message : "Import failed" }; } })));
   registrar.handle("documents:list", () => documents.list());
   registrar.handle("documents:get", ({ documentId }) => documents.get(documentId));
   registrar.handle("documents:read", ({ documentId }) => documents.read(documentId));

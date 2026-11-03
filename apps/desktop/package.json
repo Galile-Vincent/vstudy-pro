@@ -48,6 +48,7 @@
     "zustand": "5.0.16"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.0",
     "@eslint/js": "9.39.1",
     "@tailwindcss/vite": "4.1.18",
     "@types/hast": "3.0.5",
@@ -83,6 +84,10 @@
       {
         "from": "resources/converter",
         "to": "converter"
+      },
+      {
+        "from": "resources/samples",
+        "to": "samples"
       }
     ],
     "mac": {

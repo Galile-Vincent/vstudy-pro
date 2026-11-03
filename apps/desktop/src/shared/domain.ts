@@ -204,6 +204,8 @@ export const chatEventSchema = z.discriminatedUnion("type", [
 export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
   .object({
+    onboardingCompleted: z.boolean().optional(),
+    displayName: z.string().trim().max(100).optional(),
     language: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
     replyLanguage: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
     chatSide: z.enum(["left", "right"]),
