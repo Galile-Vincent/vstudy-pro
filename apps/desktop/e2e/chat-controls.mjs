@@ -52,7 +52,10 @@ try {
  const error=page.locator('.chat-error'); await error.getByRole('button',{name:'Retry',exact:true}).waitFor();
  assert.match(await error.innerText(),/rate limited/i);
  await page.screenshot({path:'/tmp/vstudy-error-retry.png'});
- await error.getByRole('button',{name:'Retry',exact:true}).click();
+ await page.reload();
+ await error.getByRole('button',{name:'Retry',exact:true}).last().waitFor();
+ assert.match(await error.last().innerText(),/rate limited/i);
+ await error.getByRole('button',{name:'Retry',exact:true}).last().click();
  await page.waitForFunction(()=>window.document.querySelector('.stop-button')?.disabled===true);
  await page.emulateMedia({colorScheme:'dark'});
  await page.getByRole('button',{name:'Model',exact:true}).click();

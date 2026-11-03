@@ -142,6 +142,7 @@ export class ChatService {
     status: "complete" | "aborted" | "error" = "complete",
     usage?: Usage,
     id = randomUUID(),
+    error?: string,
   ) {
     const previous = this.store.messages.list(request.conversationId).at(-1);
     const createdAt = new Date(
@@ -152,7 +153,7 @@ export class ChatService {
         id,
         conversationId: request.conversationId,
         role,
-        parts: [{ type: "text", text, status, modelId: request.modelId, options: request.options, turnId: request.turnId, ...(usage ? { usage } : {}), ...(role === "user" && request.selection ? { selection: request.selection } : {}) }],
+        parts: [{ type: "text", text, status, modelId: request.modelId, options: request.options, turnId: request.turnId, ...(error ? { error } : {}), ...(usage ? { usage } : {}), ...(role === "user" && request.selection ? { selection: request.selection } : {}) }],
         createdAt,
       }),
     );
@@ -188,7 +189,7 @@ export class ChatService {
         for (const model of entry.usageModels?.length ? entry.usageModels : [{ modelId: entry.request.modelId, usage: entry.usage }]) this.store.usage.record({ ...model.usage, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: model.modelId, kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
-      if (entry.text || entry.usage) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId);
+      if (entry.text || entry.usage || event.type === "error") this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined);
     } catch {
       if (!entry.controller.signal.aborted)
         event = { type: "error", message: "Chat could not be saved" };

@@ -42,11 +42,11 @@ No paid/authenticated inference was sent to the real providers. Discovery and lo
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| `pnpm typecheck` | PASS | `/tmp/vstudy-typecheck-last.log` |
-| `pnpm lint` | PASS | `/tmp/vstudy-lint-last.log` |
-| `pnpm test` | PASS | 28 files, 136 passed, 3 skipped; `/tmp/vstudy-test-last.log`. Skips are paid real-provider smoke tests and the opt-in Antigravity live probe. Installed Codex model discovery ran. |
-| `pnpm build` | PASS | `/tmp/vstudy-build-last.log` |
-| `node e2e/chat-controls.mjs` | PASS | `/tmp/vstudy-controls-last.log`: model + effort persistence, IME Enter, real clipboard, regeneration records, edit/resend, inline rate-limit + Retry, dark mode, no page errors. |
+| `pnpm typecheck` | PASS | `/tmp/vstudy-typecheck-reload.log` |
+| `pnpm lint` | PASS | `/tmp/vstudy-lint-reload.log` |
+| `pnpm test` | PASS | 28 files, 136 passed, 3 skipped; `/tmp/vstudy-test-reload.log`. Skips are paid real-provider smoke tests and the opt-in Antigravity live probe. Installed Codex model discovery ran. |
+| `pnpm build` | PASS | `/tmp/vstudy-build-reload.log` |
+| `node e2e/chat-controls.mjs` | PASS | `/tmp/vstudy-controls-reload.log`: model + effort persistence, IME Enter, real clipboard, regeneration records, edit/resend, inline rate-limit + Retry across reload, dark mode, no page errors. |
 | `node e2e/selection-chat.mjs` | PASS | `/tmp/vstudy-selection-latest.log`: exact document selection, history, API settings, usage dashboard, provider availability, model change/draft preservation; no console errors. |
 | `node e2e/visual-regressions.mjs` | PASS | `/tmp/vstudy-visual-last.log`: long selection chip, Markdown, model change/draft and restart. Uses keyboard activation for the long heading's section action, whose hover can move out of view during scroll. Waits for async model display name after restart. |
 | `node e2e/conversion.mjs` | PASS | `/tmp/vstudy-conversion-final.log`: actual DOCX/XLSX/PDF conversion, images and file drop; no console errors. Initial run exposed startup/import race; final run waits for workspace connection and passed. |

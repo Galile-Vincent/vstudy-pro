@@ -120,6 +120,7 @@ export function Chat({
       role: m.role,
       content: m.parts.map(p => ({ type: "text" as const, text: p.text })),
       createdAt: new Date(m.createdAt),
+      ...(m.role === 'assistant' && m.parts.some(p => p.status === 'error') ? { status: { type: 'incomplete' as const, reason: 'error' as const, error: m.parts.find(p => p.error)?.error ?? 'Provider unavailable' } } : {}),
       metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage, modelId: m.parts[0]?.modelId, options: m.parts[0]?.options, selection: m.parts[0]?.selection, turnId: m.parts[0]?.turnId } },
     })),
   });

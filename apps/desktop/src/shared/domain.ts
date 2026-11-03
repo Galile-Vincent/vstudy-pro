@@ -120,7 +120,7 @@ export const usageDashboardSchema = z.object({
 });
 export type UsageSummary = z.infer<typeof usageSummarySchema>;
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .object({ type: z.literal("text"), text: z.string(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .strict();
 export const messageSchema = z
   .object({
