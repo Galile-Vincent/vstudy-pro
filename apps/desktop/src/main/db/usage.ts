@@ -21,6 +21,8 @@ export function usageRepository(db: DatabaseSync) {
     list,
     forConversation: (id: string) => list('WHERE conversationId=?', [id]),
     forDocument: (id: string) => list('WHERE documentId=?', [id]),
+    conversationTotals: (id: string) => summarize(list('WHERE conversationId=?', [id])),
+    documentTotals: (id: string) => summarize(list('WHERE documentId=?', [id])),
     summary(period: 'day' | 'month' | 'last30days', now = new Date()) {
       const start = new Date(now);
       if (period === 'last30days') start.setDate(start.getDate() - 30);

@@ -55,3 +55,13 @@ export function headerRateLimit(headers: Headers, anthropic: boolean): Usage['ra
   }
   return remainingTokens === undefined && remainingRequests === undefined && !resetsAt ? undefined : { label: 'Provider rate limit', remainingTokens, remainingRequests, resetsAt };
 }
+export function cliModelUsage(data: string): { modelId: string; usage: Usage }[] | undefined {
+  if (data === '[DONE]') return undefined;
+  const result = z.object({ type: z.string().optional(), modelUsage: z.record(z.object({
+    inputTokens: z.number().int().nonnegative(), outputTokens: z.number().int().nonnegative(),
+    cacheReadInputTokens: z.number().int().nonnegative(), cacheCreationInputTokens: z.number().int().nonnegative(),
+    thinkingTokens: z.number().int().nonnegative().optional(), costUSD: z.number().finite().nonnegative(),
+  })).optional() }).parse(JSON.parse(data));
+  if (result.type !== 'result' || !result.modelUsage) return undefined;
+  return Object.entries(result.modelUsage).map(([modelId,u]) => ({ modelId, usage: { inputTokens: u.inputTokens + u.cacheReadInputTokens + u.cacheCreationInputTokens, outputTokens: u.outputTokens, cacheReadTokens: u.cacheReadInputTokens, cacheWriteTokens: u.cacheCreationInputTokens, reasoningTokens: u.thinkingTokens, costUsd: u.costUSD, costSource: 'reported' } }));
+}

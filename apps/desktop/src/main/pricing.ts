@@ -1,6 +1,6 @@
 import type { Price, Usage } from '../shared/domain';
 // Standard global rates, verified 2026-11-03; overrides cover negotiated and nonstandard tiers.
-export const pricingSources = ['https://platform.claude.com/docs/en/about-claude/pricing', 'https://developers.openai.com/api/docs/models/gpt-5.4'];
+export const pricingSources = ['https://platform.claude.com/docs/en/about-claude/pricing', 'https://developers.openai.com/api/docs/models/gpt-5.4', 'https://developers.openai.com/api/docs/models/gpt-6.1-sol', 'https://developers.openai.com/api/docs/models/gpt-6-sol'];
 export const prices: Record<string, Price> = {
   'claude-fable-5-1': { input: 10, output: 50, cacheRead: .25, cacheWrite: 12.5 },
   'claude-opus-5-5': { input: 4, output: 20, cacheRead: .2, cacheWrite: 5 },

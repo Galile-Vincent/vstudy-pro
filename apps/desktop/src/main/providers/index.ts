@@ -24,7 +24,7 @@ export interface Model {
   id: string;
   name: string;
 }
-export type ProviderRequest = ChatRequest & { prompt: string; onUsageSnapshot?: (usage: Usage) => void };
+export type ProviderRequest = ChatRequest & { prompt: string; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
 export interface ProviderAdapter {
   detect(): Promise<Availability>;
   listModels(): Promise<Model[]>;

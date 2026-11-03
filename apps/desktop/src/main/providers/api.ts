@@ -67,7 +67,7 @@ export function createApiAdapter(
     },
     async listModels() {
       if (anthropic())
-        return ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"].map(
+        return ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5", "claude-fable-5-1"].map(
           (id) => ({ id, name: id }),
         );
       const token = key();
@@ -133,7 +133,7 @@ export function createApiAdapter(
       )) {
         signal.throwIfAborted();
         if (event.type === 'usage') { snapshot(event.usage); continue; }
-        if (event.type === 'text-delta') text += event.text;
+        if (event.type === 'text-delta') { text += event.text; if (!usage) request.onUsageSnapshot?.(finalUsage()); }
         if (event.type === 'done' || event.type === 'error') { terminal = true; yield { type: 'usage', usage: finalUsage() }; }
         yield event;
       }

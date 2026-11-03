@@ -313,3 +313,39 @@ it("rejects new streams and conversations throughout document deletion", async (
   release(); await deletion;
   expect(() => chat.start(request, owner)).not.toThrow();
 });
+it('persists usage exactly once before error and attaches it to the saved assistant', async () => {
+  const {chat,store,request,owner} = await setup({...available,async *stream() {
+    yield {type:'text-delta',text:'Partial'};
+    yield {type:'usage',usage:{inputTokens:1200,outputTokens:340,costUsd:.012,costSource:'reported'}};
+    yield {type:'error',message:'private'};
+  }});
+  chat.start(request,owner);
+  await until(()=>owner.events.at(-1)?.type==='error');
+  expect(owner.events.map(e=>e.type)).toEqual(['text-delta','usage','error']);
+  expect(store.usage.forConversation(request.conversationId)).toMatchObject([{inputTokens:1200,outputTokens:340,costUsd:.012}]);
+  expect(store.messages.list(request.conversationId).at(-1)?.parts[0]).toMatchObject({status:'error',usage:{inputTokens:1200,costSource:'reported'}});
+});
+it('records the latest reported partial snapshot on abort without post-terminal events', async () => {
+  const {chat,store,request,owner} = await setup({...available,async *stream(req,signal) {
+    req.onUsageSnapshot?.({inputTokens:240,outputTokens:3,costSource:'unknown'});
+    yield {type:'text-delta',text:'Partial'};
+    await new Promise<void>(resolve=>signal.addEventListener('abort',()=>resolve(),{once:true}));
+    yield {type:'done'};
+  }});
+  chat.start(request,owner);await until(()=>owner.events.length>0);chat.abort(request.requestId,owner);
+  expect(owner.events.map(e=>e.type)).toEqual(['text-delta','usage','done']);
+  expect(store.usage.forConversation(request.conversationId)).toMatchObject([{inputTokens:240,outputTokens:3,costSource:'unknown'}]);
+  await new Promise(resolve=>setTimeout(resolve,10));expect(owner.events).toHaveLength(3);
+});
+it('records CLI auxiliary model usage separately while displaying aggregate message usage',async()=>{
+  const {chat,store,request,owner}=await setup({...available,async *stream(req){
+    req.onUsageSnapshot?.({inputTokens:3230,outputTokens:21,costUsd:.0058314,costSource:'reported'},[
+      {modelId:'claude-haiku-5-5',usage:{inputTokens:1180,outputTokens:17,costUsd:.0001265,costSource:'reported'}},
+      {modelId:'claude-sonnet-5-5',usage:{inputTokens:2050,outputTokens:4,costUsd:.0057049,costSource:'reported'}},
+    ]);
+    yield {type:'text-delta',text:'OK'};yield {type:'done'};
+  }});
+  chat.start(request,owner);await until(()=>owner.events.at(-1)?.type==='done');
+  expect(store.usage.forConversation(request.conversationId).map(r=>[r.modelId,r.inputTokens,r.outputTokens]).sort()).toEqual([['claude-haiku-5-5',1180,17],['claude-sonnet-5-5',2050,4]]);
+  expect(owner.events.filter(e=>e.type==='usage')).toHaveLength(1);
+});

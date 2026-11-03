@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { extractUsage } from "./usage";
+import { cliModelUsage, extractUsage } from "./usage";
 import type { Usage, ChatEvent } from "../../shared/domain";
 const wireEvent = z
   .object({
@@ -66,13 +66,15 @@ export async function* parseStream(
   chunks: AsyncIterable<string>,
   kind: ParserKind,
   sse = false,
-  snapshot: (usage: Usage) => void = () => {},
+  snapshot: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void = () => {},
 ): AsyncIterable<ChatEvent> {
   let usage: Usage | undefined;
   let emitted = false;
   function events(payload: string): ChatEvent[] {
     usage = extractUsage(payload, kind, usage);
-    if (usage) snapshot(usage);
+    const models = kind === 'claude' ? cliModelUsage(payload) : undefined;
+    if (models?.length && usage) usage = { ...usage, inputTokens: models.reduce((n,m) => n + m.usage.inputTokens,0), outputTokens: models.reduce((n,m) => n + m.usage.outputTokens,0), cacheReadTokens: models.reduce((n,m) => n + (m.usage.cacheReadTokens ?? 0),0), cacheWriteTokens: models.reduce((n,m) => n + (m.usage.cacheWriteTokens ?? 0),0), reasoningTokens: models.reduce((n,m) => n + (m.usage.reasoningTokens ?? 0),0) };
+    if (usage) snapshot(usage,models);
     return parseProviderEvent(kind, payload).flatMap(event => {
       if ((event.type === "done" || event.type === "error") && usage && !emitted) { emitted = true; return [{ type: "usage", usage }, event] as ChatEvent[]; }
       return [event];

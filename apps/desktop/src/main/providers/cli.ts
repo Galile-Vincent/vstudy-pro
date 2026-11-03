@@ -86,7 +86,7 @@ export async function* runCli(
   kind: ParserKind,
   signal: AbortSignal,
   timeoutMs = 120_000,
-  snapshot: (usage: Usage) => void = () => {},
+  snapshot: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void = () => {},
 ) {
   signal.throwIfAborted();
   const child = spawn(binary, args, {

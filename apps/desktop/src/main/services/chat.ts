@@ -27,6 +27,7 @@ interface ActiveRequest {
   onDestroyed: () => void;
   text: string;
   usage?: Usage;
+  usageModels?: { modelId: string; usage: Usage }[];
   usageEmitted?: boolean;
 }
 export class ChatService {
@@ -168,7 +169,7 @@ export class ChatService {
       const messageId = randomUUID();
       if (entry.usage) {
         entry.usage = priceUsage(entry.request.modelId, entry.usage, this.store.settings.get().priceOverrides);
-        this.store.usage.record({ ...entry.usage, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: entry.request.modelId, kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
+        for (const model of entry.usageModels?.length ? entry.usageModels : [{ modelId: entry.request.modelId, usage: entry.usage }]) this.store.usage.record({ ...model.usage, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: model.modelId, kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
       if (entry.text || entry.usage) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId);
@@ -205,7 +206,7 @@ export class ChatService {
           : {}),
       });
       for await (const event of adapter.stream(
-        { ...entry.request, prompt, onUsageSnapshot: usage => { if (this.active.get(entry.request.requestId) === entry) entry.usage = usageSchema.parse(usage); } },
+        { ...entry.request, prompt, onUsageSnapshot: (usage, models) => { if (this.active.get(entry.request.requestId) === entry) { entry.usage = usageSchema.parse(usage); if (models) entry.usageModels = models.map(m => ({modelId: m.modelId, usage: usageSchema.parse(m.usage)})); } } },
         entry.controller.signal,
       )) {
         if (

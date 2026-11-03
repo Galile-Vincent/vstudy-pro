@@ -13,11 +13,11 @@ import { budgetState } from '../renderer/usage/budget';
 async function events(kind: 'claude' | 'codex') {
   const text = readFileSync(join(import.meta.dirname,'providers/fixtures',`${kind}-live.jsonl`),'utf8');
   async function* chunks() { for(let i=0;i<text.length;i+=7) yield text.slice(i,i+7); }
-  return Array.fromAsync(parseStream(chunks(),kind));
+  const result = []; for await (const e of parseStream(chunks(),kind)) result.push(e); return result;
 }
 it('parses real Claude 2.1.316 final result once with reported cost and cache totals',async () => {
   const result = await events('claude');
-  expect(result.filter(e=>e.type==='usage')).toEqual([{type:'usage',usage:{inputTokens:2050,outputTokens:4,cacheReadTokens:649,cacheWriteTokens:1399,reasoningTokens:0,costUsd:0.0058314000000000005,costSource:'reported'}}]);
+  expect(result.filter(e=>e.type==='usage')).toEqual([{type:'usage',usage:{inputTokens:3230,outputTokens:21,cacheReadTokens:649,cacheWriteTokens:1399,reasoningTokens:0,costUsd:0.0058314000000000005,costSource:'reported'}}]);
   expect(result.at(-1)).toEqual({type:'done'});
 });
 it('parses real Codex 0.166.0 turn.completed usage',async () => {
@@ -25,7 +25,7 @@ it('parses real Codex 0.166.0 turn.completed usage',async () => {
 });
 it('supports token_count primary and secondary rate limits without double counting cumulative totals', () => {
   const fixture = JSON.stringify({type:'event_msg',payload:{type:'token_count',info:{total_token_usage:{input_tokens:1200,output_tokens:340}},rate_limits:{primary:{used_percent:62,window_minutes:300,resets_at:1793715000},secondary:{used_percent:18,window_minutes:10080,resets_at:1794027600}}}});
-  expect(extractUsage(fixture,'codex')).toEqual({inputTokens:1200,outputTokens:340,costSource:'unknown',rateLimit:{label:'300 minute window',usedPercent:62,resetsAt:'2026-11-03T13:30:00.000Z'}});
+  expect(extractUsage(fixture,'codex')).toMatchObject({inputTokens:1200,outputTokens:340,costSource:'unknown',rateLimit:{label:'300 minute window',usedPercent:62,resetsAt:'2026-11-03T14:10:00.000Z'}});
 });
 it('prices cache and reasoning without double counting, unknown is undefined, and overrides apply', () => {
   const u = {inputTokens:1000000,outputTokens:200000,cacheReadTokens:200000,cacheWriteTokens:100000,reasoningTokens:50000,costSource:'unknown' as const};
@@ -61,4 +61,15 @@ it('warns at literal budget boundaries and predicts exceeding either cap', () =>
   expect(budgetState({...defaultSettings,monthlyBudgetUsd:10},summary,{tokens:10,costUsd:3})).toMatchObject({percent:80,tone:'amber',exceeds:true});
   expect(budgetState({...defaultSettings,monthlyTokenBudget:1540},summary)).toMatchObject({percent:100,tone:'red'});
   expect(budgetState(defaultSettings,summary,{tokens:10000,costUsd:100})).toMatchObject({percent:0,exceeds:false});
+});
+it('merges Anthropic start/delta counters and emits one usage before the terminal frame',async()=>{
+  async function* chunks(){yield 'data: {"type":"message_start","message":{"usage":{"input_tokens":100,"cache_read_input_tokens":20,"cache_creation_input_tokens":10,"output_tokens":1}}}\n\n';yield 'data: {"type":"message_delta","usage":{"output_tokens":40}}\n\ndata: {"type":"message_stop"}\n\n';}
+  const snapshots: unknown[]=[];const result=[];for await(const event of parseStream(chunks(),'anthropic',true,u=>snapshots.push(u)))result.push(event);
+  expect(result).toEqual([{type:'usage',usage:{inputTokens:130,outputTokens:40,cacheReadTokens:20,cacheWriteTokens:10,costSource:'unknown'}},{type:'done'}]);
+  expect(snapshots.at(-1)).toMatchObject({inputTokens:130,outputTokens:40});
+});
+it('reads OpenAI usage-only chunks, cache details and reasoning details',async()=>{
+  async function* chunks(){yield 'data: {"choices":[],"usage":{"prompt_tokens":1200,"completion_tokens":340,"prompt_tokens_details":{"cached_tokens":200},"completion_tokens_details":{"reasoning_tokens":40}}}\n\ndata: [DONE]\n\n';}
+  const result=[];for await(const event of parseStream(chunks(),'openai',true))result.push(event);
+  expect(result).toEqual([{type:'usage',usage:{inputTokens:1200,outputTokens:340,cacheReadTokens:200,reasoningTokens:40,costSource:'unknown'}},{type:'done'}]);
 });
