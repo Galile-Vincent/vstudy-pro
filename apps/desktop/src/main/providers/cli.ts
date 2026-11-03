@@ -113,6 +113,8 @@ export async function* runCli(
     }
   };
   const kill = () => {
+    child.stdout.unpipe();
+    child.stdout.destroy();
     terminate("SIGTERM");
     killTimer ??= setTimeout(() => terminate("SIGKILL"), 1_000);
     killTimer.unref();
@@ -143,6 +145,9 @@ export async function* runCli(
     if (timedOut || spawnFailed || exit !== 0 || !terminal)
       throw new Error("CLI request failed");
     yield { type: "done" } as const;
+  } catch {
+    signal.throwIfAborted();
+    throw new Error("CLI request failed");
   } finally {
     clearTimeout(timer);
     signal.removeEventListener("abort", kill);

@@ -26,7 +26,7 @@ export function createChatAdapter(
       let terminal = false;
       let unsubscribe = () => {};
       const push = (event: ChatEvent) => {
-        if (terminal) return;
+        if (terminal || abortSignal.aborted || runGeneration !== generation) return;
         queue.push(event);
         if (event.type !== "text-delta") {
           terminal = true;
