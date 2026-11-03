@@ -199,7 +199,7 @@ export const chatEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("usage"), usage: usageSchema }).strict(),
   z.object({ type: z.literal("text-delta"), text: z.string(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() }).strict(),
   z.object({ type: z.literal("done") }).strict(),
-  z.object({ type: z.literal("error"), message: z.string() }).strict(),
+  z.object({ type: z.literal("error"), message: z.string(), code:z.string().max(100).optional(), params:z.record(z.union([z.string(),z.number()])).optional() }).strict(),
 ]);
 export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
