@@ -20,5 +20,19 @@
   "type_mismatch": "檔案內容與副檔名不符。",
   "unsafe_archive": "此封存檔或檔案可能不安全，無法匯入。",
   "text_encoding": "文字不是 UTF-8（可能的編碼：{{encoding}}）。請另存為 UTF-8 後再匯入。",
-  "pdf_no_text": "此 PDF 沒有文字層。目前不支援 OCR，請匯入可選取文字的 PDF。"
+  "pdf_no_text": "此 PDF 沒有文字層。目前不支援 OCR，請匯入可選取文字的 PDF。",
+  "ai_parse.images_unsupported": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.failed": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.budget": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.cap": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.range": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.size": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.document": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.closed": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.busy": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.owner": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.provider": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.active_content": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.cancelled": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.changed_too_much": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。"
 }

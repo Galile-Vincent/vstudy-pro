@@ -1,3 +1,4 @@
+import { aiParseContract } from './ai-parse';
 import { statusSchema } from "./status";
 import { folderIdSchema, libraryContract } from "./library";
 import { z } from "zod";
@@ -24,6 +25,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  ...aiParseContract,
   "secrets:unlock": {request:z.object({providerId:providerIdSchema}).strict(),response:ack},
   "secrets:session": {request:z.object({providerId:providerIdSchema,key:z.string().min(1).max(16384)}).strict(),response:ack},
   "converter:mode": {request:z.object({offline:z.boolean()}).strict(),response:ack},
@@ -57,7 +59,7 @@ export const ipcContract = {
     response: documentSchema.nullable(),
   },
   "documents:read": {
-    request: z.object({ documentId: documentIdSchema }).strict(),
+    request: z.object({ documentId: documentIdSchema, version:z.enum(["original","ai"]).optional() }).strict(),
     response: z.string(),
   },
   "documents:reconvert": {request:z.object({documentId:documentIdSchema}).strict(),response:documentSchema},

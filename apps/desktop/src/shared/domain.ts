@@ -21,6 +21,7 @@ const documentFields = {
   sourcePath: z.string().min(1),
   mime: z.string().min(1),
   converter: z.enum(["pdf_md", "markitdown"]).default("markitdown"),
+  activeVersion:z.enum(["original","ai"]).default("original"),
   markdownPath: z.string().min(1),
   createdAt: timestamp,
 };
@@ -66,6 +67,7 @@ export const selectionSchema = z
     endOffset: z.number().int().nonnegative(),
     text: z.string(),
     headingPath: z.array(z.string()),
+    version:z.enum(["original","ai"]).optional(),
     page: z.number().int().positive().optional(),
   })
   .strict()
@@ -73,6 +75,7 @@ export const selectionSchema = z
 export type Selection = z.infer<typeof selectionSchema>;
 export const modelOptionsSchema = z.record(z.string().min(1), z.union([z.string(), z.boolean()]));
 export const modelSchema = z.object({
+  supportsImages:z.boolean().optional(), imageUnsupportedReason:z.string().optional(),
   id: z.string(), name: z.string(), resolvedId: z.string().optional(),
   options: z.array(z.object({ id: z.string(), label: z.string(), values: z.array(z.object({ id: z.string(), label: z.string() })), default: z.string() })).optional(),
 });
@@ -115,12 +118,14 @@ export const usageSummarySchema = z.object({
 export const usagePeriodSchema = z.enum(['day', 'month', 'last30days', 'all']);
 export type UsagePeriod = z.infer<typeof usagePeriodSchema>;
 export const usageDashboardSchema = z.object({
+  parseTotals:z.object({calls:z.number(),inputTokens:z.number(),outputTokens:z.number(),costUsd:z.number().nullable()}).optional(),
   summary: usageSummarySchema,
   cacheReadTokens: z.number().nonnegative(), cacheWriteTokens: z.number().nonnegative(), reasoningTokens: z.number().nonnegative(),
   days: z.array(z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), inputTokens: z.number().nonnegative(), outputTokens: z.number().nonnegative() })),
 });
 export type UsageSummary = z.infer<typeof usageSummarySchema>;
 export const documentCitationSchema = z.object({
+  version:z.enum(['original','ai']).optional(),
   id: z.string().regex(/^s\d+$/), documentId: documentIdSchema,
   title: z.string().max(300), offset: z.number().int().nonnegative(),
   page: z.number().int().positive().optional(), quote: z.string().max(300),

@@ -20,5 +20,19 @@
   "type_mismatch": "The file contents do not match its type.",
   "unsafe_archive": "This archive or file looks unsafe and cannot be imported.",
   "text_encoding": "This text is not UTF-8 (possible encoding: {{encoding}}). Export it as UTF-8 and import again.",
-  "pdf_no_text": "This PDF has no text layer. OCR is not supported; import a PDF with selectable text."
+  "pdf_no_text": "This PDF has no text layer. OCR is not supported; import a PDF with selectable text.",
+  "ai_parse.images_unsupported": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.failed": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.budget": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.cap": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.range": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.size": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.document": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.closed": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.busy": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.owner": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.provider": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.active_content": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.cancelled": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.changed_too_much": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry."
 }

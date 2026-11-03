@@ -1,3 +1,4 @@
+import { aiParseMigration } from './ai-parse-migration';
 import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
 import { libraryMigration } from "./library-migration";
 import { usageMigration, usageRollupMigration, usageRepository } from "./usage";
@@ -67,6 +68,7 @@ export const migrations = [
     CREATE INDEX documents_size ON documents(sizeBytes,id) WHERE deletedAt IS NULL;
     CREATE INDEX documents_folder_size ON documents(folderId,sizeBytes,id) WHERE deletedAt IS NULL;
   ` },
+  { version:11, sql:aiParseMigration },
 ];
 const documentRow = z
   .object({
@@ -79,6 +81,7 @@ const documentRow = z
     converter: z.enum(["pdf_md", "markitdown"]),
     status: z.string(),
     error: z.string().nullable(),
+    activeVersion:z.enum(["original","ai"]),
     markdownPath: z.string(),
     createdAt: z.string(),
   })
