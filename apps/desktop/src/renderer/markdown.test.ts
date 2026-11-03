@@ -145,3 +145,10 @@ it("hides page markers, joins page continuations, and preserves selection source
   expect(source.slice(selection.startOffset, selection.endOffset)).toBe("continued");
   await act(async () => root.unmount()); container.remove();
 });
+
+it("ignores page-marker text in code and escaped text", async () => {
+  const { pageAt } = await import("./selection");
+  const source = '<!-- page 2 -->\n\n```html\n<!-- page 999 -->\n```\n\n    <!-- page 998 -->\n\n`<!-- page 997 -->`\n\n\\<!-- page 996 -->\n\n&lt;!-- page 995 -->\n';
+  expect(pageAt(source, source.length)).toBe(2);
+  expect(pageAt('`<!-- page 999 -->`', 20)).toBeUndefined();
+});

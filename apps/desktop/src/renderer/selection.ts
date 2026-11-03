@@ -39,8 +39,17 @@ export function headingsIn(source: string): Heading[] {
   }));
 }
 export function pageAt(source: string, offset: number): number | undefined {
-  const markers = [...source.slice(0, offset).matchAll(/<!-- page (\d+) -->/g)];
-  return markers.length ? Number(markers.at(-1)![1]) : undefined;
+  let page: number | undefined;
+  const visit = (node: MdNode) => {
+    if (node.type === "html" && node.position!.start.offset! < offset) {
+      for (const match of node.value.matchAll(/<!-- page (\d+) -->/g)) {
+        if (node.position!.start.offset! + match.index < offset) page = Number(match[1]);
+      }
+    }
+    if ("children" in node) node.children.forEach(visit);
+  };
+  visit(unified().use(remarkParse).parse(source) as MdRoot);
+  return page;
 }
 
 export function headingPath(headings: Heading[], offset: number): string[] {
