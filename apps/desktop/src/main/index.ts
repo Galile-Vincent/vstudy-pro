@@ -1,3 +1,4 @@
+import { acquireOwnership } from './ownership';
 import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -86,7 +87,8 @@ function createWindow(): void {
   void current.loadURL(entryUrl);
 }
 
-void app.whenReady().then(() => {
+const ownsApplication = acquireOwnership(app, () => window);
+if (ownsApplication) void app.whenReady().then(() => {
   const userData = app.getPath("userData");
   mkdirSync(userData, { recursive: true });
   store = openStore(join(userData, "vstudy.sqlite"));

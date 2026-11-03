@@ -10,7 +10,7 @@ import { profileStage } from "../../../resources/converter/profile";
 import { decodeHtmlEntities } from "../../shared/html";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
-import { mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { link, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -89,9 +89,16 @@ export class DocumentService {
           return existing;
         }
         const directory = join(this.library, sourceHash);
-        // Recover a directory left behind between publishing a source and inserting its row.
-        await rm(directory, { recursive: true, force: true });
-        await rename(staging, directory);
+        await mkdir(directory, { recursive: true, mode: 0o700 });
+        // A hash names immutable bytes. Publish each source exclusively, including after a crash.
+        try { await link(source, join(directory, `source.${extension}`)); }
+        catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
+        await rm(source, { force: true });
+        const published = this.options.store.documents.findByHash(sourceHash);
+        if (published) {
+          if (!this.get(published.id)) throw new Error("Document is pending deletion");
+          return published;
+        }
         let title = basename(path, extname(path));
         if (mime === "text/html") {
           const html = await readFile(join(directory, `source.${extension}`), "utf8");
