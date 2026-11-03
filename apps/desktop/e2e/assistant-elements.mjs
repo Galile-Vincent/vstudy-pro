@@ -13,7 +13,7 @@ try {
  await page.getByTestId('import-document').click();await page.getByTestId('document-markdown').waitFor();
  await page.getByRole('button',{name:'Start a conversation',exact:true}).click();
  const selected=page.getByRole('combobox',{name:'Model',exact:true});const search=page.getByRole('combobox',{name:'Search models'});
- await selected.click();await search.fill('6 gpt');await page.getByRole('option').filter({hasText:'GPT-6.1-Sol'}).first().click();await selected.filter({hasText:'GPT-6.1-Sol'}).waitFor();
+ await selected.click();await search.fill('fixture');await page.getByRole('option').filter({hasText:'Fixture model (test only)'}).first().click();await selected.filter({hasText:'Fixture model (test only)'}).waitFor();
  await selected.click();await search.fill('Fake');await page.getByRole('option').filter({hasText:'Fake'}).click();await selected.filter({hasText:'Fake'}).waitFor();
  const conversations=await page.evaluate(async()=>{const [doc]=await window.desktop.invoke('documents:list',{});return window.desktop.invoke('conversations:list',{documentId:doc.id});});
  assert.equal(conversations.length,1,'model changes reuse the empty conversation');

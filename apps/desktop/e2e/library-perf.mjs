@@ -121,6 +121,8 @@ try {
   Object.assign(evidence,{gridFrameP50:gridFrames[90],gridFrameP95:gridFrames[170],gridFrameMax:gridFrames.at(-1),gridMounted});
   assert.ok(gridMounted<60,`grid mounts bounded visible cards: ${gridMounted}`);
   await page.evaluate(async()=>{window.document.querySelector('.library-results').scrollTop=0;await new Promise(window.requestAnimationFrame);});
+  const profiler=process.env.VSTUDY_PERF_TRACE ? await page.context().newCDPSession(page) : null;
+  if(profiler) {await profiler.send('Profiler.enable');await profiler.send('Profiler.start');}
   const metadata=[];
   for(let n=0;n<10;n++) {
     metadata.push(await page.evaluate(()=>new Promise(resolve=>{
@@ -133,6 +135,7 @@ try {
       window.document.querySelector('.library-document').dispatchEvent(new window.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
     })));
     console.log('metadataPaintMs',metadata.at(-1));
+    if(n===0 && profiler) {const {profile}=await profiler.send('Profiler.stop');await mkdir('/tmp/vstudy-final',{recursive:true});await writeFile('/tmp/vstudy-final/metadata-first-open.cpuprofile',JSON.stringify(profile));}
     if(metadata.at(-1)<0) break;
     await page.locator('.app-header').getByRole('button',{name:'Library',exact:true}).click();await page.locator('.library-document').first().waitFor();
   }

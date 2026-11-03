@@ -46,6 +46,15 @@ try {
   const selectedText = mock
     ? "a closer look"
     : "This selected passage reaches the fake provider.";
+  await viewer.focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  for(let n=0;n<5;n++) await page.keyboard.press('Shift+ArrowRight');
+  const keyboardText=await page.evaluate(()=>window.getSelection()?.toString());
+  assert.equal(keyboardText.length,5,'keyboard selects an arbitrary five-character passage');
+  await page.keyboard.press('Meta+Shift+k');
+  await page.locator('.aui-composer-root .selection-preview').filter({hasText:keyboardText}).waitFor();
+  await page.getByRole('button',{name:'Remove selection',exact:true}).click();
   assert.ok(await viewer.locator("table").count(), "Markdown table rendered");
   assert.ok(await viewer.locator("pre code").count(), "Markdown code rendered");
   await viewer.evaluate((element, text) => {

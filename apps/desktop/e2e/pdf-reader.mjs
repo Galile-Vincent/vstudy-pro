@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, writeFile, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -26,13 +26,14 @@ if (!source) {
   const xref=Buffer.byteLength(pdf);pdf+=`xref\n0 ${offsets.length}\n0000000000 65535 f \n`+offsets.slice(1).map(n=>`${String(n).padStart(10,'0')} 00000 n \n`).join('')+`trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
   await writeFile(source,pdf);
 }
+if (process.env.VSTUDY_CONVERTER_VENV) await cp(process.env.VSTUDY_CONVERTER_VENV,join(directory,'converter-venv'),{recursive:true});
 let app;
 try {
   app = await electron.launch({ args: [resolve('.'), `--user-data-dir=${directory}`], env: { ...process.env, ELECTRON_RUN_AS_NODE: '', VSTUDY_FAKE_PROVIDER: '1' } });
   const page = await app.firstWindow();
  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   await page.getByTestId('bridge-status').waitFor({state:'attached'});
-  await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, resolve(source));
+  await app.evaluate(({ dialog }, path) => { dialog.showMessageBox = async () => ({response:1}); dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, resolve(source));
   await page.getByTestId('import-document').click();
   await page.getByTestId('document-markdown').filter({ hasText: 'R12.' }).waitFor({ timeout: 660_000 });
   await page.locator('.pane-toolbar').filter({ hasText: 'Markdown · pdf_md' }).waitFor({ timeout: 660_000 });

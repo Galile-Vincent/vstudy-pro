@@ -25,7 +25,7 @@ try {
   await shot(`${prefix}-idle`);
   assert.equal(await page.locator('.aui-composer-cancel').count(),0);
   await model.click();await search.fill('Fake');await shot(`${prefix}-search`);await close();
-  await choose('gpt-6.1-sol','GPT-6.1-Sol');await model.click();await search.fill('Sol');
+  await choose('fixture-model','Fixture model (test only)');await model.click();await search.fill('fixture');
   await page.getByRole('switch',{name:'Fast mode (priority tier)'}).click();
   await shot(`${prefix}-effort-fast`);
   const popover=await page.locator('[data-slot=model-selector-content]').boundingBox();const pane=await page.locator('.chat-pane').boundingBox();
