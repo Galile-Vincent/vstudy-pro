@@ -1,0 +1,5 @@
+{"extension":"docx","status":"ready","text":"VStudy fixture"}
+{"extension":"xlsx","status":"ready","text":"Study\nUse this section\nVStudy fixture"}
+{"extension":"pdf","status":"ready","text":"VStudy fixture"}
+{"images":"PASS","dataUri":true,"libraryProtocol":true,"fileDrop":true}
+{"result":"PASS","realConverter":true,"formats":["docx","xlsx","pdf"],"consoleErrors":[]}

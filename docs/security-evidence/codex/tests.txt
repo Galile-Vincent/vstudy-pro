@@ -1,0 +1,17 @@
+
+> vstudy-pro@ test /Users/vc/.t3/projects/vstudy-pro
+> pnpm --filter @vstudy/desktop test
+
+
+> @vstudy/desktop@0.1.0 test /Users/vc/.t3/projects/vstudy-pro/apps/desktop
+> vitest run
+
+
+ RUN  v4.1.12 /Users/vc/.t3/projects/vstudy-pro/apps/desktop
+
+
+ Test Files  50 passed (50)
+      Tests  258 passed | 6 skipped (264)
+   Start at  01:36:17
+   Duration  9.16s (transform 2.30s, setup 0ms, import 8.21s, tests 17.17s, environment 4.63s)
+

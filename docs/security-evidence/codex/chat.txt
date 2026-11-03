@@ -1,0 +1,1 @@
+PASS: Stop cancels the real provider; real Codex UI chat, conversation persisted; screenshot /tmp/vstudy-codex-chat.png

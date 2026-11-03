@@ -1,0 +1,34 @@
+{
+  "screenshots": 222,
+  "severe": [],
+  "errors": [],
+  "checks": [
+    {
+      "offscreenPaused": true,
+      "offscreenRunningAnimations": 0
+    },
+    {
+      "idleCpu": [
+        {
+          "type": "Browser",
+          "cpu": 0.008116659239549615
+        },
+        {
+          "type": "GPU",
+          "cpu": 0.0396701965249074
+        },
+        {
+          "type": "Utility",
+          "cpu": 0
+        },
+        {
+          "type": "Tab",
+          "cpu": 0.03706993639789218
+        }
+      ]
+    },
+    {
+      "hiddenOnNativeHide": false
+    }
+  ]
+}

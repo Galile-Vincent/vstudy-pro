@@ -1,0 +1,18 @@
+{
+  "top_level_keys": [
+    "approval_policy",
+    "approvals_reviewer",
+    "model",
+    "model_reasoning_effort",
+    "notify",
+    "sandbox_mode",
+    "service_tier"
+  ],
+  "feature_keys": [
+    "local_thread_store_compression"
+  ],
+  "tool_sections": [],
+  "mcp_sections": 3,
+  "profile_sections": 0,
+  "note": "Key names only; no credential or configuration values retained."
+}
