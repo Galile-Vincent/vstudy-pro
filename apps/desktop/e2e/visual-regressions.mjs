@@ -1,0 +1,60 @@
+import { _electron as electron } from "playwright";
+import assert from "node:assert/strict";
+import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+const directory = await mkdtemp(join(tmpdir(), "vstudy-visual-"));
+const fixture = join(directory, "preview.md");
+await writeFile(fixture, `# ${"Long heading path ".repeat(20)}\n\n**Blue** [fern](https://example.com) ![image](image.png)\n\n- First\n- Second\n\n${"More reading. ".repeat(30)}`);
+let app, page;
+const errors = [];
+const launch = async () => {
+  app = await electron.launch({ args: [resolve("."), `--user-data-dir=${join(directory, "user-data")}`], env: { ...process.env, ELECTRON_RUN_AS_NODE: "", VSTUDY_FAKE_PROVIDER: "1" } });
+  page = await app.firstWindow();
+  page.on("pageerror", error => errors.push(error.message));
+  page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
+  await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();
+};
+try {
+  await launch();
+  await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, fixture);
+  await page.getByRole("button", { name: "＋ Import document", exact: true }).click();
+  const viewer = page.getByTestId("document-markdown");
+  await viewer.waitFor();
+  await viewer.locator("h1").hover();
+  await viewer.locator(".section-action").click();
+  const input = page.getByRole("textbox", { name: "Ask about your document", exact: true });
+  await input.waitFor();
+  const chip = page.locator(".composer .selection-preview");
+  assert.ok(!(await chip.innerText()).includes("**Blue**"));
+  assert.ok(!(await chip.innerText()).includes("image.png"));
+  assert.equal(await chip.evaluate(el => el.scrollWidth <= el.clientWidth + 1), true);
+  assert.equal((await chip.locator("summary span").innerText()).length, 161);
+  await page.screenshot({ path: "/tmp/vstudy-visual-section.png" });
+  await chip.locator("summary").click();
+  assert.ok((await chip.innerText()).includes("Blue fern"));
+  await input.fill("Explain");
+  await page.getByRole("button", { name: "Send message", exact: true }).click();
+  await page.locator(".message.assistant strong").waitFor();
+  await page.waitForFunction(() => window.document.querySelector(".stop-button")?.disabled === true);
+  assert.equal(await page.locator(".message.assistant strong").innerText(), "bold");
+  assert.deepEqual(await page.locator(".message.assistant li").allTextContents(), ["First", "Second"]);
+  await page.locator(".message.assistant strong").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "/tmp/vstudy-visual-markdown.png" });
+  for (const name of ["Delete conversation", "Delete document"]) {
+    const button = page.getByRole("button", { name, exact: true });
+    assert.equal(Math.round((await button.boundingBox()).width), 28);
+    assert.equal(await button.getAttribute("class"), "icon-button");
+  }
+  await input.fill("Preserved draft");
+  await page.getByRole("combobox", { name: "Model", exact: true }).selectOption("claude-cli/haiku");
+  await page.waitForFunction(() => window.document.querySelector('select[aria-label="Conversation"] option:checked')?.textContent.includes("haiku"));
+  assert.equal(await input.inputValue(), "Preserved draft");
+  await app.close();
+  await launch();
+  await page.getByRole("textbox", { name: "Ask about your document", exact: true }).waitFor();
+  assert.equal(await page.getByRole("combobox", { name: "Model", exact: true }).inputValue(), "claude-cli/haiku");
+  assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => `${s.lastProviderId}/${s.lastModelId}`)), "claude-cli/haiku");
+  assert.deepEqual(errors, []);
+  console.log(JSON.stringify({ result: "PASS", screenshots: ["/tmp/vstudy-visual-section.png", "/tmp/vstudy-visual-markdown.png"], consoleErrors: errors }));
+} finally { await app?.close(); await rm(directory, { recursive: true, force: true }); }

@@ -45,3 +45,5 @@ Selection offsets are UTF-16 positions in the stored Markdown. Generated math do
 PDF conversion uses MarkItDown's text extraction. Layout, tables, images, and heading hierarchy may be lost; numbered lines such as “1. Background” are plain extracted text and may render as Markdown lists rather than headings. Consult the original PDF when structure matters.
 
 Single-file imports do not copy neighboring image files. Relative images in imported Markdown/HTML may be unavailable; embedded images extracted by the converter are supported.
+
+`node e2e/visual-regressions.mjs` additionally checks compact selection previews, Markdown replies, toolbar buttons, draft preservation on model changes, and restart behavior in the built app. This check requires a detected Claude CLI for its model picker option; it never sends a request to that CLI.

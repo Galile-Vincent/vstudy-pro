@@ -24,6 +24,7 @@ try {
   });
   page = await app.firstWindow();
   const errors = [];
+  page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
   page.on("pageerror", (error) => errors.push(error.message));
   await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();
   if (!mock) {
@@ -80,6 +81,18 @@ try {
     .filter({ hasText: selectedText })
     .waitFor({ timeout: 15000 });
   await page.waitForFunction(() => window.document.querySelector(".stop-button")?.disabled === true);
+  assert.equal(await page.locator(".message.assistant strong").innerText(), "bold");
+  assert.deepEqual(await page.locator(".message.assistant li").allTextContents(), ["First", "Second"]);
+  await page.locator(".message.assistant strong").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-markdown.png"), fullPage: true });
+  await viewer.locator("h2").first().hover();
+  await viewer.locator("h2").first().getByRole("button", { name: "Use section Details" }).click();
+  const chip = page.locator(".composer .selection-preview");
+  assert.ok(!(await chip.innerText()).includes("| Topic |"), "preview removes table syntax");
+  await chip.locator("summary").click();
+  assert.equal(await chip.getAttribute("open"), "");
+  await page.screenshot({ path: screenshot.replace(/\.png$/, "-section.png"), fullPage: true });
+  await page.getByRole("button", { name: "Remove selection" }).click();
   const prompt = await page.locator(".message.assistant .message-text").innerText();
   assert.equal(prompt.split(selectedText).length - 1, 1, "passage occurs exactly once");
   const block = prompt.split("<untrusted_document_content>")[1].split("</untrusted_document_content>")[0];
@@ -149,9 +162,14 @@ try {
     assert.equal(await app.evaluate(() => globalThis.vstudyOpenedUrl), "https://example.com");
   }
   if (!mock) {
+    const originalId = await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => s.lastDocumentId));
+    await page.evaluate(path => window.desktop.invoke("documents:importPaths", { paths: [path] }), fileURLToPath(new URL("../test-fixtures/converter/sample.md", import.meta.url)));
     await page.reload();
-    await page.locator(".message.user blockquote").waitFor();
-    assert.equal(await page.locator(".message.user blockquote").innerText(), selectedText, "structured selection survives reload");
+    await page.getByTestId("document-markdown").filter({ hasText: "E2E reading document" }).waitFor();
+    assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => s.lastDocumentId)), originalId);
+    await page.reload();
+    await page.locator(".message.user .selection-preview").waitFor();
+    assert.ok((await page.locator(".message.user .selection-preview").innerText()).includes(selectedText), "structured selection survives reload");
     await page.evaluate(() => window.desktop.invoke("providers:configure", { kind: "api", id: "anthropic-api", enabled: false }));
     await page.getByRole("alert").filter({ hasText: "This conversation’s provider is unavailable" }).waitFor();
     assert.equal(await page.getByRole("button", { name: "Send message", exact: true }).isDisabled(), true);
@@ -163,17 +181,19 @@ try {
     if (alternative) {
       await picker.selectOption(alternative);
       assert.equal(await page.getByRole("textbox", { name: "Ask about your document", exact: true }).inputValue(), "Keep this draft");
-      assert.ok((await page.locator(".notice").innerText()).includes("next conversation"));
+      await page.waitForFunction(value => window.document.querySelector('select[aria-label="Model"]').value === value, alternative);
+      assert.ok((await page.getByRole("combobox", { name: "Conversation", exact: true }).locator("option:checked").innerText()).endsWith(alternative.slice(alternative.indexOf("/") + 1)));
+      assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => `${s.lastProviderId}/${s.lastModelId}`)), alternative);
     }
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete conversation", exact: true }).click();
     await page.locator(".chat-start").waitFor();
     page.once("dialog", dialog => dialog.dismiss());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
-    assert.equal(await page.locator(".document-item").count(), 1, "cancel keeps document");
+    assert.equal(await page.locator(".document-item").count(), 2, "cancel keeps document");
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
-    await page.locator(".document-item").waitFor({ state: "detached" });
+    await page.waitForFunction(() => window.document.querySelectorAll(".document-item").length === 1);
     await page.getByRole("button", { name: "Add API key", exact: true }).click();
     const keyForm = page.getByRole("group", { name: "Add API key" });
     await keyForm.getByRole("combobox", { name: "Key provider" }).selectOption("openai-compatible");
