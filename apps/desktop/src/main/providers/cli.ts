@@ -194,6 +194,8 @@ export function createCliAdapter(
 ): ProviderAdapter {
   return {
     async detect() {
+      // Read-only sandboxing still exposes shell/read tools; fail closed until a tool-free transport is verified.
+      if (binary === 'codex') return { available: false, reason: 'Codex CLI is disabled until a tool-free mode is verified' };
       if (!(await findCli(binary)))
         return { available: false, reason: `${binary} CLI not found` };
       if (binary === "agy")
@@ -204,11 +206,11 @@ export function createCliAdapter(
       return { available: true };
     },
     async listModels() {
-      return binary === 'agy' ? [] : discoverModels(binary);
+      return binary === 'agy' || binary === 'codex' ? [] : discoverModels(binary);
     },
     async *stream(request, signal) {
       const file = await findCli(binary);
-      if (!file || binary === "agy") throw new Error("CLI unavailable");
+      if (!file || binary === "agy" || binary === "codex") throw new Error("CLI unavailable");
       const cwd = await mkdtemp(
         join(tmpdir(), `vstudy-${request.conversationId}-`),
       );

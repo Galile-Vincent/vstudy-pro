@@ -196,11 +196,13 @@ try {
   }
   if (!mock) {
     await assert.rejects(page.evaluate(() => window.desktop.invoke("shell:openExternal", { url: "file:///etc/passwd" })));
-    await app.evaluate(({ shell }) => {
+    await app.evaluate(({ shell, dialog }) => {
+      dialog.showMessageBox = async options => { globalThis.vstudyLinkConfirmation = options; return { response: 1, checkboxChecked: false }; };
       shell.openExternal = async (url) => { globalThis.vstudyOpenedUrl = url; };
     });
     await viewer.getByRole("link", { name: "Reference website" }).click();
     assert.equal(await app.evaluate(() => globalThis.vstudyOpenedUrl), "https://example.com");
+    assert.match(await app.evaluate(() => globalThis.vstudyLinkConfirmation.message), /example\.com/);
   }
   if (!mock) {
     const originalId = await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => s.lastDocumentId));

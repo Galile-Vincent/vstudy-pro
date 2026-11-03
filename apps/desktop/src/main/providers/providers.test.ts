@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApiAdapter, validateBaseUrl } from "./api";
-import { cliArgs, cliEnvironment, findCli, runCli } from "./cli";
+import { createCliAdapter, cliArgs, cliEnvironment, findCli, runCli } from "./cli";
 import { createProviderRegistry } from "./index";
 import { chatRequestSchema } from "../../shared/domain";
 const request = {
@@ -233,4 +233,11 @@ for (const kind of ["claude", "codex"] as const) it(`drops buffered ${kind} outp
     })()).rejects.toThrow();
     expect(events).toEqual([{ type: "text-delta", text: "tick" }]);
   } finally { await rm(cwd, { recursive: true, force: true }); }
+});
+
+it('fails closed for Codex until native tools can be disabled', async () => {
+ const adapter = createCliAdapter('codex');
+ expect(await adapter.detect()).toMatchObject({ available: false });
+ expect(await adapter.listModels()).toEqual([]);
+ await expect(collect(adapter.stream(request, new AbortController().signal))).rejects.toThrow('CLI unavailable');
 });
