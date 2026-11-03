@@ -78,5 +78,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { disposeLibrary(); registrar.dispose(); await disposeDocuments(); };
+  return async () => { registrar.dispose(); disposeLibrary(); await chat.dispose(); await disposeDocuments(); };
 }

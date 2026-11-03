@@ -78,8 +78,7 @@ async function setup(adapter: ProviderAdapter) {
     },
   });
   cleanups.push(async () => {
-    chat.dispose();
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await chat.dispose();
     store.close();
     await rm(cwd, { recursive: true, force: true });
   });

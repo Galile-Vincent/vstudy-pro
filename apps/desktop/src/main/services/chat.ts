@@ -46,6 +46,8 @@ interface ActiveRequest {
   supersedeOnSave?: import("../../shared/domain").Message["id"][];
 }
 export class ChatService {
+  private stopped = false;
+  private readonly producers = new Set<Promise<void>>();
   private readonly deleting = new Set<string>();
   async deleteDocument(id: ChatRequest["documentId"], remove: () => Promise<void>): Promise<void> {
     if (this.deleting.has(id)) throw new Error("Document is deleting");
@@ -79,6 +81,7 @@ export class ChatService {
     this.store.conversations.delete(id);
   }
   start(request: ChatRequest, owner: ChatOwner): void {
+    if (this.stopped) throw new Error("Chat service is closed");
     if (this.deleting.has(request.documentId)) throw new Error("Document is deleting");
     if (owner.isDestroyed()) throw new Error("Chat window unavailable");
     if (this.active.has(request.requestId))
@@ -148,9 +151,9 @@ export class ChatService {
     this.active.set(request.requestId, entry);
     owner.once("destroyed", entry.onDestroyed);
     // Start after the invoke acknowledgement so subscribers can process acceptance first.
-    setImmediate(() => {
-      void this.produce(entry, document, history, adapter);
-    });
+    const producer = new Promise<void>(resolve => setImmediate(resolve)).then(() => this.produce(entry, document, history, adapter));
+    this.producers.add(producer);
+    void producer.finally(() => this.producers.delete(producer));
   }
   abort(requestId: string, owner: ChatOwner): void {
     const entry = this.active.get(requestId);
@@ -164,9 +167,11 @@ export class ChatService {
     for (const entry of this.active.values())
       if (entry.request.documentId === documentId) this.abort(entry.request.requestId, entry.owner);
   }
-  dispose(): void {
+  async dispose(): Promise<void> {
+    this.stopped = true;
     for (const entry of this.active.values())
       this.abort(entry.request.requestId, entry.owner);
+    await Promise.all(this.producers);
   }
   private persist(
     request: ChatRequest,
@@ -255,6 +260,7 @@ export class ChatService {
     adapter: ReturnType<ProviderRegistry["get"]>,
   ) {
     try {
+      entry.controller.signal.throwIfAborted();
       if (Object.keys(entry.request.options ?? {}).length) validateOptions((await adapter.listModels()).find(m => m.id === entry.request.modelId || m.resolvedId === entry.request.modelId), entry.request.options);
       this.store.conversations.setOptions(entry.request.conversationId, entry.request.options);
       entry.controller.signal.throwIfAborted();

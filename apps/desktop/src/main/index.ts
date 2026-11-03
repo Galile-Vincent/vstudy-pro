@@ -1,3 +1,4 @@
+import { coordinateShutdown } from './shutdown';
 import { acquireOwnership } from './ownership';
 import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
@@ -166,14 +167,15 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 let quitting = false;
+const shutdown = coordinateShutdown({
+  stopWork: async () => { await disposeIpc?.(); },
+  flush: () => session.defaultSession.flushStorageData(),
+  close: () => { store?.close(); store = undefined; },
+  quit: () => { quitting = true; app.quit(); },
+  forceExit: () => app.exit(),
+});
 app.on("before-quit", (event) => {
-  if (quitting) return;
+  if (quitting || !ownsApplication) return;
   event.preventDefault();
-  quitting = true;
-  const timeout = setTimeout(() => app.exit(), 5000);
-  void Promise.resolve(disposeIpc?.()).catch(() => undefined).finally(() => {
-    clearTimeout(timeout);
-    store?.close();
-    app.quit();
-  });
+  void shutdown();
 });
