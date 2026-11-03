@@ -96,3 +96,13 @@ it.each([['en','Thinking','Enabled','Disabled'],['zh-Hant','思考','啟用','�
   expect(Array.from(document.querySelectorAll('[role=radio]')).map(e=>e.textContent)).toEqual([on,off]);
  } finally {await act(async()=>root.unmount());host.remove();await i18n.changeLanguage('en');}
 });
+
+it('keys every main-authored model option label while preserving unknown vendor labels',async()=>{
+ const {readFileSync}=await import('node:fs');const {optionLabel}=await import('./model-picker');
+ const {i18n}=await import('../shared/i18n');
+ const source=['models.ts','api.ts','index.ts'].map(file=>readFileSync(new URL('../main/providers/'+file,import.meta.url),'utf8')).join('\n');
+ const ids=[...source.matchAll(/option\(['"]([^'"]+)['"]/g)].map(match=>match[1]!);
+ expect(ids).toContain('thinking');
+ try {for(const language of ['en','zh-Hant','ja']) {await i18n.changeLanguage(language);for(const id of ids) expect(optionLabel(id,'__vendor__')).not.toBe('__vendor__');expect(optionLabel('unknown-vendor','Vendor label')).toBe('Vendor label');}}
+ finally {await i18n.changeLanguage('en');}
+});

@@ -111,11 +111,11 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
   </div>;
 }
 
-function optionLabel(id: string, fallback: string) {
+export function optionLabel(id: string, fallback: string) {
   const key = ({thinking:'picker:thinking',serviceTier:'picker:service_tier',fastMode:'common:fast_mode_on',effort:'common:effort',reasoningEffort:'common:effort'} as Record<string,string>)[id];
   return key ? tr(key) : fallback;
 }
-function optionValueLabel(option: string, id: string, fallback: string) {
+export function optionValueLabel(option: string, id: string, fallback: string) {
   if (option === 'thinking') return tr(id === 'enabled' ? 'picker:enabled' : 'picker:disabled');
   if (option === 'serviceTier' && id === 'default') return tr('common:default_label');
   return fallback;
