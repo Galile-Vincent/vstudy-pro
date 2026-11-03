@@ -11,13 +11,19 @@ to content-addressed library assets. PyMuPDF is development-only.
 Failures emit a JSON object on stderr and exit nonzero. Office archives are
 checked for expansion limits; Markdown output is capped at 8 MiB.
 
-The main-process `createConverter` bootstraps `userData/converter-venv` with uv
-(preferred, Python 3.12), or a local Python 3.10+ and pip. A requirements hash
-marks successful installation. Failed installation can be retried by calling
+The main-process `createConverter` starts only on a required-format conversion or
+explicit Privacy Retry, never on launch. After native download consent it creates
+`userData/converter-venv` with uv (preferred, Python 3.12), or Python 3.10+ and pip,
+using `requirements.lock.txt` with required hashes. A requirements hash marks
+successful installation. Offline mode prevents installation downloads. Failed installation can be retried by calling
 `ensureReady` or converting again. `onProgress` receives bootstrap milestones.
 Conversion uses a temporary working directory, a scrubbed environment, a
-120-second timeout, and bounded process output. This is process isolation,
-not an operating-system sandbox.
+120-second timeout, and bounded process output. The worker stops after idle time
+(default five minutes, configurable one to sixty) and restarts on demand. On macOS
+workers run inside a native deny-network sandbox as well as Python network guards.
+This does not establish least-privilege filesystem isolation. Installer networking
+is separate and requires consent; PyPI hosts and possible GitHub Python downloads
+are disclosed before installation.
 
 Supported library imports: DOCX, PPTX, XLSX, HTML/HTM, PDF, CSV, MD, TXT.
 MD/TXT bypass Python. Source files are capped at 50 MiB. Fixtures under

@@ -1,6 +1,8 @@
+> Current implementation note (2026-11-04): historical counts and results below describe their recorded snapshots. Provider/Privacy UI, asynchronous lazy Keychain access, session-only keys, converter idle controls and removed rendering sinks are covered by [the final implementation response](final-implementation-response.md). Release signing and real Keychain acceptance remain unverified.
+
 # Security model and verification
 
-Follow-up adversarial findings, current controls, executed verification and outstanding renderer/release work: [security audit 1 response](security-audit-1-response.md). The historical verification below predates that response.
+Earlier adversarial findings and main-process remediation evidence: [security audit 1 response](security-audit-1-response.md). Current UI and acceptance results are in the final response linked above. The historical verification below predates both responses.
 
 Assets are imported originals, extracted text, selections, prompts, conversations, provider credentials, usage history and application integrity. Adversaries include malicious documents and model responses, network attackers, compromised dependencies and malicious local processes. The supported deployment is a single-user macOS account with FileVault. An attacker executing as the same user can inspect memory, alter the library and invoke authenticated CLIs: OS file modes and safeStorage are not an isolation boundary against that attacker.
 
@@ -29,15 +31,15 @@ First-run installer -> package index (hash-checked lock) -> private converter ve
 | 4: hostile files | 50 MiB source, magic bytes, UTF-8, ZIP entry/expansion/ratio/encryption/link/path checks; every dialog/drop/importSample goes through importPath; every queued conversion (including restart/retry/reconvert) revalidates source | documents.test.ts; documents.integration.test.ts; hardening.test.ts |
 | 4: converter subprocess | shell:false argv, allowlisted env, private mkdtemp cleanup, process-group termination, watchdog, native macOS network sandbox inherited by children | converter-worker.test.ts; documents.integration.test.ts |
 | 4: converter installation | requirements.lock.txt records all transitive hashes; both uv and pip --require-hashes; lock digest invalidates prior environments | real integration bootstrap test |
-| 5: secrets/logs | safeStorage fails closed; no key IPC getter; central log redaction; static UI failures; CLI prompt stdin and env allowlist | secrets.test.ts; hardening.test.ts fake child argv/env probe; providers.test.ts |
-| 5: delete data | Settings button; native destructive confirmation; stop workers, close store, remove userData and verify absence | hardening.test.ts removes DB/library/secrets/cache/venv fixture tree |
+| 5: secrets/logs | lazy asynchronous safeStorage with deadlines, explicit unlock and session-only keys; no Keychain call on launch; no key IPC getter; central log redaction; static UI failures; CLI prompt stdin and env allowlist | secrets.test.ts; hardening.test.ts fake child argv/env probe; providers.test.ts |
+| 5: delete data | Privacy typed DELETE; main literal validation; native destructive confirmation; stop workers, close store, remove userData and verify absence | hardening.test.ts removes DB/library/secrets/cache/venv fixture tree |
 | 6: injection/model output | documents/selections delimited as untrusted; citations filtered against current main-owned catalog; CLI generative UI disabled; raw HTML and dangerous URL schemes removed; native external-link confirmation | prompt/index.test.ts; citations.test.ts; chat.test.ts; markdown.test.ts injection corpus |
 | 7: supply chain | exact direct pins; integrity lock; only electron/esbuild allowed install scripts; pinned CycloneDX and Electron lint; dangerous API lint | security-audit.json; sbom.cdx.json; licenses.json; security:check |
 | 8: data at rest | library 0700, DB/backups/secrets 0600 restored on startup; export chmod 0600; private temp directories | db/index.test.ts; library.test.ts; secrets.test.ts; hardening.test.ts |
 
 Production style-src 'unsafe-inline' is needed for React inline styles used by resizable pane geometry, virtualized/animated Welcome positioning, Radix/Base UI placement, and KaTeX layout. It does not permit scripts or eval. Removing it requires moving those runtime-computed styles to a nonce-based stylesheet implementation.
 
-The database, originals, Markdown and chat records are **not encrypted**. FileVault protects a powered-off Mac; account permissions protect against other ordinary accounts. safeStorage encrypts only provider API-key values using macOS Keychain-backed encryption. JavaScript strings cannot be reliably zeroized; keys/prompts should not be retained longer than request scope. Authenticated CLIs retain their own login material under their own policies.
+The database, originals, Markdown and chat records are **not encrypted**. FileVault protects a powered-off Mac; account permissions protect against other ordinary accounts. safeStorage encrypts only provider API-key values using macOS Keychain-backed encryption. JavaScript strings cannot be reliably zeroized. Unlocked and session-only keys remain in main memory until deletion or process exit; saved ciphertext remains on disk. Authenticated CLIs retain their own login material under their own policies.
 
 The first-run installer needs network access to download Python (if uv must provision it) and hash-locked wheels/packages. Conversion runs under macOS sandbox-exec with `(deny network*)`, plus Python socket-connect denial as defense in depth. sandbox-exec is a deprecated macOS facility and this runtime restriction is macOS-specific. Python sets RLIMIT_NOFILE=128, RLIMIT_FSIZE=64 MiB, RLIMIT_CORE=0; memory is monitored at 1500 MiB and jobs have a 120-second deadline. These do not establish a hard kernel address-space limit. The converter can still read files allowed to the account; a complete least-privilege filesystem sandbox is future work.
 
@@ -94,11 +96,11 @@ Every row uses `ipcContract[channel].request` and `.response` as the authoritati
 | `library:tree` | `library:tree` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
 | `messages:list` | `messages:list` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
 | `messages:page` | `messages:page` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
-| `providers:configure` | `providers:configure` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
-| `providers:list` | `providers:list` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
-| `secrets:delete` | `secrets:delete` request / response | M | 600 | 512 KiB | safeStorage credential file (has reads only) |
-| `secrets:has` | `secrets:has` request / response | M | 600 | 512 KiB | safeStorage credential file (has reads only) |
-| `secrets:set` | `secrets:set` request / response | M | 600 | 512 KiB | safeStorage credential file (has reads only) |
+| `providers:configure` | `providers:configure` request / response | M | 600 | 512 KiB | Provider JSON; compatible-origin changes clear its key |
+| `providers:list` | `providers:list` request / response | M | 600 | 512 KiB | Disabled CLI file metadata only; enabled providers may verify/discover models |
+| `secrets:delete` | `secrets:delete` request / response | M | 600 | 512 KiB | Remove saved and main-memory key |
+| `secrets:has` | `secrets:has` request / response | M | 600 | 512 KiB | Saved-key presence only; no Keychain/decryption |
+| `secrets:set` | `secrets:set` request / response | M | 600 | 512 KiB | Explicit async encryption, credential file write, enable provider |
 | `settings:appearance` | `settings:appearance` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
 | `settings:deleteAllData` | `settings:deleteAllData` request / response | M | 600 | 512 KiB | Native confirmation; stop services; remove userData; quit |
 | `settings:get` | `settings:get` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
@@ -113,9 +115,14 @@ Every row uses `ipcContract[channel].request` and `.response` as the authoritati
 | `usage:page` | `usage:page` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
 | `usage:rateLimits` | `usage:rateLimits` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
 | `usage:summary` | `usage:summary` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `converter:mode` | offline boolean / ack | M | 600 | 512 KiB | Persist offline choice; explicit Retry can initialize converter and ask installation consent |
+| `providers:chooseExecutable` | binary enum / nullable path | M | 600 | 512 KiB | Native chooser; validate and pin executable path/hash |
+| `secrets:unlock` | provider ID / ack | M | 600 | 512 KiB | Explicit async decrypt into main memory; enable provider |
+| `secrets:session` | provider ID + bounded key / ack | M | 600 | 512 KiB | Main-memory key only; enable provider |
+| `settings:networkActivity` | empty / bounded event list | M | 600 | 512 KiB | Read latest 500 app-initiated session events; no packet/byte accounting |
 | `welcome:sampleDocument` | `welcome:sampleDocument` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
 
-`documents:importPaths` is the only input-path route; preload obtains dropped-file paths from webUtils. Main revalidates every path regardless of provenance. A compromised trusted main frame can submit arbitrary readable file paths; webUtils is not a provenance token. Dialog results are main-owned. Heartbeats additionally require an existing document, seconds 1–60 and elapsed-time clamping. Welcome sample language is a closed enum and response is capped at 100,000 characters. Export filenames strip controls, bidi controls and separators and cap at 180 UTF-16 units. Exports request document IDs only.
+`documents:importPaths` accepts only main-issued `drop:` capabilities. Isolated preload captures trusted native drops and keeps webUtils paths private; the page-facing getter returns a token, never the raw path. Tokens are single-use, expire after sixty seconds and bind to the exact frame. Synthetic drops and raw-path submissions cannot mint them. Main still revalidates sources before import/conversion. Native dialog results remain main-owned. This is not isolation from a main-world script’s other existing bridge authority. Heartbeats additionally require an existing document, seconds 1–60 and elapsed-time clamping. Welcome sample language is a closed enum and response is capped at 100,000 characters. Export filenames strip controls, bidi controls and separators and cap at 180 UTF-16 units. Exports request document IDs only.
 
 ## Supply-chain findings
 
@@ -144,7 +151,7 @@ Every row uses `ipcContract[channel].request` and `.response` as the authoritati
 
 Only `electron` and `esbuild` install scripts are authorized in pnpm-workspace.yaml. No new build scripts were approved. CycloneDX uses npm's installed dependency view with --ignore-npm-errors because pnpm symlinks produce npm peer/dev-missing diagnostics; the SBOM is an inventory, not proof of complete dependency resolution. The license report covers the pnpm-installed graph; Python package licenses need separate review before distribution.
 
-Electron-specific lint: eslint-plugin-electron-security@0.3.0 ran all rules. One warning: dynamic `shell.openExternal` in ipc/index.ts. Accepted because externalUrlSchema restricts protocols, rejects controls/backslashes, and a native confirmation precedes opening. Electronegativity@1.10.3 was attempted but failed on Node 24 (`TypeError: _commander2.default.version is not a function`); it was removed in favor of the pinned ESLint plugin. Generic dangerous-API lint excludes test fixtures. The Mermaid JSX sink is explicitly exempted because both branches originate from DOMPurify SVG sanitization; SVG image, anchor and foreignObject tags are forbidden. Other dangerous-API rules still apply to that file.
+Electron-specific lint: eslint-plugin-electron-security@0.3.0 ran all rules. One warning: dynamic `shell.openExternal` in ipc/index.ts. Accepted because externalUrlSchema restricts protocols, rejects controls/backslashes, and a native confirmation precedes opening. Electronegativity@1.10.3 was attempted but failed on Node 24 (`TypeError: _commander2.default.version is not a function`); it was removed in favor of the pinned ESLint plugin. Generic dangerous-API lint excludes test fixtures. The unused Mermaid and map components and generative Markdown registry were removed; no JSX HTML sink exception remains. Source icons render local SVG icons rather than fetching favicons.
 
 Codex CLI 0.166.0 is restored on macOS using an app-owned tool-free model catalog, explicit feature/tool disables, isolated temporary auth/state, ignored user config/rules, and native process-fork denial. A real adversarial canary self-test gates detection, model listing and streaming, with success cached against the executable hash, app version and safety settings. Missing sandbox-exec, an unaudited CLI version or failed proof leaves it unavailable with a reason. See [the investigation, exact guarantee, evidence and residual risks](codex-tool-free.md). The wrapper does not restrict the CLI itself to endpoint-only networking or a filesystem allowlist. Claude retains its explicit empty tool list and Antigravity retains ACP disabled-tool/permission rejection.
 
@@ -156,7 +163,7 @@ A same-user malicious process can race filesystem validation and replace files a
 
 Packaged renderer files are served from the secure `vstudy://app` protocol because disabling extra file-protocol privileges prevents the prior file-based renderer load. The app protocol accepts GET only, a fixed host and a narrow index/assets path grammar, with MIME/nosniff/CSP headers and a 16 MiB cap.
 
-## Verification run
+## Historical verification run
 
 See the table below for executed commands and limitations. Signing, notarization submission, stapling and Gatekeeper acceptance require release credentials and were not verified.
 
@@ -207,6 +214,6 @@ E2E details:
 | `welcome.mjs` | [PASS](security-evidence/e2e-welcome.txt) |
 | `security-delete-data.mjs` | [PASS](security-evidence/delete-data.txt) |
 
-`assistant-elements.mjs` initially timed out while the updated Electron executable was being installed; the retry passed. `selection-chat.mjs` initially waited on the newly required external-link confirmation; its test now checks that confirmation and restores the native dialog function, and the final complete run passed. `design1.mjs` failed with “Execution context was destroyed, most likely because of a navigation”. `welcome-performance.mjs` failed its timing/long-frame assertions (the README already records this host limitation). Neither failure is represented as a passing security check, and UI performance remediation is outstanding.
+`assistant-elements.mjs` initially timed out while the updated Electron executable was being installed; the retry passed. `selection-chat.mjs` initially waited on the newly required external-link confirmation; its test now checks that confirmation and restores the native dialog function, and the final complete run passed. `design1.mjs` failed with “Execution context was destroyed, most likely because of a navigation”. `welcome-performance.mjs` failed its timing/long-frame assertions (as recorded in that snapshot). Neither failure was represented as a pass in that snapshot. Current repaired-suite results, including retained Welcome first-attempt frame failures and permitted retries, are in the final implementation response.
 
 Not proven: resistance to arbitrary same-user malware, model obedience to language instructions, exhaustive malformed-archive fuzzing, least-privilege converter filesystem access, signed hardened-runtime execution with the empty entitlements file, notarization/stapling, Gatekeeper, and complete Python-license/SBOM coverage. A signed release must close or explicitly accept these release risks. Source references: [Electron fuses](https://www.electronjs.org/docs/latest/tutorial/fuses), [ASAR integrity](https://www.electronjs.org/docs/latest/tutorial/asar-integrity).
