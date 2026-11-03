@@ -39,6 +39,15 @@ export function usageRepository(db: DatabaseSync) {
       return r;
     },
     list,
+    rollupSummary(startDate: string, endDate: string) {
+      return db.prepare('SELECT providerId,modelId,sum(inputTokens) inputTokens,sum(outputTokens) outputTokens,sum(costUsd) costUsd,sum(calls) calls FROM usage_daily WHERE date>=? AND date<=? GROUP BY providerId,modelId').all(startDate,endDate);
+    },
+    page(limit: number, cursor?: { createdAt: string; id: string }) {
+      const size = Math.min(100, Math.max(1, Math.floor(limit)));
+      const rows = db.prepare(`SELECT id,createdAt,payload FROM usage_events ${cursor ? 'WHERE (createdAt,id)>(?,?)' : ''} ORDER BY createdAt,id LIMIT ?`).all(...(cursor ? [cursor.createdAt,cursor.id] : []), size+1);
+      const last = rows[Math.min(size,rows.length)-1];
+      return { items: rows.slice(0,size).map(r=>usageRecordSchema.parse(JSON.parse(String(r.payload)))), nextCursor:rows.length>size&&last?{createdAt:String(last.createdAt),id:String(last.id)}:null };
+    },
     forConversation: (id: string) => list('WHERE conversationId=?', [id]),
     forDocument: (id: string) => list('WHERE documentId=?', [id]),
     conversationTotals: (id: string) => summarize(list('WHERE conversationId=?', [id])),

@@ -1,3 +1,5 @@
+import { dirname } from "node:path";
+import { containedPath } from "./file-paths";
 import { ActivityService } from "./activity";
 import { validateOptions } from "../providers/models";
 import { canonicalModelId, priceUsage } from "../pricing";
@@ -169,6 +171,10 @@ export class ChatService {
     );
   }
   private send(entry: ActiveRequest, event: ChatEvent) {
+    if(event.type === 'error') {
+      const category = /auth/i.test(event.message) ? 'auth_failed' : /rate.limit/i.test(event.message) ? 'rate_limited' : /network/i.test(event.message) ? 'network' : /budget|quota/i.test(event.message) ? 'budget' : 'provider_unavailable';
+      event = {...event,code:`errors.${category}`,params:{}};
+    }
     try {
       if (!entry.owner.isDestroyed())
         entry.owner.send(
@@ -225,7 +231,7 @@ export class ChatService {
       if (Object.keys(entry.request.options ?? {}).length) validateOptions((await adapter.listModels()).find(m => m.id === entry.request.modelId || m.resolvedId === entry.request.modelId), entry.request.options);
       this.store.conversations.setOptions(entry.request.conversationId, entry.request.options);
       entry.controller.signal.throwIfAborted();
-      const file = await open(document.markdownPath, "r");
+      const file = await open(containedPath(dirname(document.sourcePath), document.markdownPath), "r");
       let markdown: string;
       try {
         const buffer = Buffer.alloc(2_000_000);

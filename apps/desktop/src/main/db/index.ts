@@ -33,6 +33,17 @@ export const migrations = [
   { version: 3, sql: usageMigration },
   { version: 4, sql: "ALTER TABLE conversations ADD COLUMN options TEXT;" },
   { version: 5, sql: libraryMigration },
+  { version: 6, sql: `
+    CREATE INDEX usage_page ON usage_events(createdAt,id);
+    CREATE INDEX messages_page ON messages(conversationId,createdAt,id);
+    CREATE INDEX documents_all_manual ON documents(position,id) WHERE deletedAt IS NULL;
+    CREATE INDEX documents_all_name ON documents(title COLLATE NOCASE,id) WHERE deletedAt IS NULL;
+    CREATE INDEX documents_size ON documents(sizeBytes,id) WHERE deletedAt IS NULL;
+    CREATE INDEX documents_type ON documents(mime,id) WHERE deletedAt IS NULL;
+    CREATE INDEX documents_converter ON documents(converter,createdAt,id) WHERE deletedAt IS NULL;
+    CREATE INDEX documents_folder_size ON documents(folderId,sizeBytes,id) WHERE deletedAt IS NULL;
+    CREATE INDEX documents_folder_type ON documents(folderId,mime,id) WHERE deletedAt IS NULL;
+  ` },
 ];
 const documentRow = z
   .object({
@@ -51,7 +62,7 @@ const documentRow = z
   .transform(({ error, ...rest }) =>
     documentSchema.parse(error === null ? rest : { ...rest, error }),
   );
-const conversationRow = z.object({ options: z.string().nullable(), updatedAt: z.string().nullable() }).passthrough().transform(({ options, updatedAt: _updatedAt, ...row }) => conversationSchema.parse({ ...row, ...(options ? { options: JSON.parse(options) } : {}) }));
+const conversationRow = z.object({ options: z.string().nullable() }).passthrough().transform(({ options, ...row }) => { delete row.updatedAt; return conversationSchema.parse({ ...row, ...(options ? { options: JSON.parse(options) } : {}) }); });
 const messageRow = z
   .object({
     id: z.string(),
@@ -205,6 +216,13 @@ export function openStore(path: string) {
       },
     },
     messages: {
+      page(conversationId: Conversation["id"], limit: number, cursor?: { createdAt: string; id: string }) {
+        const size = Math.min(100, Math.max(1, Math.floor(limit)));
+        const rows = db.prepare(`SELECT * FROM messages WHERE conversationId=? ${cursor ? 'AND (createdAt,id)>(?,?)' : ''} ORDER BY createdAt,id LIMIT ?`).all(conversationId,...(cursor ? [cursor.createdAt,cursor.id] : []),size+1);
+        const items=rows.slice(0,size).map(r=>messageRow.parse(r));
+        const last=items.at(-1);
+        return {items,nextCursor:rows.length>size&&last?{createdAt:last.createdAt,id:last.id}:null};
+      },
       excludeFromContext(ids: Message['id'][]) {
         const update = db.prepare("UPDATE messages SET parts=? WHERE id=?");
         for (const id of ids) { const row = db.prepare("SELECT * FROM messages WHERE id=?").get(id); if (row) { const m = messageRow.parse(row); update.run(JSON.stringify(m.parts.map(p => ({ ...p, contextExcluded: true }))), id); } }

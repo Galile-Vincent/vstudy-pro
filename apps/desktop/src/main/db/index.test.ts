@@ -84,6 +84,7 @@ describe("SQLite repositories", () => {
     const file = join(path, "store.sqlite");
     const first = openStore(file);
     expect(first.settings.get()).toEqual({
+      language:"auto",replyLanguage:"auto",
       chatSide: "left", warnAtPercent: 80, priceOverrides: {}, enableGenerativeUI:false, modelDisplayNames:{},
       lastProviderId: null,
       lastModelId: null, lastDocumentId: null,
@@ -104,7 +105,7 @@ describe("SQLite repositories", () => {
     });
     expect(
       raw.prepare("SELECT count(*) AS count FROM migrations").get(),
-    ).toEqual({ count: 5 });
+    ).toEqual({ count: 6 });
     raw.close();
   });
   it("rejects duplicate content and invalid domain data", () => {

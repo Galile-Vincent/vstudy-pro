@@ -84,6 +84,7 @@ export class DocumentService {
           },
         }), createWriteStream(source, { flags: "wx", mode: 0o600 }));
         copied();
+        validateImport(source, extension);
         const sourceHash = hash.digest("hex");
         const existing = this.options.store.documents.findByHash(sourceHash);
         if (existing) return existing;
@@ -164,17 +165,21 @@ export class DocumentService {
           await rename(`${document.markdownPath}.tmp`, document.markdownPath);
         } else converter = await this.options.convert(document.sourcePath, document.markdownPath, message => this.options.onProgress?.(document.id, message)) ?? "markitdown";
         if ((await stat(document.markdownPath)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
-        if (!this.stopped) {
+        if (!this.stopped && this.get(document.id)) {
           const saved = profileStage("DB ready transition");
-          this.options.store.documents.transition(document.id, { status: "ready", converter });
           const content = await readFile(containedPath(this.library, document.markdownPath), "utf8");
+          this.options.store.db.exec("SAVEPOINT finalize");
+          try {
+          this.options.store.documents.transition(document.id, { status: "ready", converter });
           this.options.store.db.prepare("UPDATE documents SET contentChars=?,pageCount=? WHERE id=?").run(content.length, (content.match(/<!--\s*page\b/gi) ?? []).length || null, document.id);
           new SearchService(this.options.store.db).update(document.id, content);
+          this.options.store.db.exec("RELEASE finalize");
+          } catch (error) { this.options.store.db.exec("ROLLBACK TO finalize; RELEASE finalize"); throw error; }
           saved();
           this.options.onProgress?.(document.id, "Conversion complete");
         }
       } catch (error) {
-        if (!this.stopped) this.options.store.documents.transition(document.id, {
+        if (!this.stopped && this.get(document.id)) this.options.store.documents.transition(document.id, {
           status: "failed", error: error instanceof Error && error.message.trim() ? error.message.slice(0, 2000) : "Conversion failed",
         });
       }

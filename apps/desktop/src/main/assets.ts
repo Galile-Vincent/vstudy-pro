@@ -1,4 +1,5 @@
-import { realpath, readFile } from "node:fs/promises";
+import { containedPath } from "./services/file-paths";
+import { readFile } from "node:fs/promises";
 import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { documentIdSchema } from "../shared/domain";
 import type { Store } from "./db";
@@ -16,10 +17,7 @@ export async function resolveAssetPath(root: string, encodedPath: string): Promi
   }
   const candidate = resolve(root, path);
   if (!isWithin(resolve(root), candidate)) throw new Error("Asset outside document");
-  const [realRoot, realCandidate] = await Promise.all([realpath(root), realpath(candidate)]);
-  // Lexical containment alone would allow a symlink to expose files outside the library.
-  if (!isWithin(realRoot, realCandidate)) throw new Error("Asset outside document");
-  return realCandidate;
+  return containedPath(root, candidate);
 }
 
 const imageTypes: Readonly<Record<string, string>> = {
