@@ -1,3 +1,5 @@
+import { URL } from 'node:url';
+import { setTimeout } from 'node:timers';
 import { _electron as electron } from "playwright";
 import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
