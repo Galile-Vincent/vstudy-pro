@@ -8,7 +8,7 @@ This body paragraph line is indented well past the heading margin and is long en
 
 This body paragraph line is indented well past the heading margin and is long enough to co This body paragraph line is indented well past the heading margin and is long enough to co This body paragraph line is indented well past the heading margin and is long enough to co
 
-## 1.2 Scope
+# 1.2 Scope
 
 This body paragraph line is indented well past the heading margin and is long enough to co This body paragraph line is indented well past the heading margin and is long enough to co This body paragraph line is indented well past the heading margin and is long enough to co
 
