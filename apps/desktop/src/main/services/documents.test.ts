@@ -139,3 +139,14 @@ it('recovers the scheduler after failed terminal-state persistence', async () =>
   expect(service.get(second.id)?.status).toBe('ready');
   expect(service.get(first.id)?.status).toBe('converting');
 });
+
+it('never removes a published source when concurrent owners import identical bytes with different extensions', async () => {
+  const { service, store, userData, convert } = await setup();
+  const other = new DocumentService({store,userData,convert});
+  const a = join(userData,'race.md'), b=join(userData,'race.txt');
+  await writeFile(a,'same bytes');await writeFile(b,'same bytes');
+  const outcomes=await Promise.allSettled([service.importPath(a),other.importPath(b)]);
+  await Promise.all([service.waitForIdle(),other.waitForIdle()]); other.dispose();
+  expect(outcomes.every(o=>o.status==='fulfilled')).toBe(true);
+  for(const document of store.documents.list()) expect(await readFile(document.sourcePath,'utf8')).toBe('same bytes');
+});
