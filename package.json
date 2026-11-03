@@ -1,0 +1,17 @@
+{
+  "name": "vstudy-pro",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": ">=24.11.1"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @vstudy/desktop dev",
+    "build": "pnpm --filter @vstudy/desktop build",
+    "test": "pnpm --filter @vstudy/desktop test",
+    "typecheck": "pnpm --filter @vstudy/desktop typecheck",
+    "package": "pnpm --filter @vstudy/desktop package",
+    "lint": "pnpm --filter @vstudy/desktop lint",
+    "smoke": "pnpm --filter @vstudy/desktop smoke"
+  }
+}
