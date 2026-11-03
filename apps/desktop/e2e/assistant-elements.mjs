@@ -1,0 +1,44 @@
+import {_electron as electron} from 'playwright';
+import assert from 'node:assert/strict';
+import {mkdtemp,mkdir,rm} from 'node:fs/promises';
+import {join,resolve} from 'node:path';
+import {tmpdir} from 'node:os';
+const directory=await mkdtemp(join(tmpdir(),'vstudy-elements-'));const evidence='/tmp/vstudy-composer-redesign';await mkdir(evidence,{recursive:true});let app;
+try {
+ app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});
+ const page=await app.firstWindow();page.setDefaultTimeout(20000);const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+ await page.getByText('Workspace connected',{exact:true}).waitFor();
+ await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
+ await page.getByRole('button',{name:'＋ Import document',exact:true}).click();await page.getByTestId('document-markdown').waitFor();
+ await page.getByRole('button',{name:'Start a conversation',exact:true}).click();
+ const selected=page.getByRole('combobox',{name:'Model',exact:true});const search=page.getByRole('combobox',{name:'Search models'});
+ await selected.click();await search.fill('6 gpt');await page.getByRole('option').filter({hasText:'GPT-6.1-Sol'}).first().click();await selected.filter({hasText:'GPT-6.1-Sol'}).waitFor();
+ await selected.click();await search.fill('Fake');await page.getByRole('option').filter({hasText:'Fake'}).click();await selected.filter({hasText:'Fake'}).waitFor();
+ const conversations=await page.evaluate(async()=>{const [doc]=await window.desktop.invoke('documents:list',{});return window.desktop.invoke('conversations:list',{documentId:doc.id});});
+ assert.equal(conversations.length,1,'model changes reuse the empty conversation');
+ await page.evaluate(async()=>{const settings=await window.desktop.invoke('settings:get',{});return window.desktop.invoke('settings:set',{...settings,enableGenerativeUI:true});});
+ const input=page.getByRole('textbox',{name:'Ask about your document',exact:true});await input.fill('test enriched');await input.press('Enter');
+ await page.locator('.document-presentation').waitFor();await page.locator('.aui-composer-cancel').waitFor({state:'hidden'});
+ assert.match(await page.locator('.document-presentation table').innerText(),/Topic\s+Summary\s+Document\s+Grounded answer/);
+ await page.getByRole('button',{name:'Source 1: E2E reading document',exact:true}).click();
+ await page.locator('[data-citation-highlight]').waitFor();
+ assert.equal(await page.locator('[data-citation-highlight]').getAttribute('data-start'),'0');
+ const reasoning=page.locator('[data-slot=reasoning-trigger]').first();if(await reasoning.getAttribute('aria-expanded')==='false')await reasoning.click();
+ await page.getByText('Reviewing the reported document sections.',{exact:true}).waitFor();
+ for(const [width,height] of [[1200,800],[900,700],[720,480]])for(const scheme of ['light','dark']){await page.setViewportSize({width,height});await page.emulateMedia({colorScheme:scheme});await page.waitForTimeout(200);await page.locator('.document-presentation').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));await page.waitForTimeout(100);await page.screenshot({path:`${evidence}/${width}-${height}-${scheme}-elements.png`,animations:'disabled'});}
+ await page.getByRole('button',{name:'Conversations',exact:true}).click();await page.getByRole('button',{name:'New Thread',exact:true}).click();await input.waitFor();
+ await page.getByRole('button',{name:'Conversations',exact:true}).click();await page.getByRole('searchbox',{name:'Search threads'}).fill('Chat 1');await page.locator('[data-slot=aui_thread-list-item-trigger]').filter({hasText:'Chat 1'}).click();
+ await page.locator('.document-presentation').waitFor();await page.screenshot({path:`${evidence}/720-480-dark-thread-restored.png`,animations:'disabled'});
+ await page.reload();await page.locator('.document-presentation').waitFor();await page.getByRole('button',{name:'Go to E2E reading document',exact:true}).waitFor();
+ const stored=await page.evaluate(id=>window.desktop.invoke('messages:list',{conversationId:id}),conversations[0].id);
+ assert.equal(stored.at(-1).parts[0].reasoning,'Reviewing the reported document sections.');assert.equal(stored.at(-1).parts[0].citations[0].id,'s0');assert.equal(stored.at(-1).parts[0].toolCalls[0].result.rendered,true);
+ await page.getByRole('button',{name:'New chat',exact:true}).click();await input.waitFor();await input.fill('Please continue ' + 'context '.repeat(1200));await input.press('Enter');
+ await page.getByRole('button',{name:'Stop generating',exact:true}).waitFor();await page.locator('[data-role=assistant] strong').waitFor();await page.getByRole('button',{name:'Stop generating',exact:true}).click();
+ await page.getByRole('status').filter({hasText:'Stopped. Partial response'}).waitFor();
+ await page.getByRole('status').filter({hasText:'Stopped. Partial response'}).scrollIntoViewIfNeeded();
+ await page.locator('[data-role=assistant] .usage-chip').filter({hasText:'aborted'}).waitFor();
+ await page.locator('[data-slot=aui_thread-viewport]').evaluate(el=>el.scrollTo({top:el.scrollHeight,behavior:'instant'}));await page.waitForTimeout(250);
+ await page.screenshot({path:`${evidence}/720-480-dark-stopped.png`,animations:'disabled'});
+ await page.reload();await page.getByRole('status').filter({hasText:'Stopped. Partial response'}).waitFor();
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({result:'PASS',emptyConversationReuse:true,reasoning:true,citations:true,presentation:true,threadList:true,reload:true,consoleErrors:errors}));
+} catch(error){if(app){const page=await app.firstWindow();console.log(await page.locator('body').innerText());await page.screenshot({path:`${evidence}/elements-failure.png`});}throw error;}finally{await app?.close();await rm(directory,{recursive:true,force:true});}

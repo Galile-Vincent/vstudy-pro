@@ -17,7 +17,7 @@ try {
  const close=async()=>{await page.keyboard.press('Escape');await page.locator('[data-slot=model-selector-content]').waitFor({state:'hidden'});};
  const shot=async(name)=>{const path=`${evidence}/${name}.png`;await page.waitForTimeout(200);await page.screenshot({path,animations:'disabled'});shots.push(path);};
  const choose=async(query,name)=>{await model.click();await search.fill(query);await page.locator('[data-slot=model-selector-list]').getByRole('option').filter({hasText:name}).first().click();await model.filter({hasText:name}).waitFor();};
- for(const [width,height] of [[1200,800],[900,700]]) for(const color of ['light','dark']) {
+ for(const [width,height] of [[1200,800],[900,700],[720,480]]) for(const color of ['light','dark']) {
   await page.setViewportSize({width,height});await page.emulateMedia({colorScheme:color});const prefix=`${width}-${height}-${color}`;
   if(!(await model.innerText()).includes('Fake')) await choose('Fake','Fake (test only)');
   await page.getByRole('button',{name:'Conversation usage'}).filter({hasText:'tokens'}).waitFor();
@@ -28,12 +28,13 @@ try {
   await page.getByRole('switch',{name:'Fast mode (priority tier)'}).click();
   await shot(`${prefix}-effort-fast`);
   const popover=await page.locator('[data-slot=model-selector-content]').boundingBox();const pane=await page.locator('.chat-pane').boundingBox();
-  assert.ok(popover.x>=pane.x && popover.x+popover.width<=pane.x+pane.width,'picker stays in chat pane');await close();
-  await page.locator('.model-trigger-name').evaluate(el=>{el.textContent='A very long model display name for typography and truncation verification';});await shot(`${prefix}-long-name`);
+  assert.ok(popover.x>=pane.x && popover.x+popover.width<=pane.x+pane.width,'picker stays in chat pane');assert.ok(popover.y>=100 && popover.y+popover.height<=height,'picker avoids the pane header and window edges');await close();
+  await page.locator('.model-trigger-name').evaluate(el=>{el.firstChild.nodeValue='A very long model display name for typography and truncation verification';});await shot(`${prefix}-long-name`);
   await choose('Fake','Fake (test only)');
   const input=page.getByRole('textbox',{name:'Ask about your document',exact:true});await input.fill('Explain this document ' + 'with more context '.repeat(300));await input.press('Enter');await page.getByRole('button',{name:'Stop generating',exact:true}).waitFor();await shot(`${prefix}-streaming`);assert.equal(await page.locator('.aui-composer-cancel').count(),1,'streaming capture includes Stop');
   await page.locator('.aui-composer-cancel').waitFor({state:'hidden'});
  }
+ await page.setViewportSize({width:900,height:700});
  for(const [query,label] of [['opus','claude'],['gpt','codex'],['gemini','agy']]) {await model.click();await search.fill(query);await shot(`900-700-dark-catalog-${label}`);await close();}
  assert.deepEqual(errors,[]);console.log(JSON.stringify({result:'PASS',screenshots:shots},null,2));
-} finally {await app?.close();await rm(directory,{recursive:true,force:true});}
+} catch(error) {if(app){const page=await app.firstWindow();console.log(await page.locator('body').innerText());await page.screenshot({path:`${evidence}/qa-failure.png`});}throw error;} finally {await app?.close();await rm(directory,{recursive:true,force:true});}

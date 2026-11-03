@@ -163,6 +163,7 @@ try {
     await dashboard.screenshot({path:screenshot.replace(/\.png$/, '-token-dashboard.png')});
 
     await page.getByRole('spinbutton',{name:'Monthly budget (USD)',exact:true}).fill('0.01');
+    await page.getByRole('spinbutton',{name:'Monthly token cap',exact:true}).fill('1541');
     await page.getByRole('button',{name:'Save usage settings',exact:true}).click();
     await page.getByRole('status').filter({hasText:'Usage settings saved'}).waitFor();
     await page.screenshot({path:screenshot.replace(/\.png$/, '-usage-settings.png'),fullPage:true});
@@ -185,7 +186,7 @@ try {
     await page.waitForFunction(() => window.document.querySelectorAll('[data-role=user]').length === 2);
     await page.waitForFunction(() => !window.document.querySelector('.aui-composer-cancel'));
     const settings = await page.evaluate(() => window.desktop.invoke('settings:get',{}));
-    await page.evaluate(s => window.desktop.invoke('settings:set',{...s,monthlyBudgetUsd:undefined}),settings);
+    await page.evaluate(s => window.desktop.invoke('settings:set',{...s,monthlyBudgetUsd:undefined,monthlyTokenBudget:undefined}),settings);
     await input.fill('');
   }
 

@@ -21,6 +21,7 @@ try {
   await page.getByRole("button", { name: "＋ Import document", exact: true }).click();
   const viewer = page.getByTestId("document-markdown");
   await viewer.waitFor();
+  assert.equal(await viewer.locator('h1').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'long document headings wrap within the reader');
   await viewer.locator("h1").hover();
   await viewer.locator(".section-action").focus();
   await viewer.locator(".section-action").press("Enter");
@@ -31,7 +32,7 @@ try {
   assert.ok(!(await chip.innerText()).includes("image.png"));
   assert.equal(await chip.evaluate(el => el.scrollWidth <= el.clientWidth + 1), true);
   assert.equal((await chip.locator("summary span").innerText()).length, 161);
-  await page.screenshot({ path: "/tmp/vstudy-visual-section.png" });
+  await page.screenshot({path: "/tmp/vstudy-visual-section.png", animations:'disabled'});
   await chip.locator("summary").click();
   assert.ok((await chip.innerText()).includes("Blue fern"));
   await input.fill("Explain");
@@ -41,7 +42,7 @@ try {
   assert.equal(await page.locator("[data-role=assistant] strong").innerText(), "bold");
   assert.deepEqual(await page.locator("[data-role=assistant] li").allTextContents(), ["First", "Second"]);
   await page.locator("[data-role=assistant] strong").scrollIntoViewIfNeeded();
-  await page.screenshot({ path: "/tmp/vstudy-visual-markdown.png" });
+  await page.screenshot({path: "/tmp/vstudy-visual-markdown.png", animations:'disabled'});
   for (const name of ["Delete conversation", "Delete document"]) {
     const button = page.getByRole("button", { name, exact: true });
     assert.equal(Math.round((await button.boundingBox()).width), 28);
@@ -51,7 +52,7 @@ try {
   await page.getByRole("combobox", { name: "Model", exact: true }).click();
   await page.getByRole("combobox", { name: "Search models" }).fill("haiku");
   await page.getByRole("option").filter({hasText:"Haiku 5.5"}).first().click();
-  await page.waitForFunction(() => window.document.querySelector('select[aria-label="Conversation"] option:checked')?.textContent.includes("haiku"));
+  await page.waitForFunction(() => window.document.querySelector('[aria-label="Conversations"]')?.textContent.includes("Haiku"));
   assert.equal(await input.inputValue(), "Preserved draft");
   await app.close();
   await launch();
