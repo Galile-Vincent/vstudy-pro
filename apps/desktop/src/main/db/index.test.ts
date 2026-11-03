@@ -138,7 +138,7 @@ it("migrates existing documents with MarkItDown as their default parser", () => 
   const first = openStore(path);
   const { document } = fixture(); first.documents.insert(document); first.close();
   const old = new DatabaseSync(path);
-  old.exec("ALTER TABLE documents DROP COLUMN converter; DELETE FROM migrations WHERE version=2;"); old.close();
+  old.exec("DROP INDEX documents_converter; ALTER TABLE documents DROP COLUMN converter; DELETE FROM migrations WHERE version=2;"); old.close();
   const migrated = openStore(path); stores.push(migrated);
   expect(migrated.documents.get(document.id)?.converter).toBe("markitdown");
 });

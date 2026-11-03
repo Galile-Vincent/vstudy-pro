@@ -121,13 +121,16 @@ export class LibraryService {
                 add('d.id IN(SELECT documentId FROM document_fts WHERE document_fts MATCH ?)', '"' + text.replaceAll('"', '""') + '"');
         }
         const columns = { manual: 'd.position', name: 'd.title COLLATE NOCASE', createdAt: 'd.createdAt', lastOpenedAt: "coalesce(d.lastOpenedAt,'')", size: 'd.sizeBytes', type: 'd.mime' };
-        const column = columns[q.sort], op = q.direction === 'asc' ? '>' : '<';
+        const pinOrder = q.view === 'pinned' && q.sort === 'manual';
+        const recentOrder = q.view === 'recent' && q.sort === 'manual';
+        const direction = pinOrder || recentOrder ? 'desc' : q.direction;
+        const column = pinOrder ? "coalesce(d.pinnedAt,'')" : recentOrder ? "coalesce(d.lastOpenedAt,'')" : columns[q.sort], op = direction === 'asc' ? '>' : '<';
         if (q.cursor)
             add(`(${column} ${op} ? OR (${column}=? AND d.id ${op} ?))`, q.cursor.value, q.cursor.value, q.cursor.id);
-        const rows = this.store.db.prepare(`SELECT d.* FROM documents d WHERE ${where.join(' AND ')} ORDER BY ${column} ${q.direction},d.id ${q.direction} LIMIT ?`).all(...args, q.limit + 1);
+        const rows = this.store.db.prepare(`SELECT d.* FROM documents d WHERE ${where.join(' AND ')} ORDER BY ${column} ${direction},d.id ${direction} LIMIT ?`).all(...args, q.limit + 1);
         const items = rows.slice(0, q.limit).map(r => this.item(r));
         const last = rows[Math.min(q.limit, rows.length) - 1];
-        const key = { manual: 'position', name: 'title', createdAt: 'createdAt', lastOpenedAt: 'lastOpenedAt', size: 'sizeBytes', type: 'mime' }[q.sort];
+        const key = pinOrder ? 'pinnedAt' : recentOrder ? 'lastOpenedAt' : { manual: 'position', name: 'title', createdAt: 'createdAt', lastOpenedAt: 'lastOpenedAt', size: 'sizeBytes', type: 'mime' }[q.sort];
         return { items, nextCursor: rows.length > q.limit && last ? { value: (last[key] ?? '') as string | number, id: documentIdSchema.parse(last.id) } : null };
     }
     pin(id: string, pinned: boolean) { this.require(id); this.store.db.prepare('UPDATE documents SET pinned=?,pinnedAt=CASE WHEN ? THEN coalesce(pinnedAt,?) ELSE NULL END WHERE id=?').run(Number(pinned), Number(pinned), new Date().toISOString(), id); }
