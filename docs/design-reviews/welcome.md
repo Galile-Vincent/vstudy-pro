@@ -83,3 +83,44 @@ Native-speaking reviewers must review **all zh-Hant and ja copy**, particularly 
 VoiceOver script (not run): open from Home, confirm the introduction landmark and one complete hero heading; read all section headings in order; confirm the inert stage and repeated marquee are absent from the accessibility tree; operate a progress dot and hear the destination/current state; open from Settings and close, confirming focus returns to the tour entry; repeat with Reduce Motion and Reduce Transparency enabled. Verify no content relies on the moving stage and no decorative persona card adds a tab stop.
 
 An independent reviewer from a different model family and a human 30-second comprehension test were not performed. These are review gaps, not implied approvals.
+
+## Independent-review revision, 2026-11-04
+
+This addendum supersedes the earlier acceptance/performance results for the revised Welcome. The retained independent punch list is `welcome-independent.md`; the complete twenty-item response, including deliberate exceptions, is `welcome-response.md`.
+
+Changes: AI/Mac category and qualified privacy/citation copy in all three catalogs; fixed-padding layered hero without clamps or blur; single controls-only header; demo immediately after hero; legible persona footers; undashed sparkline with labelled fixture usage; CLI-first providers and static strip when it fits. Explicit CJK phrase boundaries prevent mid-phrase headline breaks. The demo toolbar grows naturally, quoted selection comes from the actual sample, decorative headings have no heading semantics, and ResizeObserver keeps the cited heading aligned after resizing.
+
+Pause is the first Tab destination from the h1, uses one stable label and state, and never recreates entrance animations. Finite reading reveals finish once when paused (including a paused reopen); the demo and looping motion retain their paused position. Dots have roving tabindex and arrow-key navigation. The float ends after three cycles.
+
+### Performance investigation and final result
+
+Bypassing Welcome View Transitions eliminated the duplicate Home/Welcome snapshot entrance. Initial isolated probes still recorded one 33.3–33.4 ms interval on the first mount, with eleven clean subsequent entrances. Non-urgent React navigation alone did not eliminate that miss. The retained pre-bundling trace is `/tmp/vstudy-welcome2/entrance-trace-before-bundling.json`: max layout 7.141 ms, paint 1.034 ms, task 10.226 ms; no snapshot/ViewTransition events. Those individual events do not sum to an exclusive frame cost and do not prove that host jitter caused the miss.
+
+The final implementation prepares the module/CSS during idle and bundles the three existing sample files in the lazy chunk. This avoids loading and re-rendering the sample during the entrance. The measurement begins with 1.8 seconds of Home baseline (idle preloading is enabled), then includes the first Welcome mount and eleven re-entries: six light and six dark. No run is discarded. The final isolated script exits zero; raw data is in `../evidence/welcome2-performance.json`.
+
+| Theme | Phase | p95 ms | Max ms | Estimated dropped frames | Intervals >20 ms | CLS |
+|---|---|---:|---:|---:|---:|---:|
+| light | Home baseline | 17.9 | 18.7 | 0 | 0 | 0 |
+| light | 6 entrances (worst) | 18.4 | 18.7 | 0 | 0 | 0 |
+| dark | Home baseline | 18.1 | 18.4 | 0 | 0 | 0 |
+| dark | 6 entrances (worst) | 18.5 | 18.6 | 0 | 0 | 0 |
+| light | hero idle | 18.2 | 18.7 | 0 | 0 | 0 |
+| dark | hero idle | 17.5 | 18.4 | 0 | 0 | 0 |
+| light | scroll | 18.1 | 18.7 | 0 | 0 | 0 |
+| dark | scroll | 18.3 | 18.7 | 0 | 0 | 0 |
+| light | demo loop | 18.2 | 18.7 | 0 | 0 | 0 |
+| dark | demo loop | 17.9 | 18.7 | 0 | 0 | 0 |
+
+All phases have zero LoAF >50 ms. The executable gate now requires twelve entrances with zero estimated dropped frames, zero >25 ms hero intervals, zero >20 ms scroll/demo intervals, Home-relative p95 within +1 ms, and zero CLS. These are rAF-based estimates on this host, not hardware presentation counters. The original absolute p95 ≤16.7 ms gate is superseded in the design reference, not silently reported as met.
+
+Final trace: `/tmp/vstudy-welcome2/entrance-trace.json`, with renderer-main summary in `../evidence/welcome2-trace.json`. Max style update 0.762 ms, layout 7.429 ms, paint 1.102 ms, task 11.098 ms. Trace overhead means this diagnostic run is separate from the twelve-run timing gate.
+
+Off-screen: zero running animations in both themes. One-second Electron samples: renderer 0.060% light / 0.101% dark, GPU 0.084% / 0.110%. Samples are host-dependent. Hero backdrop filters are removed; the sticky header retains material over scrolling content. A controlled before/after hero GPU percentage comparison was not repeated; the reviewer's 1.3% versus 0.4% numbers remain their measurements.
+
+### Critique and verification
+
+First rebuilt hero/demo/who images are retained under `/tmp/vstudy-welcome2/round-1/` and were viewed. The eight-principle critique and revisions are in `welcome-response.md`. Reviewing the English matrix exposed the stale resize-dependent citation offset; the second revision adds ResizeObserver and verifies the target is within 5 px of the reader clip top. Japanese and Traditional Chinese hero frames were viewed at full size; phrase breaks and card content are clean. A later geometry assertion caught a clipped citation in the 720 px Traditional Chinese demo. Shortened the scripted answer in all three catalogs and removed layout space reserved by invisible hint/thinking rows; final checks explicitly require the citation inside its answer viewport. The pause no-replay test now checks monotonic clocks and visible text: finished CSS animation clocks may advance beyond their end time after resuming, so exact clock equality was an invalid assertion. Final contact sheets cover hero/demo/who at all 18 locale/width/theme combinations; all copy remains visible and persona labels use the explicit 12/13 px floor.
+
+Final evidence: `../evidence/welcome2-screenshots.json` indexes the full matrix plus final layout/entrance recaptures; `/tmp/vstudy-welcome2/supplement.json` holds the 84 section audits. Main and supplemental settled/reduced-motion axe audits have zero serious/critical findings. A further 12 whole-view locale × theme × motion audits on the final source also pass (`welcome2-axe.json`). The manifest contains 1,086 matrix entries, 72 final layouts, and 432 final entrance/transition frames. `welcome2-checks.json` records commands, exits and log paths, including every existing e2e script and the added trace/layout scripts. Typecheck, zero-violation lint, 235 tests (four existing skips), and production build pass. The isolated performance script now passes. Bundle sizes are recorded in `welcome2-bundle.json`, below the 35 KB gzip budget, with no new runtime dependency.
+
+Still unverified: native-speaker sign-off for zh-Hant/ja, manual VoiceOver, human 30-second comprehension, native macOS hide/minimize visibility behavior and live OS Reduce Transparency changes. Synthetic visibility and CSS/startup transparency fallbacks are automated. First hero paint <150 ms was not separately instrumented. These limits are retained rather than presented as approvals.

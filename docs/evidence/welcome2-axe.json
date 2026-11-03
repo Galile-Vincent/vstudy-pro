@@ -1,0 +1,74 @@
+[
+  {
+    "language": "en",
+    "theme": "light",
+    "reducedMotion": "reduce",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "reducedMotion": "no-preference",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "reducedMotion": "reduce",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "reducedMotion": "no-preference",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "reducedMotion": "reduce",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "reducedMotion": "no-preference",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "reducedMotion": "reduce",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "reducedMotion": "no-preference",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "reducedMotion": "reduce",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "reducedMotion": "no-preference",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "reducedMotion": "reduce",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "reducedMotion": "no-preference",
+    "violations": []
+  }
+]

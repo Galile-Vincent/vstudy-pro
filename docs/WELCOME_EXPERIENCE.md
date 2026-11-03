@@ -615,3 +615,9 @@ E2E (`e2e/welcome.mjs`, built Electron, `VSTUDY_FAKE_PROVIDER=1`, seeded like th
 9. **CJK search claim.** `data_organise_2` relies on the FTS work in `src/main/services/search.ts` (trigram and bigram). Confirm that the shipped index finds two-character words such as 資料 and 通信 before release, as PRODUCT_DESIGN_V2 §1 requires. If it does not, soften the line to "Search across titles and text".
 10. **Help menu.** macOS apps usually put this kind of page under Help. Adding "What is VStudy Pro?" to the app menu next to "About VStudy Pro" (`common:menu_about`) would be natural, but it touches main-process menu code, so I left it out of scope.
 11. **Native-speaker review.** The zh-Hant and ja copy was written natively by me, not translated word for word. The glossary still requires a native-speaker review before release, especially of persona situations and the Good-to-know line.
+
+## Independent-review implementation amendments (2026-11-04)
+
+The catalog copy and response in `design-reviews/welcome-response.md` supersede the original copy tables and absolute citation claims. Demo follows hero. Hero cards use natural grid heights, solid fills and no clipping; only their reserved padding overlaps. Hero blur is removed and float ends after three cycles. Decorative, noninteractive card hairlines are exempt from the 3:1 UI-boundary target; meaningful controls, state and focus are not exempt.
+
+Welcome navigation bypasses View Transitions; the hero owns its entrance. Document morphs remain. The performance gate replaces the impossible absolute 16.7 ms p95 requirement: twelve entrances must have zero estimated dropped frames; hero has zero >25 ms intervals; scroll/demo have zero >20 ms intervals; p95 is at most same-run Home p95 + 1 ms, with zero CLS and no >50 ms LoAF. See `e2e/welcome-performance.mjs`.

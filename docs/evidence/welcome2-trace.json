@@ -1,0 +1,32 @@
+{
+  "UpdateLayoutTree": {
+    "count": 110,
+    "totalMs": 23.771000000000008,
+    "maxMs": 0.762
+  },
+  "Layout": {
+    "count": 6,
+    "totalMs": 8.863,
+    "maxMs": 7.429
+  },
+  "Paint": {
+    "count": 31,
+    "totalMs": 2.6479999999999997,
+    "maxMs": 1.102
+  },
+  "PrePaint": {
+    "count": 112,
+    "totalMs": 8.779999999999996,
+    "maxMs": 1.604
+  },
+  "FunctionCall": {
+    "count": 143,
+    "totalMs": 26.713,
+    "maxMs": 6.023
+  },
+  "RunTask": {
+    "count": 490,
+    "totalMs": 92.77500000000009,
+    "maxMs": 11.098
+  }
+}
