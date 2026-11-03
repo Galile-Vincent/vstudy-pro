@@ -84,7 +84,7 @@ export function createApiAdapter(
           .object({ data: z.array(z.object({ id: z.string() })) })
           .parse(await response.json())
           .data.slice(0, 500)
-          .map(({ id }) => ({ id, name: id, ...(getConfig().id === 'openai-api' && /^(o1|o3|o4-mini)(-|$)/.test(id) ? { options: [option('reasoning_effort', 'Effort', ['low', 'medium', 'high'], 'medium')] } : {}) }));
+          .map(({ id }) => ({ id, name: id, ...(getConfig().id === 'openai-api' && /^(o1|o3|o3-mini|o4-mini)(-\d{4}-\d{2}-\d{2})?$/.test(id) ? { options: [option('reasoning_effort', 'Effort', ['low', 'medium', 'high'], 'medium')] } : {}) }));
       } catch {
         return [];
       }

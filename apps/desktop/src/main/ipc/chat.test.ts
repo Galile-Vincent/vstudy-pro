@@ -53,7 +53,7 @@ it("registers every chat handler with validated repository round trips and dispo
     return callback(event, payload);
   };
   try {
-    expect(implemented.size).toBe(8);
+    expect(implemented.size).toBe(9);
     const doc = store.documents.insert(
       documentSchema.parse({
         id: randomUUID(),
@@ -82,6 +82,9 @@ it("registers every chat handler with validated repository round trips and dispo
     expect(
       await invoke("messages:list", { conversationId: conversation.id }),
     ).toEqual([]);
+    expect(await invoke("conversations:options", { conversationId: conversation.id, options: { effort: 'high' } })).toEqual({ ok: true });
+    expect(store.conversations.get(conversation.id)?.options).toEqual({ effort: 'high' });
+    await expect(invoke("conversations:options", { conversationId: conversation.id, options: { effort: 'ultra' } })).rejects.toThrow('Unsupported model option');
     expect(await invoke("providers:list", {})).toHaveLength(6);
     expect(
       await invoke("providers:configure", {

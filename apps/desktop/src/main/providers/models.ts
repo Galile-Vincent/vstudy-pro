@@ -1,3 +1,5 @@
+import claudeFallback from './fixtures/claude-models.json';
+import codexFallback from './fixtures/codex-models.json';
 import patterns from './fixtures/claude-t3-patterns.json';
 import { spawn } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
@@ -43,14 +45,22 @@ function capture(binary: string, args: string[], input = '', initialize = false)
     child.stdin.end(input);
   });
 }
-export async function discoverModels(kind: 'claude' | 'codex'): Promise<Model[]> {
+const catalogs = new Map<string, { expires: number; result: Promise<Model[]> }>();
+export function discoverModels(kind: 'claude' | 'codex'): Promise<Model[]> {
+  const cached = catalogs.get(kind);
+  if (cached && cached.expires > Date.now()) return cached.result;
+  const result = readCatalog(kind);
+  catalogs.set(kind, { expires: Date.now() + 60_000, result });
+  return result;
+}
+async function readCatalog(kind: 'claude' | 'codex'): Promise<Model[]> {
   const binary = await findCli(kind);
   if (binary) try {
     if (kind === 'codex') return codexModels(JSON.parse(await capture(binary, ['debug', 'models'])));
     return claudeModels(JSON.parse(await capture(binary, ['-p', '--input-format', 'stream-json', '--output-format', 'stream-json', '--verbose', '--tools', '', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--setting-sources', '', '--no-session-persistence'], JSON.stringify({ type: 'control_request', request_id: 'models', request: { subtype: 'initialize' } }) + '\n', true)));
   } catch { /* Older CLIs may not expose a catalog. */ }
   if (kind === 'codex') try { return codexModels(JSON.parse(await readFile(join(homedir(), '.codex/models_cache.json'), 'utf8'))).map(m => ({ ...m, name: `${m.name} (cached)` })); } catch { /* Cache is optional. */ }
-  return (kind === 'claude' ? ['default', 'opus', 'sonnet', 'haiku'] : ['default']).map(id => ({ id, name: `${id} (static fallback)` }));
+  return (kind === 'claude' ? claudeModels(claudeFallback) : codexModels(codexFallback)).map(m => ({ ...m, name: `${m.name} (static fallback)` }));
 }
 export function validateOptions(model: Model | undefined, values: Record<string, string | boolean> = {}) {
   for (const [id, value] of Object.entries(values)) {
