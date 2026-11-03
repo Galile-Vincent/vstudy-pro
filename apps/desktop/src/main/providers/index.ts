@@ -17,6 +17,7 @@ import {
 import type { SecretStore } from "../services/secrets";
 import { createApiAdapter, validateBaseUrl } from "./api";
 import { createCliAdapter } from "./cli";
+import { AgyAdapter } from "./agy";
 export type Availability =
   | { available: true }
   | { available: false; reason: string };
@@ -179,7 +180,7 @@ export function createProviderRegistry(
       createApiAdapter(() => registry.config("openai-compatible"), secrets),
     "claude-cli": () => createCliAdapter("claude"),
     "codex-cli": () => createCliAdapter("codex"),
-    "agy-cli": () => createCliAdapter("agy"),
+    "agy-cli": () => new AgyAdapter(),
   } satisfies Record<ProviderConfig["id"], () => ProviderAdapter>;
   for (const config of [
     "anthropic-api",

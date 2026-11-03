@@ -6,7 +6,7 @@ A macOS Electron app for reading converted documents and chatting about selected
 
 - Node >=24.11.1 and pnpm 10.28.2 (see `packageManager`).
 - `uv` or Python 3.10+ (`python3`) for real document conversion. The first conversion creates a private virtual environment and installs the pinned MarkItDown requirements; internet access is needed once.
-- Optional `claude` / `codex` CLIs, installed and authenticated separately, for CLI providers. API providers can be configured in Settings.
+- Optional `claude` / `codex` / `agy` (Antigravity) CLIs, installed and authenticated separately, for CLI providers. API providers can be configured in Settings. Antigravity uses ACP over stdio, probes the CLI’s existing login, and lists live session models (labelled static defaults if unavailable). Run `agy` once to sign in.
 
 ## Run and check
 
