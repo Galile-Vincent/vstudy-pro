@@ -55,6 +55,18 @@ export const migrations = [
     CREATE INDEX documents_folder_fk ON documents(folderId);
     CREATE INDEX documents_opened_normalized ON documents(coalesce(lastOpenedAt,''),id) WHERE deletedAt IS NULL;
   ` },
+  { version: 10, sql: `
+    DROP INDEX documents_size;
+    DROP INDEX documents_folder_size;
+    ALTER TABLE documents RENAME COLUMN sizeBytes TO legacySizeBytes;
+    ALTER TABLE documents RENAME COLUMN contentChars TO legacyContentChars;
+    ALTER TABLE documents ADD COLUMN sizeBytes INTEGER;
+    ALTER TABLE documents ADD COLUMN contentChars INTEGER;
+    ALTER TABLE documents ADD COLUMN metadataBackfilled INTEGER NOT NULL DEFAULT 0;
+    UPDATE documents SET sizeBytes=nullif(legacySizeBytes,0),contentChars=nullif(legacyContentChars,0);
+    CREATE INDEX documents_size ON documents(sizeBytes,id) WHERE deletedAt IS NULL;
+    CREATE INDEX documents_folder_size ON documents(folderId,sizeBytes,id) WHERE deletedAt IS NULL;
+  ` },
 ];
 const documentRow = z
   .object({

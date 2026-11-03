@@ -123,5 +123,6 @@
   "documentCount_other": "{{formatted}} documents",
   "pages": "{{formatted}} pages",
   "noFolders": "No folders yet",
-  "customDates": "Custom dates…"
+  "customDates": "Custom dates…",
+  "unknown_size": "Unknown size"
 }

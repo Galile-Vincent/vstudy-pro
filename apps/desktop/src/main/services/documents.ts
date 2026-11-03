@@ -1,3 +1,4 @@
+import { backfillMetadata } from "./metadata";
 import { safeDocumentLabel } from "../security";
 import { activeConversions } from "./conversion-state";
 import { chmodSync, mkdirSync } from "node:fs";
@@ -28,6 +29,7 @@ export class DocumentService {
   private readonly jobs = new Map<Document["id"], Promise<void>>();
   private queue: Promise<void> = Promise.resolve();
   private stopped = false;
+  private readonly metadata: Promise<void>;
 
   constructor(private readonly options: {
     store: Store;
@@ -38,6 +40,7 @@ export class DocumentService {
     this.library = join(options.userData, "library");
     mkdirSync(this.library, { recursive: true, mode: 0o700 });
     chmodSync(this.library, 0o700);
+    this.metadata = backfillMetadata(options.store.db, this.library, () => this.stopped);
     for (const document of this.list()) {
       if (document.status === "converting") this.enqueue(document);
     }
@@ -111,7 +114,7 @@ export class DocumentService {
           sourceHash, sourcePath: join(directory, `source.${extension}`), mime,
           markdownPath: join(directory, "content.md"), status: "converting", createdAt: new Date().toISOString(),
         }));
-        this.options.store.db.prepare("UPDATE documents SET sizeBytes=? WHERE id=?").run(size, document.id);
+        this.options.store.db.prepare("UPDATE documents SET sizeBytes=?,metadataBackfilled=1 WHERE id=?").run(size, document.id);
         new ActivityService(this.options.store).record("import", document.id, 0, document.id);
         inserted();
         this.enqueue(document);
@@ -205,6 +208,6 @@ export class DocumentService {
     this.queue = recovered;
   }
 
-  async waitForIdle(): Promise<void> { await this.operations; await this.queue; }
+  async waitForIdle(): Promise<void> { await this.operations; await this.queue; await this.metadata; }
   dispose(): void { this.stopped = true; }
 }

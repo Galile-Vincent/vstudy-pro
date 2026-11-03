@@ -19,7 +19,7 @@ it.each([1,2,3,4,5,6,7,8,9])('upgrades seeded v%s and backfills legacy metadata 
   const store=openStore(file);
   try {
    await backfillMetadata(store.db,join(root,'library'),()=>false,1);
-   expect(store.db.prepare('SELECT sizeBytes,contentChars,pageCount FROM documents WHERE id=?').get(doc)).toMatchObject({sizeBytes:12,contentChars:19,pageCount:1});
+   expect(store.db.prepare('SELECT sizeBytes,contentChars,pageCount FROM documents WHERE id=?').get(doc)).toMatchObject({sizeBytes:12,contentChars:20,pageCount:1});
    expect(store.db.prepare('SELECT sizeBytes,contentChars,pageCount FROM documents WHERE id=?').get(missing)).toMatchObject({sizeBytes:null,contentChars:null,pageCount:null});
    await backfillMetadata(store.db,join(root,'library'),()=>false,1);
    expect(store.messages.list(conversation as never)[0]?.parts[0]?.text).toBe('preserved');

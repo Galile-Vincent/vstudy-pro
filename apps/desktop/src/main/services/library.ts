@@ -70,7 +70,7 @@ export class LibraryService {
     } }); }
     require(id: string) { const d = this.store.documents.get(documentIdSchema.parse(id)); if (!d)
         throw new Error('Document not found'); return d; }
-    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: Number(row.sizeBytes), contentChars: Number(row.contentChars) }); }
+    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: row.sizeBytes === null ? null : Number(row.sizeBytes), contentChars: row.contentChars === null ? null : Number(row.contentChars) }); }
     list(input: LibraryQuery) {
         const q = libraryQuerySchema.parse(input), args: SQLInputValue[] = [], where = ['d.deletedAt IS NULL'];
         const add = (sql: string, ...values: SQLInputValue[]) => { where.push(sql); args.push(...values); };

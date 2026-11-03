@@ -41,7 +41,8 @@ function folderPath(folders: Folder[], id: string | null | undefined) {
   for (let level = 0; id && level < 8; level++) { const folder = folders.find(f => f.id === id); if (!folder) break; names.unshift(folder.name); id = folder.parentId; }
   return names.join(' › ');
 }
-export function formatSize(bytes: number, locale: string) {
+export function formatSize(bytes: number | null, locale: string) {
+    if (bytes === null) return tr("library:unknown_size");
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
   const exponent = Math.min(3, Math.max(0, Math.floor(Math.log10(Math.max(1, bytes)) / 3)));
   return new Intl.NumberFormat(locale, { style: 'unit', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
