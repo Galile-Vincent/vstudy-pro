@@ -1,0 +1,25 @@
+Original design1 failure: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('.home-upload') to be visible[22m
+
+    at go (/Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/design1.mjs:25:337)
+    at async file:///Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/design1.mjs:50:188 {
+  name: 'TimeoutError'
+}
+[]
+URL file:///Users/vc/.t3/projects/vstudy-pro/apps/desktop/out/renderer/index.html
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('.home-upload') to be visible[22m
+
+    at go (/Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/design1.mjs:25:337)
+    at async file:///Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/design1.mjs:50:188 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.19.0

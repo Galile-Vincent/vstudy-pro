@@ -1,0 +1,4 @@
+en: live language switch, chat/picker/settings, 720/900/1200 light/dark passed
+zh-Hant: live language switch, chat/picker/settings, 720/900/1200 light/dark passed
+ja: live language switch, chat/picker/settings, 720/900/1200 light/dark passed
+Screenshots: /tmp/vstudy-i18n

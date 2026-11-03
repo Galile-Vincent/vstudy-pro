@@ -1,0 +1,9 @@
+{"extension":"docx","status":"ready","text":"VStudy fixtureAsk about this\n\nAsk about this"}
+{"extension":"xlsx","status":"ready","text":"StudyUse this section\nVStudy fixture"}
+{"extension":"pptx","status":"ready","text":"VStudy fixtureAsk about this"}
+{"extension":"html","status":"ready","text":"VStudy fixtureUse this section\n\nRead this document.Ask about this"}
+{"extension":"csv","status":"ready","text":"title\tcount\nVStudy fixture\t42"}
+{"extension":"md","status":"ready","text":"VStudy fixtureUse this section\n\nMarkdown passthrough.Ask about this"}
+{"extension":"pdf","status":"ready","text":"VStudy fixtureAsk about this"}
+{"images":"PASS","dataUri":true,"libraryProtocol":true,"nativeDialog":true}
+{"result":"PASS","realConverter":true,"formats":["docx","xlsx","pptx","html","csv","md","pdf"],"consoleErrors":[]}

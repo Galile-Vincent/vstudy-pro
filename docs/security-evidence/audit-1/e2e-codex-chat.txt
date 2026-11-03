@@ -1,0 +1,1 @@
+SKIP: set VSTUDY_CODEX_LIVE=1 with authenticated Codex 0.166.0

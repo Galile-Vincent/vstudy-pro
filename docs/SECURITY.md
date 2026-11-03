@@ -1,5 +1,7 @@
 # Security model and verification
 
+Follow-up adversarial findings, current controls, executed verification and outstanding renderer/release work: [security audit 1 response](security-audit-1-response.md). The historical verification below predates that response.
+
 Assets are imported originals, extracted text, selections, prompts, conversations, provider credentials, usage history and application integrity. Adversaries include malicious documents and model responses, network attackers, compromised dependencies and malicious local processes. The supported deployment is a single-user macOS account with FileVault. An attacker executing as the same user can inspect memory, alter the library and invoke authenticated CLIs: OS file modes and safeStorage are not an isolation boundary against that attacker.
 
 ```text

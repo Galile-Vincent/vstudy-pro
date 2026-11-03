@@ -1,0 +1,95 @@
+Skip to content
+VStudy Pro
+Home
+Library
+All documents
+0
+Recent
+0
+Pinned
+0
+Unfiled
+0
+Converting / Failed
+0
+Folders
+
+No folders yet
+
+Document library
+Library
+reading
+New Chat
+Workspace connected
+A place to think together
+
+What are the three ideas worth remembering?
+What are the three ideas worth remembering?
+
+Summarize this document
+Explain the key ideas
+Compare the main arguments
+Fake (test only)
+· Low
+0 tokens
+Send message
+
+Grounded in your document. Check important details.
+
+reading.md
+Markdown · markitdown
+E2E reading document
+Use this section
+
+This selected passage reaches the fake provider.
+Ask about this
+
+Details
+Use this section
+Topic	Result
+Selection	Grounded chat
+ Markdown imported
+const selected = true;
+
+
+Math: 
+𝑎
+2
++
+𝑏
+2
+=
+𝑐
+2
+a
+2
++b
+2
+=c
+2
+.
+Ask about this
+
+Reference website
+Ask about this
+
+No matching models
+Effort
+Low
+High
+Favorite Fake (test only)
+API keys & provider settings
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-slot=model-selector-list]').getByRole('option').filter({ hasText: 'GPT-6.1-Sol' }).first()[22m
+
+    at choose (/Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/composer-visual-qa.mjs:20:185)
+    at async file:///Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/composer-visual-qa.mjs:28:3 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.19.0
