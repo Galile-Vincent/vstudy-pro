@@ -140,7 +140,7 @@ export class ChatService {
     }
     const entry: ActiveRequest = {
       owner,
-      supersedeOnSave: regenerating ? superseded : undefined,
+      ...(regenerating ? {supersedeOnSave: superseded} : {}),
       userMessageId,
       assistantMessageId,
       request,

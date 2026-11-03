@@ -61,8 +61,8 @@ it("does not touch Keychain on construction or presence checks and bounds a slow
 it.each(['delete', 'session', 'replace'] as const)('invalidates delayed decrypt on %s', async (change) => {
   const { file, encryption, store: initial } = fixture();
   await initial.set('openai-compatible', 'old-key');
-  const gate = Promise.withResolvers<{result:string}>();
-  const started = Promise.withResolvers<void>();
+  const gate = deferred<{result:string}>();
+  const started = deferred<void>();
   encryption.decryptStringAsync = () => { started.resolve(); return gate.promise; };
   const store = createSecretStore(file, encryption);
   const pending = store.getInMainOnly('openai-compatible');
@@ -74,3 +74,9 @@ it.each(['delete', 'session', 'replace'] as const)('invalidates delayed decrypt 
   expect(await pending).toBeNull();
   expect(await store.getInMainOnly('openai-compatible')).toBe(change === 'delete' ? null : 'new-key');
 });
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>(done => { resolve = done; });
+  return {promise,resolve};
+}

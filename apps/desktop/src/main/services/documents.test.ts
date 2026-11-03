@@ -114,7 +114,7 @@ it("uses the decoded HTML title instead of the import filename", async () => {
 it('re-converts a ready document while retaining its original and identity',async()=>{const {service}=await setup();const doc=await service.importPath(fixture('md'));await service.waitForIdle();expect((await service.reconvert(doc.id)).id).toBe(doc.id);await service.waitForIdle();expect(service.get(doc.id)?.status).toBe('ready');expect(await service.read(doc.id)).toContain('VStudy fixture');});
 
 it.each([false,true])('finalizes hidden conversion before undo (failure=%s)', async (fail) => {
-  const gate = Promise.withResolvers<void>();
+  const gate = deferred<void>();
   const { service, store } = await setup(async (_source, output) => { await gate.promise; if (fail) throw new Error('offline'); await writeFile(output,'finished'); });
   const document = await service.importPath(fixture('html'));
   store.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(new Date().toISOString(),document.id);
@@ -150,3 +150,9 @@ it('never removes a published source when concurrent owners import identical byt
   expect(outcomes.every(o=>o.status==='fulfilled')).toBe(true);
   for(const document of store.documents.list()) expect(await readFile(document.sourcePath,'utf8')).toBe('same bytes');
 });
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>(done => { resolve = done; });
+  return {promise,resolve};
+}

@@ -456,8 +456,8 @@ it.each(['messages', 'activity_events'])('rolls back a failed edit when %s inser
 });
 
 it('awaits provider cleanup and persists partial text and usage before disposal resolves', async () => {
-  const exited = Promise.withResolvers<void>();
-  const started = Promise.withResolvers<void>();
+  const exited = deferred<void>();
+  const started = deferred<void>();
   const fixture = await setup({...available,async *stream(_req,signal) {
     try {
       yield {type:'text-delta',text:'partial answer'};
@@ -474,3 +474,9 @@ it('awaits provider cleanup and persists partial text and usage before disposal 
   expect(fixture.store.messages.list(fixture.request.conversationId).at(-1)?.parts[0]).toMatchObject({text:'partial answer',status:'aborted',usage:{inputTokens:10,outputTokens:3}});
   exited.resolve();await disposal;
 });
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>(done => { resolve = done; });
+  return {promise,resolve};
+}
