@@ -3,6 +3,7 @@ import { desktop } from "../bridge";
 import { applyLanguage } from "../i18n";
 import {
   createContext,
+  startTransition,
   useContext,
   useState,
   useRef,
@@ -73,7 +74,7 @@ export function AppShell({
   const navigate: Navigation["navigate"] = (value) => {
     const next = typeof value === "string" ? { view: value } : value;
     if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = route; returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
-    if (next.view === 'welcome' || route.view === 'welcome') setRoute(next);
+    if (next.view === 'welcome' || route.view === 'welcome') startTransition(() => setRoute(next));
     else transitionTo(() => setRoute(next), next.view === 'workspace' && !!next.documentId);
     try { localStorage.setItem("vstudy-route", JSON.stringify(next)); } catch { /* Route persistence is optional. */ }
   };
