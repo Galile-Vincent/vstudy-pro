@@ -1,7 +1,16 @@
 import { _electron as electron } from "playwright";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import ts from 'typescript';
+const source = ts.createSourceFile('preload.ts', await readFile(new URL('../src/preload/index.ts', import.meta.url), 'utf8'), ts.ScriptTarget.Latest, true);
+let expectedMethods = [];
+function visit(node) {
+  if (ts.isVariableDeclaration(node) && node.name.getText(source) === 'api' && node.initializer && ts.isObjectLiteralExpression(node.initializer)) expectedMethods = node.initializer.properties.map(p => p.name.getText(source)).sort();
+  ts.forEachChild(node, visit);
+}
+visit(source);
+if (!expectedMethods.length) throw new Error('Preload API source not found');
 const directory = await mkdtemp(join(tmpdir(), "vstudy-smoke-"));
 let app;
 try {
@@ -12,6 +21,12 @@ try {
     args: [".", `--user-data-dir=${directory}`],
     env: { ...process.env, ELECTRON_RUN_AS_NODE: "" },
   });
+  if (process.env.VSTUDY_SMOKE_CLOSE_MS) {
+    await new Promise(resolve => setTimeout(resolve, Number(process.env.VSTUDY_SMOKE_CLOSE_MS)));
+    await app.close();
+    app = undefined;
+    console.log(JSON.stringify({ result: 'PASS', closeMs: Number(process.env.VSTUDY_SMOKE_CLOSE_MS) }));
+  } else {
   const page = await app.firstWindow();
   await page
     .getByTestId("bridge-status")
@@ -62,7 +77,7 @@ try {
   }));
   if (
     exposed.node !== "undefined" ||
-    exposed.methods.join(",") !== "getPathForFile,invoke,onChatEvent"
+    exposed.methods.join(",") !== expectedMethods.join(",")
   )
     throw new Error("Unexpected bridge surface");
   console.log(
@@ -75,6 +90,7 @@ try {
       exposed,
     }),
   );
+  }
 } finally {
   await app?.close();
   await rm(directory, { recursive: true, force: true });

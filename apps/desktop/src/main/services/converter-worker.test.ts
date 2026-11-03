@@ -39,3 +39,35 @@ for line in sys.stdin:
     await worker.run("after-timeout", "", "");
   } finally { vi.useRealTimers(); worker.stop(); await rm(directory, { recursive: true, force: true }); }
 });
+
+it('cancels bootstrap, reaps its process group and allows immediate venv removal', async () => {
+  const { createConverter } = await import('../../../resources/converter');
+  const { mkdir, readFile, chmod } = await import('node:fs/promises');
+  const directory = await mkdtemp(join(tmpdir(), 'vstudy-bootstrap-stop-'));
+  const bin = join(directory, 'bin');
+  await mkdir(bin);
+  const pidFile = join(directory, 'pids');
+  const uv = join(bin, 'uv');
+  await writeFile(join(directory, 'requirements.txt'), 'fixture');
+  await writeFile(uv, `#!/bin/sh
+mkdir -p "$4"
+${JSON.stringify(process.execPath)} -e 'require("fs").writeFileSync(${JSON.stringify(pidFile)}, String(process.pid)); process.on("SIGTERM",()=>{}); setInterval(()=>{},100)' &
+wait
+`);
+  await chmod(uv, 0o700);
+  vi.stubEnv('PATH', bin + ':' + process.env.PATH);
+  const converter = createConverter({ userData: join(directory, 'data'), resources: directory });
+  const boot = converter.ensureReady();
+  const rejected = expect(boot).rejects.toThrow();
+  try {
+    let pid = 0;
+    for (let i=0;i<200;i++) { try { pid=Number(await readFile(pidFile,'utf8')); break; } catch { await new Promise(r=>setTimeout(r,10)); } }
+    expect(pid).toBeGreaterThan(0);
+    await converter.dispose();
+    await rejected;
+    await new Promise(r=>setTimeout(r,50));
+    expect(() => process.kill(pid, 0)).toThrow();
+    await rm(join(directory,'data','converter-venv'), {recursive:true,force:true});
+    await expect(converter.ensureReady()).rejects.toThrow('Converter closed');
+  } finally { await converter.dispose(); vi.unstubAllEnvs(); await rm(directory,{recursive:true,force:true}); }
+});

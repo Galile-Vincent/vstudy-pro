@@ -12,7 +12,7 @@ export function registerDocumentsIpc(
   store: Store,
   implemented: Set<IpcChannel>,
   deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(),
-): void {
+): () => Promise<void> {
   const userData = app.getPath("userData");
   const converter = createConverter({
     userData,
@@ -45,5 +45,5 @@ export function registerDocumentsIpc(
     return { ok: true };
   });
   const dispose = registrar.dispose;
-  registrar.dispose = () => { documents.dispose(); converter.dispose(); dispose(); };
+  return async () => { documents.dispose(); dispose(); await converter.dispose(); };
 }

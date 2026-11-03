@@ -1,3 +1,4 @@
+import { ProcessScope } from "./process-scope";
 import { profileStage } from "./profile";
 import { WarmWorker } from "./warm-worker";
 import { spawn } from "node:child_process";
@@ -32,9 +33,10 @@ export async function runProcess(
   maxOutputBytes = 1024 * 1024,
   onProgress?: Progress,
   cacheDirectory?: string,
+  scope?: ProcessScope,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-    const child = spawn(executable, args, {
+    const child = (scope ? scope.spawn.bind(scope) : spawn)(executable, args, {
       cwd, env: { ...scrubbedEnvironment(cwd), ...(cacheDirectory ? { PIP_CACHE_DIR: cacheDirectory, UV_CACHE_DIR: cacheDirectory } : {}) }, shell: false, stdio: ["ignore", "pipe", "pipe"],
     });
     let bytes = 0;
@@ -47,11 +49,11 @@ export async function runProcess(
       child.kill("SIGKILL");
     };
     const timer = setTimeout(() => stop("Converter process timed out"), timeoutMs);
-    child.stdout.on("data", (chunk: Buffer) => {
+    child.stdout!.on("data", (chunk: Buffer) => {
       bytes += chunk.length;
       if (bytes > maxOutputBytes) stop("Converter process output exceeds limit");
     });
-    child.stderr.on("data", (chunk: Buffer) => {
+    child.stderr!.on("data", (chunk: Buffer) => {
       bytes += chunk.length;
       if (bytes > maxOutputBytes) stop("Converter process output exceeds limit");
       stderr = (stderr + chunk.toString("utf8")).slice(-4000);
@@ -104,7 +106,11 @@ export function createConverter(options: {
   userData: string;
   resources: string;
   onProgress?: Progress;
-}): { convert: ConverterRunner; ensureReady: () => Promise<string>; dispose: () => void } {
+}): { convert: ConverterRunner; ensureReady: () => Promise<string>; dispose: () => Promise<void> } {
+  const scope = new ProcessScope();
+  let disposed = false;
+  const checkOpen = () => { if (disposed) throw new Error('Converter closed'); };
+  const run: typeof runProcess = (executable, args, cwd, timeout, max, progress, cache) => runProcess(executable, args, cwd, timeout, max, progress, cache, scope);
   const venv = join(options.userData, "converter-venv");
   const python = join(venv, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   let worker: WarmWorker | undefined;
@@ -136,7 +142,7 @@ export function createConverter(options: {
         const candidate = await findExecutable(name);
         if (!candidate) continue;
         try {
-          await runProcess(candidate, ["-c", "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)"], cwd, 10_000);
+          await run(candidate, ["-c", "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)"], cwd, 10_000);
           systemPython = candidate;
           break;
         } catch { /* macOS may provide a Python older than MarkItDown supports. */ }
@@ -144,24 +150,27 @@ export function createConverter(options: {
       if (!uv && !systemPython) throw new Error("Install uv or Python 3.10+ to enable document conversion; then retry");
       await rm(venv, { recursive: true, force: true });
       if (uv) {
-        await runProcess(uv, ["venv", "--python", systemPython ?? "3.12", venv], cwd, 300_000);
+        await run(uv, ["venv", "--python", systemPython ?? "3.12", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await runProcess(uv, ["pip", "install", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(uv, ["pip", "install", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       } else if (systemPython) {
-        await runProcess(systemPython, ["-m", "venv", venv], cwd, 300_000);
+        await run(systemPython, ["-m", "venv", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await runProcess(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       }
-      await runProcess(python, ["-c", "import markitdown, pdfplumber"], cwd);
+      await run(python, ["-c", "import markitdown, pdfplumber"], cwd);
+      checkOpen();
       await writeFile(marker, fingerprint);
       report("Converter ready");
       return python;
     } finally { await rm(cwd, { recursive: true, force: true }); }
   }
   function ensureReady(): Promise<string> {
+    if (disposed) return Promise.reject(new Error("Converter closed"));
     bootstrap ??= install().then(async executable => {
+      checkOpen();
       const warmed = profileStage("Python spawn + warm imports");
-      worker = new WarmWorker(executable, join(options.resources, "convert.py"), options.userData);
+      worker = new WarmWorker(executable, join(options.resources, "convert.py"), options.userData, scope);
       await worker.start();
       warmed();
       return executable;
@@ -170,7 +179,13 @@ export function createConverter(options: {
   }
   return {
     ensureReady,
-    dispose: () => worker?.stop(),
+    async dispose() {
+      disposed = true;
+      const stopping = scope.dispose();
+      await stopping;
+      worker?.stop();
+      await bootstrap?.catch(() => undefined);
+    },
     async convert(source, output, onProgress) {
       progress = onProgress;
       await ensureReady();
@@ -180,7 +195,7 @@ export function createConverter(options: {
         const temporaryOutput = join(cwd, "content.md");
         await rm(`${output}.partial`, { force: true });
         let publishPreview = Promise.resolve();
-        worker ??= new WarmWorker(python, join(options.resources, "convert.py"), options.userData);
+        worker ??= new WarmWorker(python, join(options.resources, "convert.py"), options.userData, scope);
         const extracted = profileStage("Worker conversion + preview delivery");
         await worker.run(source, temporaryOutput, output, message => {
           publishPreview = publishPreview.then(async () => {

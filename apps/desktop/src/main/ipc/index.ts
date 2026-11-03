@@ -12,7 +12,7 @@ export function registerIpc(
   store: Store,
   secrets: SecretStore,
   isTrusted: (event: IpcMainInvokeEvent) => boolean,
-): () => void {
+): () => Promise<void> {
   const providers = createProviderRegistry(secrets, `${app.getPath("userData")}/providers.json`);
   const registrar = createIpcRegistrar(ipcMain, isTrusted);
   const implemented = new Set<IpcChannel>([
@@ -44,12 +44,12 @@ export function registerIpc(
   });
   registerUsageIpc(registrar, store, implemented);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
-  registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove));
+  const disposeDocuments = registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove));
   for (const channel of Object.keys(ipcContract) as IpcChannel[]) {
     if (!implemented.has(channel))
       registrar.handle(channel, () => {
         throw new Error("not implemented");
       });
   }
-  return () => registrar.dispose();
+  return async () => { registrar.dispose(); await disposeDocuments(); };
 }

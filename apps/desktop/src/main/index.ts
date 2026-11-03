@@ -12,7 +12,7 @@ import { assetHandler } from "./assets";
 protocol.registerSchemesAsPrivileged([{ scheme: "vstudy-asset", privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 
 let store: Store | undefined;
-let disposeIpc: (() => void) | undefined;
+let disposeIpc: (() => Promise<void>) | undefined;
 let window: BrowserWindow | null = null;
 const developmentUrl = !app.isPackaged
   ? process.env.ELECTRON_RENDERER_URL
@@ -95,7 +95,15 @@ void app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
-app.on("will-quit", () => {
-  disposeIpc?.();
-  store?.close();
+let quitting = false;
+app.on("before-quit", (event) => {
+  if (quitting) return;
+  event.preventDefault();
+  quitting = true;
+  const timeout = setTimeout(() => app.exit(), 5000);
+  void Promise.resolve(disposeIpc?.()).catch(() => undefined).finally(() => {
+    clearTimeout(timeout);
+    store?.close();
+    app.quit();
+  });
 });
