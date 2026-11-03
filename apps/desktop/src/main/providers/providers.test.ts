@@ -173,3 +173,26 @@ async function collect<T>(source: AsyncIterable<T>): Promise<T[]> {
   for await (const value of source) result.push(value);
   return result;
 }
+it("allows loopback compatible providers without credentials", async () => {
+  const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response('data: [DONE]\n\n'));
+  const adapter = createApiAdapter(() => ({ kind: "compatible", id: "openai-compatible", enabled: true, baseUrl: "http://127.0.0.2:123/v1" }), { getInMainOnly: () => null }, fetcher);
+  expect(await adapter.detect()).toEqual({ available: true });
+  expect(await collect(adapter.stream(request, new AbortController().signal))).toEqual([{ type: "done" }]);
+  expect(fetcher.mock.calls[0]?.[1]?.headers).toEqual({ "content-type": "application/json" });
+});
+it.each([[401, "auth failed"], [429, "rate limited"], [400, "bad request"]] as const)("categorizes HTTP %s without exposing response or key", async (status, category) => {
+  const adapter = createApiAdapter(() => ({ kind: "api", id: "openai-api", enabled: true }), { getInMainOnly: () => "private-key" }, async () => new Response("private-key", { status }));
+  await expect(collect(adapter.stream(request, new AbortController().signal))).rejects.toThrow(`Provider ${category}`);
+});
+it("returns availability while remote models are pending and caches arriving models", async () => {
+  const { ProviderRegistry } = await import("./index");
+  const registry = new ProviderRegistry();
+  let release: (value: { id: string; name: string }[]) => void = () => {};
+  registry.register("openai-api", { async detect() { return { available: true }; }, listModels: () => new Promise(resolve => { release = resolve; }), async *stream() { yield { type: "done" }; } });
+  const first = (await registry.list()).find(p => p.config.id === "openai-api")!;
+  expect(first.availability).toEqual({ available: true });
+  expect(first.models).toEqual([]);
+  release([{ id: "arrived", name: "Arrived" }]);
+  await Promise.resolve();
+  expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([{ id: "arrived", name: "Arrived" }]);
+});

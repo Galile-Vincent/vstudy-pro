@@ -51,6 +51,8 @@ export const fakeAdapter: ProviderAdapter = {
 };
 export class ProviderRegistry {
   private readonly adapters = new Map<ProviderConfig["id"], ProviderAdapter>();
+  private modelCache = new Map<string, { models: Model[]; expires: number }>();
+  private loading = new Set<string>();
   private configs: ProviderConfig[] = [
     { kind: "api", id: "anthropic-api", enabled: true },
     { kind: "api", id: "openai-api", enabled: true },
@@ -116,6 +118,15 @@ export class ProviderRegistry {
     }
     this.configs = next;
   }
+  private models(config: ProviderConfig, adapter: ProviderAdapter): Model[] {
+    const key = JSON.stringify(config);
+    const cached = this.modelCache.get(key);
+    if ((!cached || cached.expires < Date.now()) && !this.loading.has(key)) {
+      this.loading.add(key);
+      void adapter.listModels().then(models => { this.modelCache.set(key, { models, expires: Date.now() + 60_000 }); }).catch(() => {}).finally(() => this.loading.delete(key));
+    }
+    return cached?.models ?? [];
+  }
   async list() {
     return Promise.all(
       this.configs.map(async (config) => {
@@ -129,7 +140,7 @@ export class ProviderRegistry {
           return {
             config,
             availability,
-            models: adapter && config.enabled ? await adapter.listModels() : [],
+            models: adapter && config.enabled ? this.models(config, adapter) : [],
           };
         } catch {
           return {
