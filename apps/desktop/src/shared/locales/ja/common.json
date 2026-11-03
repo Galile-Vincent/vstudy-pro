@@ -295,5 +295,14 @@
   "high": "高",
   "max": "最大",
   "fast": "高速",
-  "default_label": "既定"
+  "default_label": "既定",
+  "preview_name": "{{name}} のプレビュー",
+  "remove_name": "{{name}} を削除",
+  "sort_column": "{{name}} で並べ替え",
+  "map_places": "{{count}} か所の地図",
+  "source_title": "出典 {{number}}：{{title}}",
+  "goto": "{{title}} に移動",
+  "none_label": "なし",
+  "diagram_error": "図を描画できませんでした",
+  "skip_content": "メインコンテンツへ移動"
 }

@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import { memo, type FC } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -142,7 +144,7 @@ function getFileLabel(mimeType: string): string {
     mimeType.toLowerCase(),
   )?.[1];
   if (!subtype || subtype === "octet-stream") return "File";
-  if (subtype === "plain") return "Text file";
+  if (subtype === "plain") return tr('common:text_file');
   return `${subtype.toUpperCase()} file`;
 }
 
@@ -166,6 +168,7 @@ function FileRoot({
   children,
   ...props
 }: FileRootProps) {
+  useTranslation();
   return (
     <div
       data-slot="file-root"
@@ -189,6 +192,7 @@ function FileIconDisplay({
   children,
   ...props
 }: FileIconDisplayProps) {
+  useTranslation();
   const IconComponent = mimeType ? getMimeTypeIcon(mimeType) : FileIcon;
 
   return (
@@ -207,13 +211,14 @@ function FileName({
   children,
   ...props
 }: React.ComponentProps<"span">) {
+  useTranslation();
   return (
     <span
       data-slot="file-name"
       className={cn("min-w-0 flex-1 truncate font-medium", className)}
       {...props}
     >
-      {children || "Unnamed file"}
+      {children || tr('common:unnamed_file')}
     </span>
   );
 }
@@ -223,6 +228,7 @@ type FileSizeProps = React.ComponentProps<"span"> & {
 };
 
 function FileSize({ bytes, className, ...props }: FileSizeProps) {
+  useTranslation();
   return (
     <span
       data-slot="file-size"
@@ -250,6 +256,7 @@ function FileDownload({
   children,
   ...props
 }: FileDownloadProps) {
+  useTranslation();
   if (typeof data !== "string") return null;
   const kind = getFileDataKind(data, sourceType);
   const href = getFileHref(data, mimeType, sourceType);
@@ -291,6 +298,7 @@ function FilePlayer({
   className,
   ...props
 }: FilePlayerProps) {
+  useTranslation();
   const src = getFileHref(data, mimeType, sourceType);
   const normalizedMimeType = mimeType.toLowerCase();
 
@@ -319,6 +327,7 @@ const FileImpl: FileMessagePartComponent = ({
   mimeType,
   sourceType,
 }) => {
+  useTranslation();
   const kind = getFileDataKind(data, sourceType);
   const showSize =
     typeof data === "string" && (kind === "base64" || kind === "data-uri");

@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import { useEffect, useState, type ComponentProps } from "react";
 import { cn } from "@/lib/utils";
@@ -210,7 +212,7 @@ const withUnit = (text: string, unit: string | undefined) =>
       ? `${text}${unit}`
       : `${text} ${unit}`;
 
-const EmptyValue = () => <span className="text-muted-foreground">none</span>;
+const EmptyValue = () => <span className="text-muted-foreground">{tr('common:none_label')}</span>;
 
 function Value({
   column,
@@ -223,6 +225,7 @@ function Value({
   locale: string;
   relativeTo: number | undefined;
 }) {
+  useTranslation();
   const value = row[column.key];
   if (isEmpty(value)) return <EmptyValue />;
 
@@ -341,7 +344,7 @@ function Value({
         className="underline underline-offset-2"
       >
         {textValue(value)}
-        <span className="sr-only"> (opens in a new tab)</span>
+        <span className="sr-only"> {tr('common:opens_in_a_new_tab')}</span>
       </a>
     ) : (
       <a href={href} className="underline underline-offset-2">
@@ -450,11 +453,12 @@ export function DataTable({
   sort,
   onSortChange,
   locale = "en-US",
-  emptyMessage = "No rows",
+  emptyMessage = tr('common:no_rows'),
   relativeTo,
   className,
   ...props
 }: DataTableProps) {
+  useTranslation();
   const [internalSort, setInternalSort] = useState<DataTableSort | null>(
     defaultSort ?? null,
   );
@@ -515,7 +519,7 @@ export function DataTable({
     setAnnouncement(
       next
         ? `Sorted by ${column.label}, ${next.direction === "asc" ? "ascending" : "descending"}`
-        : "Sorting cleared",
+        : tr('common:sorting_cleared'),
     );
     onSortChange?.(next);
   };
@@ -571,7 +575,7 @@ export function DataTable({
                     <button
                       type="button"
                       onClick={() => changeSort(column)}
-                      aria-label={`Sort by ${column.label}`}
+                      aria-label={tr('common:sort_column',{name:column.label})}
                       className="focus-visible:ring-foreground/20 -mx-1 rounded px-1 outline-none focus-visible:ring-1"
                     >
                       {column.label}

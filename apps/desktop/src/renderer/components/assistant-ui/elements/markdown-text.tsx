@@ -1,4 +1,7 @@
 "use client";
+import { contentLanguage } from "../../../../shared/content-language";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import "@assistant-ui/react-markdown/styles/dot.css";
 
@@ -36,6 +39,7 @@ type MarkdownTextProps = Partial<TextMessagePartProps> & {
 const useShallowStable = <T extends Record<string, unknown> | undefined>(
   value: T,
 ): T => {
+  useTranslation();
   const ref = useRef(value);
   if (value !== ref.current) {
     const prev = ref.current;
@@ -53,6 +57,8 @@ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
   components,
   componentsByLanguage,
 }) => {
+  useTranslation();
+  const text = useAuiState(s => s.message.content.filter(p => p.type === "text").map(p => p.type === "text" ? p.text : "").join(""));
   const rawCitations = useAuiState(s => s.message.metadata.custom.citations);
   const citations = documentCitationSchema.array().safeParse(rawCitations);
   const references = citations.success ? citations.data : [];
@@ -73,7 +79,7 @@ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
       skipHtml
       preprocess={text => text.replace(/\[\[cite:(s\d+)\]\]/g,(marker,id:string) => references.some(c => c.id === id) ? `[source](#vstudy-cite-${id})` : marker)}
       urlTransform={url => /^#vstudy-cite-s\d+$/.test(url) || externalUrlSchema.safeParse(url).success ? url : ""}
-      className="aui-md"
+      className="aui-md" containerProps={{lang:contentLanguage(text)}}
       components={markdownComponents}
       componentsByLanguage={stableComponentsByLanguage}
       defer
@@ -85,6 +91,7 @@ const MarkdownTextImpl: FC<MarkdownTextProps> = ({
 export const MarkdownText = memo(MarkdownTextImpl);
 
 const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
+  useTranslation();
   const { isCopied, copyToClipboard } = useCopyToClipboard();
   const onCopy = () => {
     if (!code || isCopied) return;
@@ -96,7 +103,7 @@ const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
       <span className="aui-code-header-language text-muted-foreground font-medium lowercase">
         {language}
       </span>
-      <TooltipIconButton tooltip="Copy code" onClick={onCopy}>
+      <TooltipIconButton tooltip={tr('common:copy_code')} onClick={onCopy}>
         {!isCopied && (
           <CopyIcon className="animate-in zoom-in-75 fade-in duration-150" />
         )}

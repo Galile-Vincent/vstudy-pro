@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { tr } from '../shared/i18n';
 import { ModelPicker } from "./model-picker";
 export { ModelPicker } from "./model-picker";
 import { MessageUsage } from "./usage/chip";
@@ -38,7 +40,7 @@ export function Chat({
   onProvidersChanged,
   onUsage,
   documentPageCount = 0,
-  documentTitle = "Document",
+  documentTitle = tr('common:document'),
 }: {
   conversation: Conversation;
   draft: string;
@@ -54,6 +56,7 @@ export function Chat({
   onUsage: () => void;
   documentPageCount?: number; documentTitle?: string;
 }) {
+  useTranslation();
   const [options, setOptions] = useState<Record<string,string|boolean>>(conversation.options ?? {});
   useEffect(() => setOptions(conversation.options ?? {}), [conversation.providerId,conversation.modelId]);
   const declared = providers.find(p => p.config.id === conversation.providerId)?.models.find(m => m.id === conversation.modelId || m.resolvedId === conversation.modelId)?.options ?? [];
@@ -88,7 +91,7 @@ export function Chat({
   );
   useEffect(() => () => connection.dispose(), [connection]);
   const speech = useMemo(() => typeof window !== 'undefined' && 'speechSynthesis' in window ? new WebSpeechSynthesisAdapter() : undefined, []);
-  const suggestion = useMemo(() => ({generate: async () => [{prompt:'Which passages support this answer?'},{prompt:'Explain this more simply'}]}), []);
+  const suggestion = useMemo(() => ({generate: async () => [{prompt:tr('common:which_passages_support_this_answer')},{prompt:tr('common:explain_this_more_simply')}]}), []);
   const runtime = useLocalRuntime(connection.adapter, {
     adapters: { suggestion, ...(speech ? {speech} : {}) },
     initialMessages: history.map((m) => ({
@@ -96,7 +99,7 @@ export function Chat({
       role: m.role,
       content: m.role === 'assistant' ? m.parts.flatMap(p => assistantContent(p.text,p.reasoning,p.citations,p.toolCalls)) : m.parts.map(p => ({type:'text' as const,text:p.text})),
       createdAt: new Date(m.createdAt),
-      ...(m.role === 'assistant' && m.parts.some(p => p.status === 'error') ? { status: { type: 'incomplete' as const, reason: 'error' as const, error: m.parts.find(p => p.error)?.error ?? 'Provider unavailable' } } : {}),
+      ...(m.role === 'assistant' && m.parts.some(p => p.status === 'error') ? { status: { type: 'incomplete' as const, reason: 'error' as const, error: tr('errors:provider_unavailable') } } : {}),
       ...(m.role === 'assistant' && m.parts.some(p => p.status === 'aborted') ? {status:{type:'incomplete' as const,reason:'cancelled' as const}} : {}),
       metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage, modelId: m.parts[0]?.modelId, options: m.parts[0]?.options, selection: m.parts[0]?.selection, turnId: m.parts[0]?.turnId, citations: m.parts[0]?.citations } },
     })),
@@ -110,9 +113,9 @@ export function Chat({
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
-    {unavailable && <p role="alert">This conversation’s provider is unavailable. Add an API key or enable it in Settings.</p>}
+    {unavailable && <p role="alert">{tr('common:this_conversation_s_provider_is_unavailable_add_an_api_key_or_enable_it_in_settings')}</p>}
     <Thread components={documentComponents} />
-    <p className="composer-note">Grounded in your document. Check important details.</p>
+    <p className="composer-note">{tr('common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }
 
@@ -125,25 +128,32 @@ type DocumentChat = {
 const DocumentChatContext = createContext<DocumentChat | null>(null);
 const useDocumentChat = () => useContext(DocumentChatContext)!;
 function ComposerSelection() {
+  useTranslation();
   const {selection,onClearSelection} = useDocumentChat();
-  return selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label="Remove selection" onClick={onClearSelection}>×</button></div>;
+  return selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label={tr('common:remove_selection')} onClick={onClearSelection}>×</button></div>;
 }
 function ComposerBanner() {
+  useTranslation();
   const {usage,budget} = useDocumentChat();
-  return <><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert" title="The estimate allows 1,024 output tokens; actual usage can be higher."><span>{budget.reason}</span><div className="usage-warning-actions"><Button type="button" variant="outline" size="sm" onClick={budget.approve}>Send anyway</Button><Button type="button" variant="ghost" size="sm" onClick={budget.dismiss}>Cancel</Button></div></div>}</>;
+  return <><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert" title={tr('common:the_estimate_allows_1_024_output_tokens_actual_usage_can_be_higher')}><span>{budget.reason}</span><div className="usage-warning-actions"><Button type="button" variant="outline" size="sm" onClick={budget.approve}>{tr('common:send_anyway')}</Button><Button type="button" variant="ghost" size="sm" onClick={budget.dismiss}>{tr('common:cancel')}</Button></div></div>}</>;
 }
-function ComposerModel() { return useDocumentChat().picker; }
-function ComposerUsage() { const {usage,onUsage} = useDocumentChat(); return <UsageButton {...usage} onClick={onUsage} />; }
+function ComposerModel() {
+  useTranslation(); return useDocumentChat().picker; }
+function ComposerUsage() {
+  useTranslation(); const {usage,onUsage} = useDocumentChat(); return <UsageButton {...usage} onClick={onUsage} />; }
 function MessageSelection() {
+  useTranslation();
   const id = useAuiState(s => s.message.id), {selections} = useDocumentChat();
   const selected = selections.get(id);
   return selected && <SelectionPreview selection={selected} />;
 }
 function DocumentSuggestions() {
+  useTranslation();
   const aui = useAui();
-  return <Suggestions suggestions={['Summarize this document','Explain the key ideas','Compare the main arguments']} selectedSuggestion={null} cycle={0} onSuggestion={prompt => aui.composer().setText(prompt)} variant="list" />;
+  return <Suggestions suggestions={[tr('common:summarize_this_document'),tr('common:explain_the_key_ideas'),tr('common:compare_the_main_arguments')]} selectedSuggestion={null} cycle={0} onSuggestion={prompt => aui.composer().setText(prompt)} variant="list" />;
 }
 function DocumentMessageFooter() {
+  useTranslation();
   const rawCitations = useAuiState(s => s.message.metadata.custom.citations);
   const parsedCitations = documentCitationSchema.array().safeParse(rawCitations);
   const {documentPageCount,documentTitle,usage,models,statuses,subscription} = useDocumentChat();
@@ -154,23 +164,26 @@ function DocumentMessageFooter() {
   const isLast = useAuiState(s => s.message.index === s.thread.messages.length - 1);
   const fallbackUsage = stopped && isLast ? usage.data?.records.find(record => Date.parse(record.createdAt) >= (createdAt?.getTime() ?? Infinity)) : undefined;
   const id = useAuiState(s => s.message.id);
-  return <div className="document-message-footer">{documentPageCount > 0 && citations.length > 0 && <details><summary>Document references</summary><DocumentReference title={documentTitle} pages={documentPageCount} anchors={citations.map(c => ({page:c.page!,quote:c.quote}))} activePage={activePage || citations[0]!.page!} onJump={page => {setActivePage(page);const citation=citations.find(c => c.page === page);if(citation) jumpToCitation(citation);}} /></details>}<MessageUsage subscription={subscription} models={models} fallbackUsage={fallbackUsage} />{(stopped || statuses.get(id) === "aborted") && <p role="status" className="muted">Stopped. Partial response excluded from future context.</p>}{statuses.get(id) && statuses.get(id) !== "aborted" && <p role="status">Response {statuses.get(id)}. This turn is excluded from future context.</p>}</div>;
+  return <div className="document-message-footer">{documentPageCount > 0 && citations.length > 0 && <details><summary>{tr('common:document_references')}</summary><DocumentReference title={documentTitle} pages={documentPageCount} anchors={citations.map(c => ({page:c.page!,quote:c.quote}))} activePage={activePage || citations[0]!.page!} onJump={page => {setActivePage(page);const citation=citations.find(c => c.page === page);if(citation) jumpToCitation(citation);}} /></details>}<MessageUsage subscription={subscription} models={models} fallbackUsage={fallbackUsage} />{(stopped || statuses.get(id) === "aborted") && <p role="status" className="muted">{tr('common:stopped_partial_response_excluded_from_future_context')}</p>}{statuses.get(id) && statuses.get(id) !== "aborted" && <p role="status">{tr('common:response')}{statuses.get(id)}{tr('common:this_turn_is_excluded_from_future_context')}</p>}</div>;
 }
-function useComposerBindings() { const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
+function useComposerBindings() {
+  useTranslation(); const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
 const documentComponents = { WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 
 export function SelectionPreview({ selection }: { selection: Selection }) {
+  useTranslation();
   const plain = plainSelection(selection.text.replace(/^#{1,6} .*\n?/, ""));
-  return <details className="selection-preview"><summary><strong>{selection.headingPath.join(" › ") || "Selected passage"}</strong><span>{plain.slice(0, 160)}{plain.length > 160 ? "…" : ""}</span></summary><div>{plain}</div></details>;
+  return <details className="selection-preview"><summary><strong>{selection.headingPath.join(" › ") || tr('common:selected_passage')}</strong><span>{plain.slice(0, 160)}{plain.length > 160 ? "…" : ""}</span></summary><div>{plain}</div></details>;
 }
 
 export function ChatComposerInput() {
+  useTranslation();
   const composing = useRef(false);
   const expiry = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const clear = () => { composing.current = false; clearTimeout(expiry.current); };
   const refresh = () => { composing.current = true; clearTimeout(expiry.current); expiry.current = setTimeout(clear,1500); };
   useEffect(() => () => clearTimeout(expiry.current), []);
-  return <ComposerPrimitive.Input className="aui-composer-input" aria-label="Ask about your document" placeholder="Ask about your document…" rows={2}
+  return <ComposerPrimitive.Input className="aui-composer-input" aria-label={tr('common:ask_about_your_document')} placeholder={tr('common:ask_about_your_document')} rows={2}
     onCompositionStart={refresh}
     onCompositionUpdate={refresh}
     onBlur={clear}

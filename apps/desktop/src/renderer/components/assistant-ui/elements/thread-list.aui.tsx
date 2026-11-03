@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +36,7 @@ import {
 } from "react";
 
 export const ThreadList: FC = () => {
+  useTranslation();
   const [search, setSearch] = useState("");
   const hasThreads = useAuiState((s) => s.threads.threadIds.length > 0);
 
@@ -66,8 +69,8 @@ export const ThreadListSearch = forwardRef<
         type="search"
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
-        aria-label="Search threads"
-        placeholder="Search threads"
+        aria-label={tr('common:search_threads')}
+        placeholder={tr('common:search_threads')}
         className={cn("h-8 ps-8 text-sm", className)}
         {...props}
       />
@@ -80,6 +83,7 @@ ThreadListSearch.displayName = "ThreadListSearch";
 export const ThreadListRoot: FC<
   ComponentPropsWithoutRef<typeof ThreadListPrimitive.Root>
 > = ({ className, ...props }) => {
+  useTranslation();
   return (
     <ThreadListPrimitive.Root
       data-slot="aui_thread-list-root"
@@ -92,6 +96,7 @@ export const ThreadListRoot: FC<
 export const ThreadListItems: FC<
   ComponentPropsWithoutRef<"div"> & { searchQuery?: string }
 > = ({ className, searchQuery = "", ...props }) => {
+  useTranslation();
   return (
     <div
       data-slot="aui_thread-list-items"
@@ -113,7 +118,7 @@ const dateGroupLabel = (
   startOfToday: number,
   startOfYesterday: number,
 ): string => {
-  if (!date || date.getTime() >= startOfToday) return "Today";
+  if (!date || date.getTime() >= startOfToday) return tr('common:today');
   if (date.getTime() >= startOfYesterday) return "Yesterday";
   return "Earlier";
 };
@@ -161,6 +166,7 @@ export type ThreadListGroup = { label: string; indices: number[] };
  * in which case `filteredIndices` keeps the runtime order.
  */
 export const useThreadListGroups = (searchQuery = "") => {
+  useTranslation();
   const threadIds = useAuiState((s) => s.threads.threadIds);
   const threadItems = useAuiState((s) => s.threads.threadItems);
 
@@ -175,7 +181,7 @@ export const useThreadListGroups = (searchQuery = "") => {
       .filter(
         ({ id }) =>
           !query ||
-          (itemsById.get(id)?.title || "New Chat")
+          (itemsById.get(id)?.title || tr('common:new_chat'))
             .toLowerCase()
             .includes(query),
       )
@@ -215,6 +221,7 @@ export const useThreadListGroups = (searchQuery = "") => {
 const ThreadListItemGroups: FC<{ searchQuery?: string }> = ({
   searchQuery = "",
 }) => {
+  useTranslation();
   const { threadIds, filteredIndices, groups } =
     useThreadListGroups(searchQuery);
   const query = searchQuery.trim();
@@ -225,8 +232,7 @@ const ThreadListItemGroups: FC<{ searchQuery?: string }> = ({
         data-slot="aui_thread-list-empty"
         className="text-muted-foreground px-2.5 py-4 text-sm"
       >
-        No threads found
-      </div>
+        {tr('common:no_threads_found')}</div>
     );
   }
 
@@ -285,8 +291,7 @@ export const ThreadListNew = forwardRef<
               data-slot="aui_thread-list-new-label"
               className={cn("whitespace-nowrap", labelClassName)}
             >
-              New Thread
-            </span>
+              {tr('common:new_thread')}</span>
           </>
         )}
       </Button>
@@ -297,10 +302,11 @@ export const ThreadListNew = forwardRef<
 ThreadListNew.displayName = "ThreadListNew";
 
 const ThreadListSkeleton: FC = () => {
+  useTranslation();
   return (
     <div
       role="status"
-      aria-label="Loading threads"
+      aria-label={tr('common:loading_threads')}
       className="flex flex-col gap-0.5"
     >
       {Array.from({ length: 5 }, (_, i) => (
@@ -321,6 +327,7 @@ const ThreadListSkeleton: FC = () => {
 };
 
 export const ThreadListItem: FC = () => {
+  useTranslation();
   const isRunning = useAuiState((s) => s.threadListItem.isRunning);
   const [isRenaming, setIsRenaming] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -361,9 +368,9 @@ export const ThreadListItem: FC = () => {
             data-slot="aui_thread-list-item-title"
             className="min-w-0 flex-1 truncate"
           >
-            <ThreadListItemPrimitive.Title fallback="New Chat" />
+            <ThreadListItemPrimitive.Title fallback={tr('common:new_chat')} />
           </span>
-          {isRunning && <span className="sr-only">Running</span>}
+          {isRunning && <span className="sr-only">{tr('common:running')}</span>}
         </ThreadListItemPrimitive.Trigger>
       )}
       <ThreadListItemMore onRename={() => setIsRenaming(true)} />
@@ -374,6 +381,7 @@ export const ThreadListItem: FC = () => {
 const ThreadListItemRename: FC<{
   onDone: (restoreFocus: boolean) => void;
 }> = ({ onDone }) => {
+  useTranslation();
   const aui = useAui();
   const title = useAuiState((s) => s.threadListItem.title) ?? "";
   const [value, setValue] = useState(title);
@@ -417,7 +425,7 @@ const ThreadListItemRename: FC<{
       ref={inputRef}
       autoFocus
       data-slot="aui_thread-list-item-rename"
-      aria-label="Rename thread"
+      aria-label={tr('common:rename_thread')}
       value={value}
       className="h-7 min-w-0 flex-1 ps-2.5 pe-9 text-sm"
       onChange={(event) => setValue(event.target.value)}
@@ -438,6 +446,7 @@ const ThreadListItemRename: FC<{
 };
 
 const ThreadListItemMore: FC<{ onRename: () => void }> = ({ onRename }) => {
+  useTranslation();
   return (
     <ThreadListItemMorePrimitive.Root sharedFocusGroup>
       <ThreadListItemMorePrimitive.Trigger asChild>
@@ -448,7 +457,7 @@ const ThreadListItemMore: FC<{ onRename: () => void }> = ({ onRename }) => {
           className="data-[state=open]:bg-accent absolute end-1.5 top-1/2 size-6 -translate-y-1/2 p-0 opacity-0 group-hover:opacity-100 group-has-focus-visible:opacity-100 group-data-active:opacity-100 data-[state=open]:opacity-100"
         >
           <MoreHorizontalIcon className="size-3.5" />
-          <span className="sr-only">More options</span>
+          <span className="sr-only">{tr('common:more_options')}</span>
         </Button>
       </ThreadListItemMorePrimitive.Trigger>
       <ThreadListItemMorePrimitive.Content
@@ -464,16 +473,14 @@ const ThreadListItemMore: FC<{ onRename: () => void }> = ({ onRename }) => {
           onSelect={onRename}
         >
           <PencilIcon className="size-4" />
-          Rename
-        </ThreadListItemMorePrimitive.Item>
+          {tr('common:rename')}</ThreadListItemMorePrimitive.Item>
         <ThreadListItemPrimitive.Archive asChild>
           <ThreadListItemMorePrimitive.Item
             data-slot="aui_thread-list-item-more-item"
             className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm outline-none select-none"
           >
             <ArchiveIcon className="size-4" />
-            Archive
-          </ThreadListItemMorePrimitive.Item>
+            {tr('common:archive')}</ThreadListItemMorePrimitive.Item>
         </ThreadListItemPrimitive.Archive>
         <ThreadListItemPrimitive.Delete asChild>
           <ThreadListItemMorePrimitive.Item
@@ -481,8 +488,7 @@ const ThreadListItemMore: FC<{ onRename: () => void }> = ({ onRename }) => {
             className="text-destructive hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm outline-none select-none"
           >
             <TrashIcon className="size-4" />
-            Delete
-          </ThreadListItemMorePrimitive.Item>
+            {tr('common:delete')}</ThreadListItemMorePrimitive.Item>
         </ThreadListItemPrimitive.Delete>
       </ThreadListItemMorePrimitive.Content>
     </ThreadListItemMorePrimitive.Root>

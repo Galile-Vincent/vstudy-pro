@@ -1,3 +1,5 @@
+import { tr } from "../i18n";
+import { conversionStatus } from "../../shared/status";
 import { app, dialog } from "electron";
 import { join } from "node:path";
 import type { Store } from "../db";
@@ -22,14 +24,15 @@ export function registerDocumentsIpc(
   const owners = new Map<string, Electron.WebContents>();
   const documents = new DocumentService({ store, userData, convert: converter.convert, onProgress: (documentId, message) => {
     const owner = owners.get(documentId);
-    if (owner && !owner.isDestroyed()) owner.send(documentProgressChannel, documentProgressSchema.parse({ documentId, message }));
+    if (owner && !owner.isDestroyed()) owner.send(documentProgressChannel, documentProgressSchema.parse({ documentId, message, ...conversionStatus(message) }));
   } });
   const channels = ["documents:import", "documents:importPaths", "documents:list", "documents:get", "documents:read", "documents:retry", "documents:delete"] as const;
   for (const channel of channels) implemented.add(channel);
   registrar.handle("documents:import", async (_input, event) => {
     const result = await dialog.showOpenDialog({
+      title:tr("picker:import_title"), buttonLabel:tr("picker:import_title"),
       properties: ["openFile"],
-      filters: [{ name: "Documents", extensions: Object.keys(documentFormats) }],
+      filters: [{ name: tr("picker:documents"), extensions: Object.keys(documentFormats) }],
     });
     const path = result.filePaths[0];
     if (result.canceled || !path) return null;

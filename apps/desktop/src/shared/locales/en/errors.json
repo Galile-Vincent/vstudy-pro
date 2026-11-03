@@ -1,5 +1,11 @@
 {
   "generic": "Something went wrong. Please try again.",
   "provider_unavailable": "The provider is unavailable. Check Settings.",
-  "conversion_failed": "Could not convert this file. Please retry."
+  "conversion_failed": "Could not convert this file. Please retry.",
+  "auth_failed": "Authentication failed. Check your API key or CLI login.",
+  "rate_limited": "Rate limit reached. Please try again later.",
+  "network": "Check your connection and try again.",
+  "budget": "Provider quota exceeded. Check your billing settings.",
+  "bad_request": "Check the selected model and provider settings.",
+  "server_error": "The provider encountered an error. Try again later."
 }

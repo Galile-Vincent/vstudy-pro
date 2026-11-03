@@ -1,3 +1,8 @@
+import { errorText, statusText } from "./status";
+import { conversionStatus } from "../shared/status";
+import { useTranslation } from "react-i18next";
+import { applyLanguage } from "./i18n";
+import { tr } from '../shared/i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type {
@@ -17,6 +22,7 @@ import { ConversationList } from "./conversation-list";
 import { ProviderSettings, type Providers } from "./providers";
 
 export function App() {
+  useTranslation();
   const [settings, setSettings] = useState<Settings>(defaultSettings),
     [connected, setConnected] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]),
@@ -58,14 +64,14 @@ export function App() {
     return () => { active = false; unsubscribe?.(); };
   }, [documentId]);
   const partialPreview = useMemo(() => partialSource && documentId ? <DocumentMarkdown source={partialSource} documentId={documentId}
-    onSelect={() => setNotice("Selection and chat are available when conversion finishes")}
+    onSelect={() => setNotice(tr('common:selection_and_chat_are_available_when_conversion_finishes'))}
     onNotice={setNotice} /> : null, [partialSource, documentId]);
   const doc = documents.find((d) => d.id === documentId);
   const pageProgress = /^Converting page (\d+)\/(\d+)/.exec(doc ? progress[doc.id] ?? "" : "");
   const report = useCallback(
     (error: unknown) =>
       setNotice(
-        error instanceof Error ? error.message : "Something went wrong",
+        errorText(error),
       ),
     [],
   );
@@ -85,6 +91,8 @@ export function App() {
       .then(([s, d, p]) => {
         if (!active) return;
         setSettings(s);
+        void applyLanguage(s.language);
+        void desktop.invoke('settings:appearance',{}).then(a => {document.documentElement.dataset.reducedTransparency=String(a.reducedTransparency);});
         setDocuments(d);
         setProviders(p);
         setConnected(true);
@@ -205,7 +213,7 @@ export function App() {
   };
   const importing = useRef(false);
   const importDocument = async (paths?: string[]) => {
-    if (!connected) { setNotice("Workspace is still connecting. Try importing again in a moment."); return; }
+    if (!connected) { setNotice(tr('common:workspace_is_still_connecting_try_importing_again_in_a_moment')); return; }
     if (importing.current) return;
     importing.current = true;
     setBusy(true);
@@ -256,14 +264,14 @@ export function App() {
     if (selection && !conversation && canChat && !busy) void newConversation();
   }, [selection, conversation, canChat, busy]);
   const chat = (
-    <section className="pane chat-pane" aria-label="Chat">
+    <section className="pane chat-pane" aria-label={tr('common:chat')}>
       <div className="pane-toolbar">
-        <span className="eyebrow">Conversation</span>
+        <span className="eyebrow">{tr('common:conversation')}</span>
         <div className="row">
-          <ConversationList conversations={conversations} current={conversation} providers={providers} canCreate={!!canChat && !busy} onSelect={c => {setConversation(c);setModel(`${c.providerId}/${c.modelId}`);}} onNew={() => newConversation()} onDelete={async id => {if (!window.confirm('Delete this conversation?')) return; await desktop.invoke('conversations:delete',{conversationId:id});setConversations(list=>list.filter(c=>c.id!==id));if(conversation?.id===id){setConversation(null);setHistory(null);}}}/>
+          <ConversationList conversations={conversations} current={conversation} providers={providers} canCreate={!!canChat && !busy} onSelect={c => {setConversation(c);setModel(`${c.providerId}/${c.modelId}`);}} onNew={() => newConversation()} onDelete={async id => {if (!window.confirm(tr('common:delete_this_conversation'))) return; await desktop.invoke('conversations:delete',{conversationId:id});setConversations(list=>list.filter(c=>c.id!==id));if(conversation?.id===id){setConversation(null);setHistory(null);}}}/>
 
-          {conversation && <button className="icon-button" title="Delete conversation" aria-label="Delete conversation" onClick={() => {
-            if (!window.confirm("Delete this conversation?")) return;
+          {conversation && <button className="icon-button" title={tr('common:delete_conversation')} aria-label={tr('common:delete_conversation')} onClick={() => {
+            if (!window.confirm(tr('common:delete_this_conversation'))) return;
             void desktop.invoke("conversations:delete", { conversationId: conversation.id }).then(() => {
               setConversations(list => list.filter(c => c.id !== conversation.id)); setConversation(null); setHistory(null);
             }).catch(report);
@@ -271,7 +279,7 @@ export function App() {
           <button
             disabled={!canChat || busy}
             onClick={() => void newConversation()}
-            aria-label="New chat"
+            aria-label={tr('common:new_chat')}
           >
             ＋
           </button>
@@ -280,7 +288,7 @@ export function App() {
       {conversation && history ? (
         <Chat
           documentPageCount={documentPageCount}
-          documentTitle={doc?.sourceName ?? "Document"}
+          documentTitle={doc?.sourceName ?? tr('common:document')}
             onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
           key={conversation.id}
           draft={draft}
@@ -299,26 +307,25 @@ export function App() {
         <div className="chat-start">
           <div className="empty">
             <div className="empty-symbol">✦</div>
-            <h3>A place to think together</h3>
+            <h3>{tr('common:a_place_to_think_together')}</h3>
             <p>
               {doc
-                ? "Start a conversation to explore this document."
-                : "Import a document, then follow your curiosity."}
+                ? tr('common:start_a_conversation_to_explore_this_document')
+                : tr('common:import_a_document_then_follow_your_curiosity')}
             </p>
             <button
               className="primary"
               disabled={!canChat || busy}
               onClick={() => void newConversation()}
             >
-              Start a conversation
-            </button>
+              {tr('common:start_a_conversation')}</button>
           </div>
           {selection && (
             <div className="selection-chip">
               <SelectionPreview selection={selection} />
               <button
                 onClick={() => setSelection(null)}
-                aria-label="Remove selection"
+                aria-label={tr('common:remove_selection')}
               >
                 ×
               </button>
@@ -336,11 +343,11 @@ export function App() {
     </section>
   );
   const reading = (
-    <section className="pane reading-pane" aria-label="Document">
+    <section id="reading-content" tabIndex={-1} className="pane reading-pane" aria-label={tr('common:document')}>
       <div className="pane-toolbar">
-        <span className="eyebrow">{doc?.sourceName ?? "Reading space"}</span>
-        {doc && <button className="icon-button" title="Delete document" aria-label="Delete document" onClick={() => {
-          if (!window.confirm(`Delete ${doc.title} and its conversations?`)) return;
+        <span className="eyebrow">{doc?.sourceName ?? tr('common:reading_space')}</span>
+        {doc && <button className="icon-button" title={tr('common:delete_document')} aria-label={tr('common:delete_document')} onClick={() => {
+          if (!window.confirm(tr('library:delete_document',{title:doc.title}))) return;
           void desktop.invoke("documents:delete", { documentId: doc.id }).then(async () => {
             const list = await desktop.invoke("documents:list", {}); setDocuments(list); setDocumentId(list[0]?.id ?? null);
           }).catch(report);
@@ -352,28 +359,26 @@ export function App() {
       {!doc ? (
         <div className="empty">
           <div className="empty-symbol">▤</div>
-          <h3>Your next idea starts here</h3>
-          <p>Import a document to read, select, and ask questions.</p>
+          <h3>{tr('common:your_next_idea_starts_here')}</h3>
+          <p>{tr('common:import_a_document_to_read_select_and_ask_questions')}</p>
           <button onClick={() => void importDocument()} disabled={busy || !connected}>
-            Import document
-          </button>
+            {tr('common:import_document')}</button>
           <small className="muted">
-            Drop a file anywhere to import it
-          </small>
+            {tr('common:drop_a_file_anywhere_to_import_it')}</small>
         </div>
       ) : doc.status === "converting" ? (
         <>
           <div role="status" className={partialSource ? "pane-toolbar" : "empty"}>
-            <p>{progress[doc.id] ?? "Preparing converter…"}</p>
-            {pageProgress && <progress aria-label="Conversion progress" value={Number(pageProgress[1])} max={Number(pageProgress[2])} />}
-            {partialSource && <small>Preview of first pages · selection and chat available when conversion finishes</small>}
+            <p>{statusText(conversionStatus(progress[doc.id] ?? ''))}</p>
+            {pageProgress && <progress aria-label={tr('common:conversion_progress')} value={Number(pageProgress[1])} max={Number(pageProgress[2])} />}
+            {partialSource && <small>{tr('common:preview_of_first_pages_selection_and_chat_available_when_conversion_finishes')}</small>}
           </div>
           {partialPreview}
         </>
       ) : doc.status === "failed" ? (
         <div className="empty" role="alert">
-          <h3>Couldn’t prepare this document</h3>
-          <p>{doc.error}</p>
+          <h3>{tr('common:couldn_t_prepare_this_document')}</h3>
+          <p>{tr('errors:conversion_failed')}</p>
           <button
             disabled={busy || !connected}
             onClick={() => {
@@ -389,13 +394,11 @@ export function App() {
                 .finally(() => setBusy(false));
             }}
           >
-            Retry conversion
-          </button>
+            {tr('common:retry_conversion')}</button>
         </div>
       ) : loadingSource ? (
         <div className="empty" role="status">
-          Loading document…
-        </div>
+          {tr('common:loading_document')}</div>
       ) : (
         <DocumentMarkdown
           key={doc.id}
@@ -421,15 +424,15 @@ export function App() {
         e.preventDefault();
         try {
           const paths = Array.from(e.dataTransfer.files, (file) => desktop.getPathForFile?.(file) ?? "");
-          if (!paths.length || paths.some((path) => !path)) throw new Error("Dropped files have no accessible local path");
+          if (!paths.length || paths.some((path) => !path)) throw new Error(tr('common:dropped_files_have_no_accessible_local_path'));
           void importDocument(paths);
         } catch (error) { report(error); }
       }}
     >
-      <header className="app-header">
+      <a className="skip-link" href="#reading-content">{tr('common:skip_content')}</a><header className="app-header">
         <div className="row">
           <button
-            aria-label="Toggle document library"
+            aria-label={tr('common:toggle_document_library')}
             aria-expanded={library}
             onClick={() => setLibrary(!library)}
           >
@@ -440,20 +443,20 @@ export function App() {
           </h1>
           <span className="header-divider" />
           <span className="muted workspace-title">
-            {doc?.title ?? "Your workspace"}
+            {doc?.title ?? tr('common:your_workspace')}
           </span>
         </div>
         <div className="row">
           <span className="connection-status" data-testid="bridge-status">
             {isMock
-              ? "Preview · mock bridge"
+              ? tr('common:preview_mock_bridge')
               : connected
-                ? "Workspace connected"
-                : "Connecting…"}
+                ? tr('common:workspace_connected')
+                : tr('common:connecting')}
           </span>
           <button
-            aria-label="Swap chat side"
-            title="Swap chat side"
+            aria-label={tr('common:swap_chat_side')}
+            title={tr('common:swap_chat_side')}
             onClick={() =>
               void saveSettings({
                 ...settings,
@@ -464,7 +467,7 @@ export function App() {
             ⇄
           </button>
           <button
-            aria-label="Open settings"
+            aria-label={tr('common:open_settings')}
             onClick={() => setShowSettings(true)}
           >
             ⚙
@@ -475,7 +478,7 @@ export function App() {
         <div className="notice" role="status">
           <span>{notice}</span>
           <button
-            aria-label="Dismiss notification"
+            aria-label={tr('common:dismiss_notification')}
             onClick={() => setNotice("")}
           >
             ×
@@ -484,9 +487,9 @@ export function App() {
       )}
       <div className="workspace-body">
         {library && (
-          <aside className="library" aria-label="Document library">
+          <aside className="library" aria-label={tr('common:document_library')}>
             <div className="library-heading">
-              <span className="eyebrow">Library</span>
+              <span className="eyebrow">{tr('common:library')}</span>
               <span className="muted">{documents.length}</span>
             </div>
             <button
@@ -494,8 +497,7 @@ export function App() {
               disabled={busy || !connected}
               onClick={() => void importDocument()}
             >
-              ＋ Import document
-            </button>
+              {tr('common:import_document')}</button>
             <div className="document-list">
               {documents.length ? (
                 documents.map((d) => (
@@ -515,13 +517,11 @@ export function App() {
                 ))
               ) : (
                 <p className="library-empty">
-                  Keep your reading in one place.
-                  <br />
-                  Import a file to begin.
-                </p>
+                  {tr('common:keep_your_reading_in_one_place')}<br />
+                  {tr('common:import_a_file_to_begin')}</p>
               )}
             </div>
-            <div className="library-footer">Documents stay on this Mac</div>
+            <div className="library-footer">{tr('common:documents_stay_on_this_mac')}</div>
           </aside>
         )}
         <PanelGroup direction="horizontal" className="panels">
@@ -533,7 +533,7 @@ export function App() {
               <PanelResizeHandle
                 key="divider"
                 className="resize-handle"
-                aria-label="Resize panes"
+                aria-label={tr('common:resize_panes')}
               />
             ) : (
               <Panel

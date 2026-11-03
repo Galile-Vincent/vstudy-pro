@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import { type ComponentPropsWithoutRef, type ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -49,6 +51,7 @@ function ModelSelectorRoot({
   children,
   ...stateProps
 }: ModelSelectorRootProps) {
+  useTranslation();
   const { open, setOpen, contextValue } = useModelSelectorState(stateProps);
 
   return (
@@ -96,6 +99,7 @@ function ModelSelectorTrigger({
   onKeyDown,
   ...props
 }: ModelSelectorTriggerProps) {
+  useTranslation();
   const { setOpen } = useModelSelectorContext();
 
   return (
@@ -138,6 +142,7 @@ function ModelIcon({
   children: ReactNode;
   className?: string;
 }) {
+  useTranslation();
   return (
     <span
       className={cn(
@@ -151,10 +156,11 @@ function ModelIcon({
 }
 
 function ModelSelectorValue({
-  placeholder = "Select model",
+  placeholder = tr('common:select_model'),
   showEffort = true,
   className,
 }: ModelSelectorValueProps) {
+  useTranslation();
   const { selectedModel, efforts, effort } = useModelSelectorContext();
 
   if (!selectedModel) {
@@ -209,9 +215,10 @@ export type ModelSelectorContentProps = Omit<
  * one automatically when unfiltered.
  */
 function ModelSelectorFocusAnchor() {
+  useTranslation();
   return (
     <div className="sr-only">
-      <CommandInput readOnly aria-label="Model" />
+      <CommandInput readOnly aria-label={tr('common:model')} />
     </div>
   );
 }
@@ -226,6 +233,7 @@ function ModelSelectorContent({
   children,
   ...props
 }: ModelSelectorContentProps) {
+  useTranslation();
   const { value, open } = useModelSelectorContext();
   const { side: renderedSide, popupRef } = useLazyFlipSide(
     open,
@@ -271,9 +279,10 @@ export type ModelSelectorSearchProps = ComponentPropsWithoutRef<
 >;
 
 function ModelSelectorSearch({
-  placeholder = "Search models...",
+  placeholder = tr('common:search_models'),
   ...props
 }: ModelSelectorSearchProps) {
+  useTranslation();
   return (
     <CommandInput
       data-slot="model-selector-search"
@@ -292,6 +301,7 @@ function ModelSelectorList({
   children,
   ...props
 }: ModelSelectorListProps) {
+  useTranslation();
   const { models } = useModelSelectorContext();
 
   return (
@@ -322,9 +332,10 @@ export type ModelSelectorEmptyProps = ComponentPropsWithoutRef<
 >;
 
 function ModelSelectorEmpty({ children, ...props }: ModelSelectorEmptyProps) {
+  useTranslation();
   return (
     <CommandEmpty data-slot="model-selector-empty" {...props}>
-      {children ?? "No models found."}
+      {children ?? tr('common:no_models_found')}
     </CommandEmpty>
   );
 }
@@ -334,6 +345,7 @@ export type ModelSelectorGroupProps = ComponentPropsWithoutRef<
 >;
 
 function ModelSelectorGroup(props: ModelSelectorGroupProps) {
+  useTranslation();
   return <CommandGroup data-slot="model-selector-group" {...props} />;
 }
 
@@ -342,6 +354,7 @@ export type ModelSelectorSeparatorProps = ComponentPropsWithoutRef<
 >;
 
 function ModelSelectorSeparator(props: ModelSelectorSeparatorProps) {
+  useTranslation();
   return <CommandSeparator data-slot="model-selector-separator" {...props} />;
 }
 
@@ -359,6 +372,7 @@ function ModelSelectorItem({
   onSelect,
   ...props
 }: ModelSelectorItemProps) {
+  useTranslation();
   const { value, setValue, setOpen } = useModelSelectorContext();
   const isSelected = value === model.id;
 
@@ -413,6 +427,7 @@ function ModelSelectorEffort({
   onKeyDown,
   ...props
 }: ModelSelectorEffortProps) {
+  useTranslation();
   const { efforts, effort, setEffort } = useModelSelectorEfforts();
 
   if (!efforts?.length) return null;
@@ -448,7 +463,7 @@ function ModelSelectorEffort({
         value={effort ?? ""}
         onValueChange={setEffort}
         orientation="horizontal"
-        aria-label={typeof label === "string" ? label : "Reasoning effort"}
+        aria-label={typeof label === "string" ? label : tr('common:reasoning_effort')}
         className="flex items-center gap-0.5"
       >
         {efforts.map((option) => (

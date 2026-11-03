@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import { forwardRef, memo, useCallback, useRef } from "react";
 import {
@@ -69,6 +71,7 @@ const ReasoningGroupImpl: ReasoningGroupComponent = ({
   startIndex,
   endIndex,
 }) => {
+  useTranslation();
   const isReasoningStreaming = useAuiState((s) => {
     if (s.message.status?.type !== "running") return false;
     for (let index = startIndex; index <= endIndex; index++) {
@@ -97,7 +100,7 @@ const Reasoning = memo(
   Fade: typeof ReasoningFade;
 };
 
-Reasoning.displayName = "Reasoning";
+Reasoning.displayName = tr('common:reasoning');
 Reasoning.Root = ReasoningRoot;
 Reasoning.Trigger = ReasoningTrigger;
 Reasoning.Content = ReasoningContent;

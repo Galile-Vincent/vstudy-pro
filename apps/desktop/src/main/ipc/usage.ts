@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { createRateLimitProbe } from "../providers/rate-limits";
 import { dialog } from 'electron';
 import { estimateCost } from '../pricing';
@@ -34,7 +35,7 @@ export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemen
     return rateLimit ? [...rows.filter(r => r.providerId !== 'codex-cli'), { providerId: 'codex-cli' as const, createdAt: new Date().toISOString(), rateLimit }] : rows;
   });
   registrar.handle('usage:export', async () => {
-    const result = await dialog.showSaveDialog({ defaultPath: 'vstudy-usage.csv', filters: [{ name: 'CSV', extensions: ['csv'] }] });
+    const result = await dialog.showSaveDialog({ title:tr('usage:export_title'), defaultPath: 'vstudy-usage.csv', filters: [{ name: 'CSV', extensions: ['csv'] }] });
     if (result.canceled || !result.filePath) return { saved: false };
     await writeFile(result.filePath, usageCsv(store.usage.list()), 'utf8');
     return { saved: true };

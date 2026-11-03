@@ -1,3 +1,6 @@
+import { contentLanguage } from "../shared/content-language";
+import { useTranslation } from "react-i18next";
+import { tr } from '../shared/i18n';
 import { useEffect, useMemo, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -64,6 +67,7 @@ export function DocumentMarkdown({
   onSelect: (selection: Selection) => void;
   onNotice: (message: string) => void;
 }) {
+  useTranslation();
   const root = useRef<HTMLDivElement>(null);
   const [floating, setFloating] = useState<{
     selection: Selection;
@@ -123,7 +127,7 @@ export function DocumentMarkdown({
     <div className="reading-scroll" onScroll={() => setFloating(null)}>
       <div
         ref={root}
-        className="markdown"
+        className="markdown" lang={contentLanguage(source)}
         data-testid="document-markdown"
 
       >
@@ -153,7 +157,7 @@ export function DocumentMarkdown({
                   if (href && !href.startsWith("#")) {
                     event.preventDefault();
                     void desktop.invoke("shell:openExternal", { url: href }).catch((error: unknown) =>
-                      onNotice(error instanceof Error ? error.message : "Could not open link"));
+                      onNotice(error instanceof Error ? error.message : tr('common:could_not_open_link')));
                   }
                 }}
               >
@@ -164,7 +168,7 @@ export function DocumentMarkdown({
               src && safeImage(src) ? (
                 <img src={/^data:/i.test(src) ? src : `vstudy-asset://${documentId}/${src}`} alt={alt ?? ""} loading="lazy" />
               ) : (
-                <span className="muted">[Image unavailable: {alt}]</span>
+                <span className="muted">{tr('common:image_unavailable')}{alt}]</span>
               ),
             ...Object.fromEntries(
               [1, 2, 3, 4, 5, 6].map((depth) => [
@@ -184,7 +188,7 @@ export function DocumentMarkdown({
                       {heading && (
                         <button
                           className="section-action"
-                          aria-label={`Use section ${heading.text}`}
+                          aria-label={tr('chat:section_label',{title:heading.text})}
                           onClick={() => {
                             onSelect({
                               documentId,
@@ -199,8 +203,7 @@ export function DocumentMarkdown({
                             setFloating(null);
                           }}
                         >
-                          Use this section
-                        </button>
+                          {tr('common:use_this_section')}</button>
                       )}
                     </Tag>
                   );
@@ -223,21 +226,22 @@ export function DocumentMarkdown({
             window.getSelection()?.removeAllRanges();
           }}
         >
-          Ask about this
-        </button>
+          {tr('common:ask_about_this')}</button>
       )}
     </div>
   );
 }
 
 export function ReplyMarkdown({ text }: { text: string }) {
-  return <Markdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeSanitize, schema], rehypeKatex, rehypeHighlight]} skipHtml
+  useTranslation();
+  return <div lang={contentLanguage(text)}><Markdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeSanitize, schema], rehypeKatex, rehypeHighlight]} skipHtml
     urlTransform={(url) => externalUrlSchema.safeParse(url).success ? url : ""}
-    components={{ pre: ({ children }) => <CodeBlock>{children}</CodeBlock>, a: ({ href, children }) => <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a> }}>{text}</Markdown>;
+    components={{ pre: ({ children }) => <CodeBlock>{children}</CodeBlock>, a: ({ href, children }) => <a href={href} onClick={event => { event.preventDefault(); if (href) void desktop.invoke("shell:openExternal", { url: href }); }}>{children}</a> }}>{text}</Markdown></div>;
 }
 
 function CodeBlock({ children }: { children: React.ReactNode }) {
+  useTranslation();
   const ref = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
-  return <div className="code-block"><button type="button" aria-label="Copy code" onClick={() => { void navigator.clipboard.writeText(ref.current?.textContent ?? '').then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); }}>{copied ? 'Copied' : 'Copy code'}</button><pre ref={ref}>{children}</pre></div>;
+  return <div className="code-block"><button type="button" aria-label={tr('common:copy_code')} onClick={() => { void navigator.clipboard.writeText(ref.current?.textContent ?? '').then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); }}>{copied ? tr('common:copied') : tr('common:copy_code')}</button><pre ref={ref}>{children}</pre></div>;
 }

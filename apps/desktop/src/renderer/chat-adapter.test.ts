@@ -77,7 +77,7 @@ describe("IPC chat adapter", () => {
     const test = setup(async () => {
       throw new Error("start failed");
     });
-    expect((await test.stream.next()).value).toEqual({content:[{type:'text',text:''}],metadata:{custom:{modelId:'m',options:undefined,citations:[]}},status:{type:'incomplete',reason:'error',error:'start failed'}});
+    expect((await test.stream.next()).value).toEqual({content:[{type:'text',text:''}],metadata:{custom:{modelId:'m',options:undefined,citations:[]}},status:{type:'incomplete',reason:'error',error:'Something went wrong. Please try again.'}});
     expect(test.unsubscribe).toHaveBeenCalled();
   });
   it("aborts and releases a pending stream on unmount", async () => {
@@ -98,7 +98,7 @@ describe("IPC chat adapter", () => {
     const failed = setup(async (emit) =>
       emit({ type: "error", message: "provider failed" }),
     );
-    expect((await failed.stream.next()).value).toEqual({content:[{type:'text',text:''}],metadata:{custom:{modelId:'m',options:undefined,citations:[]}},status:{type:'incomplete',reason:'error',error:'provider failed'}});
+    expect((await failed.stream.next()).value).toEqual({content:[{type:'text',text:''}],metadata:{custom:{modelId:'m',options:undefined,citations:[]}},status:{type:'incomplete',reason:'error',error:'Something went wrong. Please try again.'}});
     expect(failed.unsubscribe).toHaveBeenCalled();
   });
 });

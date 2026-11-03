@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import "leaflet/dist/leaflet.css";
 
@@ -84,6 +86,7 @@ export function GeoMap({
   className,
   ...props
 }: GeoMapProps) {
+  useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const leafletRef = useRef<LeafletModule | null>(null);
@@ -248,7 +251,7 @@ export function GeoMap({
       <div
         ref={containerRef}
         role="region"
-        aria-label={`Map of ${validPlaces.length} places`}
+        aria-label={tr('common:map_places',{count:validPlaces.length})}
         aria-busy={!mapReady || undefined}
         style={{ height }}
         data-theme={theme}
@@ -262,8 +265,7 @@ export function GeoMap({
       >
         {!mapReady ? (
           <span className="text-muted-foreground absolute inset-0 flex items-center justify-center text-xs">
-            Loading map
-          </span>
+            {tr('common:loading_map')}</span>
         ) : null}
       </div>
 

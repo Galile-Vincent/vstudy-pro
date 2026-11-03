@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import { renderMermaidSVG } from "beautiful-mermaid";
 import { Maximize2, Minus, Plus, RotateCcw, X } from "lucide-react";
@@ -127,6 +129,7 @@ type MermaidSvgProps = Omit<
  * constructable stylesheets, keep the original markup.
  */
 function MermaidSvg({ svg, ...props }: MermaidSvgProps) {
+  useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const constructable = useSyncExternalStore(
     subscribeNothing,
@@ -174,6 +177,7 @@ type MermaidZoomProps = {
 };
 
 function MermaidZoom({ svg, children }: MermaidZoomProps) {
+  useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -309,7 +313,7 @@ function MermaidZoom({ svg, children }: MermaidZoomProps) {
         ref={triggerRef}
         type="button"
         data-slot="mermaid-zoom-trigger"
-        aria-label="Expand diagram"
+        aria-label={tr('common:expand_diagram')}
         onClick={() => setIsOpen(true)}
         className="aui-mermaid-zoom-trigger text-muted-foreground hover:text-foreground hover:border-muted-foreground/70 border-border bg-background absolute top-2 right-2 rounded-md border p-1.5 opacity-0 transition group-hover/mermaid:opacity-100 focus-visible:opacity-100"
       >
@@ -322,7 +326,7 @@ function MermaidZoom({ svg, children }: MermaidZoomProps) {
             data-slot="mermaid-zoom-overlay"
             role="dialog"
             aria-modal="true"
-            aria-label="Diagram"
+            aria-label={tr('common:diagram')}
             className="aui-mermaid-zoom-overlay fade-in animate-in bg-background fixed inset-0 z-50 duration-200"
           >
             <div
@@ -350,7 +354,7 @@ function MermaidZoom({ svg, children }: MermaidZoomProps) {
             >
               <button
                 type="button"
-                aria-label="Zoom in"
+                aria-label={tr('common:zoom_in')}
                 onClick={() => zoomBy(1.25)}
                 className="text-muted-foreground hover:text-foreground rounded-sm p-1.5"
               >
@@ -358,7 +362,7 @@ function MermaidZoom({ svg, children }: MermaidZoomProps) {
               </button>
               <button
                 type="button"
-                aria-label="Zoom out"
+                aria-label={tr('common:zoom_out')}
                 onClick={() => zoomBy(0.8)}
                 className="text-muted-foreground hover:text-foreground rounded-sm p-1.5"
               >
@@ -366,7 +370,7 @@ function MermaidZoom({ svg, children }: MermaidZoomProps) {
               </button>
               <button
                 type="button"
-                aria-label="Reset zoom"
+                aria-label={tr('common:reset_zoom')}
                 onClick={() => setTransform({ x: 0, y: 0, scale: 1 })}
                 className="text-muted-foreground hover:text-foreground rounded-sm p-1.5"
               >
@@ -375,7 +379,7 @@ function MermaidZoom({ svg, children }: MermaidZoomProps) {
               <button
                 ref={closeRef}
                 type="button"
-                aria-label="Close"
+                aria-label={tr('common:close')}
                 onClick={handleClose}
                 className="text-muted-foreground hover:text-foreground rounded-sm p-1.5"
               >
@@ -394,6 +398,7 @@ const MermaidDiagramImpl: FC<MermaidDiagramProps> = ({
   className,
   streaming = false,
 }) => {
+  useTranslation();
   const result = useMemo(() => {
     if (streaming) return null;
     try {
@@ -406,7 +411,7 @@ const MermaidDiagramImpl: FC<MermaidDiagramProps> = ({
         transparent: true,
       });
       if (isIncompleteDiagram(code, svg)) {
-        throw new Error("Incomplete mermaid diagram");
+        throw new Error(tr('common:incomplete_mermaid_diagram'));
       }
       return { svg, error: null };
     } catch (err) {
@@ -421,7 +426,7 @@ const MermaidDiagramImpl: FC<MermaidDiagramProps> = ({
     return (
       <div
         data-slot="mermaid-skeleton"
-        aria-label="Rendering diagram"
+        aria-label={tr('common:rendering_diagram')}
         className={cn(
           "aui-mermaid-skeleton bg-muted flex h-32 animate-pulse items-center justify-center gap-3 rounded-b-lg p-4",
           className,
@@ -447,7 +452,7 @@ const MermaidDiagramImpl: FC<MermaidDiagramProps> = ({
       >
         <pre className="overflow-x-auto p-4 text-sm">{code.trim()}</pre>
         <p className="text-muted-foreground border-border border-t px-4 py-1.5 text-xs">
-          diagram could not be rendered
+          {tr('common:diagram_error')}
         </p>
       </div>
     );

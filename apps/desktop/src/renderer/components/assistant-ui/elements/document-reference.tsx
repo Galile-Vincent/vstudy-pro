@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import type { ComponentProps } from "react";
 import { FileTextIcon } from "lucide-react";
@@ -28,6 +30,7 @@ export function DocumentReference({
   activePage: number;
   onJump?: (page: number) => void;
 }) {
+  useTranslation();
   // several anchors can cite one page, and only one of them is the current item
   const currentIndex = anchors.findIndex(
     (anchor) => anchor.page === activePage,
@@ -51,8 +54,7 @@ export function DocumentReference({
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-[13.5px] font-medium">{title}</span>
           <span className={cn(mono, "text-muted-foreground")}>
-            {pages} pages · {anchors.length} cited
-          </span>
+            {pages} {tr('common:pages')}{anchors.length} {tr('common:cited')}</span>
         </div>
       </div>
 
@@ -69,7 +71,7 @@ export function DocumentReference({
           const content = (
             <>
               <span className={cn(mono, "text-muted-foreground")}>
-                p. {anchor.page}
+                {tr('common:p')}{anchor.page}
               </span>
               <span className="text-foreground/65 border-foreground/15 border-s-2 ps-2 text-xs leading-relaxed break-words">
                 {anchor.quote}

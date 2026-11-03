@@ -1,3 +1,4 @@
+import { statusText, errorText } from "./status";
 import type { ChatModelAdapter } from "@assistant-ui/react";
 import { modelOptionsSchema, selectionSchema } from "../shared";
 import { assistantContent } from './chat-content';
@@ -70,7 +71,7 @@ export function createChatAdapter(
             push({
               type: "error",
               message:
-                error instanceof Error ? error.message : "Could not start chat",
+                errorText(error),
             }),
           );
         started(messages.filter(m => m.role === "user").at(-1)?.id ?? "");
@@ -88,7 +89,7 @@ export function createChatAdapter(
           if (abortSignal.aborted || runGeneration !== generation) return;
           const event = queue.shift();
           if (!event) continue;
-          if (event.type === "error") { yield {...snapshot(),status:{type:'incomplete',reason:'error',error:event.message}}; return; }
+          if (event.type === "error") { yield {...snapshot(),status:{type:'incomplete',reason:'error',error:event.code ? statusText({code:event.code,params:event.params ?? {}}) : errorText(event.message)}}; return; }
           if (event.type === "done") return;
           if (event.type === "usage") { usage = event.usage; window.dispatchEvent(new Event("usage-updated")); }
           else if (event.type === 'text-delta') text += event.text;

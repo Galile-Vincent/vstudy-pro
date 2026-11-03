@@ -201,6 +201,7 @@ it("sanitizes provider exceptions and rejects inconsistent context before persis
   expect(owner.events.filter(e => e.type !== "usage")).toEqual([
     {
       type: "error",
+      code:"errors.provider_unavailable",params:{},
       message:
         "Chat request failed. Check provider configuration and try again.",
     },

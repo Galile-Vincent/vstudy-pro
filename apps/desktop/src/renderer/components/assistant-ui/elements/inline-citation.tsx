@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import type { ComponentProps } from "react";
 import { PreviewCard } from "@base-ui/react/preview-card";
@@ -44,6 +46,7 @@ export function Citation({
   className,
   ...props
 }: CitationProps) {
+  useTranslation();
   const domain = source.domain ?? hostOf(source.url);
   const href = safeHref(source.url);
   const publishedAt = formatPublishedAt(source.publishedAt);
@@ -54,7 +57,7 @@ export function Citation({
       <PreviewCard.Trigger
         delay={0}
         render={<button type="button" {...props} />}
-        aria-label={`Source ${index + 1}: ${source.title}`}
+        aria-label={tr('common:source_title',{number:index+1,title:source.title})}
         className={cn(
           "bg-foreground/[0.06] text-muted-foreground hover:text-foreground/90 data-[popup-open]:bg-foreground data-[popup-open]:text-background ms-0.5 inline-flex h-4 min-w-4 translate-y-[-2px] cursor-default items-center justify-center rounded-[5px] px-1 align-middle font-mono text-[10px] font-medium tabular-nums transition-colors motion-reduce:transition-none",
           className,
@@ -110,8 +113,8 @@ export function Citation({
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground mt-3 inline-flex text-xs underline-offset-2 transition-colors hover:underline motion-reduce:transition-none"
               >
-                Open source{" "}
-                <span className="sr-only">(opens in a new tab)</span>
+                {tr('common:open_source')}{" "}
+                <span className="sr-only">{tr('common:opens_in_a_new_tab')}</span>
               </a>
             ) : null}
           </PreviewCard.Popup>
@@ -128,6 +131,7 @@ export function InlineCitation({
   className,
   ...props
 }: InlineCitationProps) {
+  useTranslation();
   return (
     <p
       data-slot="inline-citation"

@@ -10,15 +10,15 @@ vi.mock('../bridge',()=>({desktop:{invoke:vi.fn()}}));
 it('renders literal chip values, details and honest subscription cost label',async()=>{
   const container=document.createElement('div'); const root=createRoot(container);
   await act(async()=>root.render(createElement(UsageChip,{usage:{inputTokens:1200,outputTokens:340,cacheReadTokens:200,reasoningTokens:40,costUsd:.012,costSource:'reported'},subscription:true})));
-  expect(container.textContent).toBe('in 1.2k · out 340 · $0.012 · API-equivalent (subscription)');
-  expect(container.querySelector('span')?.title).toContain('Cache read 200 · cache write 0 · reasoning 40 · cost reported');
+  expect(container.textContent).toBe('in 1.2K · out 340 · $0.012 · API-equivalent (subscription)');
+  expect(container.querySelector('span')?.title).toContain('Cache read 200 · cache write 0 · reasoning 40');
   await act(async()=>root.render(createElement(UsageChip,{usage:{inputTokens:1,outputTokens:2,costSource:'unknown'}})));
   expect(container.textContent).toContain('price unknown');await act(async()=>root.unmount());
 });
 it('shows budget remaining and an amber threshold meter',async()=>{
   const container=document.createElement('div');const root=createRoot(container);
   await act(async()=>root.render(createElement(UsageMeter,{error:'',data:{settings:{...defaultSettings,monthlyBudgetUsd:10},month:{inputTokens:1200,outputTokens:340,costUsd:8,calls:1,unknownPrices:0,groups:[]},records:[]}})));
-  expect(container.textContent).toContain('$8.000 / $10 · $2.00 left');expect(container.querySelector('.amber')).not.toBeNull();expect(container.querySelector('progress')?.value).toBe(80);await act(async()=>root.unmount());
+  expect(container.textContent).toContain('$8.000 / $10.000 · $2.000 left');expect(container.querySelector('.amber')).not.toBeNull();expect(container.querySelector('progress')?.value).toBe(80);await act(async()=>root.unmount());
 });
 it('renders overall tokens once and exposes exact chart values accessibly',async()=>{
   const {UsageOverview,UsageTrend}=await import('./dashboard');
@@ -67,8 +67,8 @@ it('keeps the full usage description available when narrow panes show the token 
   const host=document.createElement('div');const root=createRoot(host);
   const record=usageRecordSchema.parse({kind:'chat',id:'00000000-0000-4000-8000-000000000001',conversationId:'00000000-0000-4000-8000-000000000002',documentId:'00000000-0000-4000-8000-000000000003',providerId:'openai-api',modelId:'model',createdAt:'2026-11-03T12:00:00Z',inputTokens:1200,outputTokens:340,costUsd:.012,costSource:'reported',aborted:true});
   await act(async()=>root.render(createElement(UsageButton,{onClick:()=>{},error:'',data:{settings:defaultSettings,month:{inputTokens:0,outputTokens:0,calls:0,unknownPrices:0,groups:[]},records:[record]}})));
-  expect(host.querySelector('.usage-full')?.textContent).toBe('1.5k tokens · $0.012 · includes aborted turns');
-  expect(host.querySelector('.usage-compact')?.textContent).toBe('1.5k');
-  expect(host.querySelector('button')?.title).toBe('1.5k tokens · $0.012 · includes aborted turns · View usage and budget settings');
+  expect(host.querySelector('.usage-full')?.textContent).toBe('1.5K tokens · $0.012 · includes aborted turns');
+  expect(host.querySelector('.usage-compact')?.textContent).toBe('1.5K');
+  expect(host.querySelector('button')?.title).toBe('1.5K tokens · $0.012 · includes aborted turns · View usage and budget settings');
   await act(async()=>root.unmount());
 });

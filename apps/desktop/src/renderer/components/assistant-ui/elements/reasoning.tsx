@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import {
   createContext,
@@ -136,6 +138,7 @@ function ReasoningFade({
   className,
   ...props
 }: React.ComponentProps<"div"> & { side?: "top" | "bottom" }) {
+  useTranslation();
   if (side === "top") {
     return (
       <div
@@ -178,6 +181,7 @@ function ReasoningTrigger({
   active?: boolean;
   duration?: number | undefined;
 }) {
+  useTranslation();
   const durationText = duration ? ` (${duration}s)` : "";
 
   return (
@@ -200,7 +204,7 @@ function ReasoningTrigger({
           active && "shimmer motion-reduce:animate-none",
         )}
       >
-        Reasoning{durationText}
+        {tr('common:reasoning')}{durationText}
       </span>
       <ChevronDownIcon
         data-slot="reasoning-trigger-chevron"
@@ -221,6 +225,7 @@ function ReasoningContent({
   children,
   ...props
 }: React.ComponentProps<typeof CollapsibleContent>) {
+  useTranslation();
   const isPreview = useContext(ReasoningPreviewContext);
 
   return (
@@ -250,6 +255,7 @@ function ReasoningText({
   children,
   ...props
 }: React.ComponentProps<"div">) {
+  useTranslation();
   const isPreview = useContext(ReasoningPreviewContext);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);

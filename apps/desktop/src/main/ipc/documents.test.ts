@@ -59,7 +59,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     const converted = await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.docx")] }) as { document: { id: string } }[];
     await vi.waitFor(() => expect(mock.resume).toBeTypeOf("function"));
     mock.resume!();
-    await vi.waitFor(() => expect(send).toHaveBeenCalledWith("documents:progress", { documentId: converted[0]!.document.id, message: "Installing markitdown…" }));
+    await vi.waitFor(() => expect(send).toHaveBeenCalledWith("documents:progress", { documentId: converted[0]!.document.id, message: "Installing markitdown…", code:"library.conversion_preparing", params:{} }));
     for (const call of send.mock.calls) expect(() => documentProgressSchema.parse(call[1])).not.toThrow();
     await expect(invoke("documents:importPaths", { paths: [] })).rejects.toThrow();
     await expect(invoke("documents:importPaths", { paths: [12] })).rejects.toThrow();

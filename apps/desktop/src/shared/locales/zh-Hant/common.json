@@ -295,5 +295,14 @@
   "high": "高",
   "max": "最高",
   "fast": "快速",
-  "default_label": "預設"
+  "default_label": "預設",
+  "preview_name": "{{name}} 的預覽",
+  "remove_name": "移除 {{name}}",
+  "sort_column": "依 {{name}} 排序",
+  "map_places": "{{count}} 個地點的地圖",
+  "source_title": "來源 {{number}}：{{title}}",
+  "goto": "前往 {{title}}",
+  "none_label": "無",
+  "diagram_error": "無法繪製圖表",
+  "skip_content": "跳至主要內容"
 }

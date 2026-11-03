@@ -1,3 +1,6 @@
+import { useTranslation } from "react-i18next";
+import { LanguageSettings } from './language-settings';
+import { tr } from '../shared/i18n';
 import { UsageSettings } from "./usage/settings";
 import { useEffect, useRef, useState } from "react";
 import { desktop } from "./bridge";
@@ -6,7 +9,7 @@ export type Providers = IpcResponse<"providers:list">;
 export const providerName: Record<ProviderConfig["id"], string> = {
   "openai-api": "OpenAI",
   "anthropic-api": "Anthropic",
-  "openai-compatible": "OpenAI compatible",
+  get "openai-compatible"() { return tr('common:openai_compatible'); },
   "codex-cli": "Codex CLI",
   "claude-cli": "Claude CLI",
   "agy-cli": "Antigravity CLI",
@@ -22,6 +25,7 @@ export function ProviderSettings({
   onRefresh: () => Promise<void>;
   initialTab?: string;
 }) {
+  useTranslation();
   const [structuredTables, setStructuredTables] = useState(false);
   const [featureError,setFeatureError] = useState('');
   const [tab,setTab] = useState(initialTab);
@@ -40,18 +44,18 @@ export function ProviderSettings({
       }}
     >
       <div className="dialog-title">
-        <h2>{tab === "usage" ? "Usage" : "Providers & API keys"}</h2>
-        <button onClick={onClose} aria-label="Close settings">
+        <h2>{tab === "usage" ? tr('common:usage') : tr('common:providers_api_keys')}</h2>
+        <button onClick={onClose} aria-label={tr('common:close_settings')}>
           ×
         </button>
       </div>
-      <div className="settings-tabs" role="tablist" aria-label="Settings"><button role="tab" aria-selected={tab === "providers"} onClick={() => setTab("providers")}>Providers</button><button role="tab" aria-selected={tab === "usage"} onClick={() => setTab("usage")}>Usage</button></div>
+      <LanguageSettings />
+      <div className="settings-tabs" role="tablist" aria-label={tr('common:settings')}><button role="tab" aria-selected={tab === "providers"} onClick={() => setTab("providers")}>{tr('common:providers')}</button><button role="tab" aria-selected={tab === "usage"} onClick={() => setTab("usage")}>{tr('common:usage')}</button></div>
       {tab === "usage" ? <UsageSettings /> : <>
       <p className="muted">
-        Keys are saved securely in the desktop app and never read back.
-      </p>
-      <label className="generative-setting"><input type="checkbox" checked={structuredTables} onChange={e => { const enabled=e.target.checked; setStructuredTables(enabled); void desktop.invoke('settings:get',{}).then(s => desktop.invoke('settings:set',{...s,enableGenerativeUI:enabled})).catch(() => {setStructuredTables(!enabled);setFeatureError('Could not save structured table setting.');}); }} />Read-only structured tables (API providers only)</label>
-      <p className="muted">Optional table presentations. Off by default. CLI tools remain disabled.</p>
+        {tr('common:keys_are_saved_securely_in_the_desktop_app_and_never_read_back')}</p>
+      <label className="generative-setting"><input type="checkbox" checked={structuredTables} onChange={e => { const enabled=e.target.checked; setStructuredTables(enabled); void desktop.invoke('settings:get',{}).then(s => desktop.invoke('settings:set',{...s,enableGenerativeUI:enabled})).catch(() => {setStructuredTables(!enabled);setFeatureError(tr('common:could_not_save_structured_table_setting'));}); }} />{tr('common:read_only_structured_tables_api_providers_only')}</label>
+      <p className="muted">{tr('common:optional_table_presentations_off_by_default_cli_tools_remain_disabled')}</p>
       {featureError && <p role="alert">{featureError}</p>}
       {providers.map((provider) => (
         <ProviderRow
@@ -71,6 +75,7 @@ function ProviderRow({
   provider: Providers[number];
   onRefresh: () => Promise<void>;
 }) {
+  useTranslation();
   const [hasKey, setHasKey] = useState(false),
     [key, setKey] = useState(""),
     [baseUrl, setBaseUrl] = useState(
@@ -83,7 +88,7 @@ function ProviderRow({
       void desktop
         .invoke("secrets:has", { providerId: provider.config.id })
         .then((value) => setHasKey(value.hasKey))
-        .catch(() => setError("Could not check key status"));
+        .catch(() => setError(tr('common:could_not_check_key_status')));
   }, [provider.config.id, provider.config.kind]);
   const perform = async (action: () => Promise<unknown>) => {
     setBusy(true);
@@ -92,7 +97,7 @@ function ProviderRow({
       await action();
       await onRefresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not save provider");
+      setError(e instanceof Error ? e.message : tr('common:could_not_save_provider'));
     } finally {
       setBusy(false);
     }
@@ -104,11 +109,11 @@ function ProviderRow({
         <span className="muted">
           {provider.config.kind === "cli"
             ? provider.availability.available
-              ? "Detected"
-              : provider.availability.reason
+              ? tr('common:detected')
+              : tr('errors:provider_unavailable')
             : hasKey
-              ? "Key saved"
-              : "No key saved"}
+              ? tr('common:key_saved')
+              : tr('common:no_key_saved')}
         </span>
       </div>
       {provider.config.kind !== "cli" && (
@@ -127,14 +132,14 @@ function ProviderRow({
             }}
           >
             <input
-              aria-label={`${providerName[provider.config.id]} API key`}
+              aria-label={tr('settings:api_key',{provider:providerName[provider.config.id]})}
               type="password"
               autoComplete="off"
-              placeholder="Enter API key"
+              placeholder={tr('common:enter_api_key')}
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
-            <button disabled={busy || !key.trim()}>Save key</button>
+            <button disabled={busy || !key.trim()}>{tr('common:save_key')}</button>
             {hasKey && (
               <button
                 type="button"
@@ -148,8 +153,7 @@ function ProviderRow({
                   })
                 }
               >
-                Remove
-              </button>
+                {tr('common:remove')}</button>
             )}
           </form>
           {provider.config.kind === "compatible" && (
@@ -169,11 +173,11 @@ function ProviderRow({
               <input
                 type="url"
                 required
-                aria-label="OpenAI compatible base URL"
+                aria-label={tr('common:openai_compatible_base_url')}
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
               />
-              <button disabled={busy}>Save URL</button>
+              <button disabled={busy}>{tr('common:save_url')}</button>
             </form>
           )}
         </>

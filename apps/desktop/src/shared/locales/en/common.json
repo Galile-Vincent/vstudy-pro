@@ -295,5 +295,14 @@
   "high": "High",
   "max": "Max",
   "fast": "Fast",
-  "default_label": "default"
+  "default_label": "default",
+  "preview_name": "Preview of {{name}}",
+  "remove_name": "Remove {{name}}",
+  "sort_column": "Sort by {{name}}",
+  "map_places": "Map of {{count}} places",
+  "source_title": "Source {{number}}: {{title}}",
+  "goto": "Go to {{title}}",
+  "none_label": "none",
+  "diagram_error": "diagram could not be rendered",
+  "skip_content": "Skip to content"
 }

@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import {
   useEffect,
@@ -44,6 +46,7 @@ function useMediaDuration(
   src: string,
   durationMs?: number | undefined,
 ) {
+  useTranslation();
   const [metadata, setMetadata] = useState<{ src: string; duration?: number }>({
     src,
   });
@@ -82,6 +85,7 @@ export function AudioPlayer({
   className,
   ...props
 }: AudioPlayerProps) {
+  useTranslation();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playback, setPlayback] = useState({
     src,
@@ -179,7 +183,7 @@ export function AudioPlayer({
           max={duration ?? 0}
           step={0.1}
           value={Math.min(currentTime, duration ?? 0)}
-          aria-label="Seek"
+          aria-label={tr('common:seek')}
           aria-valuetext={`${formatDuration(currentTime)} of ${durationLabel}`}
           disabled={hasError}
           onChange={(event) => {
@@ -212,8 +216,7 @@ export function AudioPlayer({
       />
       {hasError ? (
         <span role="alert" className="text-muted-foreground text-xs">
-          Can't play this audio
-        </span>
+          {tr('common:can_t_play_this_audio')}</span>
       ) : null}
     </div>
   );
@@ -228,6 +231,7 @@ export function VideoPlayer({
   className,
   ...props
 }: VideoPlayerProps) {
+  useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const { duration, setDurationFromMetadata } = useMediaDuration(
     videoRef,

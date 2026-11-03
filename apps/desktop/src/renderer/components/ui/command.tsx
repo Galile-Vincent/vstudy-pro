@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../shared/i18n';
 import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 import { cn } from "@/lib/utils"
@@ -15,6 +17,7 @@ function Command({
   className,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive>) {
+  useTranslation();
   return (
     <CommandPrimitive
       data-slot="command"
@@ -28,8 +31,8 @@ function Command({
 }
 
 function CommandDialog({
-  title = "Command Palette",
-  description = "Search for a command to run...",
+  title = tr('common:command_palette'),
+  description = tr('common:search_for_a_command_to_run'),
   children,
   className,
   showCloseButton = true,
@@ -40,6 +43,7 @@ function CommandDialog({
   className?: string
   showCloseButton?: boolean
 }) {
+  useTranslation();
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
@@ -62,6 +66,7 @@ function CommandInput({
   className,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
+  useTranslation();
   return (
     <div
       data-slot="command-input-wrapper"
@@ -84,6 +89,7 @@ function CommandList({
   className,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.List>) {
+  useTranslation();
   return (
     <CommandPrimitive.List
       data-slot="command-list"
@@ -99,6 +105,7 @@ function CommandList({
 function CommandEmpty({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Empty>) {
+  useTranslation();
   return (
     <CommandPrimitive.Empty
       data-slot="command-empty"
@@ -112,6 +119,7 @@ function CommandGroup({
   className,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Group>) {
+  useTranslation();
   return (
     <CommandPrimitive.Group
       data-slot="command-group"
@@ -128,6 +136,7 @@ function CommandSeparator({
   className,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Separator>) {
+  useTranslation();
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
@@ -141,6 +150,7 @@ function CommandItem({
   className,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Item>) {
+  useTranslation();
   return (
     <CommandPrimitive.Item
       data-slot="command-item"
@@ -157,6 +167,7 @@ function CommandShortcut({
   className,
   ...props
 }: React.ComponentProps<"span">) {
+  useTranslation();
   return (
     <span
       data-slot="command-shortcut"

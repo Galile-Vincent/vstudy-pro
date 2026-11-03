@@ -1,3 +1,4 @@
+import { initReactI18next } from "react-i18next";
 import catalog0common from './locales/en/common.json';
 import catalog0chat from './locales/en/chat.json';
 import catalog0library from './locales/en/library.json';
@@ -43,5 +44,5 @@ export const resources = {
 'en-XA': { common: Object.fromEntries(Object.entries(en).map(([k,v]) => [k,pseudo(v)])) },
 };
 export const i18n = i18next.createInstance();
-void i18n.init({ resources, lng:'en', fallbackLng:'en', defaultNS:'common', keySeparator:false, interpolation:{escapeValue:false}, initImmediate:false });
+void i18n.use(initReactI18next).init({ resources, lng:'en', fallbackLng:'en', defaultNS:'common', keySeparator:false, interpolation:{escapeValue:false}, initImmediate:false });
 export function tr(key: string, params?: Record<string, unknown>): string { return String(i18n.t(key, params ?? {})); }

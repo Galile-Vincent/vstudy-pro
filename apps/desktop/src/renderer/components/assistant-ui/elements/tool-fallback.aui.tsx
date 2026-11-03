@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "react-i18next";
+import { tr } from '../../../../shared/i18n';
 
 import {
   forwardRef,
@@ -60,6 +62,7 @@ function ToolFallbackRoot({
   children,
   ...props
 }: ToolFallbackRootProps) {
+  useTranslation();
   const collapsibleRef = useRef<HTMLDivElement>(null);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const lockScroll = useScrollLock(collapsibleRef, ANIMATION_DURATION);
@@ -121,6 +124,7 @@ function ToolFallbackDuration({
   className,
   ...props
 }: React.ComponentProps<"span">) {
+  useTranslation();
   const elapsedMs = useToolCallElapsed();
   if (elapsedMs === undefined) return null;
 
@@ -149,6 +153,7 @@ function ToolFallbackTrigger({
   status?: ToolCallMessagePartStatus;
   responseDeliveryStatus?: ToolCallMessagePart["responseDeliveryStatus"];
 }) {
+  useTranslation();
   const statusType = status?.type ?? "complete";
   const isRunning = statusType === "running";
   const isCancelled =
@@ -157,14 +162,14 @@ function ToolFallbackTrigger({
   const Icon = statusIconMap[statusType];
   const label =
     responseDeliveryStatus === "queued"
-      ? "Reply queued, not sent yet"
+      ? tr('common:reply_queued_not_sent_yet')
       : statusType === "running"
-        ? "Running tool"
+        ? tr('common:running_tool')
         : statusType === "requires-action"
-          ? "Waiting on tool"
+          ? tr('common:waiting_on_tool')
           : statusType === "incomplete"
             ? `${isCancelled ? "Cancelled" : "Failed"} tool`
-            : "Used tool";
+            : tr('common:used_tool');
 
   return (
     <CollapsibleTrigger
@@ -213,6 +218,7 @@ function ToolFallbackContent({
   children,
   ...props
 }: React.ComponentProps<typeof CollapsibleContent>) {
+  useTranslation();
   return (
     <CollapsibleContent
       data-slot="tool-fallback-content"
@@ -249,6 +255,7 @@ function ToolFallbackArgs({
 }: React.ComponentProps<"div"> & {
   argsText?: string;
 }) {
+  useTranslation();
   if (!argsText) return null;
 
   return (
@@ -288,6 +295,7 @@ function ToolFallbackResult({
 }: React.ComponentProps<"div"> & {
   result?: unknown;
 }) {
+  useTranslation();
   if (result === undefined) return null;
 
   return (
@@ -297,8 +305,7 @@ function ToolFallbackResult({
       {...props}
     >
       <p className="aui-tool-fallback-result-header text-muted-foreground text-xs font-medium">
-        Result:
-      </p>
+        {tr('common:result')}</p>
       <pre className="aui-tool-fallback-result-content bg-muted/50 text-foreground/90 mt-1 rounded-md p-2.5 text-xs break-words whitespace-pre-wrap">
         {formatUnknownValue(result, 2)}
       </pre>
@@ -313,6 +320,7 @@ function ToolFallbackError({
 }: React.ComponentProps<"div"> & {
   status?: ToolCallMessagePartStatus;
 }) {
+  useTranslation();
   if (status?.type !== "incomplete") return null;
 
   const error = status.error;
@@ -322,7 +330,7 @@ function ToolFallbackError({
   if (!errorText) return null;
 
   const isCancelled = status.reason === "cancelled";
-  const headerText = isCancelled ? "Cancelled reason:" : "Error:";
+  const headerText = isCancelled ? tr('common:cancelled_reason') : "Error:";
 
   return (
     <div
@@ -340,14 +348,14 @@ function ToolFallbackError({
   );
 }
 
-const APPROVED_RESULT = "Approved by user";
-const DENIED_RESULT = "User denied tool execution";
+const APPROVED_RESULT = tr('common:approved_by_user');
+const DENIED_RESULT = tr('common:user_denied_tool_execution');
 
 const APPROVAL_OPTION_DEFAULT_LABELS: Record<string, string> = {
-  "allow-once": "Allow",
-  "allow-always": "Always allow",
-  "reject-once": "Deny",
-  "reject-always": "Always deny",
+  "allow-once": tr('common:allow'),
+  "allow-always": tr('common:always_allow'),
+  "reject-once": tr('common:deny'),
+  "reject-always": tr('common:always_deny'),
 };
 
 const isKnownKind = (kind: string) =>
@@ -408,8 +416,8 @@ const approvalReceipt = (
       outcome: "closed",
       label:
         approval.resolution === "cancelled"
-          ? "Cancelled before a decision"
-          : "Expired before a decision",
+          ? tr('common:cancelled_before_a_decision')
+          : tr('common:expired_before_a_decision'),
     };
 
   const chosen =
@@ -456,6 +464,7 @@ function ToolFallbackApprovalReceipt({
   focusReceiptRef: React.MutableRefObject<string | null | undefined>;
   receiptRef: React.MutableRefObject<HTMLDivElement | null>;
 }) {
+  useTranslation();
   useLayoutEffect(() => {
     const shouldFocus = focusReceiptRef.current === approval.id;
     focusReceiptRef.current = null;
@@ -542,6 +551,7 @@ function ToolFallbackApprovalQuestions({
   onSend: (answers: Record<string, ToolApprovalAnswer>) => void;
   onDismiss: () => void;
 }) {
+  useTranslation();
   const [selected, setSelected] = useState<
     ReadonlyMap<string, readonly string[]>
   >(() => new Map());
@@ -656,8 +666,8 @@ function ToolFallbackApprovalQuestions({
                 aria-label={question.prompt}
                 placeholder={
                   question.options?.length
-                    ? "Or type an answer"
-                    : "Type your answer"
+                    ? tr('common:or_type_an_answer')
+                    : tr('common:type_your_answer')
                 }
               />
             ) : null}
@@ -671,8 +681,7 @@ function ToolFallbackApprovalQuestions({
           onClick={send}
           disabled={locked || !complete}
         >
-          Send
-        </Button>
+          {tr('common:send')}</Button>
         {dismissible ? (
           <Button
             size="sm"
@@ -681,8 +690,7 @@ function ToolFallbackApprovalQuestions({
             onClick={onDismiss}
             disabled={locked}
           >
-            Dismiss
-          </Button>
+            {tr('common:dismiss')}</Button>
         ) : null}
       </div>
     </>
@@ -740,6 +748,7 @@ function ToolFallbackApprovalImpl({
   forwardedRef: React.ForwardedRef<HTMLDivElement>;
   carryFocusRef: React.MutableRefObject<boolean>;
 }) {
+  useTranslation();
   const [submitted, setSubmitted] = useState(false);
   const voiceActive = useAuiState((s) => s.thread.voice !== undefined);
   const canAnswer = useAuiState((s) => s.thread.capabilities.answerToolCall);
@@ -955,8 +964,7 @@ function ToolFallbackApprovalImpl({
       onClick={dismiss}
       disabled={locked}
     >
-      Dismiss
-    </Button>
+      {tr('common:dismiss')}</Button>
   ) : null;
 
   const errorText = error ? (
@@ -976,7 +984,7 @@ function ToolFallbackApprovalImpl({
         disabled={locked}
         aria-label={question ? (approval?.prompt ?? "Answer") : "Note"}
         placeholder={
-          question ? "Type your answer" : "Add a note to your decision"
+          question ? tr('common:type_your_answer') : tr('common:add_a_note_to_your_decision')
         }
       />
       {question && (
@@ -987,8 +995,7 @@ function ToolFallbackApprovalImpl({
             onClick={submitAnswer}
             disabled={locked}
           >
-            Send
-          </Button>
+            {tr('common:send')}</Button>
           {dismissButton}
         </div>
       )}
@@ -1062,8 +1069,7 @@ function ToolFallbackApprovalImpl({
             onClick={() => respondWithOption(confirming)}
             disabled={locked}
           >
-            Confirm
-          </Button>
+            {tr('common:confirm')}</Button>
           <Button
             size="sm"
             variant="outline"
@@ -1074,8 +1080,7 @@ function ToolFallbackApprovalImpl({
             }}
             disabled={locked}
           >
-            Back
-          </Button>
+            {tr('common:back')}</Button>
         </div>
       </div>
     );
@@ -1122,8 +1127,7 @@ function ToolFallbackApprovalImpl({
               onClick={() => respond(false)}
               disabled={locked}
             >
-              Deny
-            </Button>
+              {tr('common:deny')}</Button>
           )}
           {!acceptsText && dismissButton}
         </div>
@@ -1176,8 +1180,7 @@ function ToolFallbackApprovalImpl({
           onClick={() => respond(true)}
           disabled={locked}
         >
-          Allow
-        </Button>
+          {tr('common:allow')}</Button>
         <Button
           size="sm"
           variant="outline"
@@ -1185,8 +1188,7 @@ function ToolFallbackApprovalImpl({
           onClick={() => respond(false)}
           disabled={locked}
         >
-          Deny
-        </Button>
+          {tr('common:deny')}</Button>
       </div>
       {answerField}
       {errorText}
@@ -1206,6 +1208,7 @@ const ToolFallbackImpl: ToolCallMessagePartComponent = ({
   approval,
   respondToApproval,
 }) => {
+  useTranslation();
   const isCancelled =
     status?.type === "incomplete" && status.reason === "cancelled";
   const isRequiresAction = status?.type === "requires-action";
