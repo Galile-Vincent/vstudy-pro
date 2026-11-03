@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, safeStorage } from "electron";
+import { app, BrowserWindow, session, safeStorage, protocol } from "electron";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { mkdirSync } from "node:fs";
@@ -6,6 +6,10 @@ import { openStore, type Store } from "./db";
 import { registerIpc } from "./ipc";
 import { createSecretStore } from "./services/secrets";
 import { developmentCsp, isAppUrl, productionCsp } from "./security";
+
+import { assetHandler } from "./assets";
+
+protocol.registerSchemesAsPrivileged([{ scheme: "vstudy-asset", privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 
 let store: Store | undefined;
 let disposeIpc: (() => void) | undefined;
@@ -55,6 +59,7 @@ void app.whenReady().then(() => {
   const userData = app.getPath("userData");
   mkdirSync(userData, { recursive: true });
   store = openStore(join(userData, "vstudy.sqlite"));
+  protocol.handle("vstudy-asset", assetHandler(store, userData));
   const secrets = createSecretStore(
     join(userData, "secrets.json"),
     safeStorage,

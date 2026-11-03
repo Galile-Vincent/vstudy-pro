@@ -1,4 +1,4 @@
-import { ipcMain, type IpcMainInvokeEvent } from "electron";
+import { shell, ipcMain, type IpcMainInvokeEvent } from "electron";
 import type { Store } from "../db";
 import type { SecretStore } from "../services/secrets";
 import { ipcContract, type IpcChannel } from "../../shared/ipc";
@@ -13,12 +13,17 @@ export function registerIpc(
 ): () => void {
   const registrar = createIpcRegistrar(ipcMain, isTrusted);
   const implemented = new Set<IpcChannel>([
+    "shell:openExternal",
     "settings:get",
     "settings:set",
     "secrets:set",
     "secrets:has",
     "secrets:delete",
   ]);
+  registrar.handle("shell:openExternal", async ({ url }) => {
+    await shell.openExternal(url);
+    return { ok: true };
+  });
   registrar.handle("settings:get", () => store.settings.get());
   registrar.handle("settings:set", (settings) => store.settings.set(settings));
   registrar.handle("secrets:set", ({ providerId, key }) => {

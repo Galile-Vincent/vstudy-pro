@@ -15,7 +15,16 @@ import {
 
 const empty = z.object({}).strict();
 const ack = z.object({ ok: z.literal(true) }).strict();
+export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
+  if ([...value].some((char) => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127) || value.includes("\\")) return false;
+  try { return ["http:", "https:", "mailto:"].includes(new URL(value).protocol); }
+  catch { return false; }
+}, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  "shell:openExternal": {
+    request: z.object({ url: externalUrlSchema }).strict(),
+    response: ack,
+  },
   "documents:import": { request: empty, response: documentSchema.nullable() },
   "documents:importPaths": {
     request: z.object({ paths: z.array(z.string().min(1).max(4096)).min(1).max(100) }).strict(),

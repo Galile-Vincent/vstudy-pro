@@ -172,12 +172,14 @@ export function App() {
     }
   };
   const importing = useRef(false);
-  const importDocument = async () => {
+  const importDocument = async (paths?: string[]) => {
     if (importing.current) return;
     importing.current = true;
     setBusy(true);
     try {
-      const imported = await desktop.invoke("documents:import", {});
+      const imported = paths
+        ? (await desktop.invoke("documents:importPaths", { paths }))[0]
+        : await desktop.invoke("documents:import", {});
       if (imported) {
         setDocuments(await desktop.invoke("documents:list", {}));
         setDocumentId(imported.id);
@@ -376,8 +378,11 @@ export function App() {
       }}
       onDrop={(e) => {
         e.preventDefault();
-        setNotice("Choose the dropped file in the import dialog.");
-        void importDocument();
+        try {
+          const paths = Array.from(e.dataTransfer.files, (file) => desktop.getPathForFile?.(file) ?? "");
+          if (!paths.length || paths.some((path) => !path)) throw new Error("Dropped files have no accessible local path");
+          void importDocument(paths);
+        } catch (error) { report(error); }
       }}
     >
       <header className="app-header">

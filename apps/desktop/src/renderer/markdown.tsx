@@ -11,11 +11,14 @@ import {
   rangeSelection,
   sourceOffsets,
 } from "./selection";
+import { desktop } from "./bridge";
+import { externalUrlSchema } from "../shared/ipc";
 import type { Document, Selection } from "../shared";
 import "katex/dist/katex.min.css";
 
 const schema = {
   ...defaultSchema,
+  protocols: { ...defaultSchema.protocols, src: ["data"] },
   attributes: {
     ...defaultSchema.attributes,
     "*": [
@@ -104,28 +107,21 @@ export function DocumentMarkdown({
           urlTransform={(url, key) =>
             key === "src"
               ? (safeImage(url) ?? "")
-              : /^(https?:|mailto:|#)/i.test(url)
+              : (url.startsWith("#") || externalUrlSchema.safeParse(url).success)
                 ? url
                 : ""
           }
           components={{
             a: ({ children, href }) => (
               <a
-                href={href?.startsWith("#") ? href : undefined}
+                href={href}
                 role="link"
                 tabIndex={0}
                 onClick={(event) => {
-                  if (!href?.startsWith("#")) {
+                  if (href && !href.startsWith("#")) {
                     event.preventDefault();
-                    onNotice(
-                      "External links need a main-process system-browser handler. Link opening is currently unavailable.",
-                    );
-                  }
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && !href?.startsWith("#")) {
-                    event.preventDefault();
-                    onNotice("External link opening is currently unavailable.");
+                    void desktop.invoke("shell:openExternal", { url: href }).catch((error: unknown) =>
+                      onNotice(error instanceof Error ? error.message : "Could not open link"));
                   }
                 }}
               >
@@ -134,7 +130,7 @@ export function DocumentMarkdown({
             ),
             img: ({ src, alt }) =>
               src && safeImage(src) ? (
-                <img src={src} alt={alt ?? ""} loading="lazy" />
+                <img src={src.startsWith("data:") ? src : `vstudy-asset://${documentId}/${src}`} alt={alt ?? ""} loading="lazy" />
               ) : (
                 <span className="muted">[Image unavailable: {alt}]</span>
               ),
