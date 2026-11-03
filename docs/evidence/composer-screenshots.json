@@ -1,0 +1,264 @@
+{
+  "date": "2026-11-03",
+  "before": "/Users/vc/.t3/userdata/attachments/a56d2e42-6477-4555-b6c8-247c8912b20e-e8d71063-8125-4b9f-b918-df6fa6e8ec47.png",
+  "count": 64,
+  "review": "Each listed capture opened and inspected; long-name screenshots deliberately replace only the display-name text node as a typography stress case. Model catalogs are actual local CLI catalogs; inference is fake.",
+  "captures": [
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-light-idle.png",
+      "sha256": "d125e7385ce61c0bf257cf4b32f26be54769e32094de7820eecd59da9c37d4ef"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-light-search.png",
+      "sha256": "646aa9b4f56736f8978e8deae89137eea75d432220f85375db2f29f45f40c0c4"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-light-effort-fast.png",
+      "sha256": "30e09b8c8b082b7299f7b9c09ea760efff212740b07db1924fab1e874a6f23db"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-light-long-name.png",
+      "sha256": "0810a1de49f4bfa5174f78b37c2faa3a295642400d5a5fc5f342e25548677933"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-light-streaming.png",
+      "sha256": "acfda25cc6059027f8ae0298afdf5ae9d0bc2bbb3e50b7f1842251567264a9b8"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-light-elements.png",
+      "sha256": "9ad152fe4f010637c7168dc0ddc3eb473077f4d017e073d4401153db1df90727"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-dark-idle.png",
+      "sha256": "5f4adbc3335973c7f3f60a3680f38fd492a436a08ad92d13fb3a7ddbccef58e9"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-dark-search.png",
+      "sha256": "20200184164297ca68b7a66c23021e0069f79af489fd1e8c51cc6e39d6ebe549"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-dark-effort-fast.png",
+      "sha256": "24e0c262dc0098436d04714b655169ec146c318c31f6698e2cc297c0a39240a8"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-dark-long-name.png",
+      "sha256": "8095973ddc7fa4207e64dc8e5165631bd67b96a2bf87548cf2e3f5b41866978f"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-dark-streaming.png",
+      "sha256": "e6327be334f92a2e1fcd7ef478302fe26b1c8870f2b42841531c7d6f8fe3c8c7"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/1200-800-dark-elements.png",
+      "sha256": "d432e1d2a3fea5b907e726d408ed8317808bb831d01b604cca07f1aa43e8c19e"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-light-idle.png",
+      "sha256": "af5dd4a09f7d47314bd80ac33ac031791230340b85894d3555cf1a8719e1c261"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-light-search.png",
+      "sha256": "981d90ac51dd8e327ee3a22ab38e21b3e8811252082ca3fd820e180c708cba2b"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-light-effort-fast.png",
+      "sha256": "07b9283c3b60663f2d51e101f86b95b47143d09c66058e4b78cc4a87188ba5c1"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-light-long-name.png",
+      "sha256": "6c0723532468521cef3d36716467412b490014343817d5605642e9488f1a8424"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-light-streaming.png",
+      "sha256": "6bca03a880703a38b025e560d3e2569ee1d159a79ba01d15cee4c3a101e1e8db"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-light-elements.png",
+      "sha256": "c0408f80c484c8063929aab1d296324008778118b83d81d9dfb5568a03cc7c62"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-dark-idle.png",
+      "sha256": "8fadfa99536c2002f63faaf051bb8fa9fd07f30b4a41956442f8ae2a58345004"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-dark-search.png",
+      "sha256": "3943fbbef21371e0f2a761ed4c0a9aaa1d21d3b24476d2273eee9da0a1d52459"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-dark-effort-fast.png",
+      "sha256": "15f87744e51341720573721dbd0aaf4b379a7107a9419bec468aaddc5cafb743"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-dark-long-name.png",
+      "sha256": "ed92c9eae2584ab719e45ba2df6b9cdd25664d7bd7dc89564fe38a3e41e681f7"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-dark-streaming.png",
+      "sha256": "6b2afde9c257dc038b6f3517e6ce0ee850c1d330daa8be309a3b371475df2651"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-dark-elements.png",
+      "sha256": "c0b391c9ca7e19e2d8c3cec2fd6cfd5044cffcf2b683a20f28197a73db48ccf4"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-light-idle.png",
+      "sha256": "584b283671c2f18475a22c406893b367a45da541e79e2b284b5b78a86ca6bb4d"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-light-search.png",
+      "sha256": "5836dc43903da7cff43b887f9bdd8434c5785163a38cec5d4c7ec7b4ee36b0af"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-light-effort-fast.png",
+      "sha256": "fb436143e56e0bc03fef591b45007bb5156949e00ddd6afe3bcd880ad3c09281"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-light-long-name.png",
+      "sha256": "5f4975274f063c919cb627f2d2bf7f93eb10305466586a9e4ce7133ccaca955b"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-light-streaming.png",
+      "sha256": "8396a51df7e9de383c9fac8c588f6825ecdbb710c3da8883899094837f421296"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-light-elements.png",
+      "sha256": "651baf747d74527dfe30e0b4be289a8fa65458cf1f7e564d48a870c87920f03e"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-dark-idle.png",
+      "sha256": "173f0d39f9ab371df75055e4319c08e752c000bb952b7efd0e0ea96e7a1e859d"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-dark-search.png",
+      "sha256": "755ae5806fd4bdb4c2232ab8867c7e4e25bd15917b4692de3563997cc03e0059"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-dark-effort-fast.png",
+      "sha256": "4c4b3631dfa630c0513399a0b80122a079aca19a207b7bfd020c395940734bea"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-dark-long-name.png",
+      "sha256": "59c788986ebd860f095e072a044d91a4ebb2c49eaa4e6c3734923baeea7a765b"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-dark-streaming.png",
+      "sha256": "710edafb68d0b573b68d7ab9d7a7cc08cf1e2b1ecb4f50b441ecb6fbdedc6bb0"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-dark-elements.png",
+      "sha256": "8e6519d23b0e47ac41b0c5b40b3f86853d670288f1f5db4d1d021159421d7318"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-dark-catalog-claude.png",
+      "sha256": "9db1444290fa71be048ad43e479055875da7a51c03edd3d1656b10f375bb2c0c"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-dark-catalog-codex.png",
+      "sha256": "d69a5171630b1f690cc75d51e1e6e1ae109fcb212b553e93823ca65bd04e1c5f"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/900-700-dark-catalog-agy.png",
+      "sha256": "76862fb5a86f847299e4f2138b4208c474cac20ad74ddc4c2cfec0e676d33228"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-dark-thread-restored.png",
+      "sha256": "68e0aeafa41b8b19a9e7c9d42ad1f88fc2859d2ee521283035367b7804cd8f6a"
+    },
+    {
+      "path": "/tmp/vstudy-composer-redesign/720-480-dark-stopped.png",
+      "sha256": "058b2bf683fd1fe045976c75b21d8de71da88df84522025a9b05229331b790f5"
+    },
+    {
+      "path": "/tmp/vstudy-picker-open.png",
+      "sha256": "4497088f052debcbfd007ea49d3f2bbb3a43c2ad3c8160fe870760416d403b64"
+    },
+    {
+      "path": "/tmp/vstudy-picker-search.png",
+      "sha256": "6f49a95bb4fc25eddaa4d1367be28cf09e775423f3404f65123948ef140da5b9"
+    },
+    {
+      "path": "/tmp/vstudy-composer-effort.png",
+      "sha256": "486dfed507c23e4b6c5b748b4cd147a60a29add0da1c4ee225226aa1a57a9273"
+    },
+    {
+      "path": "/tmp/vstudy-loading.png",
+      "sha256": "8c529ded9a012ba8e52631a7ccad662650fe089b7bf77aa56d96c8a7b9ab5821"
+    },
+    {
+      "path": "/tmp/vstudy-error-retry.png",
+      "sha256": "50ad3bf542ba761e9cdcc55353fa91e9d56e71548e6c4ec8b78a6f701778dc37"
+    },
+    {
+      "path": "/tmp/vstudy-picker-dark.png",
+      "sha256": "4a8e75c95133b9b469099f5c29bc0679fc7e5c6dfb62df712214a8989daedf54"
+    },
+    {
+      "path": "/tmp/vstudy-visual-section.png",
+      "sha256": "49a0ba92aa9a630041c29837473ec4a5e32c1bb8b281ebdfb9b2459f9094d3d1"
+    },
+    {
+      "path": "/tmp/vstudy-visual-markdown.png",
+      "sha256": "e14854f3153cf0aff9946c346c60814903c6aabbca96b58b374fff1a157c7491"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat.png",
+      "sha256": "d95d230533e336723d9a7543d038ea10c478b1e28f958453d38c373a51a063a6"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-document.png",
+      "sha256": "e69ffa3a92c429cfdf8074d8aa53d6e872c9eaadb86a37ea38440bcce5b292b7"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-selection.png",
+      "sha256": "df41b0e7b7594031e8defbf7c409f9905d763fe68c3f35407412a9588ad00695"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-usage.png",
+      "sha256": "47881837dd8e44345b73f1f0050f12793734d323d54c2eaf44cb98264251da5e"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-markdown.png",
+      "sha256": "1ab0add576192d780ff1e43774639d0152ccc6adaa496e29e659422148af113b"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-section.png",
+      "sha256": "8bf604d87de4283e26f212136146e84da7a903e299c53bc5eb18e6e7303e2e84"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-dark.png",
+      "sha256": "1d2c653beae26f11386c48790b12763748a5284265df7b933d9cc4798f31966a"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-right.png",
+      "sha256": "910c6677d2ca5a4f01904de5af953554d075bef522c5edc52456e83dacf4c5db"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-settings.png",
+      "sha256": "e23679556ba2f1e22057cdbc5ecb4289a4fbd25f3fbad00ceaf8126970f83260"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-token-dashboard.png",
+      "sha256": "6bb46c5f3cb74147d4f61419c55ff83c003de870ed9767971782e74a452a18cf"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-usage-settings.png",
+      "sha256": "ea77fd3453531c19513d06c41e64539dedc5efe55da899ef837c0361c2905f7d"
+    },
+    {
+      "path": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-selection-chat-budget-warning.png",
+      "sha256": "8726f18428135b1fa2dd1f65ed1b13beb7dbf59bc684d58d947c8a83d84ccb81"
+    },
+    {
+      "path": "/tmp/vstudy-pdf-evidence/page-3.png",
+      "sha256": "fa2f41e9e09674daab574203a821c7cc668449a20256f3170e1039962a1af790"
+    },
+    {
+      "path": "/tmp/vstudy-pdf-evidence/page-5.png",
+      "sha256": "dd0f07b3f0dfa62f99abe768e1182675449d75de566aaeb5b5e7de4b43f0ced3"
+    },
+    {
+      "path": "/tmp/vstudy-pdf-evidence/page-10.png",
+      "sha256": "13621265df92adc1e0a096591e04d19690ecb615e6b26d99e2984d5385eeffd6"
+    }
+  ]
+}

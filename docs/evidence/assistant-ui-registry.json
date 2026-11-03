@@ -131,16 +131,68 @@
     {
       "path": "hooks/use-copy-to-clipboard.ts",
       "sha256": "1f3b8a1bab79cef961f62eb25d6b58a0d16c957d63ba1faf086ad09c99712c0a"
+    },
+    {
+      "path": "components/assistant-ui/elements/data-table.tsx",
+      "sha256": "8b2b3ba77ea50b1daf79355526fdb4669522cee5e38538c4a1e9a10f69fa19fe"
+    },
+    {
+      "path": "components/assistant-ui/elements/document-reference.tsx",
+      "sha256": "d045bc4a135297b2f1b4a512e842c51a87d62a90e4e78dfa2fad0f5266f00bfb"
+    },
+    {
+      "path": "components/assistant-ui/elements/generative-ui.tsx",
+      "sha256": "7071393c901853ef1e742977fbadef3f85abacad6e96cafdda81d0f8cbdf1b68"
+    },
+    {
+      "path": "components/assistant-ui/elements/geo-map.tsx",
+      "sha256": "755d1167b25f0951d3be677b7ccc4e20ffe32ce8a004467dd5f5758db7d684a7"
+    },
+    {
+      "path": "components/assistant-ui/elements/inline-citation.tsx",
+      "sha256": "e70551e72d0bb8cb16e9552b22ca31f8b1ed30c062217e98ecef6d86843ac64a"
+    },
+    {
+      "path": "components/assistant-ui/elements/logos.tsx",
+      "sha256": "63ecebfd780689f9af364ea107398dbaf0fc116df06989a8ce4a81d9cd6bea51"
+    },
+    {
+      "path": "components/assistant-ui/elements/mermaid-diagram.tsx",
+      "sha256": "7a18707e81eea0f9ed33ca8b4acc5e81dec480d5fb0e0d6366f163fa894aa4a5"
+    },
+    {
+      "path": "components/assistant-ui/elements/sources.aui.tsx",
+      "sha256": "032a55cdcb9e9067c10667c21f09f4d17efdd1ca4bba58c8e11601f50480b354"
+    },
+    {
+      "path": "components/assistant-ui/elements/suggestions.tsx",
+      "sha256": "6cc8d4e06028e9c3f3c233d57efc4f4960b473d3c8fa2930ace56d6e7835c99c"
+    },
+    {
+      "path": "components/assistant-ui/elements/thinking-indicator.tsx",
+      "sha256": "dc85ba3e84c99deb63ec7285dbd12d05f4c28e168ed4ae034a22a662f53eb71b"
+    },
+    {
+      "path": "components/assistant-ui/utils/range.ts",
+      "sha256": "555d880ea1ac3a2b8f0cdbe76bece147e72f6748a07a643dbe404957c64d451d"
+    },
+    {
+      "path": "components/ui/badge.tsx",
+      "sha256": "d8386d947b8a8c6d965de680503e6af5ed66068cd61b4d9ecc722a4cee1d6ffc"
     }
   ],
   "dependencies": {
+    "@assistant-ui/generative-ui": "0.0.8",
     "@assistant-ui/react": "0.15.32",
     "@assistant-ui/react-markdown": "0.14.24",
+    "@base-ui/react": "1.9.0",
+    "beautiful-mermaid": "1.1.3",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "decode-named-character-reference": "1.3.0",
     "katex": "0.16.47",
+    "leaflet": "1.9.4",
     "lucide-react": "1.67.0",
     "radix-ui": "1.8.1",
     "react": "19.2.0",
@@ -159,5 +211,7 @@
     "unified": "11.0.5",
     "zod": "3.24.2",
     "zustand": "5.0.16"
-  }
+  },
+  "additionalCommand": "ELECTRON_SKIP_BINARY_DOWNLOAD=1 npx --yes shadcn@4.23.0 add https://r.assistant-ui.com/sources.json https://r.assistant-ui.com/elements-document-reference.json https://r.assistant-ui.com/elements-inline-citation.json https://r.assistant-ui.com/elements-thinking-indicator.json https://r.assistant-ui.com/logos.json https://r.assistant-ui.com/elements-data-table.json https://r.assistant-ui.com/elements-suggestions.json https://r.assistant-ui.com/generative-ui.json --yes --overwrite -c apps/desktop",
+  "isolatedGenerativeZod": "4.6.7"
 }

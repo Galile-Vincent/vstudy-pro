@@ -1,0 +1,2189 @@
+{
+  "date": "2026-11-03",
+  "elements": [
+    {
+      "name": "Activity graph",
+      "slug": "activity-graph",
+      "url": "https://www.assistant-ui.com/elements/activity-graph.md",
+      "decision": "Skipped",
+      "reason": "Usage analytics already have a source-backed custom dashboard, explicitly retained."
+    },
+    {
+      "name": "Agent card",
+      "slug": "agent-card",
+      "url": "https://www.assistant-ui.com/elements/agent-card.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Handoff",
+      "slug": "agent-handoff",
+      "url": "https://www.assistant-ui.com/elements/agent-handoff.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Agent plan",
+      "slug": "agent-plan",
+      "url": "https://www.assistant-ui.com/elements/agent-plan.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Agent status",
+      "slug": "agent-status",
+      "url": "https://www.assistant-ui.com/elements/agent-status.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Approval card",
+      "slug": "approval-card",
+      "url": "https://www.assistant-ui.com/elements/approval-card.md",
+      "decision": "Skipped",
+      "reason": "The single API table tool is read-only; no consequential action or approval contract exists."
+    },
+    {
+      "name": "Artifact card",
+      "slug": "artifact-card",
+      "url": "https://www.assistant-ui.com/elements/artifact-card.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Assistant modal",
+      "slug": "assistant-modal",
+      "url": "https://www.assistant-ui.com/elements/assistant-modal.md",
+      "decision": "Skipped",
+      "reason": "Existing split-pane document chat is the approved entry point."
+    },
+    {
+      "name": "Assistant sidebar",
+      "slug": "assistant-sidebar",
+      "url": "https://www.assistant-ui.com/elements/assistant-sidebar.md",
+      "decision": "Skipped",
+      "reason": "Existing resizable document/chat panels are the approved layout."
+    },
+    {
+      "name": "Attachment",
+      "slug": "attachment",
+      "url": "https://www.assistant-ui.com/elements/attachment.md",
+      "decision": "Skipped",
+      "reason": "Installed dependency, capability disabled: document import and offset selections are not arbitrary provider file uploads."
+    },
+    {
+      "name": "Background runs",
+      "slug": "background-inbox",
+      "url": "https://www.assistant-ui.com/elements/background-inbox.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Canvas",
+      "slug": "canvas-split",
+      "url": "https://www.assistant-ui.com/elements/canvas-split.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Chart",
+      "slug": "chart",
+      "url": "https://www.assistant-ui.com/elements/chart.md",
+      "decision": "Skipped",
+      "reason": "The presentation tool deliberately admits text tables only; no unrestricted numeric charts."
+    },
+    {
+      "name": "Chat panel",
+      "slug": "chat-panel",
+      "url": "https://www.assistant-ui.com/elements/chat-panel.md",
+      "decision": "Skipped",
+      "reason": "Full Thread is already adopted; this demonstration shell would duplicate it."
+    },
+    {
+      "name": "Checkpoints",
+      "slug": "checkpoint-history",
+      "url": "https://www.assistant-ui.com/elements/checkpoint-history.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Code diff",
+      "slug": "code-diff",
+      "url": "https://www.assistant-ui.com/elements/code-diff.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Code runner",
+      "slug": "code-runner",
+      "url": "https://www.assistant-ui.com/elements/code-runner.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Command palette",
+      "slug": "command-palette",
+      "url": "https://www.assistant-ui.com/elements/command-palette.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Comparison",
+      "slug": "comparison-card",
+      "url": "https://www.assistant-ui.com/elements/comparison-card.md",
+      "decision": "Skipped",
+      "reason": "Comparisons are covered by the bounded vendor Table presentation."
+    },
+    {
+      "name": "Attachments",
+      "slug": "composer-attachments",
+      "url": "https://www.assistant-ui.com/elements/composer-attachments.md",
+      "decision": "Skipped",
+      "reason": "Installed dependency; selection chip remains the explicitly retained document-specific control."
+    },
+    {
+      "name": "Context",
+      "slug": "composer-context",
+      "url": "https://www.assistant-ui.com/elements/composer-context.md",
+      "decision": "Skipped",
+      "reason": "No reliable per-model context-window limit metadata; existing usage UI is explicitly retained."
+    },
+    {
+      "name": "Mentions",
+      "slug": "composer-mentions",
+      "url": "https://www.assistant-ui.com/elements/composer-mentions.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Models",
+      "slug": "composer-model-picker",
+      "url": "https://www.assistant-ui.com/elements/composer-model-picker.md",
+      "decision": "Customized",
+      "reason": "The registry ModelSelector supplies this rail; no second picker."
+    },
+    {
+      "name": "Slash commands",
+      "slug": "composer-slash-commands",
+      "url": "https://www.assistant-ui.com/elements/composer-slash-commands.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Composer trigger popover",
+      "slug": "composer-trigger-popover",
+      "url": "https://www.assistant-ui.com/elements/composer-trigger-popover.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Dictation",
+      "slug": "composer-voice",
+      "url": "https://www.assistant-ui.com/elements/composer-voice.md",
+      "decision": "Skipped",
+      "reason": "No microphone, realtime call or multi-speaker adapter. Conditional read-aloud is available without recording permissions."
+    },
+    {
+      "name": "Composer",
+      "slug": "composer",
+      "url": "https://www.assistant-ui.com/elements/composer.md",
+      "decision": "Customized",
+      "reason": "Registry Composer and Send/Stop action slot; document selection, budget, model and usage slots."
+    },
+    {
+      "name": "Computer use",
+      "slug": "computer-use",
+      "url": "https://www.assistant-ui.com/elements/computer-use.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Confidence",
+      "slug": "confidence-marker",
+      "url": "https://www.assistant-ui.com/elements/confidence-marker.md",
+      "decision": "Skipped",
+      "reason": "No calibrated claim confidence/provenance scores are reported; do not invent them."
+    },
+    {
+      "name": "Connection state",
+      "slug": "connection-state",
+      "url": "https://www.assistant-ui.com/elements/connection-state.md",
+      "decision": "Skipped",
+      "reason": "Local IPC has no resumable remote stream protocol; a reconnect control would overstate support."
+    },
+    {
+      "name": "Context breakdown",
+      "slug": "context-breakdown",
+      "url": "https://www.assistant-ui.com/elements/context-breakdown.md",
+      "decision": "Skipped",
+      "reason": "Providers do not report a full prompt/tools/history token breakdown."
+    },
+    {
+      "name": "Context display",
+      "slug": "context-display",
+      "url": "https://www.assistant-ui.com/elements/context-display.md",
+      "decision": "Skipped",
+      "reason": "No reliable context capacity metadata; do not fabricate a capacity ring."
+    },
+    {
+      "name": "Search in conversation",
+      "slug": "conversation-search",
+      "url": "https://www.assistant-ui.com/elements/conversation-search.md",
+      "decision": "Skipped",
+      "reason": "The catalog surface needs full-text search results and highlight/navigation state; the current adapter provides title search only."
+    },
+    {
+      "name": "Cost meter",
+      "slug": "cost-meter",
+      "url": "https://www.assistant-ui.com/elements/cost-meter.md",
+      "decision": "Skipped",
+      "reason": "Application usage ledger/budget UI is an explicit retained exception; avoid duplicate cost controls."
+    },
+    {
+      "name": "Data table",
+      "slug": "data-table",
+      "url": "https://www.assistant-ui.com/elements/data-table.md",
+      "decision": "Customized",
+      "reason": "Source-installed DataTable renders the allowed generative Table vocabulary entry."
+    },
+    {
+      "name": "Timestamps",
+      "slug": "day-separator",
+      "url": "https://www.assistant-ui.com/elements/day-separator.md",
+      "decision": "Skipped",
+      "reason": "Conversation history is currently compact per document; no chronology UI is required for the approved surface."
+    },
+    {
+      "name": "Diagram",
+      "slug": "diagram",
+      "url": "https://www.assistant-ui.com/elements/diagram.md",
+      "decision": "Skipped",
+      "reason": "No diagram response part is emitted; arbitrary graphics are outside the bounded presentation contract."
+    },
+    {
+      "name": "Directive text",
+      "slug": "directive-text",
+      "url": "https://www.assistant-ui.com/elements/directive-text.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Document reference",
+      "slug": "document-reference",
+      "url": "https://www.assistant-ui.com/elements/document-reference.md",
+      "decision": "Customized",
+      "reason": "Vendor controlled DocumentReference for real PDF page anchors; omitted without known page count."
+    },
+    {
+      "name": "Draft restore",
+      "slug": "draft-restore",
+      "url": "https://www.assistant-ui.com/elements/draft-restore.md",
+      "decision": "Customized",
+      "reason": "Existing composer runtime and document draft preservation retained; no separate restore prompt."
+    },
+    {
+      "name": "Edit a sent message",
+      "slug": "edit-message",
+      "url": "https://www.assistant-ui.com/elements/edit-message.md",
+      "decision": "Customized",
+      "reason": "Vendor EditComposer preserves Save & resend and IME-safe entry."
+    },
+    {
+      "name": "Elicitation form",
+      "slug": "elicitation-form",
+      "url": "https://www.assistant-ui.com/elements/elicitation-form.md",
+      "decision": "Skipped",
+      "reason": "No MCP elicitation adapter; no connector tools are enabled."
+    },
+    {
+      "name": "Empty state",
+      "slug": "empty-state",
+      "url": "https://www.assistant-ui.com/elements/empty-state.md",
+      "decision": "Customized",
+      "reason": "Vendor welcome with document-specific vendor Suggestions."
+    },
+    {
+      "name": "Error state",
+      "slug": "error-state",
+      "url": "https://www.assistant-ui.com/elements/error-state.md",
+      "decision": "Customized",
+      "reason": "Vendor MessageError with Retry, terminal status rather than rejected reload promises."
+    },
+    {
+      "name": "Feedback dialog",
+      "slug": "feedback-dialog",
+      "url": "https://www.assistant-ui.com/elements/feedback-dialog.md",
+      "decision": "Skipped",
+      "reason": "No durable feedback repository or provider feedback adapter; do not offer a fake submission."
+    },
+    {
+      "name": "File tree",
+      "slug": "file-tree",
+      "url": "https://www.assistant-ui.com/elements/file-tree.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "File",
+      "slug": "file",
+      "url": "https://www.assistant-ui.com/elements/file.md",
+      "decision": "Skipped",
+      "reason": "Installed vendor renderer retained for future file parts; no adapter emits file parts today."
+    },
+    {
+      "name": "Flow graph",
+      "slug": "flow-graph",
+      "url": "https://www.assistant-ui.com/elements/flow-graph.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Follow-up suggestions",
+      "slug": "follow-up-suggestions",
+      "url": "https://www.assistant-ui.com/elements/follow-up-suggestions.md",
+      "decision": "Adopted verbatim",
+      "reason": "Installed ThreadFollowupSuggestions consumes a local document suggestion adapter without extra inference."
+    },
+    {
+      "name": "Generative UI",
+      "slug": "generative-ui",
+      "url": "https://www.assistant-ui.com/elements/generative-ui.md",
+      "decision": "Customized",
+      "reason": "Source-installed vocabulary, lazy-loaded; only Table is enabled via a bounded, API-only present tool."
+    },
+    {
+      "name": "Geo map",
+      "slug": "geo-map",
+      "url": "https://www.assistant-ui.com/elements/geo-map.md",
+      "decision": "Skipped",
+      "reason": "Installed vocabulary dependency, dormant. No map/network capability is exposed by present."
+    },
+    {
+      "name": "Guardrail notice",
+      "slug": "guardrail-notice",
+      "url": "https://www.assistant-ui.com/elements/guardrail-notice.md",
+      "decision": "Skipped",
+      "reason": "No distinct refusal event/category is reported; existing provider error and grounded-answer disclaimer remain accurate."
+    },
+    {
+      "name": "Heat graph",
+      "slug": "heat-graph",
+      "url": "https://www.assistant-ui.com/elements/heat-graph.md",
+      "decision": "Skipped",
+      "reason": "No new run-activity dashboard scope; retained usage charts already answer spending questions."
+    },
+    {
+      "name": "Image gallery",
+      "slug": "image-gallery",
+      "url": "https://www.assistant-ui.com/elements/image-gallery.md",
+      "decision": "Skipped",
+      "reason": "No image-generation or multimodal attachment response contract."
+    },
+    {
+      "name": "Image generation",
+      "slug": "image-generation",
+      "url": "https://www.assistant-ui.com/elements/image-generation.md",
+      "decision": "Skipped",
+      "reason": "No image-generation adapter; do not advertise an unavailable operation."
+    },
+    {
+      "name": "Image",
+      "slug": "image",
+      "url": "https://www.assistant-ui.com/elements/image.md",
+      "decision": "Skipped",
+      "reason": "Installed vendor renderer retained for future image parts; no adapter emits image parts today."
+    },
+    {
+      "name": "Inline citation",
+      "slug": "inline-citation",
+      "url": "https://www.assistant-ui.com/elements/inline-citation.md",
+      "decision": "Customized",
+      "reason": "Vendor Citation markers bound to validated document IDs and reader navigation."
+    },
+    {
+      "name": "Job progress",
+      "slug": "job-progress",
+      "url": "https://www.assistant-ui.com/elements/job-progress.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Launcher",
+      "slug": "launcher-bubble",
+      "url": "https://www.assistant-ui.com/elements/launcher-bubble.md",
+      "decision": "Skipped",
+      "reason": "No corresponding persistent agent/artifact/command resource exists in this document reader; installing a control alone would imply unsupported behavior."
+    },
+    {
+      "name": "Link preview",
+      "slug": "link-preview",
+      "url": "https://www.assistant-ui.com/elements/link-preview.md",
+      "decision": "Skipped",
+      "reason": "No metadata fetcher; external links retain the allowlisted shell-open path."
+    },
+    {
+      "name": "Loader",
+      "slug": "loading-state",
+      "url": "https://www.assistant-ui.com/elements/loading-state.md",
+      "decision": "Skipped",
+      "reason": "Thread already supplies history Skeletons and ThinkingIndicator; no competing loader."
+    },
+    {
+      "name": "Model logos",
+      "slug": "logos",
+      "url": "https://www.assistant-ui.com/elements/logos.md",
+      "decision": "Adopted verbatim",
+      "reason": "Installed Claude/OpenAI/Gemini SVG model logos in the trigger."
+    },
+    {
+      "name": "Map",
+      "slug": "map-answer",
+      "url": "https://www.assistant-ui.com/elements/map-answer.md",
+      "decision": "Skipped",
+      "reason": "No geolocation/search adapter or spatial answer contract."
+    },
+    {
+      "name": "Markdown text",
+      "slug": "markdown-text",
+      "url": "https://www.assistant-ui.com/elements/markdown-text.md",
+      "decision": "Customized",
+      "reason": "Vendor MarkdownText with existing sanitize/math/highlight and URL hooks."
+    },
+    {
+      "name": "Math",
+      "slug": "math-block",
+      "url": "https://www.assistant-ui.com/elements/math-block.md",
+      "decision": "Customized",
+      "reason": "Existing KaTeX is supplied through vendor MarkdownText hooks; no duplicate math renderer."
+    },
+    {
+      "name": "MCP config dialog",
+      "slug": "mcp-config",
+      "url": "https://www.assistant-ui.com/elements/mcp-config.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Server panel",
+      "slug": "mcp-server-panel",
+      "url": "https://www.assistant-ui.com/elements/mcp-server-panel.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Media player",
+      "slug": "media-player",
+      "url": "https://www.assistant-ui.com/elements/media-player.md",
+      "decision": "Skipped",
+      "reason": "Installed dependency retained, dormant without audio/video file parts."
+    },
+    {
+      "name": "Memory",
+      "slug": "memory-chips",
+      "url": "https://www.assistant-ui.com/elements/memory-chips.md",
+      "decision": "Skipped",
+      "reason": "No memory store or memory-editing tool."
+    },
+    {
+      "name": "Mermaid diagram",
+      "slug": "mermaid-diagram",
+      "url": "https://www.assistant-ui.com/elements/mermaid-diagram.md",
+      "decision": "Skipped",
+      "reason": "Installed vocabulary dependency, dormant. The read-only tool admits Table only."
+    },
+    {
+      "name": "Message actions",
+      "slug": "message-actions",
+      "url": "https://www.assistant-ui.com/elements/message-actions.md",
+      "decision": "Customized",
+      "reason": "Vendor copy/edit/regenerate plus conditional WebSpeech read-aloud actions."
+    },
+    {
+      "name": "Message branches",
+      "slug": "message-branches",
+      "url": "https://www.assistant-ui.com/elements/message-branches.md",
+      "decision": "Skipped",
+      "reason": "Deferred: messages has no parent/head graph; ChatService replay excludes later answers and the renderer seeds a linear initialMessages list. A proper migration must persist sibling/parent/head IDs, restore repository trees, and select branch-specific prompt context before enabling BranchPicker."
+    },
+    {
+      "name": "Message pair",
+      "slug": "message-pair",
+      "url": "https://www.assistant-ui.com/elements/message-pair.md",
+      "decision": "Customized",
+      "reason": "Vendor UserMessage/AssistantMessage; document selection and usage slots."
+    },
+    {
+      "name": "Message queue",
+      "slug": "message-queue",
+      "url": "https://www.assistant-ui.com/elements/message-queue.md",
+      "decision": "Skipped",
+      "reason": "The current main contract permits one active request per conversation; queued drafts require explicit product semantics."
+    },
+    {
+      "name": "Message timing",
+      "slug": "message-timing",
+      "url": "https://www.assistant-ui.com/elements/message-timing.md",
+      "decision": "Skipped",
+      "reason": "No stable first-token/throughput timing persisted by adapters; do not infer performance claims."
+    },
+    {
+      "name": "Mobile composer",
+      "slug": "mobile-composer",
+      "url": "https://www.assistant-ui.com/elements/mobile-composer.md",
+      "decision": "Skipped",
+      "reason": "Desktop Electron minimum is 720x480; existing keyboard composer adapts to narrow panes."
+    },
+    {
+      "name": "Model selector",
+      "slug": "model-selector",
+      "url": "https://www.assistant-ui.com/elements/model-selector.md",
+      "decision": "Customized",
+      "reason": "Registry ModelSelector/Command over IPC with capabilities, favorites/recency and safe pane bounds."
+    },
+    {
+      "name": "Number ticker",
+      "slug": "number-ticker",
+      "url": "https://www.assistant-ui.com/elements/number-ticker.md",
+      "decision": "Skipped",
+      "reason": "Usage updates use plain accessible text; animated numeric decoration is unnecessary."
+    },
+    {
+      "name": "Onboarding",
+      "slug": "onboarding",
+      "url": "https://www.assistant-ui.com/elements/onboarding.md",
+      "decision": "Skipped",
+      "reason": "The existing import-first flow is retained; no additional setup wizard is needed."
+    },
+    {
+      "name": "Option list",
+      "slug": "option-list",
+      "url": "https://www.assistant-ui.com/elements/option-list.md",
+      "decision": "Skipped",
+      "reason": "No human-in-the-loop tool continuation protocol; read-only present only."
+    },
+    {
+      "name": "Orb",
+      "slug": "orb",
+      "url": "https://www.assistant-ui.com/elements/orb.md",
+      "decision": "Skipped",
+      "reason": "No microphone, realtime call or multi-speaker adapter. Conditional read-aloud is available without recording permissions."
+    },
+    {
+      "name": "Permission grant",
+      "slug": "permission-grant",
+      "url": "https://www.assistant-ui.com/elements/permission-grant.md",
+      "decision": "Skipped",
+      "reason": "No tool requires capability grants; CLI tools stay disabled and API present performs no side effects."
+    },
+    {
+      "name": "Prompt library",
+      "slug": "prompt-library",
+      "url": "https://www.assistant-ui.com/elements/prompt-library.md",
+      "decision": "Skipped",
+      "reason": "No saved prompt repository; document suggestions are adopted without inventing saved data."
+    },
+    {
+      "name": "Question flow",
+      "slug": "question-flow",
+      "url": "https://www.assistant-ui.com/elements/question-flow.md",
+      "decision": "Skipped",
+      "reason": "No multi-step elicitation protocol; ordinary text follow-up remains available."
+    },
+    {
+      "name": "Quota banner",
+      "slug": "quota-banner",
+      "url": "https://www.assistant-ui.com/elements/quota-banner.md",
+      "decision": "Skipped",
+      "reason": "No account balance/quota endpoint; the retained budget banner states user budgets only."
+    },
+    {
+      "name": "Quote",
+      "slug": "quote",
+      "url": "https://www.assistant-ui.com/elements/quote.md",
+      "decision": "Skipped",
+      "reason": "Document selections retain validated source offsets; quoting assistant prose would need a separate quoted-message context contract."
+    },
+    {
+      "name": "Read aloud",
+      "slug": "read-aloud",
+      "url": "https://www.assistant-ui.com/elements/read-aloud.md",
+      "decision": "Customized",
+      "reason": "Read aloud/Stop reading primitives in the vendor action bar; no autoplay or microphone."
+    },
+    {
+      "name": "Reasoning effort",
+      "slug": "reasoning-effort",
+      "url": "https://www.assistant-ui.com/elements/reasoning-effort.md",
+      "decision": "Customized",
+      "reason": "Supported efforts and speed share the ModelSelector Content; no speculative capabilities."
+    },
+    {
+      "name": "Reasoning",
+      "slug": "reasoning",
+      "url": "https://www.assistant-ui.com/elements/reasoning.md",
+      "decision": "Adopted verbatim",
+      "reason": "Installed Reasoning/ReasoningGroup renders reported provider summaries only."
+    },
+    {
+      "name": "Recommendation card",
+      "slug": "recommendation-card",
+      "url": "https://www.assistant-ui.com/elements/recommendation-card.md",
+      "decision": "Skipped",
+      "reason": "No accept/apply mutation contract; recommendations remain normal text."
+    },
+    {
+      "name": "Regenerate with",
+      "slug": "regenerate-menu",
+      "url": "https://www.assistant-ui.com/elements/regenerate-menu.md",
+      "decision": "Skipped",
+      "reason": "Current regeneration preserves the original model/options/selection; cross-model sibling persistence is not implemented."
+    },
+    {
+      "name": "Research report",
+      "slug": "research-report",
+      "url": "https://www.assistant-ui.com/elements/research-report.md",
+      "decision": "Skipped",
+      "reason": "No report-specific response schema; validated citations and tables are implemented instead."
+    },
+    {
+      "name": "Retrieval chunks",
+      "slug": "retrieval-chunks",
+      "url": "https://www.assistant-ui.com/elements/retrieval-chunks.md",
+      "decision": "Skipped",
+      "reason": "Current grounding uses document excerpts/selections rather than scored retrieval chunks."
+    },
+    {
+      "name": "Reviewable diff",
+      "slug": "reviewable-diff",
+      "url": "https://www.assistant-ui.com/elements/reviewable-diff.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Run activity",
+      "slug": "run-activity",
+      "url": "https://www.assistant-ui.com/elements/run-activity.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Schedule",
+      "slug": "schedule-card",
+      "url": "https://www.assistant-ui.com/elements/schedule-card.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Score breakdown",
+      "slug": "score-breakdown",
+      "url": "https://www.assistant-ui.com/elements/score-breakdown.md",
+      "decision": "Skipped",
+      "reason": "No matching response/resource contract exists in the current document reader; the full Thread, citations and bounded table tool cover the supported workflow."
+    },
+    {
+      "name": "Scroll anchor",
+      "slug": "scroll-anchor",
+      "url": "https://www.assistant-ui.com/elements/scroll-anchor.md",
+      "decision": "Adopted verbatim",
+      "reason": "The installed ThreadScrollToBottom and viewport own scroll anchoring."
+    },
+    {
+      "name": "Settings",
+      "slug": "settings-panel",
+      "url": "https://www.assistant-ui.com/elements/settings-panel.md",
+      "decision": "Skipped",
+      "reason": "Provider security and usage settings already exist and remain authoritative."
+    },
+    {
+      "name": "Shared conversation",
+      "slug": "shared-conversation",
+      "url": "https://www.assistant-ui.com/elements/shared-conversation.md",
+      "decision": "Skipped",
+      "reason": "No publishing, cloud or shared transcript route."
+    },
+    {
+      "name": "Shiki highlighter",
+      "slug": "shiki-highlighter",
+      "url": "https://www.assistant-ui.com/elements/shiki-highlighter.md",
+      "decision": "Skipped",
+      "reason": "Avoid a second highlighter; the retained sanitize/highlight pipeline is wired to vendor MarkdownText."
+    },
+    {
+      "name": "Sources",
+      "slug": "sources",
+      "url": "https://www.assistant-ui.com/elements/sources.md",
+      "decision": "Customized",
+      "reason": "Vendor document source chips, fed only main-validated document references."
+    },
+    {
+      "name": "Speaker identity",
+      "slug": "speaker-identity",
+      "url": "https://www.assistant-ui.com/elements/speaker-identity.md",
+      "decision": "Skipped",
+      "reason": "No microphone, realtime call or multi-speaker adapter. Conditional read-aloud is available without recording permissions."
+    },
+    {
+      "name": "Spec sheet",
+      "slug": "spec-sheet",
+      "url": "https://www.assistant-ui.com/elements/spec-sheet.md",
+      "decision": "Skipped",
+      "reason": "Tables cover the current structured-answer slice; no additional model schema is admitted."
+    },
+    {
+      "name": "Stopped run",
+      "slug": "stopped-run",
+      "url": "https://www.assistant-ui.com/elements/stopped-run.md",
+      "decision": "Customized",
+      "reason": "Actual cancellation status, immediate Stopped note, recorded usage, and restart persistence."
+    },
+    {
+      "name": "Streaming text",
+      "slug": "streaming-text",
+      "url": "https://www.assistant-ui.com/elements/streaming-text.md",
+      "decision": "Skipped",
+      "reason": "The existing streaming text behavior is retained; extra token coloring/reveal motion is disabled."
+    },
+    {
+      "name": "Subagent list",
+      "slug": "subagent-list",
+      "url": "https://www.assistant-ui.com/elements/subagent-list.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Syntax highlighter",
+      "slug": "syntax-highlighter",
+      "url": "https://www.assistant-ui.com/elements/syntax-highlighter.md",
+      "decision": "Customized",
+      "reason": "Existing rehype-highlight is supplied through vendor MarkdownText; no second Markdown pipeline."
+    },
+    {
+      "name": "Task card",
+      "slug": "task-card",
+      "url": "https://www.assistant-ui.com/elements/task-card.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Terminal block",
+      "slug": "terminal-block",
+      "url": "https://www.assistant-ui.com/elements/terminal-block.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Thinking indicator",
+      "slug": "thinking-indicator",
+      "url": "https://www.assistant-ui.com/elements/thinking-indicator.md",
+      "decision": "Customized",
+      "reason": "Vendor ThinkingIndicator uses actual runtime status; neutral palette token."
+    },
+    {
+      "name": "Thread list sidebar",
+      "slug": "thread-list-sidebar",
+      "url": "https://www.assistant-ui.com/elements/thread-list-sidebar.md",
+      "decision": "Skipped",
+      "reason": "ThreadList is adopted in the header popover; another sidebar would displace the document at 720px."
+    },
+    {
+      "name": "Thread list",
+      "slug": "thread-list",
+      "url": "https://www.assistant-ui.com/elements/thread-list.md",
+      "decision": "Customized",
+      "reason": "Vendor ThreadList over ExternalStoreThreadListAdapter, in a pane-bounded header popover."
+    },
+    {
+      "name": "Thread search",
+      "slug": "thread-search",
+      "url": "https://www.assistant-ui.com/elements/thread-search.md",
+      "decision": "Skipped",
+      "reason": "Conversation title search is already part of the installed ThreadList."
+    },
+    {
+      "name": "Thread",
+      "slug": "thread",
+      "url": "https://www.assistant-ui.com/elements/thread.md",
+      "decision": "Customized",
+      "reason": "Styled Thread, viewport, scroll return and message composition; document slots and linear-history scope."
+    },
+    {
+      "name": "Timeline",
+      "slug": "timeline",
+      "url": "https://www.assistant-ui.com/elements/timeline.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Todo list",
+      "slug": "todo-list",
+      "url": "https://www.assistant-ui.com/elements/todo-list.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Tool call",
+      "slug": "tool-call",
+      "url": "https://www.assistant-ui.com/elements/tool-call.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Tool failure",
+      "slug": "tool-error",
+      "url": "https://www.assistant-ui.com/elements/tool-error.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Tool fallback",
+      "slug": "tool-fallback",
+      "url": "https://www.assistant-ui.com/elements/tool-fallback.md",
+      "decision": "Adopted verbatim",
+      "reason": "Installed ToolFallback renders unknown/disabled calls inertly; no execution."
+    },
+    {
+      "name": "Tool group",
+      "slug": "tool-group",
+      "url": "https://www.assistant-ui.com/elements/tool-group.md",
+      "decision": "Adopted verbatim",
+      "reason": "Installed ToolGroup groups non-presentation calls; present is a standalone artifact."
+    },
+    {
+      "name": "Tool timeline",
+      "slug": "tool-timeline",
+      "url": "https://www.assistant-ui.com/elements/tool-timeline.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Tooltip icon button",
+      "slug": "tooltip-icon-button",
+      "url": "https://www.assistant-ui.com/elements/tooltip-icon-button.md",
+      "decision": "Adopted verbatim",
+      "reason": "Installed accessible tooltip icon buttons throughout vendor action bars."
+    },
+    {
+      "name": "Trace waterfall",
+      "slug": "trace-waterfall",
+      "url": "https://www.assistant-ui.com/elements/trace-waterfall.md",
+      "decision": "Skipped",
+      "reason": "No corresponding action/run/tool protocol is enabled. CLI tools remain disabled; the API slice is read-only table presentation, with generic calls rendered by ToolFallback."
+    },
+    {
+      "name": "Typing indicator",
+      "slug": "typing-indicator",
+      "url": "https://www.assistant-ui.com/elements/typing-indicator.md",
+      "decision": "Skipped",
+      "reason": "ThinkingIndicator and the vendor streamed indicator already expose actual running state."
+    },
+    {
+      "name": "Voice conversation",
+      "slug": "voice-conversation",
+      "url": "https://www.assistant-ui.com/elements/voice-conversation.md",
+      "decision": "Skipped",
+      "reason": "No microphone, realtime call or multi-speaker adapter. Conditional read-aloud is available without recording permissions."
+    },
+    {
+      "name": "Web preview",
+      "slug": "web-preview",
+      "url": "https://www.assistant-ui.com/elements/web-preview.md",
+      "decision": "Skipped",
+      "reason": "No sandboxed generated web-content tool is exposed."
+    },
+    {
+      "name": "Web search",
+      "slug": "web-search",
+      "url": "https://www.assistant-ui.com/elements/web-search.md",
+      "decision": "Skipped",
+      "reason": "No search tool, provider citations-to-web route, or browsing capability is enabled."
+    }
+  ],
+  "registryItems": [
+    {
+      "name": "utils",
+      "type": "registry:lib",
+      "files": [
+        "lib/utils.ts"
+      ]
+    },
+    {
+      "name": "elements-collapsible-root",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/collapsible-root.tsx"
+      ]
+    },
+    {
+      "name": "elements-surfaces",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/surfaces.tsx",
+        "components/assistant-ui/utils/useIsomorphicLayoutEffect.ts"
+      ]
+    },
+    {
+      "name": "elements-range",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/utils/range.ts"
+      ]
+    },
+    {
+      "name": "elements-tokens",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/utils/tokens.ts"
+      ]
+    },
+    {
+      "name": "elements-href",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/utils/href.ts"
+      ]
+    },
+    {
+      "name": "elements-task",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/utils/task.ts",
+        "components/assistant-ui/utils/useIsomorphicLayoutEffect.ts"
+      ]
+    },
+    {
+      "name": "elements-loading-state",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/loading-state.tsx"
+      ]
+    },
+    {
+      "name": "elements-thinking-indicator",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/thinking-indicator.tsx"
+      ]
+    },
+    {
+      "name": "elements-reasoning-panel",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/reasoning-panel.tsx"
+      ]
+    },
+    {
+      "name": "elements-streaming-text",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/streaming-text.tsx"
+      ]
+    },
+    {
+      "name": "elements-typing-indicator",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/typing-indicator.tsx"
+      ]
+    },
+    {
+      "name": "elements-message-pair",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/message-pair.tsx"
+      ]
+    },
+    {
+      "name": "elements-message-branches",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/message-branches.tsx"
+      ]
+    },
+    {
+      "name": "elements-message-actions",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/message-actions.tsx"
+      ]
+    },
+    {
+      "name": "elements-suggestions",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/suggestions.tsx"
+      ]
+    },
+    {
+      "name": "elements-error-state",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/error-state.tsx"
+      ]
+    },
+    {
+      "name": "elements-tool-call",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/tool-call.tsx"
+      ]
+    },
+    {
+      "name": "elements-run-activity",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/run-activity.tsx"
+      ]
+    },
+    {
+      "name": "elements-tool-timeline",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/tool-timeline.tsx"
+      ]
+    },
+    {
+      "name": "elements-terminal-block",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/terminal-block.tsx"
+      ]
+    },
+    {
+      "name": "elements-code-diff",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/code-diff.tsx"
+      ]
+    },
+    {
+      "name": "elements-web-search",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/web-search.tsx"
+      ]
+    },
+    {
+      "name": "elements-sources",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/sources.tsx"
+      ]
+    },
+    {
+      "name": "elements-inline-citation",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/inline-citation.tsx"
+      ]
+    },
+    {
+      "name": "elements-link-preview",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/link-preview.tsx"
+      ]
+    },
+    {
+      "name": "elements-image-generation",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/image-generation.tsx"
+      ]
+    },
+    {
+      "name": "elements-image-gallery",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/image-gallery.tsx"
+      ]
+    },
+    {
+      "name": "elements-data-table",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/data-table.tsx"
+      ]
+    },
+    {
+      "name": "elements-number-ticker",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/number-ticker.tsx"
+      ]
+    },
+    {
+      "name": "elements-agent-plan",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/agent-plan.tsx"
+      ]
+    },
+    {
+      "name": "elements-subagent-list",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/subagent-list.tsx"
+      ]
+    },
+    {
+      "name": "elements-agent-status",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/agent-status.tsx"
+      ]
+    },
+    {
+      "name": "elements-task-card",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/task-card.tsx"
+      ]
+    },
+    {
+      "name": "elements-approval-card",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/approval-card.tsx"
+      ]
+    },
+    {
+      "name": "elements-receipt-focus",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/receipt-focus.ts",
+        "components/assistant-ui/utils/useIsomorphicLayoutEffect.ts"
+      ]
+    },
+    {
+      "name": "elements-option-list",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/option-list.tsx"
+      ]
+    },
+    {
+      "name": "elements-question-flow",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/question-flow.tsx"
+      ]
+    },
+    {
+      "name": "elements-recommendation-card",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/recommendation-card.tsx"
+      ]
+    },
+    {
+      "name": "elements-artifact-card",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/artifact-card.tsx"
+      ]
+    },
+    {
+      "name": "elements-composer",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/composer.tsx"
+      ]
+    },
+    {
+      "name": "elements-chat-panel",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/chat-panel.tsx"
+      ]
+    },
+    {
+      "name": "elements-empty-state",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/empty-state.tsx"
+      ]
+    },
+    {
+      "name": "elements-thread-list",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/thread-list.tsx"
+      ]
+    },
+    {
+      "name": "elements-scroll-anchor",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/scroll-anchor.tsx"
+      ]
+    },
+    {
+      "name": "elements-conversation-map",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/conversation-map.tsx"
+      ]
+    },
+    {
+      "name": "elements-todo-list",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/todo-list.tsx"
+      ]
+    },
+    {
+      "name": "elements-message-queue",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/message-queue.tsx"
+      ]
+    },
+    {
+      "name": "elements-message-attachment",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/message-attachment.tsx"
+      ]
+    },
+    {
+      "name": "elements-reviewable-diff",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/reviewable-diff.tsx"
+      ]
+    },
+    {
+      "name": "elements-file-tree",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/file-tree.tsx"
+      ]
+    },
+    {
+      "name": "elements-elicitation-form",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/elicitation-form.tsx"
+      ]
+    },
+    {
+      "name": "elements-retrieval-chunks",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/retrieval-chunks.tsx"
+      ]
+    },
+    {
+      "name": "elements-chart",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/chart.tsx"
+      ]
+    },
+    {
+      "name": "elements-media-player",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/media-player.tsx"
+      ]
+    },
+    {
+      "name": "elements-trace-waterfall",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/trace-waterfall.tsx"
+      ]
+    },
+    {
+      "name": "elements-canvas-split",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/canvas-split.tsx"
+      ]
+    },
+    {
+      "name": "elements-voice-conversation",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/voice-conversation.tsx"
+      ]
+    },
+    {
+      "name": "elements-read-aloud",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/read-aloud.tsx"
+      ]
+    },
+    {
+      "name": "elements-mcp-server-panel",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/mcp-server-panel.tsx"
+      ]
+    },
+    {
+      "name": "elements-feedback-dialog",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/feedback-dialog.tsx"
+      ]
+    },
+    {
+      "name": "elements-quote-reply",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/quote-reply.tsx"
+      ]
+    },
+    {
+      "name": "elements-edit-message",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/edit-message.tsx"
+      ]
+    },
+    {
+      "name": "elements-stopped-run",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/stopped-run.tsx"
+      ]
+    },
+    {
+      "name": "elements-message-timing",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/message-timing.tsx"
+      ]
+    },
+    {
+      "name": "elements-connection-state",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/connection-state.tsx"
+      ]
+    },
+    {
+      "name": "elements-agent-card",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/agent-card.tsx"
+      ]
+    },
+    {
+      "name": "elements-web-preview",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/web-preview.tsx"
+      ]
+    },
+    {
+      "name": "elements-draft-restore",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/draft-restore.tsx"
+      ]
+    },
+    {
+      "name": "elements-diagram",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/diagram.tsx"
+      ]
+    },
+    {
+      "name": "elements-flow-graph",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/flow-graph.tsx"
+      ]
+    },
+    {
+      "name": "elements-activity-graph",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/activity-graph.tsx"
+      ]
+    },
+    {
+      "name": "elements-tool-group",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/tool-group.tsx"
+      ]
+    },
+    {
+      "name": "elements-context-breakdown",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/context-breakdown.tsx"
+      ]
+    },
+    {
+      "name": "elements-model-picker",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/model-picker.tsx"
+      ]
+    },
+    {
+      "name": "elements-reasoning-effort",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/reasoning-effort.tsx"
+      ]
+    },
+    {
+      "name": "elements-guardrail-notice",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/guardrail-notice.tsx"
+      ]
+    },
+    {
+      "name": "elements-day-separator",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/day-separator.tsx"
+      ]
+    },
+    {
+      "name": "elements-speaker-identity",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/speaker-identity.tsx"
+      ]
+    },
+    {
+      "name": "elements-regenerate-menu",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/regenerate-menu.tsx"
+      ]
+    },
+    {
+      "name": "elements-confidence-marker",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/confidence-marker.tsx"
+      ]
+    },
+    {
+      "name": "elements-tool-error",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/tool-error.tsx"
+      ]
+    },
+    {
+      "name": "elements-permission-grant",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/permission-grant.tsx"
+      ]
+    },
+    {
+      "name": "elements-computer-use",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/computer-use.tsx"
+      ]
+    },
+    {
+      "name": "elements-code-runner",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/code-runner.tsx"
+      ]
+    },
+    {
+      "name": "elements-document-reference",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/document-reference.tsx"
+      ]
+    },
+    {
+      "name": "elements-memory-chips",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/memory-chips.tsx"
+      ]
+    },
+    {
+      "name": "elements-research-report",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/research-report.tsx"
+      ]
+    },
+    {
+      "name": "elements-map-answer",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/map-answer.tsx"
+      ]
+    },
+    {
+      "name": "elements-geo-map",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/geo-map.tsx"
+      ]
+    },
+    {
+      "name": "elements-math-block",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/math-block.tsx"
+      ]
+    },
+    {
+      "name": "elements-spec-sheet",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/spec-sheet.tsx"
+      ]
+    },
+    {
+      "name": "elements-comparison-card",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/comparison-card.tsx"
+      ]
+    },
+    {
+      "name": "elements-timeline",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/timeline.tsx"
+      ]
+    },
+    {
+      "name": "elements-job-progress",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/job-progress.tsx"
+      ]
+    },
+    {
+      "name": "elements-score-breakdown",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/score-breakdown.tsx"
+      ]
+    },
+    {
+      "name": "elements-cost-meter",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/cost-meter.tsx"
+      ]
+    },
+    {
+      "name": "elements-quota-banner",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/quota-banner.tsx"
+      ]
+    },
+    {
+      "name": "elements-agent-handoff",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/agent-handoff.tsx"
+      ]
+    },
+    {
+      "name": "elements-background-inbox",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/background-inbox.tsx"
+      ]
+    },
+    {
+      "name": "elements-checkpoint-history",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/checkpoint-history.tsx"
+      ]
+    },
+    {
+      "name": "elements-schedule-card",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/schedule-card.tsx"
+      ]
+    },
+    {
+      "name": "elements-prompt-library",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/prompt-library.tsx"
+      ]
+    },
+    {
+      "name": "elements-command-palette",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/command-palette.tsx"
+      ]
+    },
+    {
+      "name": "elements-shared-conversation",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/shared-conversation.tsx"
+      ]
+    },
+    {
+      "name": "elements-conversation-search",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/conversation-search.tsx"
+      ]
+    },
+    {
+      "name": "elements-thread-search",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/thread-search.tsx"
+      ]
+    },
+    {
+      "name": "elements-launcher-bubble",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/launcher-bubble.tsx"
+      ]
+    },
+    {
+      "name": "elements-settings-panel",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/settings-panel.tsx"
+      ]
+    },
+    {
+      "name": "elements-onboarding",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/onboarding.tsx"
+      ]
+    },
+    {
+      "name": "elements-mobile-composer",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/mobile-composer.tsx"
+      ]
+    },
+    {
+      "name": "shimmer-style",
+      "type": "registry:style",
+      "files": []
+    },
+    {
+      "name": "chat/b/ai-sdk-quick-start/json",
+      "type": "registry:page",
+      "files": [
+        "app/ai-sdk/assistant.tsx"
+      ]
+    },
+    {
+      "name": "ai-sdk-backend",
+      "type": "registry:page",
+      "files": [
+        "app/api/chat/route.ts"
+      ]
+    },
+    {
+      "name": "ai-sdk-backend-resumable",
+      "type": "registry:page",
+      "files": [
+        "app/api/chat/route.ts",
+        "app/api/chat/resume/[streamId]/route.ts",
+        "lib/resumable-context.ts"
+      ]
+    },
+    {
+      "name": "eve-chat",
+      "type": "registry:item",
+      "files": [
+        "app/page.tsx",
+        "components/assistant-ui/elements/thread.aui.tsx",
+        "components/assistant-ui/elements/attachment.aui.tsx",
+        "components/assistant-ui/elements/tooltip-icon-button.tsx",
+        "components/assistant-ui/elements/attachment-state.ts",
+        "hooks/use-attachment-src.ts",
+        "components/assistant-ui/elements/file.tsx",
+        "components/assistant-ui/elements/media-player.tsx",
+        "components/assistant-ui/elements/surfaces.tsx",
+        "components/assistant-ui/utils/useIsomorphicLayoutEffect.ts",
+        "components/assistant-ui/elements/follow-up-suggestions.aui.tsx",
+        "components/assistant-ui/elements/image.tsx",
+        "components/assistant-ui/utils/href.ts",
+        "components/assistant-ui/elements/markdown-text.tsx",
+        "hooks/use-copy-to-clipboard.ts",
+        "components/assistant-ui/elements/reasoning.aui.tsx",
+        "components/assistant-ui/elements/reasoning.tsx",
+        "components/assistant-ui/utils/useIsomorphicLayoutEffect.ts",
+        "components/assistant-ui/elements/collapsible-root.tsx",
+        "components/assistant-ui/elements/tool-fallback.aui.tsx",
+        "components/assistant-ui/elements/tool-group.aui.tsx",
+        "components/eve-ask-question.tsx",
+        "components/ui/avatar.tsx",
+        "components/ui/button.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/skeleton.tsx",
+        "components/ui/textarea.tsx",
+        "components/ui/tooltip.tsx"
+      ]
+    },
+    {
+      "name": "eve-ask-question",
+      "type": "registry:component",
+      "files": [
+        "components/eve-ask-question.tsx"
+      ]
+    },
+    {
+      "name": "thread",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/thread.aui.tsx"
+      ]
+    },
+    {
+      "name": "elements-voice",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/voice.tsx"
+      ]
+    },
+    {
+      "name": "elements-context-display",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/context-display.tsx"
+      ]
+    },
+    {
+      "name": "elements-context-display-state",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/utils/context-display-state.ts"
+      ]
+    },
+    {
+      "name": "elements-context-usage",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/utils/context-usage.ts"
+      ]
+    },
+    {
+      "name": "voice",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/voice.aui.tsx"
+      ]
+    },
+    {
+      "name": "voice-conversation",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/voice-conversation.aui.tsx"
+      ]
+    },
+    {
+      "name": "task-card",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/task-card.aui.tsx"
+      ]
+    },
+    {
+      "name": "agent-status",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/agent-status.aui.tsx"
+      ]
+    },
+    {
+      "name": "use-copy-to-clipboard",
+      "type": "registry:hook",
+      "files": [
+        "hooks/use-copy-to-clipboard.ts"
+      ]
+    },
+    {
+      "name": "markdown-text",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/markdown-text.tsx"
+      ]
+    },
+    {
+      "name": "reasoning",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/reasoning.aui.tsx"
+      ]
+    },
+    {
+      "name": "conversation-map",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/conversation-map.aui.tsx"
+      ]
+    },
+    {
+      "name": "elements-reasoning",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/reasoning.tsx",
+        "components/assistant-ui/utils/useIsomorphicLayoutEffect.ts"
+      ]
+    },
+    {
+      "name": "message-timing",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/message-timing.aui.tsx"
+      ]
+    },
+    {
+      "name": "context-display",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/context-display.aui.tsx"
+      ]
+    },
+    {
+      "name": "thread-list",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/thread-list.aui.tsx"
+      ]
+    },
+    {
+      "name": "mcp-config",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/mcp-config.aui.tsx"
+      ]
+    },
+    {
+      "name": "elements-mcp-config-state",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/utils/mcp-config-state.ts"
+      ]
+    },
+    {
+      "name": "use-attachment-src",
+      "type": "registry:hook",
+      "files": [
+        "hooks/use-attachment-src.ts"
+      ]
+    },
+    {
+      "name": "elements-attachment-state",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/attachment-state.ts"
+      ]
+    },
+    {
+      "name": "attachment",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/attachment.aui.tsx"
+      ]
+    },
+    {
+      "name": "follow-up-suggestions",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/follow-up-suggestions.aui.tsx"
+      ]
+    },
+    {
+      "name": "tooltip-icon-button",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/tooltip-icon-button.tsx"
+      ]
+    },
+    {
+      "name": "syntax-highlighter",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/syntax-highlighter.tsx"
+      ]
+    },
+    {
+      "name": "elements-modal-size",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/utils/modal-size.ts"
+      ]
+    },
+    {
+      "name": "assistant-modal",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/assistant-modal.aui.tsx"
+      ]
+    },
+    {
+      "name": "assistant-sidebar",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/assistant-sidebar.aui.tsx"
+      ]
+    },
+    {
+      "name": "tool-fallback",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/tool-fallback.aui.tsx"
+      ]
+    },
+    {
+      "name": "tool-group",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/tool-group.aui.tsx"
+      ]
+    },
+    {
+      "name": "shiki-highlighter",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/shiki-highlighter.aui.tsx"
+      ]
+    },
+    {
+      "name": "elements-shiki-highlighter",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/shiki-highlighter.tsx"
+      ]
+    },
+    {
+      "name": "mermaid-diagram",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/mermaid-diagram.aui.tsx"
+      ]
+    },
+    {
+      "name": "elements-mermaid-diagram",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/mermaid-diagram.tsx"
+      ]
+    },
+    {
+      "name": "diff-viewer",
+      "type": "registry:ui",
+      "files": [
+        "components/ui/diff-viewer.tsx"
+      ]
+    },
+    {
+      "name": "threadlist-sidebar",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/threadlist-sidebar.aui.tsx",
+        "components/icons/github.tsx"
+      ]
+    },
+    {
+      "name": "quote",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/quote.aui.tsx"
+      ]
+    },
+    {
+      "name": "sources",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/sources.aui.tsx"
+      ]
+    },
+    {
+      "name": "image",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/image.tsx"
+      ]
+    },
+    {
+      "name": "file",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/file.tsx"
+      ]
+    },
+    {
+      "name": "model-selector",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/model-selector.aui.tsx"
+      ]
+    },
+    {
+      "name": "elements-model-selector",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/model-selector.tsx"
+      ]
+    },
+    {
+      "name": "elements-model-selection",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/utils/model-selection.ts"
+      ]
+    },
+    {
+      "name": "logos",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/logos.tsx"
+      ]
+    },
+    {
+      "name": "select",
+      "type": "registry:ui",
+      "files": [
+        "components/ui/select.tsx"
+      ]
+    },
+    {
+      "name": "direction",
+      "type": "registry:ui",
+      "files": [
+        "components/ui/direction.tsx"
+      ]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "files": [
+        "components/ui/badge.tsx"
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "files": [
+        "components/ui/tabs.tsx"
+      ]
+    },
+    {
+      "name": "accordion",
+      "type": "registry:ui",
+      "files": [
+        "components/ui/accordion.tsx"
+      ]
+    },
+    {
+      "name": "dot-matrix",
+      "type": "registry:ui",
+      "files": [
+        "components/ui/dot-matrix.tsx"
+      ]
+    },
+    {
+      "name": "number-roll",
+      "type": "registry:ui",
+      "files": [
+        "components/ui/number-roll.tsx"
+      ]
+    },
+    {
+      "name": "heat-graph",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/heat-graph.tsx",
+        "components/assistant-ui/utils/useIsomorphicLayoutEffect.ts"
+      ]
+    },
+    {
+      "name": "composer-trigger-popover",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/composer-trigger-popover.aui.tsx"
+      ]
+    },
+    {
+      "name": "directive-text",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/directive-text.aui.tsx"
+      ]
+    },
+    {
+      "name": "elements-directive-text",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/directive-text.tsx"
+      ]
+    },
+    {
+      "name": "generative-ui-style",
+      "type": "registry:style",
+      "files": []
+    },
+    {
+      "name": "generative-ui",
+      "type": "registry:component",
+      "files": [
+        "components/assistant-ui/elements/generative-ui.tsx"
+      ]
+    }
+  ],
+  "generativeVocabulary": [
+    "Header",
+    "Text",
+    "Caption",
+    "Image",
+    "Divider",
+    "Diagram",
+    "Map",
+    "Fact",
+    "Button",
+    "Select",
+    "Input",
+    "DatePicker",
+    "Checkbox",
+    "Slider",
+    "RadioGroup",
+    "CheckboxGroup",
+    "Form",
+    "Card",
+    "Col",
+    "Row",
+    "Spacer",
+    "Badge",
+    "Box",
+    "Tabs",
+    "ListView",
+    "ListViewItem",
+    "Steps",
+    "Timeline",
+    "Table",
+    "Markdown",
+    "Chart",
+    "Citation",
+    "Alert",
+    "Carousel",
+    "Icon"
+  ]
+}
