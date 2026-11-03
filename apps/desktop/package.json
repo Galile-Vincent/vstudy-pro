@@ -91,7 +91,8 @@
       "!**/*.md",
       "!**/*.test.*",
       "!**/test/**",
-      "!**/__fixtures__/**"
+      "!**/__fixtures__/**",
+      "!node_modules/**"
     ],
     "extraResources": [
       {
@@ -101,7 +102,8 @@
           "**/*.py",
           "requirements*.txt",
           "!**/test_*",
-          "!**/__pycache__/**"
+          "!**/__pycache__/**",
+          "!**/profile*"
         ]
       },
       {
@@ -118,7 +120,12 @@
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "notarize": true
+      "notarize": true,
+      "extendInfo": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false
+        }
+      }
     },
     "asar": true,
     "afterPack": "scripts/after-pack.mjs"

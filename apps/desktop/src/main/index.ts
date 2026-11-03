@@ -1,3 +1,6 @@
+import { realpathSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { runPackagedSmoke } from './packaged-smoke';
 import { app, BrowserWindow, session, safeStorage, protocol, dialog, ipcMain } from "electron";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -14,12 +17,21 @@ import { assetHandler } from "./assets";
 
 protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({ scheme, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } })));
 
+const smokeRoot = process.env.VSTUDY_PACKAGED_SMOKE_DIR;
+if (smokeRoot) {
+  const canonical = realpathSync(smokeRoot), temporary = realpathSync(tmpdir());
+  if (!canonical.startsWith(temporary + '/vstudy-packaged-smoke-') || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
+  app.setPath('userData', join(canonical, 'user-data'));
+  mkdirSync(app.getPath('userData'), {recursive:true,mode:0o700});
+}
+process.umask(0o077);
 app.enableSandbox();
 if (app.isPackaged) {
   for (const name of ['remote-debugging-port', 'remote-debugging-pipe', 'inspect', 'inspect-brk']) app.commandLine.removeSwitch(name);
 }
 app.on('web-contents-created', (_event, contents) => {
   contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  contents.on('will-frame-navigate', event => { if (!event.isMainFrame) event.preventDefault(); });
   contents.on('will-navigate', event => event.preventDefault());
   contents.on('will-redirect', event => event.preventDefault());
   contents.on('will-attach-webview', event => event.preventDefault());
@@ -67,6 +79,7 @@ function createWindow(): void {
   current.on("closed", () => {
     if (window === current) window = null;
   });
+  if (smokeRoot) current.webContents.once('did-finish-load', () => { void runPackagedSmoke(current, realpathSync(smokeRoot)); });
   void current.loadURL(entryUrl);
 }
 

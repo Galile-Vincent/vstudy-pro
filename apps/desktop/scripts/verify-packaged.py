@@ -5,7 +5,7 @@ for kind in ['run-as-node','inspect']:
  with tempfile.TemporaryDirectory(prefix='vstudy-fuse-probe-') as root:
   marker=pathlib.Path(root)/'NODE_EXECUTED'
   port=19379
-  args=[binary,'--user-data-dir='+root]
+  args=[binary,'--use-mock-keychain','--user-data-dir='+root]
   env={key:os.environ[key] for key in ['PATH','HOME','TMPDIR','LANG','USER','LOGNAME'] if key in os.environ}
   if kind=='run-as-node':
    env['ELECTRON_RUN_AS_NODE']='1'

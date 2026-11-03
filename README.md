@@ -5,8 +5,8 @@ A macOS Electron app for reading converted documents and chatting about selected
 ## Requirements
 
 - Node >=24.11.1 and pnpm 10.28.2 (see `packageManager`).
-- `uv` or Python 3.10+ (`python3`) for real document conversion. The first conversion creates a private virtual environment and installs the pinned MarkItDown requirements; internet access is needed once.
-- Optional `claude` / `codex` / `agy` (Antigravity) CLIs, installed and authenticated separately, for CLI providers. API providers can be configured in Settings. Antigravity uses ACP over stdio, probes the CLI’s existing login, and lists live session models (labelled static defaults if unavailable). Run `agy` once to sign in.
+- `uv` or Python 3.10+ (`python3`) for real document conversion. The first conversion asks permission to create a private virtual environment and download hash-locked packages from PyPI (`pypi.org`, `files.pythonhosted.org`); uv may also download Python from GitHub. Offline mode keeps Markdown/text reading available. Retry conversion to ask again.
+- CLI providers default OFF; enable each explicitly in Settings. Optional `claude` / `codex` / `agy` (Antigravity) CLIs, installed and authenticated separately, for CLI providers. API providers can be configured in Settings. Antigravity uses ACP over stdio, probes the CLI’s existing login, and lists live session models (labelled static defaults if unavailable). Run `agy` once to sign in.
 
 ## Run and check
 
@@ -34,7 +34,7 @@ VSTUDY_FAKE_PROVIDER=1 node e2e/selection-chat.mjs
 VSTUDY_FAKE_PROVIDER=1 node e2e/conversion.mjs
 ```
 
-These launch real, visible Electron windows with temporary user data. The selection check replaces only the native file chooser; import, persistence, rendering, IPC and fake-provider chat run in the app. The conversion check generates DOCX, XLSX and PDF fixtures and runs the actual converter (including first-run bootstrap). It imports DOCX by file drop, checks its embedded image, and verifies both data images and relative library images through the custom asset protocol. Both clean up on completion. Set `VSTUDY_SCREENSHOT=/absolute/path.png` to choose the selection screenshot destination; related UI states use the same filename prefix.
+These launch real, visible Electron windows with temporary user data. The selection check replaces only the native file chooser; import, persistence, rendering, IPC and fake-provider chat run in the app. The conversion check generates DOCX, XLSX and PDF fixtures and runs the actual converter (including first-run bootstrap). It exercises DOCX import, checks its embedded image, and verifies both data images and relative library images through the custom asset protocol. Both clean up on completion. Set `VSTUDY_SCREENSHOT=/absolute/path.png` to choose the selection screenshot destination; related UI states use the same filename prefix.
 
 For an isolated renderer preview, `VITE_MOCK_DESKTOP=1 pnpm build` explicitly bundles the mock bridge, then `VSTUDY_RENDERER_MOCK=1 node e2e/selection-chat.mjs` runs the mock variant. Rebuild without the flag before testing the real app.
 
@@ -69,3 +69,15 @@ These save screenshots, animation frames and measurements under `/tmp/vstudy-wel
 Security controls, trust boundaries, accepted advisories and verification evidence: [docs/SECURITY.md](docs/SECURITY.md). Run `pnpm security:check` for the reviewed-audit gate, dangerous-API and Electron lint, and normal tests.
 
 Codex chat requires authenticated CLI **0.166.0**, macOS and `/usr/bin/sandbox-exec`. It uses isolated temporary state and disables native tools; user Codex config, profiles, rules and skills are ignored. A startup canary proof is cached per app/binary/safety configuration; failures show “Unavailable: could not verify tool-free mode”. Restart after fixing authentication. Other CLI versions fail closed pending verification. Model effort/service-tier choices, usage streaming and Stop remain supported. See [Codex verification and limits](docs/codex-tool-free.md).
+
+## Network activity and unsigned builds
+
+VStudy Pro itself sends no analytics. Enabled API providers contact Anthropic, OpenAI, or your configured compatible endpoint for model discovery and chat. Enabled CLI clients use their own logins and may contact their own backend or telemetry services for discovery, verification, chat and quota checks. Claude receives its nonessential-traffic/telemetry opt-outs. Converter installation contacts the hosts listed above after consent; conversion workers deny network access on macOS. Confirmed external links open your browser or mail application. Chromium background traffic and opaque CLI subprocess traffic have not been packet-captured.
+
+Main exposes its bounded, session-only activity log through `settings:networkActivity` (action, time, destination); this records app-initiated requests and CLI launches, not individual encrypted requests inside third-party tools. Renderer panel wiring remains outstanding; see [the audit response](docs/security-audit-1-response.md).
+
+For an explicitly unsigned local build, run `CSC_IDENTITY_AUTO_DISCOVERY=false pnpm package`. afterPack applies the fuses then ad-hoc signs the app. This is not Developer ID signing or notarization; macOS Keychain may ask permission after each ad-hoc rebuild. The observed pre-ready hang was a wait inside Keychain, captured in the audit response. Automated packaged smoke uses `--use-mock-keychain` with fresh temporary user data and the fake provider; it does not verify real Keychain encryption.
+
+To sign a release, set `CSC_NAME` to the Developer ID Application identity, or provide `CSC_LINK` and `CSC_KEY_PASSWORD`. For notarization, configure `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`, or the electron-builder-supported App Store Connect API-key variables. Never commit credentials. Signing, notarization, stapling and Gatekeeper acceptance still require release verification.
+
+Packaged main/preload dependencies are bundled; `node_modules` is excluded. The converter Python sources and hash lock remain external resources. To run the packaged smoke from `apps/desktop`, prepare an isolated converter environment with the shipped lock and its SHA-256 marker, then run `VSTUDY_CONVERTER_VENV=/absolute/venv node e2e/packaged-smoke.mjs`. It clones that environment, imports Markdown, converts DOCX, persists a fake-provider chat, verifies fuses/signature/entitlements, and quits. Test user data is forced under a fresh `vstudy-packaged-smoke-*` temporary directory before startup and cannot select the real Application Support directory.
