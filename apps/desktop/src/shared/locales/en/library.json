@@ -1,0 +1,6 @@
+{
+  "conversion_pages": "Converting page {{page}} of {{total}}",
+  "conversion_complete": "Conversion complete",
+  "conversion_preparing": "Preparing converter…",
+  "delete_document": "Delete {{title}} and its conversations?"
+}

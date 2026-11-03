@@ -1,0 +1,13 @@
+{
+  "export_title": "匯出用量",
+  "unknown_calls": "{{count}} 次呼叫價格不明；合計僅為已知費用。",
+  "token_flow": "輸入 {{input}} · 輸出 {{output}}",
+  "cache_detail": "快取讀取 {{read}} · 快取寫入 {{write}} · 推理 {{reasoning}}",
+  "subscription": "API 等值估算（訂閱）",
+  "aborted": "已中止",
+  "token_count": "{{count}} 個 token",
+  "money_left": "{{used}}／{{budget}} · 剩餘 {{left}}",
+  "token_left": "{{used}}／{{budget}} 個 token · 剩餘 {{left}}",
+  "usage_loading": "用量…",
+  "daily_description": "{{date}}：輸入 {{input}}，輸出 {{output}}"
+}

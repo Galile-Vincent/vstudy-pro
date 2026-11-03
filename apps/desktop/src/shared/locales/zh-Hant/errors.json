@@ -1,0 +1,5 @@
+{
+  "generic": "發生錯誤，請再試一次。",
+  "provider_unavailable": "服務供應商無法使用，請檢查設定。",
+  "conversion_failed": "無法轉換這個檔案，請重試。"
+}

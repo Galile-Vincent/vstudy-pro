@@ -1,0 +1,5 @@
+{
+  "generic": "Something went wrong. Please try again.",
+  "provider_unavailable": "The provider is unavailable. Check Settings.",
+  "conversion_failed": "Could not convert this file. Please retry."
+}

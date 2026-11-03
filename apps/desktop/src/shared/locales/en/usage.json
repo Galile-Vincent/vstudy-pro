@@ -1,0 +1,13 @@
+{
+  "export_title": "Export usage",
+  "unknown_calls": "{{count}} calls unpriced; total is a lower bound.",
+  "token_flow": "in {{input}} · out {{output}}",
+  "cache_detail": "Cache read {{read}} · cache write {{write}} · reasoning {{reasoning}}",
+  "subscription": "API-equivalent (subscription)",
+  "aborted": "aborted",
+  "token_count": "{{count}} tokens",
+  "money_left": "{{used}} / {{budget}} · {{left}} left",
+  "token_left": "{{used}} / {{budget}} tokens · {{left}} left",
+  "usage_loading": "Usage…",
+  "daily_description": "{{date}}: {{input}} input, {{output}} output"
+}

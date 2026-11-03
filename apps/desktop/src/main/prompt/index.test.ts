@@ -67,3 +67,13 @@ it("removes entity encoded destinations and multiline base64 payloads", () => {
 it("removes entity encoded schemes combined with wrapped short base64 lines", () => {
   expect(omitDataUris(`![x](d&#x61;ta&colon;image/png;base64,\n${"AAAA".repeat(15)}\n${"BBBB".repeat(15)})`)).toBe("![x](image omitted)");
 });
+
+it('follows the latest user language by default and preserves document language', () => {
+  const prompt = buildPrompt({document:{title:'原文',markdown:'Keep me unchanged'},history:[],userMessage:'説明して'});
+  expect(prompt).toContain("language of the user's latest message");
+  expect(prompt).toContain('Never translate document content unless the user asks');
+  expect(prompt).toContain('Keep me unchanged');
+});
+it.each([['en','English'],['zh-Hant','Traditional Chinese (Taiwan)'],['ja','Japanese']] as const)('uses fixed reply language %s', (replyLanguage,label) => {
+  expect(buildPrompt({replyLanguage,document:{title:'Test',markdown:''},history:[],userMessage:'Hello'})).toContain(`Answer in ${label}.`);
+});
