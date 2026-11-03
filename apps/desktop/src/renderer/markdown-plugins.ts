@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { PluggableList } from 'unified';
 export function useMarkdownPlugins(source: string) {
   const math = /\$|\\\[|\\\(/.test(source);
-  const languages = [...new Set([...source.matchAll(/^(?:```|~~~)([a-z0-9+-]+)/gim)].map(match=>match[1]!.toLowerCase()))].sort().join(',');
+  const languages = [...new Set([...source.matchAll(/^[ \t]*(?:```|~~~)([a-z0-9+#-]+)/gim)].map(match=>match[1]!.toLowerCase()))].sort().join(',');
   const [plugins,setPlugins] = useState<{remark:PluggableList;rehype:PluggableList}>({remark:[],rehype:[]});
   useEffect(() => {
     let active=true;

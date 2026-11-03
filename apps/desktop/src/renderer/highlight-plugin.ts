@@ -2,7 +2,7 @@ import { createLowlight } from 'lowlight';
 import type { LanguageFn } from 'highlight.js';
 import type { Element, Root } from 'hast';
 const modules = import.meta.glob<{default:LanguageFn}>(['../../node_modules/highlight.js/lib/languages/*.js','!**/*.js.js']);
-const aliases: Record<string,string> = {js:'javascript',ts:'typescript',py:'python',sh:'bash',html:'xml',md:'markdown',yml:'yaml',cs:'csharp',c:'c',cpp:'cpp',rb:'ruby',rs:'rust'};
+const aliases: Record<string,string> = {js:'javascript',jsx:'javascript',ts:'typescript',tsx:'typescript','c++':'cpp','c#':'csharp',shell:'bash',zsh:'bash',py:'python',sh:'bash',html:'xml',md:'markdown',yml:'yaml',cs:'csharp',c:'c',cpp:'cpp',rb:'ruby',rs:'rust'};
 export async function highlightPlugin(languages:string[]) {
   const lowlight=createLowlight();
   await Promise.all(languages.map(async name => {
