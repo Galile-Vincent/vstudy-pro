@@ -1,0 +1,31 @@
+/* Keep model controls outside the model list's scroll area. */
+.model-popover.model-popover { width: 560px; max-width: min(560px, var(--radix-popover-content-available-width)); overflow: hidden; }
+.model-popover.model-popover > [cmdk-root] { height: min(580px, var(--radix-popover-content-available-height)); min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.model-popover.model-popover .model-picker-body { flex: 1; min-height: 0; overflow: hidden; flex-direction: column; }
+.model-popover.model-popover [cmdk-list] { flex: 1 1 0; min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; }
+.model-popover.model-popover .model-traits { width: auto; flex: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border-left: 0; border-top: 1px solid var(--line); }
+.model-popover.model-popover .model-traits section { min-width: 0; }
+.model-popover.model-popover .effort-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.model-popover.model-popover .effort-item { padding-inline: 6px; }
+.model-popover.model-popover .effort-check, .model-popover.model-popover .effort-item small, .model-popover.model-popover .speed-section p { display: none; }
+.model-popover.model-popover .speed-section { margin: 0; }
+.model-popover.model-popover .fast-mode { gap: 8px; }
+.model-popover.model-popover .model-traits h4 { margin-bottom: 4px; }
+.model-picker.model-picker { min-width: 0; flex: 1 1 auto; }
+.model-trigger.model-trigger { max-width: 100%; width: auto; }
+.composer-usage.composer-usage { flex: 0 0 auto; overflow: visible; }
+.message-usage { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; }
+.aui-user-message-content .selection-preview { width: 100%; max-width: none; min-width: 0; margin-bottom: 8px; overflow-wrap: anywhere; }
+.aui-user-message-content .selection-preview summary span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; }
+.aui-user-message-content .selection-preview[open] summary span { display: none; }
+.aui-user-message-content { min-width: 0; overflow-wrap: anywhere; }
+.aui-thread-viewport { scrollbar-gutter: stable; }
+.aui-message-error-root button { margin-top: 8px; }
+.usage-meter > small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-citation-highlight] { outline: 2px solid var(--accent); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { [data-citation-highlight] { animation: none !important; } }
+@media (max-height: 520px) {
+  [data-radix-popper-content-wrapper]:has(> .model-popover) { position: fixed !important; inset: 12px !important; transform: none !important; width: auto !important; }
+  .model-popover.model-popover { width: 100%; max-width: none; height: calc(100dvh - 24px); max-height: none; }
+  .model-popover.model-popover > [cmdk-root] { height: 100%; max-height: none; }
+}

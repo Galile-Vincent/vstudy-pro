@@ -18,7 +18,7 @@ it('searches, selects with keyboard and persists favorites', async () => {
  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host); const onModel = vi.fn();
  await act(async () => root.render(<ModelPicker providers={providers} model="codex-cli/sol" onModel={onModel} onSettings={() => {}} />));
  await act(async () => (host.querySelector('[aria-label="Model"]') as HTMLButtonElement).click());
- expect(document.querySelector('[cmdk-item]')?.textContent).toContain('Sol');
+ expect(document.querySelector('[cmdk-item]')?.textContent).toContain('Other');
  await act(async () => (document.querySelector('[aria-label="Favorite Sol"]') as HTMLButtonElement).click());
  expect(invoke).toHaveBeenCalledWith('settings:set', expect.objectContaining({favoriteModels:['codex-cli/sol']}));
  const search = document.querySelector('input')!;
@@ -73,4 +73,13 @@ it('orders Recent by recency and searches punctuation-independent tokens out of 
  await act(async()=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(input,'6 GPT');input.dispatchEvent(new Event('input',{bubbles:true}));});
  expect(Array.from(document.querySelectorAll('[role=option]')).map(x=>x.textContent)).toEqual(['GPT-6.1 Solgpt-6.1-sol']);
  await act(async()=>root.unmount());host.remove();
+});
+it('collapses disabled API models below usable CLI groups', () => {
+ const result=pickerModels([{config:{kind:'api',id:'anthropic-api',enabled:false},availability:{available:false,reason:'key'},models:[{id:'a',name:'A'},{id:'b',name:'B'},{id:'c',name:'C'}]},...providers]);
+ expect(result.map(m=>[m.name,m.available])).toEqual([['Sol',true],['Other',true],['Anthropic API',false]]);
+ expect(result.at(-1)?.reason).toBe('Add a key');
+});
+it('sorts family versions descending with a stable name tie break', async () => {
+ const {compareModels}=await import('./model-picker');
+ expect(['GPT-6 Sol','GPT-6.1 Sol','GPT-5 Sol','Gemini 3'].map(name=>({name})).sort(compareModels).map(m=>m.name)).toEqual(['Gemini 3','GPT-6.1 Sol','GPT-6 Sol','GPT-5 Sol']);
 });

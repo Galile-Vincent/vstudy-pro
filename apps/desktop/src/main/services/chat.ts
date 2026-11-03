@@ -162,7 +162,7 @@ export class ChatService {
     text: string,
     status: "complete" | "aborted" | "error" = "complete",
     usage?: Usage,
-    id = randomUUID(),
+    id: string = randomUUID(),
     error?: string,
     extras: { reasoning?: string; citations?: DocumentCitation[]; toolCalls?: ToolCall[] } = {},
   ) {

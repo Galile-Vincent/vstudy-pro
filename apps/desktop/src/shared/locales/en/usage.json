@@ -11,5 +11,13 @@
   "usage_loading": "Usage…",
   "daily_description": "{{date}}: {{input}} input, {{output}} output",
   "token_count_one": "{{formatted}} token",
-  "token_count_other": "{{formatted}} tokens"
+  "token_count_other": "{{formatted}} tokens",
+  "current_price_unknown": "Price unknown for this model",
+  "unpriced_budget": "The USD budget cannot be checked for this model.",
+  "percent_used": "{{percent}}% used of ",
+  "weekly_window": "the weekly window",
+  "day_window": "the {{count}} d window",
+  "hour_window": "the {{count}} h window",
+  "minute_window": "the {{count}} min window",
+  "provider_window": "the provider window"
 }

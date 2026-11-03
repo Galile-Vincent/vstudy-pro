@@ -1,4 +1,5 @@
 "use client";
+import { plainSelection } from "../../../selection-preview";
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
 
@@ -73,8 +74,8 @@ export function DocumentReference({
               <span className={cn(mono, "text-muted-foreground")}>
                 {tr('common:p')}{anchor.page}
               </span>
-              <span className="text-foreground/65 border-foreground/15 border-s-2 ps-2 text-xs leading-relaxed break-words">
-                {anchor.quote}
+              <span className="text-foreground/65 border-foreground/15 border-s-2 ps-2 text-xs leading-relaxed break-words line-clamp-3">
+                {plainSelection(anchor.quote)}
               </span>
             </>
           );

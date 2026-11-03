@@ -1,4 +1,5 @@
 "use client";
+import { useFormat } from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
 
@@ -24,6 +25,8 @@ import {
   TrashIcon,
 } from "lucide-react";
 import {
+  createContext,
+  useContext,
   forwardRef,
   Fragment,
   useEffect,
@@ -35,19 +38,21 @@ import {
   type FC,
 } from "react";
 
-export const ThreadList: FC = () => {
+type ThreadSummaries = Record<string,{preview:string;createdAt:string}>;
+const SummaryContext = createContext<ThreadSummaries>({});
+export const ThreadList: FC<{summaries?:ThreadSummaries}> = ({summaries = {}}) => {
   useTranslation();
   const [search, setSearch] = useState("");
   const hasThreads = useAuiState((s) => s.threads.threadIds.length > 0);
 
   return (
-    <ThreadListRoot>
+    <SummaryContext.Provider value={summaries}><ThreadListRoot>
       <ThreadListNew />
       {hasThreads && (
         <ThreadListSearch value={search} onValueChange={setSearch} />
       )}
       <ThreadListItems searchQuery={hasThreads ? search : ""} />
-    </ThreadListRoot>
+    </ThreadListRoot></SummaryContext.Provider>
   );
 };
 
@@ -328,6 +333,12 @@ const ThreadListSkeleton: FC = () => {
 
 export const ThreadListItem: FC = () => {
   useTranslation();
+  const format = useFormat();
+  const summaries = useContext(SummaryContext);
+  const id = useAuiState(s => s.threadListItem.id);
+  const summary = summaries[id];
+  const minutes = summary ? Math.min(0,Math.round((Date.parse(summary.createdAt) - Date.now()) / 60000)) : 0;
+  const relative = format.relative(Math.round(minutes / (Math.abs(minutes) >= 1440 ? 1440 : Math.abs(minutes) >= 60 ? 60 : 1)), Math.abs(minutes) >= 1440 ? 'day' : Math.abs(minutes) >= 60 ? 'hour' : 'minute');
   const isRunning = useAuiState((s) => s.threadListItem.isRunning);
   const [isRenaming, setIsRenaming] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -342,7 +353,7 @@ export const ThreadListItem: FC = () => {
   return (
     <ThreadListItemPrimitive.Root
       data-slot="aui_thread-list-item"
-      className="group hover:bg-muted focus-visible:bg-muted data-active:bg-muted has-focus-visible:bg-muted has-data-[state=open]:bg-muted relative flex h-8 items-center rounded-md transition-colors focus-visible:outline-none"
+      className="group hover:bg-muted focus-visible:bg-muted data-active:bg-muted has-focus-visible:bg-muted has-data-[state=open]:bg-muted relative flex min-h-8 items-center rounded-md transition-colors focus-visible:outline-none"
     >
       {isRenaming ? (
         <ThreadListItemRename
@@ -368,7 +379,7 @@ export const ThreadListItem: FC = () => {
             data-slot="aui_thread-list-item-title"
             className="min-w-0 flex-1 truncate"
           >
-            <ThreadListItemPrimitive.Title fallback={tr('common:new_chat')} />
+            <ThreadListItemPrimitive.Title fallback={tr('common:new_chat')} />{summary && <><small className="block truncate text-muted-foreground">{summary.preview}</small><small className="block text-muted-foreground">{relative}</small></>}
           </span>
           {isRunning && <span className="sr-only">{tr('common:running')}</span>}
         </ThreadListItemPrimitive.Trigger>

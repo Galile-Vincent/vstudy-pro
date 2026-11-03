@@ -6,7 +6,14 @@ import { priceSchema, type Settings, type IpcResponse } from '../../shared';
 import { z } from 'zod';
 import { desktop } from '../bridge';
 import { UsageDashboard } from './dashboard';
-const balanceNote = tr('common:no_provider_exposes_an_account_balance_for_api_keys_left_means_your_user_set_monthly_budget_or_token_cap_provider_rate_limits_are_separate_and_appear_only_when_reported');
+const balanceNote = () => tr('common:no_provider_exposes_an_account_balance_for_api_keys_left_means_your_user_set_monthly_budget_or_token_cap_provider_rate_limits_are_separate_and_appear_only_when_reported');
+export function rateWindow(label: string, number: (n:number) => string): string {
+  const minutes = /^(\d+) minute window$/.exec(label)?.[1];
+  const value = minutes ? Number(minutes) : undefined;
+  if (value === 10080 || /seven_day/.test(label)) return tr('usage:weekly_window');
+  if (value !== undefined) return tr(value >= 1440 ? 'usage:day_window' : value >= 60 ? 'usage:hour_window' : 'usage:minute_window',{count:number(value >= 1440 ? value/1440 : value >= 60 ? value/60 : value)});
+  return tr('usage:provider_window');
+}
 export function UsageSettings() {
   useTranslation();
   const format=useFormat();
@@ -30,9 +37,9 @@ export function UsageSettings() {
     } catch { setStatus(tr('common:check_positive_budgets_warning_percentage_1_100_and_price_json')); }
   };
   return <section className="usage-settings" aria-label={tr('common:usage_settings')}>
-    <p className="muted">{balanceNote}</p>
+    <p className="muted">{balanceNote()}</p>
     <UsageDashboard documents={documents} />
-    <div><strong>{tr('common:provider_rate_limits')}</strong>{!limits.length && <p className="muted">{tr('common:no_rate_limit_information_reported_yet_codex_cli_does_not_report_rate_limits_through_exec_its_account_probe_may_be_unavailable_claude_limits_appear_when_reported')}</p>}{limits.map(l => <p key={l.providerId}>{l.providerId}: {l.rateLimit.usedPercent === undefined ? '' : tr('common:percent_of',{percent:format.number(l.rateLimit.usedPercent)})}{l.rateLimit.label}{l.rateLimit.remainingTokens !== undefined ? tr('common:tokens_left',{count:format.number(l.rateLimit.remainingTokens)}) : ''}{l.rateLimit.remainingRequests !== undefined ? tr('common:requests_left',{count:format.number(l.rateLimit.remainingRequests)}) : ''}{l.rateLimit.resetsAt ? tr('common:resets',{date:format.date(l.rateLimit.resetsAt,{dateStyle:'medium',timeStyle:'short'})}) : ''}<small> {tr('common:reported')}{format.date(l.createdAt,{dateStyle:'medium',timeStyle:'short'})}</small></p>)}</div>
+    <div><strong>{tr('common:provider_rate_limits')}</strong>{!limits.length && <p className="muted">{tr('common:no_rate_limit_information_reported_yet_codex_cli_does_not_report_rate_limits_through_exec_its_account_probe_may_be_unavailable_claude_limits_appear_when_reported')}</p>}{limits.map(l => <p key={l.providerId}>{l.providerId}: {l.rateLimit.usedPercent === undefined ? '' : tr('usage:percent_used',{percent:format.number(l.rateLimit.usedPercent)})}{rateWindow(l.rateLimit.label,format.number)}{l.rateLimit.remainingTokens !== undefined ? tr('common:tokens_left',{count:format.number(l.rateLimit.remainingTokens)}) : ''}{l.rateLimit.remainingRequests !== undefined ? tr('common:requests_left',{count:format.number(l.rateLimit.remainingRequests)}) : ''}{l.rateLimit.resetsAt ? tr('common:resets',{date:format.date(l.rateLimit.resetsAt,{dateStyle:'medium',timeStyle:'short'})}) : ''}<small> {tr('common:reported')}{format.date(l.createdAt,{dateStyle:'medium',timeStyle:'short'})}</small></p>)}</div>
     {settings && <><div className="usage-budget-inputs">
       <label>{tr('common:monthly_budget_usd')}<input aria-label={tr('common:monthly_budget_usd')} type="number" min="0.01" step="0.01" value={settings.monthlyBudgetUsd ?? ''} onChange={e => setSettings({...settings,monthlyBudgetUsd:e.target.value ? Number(e.target.value) : undefined})}/></label>
       <label>{tr('common:monthly_token_cap')}<input aria-label={tr('common:monthly_token_cap')} type="number" min="1" step="1" value={settings.monthlyTokenBudget ?? ''} onChange={e => setSettings({...settings,monthlyTokenBudget:e.target.value ? Number(e.target.value) : undefined})}/></label>

@@ -2,5 +2,6 @@
   "import_title": "匯入文件",
   "documents": "文件",
   "favorite_model": "收藏 {{model}}",
-  "unfavorite_model": "取消收藏 {{model}}"
+  "unfavorite_model": "取消收藏 {{model}}",
+  "add_key": "新增金鑰"
 }

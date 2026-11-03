@@ -83,7 +83,7 @@ async function setup(adapter: ProviderAdapter) {
     store.close();
     await rm(cwd, { recursive: true, force: true });
   });
-  return { chat, store, request, owner: new Owner() };
+  return { chat, store, request, cwd, owner: new Owner() };
 }
 const available = {
   async detect() {
@@ -415,7 +415,7 @@ it('keeps tool execution off by default and drops enrichment after abort', async
 
 it('reloads only edited turns and regenerates without duplicating the user, retaining audit and usage', async () => {
   const prompts: string[] = [];
-  const {chat,store,request,owner} = await setup({...available, async *stream(req) {
+  const {chat,store,request,owner,cwd} = await setup({...available, async *stream(req) {
     prompts.push(req.prompt);
     yield {type:'text-delta',text:`Answer ${prompts.length}`};
     yield {type:'done'};
@@ -438,4 +438,10 @@ it('reloads only edited turns and regenerates without duplicating the user, reta
   expect(store.db.prepare('SELECT count(*) AS n FROM messages WHERE parentMessageId IS NOT NULL').get()?.n).toBe(4);
   expect(store.usage.forConversation(request.conversationId)).toHaveLength(4);
   expect(store.messages.page(request.conversationId,100).items.map(m => m.parts[0]?.text)).toEqual(['Edited question','Answer 4']);
+  const snapshot = join(cwd,'restart.sqlite');
+  store.db.prepare('VACUUM INTO ?').run(snapshot);
+  const restarted = openStore(snapshot);
+  expect(restarted.messages.list(request.conversationId).map(m => [m.role,m.parts[0]?.text])).toEqual([['user','Edited question'],['assistant','Answer 4']]);
+  expect(restarted.usage.forConversation(request.conversationId)).toHaveLength(4);
+  restarted.close();
 });

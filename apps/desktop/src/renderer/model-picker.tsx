@@ -1,3 +1,4 @@
+import './chat-fixes.css';
 import { useTranslation } from "react-i18next";
 import { tr } from '../shared/i18n';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
@@ -13,14 +14,21 @@ function cachedDisplayNames(): Record<string,string> {
 }
 export const effortLabel = (id: string) => ({ low: tr('common:low'), medium: tr('common:medium'), high: tr('common:high'), xhigh: tr('common:extra_high'), max: tr('common:max'), ultra: 'Ultra', ultracode: 'Ultracode', ultrathink: 'Ultrathink' })[id] ?? id;
 export function pickerModels(providers: Providers) {
-  return providers.flatMap(p => {
+  return [...providers].sort((a,b) => Number(!a.config.enabled || !a.availability.available) - Number(!b.config.enabled || !b.availability.available)).flatMap(p => {
     const seen = new Set<string>();
+    if (p.config.kind === 'api' && (!p.config.enabled || !p.availability.available)) return p.models.slice(0,1).map(m => ({...m,name:`${providerName[p.config.id]} API`,value:`${p.config.id}/${m.id}`,providerId:p.config.id,provider:providerName[p.config.id],available:false,reason:tr('picker:add_key')}));
     return [...p.models].sort((a, b) => Number(b.id === 'default') - Number(a.id === 'default') || Number(a.id === a.resolvedId) - Number(b.id === b.resolvedId)).filter(m => {
       const key = m.id === 'default' ? 'default' : m.resolvedId ?? m.id;
       if (seen.has(key)) return false;
       seen.add(key); return true;
     }).map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id, provider: providerName[p.config.id], available: p.config.enabled && p.availability.available, reason: !p.config.enabled ? tr('common:provider_disabled') : p.availability.available ? tr('common:available') : tr('errors:provider_unavailable') }));
   });
+}
+export function compareModels(a: {name:string}, b: {name:string}) {
+  const family = (name: string) => name.toLowerCase().replace(/[\d.]+/g,'').replace(/[-\s]+/g,' ').trim();
+  const versions = (name: string) => (name.match(/\d+/g) ?? []).map(Number);
+  const av = versions(a.name), bv = versions(b.name);
+  return family(a.name).localeCompare(family(b.name)) || Array.from({length:Math.max(av.length,bv.length)},(_,i) => (bv[i] ?? 0) - (av[i] ?? 0)).find(n => n !== 0) || a.name.localeCompare(b.name);
 }
 function traitKeys(event: KeyboardEvent<HTMLElement>) {
   const target = event.target as HTMLElement;
@@ -53,7 +61,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
   const effort = selected?.options?.find(o => /effort/i.test(o.id));
   const speed = selected?.options?.find(o => o.id === 'fastMode' || (o.id === 'serviceTier' && o.values.some(v => v.id === 'priority')));
   const fast = speed && ['true', 'priority'].includes(String(values[speed.id] ?? speed.default));
-  const entries = all.map(m => ({ id: m.value, name: m.name, description: `${m.resolvedId ?? m.id}${m.available ? '' : ` · ${m.reason}`}`, disabled: !m.available, keywords: [m.provider, m.id], icon: <span className={`availability-dot ${m.available ? 'available' : ''}`} title={m.reason} /> }));
+  const entries = all.map(m => ({ id: m.value, name: m.name, description: `${!m.available && m.providerId.endsWith("api") ? "" : m.resolvedId ?? m.id}${m.available ? '' : `${m.providerId.endsWith('api') ? '' : ' · '}${m.reason}`}`, disabled: !m.available, keywords: [m.provider, m.id], icon: <span className={`availability-dot ${m.available ? 'available' : ''}`} title={m.reason} /> }));
   const canonical = (value: string) => {
     const raw = providers.flatMap(p => p.models.map(m => ({ ...m, value: `${p.config.id}/${m.id}`, providerId: p.config.id }))).find(m => m.value === value || (m.providerId === value.split('/')[0] && m.resolvedId === value.split('/').slice(1).join('/') && m.id !== 'default'));
     return all.find(m => m.value === value)?.value ?? all.find(m => m.providerId === raw?.providerId && m.resolvedId === raw?.resolvedId && m.id !== 'default')?.value ?? value;
@@ -62,7 +70,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
   const isRecent = (value: string) => recent.some(x => canonical(x) === value);
   const persist = async (f: string[], r: string[]) => { try { const s = await desktop.invoke('settings:get', {}); await desktop.invoke('settings:set', { ...s, favoriteModels: f, recentModels: r }); } catch { /* Selection stays usable when settings storage is unavailable. */ } };
   const choose = (value: string) => { const r = [value, ...recent.filter(x => canonical(x) !== value)].slice(0,8); setRecent(r); void persist(favorites,r).then(() => onModel(value)); };
-  const groups = ['Favorites', 'Recent', ...providers.map(p => providerName[p.config.id])];
+  const groups = ['Favorites', 'Recent', ...[...new Set(all.map(m => m.provider))]];
   return <div className="model-picker" ref={root}>
     <ModelSelector.Root models={entries} value={selected?.value ?? model} onValueChange={choose} open={open} onOpenChange={setOpen}>
       <ModelSelector.Trigger aria-label={tr('common:model')} className="model-trigger" title={selected?.name}>
@@ -71,7 +79,7 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
         {effort && <span className="model-trigger-effort">· {effortLabel(String(values[effort.id] ?? effort.default))}</span>}
         {fast && <Zap size={12} aria-label={tr('common:fast_mode_on')} />}
       </ModelSelector.Trigger>
-      <ModelSelector.Content side="top" align="start" searchable filter={(value, search, keywords) => { const haystack = [value, ...(keywords ?? [])].join(" ").toLowerCase().replace(/[^a-z0-9]+/g," "); return search.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).every(token => haystack.includes(token)) ? 1 : 0; }} collisionBoundary={boundary} collisionPadding={12} className="model-popover" onKeyDown={e => {
+      <ModelSelector.Content side="top" align="start" searchable filter={(value, search, keywords) => { const haystack = [value, ...(keywords ?? [])].join(" ").toLowerCase().replace(/[^a-z0-9]+/g," "); return search.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).every(token => haystack.includes(token) || haystack.replace(/ /g, "").includes(token)) ? 1 : 0; }} collisionBoundary={boundary} collisionPadding={12} className="model-popover" onKeyDown={e => {
         if (e.key !== 'Tab') return;
         const nodes = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('input, button:not(:disabled), [tabindex="0"]')).filter(n => n.getAttribute('tabindex') !== '-1');
         const first = nodes[0], last = nodes.at(-1);
@@ -83,10 +91,10 @@ export function ModelPicker({ providers, model, onModel, onSettings, values = {}
           <ModelSelector.List id="model-list" aria-label={tr('common:models')}>
             <ModelSelector.Empty>{tr('common:no_matching_models')}</ModelSelector.Empty>
             {groups.map(group => {
-              const rows = all.filter(m => (isFavorite(m.value) ? 'Favorites' : isRecent(m.value) ? 'Recent' : m.provider) === group).sort((a,b) => group === 'Recent' ? recent.map(canonical).indexOf(a.value) - recent.map(canonical).indexOf(b.value) : 0);
+              const rows = all.filter(m => (isFavorite(m.value) ? 'Favorites' : isRecent(m.value) ? 'Recent' : m.provider) === group).sort((a,b) => group === 'Recent' ? recent.map(canonical).indexOf(a.value) - recent.map(canonical).indexOf(b.value) : compareModels(a,b));
               return rows.length > 0 && <ModelSelector.Group key={group} heading={group === 'Favorites' ? tr('common:favorites') : group === 'Recent' ? tr('common:recent') : group}>{rows.map(m => <div className="model-row" key={m.value}>
                 <ModelSelector.Item model={entries.find(x => x.id === m.value)!} title={m.reason} />
-                <button type="button" className="model-favorite" aria-label={tr(isFavorite(m.value) ? 'picker:unfavorite_model' : 'picker:favorite_model',{model:m.name})} aria-pressed={isFavorite(m.value)} onClick={() => { const f = isFavorite(m.value) ? favorites.filter(x => canonical(x) !== m.value) : [...favorites,m.value]; setFavorites(f); void persist(f,recent); }}><Star size={14} fill={isFavorite(m.value) ? 'currentColor' : 'none'} /></button>
+                {m.available && <button type="button" className="model-favorite" aria-label={tr(isFavorite(m.value) ? 'picker:unfavorite_model' : 'picker:favorite_model',{model:m.name})} aria-pressed={isFavorite(m.value)} onClick={() => { const f = isFavorite(m.value) ? favorites.filter(x => canonical(x) !== m.value) : [...favorites,m.value]; setFavorites(f); void persist(f,recent); }}><Star size={14} fill={isFavorite(m.value) ? 'currentColor' : 'none'} /></button>}
               </div>)}</ModelSelector.Group>;
             })}
           </ModelSelector.List>

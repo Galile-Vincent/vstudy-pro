@@ -22,7 +22,7 @@ export function UsageTrend({ days }: Pick<Dashboard,'days'>) {
       })}
     </svg>
     <div className="usage-axis-labels"><span>{days[0]?.date}</span><span>{days.at(-1)?.date}</span></div>
-    <details><summary>{tr('common:daily_totals')}</summary><div className="usage-breakdown"><table><thead><tr><th>{tr('common:date')}</th><th>{tr('common:input')}</th><th>{tr('common:output')}</th><th>{tr('common:total_tokens')}</th></tr></thead><tbody>{days.map(d=><tr key={d.date}><td>{d.date}</td><td>{format.number(d.inputTokens)}</td><td>{format.number(d.outputTokens)}</td><td>{format.number((d.inputTokens+d.outputTokens))}</td></tr>)}</tbody></table></div></details>
+    <details><summary>{tr('common:daily_totals')}</summary><div className="usage-breakdown"><table><thead><tr><th>{tr('common:date')}</th><th>{tr('common:input')}</th><th>{tr('common:output')}</th><th>{tr('common:total_tokens')}</th></tr></thead><tbody>{days.filter(d => d.inputTokens > 0 || d.outputTokens > 0).map(d=><tr key={d.date}><td>{d.date}</td><td>{format.number(d.inputTokens)}</td><td>{format.number(d.outputTokens)}</td><td>{format.number((d.inputTokens+d.outputTokens))}</td></tr>)}</tbody></table></div></details>
   </figure>;
 }
 export function UsageOverview({ data }: { data: Dashboard }) {
@@ -67,7 +67,7 @@ export function UsageDashboard({ documents }: {documents:IpcResponse<'documents:
       <p className="usage-count-note muted">{tr('common:input_includes_cache_reads_and_writes_output_includes_reasoning_cli_costs_are_api_equivalent_subscription_not_subscription_charges')}</p>
       <UsageTrend days={data.days}/>{period==='all'&&<p className="muted">{tr('common:totals_cover_all_time_the_chart_shows_the_last_30_calendar_days')}</p>}
       <div className="usage-breakdown-heading"><strong>{tr('common:breakdown')}</strong><select aria-label={tr('common:group_usage_by')} value={by} onChange={e=>setBy(e.target.value as typeof by)}><option value="provider">{tr('common:provider')}</option><option value="model">{tr('common:model')}</option><option value="document">{tr('common:document')}</option></select></div>
-      <div className="usage-breakdown"><table><thead><tr><th>{by==='provider'?tr('common:provider'):by==='model'?tr('common:provider_model'):tr('common:document')}</th><th>{tr('common:tokens')}</th><th>{tr('common:calls')}</th><th>{tr('common:cost')}</th></tr></thead><tbody>{groupRows(data.summary,by,documents).map(([key,r])=><tr key={key}><td>{r.label}</td><td>{format.number(r.tokens)}</td><td>{r.calls}</td><td>{money(r.costUsd)}{r.unknown>0&&tr('common:unknown_suffix')}</td></tr>)}</tbody></table></div>
+      <div className="usage-breakdown"><table><thead><tr><th>{by==='provider'?tr('common:provider'):by==='model'?tr('common:provider_model'):tr('common:document')}</th><th>{tr('common:tokens')}</th><th>{tr('common:calls')}</th><th>{tr('common:cost')}</th></tr></thead><tbody>{groupRows(data.summary,by,documents).map(([key,r])=><tr key={key}><td>{r.label}</td><td>{format.number(r.tokens)}</td><td>{r.calls}</td><td>{money(r.costUsd)}{r.unknown>0&&r.costUsd!==undefined&&tr('common:unknown_suffix')}</td></tr>)}</tbody></table></div>
     </>}
   </section>;
 }

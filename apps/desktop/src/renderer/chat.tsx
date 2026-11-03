@@ -62,7 +62,7 @@ export function Chat({
   useEffect(() => setOptions(conversation.options ?? {}), [conversation.providerId,conversation.modelId]);
   const declared = providers.find(p => p.config.id === conversation.providerId)?.models.find(m => m.id === conversation.modelId || m.resolvedId === conversation.modelId)?.options ?? [];
   const effectiveOptions = Object.fromEntries(declared.map(o => [o.id, options[o.id] ?? o.default]));
-  const usage = useUsage(conversation.id);
+  const usage = useUsage(conversation.id, conversation.modelId);
   const budget = useBudgetGuard(usage.data, conversation.id, draft);
   const available = providers.find(p => p.config.id === conversation.providerId);
   const unavailable = !available?.config.enabled || !available.availability.available;
@@ -165,7 +165,7 @@ function DocumentMessageFooter() {
   const isLast = useAuiState(s => s.message.index === s.thread.messages.length - 1);
   const fallbackUsage = stopped && isLast ? usage.data?.records.find(record => Date.parse(record.createdAt) >= (createdAt?.getTime() ?? Infinity)) : undefined;
   const id = useAuiState(s => s.message.id);
-  return <div className="document-message-footer">{documentPageCount > 0 && citations.length > 0 && <details><summary>{tr('common:document_references')}</summary><DocumentReference title={documentTitle} pages={documentPageCount} anchors={citations.map(c => ({page:c.page!,quote:c.quote}))} activePage={activePage || citations[0]!.page!} onJump={page => {setActivePage(page);const citation=citations.find(c => c.page === page);if(citation) jumpToCitation(citation);}} /></details>}<MessageUsage subscription={subscription} models={models} fallbackUsage={fallbackUsage} />{(stopped || statuses.get(id) === "aborted") && <p role="status" className="muted">{tr('common:stopped_partial_response_excluded_from_future_context')}</p>}{statuses.get(id) && statuses.get(id) !== "aborted" && <p role="status">{tr('common:response')}{statuses.get(id)}{tr('common:this_turn_is_excluded_from_future_context')}</p>}</div>;
+  return <div className="document-message-footer">{documentPageCount > 0 && citations.length > 0 && <details><summary>{tr('common:document_references')}</summary><DocumentReference title={documentTitle} pages={documentPageCount} anchors={citations.map(c => ({page:c.page!,quote:c.quote}))} activePage={activePage || citations[0]!.page!} onJump={page => {setActivePage(page);const citation=citations.find(c => c.page === page);if(citation) jumpToCitation(citation);}} /></details>}<MessageUsage subscription={subscription} models={models} fallbackUsage={fallbackUsage} />{(stopped || statuses.get(id) === "aborted") && <p role="status" className="muted">{tr('common:stopped_partial_response_excluded_from_future_context')}</p>}</div>;
 }
 function useComposerBindings() {
   useTranslation(); const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }

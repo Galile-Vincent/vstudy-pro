@@ -11,5 +11,13 @@
   "usage_loading": "使用量…",
   "daily_description": "{{date}}：入力 {{input}}、出力 {{output}}",
   "token_count_one": "{{formatted}} トークン",
-  "token_count_other": "{{formatted}} トークン"
+  "token_count_other": "{{formatted}} トークン",
+  "current_price_unknown": "このモデルの料金は不明です",
+  "unpriced_budget": "このモデルの USD 予算は確認できません。",
+  "percent_used": "{{percent}}% 使用済み：",
+  "weekly_window": "週間の上限",
+  "day_window": "{{count}} 日間の上限",
+  "hour_window": "{{count}} 時間の上限",
+  "minute_window": "{{count}} 分間の上限",
+  "provider_window": "プロバイダーの上限"
 }

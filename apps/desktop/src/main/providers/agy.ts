@@ -1,3 +1,4 @@
+import { rmSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -131,7 +132,16 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
 export class AgyAdapter implements ProviderAdapter {
   private cache?: { expires: number; availability: Availability; models: Model[] };
   private pending: Promise<NonNullable<AgyAdapter["cache"]>> | undefined;
-  constructor(private readonly options: Options = {}) {}
+  private readonly probeDirectories = new Set<string>();
+  private readonly probeController = new AbortController();
+  private readonly onExit = () => this.dispose();
+  constructor(private readonly options: Options = {}) { process.once('exit',this.onExit); }
+  dispose() {
+    this.probeController.abort();
+    for (const directory of this.probeDirectories) rmSync(directory,{recursive:true,force:true});
+    this.probeDirectories.clear();
+    process.removeListener('exit',this.onExit);
+  }
   private binary() { return (this.options.findBinary ?? (() => findCli("agy")))(); }
   private async probe() {
     if (this.cache && this.cache.expires > Date.now()) return this.cache;
@@ -142,12 +152,13 @@ export class AgyAdapter implements ProviderAdapter {
       let models: Model[] = [];
       if (binary) {
         const cwd = await mkdtemp(join(tmpdir(), "vstudy-agy-probe-"));
+        this.probeDirectories.add(cwd);
         try {
-          for await (const event of runAgy(binary, this.options.args ?? agyArgs, cwd, undefined, new AbortController().signal, this.options.timeoutMs ?? 10_000)) {
+          for await (const event of runAgy(binary, this.options.args ?? agyArgs, cwd, undefined, this.probeController.signal, this.options.timeoutMs ?? 10_000)) {
             if (Array.isArray(event)) { models = event; availability = { available: true }; }
             else if (event.type === "error") availability = { available: false, reason: event.message };
           }
-        } finally { await rm(cwd, { recursive: true, force: true }); }
+        } finally { await rm(cwd, { recursive: true, force: true }); this.probeDirectories.delete(cwd); }
       }
       return this.cache = { expires: Date.now() + 60_000, availability, models };
     })();

@@ -1,4 +1,6 @@
 "use client";
+import { copyAnswer } from "../../../copy-answer";
+import { documentCitationSchema } from "../../../../shared";
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
 
@@ -675,7 +677,7 @@ const ComposerAction: FC = () => {
               s.composer.submission !== undefined)
           }
         >
-          <ComposerPrimitive.Cancel asChild>
+          <ComposerPrimitive.Cancel onClick={e => { const input = e.currentTarget.closest(".aui-thread-root")?.querySelector<HTMLTextAreaElement>(".aui-composer-input"); requestAnimationFrame(() => input?.focus()); }} asChild>
             <Button
               type="button"
               variant="default"
@@ -694,11 +696,12 @@ const ComposerAction: FC = () => {
 
 const MessageError: FC = () => {
   useTranslation();
+  const error = useAuiState(s => s.message.status?.type === "incomplete" && s.message.status.reason === "error" ? s.message.status.error : undefined);
   return (
     <MessagePrimitive.Error>
       <ErrorPrimitive.Root className="aui-message-error-root border-destructive bg-destructive/10 text-destructive dark:bg-destructive/5 mt-2 rounded-md border p-3 text-sm dark:text-red-200">
-        <ErrorPrimitive.Message className="aui-message-error-message line-clamp-2" />
-        <ActionBarPrimitive.Reload>{tr('common:retry')}</ActionBarPrimitive.Reload>
+        <span className="aui-message-error-message line-clamp-2">{typeof error === "string" ? error : tr('errors:provider_unavailable')}</span>
+        <ActionBarPrimitive.Reload asChild><Button type="button" variant="outline" size="sm">{tr('common:retry')}</Button></ActionBarPrimitive.Reload>
       </ErrorPrimitive.Root>
     </MessagePrimitive.Error>
   );
@@ -809,6 +812,19 @@ const AssistantMessage: FC = () => {
   );
 };
 
+const CopyAnswerButton: FC = () => {
+  useTranslation();
+  const text = useAuiState(s => s.message.content.filter(p => p.type === 'text').map(p => p.text).join('\n'));
+  const raw = useAuiState(s => s.message.metadata.custom.citations);
+  const [copied,setCopied] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useLayoutEffect(() => () => clearTimeout(timer.current), []);
+  return <TooltipIconButton tooltip={tr('common:copy')} onClick={() => {
+    const parsed = documentCitationSchema.array().safeParse(raw);
+    void navigator.clipboard.writeText(copyAnswer(text, parsed.success ? parsed.data : [])).then(() => {setCopied(true);clearTimeout(timer.current);timer.current = setTimeout(() => setCopied(false),2000);});
+  }}>{copied ? <CheckIcon /> : <CopyIcon />}</TooltipIconButton>;
+};
+
 const AssistantActionBar: FC = () => {
   useTranslation();
   return (
@@ -817,16 +833,7 @@ const AssistantActionBar: FC = () => {
       autohide="not-last"
       className="aui-assistant-action-bar-root text-muted-foreground animate-in fade-in col-start-3 row-start-2 -ms-1 flex gap-1 duration-200"
     >
-      <ActionBarPrimitive.Copy asChild>
-        <TooltipIconButton tooltip={tr('common:copy')}>
-          <AuiIf condition={(s) => s.message.isCopied}>
-            <CheckIcon className="animate-in zoom-in-50 fade-in duration-200 ease-out" />
-          </AuiIf>
-          <AuiIf condition={(s) => !s.message.isCopied}>
-            <CopyIcon className="animate-in zoom-in-75 fade-in duration-150" />
-          </AuiIf>
-        </TooltipIconButton>
-      </ActionBarPrimitive.Copy>
+      <CopyAnswerButton />
       <AuiIf condition={(s) => s.thread.capabilities.feedback}>
         <ActionBarPrimitive.FeedbackPositive asChild>
           <TooltipIconButton
@@ -915,11 +922,11 @@ const UserMessage: FC = () => {
       className="fade-in slide-in-from-bottom-1 animate-in grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] content-start gap-y-2 px-2 duration-150 [contain-intrinsic-size:auto_200px] [content-visibility:auto] [&:where(>*)]:col-start-2"
       data-role="user"
     >
-      {UserMessagePrefix && <UserMessagePrefix />}
       <UserMessageAttachments />
 
       <div className="aui-user-message-content-wrapper relative col-start-2 min-w-0">
         <div className="aui-user-message-content peer bg-muted text-foreground rounded-(--composer-radius) px-4 py-2 wrap-break-word empty:hidden">
+          {UserMessagePrefix && <UserMessagePrefix />}
           <MessagePrimitive.Parts
             components={{ File: UserFilePart, Image: UserImagePart }}
           />

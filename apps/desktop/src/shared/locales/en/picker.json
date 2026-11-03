@@ -2,5 +2,6 @@
   "import_title": "Import document",
   "documents": "Documents",
   "favorite_model": "Favorite {{model}}",
-  "unfavorite_model": "Unfavorite {{model}}"
+  "unfavorite_model": "Unfavorite {{model}}",
+  "add_key": "Add a key"
 }

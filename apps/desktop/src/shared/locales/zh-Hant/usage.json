@@ -11,5 +11,13 @@
   "usage_loading": "用量…",
   "daily_description": "{{date}}：輸入 {{input}}，輸出 {{output}}",
   "token_count_one": "{{formatted}} 個 token",
-  "token_count_other": "{{formatted}} 個 token"
+  "token_count_other": "{{formatted}} 個 token",
+  "current_price_unknown": "此模型的價格未知",
+  "unpriced_budget": "無法檢查此模型的美元預算。",
+  "percent_used": "已使用 {{percent}}%：",
+  "weekly_window": "每週額度",
+  "day_window": "{{count}} 天額度",
+  "hour_window": "{{count}} 小時額度",
+  "minute_window": "{{count}} 分鐘額度",
+  "provider_window": "服務供應商額度"
 }
