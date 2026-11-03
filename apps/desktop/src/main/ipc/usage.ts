@@ -9,12 +9,9 @@ import type { Store } from '../db';
 import type { createIpcRegistrar } from './register';
 type IpcRegistrar = ReturnType<typeof createIpcRegistrar>;
 import type { IpcChannel } from '../../shared/ipc';
-import type { UsageRecord } from '../../shared/domain';
-export function usageCsv(records: UsageRecord[]): string {
-  const keys = ['id','createdAt','providerId','modelId','kind','conversationId','documentId','messageId','inputTokens','outputTokens','cacheReadTokens','cacheWriteTokens','reasoningTokens','costUsd','costSource','aborted'] as const;
-  const cell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""').replace(/^(?:[=+@\-\t\r]|\s+(?=[=+@-]))/, "'$&")}"`;
-  return [keys.join(','), ...records.map(r => keys.map(k => cell(r[k])).join(','))].join('\r\n');
-}
+import { usageCsv } from '../db/usage-csv';
+export { usageCsv };
+
 export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemented: Set<IpcChannel>, codexEnabled: () => boolean = () => false) {
   const probe = createRateLimitProbe();
   registrar.handle('usage:estimate', async ({ conversationId, userMessage }) => {

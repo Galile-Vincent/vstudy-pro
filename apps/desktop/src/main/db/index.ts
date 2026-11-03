@@ -50,6 +50,11 @@ export const migrations = [
     CREATE INDEX messages_active ON messages(conversationId,createdAt,id) WHERE supersededBy IS NULL;
   ` },
   { version: 8, sql: usageRollupMigration },
+  { version: 9, sql: `
+    CREATE INDEX activity_document ON activity_events(documentId);
+    CREATE INDEX documents_folder_fk ON documents(folderId);
+    CREATE INDEX documents_opened_normalized ON documents(coalesce(lastOpenedAt,''),id) WHERE deletedAt IS NULL;
+  ` },
 ];
 const documentRow = z
   .object({

@@ -49,3 +49,15 @@ it('reads disk history and escapes CSV in a worker without touching the main-thr
   expect(spy).not.toHaveBeenCalled();
  } finally {store.close();rmSync(directory,{recursive:true,force:true});}
 });
+
+it('indexes audit foreign-key and normalized recent-order lookups',()=>{
+ const store=openStore(':memory:');stores.push(store);
+ for(const [sql,index] of [
+  ['SELECT id FROM activity_events WHERE documentId=?','activity_document'],
+  ['SELECT id FROM documents WHERE folderId=?','documents_folder_fk'],
+  ["SELECT id FROM documents WHERE deletedAt IS NULL ORDER BY coalesce(lastOpenedAt,''),id LIMIT ?",'documents_opened_normalized'],
+ ]) {
+  const plan=store.db.prepare(`EXPLAIN QUERY PLAN ${sql}`).all(1).map(row=>String(row.detail)).join('\n');
+  expect(plan).toContain(index);expect(plan).not.toContain('USE TEMP B-TREE');
+ }
+});

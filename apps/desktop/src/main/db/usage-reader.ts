@@ -1,3 +1,4 @@
+import { usageCsv } from './usage-csv';
 import { Worker } from 'node:worker_threads';
 import type { Store } from './index';
 import type { UsageRecord } from '../../shared/domain';
@@ -9,7 +10,7 @@ export function readUsageCsv(store: Store): Promise<string> { return runReader(s
 function runReader(store: Store, kind: 'all' | 'document' | 'conversation' | 'csv', id?: string): Promise<UsageRecord[] | string> {
   const path = String(store.db.prepare('PRAGMA database_list').get()?.file ?? '');
   // In-memory test stores cannot be shared with another SQLite connection.
-  if (!path && kind === 'csv') return Promise.resolve('');
+  if (!path && kind === 'csv') return Promise.resolve(usageCsv(store.usage.list()));
   if (!path) return Promise.resolve(kind === 'document' ? store.usage.forDocument(id!) : kind === 'conversation' ? store.usage.forConversation(id!) : store.usage.list());
   return new Promise((resolve, reject) => {
     const worker = new Worker(`
@@ -21,9 +22,7 @@ function runReader(store: Store, kind: 'all' | 'document' | 'conversation' | 'cs
         const rows=db.prepare('SELECT payload FROM usage_events '+where+' ORDER BY createdAt,id').all(...(where?[workerData.id]:[]));
         const records=rows.map(row=>JSON.parse(row.payload));
         if(workerData.kind==='csv') {
-          const keys=['id','createdAt','providerId','modelId','kind','conversationId','documentId','messageId','inputTokens','outputTokens','cacheReadTokens','cacheWriteTokens','reasoningTokens','costUsd','costSource','aborted'];
-          const cell=value=>'"'+String(value??'').replaceAll('"','""').replace(/^(?:[=+@\\-\\t\\r]|\\s+(?=[=+@-]))/,"'$&")+'"';
-          parentPort.postMessage([keys.join(','),...records.map(row=>keys.map(key=>cell(row[key])).join(','))].join('\\r\\n'));
+          parentPort.postMessage((${usageCsv.toString()})(records));
         } else parentPort.postMessage(records);
       } finally {db.close();}
     `, {eval:true,workerData:{path,kind,id}});
