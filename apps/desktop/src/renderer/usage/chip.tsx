@@ -10,6 +10,7 @@ export function UsageChip({ usage, subscription = false, aborted = false }: { us
   </span>;
 }
 export function MessageUsage({ subscription, models = [] }: { subscription: boolean; models?: Model[] }) {
+  const aborted = useAuiState(s => s.message.status?.type === "incomplete" && s.message.status.reason === "cancelled");
   const value = useAuiState(s => s.message.metadata.custom.usage);
   const modelId = useAuiState(s => s.message.metadata.custom.modelId);
   const options = useAuiState(s => s.message.metadata.custom.options);
@@ -23,5 +24,5 @@ export function MessageUsage({ subscription, models = [] }: { subscription: bool
   });
   const label = [model?.name, ...labels].filter(Boolean).join(' · ');
   const parsed = usageSchema.safeParse(value);
-  return parsed.success ? <><small className="usage-chip">{label && `${label} · `}</small><UsageChip usage={parsed.data} subscription={subscription} /></> : null;
+  return parsed.success ? <><small className="usage-chip">{label && `${label} · `}</small><UsageChip usage={parsed.data} subscription={subscription} aborted={aborted} /></> : null;
 }

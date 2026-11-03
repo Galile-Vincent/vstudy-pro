@@ -34,7 +34,7 @@ it('renders overall tokens once and exposes exact chart values accessibly',async
 
 it('allows repeated unpriced requests with one inline note while still enforcing the token budget',async()=>{
   const {useBudgetGuard}=await import('./meter');const {desktop}=await import('../bridge');
-  const month={inputTokens:0,outputTokens:0,costUsd:0,calls:0,unknownPrices:0,groups:[]};
+  const month={inputTokens:0,outputTokens:0,costUsd:20,calls:1,unknownPrices:0,groups:[]};
   const settings={...defaultSettings,monthlyBudgetUsd:10,monthlyTokenBudget:1000};
   const data={settings,month,records:[]};let tokens=100;let submitted=0;
   vi.mocked(desktop.invoke).mockImplementation((channel)=>Promise.resolve(channel==='settings:get'?settings:channel==='usage:summary'?month:{inputTokens:tokens,outputTokens:0,costSource:'estimated'}) as ReturnType<typeof desktop.invoke>);

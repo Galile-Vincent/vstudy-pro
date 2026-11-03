@@ -49,7 +49,7 @@ export function useBudgetGuard(data: ReturnType<typeof useUsage>['data'], conver
     if (checking.current) return;
     checking.current = true;
     void Promise.all([desktop.invoke('usage:estimate',{conversationId,userMessage:draft}), desktop.invoke('usage:summary',{period:'month'}), desktop.invoke('settings:get',{})]).then(([next,month,settings]) => {
-      const exceeds = budgetState(settings,month,{tokens:next.inputTokens + next.outputTokens,costUsd:next.costUsd ?? 0}).exceeds;
+      const exceeds = budgetState(next.costUsd === undefined ? {...settings,monthlyBudgetUsd:undefined} : settings,month,{tokens:next.inputTokens + next.outputTokens,costUsd:next.costUsd ?? 0}).exceeds;
       window.dispatchEvent(new CustomEvent('usage-price-unknown',{detail:next.costUsd === undefined}));
       if (exceeds) {
         setReason('The next request may exceed your monthly budget.'); setWarning(true);
