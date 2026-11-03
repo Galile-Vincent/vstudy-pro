@@ -88,3 +88,14 @@ async function collect<T>(source: AsyncIterable<T>): Promise<T[]> {
   for await (const value of source) result.push(value);
   return result;
 }
+it("waits for Claude's delayed result after message_stop and honors is_error", async () => {
+  async function* fixture() {
+    yield '{"type":"stream_event","event":{"type":"content_block_delta","delta":{"type":"text_delta","text":"answer"}}}\n';
+    yield '{"type":"stream_event","event":{"type":"message_stop"}}\n';
+    await new Promise(resolve => setTimeout(resolve, 10));
+    yield '{"type":"result","is_error":true}\n';
+  }
+  const events = [];
+  for await (const event of parseStream(fixture(), "claude")) events.push(event);
+  expect(events).toEqual([{ type: "text-delta", text: "answer" }, { type: "error", message: "Provider request failed" }]);
+});

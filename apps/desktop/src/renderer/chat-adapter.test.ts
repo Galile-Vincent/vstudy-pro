@@ -102,3 +102,13 @@ describe("IPC chat adapter", () => {
     expect(failed.unsubscribe).toHaveBeenCalled();
   });
 });
+it("drops queued deltas even if done was already queued when aborted", async () => {
+  const test = setup(async emit => {
+    emit({ type: "text-delta", text: "first" });
+    emit({ type: "text-delta", text: "queued" });
+    emit({ type: "done" });
+  });
+  expect((await test.stream.next()).value).toEqual({ content: [{ type: "text", text: "first" }] });
+  test.controller.abort();
+  expect(await test.stream.next()).toEqual({ value: undefined, done: true });
+});

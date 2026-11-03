@@ -35,7 +35,11 @@ export function createChatAdapter(
         wake?.();
       };
       const cancel = () => {
-        push({ type: "done" });
+        queue.length = 0;
+        terminal = true;
+        unsubscribe();
+        queue.push({ type: "done" });
+        wake?.();
         void bridge.invoke("chat:abort", { requestId }).catch(() => {});
       };
       unsubscribe = bridge.onChatEvent(requestId, push);
@@ -63,6 +67,7 @@ export function createChatAdapter(
             await new Promise<void>((resolve) => {
               wake = resolve;
             });
+          if (abortSignal.aborted || runGeneration !== generation) return;
           const event = queue.shift();
           if (!event) continue;
           if (event.type === "error") throw new Error(event.message);

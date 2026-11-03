@@ -34,7 +34,7 @@ export function parseProviderEvent(
     return [{ type: "error", message: "Provider request failed" }];
   if (kind === "claude") {
     if (value.type === "stream_event")
-      return parseProviderEvent("anthropic", JSON.stringify(value.event));
+      return parseProviderEvent("anthropic", JSON.stringify(value.event)).filter(event => event.type !== "done");
     if (value.type === "result") return [{ type: "done" }];
   }
   if (kind === "anthropic") {
