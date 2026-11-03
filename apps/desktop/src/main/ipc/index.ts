@@ -72,8 +72,8 @@ export function registerIpc(
   });
   registerUsageIpc(registrar, store, implemented, () => providers.config('codex-cli').enabled);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
-  const disposeLibrary = registerLibraryIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove));
   const disposeDocuments = registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove));
+  const disposeLibrary = registerLibraryIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove), disposeDocuments.resume);
   for (const channel of Object.keys(ipcContract) as IpcChannel[]) {
     if (!implemented.has(channel))
       registrar.handle(channel, () => {

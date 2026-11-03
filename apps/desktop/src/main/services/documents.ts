@@ -167,6 +167,11 @@ export class DocumentService {
     return document;
   }
 
+  resume(id: Document["id"]): void {
+    if (this.stopped) return;
+    const document = this.get(id);
+    if (document?.status === 'converting') this.enqueue(document);
+  }
   private enqueue(document: Document): void {
     if (this.jobs.has(document.id)) return;
     activeConversions.add(document.id);

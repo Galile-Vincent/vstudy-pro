@@ -10,7 +10,7 @@ import type { createIpcRegistrar } from './register';
 import { LibraryService, containedPath } from '../services/library';
 import { ActivityService } from '../services/activity';
 import { getDashboard } from '../services/dashboard';
-export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>, deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove()) {
+export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>, deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(), resume: (id: import("../../shared/domain").Document["id"]) => void = () => {}) {
     const library = new LibraryService(store, join(app.getPath('userData'), 'library')), activity = new ActivityService(store);
     library.search.rebuild();
     const handle: typeof registrar.handle = (channel, handler) => { implemented.add(channel); registrar.handle(channel, handler); };
@@ -29,7 +29,7 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     handle('library:pins:reorder', r => { library.reorderPins(r.kind, r.ids); return { ok: true }; });
     handle('library:documents:rename', r => { library.rename(r.documentId, r.title); return { ok: true }; });
     handle('library:documents:softDelete', async (r) => { await deleteDocument(documentIdSchema.parse(r.documentId), async () => { library.softDelete(r.documentId); }); return { ok: true }; });
-    handle('library:documents:restore', r => { library.restore(r.documentId); return { ok: true }; });
+    handle('library:documents:restore', r => { library.restore(r.documentId); resume(documentIdSchema.parse(r.documentId)); return { ok: true }; });
     handle('library:documents:purge', () => { library.purge(); return { ok: true }; });
     handle('library:tags:list', () => library.tags());
     handle('library:tags:save', r => library.saveTag(r));

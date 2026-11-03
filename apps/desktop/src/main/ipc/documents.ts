@@ -17,7 +17,7 @@ export function registerDocumentsIpc(
   store: Store,
   implemented: Set<IpcChannel>,
   deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(),
-): () => Promise<void> {
+): (() => Promise<void>) & { resume: (id: import("../../shared/domain").Document["id"]) => void } {
   const drops = new DropTokens();
   const library = new LibraryService(store, join(app.getPath("userData"), "library"));
   const userData = app.getPath("userData");
@@ -77,5 +77,5 @@ export function registerDocumentsIpc(
     return { ok: true };
   });
   const dispose = registrar.dispose;
-  return async () => { ipcMain.removeListener('vstudy:preload-drop', captureDrop); documents.dispose(); dispose(); await converter.dispose(); await documents.waitForIdle(); };
+  return Object.assign(async () => { ipcMain.removeListener('vstudy:preload-drop', captureDrop); documents.dispose(); dispose(); await converter.dispose(); await documents.waitForIdle(); }, {resume: (id: import("../../shared/domain").Document["id"]) => documents.resume(id)});
 }
