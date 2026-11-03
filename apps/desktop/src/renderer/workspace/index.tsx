@@ -20,7 +20,7 @@ import type {
 import { defaultSettings } from "../../shared";
 import { desktop, isMock } from "../bridge";
 import { resolveModel } from "../model";
-import { ModelPicker } from "../model-picker";
+import { ModelControls } from "../model-controls";
 import { SelectionPreview } from "../selection-preview-view";
 const Chat=lazy(()=>import("../chat").then(module=>({default:module.Chat})));
 import { DocumentMarkdown } from "../lazy-reader";
@@ -340,7 +340,7 @@ export function Workspace() {
               </button>
             </div>
           )}
-          <ModelPicker
+          <ModelControls
             providers={providers}
             model={model}
             onModel={chooseModel}

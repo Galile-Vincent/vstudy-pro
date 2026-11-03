@@ -361,5 +361,7 @@
   "chat_author_assistant": "Assistant",
   "answer_error": "Answer failed",
   "sample_title": "Reading sample",
-  "checking_provider": "Checking provider…"
+  "checking_provider": "Checking provider…",
+  "tool_cancelled_label": "Tool cancelled",
+  "tool_failed_label": "Tool failed"
 }

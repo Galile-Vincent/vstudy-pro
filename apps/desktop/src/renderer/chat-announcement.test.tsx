@@ -3,7 +3,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { expect, it } from 'vitest';
 import { AssistantRuntimeProvider, ComposerPrimitive, useLocalRuntime, type ChatModelAdapter } from '@assistant-ui/react';
-import { ChatAnnouncement } from './components/assistant-ui/elements/thread.aui';
+import { ChatAnnouncement } from './chat-accessibility';
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT=true;
 function Harness({adapter}:{adapter:ChatModelAdapter}) {
  const runtime=useLocalRuntime(adapter);

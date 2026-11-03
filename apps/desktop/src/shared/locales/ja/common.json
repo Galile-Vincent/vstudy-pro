@@ -361,5 +361,7 @@
   "chat_author_assistant": "アシスタント",
   "answer_error": "回答に失敗しました",
   "sample_title": "読書サンプル",
-  "checking_provider": "プロバイダーを確認中…"
+  "checking_provider": "プロバイダーを確認中…",
+  "tool_cancelled_label": "ツールをキャンセルしました",
+  "tool_failed_label": "ツールが失敗しました"
 }

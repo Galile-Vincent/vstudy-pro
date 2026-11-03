@@ -1,8 +1,10 @@
+import { ChatAnnouncement, CopyAnswerButton } from './chat-accessibility';
+import { MarkdownText } from './document-markdown';
 import { BlankChat } from './motion/blank-chat';
 import { useTranslation } from "react-i18next";
 import { tr } from '../shared/i18n';
-import { ModelPicker } from "./model-picker";
-export { ModelPicker } from "./model-picker";
+import { ModelControls } from "./model-controls";
+export { ModelControls } from "./model-controls";
 import { MessageUsage } from "./usage/chip";
 import { UsageButton, UsageMeter, useUsage, useBudgetGuard } from "./usage/meter";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -111,7 +113,7 @@ export function Chat({
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
     selection, onClearSelection, usage, budget, unavailable, onUsage,
-    picker: <ModelPicker providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
+    picker: <ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
@@ -171,7 +173,7 @@ function DocumentMessageFooter() {
 function useComposerBindings() {
   useTranslation(); const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
 function DocumentWelcome() { const { selection, usage } = useDocumentChat(); return <div className="document-welcome"><BlankChat documentOpen hasSelection={!!selection} replyLanguage={usage.data?.settings.replyLanguage ?? 'auto'}/><DocumentSuggestions/></div>; }
-const documentComponents = { Welcome:DocumentWelcome, WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
+const documentComponents = { Announcement: ChatAnnouncement, CopyAction: CopyAnswerButton, Text: MarkdownText, Welcome:DocumentWelcome, WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 
 export function ChatComposerInput() {
   useTranslation();

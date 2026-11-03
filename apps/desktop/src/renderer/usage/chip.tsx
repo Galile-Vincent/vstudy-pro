@@ -4,7 +4,7 @@ import { i18n, tr } from '../../shared/i18n';
 import { usageSchema, type Usage, type Model } from '../../shared';
 import { useAuiState } from '@assistant-ui/react';
 import './usage.css';
-import { effortLabel } from '../model-picker';
+import { effortLabel } from '../model-catalog';
 export const compactTokens = (n: number) => formatters(i18n.language === 'en-XA' ? 'en' : i18n.language).number(n,{notation:'compact',maximumFractionDigits:1});
 export const money = (n?: number): string => n === undefined ? tr('common:price_unknown') : n > 0 && n < .001 ? `<${money(.001)}` : formatters(i18n.language === 'en-XA' ? 'en' : i18n.language).number(n,{style:'currency',currency:'USD',minimumFractionDigits:n > 0 && n < .01 ? 0 : 3,maximumFractionDigits:n > 0 && n < .01 ? 5 : 3});
 export function UsageChip({ usage, subscription = false, aborted = false }: { usage: Usage; subscription?: boolean; aborted?: boolean }) {

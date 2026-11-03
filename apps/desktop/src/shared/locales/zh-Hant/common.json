@@ -361,5 +361,7 @@
   "chat_author_assistant": "助理",
   "answer_error": "回答失敗",
   "sample_title": "閱讀範例",
-  "checking_provider": "正在檢查提供者…"
+  "checking_provider": "正在檢查提供者…",
+  "tool_cancelled_label": "工具已取消",
+  "tool_failed_label": "工具執行失敗"
 }
