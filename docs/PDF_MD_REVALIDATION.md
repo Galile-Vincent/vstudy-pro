@@ -1,5 +1,7 @@
 # PDF Markdown defect revalidation
 
+Superseded by [the final fix-round report](PDF_MD_FINAL_ROUND.md).
+
 2026-11-03. This report supersedes the completeness claims in PDF_MD_VALIDATION.md.
 The supplied full CH2 PDF remains outside the repository. New committed PDFs are
 synthetic and individually below 300 KB (the 600-page fixture is 285 KB).
