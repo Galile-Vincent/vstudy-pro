@@ -15,10 +15,21 @@ if (process.env.VSTUDY_CODEX_LIVE !== '1') {
   await page.reload(); await page.getByTestId('bridge-status').waitFor({ state: 'attached' });
   await app.evaluate(({dialog},path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, resolve('e2e/fixtures/reading.md'));
   await page.getByTestId('import-document').click(); await page.getByTestId('document-markdown').waitFor();
-  await page.waitForFunction(async () => { const providers = await window.desktop.invoke('providers:list', {}); const codex = providers.find(p => p.config.id === 'codex-cli'); return codex?.availability.available && codex.models.length; }, null, { timeout: 120_000 });
+  await page.evaluate(()=>window.desktop.invoke('providers:configure',{kind:'cli',id:'codex-cli',enabled:true}));
+  let codex;
+  const deadline=Date.now()+120_000;
+  do {
+    codex=await page.evaluate(async()=> (await window.desktop.invoke('providers:list',{})).find(p=>p.config.id==='codex-cli'));
+    if(codex?.availability.available && codex.models.length) break;
+    if(codex && !codex.availability.available && /could not verify/.test(codex.availability.reason)) break;
+    await page.waitForTimeout(1000);
+  } while(Date.now()<deadline);
+  assert.ok(codex?.availability.available,JSON.stringify(codex?.availability));
+  assert.ok(codex.models.length,'enabled Codex exposes its discovered catalog');
+  const target=codex.models.find(m=>m.id==='gpt-6.1-sol') ?? codex.models[0];
   await page.getByRole('combobox', { name: 'Model', exact: true }).click();
-  await page.getByRole('combobox', { name: 'Search models' }).fill('GPT-6.1-Sol');
-  await page.locator('[data-slot=model-selector-list] [role=option]').filter({ hasText: 'GPT-6.1-Sol' }).first().click();
+  await page.getByRole('combobox', { name: 'Search models' }).fill(target.name);
+  await page.locator('[data-slot=model-selector-list]').getByRole('option').filter({ hasText: target.name }).first().click();
   await page.getByRole('button', { name: 'Start a conversation', exact: true }).click();
   const input = page.locator('.aui-composer-input'); await input.fill('Reply with exactly: Codex chat is working.'); await input.press('Enter');
   await page.locator('[data-role=assistant]').filter({ hasText: 'Codex chat is working.' }).waitFor();

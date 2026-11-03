@@ -1,3 +1,4 @@
+import { poll } from '../scripts/poll.mjs';
 import { _electron as electron } from "playwright";
 import assert from "node:assert/strict";
 import { mkdtemp, rm, readFile } from "node:fs/promises";
@@ -248,7 +249,7 @@ try {
     assert.equal(await page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length), 2, "cancel keeps document");
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
-    await page.waitForFunction(async()=>(await window.desktop.invoke("documents:list",{})).length === 1);
+    await poll(()=>page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length === 1));
     await page.getByRole('combobox',{name:'Model',exact:true}).click();
     await page.getByRole('button',{name:'API keys & provider settings'}).click();
     const keyForm = page.locator('.provider-row').filter({hasText:'OpenAI compatible'});

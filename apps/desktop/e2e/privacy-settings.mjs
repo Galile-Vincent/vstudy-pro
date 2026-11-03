@@ -9,6 +9,8 @@ const directory=await mkdtemp(join(tmpdir(),'vstudy-privacy-'));let app;const re
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
  const page=await app.firstWindow();page.setDefaultTimeout(10000);
+ await app.evaluate(({dialog,shell})=>{dialog.showMessageBox=async()=>({response:1});shell.openExternal=async()=>{};});
+ await page.evaluate(()=>window.desktop.invoke('shell:openExternal',{url:'https://example.invalid/activity-fixture'}));
  for(const language of ['en','zh-Hant','ja']) for(const theme of ['light','dark']) for(const width of [720,1200]) {
   await app.evaluate(({BrowserWindow},width)=>BrowserWindow.getAllWindows()[0].setSize(width,800),width);
   await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});

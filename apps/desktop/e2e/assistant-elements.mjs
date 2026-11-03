@@ -20,7 +20,7 @@ try {
  await page.evaluate(async()=>{const settings=await window.desktop.invoke('settings:get',{});return window.desktop.invoke('settings:set',{...settings,enableGenerativeUI:true});});
  const input=page.locator('.aui-composer-input');await input.fill('test enriched');await input.press('Enter');
  await page.locator('.document-presentation').waitFor();await page.locator('.aui-composer-cancel').waitFor({state:'hidden'});
- assert.match(await page.locator('.document-presentation table').innerText(),/Topic\s+Summary\s+Document\s+Grounded answer/);
+ assert.deepEqual(await page.locator('.document-presentation table tr').evaluateAll(rows=>rows.map(row=>[...row.querySelectorAll('th,td')].map(cell=>cell.textContent.trim()))),[['Topic','Summary'],['Document','Grounded answer']]);
  await page.getByRole('button',{name:'Source 1: E2E reading document',exact:true}).click();
  await page.locator('[data-citation-highlight]').waitFor();
  assert.equal(await page.locator('[data-citation-highlight]').getAttribute('data-start'),'0');

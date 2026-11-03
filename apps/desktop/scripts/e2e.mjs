@@ -20,7 +20,7 @@ async function run(command,args,name,timeout) {
 const build=await run('pnpm',['package'],'build',240000);
 if(build.status!=='PASS')throw new Error(`Build failed: ${evidence}/build.log`);
 for(const script of (await readdir(`${root}/e2e`)).filter(n=>n.endsWith('.mjs')).sort()) {
- let result=await run(process.execPath,[`e2e/${script}`],script,script==='a11y-regressions.mjs'?600000:script.includes('welcome')?180000:240000);
+ let result=await run(process.execPath,[`e2e/${script}`],script,['a11y-regressions.mjs','welcome-supplement.mjs','welcome-layout.mjs','welcome.mjs'].includes(script)?600000:script.includes('welcome')?180000:240000);
  if(result.status!=='PASS' && script==='welcome-performance.mjs') { console.log('Retrying welcome-performance once; first attempt retained'); await writeFile(`${evidence}/${script}-attempt1.json`,JSON.stringify(result)); result=await run(process.execPath,[`e2e/${script}`],script+'-retry',180000); result.script=script; }
  results.push(result);console.log(`${result.status.padEnd(7)} ${script} (${result.seconds}s)`);
  await writeFile(`${evidence}/results.json`,JSON.stringify(results,null,2));

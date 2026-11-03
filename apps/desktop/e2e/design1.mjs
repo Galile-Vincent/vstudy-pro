@@ -1,3 +1,4 @@
+import { poll } from '../scripts/poll.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import { DatabaseSync } from 'node:sqlite';
@@ -13,7 +14,7 @@ for(const language of ['en','ja','zh-Hant']) {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${dir}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1',VSTUDY_LOCALE:language}});
  const page=await app.firstWindow();await page.waitForLoadState('domcontentloaded');page.setDefaultTimeout(30000);const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.locator('.onboarding[open]').waitFor();
  const call=(channel,request={})=>page.evaluate(({channel,request})=>window.desktop.invoke(channel,request),{channel,request});
- await call('settings:set',{...await call('settings:get'),language,onboardingCompleted:true,monthlyBudgetUsd:20});await page.reload({waitUntil:'domcontentloaded'});await page.locator('.home-upload').waitFor();const sample=await call('documents:importSample',{language});await page.waitForFunction(async id=>(await window.desktop.invoke('documents:list',{})).find(d=>d.id===id)?.status==='ready',sample.id);
+ await call('settings:set',{...await call('settings:get'),language,onboardingCompleted:true,monthlyBudgetUsd:20});await page.reload({waitUntil:'domcontentloaded'});await page.locator('.home-upload').waitFor();const sample=await call('documents:importSample',{language});await poll(()=>page.evaluate(async id=>(await window.desktop.invoke('documents:list',{})).find(d=>d.id===id)?.status==='ready',sample.id));
  db=new DatabaseSync(join(dir,'vstudy.sqlite'));db.exec('PRAGMA busy_timeout=5000');const now=new Date().toISOString(),folders=[];
  // Same metadata/file shapes as bench-db.mjs, reduced to review scale.
  for(let i=0;i<12;i++){const id=uuid();folders.push(id);db.prepare('INSERT INTO folders(id,parentId,name,position,pinned,pinnedAt,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?)').run(id,i%3===2?folders[i-1]:i%3===1?folders[i-1]:null,['Biology 201','講義・細胞の情報伝達と遺伝子発現','研究資料・從問題到理解的學習筆記'][i%3]+` ${i}`,i,i%4===0?1:0,now,now,now);}
