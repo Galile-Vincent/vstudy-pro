@@ -13,31 +13,47 @@ function fixture(available = true) {
   paths.push(path);
   const file = join(path, "secrets.json");
   const encryption: Encryption = {
-    isEncryptionAvailable: () => available,
-    encryptString: (value) =>
+    isAsyncEncryptionAvailable: async () => available,
+    encryptStringAsync: async (value) =>
       Buffer.from(Buffer.from(value).map((byte) => byte ^ 42)),
-    decryptString: (value) =>
-      Buffer.from(value.map((byte) => byte ^ 42)).toString(),
+    decryptStringAsync: async (value) => ({ result: Buffer.from(value.map((byte) => byte ^ 42)).toString() }),
   };
   return { file, store: createSecretStore(file, encryption), encryption };
 }
-it("encrypts, persists with 0600, replaces, and deletes keys", () => {
+it("encrypts, persists with 0600, replaces, and deletes keys", async () => {
   const { store, file, encryption } = fixture();
   expect(store.has("openai-api")).toBe(false);
-  expect(store.getInMainOnly("openai-api")).toBeNull();
-  store.set("openai-api", "secret-api-key");
+  expect(await store.getInMainOnly("openai-api")).toBeNull();
+  await store.set("openai-api", "secret-api-key");
   expect(statSync(file).mode & 0o777).toBe(0o600);
   expect(readFileSync(file, "utf8")).not.toContain("secret-api-key");
-  expect(createSecretStore(file, encryption).getInMainOnly("openai-api")).toBe(
+  expect(await createSecretStore(file, encryption).getInMainOnly("openai-api")).toBe(
     "secret-api-key",
   );
-  store.set("openai-api", "replacement");
-  expect(store.getInMainOnly("openai-api")).toBe("replacement");
+  await store.set("openai-api", "replacement");
+  expect(await store.getInMainOnly("openai-api")).toBe("replacement");
   store.delete("openai-api");
   expect(store.has("openai-api")).toBe(false);
 });
-it("fails closed when OS encryption is unavailable", () => {
+it("fails closed when OS encryption is unavailable", async () => {
   const { store } = fixture(false);
-  expect(() => store.set("openai-api", "key")).toThrow("unavailable");
+  await expect(store.set("openai-api", "key")).rejects.toThrow("unavailable");
   expect(store.has("openai-api")).toBe(false);
+});
+
+it("does not touch Keychain on construction or presence checks and bounds a slow/denied request", async () => {
+  const { file } = fixture();
+  let calls = 0;
+  const encryption: Encryption = {
+    isAsyncEncryptionAvailable: () => { calls++; return new Promise(() => {}); },
+    encryptStringAsync: async () => { throw new Error('denied'); },
+    decryptStringAsync: async () => { throw new Error('denied'); },
+  };
+  const store = createSecretStore(file, encryption, 10);
+  expect(store.has('openai-api')).toBe(false);
+  expect(calls).toBe(0);
+  await expect(store.set('openai-api', 'key')).rejects.toThrow('keychain_unavailable');
+  expect(store.has('openai-api')).toBe(false);
+  encryption.isAsyncEncryptionAvailable = async () => true;
+  await expect(store.set('openai-api', 'key')).rejects.toThrow('keychain_unavailable');
 });

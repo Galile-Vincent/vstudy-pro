@@ -65,7 +65,7 @@ export async function* responseText(
 }
 export function createApiAdapter(
   getConfig: () => ProviderConfig,
-  secrets: Pick<SecretStore, "getInMainOnly">,
+  secrets: { getInMainOnly: (id: ProviderConfig["id"]) => string | null | Promise<string | null>; has?: SecretStore["has"]; isUnlocked?: SecretStore["isUnlocked"] },
   fetcher: typeof fetch = fetch,
 ): ProviderAdapter {
   const anthropic = () => getConfig().id === "anthropic-api";
@@ -81,16 +81,17 @@ export function createApiAdapter(
   const noKeyRequired = () => getConfig().kind === "compatible" && isLoopback(base());
   return {
     async detect() {
-      return key() || noKeyRequired()
+      return (secrets.has ? secrets.has(getConfig().id) : await key()) || noKeyRequired()
         ? { available: true }
         : { available: false, reason: "Add an API key" };
     },
     async listModels() {
+      if (secrets.isUnlocked && !secrets.isUnlocked(getConfig().id) && !noKeyRequired()) return [];
       if (anthropic())
         return ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5", "claude-fable-5-1"].map(
           (id) => ({ id, name: id }),
         );
-      const token = key();
+      const token = await key();
       if (!token && !noKeyRequired()) return [];
       try {
         recordEgress('Provider request', new URL(base()).origin);
@@ -110,7 +111,7 @@ export function createApiAdapter(
       }
     },
     async *stream(request, signal) {
-      const token = key();
+      const token = await key();
       if (!token && !noKeyRequired()) throw new ProviderError("auth failed");
       const isAnthropic = anthropic();
       recordEgress('Provider request', new URL(base()).origin);

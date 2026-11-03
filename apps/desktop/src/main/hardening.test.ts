@@ -68,7 +68,7 @@ it('repairs DB, library and secret file permissions on every start', async () =>
       await chmod(library, 0o777); await chmod(secrets, 0o666);
       const store = openStore(database);
       const documents = new DocumentService({ store, userData: root, convert: async () => {} });
-      createSecretStore(secrets, { isEncryptionAvailable: () => false, encryptString: () => { throw new Error('unused'); }, decryptString: () => { throw new Error('unused'); } });
+      createSecretStore(secrets, { isAsyncEncryptionAvailable: async () => false, encryptStringAsync: async () => { throw new Error('unused'); }, decryptStringAsync: async () => { throw new Error('unused'); } });
       expect((await stat(database)).mode & 0o777).toBe(0o600);
       expect((await stat(library)).mode & 0o777).toBe(0o700);
       expect((await stat(secrets)).mode & 0o777).toBe(0o600);

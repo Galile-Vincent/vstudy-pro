@@ -12,11 +12,11 @@ import { providerIdSchema } from "../../shared/domain";
 
 type ProviderId = z.infer<typeof providerIdSchema>;
 export interface Encryption {
-  isEncryptionAvailable(): boolean;
-  encryptString(value: string): Buffer;
-  decryptString(value: Buffer): string;
+  isAsyncEncryptionAvailable(): Promise<boolean>;
+  encryptStringAsync(value: string): Promise<Buffer>;
+  decryptStringAsync(value: Buffer): Promise<{ result: string }>;
 }
-export function createSecretStore(file: string, encryption: Encryption) {
+export function createSecretStore(file: string, encryption: Encryption, timeoutMs = 10_000) {
   if (existsSync(file)) chmodSync(file, 0o600);
   function read(): Record<string, string> {
     if (!existsSync(file)) return {};
@@ -32,32 +32,45 @@ export function createSecretStore(file: string, encryption: Encryption) {
     chmodSync(temporary, 0o600);
     renameSync(temporary, file);
   }
+  async function access<T>(operation: () => Promise<T>): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([operation(), new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('errors.keychain_unavailable')), timeoutMs);
+      })]);
+    } catch { throw new Error('errors.keychain_unavailable'); }
+    finally { clearTimeout(timer); }
+  }
+  const unlocked = new Map<ProviderId, string>();
   return {
-    set(providerId: ProviderId, key: string): void {
+    async set(providerId: ProviderId, key: string): Promise<void> {
       providerIdSchema.parse(providerId);
       z.string().min(1).max(16384).parse(key);
-      if (!encryption.isEncryptionAvailable())
-        throw new Error("Secure key storage is unavailable");
-      write({
-        ...read(),
-        [providerId]: encryption.encryptString(key).toString("base64"),
-      });
+      if (!await access(() => encryption.isAsyncEncryptionAvailable()))
+        throw new Error("errors.keychain_unavailable");
+      const ciphertext = await access(() => encryption.encryptStringAsync(key));
+      write({ ...read(), [providerId]: ciphertext.toString("base64") });
+      unlocked.set(providerId, key);
     },
+    useInSession(providerId: ProviderId, key: string): void { unlocked.set(providerIdSchema.parse(providerId), z.string().min(1).max(16384).parse(key)); },
+    isUnlocked(providerId: ProviderId): boolean { return unlocked.has(providerId); },
     has(providerId: ProviderId): boolean {
       return Object.hasOwn(read(), providerIdSchema.parse(providerId));
     },
     delete(providerId: ProviderId): void {
+      unlocked.delete(providerId);
       const values = read();
       delete values[providerIdSchema.parse(providerId)];
       write(values);
     },
-    getInMainOnly(providerId: ProviderId): string | null {
+    async getInMainOnly(providerId: ProviderId): Promise<string | null> {
+      if (unlocked.has(providerId)) return unlocked.get(providerId)!;
       const value = read()[providerIdSchema.parse(providerId)];
       if (value === undefined) return null;
-      if (!encryption.isEncryptionAvailable())
-        throw new Error("Secure key storage is unavailable");
+      if (!await access(() => encryption.isAsyncEncryptionAvailable()))
+        throw new Error("errors.keychain_unavailable");
       const ciphertext = Buffer.from(value, "base64");
-      try { return encryption.decryptString(ciphertext); } finally { ciphertext.fill(0); }
+      try { const result = (await access(() => encryption.decryptStringAsync(ciphertext))).result; unlocked.set(providerId, result); return result; } finally { ciphertext.fill(0); }
     },
   };
 }
