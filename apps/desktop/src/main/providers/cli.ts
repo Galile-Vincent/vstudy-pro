@@ -22,7 +22,7 @@ export function createCliAdapter(
       return { available: true };
     },
     async listModels() {
-      return binary === 'agy' ? [] : discoverModels(binary);
+      return binary === 'agy' ? [] : (await discoverModels(binary)).map(m=>({...m,supportsImages:true}));
     },
     async *stream(request, signal) {
       const file = await findCli(binary);
@@ -33,8 +33,8 @@ export function createCliAdapter(
       try {
         yield* runCli(
           file,
-          cliArgs(binary, request.modelId, request.options),
-          request.options?.effort === 'ultrathink' ? `ultrathink\n\n${request.prompt}` : request.prompt,
+          [...cliArgs(binary, request.modelId, request.options), ...(request.systemPrompt ? ['--system-prompt',request.systemPrompt] : []), ...(request.images?.length ? ['--input-format','stream-json'] : [])],
+          request.images?.length ? JSON.stringify({type:'user',message:{role:'user',content:[{type:'text',text:request.prompt},...request.images.map(image=>({type:'image',source:{type:'base64',media_type:image.mediaType,data:image.data}}))]}})+'\n' : request.options?.effort === 'ultrathink' ? `ultrathink\n\n${request.prompt}` : request.prompt,
           cwd,
           binary,
           signal,

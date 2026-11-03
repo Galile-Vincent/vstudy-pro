@@ -89,7 +89,7 @@ export function createApiAdapter(
       if (secrets.isUnlocked && !secrets.isUnlocked(getConfig().id) && !noKeyRequired()) return [];
       if (anthropic())
         return ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5", "claude-fable-5-1"].map(
-          (id) => ({ id, name: id }),
+          (id) => ({ id, name: id, supportsImages:true }),
         );
       const token = await key();
       if (!token && !noKeyRequired()) return [];
@@ -105,7 +105,7 @@ export function createApiAdapter(
           .object({ data: z.array(z.object({ id: z.string() })) })
           .parse(await response.json())
           .data.slice(0, 500)
-          .map(({ id }) => ({ id, name: id, ...(getConfig().id === 'openai-api' && /^(o1|o3|o3-mini|o4-mini)(-\d{4}-\d{2}-\d{2})?$/.test(id) ? { options: [option('reasoning_effort', 'Effort', ['low', 'medium', 'high'], 'medium')] } : {}) }));
+          .map(({ id }) => ({ id, name: id, supportsImages:(()=>{const config=getConfig();return config.kind==='compatible'?config.imageModelIds?.includes(id)===true:config.id==='openai-api' && /^(gpt-[456]|o[134])/.test(id);})(), ...(getConfig().id === 'openai-api' && /^(o1|o3|o3-mini|o4-mini)(-\d{4}-\d{2}-\d{2})?$/.test(id) ? { options: [option('reasoning_effort', 'Effort', ['low', 'medium', 'high'], 'medium')] } : {}) }));
       } catch {
         return [];
       }
@@ -139,7 +139,11 @@ export function createApiAdapter(
               : [{ type:'function',function:presentationTool }], ...(!isAnthropic ? {parallel_tool_calls:false} : {}) } : {}),
             ...(request.options?.reasoning_effort ? { reasoning_effort: request.options.reasoning_effort } : {}),
             ...(isAnthropic ? { max_tokens: 8192 } : { stream_options: { include_usage: true } }),
-            messages: [{ role: "user", content: request.prompt }],
+            ...(request.systemPrompt && isAnthropic ? {system:request.systemPrompt} : {}),
+            messages: [...(request.systemPrompt && !isAnthropic ? [{role:'system',content:request.systemPrompt}] : []), { role: "user", content: request.images?.length ? [
+              ...(isAnthropic ? [{type:'text',text:request.prompt}] : [{type:'text',text:request.prompt}]),
+              ...request.images.map(image => isAnthropic ? {type:'image',source:{type:'base64',media_type:image.mediaType,data:image.data}} : {type:'image_url',image_url:{url:`data:${image.mediaType};base64,${image.data}`}}),
+            ] : request.prompt }],
           }),
         },
       ).catch(() => { throw new ProviderError("network"); });

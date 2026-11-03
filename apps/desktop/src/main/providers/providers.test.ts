@@ -64,7 +64,7 @@ it("sends assembled prompt and key only in main HTTP request and lists custom mo
     fetcher,
   );
   expect(await adapter.listModels()).toEqual([
-    { id: "custom-model", name: "custom-model" },
+    { id: "custom-model", name: "custom-model", supportsImages:false },
   ]);
   expect(
     await collect(adapter.stream(request, new AbortController().signal)),
@@ -242,4 +242,16 @@ it('kills a TERM-resistant descendant even when its CLI parent exits on TERM',as
   const {readFile}=await import('node:fs/promises');pid=Number(await readFile(join(cwd,'pid'),'utf8'));
   await vi.waitFor(()=>expect(()=>process.kill(pid!,0)).toThrow(),{timeout:500});
  } finally {if(pid)try{process.kill(pid,'SIGKILL');}catch{/* Already reaped. */}await rm(cwd,{recursive:true,force:true});}
+});
+
+it('serializes image input with separate system instructions and no tools for both APIs',async()=>{
+ for(const id of ['anthropic-api','openai-api'] as const) {
+  let body:Record<string,unknown>={};
+  const fetcher:typeof fetch=async(_url,init)=>{body=JSON.parse(String(init?.body));return new Response('data: [DONE]\n\n',{status:200});};
+  const adapter=createApiAdapter(()=>({id,kind:'api',enabled:true}),{getInMainOnly:()=> 'fixture-key'},fetcher);
+  try {for await(const event of adapter.stream({...request,providerId:id,systemPrompt:'SYSTEM_ONLY',images:[{mediaType:'image/png',data:'AA=='}]},new AbortController().signal)){void event;}}catch { /* This assertion concerns the outgoing body, not the intentionally empty stream. */ }
+  expect(body.tools).toBeUndefined();expect(JSON.stringify(body)).toContain(id==='anthropic-api'?'"type":"image"':'data:image/png;base64,AA==');
+  const messages=body.messages as {role:string;content:unknown}[];
+  if(id==='anthropic-api')expect(body.system).toBe('SYSTEM_ONLY');else expect(messages[0]).toEqual({role:'system',content:'SYSTEM_ONLY'});
+ }
 });

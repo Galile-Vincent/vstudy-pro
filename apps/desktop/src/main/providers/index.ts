@@ -24,7 +24,7 @@ export type Availability =
   | { available: true }
   | { available: false; reason: string };
 export type Model = import("../../shared/domain").Model;
-export type ProviderRequest = ChatRequest & { prompt: string; allowPresentation?: boolean; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
+export type ProviderRequest = ChatRequest & { prompt: string; systemPrompt?:string; images?:{mediaType:'image/png'; data:string}[]; allowPresentation?: boolean; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
 export interface ProviderAdapter {
   detect(): Promise<Availability>;
   listModels(): Promise<Model[]>;
@@ -138,7 +138,7 @@ export class ProviderRegistry {
     const key = `${this.modelRevision}:${JSON.stringify(config)}`;
     const cached = this.modelCache.get(key);
     if (discover && (!cached || cached.expires < Date.now())) {
-      const models = await adapter.listModels();
+      const models = (await adapter.listModels()).map(model=>config.id==='agy-cli'?{...model,supportsImages:false,imageUnsupportedReason:'ai_parse.images_unsupported'}:model);
       this.modelCache.set(key, {models, expires: Date.now() + 60_000});
       return models;
     }
