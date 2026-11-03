@@ -94,3 +94,19 @@ describe("Document Markdown", () => {
     );
   });
 });
+it("offers keyboard selections on selectionchange and supports the ask shortcut", async () => {
+  const container = document.createElement("div"); document.body.append(container);
+  const root = createRoot(container);
+  const select = vi.fn();
+  await act(async () => root.render(createElement(DocumentMarkdown, { source: "Keyboard passage", documentId: id, onSelect: select, onNotice: () => {} })));
+  const text = container.querySelector('[data-source-text]')!.firstChild!;
+  const range = document.createRange(); range.setStart(text, 0); range.setEnd(text, 8);
+  Object.defineProperty(range, "getBoundingClientRect", { value: () => ({ left: 0, bottom: 80 }) });
+  window.getSelection()!.removeAllRanges(); window.getSelection()!.addRange(range);
+  await act(async () => document.dispatchEvent(new Event("selectionchange")));
+  expect(container.querySelector(".floating-action")?.textContent).toBe("Ask about this");
+  expect(container.querySelector<HTMLButtonElement>(".floating-action")?.tabIndex).toBe(0);
+  await act(async () => document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, shiftKey: true })));
+  expect(select.mock.calls[0]?.[0]).toEqual({ documentId: id, startOffset: 0, endOffset: 8, text: "Keyboard", headingPath: [] });
+  await act(async () => root.unmount()); container.remove();
+});

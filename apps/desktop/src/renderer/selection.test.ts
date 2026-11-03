@@ -37,3 +37,9 @@ describe("Markdown source offsets", () => {
     expect(headingsIn("An **idea**\n===\n\nBody")[0]?.text).toBe("An idea");
   });
 });
+it("preserves literal escapes and entities within inline, fenced and indented code", () => {
+  expect(resolveTextOffset('`a\\*b &amp;`', 'a\\*b &amp;', 2)).toBe(3);
+  expect(resolveTextOffset('```\na\\*b &amp;\n```', 'a\\*b &amp;\n', 9, true)).toBe(13);
+  expect(resolveTextOffset('    a\\*b &amp;', 'a\\*b &amp;', 9, true)).toBe(13);
+  expect(resolveTextOffset('a\\*b &amp;', 'a\\*b &amp;', 6, false, true)).toBe(6);
+});

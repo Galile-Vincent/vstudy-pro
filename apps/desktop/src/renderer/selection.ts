@@ -55,11 +55,19 @@ export function resolveTextOffset(
   rendered: string,
   offset: number,
   end = false,
+  code = false,
 ): number {
+  const codeRanges: [number, number][] = [];
+  const visit = (node: MdNode) => {
+    if (node.type === "code" || node.type === "inlineCode") codeRanges.push([node.position!.start.offset!, node.position!.end.offset!]);
+    if ("children" in node) node.children.forEach(visit);
+  };
+  visit(unified().use(remarkParse).parse(raw) as MdRoot);
   const tokens: { value: string; start: number; end: number }[] = [];
   for (let i = 0; i < raw.length;) {
     const start = i;
-    const entity = /^&(#x[\da-f]+|#\d+|[a-z][a-z\d]*);/i.exec(raw.slice(i));
+    const literal = code || codeRanges.some(([start, end]) => i >= start && i < end);
+    const entity = !literal && /^&(#x[\da-f]+|#\d+|[a-z][a-z\d]*);/i.exec(raw.slice(i));
     if (entity) {
       const key = entity[1]!;
       const numeric = key.startsWith("#")
@@ -79,7 +87,7 @@ export function resolveTextOffset(
       }
     }
     if (
-      raw[i] === "\\" &&
+      !literal && raw[i] === "\\" &&
       /[!"#$%&'()*+,\-./:;<=>?@[\]\\^_`{|}~]/.test(raw[i + 1] ?? "")
     )
       i++;
@@ -201,6 +209,7 @@ export function rangeSelection(
         element.textContent ?? "",
         prefix.toString().length,
         end,
+        !!element.closest("code, pre"),
       )
     );
   };

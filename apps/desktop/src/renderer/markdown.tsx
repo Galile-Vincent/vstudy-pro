@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -69,13 +69,8 @@ export function DocumentMarkdown({
     y: number;
   } | null>(null);
   const headings = useMemo(() => headingsIn(source), [source]);
-  return (
-    <div className="reading-scroll" onScroll={() => setFloating(null)}>
-      <div
-        ref={root}
-        className="markdown"
-        data-testid="document-markdown"
-        onMouseUp={() => {
+  useEffect(() => {
+    const update = () => {
           const selected = window.getSelection();
           if (!root.current || !selected?.rangeCount) {
             setFloating(null);
@@ -93,7 +88,26 @@ export function DocumentMarkdown({
             x: Math.max(12, Math.min(window.innerWidth - 155, rect.left)),
             y: Math.max(60, Math.min(window.innerHeight - 48, rect.bottom + 8)),
           });
-        }}
+
+    };
+    const shortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "k") {
+        const selected = window.getSelection();
+        const selection = root.current && selected?.rangeCount ? rangeSelection(root.current, selected.getRangeAt(0), source, documentId) : null;
+        if (selection) { event.preventDefault(); onSelect(selection); setFloating(null); }
+      }
+    };
+    document.addEventListener("selectionchange", update);
+    document.addEventListener("keydown", shortcut);
+    return () => { document.removeEventListener("selectionchange", update); document.removeEventListener("keydown", shortcut); };
+  }, [source, documentId, onSelect]);
+  return (
+    <div className="reading-scroll" onScroll={() => setFloating(null)}>
+      <div
+        ref={root}
+        className="markdown"
+        data-testid="document-markdown"
+
       >
         <Markdown
           remarkPlugins={[remarkGfm, remarkMath]}
