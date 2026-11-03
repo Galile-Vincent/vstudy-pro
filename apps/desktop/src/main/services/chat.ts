@@ -43,6 +43,7 @@ interface ActiveRequest {
   usageModels?: { modelId: string; usage: Usage }[];
   usageEmitted?: boolean;
   promptChars?: number;
+  restoreOnFailure?: boolean;
   supersedeOnSave?: import("../../shared/domain").Message["id"][];
 }
 export class ChatService {
@@ -150,6 +151,7 @@ export class ChatService {
     const entry: ActiveRequest = {
       owner,
       ...(regenerating ? {supersedeOnSave: superseded} : {}),
+      restoreOnFailure: !regenerating && superseded.length > 0,
       userMessageId,
       assistantMessageId,
       request,
@@ -235,6 +237,11 @@ export class ChatService {
     try {
       this.store.db.exec("SAVEPOINT finish_chat");
       const messageId = entry.assistantMessageId;
+      const restoreBranch = entry.restoreOnFailure && !entry.text && !entry.reasoning && !entry.toolCalls?.length && (entry.controller.signal.aborted || event.type === 'error');
+      if (restoreBranch) {
+        this.store.db.prepare('UPDATE messages SET supersededBy=NULL WHERE supersededBy=?').run(entry.userMessageId);
+        this.store.db.prepare('DELETE FROM messages WHERE id=?').run(entry.userMessageId);
+      }
       const citedIds = new Set([...(entry.citations ?? []), ...citedReferences(entry.text, entry.citationCatalog ?? [])].map(c => c.id));
       const citations = (entry.citationCatalog ?? []).filter(c => citedIds.has(c.id));
       if (citations.length && !entry.controller.signal.aborted) this.send(entry, { type: 'citations', citations });
@@ -252,7 +259,7 @@ export class ChatService {
         for (const model of reported && entry.usageModels?.length ? entry.usageModels : [{ modelId, usage: entry.usage }]) this.store.usage.record({ ...priceUsage(model.modelId, model.usage, this.store.settings.get().priceOverrides), aborted: entry.controller.signal.aborted, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: canonicalModelId(model.modelId), kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
-      if (entry.text || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error") this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined, { ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
+      if (!restoreBranch && (entry.text || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error")) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined, { ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
       this.store.messages.link(messageId, entry.userMessageId);
       if (entry.supersedeOnSave && entry.text) this.store.messages.supersede(entry.supersedeOnSave, messageId);
       this.store.db.exec("RELEASE finish_chat");
