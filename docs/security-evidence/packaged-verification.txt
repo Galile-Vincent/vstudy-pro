@@ -1,0 +1,39 @@
+
+> @vstudy/desktop@0.1.0 package:verify ~/.t3/projects/vstudy-pro/apps/desktop
+> npx --no-install @electron/fuses read --app "release/mac-arm64/VStudy Pro.app" && python3 scripts/verify-packaged.py
+
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "recursive". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Analyzing app: VStudy Pro.app
+Fuse Version: v1
+  RunAsNode is Disabled
+  EnableCookieEncryption is Enabled
+  EnableNodeOptionsEnvironmentVariable is Disabled
+  EnableNodeCliInspectArguments is Disabled
+  EnableEmbeddedAsarIntegrityValidation is Enabled
+  OnlyLoadAppFromAsar is Enabled
+  LoadBrowserProcessSpecificV8Snapshot is Disabled
+  GrantFileProtocolExtraPrivileges is Disabled
+  WasmTrapHandlers is Enabled
+[
+  {
+    "probe": "run-as-node",
+    "nodeMarker": false,
+    "inspectorOpened": false,
+    "appAliveAfter4s": true,
+    "exit": null,
+    "log": "/tmp/vstudy-probe-run-as-node.log",
+    "loadError": false
+  },
+  {
+    "probe": "inspect",
+    "nodeMarker": false,
+    "inspectorOpened": false,
+    "appAliveAfter4s": true,
+    "exit": null,
+    "log": "/tmp/vstudy-probe-inspect.log",
+    "loadError": false
+  }
+]

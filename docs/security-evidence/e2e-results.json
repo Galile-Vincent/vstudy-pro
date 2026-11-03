@@ -1,0 +1,220 @@
+[
+  {
+    "script": "assistant-elements.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": "timeout",
+        "log": "e2e-assistant-elements.txt"
+      },
+      {
+        "exit": 0,
+        "log": "retry-e2e-assistant-elements.txt"
+      }
+    ]
+  },
+  {
+    "script": "chat-controls.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-chat-controls.txt"
+      }
+    ]
+  },
+  {
+    "script": "composer-visual-qa.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-composer-visual-qa.txt"
+      }
+    ]
+  },
+  {
+    "script": "conversion.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-conversion.txt"
+      }
+    ]
+  },
+  {
+    "script": "design1.mjs",
+    "exit": 1,
+    "attempts": [
+      {
+        "exit": 1,
+        "log": "e2e-design1.txt"
+      }
+    ]
+  },
+  {
+    "script": "home-onboarding.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-home-onboarding.txt"
+      }
+    ]
+  },
+  {
+    "script": "i18n.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-i18n.txt"
+      }
+    ]
+  },
+  {
+    "script": "library-perf.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-library-perf.txt"
+      }
+    ]
+  },
+  {
+    "script": "library.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-library.txt"
+      }
+    ]
+  },
+  {
+    "script": "pdf-reader.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-pdf-reader.txt"
+      }
+    ]
+  },
+  {
+    "script": "selection-chat.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": "timeout",
+        "log": "e2e-selection-chat.txt"
+      },
+      {
+        "exit": 0,
+        "log": "retry-e2e-selection-chat.txt"
+      }
+    ]
+  },
+  {
+    "script": "visual-regressions.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-visual-regressions.txt"
+      }
+    ]
+  },
+  {
+    "script": "welcome-axe.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-welcome-axe.txt"
+      }
+    ]
+  },
+  {
+    "script": "welcome-details.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-welcome-details.txt"
+      }
+    ]
+  },
+  {
+    "script": "welcome-layout.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-welcome-layout.txt"
+      }
+    ]
+  },
+  {
+    "script": "welcome-performance.mjs",
+    "exit": 1,
+    "attempts": [
+      {
+        "exit": 1,
+        "log": "e2e-welcome-performance.txt"
+      }
+    ]
+  },
+  {
+    "script": "welcome-pseudo.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-welcome-pseudo.txt"
+      }
+    ]
+  },
+  {
+    "script": "welcome-supplement.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-welcome-supplement.txt"
+      }
+    ]
+  },
+  {
+    "script": "welcome-trace.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-welcome-trace.txt"
+      }
+    ]
+  },
+  {
+    "script": "welcome.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "e2e-welcome.txt"
+      }
+    ]
+  },
+  {
+    "script": "security-delete-data.mjs",
+    "exit": 0,
+    "attempts": [
+      {
+        "exit": 0,
+        "log": "delete-data.txt"
+      }
+    ]
+  }
+]

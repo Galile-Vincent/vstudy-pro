@@ -1,0 +1,406 @@
+[
+  {
+    "name": "home-baseline",
+    "theme": "light",
+    "samples": 107,
+    "max": 18.59999999999991,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.399999999999864,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 97,
+    "max": 18.699999999999818,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.90000000000009,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 97,
+    "max": 18.399999999999636,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.100000000000364,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 97,
+    "max": 18.600000000000364,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.5,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 98,
+    "max": 18.699999999999818,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.900000000001455,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 97,
+    "max": 18.69999999999891,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.900000000001455,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 97,
+    "max": 18.600000000000364,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.600000000000364,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "hero",
+    "theme": "light",
+    "samples": 107,
+    "max": 18.600000000000364,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.19999999999891,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "scroll",
+    "theme": "light",
+    "samples": 171,
+    "max": 248.90000000000146,
+    "over20": 4,
+    "over25": 4,
+    "p95": 18.599999999998545,
+    "longFrames": [
+      259.60000002384186,
+      90.29999995231628,
+      149
+    ],
+    "scripts": [
+      [],
+      [],
+      []
+    ],
+    "droppedFrames": 26,
+    "cls": 0
+  },
+  {
+    "name": "demo",
+    "theme": "light",
+    "samples": 675,
+    "max": 83.29999999999927,
+    "over20": 3,
+    "over25": 3,
+    "p95": 18,
+    "longFrames": [
+      57.699999928474426
+    ],
+    "scripts": [
+      []
+    ],
+    "droppedFrames": 10,
+    "cls": 0
+  },
+  {
+    "name": "offscreen-idle",
+    "theme": "light",
+    "animations": 0,
+    "cpu": [
+      {
+        "type": "Browser",
+        "cpu": 0.017560546575743165
+      },
+      {
+        "type": "GPU",
+        "cpu": 0.02635748073225874
+      },
+      {
+        "type": "Utility",
+        "cpu": 0
+      },
+      {
+        "type": "Tab",
+        "cpu": 0.030353590727802995
+      }
+    ]
+  },
+  {
+    "name": "home-baseline",
+    "theme": "dark",
+    "samples": 107,
+    "max": 18.60000000000582,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.400000000001455,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.30000000000291,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.69999999999709,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.599999999998545,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.299999999995634,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.5,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.400000000001455,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.099999999998545,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.69999999999709,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.69999999999709,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.30000000000291,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.30000000000291,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "hero",
+    "theme": "dark",
+    "samples": 107,
+    "max": 18.5,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.19999999999709,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "scroll",
+    "theme": "dark",
+    "samples": 197,
+    "max": 18.599999999998545,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.099999999998545,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "demo",
+    "theme": "dark",
+    "samples": 685,
+    "max": 18.60000000000582,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.099999999998545,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "offscreen-idle",
+    "theme": "dark",
+    "animations": 0,
+    "cpu": [
+      {
+        "type": "Browser",
+        "cpu": 0.020491315254667852
+      },
+      {
+        "type": "GPU",
+        "cpu": 0.0582157276403644
+      },
+      {
+        "type": "Utility",
+        "cpu": 0.00066980765108876
+      },
+      {
+        "type": "Tab",
+        "cpu": 0.0627055108411155
+      }
+    ]
+  }
+]
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Welcome performance budget exceeded; see /tmp/vstudy-welcome2/performance-both-themes.json
++ actual - expected
+
++ [
++   {
++     cls: 0,
++     droppedFrames: 26,
++     longFrames: [
++       259.60000002384186,
++       90.29999995231628,
++       149
++     ],
++     max: 248.90000000000146,
++     name: 'scroll',
++     over20: 4,
++     over25: 4,
++     p95: 18.599999999998545,
++     samples: 171,
++     scripts: [
++       [],
++       [],
++       []
++     ],
++     theme: 'light'
++   },
++   {
++     cls: 0,
++     droppedFrames: 10,
++     longFrames: [
++       57.699999928474426
++     ],
++     max: 83.29999999999927,
++     name: 'demo',
++     over20: 3,
++     over25: 3,
++     p95: 18,
++     samples: 675,
++     scripts: [
++       []
++     ],
++     theme: 'light'
++   }
++ ]
+- []
+
+    at file://~/.t3/projects/vstudy-pro/apps/desktop/e2e/welcome-performance.mjs:36:8 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [
+    {
+      name: 'scroll',
+      theme: 'light',
+      samples: 171,
+      max: 248.90000000000146,
+      over20: 4,
+      over25: 4,
+      p95: 18.599999999998545,
+      longFrames: [ 259.60000002384186, 90.29999995231628, 149 ],
+      scripts: [ [], [], [] ],
+      droppedFrames: 26,
+      cls: 0
+    },
+    {
+      name: 'demo',
+      theme: 'light',
+      samples: 675,
+      max: 83.29999999999927,
+      over20: 3,
+      over25: 3,
+      p95: 18,
+      longFrames: [ 57.699999928474426 ],
+      scripts: [ [] ],
+      droppedFrames: 10,
+      cls: 0
+    }
+  ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

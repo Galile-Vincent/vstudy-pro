@@ -65,3 +65,5 @@ node e2e/welcome-performance.mjs
 ```
 
 These save screenshots, animation frames and measurements under `/tmp/vstudy-welcome/`. The pseudo-locale check starts and closes its own development renderer with the real Electron bridge. The performance check enforces p95 ≤16.7 ms, zero CLS and no long animation frames over 50 ms; it currently fails the p95 gate on the verification host. Native translation review and VoiceOver remain required.
+
+Security controls, trust boundaries, accepted advisories and verification evidence: [docs/SECURITY.md](docs/SECURITY.md). Run `pnpm security:check` for the reviewed-audit gate, dangerous-API and Electron lint, and normal tests.
