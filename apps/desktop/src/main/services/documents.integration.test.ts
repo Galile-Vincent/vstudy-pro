@@ -79,3 +79,14 @@ it("caps subprocess output, times out, and scrubs inherited secrets", async () =
     await runProcess(process.execPath, ["-e", "if (process.env.VSTUDY_TEST_SECRET || require('node:fs').realpathSync(process.env.HOME) !== process.cwd()) process.exit(1)"], cwd);
   } finally { delete process.env.VSTUDY_TEST_SECRET; await rm(cwd, { recursive: true, force: true }); }
 });
+
+
+it("shows clean resource errors and reports PDF fallback progress", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "vstudy-pdf-errors-"));
+  try {
+    const progress: string[] = [];
+    const script = `process.stderr.write(JSON.stringify({code:"PDF_FALLBACK",type:"Progress",error:"fallback"})+"\\n"); setTimeout(() => {process.stderr.write(JSON.stringify({code:"PDF_RESOURCE_LIMIT",type:"ResourceLimit",error:"memory"})); process.exit(1)}, 30)`;
+    await expect(runProcess(process.execPath, ["-e", script], cwd, 1000, 10000, message => progress.push(message))).rejects.toThrow("This PDF is too large or complex to convert");
+    expect(progress).toEqual(["PDF too complex or large for the built-in parser; trying fallback…"]);
+  } finally { await rm(cwd, { recursive: true, force: true }); }
+});

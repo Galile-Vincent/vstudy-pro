@@ -28,6 +28,7 @@ export async function runProcess(
   cwd: string,
   timeoutMs = 120_000,
   maxOutputBytes = 1024 * 1024,
+  onProgress?: Progress,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const child = spawn(executable, args, {
@@ -35,6 +36,7 @@ export async function runProcess(
     });
     let bytes = 0;
     let stderr = "";
+    let fallbackReported = false;
     let failure: Error | undefined;
     const stop = (message: string) => {
       failure ??= new Error(message);
@@ -49,15 +51,29 @@ export async function runProcess(
       bytes += chunk.length;
       if (bytes > maxOutputBytes) stop("Converter process output exceeds limit");
       stderr = (stderr + chunk.toString("utf8")).slice(-4000);
+      if (!fallbackReported && stderr.includes("PDF_FALLBACK")) {
+        fallbackReported = true;
+        onProgress?.("PDF too complex or large for the built-in parser; trying fallback…");
+      }
     });
     child.once("error", (error) => { clearTimeout(timer); reject(error); });
     child.once("close", (code) => {
       clearTimeout(timer);
       if (failure) reject(failure);
       else if (code !== 0) {
-        const errorType = /"type":\s*"([A-Za-z0-9_]+)"/.exec(stderr)?.[1];
+        const errorCode = [...stderr.matchAll(/"code":\s*"([A-Z_]+)"/g)].at(-1)?.[1];
+        if (errorCode === "PDF_RESOURCE_LIMIT" || errorCode === "PDF_TIME_LIMIT") {
+          reject(new Error("This PDF is too large or complex to convert"));
+          return;
+        }
+        const errorType = [...stderr.matchAll(/"type":\s*"([A-Za-z0-9_]+)"/g)].at(-1)?.[1];
+        let detail = stderr;
+        try {
+          const record: unknown = JSON.parse(stderr.trim().split("\n").at(-1) ?? "");
+          if (typeof record === "object" && record !== null && "error" in record && typeof record.error === "string") detail = record.error;
+        } catch { /* Third-party tools can emit plain stderr instead of JSON. */ }
         // eslint-disable-next-line no-control-regex
-        const tail = stderr.replace(/\x1b\[[0-9;]*m/g, "").replace(/https?:\/\/\S+/g, "[URL]").replace(/(?:\/[^\s"']+)+/g, "[path]").replace(/(?:sk-|Bearer\s+)\S+/gi, "[redacted]").replace(/[\x00-\x08\x0b-\x1f]/g, "").slice(-1200);
+        const tail = detail.replace(/\x1b\[[0-9;]*m/g, "").replace(/https?:\/\/\S+/g, "[URL]").replace(/(?:\/[^\s"']+)+/g, "[path]").replace(/(?:sk-|Bearer\s+)\S+/gi, "[redacted]").replace(/[\x00-\x08\x0b-\x1f]/g, "").slice(-1200);
         reject(new Error(`${errorType ? `Conversion failed (${errorType})` : `Converter process failed (exit ${code})`}: ${tail}`));
       } else resolve();
     });
@@ -140,7 +156,7 @@ export function createConverter(options: {
       const cwd = await mkdtemp(join(tmpdir(), "vstudy-convert-"));
       try {
         const temporaryOutput = join(cwd, "content.md");
-        await runProcess(executable, [join(options.resources, "convert.py"), source, temporaryOutput, output], cwd);
+        await runProcess(executable, [join(options.resources, "convert.py"), source, temporaryOutput, output], cwd, 120_000, 1024 * 1024, report);
         if ((await stat(temporaryOutput)).size > MAX_MARKDOWN_BYTES) throw new Error("Converted Markdown exceeds 8 MiB");
         const content = await readFile(temporaryOutput);
         if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Converted Markdown exceeds 8 MiB");
