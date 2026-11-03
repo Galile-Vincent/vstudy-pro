@@ -27,5 +27,11 @@
   "finish": "読書を始める",
   "progress": "{{total}} ステップ中 {{current}}",
   "name": "お名前（任意）",
-  "replay": "はじめてのガイドを開く"
+  "replay": "はじめてのガイドを開く",
+  "preview_label": "リーダーと出典付きチャットのプレビュー",
+  "preview_passage": "新しい考えを結びつけることで、読むことが理解につながります。",
+  "preview_highlight": "新しい考えを結びつける。",
+  "preview_question": "学習にどう役立ちますか？",
+  "preview_answer": "新しい概念を、すでに知っていることに結びつけてみましょう。",
+  "preview_citation": "この資料より · 1"
 }

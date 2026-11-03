@@ -27,5 +27,11 @@
   "finish": "Start exploring",
   "progress": "Step {{current}} of {{total}}",
   "name": "Your name (optional)",
-  "replay": "Show welcome guide"
+  "replay": "Show welcome guide",
+  "preview_label": "Reader and grounded chat preview",
+  "preview_passage": "Reading becomes understanding when we connect new ideas.",
+  "preview_highlight": "Connect new ideas.",
+  "preview_question": "How does this help me learn?",
+  "preview_answer": "Link a new concept to something you already know.",
+  "preview_citation": "From your document · 1"
 }

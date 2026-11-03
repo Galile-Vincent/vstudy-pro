@@ -21,7 +21,9 @@ it('shows calm zero and forty day streaks in all languages', async () => {
 it('gives every empty card meaningful content and actions', async () => {
   await i18n.changeLanguage('en');
   const markup = renderToStaticMarkup(<Home initialData={empty} navigate={() => {}} onUsage={() => {}}/>);
-  expect(markup).toContain('Pin a document'); expect(markup).toContain('Choose a file');
-  expect(markup).toContain('Your discoveries will gather here'); expect(markup).toContain('Open Library');
-  expect(markup.match(/aria-labelledby/g)).toHaveLength(6);
+  expect(markup).toContain('Choose a file');
+  expect(markup).toContain('Reader and grounded chat preview');
+  expect(markup).not.toContain('home-stat');
+  expect(markup).not.toContain('home-marker');
+  expect(markup.match(/aria-labelledby/g)).toHaveLength(1);
 });

@@ -1,3 +1,4 @@
+import { Select } from "../components/select";
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload } from 'lucide-react';
@@ -7,7 +8,7 @@ import type { folderSchema } from '../../shared/library';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { statusText } from '../status';
-export function UploadCard({ folders = [], onImported }: { folders?: z.infer<typeof folderSchema>[]; onImported?: (document: Document) => void }) {
+export function UploadCard({ folders = [], onImported, showSample = true }: { showSample?: boolean; folders?: z.infer<typeof folderSchema>[]; onImported?: (document: Document) => void }) {
   useTranslation();
   const [folderId, setFolderId] = useState('');
   const [busy, setBusy] = useState(false);
@@ -36,8 +37,9 @@ export function UploadCard({ folders = [], onImported }: { folders?: z.infer<typ
     if (paths.length && paths.every(Boolean)) void upload(paths); else setError(tr('home:drop_error'));
   }}>
     <Upload aria-hidden="true"/><p>{tr('home:upload_hint')}</p>
-    <label>{tr('home:destination')}<select value={folderId} onChange={e => setFolderId(e.target.value)} disabled={busy}><option value="">{tr('library:unfiled')}</option>{folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</select></label>
+    <label>{tr('home:destination')}<Select value={folderId} onChange={e => setFolderId(e.target.value)} disabled={busy}><option value="">{tr('library:unfiled')}</option>{folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</Select></label>
     <button className="primary" disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</button>
+    {showSample && <button className="ghost" disabled={busy} onClick={() => { setBusy(true); void desktop.invoke('documents:importSample', {language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}).then(d => { onImported?.(d); window.dispatchEvent(new Event('activity-updated')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</button>}
     <details><summary>{tr('home:paste_path')}</summary><label><span className="motion-sr">{tr('home:paste_path')}</span><input disabled={busy} onPaste={e => { const path = e.clipboardData.getData('text').trim(); if (path) { e.preventDefault(); void upload([path]); } }} /></label></details>
     {busy && <progress aria-label={tr('home:importing')}/>}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
   </div>;
