@@ -193,7 +193,7 @@ export function Workspace() {
   const saveSettings = async (next: Settings) => {
     try {
       const latest = await desktop.invoke("settings:get", {});
-      const saved = await desktop.invoke("settings:set", { ...next, language:latest.language, replyLanguage:latest.replyLanguage, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, modelDisplayNames: latest.modelDisplayNames });
+      const saved = await desktop.invoke("settings:set", { ...next, language:latest.language, replyLanguage:latest.replyLanguage, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, converterIdleMinutes:latest.converterIdleMinutes,converterOffline:latest.converterOffline,modelDisplayNames: latest.modelDisplayNames });
       setSettings(saved);
     } catch (error) {
       report(error);
@@ -377,7 +377,7 @@ export function Workspace() {
       ) : doc.status === "failed" ? (
         <div className="empty" role="alert">
           <h3>{tr('common:couldn_t_prepare_this_document')}</h3>
-          <p>{tr('errors:conversion_failed')}</p>
+          <p>{errorText(new Error(doc.error))}</p>
           <button
             disabled={busy || !connected}
             onClick={() => {

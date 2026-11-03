@@ -9,5 +9,9 @@
   "bad_request": "Check the selected model and provider settings.",
   "server_error": "The provider encountered an error. Try again later.",
   "search_refine": "Refine your query: use at least two distinct characters.",
-  "search_too_long": "Search took too long; refine your query."
+  "search_too_long": "Search took too long; refine your query.",
+  "keychain_unavailable": "Couldn’t access the Keychain. Retry or use without saving keys.",
+  "converter_offline": "Converter is offline. Retry in Settings > Privacy to allow installation, or keep reading Markdown and text in Offline mode.",
+  "converter_python": "Install uv or Python 3.10+, then Retry in Settings > Privacy. Offline mode supports Markdown and text.",
+  "converter_failed": "Could not prepare this document. Retry conversion or check Settings > Privacy. Offline mode supports Markdown and text."
 }

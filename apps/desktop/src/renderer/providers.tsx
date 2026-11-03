@@ -1,4 +1,5 @@
 import { useOptionalNavigation } from "./shell";
+import { PrivacySettings } from "./privacy-settings";
 import { Onboarding } from './onboarding/onboarding';
 import { errorText } from "./status";
 import { useTranslation } from "react-i18next";
@@ -52,7 +53,7 @@ export function ProviderSettings({
       }}
     >
       <div className="dialog-title">
-        <h2>{tab === "usage" ? tr('common:usage') : tr('common:providers_api_keys')}</h2>
+        <h2>{tab === "privacy" ? tr("settings:privacy") : tab === "usage" ? tr("common:usage") : tr("common:providers_api_keys")}</h2>
         <button onClick={onClose} aria-label={tr('common:close_settings')}>
           ×
         </button>
@@ -61,8 +62,8 @@ export function ProviderSettings({
       <button onClick={() => setGuide(true)}>{tr("onboarding:replay")}</button>
       <button id="welcome-settings-entry" onClick={() => { navigation?.navigate("welcome"); onClose(); }}>{tr("welcome:entry")}</button>
       {guide && <Onboarding onComplete={() => setGuide(false)}/>}
-      <div className="settings-tabs" role="tablist" aria-label={tr('common:settings')}><button role="tab" aria-selected={tab === "providers"} onClick={() => setTab("providers")}>{tr('common:providers')}</button><button role="tab" aria-selected={tab === "usage"} onClick={() => setTab("usage")}>{tr('common:usage')}</button></div>
-      {tab === "usage" ? <UsageSettings /> : <>
+      <div className="settings-tabs" role="tablist" aria-label={tr('common:settings')}><button role="tab" aria-selected={tab === "providers"} onClick={() => setTab("providers")}>{tr('common:providers')}</button><button role="tab" aria-selected={tab === "usage"} onClick={() => setTab("usage")}>{tr('common:usage')}</button><button role="tab" aria-selected={tab === "privacy"} onClick={() => setTab("privacy")}>{tr("settings:privacy")}</button></div>
+      {tab === "privacy" ? <PrivacySettings /> : tab === "usage" ? <UsageSettings /> : <>
       <p className="muted">
         {tr('common:keys_are_saved_securely_in_the_desktop_app_and_never_read_back')}</p>
       <label className="generative-setting"><input type="checkbox" checked={structuredTables} onChange={e => { const enabled=e.target.checked; setStructuredTables(enabled); void desktop.invoke('settings:get',{}).then(s => desktop.invoke('settings:set',{...s,enableGenerativeUI:enabled})).catch(() => {setStructuredTables(!enabled);setFeatureError(tr('common:could_not_save_structured_table_setting'));}); }} />{tr('common:read_only_structured_tables_api_providers_only')}</label>
@@ -79,7 +80,7 @@ export function ProviderSettings({
     </dialog>
   );
 }
-function ProviderRow({
+export function ProviderRow({
   provider,
   onRefresh,
 }: {
@@ -127,6 +128,12 @@ function ProviderRow({
               : tr('common:no_key_saved')}
         </span>
       </div>
+      {provider.config.kind === "cli" && <>
+        <label><input type="checkbox" checked={provider.config.enabled} disabled={busy} onChange={e => { const enabled=e.target.checked; void perform(() => desktop.invoke('providers:configure',{...provider.config,enabled})); }} />{tr('settings:enable_cli',{provider:providerName[provider.config.id]})}</label>
+        <p>{tr(provider.config.enabled ? 'settings:enabled' : 'settings:disabled')}</p>
+        <p>{tr('settings:binary_path')}: <code>{provider.resolvedPath ?? tr('settings:not_found')}</code></p>
+        <button disabled={busy} onClick={() => void perform(() => desktop.invoke('providers:chooseExecutable',{binary:provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy'}))}>{tr('settings:change')}</button>
+      </>}
       {provider.config.kind !== "cli" && (
         <>
           <form
@@ -151,6 +158,8 @@ function ProviderRow({
               onChange={(e) => setKey(e.target.value)}
             />
             <button disabled={busy || !key.trim()}>{tr('common:save_key')}</button>
+            <button type="button" disabled={busy || !key.trim()} onClick={() => void perform(async () => { await desktop.invoke('secrets:session',{providerId:provider.config.id,key}); setKey(''); })}>{tr('settings:session_key')}</button>
+            {hasKey && <button type="button" disabled={busy} onClick={() => void perform(() => desktop.invoke('secrets:unlock',{providerId:provider.config.id}))}>{tr('settings:unlock')}</button>}
             {hasKey && (
               <button
                 type="button"
@@ -193,6 +202,7 @@ function ProviderRow({
           )}
         </>
       )}
+      {busy && provider.config.kind !== "cli" && <p role="status">{tr("settings:waiting")}</p>}
       {error && <p role="alert">{error}</p>}
     </section>
   );
