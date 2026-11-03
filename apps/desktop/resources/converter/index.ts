@@ -46,7 +46,7 @@ export async function runProcess(
     let failure: Error | undefined;
     const stop = (message: string) => {
       failure ??= new Error(message);
-      child.kill("SIGKILL");
+      if (scope) scope.terminate(child, "SIGKILL"); else child.kill("SIGKILL");
     };
     const timer = setTimeout(() => stop("Converter process timed out"), timeoutMs);
     child.stdout!.on("data", (chunk: Buffer) => {

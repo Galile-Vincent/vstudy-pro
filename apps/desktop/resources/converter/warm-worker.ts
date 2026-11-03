@@ -69,6 +69,6 @@ export class WarmWorker {
   stop(error = new Error("Converter closed")): void {
     clearTimeout(this.timer); clearTimeout(this.idle);
     this.pending?.reject(error); this.pending = undefined;
-    this.child?.kill("SIGKILL"); this.child = undefined; this.ready = undefined;
+    if (this.child) { if (this.scope) this.scope.terminate(this.child, "SIGKILL"); else this.child.kill("SIGKILL"); } this.child = undefined; this.ready = undefined;
   }
 }

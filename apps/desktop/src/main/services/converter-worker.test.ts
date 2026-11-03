@@ -71,3 +71,14 @@ wait
     await expect(converter.ensureReady()).rejects.toThrow('Converter closed');
   } finally { await converter.dispose(); vi.unstubAllEnvs(); await rm(directory,{recursive:true,force:true}); }
 });
+
+it('reaps descendants when an installer exits before its child',async()=>{
+  const {ProcessScope}=await import('../../../resources/converter/process-scope');
+  const scope=new ProcessScope();
+  const script=`const child=require('child_process').spawn(process.execPath,['-e','setInterval(()=>{},100)'],{stdio:'ignore'}); console.log(child.pid); child.unref();`;
+  const child=scope.spawn(process.execPath,['-e',script],{stdio:['ignore','pipe','ignore']});
+  let pid='';child.stdout!.on('data',chunk=>{pid+=String(chunk);});
+  await new Promise<void>(resolve=>child.once('close',()=>resolve()));
+  await scope.dispose();await new Promise(r=>setTimeout(r,50));
+  expect(Number(pid)).toBeGreaterThan(0);expect(()=>process.kill(Number(pid),0)).toThrow();
+});

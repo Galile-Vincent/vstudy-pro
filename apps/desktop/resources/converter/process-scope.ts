@@ -6,16 +6,19 @@ export class ProcessScope {
   spawn(command: string, args: string[], options: SpawnOptions): ChildProcess {
     if (this.disposed) throw new Error('Converter closed');
     const child = spawn(command, args, { ...options, detached: process.platform !== 'win32' });
-    const closed = new Promise<void>(resolve => child.once('close', () => { this.children.delete(child); resolve(); }));
+    const closed = new Promise<void>(resolve => child.once('close', () => { this.terminate(child, 'SIGKILL'); this.children.delete(child); resolve(); }));
     this.children.set(child, closed);
     return child;
+  }
+  terminate(child: ChildProcess, signal: NodeJS.Signals): void {
+    try { if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, signal); else child.kill(signal); } catch { /* A process group may already have exited. */ }
   }
   async dispose(): Promise<void> {
     this.disposed = true;
     const children = [...this.children];
     const kill = (signal: NodeJS.Signals) => {
       for (const [child] of children) {
-        try { if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, signal); else child.kill(signal); } catch { /* A process group may already have exited. */ }
+        this.terminate(child, signal);
       }
     };
     kill('SIGTERM');
