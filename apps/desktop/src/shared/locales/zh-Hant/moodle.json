@@ -191,5 +191,9 @@
   "kind_video": "影片",
   "kind_subsection": "子單元",
   "kind_other": "活動",
-  "people": "課程教師"
+  "people": "課程教師",
+  "teacher_unknown": "未提供教師",
+  "class_unknown": "未提供班級",
+  "attachment_count_one": "{{count}} 個附件",
+  "attachment_count_other": "{{count}} 個附件"
 }

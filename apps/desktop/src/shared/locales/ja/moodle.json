@@ -165,7 +165,7 @@
   "original_name": "元のコース名",
   "no_term_courses": "この期間のコースはありません。",
   "module_count": "{{count}} 件のアクティビティ",
-  "attachment_count": "添付 {{count}} 件",
+  "attachment_count": "添付ファイル {{count}} 件",
   "section_locked": "まだ利用できません",
   "complete": "完了",
   "completion_incomplete": "未完了",
@@ -191,5 +191,9 @@
   "kind_video": "動画",
   "kind_subsection": "サブセクション",
   "kind_other": "アクティビティ",
-  "people": "担当教員"
+  "people": "担当教員",
+  "teacher_unknown": "教員情報なし",
+  "class_unknown": "クラス情報なし",
+  "attachment_count_one": "添付ファイル {{count}} 件",
+  "attachment_count_other": "添付ファイル {{count}} 件"
 }

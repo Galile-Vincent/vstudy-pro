@@ -263,16 +263,6 @@
   font-size: var(--type-lg);
   line-height: 1.4;
 }
-.moodle-progress-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: var(--type-xs);
-  margin-bottom: var(--space-2);
-}
-.moodle-progress-label > span {
-  color: var(--muted);
-}
 .moodle-page progress {
   width: 100%;
   display: block;
@@ -944,15 +934,6 @@
   gap: 8px;
   padding: 10px 16px;
 }
-.moodle-card-teacher {
-  margin: 12px 0 4px;
-  font-size: 13px;
-}
-.moodle-card-class {
-  color: var(--muted);
-  font-size: 12px;
-  margin: 0 0 18px;
-}
 .moodle-raw-name {
   font-size: 12px;
   color: var(--muted);
@@ -1303,3 +1284,73 @@
   color: var(--muted);
   margin: 0 0 16px;
 }
+
+.moodle-grid {
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+}
+.moodle-course-card,
+.moodle-due-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.moodle-course-card .moodle-cover,
+.moodle-due-card .moodle-cover {
+  flex: 0 0 142px;
+}
+.moodle-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.moodle-card-body h3 {
+  line-height: 1.4;
+  height: 2.8em;
+  min-height: 2.8em;
+  margin-bottom: var(--space-3);
+}
+.moodle-card-body h3 button {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  line-height: inherit;
+  margin: 0;
+}
+.moodle-identity-line {
+  height: 1.5em;
+  line-height: 1.5;
+  margin: 0 0 var(--space-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--type-sm);
+  color: var(--muted);
+}
+.moodle-identity-unknown {
+  opacity: .65;
+}
+.moodle-card-body footer {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  height: 60px;
+  flex: 0 0 60px;
+}
+.moodle-card-body .moodle-identity-line:last-of-type {
+  margin-bottom: var(--space-4);
+}
+.moodle-page .moodle-cover-progress {
+  position: absolute;
+  inset: auto 0 0;
+  height: 4px;
+  margin: 0;
+  appearance: none;
+  border: 0;
+  background: var(--hairline);
+}
+.moodle-cover-progress::-webkit-progress-bar { background: var(--hairline); }
+.moodle-cover-progress::-webkit-progress-value { background: var(--course-color); }
+.moodle-page { padding-bottom: calc(112px + env(safe-area-inset-bottom)); }

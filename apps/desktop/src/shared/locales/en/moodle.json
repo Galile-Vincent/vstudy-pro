@@ -28,7 +28,7 @@
   "expired": "Your school session has expired. Reconnect to keep courses up to date.",
   "reconnect": "Reconnect",
   "loading": "Loading courses",
-  "course_progress": "{{count}}% completed",
+  "course_progress": "{{count}}% complete",
   "progress": "Course progress",
   "course_sections": "Course sections",
   "overview": "Overview",
@@ -191,5 +191,9 @@
   "kind_video": "Video",
   "kind_subsection": "Subsection",
   "kind_other": "Activity",
-  "people": "People"
+  "people": "People",
+  "teacher_unknown": "Teacher unavailable",
+  "class_unknown": "Class unavailable",
+  "attachment_count_one": "{{count}} attachment",
+  "attachment_count_other": "{{count}} attachments"
 }

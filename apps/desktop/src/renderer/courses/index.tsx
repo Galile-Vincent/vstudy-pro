@@ -49,7 +49,7 @@ import {
   displayTeachers,
   displayClass,
   matchesTerm,
-} from "./display";
+} from "../../shared/moodle-course-display";
 import type { MoodleTermFilter } from "../../shared/moodle-course";
 import "./courses.css";
 import { ConnectDialog } from "./connect";
@@ -113,8 +113,17 @@ function Cover({ course }: { course: MoodleCourse }) {
           .filter(Boolean)
           .join(" · ") || course.shortName}
       </span>
+      {course.identity.hasProgress && course.progress !== null && (
+        <progress className="moodle-cover-progress" max={100} value={Math.round(course.progress)}
+          title={tr("moodle:course_progress", {count: Math.round(course.progress)})}
+          aria-label={tr("moodle:course_progress", {count: Math.round(course.progress)})} />
+      )}
     </div>
   );
+}
+
+function IdentityLine({value, label}: {value: string; label: string}) {
+  return <p className="moodle-identity-line">{value || <span className="moodle-identity-unknown" aria-label={label}>—</span>}</p>;
 }
 
 export function CoursesView() {
@@ -572,14 +581,8 @@ export function Courses({
                       detail.course.fullName,
                     )}
                   </h1>
-                  <p>
-                    {[
-                      displayTeachers(detail.course.identity, lang),
-                      displayClass(detail.course.identity, lang),
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
+                  <IdentityLine value={displayTeachers(detail.course.identity, lang)} label={tr("moodle:teacher_unknown")} />
+                  <IdentityLine value={displayClass(detail.course.identity)} label={tr("moodle:class_unknown")} />
                   <details className="moodle-raw-name">
                     <summary>{tr("moodle:original_name")}</summary>
                     {detail.course.fullName}
@@ -595,13 +598,7 @@ export function Courses({
                         {tr("moodle:up_next")} · {d.title} · {relative(d.dueAt)}
                       </p>
                     ))}
-                  {detail.course.identity.hasProgress && (
-                    <progress
-                      max={100}
-                      value={detail.course.progress ?? 0}
-                      aria-label={tr("moodle:progress")}
-                    />
-                  )}
+
                 </div>
               </div>
               <div className="moodle-course-layout">
@@ -822,23 +819,13 @@ export function Courses({
                         className="moodle-due-card"
                         style={courseStyle(d.courseId)}
                       >
-                        <div className="moodle-section-heading">
-                          <small>
-                            <span className="moodle-color-dot" />
-                            {course?.shortName}
-                          </small>
-                          {remind(d)}
+                        {course && <Cover course={course} />}
+                        <div className="moodle-card-body">
+                          <h3><button className="moodle-due-link" onClick={() => onCourse(d.courseId)}>{d.title}</button></h3>
+                          <IdentityLine value={course ? displayTeachers(course.identity, lang) : ''} label={tr("moodle:teacher_unknown")} />
+                          <IdentityLine value={course ? displayClass(course.identity) : ''} label={tr("moodle:class_unknown")} />
+                          <footer><time dateTime={d.dueAt}>{relative(d.dueAt)}<span>{date(d.dueAt)}</span></time>{remind(d)}</footer>
                         </div>
-                        <button
-                          className="moodle-due-link"
-                          onClick={() => onCourse(d.courseId)}
-                        >
-                          {d.title}
-                        </button>
-                        <time dateTime={d.dueAt}>
-                          {relative(d.dueAt)}
-                          <span>{date(d.dueAt)}</span>
-                        </time>
                       </article>
                     );
                   })}
@@ -897,7 +884,7 @@ export function Courses({
                     <article
                       key={course.id}
                       className="moodle-course-card"
-                      title={course.fullName}
+                      title={[course.fullName, course.identity.lifecycle === "unknown" ? tr("moodle:dates_unavailable") : null].filter(Boolean).join(" · ")}
                     >
                       <Cover course={course} />
                       <div className="moodle-card-body">
@@ -913,32 +900,8 @@ export function Courses({
                             )}
                           </button>
                         </h3>
-                        <p className="moodle-card-teacher">
-                          {displayTeachers(course.identity, lang)}
-                        </p>
-                        <p className="moodle-card-class">
-                          {displayClass(course.identity, lang)}
-                        </p>
-                        {course.identity.lifecycle === "unknown" && (
-                          <small>{tr("moodle:dates_unavailable")}</small>
-                        )}
-                        {course.identity.hasProgress && (
-                          <>
-                            <div className="moodle-progress-label">
-                              <span>{tr("moodle:progress")}</span>
-                              <strong>
-                                {tr("moodle:course_progress", {
-                                  count: course.progress ?? 0,
-                                })}
-                              </strong>
-                            </div>
-                            <progress
-                              max={100}
-                              value={course.progress ?? 0}
-                              aria-label={tr("moodle:progress")}
-                            />
-                          </>
-                        )}
+                        <IdentityLine value={displayTeachers(course.identity, lang)} label={tr("moodle:teacher_unknown")} />
+                        <IdentityLine value={displayClass(course.identity)} label={tr("moodle:class_unknown")} />
                         <footer>
                           <span>
                             <CalendarDays />

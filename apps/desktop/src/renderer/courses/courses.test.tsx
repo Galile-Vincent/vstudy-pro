@@ -65,6 +65,7 @@ describe("Courses", () => {
   it("shows course progress, due-soon cards, and per-course unread counts", async () => {
     const api = createMockMoodleApi(),
       overview = await api.overview();
+    overview.courses[0]!.progress = 64.4;
     api.overview = async () => ({
       ...overview,
       upcoming: [...overview.upcoming].reverse(),
@@ -77,9 +78,8 @@ describe("Courses", () => {
     expect(host.querySelector(".moodle-course-card")?.textContent).toContain(
       "Electronics Laboratory",
     );
-    expect(host.querySelector(".moodle-course-card")?.textContent).toContain(
-      "64%",
-    );
+    expect(host.querySelector(".moodle-course-card progress")?.getAttribute("aria-label")).toBe("64% complete");
+    expect(host.querySelector(".moodle-course-card progress")?.getAttribute("value")).toBe("64");
     expect(host.querySelector(".moodle-course-card")?.textContent).toContain(
       "2 unread",
     );
@@ -613,8 +613,6 @@ it("labels unknown lifecycle dates on Current and All", async () => {
   };
   api.overview = async () => overview;
   await mount(api);
-  expect(host.querySelector(".moodle-course-card")?.textContent).toContain(
-    "Dates unavailable",
-  );
+  expect(host.querySelector(".moodle-course-card")?.getAttribute("title")).toContain("Dates unavailable");
   expect(host.querySelectorAll(".moodle-course-card")).toHaveLength(1);
 });
