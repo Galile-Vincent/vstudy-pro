@@ -68,6 +68,10 @@ try {
     const button=row.querySelector('.document-title'),style=window.getComputedStyle(button);if(style.borderTopWidth!=='0px'||style.backgroundColor!=='rgba(0, 0, 0, 0)')errors.push('title chrome');
    }return{rows,errors};
   });assert.deepEqual(geometry.errors,[],JSON.stringify(context));
+  await page.locator('.library-document').first().hover();assert.equal(await page.locator('.document-actions').first().evaluate(e=>window.getComputedStyle(e).opacity),'1');
+  await page.locator('.library-document').first().focus();await page.keyboard.press('ArrowDown');assert.equal(await page.locator('.library-document:focus .document-actions').evaluate(e=>window.getComputedStyle(e).opacity),'1');
+  const folderWidth=await page.locator('.document-folder').first().evaluate(e=>({visible:window.getComputedStyle(e).display!=='none',width:e.getBoundingClientRect().width,tags:window.getComputedStyle(e.previousElementSibling).display,rem:parseFloat(window.getComputedStyle(window.document.documentElement).fontSize)}));
+  if(folderWidth.visible&&folderWidth.tags==='none')assert.ok(folderWidth.width>10*folderWidth.rem,JSON.stringify({context,folderWidth}));
   await page.locator('.library-document').first().click({position:{x:4,y:10}});
   const audit=async(state)=>{const result=await new AxeBuilder({page}).setLegacyMode(true).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa','best-practice']).analyze();checks.push({...context,state,rows:geometry.rows,violations:result.violations});assert.deepEqual(result.violations,[],JSON.stringify({...context,state}));};
   const selectedStyle=await page.locator('.library-document').first().evaluate(e=>{const s=window.getComputedStyle(e);return [s.boxShadow,s.borderLeftWidth,s.outlineStyle];});assert.deepEqual(selectedStyle,['none','0px','none']);
