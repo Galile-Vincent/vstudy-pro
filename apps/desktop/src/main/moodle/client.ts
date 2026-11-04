@@ -86,12 +86,12 @@ export class MoodleClient {
       return status.lastattempt?.submission?.status?.toLowerCase() === 'submitted';
     });
   }
-  private async withSubmissionStatus<T extends {submitted:boolean}>(items: T[], status: (item:T) => Promise<boolean>): Promise<T[]> {
+  private async withSubmissionStatus<T extends {submitted:boolean | null}>(items: T[], status: (item:T) => Promise<boolean>): Promise<T[]> {
     let next = 0;
     await Promise.all(Array.from({length:Math.min(4,items.length)},async () => {
       while (next < items.length) {
         const item = items[next++]!;
-        item.submitted = await status(item).catch(() => false);
+        try { item.submitted = await status(item); } catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; item.submitted = null; }
       }
     }));
     return items;
@@ -102,12 +102,13 @@ export class MoodleClient {
       const events: z.infer<typeof eventWire>[] = [];
       let after = 0;
       while (true) {
-        const page = await this.call('core_calendar_get_action_events_by_timesort',{timesortfrom:String(Math.floor(Date.now()/1000) - 14 * 86400),limittononsuspendedevents:'1',limitnum:'50',...(after ? {aftereventid:String(after)} : {})},z.object({events:z.array(eventWire)}));
+        const page = await this.call('core_calendar_get_action_events_by_timesort',{timesortfrom:String(Math.floor(Date.now()/1000) - 14 * 86400),limittononsuspendedevents:'1',limitnum:'50',...(after ? {aftereventid:String(after)} : {})},z.object({events:z.array(eventWire),lastid:integer.optional()}));
         if (!page.events.length) break;
         if (page.events.some(item => events.some(previous => previous.id === item.id))) throw new MoodleError('service');
         events.push(...page.events);
         if (page.events.length < 50) break;
-        after = page.events.at(-1)!.id;
+        if (!page.lastid || page.lastid === after) throw new MoodleError('service');
+        after = page.lastid;
       }
       return {events};
     };
@@ -142,14 +143,27 @@ export class MoodleClient {
         if (page.messages.length < 100) return {messages};
       }
     };
-    const result = await this.fallback(async () => (await get(2)).messages,async () => [...(await get(0)).messages.map(row => ({...row,read:false})),...(await get(1)).messages.map(row => ({...row,read:true}))]);
+    let source: 'message' | 'popup' = 'message';
+    const result = await this.fallback(
+      () => this.fallback(async () => (await get(2)).messages,async () => [...(await get(0)).messages.map(row => ({...row,read:false})),...(await get(1)).messages.map(row => ({...row,read:true}))]),
+      async () => {
+        source = 'popup';
+        const notifications: z.infer<typeof messageWire>[] = [];
+        while (true) {
+          const page = await this.call('message_popup_get_popup_notifications',{useridto:String(account.remoteUserId),limitfrom:String(notifications.length),limitnum:'100'},z.object({notifications:z.array(messageWire)}));
+          if (page.notifications.some(item => notifications.some(previous => previous.id === item.id))) throw new MoodleError('service');
+          notifications.push(...page.notifications);
+          if (page.notifications.length < 100) return notifications;
+        }
+      },
+    );
     const courseId = (row: z.infer<typeof messageWire>) => {
       if (row.courseid) return row.courseid;
       try { return z.object({courseid:z.coerce.number().int().positive()}).parse(JSON.parse(row.customdata ?? '{}')).courseid; } catch { return undefined; }
     };
-    return [...new Map(result.map(row => [row.id,row])).values()].map(row => ({remoteId:row.id,value:moodleNotificationSchema.parse({id:remoteId(account.id,'notification',row.id),accountId:account.id,courseId:courses.find(course => course.remoteId === courseId(row))?.id ?? null,subject:plainText(row.subject ?? ''),body:plainText(row.fullmessagehtml || row.fullmessage || row.text || row.smallmessage || ''),createdAt:date(row.timecreated),read:row.read ?? Boolean(row.timeread),url:url(row.contexturl)})}));
+    return [...new Map(result.map(row => [row.id,row])).values()].map(row => ({remoteId:row.id,value:moodleNotificationSchema.parse({id:remoteId(account.id,source === 'popup' ? 'popup-notification' : 'notification',row.id),accountId:account.id,source,courseId:courses.find(course => course.remoteId === courseId(row))?.id ?? null,subject:plainText(row.subject ?? ''),body:plainText(row.fullmessagehtml || row.fullmessage || row.text || row.smallmessage || ''),createdAt:date(row.timecreated),read:row.read ?? Boolean(row.timeread),url:url(row.contexturl)})}));
   }
-  markRead(id: number) { return this.call('core_message_mark_notification_read',{notificationid:String(id),timeread:String(Math.floor(Date.now()/1000))},z.object({}).passthrough()); }
+  markRead(id: number, source?: 'message'|'popup') { return this.call(source === 'popup' ? 'message_popup_mark_notification_read' : 'core_message_mark_notification_read',{notificationid:String(id),timeread:String(Math.floor(Date.now()/1000))},z.object({}).passthrough()); }
   async grades(course: MoodleCourse, userId: number) {
     const result = await this.call('gradereport_user_get_grade_items',{courseid:String(course.remoteId),userid:String(userId)},gradeWire);
     return result.usergrades.flatMap(user => user.gradeitems.map(row => ({remoteKey:String(row.id),value:moodleGradeItemSchema.parse({courseId:course.id,name:plainText(row.itemname ?? ''),grade:row.gradeformatted ? plainText(row.gradeformatted) : null,max:row.grademax ?? null,percentage:row.percentageformatted && Number.isFinite(parseFloat(plainText(row.percentageformatted))) ? parseFloat(plainText(row.percentageformatted)) : null,gradedAt:date(row.gradedategraded)})})));

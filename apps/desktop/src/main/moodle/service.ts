@@ -84,7 +84,7 @@ export class MoodleService {
     this.repository.markRead(id);
     const account = this.repository.account(item.accountId);
     const remote = this.repository.notificationRecords(account.id).find(row => row.value.id === id)!;
-    try { await new MoodleClient(account.siteUrl,await this.token(account.id),this.request).markRead(remote.remoteId); this.repository.acknowledgeRead(id); }
+    try { await new MoodleClient(account.siteUrl,await this.token(account.id),this.request).markRead(remote.remoteId,item.source); this.repository.acknowledgeRead(id); }
     catch { /* Keep the pending remote read for the next sync. */ }
   }
   sync(id: string): Promise<{errors:string[]}> {
@@ -114,7 +114,7 @@ export class MoodleService {
       } catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; }
     }
     for (const row of this.repository.notificationRecords(id).filter(row => row.value.pendingRemoteRead)) {
-      try { await client.markRead(row.remoteId); this.repository.acknowledgeRead(row.value.id); } catch { /* Retry on the next sync. */ }
+      try { await client.markRead(row.remoteId,row.value.source); this.repository.acknowledgeRead(row.value.id); } catch { /* Retry on the next sync. */ }
     }
     const courses = await client.courses(account);
     const errors: string[] = [];

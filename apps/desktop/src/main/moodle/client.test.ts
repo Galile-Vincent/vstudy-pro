@@ -99,9 +99,9 @@ it('uses submission and attempt status rather than actionability',async () => {
   expect((await client.assignments(account.id,courses))[0]!.submitted).toBe(true);
   expect((await client.events(account.id,courses)).find(item => item.kind === 'quiz')!.submitted).toBe(false);
 });
-it('keeps an assignment visible when submission status is unavailable',async () => {
-  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({mod_assign_get_submission_status:{errorcode:'requireloginerror'}}));
-  expect((await client.assignments(account.id,await client.courses(account)))[0]!.submitted).toBe(false);
+it('keeps an unknown submission status when the check fails',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({mod_assign_get_submission_status:{errorcode:'functionnotavailable'}}));
+  expect((await client.assignments(account.id,await client.courses(account)))[0]!.submitted).toBe(null);
 });
 it('resolves assignment calendar event submission status when no assignment list is available',async () => {
   const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({
@@ -133,4 +133,26 @@ it('requests a fourteen-day action window and skips long-ended assignments',asyn
     expect(await client.assignments(account.id,[{...courses[0]!,endAt:'2020-01-01T00:00:00.000Z'}])).toEqual([]);
     expect(request).toHaveBeenCalledTimes(0);
   } finally { vi.useRealTimers(); }
+});
+
+it('uses timeline lastid rather than the final event ID',async () => {
+  const request = fixtureFetch(); const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    const params = new URLSearchParams(String(options?.body));
+    if (params.get('wsfunction') === 'core_calendar_get_action_events_by_timesort') return Response.json(params.has('aftereventid') ? {events:[],lastid:900} : {events:Array.from({length:50},(_,index) => ({id:index+1,name:'Event',courseid:101,timesort:1794096000})),lastid:900});
+    return base(target,options);
+  });
+  const client = new MoodleClient(account.siteUrl,'token',request);
+  expect((await client.events(account.id,await client.courses(account))).length).toBe(51);
+  expect(request.mock.calls.filter(call => String(call[1]?.body).includes('aftereventid')).map(call => new URLSearchParams(String(call[1]?.body)).get('aftereventid'))).toEqual(['900']);
+});
+it('uses popup notifications only after message notifications are unsupported',async () => {
+  const request = fixtureFetch({core_message_get_messages:{errorcode:'functionnotavailable'},message_popup_get_popup_notifications:{notifications:[{id:501,subject:'Popup',timecreated:1794096000}]}});
+  const client = new MoodleClient(account.siteUrl,'token',request);
+  expect(await client.notifications(account,[])).toMatchObject([{remoteId:501,value:{subject:'Popup',source:'popup',read:false}}]);
+  await client.markRead(501,'popup');
+  expect(new URLSearchParams(String(request.mock.calls.at(-1)?.[1]?.body)).get('wsfunction')).toBe('message_popup_mark_notification_read');
+  const primary = fixtureFetch();
+  await new MoodleClient(account.siteUrl,'token',primary).notifications(account,[]);
+  expect(primary.mock.calls.map(call => new URLSearchParams(String(call[1]?.body)).get('wsfunction'))).toEqual(['core_message_get_messages']);
 });

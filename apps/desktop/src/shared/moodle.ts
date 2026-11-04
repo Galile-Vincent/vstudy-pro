@@ -66,7 +66,7 @@ export const moodleDeadlineSchema = z
     kind: z.enum(["assignment", "quiz", "event"]),
     dueAt: timestamp,
     url: z.string().url().nullable(),
-    submitted: z.boolean(),
+    submitted: z.boolean().nullable(),
     orphaned: z.boolean().optional(),
   })
   .strict();
@@ -77,6 +77,7 @@ export const moodleNotificationSchema = z
     id: z.string().uuid(),
     accountId: moodleAccountSchema.options[0].shape.id,
     courseId: moodleCourseSchema.shape.id.nullable(),
+    source: z.enum(["message","popup"]).optional(),
     subject: z.string(),
     body: z.string(),
     createdAt: timestamp,
