@@ -2,7 +2,6 @@
 
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
-import { paper } from "./surfaces";
 
 export interface SuggestionsProps extends Omit<
   ComponentProps<"div">,
@@ -46,15 +45,14 @@ export function Suggestions({
           aria-pressed={selectedSuggestion === suggestion}
           onClick={() => onSuggestion(suggestion)}
           className={cn(
-            paper,
-            "fade-in slide-in-from-bottom-2 animate-in fill-mode-both flex items-center text-[13px] transition-transform duration-300 hover:-translate-y-px active:scale-[0.96] motion-reduce:animate-none",
+            "aui-suggestion flex items-center rounded-(--r-pill) border-0 bg-[color-mix(in_oklab,var(--ink)_4%,var(--surface))] px-(--space-3) py-(--space-2) text-(length:--type-base) text-(--ink) hover:bg-[color-mix(in_oklab,var(--ink)_8%,var(--surface))]",
             list
-              ? "w-full rounded-2xl px-4 py-2.5 text-start"
-              : "rounded-full px-4 py-2",
+              ? "w-full text-start"
+              : "text-center",
             selectedSuggestion === suggestion &&
               "bg-foreground text-background",
           )}
-          style={{ animationDelay: `${index * 70}ms` }}
+          style={{ animationDelay: `calc(var(--motion-fast) * ${index} / 2)` }}
         >
           {suggestion}
         </button>

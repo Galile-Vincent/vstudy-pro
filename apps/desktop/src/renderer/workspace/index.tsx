@@ -445,7 +445,7 @@ export function Workspace() {
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
-        <><div className="flex flex-wrap items-center gap-2 p-2 text-sm"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div><DocumentMarkdown
+        <><div className="document-conversion-hint"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div><DocumentMarkdown
           key={`${doc.id}-${readerVersion}-${readerRevision}`}
           version={readerVersion}
           source={source}
