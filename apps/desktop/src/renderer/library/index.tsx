@@ -1,3 +1,6 @@
+import { Badge } from '../components/ui/badge';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
+import './ui3.css';
 import { Popover, PopoverTrigger, PopoverContent } from '../components/ui/popover';
 import { Checkbox } from '../components/checkbox';
 import { Button } from '../components/ui/button';
@@ -51,6 +54,10 @@ export function formatSize(bytes: number | null, locale: string) {
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
   const exponent = Math.min(3, Math.max(0, Math.floor(Math.log10(Math.max(1, bytes)) / 3)));
   return new Intl.NumberFormat(locale, { style: 'unit', unitDisplay:'long', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
+}
+function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpen:()=>void}) {
+ const ref=useRef<HTMLButtonElement>(null);const [visible,setVisible]=useState(false);
+ return <Tooltip delayDuration={500} open={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}}><TooltipTrigger asChild><Button ref={ref} variant="ghost" className="document-title" tabIndex={-1} lang={contentLanguage(title)} onClick={onOpen}>{title}</Button></TooltipTrigger><TooltipContent className="document-tooltip"><div>{title}</div><div>{details}</div></TooltipContent></Tooltip>;
 }
 const defaults: LibraryQuery = { sort: "manual", direction: "asc", limit: 50 };
 export function Snippet({ text }: { text: string }) {
@@ -330,7 +337,13 @@ export function LibraryView() {
       !["sort", "direction", "limit", "cursor", "view", "text", "folderId", "subfolders"].includes(key) &&
       value !== undefined,
   );
-  const rowHeight = grid ? 148 : query.text ? 96 : 64,
+  const bulkBar=useRef<HTMLDivElement>(null);
+  const [bulkHeight,setBulkHeight]=useState(0);
+  useLayoutEffect(()=>{const bar=bulkBar.current;if(!bar){setBulkHeight(0);return;}const observer=new ResizeObserver(()=>setBulkHeight(bar.getBoundingClientRect().height));observer.observe(bar);return()=>observer.disconnect();},[selected.length]);
+  const [textScale,setTextScale]=useState(()=>parseFloat(getComputedStyle(document.documentElement).fontSize));
+  useEffect(()=>{const update=()=>setTextScale(parseFloat(getComputedStyle(document.documentElement).fontSize));const observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['style']});window.addEventListener('resize',update);return()=>{observer.disconnect();window.removeEventListener('resize',update);};},[]);
+  const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
+  const rowHeight = grid ? 148 : rowRem * textScale,
     columns = grid
       ? Math.max(1, Math.floor((scroller.current?.clientWidth ?? 700) / 260))
       : 1,
@@ -538,7 +551,7 @@ export function LibraryView() {
         )}
       </div>
       {selected.length > 0 && (
-        <div className="bulk-bar">
+        <div className="bulk-bar" ref={bulkBar}>
           <span role="status">
             {tr("library:selected", {
               count: selected.length,
@@ -623,6 +636,8 @@ export function LibraryView() {
           ref={scroller}
           className="library-results"
           data-view={grid ? "grid" : "list"}
+          data-bulk={selected.length>0}
+          style={selected.length?{paddingBottom:bulkHeight+24}:undefined}
           role="list"
           aria-label={tr("library:documents")}
           tabIndex={0}
@@ -811,7 +826,7 @@ export function LibraryView() {
                     }
                   }}
                 >
-                  <div className="document-cell">
+{grid ? <>                  <div className="document-cell">
                     <FileText className="document-glyph" aria-hidden="true" />
                     <div className="document-info">
                       <Button variant="outline"
@@ -885,7 +900,21 @@ export function LibraryView() {
                     >
                       <MoreHorizontal />
                     </Button>
+                  </div></> : <>                  <div className="document-gutter" title={d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):undefined}>
+                    {d.status==='failed'?<AlertTriangle className="failed"/>:d.status==='converting'?<LoaderCircle/>:item.pinned?<Pin fill="currentColor"/>:null}
+                    <span className="sr-only">{d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):''}</span>
                   </div>
+                  <div className="document-title-cell">
+                    <DocumentTitle title={d.title} onOpen={()=>open(item)} details={`${folderPath(folders,item.folderId)||tr('library:unfiled')} · ${d.sourceName.split('.').pop()?.toUpperCase()} · ${item.pageCount!=null?tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)}):''} · ${formatSize(item.sizeBytes,document.documentElement.lang)} · ${format.date(d.createdAt)}`}/>
+
+                    {item.snippet&&<p className="search-snippet"><Snippet text={item.snippet}/></p>}
+                  </div>
+                  <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge variant="outline" key={t.id}>{t.name}</Badge>)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
+                  <div className="document-folder">{folderPath(folders,item.folderId)||tr('library:unfiled')}</div>
+                  <div className="document-size">{item.pageCount!=null&&<>{tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)})} · </>}{item.sizeBytes===null?tr("library:unknown_size"):new Intl.NumberFormat(document.documentElement.lang,{style:"unit",unit:"kilobyte",unitDisplay:"short",maximumFractionDigits:1}).format(item.sizeBytes/1000)}</div>
+                  <div className="document-added">{d.status==='failed'?<Button variant="ghost" size="sm" onClick={()=>void run(()=>desktop.invoke('documents:retry',{documentId:d.id}))}>{tr('library:retry')}</Button>:d.status==='converting'?<progress value={progress[d.id]?.page} max={progress[d.id]?.total} aria-label={tr('common:conversion_progress')}/>:format.date(d.createdAt)}</div>
+                  <div className="document-type"><Badge variant="secondary">{d.sourceName.split('.').pop()?.toUpperCase()}</Badge></div>
+                  <Button variant="ghost" size="icon-sm" className="document-actions" aria-label={tr('library:actions',{name:d.title})} tabIndex={-1} onClick={e=>{menuAnchor.current=e.currentTarget;setMenu(item);}}><MoreHorizontal/></Button></>}
                 </div>
               );
             })}
