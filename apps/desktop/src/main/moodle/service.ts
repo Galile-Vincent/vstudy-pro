@@ -34,8 +34,10 @@ export class MoodleService {
       throw new Error('Moodle login cancelled');
     }
     this.repository.saveAccount(account);
-    void this.sync(account.id);
-    return account;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try { await Promise.race([this.sync(account.id),new Promise<void>(resolve => { timer = setTimeout(resolve,30_000); })]); }
+    finally { clearTimeout(timer); }
+    return this.repository.account(account.id);
   }
   async disconnect(id: string) {
     this.repository.account(id);

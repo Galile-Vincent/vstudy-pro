@@ -258,3 +258,10 @@ it('applies successful courses when another course fails',async () => {
   expect(repository.course(repository.overview().courses.find(item => item.remoteId === 102)!.id).files).toHaveLength(1);
   await service.dispose();
 });
+it('finishes initial sync before connect returns',async () => {
+  const {service,repository} = await setup();
+  await service.connect({schoolId:'cycu'});
+  expect(repository.overview().courses).toHaveLength(1);
+  expect(repository.course(repository.overview().courses[0]!.id).files[0]!.name).toBe('lecture.pdf');
+  await service.dispose();
+});
