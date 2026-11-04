@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { Checkbox } from './components/checkbox';
 import { Switch } from './components/ui/switch';
 import { Button } from './components/ui/button';
@@ -52,7 +53,8 @@ export function ProviderRow({
       {busy && !waitingKeychain && <p role="status">{tr('common:checking_provider')}</p>}
       <div className="row">
         <strong>{providerName[provider.config.id]}</strong>
-        <span className="muted">
+        <span className="muted provider-status">
+          {hasKey && provider.config.kind!=="cli" && <Check size={14} aria-hidden="true"/>}
           {provider.config.kind === "cli"
             ? !provider.config.enabled
               ? tr(provider.resolvedPath ? "settings:found" : "settings:not_found")
@@ -67,8 +69,8 @@ export function ProviderRow({
       {provider.config.kind === "cli" && <>
         <label>{settingsView ? <Switch aria-label={tr('settings:enable_cli',{provider:providerName[provider.config.id]})} checked={provider.config.enabled} disabled={busy} onCheckedChange={enabled => { void perform(() => desktop.invoke('providers:configure',{...provider.config,enabled})); }} /> : <Checkbox checked={provider.config.enabled} disabled={busy} onChange={e=>{const enabled=e.target.checked;void perform(()=>desktop.invoke('providers:configure',{...provider.config,enabled}));}}/>}{tr('settings:enable_cli',{provider:providerName[provider.config.id]})}</label>
         <p>{tr(provider.config.enabled ? 'settings:enabled' : 'settings:disabled')}</p>
-        <p>{tr('settings:binary_path')}: <code>{provider.resolvedPath ?? tr('settings:not_found')}</code></p>
-        <Button variant="ghost" size="sm" disabled={busy} onClick={() => void perform(() => desktop.invoke('providers:chooseExecutable',{binary:provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy'}))}>{tr('settings:change')}</Button>
+        <p>{tr('settings:binary_path')}: <code title={provider.resolvedPath ?? tr('settings:not_found')}>{provider.resolvedPath ?? tr('settings:not_found')}</code></p>
+        <Button variant={settingsView?"ghost":"outline"} size={settingsView?"sm":"default"} disabled={busy} onClick={() => void perform(() => desktop.invoke('providers:chooseExecutable',{binary:provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy'}))}>{tr('settings:change')}</Button>
       </>}
       {provider.config.kind !== "cli" && (
         <>

@@ -63,3 +63,6 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 .settings-pane .usage-settings .settings-card > p { padding:var(--space-4) var(--space-5); overflow-wrap:anywhere; font-size:var(--type-sm); }
 .settings-pane .usage-settings .settings-card > .row { justify-content:flex-end; flex-wrap:wrap; padding:var(--space-4) var(--space-5); }
 .settings-pane .usage-settings .settings-card > .row button:first-child { order:1; }
+.provider-status { display:inline-flex; align-items:center; gap:var(--space-1); }
+.settings-dialog .provider-row p:has(code) { display:flex; gap:var(--space-2); }
+.settings-dialog .provider-row code { min-width:0; white-space:nowrap; }
