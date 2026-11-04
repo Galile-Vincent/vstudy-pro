@@ -1,5 +1,7 @@
-import { lazy, Suspense, useEffect, useState } from "react";
-const WelcomeView = lazy(() => import("./welcome"));
+import { lazy, Suspense, useEffect, useMemo, useState, type ComponentType } from "react";
+let loadedWelcome: ComponentType | undefined;
+const loadWelcome = () => import("./welcome").then(module => { loadedWelcome = module.default; return module; });
+const WelcomeView = lazy(loadWelcome);
 import { LibraryView, LibrarySidebar } from "./library";
 import { AppShell, useNavigate } from "./shell";
 import { HomeView } from "./home";
@@ -19,12 +21,13 @@ function GlobalSettings() {
 }
 function Views() {
   const { route } = useNavigate();
+  const Tour = useMemo(() => route.view === 'welcome' ? loadedWelcome ?? WelcomeView : WelcomeView, [route.view]);
   useEffect(() => {
     // Parse the optional tour during idle, outside the click's frame budget.
-    const idle = window.requestIdleCallback(() => { void import('./welcome'); });
+    const idle = window.requestIdleCallback(() => { void loadWelcome(); });
     return () => window.cancelIdleCallback(idle);
   }, []);
-  return route.view === "welcome" ? (<Suspense fallback={null}><WelcomeView /></Suspense>) : route.view === "workspace" ? (
+  return route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "workspace" ? (
     <Workspace />
   ) : route.view === "library" ? (
     <LibraryView key={JSON.stringify(route.query)} />

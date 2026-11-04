@@ -24,6 +24,7 @@ import sampleJa from '../../../resources/samples/ja.md?raw';
 const samples = { en: sampleEn, 'zh-Hant': sampleZh, ja: sampleJa };
 const MemoReader = memo(DocumentMarkdown);
 const ignore = () => {};
+const interfaceLanguageNames = INTERFACE_LANGUAGES.map(language => ({ language, name: new Intl.DisplayNames([language], { type: 'language' }).of(language) }));
 
 const sections = ['hero', 'demo', 'values', 'who', 'models', 'data', 'start'] as const;
 const sampleId = '00000000-0000-4000-8000-000000000000' as Document['id'];
@@ -47,7 +48,7 @@ function Heading({ id }: { id: string }) { return <div className="w-heading"><h2
 function CitationChip() { return <span className="document-citation"><Quote size={12}/>{tr('welcome:demo_citation')}</span>; }
 function Demo({ source, playing, reduced, side }: { source: string; playing: boolean; reduced: boolean; side: string }) {
   const stage = useRef<HTMLDivElement>(null);
-  const { visible } = useInView(stage, .4);
+  const { visible, seen } = useInView(stage, .4);
   const [step, setStep] = useState<DemoStep>('enter');
   const player = useRef<DemoPlayer | null>(null);
   const wasReduced = useRef(reduced);
@@ -72,13 +73,6 @@ function Demo({ source, playing, reduced, side }: { source: string; playing: boo
     return () => observer?.disconnect();
   }, [source, visible]);
   useEffect(() => {
-    const animations = stage.current?.getAnimations?.({ subtree: true }) ?? [];
-    for (const animation of animations) {
-      if (!playing || !visible) animation.pause();
-      else if (animation.playState === 'paused') animation.play();
-    }
-  }, [playing, visible]);
-  useEffect(() => {
     const heading = stage.current?.querySelector('.demo-reader-content [data-demo-depth="2"]');
     if (step === 'highlight') heading?.setAttribute('data-citation-highlight', '');
     else heading?.removeAttribute('data-citation-highlight');
@@ -87,7 +81,7 @@ function Demo({ source, playing, reduced, side }: { source: string; playing: boo
   return <><div className="w-demo-layout"><ol className="w-demo-steps" aria-label={tr('welcome:demo_steps_label')}>{[1, 2, 3, 4].map(n => <li key={n} data-active={caption === n}><span>{n}</span>{tr(`welcome:demo_step_${n}`)}</li>)}</ol>
     <div ref={stage} className="demo-stage" style={{ '--typing-duration': `${Math.min(1200, graphemes * 45)}ms`, '--typing-steps': graphemes } as CSSProperties} aria-hidden="true" inert data-step={step} data-index={index} data-playing={playing && visible && !reduced} data-side={side}>
 
-      <div className="reading-pane w-demo-reader"><div className="pane-toolbar">{tr('welcome:sample_filename')}<small>{tr('welcome:sample_format')}</small></div><div className="w-reader-clip"><div className="demo-reader-content"><MemoReader decorative source={source} documentId={sampleId} onSelect={ignore} onNotice={ignore}/></div></div></div>
+      <div className="reading-pane w-demo-reader"><div className="pane-toolbar">{tr('welcome:sample_filename')}<small>{tr('welcome:sample_format')}</small></div><div className="w-reader-clip"><div className="demo-reader-content">{seen && <MemoReader decorative source={source} documentId={sampleId} onSelect={ignore} onNotice={ignore}/>}</div></div></div>
       <div className="w-demo-chat"><span className="w-demo-hint">{tr('welcome:demo_step_1')}</span><div className="aui-user-message-content w-demo-question">{tr('welcome:demo_question')}</div><div className="w-thinking"><span/><span/><span/></div><div className="aui-assistant-message-content w-demo-answer"><ReplyMarkdown text={tr('welcome:demo_answer')} revealWords/><CitationChip/></div><div className="w-demo-composer"><span className="selection-chip">{source.split('\n\n')[2]}</span><div className="w-draft"><p className="w-placeholder">{tr("common:ask_document_placeholder")}</p><p className="w-typed">{tr("welcome:demo_question")}</p></div><small>{tr('welcome:demo_model_chip')}</small></div></div>
     </div></div><div className="w-demo-footer"><span>{tr('welcome:example_badge')}</span><p><ArrowLeftRight size={16}/>{tr('welcome:demo_swap_hint')}</p><Button variant="outline" className="ghost w-replay" onClick={() => { player.current?.replay(); if (reduced) player.current?.finish(); else { if (wasReduced.current) player.current?.replay(); player.current?.setPlaying(playing && visible); } wasReduced.current = reduced; }}>{tr('welcome:demo_replay')}</Button></div></>;
 }
@@ -117,7 +111,7 @@ export default function WelcomeView() {
   const [busy, setBusy] = useState(false);
   const root = useRef<HTMLElement>(null);
   useEffect(() => {
-    root.current?.querySelector<HTMLElement>('h1')?.focus({preventScroll:true});
+    let focusFrame = requestAnimationFrame(() => { focusFrame = requestAnimationFrame(() => root.current?.querySelector<HTMLElement>('h1')?.focus({preventScroll:true})); });
     const observer = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver(entries => {
       for (const entry of entries) if (entry.isIntersecting) setActive(entry.target.id.replace('welcome-', '') as typeof sections[number]);
     }, { root: root.current, rootMargin: '-45% 0px -45% 0px' });
@@ -126,7 +120,7 @@ export default function WelcomeView() {
     document.addEventListener('visibilitychange', update);
     void desktop.invoke('settings:get', {}).then(s => { setSide(s.chatSide); if (!s.welcomeSeen) return desktop.invoke('settings:set', { ...s, welcomeSeen: true }); }).catch(() => setError(tr('errors:generic')));
     void desktop.invoke('dashboard:get', {}).then(d => setRecent(d.recentDocuments[0]?.document)).catch(() => setError(tr('errors:generic')));
-    return () => { observer?.disconnect(); document.removeEventListener('visibilitychange', update); };
+    return () => { cancelAnimationFrame(focusFrame); observer?.disconnect(); document.removeEventListener('visibilitychange', update); };
   }, []);
   useEffect(() => {
     if (!paused) return;
@@ -159,7 +153,7 @@ export default function WelcomeView() {
     <div className="w-content">{sections.map(id => <Section key={id} id={id} active={active === id}>
       {id === 'hero' && <div className="w-hero"><div><p className="w-eyebrow">{tr('welcome:hero_eyebrow')}</p><SplitReveal text={tr('welcome:hero_title')} language={language}/><p className="w-hero-body">{tr('welcome:hero_body')}</p><div className="w-actions"><Button variant="outline" className="primary" disabled={busy} onClick={primary}>{tr(recent ? 'home:continue' : 'home:upload')}</Button><Button variant="outline" className="secondary" onClick={() => go('demo')}>{tr('welcome:hero_secondary')}</Button></div></div><div className="hero-stack" role="img" aria-label={tr('welcome:hero_visual_alt')}><div aria-hidden="true"><Glass className="w-back"><span className="w-example">{tr('welcome:example_badge')}</span><FileText/><strong>{sample.split('\n')[0]?.replace(/^# /, '')}</strong></Glass><Glass className="w-middle"><mark>{tr('welcome:hero_excerpt')}</mark></Glass><Glass className="w-front"><p>{tr('welcome:hero_answer')}</p><CitationChip/></Glass></div></div></div>}
       {id !== 'hero' && <Heading id={id}/>}
-      {id === 'values' && <><div className="w-grid w-values">{[FileText, TextSelect, Quote].map((Icon, i) => <Glass key={i}><Icon size={24}/><h3>{tr(`welcome:value_${i + 1}_title`)}</h3><p>{tr(`welcome:value_${i + 1}_body`)}</p></Glass>)}</div><dl className="w-facts" aria-label={tr('welcome:facts_label')}>{Object.entries(facts).map(([key, count]) => <div key={key}><dt><CountUp value={count} animate={active === 'values' && !reduced && !paused && !hidden}/></dt><dd>{tr(`welcome:fact_${key}`, { count })}{key === 'languages' && <p>{INTERFACE_LANGUAGES.map(lang => <span key={lang} lang={lang}>{new Intl.DisplayNames([lang], { type: 'language' }).of(lang)}{lang !== 'ja' && ' · '}</span>)}</p>}</dd></div>)}</dl></>}
+      {id === 'values' && <><div className="w-grid w-values">{[FileText, TextSelect, Quote].map((Icon, i) => <Glass key={i}><Icon size={24}/><h3>{tr(`welcome:value_${i + 1}_title`)}</h3><p>{tr(`welcome:value_${i + 1}_body`)}</p></Glass>)}</div><dl className="w-facts" aria-label={tr('welcome:facts_label')}>{Object.entries(facts).map(([key, count]) => <div key={key}><dt><CountUp value={count} animate={active === 'values' && !reduced && !paused && !hidden}/></dt><dd>{tr(`welcome:fact_${key}`, { count })}{key === 'languages' && <p>{interfaceLanguageNames.map(({language,name}) => <span key={language} lang={language}>{name}{language !== 'ja' && ' · '}</span>)}</p>}</dd></div>)}</dl></>}
       {id === 'demo' && <Demo source={sample} playing={!paused && !hidden} reduced={reduced} side={side}/>}
       {id === 'who' && <div className="w-grid w-personas">{[1, 2, 3, 4].map(n => { const Icon = personaIcons[n - 1]!; return <Glass key={n}><Icon size={24}/><h3>{tr(`welcome:p${n}_role`)}</h3><p>{tr(`welcome:p${n}_situation`)}</p><p>{tr(`welcome:p${n}_job`)}</p><div className="w-first"><strong>{tr('welcome:who_first_label')}</strong><p>{tr(`welcome:p${n}_first`)}</p></div></Glass>; })}</div>}
       {id === 'models' && <><Marquee/><div className="w-grid w-providers">{[...PROVIDER_KINDS].sort((a, b) => Number(b in commands) - Number(a in commands)).map(id => <ProviderCard key={id} id={id}/>)}</div><p className="w-note">{tr('welcome:models_note')}</p><Button variant="outline" className="secondary" onClick={() => { void desktop.invoke('providers:list', {}).then(p => { setProviders(p); setSettingsOpen(true); }).catch(() => setError(tr('errors:generic'))); }}>{tr('welcome:models_cta')}</Button></>}
