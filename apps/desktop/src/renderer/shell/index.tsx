@@ -1,3 +1,4 @@
+import { useSidebarOverlay } from './use-sidebar-overlay';
 import { applyAppearance } from '../settings/appearance';
 import { Button } from '../components/ui/button';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup } from '../components/ui/sidebar';
@@ -6,6 +7,7 @@ import { desktop } from "../bridge";
 import { applyLanguage } from "../i18n";
 import {
   createContext,
+  useCallback,
   startTransition,
   useContext,
   useState,
@@ -43,6 +45,8 @@ export function AppShell({
 }) {
   useTranslation();
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  const closeSidebar = useCallback(() => setSidebarVisible(false), []);
+  const sidebarOverlay = useSidebarOverlay(closeSidebar);
   useEffect(() => {
     const pointer=()=>{document.documentElement.dataset.inputModality='pointer';};
     const keyboard=(event:KeyboardEvent)=>{if(['Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))document.documentElement.dataset.inputModality='keyboard';};
@@ -86,6 +90,7 @@ export function AppShell({
   const returnSettings = useRef(false);
   const returnFocus = useRef<HTMLElement | null>(null);
   const navigate: Navigation["navigate"] = (value) => {
+    if (sidebarOverlay) closeSidebar();
     const next = typeof value === "string" ? { view: value } : value;
     if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = route; returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
     if (next.view === 'welcome' || route.view === 'welcome') startTransition(() => setRoute(next));
@@ -95,7 +100,7 @@ export function AppShell({
   };
   return (
     <NavigationContext.Provider value={{ route, navigate, closeWelcome: () => { navigate(previous.current); setTimeout(() => { const target = returnFocus.current; if (returnSettings.current) { window.dispatchEvent(new Event("vstudy:open-settings")); setTimeout(() => document.getElementById("welcome-settings-entry")?.focus(), 100); } else if (target?.isConnected) target.focus(); else document.getElementById("welcome-entry")?.focus(); }, 350); } }}>
-      <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view}>
+      <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view} data-sidebar-overlay={sidebarOverlay}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
         </a>

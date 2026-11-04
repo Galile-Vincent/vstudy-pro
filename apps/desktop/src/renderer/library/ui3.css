@@ -42,3 +42,8 @@ html[data-input-modality=pointer] .library-results .document-title:focus { outli
 .document-details > div { display:grid; grid-template-columns:7rem minmax(0,1fr); gap:var(--space-3); }
 .document-details dt { color:var(--muted); }
 .document-details dd { margin:0; overflow-wrap:anywhere; }
+/* A composed toolbar uses one type scale, including the custom Select. */
+.library-toolbar > :is(button,[data-slot=popover-trigger]),.library-toolbar .filter-popover { flex:none; }
+.library-toolbar :is(button,input,[data-slot=select-trigger]) { font-size:var(--type-base); }
+.library-toolbar [data-slot=select-trigger] { font-size:var(--type-sm); }
+.library-toolbar .library-search { flex:1 1 12rem; }
