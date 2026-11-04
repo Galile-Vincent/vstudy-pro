@@ -1,4 +1,4 @@
-import { courseLifecycle, parseCourseIdentity, teacherName } from './identity';
+import { applyAuthoritativeTeachers, courseLifecycle, parseCourseIdentity, teacherName } from './identity';
 import { contentsWire, parseCourseContents, sanitizeCourseHtml, safeUrl } from './contents';
 import type { MoodleAnnouncement } from '../../shared/moodle-course';
 import { moodleImage } from './files';
@@ -104,7 +104,7 @@ export class MoodleClient {
       }
     }
     const mapped = [...rowsById.values()].map(row => {
-      const identity = parseCourseIdentity(row.fullname,row.shortname,row.progress != null);
+      let identity = parseCourseIdentity(row.fullname,row.shortname,row.progress != null);
       const startAt = date(row.startdate), endAt = date(row.enddate);
       Object.assign(identity,courseLifecycle({startAt,endAt,term:identity.term,completed:row.completed ?? false,...(buckets.has(row.id) ? {server:buckets.get(row.id)!} : {})}));
       identity.enableCompletion = row.enablecompletion ?? false;
@@ -112,7 +112,7 @@ export class MoodleClient {
       identity.format = row.format ?? null;
       identity.summaryHtml = sanitizeCourseHtml(row.summary);
       identity.teacherSource = row.contacts?.length ? 'contacts' : 'name';
-      if (row.contacts?.length) identity.teachers = row.contacts.map(contact => { const name = teacherName(contact.fullname); return /[\u3400-\u9fff]/.test(name) ? {zh:name,en:null} : {zh:null,en:name}; });
+      if (row.contacts?.length) identity = applyAuthoritativeTeachers(identity,row.contacts.map(contact => { const name = teacherName(contact.fullname); return /[\u3400-\u9fff]/.test(name) ? {zh:name,en:null} : {zh:null,en:name}; }));
       return moodleCourseSchema.parse({id:remoteId(account.id,'course',row.id),accountId:account.id,remoteId:row.id,fullName:plainText(row.fullname),shortName:plainText(row.shortname),imageUrl:url(row.courseimage ?? row.overviewfiles?.[0]?.fileurl),progress:row.progress == null ? null : Math.min(100,Math.max(0,row.progress)),startAt,endAt,favourite:row.isfavourite ?? false,identity});
     });
     return Promise.all(mapped.map(async course => ({...course,imageUrl:course.imageUrl ? await moodleImage(course.imageUrl,this.host,this.token,this.request) : null})));

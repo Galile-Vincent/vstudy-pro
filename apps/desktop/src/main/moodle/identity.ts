@@ -27,7 +27,12 @@ export function identityText(value: string): string {
 }
 export function teacherName(value: string) { return identityText(value).replace(/^\s*\d+\s*[-:]?\s*/, '').trim(); }
 const cjk = /[\u3400-\u9fff]/;
-function candidate(raw: string) {
+function personalName(value: string): boolean {
+  const words = value.replace(/-\s+/g,'-').split(/[\s,]+/).filter(Boolean);
+  const tokens = words.flatMap(word => word.split('-'));
+  return tokens.length >= 2 && tokens.length <= 4 && words.every(word => /^[A-Z][a-zA-Z]*(?:-[A-Za-z]+)*$/.test(word)) && !tokens.some(token => /^(of|and|the|in|for|to)$/i.test(token));
+}
+function candidate(raw: string, teacherLength?: number) {
   const value = raw.replace(/[（）［］－]/g, char => ({'（':'(','）':')','［':'[','］':']','－':'-'}[char]!)).trim();
   const match = /^(\d{3,4})(.+)\[([A-Za-z0-9_-]+)\]$/.exec(value);
   if (!match) return null;
@@ -46,15 +51,20 @@ function candidate(raw: string) {
     }
   }
   let separator = -1;
+  let bestScore = Infinity;
   let depth = 0;
   for (let i = 0; i < body.length; i++) {
     if (body[i] === '(') depth++;
     if (body[i] === ')') depth--;
-    if (body[i] === '-' && depth === 0 && separator < 0) {
+    if (body[i] === '-' && depth === 0) {
       const suffix = body.slice(i+1).trim();
       const names = suffix.split(/、|\s*\/\s*|\s*;\s*/).map(teacherName).filter(Boolean);
-      const teachers = names.length > 0 && names.every(name => /^[\u3400-\u9fff·]{1,5}$/.test(name) || /^[A-Z][A-Z\s,.'-]*,[A-Z\s,.'-]+$/.test(name));
-      if (teachers || !suffix && classLabel !== null) separator = i;
+      const teachers = names.length > 0 && names.every(name => /^[\u3400-\u9fff·]{1,5}$/.test(name) || (teacherLength !== 0 && personalName(name) && (teacherLength !== undefined || name.includes(','))));
+      const title = body.slice(0,i).trim();
+      const danglingSurname = /\b[A-Z]{2,}$/.test(title) && !/\b(?:I|II|III|IV|VI?)$/.test(title);
+      const count = suffix.split(/[\s,-]+/).filter(Boolean).length;
+      const score = Math.abs(count - (teacherLength || 3)) * 100 + suffix.length;
+      if ((teachers && !danglingSurname || !suffix && classLabel !== null) && score < bestScore) {separator = i; bestScore = score;}
     }
   }
   const title = (separator < 0 ? body : body.slice(0,separator)).trim();
@@ -82,10 +92,14 @@ export function parseCourseIdentity(fullName: string, shortName: string, hasProg
     }
   }
   identity.title = {zh:null,en:null};
+  halves.sort((a,b) => Number(cjk.test(b)) - Number(cjk.test(a)));
+  let zhTeacherLength: number | undefined;
   for (const half of halves) {
     const lang = cjk.test(half) ? 'zh' : 'en';
-    const parsed = candidate(half);
-    identity.title[lang] = parsed?.title ?? half;
+    const parsed = candidate(half,lang === 'en' ? zhTeacherLength : undefined);
+    if (lang === 'zh') zhTeacherLength = parsed?.teachers[0]?.length ?? 0;
+    identity.title[lang] = parsed?.title ?? (/^\d{3,4}[^\x5b\x5d]+$/.test(half) ? half.replace(/^\d{3,4}/,'') : half);
+    if (!parsed && /^\d{3,4}[^\x5b\x5d]+$/.test(half)) identity.term = half.match(/^\d{3,4}/)![0];
     if (!parsed) continue;
     identity.term = parsed.term;
     identity.code = parsed.code;
@@ -115,4 +129,20 @@ export function courseLifecycle(input: {completed?:boolean;startAt:string|null;e
     return {lifecycle:term < current ? 'past' : term > current ? 'future' : 'current',lifecycleSource:'term'};
   }
   return {lifecycle:'unknown',lifecycleSource:'none'};
+}
+
+export function applyAuthoritativeTeachers(identity: MoodleCourseIdentity, teachers: MoodleCourseIdentity['teachers']): MoodleCourseIdentity {
+  const title = {...identity.title};
+  for (const lang of ['zh','en'] as const) {
+    for (const teacher of teachers) {
+      const name = teacher[lang];
+      if (!name || !title[lang]) continue;
+      const escaped = name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      title[lang] = title[lang]!.replace(new RegExp(`\\s*-\\s*${escaped}\\s*$`,'i'),'').trim();
+    }
+  }
+  return {...identity,title,teachers:teachers.map(teacher => {
+    const parsed = identity.teachers.find(value => (teacher.zh && value.zh === teacher.zh) || (teacher.en && value.en?.toLowerCase() === teacher.en.toLowerCase()));
+    return {zh:teacher.zh ?? parsed?.zh ?? null,en:teacher.en ?? parsed?.en ?? null};
+  })};
 }

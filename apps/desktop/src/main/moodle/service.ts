@@ -1,3 +1,4 @@
+import { applyAuthoritativeTeachers } from './identity';
 import { completionState } from './contents';
 import { moodleImage } from './files';
 import { MoodleAuthError, tokensSchema, type MoodleTokens } from './auth';
@@ -149,7 +150,7 @@ export class MoodleService {
           this.teacherCache.set(id,Date.now());
           if (teachers.length) {
             const latest = this.repository.course(id).course;
-            this.repository.saveCourse({...latest,identity:{...latest.identity,teachers,teacherSource:'enrolment'}});
+            this.repository.saveCourse({...latest,identity:{...applyAuthoritativeTeachers(latest.identity,teachers),teacherSource:'enrolment'}});
           }
         }
       }
