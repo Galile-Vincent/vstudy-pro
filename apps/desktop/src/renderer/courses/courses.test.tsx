@@ -9,6 +9,7 @@ import { i18n } from "../../shared/i18n";
 import type { MoodleApi } from "./api";
 import type { MoodleAgentAction } from "../../shared/moodle";
 
+vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} });
 let root: Root;
 let host: HTMLDivElement;
 (
@@ -107,7 +108,7 @@ describe("Courses", () => {
     expect(host.querySelectorAll(".moodle-unread")).toHaveLength(1);
     await click("Explain what I need to prepare");
     expect(host.querySelector(".moodle-agent")?.textContent).toContain(
-      "Course conversations are coming next.",
+      "Explain what I need to prepare",
     );
     await tab("Deadlines");
     expect(host.querySelector(".moodle-deadline-group")?.textContent).toContain(
@@ -303,6 +304,7 @@ describe("Courses", () => {
     expect((await api.course(detail.course.id)).reminders[0]?.note).toBe(
       "Review trees",
     );
+    expect((await api.course(detail.course.id)).reminders[0]?.createdBy).toBe("agent");
     expect(host.textContent).toContain("Action completed.");
   });
 });

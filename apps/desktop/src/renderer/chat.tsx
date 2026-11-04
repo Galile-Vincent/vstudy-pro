@@ -120,18 +120,19 @@ export function Chat({
   const statuses = new Map(history.flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
-    selection, onClearSelection, usage, budget, unavailable, onUsage,
+    selection, onClearSelection, usage, budget, unavailable, onUsage, isCourse: conversation.scope === "course",
     picker: <ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
     {unavailable && <p role="alert">{tr('common:this_conversation_s_provider_is_unavailable_add_an_api_key_or_enable_it_in_settings')}</p>}
     <Thread components={documentComponents} autoFocus={autoFocus} />
-    <p className="composer-note">{tr('common:grounded_in_your_document_check_important_details')}</p>
+    <p className="composer-note">{conversation.scope === 'course' ? tr('moodle:agent_scope') : tr('common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }
 
 type DocumentChat = {
+  isCourse: boolean;
   selection: Selection | null; onClearSelection: () => void;
   usage: ReturnType<typeof useUsage>; budget: ReturnType<typeof useBudgetGuard>;
   unavailable: boolean; onUsage: () => void; picker: React.ReactNode;
@@ -185,7 +186,8 @@ const documentComponents = { Announcement: ChatAnnouncement, CopyAction: CopyAns
 
 export function ChatComposerInput() {
   useTranslation();
-  const selection=useContext(DocumentChatContext)?.selection;
+  const context=useContext(DocumentChatContext);
+  const selection=context?.selection;
   const input=useRef<HTMLTextAreaElement>(null);
   useEffect(()=>{if(selection) input.current?.focus();},[selection]);
   const composing = useRef(false);
@@ -193,7 +195,7 @@ export function ChatComposerInput() {
   const clear = () => { composing.current = false; clearTimeout(expiry.current); };
   const refresh = () => { composing.current = true; clearTimeout(expiry.current); expiry.current = setTimeout(clear,1500); };
   useEffect(() => () => clearTimeout(expiry.current), []);
-  return <ComposerPrimitive.Input ref={input} className="aui-composer-input" aria-label={tr('common:ask_about_your_document')} placeholder={tr('common:ask_document_placeholder')} rows={2}
+  return <ComposerPrimitive.Input ref={input} className="aui-composer-input" aria-label={context?.isCourse ? tr('moodle:ask_course') : tr('common:ask_about_your_document')} placeholder={context?.isCourse ? tr('moodle:ask_course') : tr('common:ask_document_placeholder')} rows={2}
     onCompositionStart={refresh}
     onCompositionUpdate={refresh}
     onBlur={clear}

@@ -621,7 +621,8 @@
   color: var(--muted);
   line-height: 1.7;
 }
-.moodle-agent button {
+.moodle-agent-body > button,
+.moodle-proposal > button {
   white-space: normal;
   height: auto;
   padding: var(--space-3);
@@ -784,3 +785,7 @@
   height: auto;
   min-height: var(--control-height);
 }
+
+.moodle-course-chat { display: flex; flex-direction: column; height: 540px; min-width: 0; margin-top: var(--space-4); }
+.moodle-course-chat .aui-thread-root { flex: 1; min-height: 0; }
+.moodle-course-chat .composer-note { flex: none; }

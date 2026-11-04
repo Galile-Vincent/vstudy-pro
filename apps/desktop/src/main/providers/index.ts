@@ -44,6 +44,14 @@ export const fakeAdapter: ProviderAdapter = {
   },
   async *stream(request, signal) {
     if (request.userMessage === 'test error' && !fakeFailures.has(request.turnId ?? request.requestId)) { fakeFailures.add(request.turnId ?? request.requestId); yield { type: 'error', message: 'Provider rate limited' }; return; }
+    if (request.scope === 'course') {
+      const data = JSON.parse(request.prompt.split('<UNTRUSTED_COURSE_DATA>\n')[1]!.split('\n</UNTRUSTED_COURSE_DATA>')[0]!);
+      const deadline = data.deadlines.find((d: {dueAt:string}) => Date.parse(d.dueAt) > Date.now() + 7200000);
+      yield {type:'text-delta',text:'Review your course materials before the next deadline.\n'};
+      if (deadline) yield {type:'text-delta',text:'```vstudy-action\n'+JSON.stringify({type:'create-reminder',deadlineId:deadline.id,remindAt:new Date(Date.parse(deadline.dueAt)-3600000).toISOString(),note:'Review course materials'})+'\n```'};
+      yield {type:'done'};
+      return;
+    }
     const enriched = request.userMessage === 'test enriched';
     const citationId = request.prompt.match(/"id":"(s\d+)"/)?.[1];
     if (enriched) {

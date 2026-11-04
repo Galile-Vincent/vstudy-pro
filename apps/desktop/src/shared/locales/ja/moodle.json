@@ -90,12 +90,17 @@
   "prepare_title": "準備を整えて授業へ。",
   "prepare_description": "お知らせを整理して、次の締め切りに向けた計画を立てましょう。",
   "explain_prepare": "準備すべきことを教えて",
-  "agent_unavailable": "コースの会話機能は準備中です。ファイルを開くと、内容についてドキュメントアシスタントに質問できます。",
+  "agent_unavailable": "設定でチャットプロバイダーを有効にして、コースの会話を始めてください。",
   "action_done": "操作が完了しました。",
   "confirm_action": "提案された操作を確認",
   "reminder_proposal": "{{date}}に{{title}}を通知する。",
   "calendar_proposal": "{{count}} 件の締め切りをカレンダーに書き出す。",
   "approve": "操作を承認",
   "dismiss": "閉じる",
-  "agent_scope": "このコースのみが対象です。提案された操作には承認が必要です。"
+  "agent_scope": "このコースのみが対象です。提案された操作には承認が必要です。",
+  "summarize_notifications": "新しい通知を要約する",
+  "plan_week": "今週の予定を立てる",
+  "conversations": "コースの会話",
+  "conversation_number": "会話 {{number}}",
+  "ask_course": "このコースについて質問…"
 }

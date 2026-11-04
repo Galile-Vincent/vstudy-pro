@@ -90,12 +90,17 @@
   "prepare_title": "Walk into class prepared.",
   "prepare_description": "Make sense of course updates and turn your next deadline into a plan.",
   "explain_prepare": "Explain what I need to prepare",
-  "agent_unavailable": "Course conversations are coming next. Open a course file to ask your document assistant about its contents.",
+  "agent_unavailable": "Enable a chat provider in Settings to start a course conversation.",
   "action_done": "Action completed.",
   "confirm_action": "Review this suggested action",
   "reminder_proposal": "Remind me about {{title}} at {{date}}.",
   "calendar_proposal": "Export {{count}} deadlines to your calendar.",
   "approve": "Approve action",
   "dismiss": "Dismiss",
-  "agent_scope": "Scoped to this course. Suggested actions always need your approval."
+  "agent_scope": "Scoped to this course. Suggested actions always need your approval.",
+  "summarize_notifications": "Summarize new notifications",
+  "plan_week": "Plan my week",
+  "conversations": "Course conversations",
+  "conversation_number": "Conversation {{number}}",
+  "ask_course": "Ask about this course…"
 }

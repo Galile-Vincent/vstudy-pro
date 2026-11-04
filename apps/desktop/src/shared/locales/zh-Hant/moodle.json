@@ -90,12 +90,17 @@
   "prepare_title": "帶著準備走進教室。",
   "prepare_description": "理解課程消息，把下一個截止事項化為計畫。",
   "explain_prepare": "說明我需要準備什麼",
-  "agent_unavailable": "課程對話功能即將推出。請先開啟課程檔案，向文件助理詢問內容。",
+  "agent_unavailable": "請在設定中啟用聊天供應商以開始課程對話。",
   "action_done": "操作已完成。",
   "confirm_action": "確認建議的操作",
   "reminder_proposal": "於 {{date}} 提醒我「{{title}}」。",
   "calendar_proposal": "匯出 {{count}} 項截止事項至行事曆。",
   "approve": "核准操作",
   "dismiss": "關閉",
-  "agent_scope": "僅限此課程，建議的操作都需要你核准。"
+  "agent_scope": "僅限此課程，建議的操作都需要你核准。",
+  "summarize_notifications": "摘要最新通知",
+  "plan_week": "規劃我的一週",
+  "conversations": "課程對話",
+  "conversation_number": "對話 {{number}}",
+  "ask_course": "詢問這門課程…"
 }

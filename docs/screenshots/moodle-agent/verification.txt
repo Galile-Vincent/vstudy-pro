@@ -1,0 +1,15 @@
+PASS. Real Electron with fake provider. Course action stripped, proposed, approved, saved with agent provenance. Course conversation and proposals persisted. Moodle-linked file opened and chatted as a document.
+
+Verification commands completed successfully.
+pnpm typecheck
+pnpm lint
+pnpm test (407 passed, 13 skipped)
+pnpm security:check (no unreviewed advisories; existing dynamic shell.openExternal warning)
+pnpm build
+cd apps/desktop && node e2e/moodle-agent.mjs
+
+Screenshots proposal.png, approved.png, and file-document-chat.png were opened and visually inspected.
+The course fixture uses real SQLite cache rows and real IPC with VSTUDY_FAKE_PROVIDER=1. The Moodle file fixture links an imported, converted sample document.
+The focused course component suite passed again after the final request-handling adjustment.
+
+Limits. No live Moodle account or paid provider was used. Course answer text is buffered until completion to prevent action JSON from appearing during streaming. Pending card state is local to the mounted panel; validated proposals remain in persisted message parts. Existing document payloads may omit scope for compatibility; all database rows have an explicit scope and enforce mutually exclusive course/document foreign keys.
