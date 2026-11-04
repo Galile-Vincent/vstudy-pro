@@ -57,6 +57,7 @@ function Demo({ source, playing, reduced, side }: { source: string; playing: boo
   const graphemes = Intl.Segmenter ? [...new Intl.Segmenter(document.documentElement.lang || 'en', { granularity: 'grapheme' }).segment(question)].length : question.length;
   const index = script.findIndex(([name]) => name === step);
   useEffect(() => {
+    if (!visible) return;
     const update = () => {
       const target = stage.current?.querySelector('.demo-reader-content [data-demo-depth="2"]');
       const content = stage.current?.querySelector('.demo-reader-content');
@@ -69,7 +70,7 @@ function Demo({ source, playing, reduced, side }: { source: string; playing: boo
     const content=stage.current?.querySelector('.demo-reader-content');
     if(content) observer?.observe(content);
     return () => observer?.disconnect();
-  }, [source]);
+  }, [source, visible]);
   useEffect(() => {
     const animations = stage.current?.getAnimations?.({ subtree: true }) ?? [];
     for (const animation of animations) {
@@ -116,7 +117,7 @@ export default function WelcomeView() {
   const [busy, setBusy] = useState(false);
   const root = useRef<HTMLElement>(null);
   useEffect(() => {
-    root.current?.querySelector<HTMLElement>('h1')?.focus();
+    root.current?.querySelector<HTMLElement>('h1')?.focus({preventScroll:true});
     const observer = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver(entries => {
       for (const entry of entries) if (entry.isIntersecting) setActive(entry.target.id.replace('welcome-', '') as typeof sections[number]);
     }, { root: root.current, rootMargin: '-45% 0px -45% 0px' });
