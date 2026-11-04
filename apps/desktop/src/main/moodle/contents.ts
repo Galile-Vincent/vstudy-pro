@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import type { MoodleCourse, MoodleFile } from '../../shared/moodle';
 import type { MoodleCompletion, MoodleModuleKind, MoodleSection } from '../../shared/moodle-course';
+import { log } from '../logging';
+import { issueDiagnostics, responseShape } from './diagnostics';
+import { moodleSectionSchema } from '../../shared/moodle-course';
 import { identityText } from './identity';
 import { remoteId } from './remote-id';
 
@@ -17,13 +20,27 @@ export function sanitizeCourseHtml(value?: string | null): string | null {
   const allowed = new Set(['p','br','div','span','strong','b','em','i','u','ul','ol','li','h1','h2','h3','h4','blockquote','pre','code','table','thead','tbody','tr','th','td','hr']);
   return value.replace(/<(script|style|iframe|form|object|embed|svg|math)\b[^>]*>[\s\S]*?<\/\1\s*>/gi,'').replace(/<!--[\s\S]*?-->/g,'').replace(/<\/?([a-z][\w:-]*)\b[^>]*>/gi,(tag, name: string) => allowed.has(name.toLowerCase()) ? `<${tag.startsWith('</') ? '/' : ''}${name.toLowerCase()}>` : '').replace(/<(?!\/?[a-z][\w]*>)/gi,'&lt;');
 }
-const number = z.coerce.number().int();
-const visible = z.union([z.boolean(),z.number(),z.string()]).optional();
-const fileWire = z.object({type:z.string(),filename:z.string(),fileurl:z.string().nullish(),filesize:number.nonnegative().optional(),mimetype:z.string().optional(),timemodified:number.optional()});
-export const contentsWire = z.array(z.object({id:number,name:z.string().nullish(),section:number.optional(),summary:z.string().nullish(),visible,uservisible:visible,highlighted:visible,current:visible,component:z.string().optional(),itemid:number.optional(),modules:z.array(z.object({id:number,name:z.string(),modname:z.string().default('resource'),description:z.string().nullish(),url:z.string().nullish(),visible,uservisible:visible,instance:number.optional(),customdata:z.string().nullish(),contents:z.array(fileWire).optional(),completiondata:z.object({state:number.optional(),tracking:number.optional()}).optional()})).default([])}));
+const number = z.union([z.number(),z.string().regex(/^-?\d+(?:\.\d+)?$/)]).transform(Number).pipe(z.number().finite().int());
+const visible = z.union([z.boolean(),z.number(),z.string()]).nullish();
+const fileWire = z.object({type:z.string(),filename:z.string(),fileurl:z.string().nullish(),filesize:number.pipe(z.number().nonnegative()).nullish(),mimetype:z.string().nullish(),timemodified:number.nullish()}).passthrough();
+const moduleWire = z.object({id:number.pipe(z.number().positive()),name:z.string(),modname:z.string().nullish().transform(value => value ?? 'other'),description:z.string().nullish(),url:z.string().nullish(),visible,uservisible:visible,instance:number.nullish(),customdata:z.string().nullish(),contents:z.array(fileWire).nullish(),completiondata:z.object({state:number.nullish(),tracking:number.nullish()}).passthrough().nullish()}).passthrough();
+const sectionWire = z.object({id:number.pipe(z.number().positive()),name:z.string().nullish(),section:number.pipe(z.number().nonnegative()).nullish(),summary:z.string().nullish(),visible,uservisible:visible,highlighted:visible,current:visible,component:z.string().nullish(),itemid:number.nullish(),modules:z.array(z.unknown()).nullish()}).passthrough();
+export function parseContentsWire(raw: unknown[], diagnostic: (issues:z.ZodIssue[],path:(string|number)[],raw:unknown)=>void) {
+  return raw.flatMap((row,index) => {
+    const section = sectionWire.safeParse(row);
+    if (!section.success) { diagnostic(section.error.issues,['sections',index],row); return []; }
+    const modules = (section.data.modules ?? []).flatMap((row,moduleIndex) => {
+      const module = moduleWire.safeParse(row);
+      if (!module.success) { diagnostic(module.error.issues,['sections',index,'modules',moduleIndex],row); return []; }
+      return [module.data];
+    });
+    return [{...section.data,modules}];
+  });
+}
+export const contentsWire = z.array(z.unknown()).transform(raw => parseContentsWire(raw,(issues,path,row) => log({phase:'moodle-call',function:'core_course_get_contents',diagnostic:{kind:'validation',issues:issueDiagnostics(issues,path),shape:responseShape(row)}})));
 const isVisible = (value: unknown) => value !== false && value !== 0 && value !== '0';
 const isTrue = (value: unknown) => value === true || value === 1 || value === '1';
-export function completionState(state: number | undefined, tracking = 1): MoodleCompletion {
+export function completionState(state: number | null | undefined, tracking = 1): MoodleCompletion {
   if (!tracking || state == null) return 'none';
   return ({0:'incomplete',1:'complete',2:'pass',3:'fail'} as const)[state as 0|1|2|3] ?? 'none';
 }
@@ -44,7 +61,7 @@ export function parseCourseContents(raw: z.infer<typeof contentsWire>, course: M
       files.push(...attachments);
       const known = new Set(['resource','folder','url','page','label','forum','assign','quiz','subsection']);
       const kind: MoodleModuleKind = known.has(module.modname) ? module.modname as MoodleModuleKind : module.modname === 'h5pactivity' ? 'h5p' : /video/.test(module.modname) ? 'video' : 'other';
-      return {id:remoteId(course.accountId,'module',module.id),cmid:module.id,kind,modname:module.modname,name:identityText(module.name),descriptionHtml:sanitizeCourseHtml(module.description),url:safeUrl(module.url),accessible:isVisible(module.visible) && isVisible(module.uservisible),completion:completionState(module.completiondata?.state,module.completiondata?.tracking),dueAt:null,submitted:null,fileIds:attachments.map(file => file.value.id)};
+      return {id:remoteId(course.accountId,'module',module.id),cmid:module.id,kind,modname:module.modname,name:identityText(module.name),descriptionHtml:sanitizeCourseHtml(module.description),url:safeUrl(module.url),accessible:isVisible(module.visible) && isVisible(module.uservisible),completion:completionState(module.completiondata?.state,module.completiondata?.tracking ?? 1),dueAt:null,submitted:null,fileIds:attachments.map(file => file.value.id)};
     })};
   });
   const delegatedIds = new Set<string>();
@@ -65,7 +82,7 @@ export function parseCourseContents(raw: z.infer<typeof contentsWire>, course: M
       const candidates = raw.filter(section => section.id > 0 && !delegatedIds.has(remoteId(course.accountId,'section',`${course.remoteId}:${section.id}`)) && sections.findIndex(row => row.id === remoteId(course.accountId,'section',`${course.remoteId}:${section.id}`)) > sections.indexOf(parent));
       const childWire = candidates.find(section => section.id === targetId) ?? candidates.find(section => targetNumber != null && section.section === targetNumber) ?? candidates.find(section => section.component === 'mod_subsection' && section.itemid === wire.instance) ?? candidates.find(section => identityText(section.name ?? '').toLowerCase() === module.name.toLowerCase());
       const child = childWire && sections.find(row => row.id === remoteId(course.accountId,'section',`${course.remoteId}:${childWire.id}`));
-      if (child) { parent.modules.splice(parent.modules.indexOf(module)+1,0,...child.modules); delegatedIds.add(child.id); }
+      if (child) { parent.modules.splice(parent.modules.indexOf(module)+1,0,...child.modules.map(module => ({...module,accessible:child.accessible && module.accessible}))); delegatedIds.add(child.id); }
     }
   }
   const merged = sections.filter(section => !delegatedIds.has(section.id));
@@ -76,5 +93,5 @@ export function parseCourseContents(raw: z.infer<typeof contentsWire>, course: M
       if (!serverCurrent) section.current = false;
     }
   }
-  return {sections:merged,files};
+  return {sections:merged.map(section => moodleSectionSchema.parse(section)),files};
 }

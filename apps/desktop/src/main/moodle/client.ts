@@ -1,8 +1,9 @@
 import { log } from '../logging';
+import { diagnosticIdentifier, issueDiagnostics, responseShape } from './diagnostics';
 import type { MoodleScheduler } from './scheduler';
 import { connectionTiming } from './site-url';
 import { applyAuthoritativeTeachers, courseLifecycle, parseCourseIdentity, teacherName } from './identity';
-import { contentsWire, parseCourseContents, sanitizeCourseHtml, safeUrl } from './contents';
+import { parseContentsWire, parseCourseContents, sanitizeCourseHtml, safeUrl } from './contents';
 import type { MoodleAnnouncement } from '../../shared/moodle-course';
 import { moodleImage } from './files';
 import { authError, type MoodleTokens } from './auth';
@@ -17,9 +18,9 @@ import {
 } from '../../shared/moodle';
 
 export type Fetch = typeof fetch;
-export interface MoodleCallTiming { function:string; ms:number; bytes:number; queueMs:number; reused:boolean | null; ok:boolean; requests:number }
+export interface MoodleCallTiming { function:string; ms:number; bytes:number; queueMs:number; reused:boolean | null; ok:boolean; requests:number; diagnostic?:unknown }
 export class MoodleError extends Error {
-  constructor(readonly kind: 'auth' | 'unsupported' | 'service' | 'network') { super(`Moodle ${kind} error`); }
+  constructor(readonly kind: 'auth' | 'unsupported' | 'service' | 'network' | 'permission', readonly errorcode?:string) { super(`Moodle ${kind} error`); }
 }
 export function plainText(value: string): string {
   return decodeHtmlEntities(value.replace(/\{mlang(?:\s+[^}]*)?\}/gi, '').replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '').replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '').replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
@@ -43,18 +44,26 @@ export { publicConfigSchema } from './discovery';
 
 export class MoodleClient {
   private functions: Set<string> | undefined;
+  private userId = 0;
   private language = 'zh-tw';
   private langSupported = true;
   setLanguage(language: string) { this.language = language.replace(/_/g,'-').toLowerCase(); }
   setFunctions(functions: string[] | undefined) { this.functions = functions ? new Set(functions) : undefined; }
   wsAvailable(name: string) { return !this.functions || this.functions.has(name); }
-  constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = moodleFetch, private readonly scheduling?: {queue:MoodleScheduler;priority:number;timing?:(call:MoodleCallTiming)=>void}) {}
+  constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = moodleFetch, private readonly scheduling?: {queue:MoodleScheduler;priority:number;timing?:(call:MoodleCallTiming)=>void}, private readonly negative = new Map<string,MoodleError>()) {}
   async call<S extends z.ZodTypeAny>(name: string, params: Record<string,string>, schema: S, retryLanguage = true, signal?: AbortSignal): Promise<z.output<S>> {
     if (name !== 'core_webservice_get_site_info' && !this.wsAvailable(name)) throw new MoodleError('unsupported');
     const run = async (queueMs:number) => {
+      const cached = this.negative.get(name);
+      if (cached) throw cached;
       const started = performance.now();
       const timing: MoodleCallTiming = {function:name,ms:0,bytes:0,queueMs,reused:null,ok:false,requests:0};
       try { const result = await this.performCall(name,params,schema,retryLanguage,signal,timing); timing.ok=true; return result; }
+      catch (error) {
+        if (!timing.diagnostic) timing.diagnostic={kind:error instanceof MoodleError ? error.kind : 'service'};
+        if (name === 'tool_mobile_get_config' && error instanceof MoodleError && error.kind !== 'auth') this.negative.set(name,error);
+        throw error;
+      }
       finally { timing.ms=performance.now()-started; log({phase:'moodle-call',...timing}); this.scheduling?.timing?.(timing); }
     };
     return this.scheduling ? this.scheduling.queue.run(this.scheduling.priority,run) : run(0);
@@ -66,22 +75,33 @@ export class MoodleClient {
     catch { throw new MoodleError('network'); }
     if (!response.ok) throw new MoodleError('network');
     timing.reused = connectionTiming.get(response)?.reused ?? null;
-    const text = await response.text();
+    let text:string;
+    try { text=await response.text(); } catch { throw new MoodleError('network'); }
     timing.bytes += Buffer.byteLength(text);
     let raw:unknown;
     try { raw = JSON.parse(text); } catch { throw new MoodleError('service'); }
-    const error = z.object({exception:z.string().optional(),errorcode:z.string().optional(),error:z.string().optional(),message:z.string().optional()}).safeParse(raw);
+    const error = z.object({exception:z.string().nullish(),errorcode:z.string().nullish(),error:z.string().nullish(),message:z.string().nullish()}).safeParse(raw);
     if (error.success && (error.data.exception || error.data.errorcode || error.data.error)) {
       if (retryLanguage && this.langSupported && /invalidparameter|invalid_parameter/.test(error.data.errorcode ?? '') && /moodlewssettinglang|lang/i.test(error.data.message ?? '')) { this.langSupported = false; return this.performCall(name,params,schema,false,signal,timing); }
+      timing.diagnostic = {kind:'exception',errorcode:diagnosticIdentifier(error.data.errorcode),exception:diagnosticIdentifier(error.data.exception),shape:responseShape(raw)};
       const codes = [error.data.errorcode,error.data.exception].map(code => code?.toLowerCase());
-      throw new MoodleError(codes.some(code => code === 'invalidtoken' || code === 'requireloginerror' || code === 'accessexception') ? 'auth' : codes.some(code => ['cannotfindexternalfunction','functionnotavailable','coding_exception'].includes(code ?? '')) ? 'unsupported' : 'service');
+      const optionalFunction = ['mod_assign_get_submission_status','mod_quiz_get_user_attempts','tool_mobile_get_config'].includes(name);
+      let kind:MoodleError['kind']='service';
+      if (codes.includes('invalidtoken') || codes.includes('requireloginerror') && !optionalFunction || codes.includes('accessexception') && name === 'core_webservice_get_site_info') kind='auth';
+      else if (codes.includes('accessexception') || codes.includes('requireloginerror') || codes.includes('nopermissions')) kind='permission';
+      else if (codes.some(code => ['cannotfindexternalfunction','functionnotavailable','coding_exception'].includes(code ?? ''))) kind='unsupported';
+      const failure = new MoodleError(kind,diagnosticIdentifier(error.data.errorcode));
+      const permanent = codes.some(code => ['accessexception','invalidparameter','invalid_parameter','requireloginerror','cannotfindexternalfunction','functionnotavailable'].includes(code ?? ''));
+      if (optionalFunction && permanent) this.negative.set(name,failure);
+      throw failure;
     }
     const parsed = schema.safeParse(raw);
-    if (!parsed.success) throw new MoodleError('service');
+    if (!parsed.success) { timing.diagnostic={kind:'validation',issues:issueDiagnostics(parsed.error.issues),shape:responseShape(raw)}; throw new MoodleError('service'); }
     return parsed.data;
   }
-  mobileConfig() { return this.call('tool_mobile_get_config',{},z.object({settings:z.array(z.object({name:z.string(),value:z.string()})).default([])})); }
-  siteInfo() { return this.call('core_webservice_get_site_info', {}, siteInfoSchema); }
+  mobileConfig() { if (!this.functions?.has('tool_mobile_get_config')) throw new MoodleError('unsupported'); return this.call('tool_mobile_get_config',{},z.object({settings:z.array(z.object({name:z.string(),value:z.string()})).default([])})); }
+  async siteInfo() { const info = await this.call('core_webservice_get_site_info', {}, siteInfoSchema); this.userId=info.userid; return info; }
+  setUserId(id:number) { this.userId=id; }
   async fallback<T>(primary: () => Promise<T>, alternative: () => Promise<T>): Promise<T> {
     try { return await primary(); } catch (error) { if (!(error instanceof MoodleError) || error.kind !== 'unsupported') throw error; return alternative(); }
   }
@@ -146,7 +166,7 @@ export class MoodleClient {
     if (!submissionStatus) return deadlines.map(item => ({...item,submitted:null}));
     return this.withSubmissionStatus(deadlines, async item => {
       const assignment = result.courses.flatMap(row => row.assignments).find(row => remoteId(accountId,'assignment',row.id) === item.id)!;
-      const status = await this.call('mod_assign_get_submission_status',{assignid:String(assignment.id)},z.object({lastattempt:z.object({submission:z.object({status:optionalText}).nullish()}).nullish()}));
+      const status = await this.call('mod_assign_get_submission_status',{assignid:String(assignment.id),userid:String(this.userId),groupid:'0'},z.object({lastattempt:z.object({submission:z.object({status:optionalText}).nullish()}).nullish()}));
       return status.lastattempt?.submission?.status?.toLowerCase() === 'submitted';
     });
   }
@@ -155,7 +175,7 @@ export class MoodleClient {
     await Promise.all(Array.from({length:Math.min(4,items.length)},async () => {
       while (next < items.length) {
         const item = items[next++]!;
-        try { item.submitted = await status(item); } catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; item.submitted = null; }
+        try { item.submitted = await status(item); } catch (error) { if (error instanceof MoodleError && error.kind === 'auth' && error.errorcode !== 'requireloginerror') throw error; item.submitted = null; }
       }
     }));
     return items;
@@ -188,11 +208,11 @@ export class MoodleClient {
       const event = result.events.find(event => remoteId(accountId,'event',event.id) === item.id)!;
       if (!event.instance) return false;
       if (item.kind === 'assignment') {
-        const status = await this.call('mod_assign_get_submission_status',{assignid:String(event.instance)},z.object({lastattempt:z.object({submission:z.object({status:optionalText}).nullish()}).nullish()}));
+        const status = await this.call('mod_assign_get_submission_status',{assignid:String(event.instance),userid:String(this.userId),groupid:'0'},z.object({lastattempt:z.object({submission:z.object({status:optionalText}).nullish()}).nullish()}));
         return status.lastattempt?.submission?.status?.toLowerCase() === 'submitted';
       }
       if (item.kind !== 'quiz') return false;
-      const attempts = await this.call('mod_quiz_get_user_attempts',{quizid:String(event.instance),status:'all'},z.object({attempts:z.array(z.object({state:z.string()}))}));
+      const attempts = await this.call('mod_quiz_get_user_attempts',{quizid:String(event.instance),userid:String(this.userId),status:'all',includepreviews:'0'},z.object({attempts:z.array(z.object({state:z.string()}))}));
       return attempts.attempts.some(attempt => attempt.state === 'finished');
     });
   }
@@ -233,8 +253,18 @@ export class MoodleClient {
     return result.usergrades.flatMap(user => user.gradeitems.map(row => ({remoteKey:String(row.id),value:moodleGradeItemSchema.parse({courseId:course.id,name:plainText(row.itemname ?? ''),grade:row.gradeformatted ? plainText(row.gradeformatted) : null,max:row.grademax ?? null,percentage:row.percentageformatted && Number.isFinite(parseFloat(plainText(row.percentageformatted))) ? parseFloat(plainText(row.percentageformatted)) : null,gradedAt:date(row.gradedategraded)})})));
   }
   async courseContents(course: MoodleCourse) {
-    const sections = await this.call('core_course_get_contents',{courseid:String(course.remoteId)},contentsWire);
-    return parseCourseContents(sections,course);
+    let partial=false;
+    const schema = z.array(z.unknown()).transform(raw => {
+      const diagnostics:ReturnType<typeof issueDiagnostics> = [];
+      const sections=parseContentsWire(raw,(issues,path) => {
+        partial=true;
+        diagnostics.push(...issueDiagnostics(issues,path).slice(0,10-diagnostics.length));
+      });
+      if (partial) log({phase:'moodle-call',function:'core_course_get_contents',diagnostic:{kind:'validation',issues:diagnostics,shape:responseShape(raw)}});
+      return sections;
+    });
+    const sections = await this.call('core_course_get_contents',{courseid:String(course.remoteId)},schema);
+    return {...parseCourseContents(sections,course),partial};
   }
   async files(course: MoodleCourse) { return (await this.courseContents(course)).files; }
   async quizDeadlines(course: MoodleCourse) {
@@ -245,7 +275,7 @@ export class MoodleClient {
     });
     return this.withSubmissionStatus(deadlines,async deadline => {
       const quiz = result.quizzes.find(quiz => remoteId(course.accountId,'quiz',quiz.id) === deadline.id)!;
-      const attempts = await this.call('mod_quiz_get_user_attempts',{quizid:String(quiz.id),status:'all'},z.object({attempts:z.array(z.object({state:z.string()}))}));
+      const attempts = await this.call('mod_quiz_get_user_attempts',{quizid:String(quiz.id),userid:String(this.userId),status:'all',includepreviews:'0'},z.object({attempts:z.array(z.object({state:z.string()}))}));
       return attempts.attempts.some(attempt => attempt.state === 'finished');
     });
   }

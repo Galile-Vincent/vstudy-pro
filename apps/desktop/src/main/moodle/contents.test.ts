@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { contentsWire, parseCourseContents, sanitizeCourseHtml, completionState } from './contents';
 import { MoodleClient } from './client';
 import { account, fixtureFetch } from './fixtures/support';
@@ -39,4 +39,42 @@ it('sanitizes active elements, attributes and images and maps completion literal
  expect(sanitizeCourseHtml('<iframe src="evil">bad</iframe><form>bad</form><svg onload="evil"></svg><a href="javascript:evil()">Link</a><p style="x" onmouseover="evil()">Text<img src=x onerror=evil()></p>')).toBe('Link<p>Text</p>');
  expect([undefined,0,1,2,3,8].map(state => completionState(state))).toEqual(['none','incomplete','complete','pass','fail','none']);
  expect(completionState(1,0)).toBe('none');
+});
+
+it.each([
+ ['nullable file metadata', {contents:[{type:'file',filename:'notes.pdf',filesize:null,mimetype:null,timemodified:null}]}],
+ ['nullable contents', {contents:null}],
+ ['nullable completion', {completiondata:null}],
+ ['nullable visibility', {visible:null,uservisible:null}],
+ ['nullable instance', {instance:null}],
+])('accepts real-world Moodle wire variation %s',(_name,fields) => {
+ const parsed = contentsWire.safeParse([{id:'10',section:'1',summary:null,availabilityinfo:'<p>Locked</p>',modules:[{id:'2',name:'Item',modname:'customplugin',customdata:'{}',...fields}]}]);
+ expect(parsed.success).toBe(true);
+ if (parsed.success) expect(parsed.data[0]?.modules).toHaveLength(1);
+});
+
+it('skips malformed modules independently, retains empty sections and reports partial data',async () => {
+ const logger=vi.spyOn(console,'log').mockImplementation(() => {});
+ try {
+ const request=fixtureFetch({core_course_get_contents:[{id:10,modules:[{id:1,name:'Good',modname:'unfamiliar'},{id:'broken',name:'Bad'}]},{id:11,modules:[{id:2,name:null}]},{id:'bad'}]});
+ const client=new MoodleClient(account.siteUrl,'token',request);
+ const course=(await client.courses(account))[0]!;
+ const result=await client.courseContents(course);
+ expect(result.partial).toBe(true);
+ expect(result.sections.map(section => section.modules.map(module => module.kind))).toEqual([['other'],[]]);
+ expect(logger.mock.calls.flat().join(' ')).toContain('sections.0.modules.1.id');
+ } finally {logger.mockRestore();}
+});
+
+it('maps a full Moodle 4.x fixture with delegated sections and hidden content',async () => {
+ const {readFileSync}=await import('node:fs');
+ const raw=JSON.parse(readFileSync(new URL('./fixtures/contents-4x.json',import.meta.url),'utf8'));
+ const client=new MoodleClient(account.siteUrl,'token',fixtureFetch({core_course_get_contents:raw}));
+ const course=(await client.courses(account))[0]!;
+ const result=await client.courseContents(course);
+ expect(result.partial).toBe(false);
+ expect(result.sections).toHaveLength(1);
+ expect(result.sections[0]!.modules.map(module => [module.cmid,module.kind])).toEqual([[30,'resource'],[31,'label'],[32,'subsection'],[34,'page'],[33,'other']]);
+ expect(result.sections[0]!.modules.find(module => module.cmid === 34)?.accessible).toBe(false);
+ expect(result.files[0]?.value).toMatchObject({name:'lecture.pdf',size:0,mime:'application/octet-stream'});
 });
