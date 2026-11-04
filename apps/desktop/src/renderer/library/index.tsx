@@ -344,7 +344,7 @@ export function LibraryView() {
   const [textScale,setTextScale]=useState(()=>parseFloat(getComputedStyle(document.documentElement).fontSize));
   useEffect(()=>{const update=()=>setTextScale(parseFloat(getComputedStyle(document.documentElement).fontSize));const observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['style']});window.addEventListener('resize',update);return()=>{observer.disconnect();window.removeEventListener('resize',update);};},[]);
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const rowHeight = grid ? 148 : rowRem * textScale,
+  const rowHeight = grid ? 12 * textScale : rowRem * textScale,
     columns = grid
       ? Math.max(1, Math.floor((scroller.current?.clientWidth ?? 700) / 260))
       : 1,
@@ -687,9 +687,7 @@ export function LibraryView() {
           <div
             style={{
               height: Math.ceil(items.length / columns) * rowHeight,
-              display: undefined,
-              gridTemplateColumns: grid ? "repeat(auto-fill,minmax(220px,1fr))" : undefined,
-              gap: grid ? "var(--space-4)" : undefined,
+              marginInlineEnd: grid ? "calc(-1 * var(--space-4))" : undefined,
               position: "relative",
             }}
           >
@@ -710,11 +708,11 @@ export function LibraryView() {
                   onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: rowHeight,
+                    height: grid ? `calc(${rowHeight}px - var(--space-4))` : rowHeight,
                     position: "absolute",
                     top: Math.floor(index / columns) * rowHeight,
                     left: `${((index % columns) * 100) / columns}%`,
-                    width: `${100 / columns}%`,
+                    width: grid ? `calc(${100 / columns}% - var(--space-4))` : "100%",
                   }}
                   draggable
                   onDragStart={(e) => {

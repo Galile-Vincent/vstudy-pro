@@ -8,6 +8,7 @@ import { copyAnswer } from './copy-answer';
 import { desktop } from './bridge';
 import type { Conversation } from '../shared';
 import type { Providers } from './providers';
+import './library/library.css';
 import { ThreadList } from './components/assistant-ui/elements/thread-list.aui';
 import { Popover, PopoverContent, PopoverTrigger } from './components/ui/popover';
 
@@ -36,5 +37,5 @@ export function ConversationList({conversations,current,onSelect,onNew,onDelete,
   onRename:async(id:string,title:string)=>{const next={...renames,[id]:title};localStorage.setItem('vstudy-thread-titles',JSON.stringify(next));setRenames(next);},
   onDelete:async (id:string)=>{const conversation=conversations.find(c=>c.id===id);if(conversation)await onDelete(conversation.id);},
  }}});
- return <AssistantRuntimeProvider runtime={runtime}><Popover open={open} onOpenChange={setOpen}><PopoverTrigger ref={trigger} aria-label={tr('common:conversations')} className="conversation-trigger"><span>{current?title(current):tr('common:choose_conversation')}</span><ChevronDown size={12}/></PopoverTrigger><PopoverContent aria-label={tr("common:conversations")} align="end" collisionBoundary={trigger.current?.closest('.pane')??null} collisionPadding={10} className="conversation-list-popover"><ThreadList summaries={summaries}/></PopoverContent></Popover></AssistantRuntimeProvider>;
+ return <AssistantRuntimeProvider runtime={runtime}><Popover open={open} onOpenChange={setOpen}><PopoverTrigger ref={trigger} aria-label={tr('common:conversations')} className="conversation-trigger"><span>{current?title(current):tr('common:choose_conversation')}</span><ChevronDown size={12}/></PopoverTrigger><PopoverContent aria-label={tr("common:conversations")} align="end" collisionBoundary={trigger.current?.closest('.pane')??null} collisionPadding={10} className="conversation-list-popover library-conversations"><ThreadList summaries={summaries}/></PopoverContent></Popover></AssistantRuntimeProvider>;
 }
