@@ -48,7 +48,11 @@ export class MoodleSso {
       let settled = false;
       let failure: MoodleAuthError | undefined;
       let recoveryUrl: string | undefined;
-      const diagnostic = (phase: string, code: string, target: string) => log({phase:`moodle-sso-${phase}`,code,host:hostOf(target)});
+      const diagnostic = (phase: string, code: string, target: string, resourceType?: string) => {
+        let scheme = 'invalid', port = '';
+        try { const url = new URL(target); scheme = url.protocol; port = url.port || (scheme === 'https:' ? '443' : ''); } catch { /* Invalid URLs have no network metadata. */ }
+        log({phase:`moodle-sso-${phase}`,code,host:hostOf(target),scheme,port,resourceType});
+      };
       const finish = (outcome: Outcome) => {
         if (settled) return;
         settled = true;
@@ -93,6 +97,7 @@ export class MoodleSso {
         });
       };
       const navigate = (event: Electron.Event, target: string) => {
+        diagnostic('navigate','CHECK',target);
         if (callback(target,'navigate')) { event.preventDefault(); return; }
         if (recoveryUrl && target === launch.href) {
           event.preventDefault(); recoveryUrl = undefined; load(); return;
@@ -101,6 +106,7 @@ export class MoodleSso {
         catch { event.preventDefault(); showFailure(new MoodleAuthError('blocked'),'URL_REJECTED',target); }
       };
       isolated.webRequest.onBeforeRequest((details,respond) => {
+        diagnostic('request','CHECK',details.url,details.resourceType);
         if (/^vstudymoodle:/i.test(details.url)) { respond({cancel:true}); callback(details.url,'request'); return; }
         if (details.url === recoveryUrl) {respond({cancel:false});return;}
         try { networkUrl(details.url); respond({cancel:false}); }
