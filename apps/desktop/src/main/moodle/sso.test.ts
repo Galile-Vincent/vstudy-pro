@@ -235,3 +235,24 @@ it('allows the internal blank document without recovery',async () => {
   expect(window.url).toMatch(/^https:/);
   sso.dispose();await result;
 });
+
+it.each(['will-navigate','will-redirect','did-fail-load','request'])('accepts CYCU forced moodlemobile at %s with a valid passport signature',async phase => {
+  const site = await checkSite('https://ilearning.cycu.edu.tw',async () => Response.json([{error:false,data:{typeoflogin:2}}]));
+  const sso = new MoodleSso();
+  const pending = sso.login(site,undefined,async tokens => tokens).catch(error => ({error:error.code}));
+  const window = mock.windows.at(-1)!;
+  const signature = createHash('md5').update(site.siteUrl + new URL(window.url).searchParams.get('passport')).digest('hex');
+  const target = 'moodlemobile://token=' + Buffer.from(`${signature}:::CYCU-canary-access:::CYCU-canary-private`).toString('base64');
+  const logs = vi.spyOn(console,'log').mockImplementation(() => undefined);
+  try {
+    if (phase === 'request') {
+      const respond = vi.fn();
+      mock.request.mock.calls.at(-1)![1]({url:target,resourceType:'mainFrame'},respond);
+      expect(respond.mock.calls).toEqual([[{cancel:true}]]);
+    } else if (phase === 'did-fail-load') window.webContents.emit(phase,{},-302,target,target,true);
+    else window.webContents.emit(phase,{preventDefault:vi.fn()},target,false,true);
+    if (!window.destroyed) sso.cancel(site.siteUrl);
+    expect(await pending).toEqual({token:'CYCU-canary-access',privateToken:'CYCU-canary-private'});
+    expect(JSON.stringify(logs.mock.calls)).not.toContain(target.slice('moodlemobile://'.length));
+  } finally { logs.mockRestore(); sso.dispose(); }
+});
