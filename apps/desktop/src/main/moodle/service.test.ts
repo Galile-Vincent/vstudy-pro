@@ -31,6 +31,7 @@ it('syncs twice with stable identities and isolated account records',async () =>
   const {repository,service,store} = await setup();
   await service.sync(account.id);
   const first = repository.overview();
+  await service.refreshCourse(first.courses[0]!.id);
   const course = repository.course(first.courses[0]!.id);
   const reminder = repository.createReminder({deadlineId:course.deadlines[0]!.id,remindAt:'2026-11-06T00:00:00.000Z',note:'Study',createdBy:'user'});
   repository.markRead(course.notifications[0]!.id);
@@ -466,5 +467,25 @@ it('returns cached overview without starting per-course detail calls',async () =
   expect(overview.summaries?.[0]?.course.id).toBe(overview.courses[0]!.id);
   expect(request).not.toHaveBeenCalled();
   expect(performance.now()-started).toBeLessThan(100);
+  await service.dispose();
+});
+
+it('prefetches current contents only and loads historical grades when opened',async () => {
+  const {service,repository,request}=await setup();
+  const base=request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    if(new URLSearchParams(String(options?.body)).get('wsfunction') === 'core_enrol_get_users_courses') return Response.json([
+      {id:101,fullname:'Current',shortname:'C',startdate:1},
+      {id:102,fullname:'Past',shortname:'P',enddate:1},
+    ]);
+    return base(target,options);
+  });
+  await service.sync(account.id);
+  const calls=request.mock.calls.map(call => new URLSearchParams(String(call[1]?.body)));
+  expect(calls.filter(args => args.get('wsfunction') === 'core_course_get_contents').map(args => args.get('courseid'))).toEqual(['101']);
+  expect(calls.filter(args => args.get('wsfunction') === 'gradereport_user_get_grade_items')).toEqual([]);
+  const past=repository.overview().courses.find(course => course.remoteId === 102)!;
+  await service.refreshCourse(past.id);
+  expect(repository.course(past.id).grades).toHaveLength(1);
   await service.dispose();
 });

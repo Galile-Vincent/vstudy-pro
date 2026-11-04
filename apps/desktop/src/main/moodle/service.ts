@@ -136,7 +136,7 @@ export class MoodleService {
       };
       this.progress({accountId:account.id,courseId:id,state:'loading',completed:0,total:1});
       let contents;
-      try { contents = await client.courseContents(detail.course); } catch (error) {this.detailErrors.set(id,error instanceof MoodleError ? error.kind : 'service');if (error instanceof MoodleError && error.kind === 'auth') throw error;}
+      try { contents = await client.courseContents(detail.course); } catch (error) {if (!(error instanceof MoodleError) || error.kind !== 'unsupported') this.detailErrors.set(id,error instanceof MoodleError ? error.kind : 'service');if (error instanceof MoodleError && error.kind === 'auth') throw error;}
       if (contents && active()) this.repository.saveDetail(id,{sections:contents.sections},contents.files);
       ready();
       this.progress({accountId:account.id,courseId:id,state:'loading',completed:1,total:1});
@@ -147,7 +147,11 @@ export class MoodleService {
           optional('mod_assign_get_assignments',() => client.assignments(account.id,[detail.course])),
           optional('mod_quiz_get_quizzes_by_courses',() => client.quizDeadlines(detail.course)),
         ]);
-        const deadlines = [...(assignments ?? []),...(quizzes ?? []),...detail.deadlines];
+        const deadlines = [...new Map([...detail.deadlines,...(assignments ?? []),...(quizzes ?? [])].map(item => [item.id,item])).values()];
+        if (active()) {
+          const latest=this.repository.course(id);
+          this.repository.apply(account.id,{courses:[latest.course],deadlines,notifications:[],grades:this.repository.gradeRecords(id),files:this.repository.fileRecords(id)},id);
+        }
         for (const section of contents.sections) for (const module of section.modules) {
           const status = statuses?.find(status => status.cmid === module.cmid);
           if (status) module.completion = completionState(status.state,status.tracking);
@@ -174,6 +178,12 @@ export class MoodleService {
           }
         }
       }
+      })(),(async () => {
+        const grades=await optional('gradereport_user_get_grade_items',() => client.grades(detail.course,account.remoteUserId));
+        if (grades && active()) {
+          const latest=this.repository.course(id);
+          this.repository.apply(account.id,{courses:[latest.course],deadlines:latest.deadlines,notifications:[],grades,files:this.repository.fileRecords(id)},id);
+        }
       })(),(async () => {
       const announcements = await optional('mod_forum_get_forums_by_courses',() => client.announcements(this.repository.course(id).course));
       if (announcements && active()) this.repository.saveDetail(id,{announcements});
@@ -250,10 +260,10 @@ export class MoodleService {
     const active = () => !this.stopped && this.repository.accounts().some(account => account.id === id);
     let completed=0;
     const current=courses.filter(course => course.identity.lifecycle === 'current');
-    await Promise.all(current.map(async course => {
+    const outcomes=await Promise.allSettled(current.map(async course => {
       const [assignments,grades,contents] = await Promise.all([
         optional(() => client.assignments(id,[course],false),cached.find(item => item.course.id === course.id)?.deadlines.filter(item => item.kind === 'assignment') ?? []),
-        optional(() => client.grades(course,account.remoteUserId),this.repository.gradeRecords(course.id)),
+        Promise.resolve(this.repository.gradeRecords(course.id)),
         optional(() => client.courseContents(course),undefined),
       ]);
       if (active()) {
@@ -263,11 +273,13 @@ export class MoodleService {
         this.progress({accountId:id,state:'loading',completed:++completed,total:current.length});
       }
     }));
+    const rejected=outcomes.find(outcome => outcome.status === 'rejected');
+    if (rejected?.status === 'rejected') throw rejected.reason;
     if (active()) this.repository.apply(id,{courses,deadlines:[],notifications,grades:[],files:[]},'@notifications');
     this.progress({accountId:id,state:errors.length ? 'error' : 'idle',completed:current.length,total:current.length});
     return {errors};
     } catch (error) {this.progress({accountId:id,state:'error',completed:0,total:0});throw error;}
-    finally {log({phase:'moodle-sync',ms:performance.now()-started,calls:calls.length,bytes:calls.reduce((sum,call)=>sum+call.bytes,0),slowest:[...calls].sort((a,b)=>b.ms-a.ms).slice(0,5)});}
+    finally {log({phase:'moodle-sync',ms:performance.now()-started,calls:calls.reduce((sum,call)=>sum+call.requests,0),bytes:calls.reduce((sum,call)=>sum+call.bytes,0),slowest:[...calls].sort((a,b)=>b.ms-a.ms).slice(0,5)});}
   }
 
   async dispose() { this.stopped = true; await Promise.allSettled([...this.pending.values(),...this.detailPending.values()]); }

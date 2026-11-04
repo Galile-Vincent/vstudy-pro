@@ -1,7 +1,6 @@
 import { log } from '../logging';
-import { MoodleScheduler } from './scheduler';
+import type { MoodleScheduler } from './scheduler';
 import { connectionTiming } from './site-url';
-export interface MoodleCallTiming { function:string; ms:number; bytes:number; queueMs:number; reused:boolean | null; ok:boolean }
 import { courseLifecycle, parseCourseIdentity, teacherName } from './identity';
 import { contentsWire, parseCourseContents, sanitizeCourseHtml, safeUrl } from './contents';
 import type { MoodleAnnouncement } from '../../shared/moodle-course';
@@ -18,6 +17,7 @@ import {
 } from '../../shared/moodle';
 
 export type Fetch = typeof fetch;
+export interface MoodleCallTiming { function:string; ms:number; bytes:number; queueMs:number; reused:boolean | null; ok:boolean; requests:number }
 export class MoodleError extends Error {
   constructor(readonly kind: 'auth' | 'unsupported' | 'service' | 'network') { super(`Moodle ${kind} error`); }
 }
@@ -50,17 +50,18 @@ export class MoodleClient {
   wsAvailable(name: string) { return !this.functions || this.functions.has(name); }
   constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = moodleFetch, private readonly scheduling?: {queue:MoodleScheduler;priority:number;timing?:(call:MoodleCallTiming)=>void}) {}
   async call<S extends z.ZodTypeAny>(name: string, params: Record<string,string>, schema: S, retryLanguage = true, signal?: AbortSignal): Promise<z.output<S>> {
+    if (name !== 'core_webservice_get_site_info' && !this.wsAvailable(name)) throw new MoodleError('unsupported');
     const run = async (queueMs:number) => {
       const started = performance.now();
-      const timing: MoodleCallTiming = {function:name,ms:0,bytes:0,queueMs,reused:null,ok:false};
+      const timing: MoodleCallTiming = {function:name,ms:0,bytes:0,queueMs,reused:null,ok:false,requests:0};
       try { const result = await this.performCall(name,params,schema,retryLanguage,signal,timing); timing.ok=true; return result; }
       finally { timing.ms=performance.now()-started; log({phase:'moodle-call',...timing}); this.scheduling?.timing?.(timing); }
     };
     return this.scheduling ? this.scheduling.queue.run(this.scheduling.priority,run) : run(0);
   }
   private async performCall<S extends z.ZodTypeAny>(name:string, params:Record<string,string>, schema:S, retryLanguage:boolean, signal:AbortSignal | undefined, timing:MoodleCallTiming):Promise<z.output<S>> {
-    if (name !== 'core_webservice_get_site_info' && !this.wsAvailable(name)) throw new MoodleError('unsupported');
     let response: Response;
+    timing.requests++;
     try { response = await siteFetch(this.host,this.request)(`${this.host}/webservice/rest/server.php?moodlewsrestformat=json`, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({...params,moodlewssettingfilter:'1',...(this.langSupported ? {moodlewssettinglang:this.language} : {}),wstoken:this.token,wsfunction:name}), redirect:'error', signal:signal ? AbortSignal.any([signal,AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000)}); }
     catch { throw new MoodleError('network'); }
     if (!response.ok) throw new MoodleError('network');
@@ -135,7 +136,6 @@ export class MoodleClient {
     return Promise.all(mapped.map(async course => ({...course,imageUrl:course.imageUrl ? await moodleImage(course.imageUrl,this.host,this.token,this.request) : null})));
   }
   async assignments(accountId: string, courses: MoodleCourse[], submissionStatus = true) {
-    courses = courses.filter(course => !course.endAt || Date.parse(course.endAt) >= Date.now() - 14 * 86400000);
     if (!courses.length) return [];
     const params = Object.fromEntries(courses.map((course,index) => [`courseids[${index}]`,String(course.remoteId)]));
     const result = await this.call('mod_assign_get_assignments',params,assignmentWire);

@@ -121,7 +121,7 @@ it('fetches ordinary calendar events alongside action events',async () => {
   const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch());
   expect((await client.events(account.id,await client.courses(account))).map(item => item.title)).toEqual(['Class event','Quiz & review']);
 });
-it('requests a fourteen-day action window and skips long-ended assignments',async () => {
+it('requests a fourteen-day action window and loads historical assignments on demand',async () => {
   vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-04T00:00:00Z'));
   try {
     const request = fixtureFetch(); const client = new MoodleClient(schools[0]!.host,'token',request);
@@ -130,8 +130,8 @@ it('requests a fourteen-day action window and skips long-ended assignments',asyn
     expect(params.get('timesortfrom')).toBe('1792540800');
     expect(params.get('limittononsuspendedevents')).toBe('1');
     request.mockClear();
-    expect(await client.assignments(account.id,[{...courses[0]!,endAt:'2020-01-01T00:00:00.000Z'}])).toEqual([]);
-    expect(request).toHaveBeenCalledTimes(0);
+    expect(await client.assignments(account.id,[{...courses[0]!,endAt:'2020-01-01T00:00:00.000Z'}])).toHaveLength(1);
+    expect(request).toHaveBeenCalledTimes(2);
   } finally { vi.useRealTimers(); }
 });
 

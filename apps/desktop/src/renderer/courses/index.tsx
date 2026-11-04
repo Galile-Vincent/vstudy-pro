@@ -194,12 +194,16 @@ export function Courses({
       refreshSequence.current++;
     };
   }, [refresh]);
-  useEffect(() => api.onProgress?.(event => {
+  useEffect(() => {
+    let timer:ReturnType<typeof setTimeout> | undefined;
+    const unsubscribe=api.onProgress?.(event => {
     if (event.courseId && event.courseId !== courseId) return;
     if (!event.courseId) {setProgress(event);setSyncing(event.state === 'loading');}
     if (event.state === 'error') setError(true);
-    void refresh().catch(() => setError(true));
-  }),[api,courseId,refresh]);
+    if (!timer) timer=setTimeout(() => {timer=undefined;void refresh().catch(() => setError(true));},50);
+    });
+    return () => {clearTimeout(timer);unsubscribe?.();};
+  },[api,courseId,refresh]);
 
   const failure = () => setNotice(tr("moodle:action_error"));
   const sync = async () => {
@@ -658,7 +662,8 @@ export function Courses({
                       onError={failure}
                     />
                   </TabsContent>
-                  <TabsContent value="deadlines">
+                  <TabsContent value="deadlines" aria-busy={detail.fetchState === "loading"}>
+                    {detail.fetchState === "loading" && <Skeleton className="moodle-skeleton" />}
                     <section className="moodle-panel">
                       <div className="moodle-section-heading">
                         <h2>{tr("moodle:deadlines")}</h2>
@@ -701,7 +706,8 @@ export function Courses({
                       )}
                     </section>
                   </TabsContent>
-                  <TabsContent value="announcements">
+                  <TabsContent value="announcements" aria-busy={detail.fetchState === "loading"}>
+                    {detail.fetchState === "loading" && <Skeleton className="moodle-skeleton" />}
                     <Announcements items={detail.announcements} />
                   </TabsContent>
                   <TabsContent value="notifications">
@@ -710,7 +716,8 @@ export function Courses({
                       {notifications()}
                     </section>
                   </TabsContent>
-                  <TabsContent value="grades">
+                  <TabsContent value="grades" aria-busy={detail.fetchState === "loading"}>
+                    {detail.fetchState === "loading" && <Skeleton className="moodle-skeleton" />}
                     <section className="moodle-panel">
                       <h2>{tr("moodle:grades")}</h2>
                       {detail.grades.length ? (
