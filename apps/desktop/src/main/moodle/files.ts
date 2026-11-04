@@ -29,7 +29,7 @@ export async function importMoodleFile(repository: MoodleRepository, id: string,
     catch { throw new Error('Moodle file download failed'); }
     if (!response.ok || !response.body) throw new Error('Moodle file download failed');
     if (Number(response.headers.get('content-length')) > MAX_SOURCE_BYTES) { await response.body.cancel(); throw new Error('Document exceeds 50 MiB'); }
-    const path = join(directory,`download${extension}`);
+    const path = join(directory,Array.from(file.name,char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127 || '/\\:'.includes(char) ? '_' : char).join('').replace(/^\.+/, '_'));
     const output = await open(path,'wx',0o600);
     const reader = response.body.getReader();
     let size = 0;

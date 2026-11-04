@@ -91,7 +91,7 @@ it('downloads to a private file, imports through DocumentService, links and dedu
   });
   const request = vi.fn<typeof fetch>(async () => new Response('%PDF-1.4\nMoodle fixture\n%%EOF'));
   const id = await importMoodleFile(repository,original.id,'https://ilearning.cycu.edu.tw','token',documents,request);
-  expect(store.documents.get(id as Parameters<typeof store.documents.get>[0])?.sourceName).toBe('download.pdf');
+  expect(store.documents.get(id as Parameters<typeof store.documents.get>[0])?.sourceName).toBe('lecture.pdf');
   expect(repository.file(original.id).file.documentId).toBe(id);
   expect(await importMoodleFile(repository,original.id,'https://ilearning.cycu.edu.tw','token',documents,request)).toBe(id);
   expect(request).toHaveBeenCalledTimes(1);
