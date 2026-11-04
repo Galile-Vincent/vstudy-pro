@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useFormat } from '../i18n';
 import { Checkbox } from '../components/checkbox';
 import { Button } from '../components/ui/button';
 import { FileText,Pencil,FolderInput,Tag,ExternalLink,Download,RefreshCw,Trash2 } from 'lucide-react';
@@ -14,7 +16,19 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
  open:(item:Item)=>void;
  setMenu:(item:Item|null)=>void;setMove:(value:boolean)=>void;setTagging:(value:boolean)=>void;
 }) {
+ const [details,setDetails]=useState<Item|null>(null);const format=useFormat();
+ const path=(id:Item['folderId'])=>{const names:string[]=[];for(let n=0;id&&n<folders.length;n++){const folder=folders.find(f=>f.id===id);if(!folder)break;names.unshift(folder.name);id=folder.parentId;}return names.join(' › ')||tr('library:unfiled');};
  return <>
+ {details&&<LibraryDialog title={tr('library:details')} onClose={()=>setDetails(null)}><dl className="document-details">{[
+ [tr('library:name'),details.document.title],
+ [tr('library:folderId'),path(details.folderId)],
+ [tr('library:type'),details.document.sourceName.split('.').pop()?.toUpperCase()],
+ [tr('library:size'),details.sizeBytes===null?tr('library:unknown_size'):new Intl.NumberFormat(document.documentElement.lang,{style:'unit',unit:'kilobyte',unitDisplay:'short',maximumFractionDigits:1}).format(details.sizeBytes/1000)],
+ [tr('library:createdAt'),format.date(details.document.createdAt)],
+ [tr('library:tag'),details.tags.map(t=>t.name).join(', ')],
+ ...(details.pageCount===null?[]:[[tr('library:pageCount'),format.number(details.pageCount)]]),
+ ].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></LibraryDialog>}
+
       {menu && !move && !tagging && (
         <LibraryDialog
           title={tr("library:actions", { name: menu.document.title })}
@@ -22,6 +36,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
           onClose={() => setMenu(null)}
         >
           <div className="document-menu">
+            <Button variant="ghost" data-testid="document-details" onClick={()=>{setDetails(menu);setMenu(null);}}>{tr('library:details')}</Button>
             <Button variant="ghost" onClick={() => open(menu)}><FileText/>{tr("library:open")}</Button>
             <Button variant="ghost"
               onClick={async () => {

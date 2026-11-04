@@ -1,4 +1,4 @@
-.settings-dialog.settings-dialog[data-slot=dialog-content] { width:min(880px,calc(100vw - 32px)); height:min(640px,calc(100dvh - 32px)); max-width:calc(100vw - 32px); max-height:calc(100dvh - 32px); padding:0; display:flex; flex-direction:column; overflow:hidden; gap:0; }
+.settings-dialog.settings-dialog[data-slot=dialog-content]:not(.library-dialog) { width:min(880px,calc(100vw - 32px)); height:min(640px,calc(100dvh - 32px)); max-width:calc(100vw - 32px); max-height:calc(100dvh - 32px); padding:0; display:flex; flex-direction:column; overflow:hidden; gap:0; }
 .settings-header { height:56px; flex:none; display:flex; align-items:center; justify-content:space-between; padding-inline:var(--space-6); border-bottom:1px solid var(--hairline); }
 .settings-header h2 { font-size:var(--type-base); font-weight:600; }
 .settings-body[data-slot=tabs] { flex:1; min-height:0; display:grid; grid-template-columns:200px minmax(0,1fr); gap:0; container:settings / inline-size; }
@@ -56,7 +56,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 @container settings (max-width:40rem) { .settings-tabs[data-slot=tabs-list] { grid-column:1/-1; flex-direction:row; height:44px; overflow-x:auto; border-inline-end:0; border-bottom:1px solid var(--hairline); padding:var(--space-1); } .settings-tabs [data-slot=tabs-trigger] { width:auto; } .settings-pane { grid-column:1/-1; padding:var(--space-4) var(--space-4) var(--space-6); } }
 @media(max-width:672px) { .settings-body[data-slot=tabs] { grid-template-columns:minmax(0,1fr); grid-template-rows:44px minmax(0,1fr); } }
 @container settings (min-width:44rem) { .appearance-layout { display:grid; grid-template-columns:minmax(0,1fr) 280px; align-items:start; } .appearance-preview { grid-column:2; grid-row:1; position:sticky; top:0; } .appearance-layout > .settings-group { grid-column:1; grid-row:1; } }
-.settings-dialog.settings-dialog[data-slot=dialog-content] { container:settings-shell / inline-size; }
+.settings-dialog.settings-dialog[data-slot=dialog-content]:not(.library-dialog) { container:settings-shell / inline-size; }
 @container settings-shell (max-width:40rem) { .settings-body[data-slot=tabs] { grid-template-columns:minmax(0,1fr); grid-template-rows:44px minmax(0,1fr); } }
 .settings-pane .usage-settings .settings-control input { width:7.5rem; text-align:end; font-variant-numeric:tabular-nums; }
 .settings-pane .usage-settings .settings-control textarea { flex:1; min-width:0; width:100%; font:var(--type-sm) var(--font-mono); }

@@ -66,7 +66,7 @@ try {
   await page.locator('.library-document').first().click({position:{x:4,y:10}});
   const audit=async(state)=>{const result=await new AxeBuilder({page}).setLegacyMode(true).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa','best-practice']).analyze();checks.push({...context,state,rows:geometry.rows,violations:result.violations});assert.deepEqual(result.violations,[],JSON.stringify({...context,state}));};
   const selectedStyle=await page.locator('.library-document').first().evaluate(e=>{const s=window.getComputedStyle(e);return [s.boxShadow,s.borderLeftWidth,s.outlineStyle];});assert.deepEqual(selectedStyle,['none','0px','none']);
-  await audit('library-selected');await page.locator('.library-document').first().click({button:'right'});await page.getByRole('menu').waitFor();await audit('library-menu');await page.keyboard.press('Escape');
+  await audit('library-selected');await page.locator('.library-document').first().click({button:'right'});await page.getByRole('menu').waitFor();await audit('library-menu');await page.getByTestId('document-details').click();await page.locator('.document-details').waitFor();await audit('library-details');await page.keyboard.press('Escape');
   const shot=async(state)=>{const data=await app.evaluate(async({BrowserWindow})=>(await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'));await writeFile(`${out}/${language}-${theme}-${width}-${scale}-${state}.png`,Buffer.from(data,'base64'));};
   await page.locator('.library-title h1').hover();await shot('library');
   await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog').waitFor();let dialogSize;

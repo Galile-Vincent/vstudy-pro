@@ -38,3 +38,7 @@ html[data-input-modality=pointer] .library-results .document-title:focus { outli
 .library-view .bulk-bar { max-width:calc(100% - var(--space-8) * 2); flex-wrap:nowrap; overflow-x:auto; }
 .library-view .bulk-bar > * { flex-shrink:0; white-space:nowrap; }
 .library-view .bulk-bar button { height:var(--space-8); }
+.document-details { display:grid; gap:var(--space-4); min-width:0; }
+.document-details > div { display:grid; grid-template-columns:7rem minmax(0,1fr); gap:var(--space-3); }
+.document-details dt { color:var(--muted); }
+.document-details dd { margin:0; overflow-wrap:anywhere; }

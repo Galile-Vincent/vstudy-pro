@@ -149,5 +149,7 @@
   "ai_parse.revert": "Revert to original",
   "ai_parse.discard": "Discard AI version",
   "ai_parse.cap": "Job admission cap (USD; actual charges may exceed estimate)",
-  "ai_parse.override": "Confirm spending beyond remaining monthly budget"
+  "ai_parse.override": "Confirm spending beyond remaining monthly budget",
+  "details": "Details",
+  "pageCount": "Pages"
 }

@@ -149,5 +149,7 @@
   "ai_parse.revert": "元に戻す",
   "ai_parse.discard": "AI 版を削除",
   "ai_parse.cap": "ジョブの予算上限（USD、実際の料金は見積額を超える場合があります）",
-  "ai_parse.override": "月の残りの予算を超える支出を確認"
+  "ai_parse.override": "月の残りの予算を超える支出を確認",
+  "details": "詳細",
+  "pageCount": "ページ数"
 }
