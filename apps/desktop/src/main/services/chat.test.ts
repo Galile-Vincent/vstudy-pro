@@ -82,6 +82,7 @@ async function setup(adapter: ProviderAdapter) {
     store.close();
     await rm(cwd, { recursive: true, force: true });
   });
+  if (request.scope === "course") throw new Error("Expected document fixture");
   return { chat, store, request, cwd, owner: new Owner() };
 }
 const available = {
@@ -375,6 +376,7 @@ it('retains explicitly reported zero usage on a completed call',async()=>{
 });
 it('persists and forwards reasoning, validated citations and a bounded API presentation before one terminal event', async () => {
   const fixture = await setup({...available,async *stream(req) {
+    if (req.scope === 'course') throw new Error('Expected document fixture');
     expect(req.allowPresentation).toBe(true);
     yield {type:'reasoning-delta',text:'Reported summary'};
     yield {type:'citations',citations:[{id:'s0',documentId:req.documentId,title:'Forged title',offset:999,quote:'Forged quote'}]};
@@ -523,4 +525,28 @@ it('restores the old active branch when an accepted edit fails before output',as
  const user=store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'user',parts:[{type:'text',text:'original'}],createdAt:new Date().toISOString()});
  store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'assistant',parts:[{type:'text',text:'valuable answer'}],createdAt:new Date(Date.now()+1).toISOString()});
  const before=store.messages.list(request.conversationId);chat.start({...request,userMessage:'edited',turnId:user.id},owner);await chat.waitForIdle();expect(store.messages.list(request.conversationId)).toEqual(before);
+});
+it('persists action-only course replies and never executes a proposal', async () => {
+  const fixture = await setup({...available, async *stream(req) {
+    expect(req.allowPresentation).toBe(false);
+    expect(req.prompt).toContain('<UNTRUSTED_COURSE_DATA>');
+    yield {type:'text-delta',text:'```vstudy-action\n{"type":"export-calendar","deadlineIds":["00000000-0000-4000-8000-000000000012"]}\n```'};
+    yield {type:'done'};
+  }});
+  const courseId = '00000000-0000-4000-8000-000000000011';
+  const deadlineId = '00000000-0000-4000-8000-000000000012';
+  const accountId = '00000000-0000-4000-8000-000000000013';
+  const course = {id:courseId,accountId,remoteId:1,fullName:'Lab',shortName:'LAB',imageUrl:null,progress:null,startAt:null,endAt:null,favourite:false};
+  fixture.store.db.prepare("INSERT INTO moodle_accounts VALUES (?,'cycu',1,'{}')").run(accountId);
+  fixture.store.db.prepare('INSERT INTO moodle_courses VALUES (?,?,?)').run(courseId,accountId,JSON.stringify(course));
+  fixture.store.db.prepare('INSERT INTO moodle_deadlines VALUES (?,?,?)').run(deadlineId,courseId,JSON.stringify({id:deadlineId,courseId,title:'Lab report',kind:'assignment',dueAt:'2099-01-01T00:00:00Z',url:null,submitted:false}));
+  const conversation = fixture.chat.createConversation({scope:'course',courseId,providerId:'anthropic-api',modelId:'fake'});
+  const request = chatRequestSchema.parse({scope:'course',courseId,conversationId:conversation.id,requestId:randomUUID(),providerId:'anthropic-api',modelId:'fake',userMessage:'Plan'});
+  if (request.scope !== 'course') throw new Error('Expected course fixture');
+  expect(() => fixture.chat.start({...request,courseId:'00000000-0000-4000-8000-000000000099'},fixture.owner)).toThrow('Chat context mismatch');
+  fixture.chat.start(request,fixture.owner);
+  await fixture.chat.waitForIdle();
+  expect(fixture.owner.events).toEqual([{type:'proposals',actions:[{type:'export-calendar',deadlineIds:['00000000-0000-4000-8000-000000000012']}]},{type:'done'}]);
+  expect(fixture.store.messages.list(conversation.id).at(-1)?.parts[0]?.proposals).toEqual([{type:'export-calendar',deadlineIds:['00000000-0000-4000-8000-000000000012']}]);
+  expect(fixture.store.db.prepare('SELECT * FROM moodle_reminders').all()).toEqual([]);
 });

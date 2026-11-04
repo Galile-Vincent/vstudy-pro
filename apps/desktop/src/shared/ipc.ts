@@ -8,7 +8,7 @@ import {
   chatEventSchema,
   chatRequestSchema,
   conversationIdSchema,
-  conversationSchema,
+  conversationSchema, conversationCreateSchema, conversationScopeSchema,
   documentIdSchema,
   documentSchema,
   messageSchema,
@@ -84,13 +84,13 @@ export const ipcContract = {
     response: ack,
   },
   "conversations:create": {
-    request: conversationSchema.omit({ id: true, createdAt: true }),
+    request: conversationCreateSchema,
     response: conversationSchema,
   },
   "conversations:model": { request: z.object({ conversationId: conversationIdSchema, providerId: providerIdSchema, modelId: z.string().min(1) }).strict(), response: conversationSchema },
   "conversations:options": { request: z.object({ conversationId: conversationIdSchema, options: modelOptionsSchema }).strict(), response: ack },
   "conversations:list": {
-    request: z.object({ documentId: documentIdSchema }).strict(),
+    request: conversationScopeSchema,
     response: z.array(conversationSchema),
   },
   "conversations:delete": {

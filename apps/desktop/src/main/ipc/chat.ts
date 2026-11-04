@@ -63,8 +63,8 @@ export function registerChatIpc(
     store.conversations.setOptions(conversationId, options);
     return { ok: true };
   });
-  registrar.handle("conversations:list", ({ documentId }) =>
-    store.conversations.list(documentId),
+  registrar.handle("conversations:list", (scope) =>
+    store.conversations.list(scope),
   );
   registrar.handle("conversations:delete", ({ conversationId }) => {
     chat.deleteConversation(conversationId);

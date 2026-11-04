@@ -1,9 +1,17 @@
 import { z } from "zod";
+import { moodleAgentActionSchema } from "./moodle";
 
 export const documentIdSchema = z.string().uuid().brand<"DocumentId">();
 export const conversationIdSchema = z.string().uuid().brand<"ConversationId">();
 export const messageIdSchema = z.string().uuid().brand<"MessageId">();
 export const requestIdSchema = z.string().uuid().brand<"RequestId">();
+
+export const conversationScopeSchema = z.discriminatedUnion("scope", [
+ z.object({ scope: z.literal("document").optional(), documentId: documentIdSchema }).strict(),
+ z.object({ scope: z.literal("course"), courseId: z.string().uuid() }).strict(),
+]);
+export type ConversationScope = z.infer<typeof conversationScopeSchema>;
+
 export const providerIdSchema = z.enum([
   "anthropic-api",
   "openai-api",
@@ -80,16 +88,21 @@ export const modelSchema = z.object({
   options: z.array(z.object({ id: z.string(), label: z.string(), values: z.array(z.object({ id: z.string(), label: z.string() })), default: z.string() })).optional(),
 });
 export type Model = z.infer<typeof modelSchema>;
-export const conversationSchema = z
-  .object({
+const conversationFields = {
     id: conversationIdSchema,
-    documentId: documentIdSchema,
     providerId: providerIdSchema,
     modelId: z.string().min(1).max(300),
     options: modelOptionsSchema.optional(),
     createdAt: timestamp,
-  })
-  .strict();
+};
+export const conversationCreateSchema = z.discriminatedUnion("scope", [
+ conversationScopeSchema.options[0].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
+ conversationScopeSchema.options[1].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
+]);
+export const conversationSchema = z.discriminatedUnion("scope", [
+ conversationScopeSchema.options[0].extend(conversationFields),
+ conversationScopeSchema.options[1].extend(conversationFields),
+]);
 export type Conversation = z.infer<typeof conversationSchema>;
 export const rateLimitSchema = z.object({
   label: z.string().min(1), usedPercent: z.number().min(0).max(100).optional(),
@@ -137,7 +150,7 @@ export const toolCallSchema = z.object({
 }).strict();
 export type ToolCall = z.infer<typeof toolCallSchema>;
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .object({ type: z.literal("text"), text: z.string(), proposals: z.array(moodleAgentActionSchema).max(5).optional(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .extend({ contextExcluded: z.boolean().optional() })
   .strict();
 export const messageSchema = z
@@ -179,26 +192,23 @@ export const providerConfigSchema = z.discriminatedUnion("kind", [
     .strict(),
 ]);
 export type ProviderConfig = z.infer<typeof providerConfigSchema>;
-export const chatRequestSchema = z
-  .object({
+const chatFields = {
     requestId: requestIdSchema,
     conversationId: conversationIdSchema,
-    documentId: documentIdSchema,
     providerId: providerIdSchema,
     modelId: z.string().min(1).max(300),
     userMessage: z.string().min(1),
     options: modelOptionsSchema.optional(),
     turnId: z.string().max(200).optional(),
     contextTurnIds: z.array(z.string().max(200)).max(10000).optional(),
-    selection: selectionSchema.optional(),
-  })
-  .strict()
-  .refine(
-    (r) => !r.selection || r.selection.documentId === r.documentId,
-    "Selection belongs to another document",
-  );
+};
+export const chatRequestSchema = z.discriminatedUnion("scope", [
+ conversationScopeSchema.options[0].extend({...chatFields, selection: selectionSchema.optional()}),
+ conversationScopeSchema.options[1].extend(chatFields),
+]).refine(r => r.scope === "course" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 export const chatEventSchema = z.discriminatedUnion("type", [
+ z.object({type: z.literal("proposals"), actions: z.array(moodleAgentActionSchema).max(5)}).strict(),
   z.object({ type: z.literal("reasoning-delta"), text: z.string().max(2_000_000) }).strict(),
   z.object({ type: z.literal("citations"), citations: z.array(documentCitationSchema).max(128) }).strict(),
   z.object({ type: z.literal("tool-call"), call: toolCallSchema }).strict(),

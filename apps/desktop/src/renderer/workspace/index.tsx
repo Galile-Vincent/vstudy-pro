@@ -184,7 +184,7 @@ export function Workspace() {
   }, [documentId, report]);
   useEffect(() => {
     if (!conversation) return;
-    try { localStorage.setItem(`vstudy-conversation:${conversation.documentId}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
+    try { localStorage.setItem(`vstudy-conversation:${(conversation.scope === "course" ? conversation.courseId : conversation.documentId)}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
   }, [conversation?.id]);
   useEffect(() => {
     let active = true;
@@ -287,7 +287,7 @@ export function Workspace() {
         providerId: value.slice(0, slash) as ProviderConfig["id"],
         modelId: value.slice(slash + 1),
       });
-      if(activeDocument.current!==created.documentId)return;
+      if(created.scope === "course" || activeDocument.current!==created.documentId)return;
       setConversations((list) => [created, ...list]);
       if(activate)setCompactPane("chat");
       setFocusChat(activate);

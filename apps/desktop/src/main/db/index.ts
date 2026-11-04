@@ -73,6 +73,29 @@ export const migrations = [
   // Repairs databases that applied an earlier v11 draft without the parse rollup table/trigger.
   { version:12, sql:aiParseRollupRepair },
   { version:13, sql:moodleMigration },
+  { version:14, sql: `
+    CREATE TABLE conversations_scoped (
+      id TEXT PRIMARY KEY, scope TEXT NOT NULL CHECK(scope IN ('document','course')),
+      documentId TEXT REFERENCES documents(id) ON DELETE CASCADE,
+      courseId TEXT REFERENCES moodle_courses(id) ON DELETE CASCADE,
+      providerId TEXT NOT NULL, modelId TEXT NOT NULL, createdAt TEXT NOT NULL,
+      options TEXT, updatedAt TEXT,
+      CHECK((scope='document' AND documentId IS NOT NULL AND courseId IS NULL) OR
+            (scope='course' AND courseId IS NOT NULL AND documentId IS NULL))
+    );
+    INSERT INTO conversations_scoped SELECT id,'document',documentId,NULL,providerId,modelId,createdAt,options,updatedAt FROM conversations;
+    DROP TRIGGER conversation_touch;
+    CREATE TABLE messages_backup AS SELECT * FROM messages;
+    DELETE FROM messages;
+    DROP TABLE conversations;
+    ALTER TABLE conversations_scoped RENAME TO conversations;
+    INSERT INTO messages SELECT * FROM messages_backup;
+    DROP TABLE messages_backup;
+    CREATE TRIGGER conversation_touch AFTER INSERT ON messages BEGIN UPDATE conversations SET updatedAt=NEW.createdAt WHERE id=NEW.conversationId; END;
+    CREATE INDEX conversations_document ON conversations(documentId);
+    CREATE INDEX conversations_course ON conversations(courseId);
+    CREATE INDEX conversations_updated ON conversations(documentId,updatedAt DESC,id);
+  ` },
 ];
 const documentRow = z
   .object({
@@ -92,7 +115,7 @@ const documentRow = z
   .transform(({ error, ...rest }) =>
     documentSchema.parse(error === null ? rest : { ...rest, error }),
   );
-const conversationRow = z.object({ options: z.string().nullable() }).passthrough().transform(({ options, ...row }) => { delete row.updatedAt; return conversationSchema.parse({ ...row, ...(options ? { options: JSON.parse(options) } : {}) }); });
+const conversationRow = z.object({ options: z.string().nullable() }).passthrough().transform(({ options, ...row }) => { delete row.updatedAt; if (row.scope === "course") delete row.documentId; else { delete row.courseId; delete row.scope; } return conversationSchema.parse({ ...row, ...(options ? { options: JSON.parse(options) } : {}) }); });
 const messageRow = z
   .object({
     id: z.string(),
@@ -231,8 +254,8 @@ export function openStore(path: string) {
       insert(input: Conversation): Conversation {
         const c = conversationSchema.parse(input);
         db.prepare(
-          "INSERT INTO conversations(id,documentId,providerId,modelId,createdAt,options,updatedAt) VALUES (?,?,?,?,?,?,?)",
-        ).run(c.id, c.documentId, c.providerId, c.modelId, c.createdAt, c.options ? JSON.stringify(c.options) : null, c.createdAt);
+          "INSERT INTO conversations(id,scope,documentId,courseId,providerId,modelId,createdAt,options,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)",
+        ).run(c.id, c.scope ?? "document", c.scope === "course" ? null : c.documentId, c.scope === "course" ? c.courseId : null, c.providerId, c.modelId, c.createdAt, c.options ? JSON.stringify(c.options) : null, c.createdAt);
         return c;
       },
       get(id: Conversation["id"]): Conversation | null {
@@ -241,15 +264,15 @@ export function openStore(path: string) {
           .get(id);
         return row ? conversationRow.parse(row) : null;
       },
-      list(documentId: Document["id"]): Conversation[] {
+      list(scope: Document["id"] | import("../../shared/domain").ConversationScope): Conversation[] {
         return z
           .array(conversationRow)
           .parse(
             db
               .prepare(
-                "SELECT * FROM conversations WHERE documentId=? ORDER BY createdAt DESC,id DESC",
+                `SELECT * FROM conversations WHERE ${typeof scope !== "string" && scope.scope === "course" ? "courseId" : "documentId"}=? ORDER BY createdAt DESC,id DESC`,
               )
-              .all(documentId),
+              .all(typeof scope === "string" ? scope : scope.scope === "course" ? scope.courseId : scope.documentId),
           );
       },
       delete(id: Conversation["id"]): void {

@@ -3,11 +3,13 @@ import type { ChatModelAdapter } from "@assistant-ui/react";
 import { modelOptionsSchema, selectionSchema } from "../shared";
 import { assistantContent } from './chat-content';
 import type { DocumentCitation, ToolCall, Usage, ChatRequest, ChatEvent, DesktopApi } from "../shared";
-export type ChatContext = Omit<ChatRequest, "requestId" | "userMessage">;
+type Context<T> = T extends ChatRequest ? Omit<T, "requestId" | "userMessage"> : never;
+export type ChatContext = Context<ChatRequest>;
 export function createChatAdapter(
   bridge: DesktopApi,
   context: () => Promise<ChatContext>,
   started: (messageId: string) => void = () => {},
+  proposed: (actions: import("../shared/moodle").MoodleAgentAction[]) => void = () => {},
 ) {
   const contexts = new Map<string, ChatContext>();
   const active = new Set<() => void>();
@@ -22,7 +24,7 @@ export function createChatAdapter(
       if (saved?.turnId) {
         const selection = selectionSchema.safeParse(saved.selection);
         const options = modelOptionsSchema.safeParse(saved.options);
-        if (selection.success) details.selection = selection.data;
+        if (selection.success && details.scope !== "course") details.selection = selection.data;
         if (options.success) details.options = options.data;
       }
       contexts.set(turnId, details);
@@ -91,6 +93,7 @@ export function createChatAdapter(
           if (!event) continue;
           if (event.type === "error") { yield {...snapshot(),status:{type:'incomplete',reason:'error',error:event.code ? statusText({code:event.code,params:event.params ?? {}}) : errorText(event.message)}}; return; }
           if (event.type === "done") return;
+          if (event.type === "proposals") { proposed(event.actions); continue; }
           if (event.type === "usage") { usage = event.usage; window.dispatchEvent(new Event("usage-updated")); }
           else if (event.type === 'text-delta') text += event.text;
           else if (event.type === 'reasoning-delta') reasoning += event.text;

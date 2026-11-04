@@ -23,6 +23,7 @@ export interface MoodleApi {
     deadlineId: string;
     remindAt: string;
     note: string;
+    createdBy?: "user" | "agent";
   }): Promise<MoodleReminder>;
   deleteReminder(id: string): Promise<void>;
   exportCalendar(deadlineIds: string[]): Promise<void>;
@@ -50,12 +51,12 @@ function createBridgeMoodleApi(): MoodleApi {
     markRead: async (notificationId) => {
       await call(moodleChannels.markRead, { notificationId });
     },
-    createReminder: ({ deadlineId, remindAt, note }) =>
+    createReminder: ({ deadlineId, remindAt, note, createdBy = "user" }) =>
       call(moodleChannels.createReminder, {
         deadlineId,
         remindAt,
         note,
-        createdBy: "user",
+        createdBy,
       }),
     deleteReminder: async (reminderId) => {
       await call(moodleChannels.deleteReminder, { reminderId });

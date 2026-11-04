@@ -40,7 +40,11 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     return documentIdSchema.parse(await importMoodleFile(repository,fileId,schoolById(account.schoolId).host,await service.token(account.id),documents));
   });
   registrar.handle(moodleChannels.markRead,async ({notificationId}) => { await service.markRead(notificationId); return {ok:true}; });
-  registrar.handle(moodleChannels.createReminder,input => repository.createReminder(input));
+  registrar.handle(moodleChannels.createReminder,input => {
+    const [deadline] = repository.deadlines([input.deadlineId]);
+    if (input.createdBy === 'agent' && (Date.parse(input.remindAt) <= Date.now() || Date.parse(input.remindAt) >= Date.parse(deadline!.dueAt))) throw new Error('Invalid agent reminder time');
+    return repository.createReminder(input);
+  });
   registrar.handle(moodleChannels.deleteReminder,({reminderId}) => { repository.deleteReminder(reminderId); return {ok:true}; });
   registrar.handle(moodleChannels.exportCalendar,async ({deadlineIds}) => {
     const text = calendarText(repository.deadlines(deadlineIds));

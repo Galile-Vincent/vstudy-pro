@@ -163,7 +163,7 @@ export function createMockBridge(): DesktopApi {
         break;
       }
       case "conversations:list":
-        result = conversations.filter((c) => c.documentId === input.documentId);
+        result = conversations.filter((c) => c.scope === "course" ? c.courseId === input.courseId : c.documentId === input.documentId);
         break;
       case "conversations:delete":
         conversations.splice(
@@ -214,7 +214,7 @@ export function createMockBridge(): DesktopApi {
         break;
       case "chat:start": {
         const req = request as ChatRequest;
-        const text = `You asked: ${req.userMessage}${req.selection ? `\n\nSelected passage:\n${req.selection.text}` : ""}`;
+        const text = `You asked: ${req.userMessage}${req.scope !== "course" && req.selection ? `\n\nSelected passage:\n${req.selection.text}` : ""}`;
         messages.push(
           messageSchema.parse({
             id: crypto.randomUUID(),
@@ -321,7 +321,7 @@ export function createMockMoodleApi(): MoodleApi {
     createReminder: async input => {
       const detail = active().find(d => d.deadlines.some(deadline => deadline.id === input.deadlineId));
       if (!detail) throw new Error('Deadline unavailable');
-      const reminder = { ...input, id: crypto.randomUUID(), createdBy: 'user' as const, fired: false };
+      const reminder = { ...input, id: crypto.randomUUID(), createdBy: input.createdBy ?? 'user' as const, fired: false };
       detail.reminders.push(reminder); return structuredClone(reminder);
     },
     deleteReminder: async reminderId => { for (const detail of details) detail.reminders = detail.reminders.filter(r => r.id !== reminderId); },
