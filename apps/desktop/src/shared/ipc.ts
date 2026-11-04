@@ -35,7 +35,7 @@ export const ipcContract = {
   [moodleChannels.disconnect]: {request:z.object({accountId:z.string().uuid()}).strict(),response:ack},
   [moodleChannels.overview]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema},
   [moodleChannels.sync]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema.extend({errors:z.array(z.string())})},
-  [moodleChannels.course]: {request:z.object({courseId:z.string().uuid()}).strict(),response:moodleCourseDetailSchema},
+  [moodleChannels.course]: {request:z.object({courseId:z.string().uuid(),refresh:z.boolean().optional()}).strict(),response:moodleCourseDetailSchema},
   [moodleChannels.openFile]: {request:z.object({fileId:z.string().uuid()}).strict(),response:documentIdSchema},
   [moodleChannels.markRead]: {request:z.object({notificationId:z.string().uuid()}).strict(),response:ack},
   [moodleChannels.createReminder]: {request:moodleReminderSchema.omit({id:true,fired:true}),response:moodleReminderSchema},
@@ -162,6 +162,7 @@ export const chatEnvelopeSchema = z
   .strict();
 export type ChatEnvelope = z.infer<typeof chatEnvelopeSchema>;
 export interface DesktopApi {
+  onMoodleProgress?(listener:(event:MoodleProgress)=>void):()=>void;
   onDocumentProgress?(listener: (event: z.infer<typeof documentProgressSchema>) => void): () => void;
   getPathForFile?(file: File): string;
   invoke<C extends IpcChannel>(
@@ -173,3 +174,7 @@ export interface DesktopApi {
     listener: (event: ChatEnvelope["event"]) => void,
   ): () => void;
 }
+
+export const moodleProgressChannel = 'moodle:progress';
+export const moodleProgressSchema = z.object({accountId:z.string().uuid(),courseId:z.string().uuid().optional(),state:z.enum(['loading','idle','error']),completed:z.number().int().nonnegative(),total:z.number().int().nonnegative()}).strict();
+export type MoodleProgress = z.infer<typeof moodleProgressSchema>;

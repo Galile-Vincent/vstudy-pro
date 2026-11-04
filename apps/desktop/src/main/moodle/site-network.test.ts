@@ -5,7 +5,7 @@ import type { IncomingMessage } from 'node:http';
 import type { RequestOptions } from 'node:https';
 import { createMoodleFetch } from './site-url';
 const mock = vi.hoisted(() => ({responses:[] as {status:number;location?:string}[],lookups:[] as unknown[],options:[] as RequestOptions[]}));
-vi.mock('node:https',() => ({request:(url:URL,options:RequestOptions,receive:(response:IncomingMessage) => void) => {
+vi.mock('node:https',async importOriginal => ({...await importOriginal<typeof import('node:https')>(),request:(url:URL,options:RequestOptions,receive:(response:IncomingMessage) => void) => {
   const req = Object.assign(new EventEmitter(),{write:vi.fn(),end:() => {
     mock.options.push(options);
     options.lookup!(url.hostname,{all:true},(error,addresses) => {
@@ -24,7 +24,8 @@ it('resolves public addresses inside each connection and rejects a rebound priva
   expect(await (await request('https://school.example/api')).json()).toEqual({ok:true});
   await expect(request('https://school.example/api')).rejects.toThrow('Unsafe Moodle host address');
   expect(mock.lookups).toEqual([[{address:'8.8.8.8',family:4}]]);
-  expect(mock.options.map(options => ({agent:options.agent,rejectUnauthorized:options.rejectUnauthorized}))).toEqual([{agent:false,rejectUnauthorized:true},{agent:false,rejectUnauthorized:true}]);
+  expect(mock.options[0]!.agent).toBe(mock.options[1]!.agent);
+  expect(mock.options.map(options => options.rejectUnauthorized)).toEqual([true,true]);
 });
 it('rejects a cross-origin redirect without opening another connection',async () => {
   mock.responses.push({status:307,location:'https://evil.example/api'});

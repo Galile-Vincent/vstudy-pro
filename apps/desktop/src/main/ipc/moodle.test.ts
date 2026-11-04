@@ -25,7 +25,7 @@ it('registers every Moodle channel behind strict requests and trusted main-frame
   try {
     expect([...handlers.keys()].sort()).toEqual(Object.values(moodleChannels).sort());
     expect(await invoke('moodle:schools',{})).toMatchObject([{id:'cycu',login:'sso-launch'}]);
-    expect(await invoke('moodle:overview',{})).toEqual({accounts:[],courses:[],upcoming:[],otherNotifications:[],unreadNotifications:0});
+    expect(await invoke('moodle:overview',{})).toEqual({accounts:[],courses:[],summaries:[],upcoming:[],otherNotifications:[],unreadNotifications:0});
     await expect(invoke('moodle:schools',{}, {sender:{id:2,mainFrame:frame},senderFrame:frame})).rejects.toThrow('Untrusted');
     await expect(invoke('moodle:overview',{}, {sender,senderFrame:{}})).rejects.toThrow('Untrusted');
     await expect(invoke('moodle:overview',{token:'sensitive-token'})).rejects.toThrow('VSTUDY_STATUS');

@@ -19,7 +19,8 @@ export interface MoodleApi {
   disconnect(accountId: string): Promise<void>;
   overview(): Promise<MoodleOverview>;
   sync(accountId?: string): Promise<void>;
-  course(courseId: string): Promise<MoodleCourseDetail>;
+  onProgress?(listener:(event:import("../../shared/ipc").MoodleProgress)=>void):()=>void;
+  course(courseId: string, refresh?:boolean): Promise<MoodleCourseDetail>;
   openFile(fileId: string): Promise<{ documentId: string }>;
   markRead(notificationId: string): Promise<void>;
   createReminder(input: {
@@ -38,6 +39,7 @@ function createBridgeMoodleApi(): MoodleApi {
   const call = <C extends IpcChannel>(channel: C, request: IpcRequest<C>) =>
     desktop.invoke(channel, request);
   return {
+    onProgress: listener => desktop.onMoodleProgress?.(listener) ?? (() => {}),
     schools: () => call(moodleChannels.schools, {}),
     checkSite: (url) => call(moodleChannels.checkSite, {url}),
     connect: (input) => call(moodleChannels.connect, input),
@@ -51,7 +53,7 @@ function createBridgeMoodleApi(): MoodleApi {
       const result = await call(moodleChannels.sync, accountId ? { accountId } : {});
       if (result.errors.length) throw new Error('Moodle sync incomplete');
     },
-    course: (courseId) => call(moodleChannels.course, { courseId }),
+    course: (courseId,refresh) => call(moodleChannels.course, { courseId,...(refresh ? {refresh} : {}) }),
     openFile: async (fileId) => ({
       documentId: await call(moodleChannels.openFile, { fileId }),
     }),

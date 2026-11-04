@@ -151,6 +151,7 @@ export function Courses({
   const [detail, setDetail] = useState<MoodleCourseDetail>();
   const [homeDetails, setHomeDetails] = useState<NonNullable<MoodleOverview["summaries"]>>([]);
   const [loading, setLoading] = useState(true);
+  const [progress,setProgress] = useState<import("../../shared/ipc").MoodleProgress>();
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState("");
@@ -193,25 +194,20 @@ export function Courses({
       refreshSequence.current++;
     };
   }, [refresh]);
-  useEffect(() => {
-    if (
-      !overview?.accounts.some(
-        (account) => account.status === "connected" && !account.syncedAt,
-      )
-    )
-      return;
-    const timer = setInterval(() => {
-      void refresh().catch(() => setError(true));
-    }, 2000);
-    return () => clearInterval(timer);
-  }, [overview, refresh]);
+  useEffect(() => api.onProgress?.(event => {
+    if (event.courseId && event.courseId !== courseId) return;
+    if (!event.courseId) {setProgress(event);setSyncing(event.state === 'loading');}
+    if (event.state === 'error') setError(true);
+    void refresh().catch(() => setError(true));
+  }),[api,courseId,refresh]);
 
   const failure = () => setNotice(tr("moodle:action_error"));
   const sync = async () => {
     setSyncing(true);
     let incomplete = false;
     try {
-      await api.sync();
+      if (courseId) await api.course(courseId,true);
+      else await api.sync();
     } catch {
       incomplete = true;
     }
@@ -542,6 +538,7 @@ export function Courses({
             ))}
           </div>
         )}
+        {progress?.state === 'loading' && <p role="status">{tr('moodle:sync_progress',{completed:progress.completed,total:progress.total})}</p>}
         {loading ? (
           <div
             className="moodle-grid"
@@ -653,6 +650,8 @@ export function Courses({
                         {displayTeachers(detail.course.identity, lang)}
                       </p>
                     )}
+                    {detail.fetchState === 'loading' && <p role="status">{tr('moodle:loading')}</p>}
+                    {detail.fetchState === 'error' && <p role="alert">{tr('moodle:action_error')} <button onClick={() => void sync()}>{tr('moodle:retry')}</button></p>}
                     <CourseContent
                       detail={detail}
                       openFile={openFile}

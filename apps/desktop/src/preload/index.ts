@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 import {
+  moodleProgressChannel, moodleProgressSchema,
   documentProgressChannel, documentProgressSchema,
   chatEnvelopeSchema,
   chatEventChannel,
@@ -30,6 +31,11 @@ if (process.isMainFrame) window.addEventListener('drop', event => {
   paths.forEach((path, index) => { if (tokens[index]) dropTokens.set(path, tokens[index]!); });
 }, true);
 const api: DesktopApi = {
+  onMoodleProgress(listener) {
+    const receive = (_event:Electron.IpcRendererEvent,payload:unknown) => {const parsed=moodleProgressSchema.safeParse(payload);if(parsed.success)listener(parsed.data);};
+    ipcRenderer.on(moodleProgressChannel,receive);
+    return () => ipcRenderer.removeListener(moodleProgressChannel,receive);
+  },
   onDocumentProgress(listener) {
     const receive = (_event: Electron.IpcRendererEvent, payload: unknown) => {
       const parsed = documentProgressSchema.safeParse(payload);

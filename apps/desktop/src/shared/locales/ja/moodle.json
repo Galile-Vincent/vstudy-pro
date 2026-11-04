@@ -170,7 +170,7 @@
   "complete": "完了",
   "completion_incomplete": "未完了",
   "completion_fail": "再挑戦が必要",
-  "no_sections": "同期後にコンテンツが表示されます。",
+  "no_sections": "コース内容はありません。",
   "due": "締切",
   "not_submitted": "未提出",
   "open_link": "リンクを開く",
@@ -191,5 +191,6 @@
   "kind_video": "動画",
   "kind_subsection": "サブセクション",
   "kind_other": "アクティビティ",
-  "people": "担当教員"
+  "people": "担当教員",
+  "sync_progress": "同期中 {{completed}}/{{total}}"
 }

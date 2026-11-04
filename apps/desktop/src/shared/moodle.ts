@@ -138,6 +138,7 @@ export const moodleCourseDetailSchema = z
     grades: z.array(moodleGradeItemSchema),
     files: z.array(moodleFileSchema),
     reminders: z.array(moodleReminderSchema),
+    fetchState: z.enum(['idle','loading','error']).optional(),
     sections: z.array(moodleSectionSchema),
     announcements: z.array(moodleAnnouncementSchema),
   })

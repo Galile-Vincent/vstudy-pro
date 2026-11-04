@@ -170,7 +170,7 @@
   "complete": "Completed",
   "completion_incomplete": "Incomplete",
   "completion_fail": "Needs another attempt",
-  "no_sections": "Course content will appear after syncing.",
+  "no_sections": "No course content.",
   "due": "Due",
   "not_submitted": "Not submitted",
   "open_link": "Open link",
@@ -191,5 +191,6 @@
   "kind_video": "Video",
   "kind_subsection": "Subsection",
   "kind_other": "Activity",
-  "people": "People"
+  "people": "People",
+  "sync_progress": "Syncing {{completed}}/{{total}}"
 }

@@ -1,7 +1,9 @@
 import { lookup } from 'node:dns/promises';
 import { BlockList, isIP } from 'node:net';
-import { request as httpsRequest } from 'node:https';
+import { Agent, request as httpsRequest } from 'node:https';
 import { Readable } from 'node:stream';
+
+export const connectionTiming = new WeakMap<Response,{reused:boolean}>();
 
 export type Resolver = (host: string) => Promise<{address:string;family:number}[]>;
 const resolveAll: Resolver = host => lookup(host,{all:true,verbatim:true});
@@ -42,6 +44,7 @@ export async function resolvePublicHost(host: string, resolver: Resolver = resol
 }
 
 export function createMoodleFetch(resolver: Resolver = resolveAll): typeof fetch {
+  const agent = new Agent({keepAlive:true,maxSockets:6,maxTotalSockets:32,maxFreeSockets:6,timeout:30_000});
   return async (input, options = {}) => {
     const initial = networkUrl(String(input));
     const send = async (url: URL, hops: number): Promise<Response> => {
@@ -50,7 +53,7 @@ export function createMoodleFetch(resolver: Resolver = resolveAll): typeof fetch
       const response = await new Promise<Response>((resolve,reject) => {
         const req = httpsRequest(url,{
           method:options.method ?? 'GET', headers:Object.fromEntries(new Headers(options.headers)), signal:options.signal ?? undefined,
-          agent:false, rejectUnauthorized:true,
+          agent, rejectUnauthorized:true,
           lookup:(host, _lookupOptions, callback) => {
             void resolvePublicHost(host,resolver).then(addresses => {
               const address = addresses[0]!;
@@ -63,7 +66,9 @@ export function createMoodleFetch(resolver: Resolver = resolveAll): typeof fetch
           for (const [key,value] of Object.entries(res.headers)) if (value !== undefined) headers.set(key,Array.isArray(value) ? value.join(', ') : value);
           const status = res.statusCode ?? 502;
           if ([204,205,304].includes(status)) res.resume();
-          resolve(new Response([204,205,304].includes(status) ? null : Readable.toWeb(res) as ReadableStream<Uint8Array>,{status,headers}));
+          const response = new Response([204,205,304].includes(status) ? null : Readable.toWeb(res) as ReadableStream<Uint8Array>,{status,headers});
+          connectionTiming.set(response,{reused:req.reusedSocket});
+          resolve(response);
         });
         req.on('error',(error: Error) => reject(new Error(error.message === 'Unsafe Moodle host address' ? 'Unsafe Moodle host address' : 'Moodle request failed')));
         if (options.body != null) req.write(String(options.body));
