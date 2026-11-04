@@ -28,7 +28,7 @@ const url = (value: string | null | undefined): string | null => {
 const date = (seconds: number | null | undefined): string | null => seconds && seconds > 0 ? new Date(seconds * 1000).toISOString() : null;
 const courseWire = z.object({ id: integer, fullname: z.string(), shortname: z.string(), courseimage: optionalText, overviewfiles: z.array(z.object({fileurl:z.string()})).optional(), progress: numeric.nullable().optional(), startdate: integer.nullish(), enddate: integer.nullish(), isfavourite: flag.optional() });
 const assignmentWire = z.object({ courses: z.array(z.object({ id: integer, assignments: z.array(z.object({ id: integer, name: z.string(), duedate: integer, cmid: integer.optional() })) })) });
-const eventWire = z.object({ id:integer, name:z.string(), courseid:integer.optional(), course:z.object({id:integer}).optional(), timestart:integer.optional(), timedue:integer.optional(), timesort:integer.optional(), url:optionalText, modulename:optionalText, action:z.object({url:optionalText, actionable:flag.optional()}).optional() });
+const eventWire = z.object({ id:integer, name:z.string(), courseid:integer.optional(), course:z.object({id:integer}).optional(), timestart:integer.optional(), timedue:integer.optional(), timesort:integer.optional(), url:optionalText, modulename:optionalText, instance:integer.nullish(), action:z.object({url:optionalText, actionable:flag.optional()}).optional() });
 const messageWire = z.object({id:integer, subject:z.string().optional(), text:optionalText, customdata:optionalText, fullmessage:z.string().nullish(), fullmessagehtml:z.string().optional(), smallmessage:z.string().optional(), timecreated:integer, timeread:integer.nullish(), read:flag.optional(), contexturl:optionalText, courseid:integer.optional()});
 const gradeWire = z.object({ usergrades:z.array(z.object({gradeitems:z.array(z.object({id:integer, itemname:optionalText, gradeformatted:optionalText, grademax:numeric.nullable().optional(), percentageformatted:optionalText, gradedategraded:integer.nullable().optional()}))})) });
 const sectionsWire = z.array(z.object({id:integer, name:z.string().nullish(), modules:z.array(z.object({id:integer, name:z.string(), contents:z.array(z.object({type:z.string(), filename:z.string(), fileurl:optionalText, filesize:integer.refine(value => value >= 0).optional(), mimetype:z.string().optional(), timemodified:integer.optional()})).optional()}))}));
@@ -65,10 +65,25 @@ export class MoodleClient {
   async assignments(accountId: string, courses: MoodleCourse[]) {
     const params = Object.fromEntries(courses.map((course,index) => [`courseids[${index}]`,String(course.remoteId)]));
     const result = await this.call('mod_assign_get_assignments',params,assignmentWire);
-    return result.courses.flatMap(row => {
+    const deadlines = result.courses.flatMap(row => {
       const course = courses.find(course => course.remoteId === row.id);
       return course ? row.assignments.filter(item => item.duedate > 0).map(item => moodleDeadlineSchema.parse({id:remoteId(accountId,'assignment',item.id),courseId:course.id,title:plainText(item.name),kind:'assignment',dueAt:date(item.duedate),url:item.cmid ? `${this.host}/mod/assign/view.php?id=${item.cmid}` : null,submitted:false})) : [];
     });
+    return this.withSubmissionStatus(deadlines, async item => {
+      const assignment = result.courses.flatMap(row => row.assignments).find(row => remoteId(accountId,'assignment',row.id) === item.id)!;
+      const status = await this.call('mod_assign_get_submission_status',{assignid:String(assignment.id)},z.object({lastattempt:z.object({submission:z.object({status:optionalText}).nullish()}).nullish()}));
+      return status.lastattempt?.submission?.status?.toLowerCase() === 'submitted';
+    });
+  }
+  private async withSubmissionStatus<T extends {submitted:boolean}>(items: T[], status: (item:T) => Promise<boolean>): Promise<T[]> {
+    let next = 0;
+    await Promise.all(Array.from({length:Math.min(4,items.length)},async () => {
+      while (next < items.length) {
+        const item = items[next++]!;
+        item.submitted = await status(item).catch(() => false);
+      }
+    }));
+    return items;
   }
   async events(accountId: string, courses: MoodleCourse[]) {
     const upcoming = () => this.call('core_calendar_get_calendar_upcoming_view',{courseid:'0',categoryid:'0'},z.object({events:z.array(eventWire)}));
@@ -86,10 +101,21 @@ export class MoodleClient {
       return events.length ? {events} : upcoming();
     };
     const result = await this.fallback(timeline,upcoming);
-    return result.events.flatMap(item => {
+    const deadlines = result.events.flatMap(item => {
       const course = courses.find(course => course.remoteId === (item.courseid ?? item.course?.id));
       const dueAt = date(item.timedue ?? item.timesort ?? item.timestart);
-      return course && dueAt ? [moodleDeadlineSchema.parse({id:remoteId(accountId,'event',item.id),courseId:course.id,title:plainText(item.name),kind:item.modulename === 'quiz' ? 'quiz' : item.modulename === 'assign' ? 'assignment' : 'event',dueAt,url:url(item.url ?? item.action?.url),submitted:item.action?.actionable === false})] : [];
+      return course && dueAt ? [moodleDeadlineSchema.parse({id:remoteId(accountId,'event',item.id),courseId:course.id,title:plainText(item.name),kind:item.modulename === 'quiz' ? 'quiz' : item.modulename === 'assign' ? 'assignment' : 'event',dueAt,url:url(item.url ?? item.action?.url),submitted:false})] : [];
+    });
+    return this.withSubmissionStatus(deadlines,async item => {
+      const event = result.events.find(event => remoteId(accountId,'event',event.id) === item.id)!;
+      if (!event.instance) return false;
+      if (item.kind === 'assignment') {
+        const status = await this.call('mod_assign_get_submission_status',{assignid:String(event.instance)},z.object({lastattempt:z.object({submission:z.object({status:optionalText}).nullish()}).nullish()}));
+        return status.lastattempt?.submission?.status?.toLowerCase() === 'submitted';
+      }
+      if (item.kind !== 'quiz') return false;
+      const attempts = await this.call('mod_quiz_get_user_attempts',{quizid:String(event.instance),status:'all'},z.object({attempts:z.array(z.object({state:z.string()}))}));
+      return attempts.attempts.some(attempt => attempt.state === 'finished');
     });
   }
   async notifications(account: MoodleAccount, courses: MoodleCourse[]) {

@@ -92,3 +92,25 @@ it('accepts all four Swift callback site variants',() => {
     expect(verifyCallback(`vstudymoodle://token=${Buffer.from(`${signature}:::token`).toString('base64')}`,'https://school.example','passport')).toBe('token');
   }
 });
+it('uses submission and attempt status rather than actionability',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({
+    mod_assign_get_submission_status:{lastattempt:{submission:{status:'submitted'}}},
+    core_calendar_get_action_events_by_timesort:{events:[{id:401,name:'Quiz',courseid:101,timesort:1794096000,modulename:'quiz',instance:55,action:{actionable:false}}]},
+    mod_quiz_get_user_attempts:{attempts:[{state:'inprogress'}]},
+  }));
+  const courses = await client.courses(account);
+  expect((await client.assignments(account.id,courses))[0]!.submitted).toBe(true);
+  expect((await client.events(account.id,courses)).find(item => item.kind === 'quiz')!.submitted).toBe(false);
+});
+it('keeps an assignment visible when submission status is unavailable',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({mod_assign_get_submission_status:{errorcode:'requireloginerror'}}));
+  expect((await client.assignments(account.id,await client.courses(account)))[0]!.submitted).toBe(false);
+});
+it('resolves assignment calendar event submission status when no assignment list is available',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({
+    core_calendar_get_action_events_by_timesort:{events:[{id:401,name:'Assignment',courseid:101,timesort:1794096000,modulename:'assign',instance:201,action:{actionable:false}}]},
+    mod_assign_get_submission_status:{lastattempt:{submission:{status:'submitted'}}},
+  }));
+  const events = await client.events(account.id,await client.courses(account));
+  expect(events.find(item => item.kind === 'assignment')!.submitted).toBe(true);
+});

@@ -91,7 +91,7 @@ export class MoodleService {
       files.push(...await client.files(course).catch(error => { if (error instanceof MoodleError && error.kind === 'unsupported') return this.repository.fileRecords(course.id); throw error; }));
     }
     const matches = (assignment: typeof assignments[number], event: typeof events[number]) => assignment.courseId === event.courseId && (assignment.url === event.url && event.url !== null || assignment.title === event.title && assignment.dueAt === event.dueAt);
-    const deadlines = [...assignments.map(assignment => ({...assignment,submitted:events.find(event => matches(assignment,event))?.submitted ?? assignment.submitted})),...events.filter(event => !assignments.some(assignment => matches(assignment,event)))];
+    const deadlines = [...assignments,...events.filter(event => !assignments.some(assignment => matches(assignment,event)))];
     if (!this.stopped && this.repository.accounts().some(account => account.id === id)) this.repository.apply(id,{courses,deadlines,notifications,grades,files});
   }
   async dispose() { this.stopped = true; await Promise.allSettled(this.pending.values()); }
