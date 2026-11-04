@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const desktop = resolve(import.meta.dirname, "../../..");
-const evidence = resolve(desktop, "../../docs/screenshots/moodle-round2");
+const evidence = process.env.MOODLE_EVIDENCE_DIR ?? resolve(desktop, "../../docs/screenshots/moodle-round2");
 const directory = await mkdtemp(join(tmpdir(), "vstudy-moodle-renderer-"));
 process.env.VITE_MOCK_DESKTOP = "1";
 let app, server;
@@ -66,6 +66,11 @@ try {
       await page.locator(".moodle-course-card").first().waitFor();
       assert.equal(await page.locator(".moodle-course-card").count(), 1);
       await shot("home-current");
+      await page.getByRole("button", { name: "Connect school", exact: true }).first().click();
+      await page.locator(".moodle-connect").waitFor();
+      await shot("connect");
+      await page.keyboard.press("Escape");
+      await page.locator(".moodle-connect").waitFor({ state: "detached" });
       await page.getByRole("tab", { name: /^Past/ }).click();
       assert.equal(await page.locator(".moodle-course-card").count(), 2);
       await shot("home-past");
@@ -92,6 +97,13 @@ try {
       await page
         .locator("[data-slot=sheet-content]")
         .waitFor({ state: "detached" });
+      await page.getByRole("tab", { name: "Deadlines", exact: true }).click();
+      await shot("deadlines");
+      await page.getByRole("button", { name: "Set reminder for Amplifier lab report", exact: true }).click();
+      await page.locator(".moodle-reminder").waitFor();
+      await shot("reminder");
+      await page.keyboard.press("Escape");
+      await page.locator(".moodle-reminder").waitFor({ state: "detached" });
       await page
         .getByRole("tab", { name: "Announcements", exact: true })
         .click();
@@ -105,6 +117,10 @@ try {
         ".moodle-assistant-panel .aui-composer-input",
       );
       await composer.waitFor();
+      assert.equal(await page.locator(".moodle-agent-suggestions [data-slot=suggestions] button").count(), 3);
+      for (const selector of [".moodle-agent-suggestions [data-slot=suggestions] button", ".moodle-course-chat [data-slot=aui_composer-shell]"]) {
+        assert.equal(await page.locator(selector).first().evaluate(el => el.ownerDocument.defaultView.getComputedStyle(el).borderTopWidth), "0px");
+      }
       const panelBox = await page
         .locator(".moodle-assistant-panel")
         .boundingBox();
@@ -142,7 +158,7 @@ try {
         false,
       );
       results.push(
-        `${colorScheme} ${width}px. Eight captures. Term counts, current week, module sheet, assistant Escape and focus, no horizontal overflow, no serious or critical axe violations.`,
+        `${colorScheme} ${width}px. Eleven captures. Term counts, current week, module sheet, assistant Escape and focus, no horizontal overflow, no serious or critical axe violations.`,
       );
     }
   }
