@@ -88,3 +88,5 @@
 .home-pins .home-card { background:transparent; border:0; padding:0; }
 .home-pins .home-list { display:flex; flex-wrap:wrap; gap:var(--space-4); margin:0; }
 .home-pins .home-list li { max-width:100%; }
+
+.home-secondary .home-upload .primary:hover { background:var(--active); color:var(--ink); }

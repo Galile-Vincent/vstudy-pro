@@ -24,7 +24,10 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/data-table.tsx",
-      "registrySha256": "ec802e2f48ae1ad2a83512fedebb98e070ab34b03eb43153f1a7efd451d40fdd"
+      "registrySha256": "8b2b3ba77ea50b1daf79355526fdb4669522cee5e38538c4a1e9a10f69fa19fe",
+      "patchedSha256": "ec802e2f48ae1ad2a83512fedebb98e070ab34b03eb43153f1a7efd451d40fdd",
+      "patch": "docs/vendor-patches/assistant-ui--elements--data-table.tsx.patch",
+      "reason": "Retain localized table labels and locale-aware value formatting from the earlier optional DataTable installation; baseline verified against its original registry manifest and pristine checkout."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/document-reference.tsx",

@@ -33,7 +33,7 @@
   "components/assistant-ui/elements/thread.aui.tsx": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da",
   "components/assistant-ui/elements/suggestions.tsx": "6cc8d4e06028e9c3f3c233d57efc4f4960b473d3c8fa2930ace56d6e7835c99c",
   "components/assistant-ui/elements/surfaces.tsx": "5d81fbb669e67ae20026cd30ed57efc51a5e3ee0f4f5d265e1723de75359b8fa",
-  "components/assistant-ui/elements/data-table.tsx": "ec802e2f48ae1ad2a83512fedebb98e070ab34b03eb43153f1a7efd451d40fdd",
+  "components/assistant-ui/elements/data-table.tsx": "8b2b3ba77ea50b1daf79355526fdb4669522cee5e38538c4a1e9a10f69fa19fe",
   "components/assistant-ui/elements/reasoning.tsx": "02c42a1cad5fd56f4479fe65c779e9f9934c03a6e935ac92ebf98cbb46ef3cc7",
   "components/assistant-ui/elements/inline-citation.tsx": "e70551e72d0bb8cb16e9552b22ca31f8b1ed30c062217e98ecef6d86843ac64a",
   "components/assistant-ui/elements/model-selector.tsx": "eeee32542590ef726200994a681e704b4903e22c06ebf5d0fb8959e5ef8514c7",

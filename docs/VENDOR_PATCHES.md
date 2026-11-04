@@ -45,3 +45,5 @@ Import and translation changes are portable. Optional Thread composition slots a
 - `apps/desktop/src/renderer/components/ui/tooltip.tsx` — Resolve the registry cn helper to the existing local utility. [Exact diff](vendor-patches/ui--tooltip.tsx.patch).
 
 - `apps/desktop/src/renderer/hooks/use-attachment-src.ts` — remove the unsupported upstream ESLint suppression. [Exact diff](vendor-patches/use-attachment-src.ts.patch).
+
+- `apps/desktop/src/renderer/components/assistant-ui/elements/data-table.tsx` — retain localized labels and value formatting from the prior optional installation. Its original registry hash was verified against the pristine setup checkout. [Exact diff](vendor-patches/assistant-ui--elements--data-table.tsx.patch).

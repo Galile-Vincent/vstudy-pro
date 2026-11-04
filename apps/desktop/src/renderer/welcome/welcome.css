@@ -5,7 +5,7 @@
 .welcome h1 { font-size:var(--type-hero); line-height:1.2; margin:var(--space-3) 0 var(--space-4); }
 .welcome h2 { font-size:var(--type-xl); margin:0 0 var(--space-3); }
 .welcome h3 { font-size:var(--type-lg); margin:var(--space-4) 0 var(--space-2); }
-.w-header { position:sticky; top:0; z-index:5; min-height:var(--welcome-header-height); display:flex; align-items:center; justify-content:flex-end; gap:var(--space-3); padding:0 var(--space-6); background:var(--material-sheet); backdrop-filter:blur(20px) saturate(1.15); border-bottom:1px solid transparent; font-size:var(--type-sm); }
+.w-header { position:sticky; top:0; z-index:5; min-height:var(--welcome-header-height); display:flex; align-items:center; justify-content:flex-end; gap:var(--space-3); padding:0 var(--space-6); background:var(--material-sheet); backdrop-filter:var(--material-filter); border-bottom:1px solid transparent; font-size:var(--type-sm); }
 .w-header>div { display:flex; flex-wrap:wrap; }
 .welcome[data-scrolled=true] .w-header { border-color:var(--hairline); }
 .w-content { max-inline-size:1040px; margin-inline:auto; padding-inline:var(--space-6); }
