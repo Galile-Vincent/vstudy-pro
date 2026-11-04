@@ -1,0 +1,12 @@
+.ai-parse-controls { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; }
+.ai-parse-popover { width:min(30rem, calc(100vw - 1rem)); max-height:var(--radix-popover-content-available-height); overflow:auto; overflow-wrap:anywhere; padding:1rem; }
+.ai-parse-popover button { white-space:normal; height:auto; min-height:2rem; }
+.ai-parse-popover .model-controls { flex-wrap:wrap; min-width:0; }
+.ai-parse-popover input[type=number] { width:100%; margin:0; }
+.ai-parse-popover fieldset { border:0; padding:0; }
+.ai-parse-popover button[data-variant=ghost], .ai-parse-popover button[data-variant=link] { color:var(--ink); }
+.ai-parse-popover button[data-variant=outline] { color:var(--ink); background:var(--surface); }
+.ai-parse-popover button[data-variant=default] { color:var(--surface); background:var(--ink); }
+.ai-parse-popover select, .ai-parse-popover input[type=number] { color:var(--ink); background:var(--surface); }
+.ai-parse-popover section, .ai-parse-popover button, .ai-parse-popover input, .ai-parse-popover select { font-size:.875rem; line-height:1.5; }
+.ai-parse-popover input[type=checkbox] { margin-inline-end:.5rem; }

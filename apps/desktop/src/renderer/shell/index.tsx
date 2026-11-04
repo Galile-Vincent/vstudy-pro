@@ -27,6 +27,7 @@ export type Route = {
   documentId?: Document["id"] | undefined;
   query?: Partial<LibraryQuery> | undefined;
   title?: string | undefined;
+  aiParse?: boolean;
 };
 type Navigation = { route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void };
 const NavigationContext = createContext<Navigation | null>(null);

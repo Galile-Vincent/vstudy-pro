@@ -1,3 +1,5 @@
+import { AiParseControls } from '../ai-parse/ai-parse-controls';
+import { Button } from '../components/ui/button';
 import { useReadingActivity } from '../home/use-reading-activity';
 import { BlankChat } from '../motion/blank-chat';
 import { useNavigate } from '../shell';
@@ -54,6 +56,9 @@ export function Workspace() {
   const activeConversation = useRef(conversation);
   activeConversation.current = conversation;
   const [progress, setProgress] = useState<Record<string, string>>({});
+  const [readerVersion,setReaderVersion] = useState<'original'|'ai'>('original');
+  const [readerRevision,setReaderRevision] = useState(0);
+  const [aiOpen,setAiOpen] = useState(0);
   const [partialSource, setPartialSource] = useState("");
   useEffect(() => {
     setPartialSource("");
@@ -176,7 +181,7 @@ export function Workspace() {
     void desktop
       .invoke("documents:read", { documentId: doc.id })
       .then((value) => {
-        if (active) setSource(value);
+        if (active) {setSource(value);setReaderVersion(doc.activeVersion);}
       })
       .catch(report)
       .finally(() => {
@@ -185,7 +190,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [doc?.id, doc?.status, report]);
+  }, [doc?.id, doc?.status, readerRevision, report]);
   useEffect(() => {
     let active = true;
     setHistory(null);
@@ -361,6 +366,7 @@ export function Workspace() {
             const list = await desktop.invoke("documents:list", {}); setDocuments(list); setDocumentId(list[0]?.id ?? null);
           }).catch(report);
         }}><Trash2 size={16} /></button>}
+        {doc && <AiParseControls key={`${doc.id}-${aiOpen}`} document={doc} providers={providers} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse || aiOpen>0} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
         <span className="muted">
           {doc?.status === "ready" ? tr('common:converter_label',{converter:doc.converter}) : ""}
         </span>
@@ -403,22 +409,23 @@ export function Workspace() {
                 .finally(() => setBusy(false));
             }}
           >
-            {tr('common:retry_conversion')}</button>
+            {tr('common:retry_conversion')}</button><Button variant="outline" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button>
         </div>
       ) : loadingSource ? (
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
-        <DocumentMarkdown
-          key={doc.id}
+        <><div className="flex flex-wrap items-center gap-2 p-2 text-sm"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div><DocumentMarkdown
+          key={`${doc.id}-${readerVersion}-${readerRevision}`}
+          version={readerVersion}
           source={source}
           documentId={doc.id}
           onSelect={(value) => {
-            setSelection(value);
+            setSelection({...value,version:readerVersion});
 
           }}
           onNotice={setNotice}
-        />
+        /></>
       )}
     </section>
   );

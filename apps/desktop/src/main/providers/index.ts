@@ -1,3 +1,4 @@
+import { AI_PARSE_SYSTEM } from '../prompt/ai-parse';
 import { configuredCliPath } from './executable-pins';
 import {
   existsSync,
@@ -50,7 +51,7 @@ export const fakeAdapter: ProviderAdapter = {
       yield {type:'tool-call',call:{toolCallId:'present-fixture',toolName:'present',args:{title:'Document summary',columns:['Topic','Summary'],rows:[['Document','Grounded answer']]}}};
     }
     const fence = '`'.repeat(Math.max(2,...Array.from(request.prompt.matchAll(/`+/g),m => m[0].length)) + 1);
-    const response = enriched ? `A grounded document summary.${citationId ? ` [[cite:${citationId}]]` : ''}` : `**bold**\n\n- First\n- Second\n\n${fence}text\n${request.prompt}\n${fence}`;
+    const response = request.systemPrompt === AI_PARSE_SYSTEM ? `**${request.userMessage}**` : enriched ? `A grounded document summary.${citationId ? ` [[cite:${citationId}]]` : ''}` : `**bold**\n\n- First\n- Second\n\n${fence}text\n${request.prompt}\n${fence}`;
     for (let i = 0; i < response.length; i += 128) {
       signal.throwIfAborted();
       yield { type: "text-delta", text: response.slice(i, i + 128) };

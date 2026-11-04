@@ -148,8 +148,16 @@
   "ai_parse.use": "Use AI version",
   "ai_parse.revert": "Revert to original",
   "ai_parse.discard": "Discard AI version",
-  "ai_parse.cap": "Job admission cap (USD; actual charges may exceed estimate)",
+  "ai_parse.cap": "Job admission cap (USD; actual charges can exceed this cap)",
   "ai_parse.override": "Confirm spending beyond remaining monthly budget",
   "details": "Details",
-  "pageCount": "Pages"
+  "pageCount": "Pages",
+  "ai_parse.reparse": "Re-parse with AI",
+  "ai_parse.ai": "AI version",
+  "ai_parse.version": "Reading version",
+  "ai_parse.resume": "Resume",
+  "ai_parse.cli_hint": "CLI providers are off by default. Enable a provider in Settings to use it.",
+  "ai_parse.not_ready": "AI improvement currently requires a completed conversion. For PDFs without a text layer, import a PDF with selectable text; independent OCR is not available.",
+  "ai_parse.poor_conversion": "Conversion looks incomplete?",
+  "viewDetails": "View details"
 }

@@ -125,7 +125,7 @@
   "noFolders": "尚無資料夾",
   "customDates": "自訂日期⋯",
   "unknown_size": "大小不明",
-  "ai_parse.title": "使用 AI 改善",
+  "ai_parse.title": "用 AI 重新解析",
   "ai_parse.scope": "範圍",
   "ai_parse.all": "所有頁面",
   "ai_parse.range": "頁面範圍",
@@ -148,8 +148,16 @@
   "ai_parse.use": "使用 AI 版本",
   "ai_parse.revert": "還原原始版本",
   "ai_parse.discard": "刪除 AI 版本",
-  "ai_parse.cap": "工作預算門檻（USD；實際費用可能超出估算）",
+  "ai_parse.cap": "工作啟動上限（美元；實際費用可能超過此上限）",
   "ai_parse.override": "確認支出超出剩餘月預算",
   "details": "詳細資訊",
-  "pageCount": "頁數"
+  "pageCount": "頁數",
+  "ai_parse.reparse": "用 AI 重新解析",
+  "ai_parse.ai": "AI 版本",
+  "ai_parse.version": "閱讀版本",
+  "ai_parse.resume": "繼續",
+  "ai_parse.cli_hint": "CLI 供應商預設關閉。請在設定中啟用供應商。",
+  "ai_parse.not_ready": "AI 重新解析目前需要先完成轉換。若 PDF 沒有文字層，請匯入可選取文字的 PDF；目前不支援獨立 OCR。",
+  "ai_parse.poor_conversion": "轉換結果不完整？",
+  "viewDetails": "檢視詳細資料"
 }

@@ -1,6 +1,6 @@
 # AI document improvement
 
-The main-process implementation and headless renderer components are available. A reader host must mount `src/renderer/ai-parse/AiParsePanel` and supply model selection, estimate confirmation, job cap and budget-override controls. Existing reader UI was deliberately not modified during its concurrent replacement. This is not yet an end-to-end shipped reader feature.
+The reader mounts `src/renderer/ai-parse/AiParsePanel` through `AiParseControls`, with the vendor model selector, explicit estimate confirmation, admission cap, monthly-budget override, page progress and original/AI version controls. The Library row menu and conversion-quality/failure actions open the same panel. Failed conversions (including PDFs without text layers) show the existing backend limitation rather than attempting unsupported OCR. See `design-reviews/ai-parse-mounted.md` for mounted-UI verification and remaining limits.
 
 ## Flow and storage
 
@@ -52,6 +52,6 @@ See `ai-parse-evaluation.md` and its final verification table. Unit/integration 
 | 4. Cost control | Literal estimate regression (4,268 input / 256 output tokens, USD .011096 at 2/10 per million), USD/token monthly guards, explicit override/cap props, parse usage rollups, first-page scope | Admission/abort cap can overshoot in-flight external billing; no global budget escrow; strict financial hard cap remains incomplete |
 | 5. Prompt/safety | Versioned system prompt, AST rejection of active content, size cap, multilingual multiset gate, deterministic injection corpus | No independent OCR; annotation/operator/semantic correctness is not established; no claim of guaranteed model obedience |
 | 6. Reader contract | Optional documents:read version, persisted activeVersion, version-scoped selection/citation fields, chat active-file reads, FTS switch and restore | Host must reload/clear offsets after switching or regeneration; version identifies the original/AI slot rather than an immutable historical AI revision |
-| 7. UI pieces | New headless hook/panel only under renderer/ai-parse; model slot, scopes, cost/cap/override, statuses, compare/use/revert/discard; all three catalogs extended | Mounting and reader selection/citation navigation intentionally left to UI worker/later integration, as requested; hook polls validated status because existing preload was outside ownership |
+| 7. UI pieces | New headless hook/panel only under renderer/ai-parse; model slot, scopes, cost/cap/override, statuses, compare/use/revert/discard; all three catalogs extended | Mounted in reader and Library; switching reloads Markdown, clears selections and checks citation versions. Status polling remains in use |
 | 8. Tests/evaluation | Main/shared suite, migration seed, fake image provider, budget/cache/cancel/fallback tests; two live CLI smokes; CH2 pages 3/5/10/16 evaluated | Full E2E has concurrent renderer failures; no live API or AGY vision result; no model injection-obedience proof |
 | 9. Documentation | This document, README, SECURITY and full side-by-side CH2 evaluation | Welcome/onboarding copy untouched by this implementation |

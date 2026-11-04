@@ -61,9 +61,11 @@ export function DocumentMarkdown({
   onSelect,
   onNotice,
   decorative = false,
+  version = "original",
 }: {
   source: string;
   decorative?: boolean;
+  version?: "original"|"ai";
   documentId: Document["id"];
   onSelect: (selection: Selection) => void;
   onNotice: (message: string) => void;
@@ -83,13 +85,13 @@ export function DocumentMarkdown({
     let cleanup: (() => void) | undefined;
     const jump = (event: Event) => {
       const citation = documentCitationSchema.safeParse((event as CustomEvent).detail);
-      if (!citation.success || citation.data.documentId !== documentId || citation.data.offset > source.length || !root.current) return;
+      if (!citation.success || citation.data.documentId !== documentId || (citation.data.version ?? "original") !== version || citation.data.offset > source.length || !root.current) return;
       cleanup?.();
       cleanup = highlightCitation(root.current,citation.data.offset,window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     };
     window.addEventListener('vstudy:document-citation',jump);
     return () => { window.removeEventListener('vstudy:document-citation',jump); cleanup?.(); };
-  },[source,documentId]);
+  },[source,documentId,version]);
   const headings = useMemo(() => headingsIn(source), [source]);
   useEffect(() => {
     const update = (event: Event) => {

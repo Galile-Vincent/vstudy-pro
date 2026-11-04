@@ -1,8 +1,10 @@
+import { DropdownMenuLabel } from '../components/ui/dropdown-menu';
+import { useNavigate } from '../shell';
 import { useState } from 'react';
 import { useFormat } from '../i18n';
 import { Checkbox } from '../components/checkbox';
 import { Button } from '../components/ui/button';
-import { FileText,Pencil,FolderInput,Tag,ExternalLink,Download,RefreshCw,Trash2 } from 'lucide-react';
+import { FileText,Pencil,FolderInput,Tag,ExternalLink,Download,RefreshCw,Trash2,Pin,PinOff,Sparkles,Info } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { LibraryDialog } from './dialog';
@@ -16,6 +18,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
  open:(item:Item)=>void;
  setMenu:(item:Item|null)=>void;setMove:(value:boolean)=>void;setTagging:(value:boolean)=>void;
 }) {
+ const {navigate} = useNavigate();
  const [details,setDetails]=useState<Item|null>(null);const format=useFormat();
  const path=(id:Item['folderId'])=>{const names:string[]=[];for(let n=0;id&&n<folders.length;n++){const folder=folders.find(f=>f.id===id);if(!folder)break;names.unshift(folder.name);id=folder.parentId;}return names.join(' › ')||tr('library:unfiled');};
  return <>
@@ -35,8 +38,8 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
           menu anchor={anchor}
           onClose={() => setMenu(null)}
         >
-          <div className="document-menu">
-            <Button variant="ghost" data-testid="document-details" onClick={()=>{setDetails(menu);setMenu(null);}}>{tr('library:details')}</Button>
+          <div className="document-menu"><DropdownMenuLabel>{tr("library:details")}</DropdownMenuLabel>
+            <Button variant="ghost" data-testid="document-details" onClick={()=>{setDetails(menu);setMenu(null);}}><Info/>{tr('library:viewDetails')}</Button>
             <Button variant="ghost" onClick={() => open(menu)}><FileText/>{tr("library:open")}</Button>
             <Button variant="ghost"
               onClick={async () => {
@@ -67,7 +70,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
                 )
               }
             >
-              {tr("library:pin")}
+              {menu.pinned?<PinOff/>:<Pin/>}{tr("library:pin")}
             </Button>
             <Button variant="ghost" onClick={() => setTagging(true)}>
               <Tag/>{tr("library:tag")}
@@ -91,6 +94,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
                 {channel === "documents:reconvert" ? <RefreshCw/> : channel === "library:reveal" ? <ExternalLink/> : <Download/>}{tr(`library:${channel.split(":")[1]}`)}
               </Button>
             ))}
+            <Button variant="ghost" onClick={()=>{navigate({view:'workspace',documentId:menu.document.id,aiParse:true});setMenu(null);}}><Sparkles/>{tr('library:ai_parse.reparse')}</Button>
             <Button variant="ghost"
               onClick={() => void remove(ids.length ? ids : [menu.document.id])}
             >

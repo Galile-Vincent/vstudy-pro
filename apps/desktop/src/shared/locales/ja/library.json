@@ -125,7 +125,7 @@
   "noFolders": "フォルダはまだありません",
   "customDates": "期間を指定…",
   "unknown_size": "サイズ不明",
-  "ai_parse.title": "AI で改善",
+  "ai_parse.title": "AIで再解析",
   "ai_parse.scope": "範囲",
   "ai_parse.all": "全ページ",
   "ai_parse.range": "ページ範囲",
@@ -148,8 +148,16 @@
   "ai_parse.use": "AI 版を使用",
   "ai_parse.revert": "元に戻す",
   "ai_parse.discard": "AI 版を削除",
-  "ai_parse.cap": "ジョブの予算上限（USD、実際の料金は見積額を超える場合があります）",
+  "ai_parse.cap": "ジョブ開始時の上限（USD・実際の請求はこの上限を超える場合があります）",
   "ai_parse.override": "月の残りの予算を超える支出を確認",
   "details": "詳細",
-  "pageCount": "ページ数"
+  "pageCount": "ページ数",
+  "ai_parse.reparse": "AIで再解析",
+  "ai_parse.ai": "AI版",
+  "ai_parse.version": "表示するバージョン",
+  "ai_parse.resume": "再開",
+  "ai_parse.cli_hint": "CLIプロバイダーは初期状態では無効です。設定で有効にしてください。",
+  "ai_parse.not_ready": "AIでの再解析には変換の完了が必要です。テキスト層のないPDFは、文字を選択できるPDFを取り込んでください。独立したOCRには対応していません。",
+  "ai_parse.poor_conversion": "変換結果が不完全ですか？",
+  "viewDetails": "詳細を表示"
 }
