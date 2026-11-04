@@ -246,10 +246,10 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   background: color-mix(in oklab, var(--ink) 8%, var(--surface));
 }
 
-.settings-pane input:not([type=checkbox]):not([type=radio]):focus-visible,
-.settings-pane textarea:focus-visible,
-.settings-control input:focus-visible,
-.settings-control textarea:focus-visible {
+html[data-input-modality=keyboard] .settings-pane input:not([type=checkbox]):not([type=radio]):focus-visible,
+html[data-input-modality=keyboard] .settings-pane textarea:focus-visible,
+html[data-input-modality=keyboard] .settings-control input:focus-visible,
+html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }

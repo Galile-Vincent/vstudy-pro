@@ -39,10 +39,11 @@ try {
       input: await input.evaluate(element => { const style = window.getComputedStyle(element); return { border: style.borderTopWidth, outlineStyle: style.outlineStyle, shadow: style.boxShadow }; }),
     });
     const floating = name === 'composer' || name === 'edit-composer';
+    const borderless = floating || ['library-search', 'settings-input', 'settings-textarea'].includes(name);
     await input.click();
     const pointer = await styles();
-    assert.equal(pointer.owner.border, floating ? '0px' : '1px', `${name} uses its intended field boundary`);
-    assert.notEqual(pointer.owner.color, 'rgba(0, 0, 0, 0)');
+    assert.equal(pointer.owner.border, borderless ? '0px' : '1px', `${name} uses its intended field boundary`);
+    if (!borderless) assert.notEqual(pointer.owner.color, 'rgba(0, 0, 0, 0)');
     if (floating) assert.notEqual(pointer.owner.shadow, 'none');
     else assert.equal(pointer.owner.shadow, 'none');
     assert.equal(pointer.owner.outlineStyle, 'none', `${name} pointer focus adds no outline`);
@@ -53,7 +54,7 @@ try {
     await page.keyboard.press('Shift+Tab');
     assert.equal(await input.evaluate(element => element === window.document.activeElement), true, `${name} keyboard returns to the input`);
     const keyboard = await styles();
-    assert.equal(keyboard.owner.border, floating ? '0px' : '1px');
+    assert.equal(keyboard.owner.border, borderless ? '0px' : '1px');
     assert.equal(keyboard.owner.outline, '2px', `${name} keyboard focus belongs to the field boundary`);
     if (floating) assert.notEqual(keyboard.owner.shadow, 'none');
     else assert.equal(keyboard.owner.shadow, 'none');

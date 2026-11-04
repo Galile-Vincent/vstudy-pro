@@ -32,7 +32,7 @@
 }
 .library-view .library-search input { width:100%; min-width:0; border:0; padding-inline:0; background:transparent; box-shadow:none; transition:none; }
 .library-view .library-search input:focus-visible { outline:none; box-shadow:none; }
-.library-view .library-search:has(:focus-visible) { outline:2px solid var(--focus); outline-offset:2px; }
+html[data-input-modality=keyboard] .library-view .library-search:has(:focus-visible) { outline:2px solid var(--focus); outline-offset:2px; }
 .filter-popover { position:relative; }
 .filter-popover summary { cursor:pointer; display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2); list-style:none; min-height:var(--space-8); border-radius:var(--r-sm); }
 .filter-popover summary::-webkit-details-marker { display:none; }
