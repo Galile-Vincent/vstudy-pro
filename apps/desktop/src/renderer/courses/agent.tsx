@@ -11,6 +11,7 @@ import type {
 import { moodleAgentActionSchema } from "../../shared/moodle";
 import { tr, i18n } from "../../shared/i18n";
 import { Button } from "../components/ui/button";
+import { Suggestions } from "../components/assistant-ui/elements/suggestions";
 import type { MoodleApi } from "./api";
 
 export interface CourseAgentRequest {
@@ -205,29 +206,28 @@ export function CourseAgentPanel({
         </span>
         <h3>{tr("moodle:prepare_title")}</h3>
         <p>{tr("moodle:prepare_description")}</p>
-        <Button
-          variant="outline"
-          disabled={status === "busy"}
-          onClick={() => (agent ? void prepare() : quick("explain_prepare"))}
-        >
-          {tr("moodle:explain_prepare")}
-        </Button>
+        <fieldset className="moodle-agent-suggestions" disabled={status === "busy"}>
+          <Suggestions
+            suggestions={[tr("moodle:explain_prepare")]}
+            selectedSuggestion={null}
+            cycle={0}
+            variant="list"
+            onSuggestion={() => (agent ? void prepare() : quick("explain_prepare"))}
+          />
+        </fieldset>
         {!agent && (
           <>
-            <Button
-              variant="outline"
-              disabled={!conversation}
-              onClick={() => quick("summarize_notifications")}
-            >
-              {tr("moodle:summarize_notifications")}
-            </Button>
-            <Button
-              variant="outline"
-              disabled={!conversation}
-              onClick={() => quick("plan_week")}
-            >
-              {tr("moodle:plan_week")}
-            </Button>
+            <fieldset className="moodle-agent-suggestions" disabled={!conversation}>
+              <Suggestions
+                suggestions={[tr("moodle:summarize_notifications"), tr("moodle:plan_week")]}
+                selectedSuggestion={null}
+                cycle={0}
+                variant="list"
+                onSuggestion={(suggestion) => quick(
+                  suggestion === tr("moodle:plan_week") ? "plan_week" : "summarize_notifications",
+                )}
+              />
+            </fieldset>
             {conversations.length > 0 && (
               <select
                 aria-label={tr("moodle:conversations")}

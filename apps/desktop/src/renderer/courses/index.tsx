@@ -103,10 +103,7 @@ function Cover({ course }: { course: MoodleCourse }) {
       {course.imageUrl ? (
         <img src={course.imageUrl} alt="" referrerPolicy="no-referrer" />
       ) : (
-        <>
-          <span className="moodle-cover-orbit" />
-          <BookOpen aria-hidden="true" />
-        </>
+        <BookOpen aria-hidden="true" />
       )}
       <span className="moodle-course-code">
         {[course.identity.term, course.identity.code]
@@ -281,7 +278,7 @@ export function Courses({
     items.length ? (
       <div className="moodle-rows">
         {items.map((d) => (
-          <div className="moodle-row" key={d.id}>
+          <div className="moodle-row" key={d.id} data-deadline-group={deadlineGroup(d)}>
             <span className="moodle-row-icon">
               {d.submitted ? <Check /> : <CalendarDays />}
             </span>
@@ -461,12 +458,7 @@ export function Courses({
                 {tr("moodle:all_courses")}
               </Button>
             )}
-            {!courseId && (
-              <>
-                <p className="moodle-eyebrow">{tr("moodle:learning_space")}</p>
-                <h1>{tr("moodle:courses")}</h1>
-              </>
-            )}
+            {!courseId && <h1>{tr("moodle:courses")}</h1>}
             <p>
               {courseId
                 ? tr("moodle:course_subtitle")
@@ -828,6 +820,7 @@ export function Courses({
                       <article
                         key={d.id}
                         className="moodle-due-card"
+                        data-deadline-group={deadlineGroup(d)}
                         style={courseStyle(d.courseId)}
                       >
                         {course && <Cover course={course} />}

@@ -57,6 +57,8 @@ export function Reminder({
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
+          className="moodle-reminder-trigger"
+          data-active={existing.length > 0}
           size="icon"
           aria-label={tr("moodle:remind_for", { title: deadline.title })}
         >
