@@ -58,7 +58,7 @@ export class MoodleRepository {
     return this.db.prepare('SELECT data,remoteKey FROM moodle_grades WHERE courseId=?').all(courseId).map(row => ({remoteKey:z.string().parse(row.remoteKey),value:moodleGradeItemSchema.parse(JSON.parse(payload.parse(row).data))}));
   }
   fileRecords(courseId: string) { return this.files(courseId).map(value => ({value,url:this.file(value.id).url})); }
-  linkFile(id: string, documentId: string) { this.db.prepare('UPDATE moodle_files SET documentId=? WHERE id=?').run(documentId,id); }
+  linkFile(id: string, documentId: string, revision: Pick<MoodleFile,'modifiedAt'|'size'>) { this.db.prepare("UPDATE moodle_files SET documentId=? WHERE id=? AND json_extract(data,'$.modifiedAt') IS ? AND json_extract(data,'$.size')=?").run(documentId,id,revision.modifiedAt,revision.size); }
   apply(accountId: string, snapshot: MoodleSnapshot) {
     this.db.exec('SAVEPOINT moodle_sync');
     try {

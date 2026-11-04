@@ -168,3 +168,14 @@ it('reconnects the existing user account without exposing or duplicating its tok
   expect(await secrets.getInMainOnly(moodleSecretId(account.id))).toBe('token');
   await service.dispose();
 });
+it('does not link a download after its source revision changes',async () => {
+  const {repository,service,store} = await setup(); await service.sync(account.id);
+  const file = repository.course(repository.overview().courses[0]!.id).files[0]!;
+  const documents = {get:() => null,importPath:vi.fn(async () => {
+    store.db.prepare('UPDATE moodle_files SET data=? WHERE id=?').run(JSON.stringify({...file,size:999}),file.id);
+    return {id:'22222222-2222-4222-a222-222222222222'} as Awaited<ReturnType<DocumentService['importPath']>>;
+  })};
+  await importMoodleFile(repository,file.id,'https://ilearning.cycu.edu.tw','token',documents,async () => new Response('pdf'));
+  expect(repository.file(file.id).file.documentId).toBe(null);
+  await service.dispose();
+});

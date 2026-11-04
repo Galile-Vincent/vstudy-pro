@@ -43,7 +43,7 @@ export async function importMoodleFile(repository: MoodleRepository, id: string,
       }
     } finally { await reader.cancel().catch(() => undefined); reader.releaseLock(); await output.close(); }
     const document = await documents.importPath(path);
-    repository.linkFile(id,document.id);
+    repository.linkFile(id,document.id,file);
     return document.id;
   } finally { await rm(directory,{recursive:true,force:true}); }
 }
