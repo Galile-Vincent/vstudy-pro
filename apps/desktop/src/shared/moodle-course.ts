@@ -90,3 +90,7 @@ export type MoodleCourseExtras = z.infer<typeof moodleCourseExtrasSchema>;
 
 export const moodleTermFilterSchema = z.enum(["current", "future", "past", "all"]);
 export type MoodleTermFilter = z.infer<typeof moodleTermFilterSchema>;
+
+export function emptyCourseIdentity(title: string, hasProgress = false): MoodleCourseIdentity {
+  return {title:{zh:/[\u3400-\u9fff]/.test(title) ? title : null,en:/[\u3400-\u9fff]/.test(title) ? null : title},teachers:[],code:null,term:null,classLabel:{zh:null,en:null},lifecycle:'unknown',lifecycleSource:'none',hidden:false,hasProgress,format:null,summaryHtml:null};
+}

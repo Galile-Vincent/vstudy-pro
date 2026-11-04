@@ -1,3 +1,4 @@
+import { emptyCourseIdentity } from '../../shared/moodle-course';
 import type { DatabaseSync } from 'node:sqlite';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
@@ -15,10 +16,14 @@ export interface MoodleSnapshot {
   files: {url:string;value:MoodleFile}[];
 }
 const capabilitiesSchema = z.object({functions:z.array(z.string()).optional(),release:z.string().optional(),version:z.string().optional(),advancedfeatures:z.array(z.object({name:z.string(),value:z.union([z.string(),z.number(),z.boolean()])})),mobileConfig:z.record(z.string())});
+const storedCourseSchema = z.preprocess(value => {
+  const row = z.object({fullName:z.string(),progress:z.number().nullable().optional(),identity:z.unknown().optional()}).parse(value);
+  return row.identity ? value : {...(value as Record<string,unknown>),identity:emptyCourseIdentity(row.fullName,row.progress != null)};
+},moodleCourseSchema);
 const payload = z.object({data:z.string()});
 export class MoodleRepository {
   constructor(private readonly db: DatabaseSync) {}
-  private rows<T>(sql: string, schema: z.ZodType<T>, ...params: string[]): T[] {
+  private rows<T>(sql: string, schema: z.ZodType<T,z.ZodTypeDef,unknown>, ...params: string[]): T[] {
     return this.db.prepare(sql).all(...params).map(row => schema.parse(JSON.parse(payload.parse(row).data)));
   }
   capabilities(id: string) { return this.rows('SELECT data FROM moodle_capabilities WHERE accountId=?',capabilitiesSchema,id)[0]; }
@@ -38,14 +43,14 @@ export class MoodleRepository {
   expired(id: string) { this.saveAccount({...this.account(id),status:'expired'}); }
   overview(accountId?: string): MoodleOverview {
     const accounts = this.accounts().filter(account => !accountId || account.id === accountId);
-    const courses = this.rows('SELECT data FROM moodle_courses ORDER BY id',moodleCourseSchema).filter(course => accounts.some(account => account.id === course.accountId));
+    const courses = this.rows('SELECT data FROM moodle_courses ORDER BY id',storedCourseSchema).filter(course => accounts.some(account => account.id === course.accountId));
     const ids = new Set(courses.map(course => course.id));
     const upcoming = this.rows('SELECT data FROM moodle_deadlines',moodleDeadlineSchema).filter(item => ids.has(item.courseId) && !item.submitted && !item.orphaned).sort((a,b) => a.dueAt.localeCompare(b.dueAt));
     const notifications = this.rows('SELECT data FROM moodle_notifications',moodleNotificationSchema).filter(item => accounts.some(account => account.id === item.accountId));
     return {accounts,courses,upcoming,otherNotifications:notifications.filter(item => item.courseId === null),unreadNotifications:notifications.filter(item => !item.read).length};
   }
   course(id: string): MoodleCourseDetail {
-    const course = this.rows('SELECT data FROM moodle_courses WHERE id=?',moodleCourseSchema,id)[0];
+    const course = this.rows('SELECT data FROM moodle_courses WHERE id=?',storedCourseSchema,id)[0];
     if (!course) throw new Error('Moodle course not found');
     const deadlines = this.rows('SELECT data FROM moodle_deadlines WHERE courseId=?',moodleDeadlineSchema,id).filter(item => !item.orphaned);
     return {course,deadlines,notifications:this.rows('SELECT data FROM moodle_notifications WHERE accountId=?',moodleNotificationSchema,course.accountId).filter(item => item.courseId === id),grades:this.rows('SELECT data FROM moodle_grades WHERE courseId=?',moodleGradeItemSchema,id),files:this.files(id),reminders:this.reminders().filter(item => deadlines.some(deadline => deadline.id === item.deadlineId)),sections:[],announcements:[]};

@@ -1,3 +1,4 @@
+import { emptyCourseIdentity } from '../../shared/moodle-course';
 import { moodleImage } from './files';
 import { authError, type MoodleTokens } from './auth';
 import { moodleFetch, siteFetch } from './site-url';
@@ -68,7 +69,7 @@ export class MoodleClient {
     const timeline = async () => (await this.call('core_course_get_enrolled_courses_by_timeline_classification',{classification:'all',limit:'0',offset:'0'},z.object({courses:z.array(courseWire)}))).courses;
     const rows = await this.fallback(() => this.call('core_enrol_get_users_courses',{userid:String(account.remoteUserId)},z.array(courseWire)),timeline);
     const courses = rows.length ? rows : await timeline();
-    const mapped = courses.map(row => moodleCourseSchema.parse({id:remoteId(account.id,'course',row.id),accountId:account.id,remoteId:row.id,fullName:plainText(row.fullname),shortName:plainText(row.shortname),imageUrl:url(row.courseimage ?? row.overviewfiles?.[0]?.fileurl),progress:row.progress == null ? null : Math.min(100,Math.max(0,row.progress)),startAt:date(row.startdate),endAt:date(row.enddate),favourite:row.isfavourite ?? false}));
+    const mapped = courses.map(row => moodleCourseSchema.parse({id:remoteId(account.id,'course',row.id),accountId:account.id,remoteId:row.id,fullName:plainText(row.fullname),shortName:plainText(row.shortname),imageUrl:url(row.courseimage ?? row.overviewfiles?.[0]?.fileurl),progress:row.progress == null ? null : Math.min(100,Math.max(0,row.progress)),startAt:date(row.startdate),endAt:date(row.enddate),favourite:row.isfavourite ?? false,identity:emptyCourseIdentity(plainText(row.fullname),row.progress != null)}));
     return Promise.all(mapped.map(async course => ({...course,imageUrl:course.imageUrl ? await moodleImage(course.imageUrl,this.host,this.token,this.request) : null})));
   }
   async assignments(accountId: string, courses: MoodleCourse[]) {

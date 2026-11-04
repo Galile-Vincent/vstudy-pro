@@ -4,6 +4,7 @@ import type { MoodleCourseDetail } from "../../shared/moodle";
 const courseId = "00000000-0000-4000-8000-000000000001";
 const deadlineId = "00000000-0000-4000-8000-000000000002";
 const detail: MoodleCourseDetail = {
+  sections: [], announcements: [],
   course: {
     id: courseId,
     accountId: "00000000-0000-4000-8000-000000000003",
