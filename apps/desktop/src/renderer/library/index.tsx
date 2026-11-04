@@ -344,7 +344,7 @@ export function LibraryView() {
   const [textScale,setTextScale]=useState(()=>parseFloat(getComputedStyle(document.documentElement).fontSize));
   useEffect(()=>{const update=()=>setTextScale(parseFloat(getComputedStyle(document.documentElement).fontSize));const observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['style']});window.addEventListener('resize',update);return()=>{observer.disconnect();window.removeEventListener('resize',update);};},[]);
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const rowHeight = grid ? 12 * textScale : rowRem * textScale,
+  const rowHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--library-card-height")) : rowRem * textScale,
     columns = grid
       ? Math.max(1, Math.floor((scroller.current?.clientWidth ?? 700) / 260))
       : 1,
@@ -687,7 +687,6 @@ export function LibraryView() {
           <div
             style={{
               height: Math.ceil(items.length / columns) * rowHeight,
-              marginInlineEnd: grid ? "calc(-1 * var(--space-4))" : undefined,
               position: "relative",
             }}
           >
@@ -708,7 +707,7 @@ export function LibraryView() {
                   onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: grid ? `calc(${rowHeight}px - var(--space-4))` : rowHeight,
+                    height: rowHeight,
                     position: "absolute",
                     top: Math.floor(index / columns) * rowHeight,
                     left: `${((index % columns) * 100) / columns}%`,

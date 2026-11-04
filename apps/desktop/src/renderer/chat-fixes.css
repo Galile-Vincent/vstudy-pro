@@ -74,7 +74,9 @@
 
 .workspace .conversation-trigger { display:flex; align-items:center; gap:var(--space-1); min-width:0; max-width:220px; height:28px; font-size:var(--type-base); }
 .document-welcome { display:grid; justify-items:center; gap:var(--space-3); }
-[data-slot=suggestions] button { border:1px solid var(--hairline); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:var(--type-base); }
+[data-slot=suggestions] button { border:0; border-radius:var(--r-pill); background:color-mix(in oklab,var(--ink) 4%,var(--surface)); color:var(--ink); font-size:var(--type-base); }
+[data-slot=suggestions] button:hover:not([aria-pressed=true]):not(:disabled) { background:color-mix(in oklab,var(--ink) 8%,var(--surface)); }
+[data-slot=suggestions] button[aria-pressed=true] { background:var(--ink); color:var(--surface); }
 .effort-item[data-state=checked] { background:var(--ink); color:var(--surface); }
 .model-popover .effort-list .effort-item[data-state=checked] { background:var(--ink); color:var(--surface); }
 
@@ -154,7 +156,7 @@
  border:0;
  border-radius:var(--r-lg);
  background:color-mix(in oklab,var(--ink) 4%,var(--surface));
- box-shadow:var(--elevation-raised)!important;
+ box-shadow:var(--elevation-floating);
 }
 .workspace .new-chat-composer { padding:var(--space-3); }
 .workspace [data-slot=aui_composer-shell]:focus-within {
@@ -241,7 +243,7 @@
  .workspace .resize-handle::after, .workspace :is([data-slot=suggestions] button,.aui-thread-followup-suggestion,.blank-suggestions button,.aui-tool-group-content > div > *) { animation:none; transition:none; }
 }
 @media(prefers-contrast:more), (forced-colors:active) {
- .workspace :is([data-slot=aui_composer-shell],.aui-edit-composer-root,.new-chat-composer,.aui-user-message-content,[data-slot=suggestions] button,.aui-thread-followup-suggestion) { border:1px solid var(--ink); }
+ [data-slot=suggestions] button,.workspace :is([data-slot=aui_composer-shell],.aui-edit-composer-root,.new-chat-composer,.aui-user-message-content,[data-slot=suggestions] button,.aui-thread-followup-suggestion) { border:1px solid var(--ink); }
  .workspace .resize-handle::after { opacity:1; }
 }
 

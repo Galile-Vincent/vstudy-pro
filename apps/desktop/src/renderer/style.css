@@ -975,7 +975,7 @@ h3 {
 .model-controls [data-slot=model-selector-trigger] { max-width:180px; min-width:0; }
 .model-controls [data-slot=model-selector-value] { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .model-controls [data-slot=select-trigger] { border:0; box-shadow:none; background:transparent; gap:var(--space-1); padding-inline:var(--space-2); width:auto; }
-[data-slot=aui_composer-shell],.aui-edit-composer-root { border:1px solid var(--line); box-shadow:none!important; }
+[data-slot=aui_composer-shell],.aui-edit-composer-root { border:1px solid var(--line); box-shadow:none; }
 [data-slot=aui_composer-shell]:focus-within { background:var(--subtle); }
 html[data-input-modality=keyboard] [data-slot=aui_composer-shell]:has(:focus-visible),html[data-input-modality=keyboard] .aui-edit-composer-root:has(:focus-visible) { outline:2px solid var(--composer-focus-ring); outline-offset:2px; }
 .aui-composer-input,.aui-edit-composer-input { border:0!important; outline:none!important; box-shadow:none!important; background:transparent; }

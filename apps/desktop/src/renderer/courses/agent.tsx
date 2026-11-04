@@ -206,28 +206,29 @@ export function CourseAgentPanel({
         </span>
         <h3>{tr("moodle:prepare_title")}</h3>
         <p>{tr("moodle:prepare_description")}</p>
-        <fieldset className="moodle-agent-suggestions" disabled={status === "busy"}>
+        <div className="moodle-agent-suggestions">
           <Suggestions
-            suggestions={[tr("moodle:explain_prepare")]}
-            selectedSuggestion={null}
+            suggestions={[{ id: "explain_prepare", label: tr("moodle:explain_prepare") }]}
+            disabled={status === "busy"}
             cycle={0}
             variant="list"
             onSuggestion={() => (agent ? void prepare() : quick("explain_prepare"))}
           />
-        </fieldset>
+        </div>
         {!agent && (
           <>
-            <fieldset className="moodle-agent-suggestions" disabled={!conversation}>
+            <div className="moodle-agent-suggestions">
               <Suggestions
-                suggestions={[tr("moodle:summarize_notifications"), tr("moodle:plan_week")]}
-                selectedSuggestion={null}
+                suggestions={[
+                  { id: "summarize_notifications", label: tr("moodle:summarize_notifications") },
+                  { id: "plan_week", label: tr("moodle:plan_week") },
+                ]}
+                disabled={!conversation}
                 cycle={0}
                 variant="list"
-                onSuggestion={(suggestion) => quick(
-                  suggestion === tr("moodle:plan_week") ? "plan_week" : "summarize_notifications",
-                )}
+                onSuggestion={quick}
               />
-            </fieldset>
+            </div>
             {conversations.length > 0 && (
               <select
                 aria-label={tr("moodle:conversations")}

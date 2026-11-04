@@ -6,7 +6,7 @@
 }
 .home-content { max-width:1040px; margin-inline:auto; padding-block:var(--space-8); }
 .home-greeting { display:flex; align-items:start; justify-content:space-between; gap:var(--space-6); margin-bottom:calc(var(--space-8) * 2); }
-.home-greeting h1 { font-size:var(--type-hero); line-height:1.2; font-weight:600; margin:0 0 var(--space-4); overflow-wrap:anywhere; }
+.home-greeting h1 { white-space:normal; font-size:var(--type-hero); line-height:1.2; font-weight:600; margin:0 0 var(--space-4); overflow-wrap:anywhere; }
 .home-greeting p { color:var(--muted); font-size:var(--type-md); margin:0; }
 .home-greeting #welcome-entry { display:inline-flex; align-items:center; gap:var(--space-2); color:var(--muted); flex-shrink:0; font-size:var(--type-sm); }
 .home-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:var(--space-8); align-items:start; }

@@ -38,11 +38,13 @@ try {
       owner: await owner.evaluate(element => { const style = window.getComputedStyle(element); return { border: style.borderBottomWidth, color: style.borderBottomColor, outline: style.outlineWidth, outlineStyle: style.outlineStyle, shadow: style.boxShadow }; }),
       input: await input.evaluate(element => { const style = window.getComputedStyle(element); return { border: style.borderTopWidth, outlineStyle: style.outlineStyle, shadow: style.boxShadow }; }),
     });
+    const floating = name === 'composer' || name === 'edit-composer';
     await input.click();
     const pointer = await styles();
-    assert.equal(pointer.owner.border, '1px', `${name} keeps one visible field border`);
+    assert.equal(pointer.owner.border, floating ? '0px' : '1px', `${name} uses its intended field boundary`);
     assert.notEqual(pointer.owner.color, 'rgba(0, 0, 0, 0)');
-    assert.equal(pointer.owner.shadow, 'none');
+    if (floating) assert.notEqual(pointer.owner.shadow, 'none');
+    else assert.equal(pointer.owner.shadow, 'none');
     assert.equal(pointer.owner.outlineStyle, 'none', `${name} pointer focus adds no outline`);
     assert.equal(pointer.input.shadow, 'none');
     if (composite) { assert.equal(pointer.input.border, '0px'); assert.equal(pointer.input.outlineStyle, 'none'); }
@@ -51,9 +53,10 @@ try {
     await page.keyboard.press('Shift+Tab');
     assert.equal(await input.evaluate(element => element === window.document.activeElement), true, `${name} keyboard returns to the input`);
     const keyboard = await styles();
-    assert.equal(keyboard.owner.border, '1px');
+    assert.equal(keyboard.owner.border, floating ? '0px' : '1px');
     assert.equal(keyboard.owner.outline, '2px', `${name} keyboard focus belongs to the field boundary`);
-    assert.equal(keyboard.owner.shadow, 'none');
+    if (floating) assert.notEqual(keyboard.owner.shadow, 'none');
+    else assert.equal(keyboard.owner.shadow, 'none');
     if (composite) assert.equal(keyboard.input.outlineStyle, 'none');
     if (underline) assert.equal(await owner.evaluate(element => window.getComputedStyle(element).borderTopWidth), '0px');
     await capture(`${theme}-${name}-keyboard`, owner);

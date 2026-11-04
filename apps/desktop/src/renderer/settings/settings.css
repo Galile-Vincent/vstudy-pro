@@ -669,7 +669,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 }
 
 /* High contrast mode restores structural borders */
-@media (prefers-contrast: more) {
+@media (prefers-contrast: more), (forced-colors: active) {
   .settings-card {
     border: 1px solid var(--hairline);
   }
