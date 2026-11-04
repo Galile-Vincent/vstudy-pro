@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp,mkdir,writeFile,rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join,resolve } from 'node:path';
-const out='/tmp/vstudy-ui3/after';await mkdir(out,{recursive:true});
+const out=process.env.UI3_EVIDENCE??'/tmp/vstudy-ui3/after/review-final';await mkdir(out,{recursive:true});
 const dir=await mkdtemp(join(tmpdir(),'ui3-e2e-'));let app;const checks=[];
 try {
  app=await electron.launch({args:[process.env.UI3_BUILD??resolve('.'),`--user-data-dir=${dir}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1',VSTUDY_LOCALE:'en'}});
@@ -83,7 +83,16 @@ try {
    await page.locator('.settings-tabs [role=tab]').nth(['general','appearance','providers','usage','privacy'].indexOf(section)).click();
    const layout=await page.evaluate(()=>{const d=window.document.querySelector('.settings-dialog'),p=window.document.querySelector('.settings-pane:not([hidden])'),r=d.getBoundingClientRect();return {w:r.width,h:r.height,overflow:d.scrollWidth>d.clientWidth+1||p.scrollWidth>p.clientWidth+1,viewport:r.left>=0&&r.top>=0&&r.right<=window.innerWidth+1&&r.bottom<=window.innerHeight+1,nested:d.querySelectorAll('.settings-card .settings-card').length,rowsOverlap:[...p.querySelectorAll('.settings-row')].some(row=>{const label=row.querySelector('.settings-label'),control=row.querySelector('.settings-control');if(!label||!control)return false;const a=label.getBoundingClientRect(),b=control.getBoundingClientRect();return Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top);})};});
    assert.equal(layout.overflow,false,JSON.stringify({...context,section,layout}));assert.equal(layout.viewport,true);assert.equal(layout.nested,0);assert.equal(layout.rowsOverlap,false);if(dialogSize)assert.deepEqual([layout.w,layout.h],dialogSize);else dialogSize=[layout.w,layout.h];
+   if(section==='appearance') {
+    const appearance=await page.evaluate(()=>{const pane=window.document.querySelector('.settings-pane:not([hidden])'),control=pane.querySelector('.settings-control'),preview=pane.querySelector('.appearance-preview'),items=[...pane.querySelectorAll('[data-slot=toggle-group-item]')];return {firstControl:control.getBoundingClientRect().bottom<=pane.getBoundingClientRect().bottom,previewAfter:preview.getBoundingClientRect().top>control.getBoundingClientRect().top,wrapped:items.some(e=>e.scrollHeight>e.clientHeight+1)};});
+    assert.equal(appearance.firstControl,true,JSON.stringify({context,appearance}));assert.equal(appearance.previewAfter,true);assert.equal(appearance.wrapped,false);
+   }
    await audit(section);await shot(section);
+   await page.locator('.settings-pane:not([hidden])').evaluate(e=>{e.scrollTop=e.scrollHeight;});
+   const bottom=await page.locator('.settings-pane:not([hidden])').evaluate(e=>{const content=e.querySelector('.settings-pane-inner'),last=content.lastElementChild;return {bottom:last.getBoundingClientRect().bottom,viewport:e.getBoundingClientRect().bottom,padding:parseFloat(window.getComputedStyle(e).paddingBottom)};});
+   assert.ok(bottom.bottom<=bottom.viewport-bottom.padding+1,JSON.stringify({context,section,bottom}));
+   await shot(section+'-bottom');
+
   }
   await page.keyboard.press('Escape');
   await page.locator('.library-search input').fill('Body');await page.locator('.search-snippet').first().waitFor();

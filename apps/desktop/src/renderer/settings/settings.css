@@ -26,7 +26,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 .settings-control [data-slot=select-trigger] { width:12.5rem; max-width:100%; }
 .settings-control input { width:10rem; max-width:100%; }
 .settings-row[data-layout=stack] .settings-control { flex:1 1 100%; }
-.settings-control [data-slot=toggle-group] { flex-wrap:wrap; max-width:100%; }
+.settings-control [data-slot=toggle-group] { flex-wrap:nowrap; max-width:100%; }
 .settings-card[data-danger=true] { border-color:color-mix(in oklab,var(--danger) 35%,var(--hairline)); }
 .settings-danger { color:var(--danger); }
 .settings-dialog .provider-row { margin:0; border-top:0; display:block; }
@@ -55,7 +55,6 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 .settings-pane .usage-settings { gap:var(--space-6); }
 @container settings (max-width:40rem) { .settings-tabs[data-slot=tabs-list] { grid-column:1/-1; flex-direction:row; height:44px; overflow-x:auto; border-inline-end:0; border-bottom:1px solid var(--hairline); padding:var(--space-1); } .settings-tabs [data-slot=tabs-trigger] { width:auto; } .settings-pane { grid-column:1/-1; padding:var(--space-4) var(--space-4) var(--space-6); } }
 @media(max-width:672px) { .settings-body[data-slot=tabs] { grid-template-columns:minmax(0,1fr); grid-template-rows:44px minmax(0,1fr); } }
-@container settings (min-width:44rem) { .appearance-layout { display:grid; grid-template-columns:minmax(0,1fr) 280px; align-items:start; } .appearance-preview { grid-column:2; grid-row:1; position:sticky; top:0; } .appearance-layout > .settings-group { grid-column:1; grid-row:1; } }
 .settings-dialog.settings-dialog[data-slot=dialog-content]:not(.library-dialog) { container:settings-shell / inline-size; }
 @container settings-shell (max-width:40rem) { .settings-body[data-slot=tabs] { grid-template-columns:minmax(0,1fr); grid-template-rows:44px minmax(0,1fr); } }
 .settings-pane .usage-settings .settings-control input { width:7.5rem; text-align:end; font-variant-numeric:tabular-nums; }
@@ -66,3 +65,9 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 .provider-status { display:inline-flex; align-items:center; gap:var(--space-1); }
 .settings-dialog .provider-row p:has(code) { display:flex; gap:var(--space-2); }
 .settings-dialog .provider-row code { min-width:0; white-space:nowrap; }
+
+/* Controls occupy the same full-width rows as General; preview follows them. */
+.appearance-layout > .settings-group { order:0; }
+.appearance-preview { order:1; }
+.appearance-layout [data-slot=toggle-group-item] { white-space:nowrap; padding-inline:var(--space-2); font-size:var(--type-sm); min-height:2rem; height:auto; }
+.settings-pane { padding-bottom:calc(var(--space-8) * 2); }
