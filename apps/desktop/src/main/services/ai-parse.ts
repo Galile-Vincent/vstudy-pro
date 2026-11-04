@@ -65,8 +65,8 @@ export class AiParseService {
    if(estimate.reason)throw new Error(estimate.reason);
    const model=(await this.providers.get(r.providerId).listModels()).find(m=>m.id===r.modelId);validateOptions(model,r.options.modelOptions);
    const settings=this.store.settings.get(),spent=this.store.usage.summary('month');
-   if(estimate.costUsd===undefined || estimate.costUsd>r.options.hardCapUsd)throw new Error('ai_parse.cap');
-   if(settings.monthlyBudgetUsd!==undefined && (spent.unknownPrices || (spent.costUsd??0)+estimate.costUsd>settings.monthlyBudgetUsd) && !r.options.confirmBudgetOverride)throw new Error('ai_parse.budget');
+   if(r.options.hardCapUsd!==undefined && (estimate.costUsd===undefined || estimate.costUsd>r.options.hardCapUsd))throw new Error('ai_parse.cap');
+   if(settings.monthlyBudgetUsd!==undefined && (spent.unknownPrices || estimate.costUsd===undefined || (spent.costUsd??0)+estimate.costUsd>settings.monthlyBudgetUsd) && !r.options.confirmBudgetOverride)throw new Error('ai_parse.budget');
    if(settings.monthlyTokenBudget!==undefined && spent.inputTokens+spent.outputTokens+estimate.inputTokens+estimate.outputTokens>settings.monthlyTokenBudget && !r.options.confirmBudgetOverride)throw new Error('ai_parse.budget');
    controller.signal.throwIfAborted();
    this.store.db.prepare("INSERT INTO ai_parse_jobs VALUES(?,?,'running',?,?) ON CONFLICT(documentId) DO UPDATE SET request=excluded.request,status='running',updatedAt=excluded.updatedAt,promptVersion=excluded.promptVersion").run(r.documentId,JSON.stringify(r),new Date().toISOString(),AI_PARSE_PROMPT_VERSION);
@@ -101,7 +101,7 @@ export class AiParseService {
     if(cached?.markdown)output=String(cached.markdown);
     else {
      const cost=estimateParse([p.markdown],r.modelId,!!rendered,this.store.settings.get().priceOverrides).costUsd;
-     if(cost===undefined || reserved+cost>r.options.hardCapUsd)throw new Error('ai_parse.cap');reserved+=cost;
+     if(r.options.hardCapUsd!==undefined && (cost===undefined || reserved+cost>r.options.hardCapUsd))throw new Error('ai_parse.cap');reserved+=cost??0;
      called=true;let done=false;
      for await(const event of this.providers.get(r.providerId).stream({requestId:requestIdSchema.parse(randomUUID()),conversationId:conversationIdSchema.parse(randomUUID()),documentId:d.id,providerId:r.providerId,modelId:r.modelId,userMessage:p.markdown||' ',options:r.options.modelOptions,prompt:aiParsePrompt(p.markdown),systemPrompt:AI_PARSE_SYSTEM,allowPresentation:false,...(rendered?{images:[{mediaType:'image/png' as const,data:rendered.image.toString('base64')}]}:{}),onUsageSnapshot:value=>{usage=value;}},signal)) {
       signal.throwIfAborted();
@@ -120,7 +120,7 @@ export class AiParseService {
    } finally {
     if(called) {
      const measured=priceUsage(r.modelId,usage??{inputTokens:estimateParse([p.markdown],r.modelId,d.mime==='application/pdf').inputTokens,outputTokens:Math.ceil(output.length/3),costSource:'estimated'},this.store.settings.get().priceOverrides);
-     actualCost+=measured.costUsd??0;if(actualCost>r.options.hardCapUsd)controller.abort();
+     actualCost+=measured.costUsd??0;if(r.options.hardCapUsd!==undefined && actualCost>r.options.hardCapUsd)controller.abort();
      this.store.usage.record({...measured,id:randomUUID(),createdAt:new Date().toISOString(),providerId:r.providerId,modelId:r.modelId,kind:'parse',documentId:d.id,aborted:signal.aborted});
     }
     this.store.db.prepare('UPDATE ai_parse_pages SET provenance=? WHERE documentId=? AND page=?').run(JSON.stringify({providerId:r.providerId,modelId:r.modelId,promptVersion:AI_PARSE_PROMPT_VERSION,date:new Date().toISOString()}),d.id,p.page);

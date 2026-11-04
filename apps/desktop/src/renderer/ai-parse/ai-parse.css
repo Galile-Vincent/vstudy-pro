@@ -9,4 +9,3 @@
 .ai-parse-popover button[data-variant=default] { color:var(--surface); background:var(--ink); }
 .ai-parse-popover select, .ai-parse-popover input[type=number] { color:var(--ink); background:var(--surface); }
 .ai-parse-popover section, .ai-parse-popover button, .ai-parse-popover input, .ai-parse-popover select { font-size:.875rem; line-height:1.5; }
-.ai-parse-popover input[type=checkbox] { margin-inline-end:.5rem; }

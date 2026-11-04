@@ -92,3 +92,24 @@ it('drains an active job through the shutdown coordinator before flushing',async
   let flushed=false;await coordinateShutdown({stopWork:()=>x.service.dispose(),flush:()=>{expect(x.service.status(x.imported.id).status).toBe('cancelled');flushed=true;},close:()=>{},quit:()=>{},forceExit:()=>{throw new Error('forced exit');}})();expect(flushed).toBe(true);
  }finally{await x.cleanup();}
 });
+
+it('has no implicit job cap when the caller omits one',async()=>{
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'fixture'}],async *stream(){yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'usage',usage:{inputTokens:2000,outputTokens:2000,costSource:'estimated'}};yield {type:'done'};}};
+ const x=await setup(adapter);try {
+  x.store.settings.set({...x.store.settings.get(),priceOverrides:{'claude-haiku-5-5':{input:10000,output:10000,cacheRead:0,cacheWrite:0}}});
+  expect(x.request.options.hardCapUsd).toBeUndefined();
+  expect((await x.service.estimate(x.request)).costUsd).toBeGreaterThan(1);
+  await x.service.start(x.request);await x.service.waitForIdle();
+  expect(x.service.status(x.imported.id)).toMatchObject({status:'complete',pages:[{page:1,status:'done'}]});
+ } finally {await x.cleanup();}
+});
+it.each([false,true])('only blocks unknown pricing when a monthly USD budget is configured (%s)',async(budget)=>{
+ let calls=0;
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'unpriced-model',name:'fixture'}],async *stream(){calls++;yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'done'};}};
+ const x=await setup(adapter);try {
+  const request={...x.request,modelId:'unpriced-model'};
+  expect((await x.service.estimate(request)).costUsd).toBeUndefined();
+  if(budget){x.store.settings.set({...x.store.settings.get(),monthlyBudgetUsd:1});await expect(x.service.start(request)).rejects.toThrow('ai_parse.budget');expect(calls).toBe(0);}
+  else {await x.service.start(request);await x.service.waitForIdle();expect(x.service.status(x.imported.id).pages[0]?.status).toBe('done');expect(calls).toBe(1);}
+ } finally {await x.cleanup();}
+});

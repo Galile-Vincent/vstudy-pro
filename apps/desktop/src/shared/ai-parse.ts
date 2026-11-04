@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { documentIdSchema, providerIdSchema, modelOptionsSchema } from './domain';
-export const aiParseOptionsSchema = z.object({ concurrency:z.number().int().min(1).max(4).default(2), hardCapUsd:z.number().positive().max(100).default(1), confirmBudgetOverride:z.boolean().default(false), modelOptions:modelOptionsSchema.default({}) }).strict();
+export const aiParseOptionsSchema = z.object({ concurrency:z.number().int().min(1).max(4).default(2), hardCapUsd:z.number().positive().max(100).optional(), confirmBudgetOverride:z.boolean().default(false), modelOptions:modelOptionsSchema.default({}) }).strict();
 export const aiParseRequestSchema = z.object({ documentId:documentIdSchema, providerId:providerIdSchema, modelId:z.string().min(1).max(300), options:aiParseOptionsSchema.default({}), scope:z.enum(['all','range','currentPage','preview']).default('all'), startPage:z.number().int().positive().optional(), endPage:z.number().int().positive().optional() }).strict();
 export type AiParseRequest = z.infer<typeof aiParseRequestSchema>;
 export const aiParsePageSchema = z.object({ page:z.number().int().positive(), status:z.enum(['pending','running','done','kept-original','failed']), code:z.string().optional() }).strict();

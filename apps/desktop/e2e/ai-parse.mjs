@@ -22,6 +22,20 @@ try {
  assert.ok(await page.evaluate(async()=> (await window.desktop.invoke('providers:list',{discover:false})).filter(p=>p.config.kind==='cli').every(p=>!p.config.enabled)));checks++;
  await page.getByRole('button',{name:'Improve with AI',exact:true}).first().click();
  const panel=page.locator('.ai-parse-popover');
+ assert.equal(await panel.locator('input[type=number]').count(),0);checks++;
+ assert.equal(await panel.locator('input[type=checkbox]').count(),0);checks++;
+ await panel.getByRole('combobox',{name:'Model',exact:true}).click();
+ await page.locator('[data-slot=model-selector-search]').fill('Fixture');
+ await page.locator('[data-slot=model-selector-item]').filter({hasText:'Fixture model'}).click();
+ assert.match(await panel.getByRole('combobox',{name:'Model',exact:true}).innerText(),/Fixture model/);checks++;
+ await panel.getByRole('button',{name:'Estimate cost',exact:true}).click();
+ await panel.getByText(/Price unknown/).waitFor();
+ assert.equal(await panel.getByRole('button',{name:'Confirm and improve',exact:true}).isEnabled(),true);checks++;
+ await panel.getByRole('combobox',{name:'Model',exact:true}).click();
+ await page.locator('[data-slot=model-selector-search]').fill('Fake');
+ await page.locator('[data-slot=model-selector-item]').filter({hasText:'Fake (test only)'}).click();
+ assert.equal(await panel.getByRole('button',{name:'Confirm and improve',exact:true}).isEnabled(),false);checks++;
+
  await panel.getByRole('button',{name:'Estimate cost',exact:true}).click();
  await panel.getByText(/tokens · USD/).waitFor();checks++;
  const audit=async()=>{const result=await new AxeBuilder({page}).setLegacyMode(true).include('.ai-parse-popover').analyze();await writeFile(join(evidence,'axe.json'),JSON.stringify(result.violations,null,2));assert.deepEqual(result.violations.map(v=>v.id),[]);axeScans++;};

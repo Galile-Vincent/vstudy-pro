@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
@@ -12,9 +12,9 @@ import { useAiParse } from './use-ai-parse';
 import { AiParsePanel } from './ai-parse-panel';
 import './ai-parse.css';
 
-export function AiParseControls({ document, providers, pageCount, initiallyOpen, onReload, onSettings }: {
+export function AiParseControls({ document, providers, pageCount, initiallyOpen, onReload, onSettings, onProvidersChanged }: {
  document: Document; providers: Providers; pageCount: number; initiallyOpen: boolean;
- onReload: (version: 'original'|'ai') => Promise<void>; onSettings: () => void;
+ onReload: (version: 'original'|'ai') => Promise<void>; onSettings: () => void; onProvidersChanged: () => Promise<void>;
 }) {
  useTranslation();
  const ai = useAiParse(document.id,document.status==='ready');
@@ -22,7 +22,14 @@ export function AiParseControls({ document, providers, pageCount, initiallyOpen,
  const [model, setModel] = useState('');
  const [scope, setScope] = useState<'all'|'range'|'preview'>('all');
  const [start, setStart] = useState(1), [end, setEnd] = useState(Math.max(1,pageCount));
- const [cap, setCap] = useState(1), [override, setOverride] = useState(false);
+ const [discovering,setDiscovering] = useState(false);
+ const [discoveryError,setDiscoveryError] = useState(false);
+ const refreshModels = useCallback(async()=>{
+  setDiscovering(true);setDiscoveryError(false);
+  try {await onProvidersChanged();} catch {setDiscoveryError(true);}
+  finally {setDiscovering(false);}
+ },[onProvidersChanged]);
+ useEffect(()=>{if(open && document.status==='ready')void refreshModels();},[open,document.status,refreshModels]);
  const [options, setOptions] = useState<Record<string,string|boolean>>({});
  const [pending,setPending] = useState(false);
  const models = pickerModels(providers.filter(p=>p.config.id!=='agy-cli'));
@@ -36,7 +43,7 @@ export function AiParseControls({ document, providers, pageCount, initiallyOpen,
   previousStatus.current=ai.state?.status;
  },[ai.state?.status]);
  const request = selected ? {providerId:selected.providerId, modelId:selected.id, scope, startPage:start, endPage:end,
-  options:{concurrency:2,hardCapUsd:cap,confirmBudgetOverride:override,modelOptions:options}} : undefined;
+  options:{concurrency:2,confirmBudgetOverride:false,modelOptions:options}} : undefined;
  const invalidate = () => ai.clearEstimate();
  const useVersion = async (version:'original'|'ai') => {
   setPending(true);
@@ -51,9 +58,10 @@ export function AiParseControls({ document, providers, pageCount, initiallyOpen,
     {document.status!=='ready' ? <p role="status">{tr('library:ai_parse.not_ready')}</p> : <>
      <p className="text-muted-foreground">{tr('library:ai_parse.cli_hint')}</p>
      <Button variant="link" onClick={()=>{setOpen(false);onSettings();}}>{tr('common:open_settings')}</Button>
+     {discovering && <p role="status">{tr('common:loading_model')}</p>}
+     {discoveryError && <p role="alert">{tr('errors:provider_unavailable')}</p>}
      {ai.error && <p role="alert">{tr(ai.error)}</p>}
-     {ai.state && <AiParsePanel state={ai.state} estimate={ai.estimate} pageCount={pageCount} disabled={!selected?.available || pending} modelPicker={<fieldset disabled={busy} className="min-w-0"><ModelControls providers={providers.filter(p=>p.config.id!=='agy-cli')} model={selected?.value??''} onModel={value=>{setModel(value);setOptions({});invalidate();}} onSettings={onSettings} values={options} onChange={value=>{setOptions(value);invalidate();}}/></fieldset>}
-      hardCapUsd={cap} onHardCap={value=>{setCap(value);invalidate();}} budgetOverride={override} onBudgetOverride={setOverride}
+     {ai.state && <AiParsePanel state={ai.state} estimate={ai.estimate} pageCount={pageCount} disabled={!selected?.available || pending} modelPicker={<fieldset disabled={busy} className="min-w-0"><ModelControls providers={providers.filter(p=>p.config.id!=='agy-cli')} model={selected?.value??''} onModel={value=>{setModel(value);setOptions({});invalidate();}} onSettings={onSettings} onProvidersChanged={refreshModels} values={options} onChange={value=>{setOptions(value);invalidate();}}/></fieldset>}
       scope={scope} startPage={start} endPage={end} onScope={value=>{setScope(value);invalidate();}} onRange={(a,b)=>{setStart(a);setEnd(b);invalidate();}}
       onEstimate={()=>{if(request)void ai.estimateCost(request);}} onStart={()=>{if(request)void ai.start(request);}} onCancel={()=>void ai.cancel()}
       onUse={version=>void useVersion(version)} onDiscard={()=>void ai.discard().then(ok=>{if(ok)void onReload('original');})} t={tr}/>}</>}
