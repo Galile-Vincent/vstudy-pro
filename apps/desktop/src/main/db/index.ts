@@ -1,4 +1,4 @@
-import { aiParseMigration } from './ai-parse-migration';
+import { aiParseMigration, aiParseRollupRepair } from './ai-parse-migration';
 import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
 import { libraryMigration } from "./library-migration";
 import { usageMigration, usageRollupMigration, usageRepository } from "./usage";
@@ -69,6 +69,8 @@ export const migrations = [
     CREATE INDEX documents_folder_size ON documents(folderId,sizeBytes,id) WHERE deletedAt IS NULL;
   ` },
   { version:11, sql:aiParseMigration },
+  // Repairs databases that applied an earlier v11 draft without the parse rollup table/trigger.
+  { version:12, sql:aiParseRollupRepair },
 ];
 const documentRow = z
   .object({
