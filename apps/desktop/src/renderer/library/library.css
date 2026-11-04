@@ -107,11 +107,11 @@
 .sidebar-label button { width:auto; padding:0; }
 .sidebar-empty { color:var(--muted); font-size:var(--type-sm); padding-inline:var(--space-2); }
 .library-smart { display:grid; gap:var(--space-1); }
-.library-smart > button,.folder-pin,.library-saved-filter { border:0; border-radius:var(--r-sm); background:color-mix(in oklab, var(--ink) 3%, var(--surface)); }
+.library-smart > button,.folder-pin,.library-saved-filter { border:0; border-radius:var(--r-sm); background:transparent; }
 .library-smart > button:hover,.folder-pin:hover,.library-saved-filter:hover { background:var(--active); }
 .library-smart small,.folder-node small { margin-inline-start:auto; font-variant-numeric:tabular-nums; font-size:var(--type-xs); color:var(--muted); }
 .folder-tree { max-height:40vh; overflow:auto; position:relative; }
-.folder-node { display:flex; align-items:center; height:var(--space-8); box-sizing:border-box; border-radius:var(--r-sm); background:color-mix(in oklab, var(--ink) 3%, var(--surface)); }
+.folder-node { display:flex; align-items:center; height:var(--space-8); box-sizing:border-box; border-radius:var(--r-sm); background:transparent; }
 .folder-node:hover { background:color-mix(in oklab, var(--ink) 6%, var(--surface)); }
 .folder-node > button { width:auto; min-width:var(--space-6); padding:var(--space-1); border-radius:var(--r-xs); }
 .folder-node > .folder-link { flex:1; min-width:0; overflow:hidden; justify-content:flex-start; }
@@ -176,7 +176,7 @@ mark { background:var(--active); color:var(--ink); font-weight:600; }
 .library-conversations[data-slot=popover-content] { padding:var(--space-2); border:0; border-radius:var(--r-md); background:var(--surface); box-shadow:var(--elevation-floating); }
 .library-conversations [data-slot=aui_thread-list-root],.library-conversations [data-slot=aui_thread-list-items] { gap:var(--space-1); }
 .library-conversations :is([data-slot=aui_thread-list-new],[data-slot=aui_thread-list-item],[data-slot=aui_thread-list-item-trigger]) { border:0; border-radius:var(--r-sm); box-shadow:none; }
-.library-conversations [data-slot=aui_thread-list-item] { background:color-mix(in oklab, var(--ink) 3%, var(--surface)); }
+.library-conversations [data-slot=aui_thread-list-item] { background:transparent; }
 .library-conversations [data-slot=aui_thread-list-item]:is(:hover,[data-active],:focus-within) { background:var(--active); }
 .library-conversations [data-slot=aui_thread-list-item-trigger] { padding:var(--space-2) var(--space-3); }
 .library-conversations [data-slot=aui_thread-list-search] { padding:var(--space-2) 0; }
@@ -191,3 +191,15 @@ mark { background:var(--active); color:var(--ink); font-weight:600; }
 .home-list li:hover > button,.home-list li:focus-within > button { opacity:1; }
 .home-list li > button:disabled { visibility:hidden; }
 .home-card button:not(.primary):not(.home-row),.onboarding button:not(.primary):not(.app-select) { border-color:var(--hairline); }
+
+/* Sidebar controls share the shell's flat navigation treatment. */
+.app-shell .shell-sidebar .sidebar-label { gap:var(--space-2); }
+.sidebar-label h2 { white-space:nowrap; flex-shrink:0; }
+.app-shell .shell-sidebar .sidebar-label button { width:auto; flex:none; padding:var(--space-1); }
+.app-shell .shell-sidebar .folder-node > button { width:auto; flex:none; padding:var(--space-1); }
+.app-shell .shell-sidebar .folder-node > .folder-link { flex:1; min-width:0; }
+.app-shell .shell-sidebar .folder-node > button:hover { background:transparent; }
+.library-smart > button[aria-current=page],.library-saved-filter[aria-current=page] { background:var(--active); }
+
+/* Move notifications into the main viewport so Undo never covers folder rows. */
+.shell-sidebar .library-toast { position:fixed; inset:auto var(--space-8) var(--space-8) auto; z-index:40; width:max-content; max-width:calc(100vw - var(--space-8) * 2); }

@@ -100,7 +100,7 @@ html[data-reduced-transparency=true] { --material-card:var(--surface); --materia
 :root { --library-card-height:148px; }
 
 @media(prefers-color-scheme:dark) { :root { --hairline:color-mix(in oklab,var(--ink) 12%,transparent); } }
-button.secondary,.filter-popover summary { border:1px solid var(--hairline); background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
+button.secondary,.filter-popover summary { border:0; box-shadow:none; background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
 button.ghost { border:0; background:transparent; }
 button.primary { min-height:36px; background:var(--ink); color:var(--surface); }
 button.ghost:hover { background:var(--active); }
@@ -204,3 +204,9 @@ html[data-material=solid] * { backdrop-filter:none!important; }
 html[data-accent] ::selection { background:var(--selection-color); color:var(--ink); }
 
 :root { --active:oklch(from var(--accent-color) var(--accent-surface-l) calc(c * .2) h); --focus:oklch(from var(--accent-color) var(--focus-l) c h); }
+
+/* Tonal controls retain explicit boundaries in accessibility contrast modes. */
+[data-slot=checkbox] { width:var(--space-5); height:var(--space-5); min-width:var(--space-5); min-height:var(--space-5); min-inline-size:var(--space-5); min-block-size:var(--space-5); padding:0; }
+@media(prefers-contrast:more), (forced-colors:active) {
+ [data-slot=button],button.secondary,.filter-popover summary,[data-slot=checkbox],.provider-row,.folder-node { border:1px solid var(--ink); }
+}

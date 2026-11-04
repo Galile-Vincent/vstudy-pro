@@ -246,13 +246,13 @@ h3 {
   background: transparent;
 }
 .resize-handle {
-  width: 3px;
-  background: var(--line);
-  transition: background 120ms;
+  width: var(--space-3);
+  background: transparent;
+  transition: none;
 }
 .resize-handle:hover,
 .resize-handle[data-resize-handle-active] {
-  background: var(--palette-8);
+  background: color-mix(in oklab, var(--ink) 6%, var(--surface));
 }
 .empty {
   flex: 1;
@@ -952,7 +952,7 @@ h3 {
 }
 
 .provider-row input[type="checkbox"] { width: var(--space-5); height: var(--space-5); flex: none; }
-.provider-row label:has(input[type="checkbox"]) { display: flex; align-items: center; gap: var(--space-2); }
+.provider-row label:has(input[type="checkbox"], [role="checkbox"]) { display: flex; align-items: center; gap: var(--space-2); }
 .provider-row code { overflow-wrap: anywhere; }
 .provider-row p[role="alert"] { color: var(--ink); font-weight: 600; }
 [data-testid="privacy-settings"] section { margin-block: var(--space-5); }

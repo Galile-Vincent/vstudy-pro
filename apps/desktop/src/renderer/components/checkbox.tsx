@@ -8,7 +8,7 @@ export function Checkbox({ className, onChange, ...props }: Props) {
   return (
     <Control
       className={cn(
-        "rounded-[var(--r-xs)] border-0 bg-[color-mix(in_oklab,var(--ink)_6%,var(--surface))] transition-colors hover:bg-[color-mix(in_oklab,var(--ink)_10%,var(--surface))] data-[state=checked]:bg-[var(--ink)] data-[state=checked]:text-[var(--surface)]",
+        "rounded-[var(--r-xs)] border-0 bg-[color-mix(in_oklab,var(--ink)_12%,var(--surface))] transition-colors hover:bg-[color-mix(in_oklab,var(--ink)_16%,var(--surface))] data-[state=checked]:bg-[var(--ink)] data-[state=checked]:text-[var(--surface)]",
         className
       )}
       {...props}

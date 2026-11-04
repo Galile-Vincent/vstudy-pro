@@ -1492,3 +1492,8 @@
 @media (prefers-contrast: more), (forced-colors: active) {
   .moodle-course-chat [data-slot="aui_composer-shell"] { border: 1px solid var(--ink); }
 }
+
+/* Cover corners follow the card inset on all four corners. */
+.moodle-course-card,.moodle-due-card,.moodle-hero { --cover-inset:var(--space-1); padding:var(--cover-inset); border-radius:var(--r-lg); }
+.moodle-course-card .moodle-cover,.moodle-due-card .moodle-cover,.moodle-hero .moodle-cover { border-radius:max(0px,calc(var(--r-lg) - var(--cover-inset))); }
+.moodle-page [data-slot=tabs-trigger] { border:0; box-shadow:none; }

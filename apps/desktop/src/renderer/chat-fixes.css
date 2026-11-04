@@ -244,3 +244,6 @@
  .workspace :is([data-slot=aui_composer-shell],.aui-edit-composer-root,.new-chat-composer,.aui-user-message-content,[data-slot=suggestions] button,.aui-thread-followup-suggestion) { border:1px solid var(--ink); }
  .workspace .resize-handle::after { opacity:1; }
 }
+
+.workspace .reading-pane:focus:not(:focus-visible) { outline:none; }
+html:not([data-input-modality=keyboard]) .workspace .reading-pane:focus { outline:none; }
