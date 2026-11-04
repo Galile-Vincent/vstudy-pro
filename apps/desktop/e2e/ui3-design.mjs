@@ -54,6 +54,8 @@ try {
    await page.waitForFunction(()=>window.document.querySelector('.app-shell').dataset.sidebarOverlay==='true'&&window.document.querySelector('.shell-sidebar').hidden);
    const toolbar=await page.locator('.library-toolbar').evaluate(e=>{const controls=[...e.querySelectorAll('button,input')].filter(c=>c.getClientRects().length);return controls.map(c=>parseFloat(window.getComputedStyle(c).fontSize));});
    assert.ok(Math.min(...toolbar)>=Math.max(...toolbar)*.75,JSON.stringify({context,toolbar}));
+   const toolbarRows=await page.locator('.library-toolbar button').evaluateAll(buttons=>buttons.filter(e=>e.getClientRects().length).map(e=>e.getBoundingClientRect().top));assert.ok(Math.max(...toolbarRows)-Math.min(...toolbarRows)<=1,JSON.stringify({context,toolbarRows}));
+
   }
   const geometry=await page.evaluate(()=>{
    const errors=[];let rows=0;
@@ -78,6 +80,8 @@ try {
   const selectedStyle=await page.locator('.library-document').first().evaluate(e=>{const s=window.getComputedStyle(e);return [s.boxShadow,s.borderLeftWidth,s.outlineStyle];});assert.deepEqual(selectedStyle,['none','0px','none']);
   const bulkType=await page.locator('.bulk-bar').evaluate(e=>[...e.querySelectorAll('button,span[role=status]')].map(c=>parseFloat(window.getComputedStyle(c).fontSize)));
   assert.ok(Math.min(...bulkType)>=Math.max(...bulkType)*.75,JSON.stringify({context,bulkType}));
+  const bulkClipping=await page.locator('.bulk-bar').evaluate(bar=>{const bounds=bar.getBoundingClientRect();return [...bar.children].some(e=>{const r=e.getBoundingClientRect();return r.left<bounds.left-1||r.right>bounds.right+1||r.top<bounds.top-1||r.bottom>bounds.bottom+1||e.scrollWidth>e.clientWidth+1;});});assert.equal(bulkClipping,false,JSON.stringify(context));
+
   await page.waitForFunction(()=>parseFloat(window.getComputedStyle(window.document.querySelector('.library-results')).paddingBottom)+1>=window.document.querySelector('.bulk-bar').getBoundingClientRect().height+24);
   await page.locator('.library-results').evaluate(async e=>{await new Promise(resolve=>window.requestAnimationFrame(resolve));e.scrollTop=e.scrollHeight;await new Promise(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(resolve)));});
   const bulkGeometry=await page.evaluate(()=>{const bar=window.document.querySelector('.bulk-bar').getBoundingClientRect(),viewport=window.document.querySelector('.library-results'),rows=[...viewport.querySelectorAll('.library-document')];return {scrollTop:viewport.scrollTop,scrollHeight:viewport.scrollHeight,clientHeight:viewport.clientHeight,bar:bar.toJSON(),lastRect:rows.at(-1)?.getBoundingClientRect().toJSON(),last:rows.at(-1)?.getAttribute('aria-posinset'),intersections:rows.filter(row=>{const r=row.getBoundingClientRect();return Math.min(r.right,bar.right)>Math.max(r.left,bar.left)&&Math.min(r.bottom,bar.bottom)>Math.max(r.top,bar.top);}).length,padding:parseFloat(window.getComputedStyle(viewport).paddingBottom),height:bar.height};});
@@ -105,6 +109,7 @@ try {
    }
    if(section==='appearance') {
     const appearance=await page.evaluate(()=>{const pane=window.document.querySelector('.settings-pane:not([hidden])'),control=pane.querySelector('.settings-control'),preview=pane.querySelector('.appearance-preview'),items=[...pane.querySelectorAll('[data-slot=toggle-group-item]')];return {firstControl:control.getBoundingClientRect().bottom<=pane.getBoundingClientRect().bottom,previewAfter:preview.getBoundingClientRect().top>control.getBoundingClientRect().top,wrapped:items.some(e=>e.scrollHeight>e.clientHeight+1)};});
+    if(scale===1)assert.equal(await page.locator('.appearance-layout .settings-row').evaluateAll(rows=>rows.every(row=>{const a=row.querySelector('.settings-label').getBoundingClientRect(),b=row.querySelector('.settings-control').getBoundingClientRect();return Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<=1;})),true,JSON.stringify(context));
     assert.equal(appearance.firstControl,true,JSON.stringify({context,appearance}));assert.equal(appearance.previewAfter,true);assert.equal(appearance.wrapped,false);
    }
    const repeated=await page.locator('.settings-pane:not([hidden])').evaluate(p=>[...p.querySelectorAll('.settings-row')].some(row=>{const label=row.querySelector('.settings-label > div')?.textContent?.trim();return label&&[...row.querySelectorAll('button')].some(button=>button.textContent?.trim()===label); }));
