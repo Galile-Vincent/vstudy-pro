@@ -14,7 +14,7 @@ try {
  await page.locator('#welcome-settings-entry').click();await page.locator('.welcome').waitFor();
  await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('.settings-dialog[data-state=open] #welcome-settings-entry:focus').waitFor();results.settingsReturnFocus=true;
  await page.getByRole('button',{name:'Close settings',exact:true}).click();await page.locator('#welcome-entry').click();
- await page.locator('#welcome-title').focus();await page.keyboard.press('Tab');assert.equal(await page.locator('#welcome-pause').evaluate(e=>e===window.document.activeElement),true);results.pauseFirstTab=true;
+ await page.locator('#welcome-title').focus();await page.keyboard.press('Tab');await page.evaluate(()=>new Promise(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(resolve))));assert.equal(await page.locator('#welcome-pause').evaluate(e=>e===window.document.activeElement),true);results.pauseFirstTab=true;
  await page.getByRole('button',{name:'Pause animations',exact:true}).click();assert.equal(await page.locator('.welcome').getAttribute('data-motion'),'paused');
  await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('#welcome-entry:focus').waitFor();await page.locator('#welcome-entry').click();assert.equal(await page.locator('.welcome').getAttribute('data-motion'),'paused');results.pausePersists=true;
  await page.emulateMedia({reducedMotion:'no-preference'});await page.waitForTimeout(100);

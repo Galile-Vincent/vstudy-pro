@@ -111,7 +111,7 @@ export default function WelcomeView() {
   const [busy, setBusy] = useState(false);
   const root = useRef<HTMLElement>(null);
   useEffect(() => {
-    let focusFrame = requestAnimationFrame(() => { focusFrame = requestAnimationFrame(() => root.current?.querySelector<HTMLElement>('h1')?.focus({preventScroll:true})); });
+    let focusFrame = requestAnimationFrame(() => { focusFrame = requestAnimationFrame(() => { if (!root.current?.contains(document.activeElement)) root.current?.querySelector<HTMLElement>('h1')?.focus({preventScroll:true}); }); });
     const observer = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver(entries => {
       for (const entry of entries) if (entry.isIntersecting) setActive(entry.target.id.replace('welcome-', '') as typeof sections[number]);
     }, { root: root.current, rootMargin: '-45% 0px -45% 0px' });
