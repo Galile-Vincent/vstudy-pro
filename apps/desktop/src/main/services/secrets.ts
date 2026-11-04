@@ -11,6 +11,9 @@ import { z } from "zod";
 import { providerIdSchema } from "../../shared/domain";
 
 type ProviderId = z.infer<typeof providerIdSchema>;
+const secretIdSchema = z.union([providerIdSchema, z.string().regex(/^moodle:[0-9a-f-]{36}$/).refine(value => z.string().uuid().safeParse(value.slice(7)).success)]);
+type SecretId = ProviderId | `moodle:${string}`;
+export const moodleSecretId = (accountId: string): `moodle:${string}` => `moodle:${z.string().uuid().parse(accountId)}`;
 export interface Encryption {
   isAsyncEncryptionAvailable(): Promise<boolean>;
   encryptStringAsync(value: string): Promise<Buffer>;
@@ -22,7 +25,7 @@ export function createSecretStore(file: string, encryption: Encryption, timeoutM
     if (!existsSync(file)) return {};
     chmodSync(file, 0o600);
     return z
-      .record(providerIdSchema, z.string())
+      .record(secretIdSchema, z.string())
       .parse(JSON.parse(readFileSync(file, "utf8")));
   }
   function write(values: Record<string, string>): void {
@@ -41,10 +44,10 @@ export function createSecretStore(file: string, encryption: Encryption, timeoutM
     } catch { throw new Error('errors.keychain_unavailable'); }
     finally { clearTimeout(timer); }
   }
-  const unlocked = new Map<ProviderId, string>();
+  const unlocked = new Map<SecretId, string>();
   let compatibleOrigin: string | undefined;
-  const generations = new Map<ProviderId, number>();
-  const bump = (id: ProviderId) => { const next = (generations.get(id) ?? 0) + 1; generations.set(id, next); unlocked.delete(id); return next; };
+  const generations = new Map<SecretId, number>();
+  const bump = (id: SecretId) => { const next = (generations.get(id) ?? 0) + 1; generations.set(id, next); unlocked.delete(id); return next; };
   return {
     bindCompatibleOrigin(origin: string): void {
       const canonical = new URL(origin).origin;
@@ -55,8 +58,8 @@ export function createSecretStore(file: string, encryption: Encryption, timeoutM
       }
       compatibleOrigin = canonical;
     },
-    async set(providerId: ProviderId, key: string): Promise<void> {
-      providerIdSchema.parse(providerId);
+    async set(providerId: SecretId, key: string): Promise<void> {
+      secretIdSchema.parse(providerId);
       z.string().min(1).max(16384).parse(key);
       const generation = bump(providerId);
       if (!await access(() => encryption.isAsyncEncryptionAvailable()))
@@ -67,22 +70,22 @@ export function createSecretStore(file: string, encryption: Encryption, timeoutM
       write({ ...read(), [providerId]: ciphertext.toString("base64") });
       unlocked.set(providerId, key);
     },
-    useInSession(providerId: ProviderId, key: string): void { bump(providerId); unlocked.set(providerIdSchema.parse(providerId), z.string().min(1).max(16384).parse(key)); },
-    isUnlocked(providerId: ProviderId): boolean { return unlocked.has(providerId); },
-    has(providerId: ProviderId): boolean {
-      return Object.hasOwn(read(), providerIdSchema.parse(providerId));
+    useInSession(providerId: SecretId, key: string): void { secretIdSchema.parse(providerId); bump(providerId); unlocked.set(providerId, z.string().min(1).max(16384).parse(key)); },
+    isUnlocked(providerId: SecretId): boolean { return unlocked.has(providerId); },
+    has(providerId: SecretId): boolean {
+      return Object.hasOwn(read(), secretIdSchema.parse(providerId));
     },
-    delete(providerId: ProviderId): void {
+    delete(providerId: SecretId): void {
       bump(providerId);
       const values = read();
-      delete values[providerIdSchema.parse(providerId)];
+      delete values[secretIdSchema.parse(providerId)];
       write(values);
     },
-    async getInMainOnly(providerId: ProviderId): Promise<string | null> {
+    async getInMainOnly(providerId: SecretId): Promise<string | null> {
       if (unlocked.has(providerId)) return unlocked.get(providerId)!;
       const generation = generations.get(providerId) ?? 0;
       const current = () => (generations.get(providerId) ?? 0) === generation;
-      const value = read()[providerIdSchema.parse(providerId)];
+      const value = read()[secretIdSchema.parse(providerId)];
       if (value === undefined) return null;
       if (!await access(() => encryption.isAsyncEncryptionAvailable()))
         throw new Error("errors.keychain_unavailable");
