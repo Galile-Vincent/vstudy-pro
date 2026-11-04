@@ -41,7 +41,8 @@ export function createIpcRegistrar(
           return ipcContract[channel].response.parse(response);
         } catch (error) {
           if (!channel.startsWith('moodle:')) console.error(`[ipc] ${channel} failed:`, error instanceof Error ? error.stack ?? error.message : String(error));
-          if (error instanceof MoodleAuthError) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'moodle.auth_' + error.code.replaceAll('-','_'),params:{}}));
+          if (channel === 'moodle:connect' && error instanceof MoodleAuthError && error.code === 'cancelled') return {moodleAuthCancelled:true};
+          if (error instanceof MoodleAuthError) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'moodle.auth_' + error.code.replaceAll('-','_'),params:error.reason ? {reason:error.reason} : {}}));
           if (/^documents:import/.test(channel)) throw new Error('VSTUDY_STATUS:' + JSON.stringify(importError(error)));
           if (error instanceof Error && /Search took too long|Refine your query/.test(error.message)) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message.startsWith('Search took too long') ? 'errors.search_too_long' : 'errors.search_refine',params:{}}));
           if (error instanceof Error && error.message.startsWith('ai_parse.')) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'errors.'+error.message,params:{}}));

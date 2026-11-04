@@ -22,3 +22,15 @@ it('retains both callback secrets for all four signature candidates',() => {
     expect(verifyCallback(callback,'https://school.example','passport')).toEqual({token:'access',privateToken:'private'});
   }
 });
+it('verifies the advertised wwwroot and reports only the matching site',() => {
+  const site = 'http://www.school.example';
+  const signature = createHash('md5').update(site + 'passport').digest('hex');
+  const callback = 'vstudymoodle://token=' + Buffer.from(`${signature}:::access`).toString('base64');
+  const matched = vi.fn();
+  expect(verifyCallback(callback,['https://school.example',site],'passport',matched)).toEqual({token:'access'});
+  expect(matched).toHaveBeenCalledWith(site);
+});
+it('rejects malformed Unicode signatures without a timingSafeEqual length exception',() => {
+  const callback = 'vstudymoodle://token=' + Buffer.from(`${'é'.repeat(32)}:::access`).toString('base64');
+  expect(() => verifyCallback(callback,'https://school.example','passport')).toThrow('Invalid Moodle callback');
+});

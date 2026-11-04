@@ -1,0 +1,6 @@
+{"phase":"proxy-reset","uncaught":["ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET","ECONNRESET"],"mainSurvived":true}
+{"mode":"redirect","error":"cancelled","trace":[{"event":"will-redirect","host":"127.0.0.1:52216"}],"recoveryObserved":false,"mainSurvived":true}
+{"mode":"direct","value":"connected","trace":[{"event":"will-redirect"}],"recoveryObserved":false,"mainSurvived":true}
+{"mode":"link","value":"connected","trace":[{"event":"did-finish-load"}],"recoveryObserved":false,"mainSurvived":true}
+{"mode":"wait","error":"cancelled","trace":[{"event":"did-finish-load"},{"event":"destroyed"}],"recoveryObserved":false,"mainSurvived":true}
+{"phase":"process-exit","code":0,"signal":null}

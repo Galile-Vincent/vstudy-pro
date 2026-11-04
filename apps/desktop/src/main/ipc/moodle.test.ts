@@ -33,3 +33,11 @@ it('registers every Moodle channel behind strict requests and trusted main-frame
     expect(log).not.toHaveBeenCalled();
   } finally { log.mockRestore(); registrar.dispose(); await dispose(); store.close(); rmSync(directory,{force:true,recursive:true}); }
 });
+it('returns cancellation as a handled result rather than an Electron handler rejection',async () => {
+  const { MoodleAuthError } = await import('../moodle/auth');
+  let invoke!: (event:IpcMainInvokeEvent,payload:unknown) => unknown;
+  const registrar = createIpcRegistrar({handle:(_channel,handler) => {invoke = handler;},removeHandler:vi.fn()},() => true);
+  registrar.handle('moodle:connect',() => {throw new MoodleAuthError('cancelled');});
+  await expect(invoke({} as IpcMainInvokeEvent,{siteUrl:'https://school.example'})).resolves.toEqual({moodleAuthCancelled:true});
+  registrar.dispose();
+});

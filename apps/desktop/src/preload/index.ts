@@ -46,9 +46,9 @@ const api: DesktopApi = {
     if (!Object.hasOwn(ipcContract, channel))
       throw new Error("Unknown IPC channel");
     const payload = ipcContract[channel].request.parse(request);
-    return ipcContract[channel].response.parse(
-      await ipcRenderer.invoke(channel, payload),
-    ) as IpcResponse<C>;
+    const result: unknown = await ipcRenderer.invoke(channel, payload);
+    if (channel === 'moodle:connect' && result && typeof result === 'object' && 'moodleAuthCancelled' in result && result.moodleAuthCancelled === true) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'moodle.auth_cancelled',params:{}}));
+    return ipcContract[channel].response.parse(result) as IpcResponse<C>;
   },
   onChatEvent(requestId, listener) {
     const id = requestIdSchema.parse(requestId);

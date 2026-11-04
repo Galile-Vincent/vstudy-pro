@@ -1,3 +1,4 @@
+import { log } from './logging';
 import { showAttachedMessage } from './dialogs';
 import { coordinateShutdown } from './shutdown';
 import { acquireOwnership } from './ownership';
@@ -30,6 +31,11 @@ if (smokeRoot) {
   if (lstatSync(isolated).isSymbolicLink() || realpathSync(isolated) !== isolated) throw new Error('Smoke user data must be an isolated directory');
   app.setPath('userData', isolated);
 }
+process.on('exit', code => log({phase:'main-exit',code}));
+app.on('child-process-gone', (_event,details) => log({phase:'main-child-process-gone',code:details.exitCode,reason:details.reason,type:details.type}));
+app.on('render-process-gone', (_event,_contents,details) => log({phase:'main-render-process-gone',code:details.exitCode,reason:details.reason}));
+process.on('uncaughtExceptionMonitor', error => log({phase:'main-uncaught-exception',code:(error as NodeJS.ErrnoException).code ?? error.name}));
+process.on('unhandledRejection', () => { log({phase:'main-unhandled-rejection',code:'UNHANDLED_REJECTION'}); app.exit(1); });
 process.umask(0o077);
 app.enableSandbox();
 if (app.isPackaged) {
@@ -37,9 +43,6 @@ if (app.isPackaged) {
 }
 app.on('web-contents-created', (_event, contents) => {
   contents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  contents.on('will-frame-navigate', event => { if (!event.isMainFrame) event.preventDefault(); });
-  contents.on('will-navigate', event => event.preventDefault());
-  contents.on('will-redirect', event => event.preventDefault());
   contents.on('will-attach-webview', event => event.preventDefault());
 });
 let store: Store | undefined;
@@ -71,6 +74,7 @@ function createWindow(): void {
     },
   });
   window = current;
+  current.webContents.on('will-frame-navigate', event => { if (!event.isMainFrame) event.preventDefault(); });
   current.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   current.webContents.on("will-navigate", (event, url) => {
     if (!isAppUrl(url, entryUrl)) event.preventDefault();

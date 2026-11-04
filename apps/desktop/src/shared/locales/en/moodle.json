@@ -144,5 +144,11 @@
   "next_mobile-disabled": "Ask your administrator to enable the official Moodle mobile web service.",
   "unavailable_unsupported-version": "This Moodle version is not supported.",
   "next_unsupported-version": "VStudy needs Moodle 3.5 or later. Ask your school about upgrading.",
-  "site_placeholder": "moodle.school.edu"
+  "site_placeholder": "moodle.school.edu",
+  "auth_timeout": "Sign-in timed out. Please try again.",
+  "auth_callback-invalid": "The school returned an invalid sign-in response. Please try again.",
+  "auth_load-failed": "The sign-in page could not load. Check your connection and retry.",
+  "auth_blocked": "The sign-in page was blocked because its address is unsafe.",
+  "auth_disposed": "Sign-in stopped because the app is shutting down.",
+  "sso_retry": "Retry"
 }

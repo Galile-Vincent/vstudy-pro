@@ -144,5 +144,11 @@
   "next_mobile-disabled": "管理者に公式 Moodle モバイルウェブサービスの有効化を依頼してください。",
   "unavailable_unsupported-version": "この Moodle バージョンには対応していません。",
   "next_unsupported-version": "Moodle 3.5 以降が必要です。学校に更新を確認してください。",
-  "site_placeholder": "moodle.school.edu"
+  "site_placeholder": "moodle.school.edu",
+  "auth_timeout": "ログインがタイムアウトしました。もう一度お試しください。",
+  "auth_callback-invalid": "学校からのログイン応答が無効です。もう一度お試しください。",
+  "auth_load-failed": "ログインページを読み込めませんでした。接続を確認して再試行してください。",
+  "auth_blocked": "ログインページのアドレスが安全でないため、ブロックしました。",
+  "auth_disposed": "アプリの終了に伴い、ログインを停止しました。",
+  "sso_retry": "再試行"
 }

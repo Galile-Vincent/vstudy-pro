@@ -144,5 +144,11 @@
   "next_mobile-disabled": "請聯絡管理員啟用 Moodle 官方行動網路服務。",
   "unavailable_unsupported-version": "不支援此 Moodle 版本。",
   "next_unsupported-version": "VStudy 需要 Moodle 3.5 以上版本，請洽學校升級。",
-  "site_placeholder": "moodle.school.edu"
+  "site_placeholder": "moodle.school.edu",
+  "auth_timeout": "登入逾時，請重新嘗試。",
+  "auth_callback-invalid": "學校傳回的登入回應無效，請重新嘗試。",
+  "auth_load-failed": "無法載入登入頁面，請檢查網路連線後重試。",
+  "auth_blocked": "登入頁面的網址不安全，已封鎖連線。",
+  "auth_disposed": "應用程式正在關閉，登入已停止。",
+  "sso_retry": "重試"
 }

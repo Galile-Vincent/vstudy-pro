@@ -22,7 +22,7 @@ export function fuzzySiteMatch(query: string, text: string): boolean {
 }
 function authErrorKey(error: unknown): string {
   const message = error instanceof Error ? error.message : '';
-  const code = /moodle\.auth_(invalidlogin|usernotfullysetup|webservices_disabled|requirecorrectaccess|sso_required|cancelled)/.exec(message)?.[1];
+  const code = /moodle\.auth_(invalidlogin|usernotfullysetup|webservices_disabled|requirecorrectaccess|sso_required|cancelled|timeout|callback_invalid|load_failed|blocked|disposed)/.exec(message)?.[1];
   return code ? `moodle:auth_${code.replaceAll('_','-')}` : 'moodle:connect_error';
 }
 export function ConnectDialog({open,onOpenChange,api,onConnected}: {
