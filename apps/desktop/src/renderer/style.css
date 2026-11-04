@@ -53,8 +53,8 @@ a:focus-visible {
   outline: 2px solid var(--palette-7);
   outline-offset: 2px;
 }
-input,
-select {
+input:not([data-slot]):not([cmdk-input]),
+select:not([data-slot]) {
   color: inherit;
   border: 1px solid var(--line);
   border-radius: var(--r-xs);
@@ -976,10 +976,10 @@ h3 {
 .model-controls [data-slot=model-selector-trigger] { max-width:180px; min-width:0; }
 .model-controls [data-slot=model-selector-value] { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .model-controls [data-slot=select-trigger] { border:0; box-shadow:none; background:transparent; gap:var(--space-1); padding-inline:var(--space-2); width:auto; }
-[data-slot=aui_composer-shell],.aui-edit-composer-root { border-color:transparent!important; box-shadow:none!important; }
+[data-slot=aui_composer-shell],.aui-edit-composer-root { border:1px solid var(--line); box-shadow:none!important; }
 [data-slot=aui_composer-shell]:focus-within { background:var(--subtle); }
 html[data-input-modality=keyboard] [data-slot=aui_composer-shell]:has(:focus-visible),html[data-input-modality=keyboard] .aui-edit-composer-root:has(:focus-visible) { outline:2px solid var(--composer-focus-ring); outline-offset:2px; }
-.aui-composer-input,.aui-composer-input:focus,.aui-composer-input:focus-visible { border:0!important; outline:none!important; box-shadow:none!important; background:transparent; }
+.aui-composer-input,.aui-edit-composer-input { border:0!important; outline:none!important; box-shadow:none!important; background:transparent; }
 
 .settings-dialog[data-slot=dialog-content],.onboarding[data-slot=dialog-content] { margin:0; display:block; max-width:calc(100vw - var(--space-8)); max-height:calc(100dvh - var(--space-8)); overflow:auto; }
 .settings-dialog[data-slot=dialog-content] { width:680px; }
@@ -1010,3 +1010,10 @@ html[data-input-modality=keyboard] [data-slot=aui_composer-shell]:has(:focus-vis
 [class~="text-[13px]"] { font-size:0.8125rem; }
 
 [data-slot=dialog-overlay] { backdrop-filter:var(--material-filter); }
+
+/* Each composed text field owns one border; its inner input stays unboxed. */
+:is([data-slot=input],[data-slot=textarea],[cmdk-input]) { box-shadow:none; }
+html:not([data-input-modality=keyboard]) :is([data-slot=input],[data-slot=textarea],[cmdk-input]):focus-visible { outline:none; }
+.library-search input,[data-slot=command-input-wrapper] input { border:0; border-radius:0; outline:none; box-shadow:none; background:transparent; }
+.library-search:focus-within,[data-slot=command-input-wrapper]:focus-within { box-shadow:none; }
+html[data-input-modality=keyboard] :is(.library-search,[data-slot=command-input-wrapper]):has(:focus-visible) { outline:2px solid var(--composer-focus-ring); outline-offset:2px; }
