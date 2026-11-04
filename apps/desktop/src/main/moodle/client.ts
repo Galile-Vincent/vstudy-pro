@@ -34,7 +34,7 @@ const messageWire = z.object({id:integer, subject:z.string().optional(), text:op
 const gradeWire = z.object({ usergrades:z.array(z.object({gradeitems:z.array(z.object({id:integer, itemname:optionalText, gradeformatted:optionalText, grademax:numeric.nullable().optional(), percentageformatted:optionalText, gradedategraded:integer.nullable().optional()}))})) });
 const sectionsWire = z.array(z.object({id:integer, name:z.string().nullish(), modules:z.array(z.object({id:integer, name:z.string(), contents:z.array(z.object({type:z.string(), filename:z.string(), fileurl:optionalText, filesize:integer.refine(value => value >= 0).optional(), mimetype:z.string().optional(), timemodified:integer.optional()})).optional()}))}));
 export const siteInfoSchema = z.object({userid:integer, fullname:z.string()});
-export const publicConfigSchema = z.object({identityproviders:z.array(z.object({url:z.string().url()})).default([])});
+export { publicConfigSchema } from './discovery';
 
 export class MoodleClient {
   constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = moodleFetch) {}

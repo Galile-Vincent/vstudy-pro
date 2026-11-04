@@ -175,3 +175,14 @@ export const moodleChannels = {
   deleteReminder: "moodle:delete-reminder",
   exportCalendar: "moodle:export-calendar",
 } as const;
+
+export const moodleProviderSchema = z.object({name:z.string(),iconurl:z.string(),url:z.string().url()}).strict();
+export const moodleAuthPlanSchema = z.discriminatedUnion('kind',[
+  z.object({kind:z.literal('password')}).strict(),
+  z.object({kind:z.literal('browser'),providers:z.array(moodleProviderSchema)}).strict(),
+  z.object({kind:z.literal('embedded'),providers:z.array(moodleProviderSchema)}).strict(),
+  z.object({kind:z.literal('unavailable'),reason:z.enum(['webservices-disabled','mobile-disabled','maintenance','unsupported-version'])}).strict(),
+]);
+export type AuthPlan = z.infer<typeof moodleAuthPlanSchema>;
+export const moodleSiteCheckSchema = z.object({siteUrl:z.string().url().startsWith('https://'),siteName:z.string(),authPlan:moodleAuthPlanSchema,iconUrl:z.string().optional()}).strict();
+export type MoodleSiteCheck = z.infer<typeof moodleSiteCheckSchema>;
