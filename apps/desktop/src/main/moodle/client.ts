@@ -17,26 +17,27 @@ export function remoteId(account: string, kind: string, id: string | number): st
   const hex = createHash('sha256').update(JSON.stringify([account, kind, id])).digest('hex');
   return `${hex.slice(0,8)}-${hex.slice(8,12)}-5${hex.slice(13,16)}-a${hex.slice(17,20)}-${hex.slice(20,32)}`;
 }
-const integer = z.number().int();
-const flag = z.union([z.boolean(), z.number()]).transform(Boolean);
+const numeric = z.union([z.number(),z.string().regex(/^-?\d+(?:\.\d+)?$/)]).transform(Number).pipe(z.number().finite());
+const integer = numeric.pipe(z.number().int());
+const flag = z.union([z.boolean(),z.literal(0),z.literal(1),z.literal('0'),z.literal('1')]).transform(value => value === true || value === 1 || value === '1');
 const optionalText = z.string().nullish();
 const url = (value: string | null | undefined): string | null => {
   if (!value) return null;
   try { const parsed = new URL(value); if (parsed.protocol !== 'https:' || parsed.username || parsed.password) return null; for (const key of [...parsed.searchParams.keys()]) if (/token|sesskey/i.test(key)) parsed.searchParams.delete(key); return parsed.href; } catch { return null; }
 };
 const date = (seconds: number | null | undefined): string | null => seconds && seconds > 0 ? new Date(seconds * 1000).toISOString() : null;
-const courseWire = z.object({ id: integer, fullname: z.string(), shortname: z.string(), courseimage: optionalText, overviewfiles: z.array(z.object({fileurl:z.string()})).optional(), progress: z.number().nullable().optional(), startdate: integer.optional(), enddate: integer.optional(), isfavourite: flag.optional() });
+const courseWire = z.object({ id: integer, fullname: z.string(), shortname: z.string(), courseimage: optionalText, overviewfiles: z.array(z.object({fileurl:z.string()})).optional(), progress: numeric.nullable().optional(), startdate: integer.optional(), enddate: integer.optional(), isfavourite: flag.optional() });
 const assignmentWire = z.object({ courses: z.array(z.object({ id: integer, assignments: z.array(z.object({ id: integer, name: z.string(), duedate: integer, cmid: integer.optional() })) })) });
 const eventWire = z.object({ id:integer, name:z.string(), courseid:integer.optional(), course:z.object({id:integer}).optional(), timestart:integer.optional(), timedue:integer.optional(), timesort:integer.optional(), url:optionalText, modulename:optionalText, action:z.object({url:optionalText, actionable:flag.optional()}).optional() });
-const messageWire = z.object({id:integer, subject:z.string().optional(), fullmessage:z.string().optional(), fullmessagehtml:z.string().optional(), smallmessage:z.string().optional(), timecreated:integer, timeread:integer.optional(), read:flag.optional(), contexturl:optionalText, courseid:integer.optional()});
-const gradeWire = z.object({ usergrades:z.array(z.object({gradeitems:z.array(z.object({id:integer, itemname:optionalText, gradeformatted:optionalText, grademax:z.number().nullable().optional(), percentageformatted:optionalText, gradedategraded:integer.nullable().optional()}))})) });
-const sectionsWire = z.array(z.object({id:integer, name:z.string(), modules:z.array(z.object({id:integer, name:z.string(), contents:z.array(z.object({type:z.string(), filename:z.string(), fileurl:optionalText, filesize:integer.nonnegative().optional(), mimetype:z.string().optional(), timemodified:integer.optional()})).optional()}))}));
+const messageWire = z.object({id:integer, subject:z.string().optional(), text:optionalText, customdata:optionalText, fullmessage:z.string().optional(), fullmessagehtml:z.string().optional(), smallmessage:z.string().optional(), timecreated:integer, timeread:integer.optional(), read:flag.optional(), contexturl:optionalText, courseid:integer.optional()});
+const gradeWire = z.object({ usergrades:z.array(z.object({gradeitems:z.array(z.object({id:integer, itemname:optionalText, gradeformatted:optionalText, grademax:numeric.nullable().optional(), percentageformatted:optionalText, gradedategraded:integer.nullable().optional()}))})) });
+const sectionsWire = z.array(z.object({id:integer, name:z.string(), modules:z.array(z.object({id:integer, name:z.string(), contents:z.array(z.object({type:z.string(), filename:z.string(), fileurl:optionalText, filesize:integer.refine(value => value >= 0).optional(), mimetype:z.string().optional(), timemodified:integer.optional()})).optional()}))}));
 export const siteInfoSchema = z.object({userid:integer, fullname:z.string()});
 export const publicConfigSchema = z.object({identityproviders:z.array(z.object({url:z.string().url()})).default([])});
 
 export class MoodleClient {
   constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = fetch) {}
-  async call<T>(name: string, params: Record<string,string>, schema: z.ZodType<T>): Promise<T> {
+  async call<S extends z.ZodTypeAny>(name: string, params: Record<string,string>, schema: S): Promise<z.output<S>> {
     let response: Response;
     try { response = await this.request(`${this.host}/webservice/rest/server.php?moodlewsrestformat=json`, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({...params,wstoken:this.token,wsfunction:name}), redirect:'error', signal:AbortSignal.timeout(30_000)}); }
     catch { throw new MoodleError('network'); }
@@ -70,7 +71,21 @@ export class MoodleClient {
     });
   }
   async events(accountId: string, courses: MoodleCourse[]) {
-    const result = await this.fallback(() => this.call('core_calendar_get_action_events_by_timesort',{timesortfrom:'0',limitnum:'1000'},z.object({events:z.array(eventWire)})),() => this.call('core_calendar_get_calendar_upcoming_view',{},z.object({events:z.array(eventWire)})));
+    const upcoming = () => this.call('core_calendar_get_calendar_upcoming_view',{courseid:'0',categoryid:'0'},z.object({events:z.array(eventWire)}));
+    const timeline = async () => {
+      const events: z.infer<typeof eventWire>[] = [];
+      let after = 0;
+      while (true) {
+        const page = await this.call('core_calendar_get_action_events_by_timesort',{timesortfrom:'0',limitnum:'50',...(after ? {aftereventid:String(after)} : {})},z.object({events:z.array(eventWire)}));
+        if (!page.events.length) break;
+        if (page.events.some(item => events.some(previous => previous.id === item.id))) throw new MoodleError('service');
+        events.push(...page.events);
+        if (page.events.length < 50) break;
+        after = page.events.at(-1)!.id;
+      }
+      return events.length ? {events} : upcoming();
+    };
+    const result = await this.fallback(timeline,upcoming);
     return result.events.flatMap(item => {
       const course = courses.find(course => course.remoteId === (item.courseid ?? item.course?.id));
       const dueAt = date(item.timedue ?? item.timesort ?? item.timestart);
@@ -78,14 +93,27 @@ export class MoodleClient {
     });
   }
   async notifications(account: MoodleAccount, courses: MoodleCourse[]) {
-    const get = (read: number) => this.call('core_message_get_messages',{useridto:String(account.remoteUserId),useridfrom:'0',type:'notifications',read:String(read),newestfirst:'1',limitfrom:'0',limitnum:'1000'},z.object({messages:z.array(messageWire)}));
+    const getPage = (read: number, offset: number) => this.call('core_message_get_messages',{useridto:String(account.remoteUserId),useridfrom:'0',type:'notifications',read:String(read),newestfirst:'1',limitfrom:String(offset),limitnum:'100'},z.object({messages:z.array(messageWire)}));
+    const get = async (read: number) => {
+      const messages: z.infer<typeof messageWire>[] = [];
+      while (true) {
+        const page = await getPage(read,messages.length);
+        if (page.messages.some(item => messages.some(previous => previous.id === item.id))) throw new MoodleError('service');
+        messages.push(...page.messages);
+        if (page.messages.length < 100) return {messages};
+      }
+    };
     const result = await this.fallback(async () => (await get(2)).messages,async () => [...(await get(0)).messages.map(row => ({...row,read:false})),...(await get(1)).messages.map(row => ({...row,read:true}))]);
-    return [...new Map(result.map(row => [row.id,row])).values()].map(row => ({remoteId:row.id,value:moodleNotificationSchema.parse({id:remoteId(account.id,'notification',row.id),accountId:account.id,courseId:courses.find(course => course.remoteId === row.courseid)?.id ?? null,subject:plainText(row.subject ?? ''),body:plainText(row.fullmessagehtml || row.fullmessage || row.smallmessage || ''),createdAt:date(row.timecreated),read:row.read ?? Boolean(row.timeread),url:url(row.contexturl)})}));
+    const courseId = (row: z.infer<typeof messageWire>) => {
+      if (row.courseid) return row.courseid;
+      try { return z.object({courseid:z.coerce.number().int().positive()}).parse(JSON.parse(row.customdata ?? '{}')).courseid; } catch { return undefined; }
+    };
+    return [...new Map(result.map(row => [row.id,row])).values()].map(row => ({remoteId:row.id,value:moodleNotificationSchema.parse({id:remoteId(account.id,'notification',row.id),accountId:account.id,courseId:courses.find(course => course.remoteId === courseId(row))?.id ?? null,subject:plainText(row.subject ?? ''),body:plainText(row.fullmessagehtml || row.fullmessage || row.text || row.smallmessage || ''),createdAt:date(row.timecreated),read:row.read ?? Boolean(row.timeread),url:url(row.contexturl)})}));
   }
   markRead(id: number) { return this.call('core_message_mark_notification_read',{notificationid:String(id),timeread:String(Math.floor(Date.now()/1000))},z.object({}).passthrough()); }
   async grades(course: MoodleCourse, userId: number) {
     const result = await this.call('gradereport_user_get_grade_items',{courseid:String(course.remoteId),userid:String(userId)},gradeWire);
-    return result.usergrades.flatMap(user => user.gradeitems.map(row => ({remoteKey:String(row.id),value:moodleGradeItemSchema.parse({courseId:course.id,name:plainText(row.itemname ?? ''),grade:row.gradeformatted ? plainText(row.gradeformatted) : null,max:row.grademax ?? null,percentage:row.percentageformatted && Number.isFinite(parseFloat(row.percentageformatted)) ? parseFloat(row.percentageformatted) : null,gradedAt:date(row.gradedategraded)})})));
+    return result.usergrades.flatMap(user => user.gradeitems.map(row => ({remoteKey:String(row.id),value:moodleGradeItemSchema.parse({courseId:course.id,name:plainText(row.itemname ?? ''),grade:row.gradeformatted ? plainText(row.gradeformatted) : null,max:row.grademax ?? null,percentage:row.percentageformatted && Number.isFinite(parseFloat(plainText(row.percentageformatted))) ? parseFloat(plainText(row.percentageformatted)) : null,gradedAt:date(row.gradedategraded)})})));
   }
   async files(course: MoodleCourse) {
     const sections = await this.call('core_course_get_contents',{courseid:String(course.remoteId)},sectionsWire);

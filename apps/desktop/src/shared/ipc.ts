@@ -1,3 +1,4 @@
+import { moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
 import { aiParseContract } from './ai-parse';
 import { statusSchema } from "./status";
 import { folderIdSchema, libraryContract } from "./library";
@@ -26,6 +27,17 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
   ...aiParseContract,
+  [moodleChannels.schools]: {request:empty,response:z.array(moodleSchoolSchema)},
+  [moodleChannels.connect]: {request:z.object({schoolId:moodleSchoolSchema.shape.id,username:z.string().min(1).max(256).optional(),password:z.string().min(1).max(4096).optional()}).strict(),response:moodleAccountSchema},
+  [moodleChannels.disconnect]: {request:z.object({accountId:z.string().uuid()}).strict(),response:ack},
+  [moodleChannels.overview]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema},
+  [moodleChannels.sync]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema},
+  [moodleChannels.course]: {request:z.object({courseId:z.string().uuid()}).strict(),response:moodleCourseDetailSchema},
+  [moodleChannels.openFile]: {request:z.object({fileId:z.string().uuid()}).strict(),response:documentIdSchema},
+  [moodleChannels.markRead]: {request:z.object({notificationId:z.string().uuid()}).strict(),response:ack},
+  [moodleChannels.createReminder]: {request:moodleReminderSchema.omit({id:true,fired:true}),response:moodleReminderSchema},
+  [moodleChannels.deleteReminder]: {request:z.object({reminderId:z.string().uuid()}).strict(),response:ack},
+  [moodleChannels.exportCalendar]: {request:z.object({deadlineIds:z.array(z.string().uuid()).min(1).max(50)}).strict(),response:z.object({saved:z.boolean()}).strict()},
   "secrets:unlock": {request:z.object({providerId:providerIdSchema}).strict(),response:ack},
   "secrets:session": {request:z.object({providerId:providerIdSchema,key:z.string().min(1).max(16384)}).strict(),response:ack},
   "converter:mode": {request:z.object({offline:z.boolean()}).strict(),response:ack},

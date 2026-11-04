@@ -10,7 +10,7 @@ it("repairs a v11 database that lacks the parse rollup table", () => {
   const first = openStore(file);
   first.close?.();
   const raw = new DatabaseSync(file);
-  raw.exec("DROP TRIGGER usage_parse_rollup; DROP TABLE usage_parse_daily; DELETE FROM migrations WHERE version>=12;");
+  raw.exec("DROP TRIGGER usage_parse_rollup; DROP TABLE usage_parse_daily; DELETE FROM migrations WHERE version=12;");
   raw.close();
   const store = openStore(file);
   expect(() => store.usage.dashboard("7d" as never)).not.toThrow();

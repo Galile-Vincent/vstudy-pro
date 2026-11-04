@@ -1,3 +1,4 @@
+import { moodleMigration } from './moodle-migration';
 import { aiParseMigration, aiParseRollupRepair } from './ai-parse-migration';
 import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
 import { libraryMigration } from "./library-migration";
@@ -71,6 +72,7 @@ export const migrations = [
   { version:11, sql:aiParseMigration },
   // Repairs databases that applied an earlier v11 draft without the parse rollup table/trigger.
   { version:12, sql:aiParseRollupRepair },
+  { version:13, sql:moodleMigration },
 ];
 const documentRow = z
   .object({

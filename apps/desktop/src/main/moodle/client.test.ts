@@ -37,6 +37,11 @@ describe('Moodle response boundary',() => {
     expect(await client.notifications(account,courses)).toHaveLength(1);
     expect(request.mock.calls.map(call => String(call[1]?.body))).toEqual(expect.arrayContaining([expect.stringContaining('read=0'),expect.stringContaining('read=1')]));
   });
+  it('accepts Moodle numeric strings while rejecting nonnumeric fields',async () => {
+    const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({'core_enrol_get_users_courses':[{id:'101',fullname:'Course',shortname:'CS',progress:'42.5',isfavourite:'0'}]}));
+    expect(await client.courses(account)).toMatchObject([{remoteId:101,progress:42.5,favourite:false}]);
+    await expect(new MoodleClient(schools[0]!.host,'token',fixtureFetch({'core_webservice_get_site_info':{userid:'NaN',fullname:'User'}})).siteInfo()).rejects.toThrow('service');
+  });
   it('rejects HTTP-200 auth errors and malformed payloads without leaking server text',async () => {
     const request = fixtureFetch({'core_webservice_get_site_info':{errorcode:'invalidtoken',message:'secret-token'}});
     await expect(new MoodleClient(schools[0]!.host,'secret-token',request).siteInfo()).rejects.toMatchObject({kind:'auth',message:'Moodle auth error'});
