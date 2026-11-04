@@ -324,6 +324,7 @@ export function LibrarySidebar() {
               />
             )}
             <Button variant="ghost"
+              className="folder-link"
               tabIndex={-1}
               onClick={() => go({ folderId: f.id }, f.name)}
             >
@@ -334,7 +335,7 @@ export function LibrarySidebar() {
               ) : (
                 <FolderIcon />
               )}
-              {f.name}
+              <span className="folder-name">{f.name}</span>
               <small>
                 {typeof f.count === "number" ? format.number(f.count) : ""}
               </small>
@@ -354,7 +355,7 @@ export function LibrarySidebar() {
       </div></div>
       {!!saved.length && <h2 className="sidebar-label">{tr("library:savedFilters")}</h2>}
       {saved.map((s) => (
-        <Button variant="ghost" key={s.id} onClick={() => go(JSON.parse(s.queryJson), s.name)}>
+        <Button variant="ghost" className="library-saved-filter" key={s.id} onClick={() => go(JSON.parse(s.queryJson), s.name)}>
           <ListFilter/>{s.name}
         </Button>
       ))}
