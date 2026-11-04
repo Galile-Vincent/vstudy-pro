@@ -1,4 +1,4 @@
-import { moodleFetch, siteFetch } from './site-url';
+import { moodleFetch, siteFetch, siteTarget } from './site-url';
 import { mkdtemp, open, rm } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -8,13 +8,45 @@ import type { MoodleRepository } from './repository';
 import type { Fetch } from './client';
 
 export function authenticatedFileUrl(source: string, host: string, token: string): string {
-  const url = new URL(source);
-  const school = new URL(host);
-  if (url.protocol !== 'https:' || url.origin !== school.origin || url.username || url.password || !/\/(?:webservice\/)?pluginfile\.php\//.test(url.pathname)) throw new Error('Unsafe Moodle file URL');
-  for (const key of [...url.searchParams.keys()]) if (key.toLowerCase() === 'token') url.searchParams.delete(key);
+  const url = siteTarget(host,source);
+  const root = new URL(host).pathname.replace(/\/$/,'');
+  const relative = url.pathname.slice(root.length);
+  if (!/^\/(?:webservice\/)?pluginfile\.php(?:\/|$)/.test(relative) || relative.endsWith('pluginfile.php') && !url.searchParams.has('file')) throw new Error('Unsafe Moodle file URL');
+  url.pathname = root + relative.replace(/^\/pluginfile\.php/,'/webservice/pluginfile.php');
+  for (const key of [...url.searchParams.keys()]) if (/token|sesskey/i.test(key)) url.searchParams.delete(key);
   url.searchParams.set('token',token);
   url.hash = '';
   return url.href;
+}
+const imageCache = new Map<string,{expires:number;data:Promise<string | null>}>();
+export function moodleImage(source: string, host: string, token?: string, request: Fetch = moodleFetch): Promise<string | null> {
+  const key = `${host}:${token ?? ''}:${source}`;
+  const cached = imageCache.get(key);
+  if (cached && cached.expires > Date.now()) return cached.data;
+  const data = (async () => {
+    const url = siteTarget(host,source);
+    const target = token && /\/pluginfile\.php(?:\/|$)/.test(url.pathname) ? authenticatedFileUrl(source,host,token) : url.href;
+    const response = await siteFetch(host,request)(target,{redirect:'error',signal:AbortSignal.timeout(30_000)});
+    const mime = response.headers.get('content-type')?.split(';')[0]?.trim();
+    if (!response.ok || !response.body || !mime || !['image/png','image/jpeg','image/gif','image/webp','image/avif'].includes(mime)) { await response.body?.cancel(); return null; }
+    const limit = 2 * 1024 * 1024;
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    try {
+      while (true) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        size += chunk.value.byteLength;
+        if (size > limit) return null;
+        chunks.push(chunk.value);
+      }
+    } finally { await reader.cancel(); reader.releaseLock(); }
+    return `data:${mime};base64,${Buffer.concat(chunks).toString('base64')}`;
+  })().catch(() => null);
+  if (imageCache.size >= 128) imageCache.delete(imageCache.keys().next().value!);
+  imageCache.set(key,{expires:Date.now() + 5 * 60_000,data});
+  return data;
 }
 export async function importMoodleFile(repository: MoodleRepository, id: string, host: string, token: string, documents: Pick<DocumentService,'importPath'|'get'>, request: Fetch = moodleFetch): Promise<string> {
   const {file,url} = repository.file(id);

@@ -1,3 +1,4 @@
+import { moodleImage } from './files';
 import { MoodleAuthError, tokensSchema, type MoodleTokens } from './auth';
 import { normalizeSiteUrl } from './site-url';
 import { moodleFetch } from './site-url';
@@ -16,7 +17,9 @@ export class MoodleService {
   constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch) {}
   private readonly connecting = new Set<string>();
   async checkSite(url: string) {
-    const {siteUrl,siteName,authPlan,iconUrl} = await checkSite(url,this.request);
+    const {siteUrl,siteName,authPlan,config} = await checkSite(url,this.request);
+    const icon = config.compactlogourl || config.logourl;
+    const iconUrl = icon ? await moodleImage(icon,siteUrl,undefined,this.request) : null;
     return {siteUrl,siteName,authPlan,...(iconUrl ? {iconUrl} : {})};
   }
   async connect(input: {siteUrl:string;provider?:number | undefined;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {

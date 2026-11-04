@@ -1,3 +1,4 @@
+import { moodleImage } from './files';
 import { authError, type MoodleTokens } from './auth';
 import { moodleFetch, siteFetch } from './site-url';
 import { createHash } from 'node:crypto';
@@ -67,7 +68,8 @@ export class MoodleClient {
     const timeline = async () => (await this.call('core_course_get_enrolled_courses_by_timeline_classification',{classification:'all',limit:'0',offset:'0'},z.object({courses:z.array(courseWire)}))).courses;
     const rows = await this.fallback(() => this.call('core_enrol_get_users_courses',{userid:String(account.remoteUserId)},z.array(courseWire)),timeline);
     const courses = rows.length ? rows : await timeline();
-    return courses.map(row => moodleCourseSchema.parse({id:remoteId(account.id,'course',row.id),accountId:account.id,remoteId:row.id,fullName:plainText(row.fullname),shortName:plainText(row.shortname),imageUrl:url(row.courseimage ?? row.overviewfiles?.[0]?.fileurl),progress:row.progress == null ? null : Math.min(100,Math.max(0,row.progress)),startAt:date(row.startdate),endAt:date(row.enddate),favourite:row.isfavourite ?? false}));
+    const mapped = courses.map(row => moodleCourseSchema.parse({id:remoteId(account.id,'course',row.id),accountId:account.id,remoteId:row.id,fullName:plainText(row.fullname),shortName:plainText(row.shortname),imageUrl:url(row.courseimage ?? row.overviewfiles?.[0]?.fileurl),progress:row.progress == null ? null : Math.min(100,Math.max(0,row.progress)),startAt:date(row.startdate),endAt:date(row.enddate),favourite:row.isfavourite ?? false}));
+    return Promise.all(mapped.map(async course => ({...course,imageUrl:course.imageUrl ? await moodleImage(course.imageUrl,this.host,this.token,this.request) : null})));
   }
   async assignments(accountId: string, courses: MoodleCourse[]) {
     courses = courses.filter(course => !course.endAt || Date.parse(course.endAt) >= Date.now() - 14 * 86400000);
@@ -154,7 +156,7 @@ export class MoodleClient {
   }
   async files(course: MoodleCourse) {
     const sections = await this.call('core_course_get_contents',{courseid:String(course.remoteId)},sectionsWire);
-    return sections.flatMap(section => section.modules.flatMap(module => (module.contents ?? []).filter(file => file.type === 'file' && file.fileurl && url(file.fileurl)).map(file => ({url:url(file.fileurl)!,value:moodleFileSchema.parse({id:remoteId(course.accountId,'file',`${module.id}:${file.fileurl!.split('?')[0]}`),courseId:course.id,section:plainText(section.name ?? ''),module:plainText(module.name),name:plainText(file.filename),mime:file.mimetype ?? 'application/octet-stream',size:file.filesize ?? 0,modifiedAt:date(file.timemodified),documentId:null})}))));
+    return sections.flatMap(section => section.modules.flatMap(module => (module.contents ?? []).filter(file => file.type === 'file' && file.fileurl && url(file.fileurl)).map(file => ({url:url(file.fileurl)!,value:moodleFileSchema.parse({id:remoteId(course.accountId,'file',`${module.id}:${url(file.fileurl)}`),courseId:course.id,section:plainText(section.name ?? ''),module:plainText(module.name),name:plainText(file.filename),mime:file.mimetype ?? 'application/octet-stream',size:file.filesize ?? 0,modifiedAt:date(file.timemodified),documentId:null})}))));
   }
 }
 export async function passwordToken(host: string, username: string, password: string, request: Fetch = moodleFetch): Promise<MoodleTokens> {
