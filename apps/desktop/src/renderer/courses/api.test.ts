@@ -10,9 +10,9 @@ describe("Moodle development data", () => {
   it("provides contract-valid courses, deadline groups, and all supported file formats", async () => {
     const api = createMockMoodleApi();
     const overview = moodleOverviewSchema.parse(await api.overview());
-    expect(overview.courses).toHaveLength(3);
-    expect(overview.courses.map((c) => c.fullName)).toContain(
-      "資料結構與演算法",
+    expect(overview.courses).toHaveLength(4);
+    expect(overview.courses.map((c) => c.identity.title.en)).toContain(
+      "Electronics Laboratory",
     );
     const detail = moodleCourseDetailSchema.parse(
       await api.course(overview.courses[0]!.id),
@@ -47,7 +47,7 @@ describe("Moodle development data", () => {
     expect(
       page.items.find((item) => item.document.id === opened.documentId)
         ?.document.title,
-    ).toBe("Binary trees & traversal.pdf");
+    ).toBe("Operational amplifiers.pdf");
     const imported = page.items.find(
       (item) => item.document.id === opened.documentId,
     )!;
@@ -55,7 +55,7 @@ describe("Moodle development data", () => {
       await desktop.invoke("documents:read", {
         documentId: imported.document.id,
       }),
-    ).toContain("A binary tree gives each node at most two children.");
+    ).toContain("Review the lecture material.");
     const dashboard = libraryContract["dashboard:get"].response.parse(
       await desktop.invoke("dashboard:get", {}),
     );
@@ -68,7 +68,7 @@ describe("Moodle development data", () => {
     const courseId = overview.courses[0]!.id;
     const detail = await api.course(courseId);
     await api.markRead(detail.notifications[0]!.id);
-    expect((await api.overview()).unreadNotifications).toBe(5);
+    expect((await api.overview()).unreadNotifications).toBe(7);
     const reminder = await api.createReminder({
       deadlineId: detail.deadlines[0]!.id,
       remindAt: new Date().toISOString(),
@@ -84,6 +84,6 @@ describe("Moodle development data", () => {
     await api.disconnect(overview.accounts[0]!.id);
     expect((await api.overview()).courses).toEqual([]);
     await api.connect({siteUrl:"https://ilearning.cycu.edu.tw"});
-    expect((await api.overview()).courses).toHaveLength(3);
+    expect((await api.overview()).courses).toHaveLength(4);
   });
 });
