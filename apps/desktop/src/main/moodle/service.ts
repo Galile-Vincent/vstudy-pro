@@ -1,3 +1,4 @@
+import { completionState } from './contents';
 import { moodleImage } from './files';
 import { MoodleAuthError, tokensSchema, type MoodleTokens } from './auth';
 import { normalizeSiteUrl, moodleFetch } from './site-url';
@@ -12,8 +13,13 @@ import { checkSite, type CheckedSite } from './discovery';
 export class MoodleService {
   private readonly pending = new Map<string,Promise<{errors:string[]}>>();
   private stopped = false;
+  private readonly detailPending = new Map<string,Promise<void>>();
+  private readonly detailAttempts = new Map<string,number>();
+  private detailActive = 0;
+  private readonly detailQueue: (() => void)[] = [];
+  private readonly teacherCache = new Map<string,number>();
   private readonly lastAttempt = new Map<string,number>();
-  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch) {}
+  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch, private readonly language: () => string = () => 'zh-tw') {}
   private readonly connecting = new Set<string>();
   private readonly browserSites = new Set<string>();
   private async checkedSite(url: string) {
@@ -44,7 +50,9 @@ export class MoodleService {
     } finally { this.connecting.delete(checked.siteUrl); }
   }
   private async acceptToken(site: CheckedSite, tokens: MoodleTokens): Promise<MoodleAccount> {
-    const info = await new MoodleClient(site.siteUrl,tokens.token,this.request).siteInfo();
+    const client = new MoodleClient(site.siteUrl,tokens.token,this.request);
+    client.setLanguage(this.language());
+    const info = await client.siteInfo();
     if (!info.siteurl || normalizeSiteUrl(info.siteurl) !== site.siteUrl) throw new MoodleAuthError('requirecorrectaccess');
     if (info.version && Number(info.version) < 2018051700) throw new Error('unsupported-version');
     if (this.stopped) throw new Error('Moodle service closed');
@@ -75,6 +83,82 @@ export class MoodleService {
     const snapshot = this.repository.overview(accountId);
     for (const account of snapshot.accounts) if (account.status === 'connected' && Date.now() - (this.lastAttempt.get(account.id) ?? 0) >= 60_000 && (!account.syncedAt || Date.now() - Date.parse(account.syncedAt) > 5 * 60_000)) void this.sync(account.id);
     return snapshot;
+  }
+  async course(id: string) {
+    const cached = this.repository.course(id);
+    const last = this.detailAttempts.get(id) ?? 0;
+    if (!this.stopped && this.repository.account(cached.course.accountId).status === 'connected' && Date.now() - last >= 60_000 && (!this.repository.detailCache(id) || Date.now() - Date.parse(this.repository.detailCache(id)!.refreshedAt) > 5 * 60_000)) {
+      const work = this.refreshCourse(id);
+      if (!this.repository.detailCache(id)) await work;
+    } else if (!this.repository.detailCache(id)) await this.detailPending.get(id);
+    return this.repository.course(id);
+  }
+  refreshCourse(id: string): Promise<void> {
+    const pending = this.detailPending.get(id);
+    if (pending) return pending;
+    if (this.stopped) return Promise.resolve();
+    this.detailAttempts.set(id,Date.now());
+    const work = this.loadCourse(id).catch(error => {
+      const accountId = (() => { try { return this.repository.course(id).course.accountId; } catch { return null; } })();
+      if (accountId && error instanceof MoodleError && error.kind === 'auth') this.repository.expired(accountId);
+    }).finally(() => this.detailPending.delete(id));
+    this.detailPending.set(id,work);
+    return work;
+  }
+  private async loadCourse(id: string) {
+    if (this.detailActive >= 2) await new Promise<void>(resolve => this.detailQueue.push(resolve));
+    this.detailActive++;
+    try {
+      if (this.stopped) return;
+      const detail = this.repository.course(id);
+      const account = this.repository.account(detail.course.accountId);
+      const client = new MoodleClient(account.siteUrl,await this.token(account.id),this.request);
+      const functions = this.repository.capabilities(account.id)?.functions ?? [];
+      client.setFunctions(functions);
+      client.setLanguage(this.language());
+      const active = () => !this.stopped && this.repository.accounts().some(row => row.id === account.id);
+      const optional = async <T>(name: string, request: () => Promise<T>): Promise<T | undefined> => {
+        if (!client.wsAvailable(name)) return undefined;
+        try { return await request(); }
+        catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; return undefined; }
+      };
+      const contents = await optional('core_course_get_contents',() => client.courseContents(detail.course));
+      if (contents && active()) {
+        const statuses = detail.course.identity.enableCompletion ? await optional('core_completion_get_activities_completion_status',() => client.completion(detail.course,account.remoteUserId)) : undefined;
+        const assignments = await optional('mod_assign_get_assignments',() => client.assignments(account.id,[detail.course]));
+        const quizzes = await optional('mod_quiz_get_quizzes_by_courses',() => client.quizDeadlines(detail.course));
+        const deadlines = [...(assignments ?? []),...(quizzes ?? []),...detail.deadlines];
+        for (const section of contents.sections) for (const module of section.modules) {
+          const status = statuses?.find(status => status.cmid === module.cmid);
+          if (status) module.completion = completionState(status.state,status.tracking);
+          const deadline = deadlines.find(deadline => deadline.url && deadline.url === module.url);
+          if (deadline) { module.dueAt = deadline.dueAt; module.submitted = deadline.submitted; }
+        }
+        if (statuses?.length && active()) {
+          const tracked = statuses.filter(status => status.tracking !== 0);
+          if (tracked.length) {
+            const latest = this.repository.course(id).course;
+            this.repository.saveCourse({...latest,progress:100 * tracked.filter(status => status.state > 0).length / tracked.length,identity:{...latest.identity,hasProgress:true}});
+          }
+        }
+        if (active()) this.repository.saveDetail(id,{sections:contents.sections},contents.files);
+      }
+      if (detail.course.identity.teacherSource !== 'contacts' && Date.now() - (this.teacherCache.get(id) ?? 0) > 3600_000) {
+        const teachers = await optional('core_enrol_get_enrolled_users',() => client.teachers(detail.course));
+        if (teachers && active()) {
+          this.teacherCache.set(id,Date.now());
+          if (teachers.length) {
+            const latest = this.repository.course(id).course;
+            this.repository.saveCourse({...latest,identity:{...latest.identity,teachers,teacherSource:'enrolment'}});
+          }
+        }
+      }
+      const announcements = await optional('mod_forum_get_forums_by_courses',() => client.announcements(this.repository.course(id).course));
+      if (announcements && active()) this.repository.saveDetail(id,{announcements});
+    } finally {
+      this.detailActive--;
+      this.detailQueue.shift()?.();
+    }
   }
   private async tokens(id: string): Promise<MoodleTokens> {
     const stored = await this.secrets.getInMainOnly(moodleSecretId(id));
@@ -113,10 +197,12 @@ export class MoodleService {
     const account = this.repository.account(id);
     if (account.status === 'expired') throw new MoodleError('auth');
     const client = new MoodleClient(account.siteUrl,await this.token(id),this.request);
+    client.setLanguage(this.language());
     const info = await client.siteInfo();
     if (info.userid !== account.remoteUserId || info.siteurl && normalizeSiteUrl(info.siteurl) !== account.siteUrl) throw new MoodleError('auth');
     await this.saveCapabilities(account,info,await this.tokens(id));
     client.setFunctions(info.functions?.map(item => item.name));
+    client.setLanguage(this.language());
     if (client.wsAvailable('tool_mobile_get_config') && info.functions) {
       try {
         const config = await client.mobileConfig();
@@ -150,5 +236,5 @@ export class MoodleService {
     return {errors};
   }
 
-  async dispose() { this.stopped = true; await Promise.allSettled(this.pending.values()); }
+  async dispose() { this.stopped = true; await Promise.allSettled([...this.pending.values(),...this.detailPending.values()]); }
 }

@@ -22,3 +22,7 @@ UPDATE moodle_accounts SET siteUrl='https://ilearning.cycu.edu.tw',data=json_set
 export const moodleCapabilitiesMigration = `
 CREATE TABLE moodle_capabilities (accountId TEXT PRIMARY KEY REFERENCES moodle_accounts(id) ON DELETE CASCADE,data TEXT NOT NULL CHECK(json_valid(data)));
 `;
+
+export const moodleCourseDetailsMigration = `
+CREATE TABLE moodle_course_details (courseId TEXT PRIMARY KEY REFERENCES moodle_courses(id) ON DELETE CASCADE,data TEXT NOT NULL CHECK(json_valid(data)));
+`;

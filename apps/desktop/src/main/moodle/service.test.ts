@@ -351,3 +351,80 @@ it('redacts malformed stored token JSON',async () => {
   await expect(service.token(account.id)).rejects.toHaveProperty('message','Moodle auth error');
   await service.dispose();
 });
+
+it('loads course panels lazily, preserves successful panels on partial failure and isolates accounts',async () => {
+  const {repository,service,request} = await setup();
+  await service.sync(account.id);
+  const course = repository.overview(account.id).courses[0]!;
+  repository.saveCourse({...course,identity:{...course.identity,enableCompletion:true}});
+  repository.saveCapabilities(account.id,{functions:['core_course_get_contents','core_completion_get_activities_completion_status','mod_forum_get_forums_by_courses','mod_forum_get_forum_discussions'],advancedfeatures:[],mobileConfig:{}});
+  const base = request.getMockImplementation()!;
+  let contentsFail = false, forumFail = true, contentsRequests = 0;
+  request.mockImplementation(async (target,options) => {
+    const name = new URLSearchParams(String(options?.body)).get('wsfunction');
+    if (name === 'core_course_get_contents') {
+      contentsRequests++;
+      return Response.json(contentsFail ? {errorcode:'failure'} : [{id:1,section:1,name:'Week one',modules:[{id:8,name:'Homework',modname:'assign'}]}]);
+    }
+    if (name === 'core_completion_get_activities_completion_status') return Response.json({statuses:[{cmid:8,state:1,tracking:1}]});
+    if (name === 'mod_forum_get_forums_by_courses') return Response.json(forumFail ? {errorcode:'failure'} : [{id:2,name:'公告',type:'news'}]);
+    if (name === 'mod_forum_get_forum_discussions') return Response.json({discussions:[{id:5,name:'Notice',created:1730000000,message:'<p>Read this</p>'}]});
+    return base(target,options);
+  });
+  const [first,second] = await Promise.all([service.course(course.id),service.course(course.id)]);
+  expect(contentsRequests).toBe(1);
+  expect(first.sections.map(section => section.modules.map(module => [module.name,module.completion]))).toEqual([[['Homework','complete']]]);
+  expect(second.sections).toEqual(first.sections);
+  expect(first.announcements).toEqual([]);
+  expect(first.course.progress).toBe(100);
+  expect(first.course.identity.hasProgress).toBe(true);
+  contentsFail = true; forumFail = false;
+  await service.refreshCourse(course.id);
+  const updated = repository.course(course.id);
+  expect(updated.sections.map(section => section.name)).toEqual(['Week one']);
+  expect(updated.announcements.map(item => [item.subject,item.bodyHtml])).toEqual([['Notice','<p>Read this</p>']]);
+  const other = {...account,id:randomUUID(),remoteUserId:43}; repository.saveAccount(other);
+  expect(repository.overview(other.id).courses).toEqual([]);
+  await service.disconnect(account.id);
+  expect(() => repository.course(course.id)).toThrow('Moodle course not found');
+  await service.dispose();
+});
+
+it('skips unadvertised detail capabilities and returns the existing cache',async () => {
+  const {repository,service,request} = await setup();
+  await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  repository.saveCapabilities(account.id,{functions:[],advancedfeatures:[],mobileConfig:{}});
+  request.mockClear();
+  const detail = await service.course(course.id);
+  expect(detail.course.fullName).toBe('Algorithms');
+  expect(detail.sections).toEqual([]);
+  expect(request.mock.calls).toEqual([]);
+  await service.dispose();
+});
+
+it('returns stale panels while a background refresh is still pending',async () => {
+  const {repository,service,request,store} = await setup();
+  await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  repository.saveCapabilities(account.id,{functions:['core_course_get_contents'],advancedfeatures:[],mobileConfig:{}});
+  const base = request.getMockImplementation()!;
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  request.mockImplementation(async (target,options) => {
+    if (new URLSearchParams(String(options?.body)).get('wsfunction') === 'core_course_get_contents') {
+      await gate;
+      return Response.json([{id:1,section:0,name:'Refreshed',modules:[]}]);
+    }
+    return base(target,options);
+  });
+  repository.saveDetail(course.id,{announcements:[]});
+  store.db.prepare("UPDATE moodle_course_details SET data=json_set(data,'$.refreshedAt','2000-01-01T00:00:00Z')").run();
+  const stale = await service.course(course.id);
+  expect(stale.course.fullName).toBe('Algorithms');
+  expect(stale.sections).toEqual([]);
+  release();
+  await service.refreshCourse(course.id);
+  expect(repository.course(course.id).sections.map(section => section.name)).toEqual(['Refreshed']);
+  await service.dispose();
+});

@@ -219,3 +219,10 @@ describe('rich course data',() => {
   ]);
  });
 });
+
+it('maps quiz due dates and finished attempts to module extras without inventing zero dates',async () => {
+  const client = new MoodleClient(account.siteUrl,'token',fixtureFetch({mod_quiz_get_quizzes_by_courses:{quizzes:[{id:1,name:'Quiz',coursemodule:22,timeclose:1730000000},{id:2,name:'Undated',coursemodule:23,timeclose:0}]},mod_quiz_get_user_attempts:{attempts:[{state:'finished'}]}}));
+  const course = (await client.courses(account))[0]!;
+  expect(await client.quizDeadlines(course)).toMatchObject([{title:'Quiz',dueAt:'2024-10-27T03:33:20.000Z',submitted:true,url:'https://ilearning.cycu.edu.tw/mod/quiz/view.php?id=22'}]);
+  expect((await client.quizDeadlines(course)).length).toBe(1);
+});

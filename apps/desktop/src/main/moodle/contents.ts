@@ -68,5 +68,13 @@ export function parseCourseContents(raw: z.infer<typeof contentsWire>, course: M
       if (child) { parent.modules.splice(parent.modules.indexOf(module)+1,0,...child.modules); delegatedIds.add(child.id); }
     }
   }
-  return {sections:sections.filter(section => !delegatedIds.has(section.id)),files};
+  const merged = sections.filter(section => !delegatedIds.has(section.id));
+  const mergedNumbers = merged.filter(section => section.number > 0).map(section => section.number).sort((a,b) => a-b);
+  if (!mergedNumbers.every((number,index) => number === index+1)) {
+    for (const section of merged) {
+      section.weekStart = null;
+      if (!serverCurrent) section.current = false;
+    }
+  }
+  return {sections:merged,files};
 }

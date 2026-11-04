@@ -1,4 +1,5 @@
-import { emptyCourseIdentity } from '../../shared/moodle-course';
+import { moodleSectionSchema, moodleAnnouncementSchema, type MoodleSection, type MoodleAnnouncement } from '../../shared/moodle-course';
+import { parseCourseIdentity, courseLifecycle } from './identity';
 import type { DatabaseSync } from 'node:sqlite';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
@@ -17,12 +18,24 @@ export interface MoodleSnapshot {
 }
 const capabilitiesSchema = z.object({functions:z.array(z.string()).optional(),release:z.string().optional(),version:z.string().optional(),advancedfeatures:z.array(z.object({name:z.string(),value:z.union([z.string(),z.number(),z.boolean()])})),mobileConfig:z.record(z.string())});
 const storedCourseSchema = z.preprocess(value => {
-  const row = z.object({fullName:z.string(),progress:z.number().nullable().optional(),identity:z.unknown().optional()}).parse(value);
-  return row.identity ? value : {...(value as Record<string,unknown>),identity:emptyCourseIdentity(row.fullName,row.progress != null)};
+  const parsed = z.object({fullName:z.string(),shortName:z.string(),startAt:z.string().nullable(),endAt:z.string().nullable(),progress:z.number().nullable().optional(),identity:z.unknown().optional()}).safeParse(value);
+  if (!parsed.success) return value;
+  const row = parsed.data;
+  if (row.identity) return value;
+  const identity = parseCourseIdentity(row.fullName,row.shortName,row.progress != null);
+  Object.assign(identity,courseLifecycle({startAt:row.startAt,endAt:row.endAt,term:identity.term}));
+  return {...(value as Record<string,unknown>),identity};
 },moodleCourseSchema);
 const payload = z.object({data:z.string()});
 export class MoodleRepository {
-  constructor(private readonly db: DatabaseSync) {}
+  constructor(private readonly db: DatabaseSync) {
+    for (const row of db.prepare("SELECT id,data FROM moodle_courses WHERE json_type(data,'$.identity') IS NULL").all()) {
+      const parsed = storedCourseSchema.safeParse(JSON.parse(payload.parse(row).data));
+      if (!parsed.success) continue;
+      const course = parsed.data;
+      db.prepare('UPDATE moodle_courses SET data=? WHERE id=?').run(JSON.stringify(course),course.id);
+    }
+  }
   private rows<T>(sql: string, schema: z.ZodType<T,z.ZodTypeDef,unknown>, ...params: string[]): T[] {
     return this.db.prepare(sql).all(...params).map(row => schema.parse(JSON.parse(payload.parse(row).data)));
   }
@@ -52,8 +65,33 @@ export class MoodleRepository {
   course(id: string): MoodleCourseDetail {
     const course = this.rows('SELECT data FROM moodle_courses WHERE id=?',storedCourseSchema,id)[0];
     if (!course) throw new Error('Moodle course not found');
+    const cache = this.detailCache(id);
     const deadlines = this.rows('SELECT data FROM moodle_deadlines WHERE courseId=?',moodleDeadlineSchema,id).filter(item => !item.orphaned);
-    return {course,deadlines,notifications:this.rows('SELECT data FROM moodle_notifications WHERE accountId=?',moodleNotificationSchema,course.accountId).filter(item => item.courseId === id),grades:this.rows('SELECT data FROM moodle_grades WHERE courseId=?',moodleGradeItemSchema,id),files:this.files(id),reminders:this.reminders().filter(item => deadlines.some(deadline => deadline.id === item.deadlineId)),sections:[],announcements:[]};
+    return {course,deadlines,notifications:this.rows('SELECT data FROM moodle_notifications WHERE accountId=?',moodleNotificationSchema,course.accountId).filter(item => item.courseId === id),grades:this.rows('SELECT data FROM moodle_grades WHERE courseId=?',moodleGradeItemSchema,id),files:this.files(id),reminders:this.reminders().filter(item => deadlines.some(deadline => deadline.id === item.deadlineId)),sections:cache?.sections ?? [],announcements:cache?.announcements ?? []};
+  }
+  detailCache(id: string) {
+    return this.rows('SELECT data FROM moodle_course_details WHERE courseId=?',z.object({sections:z.array(moodleSectionSchema).default([]),announcements:z.array(moodleAnnouncementSchema).default([]),refreshedAt:z.string()}),id)[0];
+  }
+  saveDetail(id: string, panels: {sections?:MoodleSection[];announcements?:MoodleAnnouncement[]}, files?:MoodleSnapshot['files']) {
+    this.course(id);
+    const previous = this.detailCache(id);
+    const data = {...previous,...panels,refreshedAt:new Date().toISOString()};
+    this.db.exec('SAVEPOINT moodle_detail');
+    try {
+      this.db.prepare('INSERT INTO moodle_course_details(courseId,data) VALUES (?,?) ON CONFLICT(courseId) DO UPDATE SET data=excluded.data').run(id,JSON.stringify(data));
+      if (files) {
+        for (const item of files) {
+          if (item.value.courseId !== id) throw new Error('Moodle course mismatch');
+          this.db.prepare(`INSERT INTO moodle_files(id,courseId,url,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET url=excluded.url,data=excluded.data,documentId=CASE WHEN json_extract(moodle_files.data,'$.modifiedAt') IS json_extract(excluded.data,'$.modifiedAt') AND json_extract(moodle_files.data,'$.size')=json_extract(excluded.data,'$.size') THEN moodle_files.documentId ELSE NULL END`).run(item.value.id,id,item.url,JSON.stringify(item.value));
+        }
+        const keep = new Set(files.map(file => file.value.id));
+        for (const file of this.files(id)) if (!keep.has(file.id)) this.db.prepare('DELETE FROM moodle_files WHERE id=?').run(file.id);
+      }
+      this.db.exec('RELEASE moodle_detail');
+    } catch (error) { this.db.exec('ROLLBACK TO moodle_detail; RELEASE moodle_detail'); throw error; }
+  }
+  saveCourse(course: MoodleCourse) {
+    this.db.prepare('UPDATE moodle_courses SET data=? WHERE id=? AND accountId=?').run(JSON.stringify(moodleCourseSchema.parse(course)),course.id,course.accountId);
   }
   private files(courseId: string) {
     return this.db.prepare('SELECT data,documentId FROM moodle_files WHERE courseId=?').all(courseId).map(row => moodleFileSchema.parse({...JSON.parse(payload.parse(row).data),documentId:row.documentId}));
@@ -73,7 +111,10 @@ export class MoodleRepository {
     this.db.exec('SAVEPOINT moodle_sync');
     try {
       const account = this.account(accountId);
-      for (const course of snapshot.courses) {
+      for (const incoming of snapshot.courses) {
+        let course = incoming;
+        const previous = this.rows('SELECT data FROM moodle_courses WHERE id=?',storedCourseSchema,course.id)[0];
+        if (previous && course.identity.teacherSource !== 'contacts' && (previous.identity.teacherSource === 'enrolment' || !course.identity.teachers.length)) course = {...course,identity:{...course.identity,teachers:previous.identity.teachers,...(previous.identity.teacherSource ? {teacherSource:previous.identity.teacherSource} : {})}};
         if (course.accountId !== accountId) throw new Error('Moodle account mismatch');
         this.db.prepare('INSERT INTO moodle_courses(id,accountId,data) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(course.id,accountId,JSON.stringify(course));
       }

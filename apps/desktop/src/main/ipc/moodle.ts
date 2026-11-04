@@ -1,4 +1,4 @@
-import { dialog, Notification } from 'electron';
+import { app, dialog, Notification } from 'electron';
 import { moodleChannels } from '../../shared/moodle';
 import type { IpcChannel } from '../../shared/ipc';
 import { documentIdSchema } from '../../shared/domain';
@@ -17,7 +17,7 @@ import { startReminders, calendarText } from '../moodle/reminders';
 export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, secrets: SecretStore, implemented: Set<IpcChannel>, documents: Pick<DocumentService,'importPath'|'get'>, restoreMainWindow: () => void = () => {}) {
   const repository = new MoodleRepository(store.db);
   const sso = new MoodleSso(restoreMainWindow);
-  const service = new MoodleService(repository,secrets,sso);
+  const service = new MoodleService(repository,secrets,sso,undefined,() => { const language = store.settings.get().language; return language === 'auto' ? app.getLocale() : language === 'zh-Hant' ? 'zh-tw' : language; });
   const stopReminders = startReminders(repository,(title,body) => {
     if (!Notification.isSupported()) return false;
     new Notification({title,body}).show();
@@ -36,7 +36,7 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     const results = await Promise.all(accounts.map(account => service.sync(account.id)));
     return {...repository.overview(accountId),errors:results.flatMap(result => result.errors)};
   });
-  registrar.handle(moodleChannels.course,({courseId}) => { const detail = repository.course(courseId); service.overview(detail.course.accountId); return detail; });
+  registrar.handle(moodleChannels.course,({courseId}) => service.course(courseId));
   registrar.handle(moodleChannels.openFile,async ({fileId}) => {
     const {file,account} = repository.file(fileId);
     if (file.documentId && documents.get(documentIdSchema.parse(file.documentId))) return documentIdSchema.parse(file.documentId);

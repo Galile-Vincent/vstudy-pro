@@ -222,6 +222,18 @@ export class MoodleClient {
     return parseCourseContents(sections,course);
   }
   async files(course: MoodleCourse) { return (await this.courseContents(course)).files; }
+  async quizDeadlines(course: MoodleCourse) {
+    const result = await this.call('mod_quiz_get_quizzes_by_courses',{'courseids[0]':String(course.remoteId)},z.object({quizzes:z.array(z.object({id:integer,name:z.string(),coursemodule:integer,timeclose:integer.optional()}))}));
+    const deadlines = result.quizzes.flatMap(quiz => {
+      const dueAt = date(quiz.timeclose);
+      return dueAt ? [{title:plainText(quiz.name),courseId:course.id,kind:'quiz' as const,dueAt,url:`${this.host}/mod/quiz/view.php?id=${quiz.coursemodule}`,submitted:null as boolean | null,id:remoteId(course.accountId,'quiz',quiz.id)}] : [];
+    });
+    return this.withSubmissionStatus(deadlines,async deadline => {
+      const quiz = result.quizzes.find(quiz => remoteId(course.accountId,'quiz',quiz.id) === deadline.id)!;
+      const attempts = await this.call('mod_quiz_get_user_attempts',{quizid:String(quiz.id),status:'all'},z.object({attempts:z.array(z.object({state:z.string()}))}));
+      return attempts.attempts.some(attempt => attempt.state === 'finished');
+    });
+  }
   async completion(course: MoodleCourse, userId: number) {
     const result = await this.call('core_completion_get_activities_completion_status',{courseid:String(course.remoteId),userid:String(userId)},z.object({statuses:z.array(z.object({cmid:integer,state:integer,tracking:integer.optional()}))}));
     return result.statuses;
@@ -266,6 +278,8 @@ export class MoodleClient {
         if (post) {row.message = post.message;row.userfullname ??= post.author?.fullname;}
       } catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; }
     }
+    const teacherNames = new Set(course.identity.teachers.flatMap(teacher => [teacher.zh,teacher.en]).filter(Boolean).map(name => teacherName(name!).toLowerCase()));
+    newest.sort((a,b) => Number(teacherNames.has(teacherName(b[1].userfullname ?? '').toLowerCase())) - Number(teacherNames.has(teacherName(a[1].userfullname ?? '').toLowerCase())));
     return newest.flatMap(([id,row]) => {
       const createdAt = date(row.created ?? row.timecreated ?? row.timemodified);
       return createdAt ? [{id:remoteId(course.accountId,'announcement',id),subject:plainText(row.subject ?? row.name ?? ''),author:teacherName(row.userfullname ?? ''),createdAt,bodyHtml:sanitizeCourseHtml(row.message) ?? '',url:safeUrl(`${this.host}/mod/forum/discuss.php?d=${id}`)}] : [];

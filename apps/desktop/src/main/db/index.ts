@@ -1,4 +1,4 @@
-import { moodleMigration, moodleSiteMigration, moodleCapabilitiesMigration } from './moodle-migration';
+import { moodleMigration, moodleSiteMigration, moodleCapabilitiesMigration, moodleCourseDetailsMigration } from './moodle-migration';
 import { aiParseMigration, aiParseRollupRepair } from './ai-parse-migration';
 import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
 import { libraryMigration } from "./library-migration";
@@ -98,6 +98,7 @@ export const migrations = [
   ` },
   { version:15, sql:moodleSiteMigration },
   { version:16, sql:moodleCapabilitiesMigration },
+  { version:17, sql:moodleCourseDetailsMigration },
 ];
 const documentRow = z
   .object({

@@ -100,7 +100,7 @@ export function courseLifecycle(input: {completed?:boolean;startAt:string|null;e
   if (input.completed || input.endAt && Date.parse(input.endAt) < now.getTime()) return {lifecycle:'past',lifecycleSource:'dates'};
   if (input.startAt && Date.parse(input.startAt) > now.getTime()) return {lifecycle:'future',lifecycleSource:'dates'};
   if (input.startAt || input.endAt) return {lifecycle:'current',lifecycleSource:'dates'};
-  if (input.term && /^\d{3,4}[123]$/.test(input.term)) {
+  if (input.term && /^\d{2,3}[123]$/.test(input.term)) {
     const term = Number(input.term), current = Number(currentTaiwanTerm(now));
     return {lifecycle:term < current ? 'past' : term > current ? 'future' : 'current',lifecycleSource:'term'};
   }
