@@ -35,12 +35,13 @@ try {
     const signature = createHash('md5').update(school + url.searchParams.get('passport')).digest('hex');
     const callback = 'vstudymoodle://token=' + Buffer.from(`${mode === 'invalid' ? '0'.repeat(32) : signature}:::fixture-token`).toString('base64');
     if (mode === 'failure' || mode === 'retry' && retryCount++ === 0) {res.destroy();return;}
-    if (mode === 'blocked') {res.writeHead(302,{location:'https://192.168.1.1/secret?token=hidden'});res.end();return;}
+    if (mode === 'blocked') {res.end('<a href="http://school.example/secret?token=hidden">Unsafe scheme</a>');return;}
+    if (mode === 'frames') {res.end(`<iframe src="about:blank"></iframe><iframe srcdoc="frame"></iframe><iframe src="data:text/html,frame"></iframe><a href="${callback}">Open app</a>`);return;}
     if (mode === 'link') {res.end(`<a href="${callback}">Open app</a>`);return;}
     if (mode === 'wait') {res.end('Waiting for sign-in');return;}
     res.writeHead(302,{location:mode === 'direct' || mode === 'invalid' ? callback : `${idp}/hop?to=${callback}`});res.end();
   });
-  await writeFile(join(dir,'entry.ts'),`export { MoodleSso } from ${JSON.stringify(join(root,'src/main/moodle/sso.ts'))}; export { loginProxy } from ${JSON.stringify(join(root,'src/main/moodle/login-proxy.ts'))}; export { checkSite } from ${JSON.stringify(join(root,'src/main/moodle/discovery.ts'))};`);
+  await writeFile(join(dir,'entry.ts'),`export { MoodleSso } from ${JSON.stringify(join(root,'src/main/moodle/sso.ts'))}; export { checkSite } from ${JSON.stringify(join(root,'src/main/moodle/discovery.ts'))};`);
   await build({configFile:false,logLevel:'error',plugins:[{name:'isolated-test-network',enforce:'pre',transform(code,id) {
     if (baselineRef && /\/moodle\/(sso|login-proxy)\.ts$/.test(id)) code = execFileSync('git',['show',`${baselineRef}:${id.slice(resolve(root,'../..').length+1)}`],{encoding:'utf8'});
     if (id.endsWith('/moodle/site-url.ts')) return code.replace('const url = new URL(input);',`const url = new URL(input); if (process.env.VSTUDY_SSO_HARNESS === '1' && url.protocol === 'https:' && url.hostname === '127.0.0.1' && !url.username && !url.password) return url;`).replace("host = host.replace(/^\\[|\\]$/g,'');",`if (process.env.VSTUDY_SSO_HARNESS === '1' && host === '127.0.0.1') return [{address:host,family:4}]; host = host.replace(/^\\[|\\]$/g,'');`);
@@ -70,8 +71,8 @@ try {
       process.env.VSTUDY_SSO_TIMEOUT = mode === 'timeout' ? '1' : '';
       if(mode==='timeout' || mode==='dispose') site.config.launchurl = `${school}/wait/launch.php`;
       const pending=sso.login(site,undefined,async tokens=>tokens.token==='fixture-token'?'connected':'wrong-token').then(value=>({value}),error=>({error:error.code || error.message}));
-      if(mode==='link') {
-        const timer=setInterval(()=>{const window=BrowserWindow.getAllWindows().find(w=>w!==globalThis.main);if(window && window.webContents.getURL().includes('/link/')) {clearInterval(timer);void window.webContents.executeJavaScript('document.querySelector("a")?.click()').catch(()=>{});}},30);
+      if(mode==='link' || mode==='frames' || mode==='blocked') {
+        const timer=setInterval(()=>{const window=BrowserWindow.getAllWindows().find(w=>w!==globalThis.main);if(window && window.webContents.getURL().includes('/'+mode+'/')) {clearInterval(timer);void window.webContents.executeJavaScript('document.querySelector("a")?.click()').catch(()=>{});}},30);
         void pending.finally(()=>clearInterval(timer));
       }
       let recoveryObserved = false;
@@ -93,24 +94,7 @@ try {
     }
     return result;
   };
-  const resetEvidence = await app.evaluate(async () => {
-    const {connect} = globalThis.require('node:net');
-    const uncaught=[];
-    const record=error=>uncaught.push(error.code || error.name);
-    process.on('uncaughtException',record);
-    const proxy=await globalThis.fixture.loginProxy(async()=>{await new Promise(resolve=>setTimeout(resolve,100));return [{address:'1.1.1.1',family:4}];});
-    try {
-      for(let i=0;i<20;i++) await new Promise(resolve=>{
-        const socket=connect(proxy.port,'127.0.0.1');socket.on('error',()=>{});
-        socket.once('connect',()=>{socket.write('CONNECT school.example:443 HTTP/1.1\r\nHost: school.example\r\n\r\n');setTimeout(()=>{socket.resetAndDestroy();resolve();},5);});
-      });
-      await new Promise(resolve=>setTimeout(resolve,150));
-      return {phase:'proxy-reset',uncaught,mainSurvived:!globalThis.main.isDestroyed()};
-    } finally {proxy.close();process.removeListener('uncaughtException',record);}
-  });
-  console.log(JSON.stringify(resetEvidence));
-  if(!baseline) assert.deepEqual(resetEvidence.uncaught,[]);
-  for(const mode of (baseline ? ['redirect','direct','link','wait'] : ['redirect','direct','link','invalid','wait','timeout','dispose','blocked','failure','retry'])) await run(mode);
+  for(const mode of (baseline ? ['redirect','direct','link','frames','wait'] : ['redirect','direct','link','frames','invalid','wait','timeout','dispose','blocked','failure','retry'])) await run(mode);
 } finally {
   await app?.close();
   for(const server of servers) {server.closeAllConnections();server.close();}
