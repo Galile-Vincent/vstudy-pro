@@ -30,8 +30,8 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   registrar.handle(moodleChannels.overview,({accountId}) => service.overview(accountId));
   registrar.handle(moodleChannels.sync,async ({accountId}) => {
     const accounts = accountId ? [repository.account(accountId)] : repository.accounts();
-    await Promise.all(accounts.map(account => service.sync(account.id)));
-    return repository.overview(accountId);
+    const results = await Promise.all(accounts.map(account => service.sync(account.id)));
+    return {...repository.overview(accountId),errors:results.flatMap(result => result.errors)};
   });
   registrar.handle(moodleChannels.course,({courseId}) => { const detail = repository.course(courseId); service.overview(detail.course.accountId); return detail; });
   registrar.handle(moodleChannels.openFile,async ({fileId}) => {

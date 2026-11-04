@@ -42,7 +42,8 @@ function createBridgeMoodleApi(): MoodleApi {
     },
     overview: () => call(moodleChannels.overview, {}),
     sync: async (accountId) => {
-      await call(moodleChannels.sync, accountId ? { accountId } : {});
+      const result = await call(moodleChannels.sync, accountId ? { accountId } : {});
+      if (result.errors.length) throw new Error('Moodle sync incomplete');
     },
     course: (courseId) => call(moodleChannels.course, { courseId }),
     openFile: async (fileId) => ({

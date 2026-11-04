@@ -59,7 +59,7 @@ export class MoodleRepository {
   }
   fileRecords(courseId: string) { return this.files(courseId).map(value => ({value,url:this.file(value.id).url})); }
   linkFile(id: string, documentId: string, revision: Pick<MoodleFile,'modifiedAt'|'size'>) { this.db.prepare("UPDATE moodle_files SET documentId=? WHERE id=? AND json_extract(data,'$.modifiedAt') IS ? AND json_extract(data,'$.size')=?").run(documentId,id,revision.modifiedAt,revision.size); }
-  apply(accountId: string, snapshot: MoodleSnapshot) {
+  apply(accountId: string, snapshot: MoodleSnapshot, scope?: string) {
     this.db.exec('SAVEPOINT moodle_sync');
     try {
       const account = this.account(accountId);
@@ -78,8 +78,9 @@ export class MoodleRepository {
       for (const item of snapshot.grades) this.db.prepare('INSERT INTO moodle_grades(id,remoteKey,courseId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(remoteId(accountId,'grade',`${item.value.courseId}:${item.remoteKey}`),item.remoteKey,item.value.courseId,JSON.stringify(item.value));
       for (const item of snapshot.files) this.db.prepare(`INSERT INTO moodle_files(id,courseId,url,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET url=excluded.url,data=excluded.data,documentId=CASE WHEN json_extract(moodle_files.data,'$.modifiedAt') IS json_extract(excluded.data,'$.modifiedAt') AND json_extract(moodle_files.data,'$.size')=json_extract(excluded.data,'$.size') THEN moodle_files.documentId ELSE NULL END`).run(item.value.id,item.value.courseId,item.url,JSON.stringify(item.value));
       const prune = (table: 'courses'|'deadlines'|'notifications'|'grades'|'files', ids: Set<string>) => {
-        const scoped = table === 'courses' || table === 'notifications' ? 'accountId=?' : 'courseId IN (SELECT id FROM moodle_courses WHERE accountId=?)';
-        const rows = this.db.prepare(`SELECT id FROM moodle_${table} WHERE ${scoped}`).all(accountId);
+        if (scope === '@notifications' && table !== 'notifications' && table !== 'courses' || scope && scope !== '@notifications' && (table === 'notifications' || table === 'courses')) return;
+        const scoped = scope && scope !== '@notifications' ? 'courseId=?' : table === 'courses' || table === 'notifications' ? 'accountId=?' : 'courseId IN (SELECT id FROM moodle_courses WHERE accountId=?)';
+        const rows = this.db.prepare(`SELECT id FROM moodle_${table} WHERE ${scoped}`).all(scope && scope !== '@notifications' ? scope : accountId);
         for (const row of rows) if (typeof row.id === 'string' && !ids.has(row.id)) {
           if (table === 'deadlines' && this.reminders().some(item => item.deadlineId === row.id)) {
             const deadline = this.deadlines([row.id])[0]!;

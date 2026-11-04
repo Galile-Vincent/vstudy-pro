@@ -296,14 +296,11 @@ export function Courses({
   const failure = () => setNotice(tr("moodle:action_error"));
   const sync = async () => {
     setSyncing(true);
-    try {
-      await api.sync();
-      await refresh();
-    } catch {
-      setError(true);
-    } finally {
-      setSyncing(false);
-    }
+    let incomplete = false;
+    try { await api.sync(); } catch { incomplete = true; }
+    try { await refresh(); } catch { incomplete = true; }
+    setError(incomplete);
+    setSyncing(false);
   };
   const exportCalendar = async (ids: string[]) => {
     try {

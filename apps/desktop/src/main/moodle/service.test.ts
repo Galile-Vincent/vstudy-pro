@@ -233,3 +233,28 @@ it('keeps orphaned reminders safe when a whole course leaves enrollment',async (
   expect(notify).toHaveBeenCalledTimes(0);
   await service.dispose();
 });
+it('surfaces sync failures and backs off automatic retries',async () => {
+  const {service,request,repository} = await setup();
+  request.mockRejectedValue(new Error('offline'));
+  expect(await service.sync(account.id)).toMatchObject({errors:['network']});
+  const count = request.mock.calls.length;
+  service.overview(); service.overview();
+  await Promise.resolve();
+  expect(request.mock.calls.length).toBe(count);
+  expect(repository.account(account.id).status).toBe('connected');
+  await service.dispose();
+});
+it('applies successful courses when another course fails',async () => {
+  const {service,request,repository} = await setup();
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    const params = new URLSearchParams(String(options?.body));
+    if (params.get('wsfunction') === 'core_enrol_get_users_courses') return Response.json([{id:101,fullname:'One',shortname:'1'},{id:102,fullname:'Two',shortname:'2'}]);
+    if (params.get('courseid') === '101' && params.get('wsfunction') === 'core_course_get_contents') throw new Error('offline');
+    return base(target,options);
+  });
+  expect(await service.sync(account.id)).toMatchObject({errors:['network']});
+  expect(repository.overview().courses.map(item => item.fullName).sort()).toEqual(['One','Two']);
+  expect(repository.course(repository.overview().courses.find(item => item.remoteId === 102)!.id).files).toHaveLength(1);
+  await service.dispose();
+});
