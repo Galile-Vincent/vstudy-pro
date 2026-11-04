@@ -42,7 +42,7 @@ const sourceVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "outline",
+      variant: "muted",
       size: "default",
     },
   },

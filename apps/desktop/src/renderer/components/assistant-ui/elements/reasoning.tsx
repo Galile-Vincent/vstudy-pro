@@ -34,7 +34,7 @@ const reasoningVariants = cva("aui-reasoning-root mb-4 w-full", {
     },
   },
   defaultVariants: {
-    variant: "outline",
+    variant: "ghost",
   },
 });
 
@@ -112,7 +112,7 @@ const ReasoningRoot = forwardRef<
     <Collapsible
       ref={ref}
       data-slot="reasoning-root"
-      data-variant={variant}
+      data-variant={variant ?? "ghost"}
       open={isOpen}
       onOpenChange={handleOpenChange}
       className={cn(
