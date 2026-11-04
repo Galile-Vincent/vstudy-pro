@@ -33,11 +33,11 @@ select {
   font: inherit;
 }
 button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [data-slot], [data-slot] *)) {
-  border: 1px solid var(--line);
-  border-radius: var(--r-xs);
-  background: var(--surface);
+  border: 0;
+  border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--ink) 6%, var(--surface));
   color: inherit;
-  padding: 6px 10px;
+  padding: 6px 12px;
   cursor: pointer;
 }
 button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [data-slot], [data-slot] *)):hover {
@@ -56,10 +56,10 @@ a:focus-visible {
 input:not([data-slot]):not([cmdk-input]),
 select:not([data-slot]) {
   color: inherit;
-  border: 1px solid var(--line);
-  border-radius: var(--r-xs);
-  padding: 6px 8px;
-  background: var(--surface);
+  border: 0;
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  background: color-mix(in oklab, var(--ink) 5%, var(--surface));
   min-width: 0;
 }
 h1,

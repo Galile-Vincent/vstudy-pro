@@ -1,6 +1,6 @@
 /* Shared visual primitives. Inner corners subtract their inset from the outer radius. */
 :root {
- --r-xs:6px; --r-sm:10px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+ --r-xs:6px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px; --r-pill:999px;
  --r-outer:var(--r-lg); --inset:6px; --r-inner:max(0px,calc(var(--r-outer) - var(--inset)));
  --space-1:calc(4px * var(--density)); --space-2:calc(8px * var(--density)); --space-3:calc(12px * var(--density)); --space-4:calc(16px * var(--density)); --space-5:calc(20px * var(--density)); --space-6:calc(24px * var(--density)); --space-8:calc(32px * var(--density));
  --type-xs:0.75rem; --type-sm:0.75rem; --type-base:0.8125rem; --type-md:0.9375rem; --type-lg:1.0625rem; --type-xl:1.375rem; --type-display:1.75rem;
