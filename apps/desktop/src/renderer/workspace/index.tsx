@@ -203,7 +203,7 @@ export function Workspace() {
   const saveSettings = async (next: Settings) => {
     try {
       const latest = await desktop.invoke("settings:get", {});
-      const saved = await desktop.invoke("settings:set", { ...next, language:latest.language, replyLanguage:latest.replyLanguage, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, converterIdleMinutes:latest.converterIdleMinutes,converterOffline:latest.converterOffline,modelDisplayNames: latest.modelDisplayNames });
+      const saved = await desktop.invoke("settings:set", { ...next, uiScale:latest.uiScale,density:latest.density,accent:latest.accent,readerFont:latest.readerFont,readerSize:latest.readerSize,material:latest.material, language:latest.language, replyLanguage:latest.replyLanguage, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, converterIdleMinutes:latest.converterIdleMinutes,converterOffline:latest.converterOffline,modelDisplayNames: latest.modelDisplayNames });
       setSettings(saved);
     } catch (error) {
       report(error);

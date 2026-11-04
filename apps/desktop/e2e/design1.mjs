@@ -35,7 +35,7 @@ for(const language of ['en','ja','zh-Hant']) {
  const target=page.getByRole('treeitem').first();await target.dispatchEvent('dragover',{dataTransfer:transfer});await capture('library-drag',width,theme);await target.dispatchEvent('dragleave');
  await page.getByTestId('library-filters').click();await capture('library-filters',width,theme);await page.getByTestId('library-filters').click();
  await page.locator('.library-document').first().click({position:{x:4,y:4}});await capture('library-selection',width,theme);await page.keyboard.press('Escape');
- await page.locator('.library-document').first().locator('.document-cell > button').last().click();await page.getByRole('menu').waitFor();await capture('library-menu',width,theme);if(width===1200)await audit('menu-'+theme);await page.keyboard.press('Escape');
+ await page.locator('.library-document').first().locator('.document-actions').click();await page.getByRole('menu').waitFor();await capture('library-menu',width,theme);if(width===1200)await audit('menu-'+theme);await page.keyboard.press('Escape');
  await page.getByRole('button',{name:library.viewToggle}).click();await capture('library-grid',width,theme);await page.getByRole('button',{name:library.viewToggle}).click();
  await page.getByRole('textbox',{name:library.search,exact:true}).fill('no-matching-document-999');await page.locator('.library-empty').waitFor();await capture('library-no-results',width,theme);
  await go('library',{query:{folderId:folders[0],subfolders:true},title:'Biology 201'});await page.locator('.library-document').first().waitFor();await capture('library-folder',width,theme);if(width===1200)await audit('library-'+theme);
