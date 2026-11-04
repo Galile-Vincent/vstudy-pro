@@ -69,6 +69,10 @@
 html { font-family:var(--font-ui); font-synthesis:none; }
 body { font-family:inherit; }
 :lang(zh-Hant),:lang(ja) { letter-spacing:0; line-height:1.7; }
+@layer base {
+ :where([lang=zh-Hant]) { font-family:var(--font-cjk,"PingFang TC","Noto Sans CJK TC",system-ui,sans-serif); }
+ :where([lang=ja]) { font-family:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",system-ui,sans-serif); }
+}
 .markdown:lang(zh-Hant),.markdown:lang(ja) { line-break:strict; word-break:normal; overflow-wrap:anywhere; line-height:var(--reader-leading); }
 .aui-md:lang(zh-Hant),.aui-md:lang(ja) { line-break:strict; word-break:normal; overflow-wrap:anywhere; line-height:var(--chat-leading); }
 .settings-dialog,.model-popover,.conversation-list-popover,[data-slot=popover-content] { background:var(--material-card); backdrop-filter:blur(20px) saturate(1.15); box-shadow:var(--elevation-floating); border-radius:var(--r-lg); }
@@ -181,7 +185,7 @@ input[type="checkbox"] { accent-color:var(--accent-color); }
  --selection-color:color-mix(in oklab,var(--accent-color) 18%,var(--surface));
  --link-color:var(--accent-color);
  --font-ui:-apple-system,BlinkMacSystemFont,"PingFang TC","Hiragino Sans","Noto Sans CJK TC","Noto Sans CJK JP",system-ui,sans-serif;
- --font-cjk:"PingFang TC","Hiragino Sans","Noto Sans CJK TC","Noto Sans CJK JP",system-ui,sans-serif;
+ --font-cjk:initial;
  --font-reader:var(--font-ui); --font-mono:"SFMono-Regular",Consolas,monospace;
  --reader-size:.875rem; --chat-size:.8125rem;
  --reader-leading:1.8; --reader-para-gap:.875rem; --reader-tracking:normal; --reader-measure:50rem;
@@ -191,8 +195,8 @@ input[type="checkbox"] { accent-color:var(--accent-color); }
 }
 @media(prefers-color-scheme:dark) { :root { --accent-l:.92; --accent-surface-l:.34; --focus-l:.73; } }
 html { font-size:calc(100% * var(--ui-scale)); font-family:var(--font-ui); }
-html:lang(zh-Hant) { --font-cjk:"PingFang TC","Noto Sans CJK TC",system-ui,sans-serif; --font-ui:var(--font-cjk); }
-html:lang(ja) { --font-cjk:"Hiragino Sans","Noto Sans CJK JP",system-ui,sans-serif; --font-ui:var(--font-cjk); }
+html:lang(zh-Hant) { --font-ui:var(--font-cjk,"PingFang TC","Noto Sans CJK TC",system-ui,sans-serif); }
+html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",system-ui,sans-serif); }
 .markdown:lang(zh-Hant),.markdown:lang(ja) { --reader-leading:1.85; --reader-tracking:0; }
 .aui-md:lang(zh-Hant),.aui-md:lang(ja) { --chat-leading:1.85; --chat-tracking:0; }
 html[data-material=solid] { --material-card:var(--surface); --material-sheet:var(--surface); --material-filter:none; }
