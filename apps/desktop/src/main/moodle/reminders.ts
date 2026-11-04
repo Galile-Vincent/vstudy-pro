@@ -4,7 +4,7 @@ import type { MoodleRepository } from './repository';
 export function startReminders(repository: MoodleRepository, notify: (title: string, body: string) => boolean, now: () => number = Date.now) {
   const tick = () => {
     for (const item of repository.reminders()) {
-      if (item.fired || Date.parse(item.remindAt) > now()) continue;
+      if (item.orphaned || item.fired || Date.parse(item.remindAt) > now()) continue;
       const deadline = repository.deadlines([item.deadlineId])[0]!;
       if (notify(deadline.title,item.note || deadline.dueAt)) repository.fired(item);
     }

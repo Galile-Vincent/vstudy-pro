@@ -61,6 +61,7 @@ export const moodleDeadlineSchema = z
     dueAt: timestamp,
     url: z.string().url().nullable(),
     submitted: z.boolean(),
+    orphaned: z.boolean().optional(),
   })
   .strict();
 export type MoodleDeadline = z.infer<typeof moodleDeadlineSchema>;
@@ -114,6 +115,7 @@ export const moodleReminderSchema = z
     note: z.string(),
     createdBy: z.enum(["user", "agent"]),
     fired: z.boolean(),
+    orphaned: z.boolean().optional(),
   })
   .strict();
 export type MoodleReminder = z.infer<typeof moodleReminderSchema>;

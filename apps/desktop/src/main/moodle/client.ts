@@ -98,9 +98,11 @@ export class MoodleClient {
         if (page.events.length < 50) break;
         after = page.events.at(-1)!.id;
       }
-      return events.length ? {events} : upcoming();
+      return {events};
     };
-    const result = await this.fallback(timeline,upcoming);
+    const action = await this.fallback(timeline,async () => ({events:[]}));
+    const ordinary = await this.fallback(upcoming,async () => ({events:[]}));
+    const result = {events:[...new Map([...ordinary.events,...action.events].map(item => [item.id,item])).values()]};
     const deadlines = result.events.flatMap(item => {
       const course = courses.find(course => course.remoteId === (item.courseid ?? item.course?.id));
       const dueAt = date(item.timedue ?? item.timesort ?? item.timestart);

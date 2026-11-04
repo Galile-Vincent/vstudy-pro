@@ -39,7 +39,7 @@ it('syncs twice with stable identities and isolated account records',async () =>
   expect(repository.course(first.courses[0]!.id).reminders).toEqual([reminder]);
   expect(repository.course(first.courses[0]!.id).notifications[0]!.read).toBe(true);
   for (const table of ['courses','notifications','grades','files']) expect(store.db.prepare(`SELECT count(*) AS count FROM moodle_${table}`).get()?.count).toBe(1);
-  expect(store.db.prepare('SELECT count(*) AS count FROM moodle_deadlines').get()?.count).toBe(2);
+  expect(store.db.prepare('SELECT count(*) AS count FROM moodle_deadlines').get()?.count).toBe(3);
   const other = {...account,id:randomUUID(),remoteUserId:43}; repository.saveAccount(other);
   expect(repository.overview(other.id)).toMatchObject({courses:[],upcoming:[],unreadNotifications:0});
   await service.disconnect(account.id);
@@ -200,5 +200,36 @@ it('does not expire an account from a single mark-read failure',async () => {
   request.mockResolvedValue(Response.json({errorcode:'requireloginerror'}));
   await service.markRead(repository.notificationRecords(account.id)[0]!.value.id);
   expect(repository.account(account.id).status).toBe('connected');
+  await service.dispose();
+});
+it('retains one orphaned reminder when its deadline vanishes',async () => {
+  const {repository,service} = await setup(); await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  const deadline = repository.course(course.id).deadlines[0]!;
+  repository.createReminder({deadlineId:deadline.id,remindAt:'2020-01-01T00:00:00.000Z',note:'Keep',createdBy:'user'});
+  expect(repository.reminders()).toHaveLength(1);
+  repository.apply(account.id,{courses:[course],deadlines:[],notifications:[],grades:[],files:[]});
+  expect(repository.reminders()).toHaveLength(1);
+  expect(repository.reminders()[0]).toMatchObject({orphaned:true,fired:false});
+  const notify = vi.fn(() => true); startReminders(repository,notify)();
+  expect(notify).toHaveBeenCalledTimes(0);
+  await service.dispose();
+});
+it('keeps orphaned reminders safe when a whole course leaves enrollment',async () => {
+  const {repository,service,request} = await setup(); await service.sync(account.id);
+  const deadline = repository.overview().upcoming[0]!;
+  repository.createReminder({deadlineId:deadline.id,remindAt:'2020-01-01T00:00:00.000Z',note:'Keep',createdBy:'user'});
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    const name = new URLSearchParams(String(options?.body)).get('wsfunction');
+    if (name === 'core_enrol_get_users_courses') return Response.json([]);
+    if (name === 'core_course_get_enrolled_courses_by_timeline_classification') return Response.json({courses:[]});
+    return base(target,options);
+  });
+  await service.sync(account.id);
+  expect(repository.reminders()).toHaveLength(1);
+  expect(repository.reminders()[0]).toMatchObject({orphaned:true,fired:false});
+  const notify = vi.fn(() => true); startReminders(repository,notify)();
+  expect(notify).toHaveBeenCalledTimes(0);
   await service.dispose();
 });

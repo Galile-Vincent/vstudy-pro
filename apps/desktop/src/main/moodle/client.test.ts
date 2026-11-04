@@ -13,7 +13,7 @@ describe('Moodle response boundary',() => {
     const courses = await client.courses(account);
     expect(courses[0]).toMatchObject({fullName:'Algorithms',shortName:'CS & Math',progress:42.5,favourite:true,endAt:null});
     expect(await client.assignments(account.id,courses)).toMatchObject([{title:'Homework 1',kind:'assignment',dueAt:'2026-11-07T00:00:00.000Z'}]);
-    expect(await client.events(account.id,courses)).toMatchObject([{title:'Quiz & review',kind:'quiz',submitted:true}]);
+    expect(await client.events(account.id,courses)).toMatchObject([{title:'Class event',kind:'event',submitted:false},{title:'Quiz & review',kind:'quiz',submitted:true}]);
     expect(await client.notifications(account,courses)).toMatchObject([{remoteId:501,value:{subject:'Prepare',body:'Read chapter <2>',read:false,courseId:courses[0]!.id}}]);
     expect(await client.grades(courses[0]!,42)).toMatchObject([{remoteKey:'601',value:{grade:'8',max:10,percentage:80}}]);
     expect(await client.files(courses[0]!)).toMatchObject([{value:{name:'lecture.pdf',section:'Week 1',documentId:null,size:123}}]);
@@ -119,4 +119,8 @@ it('classifies only exact error codes at each call boundary',async () => {
     const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({core_webservice_get_site_info:{errorcode:code,message:'invalid token function is not available'}}));
     await expect(client.siteInfo()).rejects.toMatchObject({kind:code === 'requireloginerror' ? 'auth' : 'service'});
   }
+});
+it('fetches ordinary calendar events alongside action events',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch());
+  expect((await client.events(account.id,await client.courses(account))).map(item => item.title)).toEqual(['Class event','Quiz & review']);
 });
