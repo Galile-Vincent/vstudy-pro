@@ -19,7 +19,7 @@ for(const language of ['en','zh-Hant','ja']) {
   await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
   await page.getByTestId('import-document').click();
   await page.getByTestId('document-markdown').waitFor();
-  await page.getByRole('button',{name:catalog.start_a_conversation,exact:true}).click();
+  await page.locator('.aui-composer-input').waitFor();
   await page.locator('.aui-composer-input').waitFor();
   await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();await page.locator('.settings-tabs [role=tab]').first().click();
   await page.getByTestId('language').click();await page.getByRole('option',{name:language==='en'?'English':language==='ja'?'日本語':'繁體中文',exact:true}).click();

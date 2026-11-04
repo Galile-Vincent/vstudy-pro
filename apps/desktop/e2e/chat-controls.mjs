@@ -13,9 +13,7 @@ try {
  await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
  await page.getByTestId('import-document').click();
  await page.getByTestId('document-markdown').waitFor();
- await page.getByRole('combobox',{name:'Model',exact:true}).click();
- await page.locator('[data-slot=model-selector-list] [role=option]').filter({hasText:'Fake'}).click();
- await page.getByRole('button',{name:'Start a conversation',exact:true}).click();
+ await page.locator('.aui-composer-input').waitFor();
  const input=page.locator('.aui-composer-input'); await input.waitFor();
  await page.getByRole('combobox',{name:'Model',exact:true}).click();
  await page.screenshot({path: '/tmp/vstudy-picker-open.png', animations:'disabled'});

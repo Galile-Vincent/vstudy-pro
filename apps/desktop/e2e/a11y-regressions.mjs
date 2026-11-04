@@ -53,7 +53,7 @@ try {
  }
  await writeFile(join(output,'keyboard.json'),JSON.stringify(keyboard,null,2));
  await page.evaluate(id=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace',documentId:id})),doc.id);await page.reload();await page.locator('.markdown').waitFor();
- await page.getByRole('button',{name:'Start a conversation',exact:true}).click();const input=page.locator('.aui-composer-input');await input.fill('Question');await input.press('Enter');await page.waitForFunction(()=>window.document.querySelector('[data-testid=chat-announcement]')?.textContent?.startsWith('Answer complete'));
+ await page.locator('.aui-composer-input').waitFor();const input=page.locator('.aui-composer-input');await input.fill('Question');await input.press('Enter');await page.waitForFunction(()=>window.document.querySelector('[data-testid=chat-announcement]')?.textContent?.startsWith('Answer complete'));
  const cdp=await page.context().newCDPSession(page);const tree=await cdp.send('Accessibility.getFullAXTree');await cdp.detach();
  await writeFile(join(output,'chat-ax.json'),JSON.stringify(tree,null,2));
  assert.ok(tree.nodes.filter(n=>n.role?.value==='article' && n.name?.value).length>=2);

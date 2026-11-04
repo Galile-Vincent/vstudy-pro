@@ -7,9 +7,9 @@ import { ModelSelector } from './components/assistant-ui/elements/model-selector
 import { ClaudeLogo, OpenAILogo, GeminiLogo } from './components/assistant-ui/elements/logos';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './components/ui/select';
 import { Toggle } from './components/ui/toggle';
-export function ModelControls({providers, model, onModel, onProvidersChanged, values = {}, onChange}: {
+export function ModelControls({providers, model, onModel, onProvidersChanged, onOpenChange, values = {}, onChange}: {
  providers: Providers; model: string; onModel: (value:string)=>void; onSettings:()=>void;
- onProvidersChanged?:()=>Promise<void>; values?:Record<string,string|boolean>; onChange?:(values:Record<string,string|boolean>)=>void;
+ onOpenChange?:(open:boolean)=>void; onProvidersChanged?:()=>Promise<void>; values?:Record<string,string|boolean>; onChange?:(values:Record<string,string|boolean>)=>void;
 }) {
  useTranslation();
  const all = pickerModels(providers);
@@ -20,7 +20,7 @@ export function ModelControls({providers, model, onModel, onProvidersChanged, va
  const fast = !!speed && ['true','priority'].includes(String(values[speed.id]??speed.default));
  const entries = all.map(m=>({id:m.value,name:m.name,description:m.available?'':m.reason,disabled:!m.available,keywords:[m.provider,m.id],icon:m.providerId.includes('claude')||m.providerId.includes('anthropic')?<ClaudeLogo/>:m.providerId==='agy-cli'?<GeminiLogo/>:<OpenAILogo/>}));
  return <div className="model-controls">
-  <ModelSelector.Root models={entries} value={selected?.value??model} onValueChange={onModel} onOpenChange={open=>{if(open) void onProvidersChanged?.();}}>
+  <ModelSelector.Root models={entries} value={selected?.value??model} onValueChange={onModel} onOpenChange={open=>{onOpenChange?.(open);if(open) void onProvidersChanged?.();}}>
    <ModelSelector.Trigger aria-label={tr('common:model')} variant="ghost" size="sm"/>
    <ModelSelector.Content aria-label={tr('common:model')} side="top" align="start" searchable>
     <ModelSelector.Search aria-label={tr('common:search_models')} placeholder={tr('common:search_models_or_providers')}/>

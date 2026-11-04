@@ -13,7 +13,7 @@ try {
  await page.getByText('Workspace connected',{exact:true}).waitFor();
  await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
  await page.getByTestId('import-document').click();await page.getByTestId('document-markdown').waitFor();
- await page.getByRole('button',{name:'Start a conversation',exact:true}).click();
+ await page.locator('.aui-composer-input').waitFor();
  const model=page.getByRole('combobox',{name:'Model',exact:true}); const search=page.getByRole('combobox',{name:'Search models'});
  const close=async()=>{await page.keyboard.press('Escape');await page.locator('[data-slot=model-selector-content]').waitFor({state:'hidden'});};
  const shot=async(name)=>{const path=`${evidence}/${name}.png`;await page.waitForTimeout(200);await page.screenshot({path,animations:'disabled'});shots.push(path);};

@@ -30,7 +30,7 @@ if (process.env.VSTUDY_CODEX_LIVE !== '1') {
   await page.getByRole('combobox', { name: 'Model', exact: true }).click();
   await page.getByRole('combobox', { name: 'Search models' }).fill(target.name);
   await page.locator('[data-slot=model-selector-list]').getByRole('option').filter({ hasText: target.name }).first().click();
-  await page.getByRole('button', { name: 'Start a conversation', exact: true }).click();
+  await page.locator('.aui-composer-input').waitFor();
   const input = page.locator('.aui-composer-input'); await input.fill('Reply with exactly: Codex chat is working.'); await input.press('Enter');
   await page.locator('[data-role=assistant]').filter({ hasText: 'Codex chat is working.' }).waitFor();
   await page.waitForFunction(() => !window.document.querySelector('.aui-composer-cancel'));

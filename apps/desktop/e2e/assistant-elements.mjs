@@ -11,7 +11,7 @@ try {
  await page.getByText('Workspace connected',{exact:true}).waitFor();
  await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
  await page.getByTestId('import-document').click();await page.getByTestId('document-markdown').waitFor();
- await page.getByRole('button',{name:'Start a conversation',exact:true}).click();
+ await page.locator('.aui-composer-input').waitFor();
  const selected=page.getByRole('combobox',{name:'Model',exact:true});const search=page.getByRole('combobox',{name:'Search models'});
  await selected.click();await search.fill('fixture');await page.getByRole('option').filter({hasText:'Fixture model (test only)'}).first().click();await selected.filter({hasText:'Fixture model (test only)'}).waitFor();
  await selected.click();await search.fill('Fake');await page.getByRole('option').filter({hasText:'Fake'}).click();await selected.filter({hasText:'Fake'}).waitFor();

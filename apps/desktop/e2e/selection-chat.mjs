@@ -243,7 +243,7 @@ try {
     await page.getByRole('button',{name:'Conversations',exact:true}).click();
     await page.locator('[data-slot=aui_thread-list-item]').first().getByRole('button',{name:'More options',exact:true}).click();
     await page.getByRole('menuitem',{name:'Delete',exact:true}).click();
-    await page.locator(".chat-start").waitFor();
+    await page.locator(".aui-composer-input").waitFor();
     page.once("dialog", dialog => dialog.dismiss());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
     assert.equal(await page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length), 2, "cancel keeps document");

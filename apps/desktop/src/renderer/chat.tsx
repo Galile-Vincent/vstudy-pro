@@ -32,6 +32,7 @@ import { type Providers } from "./providers";
 
 export function Chat({
   conversation,
+  autoFocus = true,
   draft,
   onDraft,
   history,
@@ -47,6 +48,7 @@ export function Chat({
   documentTitle = tr('common:document'),
 }: {
   conversation: Conversation;
+  autoFocus?: boolean;
   draft: string;
   onDraft: (value: string) => void;
   history: Message[];
@@ -118,7 +120,7 @@ export function Chat({
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
     {unavailable && <p role="alert">{tr('common:this_conversation_s_provider_is_unavailable_add_an_api_key_or_enable_it_in_settings')}</p>}
-    <Thread components={documentComponents} />
+    <Thread components={documentComponents} autoFocus={autoFocus} />
     <p className="composer-note">{tr('common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }

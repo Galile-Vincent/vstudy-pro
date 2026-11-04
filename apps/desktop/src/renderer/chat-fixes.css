@@ -77,3 +77,10 @@
 [data-slot=suggestions] button { border:1px solid var(--hairline); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:var(--type-base); }
 .effort-item[data-state=checked] { background:var(--ink); color:var(--surface); }
 .model-popover .effort-list .effort-item[data-state=checked] { background:var(--ink); color:var(--surface); }
+
+.chat-start > .blank-chat { flex:1; min-height:0; overflow:auto; }
+.new-chat-composer { flex:none; margin-top:auto; border:1px solid var(--hairline); border-radius:var(--r-md); background:var(--surface); padding:var(--space-3); }
+.new-chat-composer [data-slot=textarea] { border:0; box-shadow:none; background:transparent; padding:0; resize:none; }
+.new-chat-composer .model-controls { flex-wrap:wrap; }
+.chat-pane > .aui-thread-root { flex:1; height:auto; min-height:0; }
+.chat-pane .aui-thread-viewport-footer { position:sticky; bottom:0; flex-shrink:0; z-index:1; }

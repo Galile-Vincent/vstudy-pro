@@ -1,3 +1,4 @@
+import { Textarea } from '../components/ui/textarea';
 import { AiParseControls } from '../ai-parse/ai-parse-controls';
 import { Button } from '../components/ui/button';
 import { useReadingActivity } from '../home/use-reading-activity';
@@ -53,6 +54,13 @@ export function Workspace() {
   const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
   useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   const [draft, setDraft] = useState("");
+  const [loadedConversationDocument,setLoadedConversationDocument] = useState<Document['id'] | null>(null);
+  const [focusChat,setFocusChat] = useState(false);
+  const [newModelPickerOpen,setNewModelPickerOpen] = useState(false);
+  const initialConversation = useRef('');
+  const activeDocument = useRef(documentId);
+  activeDocument.current=documentId;
+  const creatingConversation = useRef(false);
   const activeConversation = useRef(conversation);
   activeConversation.current = conversation;
   const [progress, setProgress] = useState<Record<string, string>>({});
@@ -104,6 +112,7 @@ export function Workspace() {
     setProviders(list);
     if (!activeConversation.current) setModel(current => resolveModel(current, list));
   }, []);
+  useEffect(()=>{if(connected)void refreshProviders().catch(report);},[connected,refreshProviders,report]);
   useEffect(() => {
     const refresh = () => { void desktop.invoke('providers:list',{discover:false}).then(setProviders).catch(report); };
     window.addEventListener('vstudy:providers-changed',refresh);
@@ -151,12 +160,16 @@ export function Workspace() {
     setConversation(null);
     setHistory(null);
     setConversations([]);
+    setLoadedConversationDocument(null);
+    setNewModelPickerOpen(false);
+    setFocusChat(false);
     if (!documentId) return;
     void desktop
       .invoke("conversations:list", { documentId })
       .then((list) => {
         if (active) {
           setConversations(list);
+          setLoadedConversationDocument(documentId);
           let remembered: string | null = null;
           try { remembered = localStorage.getItem(`vstudy-conversation:${documentId}`); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
           const selected = list.find(c => c.id === remembered) ?? list[0] ?? null;
@@ -263,8 +276,9 @@ export function Workspace() {
       setBusy(false);
     }
   };
-  const newConversation = async (value = model) => {
-    if (!doc || !model) return;
+  const newConversation = async (value = model, activate = true) => {
+    if (!doc || !value || creatingConversation.current) return;
+    creatingConversation.current=true;
     setBusy(true);
     try {
       const slash = value.indexOf("/");
@@ -273,13 +287,16 @@ export function Workspace() {
         providerId: value.slice(0, slash) as ProviderConfig["id"],
         modelId: value.slice(slash + 1),
       });
+      if(activeDocument.current!==created.documentId)return;
       setConversations((list) => [created, ...list]);
-      setCompactPane("chat");
+      if(activate)setCompactPane("chat");
+      setFocusChat(activate);
       setConversation(created);
       setHistory([]);
     } catch (error) {
       report(error);
     } finally {
+      creatingConversation.current=false;
       setBusy(false);
     }
   };
@@ -288,9 +305,18 @@ export function Workspace() {
   );
   const canChat =
     doc?.status === "ready" &&
+    loadedConversationDocument===doc.id &&
     !!model &&
     selectedModel?.availability.available &&
     selectedModel.config.enabled;
+  useEffect(()=>{
+    if(conversation){initialConversation.current='';return;}
+    if(!doc || !canChat || busy || newModelPickerOpen)return;
+    const key=`${doc.id}/${model}`;
+    if(initialConversation.current===key)return;
+    initialConversation.current=key;
+    void newConversation(model,false);
+  },[doc?.id,model,conversation?.id,canChat,busy,newModelPickerOpen]);
   useEffect(() => {
     if (selection) { setCompactPane("chat"); requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>(".aui-composer-input")?.focus()); }
     if (selection && !conversation && canChat && !busy) void newConversation();
@@ -299,7 +325,7 @@ export function Workspace() {
       <div className="workspace-conversations">
 
         <div className="row">
-          <ConversationList conversations={conversations} current={conversation} providers={providers} canCreate={!!canChat && !busy} onSelect={c => {setConversation(c);setModel(`${c.providerId}/${c.modelId}`);}} onNew={() => newConversation()} onDelete={async id => {if (!window.confirm(tr('common:delete_this_conversation'))) return; await desktop.invoke('conversations:delete',{conversationId:id});setConversations(list=>list.filter(c=>c.id!==id));if(conversation?.id===id){setConversation(null);setHistory(null);}}}/>
+          <ConversationList conversations={conversations} current={conversation} providers={providers} canCreate={!!canChat && !busy} onSelect={c => {setFocusChat(true);setConversation(c);setModel(`${c.providerId}/${c.modelId}`);}} onNew={() => newConversation()} onDelete={async id => {if (!window.confirm(tr('common:delete_this_conversation'))) return; await desktop.invoke('conversations:delete',{conversationId:id});setConversations(list=>list.filter(c=>c.id!==id));if(conversation?.id===id){setConversation(null);setHistory(null);}}}/>
 
           <button
             disabled={!canChat || busy}
@@ -319,6 +345,7 @@ export function Workspace() {
           documentTitle={doc?.sourceName ?? tr('common:document')}
             onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
           key={conversation.id}
+          autoFocus={focusChat}
           draft={draft}
           onDraft={setDraft}
           conversation={conversation}
@@ -333,7 +360,7 @@ export function Workspace() {
         /> : <p role="status">{tr("common:loading_conversation")}</p>}</Suspense>
       ) : (
         <div className="chat-start">
-          <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onStart={() => void newConversation()} onQuestion={text => { setDraft(text); void newConversation(); }} />
+          <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onQuestion={text => { setDraft(text); void newConversation(); }} />
           {selection && (
             <div className="selection-chip">
               <SelectionPreview selection={selection} />
@@ -345,13 +372,16 @@ export function Workspace() {
               </button>
             </div>
           )}
-          <ModelControls
+          <div className="new-chat-composer">
+          <Textarea disabled rows={2} aria-label={tr('common:ask_about_your_document')} placeholder={tr('common:ask_document_placeholder')}/>
+          <ModelControls onOpenChange={setNewModelPickerOpen}
             providers={providers}
             model={model}
             onModel={chooseModel}
             onSettings={() => { setSettingsTab("providers"); setShowSettings(true); }}
             onProvidersChanged={refreshProviders}
           />
+          </div>
         </div>
       )}
     </section>
