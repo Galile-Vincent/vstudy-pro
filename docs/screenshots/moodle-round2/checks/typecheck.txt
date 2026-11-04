@@ -1,0 +1,13 @@
+
+> vstudy-pro@ typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7
+> pnpm --filter @vstudy/desktop typecheck
+
+
+> @vstudy/desktop@0.1.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7/apps/desktop
+> tsc --noEmit
+
+src/main/prompt/course.test.ts(6,7): error TS2739: Type '{ course: { id: string; accountId: string; remoteId: number; fullName: string; shortName: string; imageUrl: null; progress: null; startAt: null; endAt: null; favourite: false; identity: { title: { zh: null; en: null; }; ... 9 more ...; summaryHtml: null; }; }; ... 4 more ...; reminders: never[]; }' is missing the following properties from type '{ sections: { number: number; current: boolean; summaryHtml: string | null; id: string; name: string; accessible: boolean; weekStart: string | null; modules: { url: string | null; id: string; cmid: number; ... 8 more ...; fileIds: string[]; }[]; }[]; ... 6 more ...; reminders: { ...; }[]; }': sections, announcements
+/Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7/apps/desktop:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @vstudy/desktop@0.1.0 typecheck: `tsc --noEmit`
+Exit status 2
+ ELIFECYCLE  Command failed with exit code 2.

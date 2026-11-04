@@ -1,0 +1,5 @@
+light 1440px. Eight captures. Term counts, current week, module sheet, assistant Escape and focus, no horizontal overflow, no serious or critical axe violations.
+dark 1440px. Eight captures. Term counts, current week, module sheet, assistant Escape and focus, no horizontal overflow, no serious or critical axe violations.
+light 760px. Eight captures. Term counts, current week, module sheet, assistant Escape and focus, no horizontal overflow, no serious or critical axe violations.
+dark 760px. Eight captures. Term counts, current week, module sheet, assistant Escape and focus, no horizontal overflow, no serious or critical axe violations.
+No renderer page errors during verification.
