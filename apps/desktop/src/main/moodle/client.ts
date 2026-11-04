@@ -63,6 +63,8 @@ export class MoodleClient {
     return courses.map(row => moodleCourseSchema.parse({id:remoteId(account.id,'course',row.id),accountId:account.id,remoteId:row.id,fullName:plainText(row.fullname),shortName:plainText(row.shortname),imageUrl:url(row.courseimage ?? row.overviewfiles?.[0]?.fileurl),progress:row.progress == null ? null : Math.min(100,Math.max(0,row.progress)),startAt:date(row.startdate),endAt:date(row.enddate),favourite:row.isfavourite ?? false}));
   }
   async assignments(accountId: string, courses: MoodleCourse[]) {
+    courses = courses.filter(course => !course.endAt || Date.parse(course.endAt) >= Date.now() - 14 * 86400000);
+    if (!courses.length) return [];
     const params = Object.fromEntries(courses.map((course,index) => [`courseids[${index}]`,String(course.remoteId)]));
     const result = await this.call('mod_assign_get_assignments',params,assignmentWire);
     const deadlines = result.courses.flatMap(row => {
@@ -91,7 +93,7 @@ export class MoodleClient {
       const events: z.infer<typeof eventWire>[] = [];
       let after = 0;
       while (true) {
-        const page = await this.call('core_calendar_get_action_events_by_timesort',{timesortfrom:'0',limitnum:'50',...(after ? {aftereventid:String(after)} : {})},z.object({events:z.array(eventWire)}));
+        const page = await this.call('core_calendar_get_action_events_by_timesort',{timesortfrom:String(Math.floor(Date.now()/1000) - 14 * 86400),limittononsuspendedevents:'1',limitnum:'50',...(after ? {aftereventid:String(after)} : {})},z.object({events:z.array(eventWire)}));
         if (!page.events.length) break;
         if (page.events.some(item => events.some(previous => previous.id === item.id))) throw new MoodleError('service');
         events.push(...page.events);

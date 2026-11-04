@@ -674,7 +674,7 @@ export function Courses({
                       </div>
                       {deadlines(
                         detail.deadlines
-                          .filter((d) => !d.submitted)
+                          .filter((d) => !d.submitted && Date.parse(d.dueAt) >= Date.now())
                           .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
                           .slice(0, 1),
                       )}

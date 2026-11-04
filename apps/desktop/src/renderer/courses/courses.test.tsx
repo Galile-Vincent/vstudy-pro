@@ -329,3 +329,12 @@ it("groups overdue, soon, later, and submitted deadlines", () => {
   );
   expect(deadlineGroup({ ...base, submitted: true }, now)).toBe("done");
 });
+it('shows an upcoming deadline in Up next instead of an overdue item',async () => {
+  const api = createMockMoodleApi(); const overview = await api.overview();
+  const detail = await api.course(overview.courses[0]!.id);
+  api.course = async () => ({...detail,deadlines:[{...detail.deadlines[0]!,title:'Old overdue',dueAt:'2020-01-01T00:00:00.000Z',submitted:false},{...detail.deadlines[0]!,title:'Next upcoming',dueAt:'2099-01-01T00:00:00.000Z',submitted:false}]});
+  await mount(api,detail.course.id);
+  const panel = [...host.querySelectorAll('section')].find(section => section.textContent?.includes('Up next'))!;
+  expect(panel.textContent).toContain('Next upcoming');
+  expect(panel.textContent).not.toContain('Old overdue');
+});
