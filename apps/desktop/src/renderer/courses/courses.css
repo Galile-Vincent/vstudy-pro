@@ -1,0 +1,786 @@
+.moodle-page {
+  height: 100%;
+  overflow: auto;
+  padding: var(--space-8);
+  background: var(--subtle);
+  color: var(--ink);
+}
+.moodle-content {
+  max-width: 1320px;
+  margin-inline: auto;
+}
+.moodle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+.moodle-header h1 {
+  font-size: var(--type-display);
+  margin: var(--space-2) 0;
+  line-height: 1.3;
+}
+.moodle-header p {
+  color: var(--muted);
+  margin: 0;
+}
+.moodle-eyebrow {
+  font-size: var(--type-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.moodle-header .moodle-eyebrow {
+  color: var(--muted);
+}
+.moodle-page svg,
+.moodle-reminder svg,
+.moodle-connect svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.moodle-page button {
+  cursor: pointer;
+}
+.moodle-page button:disabled {
+  cursor: wait;
+}
+.moodle-back {
+  margin-bottom: var(--space-3);
+  padding-inline: 0;
+}
+.moodle-accounts {
+  margin-bottom: var(--space-8);
+}
+.moodle-account {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--r-md);
+}
+.moodle-account > div:not(.moodle-expired) {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+  flex: 1;
+}
+.moodle-account span:not(.moodle-avatar),
+.moodle-account small {
+  color: var(--muted);
+  font-size: var(--type-xs);
+}
+.moodle-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  background: var(--subtle);
+}
+.moodle-banner,
+.moodle-expired {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.moodle-banner button {
+  margin-inline-start: auto;
+}
+.moodle-expired {
+  width: 100%;
+  margin: 0;
+  color: var(--danger);
+}
+.moodle-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.moodle-section-heading h2,
+.moodle-grid-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.moodle-section-heading > span,
+.moodle-section-heading > time {
+  font-size: var(--type-xs);
+  color: var(--muted);
+}
+.moodle-page h2 {
+  font-size: var(--type-lg);
+  margin: 0 0 var(--space-4);
+}
+.moodle-section-heading h2 {
+  margin: 0;
+}
+.moodle-due-section {
+  margin-bottom: var(--space-8);
+}
+.moodle-due-strip {
+  display: flex;
+  overflow-x: auto;
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+  scrollbar-width: thin;
+}
+.moodle-due-card {
+  flex: 0 0 260px;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.moodle-due-card small {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  color: var(--muted);
+}
+.moodle-color-dot {
+  display: inline-block;
+  background: var(--course-color);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.moodle-due-link {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  text-align: start;
+  width: 100%;
+  margin-block: var(--space-1) var(--space-3);
+  overflow-wrap: anywhere;
+}
+.moodle-due-card time {
+  font-size: var(--type-xs);
+  font-weight: 600;
+}
+.moodle-due-card time span {
+  display: block;
+  color: var(--muted);
+  margin-top: var(--space-1);
+  font-weight: 400;
+}
+.moodle-grid-heading {
+  margin-bottom: var(--space-4);
+}
+.moodle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: var(--space-5);
+}
+.moodle-course-card {
+  display: block;
+  min-width: 0;
+  padding: 0;
+  text-align: start;
+  color: var(--ink);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+  transition:
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
+}
+.moodle-course-card:hover {
+  box-shadow: var(--elevation-raised);
+  transform: translateY(-2px);
+}
+.moodle-cover {
+  position: relative;
+  overflow: hidden;
+  height: 142px;
+  padding: var(--space-5);
+  background: linear-gradient(
+    125deg,
+    color-mix(in oklab, var(--course-color) 15%, var(--surface)),
+    color-mix(in oklab, var(--course-color) 30%, var(--subtle))
+  );
+  color: var(--course-color);
+}
+.moodle-cover > svg {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: var(--space-5);
+  left: var(--space-5);
+}
+.moodle-cover-orbit {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border: 1px solid color-mix(in oklab, var(--course-color) 35%, transparent);
+  border-radius: 50%;
+  inset: -70px -70px auto auto;
+  box-shadow:
+    0 0 0 30px color-mix(in oklab, var(--course-color) 6%, transparent),
+    0 0 0 60px color-mix(in oklab, var(--course-color) 4%, transparent);
+  transform: rotate(-25deg) scaleX(1.35);
+}
+.moodle-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+.moodle-course-code {
+  position: absolute;
+  inset: auto auto var(--space-4) var(--space-5);
+  font-size: var(--type-xs);
+  font-weight: 600;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  color: var(--ink);
+}
+.moodle-card-body {
+  padding: var(--space-5);
+}
+.moodle-card-body h3 {
+  margin: 0 0 var(--space-6);
+  font-size: var(--type-lg);
+  line-height: 1.4;
+}
+.moodle-progress-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--type-xs);
+  margin-bottom: var(--space-2);
+}
+.moodle-progress-label > span {
+  color: var(--muted);
+}
+.moodle-page progress {
+  width: 100%;
+  display: block;
+  height: 4px;
+}
+.moodle-card-body footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  border-top: 1px solid var(--hairline);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  font-size: var(--type-xs);
+  color: var(--muted);
+}
+.moodle-card-body footer span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.moodle-card-body footer svg {
+  width: 13px;
+  height: 13px;
+}
+.moodle-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--type-xs);
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--subtle);
+  padding: 3px var(--space-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+.moodle-skeleton {
+  height: 300px;
+  border-radius: var(--r-lg);
+  background: var(--active);
+}
+.moodle-empty {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  padding: calc(var(--space-8) * 2);
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-lg);
+}
+.moodle-empty > svg {
+  width: 40px;
+  height: 40px;
+  color: var(--muted);
+}
+.moodle-empty h2,
+.moodle-empty p {
+  margin: 0;
+}
+.moodle-empty p,
+.moodle-empty-inline {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.moodle-empty-inline {
+  padding-block: var(--space-4);
+  font-size: var(--type-base);
+}
+.moodle-hero {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-5);
+}
+.moodle-hero .moodle-cover {
+  flex: 0 0 200px;
+  height: 160px;
+}
+.moodle-hero > div:last-child {
+  flex: 1;
+  padding: var(--space-5) var(--space-6);
+}
+.moodle-hero h1 {
+  margin: var(--space-2) 0;
+  font-size: var(--type-xl);
+}
+.moodle-hero p {
+  color: var(--muted);
+  font-size: var(--type-xs);
+}
+.moodle-hero progress {
+  max-width: 320px;
+}
+.moodle-course-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--space-5);
+  align-items: start;
+}
+.moodle-tabs {
+  min-width: 0;
+}
+.moodle-tabs [role="tablist"] {
+  width: 100%;
+  justify-content: flex-start;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--hairline);
+  padding: 0 0 var(--space-2);
+  border-radius: 0;
+  height: auto;
+  margin-bottom: var(--space-3);
+}
+.moodle-tabs [role="tab"] {
+  flex: 0 0 auto;
+  padding: var(--space-3);
+  color: var(--muted);
+}
+.moodle-tabs [role="tab"][data-state="active"] {
+  color: var(--ink);
+}
+.moodle-tabs [role="tabpanel"] {
+  outline-offset: 4px;
+}
+.moodle-panel {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+  min-width: 0;
+}
+.moodle-panel-description {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: var(--type-base);
+  margin-bottom: var(--space-5);
+}
+.moodle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-4);
+  border-bottom: 1px solid var(--hairline);
+}
+.moodle-row:last-child {
+  border-bottom: 0;
+}
+.moodle-row-main {
+  flex: 1;
+  min-width: 0;
+}
+.moodle-row-main strong {
+  display: block;
+  font-size: var(--type-base);
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.moodle-row-main small {
+  display: block;
+  color: var(--muted);
+  margin-top: var(--space-1);
+  font-size: var(--type-xs);
+}
+.moodle-row-icon {
+  color: var(--muted);
+  padding-inline-end: var(--space-2);
+}
+.moodle-relative {
+  font-size: var(--type-xs);
+  white-space: nowrap;
+  color: var(--muted);
+}
+.moodle-page [data-overdue="true"] {
+  color: var(--danger);
+}
+.moodle-deadline-group {
+  margin-top: var(--space-6);
+}
+.moodle-deadline-group > h3 {
+  font-size: var(--type-xs);
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  color: var(--muted);
+}
+.moodle-deadline-group > h3 span {
+  padding: 0 var(--space-2);
+  border-radius: var(--r-pill);
+  background: var(--subtle);
+  color: var(--muted);
+}
+.moodle-notification {
+  padding-block: var(--space-4);
+  border-bottom: 1px solid var(--hairline);
+}
+.moodle-notification:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.moodle-notification h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--type-base);
+  margin: 0;
+}
+.moodle-unread {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  flex-shrink: 0;
+}
+.moodle-notification time {
+  white-space: nowrap;
+}
+.moodle-notification p {
+  color: var(--muted);
+  font-size: var(--type-base);
+  line-height: 1.7;
+  margin-block: var(--space-2);
+  overflow-wrap: anywhere;
+}
+.moodle-notification-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.moodle-notification-actions button {
+  height: auto;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--type-xs);
+  white-space: normal;
+  text-align: start;
+}
+.moodle-table-scroll {
+  overflow: auto;
+}
+.moodle-grades {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--type-base);
+}
+.moodle-grades th,
+.moodle-grades td {
+  text-align: start;
+  padding: var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--hairline);
+}
+.moodle-grades thead th {
+  color: var(--muted);
+  font-size: var(--type-xs);
+  font-weight: 500;
+}
+.moodle-grades tbody th {
+  font-weight: 500;
+}
+.moodle-grades progress {
+  width: 88px;
+  margin-top: var(--space-2);
+}
+.moodle-file-section + .moodle-file-section {
+  margin-top: var(--space-5);
+}
+.moodle-file-section > h3 {
+  color: var(--muted);
+  font-size: var(--type-xs);
+  font-weight: 500;
+  padding-bottom: var(--space-2);
+}
+.moodle-file-row {
+  display: flex;
+  align-items: center;
+  text-align: start;
+  width: 100%;
+  gap: var(--space-3);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink);
+  padding: var(--space-4) 0;
+  border-radius: var(--r-xs);
+}
+.moodle-file-row:hover {
+  background: var(--subtle);
+}
+.moodle-file-icon {
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xs);
+  padding: var(--space-2);
+  background: var(--subtle);
+  min-width: 40px;
+}
+.moodle-file-icon small {
+  font-size: 9px;
+  font-weight: 600;
+}
+.moodle-agent {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+}
+.moodle-agent-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--hairline);
+}
+.moodle-agent-heading h2 {
+  font-size: var(--type-base);
+  margin: 0;
+  flex: 1;
+}
+.moodle-agent-body {
+  padding: var(--space-6) var(--space-4);
+}
+.moodle-agent-symbol {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--hairline);
+  background: var(--subtle);
+  border-radius: var(--r-md);
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--space-5);
+}
+.moodle-agent h3 {
+  font-size: var(--type-md);
+  margin: 0 0 var(--space-3);
+}
+.moodle-agent p {
+  font-size: var(--type-base);
+  color: var(--muted);
+  line-height: 1.7;
+}
+.moodle-agent button {
+  white-space: normal;
+  height: auto;
+  padding: var(--space-3);
+  text-align: start;
+  width: 100%;
+}
+.moodle-agent footer {
+  padding: var(--space-4);
+  border-top: 1px solid var(--hairline);
+  color: var(--muted);
+  font-size: var(--type-xs);
+  line-height: 1.6;
+}
+.moodle-proposal {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--space-3);
+  margin-top: var(--space-4);
+}
+.moodle-connect {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+}
+.moodle-connect > svg {
+  width: 32px;
+  height: 32px;
+}
+.moodle-connect select {
+  color: var(--ink);
+  background: var(--subtle);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--space-3);
+  width: 100%;
+}
+.moodle-connect small {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.moodle-reminder {
+  color: var(--ink);
+  background: var(--surface);
+  display: grid;
+  gap: var(--space-3);
+  border: 1px solid var(--line);
+}
+.moodle-reminder h3,
+.moodle-reminder p {
+  margin: 0;
+}
+.moodle-reminder p {
+  color: var(--muted);
+  font-size: var(--type-xs);
+}
+.moodle-presets {
+  display: flex;
+  gap: var(--space-1);
+}
+.moodle-presets button {
+  flex: 1;
+  padding-inline: var(--space-2);
+  font-size: var(--type-xs);
+}
+.moodle-reminder label {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--type-xs);
+}
+.moodle-saved-reminder {
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  font-size: var(--type-xs);
+}
+.moodle-spin {
+  animation: moodle-spin 1s linear infinite;
+}
+@keyframes moodle-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 1150px) {
+  .moodle-course-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .moodle-agent {
+    position: static;
+  }
+  .moodle-agent-body {
+    padding: var(--space-4);
+  }
+  .moodle-agent-body > button {
+    width: auto;
+  }
+}
+@media (max-width: 719px) {
+  .moodle-page {
+    padding: var(--space-4);
+  }
+  .moodle-header {
+    align-items: start;
+    flex-direction: column;
+  }
+  .moodle-hero .moodle-cover {
+    flex-basis: 100px;
+  }
+  .moodle-hero > div:last-child {
+    padding: var(--space-4);
+  }
+  .moodle-row {
+    flex-wrap: wrap;
+  }
+  .moodle-row-main {
+    flex-basis: 50%;
+  }
+  .moodle-account > small {
+    width: 100%;
+  }
+  .moodle-file-row {
+    flex-wrap: wrap;
+  }
+  .moodle-empty {
+    padding: var(--space-8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .moodle-course-card:hover {
+    transform: none;
+  }
+  .moodle-spin {
+    animation: none;
+  }
+}
+.moodle-grade-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+.moodle-grade-summary > div {
+  flex: 1;
+  min-width: 140px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-3);
+  font-size: var(--type-xs);
+}
+.moodle-grade-summary span {
+  color: var(--muted);
+}
+.moodle-grade-summary progress {
+  grid-column: 1 / -1;
+}
+.moodle-connect button[data-slot="button"] {
+  white-space: normal;
+  height: auto;
+  min-height: var(--control-height);
+}
