@@ -5,7 +5,7 @@ import type { SecretStore } from '../services/secrets';
 import { moodleSecretId } from '../services/secrets';
 import { MoodleClient, MoodleError, passwordToken, plainText, type Fetch } from './client';
 import { MoodleRepository } from './repository';
-import { schoolById } from './schools';
+import { checkSite } from './discovery';
 
 export class MoodleService {
   private readonly pending = new Map<string,Promise<{errors:string[]}>>();
@@ -13,22 +13,28 @@ export class MoodleService {
   private readonly lastAttempt = new Map<string,number>();
   constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(school: MoodleSchool, accept: (token: string) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch) {}
   private readonly connecting = new Set<string>();
-  async connect(input: {schoolId:string;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
-    const school = schoolById(input.schoolId);
-    if (this.stopped || this.connecting.has(school.id)) throw new Error('Moodle login unavailable');
-    if (school.login === 'sso-launch' && (input.username !== undefined || input.password !== undefined)) throw new Error('School requires SSO');
-    this.connecting.add(school.id);
+  async checkSite(url: string) {
+    const {config: _config,...result} = await checkSite(url,this.request);
+    return result;
+  }
+  async connect(input: {siteUrl:string;provider?:number | undefined;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
+    const checked = await checkSite(input.siteUrl,this.request);
+    const school: MoodleSchool = {id:'site',host:checked.siteUrl,name:checked.siteName,login:checked.authPlan.kind === 'password' ? 'password' : 'sso-launch'};
+    if (checked.authPlan.kind === 'unavailable') throw new Error(checked.authPlan.reason);
+    if (this.stopped || this.connecting.has(school.host)) throw new Error('Moodle login unavailable');
+    if (school.login === 'sso-launch' && (input.username !== undefined || input.password !== undefined)) throw new Error('Site requires SSO');
+    this.connecting.add(school.host);
     try {
       return school.login === 'sso-launch'
         ? await this.sso.login(school,token => this.acceptToken(school,token))
         : await this.acceptToken(school,await passwordToken(school.host,input.username ?? '',input.password ?? '',this.request));
-    } finally { this.connecting.delete(school.id); }
+    } finally { this.connecting.delete(school.host); }
   }
   private async acceptToken(school: MoodleSchool, token: string): Promise<MoodleAccount> {
     const info = await new MoodleClient(school.host,token,this.request).siteInfo();
     if (this.stopped) throw new Error('Moodle service closed');
-    const existing = this.repository.accounts().find(account => account.schoolId === school.id && account.remoteUserId === info.userid);
-    const account: MoodleAccount = {id:existing?.id ?? randomUUID(),schoolId:school.id,remoteUserId:info.userid,displayName:plainText(info.fullname),status:'connected',syncedAt:existing?.syncedAt ?? null};
+    const existing = this.repository.accounts().find(account => account.siteUrl === school.host && account.remoteUserId === info.userid);
+    const account: MoodleAccount = {id:existing?.id ?? randomUUID(),siteUrl:school.host,siteName:school.name,remoteUserId:info.userid,displayName:plainText(info.fullname),status:'connected',syncedAt:existing?.syncedAt ?? null};
     await this.secrets.set(moodleSecretId(account.id),token);
     if (this.stopped || existing && !this.repository.accounts().some(row => row.id === existing.id)) {
       this.secrets.delete(moodleSecretId(account.id));
@@ -62,7 +68,7 @@ export class MoodleService {
     this.repository.markRead(id);
     const account = this.repository.account(item.accountId);
     const remote = this.repository.notificationRecords(account.id).find(row => row.value.id === id)!;
-    try { await new MoodleClient(schoolById(account.schoolId).host,await this.token(account.id),this.request).markRead(remote.remoteId); this.repository.acknowledgeRead(id); }
+    try { await new MoodleClient(account.siteUrl,await this.token(account.id),this.request).markRead(remote.remoteId); this.repository.acknowledgeRead(id); }
     catch { /* Keep the pending remote read for the next sync. */ }
   }
   sync(id: string): Promise<{errors:string[]}> {
@@ -79,7 +85,7 @@ export class MoodleService {
   }
   private async refresh(id: string) {
     const account = this.repository.account(id);
-    const client = new MoodleClient(schoolById(account.schoolId).host,await this.token(id),this.request);
+    const client = new MoodleClient(account.siteUrl,await this.token(id),this.request);
     const info = await client.siteInfo();
     if (info.userid !== account.remoteUserId) throw new MoodleError('auth');
     for (const row of this.repository.notificationRecords(id).filter(row => row.value.pendingRemoteRead)) {

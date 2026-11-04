@@ -1,4 +1,4 @@
-import { moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
+import { moodleSiteCheckSchema, moodleSiteUrlSchema, moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
 import { aiParseContract } from './ai-parse';
 import { statusSchema } from "./status";
 import { folderIdSchema, libraryContract } from "./library";
@@ -28,7 +28,8 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 export const ipcContract = {
   ...aiParseContract,
   [moodleChannels.schools]: {request:empty,response:z.array(moodleSchoolSchema)},
-  [moodleChannels.connect]: {request:z.object({schoolId:moodleSchoolSchema.shape.id,username:z.string().min(1).max(256).optional(),password:z.string().min(1).max(4096).optional()}).strict(),response:moodleAccountSchema},
+  [moodleChannels.checkSite]: {request:z.object({url:z.string().min(1).max(2048)}).strict(),response:moodleSiteCheckSchema},
+  [moodleChannels.connect]: {request:z.object({siteUrl:moodleSiteUrlSchema,provider:z.number().int().nonnegative().optional(),username:z.string().min(1).max(256).optional(),password:z.string().min(1).max(4096).optional()}).strict(),response:moodleAccountSchema},
   [moodleChannels.disconnect]: {request:z.object({accountId:z.string().uuid()}).strict(),response:ack},
   [moodleChannels.overview]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema},
   [moodleChannels.sync]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema.extend({errors:z.array(z.string())})},

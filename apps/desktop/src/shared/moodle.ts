@@ -12,12 +12,17 @@ export const moodleSchoolSchema = z
   .strict();
 export type MoodleSchool = z.infer<typeof moodleSchoolSchema>;
 
+export const moodleSiteUrlSchema = z.string().url().refine(value => {
+  try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password && !url.port && !url.search && !url.hash && !value.endsWith('/'); } catch { return false; }
+}, 'Expected an HTTPS Moodle root');
+
 export const moodleAccountSchema = z.discriminatedUnion("status", [
   z
     .object({
       status: z.literal("connected"),
       id: z.string().uuid(),
-      schoolId: moodleSchoolSchema.shape.id,
+      siteUrl: moodleSiteUrlSchema,
+      siteName: z.string().min(1),
       remoteUserId: z.number().int(),
       displayName: z.string(),
       syncedAt: timestamp.nullable(),
@@ -27,7 +32,8 @@ export const moodleAccountSchema = z.discriminatedUnion("status", [
     .object({
       status: z.literal("expired"),
       id: z.string().uuid(),
-      schoolId: moodleSchoolSchema.shape.id,
+      siteUrl: moodleSiteUrlSchema,
+      siteName: z.string().min(1),
       remoteUserId: z.number().int(),
       displayName: z.string(),
       syncedAt: timestamp.nullable(),
@@ -164,6 +170,7 @@ export type MoodleAgentAction = z.infer<typeof moodleAgentActionSchema>;
 
 export const moodleChannels = {
   schools: "moodle:schools",
+  checkSite: "moodle:check-site",
   connect: "moodle:connect",
   disconnect: "moodle:disconnect",
   overview: "moodle:overview",
@@ -184,5 +191,5 @@ export const moodleAuthPlanSchema = z.discriminatedUnion('kind',[
   z.object({kind:z.literal('unavailable'),reason:z.enum(['webservices-disabled','mobile-disabled','maintenance','unsupported-version'])}).strict(),
 ]);
 export type AuthPlan = z.infer<typeof moodleAuthPlanSchema>;
-export const moodleSiteCheckSchema = z.object({siteUrl:z.string().url().startsWith('https://'),siteName:z.string(),authPlan:moodleAuthPlanSchema,iconUrl:z.string().optional()}).strict();
+export const moodleSiteCheckSchema = z.object({siteUrl:moodleSiteUrlSchema,siteName:z.string(),authPlan:moodleAuthPlanSchema,iconUrl:z.string().optional()}).strict();
 export type MoodleSiteCheck = z.infer<typeof moodleSiteCheckSchema>;

@@ -13,3 +13,8 @@ CREATE INDEX moodle_grades_course ON moodle_grades(courseId);
 CREATE INDEX moodle_files_course ON moodle_files(courseId);
 CREATE INDEX moodle_reminders_deadline ON moodle_reminders(deadlineId);
 `;
+
+export const moodleSiteMigration = `
+ALTER TABLE moodle_accounts RENAME COLUMN schoolId TO siteUrl;
+UPDATE moodle_accounts SET siteUrl='https://ilearning.cycu.edu.tw',data=json_set(json_remove(data,'$.schoolId'),'$.siteUrl','https://ilearning.cycu.edu.tw','$.siteName','中原大學 CYCU') WHERE siteUrl='cycu';
+`;

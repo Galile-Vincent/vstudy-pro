@@ -263,7 +263,7 @@ export function createMockMoodleApi(): MoodleApi {
   const id = (n: number) => `10000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
   const at = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
   const schools = [{ id: 'cycu', name: '中原大學 · Chung Yuan Christian University', host: 'https://i-learning.cycu.edu.tw', login: 'sso-launch' as const }, { id: 'demo', name: 'VStudy Demo University', host: 'https://moodle.example.edu', login: 'sso-launch' as const }];
-  let accounts: MoodleAccount[] = [{ id: id(1), schoolId: 'cycu', remoteUserId: 20416, displayName: '林以安', status: 'connected', syncedAt: at(-0.01) }];
+  let accounts: MoodleAccount[] = [{ id: id(1), siteUrl:'https://ilearning.cycu.edu.tw',siteName:'中原大學 CYCU', remoteUserId: 20416, displayName: '林以安', status: 'connected', syncedAt: at(-0.01) }];
   const details: MoodleCourseDetail[] = [
     ['資料結構與演算法', 'CS 201', 'Binary trees & traversal', 'Week 08 · Trees', 'Binary tree practice', 'Midterm preparation'],
     ['設計思考與創新', 'DES 102', 'Design research journal', 'Week 05 · Discover', 'Interview reflection', 'Studio critique'],
@@ -294,9 +294,9 @@ export function createMockMoodleApi(): MoodleApi {
   const active = () => details.filter(d => accounts.some(a => a.id === d.course.accountId));
   return {
     schools: async () => structuredClone(schools),
-    connect: async schoolId => {
-      if (!schools.some(s => s.id === schoolId)) throw new Error('Unknown school');
-      const account: MoodleAccount = { id: id(1), schoolId, remoteUserId: 20416, displayName: '林以安', status: 'connected', syncedAt: at(0) };
+    checkSite: async url => ({siteUrl:url.startsWith('https://') ? url.replace(/\/$/,'') : `https://${url}`,siteName:schools.find(s => s.host === url)?.name ?? 'Example University',authPlan:{kind:'browser',providers:[{name:'University ID',url:'https://moodle.example.edu/auth/oauth2/login.php?id=1',iconurl:''}]}}),
+    connect: async ({siteUrl}) => {
+      const account: MoodleAccount = { id: id(1), siteUrl, siteName:schools.find(s => s.host === siteUrl)?.name ?? 'Example University', remoteUserId: 20416, displayName: '林以安', status: 'connected', syncedAt: at(0) };
       accounts = [account]; return structuredClone(account);
     },
     disconnect: async accountId => { accounts = accounts.filter(a => a.id !== accountId); },

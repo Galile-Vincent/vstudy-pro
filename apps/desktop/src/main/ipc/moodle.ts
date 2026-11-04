@@ -10,7 +10,7 @@ import type { createIpcRegistrar } from './register';
 import { MoodleRepository } from '../moodle/repository';
 import { MoodleService } from '../moodle/service';
 import { MoodleSso } from '../moodle/sso';
-import { schoolById, schools } from '../moodle/schools';
+import { schools } from '../moodle/schools';
 import { importMoodleFile } from '../moodle/files';
 import { startReminders, calendarText } from '../moodle/reminders';
 
@@ -25,6 +25,7 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   });
   for (const channel of Object.values(moodleChannels)) implemented.add(channel);
   registrar.handle(moodleChannels.schools,() => schools);
+  registrar.handle(moodleChannels.checkSite,({url}) => service.checkSite(url));
   registrar.handle(moodleChannels.connect,input => service.connect(input));
   registrar.handle(moodleChannels.disconnect,async ({accountId}) => { await service.disconnect(accountId); return {ok:true}; });
   registrar.handle(moodleChannels.overview,({accountId}) => service.overview(accountId));
@@ -37,7 +38,7 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   registrar.handle(moodleChannels.openFile,async ({fileId}) => {
     const {file,account} = repository.file(fileId);
     if (file.documentId && documents.get(documentIdSchema.parse(file.documentId))) return documentIdSchema.parse(file.documentId);
-    return documentIdSchema.parse(await importMoodleFile(repository,fileId,schoolById(account.schoolId).host,await service.token(account.id),documents));
+    return documentIdSchema.parse(await importMoodleFile(repository,fileId,account.siteUrl,await service.token(account.id),documents));
   });
   registrar.handle(moodleChannels.markRead,async ({notificationId}) => { await service.markRead(notificationId); return {ok:true}; });
   registrar.handle(moodleChannels.createReminder,input => {

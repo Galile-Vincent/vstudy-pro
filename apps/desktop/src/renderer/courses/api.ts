@@ -12,7 +12,8 @@ import { moodleChannels } from "../../shared/moodle";
 
 export interface MoodleApi {
   schools(): Promise<MoodleSchool[]>;
-  connect(schoolId: string): Promise<MoodleAccount>;
+  checkSite(url: string): Promise<import("../../shared/moodle").MoodleSiteCheck>;
+  connect(input: IpcRequest<"moodle:connect">): Promise<MoodleAccount>;
   disconnect(accountId: string): Promise<void>;
   overview(): Promise<MoodleOverview>;
   sync(accountId?: string): Promise<void>;
@@ -36,7 +37,8 @@ function createBridgeMoodleApi(): MoodleApi {
     desktop.invoke(channel, request);
   return {
     schools: () => call(moodleChannels.schools, {}),
-    connect: (schoolId) => call(moodleChannels.connect, { schoolId }),
+    checkSite: (url) => call(moodleChannels.checkSite, {url}),
+    connect: (input) => call(moodleChannels.connect, input),
     disconnect: async (accountId) => {
       await call(moodleChannels.disconnect, { accountId });
     },

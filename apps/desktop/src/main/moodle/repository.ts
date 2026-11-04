@@ -27,7 +27,7 @@ export class MoodleRepository {
     return account;
   }
   saveAccount(account: MoodleAccount) {
-    this.db.prepare('INSERT INTO moodle_accounts(id,schoolId,remoteUserId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(account.id,account.schoolId,account.remoteUserId,JSON.stringify(moodleAccountSchema.parse(account)));
+    this.db.prepare('INSERT INTO moodle_accounts(id,siteUrl,remoteUserId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(account.id,account.siteUrl,account.remoteUserId,JSON.stringify(moodleAccountSchema.parse(account)));
   }
   disconnect(id: string) { this.db.prepare('DELETE FROM moodle_accounts WHERE id=?').run(id); }
   expired(id: string) { this.saveAccount({...this.account(id),status:'expired'}); }

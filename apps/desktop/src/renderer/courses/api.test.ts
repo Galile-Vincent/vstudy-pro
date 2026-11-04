@@ -83,7 +83,7 @@ describe("Moodle development data", () => {
     );
     await api.disconnect(overview.accounts[0]!.id);
     expect((await api.overview()).courses).toEqual([]);
-    await api.connect("cycu");
+    await api.connect({siteUrl:"https://ilearning.cycu.edu.tw"});
     expect((await api.overview()).courses).toHaveLength(3);
   });
 });

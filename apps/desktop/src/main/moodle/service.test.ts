@@ -161,7 +161,7 @@ it('removes stale rows only after a successful refresh and retains unsupported c
 });
 it('reconnects the existing user account without exposing or duplicating its token',async () => {
   const {repository,service,secrets} = await setup();
-  const connected = await service.connect({schoolId:'cycu'});
+  const connected = await service.connect({siteUrl:'https://ilearning.cycu.edu.tw'});
   expect(connected.id).toBe(account.id);
   expect(Object.keys(connected)).not.toContain('token');
   expect(repository.accounts()).toHaveLength(1);
@@ -260,7 +260,7 @@ it('applies successful courses when another course fails',async () => {
 });
 it('finishes initial sync before connect returns',async () => {
   const {service,repository} = await setup();
-  await service.connect({schoolId:'cycu'});
+  await service.connect({siteUrl:'https://ilearning.cycu.edu.tw'});
   expect(repository.overview().courses).toHaveLength(1);
   expect(repository.course(repository.overview().courses[0]!.id).files[0]!.name).toBe('lecture.pdf');
   await service.dispose();

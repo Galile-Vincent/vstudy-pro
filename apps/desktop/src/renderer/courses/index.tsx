@@ -143,7 +143,7 @@ export function ConnectDialog({
   const connect = async () => {
     setStatus("connecting");
     try {
-      await api.connect(schoolId);
+      await api.connect({siteUrl:schools.find(s => s.id === schoolId)!.host});
       await onConnected();
       onOpenChange(false);
     } catch {
@@ -232,7 +232,6 @@ export function Courses({
 }) {
   useTranslation("moodle");
   const [overview, setOverview] = useState<MoodleOverview>();
-  const [schools, setSchools] = useState<MoodleSchool[]>([]);
   const [detail, setDetail] = useState<MoodleCourseDetail>();
   const [homeDetails, setHomeDetails] = useState<MoodleCourseDetail[]>([]);
   const [loading, setLoading] = useState(true);
@@ -246,9 +245,8 @@ export function Courses({
   const refreshSequence = useRef(0);
   const refresh = useCallback(async () => {
     const sequence = ++refreshSequence.current;
-    const [next, schoolList, course] = await Promise.all([
+    const [next, course] = await Promise.all([
       api.overview(),
-      api.schools(),
       courseId ? api.course(courseId) : Promise.resolve(undefined),
     ]);
     const summaries = courseId
@@ -256,7 +254,6 @@ export function Courses({
       : await Promise.all(next.courses.map((course) => api.course(course.id)));
     if (sequence !== refreshSequence.current) return;
     setOverview(next);
-    setSchools(schoolList);
     setDetail(course);
     setHomeDetails(summaries);
     setError(false);
@@ -559,8 +556,7 @@ export function Courses({
                 <div>
                   <strong>{account.displayName}</strong>
                   <span>
-                    {schools.find((s) => s.id === account.schoolId)?.name ??
-                      account.schoolId}
+                    {account.siteName} · {new URL(account.siteUrl).host}
                   </span>
                 </div>
                 <small>
