@@ -170,7 +170,7 @@
   "complete": "完了",
   "completion_incomplete": "未完了",
   "completion_fail": "再挑戦が必要",
-  "no_sections": "同期後にコンテンツが表示されます。",
+  "no_sections": "コース内容はありません。",
   "due": "締切",
   "not_submitted": "未提出",
   "open_link": "リンクを開く",
@@ -195,5 +195,6 @@
   "teacher_unknown": "教員情報なし",
   "class_unknown": "クラス情報なし",
   "attachment_count_one": "添付ファイル {{count}} 件",
-  "attachment_count_other": "添付ファイル {{count}} 件"
+  "attachment_count_other": "添付ファイル {{count}} 件",
+  "sync_progress": "同期中 {{completed}}/{{total}}"
 }

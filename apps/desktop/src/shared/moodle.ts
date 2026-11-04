@@ -130,6 +130,9 @@ export const moodleReminderSchema = z
   .strict();
 export type MoodleReminder = z.infer<typeof moodleReminderSchema>;
 
+export const moodlePanelSchema=z.enum(['contents','teachers','completion','assignments','quizzes','announcements','grades']);
+export type MoodlePanel=z.infer<typeof moodlePanelSchema>;
+export const moodlePanelStateSchema=z.enum(['loading','idle','error']);
 export const moodleCourseDetailSchema = z
   .object({
     course: moodleCourseSchema,
@@ -138,6 +141,8 @@ export const moodleCourseDetailSchema = z
     grades: z.array(moodleGradeItemSchema),
     files: z.array(moodleFileSchema),
     reminders: z.array(moodleReminderSchema),
+    panels:z.record(moodlePanelSchema,moodlePanelStateSchema).optional(),
+    fetchState: z.enum(['idle','loading','error']).optional(),
     sections: z.array(moodleSectionSchema),
     announcements: z.array(moodleAnnouncementSchema),
   })
@@ -151,6 +156,7 @@ export const moodleOverviewSchema = z
     upcoming: z.array(moodleDeadlineSchema),
     otherNotifications: z.array(moodleNotificationSchema).optional(),
     unreadNotifications: z.number().int().nonnegative(),
+    summaries: z.array(z.object({course:moodleCourseSchema,notifications:z.array(moodleNotificationSchema),reminders:z.array(moodleReminderSchema)}).strict()).optional(),
   })
   .strict();
 export type MoodleOverview = z.infer<typeof moodleOverviewSchema>;

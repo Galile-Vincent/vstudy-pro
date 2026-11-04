@@ -31,6 +31,7 @@ it('syncs twice with stable identities and isolated account records',async () =>
   const {repository,service,store} = await setup();
   await service.sync(account.id);
   const first = repository.overview();
+  await service.refreshCourse(first.courses[0]!.id);
   const course = repository.course(first.courses[0]!.id);
   const reminder = repository.createReminder({deadlineId:course.deadlines[0]!.id,remindAt:'2026-11-06T00:00:00.000Z',note:'Study',createdBy:'user'});
   repository.markRead(course.notifications[0]!.id);
@@ -249,7 +250,7 @@ it('applies successful courses when another course fails',async () => {
   const base = request.getMockImplementation()!;
   request.mockImplementation(async (target,options) => {
     const params = new URLSearchParams(String(options?.body));
-    if (params.get('wsfunction') === 'core_enrol_get_users_courses') return Response.json([{id:101,fullname:'One',shortname:'1'},{id:102,fullname:'Two',shortname:'2'}]);
+    if (params.get('wsfunction') === 'core_enrol_get_users_courses') return Response.json([{id:101,fullname:'One',shortname:'1',startdate:1},{id:102,fullname:'Two',shortname:'2',startdate:1}]);
     if (params.get('courseid') === '101' && params.get('wsfunction') === 'core_course_get_contents') throw new Error('offline');
     return base(target,options);
   });
@@ -371,11 +372,15 @@ it('loads course panels lazily, preserves successful panels on partial failure a
     if (name === 'mod_forum_get_forum_discussions') return Response.json({discussions:[{id:5,name:'Notice',created:1730000000,message:'<p>Read this</p>'}]});
     return base(target,options);
   });
-  const [first,second] = await Promise.all([service.course(course.id),service.course(course.id)]);
+  const pending = service.refreshCourse(course.id);
+  await service.course(course.id);
+  await pending;
+  const first = repository.course(course.id), second = repository.course(course.id);
   expect(contentsRequests).toBe(1);
   expect(first.sections.map(section => section.modules.map(module => [module.name,module.completion]))).toEqual([[['Homework','complete']]]);
   expect(second.sections).toEqual(first.sections);
   expect(first.announcements).toEqual([]);
+  expect((await service.course(course.id)).panels).toMatchObject({contents:'idle',completion:'idle',announcements:'error'});
   expect(first.course.progress).toBe(100);
   expect(first.course.identity.hasProgress).toBe(true);
   contentsFail = true; forumFail = false;
@@ -398,7 +403,7 @@ it('skips unadvertised detail capabilities and returns the existing cache',async
   request.mockClear();
   const detail = await service.course(course.id);
   expect(detail.course.fullName).toBe('Algorithms');
-  expect(detail.sections).toEqual([]);
+  expect(detail.sections).toEqual(repository.detailCache(course.id)!.sections);
   expect(request.mock.calls).toEqual([]);
   await service.dispose();
 });
@@ -422,9 +427,66 @@ it('returns stale panels while a background refresh is still pending',async () =
   store.db.prepare("UPDATE moodle_course_details SET data=json_set(data,'$.refreshedAt','2000-01-01T00:00:00Z')").run();
   const stale = await service.course(course.id);
   expect(stale.course.fullName).toBe('Algorithms');
-  expect(stale.sections).toEqual([]);
+  expect(stale.sections).toEqual(repository.detailCache(course.id)!.sections);
   release();
   await service.refreshCourse(course.id);
   expect(repository.course(course.id).sections.map(section => section.name)).toEqual(['Refreshed']);
+  await service.dispose();
+});
+
+it('publishes sections before slow enrichment and lets a failed fetch retry inside the backoff',async () => {
+  const {repository,service,request,store} = await setup();
+  await service.sync(account.id);
+  const course=repository.overview().courses[0]!;
+  store.db.prepare('DELETE FROM moodle_course_details').run();
+  repository.saveCapabilities(account.id,{functions:['core_course_get_contents','core_enrol_get_enrolled_users'],advancedfeatures:[],mobileConfig:{}});
+  let fail=true, release!:()=>void;
+  const gate=new Promise<void>(resolve => {release=resolve;});
+  request.mockImplementation(async (_target,options) => {
+    const name=new URLSearchParams(String(options?.body)).get('wsfunction');
+    if(name === 'core_course_get_contents') return Response.json(fail ? {errorcode:'failure'} : [{id:1,section:1,name:'Visible',modules:[]}]);
+    await gate;
+    return Response.json([]);
+  });
+  const failed=await service.course(course.id);
+  expect(failed.sections).toEqual([]);
+  release();await service.refreshCourse(course.id);
+  expect((await service.course(course.id)).fetchState).toBe('error');
+  fail=false;
+  const retried=await service.course(course.id,true);
+  expect(retried.sections.map(section => section.name)).toEqual(['Visible']);
+  await service.dispose();
+});
+
+it('returns cached overview without starting per-course detail calls',async () => {
+  const {service,request}=await setup();
+  await service.sync(account.id);
+  request.mockClear();
+  const started=performance.now();
+  const overview=service.overview();
+  expect(overview.courses).toHaveLength(1);
+  expect(overview.summaries?.[0]?.course.id).toBe(overview.courses[0]!.id);
+  expect(request).not.toHaveBeenCalled();
+  expect(performance.now()-started).toBeLessThan(100);
+  await service.dispose();
+});
+
+it('prefetches current contents only and loads historical grades when opened',async () => {
+  const {service,repository,request}=await setup();
+  const base=request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    if(new URLSearchParams(String(options?.body)).get('wsfunction') === 'core_enrol_get_users_courses') return Response.json([
+      {id:101,fullname:'Current',shortname:'C',startdate:1},
+      {id:102,fullname:'Past',shortname:'P',enddate:1},
+    ]);
+    return base(target,options);
+  });
+  await service.sync(account.id);
+  const calls=request.mock.calls.map(call => new URLSearchParams(String(call[1]?.body)));
+  expect(calls.filter(args => args.get('wsfunction') === 'core_course_get_contents').map(args => args.get('courseid'))).toEqual(['101']);
+  expect(calls.filter(args => args.get('wsfunction') === 'gradereport_user_get_grade_items')).toEqual([]);
+  const past=repository.overview().courses.find(course => course.remoteId === 102)!;
+  await service.refreshCourse(past.id);
+  expect(repository.course(past.id).grades).toHaveLength(1);
   await service.dispose();
 });

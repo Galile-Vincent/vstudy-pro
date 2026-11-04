@@ -17,3 +17,18 @@ it('rejects SVG, oversized images, and foreign image origins',async () => {
   expect(await moodleImage('https://school.example/large','https://school.example',undefined,async () => new Response(new Uint8Array(2*1024*1024+1),{headers:{'content-type':'image/png'}}))).toBe(null);
   expect(await moodleImage('https://evil.example/cover.png','https://school.example','secret',async () => {throw new Error('must not request');})).toBe(null);
 });
+
+it('expires cached course images after five minutes',async () => {
+  vi.useFakeTimers();
+  try {
+    const request=vi.fn<typeof fetch>(async () => new Response(new Uint8Array([1,2,3]),{headers:{'content-type':'image/png'}}));
+    const source='https://ilearning.cycu.edu.tw/pluginfile.php/ttl-test/image.png';
+    const {moodleImage}=await import('./files');
+    expect(await moodleImage(source,'https://ilearning.cycu.edu.tw','ttl-token',request)).toContain('data:image/png;base64,');
+    await moodleImage(source,'https://ilearning.cycu.edu.tw','ttl-token',request);
+    expect(request).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(5*60_000+1);
+    await moodleImage(source,'https://ilearning.cycu.edu.tw','ttl-token',request);
+    expect(request).toHaveBeenCalledTimes(2);
+  } finally {vi.useRealTimers();}
+});

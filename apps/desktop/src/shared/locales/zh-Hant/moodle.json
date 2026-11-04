@@ -170,7 +170,7 @@
   "complete": "已完成",
   "completion_incomplete": "未完成",
   "completion_fail": "需要再次嘗試",
-  "no_sections": "同步後將顯示課程內容。",
+  "no_sections": "此課程尚無內容。",
   "due": "截止時間",
   "not_submitted": "尚未繳交",
   "open_link": "開啟連結",
@@ -195,5 +195,6 @@
   "teacher_unknown": "未提供教師",
   "class_unknown": "未提供班級",
   "attachment_count_one": "{{count}} 個附件",
-  "attachment_count_other": "{{count}} 個附件"
+  "attachment_count_other": "{{count}} 個附件",
+  "sync_progress": "同步中 {{completed}}/{{total}}"
 }
