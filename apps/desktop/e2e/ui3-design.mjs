@@ -87,6 +87,8 @@ try {
     const appearance=await page.evaluate(()=>{const pane=window.document.querySelector('.settings-pane:not([hidden])'),control=pane.querySelector('.settings-control'),preview=pane.querySelector('.appearance-preview'),items=[...pane.querySelectorAll('[data-slot=toggle-group-item]')];return {firstControl:control.getBoundingClientRect().bottom<=pane.getBoundingClientRect().bottom,previewAfter:preview.getBoundingClientRect().top>control.getBoundingClientRect().top,wrapped:items.some(e=>e.scrollHeight>e.clientHeight+1)};});
     assert.equal(appearance.firstControl,true,JSON.stringify({context,appearance}));assert.equal(appearance.previewAfter,true);assert.equal(appearance.wrapped,false);
    }
+   const textSizes=await page.locator('.settings-pane:not([hidden])').evaluate(p=>[...p.querySelectorAll('button,input,textarea')].filter(e=>e.getClientRects().length&&e.textContent?.trim()&&!e.querySelector('svg')&&e.getAttribute('role')!=='radio').map(e=>({text:e.textContent?.slice(0,24),size:parseFloat(window.getComputedStyle(e).fontSize),base:parseFloat(window.getComputedStyle(p.querySelector('.settings-label')??p).fontSize)})));
+   assert.deepEqual(textSizes.filter(s=>s.size<s.base*.75),[],JSON.stringify({context,section,textSizes}));
    await audit(section);await shot(section);
    await page.locator('.settings-pane:not([hidden])').evaluate(e=>{e.scrollTop=e.scrollHeight;});
    const bottom=await page.locator('.settings-pane:not([hidden])').evaluate(e=>{const content=e.querySelector('.settings-pane-inner'),last=content.lastElementChild;return {bottom:last.getBoundingClientRect().bottom,viewport:e.getBoundingClientRect().bottom,padding:parseFloat(window.getComputedStyle(e).paddingBottom)};});
