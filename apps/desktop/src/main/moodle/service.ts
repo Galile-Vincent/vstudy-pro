@@ -1,3 +1,4 @@
+import { moodleFetch } from './site-url';
 import { randomUUID } from 'node:crypto';
 import type { MoodleAccount, MoodleSchool } from '../../shared/moodle';
 import type { SecretStore } from '../services/secrets';
@@ -10,7 +11,7 @@ export class MoodleService {
   private readonly pending = new Map<string,Promise<{errors:string[]}>>();
   private stopped = false;
   private readonly lastAttempt = new Map<string,number>();
-  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(school: MoodleSchool, accept: (token: string) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = fetch) {}
+  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(school: MoodleSchool, accept: (token: string) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch) {}
   private readonly connecting = new Set<string>();
   async connect(input: {schoolId:string;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
     const school = schoolById(input.schoolId);

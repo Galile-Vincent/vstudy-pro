@@ -1,3 +1,4 @@
+import { moodleFetch, siteFetch } from './site-url';
 import { verifyCallback } from './callback';
 import { randomBytes } from 'node:crypto';
 import { BrowserWindow, session } from 'electron';
@@ -10,11 +11,11 @@ import { allowsLoginNavigation } from './schools';
 export class MoodleSso {
   private readonly windows = new Set<BrowserWindow>();
   private disposed = false;
-  constructor(private readonly request: Fetch = fetch) {}
+  constructor(private readonly request: Fetch = moodleFetch) {}
   async login<T>(school: MoodleSchool, accept: (token: string) => Promise<T>): Promise<T> {
     let providerId: string;
     try {
-      const response = await this.request(`${school.host}/lib/ajax/service-nologin.php?info=tool_mobile_get_public_config&lang=en`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify([{index:0,methodname:'tool_mobile_get_public_config',args:{}}]),redirect:'error',signal:AbortSignal.timeout(30_000)});
+      const response = await siteFetch(school.host,this.request)(`${school.host}/lib/ajax/service-nologin.php?info=tool_mobile_get_public_config&lang=en`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify([{index:0,methodname:'tool_mobile_get_public_config',args:{}}]),redirect:'error',signal:AbortSignal.timeout(30_000)});
       if (!response.ok) throw new MoodleError('service');
       const envelopes = z.array(z.object({error:z.literal(false),data:publicConfigSchema})).parse(await response.json());
       const provider = envelopes[0]?.data.identityproviders[0];

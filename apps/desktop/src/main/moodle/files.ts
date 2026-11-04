@@ -1,3 +1,4 @@
+import { moodleFetch, siteFetch } from './site-url';
 import { mkdtemp, open, rm } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -15,7 +16,7 @@ export function authenticatedFileUrl(source: string, host: string, token: string
   url.hash = '';
   return url.href;
 }
-export async function importMoodleFile(repository: MoodleRepository, id: string, host: string, token: string, documents: Pick<DocumentService,'importPath'|'get'>, request: Fetch = fetch): Promise<string> {
+export async function importMoodleFile(repository: MoodleRepository, id: string, host: string, token: string, documents: Pick<DocumentService,'importPath'|'get'>, request: Fetch = moodleFetch): Promise<string> {
   const {file,url} = repository.file(id);
   if (file.documentId && documents.get(file.documentId as Parameters<DocumentService['get']>[0])) return file.documentId;
   if (file.size > MAX_SOURCE_BYTES) throw new Error('Document exceeds 50 MiB');
@@ -25,7 +26,7 @@ export async function importMoodleFile(repository: MoodleRepository, id: string,
   const directory = await mkdtemp(join(tmpdir(),'vstudy-moodle-'));
   try {
     let response: Response;
-    try { response = await request(target,{redirect:'error',signal:AbortSignal.timeout(120_000)}); }
+    try { response = await siteFetch(host,request)(target,{redirect:'error',signal:AbortSignal.timeout(120_000)}); }
     catch { throw new Error('Moodle file download failed'); }
     if (!response.ok || !response.body) throw new Error('Moodle file download failed');
     if (Number(response.headers.get('content-length')) > MAX_SOURCE_BYTES) { await response.body.cancel(); throw new Error('Document exceeds 50 MiB'); }

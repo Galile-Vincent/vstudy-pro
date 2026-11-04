@@ -1,3 +1,4 @@
+import { moodleFetch, siteFetch } from './site-url';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { decodeHtmlEntities } from '../../shared/html';
@@ -36,10 +37,10 @@ export const siteInfoSchema = z.object({userid:integer, fullname:z.string()});
 export const publicConfigSchema = z.object({identityproviders:z.array(z.object({url:z.string().url()})).default([])});
 
 export class MoodleClient {
-  constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = fetch) {}
+  constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = moodleFetch) {}
   async call<S extends z.ZodTypeAny>(name: string, params: Record<string,string>, schema: S): Promise<z.output<S>> {
     let response: Response;
-    try { response = await this.request(`${this.host}/webservice/rest/server.php?moodlewsrestformat=json`, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({...params,wstoken:this.token,wsfunction:name}), redirect:'error', signal:AbortSignal.timeout(30_000)}); }
+    try { response = await siteFetch(this.host,this.request)(`${this.host}/webservice/rest/server.php?moodlewsrestformat=json`, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({...params,wstoken:this.token,wsfunction:name}), redirect:'error', signal:AbortSignal.timeout(30_000)}); }
     catch { throw new MoodleError('network'); }
     if (!response.ok) throw new MoodleError('network');
     const raw: unknown = await response.json().catch(() => { throw new MoodleError('service'); });
@@ -150,9 +151,9 @@ export class MoodleClient {
     return sections.flatMap(section => section.modules.flatMap(module => (module.contents ?? []).filter(file => file.type === 'file' && file.fileurl && url(file.fileurl)).map(file => ({url:url(file.fileurl)!,value:moodleFileSchema.parse({id:remoteId(course.accountId,'file',`${module.id}:${file.fileurl!.split('?')[0]}`),courseId:course.id,section:plainText(section.name ?? ''),module:plainText(module.name),name:plainText(file.filename),mime:file.mimetype ?? 'application/octet-stream',size:file.filesize ?? 0,modifiedAt:date(file.timemodified),documentId:null})}))));
   }
 }
-export async function passwordToken(host: string, username: string, password: string, request: Fetch = fetch): Promise<string> {
+export async function passwordToken(host: string, username: string, password: string, request: Fetch = moodleFetch): Promise<string> {
   try {
-    const response = await request(`${host}/login/token.php`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({username,password,service:'moodle_mobile_app'}),redirect:'error',signal:AbortSignal.timeout(30_000)});
+    const response = await siteFetch(host,request)(`${host}/login/token.php`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({username,password,service:'moodle_mobile_app'}),redirect:'error',signal:AbortSignal.timeout(30_000)});
     if (!response.ok) throw new MoodleError('auth');
     return z.object({token:z.string().min(1).max(16384)}).parse(await response.json()).token;
   } catch { throw new MoodleError('auth'); }
