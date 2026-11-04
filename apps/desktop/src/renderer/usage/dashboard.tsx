@@ -1,3 +1,5 @@
+import { Select } from '../components/select';
+import { Button } from '../components/ui/button';
 import { useTranslation } from "react-i18next";
 import { tr } from '../../shared/i18n';
 import { useEffect, useState } from 'react';
@@ -60,13 +62,13 @@ export function UsageDashboard({ documents }: {documents:IpcResponse<'documents:
     return()=>{active=false;window.removeEventListener('usage-updated',refresh);};
   },[period,revision]);
   return <section className="usage-dashboard" aria-label={tr('common:overall_token_dashboard')}>
-    <div className="usage-dashboard-toolbar"><div><h3>{tr('common:overall_usage')}</h3><p className="muted">{tr('common:all_providers_and_documents_recorded_by_vstudy_on_this_device')}</p></div><div className="row"><select aria-label={tr('common:usage_period')} value={period} onChange={e=>setPeriod(e.target.value as UsagePeriod)}><option value="all">{tr('common:all_time')}</option><option value="month">{tr('common:this_month')}</option><option value="last30days">{tr('common:last_30_days')}</option><option value="day">{tr('common:today')}</option></select><button onClick={()=>setRevision(r=>r+1)}>{tr('common:refresh_usage')}</button></div></div>
+    <div className="usage-dashboard-toolbar"><div><h3>{tr('common:overall_usage')}</h3><p className="muted">{tr('common:all_providers_and_documents_recorded_by_vstudy_on_this_device')}</p></div><div className="row"><Select aria-label={tr('common:usage_period')} value={period} onChange={e=>setPeriod(e.target.value as UsagePeriod)}><option value="all">{tr('common:all_time')}</option><option value="month">{tr('common:this_month')}</option><option value="last30days">{tr('common:last_30_days')}</option><option value="day">{tr('common:today')}</option></Select><Button variant="ghost" size="sm" onClick={()=>setRevision(r=>r+1)}>{tr('common:refresh_usage')}</Button></div></div>
     {error ? <p role="alert">{error}</p> : !data ? <p role="status">{tr('common:loading_dashboard')}</p> : <>
       <UsageOverview data={data}/>
       {!data.summary.calls && <p className="muted">{tr('common:no_model_usage_recorded_in_this_period_send_a_chat_to_start_tracking')}</p>}
       <p className="usage-count-note muted">{tr('common:input_includes_cache_reads_and_writes_output_includes_reasoning_cli_costs_are_api_equivalent_subscription_not_subscription_charges')}</p>
       <UsageTrend days={data.days}/>{period==='all'&&<p className="muted">{tr('common:totals_cover_all_time_the_chart_shows_the_last_30_calendar_days')}</p>}
-      <div className="usage-breakdown-heading"><strong>{tr('common:breakdown')}</strong><select aria-label={tr('common:group_usage_by')} value={by} onChange={e=>setBy(e.target.value as typeof by)}><option value="provider">{tr('common:provider')}</option><option value="model">{tr('common:model')}</option><option value="document">{tr('common:document')}</option></select></div>
+      <div className="usage-breakdown-heading"><strong>{tr('common:breakdown')}</strong><Select aria-label={tr('common:group_usage_by')} value={by} onChange={e=>setBy(e.target.value as typeof by)}><option value="provider">{tr('common:provider')}</option><option value="model">{tr('common:model')}</option><option value="document">{tr('common:document')}</option></Select></div>
       <div className="usage-breakdown"><table><thead><tr><th>{by==='provider'?tr('common:provider'):by==='model'?tr('common:provider_model'):tr('common:document')}</th><th>{tr('common:tokens')}</th><th>{tr('common:calls')}</th><th>{tr('common:cost')}</th></tr></thead><tbody>{groupRows(data.summary,by,documents).map(([key,r])=><tr key={key}><td>{r.label}</td><td>{format.number(r.tokens)}</td><td>{r.calls}</td><td>{money(r.costUsd)}{r.unknown>0&&r.costUsd!==undefined&&tr('common:unknown_suffix')}</td></tr>)}</tbody></table></div>
     </>}
   </section>;

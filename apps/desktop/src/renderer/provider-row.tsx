@@ -1,4 +1,5 @@
 import { Checkbox } from './components/checkbox';
+import { Switch } from './components/ui/switch';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { useEffect, useState } from 'react';
@@ -10,8 +11,10 @@ import { providerName, type Providers } from './provider-metadata';
 export function ProviderRow({
   provider,
   onRefresh,
+  settingsView = false,
 }: {
   provider: Providers[number];
+  settingsView?: boolean;
   onRefresh: () => Promise<void>;
 }) {
   useTranslation();
@@ -45,7 +48,7 @@ export function ProviderRow({
     }
   };
   return (
-    <section className="provider-row" aria-busy={busy}>
+    <section className={settingsView ? "provider-row settings-row" : "provider-row"} data-layout={settingsView ? "stack" : undefined} aria-busy={busy}>
       {busy && !waitingKeychain && <p role="status">{tr('common:checking_provider')}</p>}
       <div className="row">
         <strong>{providerName[provider.config.id]}</strong>
@@ -62,10 +65,10 @@ export function ProviderRow({
         </span>
       </div>
       {provider.config.kind === "cli" && <>
-        <label><Checkbox checked={provider.config.enabled} disabled={busy} onChange={e => { const enabled=e.target.checked; void perform(() => desktop.invoke('providers:configure',{...provider.config,enabled})); }} />{tr('settings:enable_cli',{provider:providerName[provider.config.id]})}</label>
+        <label>{settingsView ? <Switch aria-label={tr('settings:enable_cli',{provider:providerName[provider.config.id]})} checked={provider.config.enabled} disabled={busy} onCheckedChange={enabled => { void perform(() => desktop.invoke('providers:configure',{...provider.config,enabled})); }} /> : <Checkbox checked={provider.config.enabled} disabled={busy} onChange={e=>{const enabled=e.target.checked;void perform(()=>desktop.invoke('providers:configure',{...provider.config,enabled}));}}/>}{tr('settings:enable_cli',{provider:providerName[provider.config.id]})}</label>
         <p>{tr(provider.config.enabled ? 'settings:enabled' : 'settings:disabled')}</p>
         <p>{tr('settings:binary_path')}: <code>{provider.resolvedPath ?? tr('settings:not_found')}</code></p>
-        <Button variant="outline" disabled={busy} onClick={() => void perform(() => desktop.invoke('providers:chooseExecutable',{binary:provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy'}))}>{tr('settings:change')}</Button>
+        <Button variant="ghost" size="sm" disabled={busy} onClick={() => void perform(() => desktop.invoke('providers:chooseExecutable',{binary:provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy'}))}>{tr('settings:change')}</Button>
       </>}
       {provider.config.kind !== "cli" && (
         <>
@@ -90,11 +93,11 @@ export function ProviderRow({
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
-            <Button variant="outline" disabled={busy || !key.trim()}>{tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}</Button>
-            <Button variant="outline" type="button" disabled={busy || !key.trim()} onClick={() => void perform(async () => { await desktop.invoke('secrets:session',{providerId:provider.config.id,key}); setKey(''); })}>{tr('settings:session_key')}</Button>
-            {hasKey && <Button variant="outline" type="button" disabled={busy} onClick={() => void perform(() => desktop.invoke('secrets:unlock',{providerId:provider.config.id}), true)}>{tr(error && !key.trim() ? 'settings:retry' : 'settings:unlock')}</Button>}
+            <Button variant="default" size="sm" disabled={busy || !key.trim()}>{tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}</Button>
+            <Button variant="ghost" size="sm" type="button" disabled={busy || !key.trim()} onClick={() => void perform(async () => { await desktop.invoke('secrets:session',{providerId:provider.config.id,key}); setKey(''); })}>{tr('settings:session_key')}</Button>
+            {hasKey && <Button variant="ghost" size="sm" type="button" disabled={busy} onClick={() => void perform(() => desktop.invoke('secrets:unlock',{providerId:provider.config.id}), true)}>{tr(error && !key.trim() ? 'settings:retry' : 'settings:unlock')}</Button>}
             {hasKey && (
-              <Button variant="outline"
+              <Button variant="ghost" size="sm"
                 type="button"
                 disabled={busy}
                 onClick={() =>
@@ -130,7 +133,7 @@ export function ProviderRow({
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
               />
-              <Button variant="outline" disabled={busy}>{tr('common:save_url')}</Button>
+              <Button variant="ghost" size="sm" disabled={busy}>{tr('common:save_url')}</Button>
             </form>
           )}
         </>

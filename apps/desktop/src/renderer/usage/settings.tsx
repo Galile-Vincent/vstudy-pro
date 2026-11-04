@@ -1,3 +1,4 @@
+import { SettingsGroup, SettingsRow } from '../settings/layout';
 import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -43,13 +44,13 @@ export function UsageSettings() {
     <p className="muted">{balanceNote()}</p>
     <UsageDashboard documents={documents} />
     <div><strong>{tr('common:provider_rate_limits')}</strong>{!limits.length && <p className="muted">{tr('common:no_rate_limit_information_reported_yet_codex_cli_does_not_report_rate_limits_through_exec_its_account_probe_may_be_unavailable_claude_limits_appear_when_reported')}</p>}{limits.map(l => <p key={l.providerId}>{l.providerId}: {l.rateLimit.usedPercent === undefined ? '' : tr('usage:percent_used',{percent:format.number(l.rateLimit.usedPercent)})}{rateWindow(l.rateLimit.label,format.number)}{l.rateLimit.remainingTokens !== undefined ? tr('common:tokens_left',{count:format.number(l.rateLimit.remainingTokens)}) : ''}{l.rateLimit.remainingRequests !== undefined ? tr('common:requests_left',{count:format.number(l.rateLimit.remainingRequests)}) : ''}{l.rateLimit.resetsAt ? tr('common:resets',{date:format.date(l.rateLimit.resetsAt,{dateStyle:'medium',timeStyle:'short'})}) : ''}<small> {tr('common:reported')}{format.date(l.createdAt,{dateStyle:'medium',timeStyle:'short'})}</small></p>)}</div>
-    {settings && <><div className="usage-budget-inputs">
-      <label>{tr('common:monthly_budget_usd')}<Input aria-label={tr('common:monthly_budget_usd')} type="number" min="0.01" step="0.01" value={settings.monthlyBudgetUsd ?? ''} onChange={e => setSettings({...settings,monthlyBudgetUsd:e.target.value ? Number(e.target.value) : undefined})}/></label>
-      <label>{tr('common:monthly_token_cap')}<Input aria-label={tr('common:monthly_token_cap')} type="number" min="1" step="1" value={settings.monthlyTokenBudget ?? ''} onChange={e => setSettings({...settings,monthlyTokenBudget:e.target.value ? Number(e.target.value) : undefined})}/></label>
-      <label>{tr('common:warn_at')}<Input aria-label={tr('common:warn_at')} type="number" min="1" max="100" value={settings.warnAtPercent} onChange={e => setSettings({...settings,warnAtPercent:Number(e.target.value)})}/></label>
-    </div><label>{tr('common:price_overrides_usd_per_1m_tokens')}<Textarea aria-label={tr('common:price_overrides')} rows={5} value={overrides} onChange={e => setOverrides(e.target.value)} spellCheck={false}/></label>
+    {settings && <><SettingsGroup>
+      <SettingsRow label={tr('common:monthly_budget_usd')}><Input aria-label={tr('common:monthly_budget_usd')} type="number" min="0.01" step="0.01" value={settings.monthlyBudgetUsd ?? ''} onChange={e => setSettings({...settings,monthlyBudgetUsd:e.target.value ? Number(e.target.value) : undefined})}/></SettingsRow>
+      <SettingsRow label={tr('common:monthly_token_cap')}><Input aria-label={tr('common:monthly_token_cap')} type="number" min="1" step="1" value={settings.monthlyTokenBudget ?? ''} onChange={e => setSettings({...settings,monthlyTokenBudget:e.target.value ? Number(e.target.value) : undefined})}/></SettingsRow>
+      <SettingsRow label={tr('common:warn_at')}><Input aria-label={tr('common:warn_at')} type="number" min="1" max="100" value={settings.warnAtPercent} onChange={e => setSettings({...settings,warnAtPercent:Number(e.target.value)})}/></SettingsRow>
+    <SettingsRow stack label={tr('common:price_overrides_usd_per_1m_tokens')}><Textarea aria-label={tr('common:price_overrides')} rows={5} value={overrides} onChange={e => setOverrides(e.target.value)} spellCheck={false}/></SettingsRow>
     <p className="muted">{tr('common:json_keyed_by_exact_model_id_e_g')}{`{"my-model":{"input":2,"output":10,"cacheRead":0.1,"cacheWrite":2.5}}`}{tr('common:standard_global_defaults_verified_nov_3_2026_estimates_exclude_taxes_tools_and_special_service_tiers_cache_writes_assume_5_minutes_cli_costs_are_api_equivalent_subscription_not_subscription_charges')}</p>
-    <div className="row"><Button variant="outline" onClick={() => void save()}>{tr('common:save_usage_settings')}</Button><Button variant="outline" onClick={() => { void desktop.invoke('usage:export',{}).then(r => setStatus(r.saved ? tr('common:csv_exported') : tr('common:export_canceled'))).catch(() => setStatus(tr('common:export_failed'))); }}>{tr('common:export_csv')}</Button></div></>}
+    <div className="row"><Button variant="default" size="sm" onClick={() => void save()}>{tr('common:save_usage_settings')}</Button><Button variant="secondary" size="sm" onClick={() => { void desktop.invoke('usage:export',{}).then(r => setStatus(r.saved ? tr('common:csv_exported') : tr('common:export_canceled'))).catch(() => setStatus(tr('common:export_failed'))); }}>{tr('common:export_csv')}</Button></div></SettingsGroup></>}
     {status && <p role="status">{status}</p>}
   </section>;
 }

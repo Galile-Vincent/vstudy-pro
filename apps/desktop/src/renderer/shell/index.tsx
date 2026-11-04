@@ -1,3 +1,4 @@
+import { applyAppearance } from '../settings/appearance';
 import { Button } from '../components/ui/button';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup } from '../components/ui/sidebar';
 import { transitionTo } from "./view-transition";
@@ -51,7 +52,7 @@ export function AppShell({
   useEffect(() => {
     void desktop
       .invoke("settings:get", {})
-      .then((s) => applyLanguage(s.language));
+      .then((s) => { applyAppearance(s); return applyLanguage(s.language); });
     void desktop.invoke("settings:appearance", {}).then((a) => {
       document.documentElement.dataset.reducedTransparency = String(
         a.reducedTransparency,

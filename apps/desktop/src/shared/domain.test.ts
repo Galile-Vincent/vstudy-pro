@@ -79,5 +79,5 @@ describe("document lifecycle", () => {
 });
 
 it("loads preexisting settings with a default last document", () => {
-  expect(settingsSchema.parse({ chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku" })).toEqual({ welcomeSeen: false, language:"auto", replyLanguage:"auto", chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku", lastDocumentId: null, warnAtPercent: 80, priceOverrides: {}, converterIdleMinutes:5,converterOffline:false,enableGenerativeUI:false, modelDisplayNames:{} });
+  expect(settingsSchema.parse({ chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku" })).toEqual({ uiScale:100,density:"comfortable",accent:"neutral",readerFont:"system",readerSize:"m",material:"glass",welcomeSeen: false, language:"auto", replyLanguage:"auto", chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku", lastDocumentId: null, warnAtPercent: 80, priceOverrides: {}, converterIdleMinutes:5,converterOffline:false,enableGenerativeUI:false, modelDisplayNames:{} });
 });

@@ -210,6 +210,12 @@ export const chatEventSchema = z.discriminatedUnion("type", [
 export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
   .object({
+    uiScale: z.union([z.literal(100),z.literal(125),z.literal(150),z.literal(200)]).default(100),
+    density: z.enum(['comfortable','compact']).default('comfortable'),
+    accent: z.enum(['neutral','blue','green','violet','amber']).default('neutral'),
+    readerFont: z.enum(['system','serif','mono']).default('system'),
+    readerSize: z.enum(['s','m','l','xl']).default('m'),
+    material: z.enum(['glass','solid']).default('glass'),
     onboardingCompleted: z.boolean().optional(),
     welcomeSeen: z.boolean().default(false),
     displayName: z.string().trim().max(100).optional(),
@@ -233,6 +239,7 @@ export const settingsSchema = z
   .strict();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
+  uiScale:100, density:"comfortable", accent:"neutral", readerFont:"system", readerSize:"m", material:"glass",
   language: "auto", replyLanguage: "auto", welcomeSeen: false,
   chatSide: "left",
   converterIdleMinutes: 5, converterOffline: false, enableGenerativeUI: false, modelDisplayNames: {},

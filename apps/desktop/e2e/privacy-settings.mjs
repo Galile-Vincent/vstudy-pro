@@ -18,7 +18,7 @@ try {
   await page.locator('.onboarding[data-state=open]').waitFor();await page.locator('.onboarding footer button').last().click();
   const toggles=page.locator('.onboarding .provider-row [role=checkbox]');await toggles.first().waitFor();assert.equal(await toggles.count(),3);for(const toggle of await toggles.all())assert.equal(await toggle.isChecked(),false);
   for(const screen of ['onboarding','providers','privacy']) {
-   if(screen==='providers') {await page.keyboard.press('Escape');await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'})));await page.reload();await page.getByTestId('bridge-status').waitFor({state:'attached'});await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[data-state=open]').waitFor();}
+   if(screen==='providers') {await page.keyboard.press('Escape');await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'})));await page.reload();await page.getByTestId('bridge-status').waitFor({state:'attached'});await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[data-state=open]').waitFor();await page.locator('.settings-tabs [role=tab]').nth(2).click();}
    if(screen==='privacy')await page.locator('.settings-tabs [role=tab]').last().click();
    const findings=await new AxeBuilder({page}).setLegacyMode(true).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa','best-practice']).analyze();
    results.push({language,theme,width,screen,violations:findings.violations});
@@ -30,7 +30,7 @@ try {
  }
  await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language:'en'});});await page.reload();
  await app.evaluate(({safeStorage})=>{safeStorage.isAsyncEncryptionAvailable=async()=>{await new Promise(resolve=>globalThis.setTimeout(resolve,1000));return false;};});
- await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[data-state=open]').waitFor();
+ await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[data-state=open]').waitFor();await page.locator('.settings-tabs [role=tab]').nth(2).click();
  const copy=JSON.parse(await readFile('src/shared/locales/en/settings.json','utf8'));
  const keyInput=page.getByLabel('Anthropic API key',{exact:true});const row=page.locator('.provider-row').filter({has:keyInput});
  await keyInput.fill('test-session-only-key');await row.getByRole('button',{name:'Save key',exact:true}).click();
