@@ -73,7 +73,7 @@ export class MoodleRepository {
       for (const {remoteId,value:item} of snapshot.notifications) {
         if (item.accountId !== accountId || item.courseId && !courseIds.has(item.courseId)) throw new Error('Moodle account mismatch');
         const existing = this.notification(item.id);
-        this.db.prepare('INSERT INTO moodle_notifications(id,remoteId,accountId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(item.id,remoteId,accountId,JSON.stringify({...item,read:item.read || existing?.read === true}));
+        this.db.prepare('INSERT INTO moodle_notifications(id,remoteId,accountId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(item.id,remoteId,accountId,JSON.stringify({...item,read:item.read || existing?.read === true,...(existing?.pendingRemoteRead ? {pendingRemoteRead:true} : {})}));
       }
       for (const item of snapshot.grades) this.db.prepare('INSERT INTO moodle_grades(id,remoteKey,courseId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(remoteId(accountId,'grade',`${item.value.courseId}:${item.remoteKey}`),item.remoteKey,item.value.courseId,JSON.stringify(item.value));
       for (const item of snapshot.files) this.db.prepare(`INSERT INTO moodle_files(id,courseId,url,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET url=excluded.url,data=excluded.data,documentId=CASE WHEN json_extract(moodle_files.data,'$.modifiedAt') IS json_extract(excluded.data,'$.modifiedAt') AND json_extract(moodle_files.data,'$.size')=json_extract(excluded.data,'$.size') THEN moodle_files.documentId ELSE NULL END`).run(item.value.id,item.value.courseId,item.url,JSON.stringify(item.value));
@@ -82,6 +82,7 @@ export class MoodleRepository {
         const scoped = scope && scope !== '@notifications' ? 'courseId=?' : table === 'courses' || table === 'notifications' ? 'accountId=?' : 'courseId IN (SELECT id FROM moodle_courses WHERE accountId=?)';
         const rows = this.db.prepare(`SELECT id FROM moodle_${table} WHERE ${scoped}`).all(scope && scope !== '@notifications' ? scope : accountId);
         for (const row of rows) if (typeof row.id === 'string' && !ids.has(row.id)) {
+          if (table === 'notifications' && this.notification(row.id)?.pendingRemoteRead) continue;
           if (table === 'deadlines' && this.reminders().some(item => item.deadlineId === row.id)) {
             const deadline = this.deadlines([row.id])[0]!;
             this.db.prepare('UPDATE moodle_deadlines SET data=? WHERE id=?').run(JSON.stringify({...deadline,orphaned:true}),row.id);
@@ -114,7 +115,11 @@ export class MoodleRepository {
   markRead(id: string) {
     const item = this.notification(id);
     if (!item) throw new Error('Moodle notification not found');
-    this.db.prepare('UPDATE moodle_notifications SET data=? WHERE id=?').run(JSON.stringify({...item,read:true}),id);
+    this.db.prepare('UPDATE moodle_notifications SET data=? WHERE id=?').run(JSON.stringify({...item,read:true,pendingRemoteRead:true}),id);
+  }
+  acknowledgeRead(id: string) {
+    const item = this.notification(id);
+    if (item) this.db.prepare('UPDATE moodle_notifications SET data=? WHERE id=?').run(JSON.stringify({...item,pendingRemoteRead:false}),id);
   }
   deadlines(ids: string[]) {
     return ids.map(id => {

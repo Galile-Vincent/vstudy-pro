@@ -265,3 +265,18 @@ it('finishes initial sync before connect returns',async () => {
   expect(repository.course(repository.overview().courses[0]!.id).files[0]!.name).toBe('lecture.pdf');
   await service.dispose();
 });
+it('retries an offline mark-read on the next sync',async () => {
+  const {service,repository,request} = await setup(); await service.sync(account.id);
+  const notification = repository.notificationRecords(account.id)[0]!.value;
+  const base = request.getMockImplementation()!;
+  request.mockRejectedValue(new Error('offline'));
+  await service.markRead(notification.id);
+  request.mockImplementation(async (target,options) => new URLSearchParams(String(options?.body)).get('wsfunction') === 'core_message_mark_notification_read' ? Response.json({}) : base(target,options));
+  request.mockClear();
+  await service.sync(account.id);
+  expect(request.mock.calls.filter(call => String(call[1]?.body).includes('wsfunction=core_message_mark_notification_read'))).toHaveLength(1);
+  expect(repository.notification(notification.id)!.read).toBe(true);
+  request.mockClear(); await service.sync(account.id);
+  expect(request.mock.calls.filter(call => String(call[1]?.body).includes('wsfunction=core_message_mark_notification_read'))).toHaveLength(0);
+  await service.dispose();
+});

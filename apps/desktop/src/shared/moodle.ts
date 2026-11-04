@@ -75,6 +75,7 @@ export const moodleNotificationSchema = z
     body: z.string(),
     createdAt: timestamp,
     read: z.boolean(),
+    pendingRemoteRead: z.boolean().optional(),
     url: z.string().url().nullable(),
   })
   .strict();
