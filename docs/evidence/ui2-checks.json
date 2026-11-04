@@ -1,0 +1,319 @@
+{
+  "date": "2026-11-04T02:17:06.680Z",
+  "sourceHead": "cada2525f60aa910a099896ffe261800af249324",
+  "finalCommand": "VSTUDY_E2E_EVIDENCE=/tmp/vstudy-ui2/e2e-verified pnpm e2e",
+  "status": "PASS",
+  "environment": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v24.19.0",
+    "electron": "42.11.16",
+    "playwright": "1.56.1",
+    "browserFallback": "Shared preview reported available:false; native Electron Playwright exercises IPC."
+  },
+  "commands": [
+    {
+      "command": "pnpm typecheck",
+      "status": "PASS",
+      "path": "/tmp/vstudy-ui2/typecheck.log",
+      "sha256": "78b128dba2ebc6c7922ed3673c8c23f86f1df7dba6f9935ea32e1c3a89642038"
+    },
+    {
+      "command": "pnpm lint",
+      "status": "PASS",
+      "path": "/tmp/vstudy-ui2/lint.log",
+      "sha256": "d4f92be2394b2d2295c3a75c0a7a24ff664564b76a4640d828365a38ad604efa"
+    },
+    {
+      "command": "pnpm test",
+      "status": "PASS",
+      "path": "/tmp/vstudy-ui2/test.log",
+      "sha256": "1280be6f37926011754cd5f09146703d58324075373f17d03bc41a207bccb7e7"
+    },
+    {
+      "command": "pnpm build",
+      "status": "PASS",
+      "path": "/tmp/vstudy-ui2/build.log",
+      "sha256": "7199d5fa771cade48236407ecdc3594827d906d46120f1272375d20fa15fb311"
+    },
+    {
+      "command": "pnpm vendor:check",
+      "status": "PASS",
+      "path": "/tmp/vstudy-ui2/vendor-check.log",
+      "sha256": "eab10b707ec3fe59617220697447b5de8c9d0c81c8606ba3bef922b502e3e834"
+    }
+  ],
+  "unit": {
+    "passed": 350,
+    "skipped": 13,
+    "filesPassed": 66,
+    "filesSkipped": 4
+  },
+  "e2e": {
+    "results": [
+      {
+        "script": "a11y-regressions.mjs",
+        "status": "PASS",
+        "seconds": 23,
+        "code": 0
+      },
+      {
+        "script": "assistant-elements.mjs",
+        "status": "PASS",
+        "seconds": 8,
+        "code": 0
+      },
+      {
+        "script": "chat-controls.mjs",
+        "status": "PASS",
+        "seconds": 9,
+        "code": 0
+      },
+      {
+        "script": "codex-chat.mjs",
+        "status": "SKIP",
+        "seconds": 0,
+        "code": 0
+      },
+      {
+        "script": "composer-visual-qa.mjs",
+        "status": "PASS",
+        "seconds": 26,
+        "code": 0
+      },
+      {
+        "script": "conversion.mjs",
+        "status": "PASS",
+        "seconds": 13,
+        "code": 0
+      },
+      {
+        "script": "converter-lifecycle.mjs",
+        "status": "PASS",
+        "seconds": 68,
+        "code": 0
+      },
+      {
+        "script": "design1.mjs",
+        "status": "PASS",
+        "seconds": 81,
+        "code": 0
+      },
+      {
+        "script": "final-qa.mjs",
+        "status": "PASS",
+        "seconds": 2,
+        "code": 0
+      },
+      {
+        "script": "home-onboarding.mjs",
+        "status": "PASS",
+        "seconds": 5,
+        "code": 0
+      },
+      {
+        "script": "i18n.mjs",
+        "status": "PASS",
+        "seconds": 14,
+        "code": 0
+      },
+      {
+        "script": "library-perf.mjs",
+        "status": "PASS",
+        "seconds": 15,
+        "code": 0
+      },
+      {
+        "script": "library.mjs",
+        "status": "PASS",
+        "seconds": 27,
+        "code": 0
+      },
+      {
+        "script": "ownership-shutdown.mjs",
+        "status": "PASS",
+        "seconds": 1,
+        "code": 0
+      },
+      {
+        "script": "packaged-smoke.mjs",
+        "status": "PASS",
+        "seconds": 7,
+        "code": 0
+      },
+      {
+        "script": "pdf-reader.mjs",
+        "status": "PASS",
+        "seconds": 6,
+        "code": 0
+      },
+      {
+        "script": "privacy-settings.mjs",
+        "status": "PASS",
+        "seconds": 11,
+        "code": 0
+      },
+      {
+        "script": "security-audit.mjs",
+        "status": "PASS",
+        "seconds": 1,
+        "code": 0
+      },
+      {
+        "script": "security-delete-data.mjs",
+        "status": "PASS",
+        "seconds": 1,
+        "code": 0
+      },
+      {
+        "script": "selection-chat.mjs",
+        "status": "PASS",
+        "seconds": 7,
+        "code": 0
+      },
+      {
+        "script": "ui2-design.mjs",
+        "status": "PASS",
+        "seconds": 129,
+        "code": 0
+      },
+      {
+        "script": "visual-regressions.mjs",
+        "status": "PASS",
+        "seconds": 3,
+        "code": 0
+      },
+      {
+        "script": "welcome-axe.mjs",
+        "status": "PASS",
+        "seconds": 23,
+        "code": 0
+      },
+      {
+        "script": "welcome-details.mjs",
+        "status": "PASS",
+        "seconds": 6,
+        "code": 0
+      },
+      {
+        "script": "welcome-layout.mjs",
+        "status": "PASS",
+        "seconds": 68,
+        "code": 0
+      },
+      {
+        "script": "welcome-performance.mjs",
+        "status": "PASS",
+        "seconds": 66,
+        "code": 0
+      },
+      {
+        "script": "welcome-pseudo.mjs",
+        "status": "PASS",
+        "seconds": 2,
+        "code": 0
+      },
+      {
+        "script": "welcome-supplement.mjs",
+        "status": "PASS",
+        "seconds": 119,
+        "code": 0
+      },
+      {
+        "script": "welcome-trace.mjs",
+        "status": "PASS",
+        "seconds": 3,
+        "code": 0
+      },
+      {
+        "script": "welcome.mjs",
+        "status": "PASS",
+        "seconds": 92,
+        "code": 0
+      }
+    ],
+    "path": "/tmp/vstudy-ui2/e2e-verified/results.json",
+    "log": "/tmp/vstudy-ui2/e2e-verified.log",
+    "logSha256": "25f81a0f6ab090dc3fe7862184097747c866fd255c85d67d81dea9065809dbed",
+    "passed": 29,
+    "skipped": 1
+  },
+  "accessibility": {
+    "ui2Audits": 650,
+    "violations": 0,
+    "pageErrors": 0,
+    "additionalRegressionAudits": 144,
+    "additionalViolations": 0,
+    "locales": [
+      "en",
+      "zh-Hant",
+      "ja"
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "windowWidths": [
+      1200,
+      900,
+      720
+    ],
+    "zoom": [
+      1,
+      2
+    ],
+    "pointerComposerOutline": "none",
+    "keyboardComposerOutline": "2px",
+    "minimumOutlineContrast": 3
+  },
+  "vendor": {
+    "sources": 60,
+    "check": "pnpm vendor:check",
+    "negativeControl": "An appended byte in Button was rejected, then restored; no blanket patch exemptions."
+  },
+  "appearanceOverrides": {
+    "path": "docs/evidence/ui2-appearance-hooks.json",
+    "locales": [
+      "en",
+      "zh-Hant",
+      "ja"
+    ],
+    "uiFont": "serif",
+    "readerFont": "monospace",
+    "codeFont": "Courier New",
+    "uiScale": 1.25,
+    "rootPixels": 20,
+    "readerPixels": 17.5
+  },
+  "design": {
+    "round1": "docs/evidence/ui2-screenshots-round-1.json",
+    "round2": "docs/evidence/ui2-screenshots-round-2.json",
+    "final": "docs/evidence/ui2-screenshots.json",
+    "review": "docs/design-reviews/ui2.md"
+  },
+  "historicalFailures": [
+    {
+      "path": "/tmp/vstudy-ui2/e2e-final-current/results.json",
+      "reason": "Welcome cold first entrance forced offscreen citation layout; fixed by observing only the visible demo."
+    },
+    {
+      "path": "/tmp/vstudy-ui2/welcome-escape-before.log",
+      "reason": "Settings Escape closed the Welcome tour; regression reproduced, then fixed and verified."
+    },
+    {
+      "paths": "/tmp/vstudy-ui2/e2e*",
+      "reason": "Earlier interrupted attempts and migration failures retained; some encountered shared out/ replacement during concurrent builds."
+    },
+    {
+      "path": "/tmp/vstudy-ui2/e2e-native-final/results.json",
+      "reason": "Deferred heading autofocus stole focus after keyboard entry; a guard and a stronger two-frame focus regression fixed it."
+    }
+  ],
+  "unverified": [
+    "Manual VoiceOver",
+    "Native-speaker acceptance",
+    "Independent different-model-family design review (implementation sub-agent did not spawn nested agents)",
+    "Authenticated paid-provider inference; codex-chat intentionally skips without credentials",
+    "Signed/notarized distribution; E2E packaging uses CSC_IDENTITY_AUTO_DISCOVERY=false"
+  ]
+}

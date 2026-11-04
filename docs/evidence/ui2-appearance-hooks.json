@@ -1,0 +1,26 @@
+[
+  {
+    "language": "en",
+    "rootFont": "serif",
+    "rootSize": "20px",
+    "readerFont": "monospace",
+    "readerSize": "17.5px",
+    "codeFont": "\"Courier New\", monospace"
+  },
+  {
+    "language": "zh-Hant",
+    "rootFont": "serif",
+    "rootSize": "20px",
+    "readerFont": "monospace",
+    "readerSize": "17.5px",
+    "codeFont": "\"Courier New\", monospace"
+  },
+  {
+    "language": "ja",
+    "rootFont": "serif",
+    "rootSize": "20px",
+    "readerFont": "monospace",
+    "readerSize": "17.5px",
+    "codeFont": "\"Courier New\", monospace"
+  }
+]

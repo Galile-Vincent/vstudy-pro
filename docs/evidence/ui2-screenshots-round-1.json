@@ -1,0 +1,312 @@
+{
+  "round": "round-1",
+  "screenshots": [
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "home-empty",
+      "path": "/tmp/vstudy-ui2/round-1/en-light-1200-home-empty.png"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "home-populated",
+      "path": "/tmp/vstudy-ui2/round-1/en-light-1200-home-populated.png"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "library",
+      "path": "/tmp/vstudy-ui2/round-1/en-light-1200-library.png"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "settings",
+      "path": "/tmp/vstudy-ui2/round-1/en-light-1200-settings.png"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "workspace",
+      "path": "/tmp/vstudy-ui2/round-1/en-light-1200-workspace.png"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "picker",
+      "path": "/tmp/vstudy-ui2/round-1/en-light-1200-picker.png"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "composer-idle",
+      "path": "/tmp/vstudy-ui2/round-1/en-light-1200-composer-idle.png"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "composer-pointer",
+      "path": "/tmp/vstudy-ui2/round-1/en-light-1200-composer-pointer.png"
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "composer-keyboard",
+      "path": "/tmp/vstudy-ui2/round-1/en-light-1200-composer-keyboard.png"
+    }
+  ],
+  "checks": [
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "home-empty",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "home-populated",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "library",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "settings",
+      "violations": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "tags": [
+            "cat.aria",
+            "wcag2a",
+            "wcag412",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "RGAAv4",
+            "RGAA-7.1.1"
+          ],
+          "description": "Ensure all ARIA attributes have valid values",
+          "help": "ARIA attributes must conform to valid values",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-valid-attr-value?application=playwright",
+          "nodes": [
+            {
+              "any": [],
+              "all": [
+                {
+                  "id": "aria-valid-attr-value",
+                  "data": [
+                    "aria-controls=\"radix-_r_1d_-content-providers\""
+                  ],
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "Invalid ARIA attribute value: aria-controls=\"radix-_r_1d_-content-providers\""
+                }
+              ],
+              "none": [],
+              "impact": "critical",
+              "html": "<button type=\"button\" role=\"tab\" aria-selected=\"true\" aria-controls=\"radix-_r_1d_-content...\" data-state=\"active\" id=\"radix-_r_1d_-trigger...\" data-slot=\"tabs-trigger\" class=\"relative inline-flex...\" tabindex=\"-1\" data-orientation=\"horizontal\" data-radix-collectio...=\"\">",
+              "target": [
+                "#radix-_r_1d_-trigger-providers"
+              ],
+              "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"radix-_r_1d_-content-providers\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#797979",
+                    "bgColor": "#f2f2f2",
+                    "contrastRatio": 3.88,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [
+                    {
+                      "html": "<div role=\"tablist\" aria-orientation=\"horizontal\" data-slot=\"tabs-list\" data-variant=\"default\" class=\"group/tabs-list inli...\" aria-label=\"Settings\" tabindex=\"0\" data-orientation=\"horizontal\" style=\"outline: none;\">",
+                      "target": [
+                        ".group\\/tabs-list"
+                      ]
+                    }
+                  ],
+                  "impact": "serious",
+                  "message": "Element has insufficient color contrast of 3.88 (foreground color: #797979, background color: #f2f2f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" role=\"tab\" aria-selected=\"false\" aria-controls=\"radix-_r_1d_-content...\" data-state=\"inactive\" id=\"radix-_r_1d_-trigger...\" data-slot=\"tabs-trigger\" class=\"relative inline-flex...\" tabindex=\"-1\" data-orientation=\"horizontal\" data-radix-collectio...=\"\">",
+              "target": [
+                "#radix-_r_1d_-trigger-usage"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.88 (foreground color: #797979, background color: #f2f2f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#797979",
+                    "bgColor": "#f2f2f2",
+                    "contrastRatio": 3.88,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [
+                    {
+                      "html": "<div role=\"tablist\" aria-orientation=\"horizontal\" data-slot=\"tabs-list\" data-variant=\"default\" class=\"group/tabs-list inli...\" aria-label=\"Settings\" tabindex=\"0\" data-orientation=\"horizontal\" style=\"outline: none;\">",
+                      "target": [
+                        ".group\\/tabs-list"
+                      ]
+                    }
+                  ],
+                  "impact": "serious",
+                  "message": "Element has insufficient color contrast of 3.88 (foreground color: #797979, background color: #f2f2f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<button type=\"button\" role=\"tab\" aria-selected=\"false\" aria-controls=\"radix-_r_1d_-content...\" data-state=\"inactive\" id=\"radix-_r_1d_-trigger...\" data-slot=\"tabs-trigger\" class=\"relative inline-flex...\" tabindex=\"-1\" data-orientation=\"horizontal\" data-radix-collectio...=\"\">",
+              "target": [
+                "#radix-_r_1d_-trigger-privacy"
+              ],
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.88 (foreground color: #797979, background color: #f2f2f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "workspace",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "picker",
+      "violations": [
+        {
+          "id": "aria-dialog-name",
+          "impact": "serious",
+          "tags": [
+            "cat.aria",
+            "best-practice"
+          ],
+          "description": "Ensure every ARIA dialog and alertdialog node has an accessible name",
+          "help": "ARIA dialog and alertdialog nodes should have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-dialog-name?application=playwright",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "aria-label",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-label attribute does not exist or is empty"
+                },
+                {
+                  "id": "aria-labelledby",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty"
+                },
+                {
+                  "id": "non-empty-title",
+                  "data": {
+                    "messageKey": "noAttr"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has no title attribute"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": "serious",
+              "html": "<div data-side=\"top\" data-align=\"start\" data-state=\"open\" role=\"dialog\" id=\"radix-_r_5_\" data-slot=\"model-selector-conte...\" class=\"z-50 origin-(--radix...\" tabindex=\"-1\" style=\"--radix-popover-cont...\">",
+              "target": [
+                "#radix-_r_5_"
+              ],
+              "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "composer-idle",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "composer-pointer",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "theme": "light",
+      "width": 1200,
+      "state": "composer-keyboard",
+      "violations": []
+    }
+  ],
+  "errors": []
+}

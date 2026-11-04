@@ -1,0 +1,470 @@
+[
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.28 0 0 / 0.52)",
+      "width": "2px",
+      "ratio": 3.1925153965904713
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 1200,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 900,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 1,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 720,
+    "state": "composer-keyboard",
+    "zoom": 2,
+    "violations": [],
+    "focusContrast": {
+      "color": "oklab(0.92 0 0 / 0.4)",
+      "width": "2px",
+      "ratio": 3.232648821781172
+    }
+  }
+]
