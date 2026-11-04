@@ -1,3 +1,4 @@
+import { displayTitle } from '../../shared/moodle-course-display';
 import type { Message, Settings } from "../../shared/domain";
 import {
   moodleAgentActionSchema,
@@ -57,7 +58,9 @@ export function buildCoursePrompt(
 ): string {
   const clip = (s: string) => s.slice(0, 200);
   const data = {
-    course: { id: detail.course.id, name: clip(detail.course.fullName) },
+    course: { id: detail.course.id, name: clip(displayTitle(detail.course.identity,language,detail.course.fullName)) },
+    sections: detail.sections.slice(0,60).map(section => ({name:clip(section.name),number:section.number,weekStart:section.weekStart,current:section.current,modules:section.modules.slice(0,60).map(module => ({name:clip(module.name),kind:module.kind,dueAt:module.dueAt,submitted:module.submitted,accessible:module.accessible}))})),
+    announcements: detail.announcements.slice(0,20).map(item => ({subject:clip(item.subject),author:clip(item.author),createdAt:item.createdAt,body: item.bodyHtml.slice(0,1000)})),
     now: now.toISOString(),
     timezone,
     deadlines: detail.deadlines
