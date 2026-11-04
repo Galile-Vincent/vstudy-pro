@@ -36,8 +36,8 @@ export function siteTarget(root: string, input: string): URL {
 }
 export async function resolvePublicHost(host: string, resolver: Resolver = resolveAll) {
   host = host.replace(/^\[|\]$/g,'');
-  const addresses = isIP(host) ? [{address:host,family:isIP(host)}] : await resolver(host);
-  if (!addresses.length || addresses.some(item => !publicAddress(item.address))) throw new Error('Unsafe Moodle host address');
+  const addresses = (isIP(host) ? [{address:host,family:isIP(host)}] : await resolver(host)).filter(item => publicAddress(item.address));
+  if (!addresses.length) throw new Error('Unsafe Moodle host address');
   return addresses;
 }
 

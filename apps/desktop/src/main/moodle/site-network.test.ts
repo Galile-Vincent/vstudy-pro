@@ -43,3 +43,8 @@ it('returns empty HTTP responses without constructing an invalid response body',
   const response = await createMoodleFetch(async () => [{address:'8.8.8.8',family:4}])('https://school.example/api');
   expect(response.status).toBe(204);expect(await response.text()).toBe('');
 });
+it('passes only public answers to the connection lookup',async () => {
+  const response = await createMoodleFetch(async () => [{address:'169.254.169.254',family:4},{address:'100.64.0.1',family:4},{address:'8.8.8.8',family:4}])('https://school.example/api');
+  expect(await response.json()).toEqual({ok:true});
+  expect(mock.lookups).toEqual([[{address:'8.8.8.8',family:4}]]);
+});

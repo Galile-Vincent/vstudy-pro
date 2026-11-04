@@ -1,3 +1,4 @@
+import { URL } from 'node:url';
 import { _electron as electron } from 'playwright';
 import { build } from 'vite';
 import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';

@@ -42,17 +42,21 @@ try {
     res.writeHead(302,{location:mode === 'direct' || mode === 'invalid' ? callback : `${idp}/hop?to=${callback}`});res.end();
   });
   await writeFile(join(dir,'entry.ts'),`export { MoodleSso } from ${JSON.stringify(join(root,'src/main/moodle/sso.ts'))}; export { checkSite } from ${JSON.stringify(join(root,'src/main/moodle/discovery.ts'))};`);
-  await build({configFile:false,logLevel:'error',plugins:[{name:'isolated-test-network',enforce:'pre',transform(code,id) {
+  await build({configFile:false,logLevel:'error',plugins:[{name:'isolated-test-network',enforce:'pre',resolveId(source,importer) {
+    if (baselineRef && source === './login-proxy' && importer?.endsWith('/moodle/sso.ts')) return join(root,'src/main/moodle/login-proxy.ts');
+  },load(id) {
+    if (baselineRef && id.endsWith('/moodle/login-proxy.ts')) return execFileSync('git',['show',`${baselineRef}:apps/desktop/src/main/moodle/login-proxy.ts`],{encoding:'utf8'});
+  },transform(code,id) {
     if (baselineRef && /\/moodle\/(sso|login-proxy)\.ts$/.test(id)) code = execFileSync('git',['show',`${baselineRef}:${id.slice(resolve(root,'../..').length+1)}`],{encoding:'utf8'});
     if (id.endsWith('/moodle/site-url.ts')) return code.replace('const url = new URL(input);',`const url = new URL(input); if (process.env.VSTUDY_SSO_HARNESS === '1' && url.protocol === 'https:' && url.hostname === '127.0.0.1' && !url.username && !url.password) return url;`).replace("host = host.replace(/^\\[|\\]$/g,'');",`if (process.env.VSTUDY_SSO_HARNESS === '1' && host === '127.0.0.1') return [{address:host,family:4}]; host = host.replace(/^\\[|\\]$/g,'');`);
     if (id.endsWith('/moodle/login-proxy.ts')) return code.replace('port:443','port:Number(target.port) || 443');
-    if (id.endsWith('/moodle/sso.ts')) return code.replace('10 * 60_000','process.env.VSTUDY_SSO_TIMEOUT === "1" ? 150 : 5000');
+    if (id.endsWith('/moodle/sso.ts')) return code.replace("event => navigate(event,event.url)","event => { diagnostic('frame',event.isMainFrame ? 'MAIN' : 'SUBFRAME',event.url); navigate(event,event.url); }").replace('10 * 60_000','process.env.VSTUDY_SSO_TIMEOUT === "1" ? 150 : 5000');
   }}],build:{outDir:join(dir,'bundle'),lib:{entry:join(dir,'entry.ts'),formats:['cjs'],fileName:() => 'sso.cjs'},rollupOptions:{external:['electron',/^node:/]}}});
   const source = baselineRef ? execFileSync('git',['show',`${baselineRef}:apps/desktop/src/main/index.ts`],{encoding:'utf8'}) : await readFile(join(root,'src/main/index.ts'),'utf8');
   const globalPolicy = source.slice(source.indexOf("app.on('web-contents-created'"),source.indexOf('let store:'));
   await writeFile(join(dir,'main.cjs'),`globalThis.require=require; const {app,BrowserWindow}=require('electron'); if(app.isPackaged || process.env.VSTUDY_SSO_HARNESS !== '1') throw Error('Harness only'); app.setPath('userData',${JSON.stringify(join(dir,'data'))}); ${globalPolicy} app.on('certificate-error',(event,contents,url,error,certificate,callback)=>{if(new URL(url).hostname==='127.0.0.1'){event.preventDefault();callback(true);}else callback(false);}); app.whenReady().then(()=>{globalThis.fixture=require(${JSON.stringify(join(dir,'bundle/sso.cjs'))}); globalThis.main=new BrowserWindow({show:false,webPreferences:{sandbox:true}}); void globalThis.main.loadURL('about:blank');});`);
   app = await electron.launch({args:[join(dir,'main.cjs')],env:{...process.env,ELECTRON_RUN_AS_NODE:''}});
-  app.on('console',message => {if (message.text().startsWith('{"phase":"moodle-sso-')) console.log(message.text());});
+  app.on('console',message => {if (message.text().startsWith('{"phase":"moodle-sso-')) {const entry=JSON.parse(message.text());if(entry.scheme === 'vstudymoodle:') entry.host='[callback]';console.log(JSON.stringify(entry));}});
   app.process().on('exit',(code,signal) => console.log(JSON.stringify({phase:'process-exit',code,signal})));
   app.process().stderr.on('data',chunk => { const text=String(chunk); if (/Error|ERR_|Unhandled/.test(text)) console.log(text.replace(/vstudymoodle:\/\/\S+/g,'[callback]').replace(/\?[^\s'"]*/g,'?[redacted]')); });
   await app.firstWindow();

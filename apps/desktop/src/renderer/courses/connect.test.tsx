@@ -80,3 +80,16 @@ it('ignores a completed check after the dialog closes',async () => {
   await act(async () => done({siteUrl:'https://school.example',siteName:'Late result',authPlan:{kind:'password'}}));
   expect(document.querySelector('[role=dialog]')).toBeNull();
 });
+it('shows the actual external mode and cancels the pending sign-in',async () => {
+  const {api,connected} = await mount({kind:'browser',providers:[]});
+  let reject!: (error:Error) => void;
+  api.connect = () => new Promise((_resolve,fail) => {reject=fail;});
+  api.ssoState = vi.fn(async () => 'external' as const);
+  api.ssoCancel = vi.fn(async () => {reject(new Error('VSTUDY_STATUS:{"code":"moodle.auth_cancelled"}'));});
+  await advance();await click('Sign in');
+  expect(document.body.textContent).toContain('Waiting for your browser…');
+  await click('Cancel sign-in');
+  expect(api.ssoCancel).toHaveBeenCalledWith('https://school.example/moodle');
+  expect(connected).not.toHaveBeenCalled();
+  expect(document.querySelector('[role=alert]')?.textContent).toBe(i18n.t('moodle:auth_cancelled'));
+});

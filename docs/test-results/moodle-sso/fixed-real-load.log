@@ -1,0 +1,13 @@
+{"phase":"moodle-sso-real-config","host":"ilearning.cycu.edu.tw","kind":"embedded","providers":1}
+{"phase":"moodle-sso-mode","host":"ilearning.cycu.edu.tw","mode":"embedded"}
+{"phase":"moodle-sso-navigate","code":"ALLOW","host":"ilearning.cycu.edu.tw","scheme":"https:","port":"443","mode":"embedded"}
+{"phase":"moodle-sso-real-login","host":"ilearning.cycu.edu.tw","outcome":"rendered"}
+{"phase":"moodle-sso-navigate","code":"ALLOW","host":"ilearning.cycu.edu.tw","scheme":"https:","port":"443","mode":"embedded"}
+{"phase":"moodle-sso-navigate","code":"ALLOW","host":"ilearning.cycu.edu.tw","scheme":"https:","port":"443","mode":"embedded"}
+{"phase":"moodle-sso-navigate","code":"ALLOW","host":"login.microsoftonline.com","scheme":"https:","port":"443","mode":"embedded"}
+{"phase":"moodle-sso-real-frame","host":"login.microsoftonline.com","scheme":"https:","main":true}
+{"phase":"moodle-sso-real-frame","host":"login.microsoftonline.com","scheme":"https:","main":true}
+{"phase":"moodle-sso-real-frame","host":"login.microsoftonline.com","scheme":"https:","main":true}
+{"phase":"moodle-sso-real-frame","host":"login.microsoftonline.com","scheme":"https:","main":true}
+{"phase":"moodle-sso-real-frame","host":"login.microsoftonline.com","scheme":"https:","main":true}
+{"phase":"moodle-sso-real-result","host":"login.microsoftonline.com","outcome":"sign-in-form-visible","credentialsEntered":false}

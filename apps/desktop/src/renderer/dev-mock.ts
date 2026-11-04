@@ -294,6 +294,8 @@ export function createMockMoodleApi(): MoodleApi {
   const active = () => details.filter(d => accounts.some(a => a.id === d.course.accountId));
   return {
     schools: async () => structuredClone(schools),
+    ssoState: async () => null,
+    ssoCancel: async () => {},
     checkSite: async url => ({siteUrl:url.startsWith('https://') ? url.replace(/\/$/,'') : `https://${url}`,siteName:schools.find(s => s.host === url)?.name ?? 'Example University',authPlan:{kind:'browser',providers:[{name:'University ID',url:'https://moodle.example.edu/auth/oauth2/login.php?id=1',iconurl:''}]}}),
     connect: async ({siteUrl}) => {
       const account: MoodleAccount = { id: id(1), siteUrl, siteName:schools.find(s => s.host === siteUrl)?.name ?? 'Example University', remoteUserId: 20416, displayName: '林以安', status: 'connected', syncedAt: at(0) };

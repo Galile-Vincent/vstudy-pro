@@ -150,5 +150,8 @@
   "auth_load-failed": "The sign-in page could not load. Check your connection and retry.",
   "auth_blocked": "The sign-in page was blocked because its address is unsafe.",
   "auth_disposed": "Sign-in stopped because the app is shutting down.",
-  "sso_retry": "Retry"
+  "sso_retry": "Retry",
+  "waiting_browser": "Waiting for your browser…",
+  "waiting_embedded": "Complete sign-in in the sign-in window.",
+  "sso_cancel": "Cancel sign-in"
 }

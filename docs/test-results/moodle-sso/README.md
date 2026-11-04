@@ -1,36 +1,58 @@
-# Moodle SSO regression evidence
+# Moodle SSO browser verification
 
-Run from the repository root with installed dependencies.
+The implementation follows the browser split in the [official Moodle login helper](https://github.com/moodlehq/moodleapp/blob/main/src/core/features/login/services/login-helper.ts) and [URL callback handler](https://github.com/moodlehq/moodleapp/blob/main/src/core/services/urlschemes.ts). Packaged typeoflogin 2 uses the system browser when protocol registration succeeds. Development, registration failure, and typeoflogin 3 use the isolated embedded window.
 
-```sh
-VSTUDY_SSO_HARNESS=1 node apps/desktop/e2e/moodle-sso-flow.mjs --baseline --baseline-ref=08ee713
-VSTUDY_SSO_HARNESS=1 node apps/desktop/e2e/moodle-sso-flow.mjs
+## Evidence
+
+The real CYCU baseline did **not** reproduce the user's unsafe-address page on this machine. `blocked-real-load.log` records the original proxy and request guards reaching the Microsoft sign-in form without credentials. Proxy-client `EPIPE` events occurred but did not abort this run. They do not establish the cause of the user's incident.
+
+The baseline Electron fixture reproduced a false positive. `baseline-frame-harness.log` records a child frame with a `data:` URL and no hostname. The old `will-frame-navigate` handler sent that event through the top-level guard. `networkUrl` rejected its scheme, and `showFailure` replaced the entire document.
+
+The decisive baseline lines are:
+
+```json
+{"phase":"moodle-sso-frame","code":"SUBFRAME","host":"","scheme":"data:","port":""}
+{"phase":"moodle-sso-navigate","code":"CHECK","host":"","scheme":"data:","port":""}
+{"phase":"moodle-sso-load","code":"URL_REJECTED","host":"","scheme":"data:","port":""}
 ```
 
-The harness bundles the actual Moodle SSO, discovery and proxy modules into a temporary Electron main process. It installs the actual global web-contents policy extracted from index.ts. A hidden fixture main window remains alive while real SSO BrowserWindows navigate. TLS fixtures expose public configuration, launch.php, and an IdP redirect on a second port. Only this temporary bundle permits 127.0.0.1 and fixture ports. Certificate exceptions are installed only in the temporary Electron entry point. No test override or certificate exception is present in the production bundle.
+The baseline fixture returned `"mode":"frames","error":"blocked"`. The revised fixture returned `"mode":"frames","value":"connected"`. The exact full records are in `baseline-frame-harness.log` and `fixed-harness.log`.
 
-The baseline ref predates the fix. The harness reads its SSO, proxy and global policy directly through git show. Application source files in the worktree remain unchanged.
+`fixed-real-load.log` records the revised production window setup rendering CYCU's login page, clicking its OAuth2 link, and rendering Microsoft's visible email input at `login.microsoftonline.com`. No credentials were entered.
 
-## Findings
+## Changes
 
-The original HTTPS IdP redirect produces `cancelled`, with `will-redirect` as its last navigation event. The original global listener prevents that redirect. Direct custom-scheme redirects and clicked links already succeed in this Electron version. This reproduction does not support custom-scheme event delivery as the original cause.
+The SSO window no longer installs a proxy or webRequest guards. The unused proxy module and its socket-reset fixture were removed. Browser networking, including secondary hosts and ports, belongs to Chromium or the system browser. Only top-level navigation is restricted to HTTPS and the verified app callback. Child frames and the internal `about:blank` document never trigger recovery. The global app lockdown still only denies popups and webviews.
 
-Twenty real TCP CONNECT clients reset their sockets while the proxy awaits DNS. The original code raises twenty uncaught `ECONNRESET` exceptions. An exception listener in the harness records these and keeps Electron alive so the remaining tests can run. The fixed proxy raises no uncaught exceptions. This establishes the missing socket error handler as a real uncaught-exception defect. It does not establish that it caused the user's reported full-app exit. The baseline process exits with code 0 during harness cleanup, not from a reproduced crash.
+Main-process discovery, credential, token, API, and download requests retain the existing URL and socket-address guard. Mixed DNS answers now return only public addresses. Private-only, empty, loopback, link-local, metadata, CGNAT, ULA, and fake-IP answers still fail. The address check still runs at socket creation, including each redirect connection.
 
-The fixed harness passes HTTPS IdP redirect, direct callback, clicked link, invalid signature, cancellation, timeout, disposal, blocked private address, load failure with an open error page, and Retry followed by successful authentication. Every outcome preserves the fixture main window. The log includes event order, net error codes, sanitized hosts, callback verification diagnostics, and the process exit code. Unit tests additionally cover malformed callbacks and callback interception through request, redirect and failed-navigation hooks.
+The pending-login map owns each mode, cancellation, timeout, and cleanup. External callbacks are offered to pending logins and accepted only after passport-derived signature verification. Invalid or stale external callbacks cannot settle an unrelated login. The protocol handlers cover macOS `open-url` and Windows and Linux `second-instance` arguments. The package declares the protocol, and development or failed registration selects the embedded window. The Connect dialog polls the actual mode and offers cancellation. The recovery page shows only the failed host and reason code, without a query string.
 
-[Moodle 4.5 launch.php](https://github.com/moodle/moodle/blob/MOODLE_405_STABLE/admin/tool/mobile/launch.php) signs `$CFG->wwwroot . $passport`. It renders an auto-clicked app link when confirmed or on iOS, and otherwise uses a Location redirect. The supplied read-only Moodle app checkout was inspected at `src/core/features/login/services/login-helper.ts` and `src/core/services/urlschemes.ts`.
+The security lint check retains its dynamic `shell.openExternal` warning. Its new narrow exception covers only `sso-protocol.ts`, where `networkUrl` validates the URL immediately before opening it. Unit tests exercise that boundary.
 
-The fixed verifier accepts both the checked canonical root and the advertised wwwroot when they share the school's domain. It distinguishes malformed data from signature mismatches and reports the matched scheme and host without reporting the signature or secrets.
+## Commands
 
-## Verification
+Run from the repository root:
 
-`pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm security:check`, `pnpm build`, and the real Electron harness pass. The test suite reports 522 passed tests and 13 skipped tests across 83 passed and 4 skipped files. Production output contains no `VSTUDY_SSO_HARNESS` override.
+```sh
+MOODLE_E2E_REAL=1 pnpm --filter @vstudy/desktop exec node e2e/moodle-sso-real-load.mjs
+VSTUDY_SSO_HARNESS=1 pnpm --filter @vstudy/desktop exec node e2e/moodle-sso-flow.mjs
+VSTUDY_SSO_HARNESS=1 pnpm --filter @vstudy/desktop exec node e2e/moodle-sso-flow.mjs --baseline --baseline-ref=12d675f
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm security:check
+pnpm build
+```
 
-## Live confirmation still required
+The real-load script is opt-in and is absent from default e2e. The fixture's TLS and network exceptions exist only in its temporary bundle. Production certificate validation remains enabled.
 
-Run `pnpm dev`, choose CYCU at https://ilearning.cycu.edu.tw, press Connect, and complete Microsoft sign-in. Confirm that the school window appears, the main app stays open, and the account appears as connected. This harness does not contact CYCU or Microsoft, reproduce their cookies, MFA, CORS requests, or establish the precise cause of the reported app exit.
+## Verification results
 
-If sign-in fails, send the JSON lines whose phase begins with `moodle-sso-`, especially `moodle-sso-load` and `moodle-sso-outcome`. A signature mismatch reports `signature-mismatch`; a verified callback reports `moodle-sso-signature` with `HTTP_MATCH` or `HTTPS_MATCH` and the signing host. If the app exits, also send `main-uncaught-exception`, `main-unhandled-rejection`, `main-child-process-gone`, `main-render-process-gone`, and `main-exit` lines, plus the terminal exit code. Send these diagnostic lines only. Do not send sign-in URLs or callback payloads.
+`pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm security:check`, and `pnpm build` pass. The final suite reports 547 passed tests and 13 skipped tests across 84 passed and 4 skipped files. Both Electron scripts exit successfully. The security audit reports no unreviewed advisories. Its two accepted dynamic-URL warnings remain visible in the security log.
 
-Fix Root Causes shaped the TLS reproduction and the original-versus-fixed socket reset experiment. Model the Domain shaped the explicit success/error outcome and distinct authentication error codes. Implementation and verification ran in-thread because this task is an implementation delegate; the parent owns independent review and any PR.
+Fix Root Causes shaped the instrumented baseline frame reproduction. Model the Domain shaped the pending-login map and explicit browser mode. Prove It Works shaped the real CYCU and Electron fixture checks. This implementation delegate ran the work in-thread. The parent owns independent review and any PR.
+
+## Limits
+
+Completing Microsoft authentication and receiving a real Moodle token remain unverified. No credentials were used. Packaged protocol registration and callback delivery through the installed application on macOS, Windows, and Linux remain unverified. Unit tests cover registration failure, URL and argv routing, passport validation, replay, cancellation, and mode selection. The real network run covers the embedded fallback only. Mixed-address DNS behavior is covered with fakes, rather than a captured mixed answer from CYCU.

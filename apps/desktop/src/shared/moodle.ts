@@ -174,6 +174,8 @@ export const moodleChannels = {
   checkSite: "moodle:check-site",
   connect: "moodle:connect",
   disconnect: "moodle:disconnect",
+  ssoState: "moodle:sso-state",
+  ssoCancel: "moodle:sso-cancel",
   overview: "moodle:overview",
   sync: "moodle:sync",
   course: "moodle:course",
@@ -194,3 +196,5 @@ export const moodleAuthPlanSchema = z.discriminatedUnion('kind',[
 export type AuthPlan = z.infer<typeof moodleAuthPlanSchema>;
 export const moodleSiteCheckSchema = z.object({siteUrl:moodleSiteUrlSchema,siteName:z.string(),authPlan:moodleAuthPlanSchema,iconUrl:z.string().optional()}).strict();
 export type MoodleSiteCheck = z.infer<typeof moodleSiteCheckSchema>;
+
+export type MoodleSsoMode = 'external' | 'embedded';

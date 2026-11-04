@@ -125,6 +125,14 @@
       }
     },
     "asar": true,
-    "afterPack": "scripts/after-pack.mjs"
+    "afterPack": "scripts/after-pack.mjs",
+    "protocols": [
+      {
+        "name": "VStudy Moodle sign-in",
+        "schemes": [
+          "vstudymoodle"
+        ]
+      }
+    ]
   }
 }

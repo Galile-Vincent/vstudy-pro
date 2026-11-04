@@ -30,6 +30,8 @@ export const ipcContract = {
   [moodleChannels.schools]: {request:empty,response:z.array(moodleSchoolSchema)},
   [moodleChannels.checkSite]: {request:z.object({url:z.string().min(1).max(2048)}).strict(),response:moodleSiteCheckSchema},
   [moodleChannels.connect]: {request:z.object({siteUrl:moodleSiteUrlSchema,provider:z.number().int().nonnegative().optional(),username:z.string().min(1).max(256).optional(),password:z.string().min(1).max(4096).optional()}).strict(),response:moodleAccountSchema},
+  [moodleChannels.ssoState]: {request:z.object({siteUrl:moodleSiteUrlSchema}).strict(),response:z.enum(['external','embedded']).nullable()},
+  [moodleChannels.ssoCancel]: {request:z.object({siteUrl:moodleSiteUrlSchema}).strict(),response:ack},
   [moodleChannels.disconnect]: {request:z.object({accountId:z.string().uuid()}).strict(),response:ack},
   [moodleChannels.overview]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema},
   [moodleChannels.sync]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema.extend({errors:z.array(z.string())})},

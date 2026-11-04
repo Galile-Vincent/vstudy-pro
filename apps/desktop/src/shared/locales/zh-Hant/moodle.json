@@ -150,5 +150,8 @@
   "auth_load-failed": "無法載入登入頁面，請檢查網路連線後重試。",
   "auth_blocked": "登入頁面的網址不安全，已封鎖連線。",
   "auth_disposed": "應用程式正在關閉，登入已停止。",
-  "sso_retry": "重試"
+  "sso_retry": "重試",
+  "waiting_browser": "正在等候瀏覽器…",
+  "waiting_embedded": "請在登入視窗完成登入。",
+  "sso_cancel": "取消登入"
 }

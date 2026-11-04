@@ -27,6 +27,8 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   registrar.handle(moodleChannels.schools,() => schools);
   registrar.handle(moodleChannels.checkSite,({url}) => service.checkSite(url));
   registrar.handle(moodleChannels.connect,input => service.connect(input));
+  registrar.handle(moodleChannels.ssoState,({siteUrl}) => sso.state(siteUrl));
+  registrar.handle(moodleChannels.ssoCancel,({siteUrl}) => {sso.cancel(siteUrl);return {ok:true};});
   registrar.handle(moodleChannels.disconnect,async ({accountId}) => { await service.disconnect(accountId); return {ok:true}; });
   registrar.handle(moodleChannels.overview,({accountId}) => service.overview(accountId));
   registrar.handle(moodleChannels.sync,async ({accountId}) => {

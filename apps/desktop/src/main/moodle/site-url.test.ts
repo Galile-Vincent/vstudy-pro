@@ -14,7 +14,7 @@ it('accepts public IPv4 and IPv6',() => {
   expect(publicAddress('2606:4700:4700::1111')).toBe(true);
 });
 it('checks every DNS answer and rejects a rebound answer',async () => {
-  const resolver = vi.fn().mockResolvedValueOnce([{address:'8.8.8.8',family:4}]).mockResolvedValueOnce([{address:'8.8.8.8',family:4},{address:'::1',family:6}]);
+  const resolver = vi.fn().mockResolvedValueOnce([{address:'8.8.8.8',family:4}]).mockResolvedValueOnce([{address:'::1',family:6}]);
   expect(await resolvePublicHost('school.example',resolver)).toEqual([{address:'8.8.8.8',family:4}]);
   await expect(resolvePublicHost('school.example',resolver)).rejects.toThrow('Unsafe Moodle host');
 });
@@ -24,4 +24,10 @@ it('never sends a token outside the validated site root',async () => {
   expect(() => request('https://other.example/webservice/rest/server.php',{body:'wstoken=secret'})).toThrow('outside site root');
   expect(() => request('https://school.example/pluginfile.php/1')).toThrow('outside site root');
   expect(await (await request('https://school.example/moodle/webservice/rest/server.php')).json()).toEqual({ok:true});
+});
+
+it('filters mixed DNS answers to public connection addresses',async () => {
+  const resolver = async () => ['100.64.0.1','fc00::1','198.18.0.1','169.254.169.254','8.8.8.8','2606:4700:4700::1111'].map(address => ({address,family:address.includes(':')?6:4}));
+  expect(await resolvePublicHost('school.example',resolver)).toEqual([{address:'8.8.8.8',family:4},{address:'2606:4700:4700::1111',family:6}]);
+  await expect(resolvePublicHost('school.example',async () => [])).rejects.toThrow('Unsafe Moodle host');
 });

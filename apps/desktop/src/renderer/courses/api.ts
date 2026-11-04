@@ -14,6 +14,8 @@ export interface MoodleApi {
   schools(): Promise<MoodleSchool[]>;
   checkSite(url: string): Promise<import("../../shared/moodle").MoodleSiteCheck>;
   connect(input: IpcRequest<"moodle:connect">): Promise<MoodleAccount>;
+  ssoState(siteUrl: string): Promise<import('../../shared/moodle').MoodleSsoMode | null>;
+  ssoCancel(siteUrl: string): Promise<void>;
   disconnect(accountId: string): Promise<void>;
   overview(): Promise<MoodleOverview>;
   sync(accountId?: string): Promise<void>;
@@ -39,6 +41,8 @@ function createBridgeMoodleApi(): MoodleApi {
     schools: () => call(moodleChannels.schools, {}),
     checkSite: (url) => call(moodleChannels.checkSite, {url}),
     connect: (input) => call(moodleChannels.connect, input),
+    ssoState: (siteUrl) => call(moodleChannels.ssoState, {siteUrl}),
+    ssoCancel: async (siteUrl) => {await call(moodleChannels.ssoCancel, {siteUrl});},
     disconnect: async (accountId) => {
       await call(moodleChannels.disconnect, { accountId });
     },

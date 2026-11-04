@@ -1,3 +1,4 @@
+import { initializeMoodleProtocol } from './moodle/sso-protocol';
 import { log } from './logging';
 import { showAttachedMessage } from './dialogs';
 import { coordinateShutdown } from './shutdown';
@@ -19,6 +20,8 @@ import { developmentCsp, isAppUrl, productionCsp } from "./security";
 import { deleteAllData } from "./services/delete-data";
 import { createIpcRegistrar } from "./ipc/register";
 import { assetHandler } from "./assets";
+
+initializeMoodleProtocol();
 
 protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({ scheme, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } })));
 

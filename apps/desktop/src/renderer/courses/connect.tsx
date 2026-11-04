@@ -34,6 +34,7 @@ export function ConnectDialog({open,onOpenChange,api,onConnected}: {
   const [schools,setSchools] = useState<MoodleSchool[]>([]);
   const [recent,setRecent] = useState<MoodleSiteCheck[]>([]);
   const [busy,setBusy] = useState<'checking'|'connecting' | null>(null);
+  const [ssoMode,setSsoMode] = useState<import('../../shared/moodle').MoodleSsoMode | null>(null);
   const [error,setError] = useState('');
   const sequence = useRef(0);
   useEffect(() => {
@@ -43,6 +44,16 @@ export function ConnectDialog({open,onOpenChange,api,onConnected}: {
     void api.schools().then(items => {if (generation === sequence.current) setSchools(items);}).catch(() => {if (generation === sequence.current) setError('moodle:presets_error');});
     return () => {sequence.current++;};
   },[open,api]);
+  const activeSite = open && flow.step === 'sign-in' && busy === 'connecting' ? flow.site.siteUrl : null;
+  useEffect(() => {
+    setSsoMode(null);
+    if (!activeSite) return;
+    let active = true;
+    const update = () => { void api.ssoState(activeSite).then(mode => {if (active) setSsoMode(mode);}).catch(() => {}); };
+    update();
+    const timer = setInterval(update,250);
+    return () => {active = false;clearInterval(timer);void api.ssoCancel(activeSite).catch(() => {});};
+  },[activeSite,api]);
   const find = async (url = input) => {
     if (!url.trim() || busy) return;
     const generation = ++sequence.current;
@@ -115,6 +126,7 @@ export function ConnectDialog({open,onOpenChange,api,onConnected}: {
         </div>}
         <Button variant="ghost" disabled={!!busy} onClick={() => {setError('');setFlow(flow.step === 'sign-in' ? {step:'result',site:flow.site} : {step:'find'});}}><ArrowLeft />{tr('moodle:back')}</Button>
       </>}
+      {ssoMode && <div role="status"><p>{tr(ssoMode === 'external' ? 'moodle:waiting_browser' : 'moodle:waiting_embedded')}</p><Button variant="ghost" onClick={() => {if (activeSite) void api.ssoCancel(activeSite).catch(() => setError('moodle:connect_error'));}}>{tr('moodle:sso_cancel')}</Button></div>}
       {error && <p className="moodle-connect-error" role="alert">{tr(error)}</p>}
       {busy && <span className="sr-only" role="status">{tr(busy === 'checking' ? 'moodle:checking_site' : 'moodle:connecting')}</span>}
     </DialogContent>
