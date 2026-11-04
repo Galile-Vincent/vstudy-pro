@@ -179,7 +179,7 @@ it('does not link a download after its source revision changes',async () => {
   expect(repository.file(file.id).file.documentId).toBe(null);
   await service.dispose();
 });
-it.each(['requireloginerror','nopermissiontoviewgrades','invalidparameter','accessexception','invalidtoken'])('isolates a course access failure %s',async code => {
+it.each(['nopermissiontoviewgrades','invalidparameter'])('isolates a course access failure %s',async code => {
   const {repository,service,request} = await setup(); await service.sync(account.id);
   const course = repository.overview().courses[0]!;
   const before = repository.course(course.id);
@@ -287,5 +287,38 @@ it('rejects a token issued for a different site before storing it',async () => {
   request.mockImplementation(async (target,options) => String(target).includes('server.php') ? Response.json({userid:42,fullname:'Student',siteurl:'https://other.example'}) : base(target,options));
   await expect(service.connect({siteUrl:'https://ilearning.cycu.edu.tw'})).rejects.toMatchObject({code:'requirecorrectaccess'});
   expect(await secrets.getInMainOnly(moodleSecretId(account.id))).toBe('token');
+  await service.dispose();
+});
+
+it('persists capabilities per account and encrypts the private access key',async () => {
+  const {service,request,repository,secrets,store} = await setup();
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    if (String(options?.body).includes('wsfunction=core_webservice_get_site_info')) return Response.json({userid:42,fullname:'Student',siteurl:'https://ilearning.cycu.edu.tw',release:'4.5',version:'2024100700',functions:[{name:'core_enrol_get_users_courses'}],advancedfeatures:[{name:'enablecompletion',value:1}],userprivateaccesskey:'secret-private-key'});
+    return base(target,options);
+  });
+  expect(await service.sync(account.id)).toEqual({errors:[]});
+  expect(repository.capabilities(account.id)).toEqual({functions:['core_enrol_get_users_courses'],release:'4.5',version:'2024100700',advancedfeatures:[{name:'enablecompletion',value:1}],mobileConfig:{}});
+  expect(await secrets.getInMainOnly(moodleSecretId(account.id))).toBe('{"token":"token","userPrivateAccessKey":"secret-private-key"}');
+  expect(JSON.stringify(store.db.prepare('SELECT * FROM moodle_capabilities').all())).not.toContain('secret-private-key');
+  expect(request.mock.calls.map(call => new URLSearchParams(String(call[1]?.body)).get('wsfunction'))).toEqual(['core_webservice_get_site_info','core_enrol_get_users_courses']);
+  await service.dispose();
+});
+it.each(['invalidtoken','accessexception'])('expires on %s and avoids repeated background reconnects',async code => {
+  const {service,request,repository} = await setup();
+  request.mockResolvedValue(Response.json({errorcode:code}));
+  expect(await service.sync(account.id)).toEqual({errors:['auth']});
+  expect(repository.account(account.id).status).toBe('expired');
+  expect(await service.sync(account.id)).toEqual({errors:['auth']});
+  expect(request.mock.calls.length).toBe(1);
+  await service.dispose();
+});
+it('refuses a reconnect as a different remote user',async () => {
+  const {service,request,repository} = await setup();
+  repository.expired(account.id);
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => String(options?.body).includes('wsfunction=core_webservice_get_site_info') ? Response.json({userid:99,fullname:'Other',siteurl:account.siteUrl}) : base(target,options));
+  await expect(service.connect({siteUrl:account.siteUrl})).rejects.toMatchObject({code:'requirecorrectaccess'});
+  expect(repository.account(account.id).status).toBe('expired');
   await service.dispose();
 });

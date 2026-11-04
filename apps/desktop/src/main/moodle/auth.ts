@@ -1,5 +1,5 @@
 import { z } from 'zod';
-export const tokensSchema = z.object({token:z.string().min(1).max(16384),privateToken:z.string().min(1).max(16384).optional()}).strict();
+export const tokensSchema = z.object({token:z.string().min(1).max(16384),privateToken:z.string().min(1).max(16384).optional(),userPrivateAccessKey:z.string().min(1).max(16384).optional()}).strict();
 export type MoodleTokens = z.infer<typeof tokensSchema>;
 export type AuthCode = 'invalidlogin'|'usernotfullysetup'|'webservices-disabled'|'requirecorrectaccess'|'sso-required'|'cancelled';
 export class MoodleAuthError extends Error {

@@ -1,4 +1,4 @@
-import { moodleMigration, moodleSiteMigration } from './moodle-migration';
+import { moodleMigration, moodleSiteMigration, moodleCapabilitiesMigration } from './moodle-migration';
 import { aiParseMigration, aiParseRollupRepair } from './ai-parse-migration';
 import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
 import { libraryMigration } from "./library-migration";
@@ -97,6 +97,7 @@ export const migrations = [
     CREATE INDEX conversations_updated ON conversations(documentId,updatedAt DESC,id);
   ` },
   { version:15, sql:moodleSiteMigration },
+  { version:16, sql:moodleCapabilitiesMigration },
 ];
 const documentRow = z
   .object({

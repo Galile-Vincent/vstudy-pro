@@ -14,11 +14,16 @@ export interface MoodleSnapshot {
   grades: {remoteKey:string;value:MoodleGradeItem}[];
   files: {url:string;value:MoodleFile}[];
 }
+const capabilitiesSchema = z.object({functions:z.array(z.string()).optional(),release:z.string().optional(),version:z.string().optional(),advancedfeatures:z.array(z.object({name:z.string(),value:z.union([z.string(),z.number(),z.boolean()])})),mobileConfig:z.record(z.string())});
 const payload = z.object({data:z.string()});
 export class MoodleRepository {
   constructor(private readonly db: DatabaseSync) {}
   private rows<T>(sql: string, schema: z.ZodType<T>, ...params: string[]): T[] {
     return this.db.prepare(sql).all(...params).map(row => schema.parse(JSON.parse(payload.parse(row).data)));
+  }
+  capabilities(id: string) { return this.rows('SELECT data FROM moodle_capabilities WHERE accountId=?',capabilitiesSchema,id)[0]; }
+  saveCapabilities(id: string, capabilities: z.infer<typeof capabilitiesSchema>) {
+    this.db.prepare('INSERT INTO moodle_capabilities VALUES (?,?) ON CONFLICT(accountId) DO UPDATE SET data=excluded.data').run(id,JSON.stringify(capabilitiesSchema.parse(capabilities)));
   }
   accounts() { return this.rows('SELECT data FROM moodle_accounts ORDER BY id',moodleAccountSchema); }
   account(id: string): MoodleAccount {

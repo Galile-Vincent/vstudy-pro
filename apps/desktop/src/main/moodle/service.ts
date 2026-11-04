@@ -1,4 +1,4 @@
-import { MoodleAuthError, type MoodleTokens } from './auth';
+import { MoodleAuthError, tokensSchema, type MoodleTokens } from './auth';
 import { normalizeSiteUrl } from './site-url';
 import { moodleFetch } from './site-url';
 import { randomUUID } from 'node:crypto';
@@ -47,6 +47,7 @@ export class MoodleService {
       throw new MoodleAuthError('cancelled');
     }
     this.repository.saveAccount(account);
+    await this.saveCapabilities(account,info,tokens);
     let timer: ReturnType<typeof setTimeout> | undefined;
     try { await Promise.race([this.sync(account.id),new Promise<void>(resolve => { timer = setTimeout(resolve,30_000); })]); }
     finally { clearTimeout(timer); }
@@ -63,11 +64,16 @@ export class MoodleService {
     for (const account of snapshot.accounts) if (account.status === 'connected' && Date.now() - (this.lastAttempt.get(account.id) ?? 0) >= 60_000 && (!account.syncedAt || Date.now() - Date.parse(account.syncedAt) > 5 * 60_000)) void this.sync(account.id);
     return snapshot;
   }
-  async token(id: string): Promise<string> {
-    const token = await this.secrets.getInMainOnly(moodleSecretId(id));
-    if (!token) throw new MoodleError('auth');
-    if (token.startsWith('{')) return (JSON.parse(token) as MoodleTokens).token;
-    return token;
+  private async tokens(id: string): Promise<MoodleTokens> {
+    const stored = await this.secrets.getInMainOnly(moodleSecretId(id));
+    if (!stored) throw new MoodleError('auth');
+    return stored.startsWith('{') ? tokensSchema.parse(JSON.parse(stored)) : {token:stored};
+  }
+  async token(id: string): Promise<string> { return (await this.tokens(id)).token; }
+  private async saveCapabilities(account: MoodleAccount, info: Awaited<ReturnType<MoodleClient['siteInfo']>>, tokens: MoodleTokens) {
+    if (info.userprivateaccesskey) await this.secrets.set(moodleSecretId(account.id),JSON.stringify({...tokens,userPrivateAccessKey:info.userprivateaccesskey}));
+    const previous = this.repository.capabilities(account.id);
+    this.repository.saveCapabilities(account.id,{functions:info.functions?.map(item => item.name),release:info.release,version:info.version,advancedfeatures:info.advancedfeatures,mobileConfig:previous?.mobileConfig ?? {}});
   }
   async markRead(id: string) {
     const item = this.repository.notification(id);
@@ -92,16 +98,25 @@ export class MoodleService {
   }
   private async refresh(id: string) {
     const account = this.repository.account(id);
+    if (account.status === 'expired') throw new MoodleError('auth');
     const client = new MoodleClient(account.siteUrl,await this.token(id),this.request);
     const info = await client.siteInfo();
-    if (info.userid !== account.remoteUserId) throw new MoodleError('auth');
+    if (info.userid !== account.remoteUserId || info.siteurl && normalizeSiteUrl(info.siteurl) !== account.siteUrl) throw new MoodleError('auth');
+    await this.saveCapabilities(account,info,await this.tokens(id));
+    client.setFunctions(info.functions?.map(item => item.name));
+    if (client.wsAvailable('tool_mobile_get_config') && info.functions) {
+      try {
+        const config = await client.mobileConfig();
+        this.repository.saveCapabilities(id,{...this.repository.capabilities(id)!,mobileConfig:Object.fromEntries(config.settings.filter(item => !/token|private|secret|password|sesskey/i.test(item.name)).map(item => [item.name,item.value]))});
+      } catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; }
+    }
     for (const row of this.repository.notificationRecords(id).filter(row => row.value.pendingRemoteRead)) {
       try { await client.markRead(row.remoteId); this.repository.acknowledgeRead(row.value.id); } catch { /* Retry on the next sync. */ }
     }
     const courses = await client.courses(account);
     const errors: string[] = [];
     const optional = async <T>(request: () => Promise<T>, cached: T): Promise<T> => {
-      try { return await request(); } catch (error) { errors.push(error instanceof MoodleError ? error.kind : 'service'); return cached; }
+      try { return await request(); } catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; if (!(error instanceof MoodleError) || error.kind !== 'unsupported') errors.push(error instanceof MoodleError ? error.kind : 'service'); return cached; }
     };
     const cached = courses.flatMap(course => { try { return [this.repository.course(course.id)]; } catch { return []; } });
     const events = await optional(() => client.events(id,courses),cached.flatMap(item => item.deadlines.filter(item => item.kind !== 'assignment')));

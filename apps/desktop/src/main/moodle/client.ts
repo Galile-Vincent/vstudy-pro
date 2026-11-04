@@ -34,12 +34,16 @@ const eventWire = z.object({ id:integer, name:z.string(), courseid:integer.optio
 const messageWire = z.object({id:integer, subject:z.string().optional(), text:optionalText, customdata:optionalText, fullmessage:z.string().nullish(), fullmessagehtml:z.string().optional(), smallmessage:z.string().optional(), timecreated:integer, timeread:integer.nullish(), read:flag.optional(), contexturl:optionalText, courseid:integer.optional()});
 const gradeWire = z.object({ usergrades:z.array(z.object({gradeitems:z.array(z.object({id:integer, itemname:optionalText, gradeformatted:optionalText, grademax:numeric.nullable().optional(), percentageformatted:optionalText, gradedategraded:integer.nullable().optional()}))})) });
 const sectionsWire = z.array(z.object({id:integer, name:z.string().nullish(), modules:z.array(z.object({id:integer, name:z.string(), contents:z.array(z.object({type:z.string(), filename:z.string(), fileurl:optionalText, filesize:integer.refine(value => value >= 0).optional(), mimetype:z.string().optional(), timemodified:integer.optional()})).optional()}))}));
-export const siteInfoSchema = z.object({userid:integer, fullname:z.string(),siteurl:z.string().optional(),version:z.string().optional()});
+export const siteInfoSchema = z.object({userid:integer, fullname:z.string(),siteurl:z.string().optional(),version:z.string().optional(),release:z.string().optional(),functions:z.array(z.object({name:z.string(),version:z.union([z.string(),z.number()]).optional()})).optional(),advancedfeatures:z.array(z.object({name:z.string(),value:z.union([z.string(),z.number(),z.boolean()])})).default([]),userprivateaccesskey:z.string().optional()});
 export { publicConfigSchema } from './discovery';
 
 export class MoodleClient {
+  private functions: Set<string> | undefined;
+  setFunctions(functions: string[] | undefined) { this.functions = functions ? new Set(functions) : undefined; }
+  wsAvailable(name: string) { return !this.functions || this.functions.has(name); }
   constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = moodleFetch) {}
   async call<S extends z.ZodTypeAny>(name: string, params: Record<string,string>, schema: S): Promise<z.output<S>> {
+    if (name !== 'core_webservice_get_site_info' && !this.wsAvailable(name)) throw new MoodleError('unsupported');
     let response: Response;
     try { response = await siteFetch(this.host,this.request)(`${this.host}/webservice/rest/server.php?moodlewsrestformat=json`, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({...params,wstoken:this.token,wsfunction:name}), redirect:'error', signal:AbortSignal.timeout(30_000)}); }
     catch { throw new MoodleError('network'); }
@@ -48,12 +52,13 @@ export class MoodleClient {
     const error = z.object({exception:z.string().optional(),errorcode:z.string().optional(),error:z.string().optional(),message:z.string().optional()}).safeParse(raw);
     if (error.success && (error.data.exception || error.data.errorcode || error.data.error)) {
       const codes = [error.data.errorcode,error.data.exception].map(code => code?.toLowerCase());
-      throw new MoodleError(codes.some(code => code === 'invalidtoken' || code === 'requireloginerror') ? 'auth' : codes.some(code => ['cannotfindexternalfunction','functionnotavailable','coding_exception','accessexception'].includes(code ?? '')) ? 'unsupported' : 'service');
+      throw new MoodleError(codes.some(code => code === 'invalidtoken' || code === 'requireloginerror' || code === 'accessexception') ? 'auth' : codes.some(code => ['cannotfindexternalfunction','functionnotavailable','coding_exception'].includes(code ?? '')) ? 'unsupported' : 'service');
     }
     const parsed = schema.safeParse(raw);
     if (!parsed.success) throw new MoodleError('service');
     return parsed.data;
   }
+  mobileConfig() { return this.call('tool_mobile_get_config',{},z.object({settings:z.array(z.object({name:z.string(),value:z.string()})).default([])})); }
   siteInfo() { return this.call('core_webservice_get_site_info', {}, siteInfoSchema); }
   async fallback<T>(primary: () => Promise<T>, alternative: () => Promise<T>): Promise<T> {
     try { return await primary(); } catch (error) { if (!(error instanceof MoodleError) || error.kind !== 'unsupported') throw error; return alternative(); }

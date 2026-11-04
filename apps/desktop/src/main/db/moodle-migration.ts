@@ -18,3 +18,7 @@ export const moodleSiteMigration = `
 ALTER TABLE moodle_accounts RENAME COLUMN schoolId TO siteUrl;
 UPDATE moodle_accounts SET siteUrl='https://ilearning.cycu.edu.tw',data=json_set(json_remove(data,'$.schoolId'),'$.siteUrl','https://ilearning.cycu.edu.tw','$.siteName','中原大學 CYCU') WHERE siteUrl='cycu';
 `;
+
+export const moodleCapabilitiesMigration = `
+CREATE TABLE moodle_capabilities (accountId TEXT PRIMARY KEY REFERENCES moodle_accounts(id) ON DELETE CASCADE,data TEXT NOT NULL CHECK(json_valid(data)));
+`;

@@ -9,7 +9,7 @@ describe('Moodle response boundary',() => {
   it('maps the fixture responses into the shared contract',async () => {
     const request = fixtureFetch();
     const client = new MoodleClient(schools[0]!.host,'secret-token',request);
-    expect(await client.siteInfo()).toEqual({userid:42,fullname:'Student Example',siteurl:'https://ilearning.cycu.edu.tw'});
+    expect(await client.siteInfo()).toEqual({userid:42,fullname:'Student Example',siteurl:'https://ilearning.cycu.edu.tw',advancedfeatures:[]});
     const courses = await client.courses(account);
     expect(courses[0]).toMatchObject({fullName:'Algorithms',shortName:'CS & Math',progress:42.5,favourite:true,endAt:null});
     expect(await client.assignments(account.id,courses)).toMatchObject([{title:'Homework 1',kind:'assignment',dueAt:'2026-11-07T00:00:00.000Z'}]);
