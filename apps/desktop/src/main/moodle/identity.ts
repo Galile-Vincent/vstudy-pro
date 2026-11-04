@@ -45,13 +45,17 @@ function candidate(raw: string) {
       }
     }
   }
-  // A class suffix makes the last top-level separator a reliable teacher boundary.
   let separator = -1;
   let depth = 0;
   for (let i = 0; i < body.length; i++) {
     if (body[i] === '(') depth++;
     if (body[i] === ')') depth--;
-    if (body[i] === '-' && depth === 0 && separator < 0 && classLabel !== null) separator = i;
+    if (body[i] === '-' && depth === 0 && separator < 0) {
+      const suffix = body.slice(i+1).trim();
+      const names = suffix.split(/、|\s*\/\s*|\s*;\s*/).map(teacherName).filter(Boolean);
+      const teachers = names.length > 0 && names.every(name => /^[\u3400-\u9fff·]{1,5}$/.test(name) || /^[A-Z][A-Z\s,.'-]*,[A-Z\s,.'-]+$/.test(name));
+      if (teachers || !suffix && classLabel !== null) separator = i;
+    }
   }
   const title = (separator < 0 ? body : body.slice(0,separator)).trim();
   if (!title || depth !== 0) return null;

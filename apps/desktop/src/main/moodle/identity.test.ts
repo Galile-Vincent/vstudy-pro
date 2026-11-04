@@ -52,3 +52,9 @@ it.each([
 ] as const)('classifies lifecycle %#',(input,lifecycle,lifecycleSource) => {
  expect(courseLifecycle(input,new Date('2026-07-01T00:00:00Z'))).toEqual({lifecycle,lifecycleSource});
 });
+
+it('preserves hyphens in titles and teacher names, including titles without a class suffix',() => {
+ expect(parseCourseIdentity('1142Object-Oriented Programming (1)-TANG, SONG-NIEN(CSB)[CS1]','1142_CS1')).toMatchObject({title:{zh:null,en:'Object-Oriented Programming (1)'},teachers:[{zh:null,en:'TANG, SONG-NIEN'}]});
+ expect(parseCourseIdentity('1142Object-Oriented Programming(CSB)[CS1]','1142_CS1')).toMatchObject({title:{zh:null,en:'Object-Oriented Programming'},teachers:[]});
+ expect(parseCourseIdentity('1142人工智慧-AI應用-蘇志文[CS1]','1142_CS1')).toMatchObject({title:{zh:'人工智慧-AI應用',en:null},teachers:[{zh:'蘇志文',en:null}]});
+});
