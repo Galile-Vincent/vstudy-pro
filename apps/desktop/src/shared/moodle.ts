@@ -151,6 +151,7 @@ export const moodleOverviewSchema = z
     upcoming: z.array(moodleDeadlineSchema),
     otherNotifications: z.array(moodleNotificationSchema).optional(),
     unreadNotifications: z.number().int().nonnegative(),
+    summaries: z.array(z.object({course:moodleCourseSchema,notifications:z.array(moodleNotificationSchema),reminders:z.array(moodleReminderSchema)}).strict()).optional(),
   })
   .strict();
 export type MoodleOverview = z.infer<typeof moodleOverviewSchema>;

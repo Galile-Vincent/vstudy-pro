@@ -308,7 +308,7 @@ export function createMockMoodleApi(): MoodleApi {
       accounts = [account]; return structuredClone(account);
     },
     disconnect: async accountId => { accounts = accounts.filter(a => a.id !== accountId); },
-    overview: async () => structuredClone({ accounts, courses: active().map(d => d.course), upcoming: active().flatMap(d => d.deadlines).filter(d => !d.submitted).sort((a, b) => a.dueAt.localeCompare(b.dueAt)), unreadNotifications: active().flatMap(d => d.notifications).filter(n => !n.read).length }),
+    overview: async () => structuredClone({ accounts, summaries: active().map(d => ({course:d.course,notifications:d.notifications,reminders:d.reminders})), courses: active().map(d => d.course), upcoming: active().flatMap(d => d.deadlines).filter(d => !d.submitted).sort((a, b) => a.dueAt.localeCompare(b.dueAt)), unreadNotifications: active().flatMap(d => d.notifications).filter(n => !n.read).length }),
     sync: async accountId => { accounts = accounts.map(a => !accountId || a.id === accountId ? { ...a, syncedAt: at(0) } : a); },
     course: async courseId => { const detail = active().find(d => d.course.id === courseId); if (!detail) throw new Error('Course unavailable'); return structuredClone(detail); },
     openFile: async fileId => {

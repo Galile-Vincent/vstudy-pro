@@ -149,7 +149,7 @@ export function Courses({
   useTranslation("moodle");
   const [overview, setOverview] = useState<MoodleOverview>();
   const [detail, setDetail] = useState<MoodleCourseDetail>();
-  const [homeDetails, setHomeDetails] = useState<MoodleCourseDetail[]>([]);
+  const [homeDetails, setHomeDetails] = useState<NonNullable<MoodleOverview["summaries"]>>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(false);
@@ -167,9 +167,7 @@ export function Courses({
       api.overview(),
       courseId ? api.course(courseId) : Promise.resolve(undefined),
     ]);
-    const summaries = courseId
-      ? []
-      : await Promise.all(next.courses.map((course) => api.course(course.id)));
+    const summaries = next.summaries ?? [];
     if (sequence !== refreshSequence.current) return;
     setOverview(next);
     setDetail(course);
