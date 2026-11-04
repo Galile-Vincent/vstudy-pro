@@ -72,3 +72,5 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 .appearance-layout [data-slot=toggle-group-item] { white-space:nowrap; padding-inline:var(--space-2); font-size:var(--type-sm); min-height:2rem; height:auto; }
 .settings-pane { padding-bottom:calc(var(--space-8) * 2); }
 .settings-dialog .provider-row button { font-size:var(--type-base); }
+.settings-control [data-testid=replyLanguage] { width:16rem; min-width:min(16rem,100%); }
+.settings-pane button:not([data-slot=toggle-group-item]),.settings-pane :is(input,textarea,[data-slot=select-trigger]) { font-size:var(--type-base); }
