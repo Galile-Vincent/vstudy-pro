@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { Badge } from '../components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
 import './ui3.css';
@@ -347,13 +348,23 @@ export function LibraryView() {
     columns = grid
       ? Math.max(1, Math.floor((scroller.current?.clientWidth ?? 700) / 260))
       : 1,
-    start = Math.max(0, Math.floor(top / rowHeight) - 2) * columns,
+    start = Math.min(Math.max(0,items.length-columns),Math.max(0, Math.floor(top / rowHeight) - 2) * columns),
     end = Math.min(
       items.length,
       start +
         Math.ceil((scroller.current?.clientHeight ?? 800) / rowHeight + 5) *
           columns,
     );
+  useLayoutEffect(()=>{
+    const viewport=scroller.current;
+    if(!viewport||!selected.length||!bulkHeight)return;
+    const index=items.findIndex(item=>item.document.id===selected[selected.length-1]);
+    if(index<0)return;
+    const rowTop=Math.floor(index/columns)*rowHeight;
+    const available=Math.max(rowHeight,viewport.clientHeight-bulkHeight-24);
+    if(rowTop<viewport.scrollTop)viewport.scrollTop=rowTop;
+    else if(rowTop+rowHeight>viewport.scrollTop+available)viewport.scrollTop=rowTop+rowHeight-available;
+  },[selected,bulkHeight,rowHeight,columns,items]);
   return (
     <section
       onDragOver={(e) => e.preventDefault()}
@@ -637,7 +648,7 @@ export function LibraryView() {
           className="library-results"
           data-view={grid ? "grid" : "list"}
           data-bulk={selected.length>0}
-          style={selected.length?{paddingBottom:bulkHeight+24}:undefined}
+          style={{'--bulkbar-h':`${bulkHeight}px`} as CSSProperties}
           role="list"
           aria-label={tr("library:documents")}
           tabIndex={0}
