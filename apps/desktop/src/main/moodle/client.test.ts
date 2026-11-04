@@ -171,3 +171,51 @@ it('paginates popup rows with offset and limit while keeping duplicate notificat
     const params = new URLSearchParams(String(call[1]?.body));return {offset:params.get('offset'),limit:params.get('limit'),newestfirst:params.get('newestfirst')};
   })).toEqual([{offset:'0',limit:'100',newestfirst:'1'},{offset:'100',limit:'100',newestfirst:'1'}]);
 });
+
+describe('rich course data',() => {
+ it('pages and deduplicates timeline buckets and prefers server classification',async () => {
+  const request = vi.fn<typeof fetch>(async (_url,options) => {
+   const params = new URLSearchParams(String(options?.body));
+   if (params.get('wsfunction') === 'core_enrol_get_users_courses') return Response.json([{id:1,fullname:'1151未來課(CS)[X]',shortname:'1151_X',startdate:0,enddate:0}]);
+   const classification = params.get('classification');
+   if (classification !== 'past') return Response.json({courses:[],nextoffset:0});
+   return Response.json({courses:params.get('offset') === '0' ? [{id:1,fullname:'1151未來課(CS)[X]',shortname:'1151_X',hidden:1,isfavourite:1}] : [{id:1,fullname:'1151未來課(CS)[X]',shortname:'1151_X',hidden:1,isfavourite:1},{id:2,fullname:'Second',shortname:'S'}],nextoffset:2});
+  });
+  const client = new MoodleClient(account.siteUrl,'token',request);
+  client.setFunctions(['core_enrol_get_users_courses','core_course_get_enrolled_courses_by_timeline_classification']);
+  expect((await client.courses(account)).map(course => ({remoteId:course.remoteId,startAt:course.startAt,endAt:course.endAt,favourite:course.favourite,lifecycle:course.identity.lifecycle,source:course.identity.lifecycleSource,hidden:course.identity.hidden}))).toEqual([
+   {remoteId:1,startAt:null,endAt:null,favourite:true,lifecycle:'past',source:'server',hidden:true},
+   {remoteId:2,startAt:null,endAt:null,favourite:false,lifecycle:'past',source:'server',hidden:false},
+  ]);
+ });
+ it('requests filtered app-language data and retries an older server without lang',async () => {
+  const request = vi.fn<typeof fetch>(async (_url,options) => {
+   const params = new URLSearchParams(String(options?.body));
+   return Response.json(params.has('moodlewssettinglang') ? {errorcode:'invalidparameter',message:'Unexpected moodlewssettinglang parameter'} : {userid:42,fullname:'Student'});
+  });
+  const client = new MoodleClient(account.siteUrl,'token',request); client.setLanguage('ja');
+  expect(await client.siteInfo()).toEqual({userid:42,fullname:'Student',advancedfeatures:[]});
+  expect(request.mock.calls.map(call => { const p = new URLSearchParams(String(call[1]?.body)); return [p.get('moodlewssettingfilter'),p.get('moodlewssettinglang')]; })).toEqual([['1','ja'],['1',null]]);
+ });
+ it('deduplicates teachers and prefers editingteacher over teacher and students',async () => {
+  const request = fixtureFetch({'core_completion_get_activities_completion_status':{statuses:[{cmid:8,state:2,tracking:1}]},'core_enrol_get_enrolled_users':[{id:1,fullname:'123 王老師',roles:[{shortname:'editingteacher'}]},{id:1,fullname:'123 王老師',roles:[{shortname:'editingteacher'}]},{id:2,fullname:'Teacher',roles:[{shortname:'teacher'}]},{id:3,fullname:'Student',roles:[{shortname:'student'}]}]});
+  const client = new MoodleClient(account.siteUrl,'token',request);
+  const course = (await client.courses(account))[0]!;
+  expect(await client.teachers(course)).toEqual([{zh:'王老師',en:null}]);
+  expect(await client.completion(course,42)).toEqual([{cmid:8,state:2,tracking:1}]);
+ });
+ it('finds news forums, falls back to paginated discussions, sanitizes and fetches missing post bodies',async () => {
+  const request = fixtureFetch({
+   mod_forum_get_forums_by_courses:[{id:1,type:'general',name:'Chat'},{id:2,type:'news',name:'News'}],
+   mod_forum_get_forum_discussions:{errorcode:'functionnotavailable'},
+   mod_forum_get_forum_discussions_paginated:{discussions:[{id:100,discussion:20,name:'New',created:1730000000,userfullname:'123 Teacher'},{id:101,discussion:19,name:'Old',created:1720000000,message:'<p onclick="evil()">Old</p>'},{id:102,discussion:20,name:'Duplicate',created:1730000000}]},
+   mod_forum_get_discussion_posts:{posts:[{id:100,parent:0,message:'<script>bad</script><p>Body<img src="https://site/?token=secret"></p>'}]},
+  });
+  const client = new MoodleClient(account.siteUrl,'token',request);
+  const course = (await client.courses(account))[0]!;
+  expect((await client.announcements(course)).map(row => ({subject:row.subject,author:row.author,body:row.bodyHtml,url:row.url}))).toEqual([
+   {subject:'New',author:'Teacher',body:'<p>Body</p>',url:'https://ilearning.cycu.edu.tw/mod/forum/discuss.php?d=20'},
+   {subject:'Old',author:'',body:'<p>Old</p>',url:'https://ilearning.cycu.edu.tw/mod/forum/discuss.php?d=19'},
+  ]);
+ });
+});

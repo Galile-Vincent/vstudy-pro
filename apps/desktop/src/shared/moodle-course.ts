@@ -14,6 +14,7 @@ export const moodleCourseIdentitySchema = z
   .object({
     title: localized,
     teachers: z.array(z.object({ zh: z.string().nullable(), en: z.string().nullable() }).strict()),
+    teacherSource: z.enum(["contacts", "enrolment", "name"]).optional(),
     code: z.string().nullable(),
     term: z.string().regex(/^\d{3,4}$/).nullable(),
     classLabel: localized,
@@ -22,6 +23,7 @@ export const moodleCourseIdentitySchema = z
     hidden: z.boolean(),
     hasProgress: z.boolean(),
     format: z.string().nullable(),
+    enableCompletion: z.boolean().optional(),
     summaryHtml: z.string().nullable(),
   })
   .strict();
