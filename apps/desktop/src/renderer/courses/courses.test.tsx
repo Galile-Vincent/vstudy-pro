@@ -99,7 +99,7 @@ describe("Courses", () => {
     const courseId = (await api.overview()).courses[0]!.id;
     const exported = vi
       .fn<MoodleApi["exportCalendar"]>()
-      .mockResolvedValue(undefined);
+      .mockResolvedValue({saved:true});
     api.exportCalendar = exported;
     await mount(api, courseId);
     await tab("Notifications");
@@ -337,4 +337,13 @@ it('shows an upcoming deadline in Up next instead of an overdue item',async () =
   const panel = [...host.querySelectorAll('section')].find(section => section.textContent?.includes('Up next'))!;
   expect(panel.textContent).toContain('Next upcoming');
   expect(panel.textContent).not.toContain('Old overdue');
+});
+it('keeps the calendar proposal when export is cancelled',async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  api.exportCalendar = vi.fn(async () => ({saved:false}));
+  await act(async () => root.render(<CourseAgentPanel detail={detail} api={api} agent={async () => [{type:'export-calendar',deadlineIds:[detail.deadlines[0]!.id]}]} requested={0} onChange={async () => {}} onError={() => {}} />));
+  await click('Explain what I need to prepare'); await click('Approve action');
+  expect(host.querySelectorAll('.moodle-proposal')).toHaveLength(1);
+  expect(host.textContent).not.toContain('Action completed.');
 });

@@ -304,7 +304,7 @@ export function Courses({
   };
   const exportCalendar = async (ids: string[]) => {
     try {
-      await api.exportCalendar(ids);
+      if (!(await api.exportCalendar(ids)).saved) return;
       setNotice(tr("moodle:calendar_exported"));
     } catch {
       failure();

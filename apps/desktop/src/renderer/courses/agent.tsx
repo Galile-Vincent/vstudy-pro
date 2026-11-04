@@ -177,7 +177,7 @@ export function CourseAgentPanel({
           note: action.note,
           createdBy: "agent",
         });
-      else await api.exportCalendar(action.deadlineIds);
+      else if (!(await api.exportCalendar(action.deadlineIds)).saved) { setStatus("idle"); return; }
       setActions((current) => current.filter((a) => a !== action));
       await onChange();
       setStatus("done");
