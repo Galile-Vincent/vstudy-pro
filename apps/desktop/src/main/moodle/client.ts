@@ -26,12 +26,12 @@ const url = (value: string | null | undefined): string | null => {
   try { const parsed = new URL(value); if (parsed.protocol !== 'https:' || parsed.username || parsed.password) return null; for (const key of [...parsed.searchParams.keys()]) if (/token|sesskey/i.test(key)) parsed.searchParams.delete(key); return parsed.href; } catch { return null; }
 };
 const date = (seconds: number | null | undefined): string | null => seconds && seconds > 0 ? new Date(seconds * 1000).toISOString() : null;
-const courseWire = z.object({ id: integer, fullname: z.string(), shortname: z.string(), courseimage: optionalText, overviewfiles: z.array(z.object({fileurl:z.string()})).optional(), progress: numeric.nullable().optional(), startdate: integer.optional(), enddate: integer.optional(), isfavourite: flag.optional() });
+const courseWire = z.object({ id: integer, fullname: z.string(), shortname: z.string(), courseimage: optionalText, overviewfiles: z.array(z.object({fileurl:z.string()})).optional(), progress: numeric.nullable().optional(), startdate: integer.nullish(), enddate: integer.nullish(), isfavourite: flag.optional() });
 const assignmentWire = z.object({ courses: z.array(z.object({ id: integer, assignments: z.array(z.object({ id: integer, name: z.string(), duedate: integer, cmid: integer.optional() })) })) });
-const eventWire = z.object({ id:integer, name:z.string(), courseid:integer.optional(), course:z.object({id:integer}).optional(), timestart:integer.optional(), timedue:integer.optional(), timesort:integer.optional(), url:optionalText, modulename:optionalText, action:z.object({url:optionalText, actionable:flag.optional()}).optional() });
-const messageWire = z.object({id:integer, subject:z.string().optional(), text:optionalText, customdata:optionalText, fullmessage:z.string().optional(), fullmessagehtml:z.string().optional(), smallmessage:z.string().optional(), timecreated:integer, timeread:integer.optional(), read:flag.optional(), contexturl:optionalText, courseid:integer.optional()});
+const eventWire = z.object({ id:integer, name:z.string(), courseid:integer.optional(), course:z.object({id:integer}).optional(), timestart:integer.optional(), timedue:integer.optional(), timesort:integer.optional(), url:optionalText, modulename:optionalText, instance:integer.nullish(), action:z.object({url:optionalText, actionable:flag.optional()}).optional() });
+const messageWire = z.object({id:integer, subject:z.string().optional(), text:optionalText, customdata:optionalText, fullmessage:z.string().nullish(), fullmessagehtml:z.string().optional(), smallmessage:z.string().optional(), timecreated:integer, timeread:integer.nullish(), read:flag.optional(), contexturl:optionalText, courseid:integer.optional()});
 const gradeWire = z.object({ usergrades:z.array(z.object({gradeitems:z.array(z.object({id:integer, itemname:optionalText, gradeformatted:optionalText, grademax:numeric.nullable().optional(), percentageformatted:optionalText, gradedategraded:integer.nullable().optional()}))})) });
-const sectionsWire = z.array(z.object({id:integer, name:z.string(), modules:z.array(z.object({id:integer, name:z.string(), contents:z.array(z.object({type:z.string(), filename:z.string(), fileurl:optionalText, filesize:integer.refine(value => value >= 0).optional(), mimetype:z.string().optional(), timemodified:integer.optional()})).optional()}))}));
+const sectionsWire = z.array(z.object({id:integer, name:z.string().nullish(), modules:z.array(z.object({id:integer, name:z.string(), contents:z.array(z.object({type:z.string(), filename:z.string(), fileurl:optionalText, filesize:integer.refine(value => value >= 0).optional(), mimetype:z.string().optional(), timemodified:integer.optional()})).optional()}))}));
 export const siteInfoSchema = z.object({userid:integer, fullname:z.string()});
 export const publicConfigSchema = z.object({identityproviders:z.array(z.object({url:z.string().url()})).default([])});
 
@@ -45,8 +45,8 @@ export class MoodleClient {
     const raw: unknown = await response.json().catch(() => { throw new MoodleError('service'); });
     const error = z.object({exception:z.string().optional(),errorcode:z.string().optional(),error:z.string().optional(),message:z.string().optional()}).safeParse(raw);
     if (error.success && (error.data.exception || error.data.errorcode || error.data.error)) {
-      const codes = Object.values(error.data).join(' ').toLowerCase();
-      throw new MoodleError(/invalidtoken|requireloginerror|invalid token|session has expired/.test(codes) ? 'auth' : /cannotfindexternalfunction|functionnotavailable|coding_exception|accessexception|invalidparameter/.test(codes) ? 'unsupported' : 'service');
+      const codes = [error.data.errorcode,error.data.exception].map(code => code?.toLowerCase());
+      throw new MoodleError(codes.some(code => code === 'invalidtoken' || code === 'requireloginerror') ? 'auth' : codes.some(code => ['cannotfindexternalfunction','functionnotavailable','coding_exception','accessexception'].includes(code ?? '')) ? 'unsupported' : 'service');
     }
     const parsed = schema.safeParse(raw);
     if (!parsed.success) throw new MoodleError('service');
@@ -63,12 +63,29 @@ export class MoodleClient {
     return courses.map(row => moodleCourseSchema.parse({id:remoteId(account.id,'course',row.id),accountId:account.id,remoteId:row.id,fullName:plainText(row.fullname),shortName:plainText(row.shortname),imageUrl:url(row.courseimage ?? row.overviewfiles?.[0]?.fileurl),progress:row.progress == null ? null : Math.min(100,Math.max(0,row.progress)),startAt:date(row.startdate),endAt:date(row.enddate),favourite:row.isfavourite ?? false}));
   }
   async assignments(accountId: string, courses: MoodleCourse[]) {
+    courses = courses.filter(course => !course.endAt || Date.parse(course.endAt) >= Date.now() - 14 * 86400000);
+    if (!courses.length) return [];
     const params = Object.fromEntries(courses.map((course,index) => [`courseids[${index}]`,String(course.remoteId)]));
     const result = await this.call('mod_assign_get_assignments',params,assignmentWire);
-    return result.courses.flatMap(row => {
+    const deadlines = result.courses.flatMap(row => {
       const course = courses.find(course => course.remoteId === row.id);
       return course ? row.assignments.filter(item => item.duedate > 0).map(item => moodleDeadlineSchema.parse({id:remoteId(accountId,'assignment',item.id),courseId:course.id,title:plainText(item.name),kind:'assignment',dueAt:date(item.duedate),url:item.cmid ? `${this.host}/mod/assign/view.php?id=${item.cmid}` : null,submitted:false})) : [];
     });
+    return this.withSubmissionStatus(deadlines, async item => {
+      const assignment = result.courses.flatMap(row => row.assignments).find(row => remoteId(accountId,'assignment',row.id) === item.id)!;
+      const status = await this.call('mod_assign_get_submission_status',{assignid:String(assignment.id)},z.object({lastattempt:z.object({submission:z.object({status:optionalText}).nullish()}).nullish()}));
+      return status.lastattempt?.submission?.status?.toLowerCase() === 'submitted';
+    });
+  }
+  private async withSubmissionStatus<T extends {submitted:boolean}>(items: T[], status: (item:T) => Promise<boolean>): Promise<T[]> {
+    let next = 0;
+    await Promise.all(Array.from({length:Math.min(4,items.length)},async () => {
+      while (next < items.length) {
+        const item = items[next++]!;
+        item.submitted = await status(item).catch(() => false);
+      }
+    }));
+    return items;
   }
   async events(accountId: string, courses: MoodleCourse[]) {
     const upcoming = () => this.call('core_calendar_get_calendar_upcoming_view',{courseid:'0',categoryid:'0'},z.object({events:z.array(eventWire)}));
@@ -76,20 +93,33 @@ export class MoodleClient {
       const events: z.infer<typeof eventWire>[] = [];
       let after = 0;
       while (true) {
-        const page = await this.call('core_calendar_get_action_events_by_timesort',{timesortfrom:'0',limitnum:'50',...(after ? {aftereventid:String(after)} : {})},z.object({events:z.array(eventWire)}));
+        const page = await this.call('core_calendar_get_action_events_by_timesort',{timesortfrom:String(Math.floor(Date.now()/1000) - 14 * 86400),limittononsuspendedevents:'1',limitnum:'50',...(after ? {aftereventid:String(after)} : {})},z.object({events:z.array(eventWire)}));
         if (!page.events.length) break;
         if (page.events.some(item => events.some(previous => previous.id === item.id))) throw new MoodleError('service');
         events.push(...page.events);
         if (page.events.length < 50) break;
         after = page.events.at(-1)!.id;
       }
-      return events.length ? {events} : upcoming();
+      return {events};
     };
-    const result = await this.fallback(timeline,upcoming);
-    return result.events.flatMap(item => {
+    const action = await this.fallback(timeline,async () => ({events:[]}));
+    const ordinary = await this.fallback(upcoming,async () => ({events:[]}));
+    const result = {events:[...new Map([...ordinary.events,...action.events].map(item => [item.id,item])).values()]};
+    const deadlines = result.events.flatMap(item => {
       const course = courses.find(course => course.remoteId === (item.courseid ?? item.course?.id));
       const dueAt = date(item.timedue ?? item.timesort ?? item.timestart);
-      return course && dueAt ? [moodleDeadlineSchema.parse({id:remoteId(accountId,'event',item.id),courseId:course.id,title:plainText(item.name),kind:item.modulename === 'quiz' ? 'quiz' : item.modulename === 'assign' ? 'assignment' : 'event',dueAt,url:url(item.url ?? item.action?.url),submitted:item.action?.actionable === false})] : [];
+      return course && dueAt ? [moodleDeadlineSchema.parse({id:remoteId(accountId,'event',item.id),courseId:course.id,title:plainText(item.name),kind:item.modulename === 'quiz' ? 'quiz' : item.modulename === 'assign' ? 'assignment' : 'event',dueAt,url:url(item.url ?? item.action?.url),submitted:false})] : [];
+    });
+    return this.withSubmissionStatus(deadlines,async item => {
+      const event = result.events.find(event => remoteId(accountId,'event',event.id) === item.id)!;
+      if (!event.instance) return false;
+      if (item.kind === 'assignment') {
+        const status = await this.call('mod_assign_get_submission_status',{assignid:String(event.instance)},z.object({lastattempt:z.object({submission:z.object({status:optionalText}).nullish()}).nullish()}));
+        return status.lastattempt?.submission?.status?.toLowerCase() === 'submitted';
+      }
+      if (item.kind !== 'quiz') return false;
+      const attempts = await this.call('mod_quiz_get_user_attempts',{quizid:String(event.instance),status:'all'},z.object({attempts:z.array(z.object({state:z.string()}))}));
+      return attempts.attempts.some(attempt => attempt.state === 'finished');
     });
   }
   async notifications(account: MoodleAccount, courses: MoodleCourse[]) {
@@ -117,7 +147,7 @@ export class MoodleClient {
   }
   async files(course: MoodleCourse) {
     const sections = await this.call('core_course_get_contents',{courseid:String(course.remoteId)},sectionsWire);
-    return sections.flatMap(section => section.modules.flatMap(module => (module.contents ?? []).filter(file => file.type === 'file' && file.fileurl && url(file.fileurl)).map(file => ({url:url(file.fileurl)!,value:moodleFileSchema.parse({id:remoteId(course.accountId,'file',`${module.id}:${file.fileurl!.split('?')[0]}`),courseId:course.id,section:plainText(section.name),module:plainText(module.name),name:plainText(file.filename),mime:file.mimetype ?? 'application/octet-stream',size:file.filesize ?? 0,modifiedAt:date(file.timemodified),documentId:null})}))));
+    return sections.flatMap(section => section.modules.flatMap(module => (module.contents ?? []).filter(file => file.type === 'file' && file.fileurl && url(file.fileurl)).map(file => ({url:url(file.fileurl)!,value:moodleFileSchema.parse({id:remoteId(course.accountId,'file',`${module.id}:${file.fileurl!.split('?')[0]}`),courseId:course.id,section:plainText(section.name ?? ''),module:plainText(module.name),name:plainText(file.filename),mime:file.mimetype ?? 'application/octet-stream',size:file.filesize ?? 0,modifiedAt:date(file.timemodified),documentId:null})}))));
   }
 }
 export async function passwordToken(host: string, username: string, password: string, request: Fetch = fetch): Promise<string> {

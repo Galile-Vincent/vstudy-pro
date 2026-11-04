@@ -26,7 +26,7 @@ export interface MoodleApi {
     createdBy?: "user" | "agent";
   }): Promise<MoodleReminder>;
   deleteReminder(id: string): Promise<void>;
-  exportCalendar(deadlineIds: string[]): Promise<void>;
+  exportCalendar(deadlineIds: string[]): Promise<{saved:boolean}>;
 }
 
 const mock = createMockMoodleApi();
@@ -42,7 +42,8 @@ function createBridgeMoodleApi(): MoodleApi {
     },
     overview: () => call(moodleChannels.overview, {}),
     sync: async (accountId) => {
-      await call(moodleChannels.sync, accountId ? { accountId } : {});
+      const result = await call(moodleChannels.sync, accountId ? { accountId } : {});
+      if (result.errors.length) throw new Error('Moodle sync incomplete');
     },
     course: (courseId) => call(moodleChannels.course, { courseId }),
     openFile: async (fileId) => ({
@@ -62,7 +63,7 @@ function createBridgeMoodleApi(): MoodleApi {
       await call(moodleChannels.deleteReminder, { reminderId });
     },
     exportCalendar: async (deadlineIds) => {
-      await call(moodleChannels.exportCalendar, { deadlineIds });
+      return call(moodleChannels.exportCalendar, { deadlineIds });
     },
   } as MoodleApi;
 }

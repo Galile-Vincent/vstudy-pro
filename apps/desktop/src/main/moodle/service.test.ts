@@ -39,7 +39,7 @@ it('syncs twice with stable identities and isolated account records',async () =>
   expect(repository.course(first.courses[0]!.id).reminders).toEqual([reminder]);
   expect(repository.course(first.courses[0]!.id).notifications[0]!.read).toBe(true);
   for (const table of ['courses','notifications','grades','files']) expect(store.db.prepare(`SELECT count(*) AS count FROM moodle_${table}`).get()?.count).toBe(1);
-  expect(store.db.prepare('SELECT count(*) AS count FROM moodle_deadlines').get()?.count).toBe(2);
+  expect(store.db.prepare('SELECT count(*) AS count FROM moodle_deadlines').get()?.count).toBe(3);
   const other = {...account,id:randomUUID(),remoteUserId:43}; repository.saveAccount(other);
   expect(repository.overview(other.id)).toMatchObject({courses:[],upcoming:[],unreadNotifications:0});
   await service.disconnect(account.id);
@@ -91,7 +91,7 @@ it('downloads to a private file, imports through DocumentService, links and dedu
   });
   const request = vi.fn<typeof fetch>(async () => new Response('%PDF-1.4\nMoodle fixture\n%%EOF'));
   const id = await importMoodleFile(repository,original.id,'https://ilearning.cycu.edu.tw','token',documents,request);
-  expect(store.documents.get(id as Parameters<typeof store.documents.get>[0])?.sourceName).toBe('download.pdf');
+  expect(store.documents.get(id as Parameters<typeof store.documents.get>[0])?.sourceName).toBe('lecture.pdf');
   expect(repository.file(original.id).file.documentId).toBe(id);
   expect(await importMoodleFile(repository,original.id,'https://ilearning.cycu.edu.tw','token',documents,request)).toBe(id);
   expect(request).toHaveBeenCalledTimes(1);
@@ -166,5 +166,117 @@ it('reconnects the existing user account without exposing or duplicating its tok
   expect(Object.keys(connected)).not.toContain('token');
   expect(repository.accounts()).toHaveLength(1);
   expect(await secrets.getInMainOnly(moodleSecretId(account.id))).toBe('token');
+  await service.dispose();
+});
+it('does not link a download after its source revision changes',async () => {
+  const {repository,service,store} = await setup(); await service.sync(account.id);
+  const file = repository.course(repository.overview().courses[0]!.id).files[0]!;
+  const documents = {get:() => null,importPath:vi.fn(async () => {
+    store.db.prepare('UPDATE moodle_files SET data=? WHERE id=?').run(JSON.stringify({...file,size:999}),file.id);
+    return {id:'22222222-2222-4222-a222-222222222222'} as Awaited<ReturnType<DocumentService['importPath']>>;
+  })};
+  await importMoodleFile(repository,file.id,'https://ilearning.cycu.edu.tw','token',documents,async () => new Response('pdf'));
+  expect(repository.file(file.id).file.documentId).toBe(null);
+  await service.dispose();
+});
+it.each(['requireloginerror','nopermissiontoviewgrades','invalidparameter','accessexception','invalidtoken'])('isolates a course access failure %s',async code => {
+  const {repository,service,request} = await setup(); await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  const before = repository.course(course.id);
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    const name = new URLSearchParams(String(options?.body)).get('wsfunction');
+    if (name === 'gradereport_user_get_grade_items' || name === 'core_course_get_contents') return Response.json({errorcode:code});
+    return base(target,options);
+  });
+  await service.sync(account.id);
+  expect(repository.account(account.id).status).toBe('connected');
+  expect(repository.course(course.id).grades).toEqual(before.grades);
+  expect(repository.course(course.id).files).toEqual(before.files);
+  await service.dispose();
+});
+it('does not expire an account from a single mark-read failure',async () => {
+  const {service,repository,request} = await setup(); await service.sync(account.id);
+  request.mockResolvedValue(Response.json({errorcode:'requireloginerror'}));
+  await service.markRead(repository.notificationRecords(account.id)[0]!.value.id);
+  expect(repository.account(account.id).status).toBe('connected');
+  await service.dispose();
+});
+it('retains one orphaned reminder when its deadline vanishes',async () => {
+  const {repository,service} = await setup(); await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  const deadline = repository.course(course.id).deadlines[0]!;
+  repository.createReminder({deadlineId:deadline.id,remindAt:'2020-01-01T00:00:00.000Z',note:'Keep',createdBy:'user'});
+  expect(repository.reminders()).toHaveLength(1);
+  repository.apply(account.id,{courses:[course],deadlines:[],notifications:[],grades:[],files:[]});
+  expect(repository.reminders()).toHaveLength(1);
+  expect(repository.reminders()[0]).toMatchObject({orphaned:true,fired:false});
+  const notify = vi.fn(() => true); startReminders(repository,notify)();
+  expect(notify).toHaveBeenCalledTimes(0);
+  await service.dispose();
+});
+it('keeps orphaned reminders safe when a whole course leaves enrollment',async () => {
+  const {repository,service,request} = await setup(); await service.sync(account.id);
+  const deadline = repository.overview().upcoming[0]!;
+  repository.createReminder({deadlineId:deadline.id,remindAt:'2020-01-01T00:00:00.000Z',note:'Keep',createdBy:'user'});
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    const name = new URLSearchParams(String(options?.body)).get('wsfunction');
+    if (name === 'core_enrol_get_users_courses') return Response.json([]);
+    if (name === 'core_course_get_enrolled_courses_by_timeline_classification') return Response.json({courses:[]});
+    return base(target,options);
+  });
+  await service.sync(account.id);
+  expect(repository.reminders()).toHaveLength(1);
+  expect(repository.reminders()[0]).toMatchObject({orphaned:true,fired:false});
+  const notify = vi.fn(() => true); startReminders(repository,notify)();
+  expect(notify).toHaveBeenCalledTimes(0);
+  await service.dispose();
+});
+it('surfaces sync failures and backs off automatic retries',async () => {
+  const {service,request,repository} = await setup();
+  request.mockRejectedValue(new Error('offline'));
+  expect(await service.sync(account.id)).toMatchObject({errors:['network']});
+  const count = request.mock.calls.length;
+  service.overview(); service.overview();
+  await Promise.resolve();
+  expect(request.mock.calls.length).toBe(count);
+  expect(repository.account(account.id).status).toBe('connected');
+  await service.dispose();
+});
+it('applies successful courses when another course fails',async () => {
+  const {service,request,repository} = await setup();
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    const params = new URLSearchParams(String(options?.body));
+    if (params.get('wsfunction') === 'core_enrol_get_users_courses') return Response.json([{id:101,fullname:'One',shortname:'1'},{id:102,fullname:'Two',shortname:'2'}]);
+    if (params.get('courseid') === '101' && params.get('wsfunction') === 'core_course_get_contents') throw new Error('offline');
+    return base(target,options);
+  });
+  expect(await service.sync(account.id)).toMatchObject({errors:['network']});
+  expect(repository.overview().courses.map(item => item.fullName).sort()).toEqual(['One','Two']);
+  expect(repository.course(repository.overview().courses.find(item => item.remoteId === 102)!.id).files).toHaveLength(1);
+  await service.dispose();
+});
+it('finishes initial sync before connect returns',async () => {
+  const {service,repository} = await setup();
+  await service.connect({schoolId:'cycu'});
+  expect(repository.overview().courses).toHaveLength(1);
+  expect(repository.course(repository.overview().courses[0]!.id).files[0]!.name).toBe('lecture.pdf');
+  await service.dispose();
+});
+it('retries an offline mark-read on the next sync',async () => {
+  const {service,repository,request} = await setup(); await service.sync(account.id);
+  const notification = repository.notificationRecords(account.id)[0]!.value;
+  const base = request.getMockImplementation()!;
+  request.mockRejectedValue(new Error('offline'));
+  await service.markRead(notification.id);
+  request.mockImplementation(async (target,options) => new URLSearchParams(String(options?.body)).get('wsfunction') === 'core_message_mark_notification_read' ? Response.json({}) : base(target,options));
+  request.mockClear();
+  await service.sync(account.id);
+  expect(request.mock.calls.filter(call => String(call[1]?.body).includes('wsfunction=core_message_mark_notification_read'))).toHaveLength(1);
+  expect(repository.notification(notification.id)!.read).toBe(true);
+  request.mockClear(); await service.sync(account.id);
+  expect(request.mock.calls.filter(call => String(call[1]?.body).includes('wsfunction=core_message_mark_notification_read'))).toHaveLength(0);
   await service.dispose();
 });

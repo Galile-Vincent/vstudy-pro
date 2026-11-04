@@ -1,4 +1,8 @@
 {
+  "other_notifications": "其他通知",
+  "syncing": "正在同步課程…",
+  "no_courses": "尚無課程",
+
   "courses": "課程",
   "learning_space": "你的學習空間",
   "home_subtitle": "掌握課程近況，專注下一步。",

@@ -331,6 +331,7 @@ export function createMockMoodleApi(): MoodleApi {
       const events = active().flatMap(d => d.deadlines).filter(d => deadlineIds.includes(d.id)).map(d => ['BEGIN:VEVENT', `UID:${d.id}@vstudy`, `DTSTAMP:${stamp(at(0))}`, `DTSTART:${stamp(d.dueAt)}`, `SUMMARY:${escape(d.title)}`, 'END:VEVENT'].join('\r\n'));
       const url = URL.createObjectURL(new Blob([['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//VStudy//Courses//EN', ...events, 'END:VCALENDAR', ''].join('\r\n')], { type: 'text/calendar' }));
       const link = document.createElement('a'); link.href = url; link.download = 'vstudy-deadlines.ics'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return {saved:true};
     },
   };
 }

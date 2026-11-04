@@ -1,4 +1,8 @@
 {
+  "other_notifications": "その他の通知",
+  "syncing": "コースを同期中…",
+  "no_courses": "コースはまだありません",
+
   "courses": "コース",
   "learning_space": "学びのスペース",
   "home_subtitle": "コースを見渡して、次の一歩に集中しましょう。",

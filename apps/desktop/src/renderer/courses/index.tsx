@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -20,6 +20,7 @@ import type {
   MoodleCourseDetail,
   MoodleDeadline,
   MoodleOverview,
+  MoodleNotification,
   MoodleSchool,
 } from "../../shared/moodle";
 import type { Document } from "../../shared";
@@ -242,7 +243,9 @@ export function Courses({
   const [tab, setTab] = useState<Tab>("overview");
   const [opening, setOpening] = useState<string>();
   const [agentRequest, setAgentRequest] = useState(0);
+  const refreshSequence = useRef(0);
   const refresh = useCallback(async () => {
+    const sequence = ++refreshSequence.current;
     const [next, schoolList, course] = await Promise.all([
       api.overview(),
       api.schools(),
@@ -251,6 +254,7 @@ export function Courses({
     const summaries = courseId
       ? []
       : await Promise.all(next.courses.map((course) => api.course(course.id)));
+    if (sequence !== refreshSequence.current) return;
     setOverview(next);
     setSchools(schoolList);
     setDetail(course);
@@ -264,50 +268,34 @@ export function Courses({
     setTab("overview");
     setAgentRequest(0);
     setNotice("");
-    void Promise.all([
-      api.overview(),
-      api.schools(),
-      courseId ? api.course(courseId) : Promise.resolve(undefined),
-    ])
-      .then(async ([next, schoolList, course]) => {
-        const summaries = courseId
-          ? []
-          : await Promise.all(
-              next.courses.map((course) => api.course(course.id)),
-            );
-        if (current) {
-          setOverview(next);
-          setSchools(schoolList);
-          setDetail(course);
-          setHomeDetails(summaries);
-          setError(false);
-        }
-      })
-      .catch(() => {
-        if (current) setError(true);
-      })
-      .finally(() => {
-        if (current) setLoading(false);
-      });
+    void refresh().catch(() => {
+      if (current) setError(true);
+    }).finally(() => {
+      if (current) setLoading(false);
+    });
     return () => {
       current = false;
+      refreshSequence.current++;
     };
-  }, [api, courseId]);
+  }, [refresh]);
+  useEffect(() => {
+    if (!overview?.accounts.some(account => account.status === 'connected' && !account.syncedAt)) return;
+    const timer = setInterval(() => { void refresh().catch(() => setError(true)); },2000);
+    return () => clearInterval(timer);
+  }, [overview,refresh]);
+
   const failure = () => setNotice(tr("moodle:action_error"));
   const sync = async () => {
     setSyncing(true);
-    try {
-      await api.sync();
-      await refresh();
-    } catch {
-      setError(true);
-    } finally {
-      setSyncing(false);
-    }
+    let incomplete = false;
+    try { await api.sync(); } catch { incomplete = true; }
+    try { await refresh(); } catch { incomplete = true; }
+    setError(incomplete);
+    setSyncing(false);
   };
   const exportCalendar = async (ids: string[]) => {
     try {
-      await api.exportCalendar(ids);
+      if (!(await api.exportCalendar(ids)).saved) return;
       setNotice(tr("moodle:calendar_exported"));
     } catch {
       failure();
@@ -383,8 +371,8 @@ export function Courses({
     ) : (
       <p className="moodle-empty-inline">{tr("moodle:no_deadlines")}</p>
     );
-  const notifications = (limit?: number) => {
-    const items = [...(detail?.notifications ?? [])]
+  const notifications = (limit?: number, source: MoodleNotification[] = detail?.notifications ?? []) => {
+    const items = [...source]
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, limit);
     return items.length ? (
@@ -400,6 +388,7 @@ export function Courses({
                 {!n.read && (
                   <span
                     className="moodle-unread"
+                    role="img"
                     aria-label={tr("moodle:unread")}
                   />
                 )}
@@ -415,10 +404,11 @@ export function Courses({
                   onClick={async () => {
                     try {
                       await api.markRead(n.id);
-                      await refresh();
                     } catch {
                       failure();
+                      return;
                     }
+                    await refresh().catch(() => setError(true));
                   }}
                 >
                   <Check />
@@ -677,7 +667,7 @@ export function Courses({
                       </div>
                       {deadlines(
                         detail.deadlines
-                          .filter((d) => !d.submitted)
+                          .filter((d) => !d.submitted && Date.parse(d.dueAt) >= Date.now())
                           .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
                           .slice(0, 1),
                       )}
@@ -936,14 +926,13 @@ export function Courses({
               </div>
               <div className="moodle-grid">
                 {overview.courses.map((course) => (
-                  <button
+                  <article
                     key={course.id}
                     className="moodle-course-card"
-                    onClick={() => onCourse(course.id)}
                   >
                     <Cover course={course} />
                     <div className="moodle-card-body">
-                      <h3>{course.fullName}</h3>
+                      <h3><button type="button" onClick={() => onCourse(course.id)}>{course.fullName}</button></h3>
                       <div className="moodle-progress-label">
                         <span>{tr("moodle:progress")}</span>
                         <strong>
@@ -980,7 +969,7 @@ export function Courses({
                         </span>
                       </footer>
                     </div>
-                  </button>
+                  </article>
                 ))}
               </div>
             </section>
@@ -989,14 +978,18 @@ export function Courses({
           !error && (
             <div className="moodle-empty">
               <GraduationCap />
-              <h2>{tr("moodle:empty_title")}</h2>
-              <p>{tr("moodle:empty_description")}</p>
-              <Button onClick={() => setConnect(true)}>
+              <h2>{tr(overview?.accounts.length ? overview.accounts.some(account => !account.syncedAt) ? "moodle:syncing" : "moodle:no_courses" : "moodle:empty_title")}</h2>
+              {!overview?.accounts.length && <p>{tr("moodle:empty_description")}</p>}
+              {!overview?.accounts.length && <Button onClick={() => setConnect(true)}>
                 {tr("moodle:connect_school")}
-              </Button>
+              </Button>}
             </div>
           )
         )}
+        {!courseId && Boolean(overview?.otherNotifications?.length) && <section className="moodle-panel">
+          <h2>{tr("moodle:other_notifications")}</h2>
+          {notifications(undefined,overview?.otherNotifications)}
+        </section>}
         <ConnectDialog
           open={connect}
           onOpenChange={setConnect}

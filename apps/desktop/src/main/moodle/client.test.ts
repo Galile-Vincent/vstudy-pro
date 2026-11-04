@@ -13,7 +13,7 @@ describe('Moodle response boundary',() => {
     const courses = await client.courses(account);
     expect(courses[0]).toMatchObject({fullName:'Algorithms',shortName:'CS & Math',progress:42.5,favourite:true,endAt:null});
     expect(await client.assignments(account.id,courses)).toMatchObject([{title:'Homework 1',kind:'assignment',dueAt:'2026-11-07T00:00:00.000Z'}]);
-    expect(await client.events(account.id,courses)).toMatchObject([{title:'Quiz & review',kind:'quiz',submitted:true}]);
+    expect(await client.events(account.id,courses)).toMatchObject([{title:'Class event',kind:'event',submitted:false},{title:'Quiz & review',kind:'quiz',submitted:true}]);
     expect(await client.notifications(account,courses)).toMatchObject([{remoteId:501,value:{subject:'Prepare',body:'Read chapter <2>',read:false,courseId:courses[0]!.id}}]);
     expect(await client.grades(courses[0]!,42)).toMatchObject([{remoteKey:'601',value:{grade:'8',max:10,percentage:80}}]);
     expect(await client.files(courses[0]!)).toMatchObject([{value:{name:'lecture.pdf',section:'Week 1',documentId:null,size:123}}]);
@@ -22,7 +22,7 @@ describe('Moodle response boundary',() => {
     expect(request.mock.calls[0]![1]?.redirect).toBe('error');
   });
   it('uses course, calendar and read-status notification fallbacks',async () => {
-    const unsupported = {exception:'invalid_parameter_exception',errorcode:'invalidparameter'};
+    const unsupported = {errorcode:'functionnotavailable'};
     const request = fixtureFetch({'core_enrol_get_users_courses':unsupported,'core_calendar_get_action_events_by_timesort':unsupported});
     const base = request.getMockImplementation()!;
     request.mockImplementation(async (target,options) => {
@@ -72,4 +72,68 @@ describe('SSO callback',() => {
     for (const url of ['https://ilearning.cycu.edu.tw/login','https://login.microsoftonline.com/common']) expect(allowsLoginNavigation(schools[0]!,url)).toBe(true);
     for (const url of ['http://ilearning.cycu.edu.tw','https://ilearning.cycu.edu.tw.evil.example','https://login.microsoftonline.com@evil.example','https://evil.example','file:///etc/passwd','https://ilearning.cycu.edu.tw:444']) expect(allowsLoginNavigation(schools[0]!,url)).toBe(false);
   });
+});
+
+it('accepts nullable optional Moodle fields',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({
+    core_enrol_get_users_courses:[{id:101,fullname:'Course',shortname:'CS',startdate:null}],
+    core_message_get_messages:{messages:[{id:1,timecreated:1700000000,timeread:null,fullmessage:null}]},
+    core_course_get_contents:[{id:1,name:null,modules:[{id:2,name:'Module',contents:[{type:'file',filename:'a.pdf',fileurl:'https://ilearning.cycu.edu.tw/pluginfile.php/1/a.pdf'}]}]}],
+  }));
+  const courses = await client.courses(account);
+  expect(courses[0]!.startAt).toBe(null);
+  expect((await client.notifications(account,courses))[0]!.value.read).toBe(false);
+  expect((await client.files(courses[0]!))[0]!.value.section).toBe('');
+});
+
+it('accepts all four Swift callback site variants',() => {
+  for (const site of ['https://school.example','https://school.example/','http://school.example','http://school.example/']) {
+    const signature = createHash('md5').update(site + 'passport').digest('hex');
+    expect(verifyCallback(`vstudymoodle://token=${Buffer.from(`${signature}:::token`).toString('base64')}`,'https://school.example','passport')).toBe('token');
+  }
+});
+it('uses submission and attempt status rather than actionability',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({
+    mod_assign_get_submission_status:{lastattempt:{submission:{status:'submitted'}}},
+    core_calendar_get_action_events_by_timesort:{events:[{id:401,name:'Quiz',courseid:101,timesort:1794096000,modulename:'quiz',instance:55,action:{actionable:false}}]},
+    mod_quiz_get_user_attempts:{attempts:[{state:'inprogress'}]},
+  }));
+  const courses = await client.courses(account);
+  expect((await client.assignments(account.id,courses))[0]!.submitted).toBe(true);
+  expect((await client.events(account.id,courses)).find(item => item.kind === 'quiz')!.submitted).toBe(false);
+});
+it('keeps an assignment visible when submission status is unavailable',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({mod_assign_get_submission_status:{errorcode:'requireloginerror'}}));
+  expect((await client.assignments(account.id,await client.courses(account)))[0]!.submitted).toBe(false);
+});
+it('resolves assignment calendar event submission status when no assignment list is available',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({
+    core_calendar_get_action_events_by_timesort:{events:[{id:401,name:'Assignment',courseid:101,timesort:1794096000,modulename:'assign',instance:201,action:{actionable:false}}]},
+    mod_assign_get_submission_status:{lastattempt:{submission:{status:'submitted'}}},
+  }));
+  const events = await client.events(account.id,await client.courses(account));
+  expect(events.find(item => item.kind === 'assignment')!.submitted).toBe(true);
+});
+it('classifies only exact error codes at each call boundary',async () => {
+  for (const code of ['requireloginerror','nopermissiontoviewgrades','invalidparameter']) {
+    const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({core_webservice_get_site_info:{errorcode:code,message:'invalid token function is not available'}}));
+    await expect(client.siteInfo()).rejects.toMatchObject({kind:code === 'requireloginerror' ? 'auth' : 'service'});
+  }
+});
+it('fetches ordinary calendar events alongside action events',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch());
+  expect((await client.events(account.id,await client.courses(account))).map(item => item.title)).toEqual(['Class event','Quiz & review']);
+});
+it('requests a fourteen-day action window and skips long-ended assignments',async () => {
+  vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-04T00:00:00Z'));
+  try {
+    const request = fixtureFetch(); const client = new MoodleClient(schools[0]!.host,'token',request);
+    const courses = await client.courses(account); await client.events(account.id,courses);
+    const params = new URLSearchParams(String(request.mock.calls.find(call => String(call[1]?.body).includes('wsfunction=core_calendar_get_action_events_by_timesort'))![1]?.body));
+    expect(params.get('timesortfrom')).toBe('1792540800');
+    expect(params.get('limittononsuspendedevents')).toBe('1');
+    request.mockClear();
+    expect(await client.assignments(account.id,[{...courses[0]!,endAt:'2020-01-01T00:00:00.000Z'}])).toEqual([]);
+    expect(request).toHaveBeenCalledTimes(0);
+  } finally { vi.useRealTimers(); }
 });

@@ -99,7 +99,7 @@ describe("Courses", () => {
     const courseId = (await api.overview()).courses[0]!.id;
     const exported = vi
       .fn<MoodleApi["exportCalendar"]>()
-      .mockResolvedValue(undefined);
+      .mockResolvedValue({saved:true});
     api.exportCalendar = exported;
     await mount(api, courseId);
     await tab("Notifications");
@@ -306,6 +306,7 @@ describe("Courses", () => {
     );
     expect((await api.course(detail.course.id)).reminders[0]?.createdBy).toBe("agent");
     expect(host.textContent).toContain("Action completed.");
+    expect(document.activeElement?.className).toBe("moodle-agent");
   });
 });
 
@@ -328,4 +329,64 @@ it("groups overdue, soon, later, and submitted deadlines", () => {
     "later",
   );
   expect(deadlineGroup({ ...base, submitted: true }, now)).toBe("done");
+});
+it('shows an upcoming deadline in Up next instead of an overdue item',async () => {
+  const api = createMockMoodleApi(); const overview = await api.overview();
+  const detail = await api.course(overview.courses[0]!.id);
+  api.course = async () => ({...detail,deadlines:[{...detail.deadlines[0]!,title:'Old overdue',dueAt:'2020-01-01T00:00:00.000Z',submitted:false},{...detail.deadlines[0]!,title:'Next upcoming',dueAt:'2099-01-01T00:00:00.000Z',submitted:false}]});
+  await mount(api,detail.course.id);
+  const panel = [...host.querySelectorAll('section')].find(section => section.textContent?.includes('Up next'))!;
+  expect(panel.textContent).toContain('Next upcoming');
+  expect(panel.textContent).not.toContain('Old overdue');
+});
+it('keeps the calendar proposal when export is cancelled',async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  api.exportCalendar = vi.fn(async () => ({saved:false}));
+  await act(async () => root.render(<CourseAgentPanel detail={detail} api={api} agent={async () => [{type:'export-calendar',deadlineIds:[detail.deadlines[0]!.id]}]} requested={0} onChange={async () => {}} onError={() => {}} />));
+  await click('Explain what I need to prepare'); await click('Approve action');
+  expect(host.querySelectorAll('.moodle-proposal')).toHaveLength(1);
+  expect(host.textContent).not.toContain('Action completed.');
+});
+it('shows and marks account-wide notifications read on Courses home',async () => {
+  const api = createMockMoodleApi(); const original = await api.overview();
+  const detail = await api.course(original.courses[0]!.id);
+  let read = false;
+  api.overview = async () => ({...original,otherNotifications:[{...detail.notifications[0]!,courseId:null,subject:'School notice',read}],unreadNotifications:read ? 0 : 1});
+  api.markRead = async () => {read = true;};
+  await mount(api);
+  expect(host.textContent).toContain('Other notifications');
+  expect(host.textContent).toContain('School notice');
+  await click('Mark as read');
+  expect(host.querySelector('.moodle-notification')?.getAttribute('data-unread')).toBe('false');
+});
+it('does not replace newer refresh state with an older response',async () => {
+  const api = createMockMoodleApi(); const original = await api.overview();
+  const detail = await api.course(original.courses[0]!.id);
+  api.overview = async () => ({...original,otherNotifications:[{...detail.notifications[0]!,courseId:null}]});
+  await mount(api);
+  const pending: ((value: typeof original) => void)[] = [];
+  api.overview = () => new Promise(resolve => pending.push(resolve));
+  await click('Mark as read'); await click('Mark as read');
+  await act(async () => pending[1]!({...original,courses:[{...original.courses[0]!,fullName:'New response'}]}));
+  await act(async () => pending[0]!({...original,courses:[{...original.courses[0]!,fullName:'Old response'}]}));
+  expect(host.textContent).toContain('New response');
+  expect(host.textContent).not.toContain('Old response');
+});
+it('reports a refresh failure separately after a successful mark-read',async () => {
+  const api = createMockMoodleApi(); const courseId = (await api.overview()).courses[0]!.id;
+  await mount(api,courseId); await tab('Notifications');
+  api.overview = async () => {throw new Error('offline');};
+  await click('Mark as read');
+  expect(host.textContent).not.toContain('Something went wrong');
+  expect(host.querySelector('[role=alert]')?.textContent).toContain('Showing your last synced courses.');
+});
+
+it('uses semantic course cards and labels unread indicators',async () => {
+  const api = createMockMoodleApi(); await mount(api);
+  expect(host.querySelectorAll('button h3, button progress')).toHaveLength(0);
+  expect(host.querySelectorAll('article.moodle-course-card button')).toHaveLength(3);
+  await mount(api,(await api.overview()).courses[0]!.id); await tab('Notifications');
+  expect(host.querySelector('.moodle-unread')?.getAttribute('role')).toBe('img');
+  expect(host.querySelector('.moodle-unread')?.getAttribute('aria-label')).toBe('Unread');
 });

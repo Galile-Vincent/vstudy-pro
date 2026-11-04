@@ -7,8 +7,9 @@ import { MoodleRepository } from './repository';
 import { schoolById } from './schools';
 
 export class MoodleService {
-  private readonly pending = new Map<string,Promise<void>>();
+  private readonly pending = new Map<string,Promise<{errors:string[]}>>();
   private stopped = false;
+  private readonly lastAttempt = new Map<string,number>();
   constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(school: MoodleSchool, accept: (token: string) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = fetch) {}
   private readonly connecting = new Set<string>();
   async connect(input: {schoolId:string;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
@@ -33,8 +34,10 @@ export class MoodleService {
       throw new Error('Moodle login cancelled');
     }
     this.repository.saveAccount(account);
-    void this.sync(account.id);
-    return account;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try { await Promise.race([this.sync(account.id),new Promise<void>(resolve => { timer = setTimeout(resolve,30_000); })]); }
+    finally { clearTimeout(timer); }
+    return this.repository.account(account.id);
   }
   async disconnect(id: string) {
     this.repository.account(id);
@@ -44,7 +47,7 @@ export class MoodleService {
   }
   overview(accountId?: string) {
     const snapshot = this.repository.overview(accountId);
-    for (const account of snapshot.accounts) if (account.status === 'connected' && (!account.syncedAt || Date.now() - Date.parse(account.syncedAt) > 5 * 60_000)) void this.sync(account.id);
+    for (const account of snapshot.accounts) if (account.status === 'connected' && Date.now() - (this.lastAttempt.get(account.id) ?? 0) >= 60_000 && (!account.syncedAt || Date.now() - Date.parse(account.syncedAt) > 5 * 60_000)) void this.sync(account.id);
     return snapshot;
   }
   async token(id: string): Promise<string> {
@@ -58,15 +61,17 @@ export class MoodleService {
     this.repository.markRead(id);
     const account = this.repository.account(item.accountId);
     const remote = this.repository.notificationRecords(account.id).find(row => row.value.id === id)!;
-    try { await new MoodleClient(schoolById(account.schoolId).host,await this.token(account.id),this.request).markRead(remote.remoteId); }
-    catch (error) { if (error instanceof MoodleError && error.kind === 'auth' && this.repository.accounts().some(row => row.id === account.id)) this.repository.expired(account.id); }
+    try { await new MoodleClient(schoolById(account.schoolId).host,await this.token(account.id),this.request).markRead(remote.remoteId); this.repository.acknowledgeRead(id); }
+    catch { /* Keep the pending remote read for the next sync. */ }
   }
-  sync(id: string): Promise<void> {
-    if (this.stopped) return Promise.resolve();
+  sync(id: string): Promise<{errors:string[]}> {
+    if (this.stopped) return Promise.resolve({errors:[]});
     const current = this.pending.get(id);
     if (current) return current;
+    this.lastAttempt.set(id,Date.now());
     const work = this.refresh(id).catch(error => {
       if (error instanceof MoodleError && error.kind === 'auth' && this.repository.accounts().some(account => account.id === id)) this.repository.expired(id);
+      return {errors:[error instanceof MoodleError ? error.kind : 'service']};
     }).finally(() => this.pending.delete(id));
     this.pending.set(id,work);
     return work;
@@ -76,23 +81,32 @@ export class MoodleService {
     const client = new MoodleClient(schoolById(account.schoolId).host,await this.token(id),this.request);
     const info = await client.siteInfo();
     if (info.userid !== account.remoteUserId) throw new MoodleError('auth');
+    for (const row of this.repository.notificationRecords(id).filter(row => row.value.pendingRemoteRead)) {
+      try { await client.markRead(row.remoteId); this.repository.acknowledgeRead(row.value.id); } catch { /* Retry on the next sync. */ }
+    }
     const courses = await client.courses(account);
+    const errors: string[] = [];
     const optional = async <T>(request: () => Promise<T>, cached: T): Promise<T> => {
-      try { return await request(); } catch (error) { if (error instanceof MoodleError && error.kind === 'unsupported') return cached; throw error; }
+      try { return await request(); } catch (error) { errors.push(error instanceof MoodleError ? error.kind : 'service'); return cached; }
     };
     const cached = courses.flatMap(course => { try { return [this.repository.course(course.id)]; } catch { return []; } });
-    const assignments = await optional(() => client.assignments(id,courses),cached.flatMap(item => item.deadlines.filter(item => item.kind === 'assignment')));
     const events = await optional(() => client.events(id,courses),cached.flatMap(item => item.deadlines.filter(item => item.kind !== 'assignment')));
     const notifications = await optional(() => client.notifications(account,courses),this.repository.notificationRecords(id).map(row => ({...row,value:{...row.value,courseId:courses.some(course => course.id === row.value.courseId) ? row.value.courseId : null}})));
-    const grades = [];
-    const files = [];
+    const active = () => !this.stopped && this.repository.accounts().some(account => account.id === id);
     for (const course of courses) {
-      grades.push(...await client.grades(course,account.remoteUserId).catch(error => { if (error instanceof MoodleError && error.kind === 'unsupported') return this.repository.gradeRecords(course.id); throw error; }));
-      files.push(...await client.files(course).catch(error => { if (error instanceof MoodleError && error.kind === 'unsupported') return this.repository.fileRecords(course.id); throw error; }));
+      const assignments = await optional(() => client.assignments(id,[course]),cached.find(item => item.course.id === course.id)?.deadlines.filter(item => item.kind === 'assignment') ?? []);
+      const grades = await optional(() => client.grades(course,account.remoteUserId),this.repository.gradeRecords(course.id));
+      const files = await optional(() => client.files(course),this.repository.fileRecords(course.id));
+      const matches = (event: typeof events[number]) => assignments.some(assignment => assignment.courseId === event.courseId && (assignment.url === event.url && event.url !== null || assignment.title === event.title && assignment.dueAt === event.dueAt));
+      const deadlines = [...assignments,...events.filter(event => event.courseId === course.id && !matches(event))];
+      if (active()) {
+        try { this.repository.apply(id,{courses:[course],deadlines,notifications:[],grades,files},course.id); }
+        catch { errors.push('service'); }
+      }
     }
-    const matches = (assignment: typeof assignments[number], event: typeof events[number]) => assignment.courseId === event.courseId && (assignment.url === event.url && event.url !== null || assignment.title === event.title && assignment.dueAt === event.dueAt);
-    const deadlines = [...assignments.map(assignment => ({...assignment,submitted:events.find(event => matches(assignment,event))?.submitted ?? assignment.submitted})),...events.filter(event => !assignments.some(assignment => matches(assignment,event)))];
-    if (!this.stopped && this.repository.accounts().some(account => account.id === id)) this.repository.apply(id,{courses,deadlines,notifications,grades,files});
+    if (active()) this.repository.apply(id,{courses,deadlines:[],notifications,grades:[],files:[]},'@notifications');
+    return {errors};
   }
+
   async dispose() { this.stopped = true; await Promise.allSettled(this.pending.values()); }
 }
