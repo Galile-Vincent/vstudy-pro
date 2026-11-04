@@ -1,0 +1,11 @@
+# Moodle performance investigation
+
+The claim under test is that removing the home detail fan-out and historical-course eager work reduces cold-start calls and wall time at 120 ms per request. The local TLS transport is injected through the existing Fetch parameter. Only that test transport accepts the generated certificate and loopback address. Production network guards are unchanged. This benchmark measures orchestration, not production DNS, TLS setup, Electron rendering, or actual CYCU latency.
+
+The fixture has 47 courses, six current courses, 16 sections and 128 modules per course, eight assignments per current course, and a teaching participant. Responses include realistic HTML descriptions. A 5 ms processing delay is added to the configurable RTT. Error counts and returned sections are asserted. Every run starts with a fresh in-memory database and service. The test transport reuses TLS connections on both sides to isolate call scheduling. Run-to-run measurements are sequential, not alternated. No real-account speedup is claimed.
+
+The machine has 12 cores. Initial load averages were 2.40, 2.65, 2.82. Throughput checkpoint is five baseline runs, inspect call counts and critical-path waits, then one independently checked change per commit. The implementation stays in this worktree. As an implementation sub-agent, all exploration and implementation run in-thread.
+
+Code ownership is already suitable. MoodleClient maps remote payloads, MoodleService owns freshness and concurrency, MoodleRepository persists snapshots in savepoints, typed IPC validates boundaries, and Courses owns rendering. Two candidate designs are a queue around whole course refreshes or a queue around individual remote calls. The latter allows visible contents to pass background panel requests and bounds network pressure across both sync and detail without holding a permit while awaiting child requests.
+
+Reference evidence is in CYCUMoodleCourseCatalogProvider.swift, which limits optional instructor enrichment, and iLearningCourseDetailViewModel.swift, which applies cached data with a five-minute TTL and fetches this-week providers with async let. Repository apply and saveDetail already use savepoints. No per-row-commit fix is justified.
