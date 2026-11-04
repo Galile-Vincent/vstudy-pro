@@ -26,6 +26,13 @@ try {
  const before=await entrances();await page.locator('#welcome-pause').click();await page.waitForTimeout(100);await page.locator('#welcome-pause').click();const after=await entrances();assert.deepEqual(after.map(a=>a.name),before.map(a=>a.name));assert.ok(after.every((a,i)=>a.time>=before[i].time));assert.ok(await page.locator('#welcome-title .w-word').evaluateAll(nodes=>nodes.every(n=>window.getComputedStyle(n).opacity==='1')));results.resumeDoesNotReplay=true;
  await page.emulateMedia({reducedMotion:'reduce'});
 
+ await page.getByRole('button',{name:'Go to Models',exact:true}).click();
+ await page.getByRole('button',{name:'Set up a model',exact:true}).click();
+ await page.locator('.settings-dialog[data-state=open]').waitFor();
+ await page.keyboard.press('Escape');
+ await page.locator('.settings-dialog').waitFor({state:'hidden'});
+ await page.locator('.welcome').waitFor();results.settingsEscapeKeepsTour=true;
+
  await page.getByRole('button',{name:'Go to Demo',exact:true}).click();await page.locator('#w-demo-title:focus').waitFor();results.dotFocus=true;
  await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,chatSide:'right'});});await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('#welcome-entry').click();await page.locator('.demo-stage[data-side=right]').waitFor();results.chatSideMirrorsSettings=true;
  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2));

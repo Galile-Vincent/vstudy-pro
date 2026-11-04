@@ -102,7 +102,6 @@ function ProviderCard({ id }: { id: typeof PROVIDER_KINDS[number] }) {
 export default function WelcomeView() {
   const { i18n } = useTranslation();
   const { navigate, closeWelcome } = useNavigate();
-  useEffect(() => { const escape=(event:KeyboardEvent)=>{if(event.key === "Escape" && !document.querySelector("dialog[open]")) closeWelcome();}; window.addEventListener("keydown",escape); return ()=>window.removeEventListener("keydown",escape); },[closeWelcome]);
   const reduced = useReducedMotion();
   const language = systemLanguage(i18n.language);
   const [paused, setPaused] = useState(() => { try { return localStorage.getItem('vstudy-welcome-motion') === 'paused'; } catch { return false; } });
@@ -113,6 +112,7 @@ export default function WelcomeView() {
   const [recent, setRecent] = useState<Document>();
   const [providers, setProviders] = useState<Providers>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  useEffect(() => { const escape=(event:KeyboardEvent)=>{if(event.key === "Escape" && !settingsOpen && !event.defaultPrevented) closeWelcome();}; window.addEventListener("keydown",escape); return ()=>window.removeEventListener("keydown",escape); },[closeWelcome,settingsOpen]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const root = useRef<HTMLElement>(null);
