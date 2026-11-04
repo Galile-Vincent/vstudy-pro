@@ -179,3 +179,26 @@ it('does not link a download after its source revision changes',async () => {
   expect(repository.file(file.id).file.documentId).toBe(null);
   await service.dispose();
 });
+it.each(['requireloginerror','nopermissiontoviewgrades','invalidparameter','accessexception','invalidtoken'])('isolates a course access failure %s',async code => {
+  const {repository,service,request} = await setup(); await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  const before = repository.course(course.id);
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    const name = new URLSearchParams(String(options?.body)).get('wsfunction');
+    if (name === 'gradereport_user_get_grade_items' || name === 'core_course_get_contents') return Response.json({errorcode:code});
+    return base(target,options);
+  });
+  await service.sync(account.id);
+  expect(repository.account(account.id).status).toBe('connected');
+  expect(repository.course(course.id).grades).toEqual(before.grades);
+  expect(repository.course(course.id).files).toEqual(before.files);
+  await service.dispose();
+});
+it('does not expire an account from a single mark-read failure',async () => {
+  const {service,repository,request} = await setup(); await service.sync(account.id);
+  request.mockResolvedValue(Response.json({errorcode:'requireloginerror'}));
+  await service.markRead(repository.notificationRecords(account.id)[0]!.value.id);
+  expect(repository.account(account.id).status).toBe('connected');
+  await service.dispose();
+});

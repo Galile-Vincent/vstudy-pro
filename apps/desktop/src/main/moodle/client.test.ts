@@ -22,7 +22,7 @@ describe('Moodle response boundary',() => {
     expect(request.mock.calls[0]![1]?.redirect).toBe('error');
   });
   it('uses course, calendar and read-status notification fallbacks',async () => {
-    const unsupported = {exception:'invalid_parameter_exception',errorcode:'invalidparameter'};
+    const unsupported = {errorcode:'functionnotavailable'};
     const request = fixtureFetch({'core_enrol_get_users_courses':unsupported,'core_calendar_get_action_events_by_timesort':unsupported});
     const base = request.getMockImplementation()!;
     request.mockImplementation(async (target,options) => {
@@ -113,4 +113,10 @@ it('resolves assignment calendar event submission status when no assignment list
   }));
   const events = await client.events(account.id,await client.courses(account));
   expect(events.find(item => item.kind === 'assignment')!.submitted).toBe(true);
+});
+it('classifies only exact error codes at each call boundary',async () => {
+  for (const code of ['requireloginerror','nopermissiontoviewgrades','invalidparameter']) {
+    const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({core_webservice_get_site_info:{errorcode:code,message:'invalid token function is not available'}}));
+    await expect(client.siteInfo()).rejects.toMatchObject({kind:code === 'requireloginerror' ? 'auth' : 'service'});
+  }
 });

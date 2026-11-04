@@ -59,7 +59,7 @@ export class MoodleService {
     const account = this.repository.account(item.accountId);
     const remote = this.repository.notificationRecords(account.id).find(row => row.value.id === id)!;
     try { await new MoodleClient(schoolById(account.schoolId).host,await this.token(account.id),this.request).markRead(remote.remoteId); }
-    catch (error) { if (error instanceof MoodleError && error.kind === 'auth' && this.repository.accounts().some(row => row.id === account.id)) this.repository.expired(account.id); }
+    catch { /* Keep the pending remote read for the next sync. */ }
   }
   sync(id: string): Promise<void> {
     if (this.stopped) return Promise.resolve();
@@ -87,8 +87,8 @@ export class MoodleService {
     const grades = [];
     const files = [];
     for (const course of courses) {
-      grades.push(...await client.grades(course,account.remoteUserId).catch(error => { if (error instanceof MoodleError && error.kind === 'unsupported') return this.repository.gradeRecords(course.id); throw error; }));
-      files.push(...await client.files(course).catch(error => { if (error instanceof MoodleError && error.kind === 'unsupported') return this.repository.fileRecords(course.id); throw error; }));
+      grades.push(...await client.grades(course,account.remoteUserId).catch(error => { if (error instanceof MoodleError) return this.repository.gradeRecords(course.id); throw error; }));
+      files.push(...await client.files(course).catch(error => { if (error instanceof MoodleError) return this.repository.fileRecords(course.id); throw error; }));
     }
     const matches = (assignment: typeof assignments[number], event: typeof events[number]) => assignment.courseId === event.courseId && (assignment.url === event.url && event.url !== null || assignment.title === event.title && assignment.dueAt === event.dueAt);
     const deadlines = [...assignments,...events.filter(event => !assignments.some(assignment => matches(assignment,event)))];

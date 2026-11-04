@@ -45,8 +45,8 @@ export class MoodleClient {
     const raw: unknown = await response.json().catch(() => { throw new MoodleError('service'); });
     const error = z.object({exception:z.string().optional(),errorcode:z.string().optional(),error:z.string().optional(),message:z.string().optional()}).safeParse(raw);
     if (error.success && (error.data.exception || error.data.errorcode || error.data.error)) {
-      const codes = Object.values(error.data).join(' ').toLowerCase();
-      throw new MoodleError(/invalidtoken|requireloginerror|invalid token|session has expired/.test(codes) ? 'auth' : /cannotfindexternalfunction|functionnotavailable|coding_exception|accessexception|invalidparameter/.test(codes) ? 'unsupported' : 'service');
+      const codes = [error.data.errorcode,error.data.exception].map(code => code?.toLowerCase());
+      throw new MoodleError(codes.some(code => code === 'invalidtoken' || code === 'requireloginerror') ? 'auth' : codes.some(code => ['cannotfindexternalfunction','functionnotavailable','coding_exception','accessexception'].includes(code ?? '')) ? 'unsupported' : 'service');
     }
     const parsed = schema.safeParse(raw);
     if (!parsed.success) throw new MoodleError('service');
