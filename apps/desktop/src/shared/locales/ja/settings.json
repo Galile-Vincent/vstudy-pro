@@ -76,5 +76,7 @@
   "converterMode": "変換モード",
   "sampleReader": "The quick brown fox jumps over the lazy dog.",
   "sampleCjk": "字體預覽 Aa 你好 日本語",
-  "deletePlaceholder": "DELETE"
+  "deletePlaceholder": "DELETE",
+  "welcomeGuide": "ウェルカムガイド",
+  "aboutApp": "VStudy Pro について"
 }
