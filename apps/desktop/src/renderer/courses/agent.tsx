@@ -165,6 +165,8 @@ export function CourseAgentPanel({
       onError();
     }
   };
+  const panel = useRef<HTMLElement>(null);
+  useEffect(() => { if (status === "done") panel.current?.focus(); }, [status]);
   const approve = async (action: MoodleAgentAction) => {
     if (approving.current) return;
     approving.current = true;
@@ -189,7 +191,7 @@ export function CourseAgentPanel({
     }
   };
   return (
-    <aside className="moodle-agent" aria-label={tr("moodle:course_assistant")}>
+    <aside ref={panel} tabIndex={-1} className="moodle-agent" aria-label={tr("moodle:course_assistant")}>
       <div className="moodle-agent-heading">
         <Sparkles />
         <h2>{tr("moodle:course_assistant")}</h2>

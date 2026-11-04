@@ -306,6 +306,7 @@ describe("Courses", () => {
     );
     expect((await api.course(detail.course.id)).reminders[0]?.createdBy).toBe("agent");
     expect(host.textContent).toContain("Action completed.");
+    expect(document.activeElement?.className).toBe("moodle-agent");
   });
 });
 
@@ -379,4 +380,13 @@ it('reports a refresh failure separately after a successful mark-read',async () 
   await click('Mark as read');
   expect(host.textContent).not.toContain('Something went wrong');
   expect(host.querySelector('[role=alert]')?.textContent).toContain('Showing your last synced courses.');
+});
+
+it('uses semantic course cards and labels unread indicators',async () => {
+  const api = createMockMoodleApi(); await mount(api);
+  expect(host.querySelectorAll('button h3, button progress')).toHaveLength(0);
+  expect(host.querySelectorAll('article.moodle-course-card button')).toHaveLength(3);
+  await mount(api,(await api.overview()).courses[0]!.id); await tab('Notifications');
+  expect(host.querySelector('.moodle-unread')?.getAttribute('role')).toBe('img');
+  expect(host.querySelector('.moodle-unread')?.getAttribute('aria-label')).toBe('Unread');
 });

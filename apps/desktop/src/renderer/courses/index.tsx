@@ -388,6 +388,7 @@ export function Courses({
                 {!n.read && (
                   <span
                     className="moodle-unread"
+                    role="img"
                     aria-label={tr("moodle:unread")}
                   />
                 )}
@@ -925,14 +926,13 @@ export function Courses({
               </div>
               <div className="moodle-grid">
                 {overview.courses.map((course) => (
-                  <button
+                  <article
                     key={course.id}
                     className="moodle-course-card"
-                    onClick={() => onCourse(course.id)}
                   >
                     <Cover course={course} />
                     <div className="moodle-card-body">
-                      <h3>{course.fullName}</h3>
+                      <h3><button type="button" onClick={() => onCourse(course.id)}>{course.fullName}</button></h3>
                       <div className="moodle-progress-label">
                         <span>{tr("moodle:progress")}</span>
                         <strong>
@@ -969,7 +969,7 @@ export function Courses({
                         </span>
                       </footer>
                     </div>
-                  </button>
+                  </article>
                 ))}
               </div>
             </section>
