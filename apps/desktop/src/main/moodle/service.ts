@@ -79,7 +79,8 @@ export class MoodleService {
   private async tokens(id: string): Promise<MoodleTokens> {
     const stored = await this.secrets.getInMainOnly(moodleSecretId(id));
     if (!stored) throw new MoodleError('auth');
-    return stored.startsWith('{') ? tokensSchema.parse(JSON.parse(stored)) : {token:stored};
+    try { return stored.startsWith('{') ? tokensSchema.parse(JSON.parse(stored)) : {token:stored}; }
+    catch { throw new MoodleError('auth'); }
   }
   async token(id: string): Promise<string> { return (await this.tokens(id)).token; }
   private async saveCapabilities(account: MoodleAccount, info: Awaited<ReturnType<MoodleClient['siteInfo']>>, tokens: MoodleTokens) {

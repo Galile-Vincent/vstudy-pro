@@ -35,3 +35,7 @@ it('rejects cross-origin redirects and unrelated canonical roots',async () => {
   await expect(checkSite('school.example',async () => envelope({wwwroot:'https://evil.example'}))).rejects.toThrow('confirmation');
   await expect(checkSite('school.ac.uk',async () => envelope({wwwroot:'https://evil.ac.uk'}))).rejects.toThrow('confirmation');
 });
+
+it.each(['{moodlemobile://token=CANARY',JSON.stringify([{error:false,data:{sitename:1,typeoflogin:'moodlemobile://token=CANARY'}}])])('sanitizes discovery parse failures',async body => {
+  await expect(checkSite('https://school.example',async () => new Response(body))).rejects.toEqual(new Error('Moodle discovery failed'));
+});

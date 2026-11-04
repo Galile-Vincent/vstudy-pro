@@ -41,3 +41,14 @@ it('returns cancellation as a handled result rather than an Electron handler rej
   await expect(invoke({} as IpcMainInvokeEvent,{siteUrl:'https://school.example'})).resolves.toEqual({moodleAuthCancelled:true});
   registrar.dispose();
 });
+
+it.each(['ai_parse.moodlemobile://token=CANARY','Invalid JSON moodlemobile://token=CANARY'])('redacts Moodle IPC errors containing %s',async message => {
+  let invoke!: (event:IpcMainInvokeEvent,payload:unknown) => unknown;
+  const registrar = createIpcRegistrar({handle:(_channel,handler) => {invoke = handler;},removeHandler:vi.fn()},() => true);
+  registrar.handle('moodle:connect',() => {throw new Error(message);});
+  const logs = vi.spyOn(console,'error').mockImplementation(() => undefined);
+  try {
+    await expect(invoke({} as IpcMainInvokeEvent,{siteUrl:'https://school.example'})).rejects.toEqual(new Error('VSTUDY_STATUS:{"code":"errors.generic","params":{}}'));
+    expect(JSON.stringify(logs.mock.calls)).not.toContain('CANARY');
+  } finally {logs.mockRestore();registrar.dispose();}
+});

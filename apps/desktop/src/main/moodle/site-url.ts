@@ -65,7 +65,7 @@ export function createMoodleFetch(resolver: Resolver = resolveAll): typeof fetch
           if ([204,205,304].includes(status)) res.resume();
           resolve(new Response([204,205,304].includes(status) ? null : Readable.toWeb(res) as ReadableStream<Uint8Array>,{status,headers}));
         });
-        req.on('error',reject);
+        req.on('error',(error: Error) => reject(new Error(error.message === 'Unsafe Moodle host address' ? 'Unsafe Moodle host address' : 'Moodle request failed')));
         if (options.body != null) req.write(String(options.body));
         req.end();
       });

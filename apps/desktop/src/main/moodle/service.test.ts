@@ -345,3 +345,9 @@ it('keeps the same remote user separate across two schools',async () => {
   expect(repository.accounts().map(item => ({siteUrl:item.siteUrl,remoteUserId:item.remoteUserId}))).toEqual([{siteUrl:'https://ilearning.cycu.edu.tw',remoteUserId:42},{siteUrl:'https://other.example/moodle',remoteUserId:42}]);
   await service.dispose();
 });
+it('redacts malformed stored token JSON',async () => {
+  const {service,secrets} = await setup();
+  await secrets.set(moodleSecretId(account.id),'{moodlemobile://token=CANARY');
+  await expect(service.token(account.id)).rejects.toHaveProperty('message','Moodle auth error');
+  await service.dispose();
+});

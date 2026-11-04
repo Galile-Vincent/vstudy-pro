@@ -48,3 +48,7 @@ it('passes only public answers to the connection lookup',async () => {
   expect(await response.json()).toEqual({ok:true});
   expect(mock.lookups).toEqual([[{address:'8.8.8.8',family:4}]]);
 });
+it('redacts connection errors containing callback credentials',async () => {
+  const request = createMoodleFetch(async () => {throw new Error('moodlemobile://token=CANARY');});
+  await expect(request('https://school.example/api?passport=CANARY')).rejects.toEqual(new Error('Moodle request failed'));
+});

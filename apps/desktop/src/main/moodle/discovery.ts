@@ -46,11 +46,14 @@ export async function checkSite(input: string, request: typeof fetch = moodleFet
         continue;
       }
       if (!response.ok) throw new Error('Moodle discovery failed');
-      const raw = z.array(z.object({error:z.boolean(),data:z.unknown().optional(),exception:z.object({errorcode:z.string().optional()}).optional()})).parse(await response.json());
-      const result = raw[0];
+      const rawResult = z.array(z.object({error:z.boolean(),data:z.unknown().optional(),exception:z.object({errorcode:z.string().optional()}).optional()})).safeParse(await response.json().catch(() => { throw new Error('Moodle discovery failed'); }));
+      if (!rawResult.success) throw new Error('Moodle discovery failed');
+      const result = rawResult.data[0];
       if (result?.error && result.exception?.errorcode === 'codingerror' && !get) { get = true; continue; }
       if (!result || result.error) throw new Error('Moodle discovery failed');
-      const config = publicConfigSchema.parse(result.data);
+      const parsed = publicConfigSchema.safeParse(result.data);
+      if (!parsed.success) throw new Error('Moodle discovery failed');
+      const config = parsed.data;
       const canonical = normalizeSiteUrl(config.httpswwwroot || config.wwwroot || root);
       if (!sameSiteDomain(root,canonical)) throw new Error('Moodle canonical host requires confirmation');
       if (request === moodleFetch) await resolvePublicHost(new URL(canonical).hostname);
