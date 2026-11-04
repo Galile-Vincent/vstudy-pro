@@ -1012,8 +1012,8 @@ html[data-input-modality=keyboard] [data-slot=aui_composer-shell]:has(:focus-vis
 [data-slot=dialog-overlay] { backdrop-filter:var(--material-filter); }
 
 /* Each composed text field owns one border; its inner input stays unboxed. */
-:is([data-slot=input],[data-slot=textarea],[cmdk-input]) { box-shadow:none; }
-html:not([data-input-modality=keyboard]) :is([data-slot=input],[data-slot=textarea],[cmdk-input]):focus-visible { outline:none; }
+:is(input[data-slot],textarea[data-slot],[cmdk-input]) { box-shadow:none; }
+html:not([data-input-modality=keyboard]) :is(input[data-slot],textarea[data-slot],[cmdk-input]):focus-visible { outline:none; }
 .library-search input,[data-slot=command-input-wrapper] input { border:0; border-radius:0; outline:none; box-shadow:none; background:transparent; }
 .library-search:focus-within,[data-slot=command-input-wrapper]:focus-within { box-shadow:none; }
 html[data-input-modality=keyboard] :is(.library-search,[data-slot=command-input-wrapper]):has(:focus-visible) { outline:2px solid var(--composer-focus-ring); outline-offset:2px; }

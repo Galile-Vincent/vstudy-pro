@@ -1,0 +1,631 @@
+{
+  "date": "2026-11-04T02:31:50.733Z",
+  "baseHead": "672997520efca3b836a4f9cddb268cfd48087801",
+  "sharedWorkingTree": true,
+  "scope": "One field boundary for composers, Library/Command search, and standalone input/textarea slots; concurrent UI3 files left untouched.",
+  "styleSha256": "2f327d03dc790d2e01e3577771a253918cac3acf08157ee4313021457a3b7976",
+  "testSha256": "9c13f8ce1a74a30cf0a2d5a92d56358e59fba102ea5ae772f69bc1b955b014cf",
+  "commands": [
+    {
+      "command": "pnpm lint",
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm typecheck",
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm build",
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm vendor:check",
+      "status": "PASS"
+    },
+    {
+      "command": "node e2e/field-borders.mjs",
+      "status": "PASS"
+    },
+    {
+      "command": "node e2e/chat-controls.mjs",
+      "status": "PASS"
+    },
+    {
+      "command": "node e2e/composer-visual-qa.mjs",
+      "status": "PASS"
+    }
+  ],
+  "checks": [
+    {
+      "name": "composer",
+      "theme": "light",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.65 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.65 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "model-search",
+      "theme": "light",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.65 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.65 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "edit-composer",
+      "theme": "light",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.65 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.65 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "library-search",
+      "theme": "light",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.65 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.65 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "settings-input",
+      "theme": "light",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.48 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "1px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.48 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "1px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "settings-textarea",
+      "theme": "light",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.48 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "1px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.48 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "1px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "composer",
+      "theme": "dark",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.61 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.61 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "model-search",
+      "theme": "dark",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.61 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.61 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "edit-composer",
+      "theme": "dark",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.61 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.61 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "library-search",
+      "theme": "dark",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.61 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.61 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "0px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "settings-input",
+      "theme": "dark",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.73 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "1px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.73 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "1px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    },
+    {
+      "name": "settings-textarea",
+      "theme": "dark",
+      "pointer": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.73 0 0)",
+          "outline": "3px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "1px",
+          "outlineStyle": "none",
+          "shadow": "none"
+        }
+      },
+      "keyboard": {
+        "owner": {
+          "border": "1px",
+          "color": "oklch(0.73 0 0)",
+          "outline": "2px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        },
+        "input": {
+          "border": "1px",
+          "outlineStyle": "solid",
+          "shadow": "none"
+        }
+      },
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "snapshots": [
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-composer-keyboard-field.png",
+      "sha256": "29f9457cca72ad80b079224c15c9c21898fc735b46c8945dd7a274741cfe9ef3"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-composer-keyboard.png",
+      "sha256": "0669058cb569bd2f43733d13c17781d8154b62945f2f5c6e1ec7678d7dd8351f"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-composer-pointer-field.png",
+      "sha256": "80ae5b95b63a1618dda2be9d4d231672f866e6c7343ff4b5257353033bd7500b"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-composer-pointer.png",
+      "sha256": "634b83256f640cc506f08b522ca087f21b9af78290c04aad963b17496847f1ba"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-edit-composer-keyboard-field.png",
+      "sha256": "9ab961dc23c9c278f42dd4bff126ac8c21260cfe0c7366a112b0b393f1068c53"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-edit-composer-keyboard.png",
+      "sha256": "3a9ae9b473892691060e269a6dc2a393d1ac275a9bb2756d7d308fba9278ac7c"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-edit-composer-pointer-field.png",
+      "sha256": "e5ac762c4f622e2dcf103736984b6f60554f0cdd7b2ff70f03f6b1cce2fad9cc"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-edit-composer-pointer.png",
+      "sha256": "9ffa77b6b6af158cde4c319e67204308a4f75e7d885c3fd4063008ed2579e27d"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-library-search-keyboard-field.png",
+      "sha256": "37fa60c2ba87241199c3ae0b4c875b7f9dcb601ae13de990721a7d9b713694ab"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-library-search-keyboard.png",
+      "sha256": "755e4179ba2d595a57f092ac8ec634862d55defdb144c3b0909ac00d0702b5cf"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-library-search-pointer-field.png",
+      "sha256": "6c2726d10ba1d1c7185c866c486d23367e1f3f5117c58182bee4a63f9cc2908c"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-library-search-pointer.png",
+      "sha256": "17c536f9fc9e3d68160a0d94873b16635f509de654891ec9585259028e6210e4"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-model-search-keyboard-field.png",
+      "sha256": "ef42d1830d092af44a5529cbc915f83742975eddc092474c4eaa9fece2824038"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-model-search-keyboard.png",
+      "sha256": "d37e9b4f26e3439283625ac6a62029a3e5212b6ae44aee9d52e34a5b582572ce"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-model-search-pointer-field.png",
+      "sha256": "df6e79000909650d69072564faa7b2dc2ea92a982059d9a01333f612a3ece392"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-model-search-pointer.png",
+      "sha256": "75ed03670c2831dd936e4b865119a10440390945e740c47e81b66a3cb0599930"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-settings-input-keyboard-field.png",
+      "sha256": "c41a26bc8cc4e5bf2ba229580de8baec6628cbf3850985fc24fe19458e7b253b"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-settings-input-keyboard.png",
+      "sha256": "dfc35fb2912dab34cf8446c6b629e58bc0499338151f1b07b185dd465194cb0e"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-settings-input-pointer-field.png",
+      "sha256": "0caa2a91fe3c79a199dde5e8cfd58078e5af587576da521d93ebb50867617232"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-settings-input-pointer.png",
+      "sha256": "8a6b5f735ab5e564adec74d7a3416e0956da9bc4e60ebeb8cdfe01739f0dcacc"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-settings-textarea-keyboard-field.png",
+      "sha256": "7b7cff87dd7ed95a6f3ec7ed1b90d9a186834c4396f6e12b0d7d676a5a90b97d"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-settings-textarea-keyboard.png",
+      "sha256": "896c97cf3ff43d1b7965e6f9afa3892c59c86c01a8a6200d523c9c24620093fc"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-settings-textarea-pointer-field.png",
+      "sha256": "2b1f441d696310cf7f702a50c1defd37e1ab311835e3d69afec1512a90d785b1"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/dark-settings-textarea-pointer.png",
+      "sha256": "54d48a889d00a49aebdbd77b1e2fb6d03bd3d2e06da6abfb3481f825a03aa712"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-composer-keyboard-field.png",
+      "sha256": "f9037a2c0ccb9f444364bb132150e2a4211588240f21642c6eb0bfa79202d014"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-composer-keyboard.png",
+      "sha256": "8bd9ee1dc1cea6ce4a0aa879ae5b6f840307f1a2808749fc68ef47c69c57087e"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-composer-pointer-field.png",
+      "sha256": "39760e019667a1a6f505d471b28b87adcf6d4b7f760f763739587b0bfb233591"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-composer-pointer.png",
+      "sha256": "a8d78271d3eafe7224e9807260ccd91809825be7f468dfc51e173eb8aa9f076e"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-edit-composer-keyboard-field.png",
+      "sha256": "668528437c2caa9fe671449d5f3d8d3cc507da3f2a1e1cd61b677ccf04405842"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-edit-composer-keyboard.png",
+      "sha256": "2131aff98b95972a528f12498038a2fc11d5c25151edf0f1df5de7e3292dec65"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-edit-composer-pointer-field.png",
+      "sha256": "7d4fe8eb6a3b4a94898e3329fdae2d6df2cfc3b75b9e9cb418de52dbce1f2555"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-edit-composer-pointer.png",
+      "sha256": "9c6cf9c342de2e6200d02102762349f09bb586564437c5fd3d54ac8dbef0051c"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-library-search-keyboard-field.png",
+      "sha256": "ad46107c9a5ac3af7be95b5076e8feafa30ecf98d6a82a441c6c26505cf18787"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-library-search-keyboard.png",
+      "sha256": "17386d0c922f6d681ded57ae4e847cf5c77dff5ff00c7a00701ec22211154cb5"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-library-search-pointer-field.png",
+      "sha256": "a005a9fc37b14a54ef7ffb4c701193a1046d511f8ccfe8bde70bbf3193db5313"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-library-search-pointer.png",
+      "sha256": "fbde513b3d896d849185772c84ee2fab5b15fb50e1424a98caf2a49360ac073b"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-model-search-keyboard-field.png",
+      "sha256": "31c4c5529a905bad1df5daafee79c1b62cd25eea42accdacf6facb0cfa8a8702"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-model-search-keyboard.png",
+      "sha256": "42322cf47724d5b519bde3dcd75cf5a72300ed3742f3bb5650f4d1c16e8bf475"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-model-search-pointer-field.png",
+      "sha256": "98f5f3cb5b5121f773a47612ef8697174fcddf8a91bb08591620c51befaacc34"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-model-search-pointer.png",
+      "sha256": "c2f7fd060ab4b38e032aa447dbbc4adcc652b4eb03366b0bdb4b333ec256d58a"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-settings-input-keyboard-field.png",
+      "sha256": "d7151c3705e1a816334800a5a5ba51a29b1e5905b0ced67ffa743177c18ed6f4"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-settings-input-keyboard.png",
+      "sha256": "aa1b10785b550593e127222b6b9b3848189c71a968b47c197cd44a5fc61ed94f"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-settings-input-pointer-field.png",
+      "sha256": "ae8a720392678a888191f529ef4b522e9438072bad9f4641b033a0f0032fd568"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-settings-input-pointer.png",
+      "sha256": "593219c774802023817f59200c24eae9d2b7a4f7dbb84023a3d5a2479ecba84f"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-settings-textarea-keyboard-field.png",
+      "sha256": "d15536511f5efe099019fb9c274f9e59b022c366de501ba6f9a850ad6851f202"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-settings-textarea-keyboard.png",
+      "sha256": "fad8c643b2d2fc3caad2b76ec6d5b2257fa92c606ff40ada88f7d6ee6f2aeede"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-settings-textarea-pointer-field.png",
+      "sha256": "a426185ea66ac99306c174c90c2a11dec7014e98d41265c84f247f3e01306108"
+    },
+    {
+      "path": "/tmp/vstudy-ui2/field-borders/light-settings-textarea-pointer.png",
+      "sha256": "adf666ca953683701c1ab80fc6be6c4c885649b69bdec409e165f70582cbe741"
+    }
+  ]
+}
