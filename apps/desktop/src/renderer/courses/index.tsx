@@ -218,7 +218,7 @@ export function Courses({
     const states=names.map(name => detail?.panels?.[name]);
     return <>
       {states.includes('loading') && <div role="status" aria-label={tr('moodle:loading')}><Skeleton className="moodle-skeleton" /></div>}
-      {states.includes('error') && <p role="alert">{tr('moodle:action_error')} <button onClick={() => void sync()}>{tr('moodle:retry')}</button></p>}
+      {states.includes('error') && <p role="alert">{tr(`moodle:panel_error_${names.map(name => detail?.panelErrors?.[name]).find(Boolean) ?? 'service'}`)} <button onClick={() => void sync()}>{tr('moodle:retry')}</button></p>}
     </>;
   };
   const failure = () => setNotice(tr("moodle:action_error"));
@@ -659,6 +659,7 @@ export function Courses({
                       </p>
                     )}
                     {panelStatus('contents','completion','teachers')}
+                    {detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}
                     <CourseContent
                       detail={detail}
                       openFile={openFile}

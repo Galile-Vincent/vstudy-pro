@@ -22,6 +22,10 @@ export class MoodleService {
   private readonly detailAttempts = new Map<string,number>();
   private readonly queue = new MoodleScheduler(6);
   private readonly contentReady = new Map<string,Promise<void>>();
+  private readonly failures = new Map<string,Map<string,MoodleError>>();
+  private sessionFailures(id:string) { let failures=this.failures.get(id); if (!failures) { failures=new Map(); this.failures.set(id,failures); } return failures; }
+  private readonly panelErrors = new Map<string,Partial<Record<MoodlePanel,'auth'|'permission'|'service'|'network'|'unsupported'>>>();
+  private readonly partialContents = new Set<string>();
   private readonly panels=new Map<string,Partial<Record<MoodlePanel,'loading'|'idle'|'error'>>>();
   private readonly panelFresh = new Set<string>();
   private readonly detailErrors = new Map<string,string>();
@@ -75,6 +79,7 @@ export class MoodleService {
       throw new MoodleAuthError('cancelled');
     }
     this.repository.saveAccount(account);
+    this.failures.delete(account.id);
     await this.saveCapabilities(account,info,tokens);
     let timer: ReturnType<typeof setTimeout> | undefined;
     try { await Promise.race([this.sync(account.id),new Promise<void>(resolve => { timer = setTimeout(resolve,30_000); })]); }
@@ -84,6 +89,7 @@ export class MoodleService {
   async disconnect(id: string) {
     this.repository.account(id);
     this.repository.disconnect(id);
+    this.failures.delete(id);
     this.secrets.delete(moodleSecretId(id));
     await this.pending.get(id);
   }
@@ -100,7 +106,7 @@ export class MoodleService {
       if (!this.repository.detailCache(id)) await this.contentReady.get(id);
       void work;
     } else if (!this.repository.detailCache(id)) await this.contentReady.get(id);
-    return {...this.repository.course(id),panels:{...this.panels.get(id)},fetchState:this.detailPending.has(id) ? 'loading' as const : this.detailErrors.has(id) ? 'error' as const : 'idle' as const};
+    return {...this.repository.course(id),panels:{...this.panels.get(id)},panelErrors:{...this.panelErrors.get(id)},contentsPartial:this.partialContents.has(id),fetchState:this.detailPending.has(id) ? 'loading' as const : this.detailErrors.has(id) ? 'error' as const : 'idle' as const};
   }
   refreshCourse(id: string): Promise<void> {
     const pending = this.detailPending.get(id);
@@ -110,6 +116,7 @@ export class MoodleService {
     this.detailAttempts.set(id,Date.now());
     this.detailErrors.delete(id);
     this.panels.set(id,{});
+    this.panelErrors.set(id,{});
     let ready!:()=>void;
     this.contentReady.set(id,new Promise<void>(resolve => {ready=resolve;}));
     const work = this.loadCourse(id,ready).catch(error => {
@@ -127,7 +134,8 @@ export class MoodleService {
       if (this.stopped) return;
       const detail = this.repository.course(id);
       const account = this.repository.account(detail.course.accountId);
-      const client = new MoodleClient(account.siteUrl,await this.token(account.id),this.request,{queue:this.queue,priority:10});
+      const client = new MoodleClient(account.siteUrl,await this.token(account.id),this.request,{queue:this.queue,priority:10},this.sessionFailures(account.id));
+      client.setUserId(account.remoteUserId);
       const functions = this.repository.capabilities(account.id)?.functions;
       client.setFunctions(functions);
       client.setLanguage(this.language());
@@ -142,6 +150,7 @@ export class MoodleService {
         try { const result=await request();states[panel]='idle';return result; }
         catch (error) {
           states[panel]='error';
+          this.panelErrors.get(id)![panel]=error instanceof MoodleError ? error.kind : 'service';
           if (!(error instanceof MoodleError) || error.kind !== 'unsupported') this.detailErrors.set(id,'service');
           if (error instanceof MoodleError && error.kind === 'auth') throw error;
           return undefined;
@@ -149,7 +158,10 @@ export class MoodleService {
       };
       this.progress({accountId:account.id,courseId:id,state:'loading',completed:0,total:1});
       const contents=await optional('core_course_get_contents',() => client.courseContents(detail.course));
-      if (contents && active()) this.repository.saveDetail(id,{sections:contents.sections},contents.files);
+      if (contents && active()) {
+        if (contents.partial) this.partialContents.add(id); else this.partialContents.delete(id);
+        this.repository.saveDetail(id,{sections:contents.sections},contents.files);
+      }
       ready();
       this.progress({accountId:account.id,courseId:id,state:'loading',completed:1,total:1});
       await Promise.all([(async () => {
@@ -243,7 +255,7 @@ export class MoodleService {
     try {
     const account = this.repository.account(id);
     if (account.status === 'expired') throw new MoodleError('auth');
-    const client = new MoodleClient(account.siteUrl,await this.token(id),this.request,{queue:this.queue,priority:0,timing:call => calls.push(call)});
+    const client = new MoodleClient(account.siteUrl,await this.token(id),this.request,{queue:this.queue,priority:0,timing:call => calls.push(call)},this.sessionFailures(id));
     client.setLanguage(this.language());
     const info = await client.siteInfo();
     if (info.userid !== account.remoteUserId || info.siteurl && normalizeSiteUrl(info.siteurl) !== account.siteUrl) throw new MoodleError('auth');
@@ -281,7 +293,10 @@ export class MoodleService {
       if (active()) {
         const deadlines=[...assignments,...events.filter(event => event.courseId === course.id && !assignments.some(item => item.url === event.url))];
         this.repository.apply(id,{courses:[course],deadlines,notifications:[],grades,files:contents?.files ?? this.repository.fileRecords(course.id)},course.id);
-        if (contents) this.repository.saveDetail(course.id,{sections:contents.sections},contents.files);
+        if (contents) {
+          if (contents.partial) this.partialContents.add(course.id); else this.partialContents.delete(course.id);
+          this.repository.saveDetail(course.id,{sections:contents.sections},contents.files);
+        }
         this.progress({accountId:id,state:'loading',completed:++completed,total:current.length});
       }
     }));

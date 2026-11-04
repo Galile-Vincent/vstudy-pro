@@ -490,3 +490,26 @@ it('prefetches current contents only and loads historical grades when opened',as
   expect(repository.course(past.id).grades).toHaveLength(1);
   await service.dispose();
 });
+
+it('shares negative status results across sync clients and preserves panel failure classes',async () => {
+ const {repository,service,request}=await setup();
+ const base=request.getMockImplementation()!;
+ request.mockImplementation(async (target,options) => {
+  const name=new URLSearchParams(String(options?.body)).get('wsfunction');
+  if (name === 'mod_quiz_get_user_attempts') return Response.json({errorcode:'accessexception'});
+  return base(target,options);
+ });
+ await service.sync(account.id);
+ const count=() => request.mock.calls.filter(call => new URLSearchParams(String(call[1]?.body)).get('wsfunction') === 'mod_quiz_get_user_attempts').length;
+ expect(count()).toBe(1);
+ await service.sync(account.id);
+ expect(count()).toBe(1);
+ const course=repository.overview().courses[0]!;
+ request.mockImplementation(async (target,options) => {
+  if (new URLSearchParams(String(options?.body)).get('wsfunction') === 'core_course_get_contents') return Response.json({errorcode:'accessexception'});
+  return base(target,options);
+ });
+ await service.refreshCourse(course.id);
+ expect(await service.course(course.id)).toMatchObject({panels:{contents:'error'},panelErrors:{contents:'permission'}});
+ expect(repository.account(account.id).status).toBe('connected');
+});

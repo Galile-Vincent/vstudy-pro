@@ -196,5 +196,11 @@
   "class_unknown": "クラス情報なし",
   "attachment_count_one": "添付ファイル {{count}} 件",
   "attachment_count_other": "添付ファイル {{count}} 件",
-  "sync_progress": "同期中 {{completed}}/{{total}}"
+  "sync_progress": "同期中 {{completed}}/{{total}}",
+  "panel_error_auth": "セッションの有効期限が切れました",
+  "panel_error_permission": "アクセス権限がありません",
+  "panel_error_service": "サーバーが予期しないデータを返しました",
+  "panel_error_network": "ネットワークエラー",
+  "panel_error_unsupported": "この機能は利用できません",
+  "contents_partial": "一部の項目を表示できませんでした"
 }

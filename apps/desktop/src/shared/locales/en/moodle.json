@@ -196,5 +196,11 @@
   "class_unknown": "Class unavailable",
   "attachment_count_one": "{{count}} attachment",
   "attachment_count_other": "{{count}} attachments",
-  "sync_progress": "Syncing {{completed}}/{{total}}"
+  "sync_progress": "Syncing {{completed}}/{{total}}",
+  "panel_error_auth": "Session expired",
+  "panel_error_permission": "No permission",
+  "panel_error_service": "Server returned unexpected data",
+  "panel_error_network": "Network error",
+  "panel_error_unsupported": "This feature is unavailable",
+  "contents_partial": "Some items couldn't be displayed"
 }

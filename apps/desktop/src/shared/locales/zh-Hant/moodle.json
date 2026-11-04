@@ -196,5 +196,11 @@
   "class_unknown": "未提供班級",
   "attachment_count_one": "{{count}} 個附件",
   "attachment_count_other": "{{count}} 個附件",
-  "sync_progress": "同步中 {{completed}}/{{total}}"
+  "sync_progress": "同步中 {{completed}}/{{total}}",
+  "panel_error_auth": "登入已過期",
+  "panel_error_permission": "沒有存取權限",
+  "panel_error_service": "伺服器回傳非預期資料",
+  "panel_error_network": "網路錯誤",
+  "panel_error_unsupported": "此功能無法使用",
+  "contents_partial": "部分項目無法顯示"
 }

@@ -616,3 +616,32 @@ it("labels unknown lifecycle dates on Current and All", async () => {
   expect(host.querySelector(".moodle-course-card")?.getAttribute("title")).toContain("Dates unavailable");
   expect(host.querySelectorAll(".moodle-course-card")).toHaveLength(1);
 });
+
+it.each([
+  ['service','Server returned unexpected data'],
+  ['permission','No permission'],
+  ['network','Network error'],
+  ['auth','Session expired'],
+] as const)('shows the %s panel failure reason and retries',async (reason,label) => {
+  const api=createMockMoodleApi();
+  const detail=await api.course((await api.overview()).courses[0]!.id);
+  detail.panels={contents:'error'};
+  detail.panelErrors={contents:reason};
+  detail.sections=[];
+  const getCourse=vi.fn(async () => detail);
+  api.course=getCourse;
+  await mount(api,detail.course.id);
+  expect(host.textContent).toContain(label);
+  expect(host.textContent).not.toContain("Couldn't complete the action");
+  await click('Try again');
+  expect(getCourse).toHaveBeenCalledWith(detail.course.id,true);
+});
+it('shows a partial contents notice alongside the surviving items',async () => {
+  const api=createMockMoodleApi();
+  const detail=await api.course((await api.overview()).courses[0]!.id);
+  detail.contentsPartial=true;
+  api.course=async () => detail;
+  await mount(api,detail.course.id);
+  expect(host.textContent).toContain("Some items couldn't be displayed");
+  expect(host.querySelectorAll('.moodle-module').length).toBeGreaterThan(0);
+});
