@@ -359,3 +359,24 @@ it('shows and marks account-wide notifications read on Courses home',async () =>
   await click('Mark as read');
   expect(host.querySelector('.moodle-notification')?.getAttribute('data-unread')).toBe('false');
 });
+it('does not replace newer refresh state with an older response',async () => {
+  const api = createMockMoodleApi(); const original = await api.overview();
+  const detail = await api.course(original.courses[0]!.id);
+  api.overview = async () => ({...original,otherNotifications:[{...detail.notifications[0]!,courseId:null}]});
+  await mount(api);
+  const pending: ((value: typeof original) => void)[] = [];
+  api.overview = () => new Promise(resolve => pending.push(resolve));
+  await click('Mark as read'); await click('Mark as read');
+  await act(async () => pending[1]!({...original,courses:[{...original.courses[0]!,fullName:'New response'}]}));
+  await act(async () => pending[0]!({...original,courses:[{...original.courses[0]!,fullName:'Old response'}]}));
+  expect(host.textContent).toContain('New response');
+  expect(host.textContent).not.toContain('Old response');
+});
+it('reports a refresh failure separately after a successful mark-read',async () => {
+  const api = createMockMoodleApi(); const courseId = (await api.overview()).courses[0]!.id;
+  await mount(api,courseId); await tab('Notifications');
+  api.overview = async () => {throw new Error('offline');};
+  await click('Mark as read');
+  expect(host.textContent).not.toContain('Something went wrong');
+  expect(host.querySelector('[role=alert]')?.textContent).toContain('Showing your last synced courses.');
+});

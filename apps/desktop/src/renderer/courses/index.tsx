@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -243,7 +243,9 @@ export function Courses({
   const [tab, setTab] = useState<Tab>("overview");
   const [opening, setOpening] = useState<string>();
   const [agentRequest, setAgentRequest] = useState(0);
+  const refreshSequence = useRef(0);
   const refresh = useCallback(async () => {
+    const sequence = ++refreshSequence.current;
     const [next, schoolList, course] = await Promise.all([
       api.overview(),
       api.schools(),
@@ -252,6 +254,7 @@ export function Courses({
     const summaries = courseId
       ? []
       : await Promise.all(next.courses.map((course) => api.course(course.id)));
+    if (sequence !== refreshSequence.current) return;
     setOverview(next);
     setSchools(schoolList);
     setDetail(course);
@@ -265,35 +268,22 @@ export function Courses({
     setTab("overview");
     setAgentRequest(0);
     setNotice("");
-    void Promise.all([
-      api.overview(),
-      api.schools(),
-      courseId ? api.course(courseId) : Promise.resolve(undefined),
-    ])
-      .then(async ([next, schoolList, course]) => {
-        const summaries = courseId
-          ? []
-          : await Promise.all(
-              next.courses.map((course) => api.course(course.id)),
-            );
-        if (current) {
-          setOverview(next);
-          setSchools(schoolList);
-          setDetail(course);
-          setHomeDetails(summaries);
-          setError(false);
-        }
-      })
-      .catch(() => {
-        if (current) setError(true);
-      })
-      .finally(() => {
-        if (current) setLoading(false);
-      });
+    void refresh().catch(() => {
+      if (current) setError(true);
+    }).finally(() => {
+      if (current) setLoading(false);
+    });
     return () => {
       current = false;
+      refreshSequence.current++;
     };
-  }, [api, courseId]);
+  }, [refresh]);
+  useEffect(() => {
+    if (!overview?.accounts.some(account => account.status === 'connected' && !account.syncedAt)) return;
+    const timer = setInterval(() => { void refresh().catch(() => setError(true)); },2000);
+    return () => clearInterval(timer);
+  }, [overview,refresh]);
+
   const failure = () => setNotice(tr("moodle:action_error"));
   const sync = async () => {
     setSyncing(true);
@@ -413,10 +403,11 @@ export function Courses({
                   onClick={async () => {
                     try {
                       await api.markRead(n.id);
-                      await refresh();
                     } catch {
                       failure();
+                      return;
                     }
+                    await refresh().catch(() => setError(true));
                   }}
                 >
                   <Check />
