@@ -1,0 +1,25 @@
+Median [min, max], five runs per stage. 120 ms latency plus 5 ms server processing.
+
+| Stage | Sync ms | List persistence ms | Open contents ms | Home fan-out ms | Calls | Bytes |
+|---|---:|---:|---:|---:|---:|---:|
+| baseline.txt | 15209.98 [15042.93, 15354.62] | 1408.70 [1394.92, 1459.07] | 399.32 [383.85, 405.23] | 10334.27 [10264.11, 10425.00] | 349 | 10441356 |
+| after-home.txt | 15260.76 [15017.76, 15373.38] | 1412.51 [1402.77, 1449.33] | 395.24 [382.33, 399.51] | 0.01 [0.00, 0.01] | 157 | 5336640 |
+| after-current.txt | 1210.26 [1192.45, 1249.81] | 269.30 [258.18, 288.45] | 137.60 [136.91, 142.82] | 0.01 [0.01, 0.01] | 27 | 785461 |
+| after-final.txt | 1209.78 [1193.33, 1242.20] | 271.44 [270.02, 285.89] | 140.60 [133.30, 141.79] | 0.01 [0.01, 0.01] | 27 | 785461 |
+| after-lazy.txt | 1080.40 [1075.82, 1116.64] | 272.15 [268.98, 288.12] | 140.11 [137.48, 141.21] | 0.01 [0.01, 0.01] | 31 | 785542 |
+| after-panels.txt | 1078.27 [1075.55, 1110.92] | 269.86 [269.45, 286.54] | 140.39 [137.68, 142.88] | 0.01 [0.01, 0.02] | 31 | 785542 |
+
+Changes
+6a47769 removes home fan-out.
+7e5bd79 scopes background work to current courses, removes background submission status, runs requests through six slots and publishes contents before enrichment.
+after-final records parallel panels and UI progress.
+9242193 moves grades to demand, restores past-course assignment loading, debounces progress invalidations and verifies TLS socket reuse.
+
+09e2293 adds independent panel state and strict progress validation.
+
+Final raw runs
+{"run":0,"rtt":120,"syncMs":1110.9175830000001,"listMs":286.53812500000004,"contentMs":142.88412500000004,"homeMs":0.009250000000065484,"calls":31,"bytes":785542,"counts":{"core_webservice_get_site_info":1,"core_enrol_get_users_courses":1,"core_calendar_get_action_events_by_timesort":1,"core_calendar_get_calendar_upcoming_view":1,"mod_quiz_get_user_attempts":1,"core_message_get_messages":1,"mod_assign_get_assignments":7,"core_course_get_contents":7,"core_enrol_get_enrolled_users":1,"gradereport_user_get_grade_items":1,"mod_forum_get_forums_by_courses":1,"mod_assign_get_submission_status":8}}
+{"run":1,"rtt":120,"syncMs":1075.5515420000002,"listMs":270.2175000000002,"contentMs":137.68404200000032,"homeMs":0.008874999999989086,"calls":31,"bytes":785542,"counts":{"core_webservice_get_site_info":1,"core_enrol_get_users_courses":1,"core_calendar_get_action_events_by_timesort":1,"core_calendar_get_calendar_upcoming_view":1,"mod_quiz_get_user_attempts":1,"core_message_get_messages":1,"mod_assign_get_assignments":7,"core_course_get_contents":7,"core_enrol_get_enrolled_users":1,"gradereport_user_get_grade_items":1,"mod_forum_get_forums_by_courses":1,"mod_assign_get_submission_status":8}}
+{"run":2,"rtt":120,"syncMs":1076.8827500000002,"listMs":269.6163339999998,"contentMs":140.39208299999973,"homeMs":0.008832999999867752,"calls":31,"bytes":785542,"counts":{"core_webservice_get_site_info":1,"core_enrol_get_users_courses":1,"core_calendar_get_action_events_by_timesort":1,"core_calendar_get_calendar_upcoming_view":1,"mod_quiz_get_user_attempts":1,"core_message_get_messages":1,"mod_assign_get_assignments":7,"core_course_get_contents":7,"core_enrol_get_enrolled_users":1,"gradereport_user_get_grade_items":1,"mod_forum_get_forums_by_courses":1,"mod_assign_get_submission_status":8}}
+{"run":3,"rtt":120,"syncMs":1078.2734169999994,"listMs":269.86120799999935,"contentMs":141.71804200000042,"homeMs":0.020499999999628926,"calls":31,"bytes":785542,"counts":{"core_webservice_get_site_info":1,"core_enrol_get_users_courses":1,"core_calendar_get_action_events_by_timesort":1,"core_calendar_get_calendar_upcoming_view":1,"mod_quiz_get_user_attempts":1,"core_message_get_messages":1,"mod_assign_get_assignments":7,"core_course_get_contents":7,"core_enrol_get_enrolled_users":1,"gradereport_user_get_grade_items":1,"mod_forum_get_forums_by_courses":1,"mod_assign_get_submission_status":8}}
+{"run":4,"rtt":120,"syncMs":1082.0519169999998,"listMs":269.44729199999983,"contentMs":138.13887499999964,"homeMs":0.008958999999777006,"calls":31,"bytes":785542,"counts":{"core_webservice_get_site_info":1,"core_enrol_get_users_courses":1,"core_calendar_get_action_events_by_timesort":1,"core_calendar_get_calendar_upcoming_view":1,"mod_quiz_get_user_attempts":1,"core_message_get_messages":1,"mod_assign_get_assignments":7,"core_course_get_contents":7,"core_enrol_get_enrolled_users":1,"gradereport_user_get_grade_items":1,"mod_forum_get_forums_by_courses":1,"mod_assign_get_submission_status":8}}
