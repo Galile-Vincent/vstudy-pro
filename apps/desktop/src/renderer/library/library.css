@@ -389,7 +389,7 @@ mark {
 .bulk-bar button { border:0; background:transparent; }
 .bulk-bar button:nth-last-child(2),.document-menu button:last-child { color:var(--danger); }
 .library-live { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
-.anchored-menu { position:fixed; margin:0; width:224px; max-width:calc(100vw - 16px); padding:var(--space-1); border:1px solid var(--hairline); border-radius:var(--r-md); background:var(--material-sheet); backdrop-filter:blur(20px); }
+.anchored-menu { margin:0; min-width:14rem; width:max-content; max-height:var(--radix-dropdown-menu-content-available-height); overflow-y:auto; max-width:calc(100vw - 16px); padding:var(--space-1); border:1px solid var(--hairline); border-radius:var(--r-md); background:var(--material-sheet); backdrop-filter:blur(20px); }
 .anchored-menu::backdrop { background:transparent; }
 .document-menu { gap:0; }
 .document-menu button { min-height:28px; border:0; border-radius:var(--r-sm); background:transparent; padding:var(--space-1) var(--space-2); }
@@ -420,3 +420,7 @@ mark {
 
 [data-slot=popover-content].filter-panel { position:relative; inset:auto; margin:0; }
 .filter-panel label:has([role=checkbox]) { display:flex; justify-content:flex-start; }
+
+.anchored-menu .document-menu button { width:100%; height:auto; white-space:nowrap; overflow:visible; text-overflow:clip; justify-content:flex-start; }
+.anchored-menu .document-menu svg { flex:0 0 1rem; width:1rem; height:1rem; }
+.anchored-menu .document-menu button, .anchored-menu [data-slot=dropdown-menu-label] { font-size:.875rem; line-height:1.5; }
