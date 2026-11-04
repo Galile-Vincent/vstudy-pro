@@ -1,3 +1,4 @@
+import { Button } from '../components/ui/button';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup } from '../components/ui/sidebar';
 import { transitionTo } from "./view-transition";
 import { desktop } from "../bridge";
@@ -124,16 +125,16 @@ export function AppShell({
         </Sidebar>
         <div className="shell-main">
           <header className="shell-topbar">
-            <button
+            <Button variant="ghost"
               className="shell-toggle"
               aria-label={tr("common:toggle_document_library")}
               aria-expanded={sidebarVisible}
               onClick={() => setSidebarVisible((v) => !v)}
             >
               <Menu />
-            </button>
+            </Button>
             {route.view === "workspace" ? (
-              <button
+              <Button variant="ghost"
                 onClick={() =>
                   navigate({
                     view: "library",
@@ -144,7 +145,7 @@ export function AppShell({
               >
                 <ArrowLeft />
                 {route.title ?? tr("common:library")}
-              </button>
+              </Button>
             ) : (
               <span>
                 {route.view === "home"
