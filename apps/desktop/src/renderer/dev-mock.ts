@@ -1,3 +1,5 @@
+import realCourseRows from '../main/moodle/fixtures/real-cycu-courses.tsv?raw';
+import { parseCourseIdentity, courseLifecycle } from '../main/moodle/identity';
 import {
   defaultSettings,
   documentSchema,
@@ -297,6 +299,20 @@ export function createMockMoodleApi(): MoodleApi {
       ], reminders: [],
     };
   });
+  if (import.meta.env.VITE_MOODLE_REAL_COURSES === '1') {
+    const template = details[0]!;
+    details.splice(0,details.length,...realCourseRows.trimEnd().split('\n').map((row,index) => {
+      const [fullName,shortName,rawProgress,start,end] = row.split('\t');
+      const progress = rawProgress === '' ? null : Number(rawProgress);
+      const identity = parseCourseIdentity(fullName!,shortName!,progress !== null);
+      const startAt = start || null, endAt = end || null;
+      Object.assign(identity,courseLifecycle({startAt,endAt,term:identity.term},new Date('2026-11-04T04:00:00Z')));
+      const courseId = id(100000+index);
+      return {...structuredClone(template),course:{...template.course,id:courseId,remoteId:100000+index,fullName:fullName!,shortName:shortName!,progress,startAt,endAt,identity},
+        deadlines:index < 3 ? template.deadlines.slice(0,1).map(d => ({...d,id:id(110000+index),courseId,title:`${identity.title.en || identity.title.zh} · Preparation`})) : [],
+        notifications:[],reminders:[]};
+    }));
+  }
   const active = () => details.filter(d => accounts.some(a => a.id === d.course.accountId));
   return {
     schools: async () => structuredClone(schools),
