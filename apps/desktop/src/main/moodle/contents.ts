@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { MoodleCourse, MoodleFile } from '../../shared/moodle';
 import type { MoodleCompletion, MoodleModuleKind, MoodleSection } from '../../shared/moodle-course';
 import { identityText } from './identity';
-import { remoteId } from './client';
+import { remoteId } from './remote-id';
 
 export function safeUrl(value?: string | null): string | null {
   try {

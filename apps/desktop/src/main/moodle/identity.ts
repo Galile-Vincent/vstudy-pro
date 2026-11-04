@@ -32,6 +32,7 @@ function candidate(raw: string) {
   const match = /^(\d{3,4})(.+)\[([A-Za-z0-9_-]+)\]$/.exec(value);
   if (!match) return null;
   let body = match[2]!.trim();
+  if (body.includes('[') || body.includes(']')) return null;
   let classLabel: string | null = null;
   if (body.endsWith(')')) {
     let depth = 0;
@@ -63,7 +64,12 @@ export function parseCourseIdentity(fullName: string, shortName: string, hasProg
   const short = /^(\d{3,4})_([A-Za-z0-9_-]+)$/.exec(shortName);
   const marked = /multilang|\{\s*mlang\s/i.test(fullName);
   let halves = [raw];
-  if (marked) halves = [...new Set(['zh-tw','en'].map(lang => identityText(filterMultilang(fullName,lang))))].filter(Boolean);
+  if (marked) {
+    const languages = [...fullName.matchAll(/\blang\s*=\s*["']([^"']+)["']|\{\s*mlang\s+([\w-]+)/gi)].map(match => normalizeLanguage(match[1] ?? match[2]!));
+    const zh = languages.find(lang => /^zh(?:-|$)/.test(lang)) ?? 'zh-tw';
+    const en = languages.find(lang => /^en(?:-|$)/.test(lang)) ?? 'en';
+    halves = [...new Set([zh,en].map(lang => identityText(filterMultilang(fullName,lang))))].filter(Boolean);
+  }
   else {
     const boundary = /^(\d{3,4})[\s\S]*?\[([A-Za-z0-9_-]+)\]/.exec(raw);
     if (boundary) {

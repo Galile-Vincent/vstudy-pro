@@ -37,3 +37,18 @@ it('uses server, dates, term, then unknown lifecycle',() => {
  expect(courseLifecycle({...base,term:'1143'},now)).toEqual({lifecycle:'current',lifecycleSource:'term'});
  expect(courseLifecycle(base,now)).toEqual({lifecycle:'unknown',lifecycleSource:'none'});
 });
+
+it('retains explicitly marked Traditional Chinese and regional English titles',() => {
+ expect(parseCourseIdentity('<span class="multilang" lang="zh-Hant">物理</span><span class="multilang" lang="en-AU">Physics</span>','').title).toEqual({zh:'物理',en:'Physics'});
+ expect(parseCourseIdentity('1142A Very Long Title [X]1142Different [Y]','').title).toEqual({zh:null,en:'1142A Very Long Title [X]1142Different [Y]'});
+});
+it.each([
+ [{completed:true,startAt:null,endAt:null,term:'1151'},'past','dates'],
+ [{startAt:null,endAt:'2025-01-01T00:00:00Z',term:'1151'},'past','dates'],
+ [{startAt:'2025-01-01T00:00:00Z',endAt:null,term:'1151'},'current','dates'],
+ [{startAt:null,endAt:null,term:'1151'},'future','term'],
+ [{startAt:null,endAt:null,term:'1131'},'past','term'],
+ [{startAt:null,endAt:null,term:'1149'},'unknown','none'],
+] as const)('classifies lifecycle %#',(input,lifecycle,lifecycleSource) => {
+ expect(courseLifecycle(input,new Date('2026-07-01T00:00:00Z'))).toEqual({lifecycle,lifecycleSource});
+});

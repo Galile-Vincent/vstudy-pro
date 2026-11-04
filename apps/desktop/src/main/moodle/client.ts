@@ -4,7 +4,8 @@ import type { MoodleAnnouncement } from '../../shared/moodle-course';
 import { moodleImage } from './files';
 import { authError, type MoodleTokens } from './auth';
 import { moodleFetch, siteFetch } from './site-url';
-import { createHash } from 'node:crypto';
+import { remoteId } from './remote-id';
+export { remoteId } from './remote-id';
 import { z } from 'zod';
 import { decodeHtmlEntities } from '../../shared/html';
 import {
@@ -18,10 +19,6 @@ export class MoodleError extends Error {
 }
 export function plainText(value: string): string {
   return decodeHtmlEntities(value.replace(/\{mlang(?:\s+[^}]*)?\}/gi, '').replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '').replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '').replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
-}
-export function remoteId(account: string, kind: string, id: string | number): string {
-  const hex = createHash('sha256').update(JSON.stringify([account, kind, id])).digest('hex');
-  return `${hex.slice(0,8)}-${hex.slice(8,12)}-5${hex.slice(13,16)}-a${hex.slice(17,20)}-${hex.slice(20,32)}`;
 }
 const numeric = z.union([z.number(),z.string().regex(/^-?\d+(?:\.\d+)?$/)]).transform(Number).pipe(z.number().finite());
 const integer = numeric.pipe(z.number().int());
