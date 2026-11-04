@@ -11,7 +11,7 @@ const dir=await mkdtemp(join(tmpdir(),'ui2-')),screenshots=[],checks=[],errors=[
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${dir}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});
  const page=await app.firstWindow();page.setDefaultTimeout(10000);page.on('pageerror',e=>errors.push(e.message));
- await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true});});await page.reload();
+ await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true,displayName:'Vincent'});});await page.reload();
  const baseDpr=await page.evaluate(()=>window.devicePixelRatio);
  const zoomTo=async zoom=>{await app.evaluate(({BrowserWindow},zoom)=>BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(zoom),zoom);await page.waitForFunction(dpr=>Math.abs(window.devicePixelRatio-dpr)<.01,baseDpr*zoom);await page.evaluate(()=>new Promise(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(resolve))));};
  let context={language:'en',theme:'light',width:1200};

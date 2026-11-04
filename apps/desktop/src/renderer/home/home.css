@@ -59,7 +59,7 @@
 /* UI2: one reading action, a secondary row, then quiet lists. */
 .home-page { padding:var(--space-8); }
 .home-content { max-width:1040px; margin-inline:auto; }
-.home-greeting { display:flex; align-items:start; justify-content:space-between; gap:var(--space-6); margin-bottom:var(--space-8); }
+.home-greeting { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; justify-content:space-between; gap:var(--space-6); margin-bottom:var(--space-8); }
 .home-greeting h1 { white-space:normal; margin-bottom:var(--space-2); }
 .home-greeting #welcome-entry { color:var(--muted); flex-shrink:0; font-size:var(--type-sm); }
 .home-grid { display:flex; flex-direction:column; gap:var(--space-8); }
