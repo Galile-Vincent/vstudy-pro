@@ -35,3 +35,6 @@ html[data-input-modality=pointer] .library-results .document-title:focus { outli
 .library-results.library-results[data-view=list] { box-shadow:none; }
 .document-gutter svg { width:14px; height:14px; }
 .document-type [data-slot=badge] { border-radius:var(--r-sm); }
+.library-view .bulk-bar { max-width:calc(100% - var(--space-8) * 2); flex-wrap:nowrap; overflow-x:auto; }
+.library-view .bulk-bar > * { flex-shrink:0; white-space:nowrap; }
+.library-view .bulk-bar button { height:var(--space-8); }
