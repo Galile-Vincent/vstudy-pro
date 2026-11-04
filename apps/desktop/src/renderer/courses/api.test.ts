@@ -48,6 +48,14 @@ describe("Moodle development data", () => {
       page.items.find((item) => item.document.id === opened.documentId)
         ?.document.title,
     ).toBe("Binary trees & traversal.pdf");
+    const imported = page.items.find(
+      (item) => item.document.id === opened.documentId,
+    )!;
+    expect(
+      await desktop.invoke("documents:read", {
+        documentId: imported.document.id,
+      }),
+    ).toContain("A binary tree gives each node at most two children.");
     const dashboard = libraryContract["dashboard:get"].response.parse(
       await desktop.invoke("dashboard:get", {}),
     );

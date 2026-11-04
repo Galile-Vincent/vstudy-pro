@@ -136,7 +136,7 @@ export function createMockBridge(): DesktopApi {
         result = [...documents, ...moodleDocuments].find((d) => d.id === input.documentId) ?? null;
         break;
       case "documents:read":
-        result = mockMarkdown;
+        result = moodleDocumentSources.get(String(input.documentId)) ?? mockMarkdown;
         break;
       case "documents:delete": {
         const collection = documents.some(d => d.id === input.documentId) ? documents : moodleDocuments;
@@ -258,6 +258,7 @@ import type { MoodleApi } from './courses/api';
 import type { MoodleCourseDetail, MoodleAccount } from '../shared/moodle';
 
 const moodleDocuments: Document[] = [];
+const moodleDocumentSources = new Map<string, string>();
 export function createMockMoodleApi(): MoodleApi {
   const id = (n: number) => `10000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
   const at = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
@@ -307,6 +308,13 @@ export function createMockMoodleApi(): MoodleApi {
       if (!file) throw new Error('File unavailable');
       file.documentId ??= crypto.randomUUID();
       if (!moodleDocuments.some(d => d.id === file.documentId)) moodleDocuments.push(documentSchema.parse({ id: file.documentId, title: file.name, sourceName: file.name, sourceHash: 'b'.repeat(64), sourcePath: `mock/${file.name}`, markdownPath: 'mock/content.md', mime: file.mime, status: 'ready', createdAt: at(0) }));
+      const detail = active().find(d => d.course.id === file.courseId)!;
+      const preparation = detail.course.shortName === 'CS 201'
+        ? 'A binary tree gives each node at most two children. Compare preorder, inorder, and postorder traversal, then trace each traversal on a tree with seven nodes.'
+        : detail.course.shortName === 'DES 102'
+          ? 'Start with observation before proposing a solution. Prepare five open questions for your interview, record what you notice, and separate observations from assumptions.'
+          : 'A strong academic argument connects a clear claim with relevant evidence. Draft a topic sentence, choose two supporting sources, and explain how the evidence supports your claim.';
+      moodleDocumentSources.set(file.documentId, `# ${file.name.replace(/\.[^.]+$/, '')}\n\n${detail.course.fullName} · ${file.section}\n\n## Before class\n\n${preparation}\n\n## Preparation checklist\n\n- Review the lecture material.\n- Write down two questions for discussion.\n- Bring a first attempt at the practice task.\n\n## Reflection\n\nExplain one idea in your own words and connect it to a previous lesson.\n`);
       return { documentId: file.documentId };
     },
     markRead: async notificationId => { const notification = active().flatMap(d => d.notifications).find(n => n.id === notificationId); if (notification) notification.read = true; },
