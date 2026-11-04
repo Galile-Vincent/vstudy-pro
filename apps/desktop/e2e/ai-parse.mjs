@@ -62,7 +62,7 @@ try {
  await page.screenshot({path:join(evidence,'panel-200-percent.png')});
  for(const [language,title] of [['zh-Hant','用 AI 重新解析'],['ja','AIで再解析']]) {
   await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language});},language);
-  await page.reload();await page.getByRole('button',{name:title,exact:true}).first().waitFor();if(!await panel.isVisible())await page.getByRole('button',{name:title,exact:true}).first().click();await panel.waitFor();await audit();
+  await page.reload();await panel.getByRole('heading',{name:title,exact:true}).waitFor();await panel.waitFor();await audit();
  }
  assert.deepEqual(errors,[]);
  console.log(JSON.stringify({result:'PASS',checks,axeScans,axeViolations:0,evidence,liveProviders:0}));

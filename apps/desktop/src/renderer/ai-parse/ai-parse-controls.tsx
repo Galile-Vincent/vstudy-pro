@@ -45,7 +45,7 @@ export function AiParseControls({ document, providers, pageCount, initiallyOpen,
  };
  const hasAi = ai.state && ai.state.status !== 'idle' && ai.state.status !== 'running';
  return <div className="ai-parse-controls">
-  <Popover open={open} onOpenChange={setOpen}>
+  <Popover modal open={open} onOpenChange={setOpen}>
    <PopoverTrigger asChild><Button variant="outline" size="sm"><Sparkles aria-hidden="true"/>{tr('library:ai_parse.title')}</Button></PopoverTrigger>
    <PopoverContent align="end" sideOffset={4} collisionPadding={8} className="ai-parse-popover" aria-label={tr('library:ai_parse.title')}>
     {document.status!=='ready' ? <p role="status">{tr('library:ai_parse.not_ready')}</p> : <>
