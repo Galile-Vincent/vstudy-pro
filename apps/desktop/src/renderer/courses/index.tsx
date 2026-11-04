@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -36,18 +42,27 @@ import {
 import { Skeleton } from "../components/ui/skeleton";
 import { useMoodleApi, type MoodleApi } from "./api";
 import { Reminder } from "./reminder";
-import { CourseAgentPanel } from "./agent";
+import { CourseAssistant } from "./assistant";
+import { CourseContent, Announcements } from "./content";
+import {
+  displayTitle,
+  displayTeachers,
+  displayClass,
+  matchesTerm,
+} from "./display";
+import type { MoodleTermFilter } from "../../shared/moodle-course";
 import "./courses.css";
 import { ConnectDialog } from "./connect";
 export { ConnectDialog } from "./connect";
 
 const week = 7 * 86400000;
 const tabs = [
-  "overview",
+  "content",
   "deadlines",
-  "notifications",
+  "announcements",
   "grades",
   "files",
+  "notifications",
 ] as const;
 type Tab = (typeof tabs)[number];
 export function deadlineGroup(deadline: MoodleDeadline, now = Date.now()) {
@@ -93,7 +108,11 @@ function Cover({ course }: { course: MoodleCourse }) {
           <BookOpen aria-hidden="true" />
         </>
       )}
-      <span className="moodle-course-code">{course.shortName}</span>
+      <span className="moodle-course-code">
+        {[course.identity.term, course.identity.code]
+          .filter(Boolean)
+          .join(" · ") || course.shortName}
+      </span>
     </div>
   );
 }
@@ -136,7 +155,9 @@ export function Courses({
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState("");
   const [connect, setConnect] = useState(false);
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>("content");
+  const [term, setTerm] = useState<MoodleTermFilter>("current");
+  const lang = i18n.resolvedLanguage || "en";
   const [opening, setOpening] = useState<string>();
   const [agentRequest, setAgentRequest] = useState(0);
   const refreshSequence = useRef(0);
@@ -159,31 +180,48 @@ export function Courses({
     let current = true;
     setLoading(true);
     setDetail(undefined);
-    setTab("overview");
+    setTab("content");
     setAgentRequest(0);
     setNotice("");
-    void refresh().catch(() => {
-      if (current) setError(true);
-    }).finally(() => {
-      if (current) setLoading(false);
-    });
+    void refresh()
+      .catch(() => {
+        if (current) setError(true);
+      })
+      .finally(() => {
+        if (current) setLoading(false);
+      });
     return () => {
       current = false;
       refreshSequence.current++;
     };
   }, [refresh]);
   useEffect(() => {
-    if (!overview?.accounts.some(account => account.status === 'connected' && !account.syncedAt)) return;
-    const timer = setInterval(() => { void refresh().catch(() => setError(true)); },2000);
+    if (
+      !overview?.accounts.some(
+        (account) => account.status === "connected" && !account.syncedAt,
+      )
+    )
+      return;
+    const timer = setInterval(() => {
+      void refresh().catch(() => setError(true));
+    }, 2000);
     return () => clearInterval(timer);
-  }, [overview,refresh]);
+  }, [overview, refresh]);
 
   const failure = () => setNotice(tr("moodle:action_error"));
   const sync = async () => {
     setSyncing(true);
     let incomplete = false;
-    try { await api.sync(); } catch { incomplete = true; }
-    try { await refresh(); } catch { incomplete = true; }
+    try {
+      await api.sync();
+    } catch {
+      incomplete = true;
+    }
+    try {
+      await refresh();
+    } catch {
+      incomplete = true;
+    }
     setError(incomplete);
     setSyncing(false);
   };
@@ -239,7 +277,11 @@ export function Courses({
                 <span>{tr(`moodle:${d.kind}`)}</span>
                 <span aria-hidden="true"> · </span>
                 <time dateTime={d.dueAt}>{date(d.dueAt)}</time>
-                {d.submitted === null && <span className="moodle-chip">{tr("moodle:submission_unknown")}</span>}
+                {d.submitted === null && (
+                  <span className="moodle-chip">
+                    {tr("moodle:submission_unknown")}
+                  </span>
+                )}
                 {d.submitted && (
                   <span className="moodle-chip">{tr("moodle:submitted")}</span>
                 )}
@@ -266,7 +308,10 @@ export function Courses({
     ) : (
       <p className="moodle-empty-inline">{tr("moodle:no_deadlines")}</p>
     );
-  const notifications = (limit?: number, source: MoodleNotification[] = detail?.notifications ?? []) => {
+  const notifications = (
+    limit?: number,
+    source: MoodleNotification[] = detail?.notifications ?? [],
+  ) => {
     const items = [...source]
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, limit);
@@ -516,19 +561,47 @@ export function Courses({
                 <Cover course={detail.course} />
                 <div>
                   <span className="moodle-eyebrow">
-                    {detail.course.shortName}
+                    {[detail.course.identity.term, detail.course.identity.code]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </span>
-                  <h1>{detail.course.fullName}</h1>
+                  <h1>
+                    {displayTitle(
+                      detail.course.identity,
+                      lang,
+                      detail.course.fullName,
+                    )}
+                  </h1>
                   <p>
-                    {tr("moodle:course_progress", {
-                      count: detail.course.progress ?? 0,
-                    })}
+                    {[
+                      displayTeachers(detail.course.identity, lang),
+                      displayClass(detail.course.identity, lang),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </p>
-                  <progress
-                    max={100}
-                    value={detail.course.progress ?? 0}
-                    aria-label={tr("moodle:progress")}
-                  />
+                  <details className="moodle-raw-name">
+                    <summary>{tr("moodle:original_name")}</summary>
+                    {detail.course.fullName}
+                  </details>
+                  {detail.deadlines
+                    .filter(
+                      (d) => !d.submitted && Date.parse(d.dueAt) >= Date.now(),
+                    )
+                    .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
+                    .slice(0, 1)
+                    .map((d) => (
+                      <p key={d.id}>
+                        {tr("moodle:up_next")} · {d.title} · {relative(d.dueAt)}
+                      </p>
+                    ))}
+                  {detail.course.identity.hasProgress && (
+                    <progress
+                      max={100}
+                      value={detail.course.progress ?? 0}
+                      aria-label={tr("moodle:progress")}
+                    />
+                  )}
                 </div>
               </div>
               <div className="moodle-course-layout">
@@ -547,79 +620,46 @@ export function Courses({
                       </TabsTrigger>
                     ))}
                   </TabsList>
-                  <TabsContent value="overview">
-                    <section className="moodle-panel">
-                      <div className="moodle-section-heading">
-                        <h2>{tr("moodle:up_next")}</h2>
-                        <Button
-                          variant="ghost"
-                          onClick={() => setTab("deadlines")}
-                        >
-                          {tr("moodle:view_all")}
-                          <ChevronRight />
-                        </Button>
-                      </div>
-                      {deadlines(
-                        detail.deadlines
-                          .filter((d) => !d.submitted && Date.parse(d.dueAt) >= Date.now())
-                          .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
-                          .slice(0, 1),
-                      )}
-                    </section>
-                    <section className="moodle-panel">
-                      <h2>{tr("moodle:latest_updates")}</h2>
-                      {notifications(3)}
-                    </section>
-                    <section className="moodle-panel">
-                      <div className="moodle-section-heading">
-                        <h2>{tr("moodle:grade_summary")}</h2>
-                        <Button
-                          variant="ghost"
-                          onClick={() => setTab("grades")}
-                        >
-                          {tr("moodle:view_all")}
-                          <ChevronRight />
-                        </Button>
-                      </div>
-                      <p className="moodle-panel-description">
-                        {tr("moodle:graded_count", {
-                          count: detail.grades.filter((g) => g.grade !== null)
-                            .length,
-                          total: detail.grades.length,
-                        })}
+                  <TabsContent value="content">
+                    <div className="moodle-content-summary">
+                      <section className="moodle-panel">
+                        <div className="moodle-section-heading">
+                          <h2>{tr("moodle:up_next")}</h2>
+                          <Button
+                            variant="ghost"
+                            onClick={() => setTab("deadlines")}
+                          >
+                            {tr("moodle:view_all")}
+                            <ChevronRight />
+                          </Button>
+                        </div>
+                        {deadlines(
+                          detail.deadlines
+                            .filter(
+                              (d) =>
+                                !d.submitted &&
+                                Date.parse(d.dueAt) >= Date.now(),
+                            )
+                            .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
+                            .slice(0, 1),
+                        )}
+                      </section>
+                      <section className="moodle-panel">
+                        <h2>{tr("moodle:latest_updates")}</h2>
+                        {notifications(3)}
+                      </section>
+                    </div>
+                    {detail.course.identity.teachers.length > 0 && (
+                      <p className="moodle-people">
+                        <strong>{tr("moodle:people")}</strong> ·{" "}
+                        {displayTeachers(detail.course.identity, lang)}
                       </p>
-                      <div className="moodle-grade-summary">
-                        {detail.grades
-                          .filter((g) => g.percentage !== null)
-                          .slice(0, 3)
-                          .map((grade, index) => (
-                            <div key={index}>
-                              <span>{grade.name}</span>
-                              <strong>
-                                {new Intl.NumberFormat(i18n.resolvedLanguage, {
-                                  style: "percent",
-                                  maximumFractionDigits: 0,
-                                }).format(grade.percentage! / 100)}
-                              </strong>
-                              <progress
-                                max={100}
-                                value={grade.percentage!}
-                                aria-label={grade.name}
-                              />
-                            </div>
-                          ))}
-                      </div>
-                    </section>
-                    <section className="moodle-panel">
-                      <div className="moodle-section-heading">
-                        <h2>{tr("moodle:recent_files")}</h2>
-                        <Button variant="ghost" onClick={() => setTab("files")}>
-                          {tr("moodle:view_all")}
-                          <ChevronRight />
-                        </Button>
-                      </div>
-                      {files(2)}
-                    </section>
+                    )}
+                    <CourseContent
+                      detail={detail}
+                      openFile={openFile}
+                      onError={failure}
+                    />
                   </TabsContent>
                   <TabsContent value="deadlines">
                     <section className="moodle-panel">
@@ -663,6 +703,9 @@ export function Courses({
                         ),
                       )}
                     </section>
+                  </TabsContent>
+                  <TabsContent value="announcements">
+                    <Announcements items={detail.announcements} />
                   </TabsContent>
                   <TabsContent value="notifications">
                     <section className="moodle-panel">
@@ -738,7 +781,7 @@ export function Courses({
                     </section>
                   </TabsContent>
                 </Tabs>
-                <CourseAgentPanel
+                <CourseAssistant
                   key={detail.course.id}
                   detail={detail}
                   api={api}
@@ -818,53 +861,107 @@ export function Courses({
                   })}
                 </span>
               </div>
+              <Tabs
+                value={term}
+                onValueChange={(value) => setTerm(value as MoodleTermFilter)}
+                className="moodle-term-tabs"
+              >
+                <TabsList aria-label={tr("moodle:term_filter")}>
+                  {(["current", "future", "past", "all"] as const).map(
+                    (filter) => (
+                      <TabsTrigger key={filter} value={filter}>
+                        {tr(`moodle:term_${filter}`)}
+                        <span className="moodle-chip">
+                          {
+                            overview.courses.filter((course) =>
+                              matchesTerm(course, filter),
+                            ).length
+                          }
+                        </span>
+                      </TabsTrigger>
+                    ),
+                  )}
+                </TabsList>
+              </Tabs>
+              {!overview.courses.some((course) =>
+                matchesTerm(course, term),
+              ) && (
+                <p className="moodle-empty-inline">
+                  {tr("moodle:no_term_courses")}
+                </p>
+              )}
               <div className="moodle-grid">
-                {overview.courses.map((course) => (
-                  <article
-                    key={course.id}
-                    className="moodle-course-card"
-                  >
-                    <Cover course={course} />
-                    <div className="moodle-card-body">
-                      <h3><button type="button" onClick={() => onCourse(course.id)}>{course.fullName}</button></h3>
-                      <div className="moodle-progress-label">
-                        <span>{tr("moodle:progress")}</span>
-                        <strong>
-                          {course.progress === null
-                            ? tr("moodle:not_available")
-                            : new Intl.NumberFormat(i18n.resolvedLanguage, {
-                                style: "percent",
-                              }).format(course.progress / 100)}
-                        </strong>
+                {overview.courses
+                  .filter((course) => matchesTerm(course, term))
+                  .map((course) => (
+                    <article
+                      key={course.id}
+                      className="moodle-course-card"
+                      title={course.fullName}
+                    >
+                      <Cover course={course} />
+                      <div className="moodle-card-body">
+                        <h3>
+                          <button
+                            type="button"
+                            onClick={() => onCourse(course.id)}
+                          >
+                            {displayTitle(
+                              course.identity,
+                              lang,
+                              course.fullName,
+                            )}
+                          </button>
+                        </h3>
+                        <p className="moodle-card-teacher">
+                          {displayTeachers(course.identity, lang)}
+                        </p>
+                        <p className="moodle-card-class">
+                          {displayClass(course.identity, lang)}
+                        </p>
+                        {course.identity.lifecycle === "unknown" && (
+                          <small>{tr("moodle:dates_unavailable")}</small>
+                        )}
+                        {course.identity.hasProgress && (
+                          <>
+                            <div className="moodle-progress-label">
+                              <span>{tr("moodle:progress")}</span>
+                              <strong>
+                                {tr("moodle:course_progress", {
+                                  count: course.progress ?? 0,
+                                })}
+                              </strong>
+                            </div>
+                            <progress
+                              max={100}
+                              value={course.progress ?? 0}
+                              aria-label={tr("moodle:progress")}
+                            />
+                          </>
+                        )}
+                        <footer>
+                          <span>
+                            <CalendarDays />
+                            {tr("moodle:due_count", {
+                              count: dueSoon.filter(
+                                (d) => d.courseId === course.id,
+                              ).length,
+                            })}
+                          </span>
+                          <span>
+                            {tr("moodle:course_unread", {
+                              count:
+                                homeDetails
+                                  .find((d) => d.course.id === course.id)
+                                  ?.notifications.filter((n) => !n.read)
+                                  .length ?? 0,
+                            })}
+                            <ArrowUpRight />
+                          </span>
+                        </footer>
                       </div>
-                      <progress
-                        max={100}
-                        value={course.progress ?? 0}
-                        aria-label={tr("moodle:progress")}
-                      />
-                      <footer>
-                        <span>
-                          <CalendarDays />
-                          {tr("moodle:due_count", {
-                            count: dueSoon.filter(
-                              (d) => d.courseId === course.id,
-                            ).length,
-                          })}
-                        </span>
-                        <span>
-                          {tr("moodle:course_unread", {
-                            count:
-                              homeDetails
-                                .find((d) => d.course.id === course.id)
-                                ?.notifications.filter((n) => !n.read).length ??
-                              0,
-                          })}
-                          <ArrowUpRight />
-                        </span>
-                      </footer>
-                    </div>
-                  </article>
-                ))}
+                    </article>
+                  ))}
               </div>
             </section>
           </>
@@ -872,18 +969,32 @@ export function Courses({
           !error && (
             <div className="moodle-empty">
               <GraduationCap />
-              <h2>{tr(overview?.accounts.length ? overview.accounts.some(account => !account.syncedAt) ? "moodle:syncing" : "moodle:no_courses" : "moodle:empty_title")}</h2>
-              {!overview?.accounts.length && <p>{tr("moodle:empty_description")}</p>}
-              {!overview?.accounts.length && <Button onClick={() => setConnect(true)}>
-                {tr("moodle:connect_school")}
-              </Button>}
+              <h2>
+                {tr(
+                  overview?.accounts.length
+                    ? overview.accounts.some((account) => !account.syncedAt)
+                      ? "moodle:syncing"
+                      : "moodle:no_courses"
+                    : "moodle:empty_title",
+                )}
+              </h2>
+              {!overview?.accounts.length && (
+                <p>{tr("moodle:empty_description")}</p>
+              )}
+              {!overview?.accounts.length && (
+                <Button onClick={() => setConnect(true)}>
+                  {tr("moodle:connect_school")}
+                </Button>
+              )}
             </div>
           )
         )}
-        {!courseId && Boolean(overview?.otherNotifications?.length) && <section className="moodle-panel">
-          <h2>{tr("moodle:other_notifications")}</h2>
-          {notifications(undefined,overview?.otherNotifications)}
-        </section>}
+        {!courseId && Boolean(overview?.otherNotifications?.length) && (
+          <section className="moodle-panel">
+            <h2>{tr("moodle:other_notifications")}</h2>
+            {notifications(undefined, overview?.otherNotifications)}
+          </section>
+        )}
         <ConnectDialog
           open={connect}
           onOpenChange={setConnect}

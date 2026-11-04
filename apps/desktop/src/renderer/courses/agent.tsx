@@ -28,6 +28,7 @@ export function CourseAgentPanel({
   requested,
   onChange,
   onError,
+  onPendingChange,
 }: {
   detail: MoodleCourseDetail;
   api: MoodleApi;
@@ -35,6 +36,7 @@ export function CourseAgentPanel({
   requested: number;
   onChange: () => Promise<void>;
   onError: () => void;
+  onPendingChange?: ((pending: boolean) => void) | undefined;
 }) {
   const approving = useRef(false);
   const handledRequest = useRef(0);
@@ -118,6 +120,7 @@ export function CourseAgentPanel({
     }
   }, [requested, conversation?.id]);
   const [actions, setActions] = useState<MoodleAgentAction[]>([]);
+  useEffect(() => { onPendingChange?.(actions.length > 0); }, [actions.length, onPendingChange]);
   const [status, setStatus] = useState<
     "idle" | "busy" | "unavailable" | "done"
   >("idle");
@@ -191,7 +194,7 @@ export function CourseAgentPanel({
     }
   };
   return (
-    <aside ref={panel} tabIndex={-1} className="moodle-agent" aria-label={tr("moodle:course_assistant")}>
+    <aside ref={panel} tabIndex={-1} className="moodle-agent" data-conversation={!!conversation} aria-label={tr("moodle:course_assistant")}>
       <div className="moodle-agent-heading">
         <Sparkles />
         <h2>{tr("moodle:course_assistant")}</h2>
