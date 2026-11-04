@@ -85,3 +85,10 @@ it('accepts nullable optional Moodle fields',async () => {
   expect((await client.notifications(account,courses))[0]!.value.read).toBe(false);
   expect((await client.files(courses[0]!))[0]!.value.section).toBe('');
 });
+
+it('accepts all four Swift callback site variants',() => {
+  for (const site of ['https://school.example','https://school.example/','http://school.example','http://school.example/']) {
+    const signature = createHash('md5').update(site + 'passport').digest('hex');
+    expect(verifyCallback(`vstudymoodle://token=${Buffer.from(`${signature}:::token`).toString('base64')}`,'https://school.example','passport')).toBe('token');
+  }
+});
