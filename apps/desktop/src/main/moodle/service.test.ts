@@ -24,7 +24,7 @@ async function setup() {
   const repository = new MoodleRepository(store.db); repository.saveAccount(account);
   await secrets.set(moodleSecretId(account.id),'token');
   const request = fixtureFetch();
-  const service = new MoodleService(repository,secrets,{login:async (_school,accept) => accept('token')},request);
+  const service = new MoodleService(repository,secrets,{login:async (_site,_provider,accept) => accept({token:'token'})},request);
   return {directory,store,secrets,repository,request,service};
 }
 it('syncs twice with stable identities and isolated account records',async () => {
@@ -165,7 +165,7 @@ it('reconnects the existing user account without exposing or duplicating its tok
   expect(connected.id).toBe(account.id);
   expect(Object.keys(connected)).not.toContain('token');
   expect(repository.accounts()).toHaveLength(1);
-  expect(await secrets.getInMainOnly(moodleSecretId(account.id))).toBe('token');
+  expect(await secrets.getInMainOnly(moodleSecretId(account.id))).toBe('{"token":"token"}');
   await service.dispose();
 });
 it('does not link a download after its source revision changes',async () => {
@@ -278,5 +278,14 @@ it('retries an offline mark-read on the next sync',async () => {
   expect(repository.notification(notification.id)!.read).toBe(true);
   request.mockClear(); await service.sync(account.id);
   expect(request.mock.calls.filter(call => String(call[1]?.body).includes('wsfunction=core_message_mark_notification_read'))).toHaveLength(0);
+  await service.dispose();
+});
+
+it('rejects a token issued for a different site before storing it',async () => {
+  const {service,request,secrets} = await setup();
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => String(target).includes('server.php') ? Response.json({userid:42,fullname:'Student',siteurl:'https://other.example'}) : base(target,options));
+  await expect(service.connect({siteUrl:'https://ilearning.cycu.edu.tw'})).rejects.toMatchObject({code:'requirecorrectaccess'});
+  expect(await secrets.getInMainOnly(moodleSecretId(account.id))).toBe('token');
   await service.dispose();
 });

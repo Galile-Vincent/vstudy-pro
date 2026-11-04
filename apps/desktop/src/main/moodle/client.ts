@@ -1,3 +1,4 @@
+import { authError, type MoodleTokens } from './auth';
 import { moodleFetch, siteFetch } from './site-url';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
@@ -33,7 +34,7 @@ const eventWire = z.object({ id:integer, name:z.string(), courseid:integer.optio
 const messageWire = z.object({id:integer, subject:z.string().optional(), text:optionalText, customdata:optionalText, fullmessage:z.string().nullish(), fullmessagehtml:z.string().optional(), smallmessage:z.string().optional(), timecreated:integer, timeread:integer.nullish(), read:flag.optional(), contexturl:optionalText, courseid:integer.optional()});
 const gradeWire = z.object({ usergrades:z.array(z.object({gradeitems:z.array(z.object({id:integer, itemname:optionalText, gradeformatted:optionalText, grademax:numeric.nullable().optional(), percentageformatted:optionalText, gradedategraded:integer.nullable().optional()}))})) });
 const sectionsWire = z.array(z.object({id:integer, name:z.string().nullish(), modules:z.array(z.object({id:integer, name:z.string(), contents:z.array(z.object({type:z.string(), filename:z.string(), fileurl:optionalText, filesize:integer.refine(value => value >= 0).optional(), mimetype:z.string().optional(), timemodified:integer.optional()})).optional()}))}));
-export const siteInfoSchema = z.object({userid:integer, fullname:z.string()});
+export const siteInfoSchema = z.object({userid:integer, fullname:z.string(),siteurl:z.string().optional(),version:z.string().optional()});
 export { publicConfigSchema } from './discovery';
 
 export class MoodleClient {
@@ -151,10 +152,16 @@ export class MoodleClient {
     return sections.flatMap(section => section.modules.flatMap(module => (module.contents ?? []).filter(file => file.type === 'file' && file.fileurl && url(file.fileurl)).map(file => ({url:url(file.fileurl)!,value:moodleFileSchema.parse({id:remoteId(course.accountId,'file',`${module.id}:${file.fileurl!.split('?')[0]}`),courseId:course.id,section:plainText(section.name ?? ''),module:plainText(module.name),name:plainText(file.filename),mime:file.mimetype ?? 'application/octet-stream',size:file.filesize ?? 0,modifiedAt:date(file.timemodified),documentId:null})}))));
   }
 }
-export async function passwordToken(host: string, username: string, password: string, request: Fetch = moodleFetch): Promise<string> {
+export async function passwordToken(host: string, username: string, password: string, request: Fetch = moodleFetch): Promise<MoodleTokens> {
+  let response: Response;
   try {
-    const response = await siteFetch(host,request)(`${host}/login/token.php`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({username,password,service:'moodle_mobile_app'}),redirect:'error',signal:AbortSignal.timeout(30_000)});
-    if (!response.ok) throw new MoodleError('auth');
-    return z.object({token:z.string().min(1).max(16384)}).parse(await response.json()).token;
-  } catch { throw new MoodleError('auth'); }
+    response = await siteFetch(host,request)(`${host}/login/token.php`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({username,password,service:'moodle_mobile_app'}),redirect:'error',signal:AbortSignal.timeout(30_000)});
+  } catch { throw new MoodleError('network'); }
+  if (!response.ok) throw new MoodleError('network');
+  const raw: unknown = await response.json();
+  const error = z.object({errorcode:z.string()}).safeParse(raw);
+  if (error.success) throw authError(error.data.errorcode);
+  const result = z.object({token:z.string().min(1).max(16384),privatetoken:z.string().min(1).max(16384).optional()}).safeParse(raw);
+  if (!result.success) throw new MoodleError('service');
+  return {token:result.data.token,...(result.data.privatetoken ? {privateToken:result.data.privatetoken} : {})};
 }

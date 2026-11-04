@@ -1,44 +1,50 @@
+import { MoodleAuthError, type MoodleTokens } from './auth';
+import { normalizeSiteUrl } from './site-url';
 import { moodleFetch } from './site-url';
 import { randomUUID } from 'node:crypto';
-import type { MoodleAccount, MoodleSchool } from '../../shared/moodle';
+import type { MoodleAccount } from '../../shared/moodle';
 import type { SecretStore } from '../services/secrets';
 import { moodleSecretId } from '../services/secrets';
 import { MoodleClient, MoodleError, passwordToken, plainText, type Fetch } from './client';
 import { MoodleRepository } from './repository';
-import { checkSite } from './discovery';
+import { checkSite, type CheckedSite } from './discovery';
 
 export class MoodleService {
   private readonly pending = new Map<string,Promise<{errors:string[]}>>();
   private stopped = false;
   private readonly lastAttempt = new Map<string,number>();
-  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(school: MoodleSchool, accept: (token: string) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch) {}
+  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch) {}
   private readonly connecting = new Set<string>();
   async checkSite(url: string) {
-    const {config: _config,...result} = await checkSite(url,this.request);
-    return result;
+    const {siteUrl,siteName,authPlan,iconUrl} = await checkSite(url,this.request);
+    return {siteUrl,siteName,authPlan,...(iconUrl ? {iconUrl} : {})};
   }
   async connect(input: {siteUrl:string;provider?:number | undefined;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
     const checked = await checkSite(input.siteUrl,this.request);
-    const school: MoodleSchool = {id:'site',host:checked.siteUrl,name:checked.siteName,login:checked.authPlan.kind === 'password' ? 'password' : 'sso-launch'};
     if (checked.authPlan.kind === 'unavailable') throw new Error(checked.authPlan.reason);
-    if (this.stopped || this.connecting.has(school.host)) throw new Error('Moodle login unavailable');
-    if (school.login === 'sso-launch' && (input.username !== undefined || input.password !== undefined)) throw new Error('Site requires SSO');
-    this.connecting.add(school.host);
+    if (this.stopped || this.connecting.has(checked.siteUrl)) throw new Error('Moodle login unavailable');
+    const browser = checked.authPlan.kind !== 'password';
+    if (browser && (input.username !== undefined || input.password !== undefined)) throw new MoodleAuthError('sso-required');
+    this.connecting.add(checked.siteUrl);
     try {
-      return school.login === 'sso-launch'
-        ? await this.sso.login(school,token => this.acceptToken(school,token))
-        : await this.acceptToken(school,await passwordToken(school.host,input.username ?? '',input.password ?? '',this.request));
-    } finally { this.connecting.delete(school.host); }
+      return browser
+        ? await this.sso.login(checked,input.provider,tokens => this.acceptToken(checked,tokens))
+        : await this.acceptToken(checked,await passwordToken(checked.siteUrl,input.username ?? '',input.password ?? '',this.request));
+    } finally { this.connecting.delete(checked.siteUrl); }
   }
-  private async acceptToken(school: MoodleSchool, token: string): Promise<MoodleAccount> {
-    const info = await new MoodleClient(school.host,token,this.request).siteInfo();
+  private async acceptToken(site: CheckedSite, tokens: MoodleTokens): Promise<MoodleAccount> {
+    const info = await new MoodleClient(site.siteUrl,tokens.token,this.request).siteInfo();
+    if (!info.siteurl || normalizeSiteUrl(info.siteurl) !== site.siteUrl) throw new MoodleAuthError('requirecorrectaccess');
+    if (info.version && Number(info.version) < 2018051700) throw new Error('unsupported-version');
     if (this.stopped) throw new Error('Moodle service closed');
-    const existing = this.repository.accounts().find(account => account.siteUrl === school.host && account.remoteUserId === info.userid);
-    const account: MoodleAccount = {id:existing?.id ?? randomUUID(),siteUrl:school.host,siteName:school.name,remoteUserId:info.userid,displayName:plainText(info.fullname),status:'connected',syncedAt:existing?.syncedAt ?? null};
-    await this.secrets.set(moodleSecretId(account.id),token);
+    const existing = this.repository.accounts().find(account => account.siteUrl === site.siteUrl && account.remoteUserId === info.userid);
+    const expired = this.repository.accounts().filter(account => account.siteUrl === site.siteUrl && account.status === 'expired');
+    if (!existing && expired.length) throw new MoodleAuthError('requirecorrectaccess');
+    const account: MoodleAccount = {id:existing?.id ?? randomUUID(),siteUrl:site.siteUrl,siteName:site.siteName,remoteUserId:info.userid,displayName:plainText(info.fullname),status:'connected',syncedAt:existing?.syncedAt ?? null};
+    await this.secrets.set(moodleSecretId(account.id),JSON.stringify(tokens));
     if (this.stopped || existing && !this.repository.accounts().some(row => row.id === existing.id)) {
       this.secrets.delete(moodleSecretId(account.id));
-      throw new Error('Moodle login cancelled');
+      throw new MoodleAuthError('cancelled');
     }
     this.repository.saveAccount(account);
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -60,6 +66,7 @@ export class MoodleService {
   async token(id: string): Promise<string> {
     const token = await this.secrets.getInMainOnly(moodleSecretId(id));
     if (!token) throw new MoodleError('auth');
+    if (token.startsWith('{')) return (JSON.parse(token) as MoodleTokens).token;
     return token;
   }
   async markRead(id: string) {

@@ -2,14 +2,14 @@ import { describe, it, expect, vi } from 'vitest';
 import { createHash, randomUUID } from 'node:crypto';
 import { MoodleClient, passwordToken, plainText } from './client';
 import { verifyCallback } from './callback';
-import { allowsLoginNavigation, schools } from './schools';
+import { schools } from './schools';
 import { account, fixtureFetch } from './fixtures/support';
 
 describe('Moodle response boundary',() => {
   it('maps the fixture responses into the shared contract',async () => {
     const request = fixtureFetch();
     const client = new MoodleClient(schools[0]!.host,'secret-token',request);
-    expect(await client.siteInfo()).toEqual({userid:42,fullname:'Student Example'});
+    expect(await client.siteInfo()).toEqual({userid:42,fullname:'Student Example',siteurl:'https://ilearning.cycu.edu.tw'});
     const courses = await client.courses(account);
     expect(courses[0]).toMatchObject({fullName:'Algorithms',shortName:'CS & Math',progress:42.5,favourite:true,endAt:null});
     expect(await client.assignments(account.id,courses)).toMatchObject([{title:'Homework 1',kind:'assignment',dueAt:'2026-11-07T00:00:00.000Z'}]);
@@ -49,7 +49,7 @@ describe('Moodle response boundary',() => {
   });
   it('posts credentials only to the token endpoint',async () => {
     const request = vi.fn<typeof fetch>(async () => Response.json({token:'token'}));
-    expect(await passwordToken('https://school.example','name','password',request)).toBe('token');
+    expect(await passwordToken('https://school.example','name','password',request)).toEqual({token:'token'});
     expect(request.mock.calls[0]![0]).toBe('https://school.example/login/token.php');
     expect(String(request.mock.calls[0]![1]?.body)).toBe('username=name&password=password&service=moodle_mobile_app');
   });
@@ -62,16 +62,13 @@ describe('SSO callback',() => {
     const site = schools[0]!.host, passport = randomUUID();
     const signature = createHash('md5').update(site + passport).digest('hex');
     const callback = `vstudymoodle://token=${Buffer.from(`${signature}:::token:::private`).toString('base64')}`;
-    expect(verifyCallback(callback,site,passport)).toBe('token');
+    expect(verifyCallback(callback,site,passport)).toEqual({token:'token',privateToken:'private'});
     expect(() => verifyCallback(callback,site,'other')).toThrow('Invalid Moodle callback');
     expect(() => verifyCallback(callback,'https://other.example',passport)).toThrow();
     expect(() => verifyCallback(callback.replace('vstudymoodle:','evil:'),site,passport)).toThrow();
     expect(() => verifyCallback('vstudymoodle://token=garbage',site,passport)).toThrow();
   });
-  it('restricts navigation to exact configured HTTPS hosts',() => {
-    for (const url of ['https://ilearning.cycu.edu.tw/login','https://login.microsoftonline.com/common']) expect(allowsLoginNavigation(schools[0]!,url)).toBe(true);
-    for (const url of ['http://ilearning.cycu.edu.tw','https://ilearning.cycu.edu.tw.evil.example','https://login.microsoftonline.com@evil.example','https://evil.example','file:///etc/passwd','https://ilearning.cycu.edu.tw:444']) expect(allowsLoginNavigation(schools[0]!,url)).toBe(false);
-  });
+
 });
 
 it('accepts nullable optional Moodle fields',async () => {
@@ -89,7 +86,7 @@ it('accepts nullable optional Moodle fields',async () => {
 it('accepts all four Swift callback site variants',() => {
   for (const site of ['https://school.example','https://school.example/','http://school.example','http://school.example/']) {
     const signature = createHash('md5').update(site + 'passport').digest('hex');
-    expect(verifyCallback(`vstudymoodle://token=${Buffer.from(`${signature}:::token`).toString('base64')}`,'https://school.example','passport')).toBe('token');
+    expect(verifyCallback(`vstudymoodle://token=${Buffer.from(`${signature}:::token`).toString('base64')}`,'https://school.example','passport')).toEqual({token:'token'});
   }
 });
 it('uses submission and attempt status rather than actionability',async () => {

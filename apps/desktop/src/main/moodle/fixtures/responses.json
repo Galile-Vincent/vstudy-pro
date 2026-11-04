@@ -1,13 +1,141 @@
 {
-  "mod_assign_get_submission_status": {"lastattempt":{"submission":{"status":"draft"}}},
-  "mod_quiz_get_user_attempts": {"attempts":[{"state":"finished"}]},
-  "core_webservice_get_site_info": {"userid":42,"fullname":"Student Example","username":"student"},
-  "core_enrol_get_users_courses": [{"id":101,"fullname":"<span class=\"multilang\" lang=\"en\">Algorithms</span>","shortname":"{mlang en}CS &amp; Math{mlang}","progress":42.5,"startdate":1767225600,"enddate":0,"isfavourite":true,"overviewfiles":[]}],
-  "core_course_get_enrolled_courses_by_timeline_classification": {"courses":[{"id":101,"fullname":"Algorithms","shortname":"CS","progress":null}],"nextoffset":0},
-  "mod_assign_get_assignments": {"courses":[{"id":101,"assignments":[{"id":201,"name":"<p>Homework 1</p>","duedate":1794009600,"cmid":301}]}],"warnings":[]},
-  "core_calendar_get_action_events_by_timesort": {"events":[{"id":401,"name":"Quiz &amp; review","course":{"id":101},"timesort":1794096000,"modulename":"quiz","instance":202,"action":{"url":"https://ilearning.cycu.edu.tw/mod/quiz/view.php?id=302","actionable":true}}]},
-  "core_calendar_get_calendar_upcoming_view": {"events":[{"id":402,"name":"Class event","courseid":101,"timestart":1794096000}]},
-  "core_message_get_messages": {"messages":[{"id":501,"subject":"<b>Prepare</b>","fullmessagehtml":"<p>Read chapter &lt;2&gt;</p><script>alert(1)</script>","timecreated":1793923200,"timeread":0,"courseid":101,"contexturl":"https://ilearning.cycu.edu.tw/course/view.php?id=101"}],"warnings":[]},
-  "gradereport_user_get_grade_items": {"usergrades":[{"gradeitems":[{"id":601,"itemname":"Homework 1","gradeformatted":"<b>8</b>","grademax":10,"percentageformatted":"80.00 %","gradedategraded":1793923200}]}]},
-  "core_course_get_contents": [{"id":701,"name":"Week 1","modules":[{"id":801,"name":"Slides","contents":[{"type":"file","filename":"lecture.pdf","fileurl":"https://ilearning.cycu.edu.tw/webservice/pluginfile.php/9/mod_resource/content/1/lecture.pdf","filesize":123,"mimetype":"application/pdf","timemodified":1793923200}]}]}]
+  "mod_assign_get_submission_status": {
+    "lastattempt": {
+      "submission": {
+        "status": "draft"
+      }
+    }
+  },
+  "mod_quiz_get_user_attempts": {
+    "attempts": [
+      {
+        "state": "finished"
+      }
+    ]
+  },
+  "core_webservice_get_site_info": {
+    "userid": 42,
+    "fullname": "Student Example",
+    "username": "student",
+    "siteurl": "https://ilearning.cycu.edu.tw"
+  },
+  "core_enrol_get_users_courses": [
+    {
+      "id": 101,
+      "fullname": "<span class=\"multilang\" lang=\"en\">Algorithms</span>",
+      "shortname": "{mlang en}CS &amp; Math{mlang}",
+      "progress": 42.5,
+      "startdate": 1767225600,
+      "enddate": 0,
+      "isfavourite": true,
+      "overviewfiles": []
+    }
+  ],
+  "core_course_get_enrolled_courses_by_timeline_classification": {
+    "courses": [
+      {
+        "id": 101,
+        "fullname": "Algorithms",
+        "shortname": "CS",
+        "progress": null
+      }
+    ],
+    "nextoffset": 0
+  },
+  "mod_assign_get_assignments": {
+    "courses": [
+      {
+        "id": 101,
+        "assignments": [
+          {
+            "id": 201,
+            "name": "<p>Homework 1</p>",
+            "duedate": 1794009600,
+            "cmid": 301
+          }
+        ]
+      }
+    ],
+    "warnings": []
+  },
+  "core_calendar_get_action_events_by_timesort": {
+    "events": [
+      {
+        "id": 401,
+        "name": "Quiz &amp; review",
+        "course": {
+          "id": 101
+        },
+        "timesort": 1794096000,
+        "modulename": "quiz",
+        "instance": 202,
+        "action": {
+          "url": "https://ilearning.cycu.edu.tw/mod/quiz/view.php?id=302",
+          "actionable": true
+        }
+      }
+    ]
+  },
+  "core_calendar_get_calendar_upcoming_view": {
+    "events": [
+      {
+        "id": 402,
+        "name": "Class event",
+        "courseid": 101,
+        "timestart": 1794096000
+      }
+    ]
+  },
+  "core_message_get_messages": {
+    "messages": [
+      {
+        "id": 501,
+        "subject": "<b>Prepare</b>",
+        "fullmessagehtml": "<p>Read chapter &lt;2&gt;</p><script>alert(1)</script>",
+        "timecreated": 1793923200,
+        "timeread": 0,
+        "courseid": 101,
+        "contexturl": "https://ilearning.cycu.edu.tw/course/view.php?id=101"
+      }
+    ],
+    "warnings": []
+  },
+  "gradereport_user_get_grade_items": {
+    "usergrades": [
+      {
+        "gradeitems": [
+          {
+            "id": 601,
+            "itemname": "Homework 1",
+            "gradeformatted": "<b>8</b>",
+            "grademax": 10,
+            "percentageformatted": "80.00 %",
+            "gradedategraded": 1793923200
+          }
+        ]
+      }
+    ]
+  },
+  "core_course_get_contents": [
+    {
+      "id": 701,
+      "name": "Week 1",
+      "modules": [
+        {
+          "id": 801,
+          "name": "Slides",
+          "contents": [
+            {
+              "type": "file",
+              "filename": "lecture.pdf",
+              "fileurl": "https://ilearning.cycu.edu.tw/webservice/pluginfile.php/9/mod_resource/content/1/lecture.pdf",
+              "filesize": 123,
+              "mimetype": "application/pdf",
+              "timemodified": 1793923200
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
