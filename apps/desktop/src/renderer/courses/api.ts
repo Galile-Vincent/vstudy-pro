@@ -6,6 +6,9 @@ import type {
   MoodleSchool,
 } from "../../shared/moodle";
 import { createMockMoodleApi } from "../dev-mock";
+import { desktop, isMock } from "../bridge";
+import type { IpcChannel, IpcRequest } from "../../shared/ipc";
+import { moodleChannels } from "../../shared/moodle";
 
 export interface MoodleApi {
   schools(): Promise<MoodleSchool[]>;
@@ -26,24 +29,44 @@ export interface MoodleApi {
 }
 
 const mock = createMockMoodleApi();
-const methods: (keyof MoodleApi)[] = [
-  "schools",
-  "connect",
-  "disconnect",
-  "overview",
-  "sync",
-  "course",
-  "openFile",
-  "markRead",
-  "createReminder",
-  "deleteReminder",
-  "exportCalendar",
-];
+
+function createBridgeMoodleApi(): MoodleApi {
+  const call = <C extends IpcChannel>(channel: C, request: IpcRequest<C>) =>
+    desktop.invoke(channel, request);
+  return {
+    schools: () => call(moodleChannels.schools, {}),
+    connect: (schoolId) => call(moodleChannels.connect, { schoolId }),
+    disconnect: async (accountId) => {
+      await call(moodleChannels.disconnect, { accountId });
+    },
+    overview: () => call(moodleChannels.overview, {}),
+    sync: async (accountId) => {
+      await call(moodleChannels.sync, accountId ? { accountId } : {});
+    },
+    course: (courseId) => call(moodleChannels.course, { courseId }),
+    openFile: async (fileId) => ({
+      documentId: await call(moodleChannels.openFile, { fileId }),
+    }),
+    markRead: async (notificationId) => {
+      await call(moodleChannels.markRead, { notificationId });
+    },
+    createReminder: ({ deadlineId, remindAt, note }) =>
+      call(moodleChannels.createReminder, {
+        deadlineId,
+        remindAt,
+        note,
+        createdBy: "user",
+      }),
+    deleteReminder: async (reminderId) => {
+      await call(moodleChannels.deleteReminder, { reminderId });
+    },
+    exportCalendar: async (deadlineIds) => {
+      await call(moodleChannels.exportCalendar, { deadlineIds });
+    },
+  } as MoodleApi;
+}
+
+const real = isMock ? null : createBridgeMoodleApi();
 export function useMoodleApi(): MoodleApi {
-  const bridge = (window as Window & { vstudy?: { moodle?: MoodleApi } }).vstudy
-    ?.moodle;
-  return bridge &&
-    methods.every((method) => typeof bridge[method] === "function")
-    ? bridge
-    : mock;
+  return real ?? mock;
 }
