@@ -35,7 +35,7 @@ try {
     res.writeHead(302,{location:mode === 'direct' || mode === 'invalid' ? callback : `${idp}/hop?to=${callback}`});res.end();
   });
   await writeFile(join(dir,'entry.ts'),`export { MoodleSso } from ${JSON.stringify(join(root,'src/main/moodle/sso.ts'))}; export { checkSite } from ${JSON.stringify(join(root,'src/main/moodle/discovery.ts'))};`);
-  await build({configFile:false,logLevel:'error',plugins:[{name:'isolated-test-network',transform(code,id) {
+  await build({configFile:false,logLevel:'error',plugins:[{name:'isolated-test-network',enforce:'pre',transform(code,id) {
     if (id.endsWith('/moodle/site-url.ts')) return code.replace('const url = new URL(input);',`const url = new URL(input); if (process.env.VSTUDY_SSO_HARNESS === '1' && url.protocol === 'https:' && url.hostname === '127.0.0.1' && !url.username && !url.password) return url;`).replace("host = host.replace(/^\\[|\\]$/g,'');",`if (process.env.VSTUDY_SSO_HARNESS === '1' && host === '127.0.0.1') return [{address:host,family:4}]; host = host.replace(/^\\[|\\]$/g,'');`);
     if (id.endsWith('/moodle/login-proxy.ts')) return code.replace('port:443','port:Number(target.port) || 443');
     if (id.endsWith('/moodle/sso.ts')) return code.replace('10 * 60_000','process.env.VSTUDY_SSO_TIMEOUT === "1" ? 150 : 5000');
