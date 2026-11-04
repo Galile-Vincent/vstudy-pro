@@ -22,3 +22,33 @@ Lead: Claude (design). Implementation: Codex. Contract: `apps/desktop/src/shared
 
 ## Accessibility and i18n
 - All strings in a new `moodle` namespace for en, zh-Hant, ja. Keyboard reachable cards, visible focus, contrast per `scripts/check-contrast.mjs`, reduced motion respected.
+
+## Browser SSO callback policy
+
+SSO uses an isolated embedded window by default for every site. Moodle's
+`admin/tool/mobile/launch.php` can replace our requested `vstudymoodle` scheme
+with the site's `tool_mobile.forcedurlscheme`, including `moodlemobile` at CYCU.
+The public `tool_mobile_get_public_config` response in Moodle 4.5 does not
+advertise this setting. Any main-frame non-HTTP URL shaped as `<scheme>://token=<base64>` is a
+callback candidate, including `vstudymoodle`, `moodlemobile`, and site-specific
+schemes. The MD5 signature over the site URL variants and the one-time passport
+authorizes the response. Invalid candidates are intercepted silently and leave
+the window open. Other custom-scheme navigations remain blocked. Success closes
+the embedded window, clears its session storage and request listener, restores
+the main window, and passes the verified tokens to the account connection flow.
+
+The main-process `MoodleSso.login` option
+`{mode:'external',callbackScheme:'vstudymoodle'}` explicitly enables system-browser
+SSO when OS routing is available and the site's login plan permits it. Callers
+must establish that the site returns our scheme before choosing this option.
+The renderer does not expose this option. Never register `moodlemobile` as an OS
+handler. That scheme belongs to the official Moodle app. Sites with an unknown
+or different forced scheme must use the embedded default.
+
+SSO diagnostics retain only the scheme for custom URLs and only the scheme,
+hostname, and port for HTTP URLs. Recovery pages use fixed failure codes and a
+retry sentinel intercepted in the embedded window. They never embed callback
+authorities or the passport-bearing launch URL.
+
+Sources are Moodle's [launch implementation](https://github.com/moodle/moodle/blob/MOODLE_405_STABLE/admin/tool/mobile/launch.php)
+and [public configuration contract](https://github.com/moodle/moodle/blob/MOODLE_405_STABLE/admin/tool/mobile/classes/external.php).

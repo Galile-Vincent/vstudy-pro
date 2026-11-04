@@ -147,6 +147,9 @@ if (ownsApplication) void app.whenReady().then(() => {
       event.sender === window.webContents &&
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
+    () => {
+      if (window && !window.isDestroyed()) { window.show(); window.focus(); }
+    },
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deleteAllData');

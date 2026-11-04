@@ -1,9 +1,14 @@
 import { MoodleAuthError, type MoodleTokens } from './auth';
 import { createHash, timingSafeEqual } from 'node:crypto';
 
+export function isCallbackCandidate(target: string): boolean {
+  const match = /^([a-z][a-z0-9+.-]*):\/\/token=([A-Za-z0-9+/=%_-]+)$/i.exec(target);
+  return !!match && !['http','https'].includes(match[1]!.toLowerCase());
+}
+
 export function verifyCallback(callback: string, siteUrl: string | readonly string[], passport: string, verifiedSite?: (site: string) => void): MoodleTokens {
-  const match = /^vstudymoodle:\/\/token=([A-Za-z0-9+/=%_-]+)$/.exec(callback);
-  if (!match || callback.length > 40_000 || !passport) throw new MoodleAuthError('callback-invalid','malformed');
+  const match = /^[a-z][a-z0-9+.-]*:\/\/token=([A-Za-z0-9+/=%_-]+)$/i.exec(callback);
+  if (!isCallbackCandidate(callback) || !match || callback.length > 40_000 || !passport) throw new MoodleAuthError('callback-invalid','malformed');
   let encoded: string;
   try { encoded = decodeURIComponent(match[1]!); } catch { throw new MoodleAuthError('callback-invalid','malformed'); }
   if (!/^[A-Za-z0-9+/_-]+={0,2}$/.test(encoded)) throw new MoodleAuthError('callback-invalid','malformed');

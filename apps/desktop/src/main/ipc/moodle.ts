@@ -14,9 +14,9 @@ import { schools } from '../moodle/schools';
 import { importMoodleFile } from '../moodle/files';
 import { startReminders, calendarText } from '../moodle/reminders';
 
-export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, secrets: SecretStore, implemented: Set<IpcChannel>, documents: Pick<DocumentService,'importPath'|'get'>) {
+export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, secrets: SecretStore, implemented: Set<IpcChannel>, documents: Pick<DocumentService,'importPath'|'get'>, restoreMainWindow: () => void = () => {}) {
   const repository = new MoodleRepository(store.db);
-  const sso = new MoodleSso();
+  const sso = new MoodleSso(restoreMainWindow);
   const service = new MoodleService(repository,secrets,sso);
   const stopReminders = startReminders(repository,(title,body) => {
     if (!Notification.isSupported()) return false;

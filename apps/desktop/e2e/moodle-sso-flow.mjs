@@ -33,13 +33,13 @@ try {
     if (url.pathname.includes('service-nologin')) {res.setHeader('Content-Type','application/json');res.end(JSON.stringify([{error:false,data:{wwwroot:school,typeoflogin:2}}]));return;}
     const mode = url.pathname.split('/')[1];
     const signature = createHash('md5').update(school + url.searchParams.get('passport')).digest('hex');
-    const callback = 'vstudymoodle://token=' + Buffer.from(`${mode === 'invalid' ? '0'.repeat(32) : signature}:::fixture-token`).toString('base64');
+    const callback = (mode === 'arbitrary' ? 'cycuilearning' : mode.startsWith('forced') ? 'moodlemobile' : 'vstudymoodle') + '://token=' + Buffer.from(`${mode === 'invalid' || mode === 'forced-invalid' ? '0'.repeat(32) : signature}:::fixture-token`).toString('base64');
     if (mode === 'failure' || mode === 'retry' && retryCount++ === 0) {res.destroy();return;}
     if (mode === 'blocked') {res.end('<a href="http://school.example/secret?token=hidden">Unsafe scheme</a>');return;}
     if (mode === 'frames') {res.end(`<iframe src="about:blank"></iframe><iframe srcdoc="frame"></iframe><iframe src="data:text/html,frame"></iframe><a href="${callback}">Open app</a>`);return;}
-    if (mode === 'link') {res.end(`<a href="${callback}">Open app</a>`);return;}
+    if (mode === 'link' || mode === 'forced-link') {res.end(`<a href="${callback}">Open app</a>`);return;}
     if (mode === 'wait') {res.end('Waiting for sign-in');return;}
-    res.writeHead(302,{location:mode === 'direct' || mode === 'invalid' ? callback : `${idp}/hop?to=${callback}`});res.end();
+    res.writeHead(302,{location:mode === 'direct' || mode === 'invalid' || mode.startsWith('forced') || mode === 'arbitrary' ? callback : `${idp}/hop?to=${callback}`});res.end();
   });
   await writeFile(join(dir,'entry.ts'),`export { MoodleSso } from ${JSON.stringify(join(root,'src/main/moodle/sso.ts'))}; export { checkSite } from ${JSON.stringify(join(root,'src/main/moodle/discovery.ts'))};`);
   await build({configFile:false,logLevel:'error',plugins:[{name:'isolated-test-network',enforce:'pre',resolveId(source,importer) {
@@ -56,9 +56,9 @@ try {
   const globalPolicy = source.slice(source.indexOf("app.on('web-contents-created'"),source.indexOf('let store:'));
   await writeFile(join(dir,'main.cjs'),`globalThis.require=require; const {app,BrowserWindow}=require('electron'); if(app.isPackaged || process.env.VSTUDY_SSO_HARNESS !== '1') throw Error('Harness only'); app.setPath('userData',${JSON.stringify(join(dir,'data'))}); ${globalPolicy} app.on('certificate-error',(event,contents,url,error,certificate,callback)=>{if(new URL(url).hostname==='127.0.0.1'){event.preventDefault();callback(true);}else callback(false);}); app.whenReady().then(()=>{globalThis.fixture=require(${JSON.stringify(join(dir,'bundle/sso.cjs'))}); globalThis.main=new BrowserWindow({show:false,webPreferences:{sandbox:true}}); void globalThis.main.loadURL('about:blank');});`);
   app = await electron.launch({args:[join(dir,'main.cjs')],env:{...process.env,ELECTRON_RUN_AS_NODE:''}});
-  app.on('console',message => {if (message.text().startsWith('{"phase":"moodle-sso-')) {const entry=JSON.parse(message.text());if(entry.scheme === 'vstudymoodle:') entry.host='[callback]';console.log(JSON.stringify(entry));}});
+  app.on('console',message => {if (message.text().startsWith('{"phase":"moodle-sso-')) {const entry=JSON.parse(message.text());assert.equal(JSON.stringify(entry).includes('token='),false);console.log(JSON.stringify(entry));}});
   app.process().on('exit',(code,signal) => console.log(JSON.stringify({phase:'process-exit',code,signal})));
-  app.process().stderr.on('data',chunk => { const text=String(chunk); if (/Error|ERR_|Unhandled/.test(text)) console.log(text.replace(/vstudymoodle:\/\/\S+/g,'[callback]').replace(/\?[^\s'"]*/g,'?[redacted]')); });
+  app.process().stderr.on('data',chunk => { const text=String(chunk); if (/Error|ERR_|Unhandled/.test(text)) console.log(text.replace(/(?:vstudymoodle|moodlemobile):\/\/\S+/g,'[callback]').replace(/\?[^\s'"]*/g,'?[redacted]')); });
   await app.firstWindow();
   const run = async mode => {
     const result = await app.evaluate(async ({BrowserWindow}, {school,mode}) => {
@@ -71,11 +71,12 @@ try {
         for(const name of ['will-navigate','will-redirect','did-fail-load','did-finish-load','destroyed']) contents.on(name,(_event,...args)=> trace.push({event:name,code:name==='did-fail-load'?args[0]:undefined,host:args.filter(x=>typeof x==='string'&&x.startsWith('https:')).map(x=>new URL(x).host)[0]}));
       };
       const {app}=globalThis.require('electron');app.on('web-contents-created',onCreated);
-      const sso=new globalThis.fixture.MoodleSso();
+      let restored = false;
+      const sso=new globalThis.fixture.MoodleSso(()=>{globalThis.main.show();globalThis.main.focus();restored=true;});
       process.env.VSTUDY_SSO_TIMEOUT = mode === 'timeout' ? '1' : '';
       if(mode==='timeout' || mode==='dispose') site.config.launchurl = `${school}/wait/launch.php`;
       const pending=sso.login(site,undefined,async tokens=>tokens.token==='fixture-token'?'connected':'wrong-token').then(value=>({value}),error=>({error:error.code || error.message}));
-      if(mode==='link' || mode==='frames' || mode==='blocked') {
+      if(mode==='link' || mode==='forced-link' || mode==='frames' || mode==='blocked') {
         const timer=setInterval(()=>{const window=BrowserWindow.getAllWindows().find(w=>w!==globalThis.main);if(window && window.webContents.getURL().includes('/'+mode+'/')) {clearInterval(timer);void window.webContents.executeJavaScript('document.querySelector("a")?.click()').catch(()=>{});}},30);
         void pending.finally(()=>clearInterval(timer));
       }
@@ -85,20 +86,20 @@ try {
         void pending.finally(()=>clearInterval(timer));
       }
       if(mode==='dispose') setTimeout(()=>sso.dispose(),100);
-      if(mode==='wait') setTimeout(()=>BrowserWindow.getAllWindows().find(w=>w!==globalThis.main)?.close(),200);
+      if(['wait','invalid','forced-invalid'].includes(mode)) setTimeout(()=>BrowserWindow.getAllWindows().find(w=>w!==globalThis.main)?.close(),200);
       const result=await pending; sso.dispose();app.removeListener('web-contents-created',onCreated);
-      return {...result,trace,recoveryObserved,mainSurvived:!globalThis.main.isDestroyed()};
+      return {...result,trace,recoveryObserved,restored,mainSurvived:!globalThis.main.isDestroyed()};
     },{school,mode});
     console.log(JSON.stringify({mode,...result}));
     assert.equal(result.mainSurvived,true);
     if(!baseline) {
-      const errors={wait:'cancelled',invalid:'callback-invalid',timeout:'timeout',blocked:'blocked',failure:'load-failed',dispose:'disposed'};
-      if(errors[mode]) assert.equal(result.error,errors[mode]); else assert.equal(result.value,'connected');
+      const errors={wait:'cancelled',invalid:'cancelled','forced-invalid':'cancelled',timeout:'timeout',blocked:'blocked',failure:'load-failed',dispose:'disposed'};
+      if(errors[mode]) assert.equal(result.error,errors[mode]); else {assert.equal(result.value,'connected');assert.equal(result.restored,true);}
       if(mode==='retry' || mode==='blocked' || mode==='failure') assert.equal(result.recoveryObserved,true);
     }
     return result;
   };
-  for(const mode of (baseline ? ['redirect','direct','link','frames','wait'] : ['redirect','direct','link','frames','invalid','wait','timeout','dispose','blocked','failure','retry'])) await run(mode);
+  for(const mode of (baseline ? ['redirect','direct','link','frames','wait'] : ['arbitrary','forced','forced-link','forced-invalid','redirect','direct','link','frames','invalid','wait','timeout','dispose','blocked','failure','retry'])) await run(mode);
 } finally {
   await app?.close();
   for(const server of servers) {server.closeAllConnections();server.close();}

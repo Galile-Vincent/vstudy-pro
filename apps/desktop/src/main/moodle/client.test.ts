@@ -65,7 +65,7 @@ describe('SSO callback',() => {
     expect(verifyCallback(callback,site,passport)).toEqual({token:'token',privateToken:'private'});
     expect(() => verifyCallback(callback,site,'other')).toThrow('Invalid Moodle callback');
     expect(() => verifyCallback(callback,'https://other.example',passport)).toThrow();
-    expect(() => verifyCallback(callback.replace('vstudymoodle:','evil:'),site,passport)).toThrow();
+    expect(verifyCallback(callback.replace('vstudymoodle:','cycuilearning:'),site,passport)).toEqual({token:'token',privateToken:'private'});
     expect(() => verifyCallback('vstudymoodle://token=garbage',site,passport)).toThrow();
   });
 
