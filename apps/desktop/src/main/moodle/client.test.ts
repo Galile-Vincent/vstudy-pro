@@ -147,12 +147,27 @@ it('uses timeline lastid rather than the final event ID',async () => {
   expect(request.mock.calls.filter(call => String(call[1]?.body).includes('aftereventid')).map(call => new URLSearchParams(String(call[1]?.body)).get('aftereventid'))).toEqual(['900']);
 });
 it('uses popup notifications only after message notifications are unsupported',async () => {
-  const request = fixtureFetch({core_message_get_messages:{errorcode:'functionnotavailable'},message_popup_get_popup_notifications:{notifications:[{id:501,subject:'Popup',timecreated:1794096000}]}});
+  const request = fixtureFetch({core_message_mark_notification_read:{},core_message_get_messages:{errorcode:'functionnotavailable'},message_popup_get_popup_notifications:{notifications:[{id:501,subject:'Popup',timecreated:1794096000}]}});
   const client = new MoodleClient(account.siteUrl,'token',request);
   expect(await client.notifications(account,[])).toMatchObject([{remoteId:501,value:{subject:'Popup',source:'popup',read:false}}]);
-  await client.markRead(501,'popup');
-  expect(new URLSearchParams(String(request.mock.calls.at(-1)?.[1]?.body)).get('wsfunction')).toBe('message_popup_mark_notification_read');
+  await client.markRead(501);
+  expect(new URLSearchParams(String(request.mock.calls.at(-1)?.[1]?.body)).get('wsfunction')).toBe('core_message_mark_notification_read');
   const primary = fixtureFetch();
   await new MoodleClient(account.siteUrl,'token',primary).notifications(account,[]);
   expect(primary.mock.calls.map(call => new URLSearchParams(String(call[1]?.body)).get('wsfunction'))).toEqual(['core_message_get_messages']);
+});
+
+it('paginates popup rows with offset and limit while keeping duplicate notification IDs separate from message fetches',async () => {
+  const request = fixtureFetch({core_message_get_messages:{errorcode:'functionnotavailable'}}), base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => {
+    const params = new URLSearchParams(String(options?.body));
+    if (params.get('wsfunction') === 'message_popup_get_popup_notifications') return Response.json({notifications:params.get('offset') === '0' ? Array.from({length:100},(_,index) => ({id:index+1,subject:'Popup',timecreated:1794096000})) : [{id:1,subject:'Duplicate popup',timecreated:1794096000}]});
+    return base(target,options);
+  });
+  const records = await new MoodleClient(account.siteUrl,'token',request).notifications(account,[]);
+  expect(records.length).toBe(100);
+  expect(records[0]?.value).toMatchObject({subject:'Duplicate popup',source:'popup'});
+  expect(request.mock.calls.filter(call => String(call[1]?.body).includes('wsfunction=message_popup_get_popup_notifications')).map(call => {
+    const params = new URLSearchParams(String(call[1]?.body));return {offset:params.get('offset'),limit:params.get('limit'),newestfirst:params.get('newestfirst')};
+  })).toEqual([{offset:'0',limit:'100',newestfirst:'1'},{offset:'100',limit:'100',newestfirst:'1'}]);
 });

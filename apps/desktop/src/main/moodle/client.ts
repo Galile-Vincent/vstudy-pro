@@ -150,8 +150,8 @@ export class MoodleClient {
         source = 'popup';
         const notifications: z.infer<typeof messageWire>[] = [];
         while (true) {
-          const page = await this.call('message_popup_get_popup_notifications',{useridto:String(account.remoteUserId),limitfrom:String(notifications.length),limitnum:'100'},z.object({notifications:z.array(messageWire)}));
-          if (page.notifications.some(item => notifications.some(previous => previous.id === item.id))) throw new MoodleError('service');
+          const page = await this.call('message_popup_get_popup_notifications',{useridto:String(account.remoteUserId),offset:String(notifications.length),limit:'100',newestfirst:'1'},z.object({notifications:z.array(messageWire)}));
+          if (notifications.length >= 10000) throw new MoodleError('service');
           notifications.push(...page.notifications);
           if (page.notifications.length < 100) return notifications;
         }
@@ -163,7 +163,7 @@ export class MoodleClient {
     };
     return [...new Map(result.map(row => [row.id,row])).values()].map(row => ({remoteId:row.id,value:moodleNotificationSchema.parse({id:remoteId(account.id,source === 'popup' ? 'popup-notification' : 'notification',row.id),accountId:account.id,source,courseId:courses.find(course => course.remoteId === courseId(row))?.id ?? null,subject:plainText(row.subject ?? ''),body:plainText(row.fullmessagehtml || row.fullmessage || row.text || row.smallmessage || ''),createdAt:date(row.timecreated),read:row.read ?? Boolean(row.timeread),url:url(row.contexturl)})}));
   }
-  markRead(id: number, source?: 'message'|'popup') { return this.call(source === 'popup' ? 'message_popup_mark_notification_read' : 'core_message_mark_notification_read',{notificationid:String(id),timeread:String(Math.floor(Date.now()/1000))},z.object({}).passthrough()); }
+  markRead(id: number) { return this.call('core_message_mark_notification_read',{notificationid:String(id),timeread:String(Math.floor(Date.now()/1000))},z.object({}).passthrough()); }
   async grades(course: MoodleCourse, userId: number) {
     const result = await this.call('gradereport_user_get_grade_items',{courseid:String(course.remoteId),userid:String(userId)},gradeWire);
     return result.usergrades.flatMap(user => user.gradeitems.map(row => ({remoteKey:String(row.id),value:moodleGradeItemSchema.parse({courseId:course.id,name:plainText(row.itemname ?? ''),grade:row.gradeformatted ? plainText(row.gradeformatted) : null,max:row.grademax ?? null,percentage:row.percentageformatted && Number.isFinite(parseFloat(plainText(row.percentageformatted))) ? parseFloat(plainText(row.percentageformatted)) : null,gradedAt:date(row.gradedategraded)})})));

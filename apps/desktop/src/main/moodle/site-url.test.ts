@@ -2,6 +2,7 @@ import { expect, it, vi } from 'vitest';
 import { normalizeSiteUrl, publicAddress, resolvePublicHost, siteFetch } from './site-url';
 it('normalizes domains, IDNs, and Moodle subdirectory login links',() => {
   expect(normalizeSiteUrl(' school.example/moodle/login/index.php?x=1#top ')).toBe('https://school.example/moodle');
+  expect(normalizeSiteUrl('school.example:443/moodle/index.php/')).toBe('https://school.example/moodle');
   expect(normalizeSiteUrl('https://学校.example/moodle/')).toBe('https://xn--48s290a.example/moodle');
 });
 it.each(['http://school.example','https://user:pass@school.example','https://school.example:444','https://127.1','https://[::1]','https://2130706433','https://localhost'])('rejects unsafe input %s',input => {

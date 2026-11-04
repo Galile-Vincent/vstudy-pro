@@ -21,19 +21,12 @@ import type {
   MoodleDeadline,
   MoodleOverview,
   MoodleNotification,
-  MoodleSchool,
 } from "../../shared/moodle";
 import type { Document } from "../../shared";
 import { tr, i18n } from "../../shared/i18n";
 import { plainText } from "../../shared/plain-text";
 import { useNavigate } from "../shell";
 import { Button } from "../components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "../components/ui/dialog";
 import {
   Tabs,
   TabsContent,
@@ -45,6 +38,8 @@ import { useMoodleApi, type MoodleApi } from "./api";
 import { Reminder } from "./reminder";
 import { CourseAgentPanel } from "./agent";
 import "./courses.css";
+import { ConnectDialog } from "./connect";
+export { ConnectDialog } from "./connect";
 
 const week = 7 * 86400000;
 const tabs = [
@@ -100,104 +95,6 @@ function Cover({ course }: { course: MoodleCourse }) {
       )}
       <span className="moodle-course-code">{course.shortName}</span>
     </div>
-  );
-}
-
-export function ConnectDialog({
-  open,
-  onOpenChange,
-  api,
-  onConnected,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  api: MoodleApi;
-  onConnected: () => Promise<void>;
-}) {
-  const [schools, setSchools] = useState<MoodleSchool[]>([]);
-  const [schoolId, setSchoolId] = useState("");
-  const [revision, setRevision] = useState(0);
-  const [status, setStatus] = useState<
-    "loading" | "ready" | "connecting" | "error"
-  >("loading");
-  useEffect(() => {
-    if (!open) return;
-    let current = true;
-    setStatus("loading");
-    void api
-      .schools()
-      .then((items) => {
-        if (current) {
-          setSchools(items);
-          setSchoolId(items[0]?.id ?? "");
-          setStatus("ready");
-        }
-      })
-      .catch(() => {
-        if (current) setStatus("error");
-      });
-    return () => {
-      current = false;
-    };
-  }, [open, api, revision]);
-  const connect = async () => {
-    setStatus("connecting");
-    try {
-      await api.connect({siteUrl:schools.find(s => s.id === schoolId)!.host});
-      await onConnected();
-      onOpenChange(false);
-    } catch {
-      setStatus("error");
-    }
-  };
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="moodle-connect">
-        <GraduationCap />
-        <DialogTitle>{tr("moodle:connect_title")}</DialogTitle>
-        <DialogDescription>
-          {tr("moodle:connect_description")}
-        </DialogDescription>
-        <label htmlFor="moodle-school">{tr("moodle:school")}</label>
-        <select
-          id="moodle-school"
-          value={schoolId}
-          onChange={(e) => setSchoolId(e.target.value)}
-          disabled={status === "loading" || status === "connecting"}
-        >
-          {schools.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-        {status === "error" && (
-          <div role="alert">
-            <p>{tr("moodle:connect_error")}</p>
-            <Button
-              variant="outline"
-              onClick={() => setRevision((value) => value + 1)}
-            >
-              {tr("moodle:retry")}
-            </Button>
-          </div>
-        )}
-        <Button
-          disabled={
-            !schoolId || status === "connecting" || status === "loading"
-          }
-          onClick={() => void connect()}
-        >
-          {status === "connecting" ? (
-            <LoaderCircle className="moodle-spin" />
-          ) : (
-            <ArrowUpRight />
-          )}
-          {tr(status === "connecting" ? "moodle:connecting" : "moodle:sign_in")}
-        </Button>
-        <small>{tr("moodle:sign_in_hint")}</small>
-      </DialogContent>
-    </Dialog>
   );
 }
 
@@ -342,6 +239,7 @@ export function Courses({
                 <span>{tr(`moodle:${d.kind}`)}</span>
                 <span aria-hidden="true"> · </span>
                 <time dateTime={d.dueAt}>{date(d.dueAt)}</time>
+                {d.submitted === null && <span className="moodle-chip">{tr("moodle:submission_unknown")}</span>}
                 {d.submitted && (
                   <span className="moodle-chip">{tr("moodle:submitted")}</span>
                 )}

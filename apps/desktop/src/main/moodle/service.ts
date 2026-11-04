@@ -1,7 +1,6 @@
 import { moodleImage } from './files';
 import { MoodleAuthError, tokensSchema, type MoodleTokens } from './auth';
-import { normalizeSiteUrl } from './site-url';
-import { moodleFetch } from './site-url';
+import { normalizeSiteUrl, moodleFetch } from './site-url';
 import { randomUUID } from 'node:crypto';
 import type { MoodleAccount } from '../../shared/moodle';
 import type { SecretStore } from '../services/secrets';
@@ -16,14 +15,20 @@ export class MoodleService {
   private readonly lastAttempt = new Map<string,number>();
   constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch) {}
   private readonly connecting = new Set<string>();
+  private readonly browserSites = new Set<string>();
+  private async checkedSite(url: string) {
+    const site = await checkSite(url,this.request);
+    if (site.authPlan.kind === 'password' && this.browserSites.has(site.siteUrl)) return {...site,authPlan:{kind:'browser' as const,providers:site.config.identityproviders}};
+    return site;
+  }
   async checkSite(url: string) {
-    const {siteUrl,siteName,authPlan,config} = await checkSite(url,this.request);
+    const {siteUrl,siteName,authPlan,config} = await this.checkedSite(url);
     const icon = config.compactlogourl || config.logourl;
     const iconUrl = icon ? await moodleImage(icon,siteUrl,undefined,this.request) : null;
     return {siteUrl,siteName,authPlan,...(iconUrl ? {iconUrl} : {})};
   }
   async connect(input: {siteUrl:string;provider?:number | undefined;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
-    const checked = await checkSite(input.siteUrl,this.request);
+    const checked = await this.checkedSite(input.siteUrl);
     if (checked.authPlan.kind === 'unavailable') throw new Error(checked.authPlan.reason);
     if (this.stopped || this.connecting.has(checked.siteUrl)) throw new Error('Moodle login unavailable');
     const browser = checked.authPlan.kind !== 'password';
@@ -33,6 +38,9 @@ export class MoodleService {
       return browser
         ? await this.sso.login(checked,input.provider,tokens => this.acceptToken(checked,tokens))
         : await this.acceptToken(checked,await passwordToken(checked.siteUrl,input.username ?? '',input.password ?? '',this.request));
+    } catch (error) {
+      if (error instanceof MoodleAuthError && error.code === 'sso-required') this.browserSites.add(checked.siteUrl);
+      throw error;
     } finally { this.connecting.delete(checked.siteUrl); }
   }
   private async acceptToken(site: CheckedSite, tokens: MoodleTokens): Promise<MoodleAccount> {
@@ -43,6 +51,7 @@ export class MoodleService {
     const existing = this.repository.accounts().find(account => account.siteUrl === site.siteUrl && account.remoteUserId === info.userid);
     const expired = this.repository.accounts().filter(account => account.siteUrl === site.siteUrl && account.status === 'expired');
     if (!existing && expired.length) throw new MoodleAuthError('requirecorrectaccess');
+    if (existing) await this.pending.get(existing.id);
     const account: MoodleAccount = {id:existing?.id ?? randomUUID(),siteUrl:site.siteUrl,siteName:site.siteName,remoteUserId:info.userid,displayName:plainText(info.fullname),status:'connected',syncedAt:existing?.syncedAt ?? null};
     await this.secrets.set(moodleSecretId(account.id),JSON.stringify(tokens));
     if (this.stopped || existing && !this.repository.accounts().some(row => row.id === existing.id)) {
@@ -84,7 +93,7 @@ export class MoodleService {
     this.repository.markRead(id);
     const account = this.repository.account(item.accountId);
     const remote = this.repository.notificationRecords(account.id).find(row => row.value.id === id)!;
-    try { await new MoodleClient(account.siteUrl,await this.token(account.id),this.request).markRead(remote.remoteId,item.source); this.repository.acknowledgeRead(id); }
+    try { await new MoodleClient(account.siteUrl,await this.token(account.id),this.request).markRead(remote.remoteId); this.repository.acknowledgeRead(id); }
     catch { /* Keep the pending remote read for the next sync. */ }
   }
   sync(id: string): Promise<{errors:string[]}> {
@@ -114,7 +123,7 @@ export class MoodleService {
       } catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; }
     }
     for (const row of this.repository.notificationRecords(id).filter(row => row.value.pendingRemoteRead)) {
-      try { await client.markRead(row.remoteId,row.value.source); this.repository.acknowledgeRead(row.value.id); } catch { /* Retry on the next sync. */ }
+      try { await client.markRead(row.remoteId); this.repository.acknowledgeRead(row.value.id); } catch { /* Retry on the next sync. */ }
     }
     const courses = await client.courses(account);
     const errors: string[] = [];

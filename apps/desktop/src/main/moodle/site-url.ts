@@ -23,9 +23,9 @@ export function networkUrl(input: string, allowedPorts: readonly number[] = []):
 }
 export function normalizeSiteUrl(input: string, allowedPorts: readonly number[] = []): string {
   const text = input.trim();
-  const url = networkUrl(/^[a-z][a-z\d+.-]*:/i.test(text) ? text : `https://${text}`,allowedPorts);
+  const url = networkUrl(/^[a-z][a-z\d+.-]*:/i.test(text) && !/^[^/?#]+:\d+(?:\/|$)/.test(text) ? text : `https://${text}`,allowedPorts);
   url.search = ''; url.hash = '';
-  url.pathname = url.pathname.replace(/\/(?:login|course|my|admin|mod|user|webservice|lib|auth)(?:\/.*)?$/i,'').replace(/\/index\.php$/i,'').replace(/\/+$/,'');
+  url.pathname = url.pathname.replace(/\/(?:login|course|my|admin|mod|user|webservice|lib|auth)(?:\/.*)?$/i,'').replace(/\/index\.php(?:\/.*)?$/i,'').replace(/\/+$/,'');
   return url.href.replace(/\/$/,'');
 }
 export function siteTarget(root: string, input: string): URL {
@@ -61,7 +61,9 @@ export function createMoodleFetch(resolver: Resolver = resolveAll): typeof fetch
         },res => {
           const headers = new Headers();
           for (const [key,value] of Object.entries(res.headers)) if (value !== undefined) headers.set(key,Array.isArray(value) ? value.join(', ') : value);
-          resolve(new Response(Readable.toWeb(res) as ReadableStream<Uint8Array>,{status:res.statusCode ?? 502,headers}));
+          const status = res.statusCode ?? 502;
+          if ([204,205,304].includes(status)) res.resume();
+          resolve(new Response([204,205,304].includes(status) ? null : Readable.toWeb(res) as ReadableStream<Uint8Array>,{status,headers}));
         });
         req.on('error',reject);
         if (options.body != null) req.write(String(options.body));

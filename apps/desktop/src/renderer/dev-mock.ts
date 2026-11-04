@@ -262,7 +262,7 @@ const moodleDocumentSources = new Map<string, string>();
 export function createMockMoodleApi(): MoodleApi {
   const id = (n: number) => `10000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
   const at = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
-  const schools = [{ id: 'cycu', name: '中原大學 · Chung Yuan Christian University', host: 'https://i-learning.cycu.edu.tw', login: 'sso-launch' as const }, { id: 'demo', name: 'VStudy Demo University', host: 'https://moodle.example.edu', login: 'sso-launch' as const }];
+  const schools = [{ id: 'cycu', name: '中原大學 · Chung Yuan Christian University', host: 'https://ilearning.cycu.edu.tw', login: 'sso-launch' as const }, { id: 'demo', name: 'VStudy Demo University', host: 'https://moodle.example.edu', login: 'sso-launch' as const }];
   let accounts: MoodleAccount[] = [{ id: id(1), siteUrl:'https://ilearning.cycu.edu.tw',siteName:'中原大學 CYCU', remoteUserId: 20416, displayName: '林以安', status: 'connected', syncedAt: at(-0.01) }];
   const details: MoodleCourseDetail[] = [
     ['資料結構與演算法', 'CS 201', 'Binary trees & traversal', 'Week 08 · Trees', 'Binary tree practice', 'Midterm preparation'],

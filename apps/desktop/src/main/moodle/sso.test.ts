@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { MoodleSso } from './sso';
 import { checkSite } from './discovery';
 
-const mock = vi.hoisted(() => ({windows:[] as {options:unknown;url:string;destroyed:boolean;emit:(name:string,...args:unknown[]) => boolean;webContents:{emit:(name:string,...args:unknown[]) => boolean;setWindowOpenHandler:ReturnType<typeof vi.fn>}}[],partitions:[] as string[],clear:vi.fn(async () => undefined),permission:vi.fn()}));
+const mock = vi.hoisted(() => ({windows:[] as {options:unknown;url:string;destroyed:boolean;destroy:() => void;emit:(name:string,...args:unknown[]) => boolean;webContents:{emit:(name:string,...args:unknown[]) => boolean;setWindowOpenHandler:ReturnType<typeof vi.fn>}}[],partitions:[] as string[],clear:vi.fn(async () => undefined),permission:vi.fn()}));
 vi.mock('electron',async () => {
   const {EventEmitter} = await import('node:events');
   return {
@@ -37,15 +37,29 @@ it('uses an isolated sandbox and saves the verified callback before closing',asy
   window.webContents.emit('will-navigate',blocked,'https://127.0.0.1');
   expect(blocked.preventDefault).toHaveBeenCalledOnce();
   const signature = createHash('md5').update('https://ilearning.cycu.edu.tw' + launch.searchParams.get('passport')).digest('hex');
-  const callback = 'vstudymoodle://token=' + Buffer.from(`${signature}:::private-token`).toString('base64');
+  const callback = 'vstudymoodle://token=' + Buffer.from(`${signature}:::private-token:::private-secret`).toString('base64');
   const event = {preventDefault:vi.fn()};
   window.webContents.emit('will-redirect',event,callback);
   expect(event.preventDefault).toHaveBeenCalledOnce();
-  expect(accept).toHaveBeenCalledExactlyOnceWith({token:'private-token'});
+  expect(accept).toHaveBeenCalledExactlyOnceWith({token:'private-token',privateToken:'private-secret'});
   expect(window.destroyed).toBe(true);
+  window.webContents.emit('will-redirect',event,callback);
+  expect(accept.mock.calls).toEqual([[{token:'private-token',privateToken:'private-secret'}]]);
   saved();
   expect(await pending).toEqual({connected:true});
   expect(window.destroyed).toBe(true);
   expect(mock.clear).toHaveBeenCalled();
   sso.dispose();
+});
+
+it('closes a cancelled login without accepting a token',async () => {
+  const site = await checkSite('https://school.example',async () => Response.json([{error:false,data:{typeoflogin:3,launchurl:'https://login.school.example/launch.php'}}]));
+  const sso = new MoodleSso(), accept = vi.fn(async () => 'connected');
+  const pending = sso.login(site,undefined,accept);
+  const rejected = expect(pending).rejects.toMatchObject({code:'cancelled'});
+  await vi.waitFor(() => expect(mock.windows.at(-1)?.url).toContain('https://login.school.example/launch.php'));
+  const window = mock.windows.at(-1)!;
+  expect(new URL(window.url).searchParams.get('service')).toBe('moodle_mobile_app');
+  window.destroy();await rejected;
+  expect(accept.mock.calls).toEqual([]);expect(window.destroyed).toBe(true);sso.dispose();
 });

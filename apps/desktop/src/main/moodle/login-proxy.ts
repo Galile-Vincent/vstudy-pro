@@ -4,6 +4,7 @@ import type { Socket } from 'node:net';
 import { networkUrl, resolvePublicHost, type Resolver } from './site-url';
 
 export async function loginProxy(resolver?: Resolver) {
+  let closed = false;
   const sockets = new Set<Socket>();
   const server = createServer((_request,response) => {response.writeHead(403); response.end();});
   server.on('connection',socket => {sockets.add(socket); socket.on('close',() => sockets.delete(socket));});
@@ -11,6 +12,7 @@ export async function loginProxy(resolver?: Resolver) {
     void (async () => {
       const target = networkUrl(`https://${request.url}`);
       const addresses = await resolvePublicHost(target.hostname,resolver);
+      if (closed || client.destroyed) return;
       const upstream = connect({host:addresses[0]!.address,port:443});
       sockets.add(upstream);
       upstream.on('close',() => sockets.delete(upstream));
@@ -27,5 +29,5 @@ export async function loginProxy(resolver?: Resolver) {
   await new Promise<void>((resolve,reject) => {server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('Moodle proxy unavailable');
-  return {port:address.port,close:() => {for (const socket of sockets) socket.destroy(); server.close();}};
+  return {port:address.port,close:() => {closed = true;for (const socket of sockets) socket.destroy(); server.close();}};
 }

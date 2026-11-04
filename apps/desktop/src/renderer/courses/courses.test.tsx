@@ -175,7 +175,9 @@ describe("Courses", () => {
       "Chung Yuan Christian University",
     );
     expect(document.querySelector("input[type=password]")).toBeNull();
-    await click("Sign in with school account");
+    await click("Chung Yuan Christian University");
+    await click("Continue to sign in");
+    await click("Continue with University ID");
     expect(host.querySelectorAll(".moodle-course-card")).toHaveLength(3);
     expect(document.querySelector("[role=dialog]")).toBeNull();
   });

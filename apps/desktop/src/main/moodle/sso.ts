@@ -2,7 +2,7 @@ import { verifyCallback } from './callback';
 import { randomBytes } from 'node:crypto';
 import { BrowserWindow, session } from 'electron';
 import type { CheckedSite } from './discovery';
-import { networkUrl, siteTarget } from './site-url';
+import { networkUrl } from './site-url';
 import { loginProxy } from './login-proxy';
 import { MoodleAuthError, type MoodleTokens } from './auth';
 
@@ -14,7 +14,7 @@ export class MoodleSso {
     const provider = providerIndex === undefined ? undefined : site.authPlan.providers[providerIndex];
     if (providerIndex !== undefined && !provider) throw new MoodleAuthError('requirecorrectaccess');
     const passport = randomBytes(32).toString('hex');
-    const launch = siteTarget(site.siteUrl,site.config.launchurl || `${site.siteUrl}/admin/tool/mobile/launch.php`);
+    const launch = networkUrl(site.config.launchurl || `${site.siteUrl}/admin/tool/mobile/launch.php`);
     launch.search = new URLSearchParams({service:'moodle_mobile_app',passport,urlscheme:'vstudymoodle'}).toString();
     if (provider) {
       const id = new URL(provider.url).searchParams.get('id');
@@ -22,8 +22,10 @@ export class MoodleSso {
     }
     if (this.disposed) throw new MoodleAuthError('cancelled');
     const proxy = await loginProxy();
+    if (this.disposed) {proxy.close();throw new MoodleAuthError('cancelled');}
     const isolated = session.fromPartition(`moodle-${randomBytes(16).toString('hex')}`);
-    await isolated.setProxy({mode:'fixed_servers',proxyRules:`http=127.0.0.1:${proxy.port};https=127.0.0.1:${proxy.port}`,proxyBypassRules:'<-loopback>'});
+    try { await isolated.setProxy({mode:'fixed_servers',proxyRules:`http=127.0.0.1:${proxy.port};https=127.0.0.1:${proxy.port}`,proxyBypassRules:'<-loopback>'}); }
+    catch (error) {proxy.close();throw error;}
     isolated.webRequest.onBeforeRequest((details,callback) => {
       try { networkUrl(details.url); callback({cancel:false}); } catch { callback({cancel:true}); }
     });

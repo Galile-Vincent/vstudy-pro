@@ -647,6 +647,8 @@
   color: var(--ink);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
 }
 .moodle-connect > svg {
   width: 32px;
@@ -806,3 +808,44 @@
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
+
+.moodle-connect-steps {
+  display: flex;
+  list-style: none;
+  gap: 12px;
+  margin: 8px 0;
+  padding: 0;
+}
+.moodle-connect-steps li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  font-size: 12px;
+  color: var(--muted);
+}
+.moodle-connect-steps li > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+.moodle-connect-steps li[aria-current="step"] { color: var(--ink); font-weight: 600; }
+.moodle-connect-steps li[aria-current="step"] > span { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.moodle-connect-form { display: grid; gap: 10px; }
+.moodle-connect-form label { font-size: 13px; font-weight: 500; }
+.moodle-site-list { display: grid; gap: 4px; }
+.moodle-site-list h3 { font-size: 12px; color: var(--muted); margin: 8px 0; }
+.moodle-site-list button { justify-content: flex-start; height: auto; padding: 12px; text-align: left; }
+.moodle-site-list button > span { flex: 1; min-width: 0; white-space: normal; }
+.moodle-site-list small { display: block; font-weight: 400; }
+.moodle-site-result { display: grid; grid-template-columns: 44px 1fr 20px; gap: 12px; padding: 16px; background: var(--subtle); border: 1px solid var(--line); border-radius: var(--r-md); }
+.moodle-site-result h3 { margin: 0 0 4px; font-size: 16px; overflow-wrap: anywhere; }
+.moodle-site-result p { margin: 0; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.moodle-site-result > img, .moodle-site-icon { width: 44px; height: 44px; border-radius: 8px; object-fit: contain; display: grid; place-items: center; background: var(--surface); }
+.moodle-site-result > small { grid-column: 2 / 4; }
+.moodle-connect-unavailable { font-size: 13px; line-height: 1.6; }
+.moodle-connect-unavailable p { color: var(--muted); }
+.moodle-connect-error { color: var(--danger); font-size: 13px; margin: 0; }

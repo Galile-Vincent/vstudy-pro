@@ -322,3 +322,26 @@ it('refuses a reconnect as a different remote user',async () => {
   expect(repository.account(account.id).status).toBe('expired');
   await service.dispose();
 });
+
+it('offers a browser plan after the password endpoint requires SSO',async () => {
+  const {service,request} = await setup();
+  request.mockImplementation(async target => String(target).includes('token.php') ? Response.json({errorcode:'ssorequired'}) : Response.json([{error:false,data:{typeoflogin:1,sitename:'School',identityproviders:[{name:'Campus',iconurl:'',url:'https://ilearning.cycu.edu.tw/auth/oauth2/login.php?id=3'}]}}]));
+  await expect(service.connect({siteUrl:account.siteUrl,username:'student',password:'secret'})).rejects.toMatchObject({code:'sso-required'});
+  expect(await service.checkSite(account.siteUrl)).toEqual({siteUrl:'https://ilearning.cycu.edu.tw',siteName:'School',authPlan:{kind:'browser',providers:[{name:'Campus',iconurl:'',url:'https://ilearning.cycu.edu.tw/auth/oauth2/login.php?id=3'}]}});
+  await service.dispose();
+});
+
+it('stores both SSO tokens in safeStorage without returning them in the account',async () => {
+  const {repository,secrets,request} = await setup();
+  const service = new MoodleService(repository,secrets,{login:async (_site,_provider,accept) => accept({token:'access',privateToken:'private'})},request);
+  expect(await service.connect({siteUrl:account.siteUrl})).toMatchObject({id:'11111111-1111-4111-a111-111111111111',siteUrl:'https://ilearning.cycu.edu.tw',remoteUserId:42,status:'connected'});
+  expect(await secrets.getInMainOnly(moodleSecretId(account.id))).toBe('{"token":"access","privateToken":"private"}');
+  expect(JSON.stringify(repository.account(account.id))).not.toContain('privateToken');
+  await service.dispose();
+});
+it('keeps the same remote user separate across two schools',async () => {
+  const {repository,service} = await setup();
+  repository.saveAccount({...account,id:'22222222-2222-4222-a222-222222222222',siteUrl:'https://other.example/moodle',siteName:'Other School'});
+  expect(repository.accounts().map(item => ({siteUrl:item.siteUrl,remoteUserId:item.remoteUserId}))).toEqual([{siteUrl:'https://ilearning.cycu.edu.tw',remoteUserId:42},{siteUrl:'https://other.example/moodle',remoteUserId:42}]);
+  await service.dispose();
+});
