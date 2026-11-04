@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { mkdir, mkdtemp, readFile, rm, stat, truncate, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { openStore } from "../db";
 import { DocumentService, MAX_SOURCE_BYTES } from "./documents";
+import { LibraryService } from "./library";
 import type { ConverterRunner } from "../../../resources/converter";
 
 const cleanups: (() => Promise<void>)[] = [];
@@ -180,4 +181,45 @@ it('leaves interrupted startup metadata pending without rejecting service owners
  expect(store.db.prepare('SELECT metadataBackfilled FROM documents WHERE id=?').get(document.id)?.metadataBackfilled).toBe(0);
  store.db.exec('DROP TRIGGER metadata_disk_full');const resumed=new DocumentService({store,userData,convert});await resumed.waitForIdle();resumed.dispose();
  expect(store.db.prepare('SELECT metadataBackfilled FROM documents WHERE id=?').get(document.id)?.metadataBackfilled).toBe(1);
+});
+
+
+it.each([0, 31_000])('restores an explicitly reimported document deleted %s ms ago with its AI version and metadata', async (age) => {
+  const { service, store, userData } = await setup();
+  const document = await service.importPath(fixture('md'));
+  await service.waitForIdle();
+  const library = new LibraryService(store, join(userData, 'library'));
+  const aiMarkdown = 'Retained AI transcription for reimport.';
+  await writeFile(join(dirname(document.markdownPath), 'content.ai.md'), aiMarkdown);
+  store.db.prepare("UPDATE documents SET title='Retained title',pinned=1,activeVersion='ai' WHERE id=?").run(document.id);
+  library.softDelete(document.id);
+  store.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(new Date(Date.now()-age).toISOString(), document.id);
+  expect(service.get(document.id)).toBeNull();
+  expect(library.search.search('transcription').items).toHaveLength(0);
+  if (age > 30_000) expect(() => library.restore(document.id)).toThrow('Undo expired');
+
+  const restored = await service.importPath(fixture('md'));
+  expect(restored).toMatchObject({id:document.id,title:'Retained title',status:'ready',activeVersion:'ai'});
+  expect(service.list()).toHaveLength(1);
+  expect(await service.read(restored.id)).toBe(aiMarkdown);
+  expect(store.db.prepare('SELECT pinned,deletedAt FROM documents WHERE id=?').get(restored.id)).toMatchObject({pinned:1,deletedAt:null});
+  expect(library.search.search('transcription').items.map(item=>item.documentId)).toEqual([restored.id]);
+  expect(await readFile(restored.sourcePath)).toEqual(await readFile(fixture('md')));
+});
+
+it('resumes an interrupted hidden conversion when explicitly reimported after restart', async () => {
+  let calls = 0;
+  const { service, store, userData, convert } = await setup(async (_source, output) => { calls++; await writeFile(output,'Recovered conversion'); });
+  const document = await service.importPath(fixture('html'));
+  await service.waitForIdle();
+  store.db.prepare("UPDATE documents SET status='converting',deletedAt=? WHERE id=?").run(new Date(Date.now()-31_000).toISOString(), document.id);
+  const restarted = new DocumentService({store,userData,convert});
+  try {
+    const restored = await restarted.importPath(fixture('html'));
+    expect(restored.id).toBe(document.id);
+    await restarted.waitForIdle();
+    expect(restarted.get(restored.id)?.status).toBe('ready');
+    expect(await restarted.read(restored.id)).toBe('Recovered conversion');
+    expect(calls).toBe(2);
+  } finally { await restarted.waitForIdle(); restarted.dispose(); }
 });

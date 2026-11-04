@@ -147,9 +147,9 @@ export class LibraryService {
     reorderPins(table: 'documents' | 'folders', ids: string[]) { this.transaction(() => ids.forEach((id, i) => this.store.db.prepare(`UPDATE ${table} SET pinnedAt=? WHERE id=? AND pinned=1`).run(new Date(Date.now() - i).toISOString(), id))); }
     rename(id: string, title: string) { this.require(id); this.store.db.prepare('UPDATE documents SET title=? WHERE id=?').run(title, id); }
     softDelete(id: string) { this.store.db.prepare('UPDATE documents SET deletedAt=coalesce(deletedAt,?) WHERE id=?').run(new Date().toISOString(), id); }
-    restore(id: string) { this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath,activeVersion FROM documents WHERE id=?').get(id); if (!r)
+    restore(id: string, reason: 'undo' | 'import' = 'undo') { this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath,activeVersion FROM documents WHERE id=?').get(id); if (!r)
         throw new Error('Document not found'); if (r.deletedAt === null)
-        return; if (Date.now() - Date.parse(String(r.deletedAt)) > 30000)
+        return; if (reason === 'undo' && Date.now() - Date.parse(String(r.deletedAt)) > 30000)
         throw new Error('Undo expired'); this.store.db.prepare('UPDATE documents SET deletedAt=NULL WHERE id=?').run(id); if (r.markdownPath) {
         try {
             this.search.update(id, readFileSync(containedPath(this.root, r.activeVersion==='ai'?join(dirname(String(r.markdownPath)),'content.ai.md'):String(r.markdownPath)), 'utf8'));

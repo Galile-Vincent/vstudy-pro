@@ -67,6 +67,11 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     expect(await invoke("documents:read", { documentId: document.id })).toContain("VStudy fixture");
     expect(await invoke("documents:get", { documentId: document.id })).toMatchObject({ id: document.id });
     expect(await invoke("documents:list", {})).toHaveLength(1);
+    store.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(new Date(Date.now()-31_000).toISOString(),document.id);
+    expect(await invoke("documents:get", {documentId:document.id})).toBeNull();
+    mock.dialog.mockResolvedValueOnce({canceled:false,filePaths:[resolve("test-fixtures/converter/sample.md")]});
+    expect(await invoke("documents:import", {})).toMatchObject({id:document.id,status:"ready"});
+    expect(await invoke("documents:read", {documentId:document.id})).toContain("VStudy fixture");
     expect(await invoke("documents:importPaths", { paths: [token(resolve("test-fixtures/converter/sample.md"))] })).toHaveLength(1);
     const mixed = await invoke("documents:importPaths", { paths: [token("missing.unsupported"), token(resolve("test-fixtures/converter/sample.md"))] }) as { ok: boolean; error?: string }[];
     expect(mixed.map(r => r.ok)).toEqual([false, true]);

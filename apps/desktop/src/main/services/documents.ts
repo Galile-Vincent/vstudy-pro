@@ -4,7 +4,7 @@ import { activeConversions } from "./conversion-state";
 import { chmodSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { validateImport } from "./import-security";
-import { containedPath } from "./library";
+import { containedPath, LibraryService } from "./library";
 import { SearchService } from "./search";
 import { ActivityService } from "./activity";
 import { profileStage } from "../../../resources/converter/profile";
@@ -60,6 +60,12 @@ export class DocumentService {
     return result;
   }
 
+  private reuseImport(id: Document["id"]): Document {
+    new LibraryService(this.options.store, this.library).restore(id, 'import');
+    this.resume(id);
+    return this.require(id);
+  }
+
   importPath(path: string): Promise<Document> {
     return this.serialize(async () => {
       const extension = extname(path).slice(1).toLowerCase();
@@ -90,10 +96,7 @@ export class DocumentService {
         validateImport(source, extension);
         const sourceHash = hash.digest("hex");
         const existing = this.options.store.documents.findByHash(sourceHash);
-        if (existing) {
-          if (!this.get(existing.id)) throw new Error("Document is pending deletion");
-          return existing;
-        }
+        if (existing) return this.reuseImport(existing.id);
         const directory = join(this.library, sourceHash);
         await mkdir(directory, { recursive: true, mode: 0o700 });
         // A hash names immutable bytes. Publish each source exclusively, including after a crash.
@@ -101,10 +104,7 @@ export class DocumentService {
         catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
         await rm(source, { force: true });
         const published = this.options.store.documents.findByHash(sourceHash);
-        if (published) {
-          if (!this.get(published.id)) throw new Error("Document is pending deletion");
-          return published;
-        }
+        if (published) return this.reuseImport(published.id);
         let title = basename(path, extname(path));
         if (mime === "text/html") {
           const html = await readFile(join(directory, `source.${extension}`), "utf8");
@@ -112,10 +112,7 @@ export class DocumentService {
           if (raw?.trim()) title = decodeHtmlEntities(raw).replace(/\s+/g, " ").trim();
         }
         const raced = this.options.store.documents.findByHash(sourceHash);
-        if (raced) {
-          if (!this.get(raced.id)) throw new Error("Document is pending deletion");
-          return raced;
-        }
+        if (raced) return this.reuseImport(raced.id);
         const inserted = profileStage("DB insert");
         const document = this.options.store.documents.insert(documentSchema.parse({
           id: randomUUID(), title: safeDocumentLabel(title), sourceName: safeDocumentLabel(basename(path)),
