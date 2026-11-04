@@ -48,7 +48,7 @@ export class MoodleRepository {
     const course = this.rows('SELECT data FROM moodle_courses WHERE id=?',moodleCourseSchema,id)[0];
     if (!course) throw new Error('Moodle course not found');
     const deadlines = this.rows('SELECT data FROM moodle_deadlines WHERE courseId=?',moodleDeadlineSchema,id).filter(item => !item.orphaned);
-    return {course,deadlines,notifications:this.rows('SELECT data FROM moodle_notifications WHERE accountId=?',moodleNotificationSchema,course.accountId).filter(item => item.courseId === id),grades:this.rows('SELECT data FROM moodle_grades WHERE courseId=?',moodleGradeItemSchema,id),files:this.files(id),reminders:this.reminders().filter(item => deadlines.some(deadline => deadline.id === item.deadlineId))};
+    return {course,deadlines,notifications:this.rows('SELECT data FROM moodle_notifications WHERE accountId=?',moodleNotificationSchema,course.accountId).filter(item => item.courseId === id),grades:this.rows('SELECT data FROM moodle_grades WHERE courseId=?',moodleGradeItemSchema,id),files:this.files(id),reminders:this.reminders().filter(item => deadlines.some(deadline => deadline.id === item.deadlineId)),sections:[],announcements:[]};
   }
   private files(courseId: string) {
     return this.db.prepare('SELECT data,documentId FROM moodle_files WHERE courseId=?').all(courseId).map(row => moodleFileSchema.parse({...JSON.parse(payload.parse(row).data),documentId:row.documentId}));

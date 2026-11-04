@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { moodleCourseIdentitySchema, moodleSectionSchema, moodleAnnouncementSchema } from "./moodle-course";
 
 const timestamp = z.string().datetime();
 
@@ -54,6 +55,7 @@ export const moodleCourseSchema = z
     startAt: timestamp.nullable(),
     endAt: timestamp.nullable(),
     favourite: z.boolean(),
+    identity: moodleCourseIdentitySchema,
   })
   .strict();
 export type MoodleCourse = z.infer<typeof moodleCourseSchema>;
@@ -136,6 +138,8 @@ export const moodleCourseDetailSchema = z
     grades: z.array(moodleGradeItemSchema),
     files: z.array(moodleFileSchema),
     reminders: z.array(moodleReminderSchema),
+    sections: z.array(moodleSectionSchema),
+    announcements: z.array(moodleAnnouncementSchema),
   })
   .strict();
 export type MoodleCourseDetail = z.infer<typeof moodleCourseDetailSchema>;

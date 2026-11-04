@@ -271,7 +271,8 @@ export function createMockMoodleApi(): MoodleApi {
   ].map((names, i) => {
     const courseId = id(10 + i), base = 100 + i * 20;
     return {
-      course: { id: courseId, accountId: id(1), remoteId: 300 + i, fullName: names[0]!, shortName: names[1]!, imageUrl: null, progress: [64, 38, 82][i]!, startAt: at(-60), endAt: at(60), favourite: i === 0 },
+      course: { id: courseId, accountId: id(1), remoteId: 300 + i, fullName: names[0]!, shortName: names[1]!, imageUrl: null, progress: [64, 38, 82][i]!, startAt: at(-60), endAt: at(60), favourite: i === 0, identity:{title:{zh:null,en:null},teachers:[],code:null,term:null,classLabel:{zh:null,en:null},lifecycle:"unknown",lifecycleSource:"none",hidden:false,hasProgress:false,format:null,summaryHtml:null} },
+      sections: [], announcements: [],
       deadlines: [
         { id: id(base), courseId, title: names[4]!, kind: 'assignment', dueAt: at(1 + i), url: null, submitted: false },
         { id: id(base + 1), courseId, title: names[5]!, kind: 'quiz', dueAt: at(5 + i), url: null, submitted: false },

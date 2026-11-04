@@ -15,6 +15,7 @@ const detail: MoodleCourseDetail = {
     startAt: null,
     endAt: null,
     favourite: false,
+    identity:{title:{zh:null,en:null},teachers:[],code:null,term:null,classLabel:{zh:null,en:null},lifecycle:"unknown",lifecycleSource:"none",hidden:false,hasProgress:false,format:null,summaryHtml:null},
   },
   deadlines: [
     {
