@@ -8,7 +8,7 @@ import { createSecretStore } from '../services/secrets';
 import { createIpcRegistrar } from './register';
 import { registerMoodleIpc } from './moodle';
 import { moodleChannels } from '../../shared/moodle';
-import type { IpcChannel } from '../../shared/ipc';
+import { moodleProgressSchema, type IpcChannel } from '../../shared/ipc';
 
 vi.mock('electron',() => ({dialog:{showSaveDialog:vi.fn()},Notification:{isSupported:() => false}}));
 it('registers every Moodle channel behind strict requests and trusted main-frame senders',async () => {
@@ -51,4 +51,11 @@ it.each(['ai_parse.moodlemobile://token=CANARY','Invalid JSON moodlemobile://tok
     await expect(invoke({} as IpcMainInvokeEvent,{siteUrl:'https://school.example'})).rejects.toEqual(new Error('VSTUDY_STATUS:{"code":"errors.generic","params":{}}'));
     expect(JSON.stringify(logs.mock.calls)).not.toContain('CANARY');
   } finally {logs.mockRestore();registrar.dispose();}
+});
+
+it('rejects secret fields and unknown panels in Moodle progress events',() => {
+  const event={accountId:'11111111-1111-4111-a111-111111111111',panel:'contents',state:'loading',completed:0,total:1};
+  expect(moodleProgressSchema.parse(event)).toEqual(event);
+  expect(moodleProgressSchema.safeParse({...event,token:'secret'}).success).toBe(false);
+  expect(moodleProgressSchema.safeParse({...event,panel:'unknown'}).success).toBe(false);
 });

@@ -7,7 +7,7 @@ import { moodleImage } from './files';
 import { MoodleAuthError, tokensSchema, type MoodleTokens } from './auth';
 import { normalizeSiteUrl, moodleFetch } from './site-url';
 import { randomUUID } from 'node:crypto';
-import type { MoodleAccount } from '../../shared/moodle';
+import type { MoodlePanel, MoodleAccount } from '../../shared/moodle';
 import type { SecretStore } from '../services/secrets';
 import { moodleSecretId } from '../services/secrets';
 import { MoodleClient, MoodleError, passwordToken, plainText, type Fetch } from './client';
@@ -21,6 +21,7 @@ export class MoodleService {
   private readonly detailAttempts = new Map<string,number>();
   private readonly queue = new MoodleScheduler(6);
   private readonly contentReady = new Map<string,Promise<void>>();
+  private readonly panels=new Map<string,Partial<Record<MoodlePanel,'loading'|'idle'|'error'>>>();
   private readonly panelFresh = new Set<string>();
   private readonly detailErrors = new Map<string,string>();
   private readonly teacherCache = new Map<string,number>();
@@ -98,7 +99,7 @@ export class MoodleService {
       if (!this.repository.detailCache(id)) await this.contentReady.get(id);
       void work;
     } else if (!this.repository.detailCache(id)) await this.contentReady.get(id);
-    return {...this.repository.course(id),fetchState:this.detailPending.has(id) ? 'loading' as const : this.detailErrors.has(id) ? 'error' as const : 'idle' as const};
+    return {...this.repository.course(id),panels:{...this.panels.get(id)},fetchState:this.detailPending.has(id) ? 'loading' as const : this.detailErrors.has(id) ? 'error' as const : 'idle' as const};
   }
   refreshCourse(id: string): Promise<void> {
     const pending = this.detailPending.get(id);
@@ -107,6 +108,7 @@ export class MoodleService {
     this.panelFresh.add(id);
     this.detailAttempts.set(id,Date.now());
     this.detailErrors.delete(id);
+    this.panels.set(id,{});
     let ready!:()=>void;
     this.contentReady.set(id,new Promise<void>(resolve => {ready=resolve;}));
     const work = this.loadCourse(id,ready).catch(error => {
@@ -129,14 +131,23 @@ export class MoodleService {
       client.setFunctions(functions);
       client.setLanguage(this.language());
       const active = () => !this.stopped && this.repository.accounts().some(row => row.id === account.id);
+      const panelNames:Record<string,MoodlePanel>={core_course_get_contents:'contents',core_completion_get_activities_completion_status:'completion',mod_assign_get_assignments:'assignments',mod_quiz_get_quizzes_by_courses:'quizzes',core_enrol_get_enrolled_users:'teachers',mod_forum_get_forums_by_courses:'announcements',gradereport_user_get_grade_items:'grades'};
       const optional = async <T>(name: string, request: () => Promise<T>): Promise<T | undefined> => {
         if (!client.wsAvailable(name)) return undefined;
-        try { return await request(); }
-        catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; if (!(error instanceof MoodleError) || error.kind !== 'unsupported') this.detailErrors.set(id,'service'); return undefined; }
+        const panel=panelNames[name]!;
+        const states=this.panels.get(id)!;
+        states[panel]='loading';
+        this.progress({accountId:account.id,courseId:id,panel,state:'loading',completed:0,total:1});
+        try { const result=await request();states[panel]='idle';return result; }
+        catch (error) {
+          states[panel]='error';
+          if (!(error instanceof MoodleError) || error.kind !== 'unsupported') this.detailErrors.set(id,'service');
+          if (error instanceof MoodleError && error.kind === 'auth') throw error;
+          return undefined;
+        } finally {this.progress({accountId:account.id,courseId:id,panel,state:states[panel]!,completed:1,total:1});}
       };
       this.progress({accountId:account.id,courseId:id,state:'loading',completed:0,total:1});
-      let contents;
-      try { contents = await client.courseContents(detail.course); } catch (error) {if (!(error instanceof MoodleError) || error.kind !== 'unsupported') this.detailErrors.set(id,error instanceof MoodleError ? error.kind : 'service');if (error instanceof MoodleError && error.kind === 'auth') throw error;}
+      const contents=await optional('core_course_get_contents',() => client.courseContents(detail.course));
       if (contents && active()) this.repository.saveDetail(id,{sections:contents.sections},contents.files);
       ready();
       this.progress({accountId:account.id,courseId:id,state:'loading',completed:1,total:1});

@@ -380,6 +380,7 @@ it('loads course panels lazily, preserves successful panels on partial failure a
   expect(first.sections.map(section => section.modules.map(module => [module.name,module.completion]))).toEqual([[['Homework','complete']]]);
   expect(second.sections).toEqual(first.sections);
   expect(first.announcements).toEqual([]);
+  expect((await service.course(course.id)).panels).toMatchObject({contents:'idle',completion:'idle',announcements:'error'});
   expect(first.course.progress).toBe(100);
   expect(first.course.identity.hasProgress).toBe(true);
   contentsFail = true; forumFail = false;

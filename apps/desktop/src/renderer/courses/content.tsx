@@ -258,7 +258,7 @@ export function CourseContent({
             />
           ))
         ) : (
-          <p className="moodle-empty-inline">{tr(detail.fetchState === "loading" ? "moodle:loading" : detail.fetchState === "error" ? "moodle:action_error" : "moodle:no_sections")}</p>
+          <p className="moodle-empty-inline">{tr((detail.panels?.contents ?? detail.fetchState) === "loading" ? "moodle:loading" : (detail.panels?.contents ?? detail.fetchState) === "error" ? "moodle:action_error" : "moodle:no_sections")}</p>
         )}
       </div>
       <Sheet

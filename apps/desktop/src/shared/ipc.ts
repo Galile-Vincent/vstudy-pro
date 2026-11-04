@@ -1,4 +1,4 @@
-import { moodleSiteCheckSchema, moodleSiteUrlSchema, moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
+import { moodlePanelSchema, moodleSiteCheckSchema, moodleSiteUrlSchema, moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
 import { aiParseContract } from './ai-parse';
 import { statusSchema } from "./status";
 import { folderIdSchema, libraryContract } from "./library";
@@ -176,5 +176,5 @@ export interface DesktopApi {
 }
 
 export const moodleProgressChannel = 'moodle:progress';
-export const moodleProgressSchema = z.object({accountId:z.string().uuid(),courseId:z.string().uuid().optional(),state:z.enum(['loading','idle','error']),completed:z.number().int().nonnegative(),total:z.number().int().nonnegative()}).strict();
+export const moodleProgressSchema = z.object({accountId:z.string().uuid(),courseId:z.string().uuid().optional(),panel:moodlePanelSchema.optional(),state:z.enum(['loading','idle','error']),completed:z.number().int().nonnegative(),total:z.number().int().nonnegative()}).strict();
 export type MoodleProgress = z.infer<typeof moodleProgressSchema>;

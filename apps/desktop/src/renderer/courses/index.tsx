@@ -205,6 +205,13 @@ export function Courses({
     return () => {clearTimeout(timer);unsubscribe?.();};
   },[api,courseId,refresh]);
 
+  const panelStatus = (...names:import('../../shared/moodle').MoodlePanel[]) => {
+    const states=names.map(name => detail?.panels?.[name]);
+    return <>
+      {states.includes('loading') && <div role="status" aria-label={tr('moodle:loading')}><Skeleton className="moodle-skeleton" /></div>}
+      {states.includes('error') && <p role="alert">{tr('moodle:action_error')} <button onClick={() => void sync()}>{tr('moodle:retry')}</button></p>}
+    </>;
+  };
   const failure = () => setNotice(tr("moodle:action_error"));
   const sync = async () => {
     setSyncing(true);
@@ -654,8 +661,7 @@ export function Courses({
                         {displayTeachers(detail.course.identity, lang)}
                       </p>
                     )}
-                    {detail.fetchState === 'loading' && <p role="status">{tr('moodle:loading')}</p>}
-                    {detail.fetchState === 'error' && <p role="alert">{tr('moodle:action_error')} <button onClick={() => void sync()}>{tr('moodle:retry')}</button></p>}
+                    {panelStatus('contents','completion','teachers')}
                     <CourseContent
                       detail={detail}
                       openFile={openFile}
@@ -663,7 +669,7 @@ export function Courses({
                     />
                   </TabsContent>
                   <TabsContent value="deadlines" aria-busy={detail.fetchState === "loading"}>
-                    {detail.fetchState === "loading" && <Skeleton className="moodle-skeleton" />}
+                    {panelStatus('assignments','quizzes')}
                     <section className="moodle-panel">
                       <div className="moodle-section-heading">
                         <h2>{tr("moodle:deadlines")}</h2>
@@ -707,7 +713,7 @@ export function Courses({
                     </section>
                   </TabsContent>
                   <TabsContent value="announcements" aria-busy={detail.fetchState === "loading"}>
-                    {detail.fetchState === "loading" && <Skeleton className="moodle-skeleton" />}
+                    {panelStatus('announcements')}
                     <Announcements items={detail.announcements} />
                   </TabsContent>
                   <TabsContent value="notifications">
@@ -717,7 +723,7 @@ export function Courses({
                     </section>
                   </TabsContent>
                   <TabsContent value="grades" aria-busy={detail.fetchState === "loading"}>
-                    {detail.fetchState === "loading" && <Skeleton className="moodle-skeleton" />}
+                    {panelStatus('grades')}
                     <section className="moodle-panel">
                       <h2>{tr("moodle:grades")}</h2>
                       {detail.grades.length ? (
