@@ -153,5 +153,11 @@
   "sso_retry": "Retry",
   "waiting_browser": "Waiting for your browser…",
   "waiting_embedded": "Complete sign-in in the sign-in window.",
-  "sso_cancel": "Cancel sign-in"
+  "sso_cancel": "Cancel sign-in",
+  "keychain_waiting": "Waiting for macOS permission…",
+  "keychain_hint": "macOS may ask for your Mac password to protect your sign-in. Choose Always Allow.",
+  "keychain_error": "Secure storage was denied or is unavailable. Retry, or connect for this session only. Your sign-in will clear when you quit.",
+  "keychain_unsaved": "Could not save your sign-in securely. You are connected for this session. Retry saving without signing in again.",
+  "keychain_retry": "Retry secure storage",
+  "keychain_session": "Use for this session only"
 }

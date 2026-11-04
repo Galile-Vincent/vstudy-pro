@@ -11,6 +11,8 @@ import type { IpcChannel, IpcRequest } from "../../shared/ipc";
 import { moodleChannels } from "../../shared/moodle";
 
 export interface MoodleApi {
+  preflight(): Promise<{ready:boolean}>;
+  retrySave(accountId: string): Promise<void>;
   schools(): Promise<MoodleSchool[]>;
   checkSite(url: string): Promise<import("../../shared/moodle").MoodleSiteCheck>;
   connect(input: IpcRequest<"moodle:connect">): Promise<MoodleAccount>;
@@ -38,6 +40,8 @@ function createBridgeMoodleApi(): MoodleApi {
   const call = <C extends IpcChannel>(channel: C, request: IpcRequest<C>) =>
     desktop.invoke(channel, request);
   return {
+    preflight: () => call(moodleChannels.preflight, {}),
+    retrySave: async (accountId) => {await call(moodleChannels.retrySave, {accountId});},
     schools: () => call(moodleChannels.schools, {}),
     checkSite: (url) => call(moodleChannels.checkSite, {url}),
     connect: (input) => call(moodleChannels.connect, input),

@@ -351,3 +351,61 @@ it('redacts malformed stored token JSON',async () => {
   await expect(service.token(account.id)).rejects.toHaveProperty('message','Moodle auth error');
   await service.dispose();
 });
+
+it('preflights before opening SSO, then preserves a slow save and retries once', async () => {
+  vi.useFakeTimers();
+  const {repository,secrets,request} = await setup();
+  const preflight = vi.spyOn(secrets,'preflight').mockResolvedValue();
+  const original = secrets.set.bind(secrets);
+  let release!: () => void;
+  const saving = new Promise<void>(resolve => {release = resolve;});
+  const set = vi.spyOn(secrets,'set').mockImplementationOnce(async () => {
+    await saving;
+    throw new Error('denied');
+  }).mockImplementation(original);
+  const login = vi.fn(async (_site,_provider,accept) => {
+    expect(preflight).toHaveBeenCalledTimes(1);
+    return accept({token:'verified-token',privateToken:'private'});
+  });
+  const service = new MoodleService(repository,secrets,{login},request);
+  let finished = false;
+  const connecting = service.connect({siteUrl:account.siteUrl}).then(value => {finished=true;return value;});
+  await vi.advanceTimersByTimeAsync(60_000);
+  expect(finished).toBe(false);
+  expect(await service.token(account.id)).toBe('verified-token');
+  expect(repository.account(account.id).status).toBe('connected');
+  release();
+  const result = await connecting;
+  expect(result.status).toBe('connected');
+  expect(result.signInStorage).toBeUndefined();
+  expect(set).toHaveBeenCalledTimes(2);
+  await service.dispose();
+});
+it('retains login after both save attempts fail and retries without another login', async () => {
+  const {service,secrets,repository} = await setup();
+  const original = secrets.set.bind(secrets);
+  const set = vi.spyOn(secrets,'set').mockRejectedValue(new Error('denied'));
+  const result = await service.connect({siteUrl:account.siteUrl});
+  expect(result).toMatchObject({status:'connected',signInStorage:'unsaved'});
+  expect(set).toHaveBeenCalledTimes(2);
+  expect(await service.token(result.id)).toBe('token');
+  expect(service.overview().accounts[0]?.signInStorage).toBe('unsaved');
+  set.mockImplementation(original);
+  await service.retrySave(result.id);
+  expect(service.overview().accounts[0]?.signInStorage).toBeUndefined();
+  expect(repository.accounts()).toHaveLength(1);
+  await service.dispose();
+});
+it('connects in memory only after an explicit session choice', async () => {
+  const {service,secrets} = await setup();
+  const preflight = vi.spyOn(secrets,'preflight').mockRejectedValue(new Error('unavailable'));
+  await expect(service.connect({siteUrl:account.siteUrl})).rejects.toThrow('unavailable');
+  const set = vi.spyOn(secrets,'set');
+  const result = await service.connect({siteUrl:account.siteUrl,storage:'session'});
+  expect(result.signInStorage).toBe('session');
+  expect(preflight).toHaveBeenCalledTimes(1);
+  expect(set).not.toHaveBeenCalled();
+  expect(secrets.has(moodleSecretId(result.id))).toBe(false);
+  expect(await service.token(result.id)).toBe('token');
+  await service.dispose();
+});

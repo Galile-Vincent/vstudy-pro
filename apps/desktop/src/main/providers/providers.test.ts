@@ -60,7 +60,7 @@ it("sends assembled prompt and key only in main HTTP request and lists custom mo
     );
   const adapter = createApiAdapter(
     () => ({ id: "openai-api", kind: "api", enabled: true }),
-    { getInMainOnly: () => "private-key" },
+    { preflight: async () => {}, getInMainOnly: () => "private-key" },
     fetcher,
   );
   expect(await adapter.listModels()).toEqual([
@@ -74,7 +74,7 @@ it("sends assembled prompt and key only in main HTTP request and lists custom mo
 it("rejects truncated HTTP streams", async () => {
   const adapter = createApiAdapter(
     () => ({ id: "openai-api", kind: "api", enabled: true }),
-    { getInMainOnly: () => "key" },
+    { preflight: async () => {}, getInMainOnly: () => "key" },
     vi
       .fn<typeof fetch>()
       .mockResolvedValue(new Response('data: {"choices":[]}\n\n')),
@@ -85,7 +85,7 @@ it("rejects truncated HTTP streams", async () => {
 });
 it("only enables fake in explicit E2E mode", async () => {
   const secrets = {
-    getInMainOnly: async () => null,
+    preflight: async () => {}, getInMainOnly: async () => null,
     has: () => false,
     set: async () => {},
       bindCompatibleOrigin: () => {},
@@ -162,7 +162,7 @@ async function collect<T>(source: AsyncIterable<T>): Promise<T[]> {
 }
 it("allows loopback compatible providers without credentials", async () => {
   const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response('data: [DONE]\n\n'));
-  const adapter = createApiAdapter(() => ({ kind: "compatible", id: "openai-compatible", enabled: true, baseUrl: "http://127.0.0.2:123/v1" }), { getInMainOnly: async () => null }, fetcher);
+  const adapter = createApiAdapter(() => ({ kind: "compatible", id: "openai-compatible", enabled: true, baseUrl: "http://127.0.0.2:123/v1" }), { preflight: async () => {}, getInMainOnly: async () => null }, fetcher);
   expect(await adapter.detect()).toEqual({ available: true });
   expect(await collect(adapter.stream(request, new AbortController().signal))).toEqual([{ type: "usage", usage: { inputTokens: Math.ceil(request.prompt.length / 4), outputTokens: 0, costSource: "estimated" } }, { type: "done" }]);
   expect(fetcher.mock.calls[0]?.[1]?.headers).toEqual({ "content-type": "application/json" });
@@ -177,7 +177,7 @@ it.each([
   [409, 'Provider temporarily unavailable (HTTP 409). Try again.'],
   [425, 'Provider temporarily unavailable (HTTP 425). Try again.'],
 ] as const)('categorizes HTTP %s without exposing response or key', async (status, message) => {
-  const adapter = createApiAdapter(() => ({ kind: 'api', id: 'openai-api', enabled: true }), { getInMainOnly: () => 'private-key' }, async () => new Response('private-key', { status }));
+  const adapter = createApiAdapter(() => ({ kind: 'api', id: 'openai-api', enabled: true }), { preflight: async () => {}, getInMainOnly: () => 'private-key' }, async () => new Response('private-key', { status }));
   await expect(collect(adapter.stream(request, new AbortController().signal))).rejects.toThrow(message);
 });
 it.each([
@@ -248,7 +248,7 @@ it('serializes image input with separate system instructions and no tools for bo
  for(const id of ['anthropic-api','openai-api'] as const) {
   let body:Record<string,unknown>={};
   const fetcher:typeof fetch=async(_url,init)=>{body=JSON.parse(String(init?.body));return new Response('data: [DONE]\n\n',{status:200});};
-  const adapter=createApiAdapter(()=>({id,kind:'api',enabled:true}),{getInMainOnly:()=> 'fixture-key'},fetcher);
+  const adapter=createApiAdapter(()=>({id,kind:'api',enabled:true}),{preflight: async () => {}, getInMainOnly:()=> 'fixture-key'},fetcher);
   try {for await(const event of adapter.stream({...request,providerId:id,systemPrompt:'SYSTEM_ONLY',images:[{mediaType:'image/png',data:'AA=='}]},new AbortController().signal)){void event;}}catch { /* This assertion concerns the outgoing body, not the intentionally empty stream. */ }
   expect(body.tools).toBeUndefined();expect(JSON.stringify(body)).toContain(id==='anthropic-api'?'"type":"image"':'data:image/png;base64,AA==');
   const messages=body.messages as {role:string;content:unknown}[];

@@ -487,6 +487,12 @@ export function Courses({
                 >
                   <Unplug />
                 </Button>
+                {account.signInStorage && <div role="status">
+                  <p>{tr(account.signInStorage === 'unsaved' ? 'moodle:keychain_unsaved' : 'moodle:keychain_session')}</p>
+                  <Button onClick={async () => {
+                    try {await api.retrySave(account.id);await refresh();} catch {failure();}
+                  }}>{tr('moodle:keychain_retry')}</Button>
+                </div>}
                 {account.status === "expired" && (
                   <div className="moodle-expired" role="alert">
                     {tr("moodle:expired")}
