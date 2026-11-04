@@ -73,3 +73,15 @@ describe('SSO callback',() => {
     for (const url of ['http://ilearning.cycu.edu.tw','https://ilearning.cycu.edu.tw.evil.example','https://login.microsoftonline.com@evil.example','https://evil.example','file:///etc/passwd','https://ilearning.cycu.edu.tw:444']) expect(allowsLoginNavigation(schools[0]!,url)).toBe(false);
   });
 });
+
+it('accepts nullable optional Moodle fields',async () => {
+  const client = new MoodleClient(schools[0]!.host,'token',fixtureFetch({
+    core_enrol_get_users_courses:[{id:101,fullname:'Course',shortname:'CS',startdate:null}],
+    core_message_get_messages:{messages:[{id:1,timecreated:1700000000,timeread:null,fullmessage:null}]},
+    core_course_get_contents:[{id:1,name:null,modules:[{id:2,name:'Module',contents:[{type:'file',filename:'a.pdf',fileurl:'https://ilearning.cycu.edu.tw/pluginfile.php/1/a.pdf'}]}]}],
+  }));
+  const courses = await client.courses(account);
+  expect(courses[0]!.startAt).toBe(null);
+  expect((await client.notifications(account,courses))[0]!.value.read).toBe(false);
+  expect((await client.files(courses[0]!))[0]!.value.section).toBe('');
+});
