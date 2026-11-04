@@ -424,7 +424,7 @@ export function Workspace() {
   );
   return (
     <main
-      className="workspace" data-compact-pane={compactPane}
+      className="workspace" data-compact-pane={compactPane} onFocusCapture={event=>{const target=event.target as HTMLElement;const pane=target.closest('.chat-pane')?'chat':target.closest('.reading-pane')?'reading':null;if(pane&&pane!==compactPane)setCompactPane(pane);}}
       onDragOver={(e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";

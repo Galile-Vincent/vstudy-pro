@@ -30,7 +30,7 @@ try {
   await shot(`${prefix}-effort-fast`);
   const popover=await page.locator('[data-slot=model-selector-content]').boundingBox();const pane=await page.locator('.chat-pane').boundingBox();
   if(height>520){assert.ok(popover.x>=pane.x-1 && popover.x+popover.width<=pane.x+pane.width+1,'picker stays in chat pane');assert.ok(popover.y>=pane.y && popover.y+popover.height<=height,'picker avoids the pane header and window edges');}else{assert.ok(popover.x>=0 && popover.x+popover.width<=width && popover.y>=0 && popover.y+popover.height<=height,'short windows use an in-window sheet');}await close();
-  await page.locator('[data-slot=model-selector-value]').evaluate(el=>{el.firstChild.nodeValue='A very long model display name for typography and truncation verification';});await shot(`${prefix}-long-name`);
+  await page.locator('[data-slot=model-selector-value] > .truncate.font-medium').evaluate(el=>{el.textContent='A very long model display name for typography and truncation verification';});assert.match(await model.innerText(),/A very long model display name/);await shot(`${prefix}-long-name`);
   await choose('Fake','Fake (test only)');
   const input=page.locator('.aui-composer-input');await input.fill('Explain this document ' + 'with more context '.repeat(300));await input.press('Enter');await page.getByRole('button',{name:'Stop generating',exact:true}).waitFor();await shot(`${prefix}-streaming`);assert.equal(await page.locator('.aui-composer-cancel').count(),1,'streaming capture includes Stop');
   await page.locator('.aui-composer-cancel').waitFor({state:'hidden'});

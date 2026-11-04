@@ -37,7 +37,7 @@ try {
   await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},path);
   const extra=await page.evaluate(folderId=>window.desktop.invoke('documents:import',{folderId}),n%2===0?folder.id:null);ids.push(extra.id);
  }
- for(const id of ids) {await page.evaluate(documentId=>window.desktop.invoke('library:documents:pin',{documentId,pinned:true}),id);await page.evaluate(documentId=>window.desktop.invoke('documents:read',{documentId}),id);}
+ for(const id of ids) {await page.waitForFunction(async id=>(await window.desktop.invoke('documents:list',{})).find(d=>d.id===id)?.status==='ready',id);await page.evaluate(documentId=>window.desktop.invoke('library:documents:pin',{documentId,pinned:true}),id);await page.evaluate(documentId=>window.desktop.invoke('documents:read',{documentId}),id);}
  const keyboard=[];
  const origins=ids.map((id,index)=>({id,folderId:index===0||index===2?null:folder.id}));
  for(const query of [{view:'all'},{view:'recent'},{view:'pinned'},{view:'unfiled'},{text:'Keyboard'}, {folderId:folder.id}]) {

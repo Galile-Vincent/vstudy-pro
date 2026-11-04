@@ -45,8 +45,8 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).onboardingCompleted,true);
   db=new DatabaseSync(join(directory,'vstudy.sqlite')); db.exec('PRAGMA busy_timeout=5000; DELETE FROM activity_events; DELETE FROM activity_days; UPDATE documents SET lastOpenedAt=NULL;');
   const refresh=async()=>{
-   const expected=await page.evaluate(async()=>{window.dispatchEvent(new window.Event('activity-updated'));const data=await window.desktop.invoke('dashboard:get',{});return [...data.pinnedFolders.map(f=>f.name),...data.pinnedDocuments.slice(0,5).map(d=>d.document.title)].sort();});
-   await page.waitForFunction(expected=>{const actual=[...window.document.querySelectorAll('.home-card .home-row')].map(row=>row.querySelector('strong')?.textContent??row.textContent).sort();return JSON.stringify(actual)===JSON.stringify(expected);},expected);
+   const expected=await page.evaluate(async()=>{window.dispatchEvent(new window.Event('activity-updated'));const data=await window.desktop.invoke('dashboard:get',{});return {pins:[...data.pinnedFolders.map(f=>f.name),...data.pinnedDocuments.slice(0,5).map(d=>d.document.title)].sort(),continueTitle:data.recentDocuments[0]?.document.title??null};});
+   await page.waitForFunction(expected=>{const actual=[...window.document.querySelectorAll('.home-card .home-row')].map(row=>row.querySelector('strong')?.textContent??row.textContent).sort();const title=window.document.querySelector('.home-continue h3')?.textContent??null;return JSON.stringify(actual)===JSON.stringify(expected.pins)&&title===expected.continueTitle&&window.document.querySelectorAll('.home-continue h3').length===(expected.continueTitle?1:0);},expected);
   };
   await refresh(); await audit('home-empty'); await capture('home-empty');
   // Metadata insert shapes follow the benchmark seeder at a three-document scale.
