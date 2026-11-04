@@ -52,3 +52,22 @@ authorities or the passport-bearing launch URL.
 
 Sources are Moodle's [launch implementation](https://github.com/moodle/moodle/blob/MOODLE_405_STABLE/admin/tool/mobile/launch.php)
 and [public configuration contract](https://github.com/moodle/moodle/blob/MOODLE_405_STABLE/admin/tool/mobile/classes/external.php).
+
+## Round 2: course detail, term tabs, assistant button (Claude design)
+
+Reference for data: iCYCU app (`/Users/vc/Local/CYCU`, `iLearningCourseDetailView.swift`) and the official Moodle app. Types: `apps/desktop/src/shared/moodle-course.ts`.
+
+### Courses home
+- Segmented tabs: **Current** (default), **Upcoming**, **Past**, **All**. Counts in each tab. Current means `identity.lifecycle === "current"`. Courses with unknown lifecycle appear in All and in Current only when the term cannot be determined, with a small "Dates unavailable" note.
+- Course card shows a clean display title (never the raw bilingual string), course code and term chip (`1142 · CS924E`), the teacher, class label, a progress bar only when `hasProgress` (otherwise no bar and no "Not available" text), due soon and unread counters.
+- Title language follows the app language (zh-Hant or ja shows Chinese when present, en shows English), with a graceful fallback to whichever exists. Keep the raw name as the card tooltip and in the detail header menu.
+
+### Course page
+- Hero header: cover, display title, code, term, teacher(s), class label, next deadline summary, refresh.
+- Tabs: **Content** (default), **Deadlines**, **Announcements**, **Grades**, **Files**, **Notifications**. Overview content (up next, latest updates) lives at the top of Content as compact cards.
+- Content tab: stacked weekly sections from `sections`, each a collapsible card with title, module count and summary. The current week is auto-expanded, badged "This week" and scrolled into view; past weeks collapsed; hidden or locked sections show a lock row. Modules are rows with type icon, name, completion check when tracked, due date, attachment count, and a chevron. Click opens a module detail sheet: sanitized HTML description, attachments (open in our reader), page content inline, link out for URL, forum discussions list, assignment due/status, quiz info. Unsupported types offer "Open in Moodle" through the authenticated route.
+- Announcements tab: newest first, author and date, preview, full body in a sheet. Teacher authored first when identifiable.
+- Teachers: show names in hero and a People summary when data exists.
+
+### Course assistant
+- Not a docked panel. A floating round chat button at bottom right of the course page (and over all tabs), with an unread-proposal dot. Click expands a panel anchored bottom right (about 380 by 560, resizable on wide windows, full height sheet on narrow), with quick prompts, the conversation, and approval cards. Esc or the header button collapses it. State persists while navigating tabs. Respects reduced motion, focus returns to the button on close, labelled for screen readers.
