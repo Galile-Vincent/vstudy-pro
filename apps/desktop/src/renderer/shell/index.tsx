@@ -15,15 +15,16 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { Home, BookOpen, ArrowLeft, Menu, Settings } from "lucide-react";
+import { Home, BookOpen, ArrowLeft, Menu, Settings, GraduationCap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
 import type { Document } from "../../shared";
 import type { LibraryQuery } from "../../shared/library";
 import "./shell.css";
-export type View = "home" | "library" | "workspace" | "welcome";
+export type View = "home" | "library" | "workspace" | "welcome" | "courses";
 export type Route = {
   view: View;
+  courseId?: string | undefined;
   documentId?: Document["id"] | undefined;
   query?: Partial<LibraryQuery> | undefined;
   title?: string | undefined;
@@ -69,7 +70,7 @@ export function AppShell({
       const saved = JSON.parse(
         localStorage.getItem("vstudy-route") ?? "null",
       ) as Route | null;
-      if (saved && ["home", "library", "workspace"].includes(saved.view))
+      if (saved && ["home", "library", "workspace", "courses"].includes(saved.view))
         return saved;
     } catch {
       /* Storage can be unavailable. */
@@ -86,7 +87,7 @@ export function AppShell({
     if (route.view === 'welcome' || route.aiParse) return;
     const frame = requestAnimationFrame(() => { document.getElementById("shell-content")?.focus(); });
     return () => cancelAnimationFrame(frame);
-  }, [route.view, route.documentId]);
+  }, [route.view, route.documentId, route.courseId]);
   const previous = useRef<Route>({ view: "home" });
   const returnSettings = useRef(false);
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -127,6 +128,7 @@ export function AppShell({
               <BookOpen />
               {tr("common:library")}
             </SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "courses" ? "page" : undefined} onClick={() => navigate("courses")}><GraduationCap />{tr("moodle:courses")}</SidebarMenuButton></SidebarMenuItem>
           </SidebarMenu></SidebarGroup>
           {sidebar}</SidebarContent><SidebarFooter><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
         </Sidebar>
@@ -157,7 +159,7 @@ export function AppShell({
               <span>
                 {route.view === "home"
                   ? tr("library:home")
-                  : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
+                  : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
               </span>
             )}
           </header>

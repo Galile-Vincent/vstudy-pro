@@ -4,6 +4,7 @@ const loadWelcome = () => import("./welcome").then(module => { loadedWelcome = m
 const WelcomeView = lazy(loadWelcome);
 import { LibraryView, LibrarySidebar } from "./library";
 import { AppShell, useNavigate } from "./shell";
+import { CoursesView } from "./courses";
 import { HomeView } from "./home";
 import { Workspace } from "./workspace";
 import { desktop } from './bridge';
@@ -29,6 +30,8 @@ function Views() {
   }, []);
   return route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "workspace" ? (
     <Workspace />
+  ) : route.view === "courses" ? (
+    <CoursesView />
   ) : route.view === "library" ? (
     <LibraryView key={JSON.stringify(route.query)} />
   ) : (

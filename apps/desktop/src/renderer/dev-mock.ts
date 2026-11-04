@@ -70,6 +70,38 @@ export function createMockBridge(): DesktopApi {
     const input = request as Record<string, unknown>;
     let result: unknown = { ok: true };
     switch (channel) {
+      case "dashboard:get":
+        result = { pinnedFolders: [], pinnedDocuments: [], recentDocuments: [], month: { inputTokens: 0, outputTokens: 0, costUsd: 0, calls: 0 }, series: [], streak: { current: 0, best: 0, today: false, days: [] }, recentActivity: [] };
+        break;
+      case "usage:forConversation":
+      case "usage:forDocument":
+      case "usage:rateLimits":
+        result = [];
+        break;
+      case "usage:summary":
+        result = { inputTokens: 0, outputTokens: 0, costUsd: 0, calls: 0, unknownPrices: 0, groups: [] };
+        break;
+      case "usage:estimate":
+        result = { inputTokens: 0, outputTokens: 0, costUsd: 0 };
+        break;
+      case "library:tree":
+      case "library:folders:list":
+      case "library:savedFilters:list":
+      case "library:tags:list":
+        result = [];
+        break;
+      case "library:counts":
+        result = {};
+        break;
+      case "library:documents:list":
+        result = { items: [...documents, ...moodleDocuments].map(document => ({ document, folderId: null, position: 0, pinned: false, pinnedAt: null, lastOpenedAt: null, pageCount: null, sizeBytes: null, contentChars: null, tags: [] })), nextCursor: null };
+        break;
+      case "settings:systemLocale":
+        result = "en";
+        break;
+      case "settings:appearance":
+        result = { reducedTransparency: false };
+        break;
       case "welcome:sampleDocument":
         result = mockMarkdown;
         break;
@@ -97,7 +129,7 @@ export function createMockBridge(): DesktopApi {
         break;
       }
       case "documents:list":
-        result = [...documents];
+        result = [...documents, ...moodleDocuments];
         break;
       case "documents:get":
       case "documents:retry":
@@ -106,12 +138,12 @@ export function createMockBridge(): DesktopApi {
       case "documents:read":
         result = mockMarkdown;
         break;
-      case "documents:delete":
-        documents.splice(
-          documents.findIndex((d) => d.id === input.documentId),
-          1,
-        );
+      case "documents:delete": {
+        const collection = documents.some(d => d.id === input.documentId) ? documents : moodleDocuments;
+        const index = collection.findIndex(d => d.id === input.documentId);
+        if (index >= 0) collection.splice(index, 1);
         break;
+      }
       case "conversations:create": {
         const item = conversationSchema.parse({
           ...input,
