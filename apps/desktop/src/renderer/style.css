@@ -1008,3 +1008,5 @@ html[data-input-modality=keyboard] [data-slot=aui_composer-shell]:has(:focus-vis
 [class~="text-[11px]"] { font-size:0.6875rem; }
 [class~="text-[12px]"] { font-size:0.75rem; }
 [class~="text-[13px]"] { font-size:0.8125rem; }
+
+[data-slot=dialog-overlay] { backdrop-filter:var(--material-filter); }

@@ -417,3 +417,6 @@ mark {
 
 .folder-tree { max-height:40vh; overflow:auto; position:relative; }
 .folder-node { height:var(--space-8); box-sizing:border-box; }
+
+[data-slot=popover-content].filter-panel { position:relative; inset:auto; margin:0; }
+.filter-panel label:has([role=checkbox]) { display:flex; justify-content:flex-start; }

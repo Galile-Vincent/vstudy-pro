@@ -90,3 +90,5 @@
 .home-pins .home-list li { max-width:100%; }
 
 .home-secondary .home-upload .primary:hover { background:var(--active); color:var(--ink); }
+
+.home-secondary[data-empty=true] .home-upload .primary,.home-secondary[data-empty=true] .home-upload .primary:hover { background:var(--accent-color); color:var(--primary-foreground); }

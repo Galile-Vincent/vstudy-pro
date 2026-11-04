@@ -7,7 +7,7 @@ import { tr } from '../../shared/i18n';
 function menuItems(children:ReactNode):ReactNode {
  return Children.map(children,child=>{
   if(!isValidElement<{children?:ReactNode}>(child))return child;
-  if(child.type===Button)return <DropdownMenuItem asChild onSelect={event=>event.preventDefault()}>{child}</DropdownMenuItem>;
+  if(child.type===Button)return <DropdownMenuItem asChild className="justify-start" onSelect={event=>event.preventDefault()}>{child}</DropdownMenuItem>;
   return cloneElement(child,{},menuItems(child.props.children));
  });
 }

@@ -24,7 +24,8 @@ it('gives every empty card meaningful content and actions', async () => {
   await i18n.changeLanguage('en');
   const markup = renderToStaticMarkup(<Home initialData={empty} navigate={() => {}} onUsage={() => {}}/>);
   expect(markup).toContain('Choose a file');
-  expect(markup).toContain('Reader and grounded chat preview');
+  expect(markup).toContain('Try a sample document');
+  expect(markup).not.toContain('product-preview');
   expect(markup).not.toContain('home-stat');
   expect(markup).not.toContain('home-marker');
   expect(markup.match(/aria-labelledby/g)).toHaveLength(1);

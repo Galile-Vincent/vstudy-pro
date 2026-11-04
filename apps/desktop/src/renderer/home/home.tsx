@@ -12,7 +12,6 @@ import { useFormat } from '../i18n';
 import { AnimatedText } from '../motion/animated-text';
 import { UploadCard } from './upload-card';
 import './home.css';
-import { ProductPreview } from '../onboarding/product-preview';
 import { Card as SurfaceCard } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Skeleton } from '../components/ui/skeleton';
@@ -72,8 +71,8 @@ export function Home({ navigate, onUsage, onFolder, name, initialData }: { navig
     {error && <div role="alert">{error}<button onClick={refresh}>{tr('common:retry')}</button></div>}
     {!data ? !error && <div className="home-grid" role="status" aria-busy="true" aria-label={tr('home:loading')}>{Array.from({ length: 6 }, (_, i) => <Skeleton className="home-card home-skeleton" key={i}/>)}</div> : <div className="home-grid">
       {!!data.recentDocuments.length && <div className="home-continue"><Card title={tr('home:continue')}><h3 lang={contentLanguage(data.recentDocuments[0]!.document.title) ?? 'en'}>{data.recentDocuments[0]!.document.title}</h3>{data.recentDocuments[0]!.lastChat && <p className="home-snippet">{plainText(data.recentDocuments[0]!.lastChat!)}</p>}<Button variant="outline" className="primary" onClick={() => navigate('workspace', data.recentDocuments[0]!.document.id)}>{tr('home:continue')}</Button></Card></div>}
-      <div className="home-secondary">
-      <Card title={tr('home:upload')}><UploadCard folders={folders} onImported={refresh}/>{!data.recentDocuments.length && <ProductPreview/>}</Card>
+      <div className="home-secondary" data-empty={!data.recentDocuments.length}>
+      <Card title={tr('home:upload')}><UploadCard folders={folders} onImported={refresh}/></Card>
       {!!data.month.calls && <Card title={tr('home:usage')}><strong className="home-stat" title={fmt.number(tokens)} aria-label={fmt.number(tokens)}>{fmt.number(tokens, { notation: tokens >= 1e6 ? "compact" : "standard", maximumFractionDigits: 1 })}</strong><p>{tr('home:month_tokens', { cost: fmt.currency(data.month.costUsd) })}</p><Sparkline series={data.series}/>{!!(settings?.monthlyBudgetUsd || settings?.monthlyTokenBudget) && <><label>{tr('home:budget', { percent: fmt.number(percent) })}<Progress aria-label={tr('common:monthly_budget_used')} value={Math.min(100, percent)}/></label></>}<button onClick={onUsage}>{tr('home:view_usage')}</button></Card>}
       {data.streak.best > 0 && <Card title={tr('home:streak')}><Streak streak={data.streak}/></Card>}
       </div>

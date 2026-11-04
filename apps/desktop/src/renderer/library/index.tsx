@@ -1,3 +1,4 @@
+import { Popover, PopoverTrigger, PopoverContent } from '../components/ui/popover';
 import { Checkbox } from '../components/checkbox';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -380,9 +381,9 @@ export function LibraryView() {
             onChange={(e) => setText(e.target.value)}
           />
         </label>
-        <div className="filter-popover">
-          <Button variant="outline" className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel" onClick={() => setFiltersOpen(v => !v)}><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button>
-          <div id="library-filter-panel" className="filter-panel" hidden={!filtersOpen} onKeyDown={e => { if (e.key === "Escape") { setFiltersOpen(false); document.querySelector<HTMLButtonElement>('[data-testid="library-filters"]')?.focus(); } }}>
+        <Popover open={filtersOpen} onOpenChange={setFiltersOpen}><PopoverTrigger asChild>
+          <Button variant="outline" className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel"><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button></PopoverTrigger>
+          <PopoverContent id="library-filter-panel" aria-label={tr("library:filters")} align="start" className="filter-panel">
             {(
               ["type", "status", "converter", "tagId", "folderId"] as const
             ).map((key) => (
@@ -454,8 +455,8 @@ export function LibraryView() {
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select></label>
             <footer><Button variant="outline" className="ghost" onClick={() => setQuery(defaults)}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
-          </div>
-        </div>
+          </PopoverContent>
+        </Popover>
         <Select
           aria-label={tr("library:sort")}
           value={query.sort}
