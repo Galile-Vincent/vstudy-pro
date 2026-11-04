@@ -20,6 +20,7 @@ import type {
   MoodleCourseDetail,
   MoodleDeadline,
   MoodleOverview,
+  MoodleNotification,
   MoodleSchool,
 } from "../../shared/moodle";
 import type { Document } from "../../shared";
@@ -380,8 +381,8 @@ export function Courses({
     ) : (
       <p className="moodle-empty-inline">{tr("moodle:no_deadlines")}</p>
     );
-  const notifications = (limit?: number) => {
-    const items = [...(detail?.notifications ?? [])]
+  const notifications = (limit?: number, source: MoodleNotification[] = detail?.notifications ?? []) => {
+    const items = [...source]
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, limit);
     return items.length ? (
@@ -994,6 +995,10 @@ export function Courses({
             </div>
           )
         )}
+        {!courseId && Boolean(overview?.otherNotifications?.length) && <section className="moodle-panel">
+          <h2>{tr("moodle:other_notifications")}</h2>
+          {notifications(undefined,overview?.otherNotifications)}
+        </section>}
         <ConnectDialog
           open={connect}
           onOpenChange={setConnect}

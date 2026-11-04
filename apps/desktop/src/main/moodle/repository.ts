@@ -37,7 +37,7 @@ export class MoodleRepository {
     const ids = new Set(courses.map(course => course.id));
     const upcoming = this.rows('SELECT data FROM moodle_deadlines',moodleDeadlineSchema).filter(item => ids.has(item.courseId) && !item.submitted && !item.orphaned).sort((a,b) => a.dueAt.localeCompare(b.dueAt));
     const notifications = this.rows('SELECT data FROM moodle_notifications',moodleNotificationSchema).filter(item => accounts.some(account => account.id === item.accountId));
-    return {accounts,courses,upcoming,unreadNotifications:notifications.filter(item => !item.read).length};
+    return {accounts,courses,upcoming,otherNotifications:notifications.filter(item => item.courseId === null),unreadNotifications:notifications.filter(item => !item.read).length};
   }
   course(id: string): MoodleCourseDetail {
     const course = this.rows('SELECT data FROM moodle_courses WHERE id=?',moodleCourseSchema,id)[0];

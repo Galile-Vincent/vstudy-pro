@@ -347,3 +347,15 @@ it('keeps the calendar proposal when export is cancelled',async () => {
   expect(host.querySelectorAll('.moodle-proposal')).toHaveLength(1);
   expect(host.textContent).not.toContain('Action completed.');
 });
+it('shows and marks account-wide notifications read on Courses home',async () => {
+  const api = createMockMoodleApi(); const original = await api.overview();
+  const detail = await api.course(original.courses[0]!.id);
+  let read = false;
+  api.overview = async () => ({...original,otherNotifications:[{...detail.notifications[0]!,courseId:null,subject:'School notice',read}],unreadNotifications:read ? 0 : 1});
+  api.markRead = async () => {read = true;};
+  await mount(api);
+  expect(host.textContent).toContain('Other notifications');
+  expect(host.textContent).toContain('School notice');
+  await click('Mark as read');
+  expect(host.querySelector('.moodle-notification')?.getAttribute('data-unread')).toBe('false');
+});

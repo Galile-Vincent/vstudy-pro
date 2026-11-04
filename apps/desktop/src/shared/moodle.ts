@@ -138,6 +138,7 @@ export const moodleOverviewSchema = z
     accounts: z.array(moodleAccountSchema),
     courses: z.array(moodleCourseSchema),
     upcoming: z.array(moodleDeadlineSchema),
+    otherNotifications: z.array(moodleNotificationSchema).optional(),
     unreadNotifications: z.number().int().nonnegative(),
   })
   .strict();
