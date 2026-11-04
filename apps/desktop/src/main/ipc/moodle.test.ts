@@ -1,0 +1,35 @@
+import { it, expect, vi } from 'vitest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import type { IpcMainInvokeEvent } from 'electron';
+import { openStore } from '../db';
+import { createSecretStore } from '../services/secrets';
+import { createIpcRegistrar } from './register';
+import { registerMoodleIpc } from './moodle';
+import { moodleChannels } from '../../shared/moodle';
+import type { IpcChannel } from '../../shared/ipc';
+
+vi.mock('electron',() => ({dialog:{showSaveDialog:vi.fn()},Notification:{isSupported:() => false}}));
+it('registers every Moodle channel behind strict requests and trusted main-frame senders',async () => {
+  const directory = mkdtempSync(join(tmpdir(),'moodle-ipc-'));
+  const store = openStore(':memory:');
+  const secrets = createSecretStore(join(directory,'secrets.json'),{isAsyncEncryptionAvailable:async () => false,encryptStringAsync:vi.fn(),decryptStringAsync:vi.fn()});
+  const handlers = new Map<string,(event:IpcMainInvokeEvent,payload:unknown) => unknown>();
+  const registrar = createIpcRegistrar({handle:(channel,callback) => {handlers.set(channel,callback);},removeHandler:channel => {handlers.delete(channel);}},event => event.sender.id === 1);
+  const implemented = new Set<IpcChannel>();
+  const dispose = registerMoodleIpc(registrar,store,secrets,implemented,{get:vi.fn(),importPath:vi.fn()});
+  const frame = {}, sender = {id:1,mainFrame:frame};
+  const invoke = async (channel:string,payload:unknown,event = {sender,senderFrame:frame}) => handlers.get(channel)!(event as unknown as IpcMainInvokeEvent,payload);
+  const log = vi.spyOn(console,'error').mockImplementation(() => undefined);
+  try {
+    expect([...handlers.keys()].sort()).toEqual(Object.values(moodleChannels).sort());
+    expect(await invoke('moodle:schools',{})).toMatchObject([{id:'cycu',login:'sso-launch'}]);
+    expect(await invoke('moodle:overview',{})).toEqual({accounts:[],courses:[],upcoming:[],unreadNotifications:0});
+    await expect(invoke('moodle:schools',{}, {sender:{id:2,mainFrame:frame},senderFrame:frame})).rejects.toThrow('Untrusted');
+    await expect(invoke('moodle:overview',{}, {sender,senderFrame:{}})).rejects.toThrow('Untrusted');
+    await expect(invoke('moodle:overview',{token:'sensitive-token'})).rejects.toThrow('VSTUDY_STATUS');
+    await expect(invoke('moodle:connect',{schoolId:'cycu',password:'sensitive-password'})).rejects.toThrow('VSTUDY_STATUS');
+    expect(log).not.toHaveBeenCalled();
+  } finally { log.mockRestore(); registrar.dispose(); await dispose(); store.close(); rmSync(directory,{force:true,recursive:true}); }
+});

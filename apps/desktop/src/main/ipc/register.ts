@@ -39,7 +39,7 @@ export function createIpcRegistrar(
           const response = await handler(request, event);
           return ipcContract[channel].response.parse(response);
         } catch (error) {
-          console.error(`[ipc] ${channel} failed:`, error instanceof Error ? error.stack ?? error.message : String(error));
+          if (!channel.startsWith('moodle:')) console.error(`[ipc] ${channel} failed:`, error instanceof Error ? error.stack ?? error.message : String(error));
           if (/^documents:import/.test(channel)) throw new Error('VSTUDY_STATUS:' + JSON.stringify(importError(error)));
           if (error instanceof Error && /Search took too long|Refine your query/.test(error.message)) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message.startsWith('Search took too long') ? 'errors.search_too_long' : 'errors.search_refine',params:{}}));
           if (error instanceof Error && error.message.startsWith('ai_parse.')) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'errors.'+error.message,params:{}}));

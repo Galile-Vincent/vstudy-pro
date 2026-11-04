@@ -1,3 +1,4 @@
+import { registerMoodleIpc } from './moodle';
 import { showAttachedMessage } from '../dialogs';
 import { disposeSearchWorkers } from '../services/search-runner';
 import { disposeDiscovery } from '../providers/models';
@@ -74,6 +75,7 @@ export function registerIpc(
   registerUsageIpc(registrar, store, implemented, () => providers.config('codex-cli').enabled);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
   const disposeDocuments = registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove), providers);
+  const disposeMoodle = registerMoodleIpc(registrar, store, secrets, implemented, disposeDocuments);
   const disposeLibrary = registerLibraryIpc(registrar, store, implemented, async (id, remove) => {await disposeDocuments.stopAi(id);return chat.deleteDocument(id, remove);}, disposeDocuments.resume);
   for (const channel of Object.keys(ipcContract) as IpcChannel[]) {
     if (!implemented.has(channel))
@@ -81,5 +83,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { registrar.dispose(); disposeLibrary(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { registrar.dispose(); await disposeMoodle(); disposeLibrary(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }
