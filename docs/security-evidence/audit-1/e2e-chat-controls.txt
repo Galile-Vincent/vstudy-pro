@@ -1,0 +1,1 @@
+PASS chat controls: IME, options, copy, regenerate usage, error/retry, dark mode

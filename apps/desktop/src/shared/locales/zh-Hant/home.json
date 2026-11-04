@@ -18,7 +18,7 @@
   "drop_error": "請用按鈕選擇本機檔案。",
   "importing": "正在匯入文件…",
   "converting": "正在準備文件…",
-  "imported": "已匯入 {{count}} 份文件。",
+  "imported": "文件已加入資料庫。",
   "usage": "本月用量",
   "month_tokens": "token · 預估 {{cost}}",
   "sparkline": "近 14 天每日 token 用量",
@@ -51,5 +51,9 @@
   "question_document_2": "這和我已經知道的事，有什麼關聯？",
   "question_selection_1": "可以用一個例子解釋這段話嗎？",
   "question_selection_2": "這段話背後，有什麼假設？",
-  "question_language": "用我設定的回覆語言，說明這個想法。"
+  "question_language": "用我設定的回覆語言，說明這個想法。",
+  "streak_days_one": "{{formatted}} 天",
+  "streak_days_other": "{{formatted}} 天",
+  "best_one": "最長連續：{{formatted}} 天",
+  "best_other": "最長連續：{{formatted}} 天"
 }

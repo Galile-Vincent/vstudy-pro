@@ -1,0 +1,9 @@
+--- a/apps/desktop/src/renderer/components/ui/context-menu.tsx
++++ b/apps/desktop/src/renderer/components/ui/context-menu.tsx
+@@ -1,5 +1,5 @@
+ import * as React from "react"
+-import { cn } from "cn"
++import { cn } from "@/lib/utils"
+ import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+ import { ContextMenu as ContextMenuPrimitive } from "radix-ui"
+ 

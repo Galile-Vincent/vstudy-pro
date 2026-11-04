@@ -1,0 +1,30 @@
+CONFIRMATION SET
+REMOVING /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-delete-e2e-7gwJ9R
+
+REMOVE FAILED [Error: ENOTEMPTY: directory not empty, rmdir '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-delete-e2e-7gwJ9R/Session Storage'] {
+  errno: -66,
+  code: 'ENOTEMPTY',
+  syscall: 'rmdir',
+  path: '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-delete-e2e-7gwJ9R/Session Storage'
+}
+
+Error occurred in handler for 'settings:deleteAllData': Error: VSTUDY_STATUS:{"code":"errors.generic","params":{}}
+    at /Users/vc/.t3/projects/vstudy-pro/apps/desktop/out/main/index.js:9425:17
+    at async Session.<anonymous> (node:electron/js2c/browser_init:2:117721)
+
+Debugger ending on ws://127.0.0.1:53839/8f2f047d-a7ec-4de7-ae56-c3feefcbabaf
+For help, see: https://nodejs.org/learn/getting-started/debugging
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+electronApplication.waitForEvent: Timeout 30000ms exceeded while waiting for event "close"
+    at /Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/.debug-delete.mjs:21:22 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.19.0
+undefined
+/Users/vc/.t3/projects/vstudy-pro/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: node e2e/.debug-delete.mjs

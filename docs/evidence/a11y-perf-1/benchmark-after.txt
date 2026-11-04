@@ -1,0 +1,22 @@
+Seed: 38.79s; 5000 docs, 400 folders, 100000 messages, 1000000 usage rows
+┌─────────┬────────────────────────────┬────────┬────────┬───────────────┬──────┐
+│ (index) │ query                      │ p50_ms │ max_ms │ budget_ms     │ pass │
+├─────────┼────────────────────────────┼────────┼────────┼───────────────┼──────┤
+│ 0       │ 'folder page'              │ 0.16   │ 0.28   │ 15            │ true │
+│ 1       │ 'filtered list'            │ 0.13   │ 0.15   │ 15            │ true │
+│ 2       │ 'FTS science'              │ 25.86  │ 26.7   │ 80            │ true │
+│ 3       │ 'Library search science'   │ 24.6   │ 33.62  │ 80            │ true │
+│ 4       │ 'FTS 資料'                 │ 3.08   │ 4.03   │ 80            │ true │
+│ 5       │ 'Library search 資料'      │ 6.56   │ 8.56   │ 80            │ true │
+│ 6       │ 'FTS 学習'                 │ 2.92   │ 3.55   │ 80            │ true │
+│ 7       │ 'Library search 学習'      │ 7.43   │ 9.1    │ 80            │ true │
+│ 8       │ 'dashboard'                │ 3      │ 4.26   │ 100           │ true │
+│ 9       │ 'document metadata'        │ 0.02   │ 0.02   │ 50            │ true │
+│ 10      │ 'move'                     │ 0.08   │ 0.28   │ 'unspecified' │ true │
+│ 11      │ 'usage summary rollup'     │ 0.41   │ 0.43   │ 'unspecified' │ true │
+│ 12      │ 'usage summary day'        │ 0.87   │ 1.16   │ 100           │ true │
+│ 13      │ 'usage summary month'      │ 2.91   │ 3.73   │ 100           │ true │
+│ 14      │ 'usage summary last30days' │ 13.97  │ 15.16  │ 100           │ true │
+│ 15      │ 'usage dashboard'          │ 17.37  │ 21.26  │ 100           │ true │
+│ 16      │ 'usage rate limits'        │ 0.01   │ 0.01   │ 100           │ true │
+└─────────┴────────────────────────────┴────────┴────────┴───────────────┴──────┘

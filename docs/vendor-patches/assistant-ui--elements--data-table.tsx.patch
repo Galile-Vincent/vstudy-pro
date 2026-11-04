@@ -1,0 +1,164 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/data-table.tsx
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/data-table.tsx
+@@ -1,4 +1,7 @@
+ "use client";
++import { formatters } from '../../../../shared/format';
++import { useTranslation } from "react-i18next";
++import { i18n, tr } from '../../../../shared/i18n';
+ 
+ import { useEffect, useState, type ComponentProps } from "react";
+ import { cn } from "@/lib/utils";
+@@ -171,10 +174,7 @@
+   const [unit, amount] = units.find(
+     ([, size]) => Math.abs(seconds) >= size,
+   ) ?? ["second", 1];
+-  return new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(
+-    Math.round(seconds / amount),
+-    unit,
+-  );
++  return formatters(locale).relative(Math.round(seconds / amount),unit,{ numeric: "auto" });
+ };
+ 
+ const relativeRefreshDelay = (
+@@ -210,7 +210,7 @@
+       ? `${text}${unit}`
+       : `${text} ${unit}`;
+ 
+-const EmptyValue = () => <span className="text-muted-foreground">none</span>;
++const EmptyValue = () => <span className="text-muted-foreground">{tr('common:none_label')}</span>;
+ 
+ function Value({
+   column,
+@@ -223,6 +223,7 @@
+   locale: string;
+   relativeTo: number | undefined;
+ }) {
++  useTranslation();
+   const value = row[column.key];
+   if (isEmpty(value)) return <EmptyValue />;
+ 
+@@ -231,10 +232,7 @@
+     const number = numericValue(value);
+     if (number === undefined) return <>{textValue(value)}</>;
+     const content = formatted(value, () =>
+-      new Intl.NumberFormat(
+-        locale,
+-        numberOptions(format.decimals, format.compact === true),
+-      ).format(number),
++      formatters(locale).number(number,numberOptions(format.decimals, format.compact === true)),
+     );
+     return <>{withUnit(content, format.unit)}</>;
+   }
+@@ -245,11 +243,11 @@
+     return (
+       <>
+         {formatted(value, () =>
+-          new Intl.NumberFormat(locale, {
++          formatters(locale).number(number,{
+             style: "currency",
+             currency: format.currency,
+             ...numberOptions(format.decimals, format.compact === true),
+-          }).format(number),
++          }),
+         )}
+       </>
+     );
+@@ -261,10 +259,10 @@
+     return (
+       <>
+         {formatted(value, () =>
+-          new Intl.NumberFormat(locale, {
++          formatters(locale).number(format.basis === "unit" ? number / 100 : number,{
+             style: "percent",
+             ...fractionDigits(format.decimals),
+-          }).format(format.basis === "unit" ? number / 100 : number),
++          }),
+         )}
+       </>
+     );
+@@ -276,10 +274,10 @@
+     const direction = number > 0 ? "↑" : number < 0 ? "↓" : "→";
+     const good = number === 0 || number > 0 === (format.upIsGood ?? true);
+     const content = formatted(value, () =>
+-      new Intl.NumberFormat(locale, {
++      formatters(locale).number(number,{
+         signDisplay: "never",
+         ...fractionDigits(format.decimals),
+-      }).format(number),
++      }),
+     );
+     return (
+       <span
+@@ -303,9 +301,7 @@
+     const content = formatted(value, () =>
+       style === "relative" && relativeTo !== undefined
+         ? relativeDate(date, locale, relativeTo)
+-        : new Intl.DateTimeFormat(
+-            locale,
+-            style === "datetime"
++        : formatters(locale).date(date,style === "datetime"
+               ? { dateStyle: "medium", timeStyle: "short" }
+               : {
+                   dateStyle: "medium",
+@@ -313,8 +309,7 @@
+                   (typeof value === "string" && DATE_ONLY.test(value))
+                     ? { timeZone: "UTC" }
+                     : {}),
+-                },
+-          ).format(date),
++                }),
+     );
+     return <span title={date.toISOString()}>{content}</span>;
+   }
+@@ -322,7 +317,7 @@
+   if (format.kind === "boolean") {
+     if (typeof value !== "boolean") return <>{textValue(value)}</>;
+     return (
+-      <>{value ? (format.trueLabel ?? "Yes") : (format.falseLabel ?? "No")}</>
++      <>{value ? (format.trueLabel ?? tr('common:yes')) : (format.falseLabel ?? tr('common:no'))}</>
+     );
+   }
+ 
+@@ -341,7 +336,7 @@
+         className="underline underline-offset-2"
+       >
+         {textValue(value)}
+-        <span className="sr-only"> (opens in a new tab)</span>
++        <span className="sr-only"> {tr('common:opens_in_a_new_tab')}</span>
+       </a>
+     ) : (
+       <a href={href} className="underline underline-offset-2">
+@@ -449,12 +444,13 @@
+   defaultSort,
+   sort,
+   onSortChange,
+-  locale = "en-US",
+-  emptyMessage = "No rows",
++  locale = i18n.language === "en-XA" ? "en" : i18n.language,
++  emptyMessage = tr('common:no_rows'),
+   relativeTo,
+   className,
+   ...props
+ }: DataTableProps) {
++  useTranslation();
+   const [internalSort, setInternalSort] = useState<DataTableSort | null>(
+     defaultSort ?? null,
+   );
+@@ -515,7 +511,7 @@
+     setAnnouncement(
+       next
+         ? `Sorted by ${column.label}, ${next.direction === "asc" ? "ascending" : "descending"}`
+-        : "Sorting cleared",
++        : tr('common:sorting_cleared'),
+     );
+     onSortChange?.(next);
+   };
+@@ -571,7 +567,7 @@
+                     <button
+                       type="button"
+                       onClick={() => changeSort(column)}
+-                      aria-label={`Sort by ${column.label}`}
++                      aria-label={tr('common:sort_column',{name:column.label})}
+                       className="focus-visible:ring-foreground/20 -mx-1 rounded px-1 outline-none focus-visible:ring-1"
+                     >
+                       {column.label}

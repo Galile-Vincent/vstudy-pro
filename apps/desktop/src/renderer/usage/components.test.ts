@@ -67,8 +67,19 @@ it('keeps the full usage description available when narrow panes show the token 
   const host=document.createElement('div');const root=createRoot(host);
   const record=usageRecordSchema.parse({kind:'chat',id:'00000000-0000-4000-8000-000000000001',conversationId:'00000000-0000-4000-8000-000000000002',documentId:'00000000-0000-4000-8000-000000000003',providerId:'openai-api',modelId:'model',createdAt:'2026-11-03T12:00:00Z',inputTokens:1200,outputTokens:340,costUsd:.012,costSource:'reported',aborted:true});
   await act(async()=>root.render(createElement(UsageButton,{onClick:()=>{},error:'',data:{settings:defaultSettings,month:{inputTokens:0,outputTokens:0,calls:0,unknownPrices:0,groups:[]},records:[record]}})));
-  expect(host.querySelector('.usage-full')?.textContent).toBe('1.5K tokens · $0.012 · includes aborted turns');
+  expect(host.querySelector('.usage-full')?.textContent).toBe('1.5K tokens · $0.012');
   expect(host.querySelector('.usage-compact')?.textContent).toBe('1.5K');
-  expect(host.querySelector('button')?.title).toBe('1.5K tokens · $0.012 · includes aborted turns · View usage and budget settings');
+  expect(host.querySelector('button')?.title).toBe('Conversation usage · 1.5K tokens · $0.012 · includes aborted turns · View usage and budget settings');
   await act(async()=>root.unmount());
+});
+it('does not show an old monthly unknown-price note for a currently priced model',async()=>{
+ const host=document.createElement('div');const root=createRoot(host);
+ await act(async()=>root.render(createElement(UsageMeter,{error:'',priceUnknown:false,data:{settings:defaultSettings,month:{inputTokens:10,outputTokens:20,calls:1,unknownPrices:1,groups:[]},records:[]}})));
+ expect(host.textContent).toBe('');
+ await act(async()=>root.unmount());
+});
+it('formats weekly and hourly rate windows without raw minute counts',async()=>{
+ const {rateWindow}=await import('./settings');
+ expect(rateWindow('10080 minute window',String)).toBe('the weekly window');
+ expect(rateWindow('300 minute window',String)).toBe('the 5 h window');
 });

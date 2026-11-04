@@ -11,6 +11,7 @@ import { createIpcRegistrar } from "./register";
 
 const mock = vi.hoisted(() => ({ userData: "", dialog: vi.fn(), resume: undefined as (() => void) | undefined }));
 vi.mock("electron", () => ({
+  ipcMain: {on:vi.fn(),removeListener:vi.fn()},
   app: { getPath: () => mock.userData, getAppPath: () => process.cwd(), isPackaged: false },
   dialog: { showOpenDialog: mock.dialog },
 }));
@@ -18,6 +19,7 @@ vi.mock("../../../resources/converter", async (original) => ({
   ...await original<typeof import("../../../resources/converter")>(),
   createConverter: () => ({ ensureReady: async () => "python", dispose: () => undefined, convert: async (_source: string, output: string, progress?: (message: string) => void) => { await new Promise<void>(resolve => { mock.resume = resolve; }); progress?.("Installing markitdown…"); await writeFile(output, "converted"); } }),
 }));
+import { ipcMain } from "electron";
 import { registerDocumentsIpc } from "./documents";
 
 afterEach(() => { vi.clearAllMocks(); });
@@ -33,30 +35,48 @@ it("registers document routes, validates drop paths, owns the native dialog and 
   const abort = vi.fn();
   registerDocumentsIpc(registrar, store, implemented, async (id, remove) => { abort(id); await remove(); });
   const send = vi.fn();
-  const sender = { isDestroyed: () => false, send };
+  const mainFrame = {};
+  const sender = { mainFrame, isDestroyed: () => false, send };
   const invoke = async (channel: string, payload: unknown) => {
     const handler = handlers.get(channel);
     if (!handler) throw new Error("Missing handler");
-    return handler({ sender } as unknown as IpcMainInvokeEvent, payload);
+    return handler({ sender, senderFrame:mainFrame } as unknown as IpcMainInvokeEvent, payload);
+  };
+  const token = (path:string) => {
+    const listener=vi.mocked(ipcMain.on).mock.calls.find(c=>c[0]==='vstudy:preload-drop')![1];
+    const event={sender,senderFrame:mainFrame,returnValue:[]};
+    listener(event as unknown as Electron.IpcMainEvent,[path]);
+    return (event.returnValue as string[])[0]!;
   };
   try {
     expect(implemented).toContain("documents:importSample");
+    const before = store.documents.list().length;
+    expect(await invoke("welcome:sampleDocument", { language: "ja" })).toContain("小さな疑問");
+    expect(store.documents.list().length).toBe(before);
+    await expect(invoke("welcome:sampleDocument", { language: "../../escape" })).rejects.toThrow();
+    await expect(invoke("welcome:sampleDocument", { language: "en", path: "/tmp/secret" })).rejects.toThrow();
     mock.dialog.mockResolvedValueOnce({ canceled: true, filePaths: [] });
     expect(await invoke("documents:import", {})).toBeNull();
     mock.dialog.mockResolvedValueOnce({ canceled: false, filePaths: [resolve("test-fixtures/converter/sample.md")] });
     const document = documentSchema.parse(await invoke("documents:import", {}));
     expect(mock.dialog).toHaveBeenLastCalledWith(expect.objectContaining({
+      properties: ["openFile","multiSelections"],
       filters: [expect.objectContaining({ extensions: expect.arrayContaining(["docx", "pdf", "md", "csv"]) })],
     }));
     await vi.waitFor(() => { expect(store.documents.get(document.id)?.status).toBe("ready"); });
     expect(await invoke("documents:read", { documentId: document.id })).toContain("VStudy fixture");
     expect(await invoke("documents:get", { documentId: document.id })).toMatchObject({ id: document.id });
     expect(await invoke("documents:list", {})).toHaveLength(1);
-    expect(await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.md")] })).toHaveLength(1);
-    const mixed = await invoke("documents:importPaths", { paths: ["missing.unsupported", resolve("test-fixtures/converter/sample.md")] }) as { ok: boolean; error?: string }[];
+    store.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(new Date(Date.now()-31_000).toISOString(),document.id);
+    expect(await invoke("documents:get", {documentId:document.id})).toBeNull();
+    mock.dialog.mockResolvedValueOnce({canceled:false,filePaths:[resolve("test-fixtures/converter/sample.md")]});
+    expect(await invoke("documents:import", {})).toMatchObject({id:document.id,status:"ready"});
+    expect(await invoke("documents:read", {documentId:document.id})).toContain("VStudy fixture");
+    expect(await invoke("documents:importPaths", { paths: [token(resolve("test-fixtures/converter/sample.md"))] })).toHaveLength(1);
+    const mixed = await invoke("documents:importPaths", { paths: [token("missing.unsupported"), token(resolve("test-fixtures/converter/sample.md"))] }) as { ok: boolean; error?: string }[];
     expect(mixed.map(r => r.ok)).toEqual([false, true]);
-    expect(mixed[0]?.error).toBe("Unsupported document type");
-    const converted = await invoke("documents:importPaths", { paths: [resolve("test-fixtures/converter/sample.docx")] }) as { document: { id: string } }[];
+    expect(mixed[0]?.error).toBe('VSTUDY_STATUS:{"code":"errors.unsupported_type","params":{}}');
+    const converted = await invoke("documents:importPaths", { paths: [token(resolve("test-fixtures/converter/sample.docx"))] }) as { document: { id: string } }[];
     await vi.waitFor(() => expect(mock.resume).toBeTypeOf("function"));
     mock.resume!();
     await vi.waitFor(() => expect(send).toHaveBeenCalledWith("documents:progress", { documentId: converted[0]!.document.id, message: "Installing markitdown…", code:"library.conversion_preparing", params:{} }));
@@ -66,6 +86,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     await expect(invoke("documents:importPaths", { paths: ["file.md"], extra: true })).rejects.toThrow();
     await expect(invoke("documents:retry", { documentId: document.id })).rejects.toThrow("VSTUDY_STATUS:");
     const sample = documentSchema.parse(await invoke("documents:importSample", { language: "ja" }));
+    expect(sample.title).toBe("Reading sample");
     await vi.waitFor(() => expect(store.documents.get(sample.id)?.status).toBe("ready"));
     expect(await invoke("documents:read", { documentId: sample.id })).toContain("小さな疑問");
     await expect(invoke("documents:importSample", { language: "../../escape" })).rejects.toThrow();

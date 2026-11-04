@@ -1,4 +1,6 @@
 {
   "chat_title": "對話 {{number}} · {{model}}",
-  "section_label": "使用章節「{{title}}」"
+  "section_label": "使用章節「{{title}}」",
+  "completed_task": "已完成的任務",
+  "incomplete_task": "未完成的任務"
 }

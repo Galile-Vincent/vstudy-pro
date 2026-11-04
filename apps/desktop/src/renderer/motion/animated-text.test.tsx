@@ -31,3 +31,13 @@ it('stops rotating after three cycles and pauses on hover', async () => {
   expect(host.querySelector('.motion-current')?.textContent).toBe('Two');
   await act(async () => root.unmount()); host.remove();
 });
+it('keeps the complete static phrase when matchMedia is unavailable', async () => {
+  vi.useFakeTimers();
+  vi.stubGlobal('matchMedia', undefined);
+  const host = document.createElement('div'); const root = createRoot(host);
+  try {
+    await act(async () => root.render(<AnimatedText texts={['One','Two']}/>));
+    expect(host.querySelector('.motion-current')?.textContent).toBe('One');
+    expect(vi.getTimerCount()).toBe(0);
+  } finally { await act(async () => root.unmount()); vi.unstubAllGlobals(); }
+});

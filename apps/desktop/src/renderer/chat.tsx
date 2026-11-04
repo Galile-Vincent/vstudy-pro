@@ -1,8 +1,10 @@
+import { ChatAnnouncement, CopyAnswerButton } from './chat-accessibility';
+import { MarkdownText } from './document-markdown';
 import { BlankChat } from './motion/blank-chat';
 import { useTranslation } from "react-i18next";
 import { tr } from '../shared/i18n';
-import { ModelPicker } from "./model-picker";
-export { ModelPicker } from "./model-picker";
+import { ModelControls } from "./model-controls";
+export { ModelControls } from "./model-controls";
 import { MessageUsage } from "./usage/chip";
 import { UsageButton, UsageMeter, useUsage, useBudgetGuard } from "./usage/meter";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -17,7 +19,8 @@ import {
 import type { Conversation, Message, Selection } from "../shared";
 import { Thread } from "./components/assistant-ui/elements/thread.aui";
 import { Button } from "./components/ui/button";
-import { plainSelection } from "./selection-preview";
+import { SelectionPreview } from "./selection-preview-view";
+export { SelectionPreview } from "./selection-preview-view";
 import { desktop } from "./bridge";
 import { documentCitationSchema } from "../shared";
 import { Suggestions } from "./components/assistant-ui/elements/suggestions";
@@ -29,6 +32,9 @@ import { type Providers } from "./providers";
 
 export function Chat({
   conversation,
+  onProposals = () => {},
+  promptRequest,
+  autoFocus = true,
   draft,
   onDraft,
   history,
@@ -44,6 +50,9 @@ export function Chat({
   documentTitle = tr('common:document'),
 }: {
   conversation: Conversation;
+  onProposals?: (actions: import("../shared/moodle").MoodleAgentAction[]) => void;
+  promptRequest?: {text:string; id:number};
+  autoFocus?: boolean;
   draft: string;
   onDraft: (value: string) => void;
   history: Message[];
@@ -66,8 +75,8 @@ export function Chat({
   const budget = useBudgetGuard(usage.data, conversation.id, draft);
   const available = providers.find(p => p.config.id === conversation.providerId);
   const unavailable = !available?.config.enabled || !available.availability.available;
-  const current = useRef({ conversation, selection, onClearSelection });
-  current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, onClearSelection };
+  const current = useRef({ conversation, selection, onClearSelection, onProposals });
+  current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, onClearSelection, onProposals };
   const connection = useMemo(
     () =>
       createChatAdapter(
@@ -76,17 +85,18 @@ export function Chat({
           const { conversation: c, selection: s } = current.current;
           return {
             conversationId: c.id,
-            documentId: c.documentId,
+            ...(c.scope === "course" ? {scope:"course" as const,courseId:c.courseId} : {documentId:c.documentId}),
             providerId: c.providerId,
             modelId: c.modelId,
             options: c.options,
-            ...(s ? { selection: s } : {}),
+            ...(c.scope !== "course" && s ? { selection: s } : {}),
           };
         },
         id => {
           if (current.current.selection) selections.current.set(id, current.current.selection);
           current.current.onClearSelection();
         },
+        actions => current.current.onProposals(actions),
       ),
     [],
   );
@@ -105,22 +115,24 @@ export function Chat({
       metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage, modelId: m.parts[0]?.modelId, options: m.parts[0]?.options, selection: m.parts[0]?.selection, turnId: m.parts[0]?.turnId, citations: m.parts[0]?.citations } },
     })),
   });
+  useEffect(() => { if (promptRequest) runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}]}); }, [promptRequest?.id]);
   useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
   const statuses = new Map(history.flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
-    selection, onClearSelection, usage, budget, unavailable, onUsage,
-    picker: <ModelPicker providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
+    selection, onClearSelection, usage, budget, unavailable, onUsage, isCourse: conversation.scope === "course",
+    picker: <ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
     {unavailable && <p role="alert">{tr('common:this_conversation_s_provider_is_unavailable_add_an_api_key_or_enable_it_in_settings')}</p>}
-    <Thread components={documentComponents} />
-    <p className="composer-note">{tr('common:grounded_in_your_document_check_important_details')}</p>
+    <Thread components={documentComponents} autoFocus={autoFocus} />
+    <p className="composer-note">{conversation.scope === 'course' ? tr('moodle:agent_scope') : tr('common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }
 
 type DocumentChat = {
+  isCourse: boolean;
   selection: Selection | null; onClearSelection: () => void;
   usage: ReturnType<typeof useUsage>; budget: ReturnType<typeof useBudgetGuard>;
   unavailable: boolean; onUsage: () => void; picker: React.ReactNode;
@@ -151,7 +163,7 @@ function MessageSelection() {
 function DocumentSuggestions() {
   useTranslation();
   const aui = useAui();
-  return <Suggestions suggestions={[tr('common:summarize_this_document'),tr('common:explain_the_key_ideas'),tr('common:compare_the_main_arguments')]} selectedSuggestion={null} cycle={0} onSuggestion={prompt => aui.composer().setText(prompt)} variant="list" />;
+  return <Suggestions suggestions={[tr('common:summarize_this_document'),tr('common:explain_the_key_ideas'),tr('common:compare_the_main_arguments')]} selectedSuggestion={null} cycle={0} onSuggestion={prompt => aui.composer().setText(prompt)} variant="pills" />;
 }
 function DocumentMessageFooter() {
   useTranslation();
@@ -169,23 +181,21 @@ function DocumentMessageFooter() {
 }
 function useComposerBindings() {
   useTranslation(); const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
-function DocumentWelcome() { const { selection, usage } = useDocumentChat(); return <BlankChat documentOpen hasSelection={!!selection} replyLanguage={usage.data?.settings.replyLanguage ?? 'auto'}/>; }
-const documentComponents = { Welcome:DocumentWelcome, WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
-
-export function SelectionPreview({ selection }: { selection: Selection }) {
-  useTranslation();
-  const plain = plainSelection(selection.text.replace(/^#{1,6} .*\n?/, ""));
-  return <details className="selection-preview"><summary><strong>{selection.headingPath.join(" › ") || tr('common:selected_passage')}</strong><span>{plain.slice(0, 160)}{plain.length > 160 ? "…" : ""}</span></summary><div>{plain}</div></details>;
-}
+function DocumentWelcome() { const { selection, usage } = useDocumentChat(); return <div className="document-welcome"><BlankChat documentOpen hasSelection={!!selection} replyLanguage={usage.data?.settings.replyLanguage ?? 'auto'}/><DocumentSuggestions/></div>; }
+const documentComponents = { Announcement: ChatAnnouncement, CopyAction: CopyAnswerButton, Text: MarkdownText, Welcome:DocumentWelcome, WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 
 export function ChatComposerInput() {
   useTranslation();
+  const context=useContext(DocumentChatContext);
+  const selection=context?.selection;
+  const input=useRef<HTMLTextAreaElement>(null);
+  useEffect(()=>{if(selection) input.current?.focus();},[selection]);
   const composing = useRef(false);
   const expiry = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const clear = () => { composing.current = false; clearTimeout(expiry.current); };
   const refresh = () => { composing.current = true; clearTimeout(expiry.current); expiry.current = setTimeout(clear,1500); };
   useEffect(() => () => clearTimeout(expiry.current), []);
-  return <ComposerPrimitive.Input className="aui-composer-input" aria-label={tr('common:ask_about_your_document')} placeholder={tr('common:ask_document_placeholder')} rows={2}
+  return <ComposerPrimitive.Input ref={input} className="aui-composer-input" aria-label={context?.isCourse ? tr('moodle:ask_course') : tr('common:ask_about_your_document')} placeholder={context?.isCourse ? tr('moodle:ask_course') : tr('common:ask_document_placeholder')} rows={2}
     onCompositionStart={refresh}
     onCompositionUpdate={refresh}
     onBlur={clear}

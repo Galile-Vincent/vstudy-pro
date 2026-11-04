@@ -1,0 +1,9 @@
+2026-11-04 06:36:03.157 Df VStudy Pro[4639:14c0b29] [com.apple.securityd:keychain] Enabling System Keychain Always due to platform
+2026-11-04 06:36:03.162 Db securityd[397:14b646a] [com.apple.securityd:SecServer v1] request entry decodeDb (pid:4639 session:100020)
+2026-11-04 06:36:03.173 Db securityd[397:14c05df] [com.apple.securityd:SecServer v1] request entry authenticateDb (pid:4639 session:100020)
+2026-11-04 06:36:03.173 Db securityd[397:14ad5ff] [com.apple.securityd:SecServer v1] request entry decodeKey (pid:4639 session:100020)
+2026-11-04 06:36:03.174 Db securityd[397:14b646a] [com.apple.securityd:SecServer v1] request entry getAcl (pid:4639 session:100020)
+2026-11-04 06:36:03.174 Db securityd[397:14c05df] [com.apple.securityd:SecServer v1] request entry releaseKey (pid:4639 session:100020)
+2026-11-04 06:36:03.174 Db securityd[397:14ad5ff] [com.apple.securityd:SecServer v1] request entry decodeKey (pid:4639 session:100020)
+2026-11-04 06:36:03.174 Db securityd[397:14b646a] [com.apple.securityd:SecServer v1] request entry decrypt (pid:4639 session:100020)
+2026-11-04 06:36:03.175 Df securityd[397:14b646a] [com.apple.securityd:kcacl] Keychain query for process 4639 (UID 501)

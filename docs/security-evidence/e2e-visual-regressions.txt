@@ -1,0 +1,1 @@
+{"result":"PASS","screenshots":["/tmp/vstudy-visual-section.png","/tmp/vstudy-visual-markdown.png"],"consoleErrors":[]}

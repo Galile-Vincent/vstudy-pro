@@ -1,4 +1,6 @@
 {
   "chat_title": "Chat {{number}} · {{model}}",
-  "section_label": "Use section {{title}}"
+  "section_label": "Use section {{title}}",
+  "completed_task": "Completed task",
+  "incomplete_task": "Incomplete task"
 }

@@ -1,0 +1,12 @@
+{
+  frameP50: 16.699999999999818,
+  frameP95: 18.100000000000364,
+  frameMax: 18.600000000000364,
+  documents: 5000,
+  pages: 100,
+  maxRendered: 14,
+  scrollDurationMs: 6344.1474579999995,
+  twoFrameP50: 29.799999952316284,
+  twoFrameP95: 31.399999976158142,
+  twoFrameMax: 31.800000071525574
+}

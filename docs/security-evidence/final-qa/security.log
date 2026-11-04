@@ -1,0 +1,36 @@
+
+> vstudy-pro@ security:check /Users/vc/.t3/projects/vstudy-pro
+> node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test
+
+{"vulnerabilities":{"info":0,"low":1,"moderate":8,"high":11,"critical":1},"unreviewed":[]}
+
+> vstudy-pro@ lint /Users/vc/.t3/projects/vstudy-pro
+> pnpm --filter @vstudy/desktop lint
+
+
+> @vstudy/desktop@0.1.0 lint /Users/vc/.t3/projects/vstudy-pro/apps/desktop
+> eslint .
+
+
+/Users/vc/.t3/projects/vstudy-pro/apps/desktop/src/main/ipc/index.ts
+  43:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+✖ 1 problem (0 errors, 1 warning)
+
+
+> vstudy-pro@ test /Users/vc/.t3/projects/vstudy-pro
+> pnpm --filter @vstudy/desktop test
+
+
+> @vstudy/desktop@0.1.0 test /Users/vc/.t3/projects/vstudy-pro/apps/desktop
+> vitest run
+
+
+ RUN  v4.1.12 /Users/vc/.t3/projects/vstudy-pro/apps/desktop
+
+
+ Test Files  64 passed | 1 skipped (65)
+      Tests  344 passed | 8 skipped (352)
+   Start at  06:39:25
+   Duration  16.55s (transform 2.58s, setup 0ms, import 8.80s, tests 26.73s, environment 5.92s)
+

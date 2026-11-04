@@ -1,0 +1,1 @@
+{"rawRejected":true,"forgedRejected":true,"modelRejected":true,"bridgeReached":false,"ownBridge":false}

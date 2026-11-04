@@ -1,0 +1,39 @@
+
+> vstudy-pro@ security:check /Users/vc/.t3/worktrees/vstudy-pro/t3-45add424
+> node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test
+
+{"vulnerabilities":{"info":0,"low":1,"moderate":8,"high":11,"critical":1},"unreviewed":[]}
+
+> vstudy-pro@ lint /Users/vc/.t3/worktrees/vstudy-pro/t3-45add424
+> pnpm --filter @vstudy/desktop lint
+
+
+> @vstudy/desktop@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-45add424/apps/desktop
+> eslint .
+
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-45add424/apps/desktop/src/main/ipc/index.ts
+  44:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-45add424/apps/desktop/src/main/moodle/sso-protocol.ts
+  8:59  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+✖ 2 problems (0 errors, 2 warnings)
+
+
+> vstudy-pro@ test /Users/vc/.t3/worktrees/vstudy-pro/t3-45add424
+> pnpm --filter @vstudy/desktop test
+
+
+> @vstudy/desktop@0.1.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-45add424/apps/desktop
+> vitest run
+
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-45add424/apps/desktop
+
+
+ Test Files  84 passed | 4 skipped (88)
+      Tests  547 passed | 13 skipped (560)
+   Start at  17:57:21
+   Duration  15.10s (transform 3.42s, setup 0ms, import 12.59s, tests 28.94s, environment 6.73s)
+

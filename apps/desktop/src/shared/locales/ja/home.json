@@ -18,7 +18,7 @@
   "drop_error": "ボタンからローカルファイルを選んでください。",
   "importing": "インポート中…",
   "converting": "ドキュメントを準備中…",
-  "imported": "{{count}} 件をインポートしました。",
+  "imported": "文書をライブラリに追加しました。",
   "usage": "今月の使用量",
   "month_tokens": "トークン · 推定 {{cost}}",
   "sparkline": "過去14日間のトークン使用量",
@@ -51,5 +51,9 @@
   "question_document_2": "すでに知っていることと、どうつながりますか？",
   "question_selection_1": "この箇所を、例を使って説明できますか？",
   "question_selection_2": "この箇所には、どんな前提がありますか？",
-  "question_language": "設定した返信言語で、この考えを説明してください。"
+  "question_language": "設定した返信言語で、この考えを説明してください。",
+  "streak_days_one": "{{formatted}} 日",
+  "streak_days_other": "{{formatted}} 日",
+  "best_one": "最長：{{formatted}} 日",
+  "best_other": "最長：{{formatted}} 日"
 }

@@ -14,7 +14,7 @@ const stores: Store[] = [], dirs: string[] = [];
 afterEach(() => { stores.splice(0).forEach(s => s.close()); dirs.splice(0).forEach(d => rmSync(d, { recursive: true, force: true })); });
 function fixture() { const s = openStore(':memory:'); stores.push(s); const root = mkdtempSync(join(tmpdir(), 'library-test-')); dirs.push(root); const lib = new LibraryService(s, root); const doc = documentSchema.parse({ id: randomUUID(), title: '資料通信網路', sourceName: '学習.md', sourceHash: randomUUID().replaceAll('-', '').repeat(2), sourcePath: join(root, 'source.md'), markdownPath: join(root, 'content.md'), mime: 'text/markdown', status: 'ready', createdAt: new Date().toISOString() }); writeFileSync(doc.markdownPath, '資料の通信と学習。網路資料 science learning'); s.documents.insert(doc); lib.search.update(doc.id, '資料の通信と学習。網路資料 science learning'); return { s, lib, doc, root }; }
 it('finds literal zh-Hant, ja, en and safely handles FTS syntax', () => { const { lib } = fixture(); for (const q of ['資料', '通信', '学習', '網路', 'science', 'learning'])
-    expect(lib.search.search(q).items).toHaveLength(1); for (const q of ['"', 'OR', '-', 'a:b', '" OR *'])
+    expect(lib.search.search(q).items).toHaveLength(1); for (const q of ['OR', 'a:b', '" OR *'])
     expect(() => lib.search.search(q)).not.toThrow(); expect(lib.search.search('science').items[0]?.snippet).toContain('[mark]science[/mark]'); });
 it('compares bigram unicode61 and trigram on actual multilingual text', () => { const { s, lib } = fixture(); s.db.exec("CREATE VIRTUAL TABLE bigrams USING fts5(content,tokenize='unicode61')"); const text = '資料の通信と学習 網路資料 science learning'; const bigrams = text.replace(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]+/gu, run => [...run].slice(0,-1).map((c,i)=>c+[...run][i+1]).join(' ')); s.db.prepare('INSERT INTO bigrams VALUES(?)').run(bigrams); for (const q of ['資料', '通信', '学習', '網路']) {
     expect(s.db.prepare('SELECT rowid FROM bigrams WHERE bigrams MATCH ?').all(q)).toHaveLength(1);
@@ -56,3 +56,19 @@ it('orders Pinned by pinnedAt and Recent by lastOpenedAt with stable cursors',()
 it('hydrates a metadata page and its tags in two queries regardless of page size',()=>{const {s,lib,doc}=fixture();for(let i=0;i<99;i++)s.documents.insert({...doc,id:documentSchema.parse({...doc,id:randomUUID()}).id,sourceHash:randomUUID().replaceAll('-','').repeat(2)});const spy=vi.spyOn(s.db,'prepare');try{const page=lib.list(libraryQuerySchema.parse({limit:100}));expect(page.items).toHaveLength(100);expect(spy).toHaveBeenCalledTimes(2);}finally{spy.mockRestore();}});
 
 it('returns highlighted snippets on every filtered keyset page',()=>{const {s,lib,doc}=fixture();for(let i=0;i<3;i++){const next={...doc,id:documentSchema.parse({...doc,id:randomUUID()}).id,sourceHash:randomUUID().replaceAll('-','').repeat(2)};s.documents.insert(next);lib.search.update(next.id,'資料 通信 science learning');}let cursor:unknown;let count=0;do{const page=lib.list(libraryQuerySchema.parse({text:'science',limit:1,...(cursor?{cursor}:{})}));expect(page.items[0]?.snippet).toContain('[mark]science[/mark]');count+=page.items.length;cursor=page.nextCursor;}while(cursor);expect(count).toBe(4);});
+
+it('counts descendant documents and excludes deleted documents throughout the tree', () => {
+ const {lib,doc}=fixture(); const parent=lib.createFolder('Parent',null),child=lib.createFolder('Child',parent.id),leaf=lib.createFolder('Leaf',child.id);
+ lib.move([doc.id],leaf.id);
+ for(const id of [parent.id,child.id,leaf.id]) expect(lib.folders().find(f=>f.id===id)?.count).toBe(1);
+ lib.softDelete(doc.id); expect(lib.folders().find(f=>f.id===parent.id)?.count).toBe(0);
+ lib.restore(doc.id); lib.move([doc.id],null); expect(lib.folders().find(f=>f.id===parent.id)?.count).toBe(0);
+});
+
+it.each(['asc','desc'])('paginates unknown and known sizes without dropping rows (%s)',direction=>{
+ const {s,lib,doc}=fixture();
+ for(let i=0;i<3;i++) {const d=s.documents.insert({...doc,id:randomUUID() as never,sourceHash:randomUUID().replaceAll('-','').repeat(2)});if(i===2)s.db.prepare('UPDATE documents SET sizeBytes=10 WHERE id=?').run(d.id);}
+ const ids:string[]=[];let cursor:unknown;
+ do {const page=lib.list(libraryQuerySchema.parse({sort:'size',direction,limit:1,...(cursor?{cursor}:{})}));ids.push(...page.items.map(i=>i.document.id));cursor=page.nextCursor;}while(cursor);
+ expect(ids).toHaveLength(4);expect(new Set(ids).size).toBe(4);
+});

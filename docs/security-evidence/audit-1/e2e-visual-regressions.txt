@@ -1,0 +1,13 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('option').filter({ hasText: 'Haiku 5.5' }).first()[22m
+
+    at /Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/visual-regressions.mjs:55:72 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.19.0

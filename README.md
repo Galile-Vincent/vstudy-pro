@@ -1,16 +1,12 @@
 # VStudy Pro
 
-A macOS Electron app for reading converted documents and chatting about selected passages.
+A macOS Electron app for reading documents and discussing passages with AI. The interface supports English, Traditional Chinese and Japanese.
 
-## Requirements
+Import PDF, DOCX, XLSX, PPTX, HTML, CSV, Markdown or plain text (up to 50 MB). Organise documents with folders, pins, tags and saved filters; search the library, select passages, follow answer citations, and track reported or estimated token usage and cost. Read-only structured tables are optional. Documents and originals stay in a local library; there is no device sync.
 
-- Node >=24.11.1 and pnpm 10.28.2 (see `packageManager`).
-- `uv` or Python 3.10+ (`python3`) for real document conversion. The first conversion creates a private virtual environment and installs the pinned MarkItDown requirements; internet access is needed once.
-- Optional `claude` / `codex` / `agy` (Antigravity) CLIs, installed and authenticated separately, for CLI providers. API providers can be configured in Settings. Antigravity uses ACP over stdio, probes the CLI’s existing login, and lists live session models (labelled static defaults if unavailable). Run `agy` once to sign in.
+## Install, run and verify
 
-## Run and check
-
-From the repository root:
+Requires Node >=24.11.1 and pnpm 10.28.2. Automatic E2E converter setup also requires uv; an existing locked environment can be supplied instead. Run from the repository root:
 
 ```sh
 pnpm install
@@ -19,37 +15,53 @@ pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
+pnpm e2e
+pnpm security:check
 pnpm smoke
-pnpm package
+CSC_IDENTITY_AUTO_DISCOVERY=false pnpm package
 ```
 
-`pnpm package` builds macOS app/dmg artifacts; signing needs release configuration. Renderer tests alone: `pnpm --filter @vstudy/desktop exec vitest run src/renderer`.
+`pnpm e2e` builds once and runs every `apps/desktop/e2e/*.mjs` serially against that output, with deadlines and a pass/fail table. Logs default to `/tmp/vstudy-final/e2e`; set `VSTUDY_E2E_EVIDENCE` to preserve separate runs. The runner also prepares an unsigned package and a hash-locked test converter environment using uv (which may download Python/packages). Set `VSTUDY_CONVERTER_VENV` to reuse an existing prepared environment. Standalone packaged smoke requires that variable. Live Codex checks require explicit opt-in and authentication; skipped live checks do not prove live operation.
 
-## End-to-end checks
+## Providers and keys
 
-Build normally first, then from `apps/desktop`:
+Claude Code (`claude`), Codex (`codex`) and Antigravity (`agy`) default OFF. Settings > Providers and onboarding offer individual opt-ins to use your existing CLI login. Before opt-in, resolution checks installed files without launching the CLI. Settings displays the resolved executable and offers a native Change chooser; main validates its path and permissions. A changed executable requires confirmation before reuse. Sign in outside VStudy (`claude auth login`, `codex login`, or `agy`).
+
+Anthropic, OpenAI and OpenAI-compatible API endpoints are supported. Saved keys are encrypted through asynchronous macOS Keychain access only when explicitly saved or unlocked; window creation never waits for decryption. Access has a ten-second timeout. Retry after granting access, or choose **Use without saving keys** to retain a key only for the current process. Saved keys need explicit unlocking after restart before model discovery can use them.
+
+Codex requires authenticated CLI **0.166.0**, macOS and `/usr/bin/sandbox-exec`. Its isolated chat transport disables native tools and denies child-process creation; a cached canary verification fails closed on unsupported versions or failed verification. It is not a filesystem or endpoint-only network sandbox for a compromised CLI. See [the transport verification](docs/codex-tool-free.md).
+
+## Privacy and network
+
+VStudy itself sends no analytics. Enabled API providers receive questions, conversation history, document metadata and selected text; without a selection, an outline and opening excerpt are included. Prior selections can remain in conversation context. CLI providers use their own login and may contact their own discovery, verification, quota, chat or telemetry services. Claude receives telemetry/nonessential-traffic opt-outs. External browser and mail links require confirmation; mail confirmation shows address, subject and body length.
+
+Settings > Privacy shows the bounded, session-only app-initiated network activity inventory. It records requests and CLI launches, not every encrypted request inside a CLI or Chromium. It is not a packet capture; byte counts are currently unknown. Delete all data requires typing `DELETE` and a native confirmation, then removes the application data namespace and quits. It keeps original files outside the library, CLI logins and shared Python download caches; it is not secure erasure of backups or SSD blocks.
+
+## Conversion
+
+The first conversion asks permission before downloading hash-locked Python packages from `pypi.org` and `files.pythonhosted.org`; uv may download Python from GitHub. Install uv or Python 3.10+ separately. Settings > Privacy provides Retry and persistent Offline mode. Offline mode supports Markdown and text without installation. The converter starts on demand and stops after idle time (default five minutes, configurable from one to sixty). No idle startup prewarm is used. Cold Python startup and imports can take several seconds; warm timing targets do not apply to that first import.
+
+PDF conversion first uses the pinned pdfplumber-based `pdf_md` parser, with MarkItDown fallback. Conversion workers deny network access on macOS. Progressive first-page delivery is provisional until conversion finishes. See [performance targets and measurements](apps/desktop/resources/converter/PERFORMANCE.md).
+
+There is **no OCR**: scanned/image-only PDFs cannot be read. PDF tables require ruled grids; images may be omitted, and columns, equations and complex layouts can lose fidelity. Single-file Markdown/HTML imports do not copy neighboring images. UTF-16 selection offsets map to stored Markdown; generated math may require selecting its containing section. Arrow and Shift+Arrow within the focused reader move/extend a text selection; Cmd/Ctrl+Shift+K asks about it.
+
+## Packaging and known limits
+
+macOS only. Local packages are ad-hoc signed, unsigned by a Developer ID, and not notarized. macOS may show Gatekeeper warnings and Keychain permission prompts, including after rebuilds. When saving or unlocking a key, macOS may ask to let the app access its login-Keychain encryption key and may request your Keychain password. Granting access permits saved-key use; denying access leaves Retry and session-only use available. A rebuilt ad-hoc app may ask again. The cookie-encryption fuse is OFF because the renderer uses no cookies: Chromium must not read its Safe Storage item before showing the window. API-key safeStorage encryption remains enabled and lazy; expect its prompt only when saving or unlocking a key. Production and packaged smoke do not use `--use-mock-keychain`.
+
+For a release, configure Developer ID signing and notarization through electron-builder credentials (never commit them). Developer ID signing, notarization, stapling, Gatekeeper acceptance and manual VoiceOver review remain release verification tasks. Performance budgets and full E2E acceptance must be judged from current evidence, not historical pass counts.
+
+[Documentation index](docs/README.md) · [Security model and historical evidence](docs/SECURITY.md) · [Localization verification](docs/i18n-verification.md)
+
+To make a distribution build, install a **Developer ID Application** certificate in your build keychain. Set `CSC_NAME` to that certificate's identity; alternatively set `CSC_LINK` to a private certificate file and `CSC_KEY_PASSWORD` in the environment. For notarization, set `APPLE_API_KEY` (path to your private `.p8` file), `APPLE_API_KEY_ID`, and `APPLE_API_ISSUER`; alternatively set `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`. Keep certificate files, passwords, and API keys outside this repository. Run `pnpm package:signed`; it rejects missing signing or notarization configuration before building. Electron-builder signs with hardened runtime and requests notarization. After packaging, verify the actual artifact:
 
 ```sh
-VSTUDY_FAKE_PROVIDER=1 node e2e/selection-chat.mjs
-VSTUDY_FAKE_PROVIDER=1 node e2e/conversion.mjs
+codesign --verify --deep --strict 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+xcrun stapler staple 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+xcrun stapler validate 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+spctl --assess --type execute --verbose 'apps/desktop/release/mac-arm64/VStudy Pro.app'
 ```
 
-These launch real, visible Electron windows with temporary user data. The selection check replaces only the native file chooser; import, persistence, rendering, IPC and fake-provider chat run in the app. The conversion check generates DOCX, XLSX and PDF fixtures and runs the actual converter (including first-run bootstrap). It imports DOCX by file drop, checks its embedded image, and verifies both data images and relative library images through the custom asset protocol. Both clean up on completion. Set `VSTUDY_SCREENSHOT=/absolute/path.png` to choose the selection screenshot destination; related UI states use the same filename prefix.
+Verify first-open Gatekeeper behavior on a quarantined copy on a clean Mac before distributing. An ad-hoc build passing smoke checks does not prove Developer ID trust or notarization.
 
-For an isolated renderer preview, `VITE_MOCK_DESKTOP=1 pnpm build` explicitly bundles the mock bridge, then `VSTUDY_RENDERER_MOCK=1 node e2e/selection-chat.mjs` runs the mock variant. Rebuild without the flag before testing the real app.
-
-Selection offsets are UTF-16 positions in the stored Markdown. Generated math does not map character for character; use its containing section. Selected passages also appear in user-message history. Main owns prompt assembly and treats document content as untrusted.
-
-## Conversion limits
-
-PDFs use the pinned pdfplumber-based `pdf_md` converter first, with MarkItDown as automatic fallback. Tables require a ruled grid; text alignment alone never creates one. Font sizes determine heading ranks, repeated margins are removed, and PDF text annotations become `> note:` blocks. Hidden `<!-- page N -->` markers remain in stored Markdown and provide page metadata for selections. The reader header shows the parser that ran; existing records default to `markitdown`.
-
-This is text-layer extraction, without OCR. If both parsers produce no text, import reports “no text layer; OCR not supported yet”. Raster images currently use an explicit omission placeholder. Complex equations, interleaved columns, and document-specific line wrapping may lose layout. Sources retain their original bytes in the library.
-
-Python golden tests: install `apps/desktop/resources/converter/requirements.txt` into a Python environment, then run `python -m unittest discover -s apps/desktop/resources/converter -p 'test_*.py'`. Development-only comparisons: `scripts/pdf-compare.py` (see its module docstring for isolated dependencies); PyMuPDF is never a shipped requirement. `node e2e/pdf-reader.mjs SOURCE.pdf` from `apps/desktop` imports through the built Electron app and captures reader pages 3/5 under `/tmp/vstudy-pdf-evidence`.
-
-Single-file imports do not copy neighboring image files. Relative images in imported Markdown/HTML may be unavailable; embedded images extracted by the converter are supported.
-
-`node e2e/visual-regressions.mjs` additionally checks compact selection previews, Markdown replies, toolbar buttons, draft preservation on model changes, and restart behavior in the built app. This check requires a detected Claude CLI for its model picker option; it never sends a request to that CLI.
-
-Language preferences and reply language are in Settings. Interface languages: English, Traditional Chinese and Japanese; switching is live. See [the localization glossary](docs/i18n-glossary.md) and [verification guide](docs/i18n-verification.md). The Electron locale matrix is `node e2e/i18n.mjs` from `apps/desktop` after building.
+An opt-in AI document-improvement backend and isolated reader panel are available for integration. It creates `content.ai.md` beside the original, with page-level fallback, cost estimates and provenance. The panel is not yet mounted in the reader. See [AI improvement design and remaining limits](docs/AI_PARSE.md) and [the real CH2 evaluation](docs/ai-parse-evaluation.md), including the current admission-cap billing limitation.

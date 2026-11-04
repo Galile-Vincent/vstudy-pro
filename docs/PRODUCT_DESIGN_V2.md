@@ -1,3 +1,5 @@
+> Design reference: current behavior and limits are documented in [README](../README.md). CLI providers now require explicit per-provider opt-in; saved keys require lazy Keychain unlock. See [the implementation response](final-implementation-response.md) for acceptance evidence and unresolved performance work.
+
 # Product design v2: library, home, onboarding, i18n, hardening
 
 Decided by the lead. Workers implement this; deviations need evidence.
@@ -33,7 +35,7 @@ Empty states are designed, not blank.
 
 ## 3. Onboarding and empty states
 
-First run only (re-runnable from Settings): 1) Welcome with language choice (defaults from system locale), 2) Connect a model (detect claude/codex/agy; paste an API key; skip allowed), 3) Bring a document (drop zone or "Try a sample document"), 4) A three-tip coach for selecting text and asking. Progress dots, Back/Skip, keyboard friendly, no dark patterns. Welcome words and empty-state copy are written per locale by hand, not machine-literal. Blank chat state shows the rotating suggestions with a gentle animated reveal. All animation: 150-300 ms, easing out, disabled with `prefers-reduced-motion`.
+First run only (re-runnable from Settings): 1) Welcome with language choice (defaults from system locale), 2) Connect a model (ask explicitly whether to use each Claude Code/Codex/Antigravity login, with OFF-by-default opt-in toggles; paste an API key; skip allowed), 3) Bring a document (drop zone or "Try a sample document"), 4) A three-tip coach for selecting text and asking. Progress dots, Back/Skip, keyboard friendly, no dark patterns. Welcome words and empty-state copy are written per locale by hand, not machine-literal. Blank chat state shows the rotating suggestions with a gentle animated reveal. All animation: 150-300 ms, easing out, disabled with `prefers-reduced-motion`.
 
 ## 4. Languages
 

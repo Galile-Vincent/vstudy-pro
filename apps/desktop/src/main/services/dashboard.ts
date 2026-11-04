@@ -1,3 +1,5 @@
+import { plainText } from '../../shared/plain-text';
+import type { DocumentCitation } from '../../shared/domain';
 import { LibraryService } from './library';
 import { ActivityService, localDate, shiftDay } from './activity';
 import { dashboardSchema, libraryQuerySchema } from '../../shared/library';
@@ -7,9 +9,9 @@ export function getDashboard(library: LibraryService, activity: ActivityService,
     const series = db.prepare(`SELECT date,${totals} FROM usage_daily WHERE date>=? AND date<=? GROUP BY date ORDER BY date`).all(shiftDay(today, -13), today);
     const recent = library.list(libraryQuerySchema.parse({ view: 'recent', sort: 'lastOpenedAt', direction: 'desc', limit: 3 })).items.map(item => {
         const chat = db.prepare('SELECT m.parts FROM conversations c JOIN messages m ON m.conversationId=c.id WHERE c.documentId=? ORDER BY m.createdAt DESC LIMIT 1').get(item.document.id);
-        return { ...item, lastChat: chat ? String((JSON.parse(String(chat.parts)) as {
+        return { ...item, lastChat: chat ? plainText(String((JSON.parse(String(chat.parts)) as {
                 text?: string;
-            }[])[0]?.text ?? '').slice(0, 240) : null };
+            }[])[0]?.text ?? ''), (JSON.parse(String(chat.parts)) as {citations?:DocumentCitation[]}[])[0]?.citations).slice(0, 240) : null };
     });
-    return dashboardSchema.parse({ pinnedFolders: library.folders().filter(f => f.pinned).sort((a, b) => (b.pinnedAt ?? '').localeCompare(a.pinnedAt ?? '')), pinnedDocuments: db.prepare('SELECT * FROM documents WHERE deletedAt IS NULL AND pinned=1 ORDER BY pinnedAt DESC,id LIMIT 100').all().map(r => library.item(r)), recentDocuments: recent, month: db.prepare(`SELECT ${totals} FROM usage_daily WHERE date>=? AND date<=?`).get(month, today), series: Array.from({ length: 14 }, (_, i) => { const date = shiftDay(today, i - 13); return series.find(r => r.date === date) ?? { date, inputTokens: 0, outputTokens: 0, costUsd: 0, calls: 0 }; }), streak: activity.streak(), recentActivity: db.prepare('SELECT * FROM activity_events ORDER BY createdAt DESC,id LIMIT 30').all() });
+    return dashboardSchema.parse({ pinnedFolders: library.folders().filter(f => f.pinned).sort((a, b) => (b.pinnedAt ?? '').localeCompare(a.pinnedAt ?? '')), pinnedDocuments: db.prepare('SELECT * FROM documents WHERE deletedAt IS NULL AND pinned=1 ORDER BY pinnedAt DESC,id LIMIT 100').all().map(r => library.item(r)), recentDocuments: recent, month: db.prepare(`SELECT ${totals} FROM usage_daily WHERE date>=? AND date<=?`).get(month, today), series: Array.from({ length: 14 }, (_, i) => { const date = shiftDay(today, i - 13); return series.find(r => r.date === date) ?? { date, inputTokens: 0, outputTokens: 0, costUsd: 0, calls: 0 }; }), streak: activity.streak(), recentActivity: db.prepare('SELECT a.*,d.title documentTitle FROM activity_events a LEFT JOIN documents d ON d.id=a.documentId ORDER BY a.createdAt DESC,a.id LIMIT 30').all() });
 }

@@ -1,3 +1,6 @@
+import { Textarea } from '../components/ui/textarea';
+import { AiParseControls } from '../ai-parse/ai-parse-controls';
+import { Button } from '../components/ui/button';
 import { useReadingActivity } from '../home/use-reading-activity';
 import { BlankChat } from '../motion/blank-chat';
 import { useNavigate } from '../shell';
@@ -7,7 +10,7 @@ import { conversionStatus } from "../../shared/status";
 import { useTranslation } from "react-i18next";
 import { applyLanguage } from "../i18n";
 import { tr } from '../../shared/i18n';
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type {
   Conversation,
@@ -20,13 +23,15 @@ import type {
 import { defaultSettings } from "../../shared";
 import { desktop, isMock } from "../bridge";
 import { resolveModel } from "../model";
-import { Chat, ModelPicker, SelectionPreview } from "../chat";
-import { DocumentMarkdown } from "../markdown";
+import { ModelControls } from "../model-controls";
+import { SelectionPreview } from "../selection-preview-view";
+const Chat=lazy(()=>import("../chat").then(module=>({default:module.Chat})));
+import { DocumentMarkdown } from "../lazy-reader";
 import { ConversationList } from "../conversation-list";
 import { ProviderSettings, type Providers } from "../providers";
 
 export function Workspace() {
-  const { route } = useNavigate();
+  const { route, navigate } = useNavigate();
   useTranslation();
   const [settings, setSettings] = useState<Settings>(defaultSettings),
     [connected, setConnected] = useState(false);
@@ -45,10 +50,23 @@ export function Workspace() {
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [loadingSource, setLoadingSource] = useState(false);
+
+  const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
+  useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   const [draft, setDraft] = useState("");
+  const [loadedConversationDocument,setLoadedConversationDocument] = useState<Document['id'] | null>(null);
+  const [focusChat,setFocusChat] = useState(false);
+  const [newModelPickerOpen,setNewModelPickerOpen] = useState(false);
+  const initialConversation = useRef('');
+  const activeDocument = useRef(documentId);
+  activeDocument.current=documentId;
+  const creatingConversation = useRef(false);
   const activeConversation = useRef(conversation);
   activeConversation.current = conversation;
   const [progress, setProgress] = useState<Record<string, string>>({});
+  const [readerVersion,setReaderVersion] = useState<'original'|'ai'>('original');
+  const [readerRevision,setReaderRevision] = useState(0);
+  const [aiOpen,setAiOpen] = useState(0);
   const [partialSource, setPartialSource] = useState("");
   useEffect(() => {
     setPartialSource("");
@@ -72,6 +90,14 @@ export function Workspace() {
     onNotice={setNotice} /> : null, [partialSource, documentId]);
   useEffect(() => { if (route.documentId) setDocumentId(route.documentId); }, [route.documentId]);
   const doc = documents.find((d) => d.id === documentId);
+  const [chatDocument,setChatDocument] = useState<Document['id'] | null>(null);
+  useEffect(()=>{
+    if(!doc) return;
+    let second=0;
+    // Cached chat code can still have an expensive first mount; paint metadata first.
+    const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>setChatDocument(doc.id));});
+    return ()=>{cancelAnimationFrame(first);cancelAnimationFrame(second);};
+  },[doc?.id]);
   useReadingActivity(doc?.id ?? null, doc?.status === "ready" && !loadingSource);
   const pageProgress = /^Converting page (\d+)\/(\d+)/.exec(doc ? progress[doc.id] ?? "" : "");
   const report = useCallback(
@@ -86,13 +112,20 @@ export function Workspace() {
     setProviders(list);
     if (!activeConversation.current) setModel(current => resolveModel(current, list));
   }, []);
-  useEffect(() => { const timer = setInterval(() => { void refreshProviders().catch(report); }, 2000); return () => clearInterval(timer); }, [refreshProviders, report]);
+  useEffect(()=>{if(connected)void refreshProviders().catch(report);},[connected,refreshProviders,report]);
+  useEffect(() => {
+    const refresh = () => { void desktop.invoke('providers:list',{discover:false}).then(setProviders).catch(report); };
+    window.addEventListener('vstudy:providers-changed',refresh);
+    return () => window.removeEventListener('vstudy:providers-changed',refresh);
+  },[report]);
   useEffect(() => {
     let active = true;
     void Promise.all([
       desktop.invoke("settings:get", {}),
-      desktop.invoke("documents:list", {}),
-      desktop.invoke("providers:list", {}),
+      (route.documentId
+        ? desktop.invoke("documents:get", {documentId:route.documentId}).then(doc => doc ? [doc] : [])
+        : desktop.invoke("documents:list", {})).then(rows => { if (active) setDocuments(rows); return rows; }),
+      desktop.invoke("providers:list", {discover:false}),
     ])
       .then(([s, d, p]) => {
         if (!active) return;
@@ -127,12 +160,16 @@ export function Workspace() {
     setConversation(null);
     setHistory(null);
     setConversations([]);
+    setLoadedConversationDocument(null);
+    setNewModelPickerOpen(false);
+    setFocusChat(false);
     if (!documentId) return;
     void desktop
       .invoke("conversations:list", { documentId })
       .then((list) => {
         if (active) {
           setConversations(list);
+          setLoadedConversationDocument(documentId);
           let remembered: string | null = null;
           try { remembered = localStorage.getItem(`vstudy-conversation:${documentId}`); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
           const selected = list.find(c => c.id === remembered) ?? list[0] ?? null;
@@ -147,7 +184,7 @@ export function Workspace() {
   }, [documentId, report]);
   useEffect(() => {
     if (!conversation) return;
-    try { localStorage.setItem(`vstudy-conversation:${conversation.documentId}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
+    try { localStorage.setItem(`vstudy-conversation:${(conversation.scope === "course" ? conversation.courseId : conversation.documentId)}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
   }, [conversation?.id]);
   useEffect(() => {
     let active = true;
@@ -157,7 +194,7 @@ export function Workspace() {
     void desktop
       .invoke("documents:read", { documentId: doc.id })
       .then((value) => {
-        if (active) setSource(value);
+        if (active) {setSource(value);setReaderVersion(doc.activeVersion);}
       })
       .catch(report)
       .finally(() => {
@@ -166,7 +203,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [doc?.id, doc?.status, report]);
+  }, [doc?.id, doc?.status, readerRevision, report]);
   useEffect(() => {
     let active = true;
     setHistory(null);
@@ -184,7 +221,7 @@ export function Workspace() {
   const saveSettings = async (next: Settings) => {
     try {
       const latest = await desktop.invoke("settings:get", {});
-      const saved = await desktop.invoke("settings:set", { ...next, language:latest.language, replyLanguage:latest.replyLanguage, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, modelDisplayNames: latest.modelDisplayNames });
+      const saved = await desktop.invoke("settings:set", { ...next, uiScale:latest.uiScale,density:latest.density,accent:latest.accent,readerFont:latest.readerFont,readerSize:latest.readerSize,material:latest.material, language:latest.language, replyLanguage:latest.replyLanguage, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, converterIdleMinutes:latest.converterIdleMinutes,converterOffline:latest.converterOffline,modelDisplayNames: latest.modelDisplayNames });
       setSettings(saved);
     } catch (error) {
       report(error);
@@ -239,8 +276,9 @@ export function Workspace() {
       setBusy(false);
     }
   };
-  const newConversation = async (value = model) => {
-    if (!doc || !model) return;
+  const newConversation = async (value = model, activate = true) => {
+    if (!doc || !value || creatingConversation.current) return;
+    creatingConversation.current=true;
     setBusy(true);
     try {
       const slash = value.indexOf("/");
@@ -249,12 +287,16 @@ export function Workspace() {
         providerId: value.slice(0, slash) as ProviderConfig["id"],
         modelId: value.slice(slash + 1),
       });
+      if(created.scope === "course" || activeDocument.current!==created.documentId)return;
       setConversations((list) => [created, ...list]);
+      if(activate)setCompactPane("chat");
+      setFocusChat(activate);
       setConversation(created);
       setHistory([]);
     } catch (error) {
       report(error);
     } finally {
+      creatingConversation.current=false;
       setBusy(false);
     }
   };
@@ -263,25 +305,28 @@ export function Workspace() {
   );
   const canChat =
     doc?.status === "ready" &&
+    loadedConversationDocument===doc.id &&
     !!model &&
     selectedModel?.availability.available &&
     selectedModel.config.enabled;
+  useEffect(()=>{
+    if(conversation){initialConversation.current='';return;}
+    if(!doc || !canChat || busy || newModelPickerOpen)return;
+    const key=`${doc.id}/${model}`;
+    if(initialConversation.current===key)return;
+    initialConversation.current=key;
+    void newConversation(model,false);
+  },[doc?.id,model,conversation?.id,canChat,busy,newModelPickerOpen]);
   useEffect(() => {
+    if (selection) { setCompactPane("chat"); requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>(".aui-composer-input")?.focus()); }
     if (selection && !conversation && canChat && !busy) void newConversation();
   }, [selection, conversation, canChat, busy]);
-  const chat = (
-    <section className="pane chat-pane" aria-label={tr('common:chat')}>
-      <div className="pane-toolbar">
-        <span className="eyebrow">{tr('common:conversation')}</span>
-        <div className="row">
-          <ConversationList conversations={conversations} current={conversation} providers={providers} canCreate={!!canChat && !busy} onSelect={c => {setConversation(c);setModel(`${c.providerId}/${c.modelId}`);}} onNew={() => newConversation()} onDelete={async id => {if (!window.confirm(tr('common:delete_this_conversation'))) return; await desktop.invoke('conversations:delete',{conversationId:id});setConversations(list=>list.filter(c=>c.id!==id));if(conversation?.id===id){setConversation(null);setHistory(null);}}}/>
+  const chatControls = (
+      <div className="workspace-conversations">
 
-          {conversation && <button className="icon-button" title={tr('common:delete_conversation')} aria-label={tr('common:delete_conversation')} onClick={() => {
-            if (!window.confirm(tr('common:delete_this_conversation'))) return;
-            void desktop.invoke("conversations:delete", { conversationId: conversation.id }).then(() => {
-              setConversations(list => list.filter(c => c.id !== conversation.id)); setConversation(null); setHistory(null);
-            }).catch(report);
-          }}><Trash2 size={16} /></button>}
+        <div className="row">
+          <ConversationList conversations={conversations} current={conversation} providers={providers} canCreate={!!canChat && !busy} onSelect={c => {setFocusChat(true);setConversation(c);setModel(`${c.providerId}/${c.modelId}`);}} onNew={() => newConversation()} onDelete={async id => {if (!window.confirm(tr('common:delete_this_conversation'))) return; await desktop.invoke('conversations:delete',{conversationId:id});setConversations(list=>list.filter(c=>c.id!==id));if(conversation?.id===id){setConversation(null);setHistory(null);}}}/>
+
           <button
             disabled={!canChat || busy}
             onClick={() => void newConversation()}
@@ -291,12 +336,16 @@ export function Workspace() {
           </button>
         </div>
       </div>
+  );
+  const chat = (
+    <section className="pane chat-pane" aria-label={tr('common:chat')}>
       {conversation && history ? (
-        <Chat
+        <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}>{chatDocument === documentId ? <Chat
           documentPageCount={documentPageCount}
           documentTitle={doc?.sourceName ?? tr('common:document')}
             onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
           key={conversation.id}
+          autoFocus={focusChat}
           draft={draft}
           onDraft={setDraft}
           conversation={conversation}
@@ -308,10 +357,10 @@ export function Workspace() {
           onModel={chooseModel}
           onSettings={() => { setSettingsTab("providers"); setShowSettings(true); }}
           onProvidersChanged={refreshProviders}
-        />
+        /> : <p role="status">{tr("common:loading_conversation")}</p>}</Suspense>
       ) : (
         <div className="chat-start">
-          <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onStart={() => void newConversation()} />
+          <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onQuestion={text => { setDraft(text); void newConversation(); }} />
           {selection && (
             <div className="selection-chip">
               <SelectionPreview selection={selection} />
@@ -323,13 +372,16 @@ export function Workspace() {
               </button>
             </div>
           )}
-          <ModelPicker
+          <div className="new-chat-composer">
+          <Textarea disabled rows={2} aria-label={tr('common:ask_about_your_document')} placeholder={tr('common:ask_document_placeholder')}/>
+          <ModelControls onOpenChange={setNewModelPickerOpen}
             providers={providers}
             model={model}
             onModel={chooseModel}
             onSettings={() => { setSettingsTab("providers"); setShowSettings(true); }}
             onProvidersChanged={refreshProviders}
           />
+          </div>
         </div>
       )}
     </section>
@@ -344,6 +396,7 @@ export function Workspace() {
             const list = await desktop.invoke("documents:list", {}); setDocuments(list); setDocumentId(list[0]?.id ?? null);
           }).catch(report);
         }}><Trash2 size={16} /></button>}
+        {doc && <AiParseControls key={`${doc.id}-${aiOpen}`} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse || aiOpen>0} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
         <span className="muted">
           {doc?.status === "ready" ? tr('common:converter_label',{converter:doc.converter}) : ""}
         </span>
@@ -370,7 +423,7 @@ export function Workspace() {
       ) : doc.status === "failed" ? (
         <div className="empty" role="alert">
           <h3>{tr('common:couldn_t_prepare_this_document')}</h3>
-          <p>{tr('errors:conversion_failed')}</p>
+          <p>{errorText(new Error(doc.error))}</p>
           <button
             disabled={busy || !connected}
             onClick={() => {
@@ -386,28 +439,29 @@ export function Workspace() {
                 .finally(() => setBusy(false));
             }}
           >
-            {tr('common:retry_conversion')}</button>
+            {tr('common:retry_conversion')}</button><Button variant="outline" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button>
         </div>
       ) : loadingSource ? (
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
-        <DocumentMarkdown
-          key={doc.id}
+        <><div className="document-conversion-hint"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div><DocumentMarkdown
+          key={`${doc.id}-${readerVersion}-${readerRevision}`}
+          version={readerVersion}
           source={source}
           documentId={doc.id}
           onSelect={(value) => {
-            setSelection(value);
+            setSelection({...value,version:readerVersion});
 
           }}
           onNotice={setNotice}
-        />
+        /></>
       )}
     </section>
   );
   return (
     <main
-      className="workspace"
+      className="workspace" data-compact-pane={compactPane} onFocusCapture={event=>{const target=event.target as HTMLElement;const pane=target.closest('.chat-pane')?'chat':target.closest('.reading-pane')?'reading':null;if(pane&&pane!==compactPane)setCompactPane(pane);}}
       onDragOver={(e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";
@@ -421,19 +475,17 @@ export function Workspace() {
         } catch (error) { report(error); }
       }}
     >
-      <a className="skip-link" href="#reading-content">{tr('common:skip_content')}</a><header className="app-header">
+      <h1 className="sr-only">{tr("common:document_library")}</h1><header className="app-header">
         <div className="row">
+          <button className="ghost" onClick={() => navigate("library")}>{tr("common:library")}</button>
           <button data-testid="import-document" aria-label={tr('common:import_document')} disabled={busy||!connected} onClick={()=>void importDocument()}><Plus size={16}/></button>
-          <h1>
-            VStudy <span>Pro</span>
-          </h1>
-          <span className="header-divider" />
           <span className="muted workspace-title">
             {doc?.title ?? tr('common:your_workspace')}
           </span>
         </div>
+        {chatControls}
         <div className="row">
-          <span className="connection-status" data-testid="bridge-status">
+          <span className={`connection-status ${connected && !isMock ? "motion-sr" : ""}`} data-testid="bridge-status">
             {isMock
               ? tr('common:preview_mock_bridge')
               : connected
@@ -471,6 +523,10 @@ export function Workspace() {
           </button>
         </div>
       )}
+      <div className="workspace-tabs" role="tablist" aria-label={tr('common:your_workspace')}>
+        <button role="tab" aria-selected={compactPane === 'reading'} onClick={() => setCompactPane('reading')}>{tr('common:document')}</button>
+        <button role="tab" aria-selected={compactPane === 'chat'} onClick={() => setCompactPane('chat')}>{tr('common:chat')}</button>
+      </div>
       <div className="workspace-body">
         <PanelGroup direction="horizontal" className="panels">
           {(settings.chatSide === "left"

@@ -1,0 +1,356 @@
+[
+  {
+    "name": "home-baseline",
+    "theme": "light",
+    "samples": 107,
+    "max": 18.59999999999991,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.90000000000009,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 96,
+    "max": 33.399999999999636,
+    "over20": 1,
+    "over25": 1,
+    "p95": 18.300000000000182,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 1,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 97,
+    "max": 18.699999999999818,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.300000000000182,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 97,
+    "max": 18.5,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.899999999999636,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 98,
+    "max": 18.600000000000364,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.300000000000182,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 97,
+    "max": 18.69999999999891,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.19999999999891,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "light",
+    "samples": 97,
+    "max": 18.5,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.200000000000728,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "hero",
+    "theme": "light",
+    "samples": 107,
+    "max": 18.299999999999272,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "scroll",
+    "theme": "light",
+    "samples": 196,
+    "max": 18.5,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "demo",
+    "theme": "light",
+    "samples": 685,
+    "max": 18.700000000000728,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.099999999998545,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "offscreen-idle",
+    "theme": "light",
+    "animations": 0,
+    "cpu": [
+      {
+        "type": "Browser",
+        "cpu": 0.018287563167326572
+      },
+      {
+        "type": "GPU",
+        "cpu": 0.05959065650252451
+      },
+      {
+        "type": "Utility",
+        "cpu": 0
+      },
+      {
+        "type": "Tab",
+        "cpu": 0.06485698724289103
+      }
+    ]
+  },
+  {
+    "name": "home-baseline",
+    "theme": "dark",
+    "samples": 107,
+    "max": 18.69999999999709,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.299999999999272,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.60000000000582,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.89999999999418,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.400000000001455,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.400000000001455,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 17.400000000001455,
+    "over20": 0,
+    "over25": 0,
+    "p95": 16.89999999999418,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.69999999999709,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.5,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18.700000000004366,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.19999999999709,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "entrance",
+    "theme": "dark",
+    "samples": 97,
+    "max": 18,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.599999999998545,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "hero",
+    "theme": "dark",
+    "samples": 108,
+    "max": 18.700000000004366,
+    "over20": 0,
+    "over25": 0,
+    "p95": 17.80000000000291,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "scroll",
+    "theme": "dark",
+    "samples": 198,
+    "max": 18.60000000000582,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.10000000000582,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "demo",
+    "theme": "dark",
+    "samples": 686,
+    "max": 18.80000000000291,
+    "over20": 0,
+    "over25": 0,
+    "p95": 18.19999999999709,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "offscreen-idle",
+    "theme": "dark",
+    "animations": 0,
+    "cpu": [
+      {
+        "type": "Browser",
+        "cpu": 0.016343742861544507
+      },
+      {
+        "type": "GPU",
+        "cpu": 0.02970000504684267
+      },
+      {
+        "type": "Utility",
+        "cpu": 0.0006308572187497406
+      },
+      {
+        "type": "Tab",
+        "cpu": 0.026578984241202374
+      }
+    ]
+  }
+]
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Welcome performance budget exceeded; see /tmp/vstudy-welcome2/performance-both-themes.json
++ actual - expected
+
++ [
++   {
++     cls: 0,
++     droppedFrames: 1,
++     longFrames: [],
++     max: 33.399999999999636,
++     name: 'entrance',
++     over20: 1,
++     over25: 1,
++     p95: 18.300000000000182,
++     samples: 96,
++     scripts: [],
++     theme: 'light'
++   }
++ ]
+- []
+
+    at file:///Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/welcome-performance.mjs:36:8 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [
+    {
+      name: 'entrance',
+      theme: 'light',
+      samples: 96,
+      max: 33.399999999999636,
+      over20: 1,
+      over25: 1,
+      p95: 18.300000000000182,
+      longFrames: [],
+      scripts: [],
+      droppedFrames: 1,
+      cls: 0
+    }
+  ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

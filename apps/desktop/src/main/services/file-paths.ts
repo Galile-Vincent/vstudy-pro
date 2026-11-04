@@ -7,7 +7,7 @@ export function containedPath(root: string, path: string) {
     let current = resolve(root);
     for (const part of lexical.split(sep)) {
         current = join(current, part);
-        if (lstatSync(current).isSymbolicLink())
+        if (lstatSync(current).isSymbolicLink() || (lstatSync(current).isFile() && lstatSync(current).nlink !== 1))
             throw new Error('Symlink in library path');
     }
     const realRoot = realpathSync(root), real = realpathSync(path), rel = relative(realRoot, real);

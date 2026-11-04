@@ -1,4 +1,6 @@
 {
   "chat_title": "会話 {{number}} · {{model}}",
-  "section_label": "「{{title}}」のセクションを使う"
+  "section_label": "「{{title}}」のセクションを使う",
+  "completed_task": "完了したタスク",
+  "incomplete_task": "未完了のタスク"
 }

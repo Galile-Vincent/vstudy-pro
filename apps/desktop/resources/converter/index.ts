@@ -1,3 +1,5 @@
+import { recordEgress } from '../../src/main/services/egress';
+import { resolveInstalledExecutable, installDirectories } from '../../src/main/providers/trusted-executable';
 import { ProcessScope } from "./process-scope";
 import { profileStage } from "./profile";
 import { WarmWorker } from "./warm-worker";
@@ -5,25 +7,11 @@ import { spawn } from "node:child_process";
 import { access, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { homedir, tmpdir } from "node:os";
-import { delimiter, join } from "node:path";
+import { join } from "node:path";
 import { createHash } from "node:crypto";
 
-export const MAX_MARKDOWN_BYTES = 8 * 1024 * 1024;
-export type Progress = (message: string) => void;
-export type ConverterRunner = (source: string, output: string, onProgress?: Progress) => Promise<"pdf_md" | "markitdown" | void>;
-
-export function scrubbedEnvironment(cwd: string): NodeJS.ProcessEnv {
-  return {
-    PATH: process.env.PATH ?? "/usr/bin:/bin:/opt/homebrew/bin",
-    HOME: cwd,
-    TMPDIR: cwd,
-    LANG: "en_US.UTF-8",
-    PYTHONIOENCODING: "utf-8",
-    PYTHONNOUSERSITE: "1",
-    PIP_DISABLE_PIP_VERSION_CHECK: "1",
-    UV_NO_PROGRESS: "1",
-  };
-}
+import { scrubbedEnvironment, type Progress, type ConverterRunner, MAX_MARKDOWN_BYTES } from './contracts';
+export { scrubbedEnvironment, type Progress, type ConverterRunner, MAX_MARKDOWN_BYTES } from './contracts';
 
 export async function runProcess(
   executable: string,
@@ -59,7 +47,7 @@ export async function runProcess(
       stderr = (stderr + chunk.toString("utf8")).slice(-4000);
       if (cacheDirectory) {
         for (const match of stderr.matchAll(/Downloading ([^\n\r]{1,160})/g)) {
-          if (!downloads.has(match[1]!)) { downloads.add(match[1]!); onProgress?.(`Downloading ${match[1]}`); }
+          if (!downloads.has(match[1]!)) { downloads.add(match[1]!); onProgress?.("Downloading converter dependencies…"); }
         }
       }
       if (!fallbackReported && stderr.includes("PDF_FALLBACK")) {
@@ -77,35 +65,23 @@ export async function runProcess(
           reject(new Error("This PDF is too large or complex to convert"));
           return;
         }
-        const errorType = [...stderr.matchAll(/"type":\s*"([A-Za-z0-9_]+)"/g)].at(-1)?.[1];
-        let detail = stderr;
-        try {
-          const record: unknown = JSON.parse(stderr.trim().split("\n").at(-1) ?? "");
-          if (typeof record === "object" && record !== null && "error" in record && typeof record.error === "string") detail = record.error;
-        } catch { /* Third-party tools can emit plain stderr instead of JSON. */ }
-        // eslint-disable-next-line no-control-regex
-        const tail = detail.replace(/\x1b\[[0-9;]*m/g, "").replace(/https?:\/\/\S+/g, "[URL]").replace(/(?:\/[^\s"']+)+/g, "[path]").replace(/(?:sk-|Bearer\s+)\S+/gi, "[redacted]").replace(/[\x00-\x08\x0b-\x1f]/g, "").slice(-1200);
-        reject(new Error(`${errorType ? `Conversion failed (${errorType})` : `Converter process failed (exit ${code})`}: ${tail}`));
+        if (errorCode === "NO_TEXT_LAYER") { reject(new Error("NO_TEXT_LAYER: OCR not supported")); return; }
+        reject(new Error(`Converter process failed (exit ${code})`));
       } else resolve();
     });
   });
 }
 
 async function findExecutable(name: string): Promise<string | undefined> {
-  const paths = (process.env.PATH ?? "").split(delimiter);
-  paths.push("/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", join(homedir(), ".local/bin"));
-  for (const directory of paths) {
-    if (!directory) continue;
-    const candidate = join(directory, name);
-    try { await access(candidate, constants.X_OK); return candidate; } catch { /* An executable can disappear while resolving PATH. */ }
-  }
-  return undefined;
+  return (await resolveInstalledExecutable(name, [...installDirectories(), '/usr/bin', '/bin'])) ?? undefined;
 }
 
 export function createConverter(options: {
   userData: string;
   resources: string;
   onProgress?: Progress;
+  idleMinutes?: () => number;
+  authorizeDownload?: () => Promise<boolean>;
 }): { convert: ConverterRunner; ensureReady: () => Promise<string>; dispose: () => Promise<void> } {
   const scope = new ProcessScope();
   let disposed = false;
@@ -114,13 +90,19 @@ export function createConverter(options: {
   const venv = join(options.userData, "converter-venv");
   const python = join(venv, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   let worker: WarmWorker | undefined;
+  let idleTimer: ReturnType<typeof setTimeout> | undefined;
+  function scheduleIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { worker?.stop(); worker = undefined; bootstrap = undefined; }, (options.idleMinutes?.() ?? 5) * 60_000);
+    idleTimer.unref();
+  }
   let bootstrap: Promise<string> | undefined;
   let progress: Progress | undefined;
   const report = (message: string) => { options.onProgress?.(message); progress?.(message); };
   async function install(): Promise<string> {
     const checked = profileStage("Venv/bootstrap check");
     await mkdir(options.userData, { recursive: true, mode: 0o700 });
-    const requirements = join(options.resources, "requirements.txt");
+    const requirements = join(options.resources, "requirements.lock.txt");
     const fingerprint = createHash("sha256").update(await readFile(requirements)).digest("hex");
     const marker = join(venv, ".requirements-sha256");
     const cwd = await mkdtemp(join(tmpdir(), "vstudy-bootstrap-"));
@@ -132,6 +114,8 @@ export function createConverter(options: {
           return python;
         }
       } catch { /* An interrupted installation is rebuilt on the next attempt. */ }
+      if (!await options.authorizeDownload?.()) throw new Error('Converter offline: allow the dependency download and retry');
+      recordEgress('converter_install', 'pypi.org, files.pythonhosted.org; github.com for Python if needed');
       report("Setting up converter (one time; download size depends on platform)…");
       const uv = await findExecutable("uv");
       // Cache wheels across private bootstrap directories without inheriting user configuration.
@@ -152,11 +136,11 @@ export function createConverter(options: {
       if (uv) {
         await run(uv, ["venv", "--python", systemPython ?? "3.12", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await run(uv, ["pip", "install", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(uv, ["pip", "install", "--require-hashes", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       } else if (systemPython) {
         await run(systemPython, ["-m", "venv", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await run(python, ["-m", "pip", "install", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(python, ["-m", "pip", "install", "--require-hashes", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       }
       await run(python, ["-c", "import markitdown, pdfplumber"], cwd);
       checkOpen();
@@ -170,9 +154,10 @@ export function createConverter(options: {
     bootstrap ??= install().then(async executable => {
       checkOpen();
       const warmed = profileStage("Python spawn + warm imports");
-      worker = new WarmWorker(executable, join(options.resources, "convert.py"), options.userData, scope);
+      worker = new WarmWorker(executable, join(options.resources, "convert.py"), options.userData, scope, options.idleMinutes);
       await worker.start();
       warmed();
+      scheduleIdle();
       return executable;
     }).catch((error: unknown) => { bootstrap = undefined; throw error; });
     return bootstrap;
@@ -181,6 +166,7 @@ export function createConverter(options: {
     ensureReady,
     async dispose() {
       disposed = true;
+      clearTimeout(idleTimer);
       const stopping = scope.dispose();
       await stopping;
       worker?.stop();
@@ -189,13 +175,14 @@ export function createConverter(options: {
     async convert(source, output, onProgress) {
       progress = onProgress;
       await ensureReady();
+      clearTimeout(idleTimer);
       report("Converting…");
       const cwd = await mkdtemp(join(tmpdir(), "vstudy-convert-"));
       try {
         const temporaryOutput = join(cwd, "content.md");
         await rm(`${output}.partial`, { force: true });
         let publishPreview = Promise.resolve();
-        worker ??= new WarmWorker(python, join(options.resources, "convert.py"), options.userData, scope);
+        worker ??= new WarmWorker(python, join(options.resources, "convert.py"), options.userData, scope, options.idleMinutes);
         const extracted = profileStage("Worker conversion + preview delivery");
         await worker.run(source, temporaryOutput, output, message => {
           publishPreview = publishPreview.then(async () => {
@@ -222,7 +209,7 @@ export function createConverter(options: {
         const metadata: unknown = JSON.parse(await readFile(`${temporaryOutput}.json`, "utf8"));
         if (typeof metadata !== "object" || metadata === null || !("converter" in metadata) || (metadata.converter !== "pdf_md" && metadata.converter !== "markitdown")) throw new Error("Invalid converter metadata");
         return metadata.converter;
-      } finally { progress = undefined; await rm(`${output}.partial`, { force: true }); await rm(cwd, { recursive: true, force: true }); }
+      } finally { scheduleIdle(); progress = undefined; await rm(`${output}.partial`, { force: true }); await rm(cwd, { recursive: true, force: true }); }
     },
   };
 }

@@ -1,6 +1,7 @@
-"use client";
-import { copyAnswer } from "../../../copy-answer";
-import { documentCitationSchema } from "../../../../shared";
+
+
+
+
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
 
@@ -70,8 +71,8 @@ import {
 import {
   createContext,
   useContext,
-  useLayoutEffect,
   useRef,
+  useLayoutEffect,
   useState,
   type ComponentType,
   type FC,
@@ -134,6 +135,9 @@ export type ThreadComponents = {
   TaskGroup?: ComponentType<{ group: ThreadGroupPart }> | undefined;
   Source?: SourceMessagePartComponent | undefined;
   WelcomeExtra?: ComponentType | undefined;
+  Announcement?: ComponentType | undefined;
+  CopyAction?: ComponentType | undefined;
+  Text?: ComponentType | undefined;
   ComposerExtra?: ComponentType | undefined;
   ComposerPrefix?: ComponentType | undefined;
   ComposerBanner?: ComponentType | undefined;
@@ -238,7 +242,7 @@ const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
   autoFocus,
 }) => {
   useTranslation();
-  const { Welcome = ThreadWelcome } = useContext(ThreadComponentsContext);
+  const { Announcement, Welcome = ThreadWelcome } = useContext(ThreadComponentsContext);
 
   return (
     <ThreadPrimitive.Root
@@ -251,6 +255,7 @@ const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
         ["--composer-padding" as string]: "8px",
       }}
     >
+      {Announcement && <Announcement />}
       <ThreadPrimitive.Viewport
         turnAnchor="top"
         data-slot="aui_thread-viewport"
@@ -716,6 +721,7 @@ const AssistantMessage: FC = () => {
     TaskGroup: TaskGroupComponent,
     MessageFooter,
     Source: SourceComponent = Sources,
+    Text: TextComponent = MarkdownText,
   } = useContext(ThreadComponentsContext);
   const groupBy = TaskGroupComponent ? taskAwareGroupBy : messageGroupBy;
 
@@ -726,8 +732,10 @@ const AssistantMessage: FC = () => {
   return (
     <MessagePrimitive.Root
       data-slot="aui_assistant-message-root"
+      role="article"
+      aria-label={tr("common:chat_author_assistant")}
       data-role="assistant"
-      className="fade-in slide-in-from-bottom-1 animate-in relative -mb-7.5 pb-7.5 duration-150 [contain-intrinsic-size:auto_200px] [content-visibility:auto]"
+      className="fade-in slide-in-from-bottom-1 animate-in relative -mb-7.5 pb-7.5 duration-150"
     >
       <div
         data-slot="aui_assistant-message-content"
@@ -769,7 +777,7 @@ const AssistantMessage: FC = () => {
                 );
               }
               case "text":
-                return <MarkdownText />;
+                return <TextComponent />;
               case "reasoning":
                 return <Reasoning {...part} />;
               case "tool-call":
@@ -791,7 +799,7 @@ const AssistantMessage: FC = () => {
                   </div>
                 );
               case "indicator":
-                return <ThinkingIndicator role="status" aria-label={tr('common:assistant_is_working')} label="Thinking" />;
+                return <ThinkingIndicator role="status" aria-label={tr('common:assistant_is_working')} label={tr('common:thinking')} />;
               default:
                 return null;
             }
@@ -812,20 +820,8 @@ const AssistantMessage: FC = () => {
   );
 };
 
-const CopyAnswerButton: FC = () => {
-  useTranslation();
-  const text = useAuiState(s => s.message.content.filter(p => p.type === 'text').map(p => p.text).join('\n'));
-  const raw = useAuiState(s => s.message.metadata.custom.citations);
-  const [copied,setCopied] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useLayoutEffect(() => () => clearTimeout(timer.current), []);
-  return <TooltipIconButton tooltip={tr('common:copy')} onClick={() => {
-    const parsed = documentCitationSchema.array().safeParse(raw);
-    void navigator.clipboard.writeText(copyAnswer(text, parsed.success ? parsed.data : [])).then(() => {setCopied(true);clearTimeout(timer.current);timer.current = setTimeout(() => setCopied(false),2000);});
-  }}>{copied ? <CheckIcon /> : <CopyIcon />}</TooltipIconButton>;
-};
-
 const AssistantActionBar: FC = () => {
+  const { CopyAction } = useContext(ThreadComponentsContext);
   useTranslation();
   return (
     <ActionBarPrimitive.Root
@@ -833,7 +829,7 @@ const AssistantActionBar: FC = () => {
       autohide="not-last"
       className="aui-assistant-action-bar-root text-muted-foreground animate-in fade-in col-start-3 row-start-2 -ms-1 flex gap-1 duration-200"
     >
-      <CopyAnswerButton />
+      {CopyAction ? <CopyAction /> : <ActionBarPrimitive.Copy asChild><TooltipIconButton tooltip={tr("common:copy")}><CopyIcon /></TooltipIconButton></ActionBarPrimitive.Copy>}
       <AuiIf condition={(s) => s.thread.capabilities.feedback}>
         <ActionBarPrimitive.FeedbackPositive asChild>
           <TooltipIconButton
@@ -919,7 +915,9 @@ const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root
       data-slot="aui_user-message-root"
-      className="fade-in slide-in-from-bottom-1 animate-in grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] content-start gap-y-2 px-2 duration-150 [contain-intrinsic-size:auto_200px] [content-visibility:auto] [&:where(>*)]:col-start-2"
+      className="fade-in slide-in-from-bottom-1 animate-in grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] content-start gap-y-2 px-2 duration-150 [&:where(>*)]:col-start-2"
+      role="article"
+      aria-label={tr("common:chat_author_you")}
       data-role="user"
     >
       <UserMessageAttachments />
@@ -963,7 +961,7 @@ const EditComposer: FC = () => {
   return (
     <MessagePrimitive.Root
       data-slot="aui_edit-composer-wrapper"
-      className="flex flex-col px-2 [contain-intrinsic-size:auto_200px] [content-visibility:auto]"
+      className="flex flex-col px-2"
     >
       <ComposerPrimitive.Root className="aui-edit-composer-root border-foreground/10 focus-within:border-foreground/25 ms-auto flex w-full max-w-[85%] cursor-text flex-col rounded-(--composer-radius) border bg-(--composer-bg) transition-[border-color]">
         <ComposerPrimitive.Input

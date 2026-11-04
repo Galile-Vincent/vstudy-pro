@@ -19,3 +19,8 @@ it("permits required style and font sources while keeping scripts strict", () =>
   expect(directives.find(d => d.startsWith("style-src"))).toBe("style-src 'self' 'unsafe-inline'");
   expect(directives.find(d => d.startsWith("font-src"))).toBe("font-src 'self' data:");
 });
+
+it('checks custom app hosts even when URL.origin is opaque', () => {
+ expect(isAppUrl('vstudy://app/index.html', 'vstudy://app/index.html')).toBe(true);
+ expect(isAppUrl('vstudy://evil/index.html', 'vstudy://app/index.html')).toBe(false);
+});

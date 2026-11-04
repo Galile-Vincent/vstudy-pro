@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApiAdapter, validateBaseUrl } from "./api";
-import { cliArgs, cliEnvironment, findCli, runCli } from "./cli";
+import { createCliAdapter, cliArgs, cliEnvironment, findCli, runCli } from "./cli";
 import { createProviderRegistry } from "./index";
 import { chatRequestSchema } from "../../shared/domain";
 const request = {
@@ -64,7 +64,7 @@ it("sends assembled prompt and key only in main HTTP request and lists custom mo
     fetcher,
   );
   expect(await adapter.listModels()).toEqual([
-    { id: "custom-model", name: "custom-model" },
+    { id: "custom-model", name: "custom-model", supportsImages:false },
   ]);
   expect(
     await collect(adapter.stream(request, new AbortController().signal)),
@@ -85,9 +85,12 @@ it("rejects truncated HTTP streams", async () => {
 });
 it("only enables fake in explicit E2E mode", async () => {
   const secrets = {
-    getInMainOnly: () => null,
+    getInMainOnly: async () => null,
     has: () => false,
-    set: () => {},
+    set: async () => {},
+      bindCompatibleOrigin: () => {},
+      useInSession: () => {},
+      isUnlocked: () => false,
     delete: () => {},
   };
   vi.stubEnv("VSTUDY_FAKE_PROVIDER", "0");
@@ -138,35 +141,19 @@ it("kills a real subprocess on abort and on timeout", async () => {
   }
 });
 for (const kind of ["claude", "codex"] as const)
-  it.skipIf(process.env.VSTUDY_REAL_CLI_SMOKE !== "1")(
-    `real ${kind} smoke`,
-    async () => {
-      const binary = await findCli(kind);
-      if (!binary) return;
-      const cwd = await mkdtemp(join(tmpdir(), `vstudy-${kind}-smoke-`));
-      try {
-        const events = await collect(
-          runCli(
-            binary,
-            cliArgs(kind, "default"),
-            "Reply with exactly VSTUDY_OK. Do not use any tools.",
-            cwd,
-            kind,
-            new AbortController().signal,
-          ),
-        );
-        expect(
-          events
-            .flatMap((e) => (e.type === "text-delta" ? [e.text] : []))
-            .join(""),
-        ).toContain("VSTUDY_OK");
-        expect(events.at(-1)).toEqual({ type: "done" });
-      } finally {
-        await rm(cwd, { recursive: true, force: true });
-      }
-    },
-    140_000,
-  );
+  it.skipIf(process.env.VSTUDY_REAL_CLI_SMOKE !== "1")(`real ${kind} smoke`, async context => {
+    if (!(await findCli(kind))) { context.skip(); return; }
+    const adapter = createCliAdapter(kind);
+    if (!(await adapter.detect()).available) { context.skip(); return; }
+    const events = await collect(adapter.stream({ ...request, providerId: kind === 'codex' ? 'codex-cli' : 'claude-cli', modelId: 'default', prompt: 'Reply with exactly VSTUDY_OK. Do not use any tools.' }, new AbortController().signal));
+    expect(events.flatMap(e => e.type === 'text-delta' ? [e.text] : []).join('')).toContain('VSTUDY_OK');
+    expect(events.at(-1)).toEqual({ type: 'done' });
+  }, 140_000);
+
+for (const newline of ['', '\n']) it(`rejects native Codex tool events with ${newline ? 'a' : 'no'} final newline`, async () => {
+  const record = JSON.stringify({ type: 'item.completed', item: { type: 'command_execution', command: 'cat secret' } }) + newline;
+  await expect(collect(runCli(process.execPath, ['-e', `process.stdout.write(${JSON.stringify(record)})`], '', tmpdir(), 'codex', new AbortController().signal))).rejects.toThrow('Provider unavailable');
+});
 
 async function collect<T>(source: AsyncIterable<T>): Promise<T[]> {
   const result: T[] = [];
@@ -175,7 +162,7 @@ async function collect<T>(source: AsyncIterable<T>): Promise<T[]> {
 }
 it("allows loopback compatible providers without credentials", async () => {
   const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response('data: [DONE]\n\n'));
-  const adapter = createApiAdapter(() => ({ kind: "compatible", id: "openai-compatible", enabled: true, baseUrl: "http://127.0.0.2:123/v1" }), { getInMainOnly: () => null }, fetcher);
+  const adapter = createApiAdapter(() => ({ kind: "compatible", id: "openai-compatible", enabled: true, baseUrl: "http://127.0.0.2:123/v1" }), { getInMainOnly: async () => null }, fetcher);
   expect(await adapter.detect()).toEqual({ available: true });
   expect(await collect(adapter.stream(request, new AbortController().signal))).toEqual([{ type: "usage", usage: { inputTokens: Math.ceil(request.prompt.length / 4), outputTokens: 0, costSource: "estimated" } }, { type: "done" }]);
   expect(fetcher.mock.calls[0]?.[1]?.headers).toEqual({ "content-type": "application/json" });
@@ -200,24 +187,25 @@ it.each([
 ] as const)('classifies %s JSON stdout authentication failures with empty stderr', async (kind, fixture, message) => {
   await expect(collect(runCli(process.execPath, ['-e', `console.log(${JSON.stringify(JSON.stringify(fixture))})`], '', tmpdir(), kind, new AbortController().signal))).rejects.toThrow(message);
 });
-it("returns availability while remote models are pending and caches arriving models", async () => {
+it("discovers only on request, awaits results, and observes the TTL without background refresh", async () => {
   const { ProviderRegistry } = await import("./index");
   const registry = new ProviderRegistry();
-  let release: (value: { id: string; name: string }[]) => void = () => {};
-  registry.register("openai-api", { async detect() { return { available: true }; }, listModels: () => new Promise(resolve => { release = resolve; }), async *stream() { yield { type: "done" }; } });
-  const first = (await registry.list()).find(p => p.config.id === "openai-api")!;
-  expect(first.availability).toEqual({ available: true });
-  expect(first.models).toEqual([]);
-  expect(first.modelsLoading).toBe(true);
-  release([{ id: "arrived", name: "Arrived" }]);
-  await Promise.resolve();
-  expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([{ id: "arrived", name: "Arrived" }]);
-  expect((await registry.list()).find(p => p.config.id === "openai-api")?.modelsLoading).toBe(false);
-  registry.configure({ kind: "api", id: "openai-api", enabled: true });
-  expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([]);
-  release([{ id: "refreshed", name: "Refreshed" }]);
-  await Promise.resolve();
-  expect((await registry.list()).find(p => p.config.id === "openai-api")?.models).toEqual([{ id: "refreshed", name: "Refreshed" }]);
+  let calls = 0, detects = 0;
+  registry.register("claude-cli", { async detect() { detects++; return {available:true}; }, async listModels() { calls++; return [{id:'arrived',name:'Arrived'}]; }, async *stream() { yield {type:'done'}; } });
+  registry.configure({kind:'cli',id:'claude-cli',enabled:true});
+  await registry.list(false);
+  expect([calls,detects]).toEqual([0,0]);
+  expect((await registry.list()).find(p => p.config.id === 'claude-cli')?.models).toEqual([{id:'arrived',name:'Arrived'}]);
+  await registry.list(false);
+  await registry.list();
+  expect(calls).toBe(1);
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 62_000);
+  try {
+    await registry.list(false);
+    expect(calls).toBe(1);
+    await registry.list(true);
+    expect(calls).toBe(2);
+  } finally { clock.mockRestore(); }
 });
 for (const kind of ["claude", "codex"] as const) it(`drops buffered ${kind} output and kills a process that writes after SIGTERM`, async () => {
   const cwd = await mkdtemp(join(tmpdir(), "vstudy-stubborn-cli-"));
@@ -233,4 +221,37 @@ for (const kind of ["claude", "codex"] as const) it(`drops buffered ${kind} outp
     })()).rejects.toThrow();
     expect(events).toEqual([{ type: "text-delta", text: "tick" }]);
   } finally { await rm(cwd, { recursive: true, force: true }); }
+});
+
+it('discovers saved-key availability without unlocking the Keychain or fetching models', async () => {
+  const getInMainOnly = vi.fn(async () => { throw new Error('Keychain must remain lazy'); });
+  const fetcher = vi.fn<typeof fetch>();
+  const adapter = createApiAdapter(() => ({kind:'api',id:'openai-api',enabled:true}), {getInMainOnly,has:()=>true,isUnlocked:()=>false}, fetcher);
+  expect(await adapter.detect()).toEqual({available:true});
+  expect(await adapter.listModels()).toEqual([]);
+  expect(getInMainOnly).not.toHaveBeenCalled();
+  expect(fetcher).not.toHaveBeenCalled();
+});
+it('kills a TERM-resistant descendant even when its CLI parent exits on TERM',async()=>{
+ const cwd=await mkdtemp(join(tmpdir(),'vstudy-cli-descendant-'));let pid:number|undefined;
+ const line={type:'stream_event',event:{type:'content_block_delta',delta:{type:'text_delta',text:'tick'}}};
+ const script=`const child=require('node:child_process').spawn(process.execPath,['-e',"process.on('SIGTERM',()=>{});process.send('ready');setInterval(()=>{},1000)"],{stdio:['ignore','ignore','ignore','ipc']});require('node:fs').writeFileSync('pid',String(child.pid));child.on('message',()=>console.log(${JSON.stringify(JSON.stringify(line))}));setInterval(()=>{},1000);`;
+ const controller=new AbortController();
+ try {
+  await expect((async()=>{for await(const event of runCli(process.execPath,['-e',script],'',cwd,'claude',controller.signal)){if(event.type==='text-delta')controller.abort();}})()).rejects.toThrow();
+  const {readFile}=await import('node:fs/promises');pid=Number(await readFile(join(cwd,'pid'),'utf8'));
+  await vi.waitFor(()=>expect(()=>process.kill(pid!,0)).toThrow(),{timeout:500});
+ } finally {if(pid)try{process.kill(pid,'SIGKILL');}catch{/* Already reaped. */}await rm(cwd,{recursive:true,force:true});}
+});
+
+it('serializes image input with separate system instructions and no tools for both APIs',async()=>{
+ for(const id of ['anthropic-api','openai-api'] as const) {
+  let body:Record<string,unknown>={};
+  const fetcher:typeof fetch=async(_url,init)=>{body=JSON.parse(String(init?.body));return new Response('data: [DONE]\n\n',{status:200});};
+  const adapter=createApiAdapter(()=>({id,kind:'api',enabled:true}),{getInMainOnly:()=> 'fixture-key'},fetcher);
+  try {for await(const event of adapter.stream({...request,providerId:id,systemPrompt:'SYSTEM_ONLY',images:[{mediaType:'image/png',data:'AA=='}]},new AbortController().signal)){void event;}}catch { /* This assertion concerns the outgoing body, not the intentionally empty stream. */ }
+  expect(body.tools).toBeUndefined();expect(JSON.stringify(body)).toContain(id==='anthropic-api'?'"type":"image"':'data:image/png;base64,AA==');
+  const messages=body.messages as {role:string;content:unknown}[];
+  if(id==='anthropic-api')expect(body.system).toBe('SYSTEM_ONLY');else expect(messages[0]).toEqual({role:'system',content:'SYSTEM_ONLY'});
+ }
 });

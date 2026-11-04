@@ -1,27 +1,38 @@
+import { useSidebarOverlay } from './use-sidebar-overlay';
+import { applyAppearance } from '../settings/appearance';
+import { Button } from '../components/ui/button';
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup } from '../components/ui/sidebar';
+import { transitionTo } from "./view-transition";
 import { desktop } from "../bridge";
 import { applyLanguage } from "../i18n";
 import {
   createContext,
+  useCallback,
+  startTransition,
   useContext,
   useState,
+  useRef,
   useEffect,
   type ReactNode,
 } from "react";
-import { Home, Library, ArrowLeft, Menu } from "lucide-react";
+import { Home, BookOpen, ArrowLeft, Menu, Settings, GraduationCap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
 import type { Document } from "../../shared";
 import type { LibraryQuery } from "../../shared/library";
 import "./shell.css";
-export type View = "home" | "library" | "workspace";
+export type View = "home" | "library" | "workspace" | "welcome" | "courses";
 export type Route = {
   view: View;
+  courseId?: string | undefined;
   documentId?: Document["id"] | undefined;
   query?: Partial<LibraryQuery> | undefined;
   title?: string | undefined;
+  aiParse?: boolean;
 };
-type Navigation = { route: Route; navigate: (route: Route | View) => void };
+type Navigation = { route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void };
 const NavigationContext = createContext<Navigation | null>(null);
+export function useOptionalNavigation() { return useContext(NavigationContext); }
 export function useNavigate() {
   const value = useContext(NavigationContext);
   if (!value) throw new Error("Navigation provider missing");
@@ -36,10 +47,18 @@ export function AppShell({
 }) {
   useTranslation();
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  const closeSidebar = useCallback(() => setSidebarVisible(false), []);
+  const sidebarOverlay = useSidebarOverlay(closeSidebar);
+  useEffect(() => {
+    const pointer=()=>{document.documentElement.dataset.inputModality='pointer';};
+    const keyboard=(event:KeyboardEvent)=>{if(['Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))document.documentElement.dataset.inputModality='keyboard';};
+    document.addEventListener('pointerdown',pointer,true);document.addEventListener('keydown',keyboard,true);
+    return()=>{document.removeEventListener('pointerdown',pointer,true);document.removeEventListener('keydown',keyboard,true);};
+  }, []);
   useEffect(() => {
     void desktop
       .invoke("settings:get", {})
-      .then((s) => applyLanguage(s.language));
+      .then((s) => { applyAppearance(s); return applyLanguage(s.language); });
     void desktop.invoke("settings:appearance", {}).then((a) => {
       document.documentElement.dataset.reducedTransparency = String(
         a.reducedTransparency,
@@ -51,60 +70,80 @@ export function AppShell({
       const saved = JSON.parse(
         localStorage.getItem("vstudy-route") ?? "null",
       ) as Route | null;
-      if (saved && ["home", "library", "workspace"].includes(saved.view))
+      if (saved && ["home", "library", "workspace", "courses"].includes(saved.view))
         return saved;
     } catch {
       /* Storage can be unavailable. */
     }
     return { view: "home" };
   });
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 999px)');
+    const update = () => { if (media.matches && (route.view === 'workspace' || window.innerWidth < 720)) setSidebarVisible(false); };
+    update(); media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, [route.view]);
+  useEffect(() => {
+    if (route.view === 'welcome' || route.aiParse) return;
+    const frame = requestAnimationFrame(() => { document.getElementById("shell-content")?.focus(); });
+    return () => cancelAnimationFrame(frame);
+  }, [route.view, route.documentId, route.courseId]);
+  const previous = useRef<Route>({ view: "home" });
+  const returnSettings = useRef(false);
+  const returnFocus = useRef<HTMLElement | null>(null);
   const navigate: Navigation["navigate"] = (value) => {
+    if (sidebarOverlay) closeSidebar();
     const next = typeof value === "string" ? { view: value } : value;
-    setRoute(next);
-    localStorage.setItem("vstudy-route", JSON.stringify(next));
+    if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = route; returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
+    if (next.view === 'welcome' || route.view === 'welcome') startTransition(() => setRoute(next));
+    else if ((next.view === 'workspace' && next.documentId) || (route.view === 'workspace' && next.view === 'library')) transitionTo(() => setRoute(next), false, true);
+    else transitionTo(() => setRoute(next));
+    try { localStorage.setItem("vstudy-route", JSON.stringify(next)); } catch { /* Route persistence is optional. */ }
   };
   return (
-    <NavigationContext.Provider value={{ route, navigate }}>
-      <div className="app-shell">
+    <NavigationContext.Provider value={{ route, navigate, closeWelcome: () => { navigate(previous.current); setTimeout(() => { const target = returnFocus.current; if (returnSettings.current) { window.dispatchEvent(new Event("vstudy:open-settings")); setTimeout(() => document.getElementById("welcome-settings-entry")?.focus(), 100); } else if (target?.isConnected) target.focus(); else document.getElementById("welcome-entry")?.focus(); }, 350); } }}>
+      <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view} data-sidebar-overlay={sidebarOverlay}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
         </a>
-        <aside
+        <Sidebar role="complementary" collapsible="none"
           hidden={!sidebarVisible}
           className="shell-sidebar"
           aria-label={tr("common:document_library")}
         >
-          <div className="shell-brand">{tr("library:brand")}</div>
-          <nav>
-            <button
+          <SidebarHeader className="shell-brand">{tr("library:brand")}</SidebarHeader><SidebarContent>
+          <SidebarGroup><SidebarMenu>
+            <SidebarMenuItem><SidebarMenuButton
               aria-current={route.view === "home" ? "page" : undefined}
               onClick={() => navigate("home")}
             >
               <Home />
               {tr("library:home")}
-            </button>
-            <button
+            </SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton
+              data-parent={!!route.query?.folderId}
               aria-current={route.view === "library" ? "page" : undefined}
               onClick={() => navigate("library")}
             >
-              <Library />
+              <BookOpen />
               {tr("common:library")}
-            </button>
-          </nav>
-          {sidebar}
-        </aside>
+            </SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "courses" ? "page" : undefined} onClick={() => navigate("courses")}><GraduationCap />{tr("moodle:courses")}</SidebarMenuButton></SidebarMenuItem>
+          </SidebarMenu></SidebarGroup>
+          {sidebar}</SidebarContent><SidebarFooter><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
+        </Sidebar>
         <div className="shell-main">
           <header className="shell-topbar">
-            <button
+            <Button variant="ghost"
               className="shell-toggle"
               aria-label={tr("common:toggle_document_library")}
               aria-expanded={sidebarVisible}
               onClick={() => setSidebarVisible((v) => !v)}
             >
               <Menu />
-            </button>
+            </Button>
             {route.view === "workspace" ? (
-              <button
+              <Button variant="ghost"
                 onClick={() =>
                   navigate({
                     view: "library",
@@ -115,20 +154,20 @@ export function AppShell({
               >
                 <ArrowLeft />
                 {route.title ?? tr("common:library")}
-              </button>
+              </Button>
             ) : (
               <span>
                 {route.view === "home"
                   ? tr("library:home")
-                  : tr("common:library")}
+                  : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
               </span>
             )}
           </header>
-          <div id="shell-content" className="shell-content" tabIndex={-1}>
+          <div id="shell-content" role={route.view === "library" ? "main" : undefined} className="shell-content" tabIndex={-1}>
             {children}
           </div>
         </div>
-      </div>
+      </div></SidebarProvider>
     </NavigationContext.Provider>
   );
 }

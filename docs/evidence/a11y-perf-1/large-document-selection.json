@@ -1,0 +1,121 @@
+{
+ "select": {
+  "small(284 B)": {
+   "1 paragraph, ~5% into doc": {
+    "fabMs": 4,
+    "chars": 62,
+    "blocks": 4,
+    "nodes": 98
+   },
+   "1 paragraph, middle": {
+    "fabMs": 2,
+    "chars": 18,
+    "blocks": 4,
+    "nodes": 98
+   },
+   "1 paragraph, near end": {
+    "fabMs": 1,
+    "chars": 52,
+    "blocks": 4,
+    "nodes": 98
+   },
+   "~5% of doc (multi-paragraph)": {
+    "fabMs": 5,
+    "chars": 18,
+    "blocks": 4,
+    "nodes": 98
+   },
+   "~30% of doc": {
+    "fabMs": 1,
+    "chars": 140,
+    "blocks": 4,
+    "nodes": 98
+   }
+  },
+  "medium(210 KB)": {
+   "1 paragraph, ~5% into doc": {
+    "fabMs": 11,
+    "chars": 2288,
+    "blocks": 222,
+    "nodes": 3967
+   },
+   "1 paragraph, middle": {
+    "fabMs": 3,
+    "chars": 1890,
+    "blocks": 222,
+    "nodes": 3967
+   },
+   "1 paragraph, near end": {
+    "fabMs": 2,
+    "chars": 1878,
+    "blocks": 222,
+    "nodes": 3967
+   },
+   "~5% of doc (multi-paragraph)": {
+    "fabMs": 4,
+    "chars": 11378,
+    "blocks": 222,
+    "nodes": 3967
+   },
+   "~30% of doc": {
+    "fabMs": 11,
+    "chars": 57595,
+    "blocks": 222,
+    "nodes": 3967
+   }
+  },
+  "big(2 MB)": {
+   "1 paragraph, ~5% into doc": {
+    "fabMs": 10,
+    "chars": 70,
+    "blocks": 2094,
+    "nodes": 37519
+   },
+   "1 paragraph, middle": {
+    "fabMs": 11,
+    "chars": 1894,
+    "blocks": 2094,
+    "nodes": 37519
+   },
+   "1 paragraph, near end": {
+    "fabMs": 10,
+    "chars": 1466,
+    "blocks": 2094,
+    "nodes": 37519
+   },
+   "~5% of doc (multi-paragraph)": {
+    "fabMs": 24,
+    "chars": 99236,
+    "blocks": 2094,
+    "nodes": 37519
+   },
+   "~30% of doc": {
+    "fabMs": 96,
+    "chars": 549167,
+    "blocks": 2094,
+    "nodes": 37519
+   }
+  }
+ },
+ "scroll": {
+  "big": {
+   "n": 359,
+   "min": 14.7,
+   "p50": 16.7,
+   "p95": 18.3,
+   "max": 33.4,
+   "mean": 16.7,
+   "over25": 1,
+   "over50": 0,
+   "over100": 0,
+   "scrollHeightPx": 706475,
+   "approxA4pages": 642
+  }
+ },
+ "mem": {
+  "big": {
+   "heapMB": 51,
+   "dom": 37727
+  }
+ }
+}

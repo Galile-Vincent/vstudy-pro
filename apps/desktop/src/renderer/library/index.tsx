@@ -1,3 +1,13 @@
+import type { CSSProperties } from 'react';
+import { Badge } from '../components/ui/badge';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
+import './ui3.css';
+import { Popover, PopoverTrigger, PopoverContent } from '../components/ui/popover';
+import { Checkbox } from '../components/checkbox';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { contentLanguage } from "../../shared/content-language";
+import { Select } from "../components/select";
 import {
   useCallback,
   useEffect,
@@ -12,7 +22,7 @@ import {
   MoreHorizontal,
   LayoutGrid,
   List,
-  FolderOpen,
+  FolderOpen, SlidersHorizontal, AlertTriangle, LoaderCircle, X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { LibraryQuery } from "../../shared/library";
@@ -22,9 +32,11 @@ import { desktop } from "../bridge";
 import { useFormat } from "../i18n";
 import { errorText } from "../status";
 import { useNavigate } from "../shell";
-import { LibraryDialog, useLibraryPrompt } from "./dialog";
+import { LibraryMenus } from "./menus";
+import { useLibraryPrompt } from "./dialog";
 import {
   changed,
+  reorderDestination,
   importFiles,
   moveDocuments,
   selectedRange,
@@ -33,6 +45,21 @@ import {
 } from "./model";
 import "./library.css";
 export { LibrarySidebar } from "./sidebar";
+function folderPath(folders: Folder[], id: string | null | undefined) {
+  const names: string[] = [];
+  for (let level = 0; id && level < 8; level++) { const folder = folders.find(f => f.id === id); if (!folder) break; names.unshift(folder.name); id = folder.parentId; }
+  return names.join(' › ');
+}
+export function formatSize(bytes: number | null, locale: string) {
+    if (bytes === null) return tr("library:unknown_size");
+  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
+  const exponent = Math.min(3, Math.max(0, Math.floor(Math.log10(Math.max(1, bytes)) / 3)));
+  return new Intl.NumberFormat(locale, { style: 'unit', unitDisplay:'long', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
+}
+function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpen:()=>void}) {
+ const ref=useRef<HTMLButtonElement>(null);const [visible,setVisible]=useState(false);
+ return <Tooltip delayDuration={500} open={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}}><TooltipTrigger asChild><Button ref={ref} variant="ghost" className="document-title" tabIndex={-1} lang={contentLanguage(title)} onClick={onOpen}>{title}</Button></TooltipTrigger><TooltipContent className="document-tooltip"><div>{title}</div><div>{details}</div></TooltipContent></Tooltip>;
+}
 const defaults: LibraryQuery = { sort: "manual", direction: "asc", limit: 50 };
 export function Snippet({ text }: { text: string }) {
   return (
@@ -64,6 +91,11 @@ export function LibraryView() {
     ...JSON.parse(localStorage.getItem(`library-sort:${viewKey}`) ?? "{}"),
     ...route.query,
   }));
+  const [customDates,setCustomDates] = useState(false);
+  const [filtersOpen,setFiltersOpen] = useState(false);
+  useEffect(() => {
+    if (filtersOpen) document.querySelector<HTMLElement>('.filter-panel input,.filter-panel button')?.focus();
+  }, [filtersOpen]);
   const [text, setText] = useState(route.query?.text ?? ""),
     [items, setItems] = useState<Item[]>([]),
     [cursor, setCursor] = useState<LibraryQuery["cursor"]>(),
@@ -96,6 +128,7 @@ export function LibraryView() {
     [tags, setTags] = useState<IpcResponse<"library:tags:list">>([]),
     [undo, setUndo] = useState<(() => Promise<void>) | null>(null),
     [notice, setNotice] = useState("");
+  const menuAnchor = useRef<HTMLElement | null>(null);
   const scroller = useRef<HTMLDivElement>(null),
     anchor = useRef(""),
     generation = useRef(0),
@@ -116,7 +149,7 @@ export function LibraryView() {
             ? q
             : { ...q, text: text.trim() || undefined, cursor: undefined },
         ),
-      250,
+      150,
     );
     return () => clearTimeout(timer);
   }, [text]);
@@ -161,7 +194,7 @@ export function LibraryView() {
           : 1;
         while (
           page.nextCursor &&
-          (rows.length * 104) / multiplier < restoreTop.current + 800
+          (rows.length * 64) / multiplier < restoreTop.current + 800
         ) {
           const next = await desktop.invoke("library:documents:list", {
             ...query,
@@ -198,12 +231,23 @@ export function LibraryView() {
     }, 30000);
     return () => clearTimeout(timer);
   }, [undo]);
+  const focusAfter = useRef<string | null>(null);
+  const [activeRow, setActiveRow] = useState<string>();
+  useLayoutEffect(() => {
+    if (!loading && focusAfter.current) {
+      const target = document.getElementById(focusAfter.current);
+      (target ?? scroller.current ?? document.getElementById("shell-content"))?.focus();
+      focusAfter.current = null;
+    }
+  }, [loading, items]);
   const run = async (action: () => Promise<unknown>) => {
+    const focused = document.activeElement as HTMLElement | null;
+    focusAfter.current = focused?.closest<HTMLElement>("[data-index]")?.id ?? menuAnchor.current?.closest<HTMLElement>("[data-index]")?.id ?? "shell-content";
     try {
       await action();
       changed();
     } catch (e) {
-      setError(errorText(e));
+      setNotice(errorText(e));
     }
   };
   const more = async () => {
@@ -285,33 +329,42 @@ export function LibraryView() {
     setMenu(null);
   };
   const reorder = async (item: Item, delta: number) => {
-    const index = items.indexOf(item),
-      before = items[index + (delta < 0 ? -1 : 2)];
-    if (index + delta < 0 || index + delta >= items.length) return;
-    await run(() =>
-      desktop.invoke("library:documents:move", {
-        documentIds: [item.document.id],
-        folderId: item.folderId,
-        ...(before ? { beforeId: before.document.id } : {}),
-      }),
-    );
+    const destination = reorderDestination(items, items.indexOf(item), delta);
+    if (!destination) return;
+    await run(() => desktop.invoke("library:documents:move", { documentIds: [item.document.id], ...destination }));
   };
   const filters = Object.entries(query).filter(
     ([key, value]) =>
-      !["sort", "direction", "limit", "cursor", "view", "text"].includes(key) &&
+      !["sort", "direction", "limit", "cursor", "view", "text", "folderId", "subfolders"].includes(key) &&
       value !== undefined,
   );
-  const rowHeight = grid ? 216 : query.text ? 128 : 104,
+  const bulkBar=useRef<HTMLDivElement>(null);
+  const [bulkHeight,setBulkHeight]=useState(0);
+  useLayoutEffect(()=>{const bar=bulkBar.current;if(!bar){setBulkHeight(0);return;}const observer=new ResizeObserver(()=>setBulkHeight(bar.getBoundingClientRect().height));observer.observe(bar);return()=>observer.disconnect();},[selected.length]);
+  const [textScale,setTextScale]=useState(()=>parseFloat(getComputedStyle(document.documentElement).fontSize));
+  useEffect(()=>{const update=()=>setTextScale(parseFloat(getComputedStyle(document.documentElement).fontSize));const observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['style']});window.addEventListener('resize',update);return()=>{observer.disconnect();window.removeEventListener('resize',update);};},[]);
+  const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
+  const rowHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--library-card-height")) : rowRem * textScale,
     columns = grid
       ? Math.max(1, Math.floor((scroller.current?.clientWidth ?? 700) / 260))
       : 1,
-    start = Math.max(0, Math.floor(top / rowHeight) - 2) * columns,
+    start = Math.min(Math.max(0,items.length-columns),Math.max(0, Math.floor(top / rowHeight) - 2) * columns),
     end = Math.min(
       items.length,
       start +
         Math.ceil((scroller.current?.clientHeight ?? 800) / rowHeight + 5) *
           columns,
     );
+  useLayoutEffect(()=>{
+    const viewport=scroller.current;
+    if(!viewport||!selected.length||!bulkHeight)return;
+    const index=items.findIndex(item=>item.document.id===selected[selected.length-1]);
+    if(index<0)return;
+    const rowTop=Math.floor(index/columns)*rowHeight;
+    const available=Math.max(rowHeight,viewport.clientHeight-bulkHeight-24);
+    if(rowTop<viewport.scrollTop)viewport.scrollTop=rowTop;
+    else if(rowTop+rowHeight>viewport.scrollTop+available)viewport.scrollTop=rowTop+rowHeight-available;
+  },[selected,bulkHeight,rowHeight,columns,items]);
   return (
     <section
       onDragOver={(e) => e.preventDefault()}
@@ -330,20 +383,21 @@ export function LibraryView() {
     >
       <div className="library-title">
         <div>
-          <h1>{route.title ?? tr("common:library")}</h1>
-          <p className="muted">{tr("library:subtitle")}</p>
+          <h1>{route.title ?? (folderPath(folders, query.folderId) || tr("common:library"))}</h1>
+          <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) + (cursor ? "+" : "") })}</p>
         </div>
-        <button
+        <Button variant="outline"
+          hidden={!loading && !items.length && !text && !filters.length}
           data-testid="import-document"
           onClick={() => void run(() => importFiles(query.folderId ?? null))}
         >
           {tr("common:import_document")}
-        </button>
+        </Button>
       </div>
-      <div className="library-toolbar">
+      <div className="library-toolbar" hidden={!loading && !items.length && !text && !filters.length && !query.folderId}>
         <label className="library-search">
           <Search aria-hidden="true" />
-          <input
+          <Input
             aria-label={tr("library:search")}
             placeholder={tr("library:search")}
             value={text}
@@ -351,15 +405,15 @@ export function LibraryView() {
             onChange={(e) => setText(e.target.value)}
           />
         </label>
-        <details className="filter-popover">
-          <summary>{tr("library:filters")}</summary>
-          <div className="filter-panel">
+        <Popover open={filtersOpen} onOpenChange={setFiltersOpen}><PopoverTrigger asChild>
+          <Button variant="outline" className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel"><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button></PopoverTrigger>
+          <PopoverContent id="library-filter-panel" aria-label={tr("library:filters")} align="start" className="filter-panel">
             {(
               ["type", "status", "converter", "tagId", "folderId"] as const
             ).map((key) => (
               <label key={key}>
                 {tr(`library:${key}`)}
-                <select
+                <Select
                   aria-label={tr(`library:${key}`)}
                   value={String(query[key] ?? "")}
                   onChange={(e) =>
@@ -400,13 +454,12 @@ export function LibraryView() {
                             {tr(`library:${v}`)}
                           </option>
                         ))}
-                </select>
+                </Select>
               </label>
             ))}
             {(["subfolders", "hasChats", "pinned"] as const).map((key) => (
               <label key={key}>
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={query[key] ?? false}
                   onChange={(e) =>
                     setQuery((q) => ({
@@ -418,34 +471,17 @@ export function LibraryView() {
                 {tr(`library:${key}`)}
               </label>
             ))}
-            {(["addedAfter", "addedBefore", "minSize", "maxSize"] as const).map(
-              (key) => (
-                <label key={key}>
-                  {tr(`library:${key}`)}
-                  <input
-                    type={key.startsWith("added") ? "date" : "number"}
-                    min="0"
-                    value={String(query[key] ?? "").slice(
-                      0,
-                      key.startsWith("added") ? 10 : undefined,
-                    )}
-                    onChange={(e) =>
-                      setQuery((q) => ({
-                        ...q,
-                        [key]: e.target.value
-                          ? key.startsWith("added")
-                            ? new Date(e.target.value).toISOString()
-                            : Number(e.target.value)
-                          : undefined,
-                      }))
-                    }
-                  />
-                </label>
-              ),
-            )}
-          </div>
-        </details>
-        <select
+            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setCustomDates(true);return;} setCustomDates(false); setQuery(q => ({...q, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
+              <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
+            </Select></label>
+            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} value={query[key]?.slice(0,10) ?? ''} onChange={e => setQuery(q => ({...q,[key]:e.target.value ? new Date(e.target.value).toISOString() : undefined}))}/></label>)}
+            <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
+              <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
+            </Select></label>
+            <footer><Button variant="outline" className="ghost" onClick={() => setQuery(defaults)}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
+          </PopoverContent>
+        </Popover>
+        <Select
           aria-label={tr("library:sort")}
           value={query.sort}
           onChange={(e) =>
@@ -462,8 +498,8 @@ export function LibraryView() {
               </option>
             ),
           )}
-        </select>
-        <button
+        </Select>
+        <Button variant="outline"
           aria-label={tr("library:direction")}
           onClick={() =>
             setQuery((q) => ({
@@ -473,8 +509,8 @@ export function LibraryView() {
           }
         >
           {query.direction === "asc" ? "↑" : "↓"}
-        </button>
-        <button
+        </Button>
+        <Button variant="outline"
           aria-label={tr("library:viewToggle")}
           aria-pressed={grid}
           onClick={() =>
@@ -484,12 +520,12 @@ export function LibraryView() {
             })
           }
         >
-          {grid ? <List /> : <LayoutGrid />}
-        </button>
+          {grid ? <LayoutGrid /> : <List />}
+        </Button>
       </div>
       <div className="filter-chips">
         {filters.map(([key, value]) => (
-          <button
+          <Button variant="outline"
             key={key}
             onClick={() => setQuery((q) => ({ ...q, [key]: undefined }))}
           >
@@ -498,16 +534,16 @@ export function LibraryView() {
               ? tr("library:yes")
               : (folders.find((f) => f.id === value)?.name ??
                 tags.find((t) => t.id === value)?.name ??
-                String(value))}{" "}
-            ×
-          </button>
+                (["status", "type"].includes(key) ? tr(`library:${value}`) : String(value)))}{" "}
+            <X size={12} aria-hidden="true" />
+          </Button>
         ))}
         {filters.length > 0 && (
           <>
-            <button onClick={() => setQuery({ ...defaults, ...route.query })}>
+            <Button variant="outline" className="ghost" onClick={() => setQuery({ ...defaults, ...route.query })}>
               {tr("library:clearFilters")}
-            </button>
-            <button
+            </Button>
+            <Button variant="outline" className="ghost"
               onClick={async () => {
                 const name = await prompt(tr("library:saveFilter"));
                 if (name)
@@ -521,27 +557,27 @@ export function LibraryView() {
               }}
             >
               {tr("library:saveFilter")}
-            </button>
+            </Button>
           </>
         )}
       </div>
       {selected.length > 0 && (
-        <div className="bulk-bar">
+        <div className="bulk-bar" ref={bulkBar}>
           <span role="status">
             {tr("library:selected", {
               count: selected.length,
               formatted: format.number(selected.length),
             })}
           </span>
-          <button
+          <Button variant="outline"
             onClick={async () => {
               setMenu(null);
               setMove(true);
             }}
           >
             {tr("library:move")}
-          </button>
-          <button
+          </Button>
+          <Button variant="outline"
             onClick={() =>
               void run(async () => {
                 for (const documentId of selected)
@@ -553,22 +589,22 @@ export function LibraryView() {
             }
           >
             {tr("library:pin")}
-          </button>
-          <button onClick={() => void remove(selected)}>
+          </Button>
+          <Button variant="outline" onClick={() => void remove(selected)}>
             {tr("library:delete")}
-          </button>
-          <button onClick={() => setSelected([])}>
+          </Button>
+          <Button variant="outline" onClick={() => setSelected([])}>
             {tr("library:clearSelection")}
-          </button>
+          </Button>
         </div>
       )}
-      {error ? (
+      {text.trim().length === 1 ? <p role="status">{tr('errors:search_refine')}</p> : error ? (
         <div className="empty" role="alert">
           <h2>{tr("library:error")}</h2>
           <p>{error}</p>
-          <button onClick={refresh}>{tr("library:retry")}</button>
+          <Button variant="outline" onClick={refresh}>{tr("library:retry")}</Button>
         </div>
-      ) : loading ? (
+      ) : loading && !items.length ? (
         <div
           className="library-skeleton"
           role="status"
@@ -584,10 +620,10 @@ export function LibraryView() {
           <h2>
             {tr(
               `library:empty_${text ? "search" : filters.length ? "filter" : query.folderId ? "folder" : "library"}`,
-            )}
+              { query: text })}
           </h2>
-          <p>{tr("library:emptyHint")}</p>
-          <button
+          <p>{tr(text ? "library:searchHint" : filters.length ? "library:filterHint" : "library:emptyHint")}</p>
+          <Button variant="outline"
             onClick={() =>
               text
                 ? setText("")
@@ -603,18 +639,18 @@ export function LibraryView() {
                   ? "library:clearFilters"
                   : "common:import_document",
             )}
-          </button>
+          </Button>
+          {!text && !filters.length && <Button variant="outline" className="ghost" onClick={() => void run(async () => { await desktop.invoke('documents:importSample',{language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}); changed(); })}>{tr('onboarding:sample')}</Button>}
         </div>
       ) : (
         <div
           ref={scroller}
           className="library-results"
           data-view={grid ? "grid" : "list"}
-          role="grid"
-          aria-colcount={1}
-          aria-rowcount={items.length}
+          data-bulk={selected.length>0}
+          style={{'--bulkbar-h':`${bulkHeight}px`} as CSSProperties}
+          role="list"
           aria-label={tr("library:documents")}
-          aria-multiselectable="true"
           tabIndex={0}
           onScroll={(e) => {
             const el = e.currentTarget;
@@ -658,24 +694,24 @@ export function LibraryView() {
               const d = item.document,
                 index = start + offset;
               return (
-                <article
+                <div
                   key={d.id}
+                  id={`library-document-${d.id}`}
                   data-index={index}
-                  role="row"
-                  aria-rowindex={index + 1}
-                  aria-selected={selected.includes(d.id)}
-                  tabIndex={0}
+                  role="listitem"
+                  aria-posinset={index + 1}
+                  aria-setsize={items.length}
+                  data-selected={selected.includes(d.id)}
+                  tabIndex={activeRow === d.id || (!activeRow && index === 0) ? 0 : -1}
+                  onFocus={() => { setActiveRow(d.id);  }}
+                  onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: grid
-                      ? "calc(var(--library-card-height) - var(--space-3))"
-                      : rowHeight,
+                    height: rowHeight,
                     position: "absolute",
                     top: Math.floor(index / columns) * rowHeight,
                     left: `${((index % columns) * 100) / columns}%`,
-                    width: grid
-                      ? `calc(${100 / columns}% - var(--space-3))`
-                      : `${100 / columns}%`,
+                    width: grid ? `calc(${100 / columns}% - var(--space-4))` : "100%",
                   }}
                   draggable
                   onDragStart={(e) => {
@@ -737,7 +773,7 @@ export function LibraryView() {
                   onDoubleClick={() => open(item)}
                   onContextMenu={(e) => {
                     e.preventDefault();
-                    setMenu(item);
+                    menuAnchor.current = e.currentTarget; setMenu(item);
                   }}
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return;
@@ -760,6 +796,8 @@ export function LibraryView() {
                                   index + (e.key === "ArrowUp" ? -1 : 1),
                                 ),
                               );
+                      if (e.shiftKey) setSelected(selectedRange(items, anchor.current ?? d.id, items[next]!.document.id));
+                      if (!anchor.current) anchor.current = d.id;
                       if (scroller.current) {
                         scroller.current.scrollTop =
                           Math.floor(next / columns) * rowHeight;
@@ -784,7 +822,7 @@ export function LibraryView() {
                       (e.shiftKey && e.key === "F10")
                     ) {
                       e.preventDefault();
-                      setMenu(item);
+                      menuAnchor.current = e.currentTarget; setMenu(item);
                     }
                     if (
                       (e.metaKey || e.ctrlKey) &&
@@ -796,32 +834,24 @@ export function LibraryView() {
                     }
                   }}
                 >
-                  <div role="gridcell" className="document-cell">
+{grid ? <>                  <div className="document-cell">
                     <FileText className="document-glyph" aria-hidden="true" />
                     <div className="document-info">
-                      <button
+                      <Button variant="outline"
                         className="document-title"
+                        tabIndex={-1}
+                        lang={contentLanguage(d.title)}
                         onClick={() => open(item)}
                       >
                         {d.title}
-                      </button>
-                      <div className="document-meta">
-                        <span>
-                          {folders.find((f) => f.id === item.folderId)?.name ??
-                            tr("library:unfiled")}
-                        </span>
-                        <span>
-                          {format.number(item.sizeBytes)} {tr("library:bytes")}
-                        </span>
-                        <span>
-                          {tr("library:convertedFrom", {
-                            name: d.sourceName,
-                            converter: d.converter,
-                          })}
-                        </span>
-                        <span className="status-badge">
-                          {tr(`library:${d.status}`)}
-                        </span>
+                      </Button>
+                      <div className="document-meta" title={`${d.sourceName} · ${d.converter}`}>
+                        {!query.folderId && <span>{folderPath(folders, item.folderId) || tr("library:unfiled")}</span>}
+                        <span>{d.sourceName.split('.').pop()?.toUpperCase()}</span>
+                        {item.pageCount != null && <span>{tr("library:pages", {count:item.pageCount, formatted:format.number(item.pageCount)})}</span>}
+                        <span>{formatSize(item.sizeBytes, document.documentElement.lang)}</span>
+                        <span>{format.date(d.createdAt)}</span>
+                        {d.status !== 'ready' && <span className="status-badge" data-status={d.status}>{d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}{tr(`library:${d.status}`)}</span>}
                       </div>
                       {item.snippet && (
                         <p className="search-snippet">
@@ -834,22 +864,8 @@ export function LibraryView() {
                             {t.name}
                           </span>
                         ))}
-                        <button onClick={() => open(item)}>
-                          {tr("library:markdown")}
-                        </button>
-                        <button
-                          onClick={() =>
-                            void run(() =>
-                              desktop.invoke("library:openOriginal", {
-                                documentId: d.id,
-                              }),
-                            )
-                          }
-                        >
-                          {tr("library:original")}
-                        </button>
                         {d.status === "failed" && (
-                          <button
+                          <Button variant="outline"
                             onClick={() =>
                               void run(() =>
                                 desktop.invoke("documents:retry", {
@@ -859,7 +875,7 @@ export function LibraryView() {
                             }
                           >
                             {tr("library:retry")}
-                          </button>
+                          </Button>
                         )}
                         {d.status === "converting" && (
                           <progress
@@ -870,8 +886,9 @@ export function LibraryView() {
                         )}
                       </div>
                     </div>
-                    <button
-                      aria-label={tr("library:pin")}
+                    <Button variant="outline"
+                      aria-label={`${tr("library:pin")}: ${d.title}`}
+                      tabIndex={-1}
                       aria-pressed={item.pinned}
                       onClick={() =>
                         void run(() =>
@@ -883,22 +900,37 @@ export function LibraryView() {
                       }
                     >
                       <Pin />
-                    </button>
-                    <button
+                    </Button>
+                    <Button variant="outline"
                       aria-label={tr("library:actions", { name: d.title })}
-                      onClick={() => setMenu(item)}
+                      tabIndex={-1}
+                      onClick={(e) => { menuAnchor.current = e.currentTarget; setMenu(item); }}
                     >
                       <MoreHorizontal />
-                    </button>
+                    </Button>
+                  </div></> : <>                  <div className="document-gutter" title={d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):undefined}>
+                    {d.status==='failed'?<AlertTriangle className="failed"/>:d.status==='converting'?<LoaderCircle/>:item.pinned?<Pin fill="currentColor"/>:null}
+                    <span className="sr-only">{d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):''}</span>
                   </div>
-                </article>
+                  <div className="document-title-cell">
+                    <DocumentTitle title={d.title} onOpen={()=>open(item)} details={`${folderPath(folders,item.folderId)||tr('library:unfiled')} · ${d.sourceName.split('.').pop()?.toUpperCase()} · ${item.pageCount!=null?tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)}):''} · ${formatSize(item.sizeBytes,document.documentElement.lang)} · ${format.date(d.createdAt)}`}/>
+
+                    {item.snippet&&<p className="search-snippet"><Snippet text={item.snippet}/></p>}
+                  </div>
+                  <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge variant="outline" key={t.id}>{t.name}</Badge>)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
+                  <div className="document-folder">{folderPath(folders,item.folderId)||tr('library:unfiled')}</div>
+                  <div className="document-size">{item.pageCount!=null&&<>{tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)})} · </>}{item.sizeBytes===null?tr("library:unknown_size"):new Intl.NumberFormat(document.documentElement.lang,{style:"unit",unit:"kilobyte",unitDisplay:"short",maximumFractionDigits:1}).format(item.sizeBytes/1000)}</div>
+                  <div className="document-added">{d.status==='failed'?<Button variant="ghost" size="sm" onClick={()=>void run(()=>desktop.invoke('documents:retry',{documentId:d.id}))}>{tr('library:retry')}</Button>:d.status==='converting'?<progress value={progress[d.id]?.page} max={progress[d.id]?.total} aria-label={tr('common:conversion_progress')}/>:format.date(d.createdAt)}</div>
+                  <div className="document-type"><Badge variant="secondary">{d.sourceName.split('.').pop()?.toUpperCase()}</Badge></div>
+                  <Button variant="ghost" size="icon-sm" className="document-actions" aria-label={tr('library:actions',{name:d.title})} tabIndex={-1} onClick={e=>{menuAnchor.current=e.currentTarget;setMenu(item);}}><MoreHorizontal/></Button></>}
+                </div>
               );
             })}
           </div>
           {cursor && (
-            <button className="load-more" onClick={() => void more()}>
+            <Button variant="outline" className="load-more" onClick={() => void more()}>
               {tr("library:loadMore")}
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -912,7 +944,7 @@ export function LibraryView() {
         <div className="library-toast" role="status">
           {notice}
           {undo && (
-            <button
+            <Button variant="outline"
               onClick={() =>
                 void run(async () => {
                   await undo();
@@ -922,157 +954,11 @@ export function LibraryView() {
               }
             >
               {tr("library:undo")}
-            </button>
+            </Button>
           )}
         </div>
       )}
-      {menu && !move && !tagging && (
-        <LibraryDialog
-          title={tr("library:actions", { name: menu.document.title })}
-          onClose={() => setMenu(null)}
-        >
-          <div className="document-menu">
-            <button onClick={() => open(menu)}>{tr("library:open")}</button>
-            <button
-              onClick={async () => {
-                const title = await prompt(
-                  tr("library:rename"),
-                  menu.document.title,
-                );
-                if (title)
-                  void run(() =>
-                    desktop.invoke("library:documents:rename", {
-                      documentId: menu.document.id,
-                      title,
-                    }),
-                  );
-                setMenu(null);
-              }}
-            >
-              {tr("library:rename")}
-            </button>
-            <button onClick={() => setMove(true)}>{tr("library:move")}</button>
-            <button
-              onClick={() =>
-                void run(() =>
-                  desktop.invoke("library:documents:pin", {
-                    documentId: menu.document.id,
-                    pinned: !menu.pinned,
-                  }),
-                )
-              }
-            >
-              {tr("library:pin")}
-            </button>
-            <button onClick={() => setTagging(true)}>
-              {tr("library:tag")}
-            </button>
-            {(
-              [
-                "library:reveal",
-                "library:exportMarkdown",
-                "library:exportOriginal",
-                "documents:reconvert",
-              ] as const
-            ).map((channel) => (
-              <button
-                key={channel}
-                onClick={() =>
-                  void run(() =>
-                    desktop.invoke(channel, { documentId: menu.document.id }),
-                  )
-                }
-              >
-                {tr(`library:${channel.split(":")[1]}`)}
-              </button>
-            ))}
-            <button
-              onClick={() => void remove(ids.length ? ids : [menu.document.id])}
-            >
-              {tr("library:delete")}
-            </button>
-          </div>
-        </LibraryDialog>
-      )}
-      {move && (
-        <LibraryDialog
-          title={tr("library:move")}
-          onClose={() => {
-            setMove(false);
-            setMenu(null);
-          }}
-        >
-          <div className="folder-picker">
-            <button onClick={() => void moveTo(null)}>
-              {tr("library:unfiled")}
-            </button>
-            {folders.map((f) => (
-              <button key={f.id} onClick={() => void moveTo(f.id)}>
-                {f.name}
-              </button>
-            ))}
-          </div>
-        </LibraryDialog>
-      )}
-      {menu && tagging && (
-        <LibraryDialog
-          title={tr("library:tag")}
-          onClose={() => {
-            setTagging(false);
-            setMenu(null);
-          }}
-        >
-          <div className="folder-picker">
-            {tags.map((tag) => (
-              <label key={tag.id}>
-                <input
-                  type="checkbox"
-                  checked={
-                    items
-                      .find((i) => i.document.id === menu.document.id)
-                      ?.tags.some((t) => t.id === tag.id) ?? false
-                  }
-                  onChange={(e) =>
-                    void run(() =>
-                      desktop.invoke("library:documents:tag", {
-                        documentId: menu.document.id,
-                        tagId: tag.id,
-                        assigned: e.target.checked,
-                      }),
-                    )
-                  }
-                />
-                {tag.name}
-              </label>
-            ))}
-            <button
-              onClick={async () => {
-                const name = await prompt(tr("library:tag"));
-                if (name)
-                  void run(async () => {
-                    const tag =
-                      tags.find(
-                        (t) =>
-                          t.name.toLocaleLowerCase() ===
-                          name.toLocaleLowerCase(),
-                      ) ??
-                      (await desktop.invoke("library:tags:save", {
-                        name,
-                        color: null,
-                      }));
-                    await desktop.invoke("library:documents:tag", {
-                      documentId: menu.document.id,
-                      tagId: tag.id,
-                      assigned: true,
-                    });
-                  });
-              }}
-            >
-              {tr("library:newTag")}
-            </button>
-          </div>
-        </LibraryDialog>
-      )}
+      <LibraryMenus menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={setMove} setTagging={setTagging}/>
       {promptDialog}
     </section>
   );

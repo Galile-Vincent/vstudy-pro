@@ -1,12 +1,12 @@
 import { activeConversions } from "./conversion-state";
 import { randomUUID } from 'node:crypto';
 import { readFileSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import type { SQLInputValue } from 'node:sqlite';
 import type { Store } from '../db';
 import { documentIdSchema, documentSchema } from '../../shared/domain';
 import { folderSchema, libraryDocumentSchema, libraryQuerySchema, savedFilterSchema, tagSchema, type LibraryQuery } from '../../shared/library';
-import { SearchService } from './search';
+import { SearchService, validateSearchQuery } from './search';
 import { containedPath } from "./file-paths";
 export { containedPath } from "./file-paths";
 export class LibraryService {
@@ -21,7 +21,7 @@ export class LibraryService {
         db.exec('ROLLBACK TO library; RELEASE library');
         throw e;
     } }
-    folders() { return this.store.db.prepare('SELECT f.*,(SELECT count(*) FROM documents d WHERE d.folderId=f.id AND d.deletedAt IS NULL) AS count FROM folders f ORDER BY position,id').all().map(r => folderSchema.parse(r)); }
+    folders() { return this.store.db.prepare('SELECT f.*,(WITH RECURSIVE subtree(id) AS (SELECT f.id UNION ALL SELECT child.id FROM folders child JOIN subtree s ON child.parentId=s.id) SELECT count(*) FROM documents d WHERE d.folderId IN (SELECT id FROM subtree) AND d.deletedAt IS NULL) AS count FROM folders f ORDER BY position,id').all().map(r => folderSchema.parse(r)); }
     private folder(id: string) { const f = this.store.db.prepare('SELECT * FROM folders WHERE id=?').get(id); if (!f)
         throw new Error('Folder not found'); return folderSchema.parse(f); }
     private ancestors(id: string | null) { const result: string[] = []; while (id) {
@@ -70,7 +70,7 @@ export class LibraryService {
     } }); }
     require(id: string) { const d = this.store.documents.get(documentIdSchema.parse(id)); if (!d)
         throw new Error('Document not found'); return d; }
-    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: Number(row.sizeBytes), contentChars: Number(row.contentChars) }); }
+    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','activeVersion','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: row.sizeBytes === null ? null : Number(row.sizeBytes), contentChars: row.contentChars === null ? null : Number(row.contentChars) }); }
     list(input: LibraryQuery) {
         const q = libraryQuerySchema.parse(input), args: SQLInputValue[] = [], where = ['d.deletedAt IS NULL'];
         const add = (sql: string, ...values: SQLInputValue[]) => { where.push(sql); args.push(...values); };
@@ -112,7 +112,7 @@ export class LibraryService {
             add(`d.mime ${q.type === 'other' ? 'NOT ' : ''}IN(${types.map(() => '?').join(',')})`, ...types);
         }
         if (q.text) {
-            const text = q.text.trim();
+            const text = validateSearchQuery(q.text);
             if ([...text].length < 3) {
                 const literal = '%' + text.replace(/[\\%_]/g, '\\$&') + '%';
                 add("d.id IN(SELECT documentId FROM document_fts WHERE title LIKE ? ESCAPE '\\' OR filename LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\')", literal, literal, literal);
@@ -120,7 +120,7 @@ export class LibraryService {
             else
                 add('d.id IN(SELECT documentId FROM document_fts WHERE document_fts MATCH ?)', '"' + text.replaceAll('"', '""') + '"');
         }
-        const columns = { manual: 'd.position', name: 'd.title COLLATE NOCASE', createdAt: 'd.createdAt', lastOpenedAt: "coalesce(d.lastOpenedAt,'')", size: 'd.sizeBytes', type: 'd.mime' };
+        const columns = { manual: 'd.position', name: 'd.title COLLATE NOCASE', createdAt: 'd.createdAt', lastOpenedAt: "coalesce(d.lastOpenedAt,'')", size: 'coalesce(d.sizeBytes,-1)', type: 'd.mime' };
         const pinOrder = q.view === 'pinned' && q.sort === 'manual';
         const recentOrder = q.view === 'recent' && q.sort === 'manual';
         const direction = pinOrder || recentOrder ? 'desc' : q.direction;
@@ -141,18 +141,18 @@ export class LibraryService {
         }
         const last = rows[Math.min(q.limit, rows.length) - 1];
         const key = pinOrder ? 'pinnedAt' : recentOrder ? 'lastOpenedAt' : { manual: 'position', name: 'title', createdAt: 'createdAt', lastOpenedAt: 'lastOpenedAt', size: 'sizeBytes', type: 'mime' }[q.sort];
-        return { items, nextCursor: rows.length > q.limit && last ? { value: (last[key] ?? '') as string | number, id: documentIdSchema.parse(last.id) } : null };
+        return { items, nextCursor: rows.length > q.limit && last ? { value: (last[key] ?? (key === 'sizeBytes' ? -1 : '')) as string | number, id: documentIdSchema.parse(last.id) } : null };
     }
     pin(id: string, pinned: boolean) { this.require(id); this.store.db.prepare('UPDATE documents SET pinned=?,pinnedAt=CASE WHEN ? THEN coalesce(pinnedAt,?) ELSE NULL END WHERE id=?').run(Number(pinned), Number(pinned), new Date().toISOString(), id); }
     reorderPins(table: 'documents' | 'folders', ids: string[]) { this.transaction(() => ids.forEach((id, i) => this.store.db.prepare(`UPDATE ${table} SET pinnedAt=? WHERE id=? AND pinned=1`).run(new Date(Date.now() - i).toISOString(), id))); }
     rename(id: string, title: string) { this.require(id); this.store.db.prepare('UPDATE documents SET title=? WHERE id=?').run(title, id); }
     softDelete(id: string) { this.store.db.prepare('UPDATE documents SET deletedAt=coalesce(deletedAt,?) WHERE id=?').run(new Date().toISOString(), id); }
-    restore(id: string) { this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath FROM documents WHERE id=?').get(id); if (!r)
+    restore(id: string, reason: 'undo' | 'import' = 'undo') { this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath,activeVersion FROM documents WHERE id=?').get(id); if (!r)
         throw new Error('Document not found'); if (r.deletedAt === null)
-        return; if (Date.now() - Date.parse(String(r.deletedAt)) > 30000)
+        return; if (reason === 'undo' && Date.now() - Date.parse(String(r.deletedAt)) > 30000)
         throw new Error('Undo expired'); this.store.db.prepare('UPDATE documents SET deletedAt=NULL WHERE id=?').run(id); if (r.markdownPath) {
         try {
-            this.search.update(id, readFileSync(containedPath(this.root, String(r.markdownPath)), 'utf8'));
+            this.search.update(id, readFileSync(containedPath(this.root, r.activeVersion==='ai'?join(dirname(String(r.markdownPath)),'content.ai.md'):String(r.markdownPath)), 'utf8'));
         }
         catch { /* Rebuild retries unavailable content at startup. */ }
     } }); }

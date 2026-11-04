@@ -1,9 +1,17 @@
 import { z } from "zod";
+import { moodleAgentActionSchema } from "./moodle";
 
 export const documentIdSchema = z.string().uuid().brand<"DocumentId">();
 export const conversationIdSchema = z.string().uuid().brand<"ConversationId">();
 export const messageIdSchema = z.string().uuid().brand<"MessageId">();
 export const requestIdSchema = z.string().uuid().brand<"RequestId">();
+
+export const conversationScopeSchema = z.discriminatedUnion("scope", [
+ z.object({ scope: z.literal("document").optional(), documentId: documentIdSchema }).strict(),
+ z.object({ scope: z.literal("course"), courseId: z.string().uuid() }).strict(),
+]);
+export type ConversationScope = z.infer<typeof conversationScopeSchema>;
+
 export const providerIdSchema = z.enum([
   "anthropic-api",
   "openai-api",
@@ -21,6 +29,7 @@ const documentFields = {
   sourcePath: z.string().min(1),
   mime: z.string().min(1),
   converter: z.enum(["pdf_md", "markitdown"]).default("markitdown"),
+  activeVersion:z.enum(["original","ai"]).default("original"),
   markdownPath: z.string().min(1),
   createdAt: timestamp,
 };
@@ -66,6 +75,7 @@ export const selectionSchema = z
     endOffset: z.number().int().nonnegative(),
     text: z.string(),
     headingPath: z.array(z.string()),
+    version:z.enum(["original","ai"]).optional(),
     page: z.number().int().positive().optional(),
   })
   .strict()
@@ -73,20 +83,26 @@ export const selectionSchema = z
 export type Selection = z.infer<typeof selectionSchema>;
 export const modelOptionsSchema = z.record(z.string().min(1), z.union([z.string(), z.boolean()]));
 export const modelSchema = z.object({
+  supportsImages:z.boolean().optional(), imageUnsupportedReason:z.string().optional(),
   id: z.string(), name: z.string(), resolvedId: z.string().optional(),
   options: z.array(z.object({ id: z.string(), label: z.string(), values: z.array(z.object({ id: z.string(), label: z.string() })), default: z.string() })).optional(),
 });
 export type Model = z.infer<typeof modelSchema>;
-export const conversationSchema = z
-  .object({
+const conversationFields = {
     id: conversationIdSchema,
-    documentId: documentIdSchema,
     providerId: providerIdSchema,
-    modelId: z.string().min(1),
+    modelId: z.string().min(1).max(300),
     options: modelOptionsSchema.optional(),
     createdAt: timestamp,
-  })
-  .strict();
+};
+export const conversationCreateSchema = z.discriminatedUnion("scope", [
+ conversationScopeSchema.options[0].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
+ conversationScopeSchema.options[1].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
+]);
+export const conversationSchema = z.discriminatedUnion("scope", [
+ conversationScopeSchema.options[0].extend(conversationFields),
+ conversationScopeSchema.options[1].extend(conversationFields),
+]);
 export type Conversation = z.infer<typeof conversationSchema>;
 export const rateLimitSchema = z.object({
   label: z.string().min(1), usedPercent: z.number().min(0).max(100).optional(),
@@ -104,7 +120,7 @@ export const priceSchema = z.object({ input: z.number().finite().nonnegative(), 
 export type Price = z.infer<typeof priceSchema>;
 export const usageRecordSchema = usageSchema.extend({
   aborted: z.boolean().optional(),
-  id: z.string().uuid(), createdAt: timestamp, providerId: providerIdSchema, modelId: z.string().min(1),
+  id: z.string().uuid(), createdAt: timestamp, providerId: providerIdSchema, modelId: z.string().min(1).max(300),
   kind: z.enum(['chat', 'parse']), conversationId: conversationIdSchema.optional(), documentId: documentIdSchema.optional(), messageId: messageIdSchema.optional(),
 });
 export type UsageRecord = z.infer<typeof usageRecordSchema>;
@@ -115,12 +131,14 @@ export const usageSummarySchema = z.object({
 export const usagePeriodSchema = z.enum(['day', 'month', 'last30days', 'all']);
 export type UsagePeriod = z.infer<typeof usagePeriodSchema>;
 export const usageDashboardSchema = z.object({
+  parseTotals:z.object({calls:z.number(),inputTokens:z.number(),outputTokens:z.number(),costUsd:z.number().nullable()}).optional(),
   summary: usageSummarySchema,
   cacheReadTokens: z.number().nonnegative(), cacheWriteTokens: z.number().nonnegative(), reasoningTokens: z.number().nonnegative(),
   days: z.array(z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), inputTokens: z.number().nonnegative(), outputTokens: z.number().nonnegative() })),
 });
 export type UsageSummary = z.infer<typeof usageSummarySchema>;
 export const documentCitationSchema = z.object({
+  version:z.enum(['original','ai']).optional(),
   id: z.string().regex(/^s\d+$/), documentId: documentIdSchema,
   title: z.string().max(300), offset: z.number().int().nonnegative(),
   page: z.number().int().positive().optional(), quote: z.string().max(300),
@@ -132,7 +150,7 @@ export const toolCallSchema = z.object({
 }).strict();
 export type ToolCall = z.infer<typeof toolCallSchema>;
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .object({ type: z.literal("text"), text: z.string(), proposals: z.array(moodleAgentActionSchema).max(5).optional(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .extend({ contextExcluded: z.boolean().optional() })
   .strict();
 export const messageSchema = z
@@ -157,6 +175,7 @@ export const providerConfigSchema = z.discriminatedUnion("kind", [
     .object({
       kind: z.literal("compatible"),
       id: z.literal("openai-compatible"),
+      imageModelIds:z.array(z.string().min(1).max(300)).max(500).optional(),
       baseUrl: z
         .string()
         .url()
@@ -173,26 +192,23 @@ export const providerConfigSchema = z.discriminatedUnion("kind", [
     .strict(),
 ]);
 export type ProviderConfig = z.infer<typeof providerConfigSchema>;
-export const chatRequestSchema = z
-  .object({
+const chatFields = {
     requestId: requestIdSchema,
     conversationId: conversationIdSchema,
-    documentId: documentIdSchema,
     providerId: providerIdSchema,
-    modelId: z.string().min(1),
+    modelId: z.string().min(1).max(300),
     userMessage: z.string().min(1),
     options: modelOptionsSchema.optional(),
     turnId: z.string().max(200).optional(),
     contextTurnIds: z.array(z.string().max(200)).max(10000).optional(),
-    selection: selectionSchema.optional(),
-  })
-  .strict()
-  .refine(
-    (r) => !r.selection || r.selection.documentId === r.documentId,
-    "Selection belongs to another document",
-  );
+};
+export const chatRequestSchema = z.discriminatedUnion("scope", [
+ conversationScopeSchema.options[0].extend({...chatFields, selection: selectionSchema.optional()}),
+ conversationScopeSchema.options[1].extend(chatFields),
+]).refine(r => r.scope === "course" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 export const chatEventSchema = z.discriminatedUnion("type", [
+ z.object({type: z.literal("proposals"), actions: z.array(moodleAgentActionSchema).max(5)}).strict(),
   z.object({ type: z.literal("reasoning-delta"), text: z.string().max(2_000_000) }).strict(),
   z.object({ type: z.literal("citations"), citations: z.array(documentCitationSchema).max(128) }).strict(),
   z.object({ type: z.literal("tool-call"), call: toolCallSchema }).strict(),
@@ -204,11 +220,20 @@ export const chatEventSchema = z.discriminatedUnion("type", [
 export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
   .object({
+    uiScale: z.union([z.literal(100),z.literal(125),z.literal(150),z.literal(200)]).default(100),
+    density: z.enum(['comfortable','compact']).default('comfortable'),
+    accent: z.enum(['neutral','blue','green','violet','amber']).default('neutral'),
+    readerFont: z.enum(['system','serif','mono']).default('system'),
+    readerSize: z.enum(['s','m','l','xl']).default('m'),
+    material: z.enum(['glass','solid']).default('glass'),
     onboardingCompleted: z.boolean().optional(),
+    welcomeSeen: z.boolean().default(false),
     displayName: z.string().trim().max(100).optional(),
     language: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
     replyLanguage: z.enum(["auto", "en", "zh-Hant", "ja"]).default("auto"),
     chatSide: z.enum(["left", "right"]),
+    converterIdleMinutes: z.number().int().min(1).max(60).default(5),
+    converterOffline: z.boolean().default(false),
     enableGenerativeUI: z.boolean().default(false),
     monthlyBudgetUsd: z.number().finite().positive().optional(),
     monthlyTokenBudget: z.number().int().positive().optional(),
@@ -224,9 +249,10 @@ export const settingsSchema = z
   .strict();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
-  language: "auto", replyLanguage: "auto",
+  uiScale:100, density:"comfortable", accent:"neutral", readerFont:"system", readerSize:"m", material:"glass",
+  language: "auto", replyLanguage: "auto", welcomeSeen: false,
   chatSide: "left",
-  enableGenerativeUI: false, modelDisplayNames: {},
+  converterIdleMinutes: 5, converterOffline: false, enableGenerativeUI: false, modelDisplayNames: {},
   warnAtPercent: 80, priceOverrides: {},
   lastProviderId: null,
   lastModelId: null,

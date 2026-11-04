@@ -2,8 +2,8 @@
   "welcome": "Make space for understanding",
   "welcome_body": "Read your own documents and ask about the passages that matter. Your library stays on this Mac.",
   "language": "Choose your language",
-  "connect": "Think with a model",
-  "connect_body": "Use a CLI you already signed in to, or add an API key. You can read documents without connecting.",
+  "connect": "Use your Claude Code / Codex / Antigravity login",
+  "connect_body": "CLI providers start disabled. Enable one here to use its login. Discovery and chat may contact provider services and CLI telemetry endpoints. Chat sends questions, conversation history, document metadata and selected text to your chosen provider. You can read without connecting. Without a selection, the document outline and opening excerpt are sent. Earlier selections can remain in conversation history.",
   "signin": "Not ready yet? Install the CLI and sign in in Terminal, then check again.",
   "refresh": "Check again",
   "ready": "Ready",
@@ -13,7 +13,7 @@
   "save_key": "Save and connect",
   "key_saved": "Connected. Your key is stored securely.",
   "bring": "Start with something you care about",
-  "bring_body": "Add your notes, a paper, or a short sample. Your original file is kept alongside a readable copy.",
+  "bring_body": "Add your notes, a paper, or a short sample. Your original file is kept alongside a readable copy. The first conversion asks to download packages from PyPI and possibly Python from GitHub. Choose Offline to read Markdown and text; retry conversion when ready.",
   "sample": "Try a sample document",
   "sample_added": "Your sample is in the Library.",
   "coach": "Three small ways to go further",
@@ -27,5 +27,11 @@
   "finish": "Start exploring",
   "progress": "Step {{current}} of {{total}}",
   "name": "Your name (optional)",
-  "replay": "Show welcome guide"
+  "replay": "Show welcome guide",
+  "preview_label": "Reader and grounded chat preview",
+  "preview_passage": "Reading becomes understanding when we connect new ideas.",
+  "preview_highlight": "Connect new ideas.",
+  "preview_question": "How does this help me learn?",
+  "preview_answer": "Link a new concept to something you already know.",
+  "preview_citation": "From your document · 1"
 }

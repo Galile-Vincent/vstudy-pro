@@ -1,6 +1,8 @@
+import { moodleMigration, moodleSiteMigration, moodleCapabilitiesMigration, moodleCourseDetailsMigration } from './moodle-migration';
+import { aiParseMigration, aiParseRollupRepair } from './ai-parse-migration';
 import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
 import { libraryMigration } from "./library-migration";
-import { usageMigration, usageRepository } from "./usage";
+import { usageMigration, usageRollupMigration, usageRepository } from "./usage";
 import { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
 import {
@@ -49,6 +51,54 @@ export const migrations = [
     ALTER TABLE messages ADD COLUMN supersededBy TEXT DEFAULT NULL;
     CREATE INDEX messages_active ON messages(conversationId,createdAt,id) WHERE supersededBy IS NULL;
   ` },
+  { version: 8, sql: usageRollupMigration },
+  { version: 9, sql: `
+    CREATE INDEX activity_document ON activity_events(documentId);
+    CREATE INDEX documents_folder_fk ON documents(folderId);
+    CREATE INDEX documents_opened_normalized ON documents(coalesce(lastOpenedAt,''),id) WHERE deletedAt IS NULL;
+  ` },
+  { version: 10, sql: `
+    DROP INDEX documents_size;
+    DROP INDEX documents_folder_size;
+    ALTER TABLE documents RENAME COLUMN sizeBytes TO legacySizeBytes;
+    ALTER TABLE documents RENAME COLUMN contentChars TO legacyContentChars;
+    ALTER TABLE documents ADD COLUMN sizeBytes INTEGER;
+    ALTER TABLE documents ADD COLUMN contentChars INTEGER;
+    ALTER TABLE documents ADD COLUMN metadataBackfilled INTEGER NOT NULL DEFAULT 0;
+    UPDATE documents SET sizeBytes=nullif(legacySizeBytes,0),contentChars=nullif(legacyContentChars,0);
+    CREATE INDEX documents_size ON documents(sizeBytes,id) WHERE deletedAt IS NULL;
+    CREATE INDEX documents_folder_size ON documents(folderId,sizeBytes,id) WHERE deletedAt IS NULL;
+  ` },
+  { version:11, sql:aiParseMigration },
+  // Repairs databases that applied an earlier v11 draft without the parse rollup table/trigger.
+  { version:12, sql:aiParseRollupRepair },
+  { version:13, sql:moodleMigration },
+  { version:14, sql: `
+    CREATE TABLE conversations_scoped (
+      id TEXT PRIMARY KEY, scope TEXT NOT NULL CHECK(scope IN ('document','course')),
+      documentId TEXT REFERENCES documents(id) ON DELETE CASCADE,
+      courseId TEXT REFERENCES moodle_courses(id) ON DELETE CASCADE,
+      providerId TEXT NOT NULL, modelId TEXT NOT NULL, createdAt TEXT NOT NULL,
+      options TEXT, updatedAt TEXT,
+      CHECK((scope='document' AND documentId IS NOT NULL AND courseId IS NULL) OR
+            (scope='course' AND courseId IS NOT NULL AND documentId IS NULL))
+    );
+    INSERT INTO conversations_scoped SELECT id,'document',documentId,NULL,providerId,modelId,createdAt,options,updatedAt FROM conversations;
+    DROP TRIGGER conversation_touch;
+    CREATE TABLE messages_backup AS SELECT * FROM messages;
+    DELETE FROM messages;
+    DROP TABLE conversations;
+    ALTER TABLE conversations_scoped RENAME TO conversations;
+    INSERT INTO messages SELECT * FROM messages_backup;
+    DROP TABLE messages_backup;
+    CREATE TRIGGER conversation_touch AFTER INSERT ON messages BEGIN UPDATE conversations SET updatedAt=NEW.createdAt WHERE id=NEW.conversationId; END;
+    CREATE INDEX conversations_document ON conversations(documentId);
+    CREATE INDEX conversations_course ON conversations(courseId);
+    CREATE INDEX conversations_updated ON conversations(documentId,updatedAt DESC,id);
+  ` },
+  { version:15, sql:moodleSiteMigration },
+  { version:16, sql:moodleCapabilitiesMigration },
+  { version:17, sql:moodleCourseDetailsMigration },
 ];
 const documentRow = z
   .object({
@@ -61,13 +111,14 @@ const documentRow = z
     converter: z.enum(["pdf_md", "markitdown"]),
     status: z.string(),
     error: z.string().nullable(),
+    activeVersion:z.enum(["original","ai"]),
     markdownPath: z.string(),
     createdAt: z.string(),
   })
   .transform(({ error, ...rest }) =>
     documentSchema.parse(error === null ? rest : { ...rest, error }),
   );
-const conversationRow = z.object({ options: z.string().nullable() }).passthrough().transform(({ options, ...row }) => { delete row.updatedAt; return conversationSchema.parse({ ...row, ...(options ? { options: JSON.parse(options) } : {}) }); });
+const conversationRow = z.object({ options: z.string().nullable() }).passthrough().transform(({ options, ...row }) => { delete row.updatedAt; if (row.scope === "course") delete row.documentId; else { delete row.courseId; delete row.scope; } return conversationSchema.parse({ ...row, ...(options ? { options: JSON.parse(options) } : {}) }); });
 const messageRow = z
   .object({
     id: z.string(),
@@ -81,6 +132,9 @@ const messageRow = z
   );
 
 export function openStore(path: string) {
+  if (path !== ':memory:') for (const suffix of ['', '-wal', '-shm', '.before-v5.bak']) {
+    if (existsSync(path + suffix)) chmodSync(path + suffix, 0o600);
+  }
   const recovering = path !== ":memory:" && existsSync(`${path}-wal`) && statSync(`${path}-wal`).size > 0;
   const fresh = path === ":memory:" || !existsSync(path);
   const db = new DatabaseSync(path);
@@ -105,10 +159,10 @@ export function openStore(path: string) {
       throw new Error("Database version is newer than this application");
     for (const migration of migrations) {
       if (versions.includes(migration.version)) continue;
-      if (!fresh && migration.version === 5) {
+      if (!fresh && [5,8].includes(migration.version)) {
         db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-        copyFileSync(path, `${path}.before-v5.bak`);
-        chmodSync(`${path}.before-v5.bak`, 0o600);
+        copyFileSync(path, `${path}.before-v${migration.version}.bak`);
+        chmodSync(`${path}.before-v${migration.version}.bak`, 0o600);
       }
       db.exec("BEGIN IMMEDIATE");
       try {
@@ -126,6 +180,7 @@ export function openStore(path: string) {
     db.close();
     throw error;
   }
+  if (path !== ':memory:') for (const suffix of ['-wal', '-shm']) if (existsSync(path + suffix)) chmodSync(path + suffix, 0o600);
   if (recovering && db.prepare("PRAGMA integrity_check").get()?.integrity_check !== "ok") { db.close(); throw new Error("Database integrity check failed"); }
   const documents = {
     insert(input: Document): Document {
@@ -151,6 +206,10 @@ export function openStore(path: string) {
       const row = db.prepare("SELECT * FROM documents WHERE id=? AND deletedAt IS NULL").get(id);
       return row ? documentRow.parse(row) : null;
     },
+    getIncludingDeleted(id: Document["id"]): Document | null {
+      const row = db.prepare("SELECT * FROM documents WHERE id=?").get(id);
+      return row ? documentRow.parse(row) : null;
+    },
     findByHash(hash: string): Document | null {
       const row = db
         .prepare("SELECT * FROM documents WHERE sourceHash=?")
@@ -165,7 +224,7 @@ export function openStore(path: string) {
         );
     },
     transition(id: Document["id"], next: DocumentTransition): Document {
-      const current = documents.get(id);
+      const current = documents.getIncludingDeleted(id);
       if (!current) throw new Error("Document not found");
       const updated = transitionDocument(current, next);
       db.prepare("UPDATE documents SET status=?,error=?,converter=? WHERE id=?").run(
@@ -198,8 +257,8 @@ export function openStore(path: string) {
       insert(input: Conversation): Conversation {
         const c = conversationSchema.parse(input);
         db.prepare(
-          "INSERT INTO conversations(id,documentId,providerId,modelId,createdAt,options,updatedAt) VALUES (?,?,?,?,?,?,?)",
-        ).run(c.id, c.documentId, c.providerId, c.modelId, c.createdAt, c.options ? JSON.stringify(c.options) : null, c.createdAt);
+          "INSERT INTO conversations(id,scope,documentId,courseId,providerId,modelId,createdAt,options,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)",
+        ).run(c.id, c.scope ?? "document", c.scope === "course" ? null : c.documentId, c.scope === "course" ? c.courseId : null, c.providerId, c.modelId, c.createdAt, c.options ? JSON.stringify(c.options) : null, c.createdAt);
         return c;
       },
       get(id: Conversation["id"]): Conversation | null {
@@ -208,15 +267,15 @@ export function openStore(path: string) {
           .get(id);
         return row ? conversationRow.parse(row) : null;
       },
-      list(documentId: Document["id"]): Conversation[] {
+      list(scope: Document["id"] | import("../../shared/domain").ConversationScope): Conversation[] {
         return z
           .array(conversationRow)
           .parse(
             db
               .prepare(
-                "SELECT * FROM conversations WHERE documentId=? ORDER BY createdAt DESC,id DESC",
+                `SELECT * FROM conversations WHERE ${typeof scope !== "string" && scope.scope === "course" ? "courseId" : "documentId"}=? ORDER BY createdAt DESC,id DESC`,
               )
-              .all(documentId),
+              .all(typeof scope === "string" ? scope : scope.scope === "course" ? scope.courseId : scope.documentId),
           );
       },
       delete(id: Conversation["id"]): void {
@@ -233,9 +292,9 @@ export function openStore(path: string) {
       },
       supersede(ids: Message['id'][], replacementId: string) {
         const update = db.prepare('UPDATE messages SET supersededBy=? WHERE id=? AND supersededBy IS NULL');
-        db.exec('BEGIN IMMEDIATE');
-        try { for (const id of ids) update.run(replacementId,id); db.exec('COMMIT'); }
-        catch (error) { db.exec('ROLLBACK'); throw error; }
+        db.exec('SAVEPOINT supersede');
+        try { for (const id of ids) update.run(replacementId,id); db.exec('RELEASE supersede'); }
+        catch (error) { db.exec('ROLLBACK TO supersede; RELEASE supersede'); throw error; }
       },
       link(id: string, parentId: string) { db.prepare('UPDATE messages SET parentMessageId=? WHERE id=?').run(parentId,id); },
       excludeFromContext(ids: Message['id'][]) {

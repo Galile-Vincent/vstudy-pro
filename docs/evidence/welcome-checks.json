@@ -1,0 +1,115 @@
+{
+  "typecheck": "passed",
+  "lint": "passed",
+  "unit": {
+    "filesPassed": 48,
+    "testsPassed": 235,
+    "skipped": 4
+  },
+  "build": "passed",
+  "existingE2E": [
+    {
+      "script": "assistant-elements.mjs",
+      "exitCode": 0,
+      "seconds": 10.0
+    },
+    {
+      "script": "chat-controls.mjs",
+      "exitCode": 0,
+      "seconds": 8.9
+    },
+    {
+      "script": "composer-visual-qa.mjs",
+      "exitCode": 0,
+      "seconds": 27.7
+    },
+    {
+      "script": "conversion.mjs",
+      "exitCode": 0,
+      "seconds": 7.4
+    },
+    {
+      "script": "design1.mjs",
+      "exitCode": 0,
+      "seconds": 75.7
+    },
+    {
+      "script": "home-onboarding.mjs",
+      "exitCode": 0,
+      "seconds": 5.3
+    },
+    {
+      "script": "i18n.mjs",
+      "exitCode": 0,
+      "seconds": 14.9
+    },
+    {
+      "script": "library-perf.mjs",
+      "exitCode": 0,
+      "seconds": 8.2
+    },
+    {
+      "script": "library.mjs",
+      "exitCode": 0,
+      "seconds": 18.9
+    },
+    {
+      "script": "pdf-reader.mjs",
+      "exitCode": 0,
+      "seconds": 8.3
+    },
+    {
+      "script": "selection-chat.mjs",
+      "exitCode": 0,
+      "seconds": 13.3
+    },
+    {
+      "script": "visual-regressions.mjs",
+      "exitCode": 0,
+      "seconds": 6.2
+    }
+  ],
+  "welcomeMatrix": "passed",
+  "welcomeSupplement": {
+    "audits": 84,
+    "seriousOrCritical": 0
+  },
+  "welcomeInteractions": {
+    "noAutomaticTour": true,
+    "settingsReturnFocus": true,
+    "pausePersists": true,
+    "dotFocus": true,
+    "chatSideMirrorsSettings": true,
+    "zoom200": true,
+    "reducedTransitionsSkipped": true,
+    "documentMorph": {
+      "source": true,
+      "started": 3681,
+      "target": true,
+      "duration": 364.8000000715256
+    },
+    "throwingTransitionStillNavigates": true,
+    "optionalTour": true
+  },
+  "performanceGate": {
+    "status": "failed",
+    "targetP95Ms": 16.7,
+    "observedP95RangeMs": [
+      18.0,
+      18.5
+    ],
+    "longFramesOver50ms": 0,
+    "cls": 0
+  },
+  "unverified": [
+    "Native macOS hide/visibility (synthetic handler test passes)",
+    "Native translation review",
+    "VoiceOver",
+    "Independent design reviewer",
+    "Human 30-second comprehension",
+    "First hero paint <150ms",
+    "Live macOS Reduce Transparency changes"
+  ],
+  "welcomePseudo": "passed",
+  "welcomePerformanceExitCode": 1
+}

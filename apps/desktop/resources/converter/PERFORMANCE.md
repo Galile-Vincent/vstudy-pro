@@ -136,3 +136,48 @@ Evidence: `/tmp/vstudy-speed-warm.log`, `/tmp/vstudy-speed-after/profile.json`,
 `/tmp/vstudy-speed-targeted-final.log`, `/tmp/vstudy-speed-all-tests.log`,
 `/tmp/vstudy-speed-{selection,conversion,visual}-final.log`,
 `/tmp/vstudy-speed-reader-verified.log`, `/tmp/vstudy-speed-progress-check.log`.
+
+## Current lifecycle and acceptance (2026-11-04)
+
+The earlier measurements above describe the Electron 40 implementation. Its
+background-startup description and one-second `PROFILE_WARM` sleep are historical:
+the current app starts no converter on launch. A first required-format import or
+explicit Privacy Retry initializes it; idle shutdown defaults to five minutes and
+is configurable from one to sixty. No idle prewarm is used. A cold worker still
+pays Python import costs; active-worker RSS was not reduced by making it lazy.
+
+A current real eighteen-page CH2 probe uses a prepared hash-locked environment,
+then converts the same pages again in the warm worker. A harmless trailing PDF
+comment avoids import deduplication. The probe asserts eighteen progress events,
+identical final Markdown, and first-page paint before completion. Warm targets
+remain **first page <1.5 s, total <4 s**. This does not include first-install network
+or package installation time.
+
+Run from `apps/desktop`, with the current production output already built:
+
+```sh
+VSTUDY_CONVERTER_VENV=/absolute/locked-venv node scripts/measure-converter.mjs /absolute/CH2.pdf
+node scripts/measure-reader.mjs
+```
+
+The old `profile-convert.mjs` command above is retained as the historical protocol;
+it is not the current UI acceptance runner. Current evidence is saved under
+`/tmp/vstudy-final/`. See [the implementation response](../../../../docs/final-implementation-response.md)
+for final measured results, full-suite manifests and remaining limits.
+
+Current retained-CH2 result (prepared venv, fresh worker then warm worker,
+filesystem caches warm; Electron 42.11.16):
+
+| Worker state | First page | Completion |
+| --- | ---: | ---: |
+| Cold | 3.926 s | 4.814 s |
+| Warm | 0.0785 s | 1.215 s |
+
+Both produce eighteen page progress events and Markdown SHA-256
+`e6c2e251437506db73561546957a5659aff495e9c64fe5f7e5569af3e74efcfe`,
+identical to the retained earlier before/after files. The cold cost is deferred
+from launch to first use; the warm first-page and total targets pass. Final
+DOCX lifecycle probes recorded zero launch Python RSS, 3.84–4.84 s cold import,
+and about 168–170 MiB active-worker RSS. Idle shutdown/restart pass; making the
+worker lazy does not claim lower active-worker memory. These are finite samples,
+not controlled cold-disk comparisons or latency guarantees.

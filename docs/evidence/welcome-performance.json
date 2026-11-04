@@ -1,0 +1,82 @@
+[
+  {
+    "name": "home-baseline",
+    "theme": "light",
+    "samples": 107,
+    "p95": 18.300000000000068,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "hero",
+    "theme": "light",
+    "samples": 111,
+    "p95": 18,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "scroll",
+    "theme": "light",
+    "samples": 197,
+    "p95": 18.300000000000182,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "demo",
+    "theme": "light",
+    "samples": 686,
+    "p95": 18.19999999999891,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "home-baseline",
+    "theme": "dark",
+    "samples": 107,
+    "p95": 18.200000000000728,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "hero",
+    "theme": "dark",
+    "samples": 96,
+    "p95": 18.5,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 1,
+    "cls": 0
+  },
+  {
+    "name": "scroll",
+    "theme": "dark",
+    "samples": 198,
+    "p95": 18.30000000000291,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  },
+  {
+    "name": "demo",
+    "theme": "dark",
+    "samples": 685,
+    "p95": 18.299999999999272,
+    "longFrames": [],
+    "scripts": [],
+    "droppedFrames": 0,
+    "cls": 0
+  }
+]

@@ -1,0 +1,71 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/inline-citation.tsx
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/inline-citation.tsx
+@@ -1,4 +1,7 @@
+ "use client";
++import { formatters } from "../../../../shared/format";
++import { useTranslation } from "react-i18next";
++import { tr } from '../../../../shared/i18n';
+ 
+ import type { ComponentProps } from "react";
+ import { PreviewCard } from "@base-ui/react/preview-card";
+@@ -25,15 +28,10 @@
+   className?: string | undefined;
+ }
+ 
+-const dateFormatter = new Intl.DateTimeFormat("en-US", {
+-  month: "short",
+-  year: "numeric",
+-});
+-
+ function formatPublishedAt(publishedAt: string | undefined) {
+   if (publishedAt === undefined) return undefined;
+   const date = new Date(publishedAt);
+-  return Number.isNaN(date.getTime()) ? undefined : dateFormatter.format(date);
++  return Number.isNaN(date.getTime()) ? undefined : formatters().date(date,{month:'short',year:'numeric'});
+ }
+ 
+ export function Citation({
+@@ -44,6 +42,7 @@
+   className,
+   ...props
+ }: CitationProps) {
++  useTranslation();
+   const domain = source.domain ?? hostOf(source.url);
+   const href = safeHref(source.url);
+   const publishedAt = formatPublishedAt(source.publishedAt);
+@@ -54,7 +53,7 @@
+       <PreviewCard.Trigger
+         delay={0}
+         render={<button type="button" {...props} />}
+-        aria-label={`Source ${index + 1}: ${source.title}`}
++        aria-label={tr('common:source_title',{number:index+1,title:source.title})}
+         className={cn(
+           "bg-foreground/[0.06] text-muted-foreground hover:text-foreground/90 data-[popup-open]:bg-foreground data-[popup-open]:text-background ms-0.5 inline-flex h-4 min-w-4 translate-y-[-2px] cursor-default items-center justify-center rounded-[5px] px-1 align-middle font-mono text-[10px] font-medium tabular-nums transition-colors motion-reduce:transition-none",
+           className,
+@@ -110,8 +109,8 @@
+                 rel="noopener noreferrer"
+                 className="text-muted-foreground hover:text-foreground mt-3 inline-flex text-xs underline-offset-2 transition-colors hover:underline motion-reduce:transition-none"
+               >
+-                Open source{" "}
+-                <span className="sr-only">(opens in a new tab)</span>
++                {tr('common:open_source')}{" "}
++                <span className="sr-only">{tr('common:opens_in_a_new_tab')}</span>
+               </a>
+             ) : null}
+           </PreviewCard.Popup>
+@@ -121,13 +120,14 @@
+   );
+ }
+ 
+-export interface InlineCitationProps extends ComponentProps<"p"> {}
++export type InlineCitationProps = ComponentProps<"p">;
+ 
+ export function InlineCitation({
+   children,
+   className,
+   ...props
+ }: InlineCitationProps) {
++  useTranslation();
+   return (
+     <p
+       data-slot="inline-citation"

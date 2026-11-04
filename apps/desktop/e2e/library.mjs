@@ -32,7 +32,7 @@ try {
   });
   await page.reload();
   await page
-    .locator(".shell-sidebar nav")
+    .locator(".shell-sidebar [data-slot=sidebar-menu]")
     .first()
     .getByRole("button", { name: "Library", exact: true })
     .click();
@@ -46,11 +46,18 @@ try {
     screenshots.push(path);
   };
   await shot("empty");
-  const call = (channel, request) =>
-    page.evaluate(
-      ({ channel, request }) => window.desktop.invoke(channel, request),
-      { channel, request },
-    );
+  const call = async (channel, request) => {
+    if (channel === 'documents:importPaths') {
+      const rows=[];
+      for (const path of request.paths) {
+        await app.evaluate(({dialog}, path) => {dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},path);
+        const document=await page.evaluate(request=>window.desktop.invoke('documents:import',request),{folderId:request.folderId??null});
+        rows.push({ok:!!document,document});
+      }
+      return rows;
+    }
+    return page.evaluate(({channel,request})=>window.desktop.invoke(channel,request),{channel,request});
+  };
   for (const language of ["en", "ja"]) {
     await page.evaluate(async (language) => {
       const settings = await window.desktop.invoke("settings:get", {});
@@ -135,14 +142,14 @@ try {
           ?.textContent?.startsWith("0") === false,
     );
     await page.locator(".search-snippet mark").first().waitFor();
-    assert.ok(await page.locator("article[role=row]").count());
+    assert.ok(await page.locator(".library-document[role=listitem]").count());
   }
   await page.getByRole("textbox", { name: "Search your documents" }).fill("");
   await page.getByRole("button", { name: "Lesson 2", exact: true }).waitFor();
-  await page.locator("article[role=row]").first().click();
+  await page.locator(".library-document[role=listitem]").first().click();
   await page.keyboard.press("Meta+a");
   assert.equal(
-    await page.locator("article[role=row][aria-selected=true]").count(),
+    await page.locator(".library-document[role=listitem][data-selected=true]").count(),
     3,
   );
   await shot("selection");
@@ -171,7 +178,7 @@ try {
     .getByRole("button")
     .nth(1)
     .click();
-  await page.locator("article[role=row]").first().waitFor();
+  await page.locator(".library-document[role=listitem]").first().waitFor();
   const before = (
     await call("library:documents:list", {
       folderId: nested.id,
@@ -180,7 +187,7 @@ try {
       limit: 50,
     })
   ).items.map((i) => i.document.id);
-  await page.locator("article[role=row]").first().press("Meta+Alt+ArrowDown");
+  await page.locator(".library-document[role=listitem]").first().press("Meta+Alt+ArrowDown");
   await page.waitForFunction(
     async ({ folderId, first }) =>
       (
@@ -228,18 +235,15 @@ try {
     .nth(1)
     .click();
   await page.getByRole("button", { name: "Lesson 0", exact: true }).waitFor();
-  const row = page.locator("article[role=row]").first();
+  const row = page.locator(".library-document[role=listitem]").first();
   await row.click({ button: "right" });
-  await page.getByRole("dialog").waitFor();
+  await page.getByRole("menu").waitFor().catch(async e => { await page.screenshot({path:"/tmp/vstudy-design1/menu-failure.png"}); console.log(await page.locator("body").innerText()); throw e; });
   await shot("context-menu");
   await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Pin", exact: true })
+    .getByRole("menu")
+    .getByRole("menuitem", { name: "Pin", exact: true })
     .click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Close", exact: true })
-    .click();
+  await page.keyboard.press("Escape");
   await row.focus();
   await page.keyboard.press("Space");
   await page
@@ -296,12 +300,18 @@ try {
         );
         await page.emulateMedia({ colorScheme });
         await shot(`${lang}-${width}-${colorScheme}-populated`);
-        await page.locator(".filter-popover summary").click();
-        await page
-          .locator(".filter-panel")
-          .getByLabel(catalog.status, { exact: true })
-          .selectOption("ready");
-        await page.locator(".filter-popover summary").click();
+        await page.getByTestId("library-filters").click();
+        await page.locator('.filter-panel').getByRole('combobox',{name:catalog.status,exact:true}).click();
+        await page.getByRole('option',{name:catalog.ready,exact:true}).click();
+        await page.getByTestId("library-filters").click();
+        if (lang === 'en' && width === 720 && colorScheme === 'light') {
+          await page.getByRole('button',{name:catalog.saveFilter,exact:true}).click();
+          await page.getByRole('dialog').getByRole('textbox').fill('Ready study');
+          await page.getByRole('dialog').getByRole('button',{name:catalog.save,exact:true}).click();
+          await page.getByRole('button',{name:'Ready study',exact:true}).waitFor();
+          const saved=await call('library:savedFilters:list',{});
+          assert.equal(JSON.parse(saved.find(f=>f.name==='Ready study').queryJson).status,'ready');
+        }
         await shot(`${lang}-${width}-${colorScheme}-filters`);
         const axe = await new AxeBuilder({ page })
           .setLegacyMode()
@@ -323,16 +333,13 @@ try {
         await page
           .getByRole("button", { name: catalog.viewToggle, exact: true })
           .click();
-        const currentRow = page.locator("article[role=row]").first();
+        const currentRow = page.locator(".library-document[role=listitem]").first();
         await currentRow.click({ position: { x: 4, y: 4 } });
         await shot(`${lang}-${width}-${colorScheme}-selection`);
         await page.keyboard.press("Escape");
         await currentRow.click({ button: "right" });
         await shot(`${lang}-${width}-${colorScheme}-context-menu`);
-        await page
-          .getByRole("dialog")
-          .getByRole("button", { name: catalog.close, exact: true })
-          .click();
+        await page.keyboard.press('Escape');
         const target = page.getByRole("treeitem", {
           name: "Study",
           exact: true,
@@ -349,13 +356,13 @@ try {
           .getByRole("textbox", { name: catalog.search, exact: true })
           .fill("no-matching-document-999");
         await page
-          .getByRole("heading", { name: catalog.empty_search, exact: true })
+          .getByRole("heading", { name: catalog.empty_search.replace("{{query}}","no-matching-document-999"), exact: true })
           .waitFor();
         await shot(`${lang}-${width}-${colorScheme}-empty`);
         await page
           .getByRole("button", { name: catalog.clearSearch, exact: true })
           .click();
-        await page.locator("article[role=row]").first().waitFor();
+        await page.locator(".library-document[role=listitem]").first().waitFor();
         assert.equal(
           await page
             .locator("body")

@@ -1,0 +1,1 @@
+{"captures":72,"frames":432,"alignment":"pass"}

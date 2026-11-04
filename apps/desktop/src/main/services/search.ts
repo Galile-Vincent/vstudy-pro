@@ -1,7 +1,16 @@
 import { containedPath } from "./file-paths";
+import { dirname, join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import type { DatabaseSync } from 'node:sqlite';
 import { documentIdSchema } from '../../shared/domain';
+export function indexedText(content: string): string {
+    return content.slice(0, 1_000_000).replace(/(.)\1{63,}/gs, '$1'.repeat(32));
+}
+export function validateSearchQuery(text: string): string {
+    const q = text.trim();
+    if ([...q].length < 2 || q.length > 200 || new Set(q.toLocaleLowerCase()).size < 2) throw new Error('Refine your query: use at least two distinct characters');
+    return q;
+}
 export class SearchService {
     constructor(private readonly db: DatabaseSync, private readonly root?: string) { }
     update(id: string, content: string) {
@@ -10,7 +19,7 @@ export class SearchService {
         try {
             this.db.prepare('DELETE FROM document_fts WHERE documentId=?').run(id);
             if (d)
-                this.db.prepare('INSERT INTO document_fts(documentId,title,filename,content) VALUES(?,?,?,?)').run(id, String(d.title), String(d.sourceName), content);
+                this.db.prepare('INSERT INTO document_fts(documentId,title,filename,content) VALUES(?,?,?,?)').run(id, indexedText(String(d.title)), indexedText(String(d.sourceName)), indexedText(content));
             if (d)
                 this.db.prepare('UPDATE documents SET contentChars=? WHERE id=?').run(content.length, id);
             this.db.exec('RELEASE search_update');
@@ -28,10 +37,17 @@ export class SearchService {
             this.db.exec("DROP TABLE document_fts; CREATE VIRTUAL TABLE document_fts USING fts5(documentId UNINDEXED,title,filename,content,tokenize='trigram')");
         }
         this.db.exec('DELETE FROM document_fts WHERE documentId NOT IN(SELECT id FROM documents WHERE deletedAt IS NULL)');
-        const missing = this.db.prepare("WITH indexed AS MATERIALIZED (SELECT documentId,count(*) copies,max(length(content)) chars FROM document_fts GROUP BY documentId) SELECT d.id,d.markdownPath FROM documents d LEFT JOIN indexed f ON f.documentId=d.id WHERE d.status='ready' AND d.deletedAt IS NULL AND (coalesce(f.copies,0)!=1 OR d.contentChars!=f.chars)").all();
+        for (const {rowid} of this.db.prepare('SELECT rowid FROM document_fts').all()) {
+            const row = this.db.prepare('SELECT title,filename,substr(content,1,1000000) content,length(content) chars FROM document_fts WHERE rowid=?').get(rowid!);
+            if (!row) continue;
+            const title = indexedText(String(row.title)), filename = indexedText(String(row.filename)), content = indexedText(String(row.content));
+            if (title !== row.title || filename !== row.filename || content !== row.content || Number(row.chars) > 1_000_000)
+                this.db.prepare('UPDATE document_fts SET title=?,filename=?,content=? WHERE rowid=?').run(title,filename,content,rowid!);
+        }
+        const missing = this.db.prepare("WITH indexed AS MATERIALIZED (SELECT documentId,count(*) copies,max(length(content)) chars FROM document_fts GROUP BY documentId) SELECT d.id,d.markdownPath,d.activeVersion FROM documents d LEFT JOIN indexed f ON f.documentId=d.id WHERE d.status='ready' AND d.deletedAt IS NULL AND (coalesce(f.copies,0)!=1)").all();
         for (const d of missing) {
             try {
-                const path = String(d.markdownPath);
+                const path = d.activeVersion==='ai' ? join(dirname(String(d.markdownPath)),'content.ai.md') : String(d.markdownPath);
                 this.update(String(d.id), readFileSync(this.root ? containedPath(this.root, path) : path, 'utf8'));
             }
             catch { /* A missing source is retried on the next startup. */ }
@@ -41,10 +57,8 @@ export class SearchService {
         rank: number;
         id: string;
     }) {
-        const q = text.trim();
-        if (!q || q.length > 200)
-            throw new Error('Invalid search query');
-        const started = performance.now();
+        const q = validateSearchQuery(text);
+        
         // Trigram preserves literal substrings across zh-Hant/ja/en. Two-character fixtures
         // (資料/通信/学習/網路) need LIKE: trigram MATCH has no token below 3 codepoints.
         // Bigram unicode61 needs synthetic token/offset mapping and loses native snippets.
@@ -61,8 +75,6 @@ export class SearchService {
     SELECT rowid,documentId,${rank} AS rank FROM document_fts f WHERE ${where}
   ), hits AS MATERIALIZED (SELECT * FROM ranked ${cursorWhere} ORDER BY rank,documentId LIMIT ?)
   SELECT f.documentId,f.title,${snippet} AS snippet,h.rank FROM hits h JOIN document_fts f ON f.rowid=h.rowid ${short ? "" : "WHERE document_fts MATCH ?"} ORDER BY h.rank,h.documentId`).all(...args, ...cursorArgs, limit + 1, ...(short ? [q] : [match]));
-        if (performance.now() - started > 80)
-            throw new Error('Search time budget exceeded');
         const items = rows.slice(0, limit).map(r => ({ documentId: documentIdSchema.parse(r.documentId), title: String(r.title), snippet: short ? String(r.snippet).replaceAll(q, `[mark]${q}[/mark]`) : String(r.snippet), rank: Number(r.rank) }));
         const last = items.at(-1);
         return { items, nextCursor: rows.length > limit && last ? { rank: last.rank, id: last.documentId } : null };

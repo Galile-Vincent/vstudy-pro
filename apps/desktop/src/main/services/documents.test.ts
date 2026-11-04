@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { mkdir, mkdtemp, readFile, rm, stat, truncate, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { openStore } from "../db";
 import { DocumentService, MAX_SOURCE_BYTES } from "./documents";
+import { LibraryService } from "./library";
 import type { ConverterRunner } from "../../../resources/converter";
 
 const cleanups: (() => Promise<void>)[] = [];
@@ -47,7 +48,7 @@ describe("DocumentService", () => {
     const first = await service.importPath(fixture("html"));
     const second = await service.importPath(fixture("csv"));
     await service.waitForIdle();
-    expect(service.get(first.id)).toMatchObject({ status: "failed", error: "fixture failure" });
+    expect(service.get(first.id)).toMatchObject({ status: "failed", error: expect.stringContaining("errors.converter_failed") });
     await expect(service.read(first.id)).rejects.toThrow("not ready");
     fail = false;
     expect((await service.retry(first.id)).status).toBe("converting");
@@ -100,7 +101,7 @@ describe("DocumentService", () => {
     await writeFile(oversized, "a".repeat(8 * 1024 * 1024 + 1));
     const document = await service.importPath(oversized);
     await service.waitForIdle();
-    expect(service.get(document.id)).toMatchObject({ status: "failed", error: "Markdown exceeds 8 MiB" });
+    expect(service.get(document.id)).toMatchObject({ status: "failed", error: expect.stringContaining("errors.converter_failed") });
   });
 });
 it("uses the decoded HTML title instead of the import filename", async () => {
@@ -112,3 +113,113 @@ it("uses the decoded HTML title instead of the import filename", async () => {
 });
 
 it('re-converts a ready document while retaining its original and identity',async()=>{const {service}=await setup();const doc=await service.importPath(fixture('md'));await service.waitForIdle();expect((await service.reconvert(doc.id)).id).toBe(doc.id);await service.waitForIdle();expect(service.get(doc.id)?.status).toBe('ready');expect(await service.read(doc.id)).toContain('VStudy fixture');});
+
+it.each([false,true])('finalizes hidden conversion before undo (failure=%s)', async (fail) => {
+  const gate = deferred<void>();
+  const { service, store } = await setup(async (_source, output) => { await gate.promise; if (fail) throw new Error('offline'); await writeFile(output,'finished'); });
+  const document = await service.importPath(fixture('html'));
+  store.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(new Date().toISOString(),document.id);
+  gate.resolve();
+  await service.waitForIdle();
+  expect(store.db.prepare('SELECT status FROM documents WHERE id=?').get(document.id)?.status).toBe(fail ? 'failed' : 'ready');
+  expect(store.db.prepare('SELECT * FROM document_fts WHERE documentId=?').all(document.id)).toHaveLength(0);
+  store.db.prepare('UPDATE documents SET deletedAt=NULL WHERE id=?').run(document.id);
+  expect(service.get(document.id)?.status).toBe(fail ? 'failed' : 'ready');
+});
+
+it('recovers the scheduler after failed terminal-state persistence', async () => {
+  let calls = 0;
+  const { service, store } = await setup(async (_source, output) => { calls++; if(calls===1) throw new Error('converter failed'); await writeFile(output,'recovered'); });
+  store.db.exec("CREATE TRIGGER reject_failure BEFORE UPDATE OF status ON documents WHEN NEW.status='failed' BEGIN SELECT RAISE(ABORT,'storage unavailable'); END");
+  const first = await service.importPath(fixture('html'));
+  await expect(service.waitForIdle()).resolves.toBeUndefined();
+  store.db.exec('DROP TRIGGER reject_failure');
+  const second = await service.importPath(fixture('csv'));
+  await service.waitForIdle();
+  expect(calls).toBe(2);
+  expect(service.get(second.id)?.status).toBe('ready');
+  expect(service.get(first.id)?.status).toBe('converting');
+});
+
+it('never removes a published source when concurrent owners import identical bytes with different extensions', async () => {
+  const { service, store, userData, convert } = await setup();
+  const other = new DocumentService({store,userData,convert});
+  const a = join(userData,'race.md'), b=join(userData,'race.txt');
+  await writeFile(a,'same bytes');await writeFile(b,'same bytes');
+  const outcomes=await Promise.allSettled([service.importPath(a),other.importPath(b)]);
+  await Promise.all([service.waitForIdle(),other.waitForIdle()]); other.dispose();
+  expect(outcomes.every(o=>o.status==='fulfilled')).toBe(true);
+  for(const document of store.documents.list()) expect(await readFile(document.sourcePath,'utf8')).toBe('same bytes');
+});
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>(done => { resolve = done; });
+  return {promise,resolve};
+}
+it('recovers a source published before a disk-full insert without removing its bytes',async()=>{
+ const {service,store,userData}=await setup();const a=join(userData,'disk.md'),b=join(userData,'disk.txt');await writeFile(a,'durable');await writeFile(b,'durable');
+ store.db.exec("CREATE TRIGGER disk_full BEFORE INSERT ON documents BEGIN SELECT RAISE(ABORT,'disk full'); END");
+ await expect(service.importPath(a)).rejects.toThrow('disk full');
+ const {createHash}=await import('node:crypto');const oldPath=join(userData,'library',createHash('sha256').update('durable').digest('hex'),'source.md');
+ expect(await readFile(oldPath,'utf8')).toBe('durable');
+ store.db.exec('DROP TRIGGER disk_full');const recovered=await service.importPath(b);await service.waitForIdle();
+ expect(await readFile(oldPath,'utf8')).toBe('durable');expect(service.get(recovered.id)?.status).toBe('ready');
+});
+it('requeues an unfinished hidden document restored after startup',async()=>{
+ const {service,store,userData,convert}=await setup();const document=await service.importPath(fixture('html'));await service.waitForIdle();
+ store.db.prepare("UPDATE documents SET status='converting',deletedAt=? WHERE id=?").run(new Date().toISOString(),document.id);
+ const restarted=new DocumentService({store,userData,convert});
+ const {LibraryService}=await import('./library');const library=new LibraryService(store,join(userData,'library'));
+ library.restore(document.id);restarted.resume(document.id);await restarted.waitForIdle();restarted.dispose();expect(store.documents.get(document.id)?.status).toBe('ready');
+});
+it('leaves interrupted startup metadata pending without rejecting service ownership',async()=>{
+ const {service,store,userData,convert}=await setup();const document=await service.importPath(fixture('html'));await service.waitForIdle();
+ store.db.prepare('UPDATE documents SET metadataBackfilled=0 WHERE id=?').run(document.id);
+ store.db.exec("CREATE TRIGGER metadata_disk_full BEFORE UPDATE OF metadataBackfilled ON documents WHEN NEW.metadataBackfilled=1 BEGIN SELECT RAISE(ABORT,'disk full'); END");
+ const interrupted=new DocumentService({store,userData,convert});await expect(interrupted.waitForIdle()).resolves.toBeUndefined();interrupted.dispose();
+ expect(store.db.prepare('SELECT metadataBackfilled FROM documents WHERE id=?').get(document.id)?.metadataBackfilled).toBe(0);
+ store.db.exec('DROP TRIGGER metadata_disk_full');const resumed=new DocumentService({store,userData,convert});await resumed.waitForIdle();resumed.dispose();
+ expect(store.db.prepare('SELECT metadataBackfilled FROM documents WHERE id=?').get(document.id)?.metadataBackfilled).toBe(1);
+});
+
+
+it.each([0, 31_000])('restores an explicitly reimported document deleted %s ms ago with its AI version and metadata', async (age) => {
+  const { service, store, userData } = await setup();
+  const document = await service.importPath(fixture('md'));
+  await service.waitForIdle();
+  const library = new LibraryService(store, join(userData, 'library'));
+  const aiMarkdown = 'Retained AI transcription for reimport.';
+  await writeFile(join(dirname(document.markdownPath), 'content.ai.md'), aiMarkdown);
+  store.db.prepare("UPDATE documents SET title='Retained title',pinned=1,activeVersion='ai' WHERE id=?").run(document.id);
+  library.softDelete(document.id);
+  store.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(new Date(Date.now()-age).toISOString(), document.id);
+  expect(service.get(document.id)).toBeNull();
+  expect(library.search.search('transcription').items).toHaveLength(0);
+  if (age > 30_000) expect(() => library.restore(document.id)).toThrow('Undo expired');
+
+  const restored = await service.importPath(fixture('md'));
+  expect(restored).toMatchObject({id:document.id,title:'Retained title',status:'ready',activeVersion:'ai'});
+  expect(service.list()).toHaveLength(1);
+  expect(await service.read(restored.id)).toBe(aiMarkdown);
+  expect(store.db.prepare('SELECT pinned,deletedAt FROM documents WHERE id=?').get(restored.id)).toMatchObject({pinned:1,deletedAt:null});
+  expect(library.search.search('transcription').items.map(item=>item.documentId)).toEqual([restored.id]);
+  expect(await readFile(restored.sourcePath)).toEqual(await readFile(fixture('md')));
+});
+
+it('resumes an interrupted hidden conversion when explicitly reimported after restart', async () => {
+  let calls = 0;
+  const { service, store, userData, convert } = await setup(async (_source, output) => { calls++; await writeFile(output,'Recovered conversion'); });
+  const document = await service.importPath(fixture('html'));
+  await service.waitForIdle();
+  store.db.prepare("UPDATE documents SET status='converting',deletedAt=? WHERE id=?").run(new Date(Date.now()-31_000).toISOString(), document.id);
+  const restarted = new DocumentService({store,userData,convert});
+  try {
+    const restored = await restarted.importPath(fixture('html'));
+    expect(restored.id).toBe(document.id);
+    await restarted.waitForIdle();
+    expect(restarted.get(restored.id)?.status).toBe('ready');
+    expect(await restarted.read(restored.id)).toBe('Recovered conversion');
+    expect(calls).toBe(2);
+  } finally { await restarted.waitForIdle(); restarted.dispose(); }
+});

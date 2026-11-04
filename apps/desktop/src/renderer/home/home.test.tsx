@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToStaticMarkup as render } from 'react-dom/server';
+import { TooltipProvider } from '../components/ui/tooltip';
+const renderToStaticMarkup = (node:React.ReactNode) => render(<TooltipProvider>{node}</TooltipProvider>);
 import { expect, it, vi } from 'vitest';
 vi.mock('../bridge', () => ({ desktop:{} }));
 import { Home, Streak, sparklinePoints, type Dashboard } from './home';
@@ -21,7 +23,22 @@ it('shows calm zero and forty day streaks in all languages', async () => {
 it('gives every empty card meaningful content and actions', async () => {
   await i18n.changeLanguage('en');
   const markup = renderToStaticMarkup(<Home initialData={empty} navigate={() => {}} onUsage={() => {}}/>);
-  expect(markup).toContain('Pin a document'); expect(markup).toContain('Choose a file');
-  expect(markup).toContain('Your discoveries will gather here'); expect(markup).toContain('Open Library');
-  expect(markup.match(/aria-labelledby/g)).toHaveLength(6);
+  expect(markup).toContain('Choose a file');
+  expect(markup).toContain('Try a sample document');
+  expect(markup).not.toContain('product-preview');
+  expect(markup).not.toContain('home-stat');
+  expect(markup).not.toContain('home-marker');
+  expect(markup.match(/aria-labelledby/g)).toHaveLength(1);
+});
+
+it('names the document in recent activity', async () => {
+ await i18n.changeLanguage('en');
+ const markup=renderToStaticMarkup(<Home initialData={{...empty,recentActivity:[{id:'event',documentId:'00000000-0000-4000-8000-000000000001' as Dashboard['recentActivity'][number]['documentId'],kind:'chat',createdAt:'2026-11-04T00:00:00Z',documentTitle:'Networking notes'}]}} navigate={() => {}} onUsage={() => {}}/>);
+ expect(markup).toContain('Conversation explored<strong>Networking notes</strong>');
+});
+
+it('uses singular English study and unpriced-call labels', async () => {
+ await i18n.changeLanguage('en');
+ expect(renderToStaticMarkup(<Streak streak={{current:1,best:1,today:true,days:[]}}/>)).toContain('>1 day</strong>');
+ expect(i18n.t('usage:unknown_calls',{count:1})).toBe('1 call unpriced; total is a lower bound.');
 });

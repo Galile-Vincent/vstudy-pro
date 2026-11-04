@@ -14,7 +14,7 @@ const launch = async () => {
  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   page.on("pageerror", error => errors.push(error.message));
   page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
-  await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();
+  await page.getByTestId("bridge-status").waitFor({state:"attached"});
 };
 try {
   await launch();
@@ -44,22 +44,22 @@ try {
   assert.deepEqual(await page.locator("[data-role=assistant] li").allTextContents(), ["First", "Second"]);
   await page.locator("[data-role=assistant] strong").scrollIntoViewIfNeeded();
   await page.screenshot({path: "/tmp/vstudy-visual-markdown.png", animations:'disabled'});
-  for (const name of ["Delete conversation", "Delete document"]) {
+  for (const name of ["Delete document"]) {
     const button = page.getByRole("button", { name, exact: true });
     assert.equal(Math.round((await button.boundingBox()).width), 28);
     assert.equal(await button.getAttribute("class"), "icon-button");
   }
   await input.fill("Preserved draft");
   await page.getByRole("combobox", { name: "Model", exact: true }).click();
-  await page.getByRole("combobox", { name: "Search models" }).fill("haiku");
-  await page.getByRole("option").filter({hasText:"Haiku 5.5"}).first().click();
-  await page.waitForFunction(() => window.document.querySelector('[aria-label="Conversations"]')?.textContent.includes("Haiku"));
+  await page.getByRole("combobox", { name: "Search models" }).fill("fixture");
+  await page.getByRole("option").filter({hasText:"Fixture model (test only)"}).first().click();
+  await page.waitForFunction(() => window.document.querySelector('[data-slot=model-selector-trigger]')?.textContent.includes("Fixture model"));
   assert.equal(await input.inputValue(), "Preserved draft");
   await app.close();
   await launch();
   await page.locator('.aui-composer-input').waitFor();
-  await page.getByRole("combobox", { name: "Model", exact: true }).filter({ hasText: "Haiku 5.5" }).waitFor();
-  assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => `${s.lastProviderId}/${s.lastModelId}`)), "claude-cli/haiku");
+  await page.getByRole("combobox", { name: "Model", exact: true }).filter({ hasText: "Fixture model (test only)" }).waitFor();
+  assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => `${s.lastProviderId}/${s.lastModelId}`)), "anthropic-api/fixture-model");
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ result: "PASS", screenshots: ["/tmp/vstudy-visual-section.png", "/tmp/vstudy-visual-markdown.png"], consoleErrors: errors }));
 } finally { await app?.close(); await rm(directory, { recursive: true, force: true }); }

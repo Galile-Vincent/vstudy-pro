@@ -9,7 +9,10 @@ export async function importFiles(
 ) {
   if (files) {
     const paths = files.map((file) => desktop.getPathForFile?.(file) ?? "");
-    await desktop.invoke("documents:importPaths", { paths, folderId });
+    const results = await desktop.invoke("documents:importPaths", { paths, folderId });
+    changed();
+    const failed = results.find(result => !result.ok);
+    if (failed && !failed.ok) throw new Error(failed.error);
   } else await desktop.invoke("documents:import", { folderId });
   changed();
 }
@@ -47,4 +50,11 @@ export async function moveDocuments(
       folderId,
       ...(beforeId ? { beforeId } : {}),
     });
+}
+
+export function reorderDestination(items: Item[], index: number, delta: number) {
+  const target = items[index + delta];
+  if (!target) return null;
+  const before = delta < 0 ? target : items.slice(index + delta + 1).find(row => row.folderId === target.folderId);
+  return { folderId: target.folderId, ...(before ? { beforeId: before.document.id } : {}) };
 }

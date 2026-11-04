@@ -1,0 +1,42 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/document-reference.tsx
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/document-reference.tsx
+@@ -1,4 +1,7 @@
+ "use client";
++import { plainSelection } from "../../../selection-preview";
++import { useTranslation } from "react-i18next";
++import { tr } from '../../../../shared/i18n';
+ 
+ import type { ComponentProps } from "react";
+ import { FileTextIcon } from "lucide-react";
+@@ -28,6 +31,7 @@
+   activePage: number;
+   onJump?: (page: number) => void;
+ }) {
++  useTranslation();
+   // several anchors can cite one page, and only one of them is the current item
+   const currentIndex = anchors.findIndex(
+     (anchor) => anchor.page === activePage,
+@@ -51,8 +55,7 @@
+         <div className="flex min-w-0 flex-1 flex-col">
+           <span className="truncate text-[13.5px] font-medium">{title}</span>
+           <span className={cn(mono, "text-muted-foreground")}>
+-            {pages} pages · {anchors.length} cited
+-          </span>
++            {pages} {tr('common:pages')}{anchors.length} {tr('common:cited')}</span>
+         </div>
+       </div>
+ 
+@@ -69,10 +72,10 @@
+           const content = (
+             <>
+               <span className={cn(mono, "text-muted-foreground")}>
+-                p. {anchor.page}
++                {tr('common:p')}{anchor.page}
+               </span>
+-              <span className="text-foreground/65 border-foreground/15 border-s-2 ps-2 text-xs leading-relaxed break-words">
+-                {anchor.quote}
++              <span className="text-foreground/65 border-foreground/15 border-s-2 ps-2 text-xs leading-relaxed break-words line-clamp-3">
++                {plainSelection(anchor.quote)}
+               </span>
+             </>
+           );

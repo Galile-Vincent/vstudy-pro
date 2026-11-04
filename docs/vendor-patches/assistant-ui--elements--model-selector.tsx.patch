@@ -1,0 +1,64 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/model-selector.tsx
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/model-selector.tsx
+@@ -1,5 +1,6 @@
+-"use client";
++import { tr } from "../../../../shared/i18n";
+ 
++
+ import { type ComponentPropsWithoutRef, type ReactNode } from "react";
+ import { cva, type VariantProps } from "class-variance-authority";
+ import { CheckIcon, ChevronDownIcon } from "lucide-react";
+@@ -151,7 +152,7 @@
+ }
+ 
+ function ModelSelectorValue({
+-  placeholder = "Select model",
++  placeholder = tr("common:choose_a_model"),
+   showEffort = true,
+   className,
+ }: ModelSelectorValueProps) {
+@@ -210,7 +211,7 @@
+ function ModelSelectorFocusAnchor() {
+   return (
+     <div className="sr-only">
+-      <CommandInput readOnly aria-label="Model" />
++      <CommandInput readOnly aria-label={tr("common:model")} />
+     </div>
+   );
+ }
+@@ -268,7 +269,7 @@
+ >;
+ 
+ function ModelSelectorSearch({
+-  placeholder = "Search models...",
++  placeholder = tr("common:search_models"),
+   ...props
+ }: ModelSelectorSearchProps) {
+   return (
+@@ -321,7 +322,7 @@
+ function ModelSelectorEmpty({ children, ...props }: ModelSelectorEmptyProps) {
+   return (
+     <CommandEmpty data-slot="model-selector-empty" {...props}>
+-      {children ?? "No models found."}
++      {children ?? tr("common:no_models_found")}
+     </CommandEmpty>
+   );
+ }
+@@ -405,7 +406,7 @@
+ };
+ 
+ function ModelSelectorEffort({
+-  label = "Thinking",
++  label = tr("common:thinking"),
+   className,
+   onKeyDown,
+   ...props
+@@ -445,7 +446,7 @@
+         value={effort ?? ""}
+         onValueChange={setEffort}
+         orientation="horizontal"
+-        aria-label={typeof label === "string" ? label : "Reasoning effort"}
++        aria-label={typeof label === "string" ? label : tr("common:effort")}
+         className="flex items-center gap-0.5"
+       >
+         {efforts.map((option) => (

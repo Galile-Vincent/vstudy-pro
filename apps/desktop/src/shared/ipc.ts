@@ -1,3 +1,5 @@
+import { moodlePanelSchema, moodleSiteCheckSchema, moodleSiteUrlSchema, moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
+import { aiParseContract } from './ai-parse';
 import { statusSchema } from "./status";
 import { folderIdSchema, libraryContract } from "./library";
 import { z } from "zod";
@@ -6,7 +8,7 @@ import {
   chatEventSchema,
   chatRequestSchema,
   conversationIdSchema,
-  conversationSchema,
+  conversationSchema, conversationCreateSchema, conversationScopeSchema,
   documentIdSchema,
   documentSchema,
   messageSchema,
@@ -24,6 +26,27 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  ...aiParseContract,
+  [moodleChannels.schools]: {request:empty,response:z.array(moodleSchoolSchema)},
+  [moodleChannels.checkSite]: {request:z.object({url:z.string().min(1).max(2048)}).strict(),response:moodleSiteCheckSchema},
+  [moodleChannels.connect]: {request:z.object({siteUrl:moodleSiteUrlSchema,provider:z.number().int().nonnegative().optional(),username:z.string().min(1).max(256).optional(),password:z.string().min(1).max(4096).optional()}).strict(),response:moodleAccountSchema},
+  [moodleChannels.ssoState]: {request:z.object({siteUrl:moodleSiteUrlSchema}).strict(),response:z.enum(['external','embedded']).nullable()},
+  [moodleChannels.ssoCancel]: {request:z.object({siteUrl:moodleSiteUrlSchema}).strict(),response:ack},
+  [moodleChannels.disconnect]: {request:z.object({accountId:z.string().uuid()}).strict(),response:ack},
+  [moodleChannels.overview]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema},
+  [moodleChannels.sync]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema.extend({errors:z.array(z.string())})},
+  [moodleChannels.course]: {request:z.object({courseId:z.string().uuid(),refresh:z.boolean().optional()}).strict(),response:moodleCourseDetailSchema},
+  [moodleChannels.openFile]: {request:z.object({fileId:z.string().uuid()}).strict(),response:documentIdSchema},
+  [moodleChannels.markRead]: {request:z.object({notificationId:z.string().uuid()}).strict(),response:ack},
+  [moodleChannels.createReminder]: {request:moodleReminderSchema.omit({id:true,fired:true}),response:moodleReminderSchema},
+  [moodleChannels.deleteReminder]: {request:z.object({reminderId:z.string().uuid()}).strict(),response:ack},
+  [moodleChannels.exportCalendar]: {request:z.object({deadlineIds:z.array(z.string().uuid()).min(1).max(50)}).strict(),response:z.object({saved:z.boolean()}).strict()},
+  "secrets:unlock": {request:z.object({providerId:providerIdSchema}).strict(),response:ack},
+  "secrets:session": {request:z.object({providerId:providerIdSchema,key:z.string().min(1).max(16384)}).strict(),response:ack},
+  "converter:mode": {request:z.object({offline:z.boolean()}).strict(),response:ack},
+  "settings:networkActivity": {request:empty,response:z.array(z.object({at:z.string().datetime(),what:z.string(),to:z.string()}).strict())},
+  "providers:chooseExecutable": {request:z.object({binary:z.enum(['claude','codex','agy'])}).strict(),response:z.object({path:z.string().nullable()}).strict()},
+  "settings:deleteAllData": { request: z.object({confirmation:z.literal("DELETE")}).strict(), response: ack },
   "settings:appearance": { request: empty, response: z.object({ reducedTransparency:z.boolean() }).strict() },
   "settings:systemLocale": { request: empty, response: z.string().max(100) },
   ...libraryContract,
@@ -38,10 +61,11 @@ export const ipcContract = {
     request: z.object({ url: externalUrlSchema }).strict(),
     response: ack,
   },
+  "welcome:sampleDocument": { request: z.object({ language: z.enum(["en", "zh-Hant", "ja"]) }).strict(), response: z.string().max(100_000) },
   "documents:importSample": { request: z.object({ language: z.enum(["en", "zh-Hant", "ja"]) }).strict(), response: documentSchema },
   "documents:import": { request: z.object({ folderId: folderIdSchema.nullable().optional() }).strict(), response: documentSchema.nullable() },
   "documents:importPaths": {
-    request: z.object({ paths: z.array(z.string().min(1).max(4096)).min(1).max(100), folderId: folderIdSchema.nullable().optional() }).strict(),
+    request: z.object({ paths: z.array(z.string().regex(/^drop:[a-f0-9]{64}$/)).min(1).max(100), folderId: folderIdSchema.nullable().optional() }).strict(),
     response: z.array(z.discriminatedUnion("ok", [z.object({ ok: z.literal(true), document: documentSchema }), z.object({ ok: z.literal(false), path: z.string(), error: z.string() })])),
   },
   "documents:list": { request: empty, response: z.array(documentSchema) },
@@ -50,7 +74,7 @@ export const ipcContract = {
     response: documentSchema.nullable(),
   },
   "documents:read": {
-    request: z.object({ documentId: documentIdSchema }).strict(),
+    request: z.object({ documentId: documentIdSchema, version:z.enum(["original","ai"]).optional() }).strict(),
     response: z.string(),
   },
   "documents:reconvert": {request:z.object({documentId:documentIdSchema}).strict(),response:documentSchema},
@@ -63,13 +87,13 @@ export const ipcContract = {
     response: ack,
   },
   "conversations:create": {
-    request: conversationSchema.omit({ id: true, createdAt: true }),
+    request: conversationCreateSchema,
     response: conversationSchema,
   },
   "conversations:model": { request: z.object({ conversationId: conversationIdSchema, providerId: providerIdSchema, modelId: z.string().min(1) }).strict(), response: conversationSchema },
   "conversations:options": { request: z.object({ conversationId: conversationIdSchema, options: modelOptionsSchema }).strict(), response: ack },
   "conversations:list": {
-    request: z.object({ documentId: documentIdSchema }).strict(),
+    request: conversationScopeSchema,
     response: z.array(conversationSchema),
   },
   "conversations:delete": {
@@ -83,7 +107,7 @@ export const ipcContract = {
   "settings:get": { request: empty, response: settingsSchema },
   "settings:set": { request: settingsSchema, response: settingsSchema },
   "providers:list": {
-    request: empty,
+    request: z.object({ discover: z.boolean().optional() }).strict(),
     response: z.array(
       z.object({
         config: providerConfigSchema,
@@ -91,6 +115,7 @@ export const ipcContract = {
           z.object({ available: z.literal(true) }),
           z.object({ available: z.literal(false), reason: z.string() }),
         ]),
+        resolvedPath: z.string().nullable().optional(),
         modelsLoading: z.boolean().optional(),
         models: z.array(modelSchema),
       }),
@@ -137,6 +162,7 @@ export const chatEnvelopeSchema = z
   .strict();
 export type ChatEnvelope = z.infer<typeof chatEnvelopeSchema>;
 export interface DesktopApi {
+  onMoodleProgress?(listener:(event:MoodleProgress)=>void):()=>void;
   onDocumentProgress?(listener: (event: z.infer<typeof documentProgressSchema>) => void): () => void;
   getPathForFile?(file: File): string;
   invoke<C extends IpcChannel>(
@@ -148,3 +174,7 @@ export interface DesktopApi {
     listener: (event: ChatEnvelope["event"]) => void,
   ): () => void;
 }
+
+export const moodleProgressChannel = 'moodle:progress';
+export const moodleProgressSchema = z.object({accountId:z.string().uuid(),courseId:z.string().uuid().optional(),panel:moodlePanelSchema.optional(),state:z.enum(['loading','idle','error']),completed:z.number().int().nonnegative(),total:z.number().int().nonnegative()}).strict();
+export type MoodleProgress = z.infer<typeof moodleProgressSchema>;

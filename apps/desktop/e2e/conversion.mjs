@@ -2,7 +2,7 @@ import { _electron as electron } from "playwright";
 import { Buffer } from "node:buffer";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile, mkdir, cp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -11,6 +11,7 @@ const fixtures = join(directory, "fixtures");
 const unsupported = join(directory, "unsupported.exe");
 await writeFile(unsupported, "unsupported");
 execFileSync("python3", ["test-fixtures/converter/generate.py", fixtures]);
+if(process.env.VSTUDY_CONVERTER_VENV){await mkdir(join(directory,'user-data'));await cp(process.env.VSTUDY_CONVERTER_VENV,join(directory,'user-data','converter-venv'),{recursive:true});}
 let app, page;
 try {
   app = await electron.launch({
@@ -21,35 +22,15 @@ try {
  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();
+  await page.getByTestId("bridge-status").waitFor({state:"attached"});
   await page.getByText("Workspace connected", { exact: true }).waitFor();
-  for (const extension of ["docx", "xlsx", "pdf"]) {
+  for (const extension of ["docx", "xlsx", "pptx", "html", "csv", "md", "pdf"]) {
     const path = join(fixtures, `sample.${extension}`);
-    await app.evaluate(({ dialog }, { path, extension }) => {
-      dialog.showOpenDialog = extension === "docx"
-        ? async () => { throw new Error("File drop must not open a chooser"); }
-        : async () => ({ canceled: false, filePaths: [path] });
-    }, { path, extension });
-    if (extension === "docx") {
-      await page.evaluate(() => {
-        const input = window.document.createElement("input");
-        input.type = "file";
-        input.multiple = true;
-        input.id = "e2e-drop-file";
-        input.hidden = true;
-        window.document.body.append(input);
-      });
-      await page.locator("#e2e-drop-file").setInputFiles([unsupported, path]);
-      await page.evaluate(() => {
-        const input = window.document.querySelector("#e2e-drop-file");
-        const dataTransfer = new window.DataTransfer();
-        for (const file of input.files) dataTransfer.items.add(file);
-        window.document.querySelector(".workspace").dispatchEvent(new window.DragEvent("drop", { bubbles: true, dataTransfer }));
-        input.remove();
-      });
-    } else {
-      await page.getByTestId("import-document").click();
-    }
+    await app.evaluate(({ dialog }, path) => {
+      dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] });
+      dialog.showMessageBox = async () => ({response:1,checkboxChecked:false});
+    }, path);
+    await page.getByTestId("import-document").click();
     await page.getByRole("region", { name: "Document", exact: true })
       .locator(".pane-toolbar .eyebrow").filter({ hasText: `sample.${extension}` }).waitFor();
     const viewer = page.getByTestId("document-markdown");
@@ -60,19 +41,19 @@ try {
     }, `sample.${extension}`);
     assert.equal(importedDocument.status, "ready", importedDocument.error ?? "Document must finish conversion");
     if (extension === "docx") {
-      assert.ok((await page.locator(".notice").innerText()).includes("Could not convert this file. Please retry."), "per-file import failure is reported while successful file opens");
       await viewer.locator("img").waitFor();
       await page.waitForFunction(() => {
         const image = window.document.querySelector('[data-testid="document-markdown"] img');
         return image?.complete && image.naturalWidth === 1;
       });
     }
-    assert.equal(importedDocument.mime.includes(extension === "pdf" ? "pdf" : "officedocument"), true);
+    assert.equal(importedDocument.mime, ({pdf:'application/pdf',html:'text/html',csv:'text/csv',md:'text/markdown'})[extension] ?? `application/vnd.openxmlformats-officedocument.${({docx:'wordprocessingml.document',xlsx:'spreadsheetml.sheet',pptx:'presentationml.presentation'})[extension]}`);
     const chatBox = await page.getByRole("region", { name: "Chat", exact: true }).boundingBox();
     const documentBox = await page.getByRole("region", { name: "Document", exact: true }).boundingBox();
     assert.ok(documentBox.x > chatBox.x, "Converted text appears in right pane");
     console.log(JSON.stringify({ extension, status: importedDocument.status, text: await viewer.innerText() }));
   }
+  await assert.rejects(page.evaluate(path=>window.desktop.invoke('documents:importPaths',{paths:[path]}),unsupported));
   const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
   const imageFixture = join(fixtures, "images.md");
   await writeFile(imageFixture, `# Image rendering\n\n![embedded](data:image/png;base64,${png})\n\n![library](assets/pixel.png)`);
@@ -83,7 +64,6 @@ try {
   await page.getByTestId("document-markdown").filter({ hasText: "Image rendering" }).waitFor();
   const imageDocument = await page.evaluate(async () =>
     (await window.desktop.invoke("documents:list", {})).find((document) => document.sourceName === "images.md"));
-  const { mkdir } = await import("node:fs/promises");
   const { dirname } = await import("node:path");
   await mkdir(join(dirname(imageDocument.markdownPath), "assets"));
   await writeFile(join(dirname(imageDocument.markdownPath), "assets/pixel.png"), Buffer.from(png, "base64"));
@@ -93,9 +73,9 @@ try {
     const images = Array.from(window.document.querySelectorAll('[data-testid="document-markdown"] img'));
     return images.length === 2 && images.every((image) => image.complete && image.naturalWidth === 1);
   });
-  console.log(JSON.stringify({ images: "PASS", dataUri: true, libraryProtocol: true, fileDrop: true }));
+  console.log(JSON.stringify({ images: "PASS", dataUri: true, libraryProtocol: true, nativeDialog: true }));
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ result: "PASS", realConverter: true, formats: ["docx", "xlsx", "pdf"], consoleErrors: errors }));
+  console.log(JSON.stringify({ result: "PASS", realConverter: true, formats: ["docx", "xlsx", "pptx", "html", "csv", "md", "pdf"], consoleErrors: errors }));
 } catch (error) {
   console.error(await page?.locator("body").innerText().catch(() => "Window unavailable"));
   throw error;

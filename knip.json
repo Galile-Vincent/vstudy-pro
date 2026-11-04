@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {"entry": ["scripts/**/*.{mjs,cjs,ts}"], "project": ["scripts/**/*.{mjs,cjs,ts}"]},
+    "apps/desktop": {
+      "entry": ["src/main/index.ts", "src/preload/index.ts", "src/renderer/main.tsx", "src/main/services/search-worker.ts", "resources/converter/**/*.ts", "scripts/**/*.{mjs,cjs,ts}", "e2e/**/*.mjs", "src/**/*.test.{ts,tsx}"],
+      "project": ["src/**/*.{ts,tsx}", "resources/**/*.ts", "scripts/**/*.{mjs,cjs,ts}", "e2e/**/*.mjs"],
+      "ignoreDependencies": ["@cyclonedx/cyclonedx-npm", "tailwindcss", "tw-animate-css"]
+    }
+  }
+}

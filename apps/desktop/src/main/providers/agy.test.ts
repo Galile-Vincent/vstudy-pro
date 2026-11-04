@@ -72,3 +72,19 @@ it("suppresses duplicate terminals and trailing output in a successful stream", 
   for await (const event of adapter.stream(request, controller.signal)) { events.push(event); controller.abort(); }
   expect(events).toEqual([{ type: "done" }]);
 });
+it('removes a pending probe directory when disposed before the handshake completes', async () => {
+ const {readdir}=await import('node:fs/promises');
+ const before=new Set(await readdir(tmpdir()));
+ const adapter=new AgyAdapter(fake('setInterval(()=>{},1000)'));
+ const pending=adapter.detect();
+ let created:string[]=[];
+ for(let i=0;i<100;i++) {
+  created=(await readdir(tmpdir())).filter(name=>name.startsWith('vstudy-agy-probe-')&&!before.has(name));
+  if(created.length)break;
+  await new Promise(resolve=>setTimeout(resolve,5));
+ }
+ expect(created).toHaveLength(1);
+ adapter.dispose();
+ expect((await readdir(tmpdir())).filter(name=>created.includes(name))).toEqual([]);
+ await pending;
+});

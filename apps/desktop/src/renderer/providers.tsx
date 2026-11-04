@@ -1,26 +1,31 @@
+import { Switch } from './components/ui/switch';
+import { SlidersHorizontal, Palette, KeyRound, BarChart3, Shield, X } from 'lucide-react';
+import { SettingsGroup, SettingsRow } from './settings/layout';
+import { AppearanceSection } from './settings/appearance';
+import './settings/settings.css';
+import { Dialog, DialogContent, DialogTitle } from './components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
+import { Button } from './components/ui/button';
+import { useOptionalNavigation } from './shell';
+import { PrivacySettings } from './privacy-settings';
 import { Onboarding } from './onboarding/onboarding';
-import { errorText } from "./status";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 import { LanguageSettings } from './language-settings';
 import { tr } from '../shared/i18n';
-import { UsageSettings } from "./usage/settings";
-import { useEffect, useRef, useState } from "react";
-import { desktop } from "./bridge";
-import type { IpcResponse, ProviderConfig } from "../shared";
-export type Providers = IpcResponse<"providers:list">;
-export const providerName: Record<ProviderConfig["id"], string> = {
-  "openai-api": "OpenAI",
-  "anthropic-api": "Anthropic",
-  get "openai-compatible"() { return tr('common:openai_compatible'); },
-  "codex-cli": "Codex CLI",
-  "claude-cli": "Claude CLI",
-  "agy-cli": "Antigravity CLI",
-};
+import { UsageSettings } from './usage/settings';
+import { useEffect, useState } from 'react';
+import { desktop } from './bridge';
+import { type Providers } from './provider-metadata';
+import { ProviderRow } from './provider-row';
+
+export { providerName, type Providers } from './provider-metadata';
+export { ProviderRow } from './provider-row';
+
 export function ProviderSettings({
   providers,
   onClose,
   onRefresh,
-  initialTab = "providers",
+  initialTab = 'general',
 }: {
   providers: Providers;
   onClose: () => void;
@@ -28,166 +33,142 @@ export function ProviderSettings({
   initialTab?: string;
 }) {
   useTranslation();
+  const navigation = useOptionalNavigation();
   const [guide, setGuide] = useState(false);
   const [structuredTables, setStructuredTables] = useState(false);
-  const [featureError,setFeatureError] = useState('');
-  const [tab,setTab] = useState(initialTab);
-  const dialog = useRef<HTMLDialogElement>(null);
+  const [featureError, setFeatureError] = useState('');
+  const [tab, setTab] = useState(initialTab);
+
   useEffect(() => {
-    dialog.current?.showModal();
-    void desktop.invoke('settings:get',{}).then(s => setStructuredTables(s.enableGenerativeUI)).catch(() => {});
+    const previous = document.activeElement as HTMLElement | null;
+
+    void desktop
+      .invoke('settings:get', {})
+      .then((s) => setStructuredTables(s.enableGenerativeUI))
+      .catch(() => {});
+    return () => {
+      if (previous?.isConnected) previous.focus();
+      else document.getElementById('shell-content')?.focus();
+    };
   }, []);
+
   return (
-    <dialog
-      ref={dialog}
-      className={`settings-dialog ${tab === "usage" ? "usage-dashboard-dialog" : ""}`}
-      onCancel={onClose}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
       }}
     >
-      <div className="dialog-title">
-        <h2>{tab === "usage" ? tr('common:usage') : tr('common:providers_api_keys')}</h2>
-        <button onClick={onClose} aria-label={tr('common:close_settings')}>
-          ×
-        </button>
-      </div>
-      <LanguageSettings />
-      <button onClick={() => setGuide(true)}>{tr("onboarding:replay")}</button>
-      {guide && <Onboarding onComplete={() => setGuide(false)}/>}
-      <div className="settings-tabs" role="tablist" aria-label={tr('common:settings')}><button role="tab" aria-selected={tab === "providers"} onClick={() => setTab("providers")}>{tr('common:providers')}</button><button role="tab" aria-selected={tab === "usage"} onClick={() => setTab("usage")}>{tr('common:usage')}</button></div>
-      {tab === "usage" ? <UsageSettings /> : <>
-      <p className="muted">
-        {tr('common:keys_are_saved_securely_in_the_desktop_app_and_never_read_back')}</p>
-      <label className="generative-setting"><input type="checkbox" checked={structuredTables} onChange={e => { const enabled=e.target.checked; setStructuredTables(enabled); void desktop.invoke('settings:get',{}).then(s => desktop.invoke('settings:set',{...s,enableGenerativeUI:enabled})).catch(() => {setStructuredTables(!enabled);setFeatureError(tr('common:could_not_save_structured_table_setting'));}); }} />{tr('common:read_only_structured_tables_api_providers_only')}</label>
-      <p className="muted">{tr('common:optional_table_presentations_off_by_default_cli_tools_remain_disabled')}</p>
-      {featureError && <p role="alert">{featureError}</p>}
-      {providers.map((provider) => (
-        <ProviderRow
-          key={provider.config.id}
-          provider={provider}
-          onRefresh={onRefresh}
-        />
-      ))}
-      </>}
-    </dialog>
-  );
-}
-function ProviderRow({
-  provider,
-  onRefresh,
-}: {
-  provider: Providers[number];
-  onRefresh: () => Promise<void>;
-}) {
-  useTranslation();
-  const [hasKey, setHasKey] = useState(false),
-    [key, setKey] = useState(""),
-    [baseUrl, setBaseUrl] = useState(
-      provider.config.kind === "compatible" ? provider.config.baseUrl : "",
-    ),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
-  useEffect(() => {
-    if (provider.config.kind !== "cli")
-      void desktop
-        .invoke("secrets:has", { providerId: provider.config.id })
-        .then((value) => setHasKey(value.hasKey))
-        .catch(() => setError(tr('common:could_not_check_key_status')));
-  }, [provider.config.id, provider.config.kind]);
-  const perform = async (action: () => Promise<unknown>) => {
-    setBusy(true);
-    setError("");
-    try {
-      await action();
-      await onRefresh();
-    } catch (e) {
-      setError(errorText(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <section className="provider-row">
-      <div className="row">
-        <strong>{providerName[provider.config.id]}</strong>
-        <span className="muted">
-          {provider.config.kind === "cli"
-            ? provider.availability.available
-              ? tr('common:detected')
-              : tr('errors:provider_unavailable')
-            : hasKey
-              ? tr('common:key_saved')
-              : tr('common:no_key_saved')}
-        </span>
-      </div>
-      {provider.config.kind !== "cli" && (
-        <>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void perform(async () => {
-                await desktop.invoke("secrets:set", {
-                  providerId: provider.config.id,
-                  key,
-                });
-                setKey("");
-                setHasKey(true);
-              });
-            }}
-          >
-            <input
-              aria-label={tr('settings:api_key',{provider:providerName[provider.config.id]})}
-              type="password"
-              autoComplete="off"
-              placeholder={tr('common:enter_api_key')}
-              value={key}
-              onChange={(e) => setKey(e.target.value)}
-            />
-            <button disabled={busy || !key.trim()}>{tr('common:save_key')}</button>
-            {hasKey && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() =>
-                  void perform(async () => {
-                    await desktop.invoke("secrets:delete", {
-                      providerId: provider.config.id,
-                    });
-                    setHasKey(false);
-                  })
-                }
-              >
-                {tr('common:remove')}</button>
-            )}
-          </form>
-          {provider.config.kind === "compatible" && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                void perform(() =>
-                  desktop.invoke("providers:configure", {
-                    kind: "compatible",
-                    id: "openai-compatible",
-                    enabled: true,
-                    baseUrl,
-                  }),
-                );
-              }}
-            >
-              <input
-                type="url"
-                required
-                aria-label={tr('common:openai_compatible_base_url')}
-                value={baseUrl}
-                onChange={(e) => setBaseUrl(e.target.value)}
-              />
-              <button disabled={busy}>{tr('common:save_url')}</button>
-            </form>
-          )}
-        </>
-      )}
-      {error && <p role="alert">{error}</p>}
-    </section>
+      <DialogContent aria-describedby={undefined} showCloseButton={false} className="settings-dialog">
+        <div className="settings-header">
+          <DialogTitle>{tr('common:settings')}</DialogTitle>
+          <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={tr('common:close_settings')}>
+            <X size={16} />
+          </Button>
+        </div>
+        {guide && <Onboarding onComplete={() => setGuide(false)} />}
+        <Tabs orientation="vertical" value={tab} onValueChange={setTab} className="settings-body">
+          <TabsList variant="line" className="settings-tabs" aria-label={tr('common:settings')}>
+            {(
+              [
+                ['general', SlidersHorizontal],
+                ['appearance', Palette],
+                ['providers', KeyRound],
+                ['usage', BarChart3],
+                ['privacy', Shield],
+              ] as const
+            ).map(([id, Icon]) => (
+              <TabsTrigger key={id} value={id}>
+                <Icon size={16} />
+                {tr(`settings:${id}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {['general', 'appearance', 'providers', 'usage', 'privacy'].map((id) => (
+            <TabsContent forceMount hidden={tab !== id} value={id} key={id} className="settings-pane">
+              <div className="settings-pane-inner">
+                <header className="settings-section-header">
+                  <h2>{tr(`settings:${id}`)}</h2>
+                  {id === 'providers' && (
+                    <p className="muted">
+                      {tr('common:keys_are_saved_securely_in_the_desktop_app_and_never_read_back')}
+                    </p>
+                  )}
+                </header>
+                {tab === id &&
+                  (id === 'general' ? (
+                    <>
+                      <SettingsGroup title={tr('settings:languages')}>
+                        <LanguageSettings />
+                      </SettingsGroup>
+                      <SettingsGroup title={tr('settings:welcome')}>
+                        <SettingsRow label={tr('settings:welcomeGuide')}>
+                          <Button size="sm" variant="secondary" onClick={() => setGuide(true)}>
+                            {tr('onboarding:replay')}
+                          </Button>
+                        </SettingsRow>
+                        <SettingsRow label={tr('settings:aboutApp')}>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            id="welcome-settings-entry"
+                            onClick={() => {
+                              navigation?.navigate('welcome');
+                              onClose();
+                            }}
+                          >
+                            {tr('welcome:entry')}
+                          </Button>
+                        </SettingsRow>
+                      </SettingsGroup>
+                    </>
+                  ) : id === 'appearance' ? (
+                    <AppearanceSection />
+                  ) : id === 'privacy' ? (
+                    <PrivacySettings />
+                  ) : id === 'usage' ? (
+                    <UsageSettings />
+                  ) : (
+                    <>
+                      <SettingsGroup>
+                        <SettingsRow
+                          label={tr('common:read_only_structured_tables_api_providers_only')}
+                          description={tr('common:optional_table_presentations_off_by_default_cli_tools_remain_disabled')}
+                        >
+                          <Switch
+                            aria-label={tr('common:read_only_structured_tables_api_providers_only')}
+                            checked={structuredTables}
+                            onCheckedChange={(enabled) => {
+                              setStructuredTables(enabled);
+                              void desktop
+                                .invoke('settings:get', {})
+                                .then((s) => desktop.invoke('settings:set', { ...s, enableGenerativeUI: enabled }))
+                                .catch(() => {
+                                  setStructuredTables(!enabled);
+                                  setFeatureError(tr('common:could_not_save_structured_table_setting'));
+                                });
+                            }}
+                          />
+                        </SettingsRow>
+                        {featureError && <p role="alert">{featureError}</p>}
+                      </SettingsGroup>
+                      <SettingsGroup title={tr('common:providers')}>
+                        {providers.map((provider) => (
+                          <ProviderRow
+                            settingsView
+                            key={provider.config.id}
+                            provider={provider}
+                            onRefresh={onRefresh}
+                          />
+                        ))}
+                      </SettingsGroup>
+                    </>
+                  ))}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </DialogContent>
+    </Dialog>
   );
 }

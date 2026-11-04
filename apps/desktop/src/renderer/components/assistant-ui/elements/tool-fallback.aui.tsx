@@ -1,6 +1,5 @@
-"use client";
-import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
+
 
 import {
   forwardRef,
@@ -62,7 +61,6 @@ function ToolFallbackRoot({
   children,
   ...props
 }: ToolFallbackRootProps) {
-  useTranslation();
   const collapsibleRef = useRef<HTMLDivElement>(null);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const lockScroll = useScrollLock(collapsibleRef, ANIMATION_DURATION);
@@ -124,7 +122,6 @@ function ToolFallbackDuration({
   className,
   ...props
 }: React.ComponentProps<"span">) {
-  useTranslation();
   const elapsedMs = useToolCallElapsed();
   if (elapsedMs === undefined) return null;
 
@@ -153,7 +150,6 @@ function ToolFallbackTrigger({
   status?: ToolCallMessagePartStatus;
   responseDeliveryStatus?: ToolCallMessagePart["responseDeliveryStatus"];
 }) {
-  useTranslation();
   const statusType = status?.type ?? "complete";
   const isRunning = statusType === "running";
   const isCancelled =
@@ -168,7 +164,7 @@ function ToolFallbackTrigger({
         : statusType === "requires-action"
           ? tr('common:waiting_on_tool')
           : statusType === "incomplete"
-            ? `${isCancelled ? tr('common:cancelled') : tr('common:failed')} ${tr('common:tool')}`
+            ? tr(isCancelled ? 'common:tool_cancelled_label' : 'common:tool_failed_label')
             : tr('common:used_tool');
 
   return (
@@ -218,7 +214,6 @@ function ToolFallbackContent({
   children,
   ...props
 }: React.ComponentProps<typeof CollapsibleContent>) {
-  useTranslation();
   return (
     <CollapsibleContent
       data-slot="tool-fallback-content"
@@ -255,7 +250,6 @@ function ToolFallbackArgs({
 }: React.ComponentProps<"div"> & {
   argsText?: string;
 }) {
-  useTranslation();
   if (!argsText) return null;
 
   return (
@@ -295,7 +289,6 @@ function ToolFallbackResult({
 }: React.ComponentProps<"div"> & {
   result?: unknown;
 }) {
-  useTranslation();
   if (result === undefined) return null;
 
   return (
@@ -320,7 +313,6 @@ function ToolFallbackError({
 }: React.ComponentProps<"div"> & {
   status?: ToolCallMessagePartStatus;
 }) {
-  useTranslation();
   if (status?.type !== "incomplete") return null;
 
   const error = status.error;
@@ -352,10 +344,10 @@ const APPROVED_RESULT = tr('common:approved_by_user');
 const DENIED_RESULT = tr('common:user_denied_tool_execution');
 
 const APPROVAL_OPTION_DEFAULT_LABELS: Record<string, string> = {
-  "allow-once": tr('common:allow'),
-  "allow-always": tr('common:always_allow'),
-  "reject-once": tr('common:deny'),
-  "reject-always": tr('common:always_deny'),
+  "allow-once": "common:allow",
+  "allow-always": "common:always_allow",
+  "reject-once": "common:deny",
+  "reject-always": "common:always_deny",
 };
 
 const isKnownKind = (kind: string) =>
@@ -367,7 +359,7 @@ const isAllowKind = (kind: string) =>
 const approvalOptionLabel = (option: ToolApprovalOption) =>
   option.label ??
   (isKnownKind(option.kind)
-    ? APPROVAL_OPTION_DEFAULT_LABELS[option.kind]
+    ? tr(APPROVAL_OPTION_DEFAULT_LABELS[option.kind]!)
     : undefined) ??
   option.id;
 
@@ -464,7 +456,6 @@ function ToolFallbackApprovalReceipt({
   focusReceiptRef: React.MutableRefObject<string | null | undefined>;
   receiptRef: React.MutableRefObject<HTMLDivElement | null>;
 }) {
-  useTranslation();
   useLayoutEffect(() => {
     const shouldFocus = focusReceiptRef.current === approval.id;
     focusReceiptRef.current = null;
@@ -551,7 +542,6 @@ function ToolFallbackApprovalQuestions({
   onSend: (answers: Record<string, ToolApprovalAnswer>) => void;
   onDismiss: () => void;
 }) {
-  useTranslation();
   const [selected, setSelected] = useState<
     ReadonlyMap<string, readonly string[]>
   >(() => new Map());
@@ -748,7 +738,6 @@ function ToolFallbackApprovalImpl({
   forwardedRef: React.ForwardedRef<HTMLDivElement>;
   carryFocusRef: React.MutableRefObject<boolean>;
 }) {
-  useTranslation();
   const [submitted, setSubmitted] = useState(false);
   const voiceActive = useAuiState((s) => s.thread.voice !== undefined);
   const canAnswer = useAuiState((s) => s.thread.capabilities.answerToolCall);
@@ -1208,7 +1197,6 @@ const ToolFallbackImpl: ToolCallMessagePartComponent = ({
   approval,
   respondToApproval,
 }) => {
-  useTranslation();
   const isCancelled =
     status?.type === "incomplete" && status.reason === "cancelled";
   const isRequiresAction = status?.type === "requires-action";

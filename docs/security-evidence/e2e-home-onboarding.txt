@@ -1,0 +1,2 @@
+en: onboarding, sample, Home states, reorder and axe passed
+Evidence: /tmp/vstudy-home; 14 screenshots

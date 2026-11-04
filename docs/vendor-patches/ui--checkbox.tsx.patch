@@ -1,0 +1,9 @@
+--- a/apps/desktop/src/renderer/components/ui/checkbox.tsx
++++ b/apps/desktop/src/renderer/components/ui/checkbox.tsx
+@@ -1,5 +1,5 @@
+ import * as React from "react"
+-import { cn } from "cn"
++import { cn } from "@/lib/utils"
+ import { CheckIcon } from "lucide-react"
+ import { Checkbox as CheckboxPrimitive } from "radix-ui"
+ 

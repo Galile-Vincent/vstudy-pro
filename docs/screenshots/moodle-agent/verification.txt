@@ -1,0 +1,14 @@
+PASS. Real Electron with fake provider. Course action stripped, proposed, approved, saved with agent provenance. Course conversation and proposals persisted. Moodle-linked file opened and chatted as a document.
+
+Verification on 2026-11-04.
+pnpm typecheck passed.
+pnpm lint passed.
+pnpm security:check passed, including pnpm test with 434 passed and 13 existing skipped tests.
+Security audit reported no unreviewed advisories. The existing dynamic shell.openExternal warning remains.
+pnpm build passed.
+cd apps/desktop && node e2e/moodle-agent.mjs passed after the final build.
+
+The approved screenshot was opened and visually inspected. The flow refreshed proposal.png and approved.png.
+Regression tests reproduced each requested finding before its fix. The in-memory reminder tests verify one reminder remains one after deadline or course removal and does not fire while orphaned.
+
+Limits. No live Moodle account or paid provider was used. The Electron flow uses real SQLite cache rows and IPC with VSTUDY_FAKE_PROVIDER=1. Notification paging remains uncapped, and reminder body formatting is unchanged. These were optional follow-ups.

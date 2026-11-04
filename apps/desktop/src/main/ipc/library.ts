@@ -1,6 +1,8 @@
+import { searchInWorker } from '../services/search-runner';
 import { documentIdSchema } from '../../shared/domain';
 import { app, dialog, shell } from 'electron';
-import { copyFile } from 'node:fs/promises';
+import { safeFilename } from "../security";
+import { exportFile } from '../services/export-file';
 import { basename, extname, join } from 'node:path';
 import type { Store } from '../db';
 import type { IpcChannel } from '../../shared/ipc';
@@ -8,7 +10,7 @@ import type { createIpcRegistrar } from './register';
 import { LibraryService, containedPath } from '../services/library';
 import { ActivityService } from '../services/activity';
 import { getDashboard } from '../services/dashboard';
-export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>, deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove()) {
+export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>, deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(), resume: (id: import("../../shared/domain").Document["id"]) => void = () => {}) {
     const library = new LibraryService(store, join(app.getPath('userData'), 'library')), activity = new ActivityService(store);
     library.search.rebuild();
     const handle: typeof registrar.handle = (channel, handler) => { implemented.add(channel); registrar.handle(channel, handler); };
@@ -21,13 +23,13 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     handle('library:folders:update', r => library.updateFolder(r.folderId, r));
     handle('library:folders:move', r => { library.moveFolder(r.folderId, r.parentId, r.beforeId); return { ok: true }; });
     handle('library:folders:delete', r => { library.deleteFolder(r.folderId, r.destination); return { ok: true }; });
-    handle('library:documents:list', r => library.list(r));
+    handle('library:documents:list', r => r.text ? searchInWorker('library:documents:list', r, String(store.db.prepare('PRAGMA database_list').get()!.file), library.root) : library.list(r));
     handle('library:documents:move', r => { library.move(r.documentIds, r.folderId, r.beforeId); return { ok: true }; });
     handle('library:documents:pin', r => { library.pin(r.documentId, r.pinned); return { ok: true }; });
     handle('library:pins:reorder', r => { library.reorderPins(r.kind, r.ids); return { ok: true }; });
     handle('library:documents:rename', r => { library.rename(r.documentId, r.title); return { ok: true }; });
     handle('library:documents:softDelete', async (r) => { await deleteDocument(documentIdSchema.parse(r.documentId), async () => { library.softDelete(r.documentId); }); return { ok: true }; });
-    handle('library:documents:restore', r => { library.restore(r.documentId); return { ok: true }; });
+    handle('library:documents:restore', r => { library.restore(r.documentId); resume(documentIdSchema.parse(r.documentId)); return { ok: true }; });
     handle('library:documents:purge', () => { library.purge(); return { ok: true }; });
     handle('library:tags:list', () => library.tags());
     handle('library:tags:save', r => library.saveTag(r));
@@ -36,7 +38,7 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     handle('library:savedFilters:list', () => library.filters());
     handle('library:savedFilters:save', r => library.saveFilter(r));
     handle('library:savedFilters:delete', r => { library.deleteFilter(r.id); return { ok: true }; });
-    handle('library:search', r => library.search.search(r.text, r.limit, r.cursor));
+    handle('library:search', r => searchInWorker('library:search', r, String(store.db.prepare('PRAGMA database_list').get()!.file), library.root));
     const beats = new Map<string, number>();
     handle('activity:heartbeat', (r, event) => { library.require(r.documentId); const key = `${event.sender.id}:${r.documentId}`, now = Date.now(), last = beats.get(key) ?? now - 60000; const seconds = Math.min(r.seconds, Math.floor((now - last) / 1000)); if (seconds > 0) {
         activity.record('read', r.documentId, seconds);
@@ -51,10 +53,10 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
                 throw new Error('Export rate limited');
             exports.set(event.sender.id, now);
             const d = library.require(r.documentId), path = containedPath(library.root, channel === 'library:exportMarkdown' ? d.markdownPath : d.sourcePath);
-            const result = await dialog.showSaveDialog({ defaultPath: channel === 'library:exportMarkdown' ? `${basename(d.sourceName, extname(d.sourceName))}.md` : basename(d.sourceName) });
+            const result = await dialog.showSaveDialog({ defaultPath: channel === 'library:exportMarkdown' ? safeFilename(`${basename(d.sourceName, extname(d.sourceName))}.md`) : safeFilename(basename(d.sourceName)) });
             if (result.canceled || !result.filePath)
                 return { saved: false };
-            await copyFile(path, result.filePath);
+            await exportFile(path, result.filePath);
             return { saved: true };
         });
     handle('library:reveal', r => { shell.showItemInFolder(containedPath(library.root, library.require(r.documentId).sourcePath)); return { ok: true }; });

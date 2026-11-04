@@ -78,11 +78,11 @@ async function setup(adapter: ProviderAdapter) {
     },
   });
   cleanups.push(async () => {
-    chat.dispose();
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await chat.dispose();
     store.close();
     await rm(cwd, { recursive: true, force: true });
   });
+  if (request.scope === "course") throw new Error("Expected document fixture");
   return { chat, store, request, cwd, owner: new Owner() };
 }
 const available = {
@@ -115,7 +115,7 @@ it("persists both messages and streams selection-grounded prompt only to origin"
   chat.start(request, owner);
   await until(() => owner.events.some((e) => e.type === "done"));
   expect(received?.prompt).toContain("Exact selected passage");
-  expect(received?.prompt).toContain("Document: Study");
+  expect(received?.prompt).toContain('Document: "Study"');
   expect(owner.events.filter(e => e.type !== "usage")).toEqual([
     { type: "text-delta", text: "Answer" },
     { type: "done" },
@@ -156,7 +156,7 @@ it("rejects duplicate ids and foreign aborts; abort emits exactly done despite l
   chat.abort(request.requestId, owner);
   chat.abort(request.requestId, owner);
   release?.();
-  await new Promise((r) => setTimeout(r, 15));
+  await chat.waitForIdle();
   expect(aborted).toBe(true);
   expect(owner.events.filter(e => e.type !== "usage")).toEqual([
     { type: "text-delta", text: "first" },
@@ -180,7 +180,7 @@ it("aborts all window-owned requests on destruction and suppresses late deltas",
   chat.start(request, owner);
   await until(() => signal !== undefined);
   owner.destroy();
-  await new Promise((r) => setTimeout(r, 10));
+  await chat.waitForIdle();
   expect(signal?.aborted).toBe(true);
   expect(owner.events.filter(e => e.type !== "usage")).toEqual([{ type: "text-delta", text: "first" }]);
 });
@@ -218,7 +218,7 @@ it("an immediate abort never starts the provider and does not persist an empty a
   });
   chat.start(request, owner);
   chat.abort(request.requestId, owner);
-  await new Promise((r) => setTimeout(r, 10));
+  await chat.waitForIdle();
   expect(called).toBe(false);
   expect(owner.events.filter(e => e.type !== "usage")).toEqual([{ type: "done" }]);
   expect(store.messages.list(request.conversationId)).toHaveLength(1);
@@ -280,7 +280,7 @@ it.each(["document", "conversation"])("aborts before deleting %s without late sa
   await until(() => owner.events.length === 1);
   if (kind === "document") { chat.abortDocument(request.documentId); store.documents.delete(request.documentId); }
   else chat.deleteConversation(request.conversationId);
-  await new Promise(resolve => setTimeout(resolve, 10));
+  await chat.waitForIdle();
   expect(signal?.aborted).toBe(true);
   expect(owner.events.filter(e => e.type !== "usage")).toEqual([{ type: "text-delta", text: "partial" }, { type: "done" }]);
   expect(store.messages.list(request.conversationId)).toEqual([]);
@@ -336,7 +336,7 @@ it('records the latest reported partial snapshot on abort without post-terminal 
   chat.start(request,owner);await until(()=>owner.events.length>0);chat.abort(request.requestId,owner);
   expect(owner.events.map(e=>e.type)).toEqual(['text-delta','usage','done']);
   expect(store.usage.forConversation(request.conversationId)).toMatchObject([{inputTokens:240,outputTokens:3,costSource:'estimated',aborted:true}]);
-  await new Promise(resolve=>setTimeout(resolve,10));expect(owner.events).toHaveLength(3);
+  await chat.waitForIdle();expect(owner.events).toHaveLength(3);
 });
 it('records CLI auxiliary model usage separately while displaying aggregate message usage',async()=>{
   const {chat,store,request,owner}=await setup({...available,async *stream(req){
@@ -376,6 +376,7 @@ it('retains explicitly reported zero usage on a completed call',async()=>{
 });
 it('persists and forwards reasoning, validated citations and a bounded API presentation before one terminal event', async () => {
   const fixture = await setup({...available,async *stream(req) {
+    if (req.scope === 'course') throw new Error('Expected document fixture');
     expect(req.allowPresentation).toBe(true);
     yield {type:'reasoning-delta',text:'Reported summary'};
     yield {type:'citations',citations:[{id:'s0',documentId:req.documentId,title:'Forged title',offset:999,quote:'Forged quote'}]};
@@ -389,7 +390,7 @@ it('persists and forwards reasoning, validated citations and a bounded API prese
   await until(() => fixture.owner.events.some(e => e.type === 'done'));
   const parts=fixture.store.messages.list(fixture.request.conversationId).at(-1)!.parts[0]!;
   expect(parts.reasoning).toBe('Reported summary');
-  expect(parts.citations).toEqual([{id:'s0',documentId:fixture.request.documentId,title:'Study',offset:0,quote:'# Study\nExact selected passage'}]);
+  expect(parts.citations).toEqual([{version:'original',id:'s0',documentId:fixture.request.documentId,title:'Study',offset:0,quote:'# Study\nExact selected passage'}]);
   expect(parts.toolCalls).toEqual([{toolCallId:'present-1',toolName:'present',args:{title:'Comparison',columns:['Topic','Fact'],rows:[['Study','Exact passage']]},result:{rendered:true},isError:false}]);
   expect(fixture.owner.events.filter(e => e.type === 'done' || e.type === 'error')).toEqual([{type:'done'}]);
   expect(fixture.owner.events.at(-1)).toEqual({type:'done'});
@@ -406,7 +407,7 @@ it('keeps tool execution off by default and drops enrichment after abort', async
   fixture.chat.start(fixture.request,fixture.owner);
   await until(() => fixture.owner.events.some(e => e.type === 'reasoning-delta'));
   fixture.chat.abort(fixture.request.requestId,fixture.owner);
-  const events=[...fixture.owner.events];release();await new Promise(resolve => setTimeout(resolve,15));
+  const events=[...fixture.owner.events];release();await fixture.chat.waitForIdle();
   expect(fixture.owner.events).toEqual(events);
   expect(events.filter(e => e.type === 'done' || e.type === 'error')).toEqual([{type:'done'}]);
   const part=fixture.store.messages.list(fixture.request.conversationId).at(-1)!.parts[0]!;
@@ -444,4 +445,108 @@ it('reloads only edited turns and regenerates without duplicating the user, reta
   expect(restarted.messages.list(request.conversationId).map(m => [m.role,m.parts[0]?.text])).toEqual([['user','Edited question'],['assistant','Answer 4']]);
   expect(restarted.usage.forConversation(request.conversationId)).toHaveLength(4);
   restarted.close();
+});
+
+it.each(['messages', 'activity_events'])('rolls back a failed edit when %s insertion aborts', async (table) => {
+  const { chat, store, request, owner } = await setup({ ...available, async *stream() { yield { type: 'done' }; } });
+  const user = store.messages.insert({id: randomUUID() as never, conversationId: request.conversationId, role:'user', parts:[{type:'text',text:'original'}], createdAt:new Date().toISOString()});
+  store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'assistant',parts:[{type:'text',text:'valuable answer'}],createdAt:new Date(Date.now()+1).toISOString()});
+  const before = store.messages.list(request.conversationId);
+  store.db.exec(`CREATE TRIGGER reject_edit BEFORE INSERT ON ${table} BEGIN SELECT RAISE(ABORT,'simulated storage failure'); END`);
+  expect(() => chat.start({...request,turnId:user.id,userMessage:'edited'},owner)).toThrow('simulated storage failure');
+  expect(store.messages.list(request.conversationId)).toEqual(before);
+});
+
+it('awaits provider cleanup and persists partial text and usage before disposal resolves', async () => {
+  const exited = deferred<void>();
+  const started = deferred<void>();
+  const fixture = await setup({...available,async *stream(_req,signal) {
+    try {
+      yield {type:'text-delta',text:'partial answer'};
+      yield {type:'usage',usage:{inputTokens:10,outputTokens:3,costSource:'reported'}};
+      started.resolve();
+      await new Promise<void>(resolve=>signal.addEventListener('abort',()=>resolve(),{once:true}));
+    } finally { await exited.promise; }
+  }});
+  fixture.chat.start(fixture.request,fixture.owner);await started.promise;
+  let disposed=false;
+  const disposal=Promise.resolve(fixture.chat.dispose()).then(()=>{disposed=true;});
+  await new Promise<void>(resolve=>setImmediate(resolve));
+  expect(disposed).toBe(false);
+  expect(fixture.store.messages.list(fixture.request.conversationId).at(-1)?.parts[0]).toMatchObject({text:'partial answer',status:'aborted',usage:{inputTokens:10,outputTokens:3}});
+  exited.resolve();await disposal;
+});
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>(done => { resolve = done; });
+  return {promise,resolve};
+}
+
+it('restores the original branch on an enclosing crash-simulated rollback', async () => {
+ const {chat,store,request,owner}=await setup({...available,async *stream(){yield {type:'done'};}});
+ const user=store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'user',parts:[{type:'text',text:'original'}],createdAt:new Date().toISOString()});
+ const before=store.messages.list(request.conversationId);
+ store.db.exec('BEGIN IMMEDIATE');chat.start({...request,userMessage:'edited',turnId:user.id},owner);store.db.exec('ROLLBACK');
+ expect(store.messages.list(request.conversationId)).toEqual(before);await chat.dispose();
+});
+it('keeps the previous assistant visible when regeneration is cancelled before output',async()=>{
+ const gate=deferred<void>();const started=deferred<void>();
+ const {chat,store,request,owner}=await setup({...available,async *stream(){started.resolve();await gate.promise;yield {type:'done'};}});
+ const user=store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'user',parts:[{type:'text',text:request.userMessage}],createdAt:new Date().toISOString()});
+ store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'assistant',parts:[{type:'text',text:'valuable answer'}],createdAt:new Date(Date.now()+1).toISOString()});
+ const before=store.messages.list(request.conversationId);chat.start({...request,turnId:user.id},owner);await started.promise;
+ expect(store.messages.list(request.conversationId)).toEqual(before);chat.abort(request.requestId,owner);gate.resolve();await chat.waitForIdle();expect(store.messages.list(request.conversationId)).toEqual(before);
+});
+it('rolls back all usage inserts when a later model usage write fails', async()=>{
+ const {chat,store,request,owner}=await setup({...available,async *stream(req){
+  yield {type:'text-delta',text:'answer'};
+  req.onUsageSnapshot?.({inputTokens:10,outputTokens:2,costSource:'reported'},[{modelId:'one',usage:{inputTokens:5,outputTokens:1,costSource:'reported'}},{modelId:'two',usage:{inputTokens:5,outputTokens:1,costSource:'reported'}}]);
+  yield {type:'done'};
+ }});
+ store.db.exec("CREATE TRIGGER reject_second_usage BEFORE INSERT ON usage_events WHEN NEW.modelId='two' BEGIN SELECT RAISE(ABORT,'storage unavailable'); END");
+ chat.start(request,owner);await chat.waitForIdle();
+ expect(store.db.prepare('SELECT * FROM usage_events').all()).toHaveLength(0);
+ expect(store.db.prepare('SELECT * FROM usage_daily').all()).toHaveLength(0);
+ expect(store.messages.list(request.conversationId).filter(m=>m.role==='assistant')).toHaveLength(0);
+ expect(owner.events.at(-1)?.type).toBe('error');
+});
+
+it('rejects invalid edit options before committing any branch or activity changes',async()=>{
+ const {chat,store,request,owner}=await setup({...available,async *stream(){yield {type:'done'};}});
+ const user=store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'user',parts:[{type:'text',text:'original'}],createdAt:new Date().toISOString()});
+ const before=store.messages.list(request.conversationId);
+ await expect(Promise.resolve().then(()=>chat.start({...request,userMessage:'edited',turnId:user.id,options:{invented:'unsafe'}},owner))).rejects.toThrow('Unsupported model option');
+ expect(store.messages.list(request.conversationId)).toEqual(before);
+ expect(store.db.prepare('SELECT * FROM activity_events').all()).toHaveLength(0);
+});
+it('restores the old active branch when an accepted edit fails before output',async()=>{
+ const {chat,store,request,owner}=await setup({...available,async *stream(){throw new Error('network unavailable');yield {type:'done'};}});
+ const user=store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'user',parts:[{type:'text',text:'original'}],createdAt:new Date().toISOString()});
+ store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'assistant',parts:[{type:'text',text:'valuable answer'}],createdAt:new Date(Date.now()+1).toISOString()});
+ const before=store.messages.list(request.conversationId);chat.start({...request,userMessage:'edited',turnId:user.id},owner);await chat.waitForIdle();expect(store.messages.list(request.conversationId)).toEqual(before);
+});
+it('persists action-only course replies and never executes a proposal', async () => {
+  const fixture = await setup({...available, async *stream(req) {
+    expect(req.allowPresentation).toBe(false);
+    expect(req.prompt).toContain('<UNTRUSTED_COURSE_DATA>');
+    yield {type:'text-delta',text:'```vstudy-action\n{"type":"export-calendar","deadlineIds":["00000000-0000-4000-8000-000000000012"]}\n```'};
+    yield {type:'done'};
+  }});
+  const courseId = '00000000-0000-4000-8000-000000000011';
+  const deadlineId = '00000000-0000-4000-8000-000000000012';
+  const accountId = '00000000-0000-4000-8000-000000000013';
+  const course = {id:courseId,accountId,remoteId:1,fullName:'Lab',shortName:'LAB',imageUrl:null,progress:null,startAt:null,endAt:null,favourite:false};
+  fixture.store.db.prepare("INSERT INTO moodle_accounts VALUES (?,'cycu',1,'{}')").run(accountId);
+  fixture.store.db.prepare('INSERT INTO moodle_courses VALUES (?,?,?)').run(courseId,accountId,JSON.stringify(course));
+  fixture.store.db.prepare('INSERT INTO moodle_deadlines VALUES (?,?,?)').run(deadlineId,courseId,JSON.stringify({id:deadlineId,courseId,title:'Lab report',kind:'assignment',dueAt:'2099-01-01T00:00:00Z',url:null,submitted:false}));
+  const conversation = fixture.chat.createConversation({scope:'course',courseId,providerId:'anthropic-api',modelId:'fake'});
+  const request = chatRequestSchema.parse({scope:'course',courseId,conversationId:conversation.id,requestId:randomUUID(),providerId:'anthropic-api',modelId:'fake',userMessage:'Plan'});
+  if (request.scope !== 'course') throw new Error('Expected course fixture');
+  expect(() => fixture.chat.start({...request,courseId:'00000000-0000-4000-8000-000000000099'},fixture.owner)).toThrow('Chat context mismatch');
+  fixture.chat.start(request,fixture.owner);
+  await fixture.chat.waitForIdle();
+  expect(fixture.owner.events).toEqual([{type:'proposals',actions:[{type:'export-calendar',deadlineIds:['00000000-0000-4000-8000-000000000012']}]},{type:'done'}]);
+  expect(fixture.store.messages.list(conversation.id).at(-1)?.parts[0]?.proposals).toEqual([{type:'export-calendar',deadlineIds:['00000000-0000-4000-8000-000000000012']}]);
+  expect(fixture.store.db.prepare('SELECT * FROM moodle_reminders').all()).toEqual([]);
 });

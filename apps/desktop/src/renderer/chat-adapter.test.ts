@@ -8,7 +8,7 @@ const context = {
   documentId: "d",
   providerId: "openai-api",
   modelId: "m",
-} as ChatContext;
+} as Extract<ChatContext, {documentId: unknown}>;
 function setup(
   start: (listener: (event: ChatEvent) => void) => Promise<unknown>,
 ) {
@@ -113,7 +113,7 @@ it("drops queued deltas even if done was already queued when aborted", async () 
   expect(await test.stream.next()).toEqual({ value: undefined, done: true });
 });
 it('retry and regenerate reuse the original selection and options with a fresh request ID', async () => {
-  const original = { ...context, options: { reasoningEffort:'ultra' }, selection: { documentId:context.documentId, startOffset:0, endOffset:4, text:'text', headingPath:[] } } as ChatContext;
+  const original = { ...context, options: { reasoningEffort:'ultra' }, selection: { documentId:context.documentId, startOffset:0, endOffset:4, text:'text', headingPath:[] } } as Extract<ChatContext, {documentId: unknown}>;
   let current = original;
   let listener: (event: ChatEvent) => void = () => {};
   const invoke = vi.fn(async () => { listener({type:'done'}); return {ok:true}; });

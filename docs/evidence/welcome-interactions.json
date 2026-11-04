@@ -1,0 +1,17 @@
+{
+  "noAutomaticTour": true,
+  "settingsReturnFocus": true,
+  "pausePersists": true,
+  "dotFocus": true,
+  "chatSideMirrorsSettings": true,
+  "zoom200": true,
+  "reducedTransitionsSkipped": true,
+  "documentMorph": {
+    "source": true,
+    "started": 3681,
+    "target": true,
+    "duration": 364.8000000715256
+  },
+  "throwingTransitionStillNavigates": true,
+  "optionalTour": true
+}

@@ -57,3 +57,45 @@ it("rejects malformed responses before they cross the bridge", async () => {
   if (!invoke) throw new Error("Missing handler");
   await expect(invoke({} as IpcMainInvokeEvent, {})).rejects.toThrow();
 });
+
+it('rejects iframe and alternate URL senders for EVERY registered contract channel', async () => {
+  const { ipcContract } = await import('../../shared/ipc');
+  for (const channel of Object.keys(ipcContract) as (keyof typeof ipcContract)[]) {
+    let invoke: ((event: IpcMainInvokeEvent, payload: unknown) => unknown) | undefined;
+    let calls = 0;
+    const registrar = createIpcRegistrar({ handle: (_channel, listener) => { invoke = listener; }, removeHandler: () => {} }, event => event.senderFrame === event.sender.mainFrame && event.senderFrame.url === 'file:///app/index.html');
+    registrar.handle(channel, () => { calls++; throw new Error('Must never run'); });
+    const mainFrame = { url: 'file:///app/index.html' };
+    for (const frame of [{ url: 'https://evil.example/' }, { url: mainFrame.url }]) {
+      await expect(invoke!({ sender: { id: 1, mainFrame }, senderFrame: frame } as unknown as IpcMainInvokeEvent, {})).rejects.toThrow('Untrusted IPC sender');
+    }
+    expect(calls).toBe(0);
+  }
+});
+it('caps payload bytes and per-channel budgets before side effects', async () => {
+  let invoke: ((event: IpcMainInvokeEvent, payload: unknown) => unknown) | undefined;
+  const registrar = createIpcRegistrar({ handle: (_channel, listener) => { invoke = listener; }, removeHandler: () => {} }, () => true);
+  registrar.handle('welcome:sampleDocument', () => 'sample');
+  const event = {} as IpcMainInvokeEvent;
+  await expect(invoke!(event, { language: 'x'.repeat(600_000) })).rejects.toThrow('too large');
+  for (let i = 0; i < 600; i++) await invoke!(event, { language: 'en' });
+  await expect(invoke!(event, { language: 'en' })).rejects.toThrow('rate limited');
+});
+it('gives searches a read budget independent of import and export', async () => {
+  const { channelPolicy } = await import('./register');
+  expect(channelPolicy('library:search').requests).toBe(600);
+  expect(channelPolicy('documents:import').requests).toBe(12);
+  expect(channelPolicy('library:export').requests).toBe(12);
+});
+
+it('validates all AI parse channels through the same sender and response boundary',async()=>{
+ const {aiParseContract}=await import('../../shared/ai-parse');
+ const handlers=new Map<string,(e:IpcMainInvokeEvent,p:unknown)=>unknown>();
+ let trusted=true;
+ const registrar=createIpcRegistrar({handle:(c,h)=>{handlers.set(c,h);},removeHandler:()=>{}},()=>trusted);
+ const id='00000000-0000-4000-8000-000000000001';
+ for(const channel of Object.keys(aiParseContract) as (keyof typeof aiParseContract)[])registrar.handle(channel,()=>{throw new Error('validated');});
+ const event={sender:{id:1}} as IpcMainInvokeEvent;
+ for(const [channel,handler] of handlers){await expect(handler(event,{documentId:id,extra:'forbidden'})).rejects.toThrow();trusted=false;await expect(handler(event,{documentId:id})).rejects.toThrow('Untrusted');trusted=true;expect(channel).toMatch(/^aiParse:/);}
+ registrar.dispose();
+});

@@ -1,0 +1,55 @@
+{
+  "slug": "gpt-6.1-sol",
+  "display_name": "GPT-6.1-Sol",
+  "description": "Latest workhorse model for coding and everyday work.",
+  "default_reasoning_level": "low",
+  "supported_reasoning_levels": [
+    {
+      "effort": "low",
+      "description": "Fast responses with lighter reasoning"
+    },
+    {
+      "effort": "medium",
+      "description": "Balances speed and reasoning depth for everyday tasks"
+    },
+    {
+      "effort": "high",
+      "description": "Greater reasoning depth for complex problems"
+    },
+    {
+      "effort": "xhigh",
+      "description": "Extra high reasoning depth for complex problems"
+    },
+    {
+      "effort": "max",
+      "description": "Maximum reasoning depth for the hardest problems"
+    },
+    {
+      "effort": "ultra",
+      "description": "Maximum reasoning with automatic task delegation"
+    }
+  ],
+  "shell_type": "disabled",
+  "visibility": "list",
+  "supported_in_api": true,
+  "priority": 1,
+  "availability_nux": {
+    "message": "Maximize usage with GPT-6.1 Sol. Try it on complex work for near-Astra performance at a lower cost."
+  },
+  "upgrade": null,
+  "support_verbosity": true,
+  "default_verbosity": "low",
+  "apply_patch_tool_type": null,
+  "truncation_policy": {
+    "mode": "tokens",
+    "limit": 10000
+  },
+  "experimental_supported_tools": [],
+  "use_responses_lite": true,
+  "tool_mode": "direct",
+  "supports_search_tool": false,
+  "multi_agent_version": null,
+  "model_messages": {
+    "instructions_template": "You are a helpful chat assistant. Answer from the conversation and supplied documents."
+  }
+}

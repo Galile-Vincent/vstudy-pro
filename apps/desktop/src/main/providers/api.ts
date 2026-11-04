@@ -1,4 +1,5 @@
-import { option } from "./models";
+import { recordEgress } from '../services/egress';
+import { option } from "./model-options";
 import { z } from "zod";
 import { headerRateLimit } from "./usage";
 import type { Usage, ProviderConfig } from "../../shared/domain";
@@ -64,7 +65,7 @@ export async function* responseText(
 }
 export function createApiAdapter(
   getConfig: () => ProviderConfig,
-  secrets: Pick<SecretStore, "getInMainOnly">,
+  secrets: { getInMainOnly: (id: ProviderConfig["id"]) => string | null | Promise<string | null>; has?: SecretStore["has"]; isUnlocked?: SecretStore["isUnlocked"] },
   fetcher: typeof fetch = fetch,
 ): ProviderAdapter {
   const anthropic = () => getConfig().id === "anthropic-api";
@@ -80,19 +81,21 @@ export function createApiAdapter(
   const noKeyRequired = () => getConfig().kind === "compatible" && isLoopback(base());
   return {
     async detect() {
-      return key() || noKeyRequired()
+      return secrets.isUnlocked?.(getConfig().id) || (secrets.has ? secrets.has(getConfig().id) : await key()) || noKeyRequired()
         ? { available: true }
         : { available: false, reason: "Add an API key" };
     },
     async listModels() {
+      if (secrets.isUnlocked && !secrets.isUnlocked(getConfig().id) && !noKeyRequired()) return [];
       if (anthropic())
         return ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5", "claude-fable-5-1"].map(
-          (id) => ({ id, name: id }),
+          (id) => ({ id, name: id, supportsImages:true }),
         );
-      const token = key();
+      const token = await key();
       if (!token && !noKeyRequired()) return [];
       try {
-        const response = await fetcher(`${base()}/models`, {
+        recordEgress('provider_request', new URL(base()).origin);
+      const response = await fetcher(`${base()}/models`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           signal: AbortSignal.timeout(2500),
           redirect: "error",
@@ -102,15 +105,16 @@ export function createApiAdapter(
           .object({ data: z.array(z.object({ id: z.string() })) })
           .parse(await response.json())
           .data.slice(0, 500)
-          .map(({ id }) => ({ id, name: id, ...(getConfig().id === 'openai-api' && /^(o1|o3|o3-mini|o4-mini)(-\d{4}-\d{2}-\d{2})?$/.test(id) ? { options: [option('reasoning_effort', 'Effort', ['low', 'medium', 'high'], 'medium')] } : {}) }));
+          .map(({ id }) => ({ id, name: id, supportsImages:(()=>{const config=getConfig();return config.kind==='compatible'?config.imageModelIds?.includes(id)===true:config.id==='openai-api' && /^(gpt-[456]|o[134])/.test(id);})(), ...(getConfig().id === 'openai-api' && /^(o1|o3|o3-mini|o4-mini)(-\d{4}-\d{2}-\d{2})?$/.test(id) ? { options: [option('reasoning_effort', 'Effort', ['low', 'medium', 'high'], 'medium')] } : {}) }));
       } catch {
         return [];
       }
     },
     async *stream(request, signal) {
-      const token = key();
+      const token = await key();
       if (!token && !noKeyRequired()) throw new ProviderError("auth failed");
       const isAnthropic = anthropic();
+      recordEgress('provider_request', new URL(base()).origin);
       const response = await fetcher(
         `${base()}/${isAnthropic ? "messages" : "chat/completions"}`,
         {
@@ -135,7 +139,11 @@ export function createApiAdapter(
               : [{ type:'function',function:presentationTool }], ...(!isAnthropic ? {parallel_tool_calls:false} : {}) } : {}),
             ...(request.options?.reasoning_effort ? { reasoning_effort: request.options.reasoning_effort } : {}),
             ...(isAnthropic ? { max_tokens: 8192 } : { stream_options: { include_usage: true } }),
-            messages: [{ role: "user", content: request.prompt }],
+            ...(request.systemPrompt && isAnthropic ? {system:request.systemPrompt} : {}),
+            messages: [...(request.systemPrompt && !isAnthropic ? [{role:'system',content:request.systemPrompt}] : []), { role: "user", content: request.images?.length ? [
+              ...(isAnthropic ? [{type:'text',text:request.prompt}] : [{type:'text',text:request.prompt}]),
+              ...request.images.map(image => isAnthropic ? {type:'image',source:{type:'base64',media_type:image.mediaType,data:image.data}} : {type:'image_url',image_url:{url:`data:${image.mediaType};base64,${image.data}`}}),
+            ] : request.prompt }],
           }),
         },
       ).catch(() => { throw new ProviderError("network"); });

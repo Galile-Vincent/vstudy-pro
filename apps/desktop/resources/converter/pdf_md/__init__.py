@@ -27,6 +27,7 @@ class PasswordProtected(ValueError):
 
 
 def tokens(text):
+    text = re.sub(r"\$\{\}[\^_]\{([^{}]*)\}\$", r"\1", text)
     text = unicodedata.normalize("NFKC", html.unescape(text)).lower()
     words, word = [], ""
     for char in text:
@@ -227,7 +228,83 @@ def gutters(rows, occupancy=0.15):
     return sorted(c[2] for c in sorted(candidates, reverse=True)[:3])
 
 
+def positioned_scripts(chars):
+    # Font size plus baseline displacement distinguishes scripts from ordinary small text.
+    result = [dict(c) for c in sorted(chars, key=lambda c: (-c["size"], c["top"], c["x0"]))]
+    consumed = set()
+    buckets = {}
+    for i, base in enumerate(result):
+        buckets.setdefault((int(base["x1"] // 8), int(base["bottom"] // 8)), []).append((i, base))
+    for index, char in enumerate(result):
+        if not char["text"].strip():
+            continue
+        candidates = [(i, base)
+                      for x in range(int(char["x0"] // 8) - 3, int(char["x0"] // 8) + 4)
+                      for y in range(int(char["bottom"] // 8) - 4, int(char["bottom"] // 8) + 5)
+                      for i, base in buckets.get((x, y), ())
+                      if i != index and base["size"] > char["size"] / 0.82
+                      and -base["size"] * 0.4 <= char["x0"] - base["x1"] <= base["size"] * 0.32
+                      and 1 < abs(char["bottom"] - base["bottom"]) < base["size"] * 0.65
+                      and base.get("annotation", False) == char.get("annotation", False)]
+        if not candidates:
+            continue
+        base_index, base = min(candidates, key=lambda item: abs(char["x0"] - item[1]["x1"]))
+        operator = "^" if char["bottom"] < base["bottom"] else "_"
+        base["text"] += "${}" + operator + "{" + char["text"] + "}$"
+        base["x1"] = char["x1"]
+        consumed.add(index)
+    for char in result:
+        char["text"] = re.sub(r"\$\{\}([\^_])\{([^{}]*)\}\$\$\{\}\1\{([^{}]*)\}\$", r"${}\1{\2\3}$", char["text"])
+        char["text"] = re.sub(r"\$\{\}([\^_])\{([^{}]*)\}\$\$\{\}\1\{([^{}]*)\}\$", r"${}\1{\2\3}$", char["text"])
+    return [c for i, c in enumerate(result) if i not in consumed]
+
+
+def inline_fractions(lines):
+    consumed, result = set(), []
+    for numerator in sorted(lines, key=lambda l: (l.top, l.x0)):
+        if id(numerator) in consumed:
+            continue
+        # Only compact math runs qualify; ordinary stacked prose must retain reading order.
+        candidates = [denominator for denominator in lines
+                      if id(denominator) not in consumed and denominator is not numerator
+                      and numerator.math and denominator.math
+                      and not re.search(r"[A-Za-z]", numerator.text + denominator.text)
+                      and max(numerator.x1 - numerator.x0, denominator.x1 - denominator.x0) < 120
+                      and 0.7 * numerator.size < denominator.top - numerator.top < 1.8 * numerator.size
+                      and abs(numerator.size - denominator.size) < 1
+                      and min(numerator.x1, denominator.x1) - max(numerator.x0, denominator.x0)
+                      > min(numerator.x1 - numerator.x0, denominator.x1 - denominator.x0) * 0.6]
+        if candidates:
+            denominator = min(candidates, key=lambda l: (l.top, l.x0))
+            consumed.add(id(denominator))
+            result.append(replace(numerator, text="(" + numerator.text + ")/(" + denominator.text + ")",
+                                  top=(numerator.top + denominator.top) / 2,
+                                  bottom=(numerator.bottom + denominator.bottom) / 2,
+                                  x0=min(numerator.x0, denominator.x0), x1=max(numerator.x1, denominator.x1)))
+        else:
+            result.append(numerator)
+    return result
+
+
+def merge_math_fragments(lines):
+    result = []
+    for line in sorted(inline_fractions(lines), key=lambda l: (l.top, l.x0)):
+        same = next((i for i, other in enumerate(result)
+                     if (line.math or other.math) and abs(line.top - other.top) < (line.size * 0.25 if ")/(" in line.text + other.text else 1.5)
+                     and abs(line.size - other.size) < 1
+                     and not line.note and not other.note), None)
+        if same is None:
+            result.append(line)
+        else:
+            other = result[same]
+            left, right = sorted([line, other], key=lambda l: l.x0)
+            result[same] = replace(left, text=join_text(left.text, right.text), x1=max(left.x1, right.x1),
+                                   bottom=max(left.bottom, right.bottom), math=True)
+    return sorted(result, key=lambda l: (l.top, l.x0))
+
+
 def chars_to_lines(chars):
+    chars = positioned_scripts(chars)
     groups = []
     buckets = {}
     for char in sorted(chars, key=lambda c: (c["top"], c["x0"])):
@@ -303,7 +380,7 @@ def chars_to_lines(chars):
                     links=char_links(run),
                 )
             )
-    return sorted(result, key=lambda l: (l.top, l.x0))
+    return merge_math_fragments(sorted(result, key=lambda l: (l.top, l.x0)))
 
 
 def mark_annotations(lines, figure_regions=()):

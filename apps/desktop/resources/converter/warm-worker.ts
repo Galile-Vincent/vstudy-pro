@@ -1,7 +1,7 @@
 import { ProcessScope } from "./process-scope";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
-import { scrubbedEnvironment, type Progress } from "./index";
+import { scrubbedEnvironment, type Progress } from "./contracts";
 
 export class WarmWorker {
   private child: ChildProcessWithoutNullStreams | undefined;
@@ -10,12 +10,15 @@ export class WarmWorker {
   private idle?: NodeJS.Timeout;
   private timer?: NodeJS.Timeout;
 
-  constructor(private readonly python: string, private readonly script: string, private readonly cwd: string, private readonly scope?: ProcessScope) {}
+  constructor(private readonly python: string, private readonly script: string, private readonly cwd: string, private readonly scope?: ProcessScope, private readonly idleMinutes: () => number = () => 5) {}
 
   start(): Promise<void> {
     if (this.ready) return this.ready;
     this.ready = new Promise<void>((resolve, reject) => {
-      const child = (this.scope ? this.scope.spawn.bind(this.scope) : spawn)(this.python, [this.script, "--warm-worker"], {
+      const args = ["-B", "-E", "-s", this.script, "--warm-worker"];
+      const executable = process.platform === 'darwin' ? '/usr/bin/sandbox-exec' : this.python;
+      const launchArgs = process.platform === 'darwin' ? ['-p', '(version 1)(allow default)(deny network*)', this.python, ...args] : args;
+      const child = (this.scope ? this.scope.spawn.bind(this.scope) : spawn)(executable, launchArgs, {
         cwd: this.cwd, env: scrubbedEnvironment(this.cwd), shell: false, stdio: ["pipe", "pipe", "pipe"],
       });
       this.child = child as ChildProcessWithoutNullStreams;
@@ -30,7 +33,7 @@ export class WarmWorker {
           else if (record.code === "PDF_FALLBACK") this.pending?.progress?.("PDF too complex or large for the built-in parser; trying fallback…");
           else if (record.error) {
             const message = ["PDF_RESOURCE_LIMIT", "PDF_TIME_LIMIT"].includes(record.code ?? "")
-              ? "This PDF is too large or complex to convert" : "Document conversion failed";
+              ? "This PDF is too large or complex to convert" : record.code === "NO_TEXT_LAYER" ? "NO_TEXT_LAYER: OCR not supported" : "Document conversion failed";
             if (!this.pending) { const error = new Error(message); reject(error); this.stop(error); }
             else { this.pending.reject(new Error(message)); this.finish(); }
           } else if (record.done) { this.pending?.resolve(); this.finish(); }
@@ -65,7 +68,7 @@ export class WarmWorker {
   }
 
   private finish(): void { clearTimeout(this.timer); this.pending = undefined; this.scheduleIdle(); }
-  private scheduleIdle(): void { clearTimeout(this.idle); this.idle = setTimeout(() => this.stop(), 300_000); this.idle.unref(); }
+  private scheduleIdle(): void { clearTimeout(this.idle); this.idle = setTimeout(() => this.stop(), this.idleMinutes() * 60_000); this.idle.unref(); }
   stop(error = new Error("Converter closed")): void {
     clearTimeout(this.timer); clearTimeout(this.idle);
     this.pending?.reject(error); this.pending = undefined;

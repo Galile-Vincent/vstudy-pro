@@ -1,3 +1,5 @@
+import { AI_PARSE_SYSTEM } from '../prompt/ai-parse';
+import { configuredCliPath } from './executable-pins';
 import {
   existsSync,
   readFileSync,
@@ -5,7 +7,7 @@ import {
   writeFileSync,
   renameSync,
 } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { z } from "zod";
 import {
   providerConfigSchema,
@@ -16,13 +18,14 @@ import {
 } from "../../shared/domain";
 import type { SecretStore } from "../services/secrets";
 import { createApiAdapter, validateBaseUrl } from "./api";
+import { createCodexAdapter } from './codex';
 import { createCliAdapter } from "./cli";
 import { AgyAdapter } from "./agy";
 export type Availability =
   | { available: true }
   | { available: false; reason: string };
 export type Model = import("../../shared/domain").Model;
-export type ProviderRequest = ChatRequest & { prompt: string; allowPresentation?: boolean; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
+export type ProviderRequest = ChatRequest & { prompt: string; systemPrompt?:string; images?:{mediaType:'image/png'; data:string}[]; allowPresentation?: boolean; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
 export interface ProviderAdapter {
   detect(): Promise<Availability>;
   listModels(): Promise<Model[]>;
@@ -37,10 +40,18 @@ export const fakeAdapter: ProviderAdapter = {
     return { available: true };
   },
   async listModels() {
-    return [{ id: "fake", name: "Fake (test only)", options: [{ id: "effort", label: "Effort", values: [{ id: "low", label: "low" }, { id: "high", label: "high" }], default: "low" }] }];
+    return [{ id: "fake", name: "Fake (test only)", options: [{ id: "effort", label: "Effort", values: [{ id: "low", label: "low" }, { id: "high", label: "high" }], default: "low" }] }, {id:'fixture-model',name:'Fixture model (test only)',options:[{id:'effort',label:'Effort',values:[{id:'low',label:'low'},{id:'high',label:'high'}],default:'low'},{id:'serviceTier',label:'Service tier',values:[{id:'default',label:'Default'},{id:'priority',label:'Priority'}],default:'default'}]}];
   },
   async *stream(request, signal) {
     if (request.userMessage === 'test error' && !fakeFailures.has(request.turnId ?? request.requestId)) { fakeFailures.add(request.turnId ?? request.requestId); yield { type: 'error', message: 'Provider rate limited' }; return; }
+    if (request.scope === 'course') {
+      const data = JSON.parse(request.prompt.split('<UNTRUSTED_COURSE_DATA>\n')[1]!.split('\n</UNTRUSTED_COURSE_DATA>')[0]!);
+      const deadline = data.deadlines.find((d: {dueAt:string}) => Date.parse(d.dueAt) > Date.now() + 7200000);
+      yield {type:'text-delta',text:'Review your course materials before the next deadline.\n'};
+      if (deadline) yield {type:'text-delta',text:'```vstudy-action\n'+JSON.stringify({type:'create-reminder',deadlineId:deadline.id,remindAt:new Date(Date.parse(deadline.dueAt)-3600000).toISOString(),note:'Review course materials'})+'\n```'};
+      yield {type:'done'};
+      return;
+    }
     const enriched = request.userMessage === 'test enriched';
     const citationId = request.prompt.match(/"id":"(s\d+)"/)?.[1];
     if (enriched) {
@@ -48,7 +59,7 @@ export const fakeAdapter: ProviderAdapter = {
       yield {type:'tool-call',call:{toolCallId:'present-fixture',toolName:'present',args:{title:'Document summary',columns:['Topic','Summary'],rows:[['Document','Grounded answer']]}}};
     }
     const fence = '`'.repeat(Math.max(2,...Array.from(request.prompt.matchAll(/`+/g),m => m[0].length)) + 1);
-    const response = enriched ? `A grounded document summary.${citationId ? ` [[cite:${citationId}]]` : ''}` : `**bold**\n\n- First\n- Second\n\n${fence}text\n${request.prompt}\n${fence}`;
+    const response = request.systemPrompt === AI_PARSE_SYSTEM ? `**${request.userMessage}**` : enriched ? `A grounded document summary.${citationId ? ` [[cite:${citationId}]]` : ''}` : `**bold**\n\n- First\n- Second\n\n${fence}text\n${request.prompt}\n${fence}`;
     for (let i = 0; i < response.length; i += 128) {
       signal.throwIfAborted();
       yield { type: "text-delta", text: response.slice(i, i + 128) };
@@ -64,6 +75,7 @@ export class ProviderRegistry {
   private modelRevision = 0;
   private modelCache = new Map<string, { models: Model[]; expires: number }>();
   private loading = new Set<string>();
+  private availabilityCache = new Map<string, Availability>();
   private configs: ProviderConfig[] = [
     { kind: "api", id: "anthropic-api", enabled: true },
     { kind: "api", id: "openai-api", enabled: true },
@@ -73,9 +85,9 @@ export class ProviderRegistry {
       enabled: false,
       baseUrl: "http://localhost:11434/v1",
     },
-    { kind: "cli", id: "claude-cli", enabled: true },
-    { kind: "cli", id: "codex-cli", enabled: true },
-    { kind: "cli", id: "agy-cli", enabled: true },
+    { kind: "cli", id: "claude-cli", enabled: false },
+    { kind: "cli", id: "codex-cli", enabled: false },
+    { kind: "cli", id: "agy-cli", enabled: false },
   ];
   constructor(private readonly configFile?: string) {
     if (configFile && existsSync(configFile)) {
@@ -131,16 +143,17 @@ export class ProviderRegistry {
     this.modelRevision++;
     this.modelCache.clear();
   }
-  private models(config: ProviderConfig, adapter: ProviderAdapter): Model[] {
+  private async models(config: ProviderConfig, adapter: ProviderAdapter, discover: boolean): Promise<Model[]> {
     const key = `${this.modelRevision}:${JSON.stringify(config)}`;
     const cached = this.modelCache.get(key);
-    if ((!cached || cached.expires < Date.now()) && !this.loading.has(key)) {
-      this.loading.add(key);
-      void adapter.listModels().then(models => { this.modelCache.set(key, { models, expires: Date.now() + 60_000 }); }).catch(() => {}).finally(() => this.loading.delete(key));
+    if (discover && (!cached || cached.expires < Date.now())) {
+      const models = (await adapter.listModels()).map(model=>config.id==='agy-cli'?{...model,supportsImages:false,imageUnsupportedReason:'ai_parse.images_unsupported'}:model);
+      this.modelCache.set(key, {models, expires: Date.now() + 60_000});
+      return models;
     }
     return cached?.models ?? [];
   }
-  async list() {
+  async list(discover = true) {
     return Promise.all(
       this.configs.map(async (config) => {
         const adapter = this.adapters.get(config.id);
@@ -148,12 +161,14 @@ export class ProviderRegistry {
           const availability: Availability = !config.enabled
             ? { available: false, reason: "Provider disabled" }
             : adapter
-              ? await adapter.detect()
+              ? config.kind === 'cli' && !discover ? this.availabilityCache.get(config.id) ?? {available:false,reason:'Provider discovery required'} : await adapter.detect()
               : { available: false, reason: "Provider unavailable" };
+          if (discover) this.availabilityCache.set(config.id, availability);
           return {
             config,
+            ...(config.kind === 'cli' ? {resolvedPath:await configuredCliPath(config.id.replace('-cli',''))} : {}),
             availability,
-            models: adapter && config.enabled ? this.models(config, adapter) : [],
+            models: adapter && config.enabled ? await this.models(config, adapter, discover || process.env.VSTUDY_FAKE_PROVIDER === '1') : [],
             modelsLoading: !!adapter && config.enabled && this.loading.has(`${this.modelRevision}:${JSON.stringify(config)}`),
           };
         } catch {
@@ -164,6 +179,7 @@ export class ProviderRegistry {
               reason: "Provider detection failed",
             } satisfies Availability,
             models: [],
+            modelsLoading: false,
           };
         }
       }),
@@ -185,7 +201,7 @@ export function createProviderRegistry(
     "openai-compatible": () =>
       createApiAdapter(() => registry.config("openai-compatible"), secrets),
     "claude-cli": () => createCliAdapter("claude"),
-    "codex-cli": () => createCliAdapter("codex"),
+    "codex-cli": () => createCodexAdapter(configFile ? join(dirname(configFile), "codex-chat-proof.json") : undefined),
     "agy-cli": () => new AgyAdapter(),
   } satisfies Record<ProviderConfig["id"], () => ProviderAdapter>;
   for (const config of [

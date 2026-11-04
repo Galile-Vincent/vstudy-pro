@@ -1,0 +1,115 @@
+[
+  {
+    "script": "assistant-elements.mjs",
+    "exit": 0,
+    "seconds": 13.2
+  },
+  {
+    "script": "chat-controls.mjs",
+    "exit": 0,
+    "seconds": 11.7
+  },
+  {
+    "script": "composer-visual-qa.mjs",
+    "exit": 0,
+    "seconds": 32.4
+  },
+  {
+    "script": "conversion.mjs",
+    "exit": 0,
+    "seconds": 8.8
+  },
+  {
+    "script": "design1.mjs",
+    "exit": 0,
+    "seconds": 86.6
+  },
+  {
+    "script": "home-onboarding.mjs",
+    "exit": 0,
+    "seconds": 9.1
+  },
+  {
+    "script": "i18n.mjs",
+    "exit": 0,
+    "seconds": 26.7
+  },
+  {
+    "script": "library-perf.mjs",
+    "exit": 0,
+    "seconds": 8.1
+  },
+  {
+    "script": "library.mjs",
+    "exit": 0,
+    "seconds": 18.7
+  },
+  {
+    "script": "pdf-reader.mjs",
+    "exit": 0,
+    "seconds": 9.7
+  },
+  {
+    "script": "security-delete-data.mjs",
+    "exit": 0,
+    "seconds": 0.4
+  },
+  {
+    "script": "selection-chat.mjs",
+    "exit": 0,
+    "seconds": 16.3
+  },
+  {
+    "script": "visual-regressions.mjs",
+    "exit": 0,
+    "seconds": 12.6
+  },
+  {
+    "script": "welcome-axe.mjs",
+    "exit": 0,
+    "seconds": 25.5
+  },
+  {
+    "script": "welcome-details.mjs",
+    "exit": 0,
+    "seconds": 7.8
+  },
+  {
+    "script": "welcome-layout.mjs",
+    "exit": 0,
+    "seconds": 66.5
+  },
+  {
+    "script": "welcome-performance.mjs",
+    "exit": 0,
+    "seconds": 65.6,
+    "initialExit": 1,
+    "recheck": "performance-isolated.txt"
+  },
+  {
+    "script": "welcome-pseudo.mjs",
+    "exit": 0,
+    "seconds": 3.7
+  },
+  {
+    "script": "welcome-supplement.mjs",
+    "exit": 0,
+    "seconds": 120.1
+  },
+  {
+    "script": "welcome-trace.mjs",
+    "exit": 0,
+    "seconds": 2.9
+  },
+  {
+    "script": "welcome.mjs",
+    "exit": 0,
+    "seconds": 93.2
+  },
+  {
+    "script": "codex-chat.mjs",
+    "exit": 0,
+    "evidence": "chat.txt",
+    "live": true
+  }
+]

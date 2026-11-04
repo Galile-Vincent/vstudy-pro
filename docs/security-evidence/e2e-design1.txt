@@ -1,0 +1,10 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.evaluate: Execution context was destroyed, most likely because of a navigation
+    at ~/.t3/projects/vstudy-pro/apps/desktop/e2e/design1.mjs:52:76 {
+  name: 'Error'
+}
+
+Node.js v24.19.0

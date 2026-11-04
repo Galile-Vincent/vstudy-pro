@@ -2,8 +2,8 @@
   "welcome": "留一點空間，讀懂更多",
   "welcome_body": "讀自己的文件，針對在意的段落提問。文件庫保留在這台 Mac 上。",
   "language": "選擇介面語言",
-  "connect": "找個模型，一起想",
-  "connect_body": "使用已登入的 CLI，或加入 API 金鑰。還沒連線，也能先閱讀文件。",
+  "connect": "使用你的 Claude Code / Codex / Antigravity 登入",
+  "connect_body": "CLI 提供者預設停用。可在此啟用並使用其登入狀態。探索模型與聊天可能連線至提供者服務及 CLI 遙測端點。聊天會將問題、對話記錄、文件中繼資料與選取文字傳給您選擇的提供者。您也可以不連線直接閱讀。 未選取文字時，會傳送文件大綱與開頭摘錄。先前選取的文字可能保留在對話記錄中。",
   "signin": "還沒準備好嗎？請先安裝 CLI 並在終端機登入，再重新檢查。",
   "refresh": "重新檢查",
   "ready": "可使用",
@@ -13,7 +13,7 @@
   "save_key": "儲存並連線",
   "key_saved": "已連線。金鑰已安全儲存。",
   "bring": "從你在意的內容開始",
-  "bring_body": "匯入筆記、論文，或先試讀一份短範例。原始檔案會和可閱讀的版本一起保留。",
+  "bring_body": "匯入筆記、論文，或先試讀一份短範例。原始檔案會和可閱讀的版本一起保留。 首次轉換會詢問是否從 PyPI 下載套件，並可能從 GitHub 下載 Python。選擇離線仍可閱讀 Markdown 和文字，準備好後再重試轉換。",
   "sample": "試讀範例文件",
   "sample_added": "範例已放進文件庫。",
   "coach": "三個小方法，讀得更深入",
@@ -27,5 +27,11 @@
   "finish": "開始探索",
   "progress": "第 {{current}} 步，共 {{total}} 步",
   "name": "怎麼稱呼你（選填）",
-  "replay": "重新開啟入門導覽"
+  "replay": "重新開啟入門導覽",
+  "preview_label": "閱讀器與附來源對話預覽",
+  "preview_passage": "把新的想法串連起來，閱讀就能化為理解。",
+  "preview_highlight": "串連新的想法。",
+  "preview_question": "這如何幫助我學習？",
+  "preview_answer": "試著把新概念與你已經知道的事連結起來。",
+  "preview_citation": "來自你的文件 · 1"
 }

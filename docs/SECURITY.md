@@ -1,0 +1,234 @@
+> Current implementation note (2026-11-04): historical counts and results below describe their recorded snapshots. Provider/Privacy UI, asynchronous lazy Keychain access, session-only keys, converter idle controls and removed rendering sinks are covered by [the final implementation response](final-implementation-response.md). Release signing and real Keychain acceptance remain unverified.
+
+# Security model and verification
+
+Earlier adversarial findings and main-process remediation evidence: [security audit 1 response](security-audit-1-response.md). Current UI and acceptance results are in the final response linked above. The historical verification below predates both responses.
+
+Assets are imported originals, extracted text, selections, prompts, conversations, provider credentials, usage history and application integrity. Adversaries include malicious documents and model responses, network attackers, compromised dependencies and malicious local processes. The supported deployment is a single-user macOS account with FileVault. An attacker executing as the same user can inspect memory, alter the library and invoke authenticated CLIs: OS file modes and safeStorage are not an isolation boundary against that attacker.
+
+```text
+Untrusted document -> main import/signature/ZIP guard -> private hashed library
+                           | -> sandbox-exec (deny network) -> Python converter
+Untrusted renderer -> isolated preload -> sender + budget + Zod registrar -> services -> SQLite
+Untrusted model -> main citation catalog / presentation allowlist -> sanitized Markdown
+Main -> HTTPS API / restricted authenticated CLI (stdin prompt; scrubbed env)
+Main -> safeStorage -> Keychain-encrypted credentials file
+User-confirmed external link -> schema allowlist -> native confirmation -> OS browser
+First-run installer -> package index (hash-checked lock) -> private converter venv
+```
+
+## Controls and evidence mapping
+
+| Threat / item | Control | Evidence |
+| --- | --- | --- |
+| 1: packaged Node/inspector abuse | afterPack flips seven fuses; ASAR; production maps excluded; file allowlist | scripts/after-pack.mjs; package verification below |
+| 1: macOS release integrity | hardened runtime; empty entitlement dictionary; electron-builder uses CSC_NAME/CSC_LINK and APPLE_ID/APPLE_APP_SPECIFIC_PASSWORD/APPLE_TEAM_ID or API-key notarization environment | unsigned packaging only; signing unverified |
+| 2: renderer escape | app.enableSandbox, context isolation, disabled Node/webview, global web-contents-created navigation/popup/webview denial | src/main/index.ts; smoke; security.test.ts |
+| 2: permission/device abuse | deny handlers; only main-frame app clipboard-sanitized-write; deny device access | index.ts; packaged GUI verification required |
+| 2: network exfiltration | production connect-src 'none' (stricter than self); remote requests blocked; document images restricted to raster data/local asset paths; assistant images never load | markdown.test.ts; productionCsp |
+| 2: asset traversal | realpath containment, symlink/hardlink refusal, GET, raster extension allowlist, 12 MiB cap, MIME/nosniff/CSP | assets.test.ts; hardening.test.ts |
+| 3: untrusted IPC | exact main frame/window URL; central request/response Zod validation; byte budgets and fixed-window per-sender/channel limits | register.test.ts covers every contract channel, oversized payload, budget and malformed response |
+| 4: hostile files | 50 MiB source, magic bytes, UTF-8, ZIP entry/expansion/ratio/encryption/link/path checks; every dialog/drop/importSample goes through importPath; every queued conversion (including restart/retry/reconvert) revalidates source | documents.test.ts; documents.integration.test.ts; hardening.test.ts |
+| 4: converter subprocess | shell:false argv, allowlisted env, private mkdtemp cleanup, process-group termination, watchdog, native macOS network sandbox inherited by children | converter-worker.test.ts; documents.integration.test.ts |
+| 4: converter installation | requirements.lock.txt records all transitive hashes; both uv and pip --require-hashes; lock digest invalidates prior environments | real integration bootstrap test |
+| 5: secrets/logs | lazy asynchronous safeStorage with deadlines, explicit unlock and session-only keys; no Keychain call on launch; no key IPC getter; central log redaction; static UI failures; CLI prompt stdin and env allowlist | secrets.test.ts; hardening.test.ts fake child argv/env probe; providers.test.ts |
+| 5: delete data | Privacy typed DELETE; main literal validation; native destructive confirmation; stop workers, close store, remove userData and verify absence | hardening.test.ts removes DB/library/secrets/cache/venv fixture tree |
+| 6: injection/model output | documents/selections delimited as untrusted; citations filtered against current main-owned catalog; CLI generative UI disabled; raw HTML and dangerous URL schemes removed; native external-link confirmation | prompt/index.test.ts; citations.test.ts; chat.test.ts; markdown.test.ts injection corpus |
+| 7: supply chain | exact direct pins; integrity lock; only electron/esbuild allowed install scripts; pinned CycloneDX and Electron lint; dangerous API lint | security-audit.json; sbom.cdx.json; licenses.json; security:check |
+| 8: data at rest | library 0700, DB/backups/secrets 0600 restored on startup; export chmod 0600; private temp directories | db/index.test.ts; library.test.ts; secrets.test.ts; hardening.test.ts |
+
+Production style-src 'unsafe-inline' is needed for React inline styles used by resizable pane geometry, virtualized/animated Welcome positioning, Radix/Base UI placement, and KaTeX layout. It does not permit scripts or eval. Removing it requires moving those runtime-computed styles to a nonce-based stylesheet implementation.
+
+The database, originals, Markdown and chat records are **not encrypted**. FileVault protects a powered-off Mac; account permissions protect against other ordinary accounts. safeStorage encrypts only provider API-key values using macOS Keychain-backed encryption. JavaScript strings cannot be reliably zeroized. Unlocked and session-only keys remain in main memory until deletion or process exit; saved ciphertext remains on disk. Authenticated CLIs retain their own login material under their own policies.
+
+The first-run installer needs network access to download Python (if uv must provision it) and hash-locked wheels/packages. Conversion runs under macOS sandbox-exec with `(deny network*)`, plus Python socket-connect denial as defense in depth. sandbox-exec is a deprecated macOS facility and this runtime restriction is macOS-specific. Python sets RLIMIT_NOFILE=128, RLIMIT_FSIZE=64 MiB, RLIMIT_CORE=0; memory is monitored at 1500 MiB and jobs have a 120-second deadline. These do not establish a hard kernel address-space limit. The converter can still read files allowed to the account; a complete least-privilege filesystem sandbox is future work.
+
+## IPC registry inventory
+
+Every row uses `ipcContract[channel].request` and `.response` as the authoritative validator (shared/ipc.ts spreads shared/library.ts). Sender **M** means the current BrowserWindow, its identical mainFrame and exact entry URL. All request caps apply before parsing/side effects. Rate limits are fixed windows per sender/channel, not concurrent-job limits. Responses are schema validated; unbounded legacy list responses are an accepted availability risk.
+
+| Channel | Validator (request / response) | Sender | Requests / minute | Request cap | Side effects |
+| --- | --- | --- | --- | --- | --- |
+| `activity:heartbeat` | `activity:heartbeat` request / response | M | 120 | 512 KiB | Validated DB/settings mutation |
+| `chat:abort` | `chat:abort` request / response | M | 600 | 512 KiB | Provider network/CLI; DB messages or abort |
+| `chat:start` | `chat:start` request / response | M | 12 | 8 MiB | Provider network/CLI; DB messages or abort |
+| `conversations:create` | `conversations:create` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `conversations:delete` | `conversations:delete` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `conversations:list` | `conversations:list` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `conversations:model` | `conversations:model` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `conversations:options` | `conversations:options` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `dashboard:get` | `dashboard:get` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `documents:delete` | `documents:delete` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `documents:get` | `documents:get` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `documents:import` | `documents:import` request / response | M | 12 | 512 KiB | Read validated source; library/DB write; queued converter |
+| `documents:importPaths` | `documents:importPaths` request / response | M | 12 | 512 KiB | Read validated source; library/DB write; queued converter |
+| `documents:importSample` | `documents:importSample` request / response | M | 12 | 512 KiB | Read validated source; library/DB write; queued converter |
+| `documents:list` | `documents:list` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `documents:read` | `documents:read` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `documents:reconvert` | `documents:reconvert` request / response | M | 12 | 512 KiB | Read validated source; library/DB write; queued converter |
+| `documents:retry` | `documents:retry` request / response | M | 12 | 512 KiB | Read validated source; library/DB write; queued converter |
+| `library:counts` | `library:counts` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `library:documents:list` | `library:documents:list` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `library:documents:move` | `library:documents:move` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:documents:pin` | `library:documents:pin` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:documents:purge` | `library:documents:purge` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:documents:rename` | `library:documents:rename` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:documents:restore` | `library:documents:restore` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:documents:softDelete` | `library:documents:softDelete` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:documents:tag` | `library:documents:tag` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:exportMarkdown` | `library:exportMarkdown` request / response | M | 12 | 512 KiB | Native save dialog; write selected export |
+| `library:exportOriginal` | `library:exportOriginal` request / response | M | 12 | 512 KiB | Native save dialog; write selected export |
+| `library:folders:create` | `library:folders:create` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:folders:delete` | `library:folders:delete` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:folders:list` | `library:folders:list` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `library:folders:move` | `library:folders:move` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:folders:update` | `library:folders:update` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:openOriginal` | `library:openOriginal` request / response | M | 600 | 512 KiB | Validated contained original; OS opener |
+| `library:pins:reorder` | `library:pins:reorder` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:reveal` | `library:reveal` request / response | M | 600 | 512 KiB | Validated contained path; Finder |
+| `library:savedFilters:delete` | `library:savedFilters:delete` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:savedFilters:list` | `library:savedFilters:list` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `library:savedFilters:save` | `library:savedFilters:save` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:search` | `library:search` request / response | M | 12 | 512 KiB | Read metadata/content; read may record activity |
+| `library:tags:delete` | `library:tags:delete` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:tags:list` | `library:tags:list` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `library:tags:save` | `library:tags:save` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `library:tree` | `library:tree` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `messages:list` | `messages:list` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `messages:page` | `messages:page` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `providers:configure` | `providers:configure` request / response | M | 600 | 512 KiB | Provider JSON; compatible-origin changes clear its key |
+| `providers:list` | `providers:list` request / response | M | 600 | 512 KiB | Disabled CLI file metadata only; enabled providers may verify/discover models |
+| `secrets:delete` | `secrets:delete` request / response | M | 600 | 512 KiB | Remove saved and main-memory key |
+| `secrets:has` | `secrets:has` request / response | M | 600 | 512 KiB | Saved-key presence only; no Keychain/decryption |
+| `secrets:set` | `secrets:set` request / response | M | 600 | 512 KiB | Explicit async encryption, credential file write, enable provider |
+| `settings:appearance` | `settings:appearance` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `settings:deleteAllData` | `settings:deleteAllData` request / response | M | 600 | 512 KiB | Native confirmation; stop services; remove userData; quit |
+| `settings:get` | `settings:get` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `settings:set` | `settings:set` request / response | M | 600 | 512 KiB | Validated DB/settings mutation |
+| `settings:systemLocale` | `settings:systemLocale` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `shell:openExternal` | `shell:openExternal` request / response | M | 600 | 512 KiB | Native confirmation; OS browser |
+| `usage:dashboard` | `usage:dashboard` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `usage:estimate` | `usage:estimate` request / response | M | 600 | 8 MiB | Read metadata/content; read may record activity |
+| `usage:export` | `usage:export` request / response | M | 12 | 512 KiB | Native save dialog; write selected export |
+| `usage:forConversation` | `usage:forConversation` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `usage:forDocument` | `usage:forDocument` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `usage:page` | `usage:page` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `usage:rateLimits` | `usage:rateLimits` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `usage:summary` | `usage:summary` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+| `converter:mode` | offline boolean / ack | M | 600 | 512 KiB | Persist offline choice; explicit Retry can initialize converter and ask installation consent |
+| `providers:chooseExecutable` | binary enum / nullable path | M | 600 | 512 KiB | Native chooser; validate and pin executable path/hash |
+| `secrets:unlock` | provider ID / ack | M | 600 | 512 KiB | Explicit async decrypt into main memory; enable provider |
+| `secrets:session` | provider ID + bounded key / ack | M | 600 | 512 KiB | Main-memory key only; enable provider |
+| `settings:networkActivity` | empty / bounded event list | M | 600 | 512 KiB | Read latest 500 app-initiated session events; no packet/byte accounting |
+| `welcome:sampleDocument` | `welcome:sampleDocument` request / response | M | 600 | 512 KiB | Read metadata/content; read may record activity |
+
+`documents:importPaths` accepts only main-issued `drop:` capabilities. Isolated preload captures trusted native drops and keeps webUtils paths private; the page-facing getter returns a token, never the raw path. Tokens are single-use, expire after sixty seconds and bind to the exact frame. Synthetic drops and raw-path submissions cannot mint them. Main still revalidates sources before import/conversion. Native dialog results remain main-owned. This is not isolation from a main-world script’s other existing bridge authority. Heartbeats additionally require an existing document, seconds 1–60 and elapsed-time clamping. Welcome sample language is a closed enum and response is capped at 100,000 characters. Export filenames strip controls, bidi controls and separators and cap at 180 UTF-16 units. Exports request document IDs only.
+
+## Supply-chain findings
+
+`pnpm security:check` runs the audit and rejects advisory IDs absent from the reviewed snapshot; this is not a clean-audit claim. The raw report accompanies this table. Direct Zod remains on v3 because migrating the entire shared contract is a separate compatibility change; the central byte budget reduces constrained-collection exhaustion exposure but is not a proof against every adversarial nested object.
+
+| Advisory | Package / severity | Disposition |
+| --- | --- | --- |
+| [1112659](https://github.com/advisories/GHSA-34x7-hfp2-rc4v) | tar / high | node-tar Vulnerable to Arbitrary File Creation/Overwrite via Hardlink Path Traversal. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1113300](https://github.com/advisories/GHSA-8qq5-rm4j-mr97) | tar / high | node-tar is Vulnerable to Arbitrary File Overwrite and Symlink Poisoning via Insufficient Path Sanitization. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1113375](https://github.com/advisories/GHSA-83g3-92jg-28cx) | tar / high | Arbitrary File Read/Write via Hardlink Target Escape Through Symlink Chain in node-tar Extraction. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1114200](https://github.com/advisories/GHSA-qffp-2rhf-9h96) | tar / high | tar has Hardlink Path Traversal via Drive-Relative Linkpath. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1114302](https://github.com/advisories/GHSA-9ppj-qmqm-q256) | tar / high | node-tar Symlink Path Traversal via Drive-Relative Linkpath. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1114680](https://github.com/advisories/GHSA-r6q2-hw4h-h46w) | tar / high | Race Condition in node-tar Path Reservations via Unicode Ligature Collisions on macOS APFS. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1120782](https://github.com/advisories/GHSA-vmf3-w455-68vh) | tar / moderate | node-tar applies PAX size override to intermediary GNU long-name/long-link headers, causing tar parser interpretation differential (file smuggling). Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1123939](https://github.com/advisories/GHSA-w8wr-v893-vjvp) | tar / moderate | node-tar: Process crash via PAX numeric path type confusion. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1123940](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) | tar / critical | node-tar: Decompression/parse DoS via unlimited input. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1123941](https://github.com/advisories/GHSA-8x88-c5mf-7j5w) | tar / high | node-tar: Negative tar entry size causes infinite loop in archive replace. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1123942](https://github.com/advisories/GHSA-gvwx-54wh-qm9j) | tar / moderate | node-tar: Uncaught Exception DoS via NUL byte in PAX path/linkpath records. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1124278](https://github.com/advisories/GHSA-p2f4-r6v6-j797) | builder-util-runtime / high | electron-updater: Cross-origin redirect leaks `PRIVATE-TOKEN` and mixed-case `Authorization` credentials in `builder-util-runtime`. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1124279](https://github.com/advisories/GHSA-7g7r-gx96-252g) | app-builder-lib / high | electron-updater: Uncontrolled search path elements within `AppImage` built by `app-builder-lib`. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1145647](https://github.com/advisories/GHSA-r292-9mhp-454m) | tar / high | node-tar: Uncontrolled recursion in mapHas/filesFilter allows uncatchable stack-overflow DoS via crafted long-path tar with member selection. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1241206](https://github.com/advisories/GHSA-238p-pmpm-9mq7) | katex / low | KaTeX: Existing prototype pollution can bypass trust restrictions. Accepted low severity prerequisite: existing prototype pollution. trust is disabled; sanitized Markdown; update all rehype consumers together. |
+| [1243066](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5) | zod / high | Zod can exhaust memory while validating oversized constrained collections. Accepted pending Zod v4 contract migration; bounded IPC transport and schemas reduce exposure. |
+| [1244012](https://github.com/advisories/GHSA-g3hv-75wg-m249) | minimatch / moderate | minimatch has potential denial of service via globparts amplification. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+| [1244013](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4) | glob / moderate | Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal. Build/development dependency only; not used to extract untrusted user documents at runtime. Release tooling remains a supply-chain risk; update transitive dependency graph before signed release. |
+
+Only `electron` and `esbuild` install scripts are authorized in pnpm-workspace.yaml. No new build scripts were approved. CycloneDX uses npm's installed dependency view with --ignore-npm-errors because pnpm symlinks produce npm peer/dev-missing diagnostics; the SBOM is an inventory, not proof of complete dependency resolution. The license report covers the pnpm-installed graph; Python package licenses need separate review before distribution.
+
+Electron-specific lint: eslint-plugin-electron-security@0.3.0 ran all rules. One warning: dynamic `shell.openExternal` in ipc/index.ts. Accepted because externalUrlSchema restricts protocols, rejects controls/backslashes, and a native confirmation precedes opening. Electronegativity@1.10.3 was attempted but failed on Node 24 (`TypeError: _commander2.default.version is not a function`); it was removed in favor of the pinned ESLint plugin. Generic dangerous-API lint excludes test fixtures. The unused Mermaid and map components and generative Markdown registry were removed; no JSX HTML sink exception remains. Source icons render local SVG icons rather than fetching favicons.
+
+Codex CLI 0.166.0 is restored on macOS using an app-owned tool-free model catalog, explicit feature/tool disables, isolated temporary auth/state, ignored user config/rules, and native process-fork denial. A real adversarial canary self-test gates detection, model listing and streaming, with success cached against the executable hash, app version and safety settings. Missing sandbox-exec, an unaudited CLI version or failed proof leaves it unavailable with a reason. See [the investigation, exact guarantee, evidence and residual risks](codex-tool-free.md). The wrapper does not restrict the CLI itself to endpoint-only networking or a filesystem allowlist. Claude retains its explicit empty tool list and Antigravity retains ACP disabled-tool/permission rejection.
+
+## Accepted risks and limits
+
+Prompt delimiters cannot guarantee that a model obeys reply language or refuses document instructions. The enforceable boundary is that document/model output cannot access keys or execute tools, citations cannot invent main-owned targets, and rendered output cannot run scripts or load remote images. Tests prove these deterministic boundaries, not model behavior.
+
+A same-user malicious process can race filesystem validation and replace files after realpath checks; this is not solved by mode bits. Existing persisted document objects include absolute source/Markdown paths in trusted renderer responses. OS export paths are chosen with native dialogs; O_NOFOLLOW, inode/link-count checks and fchmod protect the opened destination. Asset MIME is extension-allowlisted and nosniff, not a full image decoder validator. Existing library files can be tampered with by the account. Delete-all verifies namespace removal, not secure erasure of SSD blocks, snapshots, backups or Keychain system history. Native signed hardened-runtime launches with the empty entitlement plist have not been verified; no JIT/unsigned-memory entitlement is preemptively granted.
+
+Packaged renderer files are served from the secure `vstudy://app` protocol because disabling extra file-protocol privileges prevents the prior file-based renderer load. The app protocol accepts GET only, a fixed host and a narrow index/assets path grammar, with MIME/nosniff/CSP headers and a 16 MiB cap.
+
+## Historical verification run
+
+See the table below for executed commands and limitations. Signing, notarization submission, stapling and Gatekeeper acceptance require release credentials and were not verified.
+
+
+Verified on 2026-11-04, macOS arm64, Electron 42.11.16. Evidence is checked in under [security-evidence](security-evidence/).
+
+| Verification | Result | Evidence |
+| --- | --- | --- |
+| Typecheck | PASS | [log](security-evidence/typecheck.txt) |
+| Normal tests / security:check | PASS: 49 files, 248 tests passed, 4 skipped | [log](security-evidence/security-check.txt) |
+| Lint and Electron rules | PASS; one explicitly reviewed opener warning | [log](security-evidence/lint.txt), [gate](security-evidence/security-check.txt) |
+| Audit | 21 findings: 1 critical, 11 high, 8 moderate, 1 low; all individually documented above; no new advisory IDs | [gate](security-evidence/audit-gate.txt), [raw report](security-audit.json) |
+| Frozen install / exact pins | PASS: --frozen-lockfile --ignore-scripts; lock checksum recorded | [log](security-evidence/frozen-lockfile.txt), [policy](security-evidence/dependency-policy.json) |
+| Build and unsigned package | PASS: CSC_IDENTITY_AUTO_DISCOVERY=false pnpm package; arm64 app and DMG | [log](security-evidence/package.txt) |
+| Seven requested fuses | PASS: npx --no-install @electron/fuses read on actual app | [read-back](security-evidence/packaged-verification.txt) |
+| Run-as-node / inspector attempts | PASS: both binaries stay alive; Node marker absent; port never opens; no renderer-load error | [probes](security-evidence/packaged-verification.txt); reproduce with pnpm --filter @vstudy/desktop package:verify |
+| Bundle allowlist | PASS: 12,743 ASAR entries; zero maps/tests/docs/e2e/fixtures | [inventory](security-evidence/bundle-inventory.json) |
+| Development smoke | PASS: visible window, sandbox/isolation, no renderer Node, bridge shape, settings roundtrip/reload | [log](security-evidence/smoke.txt) |
+| Packaged Playwright smoke | Incompatible: disabling Node inspect breaks Playwright's Electron attach; native binary probes used for packaged launch verification | No security fuse was weakened for automation |
+| Delete all data e2e | PASS: cancellation retains DB; confirmation removes real userData root after shutdown | [log](security-evidence/delete-data.txt) |
+| All e2e scripts | 19 PASS, 2 FAIL, including retries and new deletion check | [per-script results](security-evidence/e2e-results.json) |
+| Signing/notarization/Gatekeeper | NOT VERIFIED; unsigned package repairs ad-hoc signatures after fuse editing | No Developer ID credentials used |
+| OS Keychain / FileVault / hard kernel memory limits | NOT VERIFIED; encryption unit tests inject a cipher; FileVault is a deployment assumption; RSS monitor is not RLIMIT_AS | See threat-model limits |
+
+E2E details:
+
+| Script | Result |
+| --- | --- |
+| `assistant-elements.mjs` | [PASS](security-evidence/retry-e2e-assistant-elements.txt) |
+| `chat-controls.mjs` | [PASS](security-evidence/e2e-chat-controls.txt) |
+| `composer-visual-qa.mjs` | [PASS](security-evidence/e2e-composer-visual-qa.txt) |
+| `conversion.mjs` | [PASS](security-evidence/e2e-conversion.txt) |
+| `design1.mjs` | [FAIL](security-evidence/e2e-design1.txt) |
+| `home-onboarding.mjs` | [PASS](security-evidence/e2e-home-onboarding.txt) |
+| `i18n.mjs` | [PASS](security-evidence/e2e-i18n.txt) |
+| `library-perf.mjs` | [PASS](security-evidence/e2e-library-perf.txt) |
+| `library.mjs` | [PASS](security-evidence/e2e-library.txt) |
+| `pdf-reader.mjs` | [PASS](security-evidence/e2e-pdf-reader.txt) |
+| `selection-chat.mjs` | [PASS](security-evidence/retry-e2e-selection-chat.txt) |
+| `visual-regressions.mjs` | [PASS](security-evidence/e2e-visual-regressions.txt) |
+| `welcome-axe.mjs` | [PASS](security-evidence/e2e-welcome-axe.txt) |
+| `welcome-details.mjs` | [PASS](security-evidence/e2e-welcome-details.txt) |
+| `welcome-layout.mjs` | [PASS](security-evidence/e2e-welcome-layout.txt) |
+| `welcome-performance.mjs` | [FAIL](security-evidence/e2e-welcome-performance.txt) |
+| `welcome-pseudo.mjs` | [PASS](security-evidence/e2e-welcome-pseudo.txt) |
+| `welcome-supplement.mjs` | [PASS](security-evidence/e2e-welcome-supplement.txt) |
+| `welcome-trace.mjs` | [PASS](security-evidence/e2e-welcome-trace.txt) |
+| `welcome.mjs` | [PASS](security-evidence/e2e-welcome.txt) |
+| `security-delete-data.mjs` | [PASS](security-evidence/delete-data.txt) |
+
+`assistant-elements.mjs` initially timed out while the updated Electron executable was being installed; the retry passed. `selection-chat.mjs` initially waited on the newly required external-link confirmation; its test now checks that confirmation and restores the native dialog function, and the final complete run passed. `design1.mjs` failed with “Execution context was destroyed, most likely because of a navigation”. `welcome-performance.mjs` failed its timing/long-frame assertions (as recorded in that snapshot). Neither failure was represented as a pass in that snapshot. Current repaired-suite results, including retained Welcome first-attempt frame failures and permitted retries, are in the final implementation response.
+
+Not proven: resistance to arbitrary same-user malware, model obedience to language instructions, exhaustive malformed-archive fuzzing, least-privilege converter filesystem access, signed hardened-runtime execution with the empty entitlements file, notarization/stapling, Gatekeeper, and complete Python-license/SBOM coverage. A signed release must close or explicitly accept these release risks. Source references: [Electron fuses](https://www.electronjs.org/docs/latest/tutorial/fuses), [ASAR integrity](https://www.electronjs.org/docs/latest/tutorial/asar-integrity).
+
+## AI document improvement
+
+Explicitly started AI improvement sends selected PDF page PNGs and parser Markdown (or text-only Markdown for other formats) to the chosen provider. These are untrusted data, with separate system instructions and no tools. Main rejects raw HTML, images, unsafe links, oversized output and pages outside conservative token-coverage thresholds. Originals remain immutable; rejected pages retain original text. Rendering runs in a bounded, cancellable converter subprocess with network denied on macOS. API calls and CLI launches enter the existing session egress inventory. CLI provider-managed traffic retains the transport limits above.
+
+The token gate does not verify equation operators, semantics or annotations absent from the PDF text layer. Cost estimates and admission/abort caps cannot guarantee an external provider's final bill. The reader panel remains unmounted pending integration. See [the design and precise limitations](AI_PARSE.md) and [private-document evaluation results](ai-parse-evaluation.md).
+
+| New IPC channel | Request / response validator | Sender | Requests/minute | Request cap | Side effect |
+|---|---|---|---:|---|---|
+| `aiParse:estimate` | shared/ai-parse contract | M | 12 | 512 KiB | Local estimate; model discovery |
+| `aiParse:start` | shared/ai-parse contract | M; one live owner per document | 12 | 512 KiB | Render, provider egress, usage and second-version writes |
+| `aiParse:status` | shared/ai-parse contract | M | 600 | 512 KiB | Read job metadata |
+| `aiParse:cancel` | shared/ai-parse contract | M plus job owner | 600 | 512 KiB | Abort child processes and preserve partial state |
+| `aiParse:use` | shared/ai-parse contract | M | 12 | 512 KiB | Switch active version; reindex FTS |
+| `aiParse:discard` | shared/ai-parse contract | M | 12 | 512 KiB | Revert and remove the AI output/job |

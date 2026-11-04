@@ -1,0 +1,19 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(await page.locator('.w-first strong').evaluateAll(nodes=>nodes.every(n=>parseFloat(window.getComputedStyle(n).fontSize)>= (window.document.documentElement.lang==='en'?12:13))))
+
+    at capture (file:///Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/welcome.mjs:27:29)
+    at async file:///Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/welcome.mjs:33:81 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

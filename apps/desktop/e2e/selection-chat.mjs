@@ -1,3 +1,4 @@
+import { poll } from '../scripts/poll.mjs';
 import { _electron as electron } from "playwright";
 import assert from "node:assert/strict";
 import { mkdtemp, rm, readFile } from "node:fs/promises";
@@ -23,11 +24,12 @@ try {
     },
   });
   page = await app.firstWindow();
+ await page.evaluate(async()=>{await window.desktop.invoke('providers:configure',{kind:'api',id:'anthropic-api',enabled:true});const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,lastProviderId:'anthropic-api',lastModelId:'fake'});});
  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
   const errors = [];
   page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.getByRole("heading", { name: "VStudy Pro" }).waitFor();
+  await page.getByTestId("bridge-status").waitFor({state:"attached"});
   if (!mock) {
     await app.evaluate(({ dialog }, path) => {
       dialog.showOpenDialog = async () => ({
@@ -45,6 +47,15 @@ try {
   const selectedText = mock
     ? "a closer look"
     : "This selected passage reaches the fake provider.";
+  await viewer.focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  for(let n=0;n<5;n++) await page.keyboard.press('Shift+ArrowRight');
+  const keyboardText=await page.evaluate(()=>window.getSelection()?.toString());
+  assert.equal(keyboardText.length,5,'keyboard selects an arbitrary five-character passage');
+  await page.keyboard.press('Meta+Shift+k');
+  await page.locator('.aui-composer-root .selection-preview').filter({hasText:keyboardText}).waitFor();
+  await page.getByRole('button',{name:'Remove selection',exact:true}).click();
   assert.ok(await viewer.locator("table").count(), "Markdown table rendered");
   assert.ok(await viewer.locator("pre code").count(), "Markdown code rendered");
   await viewer.evaluate((element, text) => {
@@ -62,7 +73,7 @@ try {
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(range);
-      window.document.dispatchEvent(new window.Event("selectionchange"));
+      window.document.dispatchEvent(new window.Event("mouseup"));
       return;
     }
     throw new Error("Fixture text missing");
@@ -133,11 +144,6 @@ try {
     "Swap preserves the conversation",
   );
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-right.png"), fullPage: true, animations: "disabled" });
-  await page.getByRole("button", { name: "Toggle document library" }).click();
-  assert.equal(
-    await page.getByRole("complementary", { name: "Document library" }).count(),
-    0,
-  );
   await page.getByRole("button", { name: "Open settings" }).click();
   await page.getByRole("dialog").waitFor();
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-settings.png"), fullPage: true, animations: "disabled" });
@@ -151,12 +157,12 @@ try {
     await page.getByRole('tab',{name:'Usage',exact:true}).click();
     const dashboard = page.getByRole('region',{name:'Overall token dashboard',exact:true});
     await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
-    assert.equal(await page.getByRole('combobox',{name:'Usage period',exact:true}).inputValue(),'all');
-    await page.getByRole('combobox',{name:'Group usage by',exact:true}).selectOption('model');
+    assert.equal(await page.getByRole('combobox',{name:'Usage period',exact:true}).getAttribute('data-value'),'all');
+    await page.getByRole('combobox',{name:'Group usage by',exact:true}).click();await page.getByRole('option',{name:'Model',exact:true}).click();
     await page.locator('.usage-dashboard table').filter({hasText:'anthropic-api/fake'}).waitFor();
-    await page.getByRole('combobox',{name:'Usage period',exact:true}).selectOption('day');
+    await page.getByRole('combobox',{name:'Usage period',exact:true}).click();await page.getByRole('option',{name:'Today',exact:true}).click();
     await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
-    await page.getByRole('combobox',{name:'Usage period',exact:true}).selectOption('all');
+    await page.getByRole('combobox',{name:'Usage period',exact:true}).click();await page.getByRole('option',{name:'All time',exact:true}).click();
     await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
     await dashboard.screenshot({path:screenshot.replace(/\.png$/, '-token-dashboard.png'),animations:'disabled'});
 
@@ -201,15 +207,20 @@ try {
   }
   if (!mock) {
     await assert.rejects(page.evaluate(() => window.desktop.invoke("shell:openExternal", { url: "file:///etc/passwd" })));
-    await app.evaluate(({ shell }) => {
+    await app.evaluate(({ shell, dialog }) => {
+      globalThis.vstudyOriginalMessageBox = dialog.showMessageBox;
+      dialog.showMessageBox = async (parent, options) => { if (!parent.isVisible()) throw new Error('Consent requires a visible parent'); globalThis.vstudyLinkConfirmation = options; return { response: 1, checkboxChecked: false }; };
       shell.openExternal = async (url) => { globalThis.vstudyOpenedUrl = url; };
     });
     await viewer.getByRole("link", { name: "Reference website" }).click();
     assert.equal(await app.evaluate(() => globalThis.vstudyOpenedUrl), "https://example.com");
+    assert.match(await app.evaluate(() => globalThis.vstudyLinkConfirmation.message), /example\.com/);
+    await app.evaluate(({ dialog }) => { dialog.showMessageBox = globalThis.vstudyOriginalMessageBox; });
   }
   if (!mock) {
     const originalId = await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => s.lastDocumentId));
-    await page.evaluate(path => window.desktop.invoke("documents:importPaths", { paths: [path] }), fileURLToPath(new URL("../test-fixtures/converter/sample.md", import.meta.url)));
+    await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},fileURLToPath(new URL("../test-fixtures/converter/sample.md", import.meta.url)));
+    await page.evaluate(()=>window.desktop.invoke("documents:import",{}));
     await page.reload();
     await page.getByTestId("document-markdown").filter({ hasText: "E2E reading document" }).waitFor();
     assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => s.lastDocumentId)), originalId);
@@ -229,16 +240,17 @@ try {
       assert.equal(await page.locator('.aui-composer-input').inputValue(),'Keep this draft');
     } else await page.getByRole('combobox',{name:'Search models'}).press('Escape');
     page.once("dialog", dialog => dialog.accept());
-    await page.getByRole("button", { name: "Delete conversation", exact: true }).click();
-    await page.locator(".chat-start").waitFor();
+    await page.getByRole('button',{name:'Conversations',exact:true}).click();
+    await page.locator('[data-slot=aui_thread-list-item]').first().getByRole('button',{name:'More options',exact:true}).click();
+    await page.getByRole('menuitem',{name:'Delete',exact:true}).click();
+    await page.locator(".aui-composer-input").waitFor();
     page.once("dialog", dialog => dialog.dismiss());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
     assert.equal(await page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length), 2, "cancel keeps document");
     page.once("dialog", dialog => dialog.accept());
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
-    await page.waitForFunction(async()=>(await window.desktop.invoke("documents:list",{})).length === 1);
-    await page.getByRole('combobox',{name:'Model',exact:true}).click();
-    await page.getByRole('button',{name:'API keys & provider settings'}).click();
+    await poll(()=>page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length === 1));
+    await page.getByRole('button',{name:'Open settings',exact:true}).click();
     const keyForm = page.locator('.provider-row').filter({hasText:'OpenAI compatible'});
     await keyForm.getByRole('textbox',{name:'OpenAI compatible API key',exact:true}).fill('local-test-key');
     await keyForm.getByRole('button',{name:'Save key',exact:true}).click();

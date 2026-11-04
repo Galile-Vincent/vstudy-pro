@@ -1,0 +1,5 @@
+light: home, course, files captured; keyboard course navigation; no horizontal overflow or serious/critical axe violations
+dark: home, course, files captured; keyboard course navigation; no horizontal overflow or serious/critical axe violations
+Reminder saved and displayed in the reopened popover
+File opened in workspace with a document ID and rendered reader content
+No renderer page errors during the tested flows

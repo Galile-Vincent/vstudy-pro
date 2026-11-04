@@ -351,5 +351,17 @@
   "menu_togglefullscreen": "フルスクリーンを切り替え",
   "menu_minimize": "最小化",
   "menu_zoom": "拡大・縮小",
-  "menu_front": "すべてを手前に移動"
+  "menu_front": "すべてを手前に移動",
+  "delete_all_data": "すべてのデータを削除",
+  "answer_streaming": "アシスタントが回答中です",
+  "answer_complete": "回答が完了しました",
+  "answer_stopped": "回答が停止しました",
+  "ask_about_paragraph": "この段落について質問",
+  "chat_author_you": "あなた",
+  "chat_author_assistant": "アシスタント",
+  "answer_error": "回答に失敗しました",
+  "sample_title": "読書サンプル",
+  "checking_provider": "プロバイダーを確認中…",
+  "tool_cancelled_label": "ツールをキャンセルしました",
+  "tool_failed_label": "ツールが失敗しました"
 }

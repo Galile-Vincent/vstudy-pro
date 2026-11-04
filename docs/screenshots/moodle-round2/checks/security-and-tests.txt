@@ -1,0 +1,502 @@
+
+> vstudy-pro@ security:check /Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7
+> node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test
+
+{"vulnerabilities":{"info":0,"low":1,"moderate":8,"high":11,"critical":1},"unreviewed":[]}
+
+> vstudy-pro@ lint /Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7
+> pnpm --filter @vstudy/desktop lint
+
+
+> @vstudy/desktop@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7/apps/desktop
+> eslint .
+
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7/apps/desktop/src/main/ipc/index.ts
+  45:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7/apps/desktop/src/main/moodle/sso-protocol.ts
+  8:59  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+✖ 2 problems (0 errors, 2 warnings)
+
+
+> vstudy-pro@ test /Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7
+> pnpm --filter @vstudy/desktop test
+
+
+> @vstudy/desktop@0.1.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7/apps/desktop
+> vitest run
+
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7/apps/desktop
+
+ ❯ src/main/moodle/client.test.ts (18 tests | 10 failed) 41ms
+     × maps the fixture responses into the shared contract 25ms
+     × uses course, calendar and read-status notification fallbacks 1ms
+     × accepts Moodle numeric strings while rejecting nonnumeric fields 1ms
+   × accepts nullable optional Moodle fields 0ms
+   × uses submission and attempt status rather than actionability 1ms
+   × keeps an unknown submission status when the check fails 0ms
+   × resolves assignment calendar event submission status when no assignment list is available 0ms
+   × fetches ordinary calendar events alongside action events 0ms
+   × requests a fourteen-day action window and skips long-ended assignments 3ms
+   × uses timeline lastid rather than the final event ID 0ms
+ ❯ src/main/moodle/service.test.ts (29 tests | 15 failed) 260ms
+   × syncs twice with stable identities and isolated account records 28ms
+   × downloads to a private file, imports through DocumentService, links and deduplicates 10ms
+   × rejects hostile URLs and oversized downloads before import 9ms
+   × fires overdue reminders once and persists their fired state 8ms
+   × removes stale rows only after a successful refresh and retains unsupported capability caches 11ms
+   × does not link a download after its source revision changes 8ms
+   × isolates a course access failure nopermissiontoviewgrades 8ms
+   × isolates a course access failure invalidparameter 9ms
+   × does not expire an account from a single mark-read failure 8ms
+   × retains one orphaned reminder when its deadline vanishes 10ms
+   × keeps orphaned reminders safe when a whole course leaves enrollment 8ms
+   × applies successful courses when another course fails 10ms
+   × finishes initial sync before connect returns 9ms
+   × retries an offline mark-read on the next sync 8ms
+   × persists capabilities per account and encrypts the private access key 8ms
+ ❯ src/main/services/chat.test.ts (29 tests | 1 failed) 445ms
+   × persists action-only course replies and never executes a proposal 15ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 26 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/moodle/client.test.ts > Moodle response boundary > maps the fixture responses into the shared contract
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:13:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/26]⎯
+
+ FAIL  src/main/moodle/client.test.ts > Moodle response boundary > uses course, calendar and read-status notification fallbacks
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:34:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/26]⎯
+
+ FAIL  src/main/moodle/client.test.ts > Moodle response boundary > accepts Moodle numeric strings while rejecting nonnumeric fields
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:42:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/26]⎯
+
+ FAIL  src/main/moodle/client.test.ts > accepts nullable optional Moodle fields
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:80:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/26]⎯
+
+ FAIL  src/main/moodle/client.test.ts > uses submission and attempt status rather than actionability
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:98:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/26]⎯
+
+ FAIL  src/main/moodle/client.test.ts > keeps an unknown submission status when the check fails
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:104:47
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/26]⎯
+
+ FAIL  src/main/moodle/client.test.ts > resolves assignment calendar event submission status when no assignment list is available
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:111:49
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/26]⎯
+
+ FAIL  src/main/moodle/client.test.ts > fetches ordinary calendar events alongside action events
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:122:42
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/26]⎯
+
+ FAIL  src/main/moodle/client.test.ts > requests a fourteen-day action window and skips long-ended assignments
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:128:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/26]⎯
+
+ FAIL  src/main/moodle/client.test.ts > uses timeline lastid rather than the final event ID
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/client.ts:71:58
+
+ ❯ MoodleClient.courses src/main/moodle/client.ts:71:28
+ ❯ src/main/moodle/client.test.ts:146:42
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > syncs twice with stable identities and isolated account records
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/main/moodle/service.test.ts:34:54
+     32|   await service.sync(account.id);
+     33|   const first = repository.overview();
+     34|   const course = repository.course(first.courses[0]!.id);
+       |                                                      ^
+     35|   const reminder = repository.createReminder({deadlineId:course.deadli…
+     36|   repository.markRead(course.notifications[0]!.id);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > downloads to a private file, imports through DocumentService, links and deduplicates
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/main/moodle/service.test.ts:84:69
+     82|   const {repository,service,store,directory} = await setup();
+     83|   await service.sync(account.id);
+     84|   const original = repository.course(repository.overview().courses[0]!…
+       |                                                                     ^
+     85|   const documents = new DocumentService({store,userData:directory,conv…
+     86|   const importedPaths: string[] = [];
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > rejects hostile URLs and oversized downloads before import
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/main/moodle/service.test.ts:111:65
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > fires overdue reminders once and persists their fired state
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/main/moodle/service.test.ts:119:67
+    117|   const {repository,service} = await setup(); await service.sync(accou…
+    118|   const deadline = repository.overview().upcoming[0]!;
+    119|   const reminder = repository.createReminder({deadlineId:deadline.id,r…
+       |                                                                   ^
+    120|   const notify = vi.fn(() => true);
+    121|   const stop = startReminders(repository,notify); stop();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > removes stale rows only after a successful refresh and retains unsupported capability caches
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/main/moodle/service.test.ts:139:45
+    137|   const {repository,service,request} = await setup(); await service.sy…
+    138|   const course = repository.overview().courses[0]!;
+    139|   const original = repository.course(course.id);
+       |                                             ^
+    140|   const base = request.getMockImplementation()!;
+    141|   request.mockImplementation(async (target,options) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > does not link a download after its source revision changes
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/main/moodle/service.test.ts:173:65
+    171| it('does not link a download after its source revision changes',async …
+    172|   const {repository,service,store} = await setup(); await service.sync…
+    173|   const file = repository.course(repository.overview().courses[0]!.id)…
+       |                                                                 ^
+    174|   const documents = {get:() => null,importPath:vi.fn(async () => {
+    175|     store.db.prepare('UPDATE moodle_files SET data=? WHERE id=?').run(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > isolates a course access failure nopermissiontoviewgrades
+ FAIL  src/main/moodle/service.test.ts > isolates a course access failure invalidparameter
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/main/moodle/service.test.ts:185:43
+    183|   const {repository,service,request} = await setup(); await service.sy…
+    184|   const course = repository.overview().courses[0]!;
+    185|   const before = repository.course(course.id);
+       |                                           ^
+    186|   const base = request.getMockImplementation()!;
+    187|   request.mockImplementation(async (target,options) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > does not expire an account from a single mark-read failure
+TypeError: Cannot read properties of undefined (reading 'value')
+ ❯ src/main/moodle/service.test.ts:201:70
+    199|   const {service,repository,request} = await setup(); await service.sy…
+    200|   request.mockResolvedValue(Response.json({errorcode:'requireloginerro…
+    201|   await service.markRead(repository.notificationRecords(account.id)[0]…
+       |                                                                      ^
+    202|   expect(repository.account(account.id).status).toBe('connected');
+    203|   await service.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > retains one orphaned reminder when its deadline vanishes
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/main/moodle/service.test.ts:208:45
+    206|   const {repository,service} = await setup(); await service.sync(accou…
+    207|   const course = repository.overview().courses[0]!;
+    208|   const deadline = repository.course(course.id).deadlines[0]!;
+       |                                             ^
+    209|   repository.createReminder({deadlineId:deadline.id,remindAt:'2020-01-…
+    210|   expect(repository.reminders()).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > keeps orphaned reminders safe when a whole course leaves enrollment
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/main/moodle/service.test.ts:221:50
+    219|   const {repository,service,request} = await setup(); await service.sy…
+    220|   const deadline = repository.overview().upcoming[0]!;
+    221|   repository.createReminder({deadlineId:deadline.id,remindAt:'2020-01-…
+       |                                                  ^
+    222|   const base = request.getMockImplementation()!;
+    223|   request.mockImplementation(async (target,options) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > applies successful courses when another course fails
+AssertionError: expected { errors: [ 'service' ] } to match object { errors: [ 'network' ] }
+
+- Expected
++ Received
+
+  {
+    "errors": [
+-     "network",
++     "service",
+    ],
+  }
+
+ ❯ src/main/moodle/service.test.ts:256:42
+    254|     return base(target,options);
+    255|   });
+    256|   expect(await service.sync(account.id)).toMatchObject({errors:['netwo…
+       |                                          ^
+    257|   expect(repository.overview().courses.map(item => item.fullName).sort…
+    258|   expect(repository.course(repository.overview().courses.find(item => …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > finishes initial sync before connect returns
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/main/moodle/service.test.ts:264:41
+    262|   const {service,repository} = await setup();
+    263|   await service.connect({siteUrl:'https://ilearning.cycu.edu.tw'});
+    264|   expect(repository.overview().courses).toHaveLength(1);
+       |                                         ^
+    265|   expect(repository.course(repository.overview().courses[0]!.id).files…
+    266|   await service.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > retries an offline mark-read on the next sync
+TypeError: Cannot read properties of undefined (reading 'value')
+ ❯ src/main/moodle/service.test.ts:270:68
+    268| it('retries an offline mark-read on the next sync',async () => {
+    269|   const {service,repository,request} = await setup(); await service.sy…
+    270|   const notification = repository.notificationRecords(account.id)[0]!.…
+       |                                                                    ^
+    271|   const base = request.getMockImplementation()!;
+    272|   request.mockRejectedValue(new Error('offline'));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/26]⎯
+
+ FAIL  src/main/moodle/service.test.ts > persists capabilities per account and encrypts the private access key
+AssertionError: expected { errors: [ 'service' ] } to deeply equal { errors: [] }
+
+- Expected
++ Received
+
+  {
+-   "errors": [],
++   "errors": [
++     "service",
++   ],
+  }
+
+ ❯ src/main/moodle/service.test.ts:300:42
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/26]⎯
+
+ FAIL  src/main/services/chat.test.ts > persists action-only course replies and never executes a proposal
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "undefined",
+    "path": [
+      "identity"
+    ],
+    "message": "Required"
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/moodle/repository.ts:22:66
+     20|   constructor(private readonly db: DatabaseSync) {}
+     21|   private rows<T>(sql: string, schema: z.ZodType<T>, ...params: string…
+     22|     return this.db.prepare(sql).all(...params).map(row => schema.parse…
+       |                                                                  ^
+     23|   }
+     24|   capabilities(id: string) { return this.rows('SELECT data FROM moodle…
+ ❯ MoodleRepository.rows src/main/moodle/repository.ts:22:48
+ ❯ MoodleRepository.course src/main/moodle/repository.ts:48:25
+ ❯ ChatService.createConversation src/main/services/chat.ts:71:71
+ ❯ src/main/services/chat.test.ts:543:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/26]⎯
+
+
+ Test Files  3 failed | 82 passed | 4 skipped (89)
+      Tests  26 failed | 571 passed | 13 skipped (610)
+   Start at  18:42:35
+   Duration  7.16s (transform 3.54s, setup 0ms, import 12.41s, tests 19.77s, environment 6.13s)
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-9c053bf7/apps/desktop:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @vstudy/desktop@0.1.0 test: `vitest run`
+Exit status 1
+ ELIFECYCLE  Test failed. See above for more details.
+ ELIFECYCLE  Command failed with exit code 1.

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "20", "name": "Week 1", "visible": "1", "summary": null,
+    "summaryformat": 1, "section": "1", "hiddenbynumsections": 0,
+    "uservisible": true, "availabilityinfo": "<p>Available after Monday</p>",
+    "modules": [
+      {
+        "id": "30", "url": null, "name": "Lecture", "instance": "40", "contextid": "50",
+        "description": null, "visible": 1, "uservisible": true, "visibleoncoursepage": 1,
+        "modicon": "https://school.example/icon.png", "modname": "resource", "modplural": "Files",
+        "availability": null, "indent": 0, "onclick": "", "afterlink": "", "customdata": "{\"revision\":3}",
+        "noviewlink": false, "completion": 1,
+        "completiondata": {"state":"1","timecompleted":null,"overrideby":null,"valueused":false,"hascompletion":true,"isautomatic":true,"istrackeduser":true,"uservisible":true,"details":[]},
+        "downloadcontent": 1, "dates": [],
+        "contents": [{"type":"file","filename":"lecture.pdf","filepath":"/","filesize":null,"fileurl":"https://school.example/pluginfile.php/lecture.pdf","timecreated":null,"timemodified":"1700000000","sortorder":0,"mimetype":null,"isexternalfile":false,"repositorytype":null,"userid":null,"author":null,"license":null}],
+        "contentsinfo": {"filescount":1,"filessize":0,"lastmodified":1700000000,"mimetypes":[],"repositorytype":null}
+      },
+      {"id":"31","name":"Read first","modname":"label","completiondata":null},
+      {"id":"32","name":"More","modname":"subsection","customdata":"{\"sectionid\":21}"},
+      {"id":"33","name":"Extension","modname":"site_custom_activity","contents":null}
+    ]
+  },
+  {"id":"21","section":"2","name":"More","visible":0,"uservisible":false,"summary":null,"component":"mod_subsection","itemid":"60","modules":[{"id":"34","name":"Child","modname":"page"}]}
+]

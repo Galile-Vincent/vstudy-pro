@@ -1,0 +1,15 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: {"language":"en","width":720,"theme":"light","alignment":{"delta":-182.765625,"toolbarBottom":462.875,"clipTop":462.875}}
+    at file:///Users/vc/.t3/projects/vstudy-pro/apps/desktop/e2e/welcome-layout.mjs:20:14 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

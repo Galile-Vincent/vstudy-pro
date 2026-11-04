@@ -1,0 +1,83 @@
+- Checking registry.
+✔ Checking registry.
+- Installing dependencies.
+- Installing dependencies.
+✔ Installing dependencies.
+- Updating files.
+✔ Created 16 files:
+  - src/renderer/components/ui/card.tsx
+  - src/renderer/components/ui/select.tsx
+  - src/renderer/components/ui/switch.tsx
+  - src/renderer/components/ui/checkbox.tsx
+  - src/renderer/components/ui/scroll-area.tsx
+  - src/renderer/components/ui/separator.tsx
+  - src/renderer/components/ui/dropdown-menu.tsx
+  - src/renderer/components/ui/context-menu.tsx
+  - src/renderer/components/ui/tabs.tsx
+  - src/renderer/components/ui/progress.tsx
+  - src/renderer/components/ui/sheet.tsx
+  - src/renderer/hooks/use-mobile.ts
+  - src/renderer/components/ui/toggle.tsx
+  - src/renderer/components/ui/alert-dialog.tsx
+  - src/renderer/components/ui/sidebar.tsx
+  - src/renderer/components/ui/toggle-group.tsx
+ℹ Updated 26 files:
+  - src/renderer/components/ui/button.tsx
+  - src/renderer/components/ui/skeleton.tsx
+  - src/renderer/components/ui/dialog.tsx
+  - src/renderer/components/ui/tooltip.tsx
+  - src/renderer/components/ui/avatar.tsx
+  - src/renderer/hooks/use-attachment-src.ts
+  - src/renderer/components/assistant-ui/elements/follow-up-suggestions.aui.tsx
+  - src/renderer/components/ui/textarea.tsx
+  - src/renderer/components/ui/input.tsx
+  - src/renderer/components/ui/popover.tsx
+  - src/renderer/components/ui/command.tsx
+  - src/renderer/components/assistant-ui/elements/attachment-state.ts
+  - src/renderer/components/assistant-ui/elements/document-reference.tsx
+  - src/renderer/components/assistant-ui/elements/media-player.tsx
+  - src/renderer/components/assistant-ui/elements/inline-citation.tsx
+  - src/renderer/components/assistant-ui/elements/image.tsx
+  - src/renderer/components/assistant-ui/elements/reasoning.tsx
+  - src/renderer/components/assistant-ui/elements/tool-fallback.aui.tsx
+  - src/renderer/components/assistant-ui/elements/thread-list.aui.tsx
+  - src/renderer/components/assistant-ui/elements/sources.aui.tsx
+  - src/renderer/components/assistant-ui/elements/model-selector.tsx
+  - src/renderer/components/assistant-ui/elements/markdown-text.tsx
+  - src/renderer/components/assistant-ui/elements/attachment.aui.tsx
+  - src/renderer/components/assistant-ui/elements/file.tsx
+  - src/renderer/components/assistant-ui/elements/reasoning.aui.tsx
+  - src/renderer/components/assistant-ui/elements/thread.aui.tsx
+ℹ Skipped 13 files: (files might be identical, use --overwrite to overwrite)
+  - src/renderer/components/assistant-ui/elements/logos.tsx
+  - src/renderer/components/assistant-ui/elements/surfaces.tsx
+  - src/renderer/components/assistant-ui/utils/useIsomorphicLayoutEffect.ts
+  - src/renderer/components/assistant-ui/utils/href.ts
+  - src/renderer/hooks/use-copy-to-clipboard.ts
+  - src/renderer/components/assistant-ui/elements/collapsible-root.tsx
+  - src/renderer/components/assistant-ui/utils/model-selection.ts
+  - src/renderer/components/ui/badge.tsx
+  - src/renderer/components/assistant-ui/elements/tooltip-icon-button.tsx
+  - src/renderer/components/assistant-ui/elements/thinking-indicator.tsx
+  - src/renderer/components/assistant-ui/elements/suggestions.tsx
+  - src/renderer/components/assistant-ui/elements/tool-group.aui.tsx
+  - src/renderer/components/assistant-ui/elements/model-selector.aui.tsx
+- Updating src/renderer/style.css
+✔ Updating src/renderer/style.css
+The `tooltip` component has been added. Remember to wrap your app with the `TooltipProvider` component.
+
+```tsx title="app/layout.tsx"
+import { TooltipProvider } from "@/components/ui/tooltip"
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <TooltipProvider>{children}</TooltipProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+

@@ -1,0 +1,127 @@
+[
+  {
+    "script": "a11y-regressions.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "assistant-elements.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "chat-controls.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "codex-chat.mjs",
+    "exit": 0,
+    "skipped": true
+  },
+  {
+    "script": "composer-visual-qa.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "conversion.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "design1.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "home-onboarding.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "i18n.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "library-perf.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "library.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "packaged-smoke.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "pdf-reader.mjs",
+    "exit": "TIMEOUT",
+    "skipped": false
+  },
+  {
+    "script": "security-audit.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "security-delete-data.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "selection-chat.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "visual-regressions.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "welcome-axe.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "welcome-details.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "welcome-layout.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "welcome-performance.mjs",
+    "exit": 1,
+    "skipped": false
+  },
+  {
+    "script": "welcome-pseudo.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "welcome-supplement.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "welcome-trace.mjs",
+    "exit": 0,
+    "skipped": false
+  },
+  {
+    "script": "welcome.mjs",
+    "exit": 1,
+    "skipped": false
+  }
+]

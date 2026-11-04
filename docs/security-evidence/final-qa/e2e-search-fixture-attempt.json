@@ -1,0 +1,92 @@
+[
+  {
+    "script": "a11y-regressions.mjs",
+    "status": "PASS",
+    "seconds": 22,
+    "code": 0
+  },
+  {
+    "script": "assistant-elements.mjs",
+    "status": "PASS",
+    "seconds": 8,
+    "code": 0
+  },
+  {
+    "script": "chat-controls.mjs",
+    "status": "PASS",
+    "seconds": 8,
+    "code": 0
+  },
+  {
+    "script": "codex-chat.mjs",
+    "status": "SKIP",
+    "seconds": 0,
+    "code": 0
+  },
+  {
+    "script": "composer-visual-qa.mjs",
+    "status": "PASS",
+    "seconds": 27,
+    "code": 0
+  },
+  {
+    "script": "conversion.mjs",
+    "status": "PASS",
+    "seconds": 15,
+    "code": 0
+  },
+  {
+    "script": "converter-lifecycle.mjs",
+    "status": "PASS",
+    "seconds": 67,
+    "code": 0
+  },
+  {
+    "script": "design1.mjs",
+    "status": "PASS",
+    "seconds": 79,
+    "code": 0
+  },
+  {
+    "script": "final-qa.mjs",
+    "status": "FAIL",
+    "seconds": 31,
+    "code": 1
+  },
+  {
+    "script": "home-onboarding.mjs",
+    "status": "PASS",
+    "seconds": 4,
+    "code": 0
+  },
+  {
+    "script": "i18n.mjs",
+    "status": "PASS",
+    "seconds": 10,
+    "code": 0
+  },
+  {
+    "script": "library-perf.mjs",
+    "status": "PASS",
+    "seconds": 15,
+    "code": 0
+  },
+  {
+    "script": "library.mjs",
+    "status": "PASS",
+    "seconds": 17,
+    "code": 0
+  },
+  {
+    "script": "ownership-shutdown.mjs",
+    "status": "PASS",
+    "seconds": 1,
+    "code": 0
+  },
+  {
+    "script": "packaged-smoke.mjs",
+    "status": "PASS",
+    "seconds": 7,
+    "code": 0
+  }
+]
