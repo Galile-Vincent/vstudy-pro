@@ -363,5 +363,7 @@
   "sample_title": "閱讀範例",
   "checking_provider": "正在檢查提供者…",
   "tool_cancelled_label": "工具已取消",
-  "tool_failed_label": "工具執行失敗"
+  "tool_failed_label": "工具執行失敗",
+  "attachment_label": "附件 {{name}}（{{type}}）{{status}}",
+  "uploading": "上傳中"
 }

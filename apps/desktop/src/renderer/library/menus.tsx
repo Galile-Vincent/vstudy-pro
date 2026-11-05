@@ -70,7 +70,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
                 )
               }
             >
-              {menu.pinned?<PinOff/>:<Pin/>}{tr("library:pin")}
+              {menu.pinned?<PinOff/>:<Pin/>}{tr(menu.pinned ? "library:unpin" : "library:pin")}
             </Button>
             <Button variant="ghost" onClick={() => setTagging(true)}>
               <Tag/>{tr("library:tag")}
@@ -117,7 +117,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
             </Button>
             {folders.map((f) => (
               <Button variant="ghost" key={f.id} onClick={() => void moveTo(f.id)}>
-                {f.name}
+                {path(f.id)}
               </Button>
             ))}
           </div>
@@ -132,7 +132,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
           }}
         >
           <div className="folder-picker">
-            {tags.map((tag) => (
+            <p>{tr('library:tag_hint')}</p>{tags.map((tag) => (
               <label key={tag.id}>
                 <Checkbox
                   checked={

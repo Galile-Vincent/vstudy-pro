@@ -173,9 +173,7 @@ const AttachmentUI: FC = () => {
                       }
                     : undefined
                 }
-                aria-label={`${src ? `Preview ${name}` : `${typeLabel} attachment ${name}`}${
-                  isError ? tr('common:upload_failed') : isUploading ? ", uploading" : ""
-                }`}
+                aria-label={tr('common:attachment_label', {name, type: typeLabel, status: isError ? tr('common:upload_failed') : isUploading ? tr('common:uploading') : ''})}
               >
                 <AttachmentThumb src={src} />
                 {isUploading && (

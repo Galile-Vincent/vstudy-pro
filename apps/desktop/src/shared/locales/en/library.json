@@ -79,7 +79,7 @@
   "empty_filter": "No matching documents",
   "empty_folder": "Room for a new idea",
   "empty_library": "Your reading starts here",
-  "emptyHint": "Bring a document and make room for understanding.",
+  "emptyHint": "Import a PDF or text file, wait for it to open, then select a sentence and ask in Chat.",
   "clearSearch": "Clear search",
   "documents": "Documents",
   "bytes": "bytes",
@@ -159,5 +159,14 @@
   "ai_parse.cli_hint": "CLI providers are off by default. Enable a provider in Settings to use it.",
   "ai_parse.not_ready": "AI improvement currently requires a completed conversion. For PDFs without a text layer, import a PDF with selectable text; independent OCR is not available.",
   "ai_parse.poor_conversion": "Conversion looks incomplete?",
-  "viewDetails": "View details"
+  "viewDetails": "View details",
+  "unpin": "Unpin",
+  "tag_hint": "Tags group a document under several topics. Changes save right away.",
+  "retry_hint": "Try again, or import a PDF or text file with readable words.",
+  "reader_hint": "Select a sentence with your mouse or Shift + arrow keys, then ask a question in Chat. Selecting opens Chat.",
+  "context_selection": "Using selected passage. Clear it to use the whole document.",
+  "context_document": "Using the whole document.",
+  "estimate_hint": "First choose a model and estimate the cost.",
+  "chat_error": "The answer could not finish. Check your model in Settings, then try again.",
+  "chat_network_error": "Could not connect. Check your internet, then try again."
 }

@@ -143,7 +143,7 @@ const useDocumentChat = () => useContext(DocumentChatContext)!;
 function ComposerSelection() {
   useTranslation();
   const {selection,onClearSelection} = useDocumentChat();
-  return selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label={tr('common:remove_selection')} onClick={onClearSelection}>×</button></div>;
+  return <><p>{tr(selection ? 'library:context_selection' : 'library:context_document')}</p>{selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label={tr('common:remove_selection')} onClick={onClearSelection}>×</button></div>}</>;
 }
 function ComposerBanner() {
   useTranslation();

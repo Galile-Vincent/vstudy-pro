@@ -363,5 +363,7 @@
   "sample_title": "読書サンプル",
   "checking_provider": "プロバイダーを確認中…",
   "tool_cancelled_label": "ツールをキャンセルしました",
-  "tool_failed_label": "ツールが失敗しました"
+  "tool_failed_label": "ツールが失敗しました",
+  "attachment_label": "添付 {{name}}（{{type}}）{{status}}",
+  "uploading": "アップロード中"
 }

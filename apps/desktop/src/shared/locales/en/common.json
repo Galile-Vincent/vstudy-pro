@@ -363,5 +363,7 @@
   "sample_title": "Reading sample",
   "checking_provider": "Checking provider…",
   "tool_cancelled_label": "Tool cancelled",
-  "tool_failed_label": "Tool failed"
+  "tool_failed_label": "Tool failed",
+  "attachment_label": "Attachment {{name}} ({{type}}) {{status}}",
+  "uploading": "Uploading"
 }

@@ -66,6 +66,7 @@ export function Workspace() {
   const [progress, setProgress] = useState<Record<string, string>>({});
   const [readerVersion,setReaderVersion] = useState<'original'|'ai'>('original');
   const [readerRevision,setReaderRevision] = useState(0);
+  const [readerHint,setReaderHint] = useState(true);
   const [aiOpen,setAiOpen] = useState(0);
   const [partialSource, setPartialSource] = useState("");
   useEffect(() => {
@@ -439,13 +440,13 @@ export function Workspace() {
                 .finally(() => setBusy(false));
             }}
           >
-            {tr('common:retry_conversion')}</button><Button variant="outline" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button>
+            {tr('common:retry_conversion')}</button><p>{tr('library:retry_hint')}</p>
         </div>
       ) : loadingSource ? (
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
-        <><div className="document-conversion-hint"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div><DocumentMarkdown
+        <>{readerHint && <div role="status"><p>{tr('library:reader_hint')}</p><Button variant="ghost" onClick={()=>setReaderHint(false)}>{tr('common:dismiss')}</Button></div>}<div className="document-conversion-hint"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div><DocumentMarkdown
           key={`${doc.id}-${readerVersion}-${readerRevision}`}
           version={readerVersion}
           source={source}

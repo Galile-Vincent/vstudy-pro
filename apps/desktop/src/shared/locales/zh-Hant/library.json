@@ -79,7 +79,7 @@
   "empty_filter": "沒有符合條件的文件",
   "empty_folder": "放進一個新靈感",
   "empty_library": "從這裡開始閱讀",
-  "emptyHint": "匯入一份文件，開始探索與理解。",
+  "emptyHint": "匯入 PDF 或文字檔，等待開啟後選取句子，再到聊天提問。",
   "clearSearch": "清除搜尋",
   "documents": "文件",
   "bytes": "位元組",
@@ -159,5 +159,14 @@
   "ai_parse.cli_hint": "CLI 供應商預設關閉。請在設定中啟用供應商。",
   "ai_parse.not_ready": "AI 重新解析目前需要先完成轉換。若 PDF 沒有文字層，請匯入可選取文字的 PDF；目前不支援獨立 OCR。",
   "ai_parse.poor_conversion": "轉換結果不完整？",
-  "viewDetails": "檢視詳細資料"
+  "viewDetails": "檢視詳細資料",
+  "unpin": "取消釘選",
+  "tag_hint": "標籤讓文件屬於多個主題。變更會立即儲存。",
+  "retry_hint": "請重試，或匯入有可讀文字的 PDF 或文字檔。",
+  "reader_hint": "用滑鼠或 Shift 加方向鍵選取句子，再到聊天提問。選取後會開啟聊天。",
+  "context_selection": "正在使用選取段落。清除選取即可使用整份文件。",
+  "context_document": "正在使用整份文件。",
+  "estimate_hint": "請先選擇模型並估算費用。",
+  "chat_error": "回答無法完成。請到設定檢查模型，再重試。",
+  "chat_network_error": "無法連線。請檢查網路後重試。"
 }
