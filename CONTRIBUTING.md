@@ -40,8 +40,8 @@ Git-cliff fits this single-app repository without a changeset file per change or
 - [ ] Typecheck, lint, tests, build, `pnpm security:check`, `pnpm vendor:check`, and `pnpm knip` pass on the release commit.
 - [ ] Review [the security model](docs/SECURITY.md), dependency exceptions, privacy, migration backups, and recovery behavior.
 - [ ] Run the Electron smoke and E2E checks on a machine with sufficient memory. Review keyboard, VoiceOver, locales, and first-run behavior.
-- [ ] Set signing and notarization credentials outside the repository as described in [README](README.md).
-- [ ] Run `pnpm package:signed`. Verify codesign, stapling, Gatekeeper, and first open on a clean Mac using the README commands.
+- [ ] Set signing and notarization credentials outside the repository as described below.
+- [ ] Run `pnpm package:signed`. Verify codesign, stapling, Gatekeeper, and first open on a clean Mac using the commands below.
 - [ ] Generate SHA-256 checksums for the exact signed DMG. Attach checksums, evidence, and release notes.
 - [ ] Confirm the version matches the tag and obtain maintainer approval before distributing the signed artifact.
 
@@ -55,3 +55,25 @@ Existing binary evidence has been removed from the index only. Historical screen
 Git LFS is not required for current screenshots, which were individually below 256 KB at this audit. Keep video outside Git. Reconsider LFS if stable binary reference assets must be versioned with source. Agree on retention, hosting quota, and contributor setup first. Do not migrate history as part of routine hygiene.
 
 See [stream H notes](docs/REPO_HYGIENE.md) for the baseline tag proposal and validation limits.
+
+## Keep the user guides in sync
+
+Update `README.md`, `README.zh-Hant.md`, and `README.ja.md` together. Keep the same heading order, screenshots, commands, supported features, and limits. Use natural Taiwanese Traditional Chinese and Japanese, and preserve technical names. Keep the language switcher on the first line. Check version badges against `apps/desktop/package.json` and runtime versions against `.node-version` and `package.json`.
+
+Run `node scripts/check-readme-links.mjs` before submitting. Pre-push runs the same check. It validates local inline and reference links, Markdown heading fragments, and the 400 KB screenshot limit in the three READMEs and `docs/README.md`. It does not check remote URL availability. Stable README images are an exception to the generated-evidence retention policy above. Store optimized copies under `docs/assets/readme/` and record their source there.
+
+## Sign a distribution build
+
+Install a Developer ID Application certificate in your build keychain. Set `CSC_NAME` to its identity, or set `CSC_LINK` to a private certificate file and `CSC_KEY_PASSWORD` to its password. For notarization, set `APPLE_API_KEY` to your private `.p8` path, `APPLE_API_KEY_ID`, and `APPLE_API_ISSUER`. Alternatively, use `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`. Keep all credentials outside Git.
+
+`pnpm package:signed` rejects missing signing or notarization configuration, builds with hardened runtime, and requests notarization. Verify the actual artifact before distribution.
+
+```sh
+pnpm package:signed
+codesign --verify --deep --strict 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+xcrun stapler staple 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+xcrun stapler validate 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+spctl --assess --type execute --verbose 'apps/desktop/release/mac-arm64/VStudy Pro.app'
+```
+
+Verify first-open behavior on a quarantined copy on a clean Mac. Generate `SHA256SUMS.txt` with `shasum -a 256 ./*.dmg > SHA256SUMS.txt` from `apps/desktop/release`. Attach it beside the exact signed DMG. An unsigned build passing packaging checks does not establish Developer ID trust or notarization.
