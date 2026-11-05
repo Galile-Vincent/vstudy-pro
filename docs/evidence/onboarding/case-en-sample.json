@@ -1,0 +1,49 @@
+[
+  {
+    "language": "en",
+    "goal": "sample",
+    "firstTaskMs": 3730,
+    "totalMs": 6303,
+    "privacyShownAtMs": 2175,
+    "schoolAuthentication": "not used",
+    "ai": "local fake provider; question and chat-history search exercised",
+    "screenshots": [
+      "en-sample-welcome.png",
+      "en-sample-appearance.png",
+      "en-sample-goal.png",
+      "en-sample-ai.png",
+      "en-sample-start.png",
+      "en-sample-start-dark-720.png",
+      "en-sample-selection.png",
+      "en-sample-chat-answer.png",
+      "en-sample-history-search.png",
+      "en-sample-first-task.png",
+      "en-sample-walkthrough-school.png",
+      "en-sample-walkthrough-due.png",
+      "en-sample-walkthrough-agent.png",
+      "en-sample-walkthrough-selection.png",
+      "en-sample-walkthrough-history.png",
+      "en-sample-recorded-video.png",
+      "en-sample-shortcuts.png"
+    ],
+    "violations": [
+      {
+        "name": "welcome",
+        "violations": []
+      },
+      {
+        "name": "ai",
+        "violations": []
+      },
+      {
+        "name": "start-dark-720",
+        "violations": []
+      },
+      {
+        "name": "walkthroughs",
+        "violations": []
+      }
+    ],
+    "errors": []
+  }
+]
