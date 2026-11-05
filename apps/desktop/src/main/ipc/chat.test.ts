@@ -60,7 +60,7 @@ it("registers every chat handler with validated repository round trips and dispo
     return callback(event, payload);
   };
   try {
-    expect(implemented.size).toBe(11);
+    expect(implemented.size).toBe(15);
     expect(await invoke('providers:test', {providerId:'anthropic-api'})).toEqual('bad_key');
     await expect(invoke('providers:test', {providerId:'claude-cli'})).rejects.toThrow();
     testKey = 'private-test-key';
@@ -117,6 +117,11 @@ it("registers every chat handler with validated repository round trips and dispo
     expect(store.conversations.list(doc.id)).toHaveLength(1);
     store.messages.insert({id:randomUUID() as import('../../shared').Message['id'],conversationId:conversation.id,role:'user',parts:[{type:'text',text:'Started'}],createdAt:new Date().toISOString()});
     await expect(invoke('conversations:model',{conversationId:conversation.id,providerId:'anthropic-api',modelId:'fake'})).rejects.toThrow("errors.conversation_not_empty");
+    expect(await invoke('chats:get',{conversationId:conversation.id})).toEqual(store.conversations.get(conversation.id));
+    expect(await invoke('chats:search',{query:'Started',role:'user'})).toMatchObject({items:[{id:conversation.id,matches:[{role:'user'}]}]});
+    await expect(invoke('chats:search',{query:'x',unexpected:true})).rejects.toThrow();
+    await expect(invoke('chats:update',{conversationId:conversation.id,patch:{pinned:'true'}})).rejects.toThrow();
+    expect(await invoke('chats:update',{conversationId:conversation.id,patch:{pinned:true}})).toEqual({ok:true});
     expect(await invoke("providers:list", {})).toHaveLength(6);
     expect(
       await invoke("providers:configure", {

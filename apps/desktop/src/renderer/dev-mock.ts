@@ -165,7 +165,7 @@ export function createMockBridge(): DesktopApi {
         break;
       }
       case "conversations:list":
-        result = conversations.filter((c) => c.scope === "course" ? c.courseId === input.courseId : c.documentId === input.documentId);
+        result = conversations.filter((c) => c.scope === "course" ? c.courseId === input.courseId : c.scope === "general" ? input.scope === "general" : c.documentId === input.documentId);
         break;
       case "conversations:delete":
         conversations.splice(
@@ -216,7 +216,7 @@ export function createMockBridge(): DesktopApi {
         break;
       case "chat:start": {
         const req = request as ChatRequest;
-        const text = `You asked: ${req.userMessage}${req.scope !== "course" && req.selection ? `\n\nSelected passage:\n${req.selection.text}` : ""}`;
+        const text = `You asked: ${req.userMessage}${req.scope !== "course" && req.scope !== "general" && req.selection ? `\n\nSelected passage:\n${req.selection.text}` : ""}`;
         messages.push(
           messageSchema.parse({
             id: crypto.randomUUID(),
