@@ -1,0 +1,77 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+ ❯ src/main/ipc/planner.test.ts (4 tests | 2 failed) 39ms
+   × localizes calendar dialog in zh-Hant 10ms
+   × localizes calendar dialog in ja 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/ipc/planner.test.ts > localizes calendar dialog in zh-Hant
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…} ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
++   {
++     "defaultPath": "vstudy-study-plan.ics",
+      "filters": [
+        {
+          "extensions": [
+            "ics",
+          ],
+-         "name": "行事曆",
++         "name": "Calendar",
+        },
+      ],
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/ipc/planner.test.ts:19:117
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/main/ipc/planner.test.ts > localizes calendar dialog in ja
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…} ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
++   {
++     "defaultPath": "vstudy-study-plan.ics",
+      "filters": [
+        {
+          "extensions": [
+            "ics",
+          ],
+-         "name": "カレンダー",
++         "name": "Calendar",
+        },
+      ],
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/ipc/planner.test.ts:19:117
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  01:01:26
+   Duration  379ms (transform 183ms, setup 0ms, import 248ms, tests 39ms, environment 0ms)
+

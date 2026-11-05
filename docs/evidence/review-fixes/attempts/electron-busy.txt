@@ -1,0 +1,3 @@
+AssertionError [ERR_ASSERTION]: Another Electron test is running. Retry after it exits.
+
+true !== false

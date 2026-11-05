@@ -1,0 +1,38 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+ ❯ src/renderer/chat-materials.test.tsx (1 test | 1 failed) 12ms
+   × does not retain material consent after the runtime refuses append 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/chat-materials.test.tsx > does not retain material consent after the runtime refuses append
+AssertionError: expected { mode: 'summary', …(1) } to be undefined
+
+- Expected:
+undefined
+
++ Received:
+{
+  "documentIds": [
+    "00000000-0000-4000-8000-000000000003",
+  ],
+  "mode": "summary",
+}
+
+ ❯ src/renderer/chat-materials.test.tsx:24:48
+     22|   try {
+     23|     await act(()=>root.render(<Chat {...props} promptRequest={{id:2,te…
+     24|     expect((await state.context!()).materials).toBeUndefined();
+       |                                                ^
+     25|   }finally{await act(()=>root.unmount());host.remove();}
+     26| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  01:07:53
+   Duration  1.14s (transform 232ms, setup 0ms, import 737ms, tests 12ms, environment 294ms)
+

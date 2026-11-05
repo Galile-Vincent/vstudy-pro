@@ -1,0 +1,70 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+ ❯ src/main/planner/repository.test.ts (7 tests | 1 failed) 185ms
+   × skips a corrupt planner row while preserving healthy tasks and reminders 9ms
+ ❯ src/main/storage/backup.test.ts (19 tests | 6 failed) 1660ms
+   × rejects corrupt planner records before publishing (INSERT INTO planner_tasks VALUES ('00000000-0000-4000-8000-000000000001','',NULL,NULL,60,'todo','user',NULL,NULL,'bad','bad')) 65ms
+   × rejects corrupt planner records before publishing (INSERT INTO planner_exams VALUES ('00000000-0000-4000-8000-000000000001','Exam',NULL,'2030-01-01T00:00:00Z','{}','[]',NULL,'2030-01-01T00:00:00Z')) 68ms
+   × rejects corrupt planner records before publishing (INSERT INTO planner_goals VALUES ('00000000-0000-4000-8000-000000000001','',NULL,NULL,'active')) 63ms
+   × rejects corrupt planner records before publishing (INSERT INTO planner_plans VALUES ('00000000-0000-4000-8000-000000000001','Plan','Invalid/Zone',60,'["Study"]','2030-01-01T00:00:00Z')) 65ms
+   × rejects corrupt planner records before publishing (INSERT INTO planner_blocks VALUES ('00000000-0000-4000-8000-000000000001',NULL,'Study',NULL,NULL,NULL,'bad',30)) 64ms
+   × rejects corrupt planner records before publishing (INSERT INTO planner_reminders VALUES ('00000000-0000-4000-8000-000000000001','task','bad','bad','Note',0)) 63ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/planner/repository.test.ts > skips a corrupt planner row while preserving healthy tasks and reminders
+ZodError: [
+  {
+    "code": "too_small",
+    "minimum": 1,
+    "type": "string",
+    "inclusive": true,
+    "exact": false,
+    "message": "String must contain at least 1 character(s)",
+    "path": [
+      "title"
+    ]
+  }
+]
+ ❯ Object.get error [as error] ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:587:31
+ ❯ ZodObject.parse ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs:663:22
+ ❯ src/main/planner/repository.ts:25:101
+
+ ❯ PlannerRepository.snapshot src/main/planner/repository.ts:25:79
+ ❯ src/main/planner/repository.test.ts:113:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/main/storage/backup.test.ts > rejects corrupt planner records before publishing (INSERT INTO planner_tasks VALUES ('00000000-0000-4000-8000-000000000001','',NULL,NULL,60,'todo','user',NULL,NULL,'bad','bad'))
+ FAIL  src/main/storage/backup.test.ts > rejects corrupt planner records before publishing (INSERT INTO planner_exams VALUES ('00000000-0000-4000-8000-000000000001','Exam',NULL,'2030-01-01T00:00:00Z','{}','[]',NULL,'2030-01-01T00:00:00Z'))
+ FAIL  src/main/storage/backup.test.ts > rejects corrupt planner records before publishing (INSERT INTO planner_goals VALUES ('00000000-0000-4000-8000-000000000001','',NULL,NULL,'active'))
+ FAIL  src/main/storage/backup.test.ts > rejects corrupt planner records before publishing (INSERT INTO planner_plans VALUES ('00000000-0000-4000-8000-000000000001','Plan','Invalid/Zone',60,'["Study"]','2030-01-01T00:00:00Z'))
+ FAIL  src/main/storage/backup.test.ts > rejects corrupt planner records before publishing (INSERT INTO planner_blocks VALUES ('00000000-0000-4000-8000-000000000001',NULL,'Study',NULL,NULL,NULL,'bad',30))
+ FAIL  src/main/storage/backup.test.ts > rejects corrupt planner records before publishing (INSERT INTO planner_reminders VALUES ('00000000-0000-4000-8000-000000000001','task','bad','bad','Note',0))
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/main/storage/backup.test.ts:121:42
+    119|   try {
+    120|     store.db.exec(sql);const zip=join(target,'bad.zip');await exportBa…
+    121|     await expect(stageRestore(target,zip)).rejects.toThrow();
+       |                                          ^
+    122|     expect(await readdir(target)).toEqual(['bad.zip']);
+    123|   } finally {store.close();await rm(root,{recursive:true,force:true});…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  7 failed | 19 passed (26)
+   Start at  00:52:28
+   Duration  1.96s (transform 297ms, setup 0ms, import 417ms, tests 1.84s, environment 0ms)
+

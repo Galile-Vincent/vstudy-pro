@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  00:58:55
+   Duration  889ms (transform 184ms, setup 0ms, import 582ms, tests 8ms, environment 203ms)
+
