@@ -61,13 +61,13 @@
   color: color-mix(in oklab, var(--foreground) 70%, transparent);
 }
 [data-aui="text"][data-aui-color="white"] {
-  color: white;
+  color: var(--ink);
 }
 [data-aui="text"][data-aui-color="white-70"] {
-  color: color-mix(in oklab, white 70%, transparent);
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
 }
 [data-aui="text"][data-aui-color="white-50"] {
-  color: color-mix(in oklab, white 50%, transparent);
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
 }
 [data-aui="fact"] {
   margin: 0;
@@ -623,13 +623,13 @@ fieldset[data-aui="answered"] [data-aui="button"], fieldset[data-aui="answered"]
   color: color-mix(in oklab, var(--foreground) 70%, transparent);
 }
 [data-aui="chart"][data-aui-color="white"] {
-  color: white;
+  color: var(--ink);
 }
 [data-aui="chart"][data-aui-color="white-70"] {
-  color: color-mix(in oklab, white 70%, transparent);
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
 }
 [data-aui="chart"][data-aui-color="white-50"] {
-  color: color-mix(in oklab, white 50%, transparent);
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
 }
 [data-aui="chart-frame"] {
   display: grid;
@@ -728,22 +728,22 @@ fieldset[data-aui="answered"] [data-aui="button"], fieldset[data-aui="answered"]
   --aui-series-color: color-mix(in oklab, var(--foreground) 70%, transparent);
 }
 [data-aui="chart-series"][data-aui-color="white"] {
-  color: white;
+  color: var(--ink);
 }
 [data-aui="chart-legend-item"][data-aui-color="white"] {
-  --aui-series-color: white;
+  --aui-series-color: var(--ink);
 }
 [data-aui="chart-series"][data-aui-color="white-70"] {
-  color: color-mix(in oklab, white 70%, transparent);
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
 }
 [data-aui="chart-legend-item"][data-aui-color="white-70"] {
-  --aui-series-color: color-mix(in oklab, white 70%, transparent);
+  --aui-series-color: color-mix(in oklab, var(--ink) 70%, transparent);
 }
 [data-aui="chart-series"][data-aui-color="white-50"] {
-  color: color-mix(in oklab, white 50%, transparent);
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
 }
 [data-aui="chart-legend-item"][data-aui-color="white-50"] {
-  --aui-series-color: color-mix(in oklab, white 50%, transparent);
+  --aui-series-color: color-mix(in oklab, var(--ink) 50%, transparent);
 }
 [data-aui="carousel-frame"] {
   min-width: 0;

@@ -1,0 +1,11 @@
+[
+  {"id":"vstudy","name":"VStudy","light":["#f5f6fa","#ffffff","#edf0f8","#e0e5f2","#22293c","#505b73","#53617b","#435caa"],"dark":["#171b28","#202637","#1b2131","#303c55","#eef1fa","#b7c1d6","#7d90b2","#a7baff"]},
+  {"id":"ocean","name":"Ocean","light":["#eef7f9","#fbfeff","#e3f0f3","#d4e7ed","#173b4a","#496672","#567785","#12627d"],"dark":["#0e222c","#162f3c","#112833","#224655","#e5f4fa","#a8c7d5","#6c9bae","#7ed3f1"]},
+  {"id":"grove","name":"Grove","light":["#f0f5ec","#fcfef9","#e6efdf","#d9e5d1","#253e2a","#52674e","#617a58","#38643b"],"dark":["#17231b","#203127","#1b2b20","#314a35","#e9f4e7","#b7cbb1","#809f78","#acd79a"]},
+  {"id":"ember","name":"Ember","light":["#fcf2eb","#fffcf8","#f6e7dc","#efdbcc","#4b2b21","#78584b","#986e57","#984421"],"dark":["#2a1c18","#382720","#30211c","#52392b","#fceee2","#d9bca7","#b48a6b","#f8b27e"]},
+  {"id":"iris","name":"Iris","light":["#f5f1fb","#fefbff","#ede5f6","#e2d9ef","#392747","#6c537d","#8b6c9d","#74509a"],"dark":["#241b30","#30253f","#291f37","#483659","#f5ecfc","#cbb5dd","#9e81bb","#cfacfa"]},
+  {"id":"rose","name":"Rose","light":["#fcf0f3","#fffafd","#f7e3ea","#efd6df","#492836","#7a5263","#9c7081","#9b3f65"],"dark":["#2c1b24","#3b2632","#33212b","#553645","#fcebf1","#d8b7c7","#b18098","#f4aacb"]},
+  {"id":"slate","name":"Slate","light":["#f0f3f6","#fcfdfe","#e5eaf0","#d8e0e8","#283541","#536373","#6a7c8d","#405e79"],"dark":["#1a222a","#252f39","#202831","#364654","#edf3f7","#b8c7d5","#829aaf","#adcbe5"]},
+  {"id":"paper","name":"Paper","light":["#f6efdD","#fffaee","#eee5cf","#e3d8bd","#41351f","#69583f","#8b7653","#735421"],"dark":["#28241b","#353024","#2e291f","#4b4432","#f5eedc","#ccc1a5","#9e9170","#ddc388"]},
+  {"id":"contrast","name":"High contrast","light":["#ffffff","#ffffff","#f2f2f2","#e1e1e1","#080808","#333333","#444444","#003a9b"],"dark":["#000000","#080808","#121212","#262626","#ffffff","#e1e1e1","#b0b0b0","#b5d9ff"]}
+]

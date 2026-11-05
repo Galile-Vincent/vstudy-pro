@@ -34,7 +34,8 @@ it('shows a checked site before asking for a password and clears form secrets on
   const {connect,connected,closed} = await mount();
   expect(document.querySelector('input[type=password]')).toBeNull();
   await click('Chung Yuan');
-  expect(document.querySelector('.moodle-site-result')?.textContent).toBe('Example Universityschool.example/moodleSign in with your Moodle username and password');
+  expect(document.querySelector('.moodle-site-result h3')?.textContent).toBe('Example University');
+  expect(document.querySelector('.moodle-site-result')?.textContent).toContain('school.example/moodle');
   expect(document.querySelector('[aria-current=step]')?.textContent).toBe('2Check site');
   expect(document.querySelector('input[type=password]')).toBeNull();
   await click('Continue to sign in');
@@ -75,7 +76,7 @@ it('ignores a completed check after the dialog closes',async () => {
   const {api} = await mount();let done!: (value: Awaited<ReturnType<typeof api.checkSite>>) => void;
   api.checkSite = () => new Promise(resolve => {done = resolve;});
   await click('Chung Yuan');
-  expect(document.querySelector('[role=status]')?.textContent).toBe('Checking your school…');
+  expect(document.body.textContent).toContain('Checking your school…');
   await act(async () => root.render(<ConnectDialog open={false} onOpenChange={() => {}} api={api} onConnected={async () => {}} />));
   await act(async () => done({siteUrl:'https://school.example',siteName:'Late result',authPlan:{kind:'password'}}));
   expect(document.querySelector('[role=dialog]')).toBeNull();
@@ -130,4 +131,11 @@ it('keeps an unsaved connection open with a retry button',async () => {
   await click('Retry secure storage');
   expect(api.retrySave).toHaveBeenCalledTimes(1);
   expect(closed).toHaveBeenCalledWith(false);
+});
+it('offers an alternate SSO provider alongside a password form',async () => {
+  const {connect}=await mount({kind:'password',providers:[{name:'Campus ID',iconurl:'',url:'https://school.example/auth/oauth2/login.php?id=9'}]});
+  await advance();
+  expect(document.querySelector('input[type=password]')).not.toBeNull();
+  await click('Continue with Campus ID');
+  expect(connect).toHaveBeenCalledWith({siteUrl:'https://school.example/moodle',provider:0});
 });

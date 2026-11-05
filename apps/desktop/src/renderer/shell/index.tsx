@@ -1,6 +1,6 @@
 import { HelpMenu } from "../onboarding/help";
 import { useSidebarOverlay } from './use-sidebar-overlay';
-import { applyAppearance } from '../settings/appearance';
+import { applyAppearance } from '../settings/apply-appearance';
 import { Button } from '../components/ui/button';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup } from '../components/ui/sidebar';
 import { transitionTo } from "./view-transition";

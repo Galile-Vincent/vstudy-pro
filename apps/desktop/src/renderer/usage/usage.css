@@ -66,17 +66,17 @@
 }
 
 .usage-meter progress::-webkit-progress-value {
-  background: var(--folder-sage, oklch(.53 .13 145));
+  background: var(--folder-sage);
   border-radius: var(--r-pill);
   transition: width var(--motion-base) var(--ease-out-soft);
 }
 
 .usage-meter.amber progress::-webkit-progress-value {
-  background: var(--palette-37, oklch(.65 .16 75));
+  background: var(--warning);
 }
 
 .usage-meter.red progress::-webkit-progress-value {
-  background: var(--danger, oklch(.46 .15 25));
+  background: var(--danger);
 }
 
 /* Usage budget warning notification */
@@ -87,7 +87,7 @@
   gap: var(--space-2) var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--r-sm);
-  background: color-mix(in oklab, var(--palette-37, #bd851e) 12%, var(--surface));
+  background: color-mix(in oklab, var(--warning) 12%, var(--surface));
   font-size: var(--type-sm);
   border: 0;
 }

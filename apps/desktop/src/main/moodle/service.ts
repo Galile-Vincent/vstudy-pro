@@ -4,11 +4,11 @@ import { log } from '../logging';
 import type { MoodleCallTiming } from './client';
 import type { MoodleProgress } from '../../shared/ipc';
 import { completionState } from './contents';
-import { moodleImage } from './files';
+import { MoodleLogoCache } from './logos';
 import { MoodleAuthError, tokensSchema, type MoodleTokens } from './auth';
 import { normalizeSiteUrl, moodleFetch } from './site-url';
 import { randomUUID } from 'node:crypto';
-import type { MoodlePanel, MoodleAccount } from '../../shared/moodle';
+import type { MoodlePanel, MoodleAccount, MoodleSiteCheck } from '../../shared/moodle';
 import type { SecretStore } from '../services/secrets';
 import { moodleSecretId } from '../services/secrets';
 import { MoodleClient, MoodleError, passwordToken, plainText, type Fetch } from './client';
@@ -32,7 +32,7 @@ export class MoodleService {
   private readonly teacherCache = new Map<string,number>();
   private readonly signInStorage = new Map<string, 'session' | 'unsaved'>();
   private readonly lastAttempt = new Map<string,number>();
-  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch, private readonly language: () => string = () => 'zh-tw', private readonly progress: (event:MoodleProgress)=>void = () => {}) {}
+  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch, private readonly language: () => string = () => 'zh-tw', private readonly progress: (event:MoodleProgress)=>void = () => {}, private readonly logos?: MoodleLogoCache) {}
   private readonly connecting = new Set<string>();
   private readonly browserSites = new Set<string>();
   private async checkedSite(url: string) {
@@ -40,23 +40,32 @@ export class MoodleService {
     if (site.authPlan.kind === 'password' && this.browserSites.has(site.siteUrl)) return {...site,authPlan:{kind:'browser' as const,providers:site.config.identityproviders}};
     return site;
   }
-  async checkSite(url: string) {
+  async checkSite(url: string): Promise<MoodleSiteCheck> {
     const {siteUrl,siteName,authPlan,config} = await this.checkedSite(url);
-    const icon = config.compactlogourl || config.logourl;
-    const iconUrl = icon ? await moodleImage(icon,siteUrl,undefined,this.request) : null;
-    return {siteUrl,siteName,authPlan,...(iconUrl ? {iconUrl} : {})};
+    let iconUrl: string | null = null;
+    for (const icon of [config.compactlogourl,config.logourl]) {
+      if (icon && this.logos) iconUrl = await this.logos.get(icon,siteUrl);
+      if (iconUrl) break;
+    }
+    return {siteUrl,siteName:plainText(siteName).trim() || new URL(siteUrl).host,authPlan,...(iconUrl ? {iconUrl} : {}),
+      ...(config.country ? {country:config.country} : {}),forcedUrlScheme:config.forcedurlscheme ?? null,
+      registration:config.registerauth ? 'browser' as const : 'disabled' as const,
+      qrLogin:config.tool_mobile_qrcodetype > 0,
+      ...(config.maintenanceenabled && config.maintenancemessage ? {maintenanceMessage:plainText(config.maintenancemessage).slice(0,2000)} : {}),
+    };
   }
   async connect(input: {siteUrl:string;storage?:'secure'|'session' | undefined;provider?:number | undefined;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
     if (input.storage !== 'session') await this.secrets.preflight();
     const checked = await this.checkedSite(input.siteUrl);
     if (checked.authPlan.kind === 'unavailable') throw new Error(checked.authPlan.reason);
     if (this.stopped || this.connecting.has(checked.siteUrl)) throw new Error('Moodle login unavailable');
-    const browser = checked.authPlan.kind !== 'password';
+    const browser = checked.authPlan.kind !== 'password' || input.provider !== undefined;
+    const ssoSite = checked.authPlan.kind === 'password' ? {...checked,authPlan:{kind:'browser' as const,providers:checked.authPlan.providers ?? []}} : checked;
     if (browser && (input.username !== undefined || input.password !== undefined)) throw new MoodleAuthError('sso-required');
     this.connecting.add(checked.siteUrl);
     try {
       return browser
-        ? await this.sso.login(checked,input.provider,tokens => this.acceptToken(checked,tokens,input.storage))
+        ? await this.sso.login(ssoSite,input.provider,tokens => this.acceptToken(checked,tokens,input.storage))
         : await this.acceptToken(checked,await passwordToken(checked.siteUrl,input.username ?? '',input.password ?? '',this.request),input.storage);
     } catch (error) {
       if (error instanceof MoodleAuthError && error.code === 'sso-required') this.browserSites.add(checked.siteUrl);
@@ -74,7 +83,7 @@ export class MoodleService {
     const expired = this.repository.accounts().filter(account => account.siteUrl === site.siteUrl && account.status === 'expired');
     if (!existing && expired.length) throw new MoodleAuthError('requirecorrectaccess');
     if (existing) await this.pending.get(existing.id);
-    const account: MoodleAccount = {id:existing?.id ?? randomUUID(),siteUrl:site.siteUrl,siteName:site.siteName,remoteUserId:info.userid,displayName:plainText(info.fullname),status:'connected',syncedAt:existing?.syncedAt ?? null};
+    const account: MoodleAccount = {id:existing?.id ?? randomUUID(),siteUrl:site.siteUrl,siteName:plainText(info.sitename || site.siteName).trim() || new URL(site.siteUrl).host,remoteUserId:info.userid,displayName:plainText(info.fullname),status:'connected',syncedAt:existing?.syncedAt ?? null};
     const verifiedTokens = {...tokens,...(info.userprivateaccesskey ? {userPrivateAccessKey:info.userprivateaccesskey} : {})};
     if (storage === 'session') this.secrets.delete(moodleSecretId(account.id));
     this.secrets.useInSession(moodleSecretId(account.id),JSON.stringify(verifiedTokens));

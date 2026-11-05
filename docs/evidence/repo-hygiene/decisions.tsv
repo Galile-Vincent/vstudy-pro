@@ -1,0 +1,4 @@
+ts	phase	decision	why	evidence	result
+2026-11-05T14:48:09.804812+00:00	audit	Keep generated binaries outside Git	Retain reproducible source fixtures and avoid more binary history	docs/REPO_HYGIENE.md	76 files removed from index only
+2026-11-05T14:48:09.804948+00:00	tooling	Use git-cliff and Lefthook	One desktop release needs grouped history and local checks	cliff.toml, lefthook.yml	commands verified
+2026-11-05T14:48:09.804950+00:00	verification	Keep existing check failures visible	Other streams own source drift and dependencies	docs/evidence/repo-hygiene	tests pass; security, vendor, and knip fail

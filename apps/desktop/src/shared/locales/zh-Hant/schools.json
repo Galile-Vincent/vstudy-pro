@@ -1,0 +1,21 @@
+{
+  "search_label": "學校名稱、國家或 Moodle 網址",
+  "search_placeholder": "搜尋學校或貼上 Moodle 網址",
+  "privacy_hint": "搜尋只在此裝置進行。選擇學校或檢查網址時會連線至該學校，並可能下載校徽。可在「設定 > 隱私權」查看連線記錄。",
+  "results": "學校",
+  "connected": "已連結的學校",
+  "recent": "最近使用的學校",
+  "directory": "學校目錄",
+  "result_count_one": "找到 {{count}} 所學校",
+  "result_count_other": "找到 {{count}} 所學校",
+  "no_results": "內建目錄中沒有符合的學校。您仍可輸入學校的 Moodle 網址來連結。",
+  "add_url": "使用網址新增",
+  "multiple_accounts": "可同時連結多所學校與多個帳號，現有連線會保持登入。",
+  "qr_unsupported": "此處尚不支援 QR 碼登入。請輸入學校的 Moodle 網址，再使用學校帳號或單一登入。",
+  "signup_disabled": "請使用現有的學校帳號。VStudy 不提供自行註冊。如需帳號，請聯絡學校。",
+  "signup_browser": "請先在學校的 Moodle 網站建立帳號，再回到此處登入。",
+  "unsupported_login": "這所學校使用尚未支援的登入方式。",
+  "unsupported_login_next": "請向學校管理員詢問 Moodle 行動網路服務的存取方式。",
+  "https_required": "請使用學校的 HTTPS Moodle 網址。不支援未加密的 HTTP 網站。",
+  "network_request": "Moodle HTTPS 連線"
+}

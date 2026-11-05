@@ -39,3 +39,19 @@ it('rejects cross-origin redirects and unrelated canonical roots',async () => {
 it.each(['{moodlemobile://token=CANARY',JSON.stringify([{error:false,data:{sitename:1,typeoflogin:'moodlemobile://token=CANARY'}}])])('sanitizes discovery parse failures',async body => {
   await expect(checkSite('https://school.example',async () => new Response(body))).rejects.toEqual(new Error('Moodle discovery failed'));
 });
+
+it.each([
+  [{typeoflogin:3},{kind:'embedded',providers:[]}],
+  [{typeoflogin:99},{kind:'unavailable',reason:'unsupported-login'}],
+  [{showloginform:0},{kind:'browser',providers:[]}],
+])('handles the remaining login modes without guessing a password flow %j',async (config,expected) => {
+  expect((await checkSite('school.example',async () => envelope(config))).authPlan).toEqual(expected);
+});
+it('retains optional branding, registration, QR, maintenance, and forced-scheme metadata',async () => {
+  const config={sitename:'Campus',logourl:'https://school.example/logo.png',compactlogourl:'https://school.example/compact.png',country:'JP',registerauth:'email',tool_mobile_qrcodetype:2,maintenanceenabled:1,maintenancemessage:'Planned maintenance',forcedurlscheme:'campus-app'};
+  expect((await checkSite('school.example',async () => envelope(config))).config).toMatchObject(config);
+});
+it('preserves alternate identity providers alongside the normal password form',async () => {
+  const providers=[{name:'Campus ID',iconurl:'',url:'https://school.example/auth/oauth2/login.php?id=3'}];
+  expect((await checkSite('school.example',async () => envelope({typeoflogin:1,identityproviders:providers}))).authPlan).toEqual({kind:'password',providers});
+});
