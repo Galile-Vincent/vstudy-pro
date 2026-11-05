@@ -33,8 +33,8 @@ export function StorageSettings(){
       {usage && <p className="settings-copy muted">{tr('storage:logical_cache',{size:bytes(usage.cacheBytes)})}</p>}
     </SettingsGroup>
     <SettingsGroup>
-      <SettingsRow label={tr('storage:clear_cache')} description={tr('storage:cache_limit')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{await desktop.invoke('storage:clearCache',{});return tr('storage:done');})}>{tr('storage:clear_cache')}</Button></SettingsRow>
-      <SettingsRow label={tr('storage:clear_converted')} description={tr('storage:clear_converted_copy')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{await desktop.invoke('storage:clearConverted',{});return tr('storage:done');})}>{tr('storage:clear_converted')}</Button></SettingsRow>
+      <SettingsRow label={tr('storage:clear_cache')} description={tr('storage:cache_limit')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:clearCache',{});return 'cancelled' in result ? '' : tr('storage:done');})}>{tr('storage:clear_cache')}</Button></SettingsRow>
+      <SettingsRow label={tr('storage:clear_converted')} description={tr('storage:clear_converted_copy')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:clearConverted',{});return 'cancelled' in result ? '' : tr('storage:done');})}>{tr('storage:clear_converted')}</Button></SettingsRow>
     </SettingsGroup>
     <SettingsGroup title={tr('storage:backup')}>
       <p className="settings-copy muted">{tr('storage:backup_copy')}</p>
