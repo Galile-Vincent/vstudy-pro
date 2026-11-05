@@ -3,3 +3,7 @@ packages:
 onlyBuiltDependencies:
   - electron
   - esbuild
+
+# minimatch 11 keeps the named CommonJS API used by glob and electron-builder.
+overrides:
+  "minimatch@>=7.0.0 <11.0.1": 11.0.1

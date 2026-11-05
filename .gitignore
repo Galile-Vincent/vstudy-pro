@@ -29,3 +29,6 @@ docs/security-evidence/**/*.png
 .env
 .env.*
 !.env.example
+
+# Derived from src/shared/locales by install, dev, build, test, and typecheck.
+apps/desktop/src/shared/locales.generated.ts
