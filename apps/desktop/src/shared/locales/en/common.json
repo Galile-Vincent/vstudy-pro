@@ -1,6 +1,7 @@
 {
   "conversion_complete": "Conversion complete",
   "selection_and_chat_are_available_when_conversion_finishes": "Selection and chat are available when conversion finishes",
+  "surface_render_error": "This view could not be displayed. Try again to reopen it.",
   "something_went_wrong": "Something went wrong",
   "workspace_is_still_connecting_try_importing_again_in_a_moment": "Workspace is still connecting. Try importing again in a moment.",
   "chat": "Chat",

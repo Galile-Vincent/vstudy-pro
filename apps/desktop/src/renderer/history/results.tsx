@@ -29,7 +29,9 @@ const Context = createContext<ContextValue | null>(null);
 function Result() {
   useTranslation();
   const id = useAuiState(s => s.threadListItem.id), context = useContext(Context)!;
-  const hit = context.items.find(h => h.id === id)!;
+  const hit = context.items.find(h => h.id === id);
+  // assistant-ui updates thread IDs in an effect, after the new search data renders.
+  if (!hit) return null;
   const group = hit.courseTitle || hit.documentTitle || tr('history:' + hit.scope);
   const first = context.items.find(h => (h.courseId ?? h.documentId ?? h.scope) === (hit.courseId ?? hit.documentId ?? hit.scope))?.id === id;
   return <>{context.groupByCourse && first && <h2 className="history-group">{group}</h2>}<ThreadListItemPrimitive.Root className="history-result" data-testid="history-result">

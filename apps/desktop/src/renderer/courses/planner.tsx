@@ -15,9 +15,14 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import "./planner.css";
-export function Planner({ courses, deadlines, api = plannerApi, clock = Date.now }: {
+import { SurfaceErrorBoundary } from "../components/surface-error-boundary";
+type PlannerProps = {
   courses: MoodleCourse[]; deadlines: MoodleDeadline[]; api?: PlannerApi; clock?: () => number;
-}) {
+};
+export function Planner(props: PlannerProps) {
+  return <SurfaceErrorBoundary><PlannerContent {...props}/></SurfaceErrorBoundary>;
+}
+function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now }: PlannerProps) {
   useTranslation("planner");
   const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [snapshot, setSnapshot] = useState(emptyPlanner);

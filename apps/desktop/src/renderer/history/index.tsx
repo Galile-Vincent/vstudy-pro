@@ -7,6 +7,7 @@ import type { Conversation, Message } from '../../shared/domain';
 import type { Providers } from '../providers';
 import { desktop } from '../bridge';
 import { useNavigate } from '../shell';
+import { SurfaceErrorBoundary } from '../components/surface-error-boundary';
 import { HistorySearch } from './search';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
 const Chat = lazy(() => import('../chat').then(m => ({ default: m.Chat })));
@@ -53,6 +54,9 @@ export function HistoryFinder() {
   }} onCloseAutoFocus={event => { event.preventDefault(); trigger.current?.focus(); }}><DialogTitle>{tr('history:title')}</DialogTitle><DialogDescription>{tr('history:subtitle')}</DialogDescription><HistorySearch compact onOpen={(hit, messageId) => { setOpen(false); navigate({ view: 'history', conversationId: hit.id, messageId }); }}/><button onClick={() => { setOpen(false); navigate('history'); }}>{tr('history:full_history')}</button></DialogContent></Dialog>;
 }
 export function HistoryView() {
+  return <SurfaceErrorBoundary><HistoryContent/></SurfaceErrorBoundary>;
+}
+function HistoryContent() {
   useTranslation();
   const { route, navigate } = useNavigate();
   const [loaded, setLoaded] = useState<{
