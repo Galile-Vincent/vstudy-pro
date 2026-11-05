@@ -85,7 +85,7 @@ it("rejects truncated HTTP streams", async () => {
 });
 it("only enables fake in explicit E2E mode", async () => {
   const secrets = {
-    getInMainOnly: async () => null,
+    preflight: async () => {}, getInMainOnly: async () => null,
     has: () => false,
     set: async () => {},
       bindCompatibleOrigin: () => {},

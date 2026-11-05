@@ -93,3 +93,41 @@ it('shows the actual external mode and cancels the pending sign-in',async () => 
   expect(connected).not.toHaveBeenCalled();
   expect(document.querySelector('[role=alert]')?.textContent).toBe(i18n.t('moodle:auth_cancelled'));
 });
+
+it('waits for permission before sign-in without timing out',async () => {
+  const {api,connect} = await mount({kind:'browser',providers:[]});
+  let release!: (value:{ready:boolean}) => void;
+  api.preflight = () => new Promise(resolve => {release=resolve;});
+  await click('Chung Yuan');await click('Continue to sign in');
+  expect(document.body.textContent).toContain('Waiting for macOS permission');
+  expect(document.body.textContent).toContain('Choose Always Allow');
+  expect(connect).not.toHaveBeenCalled();
+  expect([...document.querySelectorAll('button')].some(button => button.textContent === 'Sign in')).toBe(false);
+  await act(async () => release({ready:true}));
+  await click('Sign in');
+  expect(connect).toHaveBeenCalledTimes(1);
+});
+it('offers retry and requires a session-only choice after unavailable permission',async () => {
+  const {api,connect} = await mount({kind:'browser',providers:[]});
+  api.preflight = vi.fn(async () => ({ready:false}));
+  await advance();
+  expect(document.body.textContent).toContain('Secure storage was denied or is unavailable');
+  expect(connect).not.toHaveBeenCalled();
+  await click('Retry secure storage');
+  expect(api.preflight).toHaveBeenCalledTimes(2);
+  await click('Use for this session only');await click('Sign in');
+  expect(connect).toHaveBeenCalledWith({siteUrl:'https://school.example/moodle',storage:'session'});
+});
+it('keeps an unsaved connection open with a retry button',async () => {
+  const {api,closed,connected} = await mount({kind:'browser',providers:[]});
+  const original = api.connect;
+  api.connect = async input => ({...await original(input),signInStorage:'unsaved'});
+  api.retrySave = vi.fn(async () => {});
+  await advance();await click('Sign in');
+  expect(connected).toHaveBeenCalledTimes(1);
+  expect(closed).not.toHaveBeenCalled();
+  expect(document.body.textContent).toContain('Could not save your sign-in securely');
+  await click('Retry secure storage');
+  expect(api.retrySave).toHaveBeenCalledTimes(1);
+  expect(closed).toHaveBeenCalledWith(false);
+});

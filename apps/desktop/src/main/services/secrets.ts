@@ -6,6 +6,7 @@ import {
   renameSync,
   writeFileSync,
 } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { dirname } from "node:path";
 import { z } from "zod";
 import { providerIdSchema } from "../../shared/domain";
@@ -19,7 +20,7 @@ export interface Encryption {
   encryptStringAsync(value: string): Promise<Buffer>;
   decryptStringAsync(value: Buffer): Promise<{ result: string }>;
 }
-export function createSecretStore(file: string, encryption: Encryption, timeoutMs = 10_000) {
+export function createSecretStore(file: string, encryption: Encryption) {
   if (existsSync(file)) chmodSync(file, 0o600);
   function read(): Record<string, string> {
     if (!existsSync(file)) return {};
@@ -36,19 +37,27 @@ export function createSecretStore(file: string, encryption: Encryption, timeoutM
     renameSync(temporary, file);
   }
   async function access<T>(operation: () => Promise<T>): Promise<T> {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    try {
-      return await Promise.race([operation(), new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error('errors.keychain_unavailable')), timeoutMs);
-      })]);
-    } catch { throw new Error('errors.keychain_unavailable'); }
-    finally { clearTimeout(timer); }
+    try { return await operation(); }
+    catch { throw new Error('errors.keychain_unavailable'); }
   }
+  let preflight: Promise<void> | undefined;
+
   const unlocked = new Map<SecretId, string>();
   let compatibleOrigin: string | undefined;
   const generations = new Map<SecretId, number>();
   const bump = (id: SecretId) => { const next = (generations.get(id) ?? 0) + 1; generations.set(id, next); unlocked.delete(id); return next; };
   return {
+    preflight(): Promise<void> {
+      preflight ??= access(async () => {
+        if (!await encryption.isAsyncEncryptionAvailable()) throw new Error('unavailable');
+        const canary = randomBytes(32).toString('hex');
+        const ciphertext = await encryption.encryptStringAsync(canary);
+        try {
+          if ((await encryption.decryptStringAsync(ciphertext)).result !== canary) throw new Error('round trip failed');
+        } finally { ciphertext.fill(0); }
+      }).catch(error => { preflight = undefined; throw error; });
+      return preflight;
+    },
     bindCompatibleOrigin(origin: string): void {
       const canonical = new URL(origin).origin;
       if (compatibleOrigin === canonical) return;
@@ -61,7 +70,9 @@ export function createSecretStore(file: string, encryption: Encryption, timeoutM
     async set(providerId: SecretId, key: string): Promise<void> {
       secretIdSchema.parse(providerId);
       z.string().min(1).max(16384).parse(key);
+      const previous = unlocked.get(providerId);
       const generation = bump(providerId);
+      if (previous !== undefined) unlocked.set(providerId, previous);
       if (!await access(() => encryption.isAsyncEncryptionAvailable()))
         throw new Error("errors.keychain_unavailable");
       if (generations.get(providerId) !== generation) return;

@@ -1,10 +1,11 @@
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createSecretStore, type Encryption } from "./secrets";
 const paths: string[] = [];
 afterEach(() => {
+  vi.useRealTimers();
   for (const path of paths.splice(0))
     rmSync(path, { recursive: true, force: true });
 });
@@ -41,15 +42,15 @@ it("fails closed when OS encryption is unavailable", async () => {
   expect(store.has("openai-api")).toBe(false);
 });
 
-it("does not touch Keychain on construction or presence checks and bounds a slow/denied request", async () => {
+it("does not touch Keychain on construction or presence checks and reports a denied request", async () => {
   const { file } = fixture();
   let calls = 0;
   const encryption: Encryption = {
-    isAsyncEncryptionAvailable: () => { calls++; return new Promise(() => {}); },
+    isAsyncEncryptionAvailable: async () => { calls++; return true; },
     encryptStringAsync: async () => { throw new Error('denied'); },
     decryptStringAsync: async () => { throw new Error('denied'); },
   };
-  const store = createSecretStore(file, encryption, 10);
+  const store = createSecretStore(file, encryption);
   expect(store.has('openai-api')).toBe(false);
   expect(calls).toBe(0);
   await expect(store.set('openai-api', 'key')).rejects.toThrow('keychain_unavailable');
@@ -108,4 +109,50 @@ it('only invokes OS encryption on an explicit save or unlock, even with a persis
   expect(calls).toEqual([]);
   expect(await restarted.getInMainOnly('openai-api')).toBe('test-key');
   expect(calls).toEqual(['available','decrypt']);
+});
+
+it("waits for human permission beyond ten seconds without losing the save", async () => {
+  vi.useFakeTimers();
+  const { store, encryption } = fixture();
+  let release!: (value: Buffer) => void;
+  encryption.encryptStringAsync = () => new Promise(resolve => { release = resolve; });
+  let state = 'pending';
+  const saving = store.set('openai-api', 'key').then(() => { state = 'saved'; }, () => { state = 'failed'; });
+  await vi.advanceTimersByTimeAsync(60_000);
+  expect(state).toBe('pending');
+  release(Buffer.from('encrypted'));
+  await saving;
+  expect(state).toBe('saved');
+  expect(await store.getInMainOnly('openai-api')).toBe('key');
+});
+
+it('coalesces and caches successful preflight for this app run', async () => {
+  const {store, encryption, file} = fixture();
+  const encrypt = vi.spyOn(encryption, 'encryptStringAsync');
+  const decrypt = vi.spyOn(encryption, 'decryptStringAsync');
+  await Promise.all([store.preflight(),store.preflight()]);
+  await store.preflight();
+  expect(encrypt).toHaveBeenCalledTimes(1);
+  expect(decrypt).toHaveBeenCalledTimes(1);
+  expect(() => readFileSync(file)).toThrow();
+});
+it.each(['denied','unavailable'])('permits retry after %s preflight without plaintext persistence', async failure => {
+  const {store,encryption,file} = fixture(failure !== 'unavailable');
+  const original = encryption.encryptStringAsync;
+  if (failure === 'denied') encryption.encryptStringAsync = async () => {throw new Error('denied');};
+  await expect(store.preflight()).rejects.toThrow('keychain_unavailable');
+  expect(() => readFileSync(file)).toThrow();
+  encryption.isAsyncEncryptionAvailable = async () => true;
+  encryption.encryptStringAsync = original;
+  await expect(store.preflight()).resolves.toBeUndefined();
+});
+it('keeps session tokens readable throughout a delayed save', async () => {
+  const {store,encryption} = fixture();
+  store.useInSession('openai-api','verified');
+  const gate = deferred<Buffer>();
+  encryption.encryptStringAsync = () => gate.promise;
+  const saving = store.set('openai-api','verified');
+  expect(await store.getInMainOnly('openai-api')).toBe('verified');
+  gate.resolve(Buffer.from('encrypted'));
+  await saving;
 });

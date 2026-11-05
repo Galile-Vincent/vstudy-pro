@@ -33,14 +33,16 @@ export function ConnectDialog({open,onOpenChange,api,onConnected}: {
   const [input,setInput] = useState('');
   const [schools,setSchools] = useState<MoodleSchool[]>([]);
   const [recent,setRecent] = useState<MoodleSiteCheck[]>([]);
-  const [busy,setBusy] = useState<'checking'|'connecting' | null>(null);
+  const [busy,setBusy] = useState<'checking'|'permission'|'connecting' | null>(null);
   const [ssoMode,setSsoMode] = useState<import('../../shared/moodle').MoodleSsoMode | null>(null);
   const [error,setError] = useState('');
+  const [storage,setStorage] = useState<'secure'|'session'>('secure');
+  const [unsaved,setUnsaved] = useState<string | null>(null);
   const sequence = useRef(0);
   useEffect(() => {
     if (!open) return;
     const generation = ++sequence.current;
-    setFlow({step:'find'}); setInput(''); setError(''); setBusy(null); setRecent(recentSites());
+    setUnsaved(null); setStorage('secure'); setFlow({step:'find'}); setInput(''); setError(''); setBusy(null); setRecent(recentSites());
     void api.schools().then(items => {if (generation === sequence.current) setSchools(items);}).catch(() => {if (generation === sequence.current) setError('moodle:presets_error');});
     return () => {sequence.current++;};
   },[open,api]);
@@ -68,14 +70,28 @@ export function ConnectDialog({open,onOpenChange,api,onConnected}: {
     } catch {if (generation === sequence.current) setError('moodle:site_check_error');}
     finally {if (generation === sequence.current) setBusy(null);}
   };
+  const prepare = async () => {
+    if (flow.step !== 'result' || busy) return;
+    const generation = ++sequence.current;
+    setBusy('permission'); setError('');
+    try {
+      const {ready} = await api.preflight();
+      if (generation !== sequence.current) return;
+      if (ready) {setStorage('secure');setFlow({step:'sign-in',site:flow.site});}
+      else setError('moodle:keychain_error');
+    } catch {if (generation === sequence.current) setError('moodle:keychain_error');}
+    finally {if (generation === sequence.current) setBusy(null);}
+  };
   const connect = async (provider?: number, credentials?: {username:string;password:string}) => {
     if (flow.step !== 'sign-in' || busy) return;
     const generation = ++sequence.current;
     setBusy('connecting'); setError('');
     try {
-      await api.connect({siteUrl:flow.site.siteUrl,...(provider === undefined ? {} : {provider}),...credentials});
+      const account = await api.connect({siteUrl:flow.site.siteUrl,...(storage === 'session' ? {storage} : {}),...(provider === undefined ? {} : {provider}),...credentials});
       if (generation !== sequence.current) return;
-      await onConnected(); onOpenChange(false);
+      await onConnected();
+      if (account.signInStorage === 'unsaved') setUnsaved(account.id);
+      else onOpenChange(false);
     } catch (cause) {
       if (generation !== sequence.current) return;
       const key = authErrorKey(cause);
@@ -95,7 +111,13 @@ export function ConnectDialog({open,onOpenChange,api,onConnected}: {
       <ol className="moodle-connect-steps" aria-label={tr('moodle:connect_steps')}>
         {['find_school','check_school','sign_in_step'].map((label,index) => <li key={label} aria-current={step === index ? 'step' : undefined} data-complete={step > index}><span>{step > index ? '✓' : index+1}</span>{tr(`moodle:${label}`)}</li>)}
       </ol>
-      {flow.step === 'find' ? <>
+      {unsaved ? <div role="status"><p>{tr('moodle:keychain_unsaved')}</p>
+        <Button disabled={!!busy} onClick={() => {
+          setBusy('permission');setError('');
+          void api.retrySave(unsaved).then(async () => {await onConnected();onOpenChange(false);}).catch(() => setError('moodle:keychain_error')).finally(() => setBusy(null));
+        }}>{tr('moodle:keychain_retry')}</Button>
+        <Button disabled={!!busy} onClick={() => onOpenChange(false)}>{tr('moodle:keychain_session')}</Button>
+      </div> : flow.step === 'find' ? <>
         <form onSubmit={event => {event.preventDefault();void find();}} className="moodle-connect-form">
           <label htmlFor="moodle-site">{tr('moodle:site_address')}</label>
           <Input id="moodle-site" value={input} autoComplete="url" autoCapitalize="none" spellCheck={false} placeholder={tr('moodle:site_placeholder')} disabled={!!busy} aria-describedby="moodle-url-hint" onChange={event => {setInput(event.target.value);setError('');}} onPaste={event => {const text = event.clipboardData.getData('text').trim();if (/^(https:\/\/)?[^\s]+\.[^\s]+$/i.test(text)) {event.preventDefault();setInput(text);setError('');}}} />
@@ -111,7 +133,7 @@ export function ConnectDialog({open,onOpenChange,api,onConnected}: {
           <ShieldCheck aria-hidden="true" />
           <small>{tr(`moodle:method_${plan!.kind}`)}</small>
         </div>
-        {plan?.kind === 'unavailable' ? <div role="alert" className="moodle-connect-unavailable"><strong>{tr(`moodle:unavailable_${plan.reason}`)}</strong><p>{tr(`moodle:next_${plan.reason}`)}</p></div> : flow.step === 'result' ? <Button onClick={() => {setError('');setFlow({step:'sign-in',site:flow.site});}}><ArrowRight />{tr('moodle:continue_sign_in')}</Button> : plan?.kind === 'password' ? <form className="moodle-connect-form" onSubmit={event => {
+        {plan?.kind === 'unavailable' ? <div role="alert" className="moodle-connect-unavailable"><strong>{tr(`moodle:unavailable_${plan.reason}`)}</strong><p>{tr(`moodle:next_${plan.reason}`)}</p></div> : flow.step === 'result' ? <Button disabled={!!busy} onClick={() => void prepare()}><ArrowRight />{tr(error === 'moodle:keychain_error' ? 'moodle:keychain_retry' : 'moodle:continue_sign_in')}</Button> : plan?.kind === 'password' ? <form className="moodle-connect-form" onSubmit={event => {
           event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
           const username = String(data.get('username') ?? ''); const password = String(data.get('password') ?? '');
           form.reset(); void connect(undefined,{username,password});
@@ -126,9 +148,11 @@ export function ConnectDialog({open,onOpenChange,api,onConnected}: {
         </div>}
         <Button variant="ghost" disabled={!!busy} onClick={() => {setError('');setFlow(flow.step === 'sign-in' ? {step:'result',site:flow.site} : {step:'find'});}}><ArrowLeft />{tr('moodle:back')}</Button>
       </>}
+      {busy === 'permission' && <div role="status"><p>{tr('moodle:keychain_waiting')}</p><p>{tr('moodle:keychain_hint')}</p></div>}
+      {!unsaved && error === 'moodle:keychain_error' && flow.step === 'result' && <Button disabled={!!busy} onClick={() => {setStorage('session');setError('');setFlow({step:'sign-in',site:flow.site});}}>{tr('moodle:keychain_session')}</Button>}
       {ssoMode && <div role="status"><p>{tr(ssoMode === 'external' ? 'moodle:waiting_browser' : 'moodle:waiting_embedded')}</p><Button variant="ghost" onClick={() => {if (activeSite) void api.ssoCancel(activeSite).catch(() => setError('moodle:connect_error'));}}>{tr('moodle:sso_cancel')}</Button></div>}
       {error && <p className="moodle-connect-error" role="alert">{tr(error)}</p>}
-      {busy && <span className="sr-only" role="status">{tr(busy === 'checking' ? 'moodle:checking_site' : 'moodle:connecting')}</span>}
+      {busy && <span className="sr-only" role="status">{tr(busy === 'checking' ? 'moodle:checking_site' : busy === 'permission' ? 'moodle:keychain_waiting' : 'moodle:connecting')}</span>}
     </DialogContent>
   </Dialog>;
 }

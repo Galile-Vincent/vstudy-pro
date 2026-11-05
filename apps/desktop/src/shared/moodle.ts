@@ -27,6 +27,7 @@ export const moodleAccountSchema = z.discriminatedUnion("status", [
       remoteUserId: z.number().int(),
       displayName: z.string(),
       syncedAt: timestamp.nullable(),
+      signInStorage: z.enum(["session", "unsaved"]).optional(),
     })
     .strict(),
   z
@@ -38,6 +39,7 @@ export const moodleAccountSchema = z.discriminatedUnion("status", [
       remoteUserId: z.number().int(),
       displayName: z.string(),
       syncedAt: timestamp.nullable(),
+      signInStorage: z.enum(["session", "unsaved"]).optional(),
     })
     .strict(),
 ]);
@@ -185,6 +187,8 @@ export const moodleChannels = {
   schools: "moodle:schools",
   checkSite: "moodle:check-site",
   connect: "moodle:connect",
+  preflight: "moodle:preflight",
+  retrySave: "moodle:retry-save",
   disconnect: "moodle:disconnect",
   ssoState: "moodle:sso-state",
   ssoCancel: "moodle:sso-cancel",

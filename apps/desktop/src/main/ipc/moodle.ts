@@ -28,6 +28,11 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   for (const channel of Object.values(moodleChannels)) implemented.add(channel);
   registrar.handle(moodleChannels.schools,() => schools);
   registrar.handle(moodleChannels.checkSite,({url}) => service.checkSite(url));
+  registrar.handle(moodleChannels.preflight,async () => {
+    try { await secrets.preflight(); return {ready:true}; }
+    catch { return {ready:false}; }
+  });
+  registrar.handle(moodleChannels.retrySave,async ({accountId}) => { await service.retrySave(accountId); return {ok:true}; });
   registrar.handle(moodleChannels.connect,input => service.connect(input));
   registrar.handle(moodleChannels.ssoState,({siteUrl}) => sso.state(siteUrl));
   registrar.handle(moodleChannels.ssoCancel,({siteUrl}) => {sso.cancel(siteUrl);return {ok:true};});

@@ -35,7 +35,7 @@ it("registers every chat handler with validated repository round trips and dispo
     registrar,
     store,
     {
-      getInMainOnly: async () => null,
+      preflight: async () => {}, getInMainOnly: async () => null,
       has: () => false,
       set: async () => {},
       bindCompatibleOrigin: () => {},

@@ -30,6 +30,7 @@ export class MoodleService {
   private readonly panelFresh = new Set<string>();
   private readonly detailErrors = new Map<string,string>();
   private readonly teacherCache = new Map<string,number>();
+  private readonly signInStorage = new Map<string, 'session' | 'unsaved'>();
   private readonly lastAttempt = new Map<string,number>();
   constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch, private readonly language: () => string = () => 'zh-tw', private readonly progress: (event:MoodleProgress)=>void = () => {}) {}
   private readonly connecting = new Set<string>();
@@ -45,7 +46,8 @@ export class MoodleService {
     const iconUrl = icon ? await moodleImage(icon,siteUrl,undefined,this.request) : null;
     return {siteUrl,siteName,authPlan,...(iconUrl ? {iconUrl} : {})};
   }
-  async connect(input: {siteUrl:string;provider?:number | undefined;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
+  async connect(input: {siteUrl:string;storage?:'secure'|'session' | undefined;provider?:number | undefined;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
+    if (input.storage !== 'session') await this.secrets.preflight();
     const checked = await this.checkedSite(input.siteUrl);
     if (checked.authPlan.kind === 'unavailable') throw new Error(checked.authPlan.reason);
     if (this.stopped || this.connecting.has(checked.siteUrl)) throw new Error('Moodle login unavailable');
@@ -54,14 +56,14 @@ export class MoodleService {
     this.connecting.add(checked.siteUrl);
     try {
       return browser
-        ? await this.sso.login(checked,input.provider,tokens => this.acceptToken(checked,tokens))
-        : await this.acceptToken(checked,await passwordToken(checked.siteUrl,input.username ?? '',input.password ?? '',this.request));
+        ? await this.sso.login(checked,input.provider,tokens => this.acceptToken(checked,tokens,input.storage))
+        : await this.acceptToken(checked,await passwordToken(checked.siteUrl,input.username ?? '',input.password ?? '',this.request),input.storage);
     } catch (error) {
       if (error instanceof MoodleAuthError && error.code === 'sso-required') this.browserSites.add(checked.siteUrl);
       throw error;
     } finally { this.connecting.delete(checked.siteUrl); }
   }
-  private async acceptToken(site: CheckedSite, tokens: MoodleTokens): Promise<MoodleAccount> {
+  private async acceptToken(site: CheckedSite, tokens: MoodleTokens, storage: 'secure' | 'session' = 'secure'): Promise<MoodleAccount> {
     const client = new MoodleClient(site.siteUrl,tokens.token,this.request);
     client.setLanguage(this.language());
     const info = await client.siteInfo();
@@ -73,29 +75,58 @@ export class MoodleService {
     if (!existing && expired.length) throw new MoodleAuthError('requirecorrectaccess');
     if (existing) await this.pending.get(existing.id);
     const account: MoodleAccount = {id:existing?.id ?? randomUUID(),siteUrl:site.siteUrl,siteName:site.siteName,remoteUserId:info.userid,displayName:plainText(info.fullname),status:'connected',syncedAt:existing?.syncedAt ?? null};
-    await this.secrets.set(moodleSecretId(account.id),JSON.stringify(tokens));
+    const verifiedTokens = {...tokens,...(info.userprivateaccesskey ? {userPrivateAccessKey:info.userprivateaccesskey} : {})};
+    if (storage === 'session') this.secrets.delete(moodleSecretId(account.id));
+    this.secrets.useInSession(moodleSecretId(account.id),JSON.stringify(verifiedTokens));
+    this.signInStorage.set(account.id,storage === 'session' ? 'session' : 'unsaved');
     if (this.stopped || existing && !this.repository.accounts().some(row => row.id === existing.id)) {
       this.secrets.delete(moodleSecretId(account.id));
       throw new MoodleAuthError('cancelled');
     }
     this.repository.saveAccount(account);
     this.failures.delete(account.id);
-    await this.saveCapabilities(account,info,tokens);
+    await this.saveCapabilities(account,info);
+    if (storage === 'secure') {
+      try { await this.retrySave(account.id); } catch { /* The verified session remains connected. */ }
+    }
+    if (this.stopped || !this.repository.accounts().some(row => row.id === account.id)) throw new MoodleAuthError('cancelled');
     let timer: ReturnType<typeof setTimeout> | undefined;
     try { await Promise.race([this.sync(account.id),new Promise<void>(resolve => { timer = setTimeout(resolve,30_000); })]); }
     finally { clearTimeout(timer); }
-    return this.repository.account(account.id);
+    return {...this.repository.account(account.id),...(this.signInStorage.has(account.id) ? {signInStorage:this.signInStorage.get(account.id)!} : {})};
+  }
+  async retrySave(id: string) {
+    this.repository.account(id);
+    const value = await this.secrets.getInMainOnly(moodleSecretId(id));
+    if (!value) throw new MoodleError('auth');
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        await this.secrets.set(moodleSecretId(id),value);
+        if (this.stopped || !this.repository.accounts().some(row => row.id === id)) {
+          this.secrets.delete(moodleSecretId(id));
+          throw new MoodleAuthError('cancelled');
+        }
+        this.signInStorage.delete(id);
+        return;
+      } catch (error) {
+        if (this.stopped || !this.repository.accounts().some(row => row.id === id)) throw error;
+        this.secrets.useInSession(moodleSecretId(id),value);
+        if (attempt === 1) throw error;
+      }
+    }
   }
   async disconnect(id: string) {
     this.repository.account(id);
     this.repository.disconnect(id);
     this.failures.delete(id);
+    this.signInStorage.delete(id);
     this.secrets.delete(moodleSecretId(id));
     await this.pending.get(id);
   }
   overview(accountId?: string) {
     const snapshot = this.repository.overview(accountId);
     for (const account of snapshot.accounts) if (account.status === 'connected' && Date.now() - (this.lastAttempt.get(account.id) ?? 0) >= 60_000 && (!account.syncedAt || Date.now() - Date.parse(account.syncedAt) > 5 * 60_000)) void this.sync(account.id);
+    snapshot.accounts = snapshot.accounts.map(account => ({...account,...(this.signInStorage.has(account.id) ? {signInStorage:this.signInStorage.get(account.id)!} : {})}));
     return snapshot;
   }
   async course(id: string, force = false) {
@@ -223,8 +254,17 @@ export class MoodleService {
     catch { throw new MoodleError('auth'); }
   }
   async token(id: string): Promise<string> { return (await this.tokens(id)).token; }
-  private async saveCapabilities(account: MoodleAccount, info: Awaited<ReturnType<MoodleClient['siteInfo']>>, tokens: MoodleTokens) {
-    if (info.userprivateaccesskey) await this.secrets.set(moodleSecretId(account.id),JSON.stringify({...tokens,userPrivateAccessKey:info.userprivateaccesskey}));
+  private async saveCapabilities(account: MoodleAccount, info: Awaited<ReturnType<MoodleClient['siteInfo']>>) {
+    if (info.userprivateaccesskey) {
+      const tokens = await this.tokens(account.id);
+      if (tokens.userPrivateAccessKey !== info.userprivateaccesskey) {
+        this.secrets.useInSession(moodleSecretId(account.id),JSON.stringify({...tokens,userPrivateAccessKey:info.userprivateaccesskey}));
+        if (this.signInStorage.get(account.id) !== 'session') {
+          this.signInStorage.set(account.id,'unsaved');
+          try { await this.retrySave(account.id); } catch { /* Retain the updated key in this session. */ }
+        }
+      }
+    }
     const previous = this.repository.capabilities(account.id);
     this.repository.saveCapabilities(account.id,{functions:info.functions?.map(item => item.name),release:info.release,version:info.version,advancedfeatures:info.advancedfeatures,mobileConfig:previous?.mobileConfig ?? {}});
   }
@@ -259,7 +299,7 @@ export class MoodleService {
     client.setLanguage(this.language());
     const info = await client.siteInfo();
     if (info.userid !== account.remoteUserId || info.siteurl && normalizeSiteUrl(info.siteurl) !== account.siteUrl) throw new MoodleError('auth');
-    await this.saveCapabilities(account,info,await this.tokens(id));
+    await this.saveCapabilities(account,info);
     client.setFunctions(info.functions?.map(item => item.name));
     client.setLanguage(this.language());
     if (client.wsAvailable('tool_mobile_get_config') && info.functions) {

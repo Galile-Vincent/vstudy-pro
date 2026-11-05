@@ -202,5 +202,11 @@
   "panel_error_service": "Server returned unexpected data",
   "panel_error_network": "Network error",
   "panel_error_unsupported": "This feature is unavailable",
-  "contents_partial": "Some items couldn't be displayed"
+  "contents_partial": "Some items couldn't be displayed",
+  "keychain_waiting": "Waiting for macOS permission…",
+  "keychain_hint": "macOS may ask for your Mac password to protect your sign-in. Choose Always Allow.",
+  "keychain_error": "Secure storage was denied or is unavailable. Retry, or connect for this session only. Your sign-in will clear when you quit.",
+  "keychain_unsaved": "Could not save your sign-in securely. You are connected for this session. Retry saving without signing in again.",
+  "keychain_retry": "Retry secure storage",
+  "keychain_session": "Use for this session only"
 }

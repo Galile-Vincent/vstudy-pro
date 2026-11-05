@@ -202,5 +202,11 @@
   "panel_error_service": "サーバーが予期しないデータを返しました",
   "panel_error_network": "ネットワークエラー",
   "panel_error_unsupported": "この機能は利用できません",
-  "contents_partial": "一部の項目を表示できませんでした"
+  "contents_partial": "一部の項目を表示できませんでした",
+  "keychain_waiting": "macOS の許可を待っています…",
+  "keychain_hint": "サインイン情報を保護するため、macOS が Mac のパスワードを求める場合があります。「常に許可」を選んでください。",
+  "keychain_error": "安全な保存が拒否されたか、利用できません。再試行するか、今回のみ接続してください。アプリを終了するとサインイン情報は消去されます。",
+  "keychain_unsaved": "サインイン情報を安全に保存できませんでした。今回は接続したまま利用できます。再度サインインせずに保存を再試行できます。",
+  "keychain_retry": "安全な保存を再試行",
+  "keychain_session": "今回のみ利用"
 }

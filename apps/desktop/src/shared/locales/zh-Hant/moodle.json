@@ -202,5 +202,11 @@
   "panel_error_service": "伺服器回傳非預期資料",
   "panel_error_network": "網路錯誤",
   "panel_error_unsupported": "此功能無法使用",
-  "contents_partial": "部分項目無法顯示"
+  "contents_partial": "部分項目無法顯示",
+  "keychain_waiting": "等待 macOS 授權…",
+  "keychain_hint": "macOS 可能會要求輸入 Mac 密碼以保護你的登入資訊。請選擇「永遠允許」。",
+  "keychain_error": "安全儲存遭拒或無法使用。請重試，或僅在本次使用期間連線。結束應用程式後將清除登入資訊。",
+  "keychain_unsaved": "無法安全儲存登入資訊。目前仍可在本次使用期間連線。你可以重試儲存，無須重新登入。",
+  "keychain_retry": "重試安全儲存",
+  "keychain_session": "僅在本次使用期間使用"
 }
