@@ -1,3 +1,4 @@
+import { enterStorageRequest } from "../storage/maintenance";
 import { MoodleAuthError } from '../moodle/auth';
 import { importError } from '../../shared/import-error';
 import type { IpcMain, IpcMainInvokeEvent } from "electron";
@@ -35,11 +36,18 @@ export function createIpcRegistrar(
         const budget = budgets.get(key);
         if (!budget || now - budget.start >= policy.windowMs) budgets.set(key, { start: now, count: 1 });
         else if (++budget.count > policy.requests) throw new Error('IPC rate limited');
+        let release = () => {};
         try {
+          release = channel.startsWith('storage:') ? () => {} : enterStorageRequest();
           const request = ipcContract[channel].request.parse(payload) as IpcRequest<C>;
           const response = await handler(request, event);
           return ipcContract[channel].response.parse(response);
         } catch (error) {
+          if (channel.startsWith('storage:') || error instanceof Error && error.message.startsWith('storage.')) {
+            const errno=(error as NodeJS.ErrnoException).code;
+            const code=errno==='ENOSPC' ? 'disk_full' : errno==='EACCES' || errno==='EPERM' ? 'permission' : errno==='EBUSY' ? 'busy' : error instanceof Error && error.message.startsWith('storage.') ? error.message.slice(8) : 'failed';
+            throw new Error('VSTUDY_STATUS:'+JSON.stringify({code:'storage.'+code,params:{}}));
+          }
           if (!channel.startsWith('moodle:')) console.error(`[ipc] ${channel} failed:`, error instanceof Error ? error.stack ?? error.message : String(error));
           if (channel === 'moodle:connect' && error instanceof MoodleAuthError && error.code === 'cancelled') return {moodleAuthCancelled:true};
           if (error instanceof MoodleAuthError) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'moodle.auth_' + error.code.replaceAll('-','_'),params:error.reason ? {reason:error.reason} : {}}));
@@ -52,7 +60,7 @@ export function createIpcRegistrar(
           const code=error instanceof Error && error.message.includes('Only empty conversations') ? 'errors.conversation_not_empty' : 'errors.generic';
           // Electron strips custom Error fields, so keep the stable payload in its message.
           throw new Error('VSTUDY_STATUS:' + JSON.stringify({code,params:{}}));
-        }
+        } finally { release(); }
       });
       registered.push(channel);
     },

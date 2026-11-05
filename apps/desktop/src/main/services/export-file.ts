@@ -1,26 +1,20 @@
-import { open } from 'node:fs/promises';
+/** Native-dialog exports preserve existing bytes if writing fails. Paths never come from IPC. */
 import { constants } from 'node:fs';
+import { open, lstat } from 'node:fs/promises';
+import { atomicWrite, validateDestination } from '../storage/atomic';
+
 export async function exportFile(sourcePath: string, destinationPath: string): Promise<void> {
+  await validateDestination(destinationPath);
   const source = await open(sourcePath, constants.O_RDONLY | constants.O_NOFOLLOW);
   try {
     const input = await source.stat();
-    const destination = await open(destinationPath, constants.O_WRONLY | constants.O_CREAT | constants.O_NOFOLLOW, 0o600);
-    try {
-      const output = await destination.stat();
-      if (!output.isFile() || output.nlink !== 1 || (input.dev === output.dev && input.ino === output.ino)) throw new Error('Unsafe export destination');
-      await destination.chmod(0o600);
-      await destination.truncate(0);
-      await destination.writeFile(await source.readFile());
-    } finally { await destination.close(); }
+    const output = await lstat(destinationPath).catch(error => {if (error.code === 'ENOENT') return undefined; throw error;});
+    if (output && output.dev === input.dev && output.ino === input.ino) throw new Error('Unsafe export destination');
+    if (!input.isFile()) throw new Error('Unsafe export source');
+    await atomicWrite(destinationPath, await source.readFile());
   } finally { await source.close(); }
 }
 export async function exportText(text: string, destinationPath: string): Promise<void> {
-  const destination = await open(destinationPath, constants.O_WRONLY | constants.O_CREAT | constants.O_NOFOLLOW, 0o600);
-  try {
-    const metadata = await destination.stat();
-    if (!metadata.isFile() || metadata.nlink !== 1) throw new Error('Unsafe export destination');
-    await destination.chmod(0o600);
-    await destination.truncate(0);
-    await destination.writeFile(text, 'utf8');
-  } finally { await destination.close(); }
+  await validateDestination(destinationPath);
+  await atomicWrite(destinationPath, text);
 }

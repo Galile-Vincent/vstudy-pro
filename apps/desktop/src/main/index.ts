@@ -1,3 +1,5 @@
+import { reconcileDownloads } from "./storage/reconcile";
+import { recoverRestore } from "./storage/backup";
 import { applyNativeTheme, nativeBackground } from './theme';
 import { initializeMoodleProtocol } from './moodle/sso-protocol';
 import { log } from './logging';
@@ -102,9 +104,11 @@ function createWindow(): void {
 }
 
 const ownsApplication = acquireOwnership(app, () => window);
-if (ownsApplication) void app.whenReady().then(() => {
+if (ownsApplication) void app.whenReady().then(async () => {
   const userData = app.getPath("userData");
   mkdirSync(userData, { recursive: true });
+  await recoverRestore(userData);
+  await reconcileDownloads(join(userData,"moodle-downloads"));
   store = openStore(join(userData, "vstudy.sqlite"));
   protocol.handle("vstudy-asset", assetHandler(store, userData));
   protocol.handle('vstudy', async request => {
@@ -179,6 +183,12 @@ if (ownsApplication) void app.whenReady().then(() => {
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+}).catch(async error => {
+  const code=(error as NodeJS.ErrnoException).code;
+  log({phase:'startup-storage-failed',code:code ?? 'STORAGE'});
+  const key=code==='ENOSPC' ? 'disk_full' : code==='EACCES' || code==='EPERM' ? 'permission' : 'integrity_failed';
+  await showAttachedMessage({type:'error',message:tr('storage:'+key),buttons:[tr('common:close')]});
+  app.exit(1);
 });
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();

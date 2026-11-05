@@ -1,0 +1,92 @@
+[
+  {
+    "function": "runStorageBench",
+    "module": "file:///Users/vc/.t3/worktrees/vstudy-pro/t3-f39390e0/scripts/bench-storage.mjs",
+    "selfMs": 1766.46
+  },
+  {
+    "function": "course",
+    "module": "baseline repository from git",
+    "selfMs": 278.04
+  },
+  {
+    "function": "wrapSafe",
+    "module": "node:internal/modules/cjs/loader",
+    "selfMs": 225.38
+  },
+  {
+    "function": "datetimeRegex",
+    "module": "file:///Users/vc/.t3/worktrees/vstudy-pro/t3-f39390e0/node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs",
+    "selfMs": 213.09
+  },
+  {
+    "function": "integrityCheck",
+    "module": "file:///Users/vc/.t3/worktrees/vstudy-pro/t3-f39390e0/apps/desktop/src/main/db/index.ts",
+    "selfMs": 208.38
+  },
+  {
+    "function": "_parse",
+    "module": "file:///Users/vc/.t3/worktrees/vstudy-pro/t3-f39390e0/node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs",
+    "selfMs": 194.33
+  },
+  {
+    "function": "",
+    "module": "baseline repository from git",
+    "selfMs": 187.92
+  },
+  {
+    "function": "(garbage collector)",
+    "module": "",
+    "selfMs": 77.83
+  },
+  {
+    "function": "_parseSync",
+    "module": "file:///Users/vc/.t3/worktrees/vstudy-pro/t3-f39390e0/node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs",
+    "selfMs": 73.33
+  },
+  {
+    "function": "ZodType",
+    "module": "file:///Users/vc/.t3/worktrees/vstudy-pro/t3-f39390e0/node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/types.js",
+    "selfMs": 62.83
+  },
+  {
+    "function": "spawnSync",
+    "module": "node:internal/child_process",
+    "selfMs": 59.0
+  },
+  {
+    "function": "rows",
+    "module": "baseline repository from git",
+    "selfMs": 50.83
+  },
+  {
+    "function": "file",
+    "module": "baseline repository from git",
+    "selfMs": 50.04
+  },
+  {
+    "function": "RegExp: ^[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$",
+    "module": "",
+    "selfMs": 44.96
+  },
+  {
+    "function": "migrate",
+    "module": "file:///Users/vc/.t3/worktrees/vstudy-pro/t3-f39390e0/apps/desktop/src/main/db/migrate.ts",
+    "selfMs": 39.25
+  },
+  {
+    "function": "(program)",
+    "module": "",
+    "selfMs": 31.33
+  },
+  {
+    "function": "detailCache",
+    "module": "baseline repository from git",
+    "selfMs": 31.29
+  },
+  {
+    "function": "RegExp: ^((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d+)?(Z)$",
+    "module": "",
+    "selfMs": 31.08
+  }
+]

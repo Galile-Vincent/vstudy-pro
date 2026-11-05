@@ -48,7 +48,7 @@ List filters combine type groups, status, converter, folder/subtree, tag, added 
 
 ## SQLite lifetime and migrations
 
-On open: WAL, synchronous NORMAL, foreign_keys ON, busy_timeout 5000, temp_store MEMORY, mmap_size 256 MiB, cache_size -16384 (16 MiB). New databases select incremental auto_vacuum before creating tables. Existing databases retain their auto_vacuum mode: switching requires an explicit maintenance `PRAGMA auto_vacuum=INCREMENTAL; VACUUM` with sufficient free disk, a verified backup, and no active work. Opening does not impose that blocking rewrite.
+On open: WAL, synchronous FULL, foreign_keys ON, busy_timeout 5000, temp_store MEMORY, mmap_size 256 MiB, cache_size -16384 (16 MiB). New databases select incremental auto_vacuum before creating tables. Existing databases retain their auto_vacuum mode: switching requires an explicit maintenance `PRAGMA auto_vacuum=INCREMENTAL; VACUUM` with sufficient free disk, a verified backup, and no active work. Opening does not impose that blocking rewrite.
 
 Migrations are numbered, forward-only and transactional. Version 5 adds library tables/columns, rebuilds usage rollups and backfills conversation updatedAt. Before applying it to an existing database, the application checkpoints WAL and copies the database to `<db>.before-v5.bak`, mode 0600. Version 6 only adds indexes. A test creates the previous four-migration schema, inserts multilingual document/chat data and existing usage, migrates it, verifies backup creation, rollups and integrity. The previous schema remains recoverable in the backup; automatic downgrade is unsupported.
 
@@ -97,3 +97,7 @@ Verification after the final review fixes: typecheck, lint, security:check, buil
 Version 10 retains legacy metadata columns for migration safety and introduces nullable sizeBytes/contentChars. Startup backfill reads contained files in batches of 32, commits a completion marker per document, and yields between batches. Missing files remain NULL. Interrupted batches resume from unmarked rows; missing files that later return require explicit re-conversion to refresh metadata.
 
 Application ownership is acquired through Electron's single-instance lock before normal userData startup. Shutdown removes IPC handlers, aborts and persists chats while SQLite is open, awaits provider and discovery process-group teardown, stops search/converter/document work, flushes, then closes SQLite and quits. Reentrant quits join the same coordinator; a five-second deadline forces exit if cleanup cannot finish. Edit acceptance groups replacement insertion, superseding and activity in a savepoint; pre-output failure restores the old branch. Regeneration retains its prior assistant until nonempty replacement output is persisted. Assistant persistence and all model usage writes share a savepoint.
+
+## Storage and recovery contract
+
+[STORAGE.md](STORAGE.md) is the current inventory and migration API reference. Migration 19 adds the account response cache and Moodle lookup indexes. The runner records SHA-256 checksums and backs up before every pending migration of an existing disk database. Settings > Storage exposes bounded cache cleanup, converted-file cleanup, validated portable backups, restart recovery, and database integrity checks.

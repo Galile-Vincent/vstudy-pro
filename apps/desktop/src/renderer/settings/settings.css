@@ -693,3 +693,6 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
 @media(prefers-contrast:more), (forced-colors:active) {
  .settings-dialog .provider-row { border:1px solid var(--ink); }
 }
+
+.settings-storage-intro { margin-bottom: var(--space-6); }
+.storage-bytes { font-variant-numeric: tabular-nums; white-space: nowrap; }

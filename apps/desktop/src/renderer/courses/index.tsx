@@ -606,6 +606,7 @@ function CoursesBody({
                       detail.course.fullName,
                     )}
                   </h1>
+                  <p className="muted" data-testid="course-cache-state">{tr('storage:cached_'+(detail.cacheState ?? 'stale'))}{' · '}{detail.lastSyncedAt ? tr('storage:last_synced',{time:relative(detail.lastSyncedAt)}) : tr('storage:never_synced')}</p>
                   <IdentityLine value={displayTeachers(detail.course.identity, lang)} label={tr("moodle:teacher_unknown")} />
                   <IdentityLine value={displayClass(detail.course.identity)} label={tr("moodle:class_unknown")} />
                   <Button variant="outline" onClick={() => {

@@ -1,8 +1,11 @@
+import { storageMigration } from "../cache/migration";
+/** Main SQLite owner. Repositories share one connection and use nested savepoints. */
+import { migrate } from "./migrate";
 import { chatHistoryMigration } from './chat-history-migration';
 import { chatHistoryRepository } from './chat-history';
 import { moodleMigration, moodleSiteMigration, moodleCapabilitiesMigration, moodleCourseDetailsMigration } from './moodle-migration';
 import { aiParseMigration, aiParseRollupRepair } from './ai-parse-migration';
-import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
+import { chmodSync, existsSync, statSync } from "node:fs";
 import { libraryMigration } from "./library-migration";
 import { usageMigration, usageRollupMigration, usageRepository } from "./usage";
 import { DatabaseSync } from "node:sqlite";
@@ -102,6 +105,8 @@ export const migrations = [
   { version:16, sql:moodleCapabilitiesMigration },
   { version:17, sql:moodleCourseDetailsMigration },
   { version:18, sql:chatHistoryMigration },
+  { version:19, sql:storageMigration },
+  { version:20, sql:"CREATE INDEX IF NOT EXISTS conversations_course_page ON conversations(courseId,createdAt DESC,id DESC);" },
 ];
 const documentRow = z
   .object({
@@ -148,40 +153,9 @@ export function openStore(path: string) {
   try {
     if (fresh) db.exec("PRAGMA auto_vacuum=INCREMENTAL");
     db.exec(
-      "PRAGMA synchronous=NORMAL; PRAGMA temp_store=MEMORY; PRAGMA mmap_size=268435456; PRAGMA cache_size=-16384; PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;",
+      "PRAGMA synchronous=FULL; PRAGMA temp_store=MEMORY; PRAGMA mmap_size=268435456; PRAGMA cache_size=-16384; PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;",
     );
-    db.exec(
-      "CREATE TABLE IF NOT EXISTS migrations (version INTEGER PRIMARY KEY, appliedAt TEXT NOT NULL)",
-    );
-    const versions = z
-      .array(z.object({ version: z.number() }))
-      .parse(
-        db.prepare("SELECT version FROM migrations ORDER BY version").all(),
-      )
-      .map((row) => row.version);
-    if (
-      versions.some((version) => !migrations.some((m) => m.version === version))
-    )
-      throw new Error("Database version is newer than this application");
-    for (const migration of migrations) {
-      if (versions.includes(migration.version)) continue;
-      if (!fresh && [5,8,18].includes(migration.version)) {
-        db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-        copyFileSync(path, `${path}.before-v${migration.version}.bak`);
-        chmodSync(`${path}.before-v${migration.version}.bak`, 0o600);
-      }
-      db.exec("BEGIN IMMEDIATE");
-      try {
-        db.exec(migration.sql);
-        db.prepare(
-          "INSERT INTO migrations(version, appliedAt) VALUES (?, ?)",
-        ).run(migration.version, new Date().toISOString());
-        db.exec("COMMIT");
-      } catch (error) {
-        db.exec("ROLLBACK");
-        throw error;
-      }
-    }
+    migrate(db, migrations, fresh ? ":memory:" : path);
   } catch (error) {
     db.close();
     throw error;
@@ -245,7 +219,7 @@ export function openStore(path: string) {
       db.prepare("DELETE FROM documents WHERE id=?").run(id);
     },
   };
-  const maintenance = setInterval(() => { db.exec("PRAGMA optimize; PRAGMA incremental_vacuum(128)"); }, 300_000);
+  const maintenance = setInterval(() => { try { db.exec("PRAGMA optimize; PRAGMA incremental_vacuum(128)"); } catch { console.error("Database maintenance deferred"); } }, 300_000);
   maintenance.unref();
   return {
     db,
