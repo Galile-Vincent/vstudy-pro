@@ -1,0 +1,70 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed 2"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - text: Home
+  - button "Help"
+  - button "Find a conversation": Find a conversation ⌘/Ctrl K
+- main:
+  - heading "Good morning" [level=1]
+  - paragraph:
+    - group "A little curiosity goes a long way."
+  - button "How to use · Try it"
+  - region "Getting started":
+    - heading "Getting started" [level=2]
+    - text: 1 of 4 complete
+    - paragraph: A few useful first steps. Reopen any of them whenever you need a reminder.
+    - list:
+      - listitem:
+        - button "Choose your starting point"
+      - listitem:
+        - button "Add a document or sample Completed"
+      - listitem:
+        - button "Follow a walkthrough"
+      - listitem:
+        - button "Find Help and shortcuts"
+    - button "Resume setup"
+  - region "Bring a document":
+    - heading "Bring a document" [level=2]
+    - paragraph: Drop a file here. Read, select a passage, and explore it together.
+    - paragraph: PDF, DOCX, XLSX, PPTX, HTML, CSV, Markdown, or text. Up to 50 MB per file. Scanned PDFs are not supported.
+    - button "Choose a file"
+    - button "Try a sample document"
+  - region "Your study rhythm":
+    - heading "Your study rhythm" [level=2]
+    - strong: 1 day
+    - paragraph: A little learning, already part of today.
+    - list:
+      - listitem "2026-10-31": "S 2026-10-31: no study recorded"
+      - listitem "2026-11-01": "S 2026-11-01: no study recorded"
+      - listitem "2026-11-02": "M 2026-11-02: no study recorded"
+      - listitem "2026-11-03": "T 2026-11-03: no study recorded"
+      - listitem "2026-11-04": "W 2026-11-04: no study recorded"
+      - listitem "2026-11-05": "T 2026-11-05: no study recorded"
+      - listitem "2026-11-06": "F 2026-11-06: studied"
+    - text: "Best rhythm: 1 day"
+  - region "Recent activity":
+    - group: Recent activity

@@ -1,0 +1,23 @@
+- main:
+  - status
+- dialog "集中管理你的課程":
+  - heading "集中管理你的課程" [level=2]
+  - paragraph: 連結任何支援 Moodle 官方行動服務的學校。
+  - list "連結步驟":
+    - listitem: 1 尋找學校
+    - listitem: 2 確認網站
+    - listitem: 3 登入
+  - text: 學校名稱、國家或 Moodle 網址
+  - combobox "學校名稱、國家或 Moodle 網址" [expanded]
+  - text: 搜尋只在此裝置進行。選擇學校或檢查網址時會連線至該學校，並可能下載校徽。可在「設定 > 隱私權」查看連線記錄。
+  - button "尋找我的學校"
+  - status: 找到 4 所學校
+  - listbox "學校":
+    - group "學校目錄":
+      - option "中原大學 ilearning.cycu.edu.tw · 台灣"
+      - option "倫敦大學學院 moodle.ucl.ac.uk · 英國"
+      - option "華威大學 moodle.warwick.ac.uk · 英國"
+      - option "新南威爾斯大學 moodle.telt.unsw.edu.au · 澳洲"
+  - button "使用網址新增"
+  - text: 可同時連結多所學校與多個帳號，現有連線會保持登入。
+  - button "關閉"

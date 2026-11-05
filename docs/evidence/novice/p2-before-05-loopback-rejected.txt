@@ -1,0 +1,20 @@
+- main:
+  - status
+- dialog "Bring your courses together":
+  - heading "Bring your courses together" [level=2]
+  - paragraph: Connect any school that supports the official Moodle mobile service.
+  - list "Connection steps":
+    - listitem: 1 Find your school
+    - listitem: 2 Check site
+    - listitem: 3 Sign in
+  - text: School name, country, or Moodle URL
+  - combobox "School name, country, or Moodle URL": https://127.0.0.1:60443
+  - text: Search stays on this device. Choosing a school or checking a URL contacts that school and may download its logo. Requests appear in Settings > Privacy.
+  - button "Find my school"
+  - status: 0 schools found
+  - listbox "Schools"
+  - paragraph: No matching schools in the bundled directory. You can still connect using your school’s Moodle URL.
+  - button "Add by URL"
+  - text: You can connect several schools and accounts. Existing connections stay signed in.
+  - alert: Could not find a supported Moodle site. Check the address and your connection. Only public HTTPS sites are supported.
+  - button "Close"

@@ -89,6 +89,7 @@ export function UsageSettings() {
     <section className="usage-settings" aria-label={tr('common:usage_settings')}>
       <SettingsGroup>
         <div className="usage-overview-content">
+          <p>{tr('novice:usage_help')}</p>
           <p className="muted">{balanceNote()}</p>
           <UsageDashboard documents={documents} />
         </div>

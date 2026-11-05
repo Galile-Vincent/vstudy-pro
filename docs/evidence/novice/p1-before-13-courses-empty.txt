@@ -1,0 +1,45 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "顯示或隱藏文件庫" [expanded]
+  - text: 課程
+  - button "說明"
+  - button "尋找對話": 尋找對話 ⌘/Ctrl K
+- complementary "首次使用提示":
+  - group:
+    - strong: 先查看即將到期的作業
+    - paragraph: 如果這裡還是空的，先連接學校。同步後，「即將到期」會顯示七天內的期限。開啟課程即可查看期限與課程助理。採取行動前，請向學校確認 AI 回答中的日期。
+  - button "觀看操作示範"
+  - button "不再顯示這則提示"
+- main:
+  - button "今天 / 讀書計畫"
+  - heading "課程" [level=1]
+  - paragraph: 掌握課程近況，專注下一步。
+  - button "連結學校"
+  - status
+  - heading "從這裡開始學習新篇章" [level=2]
+  - paragraph: 連結學校，在同一個地方掌握課程、作業截止與教材。
+  - button "連結學校"

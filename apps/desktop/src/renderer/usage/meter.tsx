@@ -66,7 +66,7 @@ export function UsageButton({
       aria-label={tr('common:conversation_usage')}
       title={
         data
-          ? `${tr('common:conversation_usage')} · ${description}${
+          ? `${tr('novice:usage_help')} ${tr('common:conversation_usage')} · ${description}${
               priceUnknown ? ` · ${tr('usage:current_price_unknown')}` : ''
             } · ${tr('common:view_usage_and_budget_settings')}`
           : tr('common:view_usage_and_budget_settings')

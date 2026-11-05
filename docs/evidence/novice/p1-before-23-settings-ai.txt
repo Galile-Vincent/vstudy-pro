@@ -1,0 +1,84 @@
+- dialog "設定":
+  - heading "設定" [level=2]
+  - button "關閉設定"
+  - tablist "設定":
+    - tab "一般"
+    - tab "外觀"
+    - tab "供應商" [selected]
+    - tab "用量"
+    - tab "儲存空間"
+    - tab "隱私"
+  - tabpanel "供應商":
+    - banner:
+      - heading "供應商" [level=2]
+      - paragraph: 金鑰安全儲存於桌面應用程式中，不會傳回顯示。
+    - text: 唯讀結構化表格（僅限 API 服務供應商）
+    - paragraph: 可選用的表格呈現功能，預設關閉。CLI 工具仍維持停用。
+    - group "唯讀結構化表格（僅限 API 服務供應商） 可選用的表格呈現功能，預設關閉。CLI 工具仍維持停用。":
+      - switch "唯讀結構化表格（僅限 API 服務供應商）"
+    - heading "服務供應商" [level=3]
+    - strong: Anthropic
+    - text: 尚未儲存金鑰
+    - button "取得金鑰"
+    - button "測試連線"
+    - paragraph: API 金鑰是從 AI 服務開發者網站取得的秘密代碼，與聊天帳號登入不同。使用時可能收費。
+    - paragraph: 在 Mac 儲存時，可能需要輸入 Mac 登入密碼，讓 VStudy Pro 使用鑰匙圈。暫存金鑰只保留到關閉程式。
+    - textbox "Anthropic API 金鑰":
+      - /placeholder: 輸入 API 金鑰
+    - button "儲存金鑰" [disabled]
+    - button "使用但不儲存金鑰" [disabled]
+    - strong: OpenAI
+    - text: 尚未儲存金鑰
+    - button "取得金鑰"
+    - button "測試連線"
+    - paragraph: API 金鑰是從 AI 服務開發者網站取得的秘密代碼，與聊天帳號登入不同。使用時可能收費。
+    - paragraph: 在 Mac 儲存時，可能需要輸入 Mac 登入密碼，讓 VStudy Pro 使用鑰匙圈。暫存金鑰只保留到關閉程式。
+    - textbox "OpenAI API 金鑰":
+      - /placeholder: 輸入 API 金鑰
+    - button "儲存金鑰" [disabled]
+    - button "使用但不儲存金鑰" [disabled]
+    - strong: OpenAI 相容服務
+    - text: 尚未儲存金鑰
+    - button "取得金鑰"
+    - button "測試連線"
+    - paragraph: API 金鑰是從 AI 服務開發者網站取得的秘密代碼，與聊天帳號登入不同。使用時可能收費。
+    - paragraph: 在 Mac 儲存時，可能需要輸入 Mac 登入密碼，讓 VStudy Pro 使用鑰匙圈。暫存金鑰只保留到關閉程式。
+    - textbox "OpenAI 相容服務 API 金鑰":
+      - /placeholder: 輸入 API 金鑰
+    - button "儲存金鑰" [disabled]
+    - button "使用但不儲存金鑰" [disabled]
+    - textbox "OpenAI 相容服務基底網址": http://localhost:11434/v1
+    - button "儲存網址"
+    - strong: Claude CLI
+    - text: 已找到執行檔 — 尚未檢查登入
+    - paragraph: 請從官方網站安裝此工具，再開啟終端機執行 claude 登入，然後回來重新偵測。
+    - button "重新偵測"
+    - switch "要使用你的 Claude CLI 登入嗎？"
+    - text: 要使用你的 Claude CLI 登入嗎？
+    - paragraph: 關閉 — 不會啟動 CLI
+    - paragraph:
+      - text: "執行檔路徑:"
+      - code: /Users/vc/.local/share/claude/versions/2.1.318
+    - button "更改"
+    - strong: Codex CLI
+    - text: 已找到執行檔 — 尚未檢查登入
+    - paragraph: 請從官方網站安裝此工具，再開啟終端機執行 codex login 登入，然後回來重新偵測。
+    - button "重新偵測"
+    - switch "要使用你的 Codex CLI 登入嗎？"
+    - text: 要使用你的 Codex CLI 登入嗎？
+    - paragraph: 關閉 — 不會啟動 CLI
+    - paragraph:
+      - text: "執行檔路徑:"
+      - code: /Users/vc/.codex/packages/standalone/releases/0.166.0-aarch64-apple-darwin/bin/codex
+    - button "更改"
+    - strong: Antigravity CLI
+    - text: 已找到執行檔 — 尚未檢查登入
+    - paragraph: 請從官方網站安裝此工具，再開啟終端機執行 agy 登入，然後回來重新偵測。
+    - button "重新偵測"
+    - switch "要使用你的 Antigravity CLI 登入嗎？"
+    - text: 要使用你的 Antigravity CLI 登入嗎？
+    - paragraph: 關閉 — 不會啟動 CLI
+    - paragraph:
+      - text: "執行檔路徑:"
+      - code: /Users/vc/.local/bin/agy
+    - button "更改"

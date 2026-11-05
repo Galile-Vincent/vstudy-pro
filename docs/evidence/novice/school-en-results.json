@@ -1,0 +1,23 @@
+[
+  {
+    "language": "en",
+    "goal": "school",
+    "firstTaskMs": 1790,
+    "totalMs": 3524,
+    "privacyShownAtMs": 1187,
+    "schoolAuthentication": "main-process fixture; no live school or Keychain",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "en-school-welcome.png",
+      "en-school-goal.png",
+      "en-school-start.png",
+      "en-school-school-picker.png",
+      "en-school-school-result.png",
+      "en-school-due-work.png",
+      "en-school-first-task.png",
+      "en-school-shortcuts.png"
+    ],
+    "violations": [],
+    "errors": []
+  }
+]

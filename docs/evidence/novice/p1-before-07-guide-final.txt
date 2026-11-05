@@ -1,0 +1,18 @@
+- dialog "開始第一步":
+  - status: 第 6 步，共 6 步
+  - button "儲存進度並離開"
+  - heading "開始第一步" [level=1]
+  - paragraph: 依照下方說明操作。隨時可從畫面上方的「說明」重新查看。
+  - region "開始第一步":
+    - paragraph: 按下方「連接我的學校」，再用校名、國家或 Moodle 網址搜尋。選擇結果或檢查網址時，會連接學校網站並可能下載校徽。確認網站正確後再登入。保護學校登入資料可能需要 macOS 鑰匙圈權限。不要把學校密碼貼進 AI 聊天。
+    - region "連接學校":
+      - paragraph: 圖解範例・非即時資料
+      - paragraph: 第 1 段，共 3 段。 從側邊欄開啟「課程」，選擇「連接學校」。不需要 AI 帳號。
+      - button "暫停"
+      - button "重播"
+      - button "下一段說明"
+      - group: 閱讀完整步驟
+      - group: 觀看實際畫面步驟
+  - contentinfo:
+    - button "上一步"
+    - button "連接我的學校"

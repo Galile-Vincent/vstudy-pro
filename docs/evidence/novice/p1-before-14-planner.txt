@@ -1,0 +1,83 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "顯示或隱藏文件庫" [expanded]
+  - text: 課程
+  - button "說明"
+  - button "尋找對話": 尋找對話 ⌘/Ctrl K
+- complementary "首次使用提示":
+  - group:
+    - strong: 先查看即將到期的作業
+    - paragraph: 如果這裡還是空的，先連接學校。同步後，「即將到期」會顯示七天內的期限。開啟課程即可查看期限與課程助理。採取行動前，請向學校確認 AI 回答中的日期。
+  - button "觀看操作示範"
+  - button "不再顯示這則提示"
+- main:
+  - button "返回課程"
+  - region "今天 / 讀書計畫":
+    - heading "今天 / 讀書計畫" [level=1]
+    - paragraph: 把截止日期變成做得到的計畫。學校作業的繳交狀態仍以 Moodle 為準。
+    - button "重新整理計畫"
+    - group:
+      - text: 新增任務 你需要完成什麼？
+      - textbox "你需要完成什麼？"
+      - text: 課程
+      - combobox "課程":
+        - option "個人任務" [selected]
+      - text: 截止時間
+      - textbox "截止時間"
+      - text: 預估分鐘數
+      - spinbutton "預估分鐘數": "30"
+      - button "新增任務"
+    - group: 新增考試
+    - region "規劃這一週":
+      - text: 每日讀書分鐘數
+      - spinbutton "每日讀書分鐘數": "120"
+      - text: 可用時間起點
+      - spinbutton "可用時間起點": "18"
+      - text: 可用時間終點
+      - spinbutton "可用時間終點": "22"
+      - paragraph: 假設每天 18:00 到 22:00（Asia/Taipei）可以讀書。請依你的時間表調整。
+      - button "規劃這一週"
+      - button "規劃今天"
+      - button "匯出讀書時段" [disabled]
+      - paragraph: 請先檢查。助理只有在你核准後才會儲存變更。
+    - tablist "今天 / 讀書計畫":
+      - tab "今天" [selected]
+      - tab "未來 7 天"
+    - tabpanel "今天":
+      - heading "今天" [level=2]
+      - paragraph: 從一件事開始。新增任務，再安排讀書時段。之後到期的工作會顯示在週間檢視。
+      - list
+      - heading "學校截止事項" [level=2]
+      - list
+      - heading "考試" [level=2]
+      - paragraph: 新增考試與範圍主題，提早開始準備。
+      - region "未來 7 天":
+        - heading "未來 7 天" [level=2]
+        - paragraph: 還沒有讀書時段。「規劃這一週」會先產生草稿，經你檢查核准後才儲存。
+        - heading "11月6日週五" [level=3]
+        - text: 已安排 0 分鐘
+        - list

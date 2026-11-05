@@ -1,0 +1,48 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed 1"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - button "Help"
+  - button "Find a conversation": Find a conversation ⌘/Ctrl K
+- main:
+  - region "Library":
+    - heading "Converting / Failed" [level=1]
+    - paragraph: 1 document
+    - button "Import document"
+    - textbox "Search your documents"
+    - button "Filters"
+    - combobox "Sort by": Manual order
+    - button "Reverse sort direction": ↑
+    - button "Switch list or grid view"
+    - list "Documents":
+      - listitem:
+        - text: Converting
+        - button "novice-reading"
+        - text: Unfiled 0.8 kB
+        - progressbar "Conversion progress"
+        - text: PDF
+        - 'button "Document options: novice-reading"'
+    - text: 1 document loaded

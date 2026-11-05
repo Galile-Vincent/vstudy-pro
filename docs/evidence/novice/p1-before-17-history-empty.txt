@@ -1,0 +1,43 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "顯示或隱藏文件庫" [expanded]
+  - text: 聊天紀錄
+  - button "說明"
+  - button "尋找對話": 尋找對話 ⌘/Ctrl K
+- main:
+  - heading "聊天紀錄" [level=1]
+  - paragraph: 搜尋所有聊天中的問題、回答與想法。
+  - region "聊天紀錄":
+    - searchbox "搜尋聊天紀錄"
+    - button "全部" [pressed]
+    - button "依課程"
+    - button "依文件"
+    - button "一般"
+    - button "已釘選"
+    - group: 更多篩選
+    - heading "你的對話會顯示在這裡" [level=2]
+    - paragraph: 在文件或課程中提問，即可開始累積紀錄。

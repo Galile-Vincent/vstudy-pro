@@ -1,0 +1,72 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗 1"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "顯示或隱藏文件庫" [expanded]
+  - text: 首頁
+  - button "說明"
+  - button "尋找對話": 尋找對話 ⌘/Ctrl K
+- main:
+  - heading "早安" [level=1]
+  - paragraph:
+    - group "帶著一點好奇，慢慢讀。"
+  - button "如何使用 · 試試看"
+  - region "開始使用":
+    - heading "開始使用" [level=2]
+    - text: 已完成 1 / 4 項
+    - paragraph: 幾個實用的第一步。需要提醒時，隨時可重新開啟。
+    - list:
+      - listitem:
+        - button "選擇你的起點"
+      - listitem:
+        - button "加入文件或範例 已完成"
+      - listitem:
+        - button "觀看一段操作示範"
+      - listitem:
+        - button "找到說明與快捷鍵"
+    - button "繼續設定"
+  - region "帶一份文件來":
+    - heading "帶一份文件來" [level=2]
+    - paragraph: 把檔案拖到這裡，閱讀、選取段落，一起釐清想法。
+    - paragraph: 支援 PDF、DOCX、XLSX、PPTX、HTML、CSV、Markdown 或純文字。每個檔案上限 50 MB，不支援掃描 PDF。
+    - button "選擇檔案"
+    - button "試讀範例文件"
+    - button "開啟 閱讀範例"
+    - status: 文件已加入資料庫。
+  - region "閱讀的步調":
+    - heading "閱讀的步調" [level=2]
+    - strong: 1 天
+    - paragraph: 今天，已經留下一點收穫。
+    - list:
+      - listitem "2026-10-31": 六 2026-10-31：尚無閱讀紀錄
+      - listitem "2026-11-01": 日 2026-11-01：尚無閱讀紀錄
+      - listitem "2026-11-02": 一 2026-11-02：尚無閱讀紀錄
+      - listitem "2026-11-03": 二 2026-11-03：尚無閱讀紀錄
+      - listitem "2026-11-04": 三 2026-11-04：尚無閱讀紀錄
+      - listitem "2026-11-05": 四 2026-11-05：尚無閱讀紀錄
+      - listitem "2026-11-06": 五 2026-11-06：有閱讀紀錄
+    - text: 最長連續：1 天
+  - region "最近動態":
+    - group: 最近動態

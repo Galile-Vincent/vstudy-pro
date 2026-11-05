@@ -1,4 +1,5 @@
 import { ChatAnnouncement, CopyAnswerButton } from './chat-accessibility';
+import { AiSetupNotice } from './ai-setup';
 import { MarkdownText } from './document-markdown';
 import { BlankChat } from './motion/blank-chat';
 import { useTranslation } from "react-i18next";
@@ -137,7 +138,7 @@ export function Chat({
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
-    {unavailable && <p role="alert">{tr('common:this_conversation_s_provider_is_unavailable_add_an_api_key_or_enable_it_in_settings')}</p>}
+    {unavailable && <AiSetupNotice onSettings={onSettings} />}
     <Thread components={documentComponents} autoFocus={autoFocus} />
     <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;

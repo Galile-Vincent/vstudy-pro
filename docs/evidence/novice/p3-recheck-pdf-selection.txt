@@ -1,0 +1,70 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed 1"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- complementary "First-time tip":
+  - group:
+    - strong: Try selecting one sentence
+    - paragraph: Drag across text in the reader, then choose Ask about this. With the reader focused, Shift + Arrow also selects text. Your selection appears above Chat. Choose a model before sending. Open the conversation menu above Chat to search this document’s chats.
+  - button "Watch walkthroughs"
+  - button "Dismiss this tip permanently"
+- main:
+  - heading "Document library" [level=1]
+  - button "Library"
+  - button "Import document"
+  - text: sample
+  - button "Conversations"
+  - button "New Chat" [disabled]
+  - button "Help"
+  - text: Workspace connected
+  - button "Swap chat side"
+  - button "Open settings"
+  - region "Chat":
+    - heading "A place to think together" [level=2]
+    - paragraph:
+      - group "Could you explain this passage with an example?"
+    - complementary "AI chat is not connected yet":
+      - strong: AI chat is not connected yet
+      - paragraph: You can read and organise documents, view connected school deadlines, and make a study plan without AI. Answers about your reading need a connected AI service.
+      - button "Set up AI help"
+    - group:
+      - strong: Selected passage
+      - text: VStudy f
+    - button "Remove selection"
+    - textbox "Ask about your document" [disabled]:
+      - /placeholder: Ask about your document…
+    - combobox "Model": Choose a model
+    - button "Set up AI help"
+  - separator "Resize panes"
+  - region "Document":
+    - text: sample.pdf
+    - button "Delete document"
+    - button "Improve with AI"
+    - text: Ready to read Conversion looks incomplete?
+    - button "Improve with AI"
+    - document:
+      - paragraph:
+        - text: VStudy fixture
+        - button "Ask about this paragraph": Ask about this
+    - button "Ask about this"

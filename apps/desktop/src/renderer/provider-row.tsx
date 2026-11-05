@@ -57,7 +57,7 @@ export function ProviderRow({
   const isCli = provider.config.kind === 'cli';
   const isEnabled = provider.config.enabled;
   const isAvailable = provider.availability.available;
-  const isReady = isCli ? (isEnabled && isAvailable) : hasKey;
+  const isReady = isCli ? (isEnabled && isAvailable) : hasKey || (isEnabled && isAvailable);
   const isError = isCli ? (isEnabled && !isAvailable) : Boolean(error);
   const statusTone = isReady ? 'ready' : isError ? 'error' : 'idle';
   const statusText = isCli
@@ -68,6 +68,8 @@ export function ProviderRow({
       : tr('errors:provider_unavailable')
     : hasKey
       ? tr('common:key_saved')
+      : isEnabled && isAvailable
+      ? tr('settings:session_ready')
       : tr('common:no_key_saved');
 
   return (

@@ -20,3 +20,12 @@ it('announces a pending CLI enable check until discovery finishes', async () => 
   expect(host.querySelector('[role=status]')).toBeNull();
  } finally {await act(async()=>root.unmount());host.remove();}
 });
+it('confirms a working session key without claiming it was saved', async () => {
+ await i18n.changeLanguage('en');
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ try {
+  await act(async()=>root.render(<ProviderRow provider={{config:{kind:'api',id:'openai-api',enabled:true},availability:{available:true},models:[{id:'test',name:'Test'}]}} onRefresh={async()=>{}}/>));
+  expect(host.querySelector('.provider-status')?.textContent).toContain('Key is available for this session only.');
+  expect(host.querySelector('.provider-status')?.textContent).not.toContain('No key saved');
+ } finally {await act(async()=>root.unmount());host.remove();}
+});

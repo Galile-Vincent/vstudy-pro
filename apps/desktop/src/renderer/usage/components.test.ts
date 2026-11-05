@@ -69,7 +69,9 @@ it('keeps the full usage description available when narrow panes show the token 
   await act(async()=>root.render(createElement(UsageButton,{onClick:()=>{},error:'',data:{settings:defaultSettings,month:{inputTokens:0,outputTokens:0,calls:0,unknownPrices:0,groups:[]},records:[record]}})));
   expect(host.querySelector('.usage-full')?.textContent).toBe('1.5K tokens · $0.012');
   expect(host.querySelector('.usage-compact')?.textContent).toBe('1.5K');
-  expect(host.querySelector('button')?.title).toBe('Conversation usage · 1.5K tokens · $0.012 · includes aborted turns · View usage and budget settings');
+  expect(host.querySelector('button')?.title).toContain('small pieces of words');
+  expect(host.querySelector('button')?.title).toContain('not your account balance');
+  expect(host.querySelector('button')?.title).toContain('Conversation usage · 1.5K tokens · $0.012 · includes aborted turns · View usage and budget settings');
   await act(async()=>root.unmount());
 });
 it('does not show an old monthly unknown-price note for a currently priced model',async()=>{

@@ -1,0 +1,8 @@
+
+> vstudy-pro@ lint /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc
+> pnpm --filter @vstudy/desktop lint
+
+
+> @vstudy/desktop@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop
+> eslint .
+

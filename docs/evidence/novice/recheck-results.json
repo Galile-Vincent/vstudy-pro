@@ -1,0 +1,125 @@
+[
+  {
+    "persona": "p1",
+    "language": "zh-Hant",
+    "freshProfile": true,
+    "tasks": {
+      "reading-without-ai": {
+        "seconds": 0.125,
+        "screenshot": "p1-recheck-reading-without-ai.png"
+      },
+      "no-key-fallback": {
+        "seconds": 0.105,
+        "screenshot": "p1-recheck-no-key-fallback.png"
+      },
+      "return-to-reading": {
+        "seconds": 0.03,
+        "screenshot": "p1-recheck-return-to-reading.png"
+      },
+      "pdf-selection": {
+        "seconds": 10.887,
+        "screenshot": "p1-recheck-pdf-selection.png"
+      },
+      "fixture-answer": {
+        "seconds": 0.447,
+        "screenshot": "p1-recheck-fixture-answer.png"
+      },
+      "find-old-conversation": {
+        "seconds": 1.012,
+        "screenshot": "p1-recheck-find-old-conversation.png"
+      },
+      "understand-ai-usage": {
+        "seconds": 0.087,
+        "screenshot": "p1-recheck-understand-ai-usage.png"
+      },
+      "theme-and-language": {
+        "seconds": 0.286,
+        "screenshot": "p1-recheck-theme-and-language.png"
+      }
+    },
+    "rendererErrors": [],
+    "ai": "No saved key and no enabled CLI. Answer phase uses the explicit local fake adapter."
+  },
+  {
+    "persona": "p2",
+    "language": "en",
+    "freshProfile": true,
+    "tasks": {
+      "reading-without-ai": {
+        "seconds": 0.144,
+        "screenshot": "p2-recheck-reading-without-ai.png"
+      },
+      "no-key-fallback": {
+        "seconds": 0.075,
+        "screenshot": "p2-recheck-no-key-fallback.png"
+      },
+      "return-to-reading": {
+        "seconds": 0.035,
+        "screenshot": "p2-recheck-return-to-reading.png"
+      },
+      "pdf-selection": {
+        "seconds": 5.356,
+        "screenshot": "p2-recheck-pdf-selection.png"
+      },
+      "fixture-answer": {
+        "seconds": 0.392,
+        "screenshot": "p2-recheck-fixture-answer.png"
+      },
+      "find-old-conversation": {
+        "seconds": 1.009,
+        "screenshot": "p2-recheck-find-old-conversation.png"
+      },
+      "understand-ai-usage": {
+        "seconds": 0.081,
+        "screenshot": "p2-recheck-understand-ai-usage.png"
+      },
+      "theme-and-language": {
+        "seconds": 0.289,
+        "screenshot": "p2-recheck-theme-and-language.png"
+      }
+    },
+    "rendererErrors": [],
+    "ai": "No saved key and no enabled CLI. Answer phase uses the explicit local fake adapter."
+  },
+  {
+    "persona": "p3",
+    "language": "en",
+    "freshProfile": true,
+    "tasks": {
+      "reading-without-ai": {
+        "seconds": 0.142,
+        "screenshot": "p3-recheck-reading-without-ai.png"
+      },
+      "no-key-fallback": {
+        "seconds": 0.087,
+        "screenshot": "p3-recheck-no-key-fallback.png"
+      },
+      "return-to-reading": {
+        "seconds": 0.031,
+        "screenshot": "p3-recheck-return-to-reading.png"
+      },
+      "pdf-selection": {
+        "seconds": 5.37,
+        "screenshot": "p3-recheck-pdf-selection.png"
+      },
+      "fixture-answer": {
+        "seconds": 0.39,
+        "screenshot": "p3-recheck-fixture-answer.png"
+      },
+      "find-old-conversation": {
+        "seconds": 1.022,
+        "screenshot": "p3-recheck-find-old-conversation.png"
+      },
+      "understand-ai-usage": {
+        "seconds": 0.091,
+        "screenshot": "p3-recheck-understand-ai-usage.png"
+      },
+      "theme-and-language": {
+        "seconds": 0.279,
+        "screenshot": "p3-recheck-theme-and-language.png"
+      }
+    },
+    "rendererErrors": [],
+    "ai": "No saved key and no enabled CLI. Answer phase uses the explicit local fake adapter."
+  }
+]

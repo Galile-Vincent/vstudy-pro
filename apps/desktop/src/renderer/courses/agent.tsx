@@ -1,5 +1,6 @@
 /** Course chat keeps model output as proposals. Only confirmation cards invoke planner writes or approve material access. */
 import { emptyPlanner, type MaterialRequest } from "../../shared/planner";
+import { AiSetupNotice } from '../ai-setup';
 import { assertCourseAction } from "../../shared/course-actions";
 import { plannerApi } from "./planner-api";
 import { PlannerProposal } from "./planner-proposal";
@@ -225,7 +226,7 @@ export function CourseAgentPanel({
         <div className="moodle-agent-suggestions">
           <Suggestions
             suggestions={[{ id: "explain_prepare", label: tr("moodle:explain_prepare") }]}
-            disabled={status === "busy"}
+            disabled={status === "busy" || (!agent && !conversation)}
             cycle={0}
             variant="list"
             onSuggestion={() => (agent ? void prepare() : quick("explain_prepare"))}
@@ -313,7 +314,7 @@ export function CourseAgentPanel({
           </>
         )}
         {status === "unavailable" && (
-          <div role="status"><p>{tr("moodle:connect_helper")}</p><Button onClick={() => window.dispatchEvent(new CustomEvent("vstudy:open-settings", { detail: { tab: "providers" } }))}>{tr("moodle:providers_settings")}</Button></div>
+          <AiSetupNotice onSettings={() => window.dispatchEvent(new CustomEvent("vstudy:open-settings", { detail: { tab: "providers" } }))} />
         )}
         {status === "done" && (
           <p role="status">
