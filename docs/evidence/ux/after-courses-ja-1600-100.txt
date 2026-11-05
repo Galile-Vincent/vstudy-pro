@@ -1,0 +1,73 @@
+- link "メインコンテンツへ移動":
+  - /url: "#shell-content"
+- complementary "ドキュメントライブラリ":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "ホーム"
+    - listitem:
+      - button "ライブラリ"
+    - listitem:
+      - button "コース"
+    - listitem:
+      - button "履歴"
+  - navigation "スマートビュー":
+    - button "すべてのドキュメント"
+    - button "最近使った項目"
+    - button "ピン留め"
+    - button "未分類"
+    - button "変換中・失敗"
+  - heading "フォルダ" [level=2]
+  - button "新規フォルダ"
+  - paragraph: フォルダはまだありません
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "ライブラリの表示を切り替え" [expanded]
+  - text: コース
+  - button "ヘルプ"
+  - button "会話を探す": 会話を探す ⌘/Ctrl K
+- complementary "初回のヒント":
+  - group:
+    - strong: まず次の締め切りを確認
+    - paragraph: 何も表示されない場合は学校を接続します。同期後、「締め切り間近」に今後 7 日間の課題が表示されます。授業を開くと締め切り一覧と授業アシスタントを使えます。AI の回答にある日付は学校の情報で確認してください。
+  - button "操作ガイドを見る"
+  - button "このヒントを今後表示しない"
+- main:
+  - button "今日 / 学習プラン"
+  - heading "コース" [level=1]
+  - paragraph: コースを見渡して、次の一歩に集中しましょう。
+  - button "学校に接続"
+  - status
+  - strong: Alex Chen
+  - text: Example University · moodle.example.edu 昨日 に同期
+  - button "コースを更新"
+  - button "学校との接続を解除"
+  - heading "まもなく締め切り" [level=2]
+  - text: 今後 7 日間
+  - article:
+    - text: 1151 · CS210
+    - progressbar "64% 完了"
+    - heading "Prepare a research report explaining the experimental observations and conclusions" [level=3]:
+      - button "Prepare a research report explaining the experimental observations and conclusions"
+    - paragraph: 陳教授
+    - paragraph: 資訊三乙
+    - time: 明後日 11月8日 0:31
+    - button "Prepare a research report explaining the experimental observations and conclusions のリマインダーを設定"
+  - heading "あなたのコース 3" [level=2]
+  - text: 未読のお知らせ 1 件
+  - tablist "履修期間":
+    - tab "現在 1" [selected]
+    - tab "今後 1"
+    - tab "過去 1"
+    - tab "すべて 3"
+  - tabpanel "現在 1":
+    - article "資料結構與演算法 · Algorithms and Data Structures for Applied Scientific Research":
+      - text: 1151 · CS210
+      - progressbar "64% 完了"
+      - heading "資料結構與演算法的科學應用及實驗" [level=3]:
+        - button "資料結構與演算法的科學應用及實驗"
+      - paragraph: 陳教授
+      - paragraph: 資訊三乙
+      - text: まもなく締め切り 1 件 未読 0 件

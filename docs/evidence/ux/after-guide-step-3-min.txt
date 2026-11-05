@@ -1,0 +1,20 @@
+- dialog "What would you like to do first?":
+  - status: Step 4 of 6
+  - button "Save and leave"
+  - heading "What would you like to do first?" [level=1]
+  - paragraph: Choose one starting point. You can use all three later.
+  - region "What would you like to do first?":
+    - group "What would you like to do first?":
+      - text: What would you like to do first?
+      - radio "Connect my school’s Moodle See courses, due work, and announcements. You will need your school’s sign-in."
+      - strong: Connect my school’s Moodle
+      - text: See courses, due work, and announcements. You will need your school’s sign-in.
+      - radio "Import my own documents Read lecture notes, papers, or study materials stored on this Mac."
+      - strong: Import my own documents
+      - text: Read lecture notes, papers, or study materials stored on this Mac.
+      - radio "Explore with a sample No school account, downloads, or AI key needed." [checked]
+      - strong: Explore with a sample
+      - text: No school account, downloads, or AI key needed.
+  - contentinfo:
+    - button "Back"
+    - button "Continue"

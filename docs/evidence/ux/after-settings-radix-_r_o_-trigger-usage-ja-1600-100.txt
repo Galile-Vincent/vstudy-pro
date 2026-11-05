@@ -1,0 +1,71 @@
+- dialog "設定":
+  - heading "設定" [level=2]
+  - button "設定を閉じる"
+  - tablist "設定":
+    - tab "一般"
+    - tab "外観"
+    - tab "プロバイダー"
+    - tab "使用量" [selected]
+    - tab "ストレージ"
+    - tab "プライバシー"
+  - tabpanel "使用量":
+    - banner:
+      - heading "使用量" [level=2]
+    - region "使用量の設定":
+      - paragraph: API キーのアカウント残高は取得できません。「残り」は設定した月間予算やトークン上限の残量です。プロバイダーのレート制限は、報告された場合に別途表示します。
+      - region "トークン使用量の概要":
+        - heading "使用量の概要" [level=3]
+        - paragraph: このデバイスで VStudy が記録したすべてのプロバイダーとドキュメントです。
+        - combobox "使用量の期間": 全期間
+        - button "使用量を更新"
+        - text: 合計トークン数
+        - strong: "0"
+        - text: 0 件のモデル呼び出し
+        - term: 入力、
+        - definition: "0"
+        - term: 出力
+        - definition: "0"
+        - term: キャッシュ読み込み
+        - definition: "0"
+        - term: キャッシュ書き込み
+        - definition: "0"
+        - term: 推論
+        - definition: "0"
+        - text: 記録された費用
+        - strong: $0.000
+        - text: 報告された費用と見積額
+        - paragraph: この期間のモデル使用量はまだありません。メッセージを送信すると記録が始まります。
+        - paragraph: 入力にはキャッシュの読み書き、出力には推論を含みます。CLI の費用は API 相当の見積もりで、サブスクリプション料金ではありません。
+        - figure "日別トークン数 入力、 出力 · 最大0":
+          - strong: 日別トークン数
+          - text: 入力、 出力 · 最大0
+          - img "日別の入力と出力トークン数です。正確な値は日別合計の表で確認できます。"
+          - text: 2026-10-08 2026-11-06
+          - group: 日別合計
+        - paragraph: 合計は全期間、グラフは直近 30 日間を表示します。
+        - strong: 内訳
+        - combobox "使用量の集計単位": プロバイダー
+        - table:
+          - rowgroup:
+            - row "プロバイダー トークン数 呼び出し回数 費用":
+              - cell "プロバイダー"
+              - cell "トークン数"
+              - cell "呼び出し回数"
+              - cell "費用"
+          - rowgroup
+      - heading "プロバイダーのレート制限" [level=3]
+      - paragraph: レート制限の報告はまだありません。Codex CLI は exec で制限を報告せず、アカウント確認も利用できない場合があります。Claude の制限は報告時に表示します。
+      - heading "予算" [level=3]
+      - paragraph: トークンは単語の小さな断片です。予算を空欄にすると上限なしになります。警告の割合は月の上限が近いことを知らせます。
+      - text: 月間予算（米ドル）
+      - group "月間予算（米ドル）":
+        - spinbutton "月間予算（米ドル）"
+      - text: 月間トークン上限
+      - group "月間トークン上限":
+        - spinbutton "月間トークン上限"
+      - text: 警告する使用率（%）
+      - group "警告する使用率（%）":
+        - spinbutton "警告する使用率（%）": "80"
+      - group: 詳細設定：独自の料金
+      - button "使用量の設定を保存"
+      - button "CSV をエクスポート"

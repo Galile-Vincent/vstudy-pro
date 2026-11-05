@@ -1,0 +1,38 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - button "Help"
+  - button "Find a conversation"
+- main:
+  - region "Library":
+    - heading "Library" [level=1]
+    - paragraph: 0 documents
+    - heading "Your reading starts here" [level=2]
+    - paragraph: Import a PDF or text file, wait for it to open, then select a sentence and ask in Chat.
+    - button "Import document"
+    - button "Try a sample document"
+    - text: 0 documents loaded

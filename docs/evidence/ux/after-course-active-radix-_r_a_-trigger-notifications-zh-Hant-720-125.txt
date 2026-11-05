@@ -1,0 +1,73 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "顯示或隱藏文件庫" [expanded]
+  - text: 課程
+  - button "說明"
+  - button "尋找對話"
+- complementary "首次使用提示":
+  - group:
+    - strong: 先查看即將到期的作業
+  - button "觀看操作示範"
+  - button "不再顯示這則提示"
+- main:
+  - button "今天 / 讀書計畫"
+  - button "所有課程"
+  - paragraph: 下次上課所需的一切，都在這裡。
+  - button "連結學校"
+  - status
+  - strong: Alex Chen
+  - text: Example University · moodle.example.edu 已於 昨天 同步
+  - button "重新整理課程"
+  - button "解除學校連結"
+  - text: 1151 · CS210
+  - progressbar "已完成 64%"
+  - text: 1151 · CS210
+  - heading "資料結構與演算法的科學應用及實驗" [level=1]
+  - paragraph: 顯示快取內容 · 尚未同步
+  - paragraph: 陳教授
+  - paragraph: 資訊三乙
+  - button "在 Moodle 開啟"
+  - group: 原始課程名稱 資料結構與演算法 · Algorithms and Data Structures for Applied Scientific Research
+  - paragraph: 近期截止 · Prepare a research report explaining the experimental observations and conclusions · 後天
+  - tablist "課程分頁":
+    - tab "課程內容"
+    - tab "截止日期"
+    - tab "課程公告"
+    - tab "成績"
+    - tab "教材"
+    - tab "通知" [selected]
+  - tabpanel "通知":
+    - heading "通知" [level=2]
+    - article:
+      - heading "未讀 Materials for the next laboratory session" [level=3]:
+        - img "未讀"
+        - text: Materials for the next laboratory session
+      - time: 昨天
+      - paragraph: Read the lecture notes before class and bring your lab notebook.
+      - button "標示為已讀"
+      - button "說明我需要準備什麼"
+  - button "課程助理"

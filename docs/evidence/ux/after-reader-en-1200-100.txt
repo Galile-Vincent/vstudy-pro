@@ -1,0 +1,92 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- complementary "First-time tip":
+  - group:
+    - strong: Try selecting one sentence
+    - paragraph: Drag across text in the reader, then choose Ask about this. With the reader focused, Shift + Arrow also selects text. Your selection appears above Chat. Choose a model before sending. Open the conversation menu above Chat to search this document’s chats.
+  - button "Watch walkthroughs"
+  - button "Dismiss this tip permanently"
+- main:
+  - heading "Document library" [level=1]
+  - button "Library"
+  - button "Import document"
+  - text: Reading sample
+  - button "Conversations"
+  - button "New Chat"
+  - button "Help"
+  - text: Workspace connected
+  - button "Swap chat side"
+  - button "Open settings"
+  - region "Chat":
+    - status
+    - heading "A place to think together" [level=2]
+    - paragraph:
+      - group "What are the three ideas worth remembering?"
+    - button "Summarize this document"
+    - button "Explain the key ideas"
+    - button "Compare the main arguments"
+    - status
+    - paragraph: Using the whole document.
+    - textbox "Ask about your document":
+      - /placeholder: Ask about your document…
+    - combobox "Model": Fake (test only)
+    - combobox "Effort": Low
+    - button "Conversation usage": 0 tokens
+    - button "Send message" [disabled]
+    - paragraph: Grounded in your document. Check important details.
+  - separator "Resize panes"
+  - region "Document":
+    - text: en.md
+    - button "Delete document"
+    - button "Improve with AI"
+    - text: Markdown · markitdown Conversion looks incomplete?
+    - button "Improve with AI"
+    - document:
+      - heading "Small questions, deeper reading Use section Small questions, deeper reading" [level=1]:
+        - text: Small questions, deeper reading
+        - button "Use section Small questions, deeper reading": Use this section
+      - paragraph:
+        - text: "Reading is an active conversation with an idea. Pause after a paragraph and ask:"
+        - strong: What is the claim? What evidence supports it?
+        - button "Ask about this paragraph": Ask about this
+      - paragraph:
+        - text: A useful habit is to explain one idea in your own words. For example, instead of memorizing “spaced practice”, revisit a question tomorrow and again next week. The pause gives you a chance to retrieve what you remember.
+        - button "Ask about this paragraph": Ask about this
+      - heading "Try it Use section Try it" [level=2]:
+        - text: Try it
+        - button "Use section Try it": Use this section
+      - paragraph:
+        - text: Select the paragraph above and ask for a practical example. Then ask which assumptions deserve a closer look.
+        - button "Ask about this paragraph": Ask about this
+      - heading "一點中文 / A little Chinese Use section 一點中文 / A little Chinese" [level=2]:
+        - text: 一點中文 / A little Chinese
+        - button "Use section 一點中文 / A little Chinese": Use this section
+      - paragraph:
+        - text: 學習不只是記住答案，也是在練習提出好問題。把一個想法說給別人聽，常常能發現自己還不懂的地方。
+        - button "Ask about this paragraph": Ask about this
+      - paragraph:
+        - text: Learning includes asking better questions. Explaining an idea often reveals what we still want to understand.
+        - button "Ask about this paragraph": Ask about this

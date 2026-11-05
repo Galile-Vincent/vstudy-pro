@@ -1,0 +1,6 @@
+PASS quick-add and draft approval through production IPC; no blocks before approval; seven-day view after approval.
+PASS native-dialog calendar export contains block end times.
+PASS exam remains a proposal until approval; countdown and scope render; planner axe audit has no A/AA violations.
+PASS course agent emits a typed task proposal; no task before approval; approved task has agent provenance.
+PASS material-selection approval starts the quiz request only after confirmation. Model is the deterministic fake provider.
+PASS persisted tasks across reloads, three languages, Ocean/Grove/Iris light and dark themes, narrow layout, and no renderer page errors.

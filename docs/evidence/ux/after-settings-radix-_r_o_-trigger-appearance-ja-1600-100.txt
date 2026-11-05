@@ -1,0 +1,82 @@
+- dialog "設定":
+  - heading "設定" [level=2]
+  - button "設定を閉じる"
+  - tablist "設定":
+    - tab "一般"
+    - tab "外観" [selected]
+    - tab "プロバイダー"
+    - tab "使用量"
+    - tab "ストレージ"
+    - tab "プライバシー"
+  - tabpanel "外観":
+    - banner:
+      - heading "外観" [level=2]
+    - region "カラーモード":
+      - heading "カラーモード" [level=3]
+      - button "システム" [pressed]
+      - button "ライト"
+      - button "ダーク"
+    - region "テーマ":
+      - heading "テーマ" [level=3]
+      - button "テーマを作成"
+      - button "テーマを追加"
+      - button "VStudy" [pressed]
+      - button "VStudy を書き出す"
+      - button "オーシャン"
+      - button "Ocean を書き出す"
+      - button "グローブ"
+      - button "Grove を書き出す"
+      - button "エンバー"
+      - button "Ember を書き出す"
+      - button "アイリス"
+      - button "Iris を書き出す"
+      - button "ローズ"
+      - button "Rose を書き出す"
+      - button "スレート"
+      - button "Slate を書き出す"
+      - button "ペーパー"
+      - button "Paper を書き出す"
+      - button "ハイコントラスト"
+      - button "High contrast を書き出す"
+    - heading "インターフェース" [level=3]
+    - text: コントラスト
+    - paragraph: 文字、境界線、フォーカスのコントラストを高めます。100% がアクセシビリティの基準です。
+    - group "コントラスト 文字、境界線、フォーカスのコントラストを高めます。100% がアクセシビリティの基準です。":
+      - status "100": 100%
+      - slider "コントラスト": "100"
+    - text: ガラスの不透明度
+    - paragraph: 値を高くするとメニュー、ダイアログ、入力欄が不透明になります。
+    - group "ガラスの不透明度 値を高くするとメニュー、ダイアログ、入力欄が不透明になります。":
+      - status "80": 80%
+      - slider "ガラスの不透明度": "80"
+    - text: 文字サイズ
+    - group "文字サイズ":
+      - radiogroup "文字サイズ":
+        - radio "100%" [checked]
+        - radio "125%"
+        - radio "150%"
+        - radio "200%"
+    - text: 表示密度
+    - group "表示密度":
+      - radiogroup "表示密度":
+        - radio "標準" [checked]
+        - radio "コンパクト"
+    - text: 閲覧フォント
+    - group "閲覧フォント":
+      - combobox "閲覧フォント": システム
+    - text: 閲覧文字サイズ
+    - group "閲覧文字サイズ":
+      - radiogroup "閲覧文字サイズ":
+        - radio "小"
+        - radio "中" [checked]
+        - radio "大"
+        - radio "特大"
+    - text: マテリアル
+    - group "マテリアル":
+      - radiogroup "マテリアル":
+        - radio "ガラス" [checked]
+        - radio "ソリッド"
+    - heading "読書ノート" [level=3]
+    - paragraph: The quick brown fox jumps over the lazy dog. 字體預覽 Aa 你好 日本語
+    - paragraph: この文書について質問
+    - text: 選択した文章

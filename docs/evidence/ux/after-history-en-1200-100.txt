@@ -1,0 +1,46 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - text: History
+  - button "Help"
+  - button "Find a conversation": Find a conversation ⌘/Ctrl K
+- main:
+  - heading "History" [level=1]
+  - paragraph: Find your questions, answers and ideas across every chat.
+  - region "History":
+    - searchbox "Search chat history"
+    - button "All" [pressed]
+    - button "By course"
+    - button "By document"
+    - button "General"
+    - button "Pinned"
+    - group: More filters
+    - button "New Chat Nov 6":
+      - strong: New Chat
+      - time: Nov 6
+    - paragraph: Reading sample · fake
+    - button "More options"

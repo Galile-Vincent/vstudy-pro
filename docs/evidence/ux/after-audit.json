@@ -1,0 +1,1425 @@
+{
+  "captures": [
+    {
+      "name": "welcome-guide-720",
+      "path": "after-welcome-guide-720.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg onboarding",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "welcome-guide-1200",
+      "path": "after-welcome-guide-1200.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg onboarding",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "welcome-guide-1600",
+      "path": "after-welcome-guide-1600.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg onboarding",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "guide-pseudo-min",
+      "path": "after-guide-pseudo-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg onboarding",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "guide-step-1-min",
+      "path": "after-guide-step-1-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg onboarding",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "guide-step-2-min",
+      "path": "after-guide-step-2-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg onboarding",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "guide-step-3-min",
+      "path": "after-guide-step-3-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg onboarding",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "guide-step-4-min",
+      "path": "after-guide-step-4-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg onboarding",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "guide-step-5-min",
+      "path": "after-guide-step-5-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg onboarding",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "home-fresh-min",
+      "path": "after-home-fresh-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "library-empty-min",
+      "path": "after-library-empty-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "courses-empty-min",
+      "path": "after-courses-empty-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "connect-min",
+      "path": "after-connect-min.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg moodle-connect",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "home-en-1200-100",
+      "path": "after-home-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "welcome-en-1200-100",
+      "path": "after-welcome-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "library-en-1200-100",
+      "path": "after-library-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "reader-en-1200-100",
+      "path": "after-reader-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "history-en-1200-100",
+      "path": "after-history-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "courses-en-1200-100",
+      "path": "after-courses-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "course-content-en-1200-100",
+      "path": "after-course-content-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "module-en-1200-100",
+      "path": "after-module-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500 inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm moodle-detail-sheet",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-content-en-1200-100",
+      "path": "after-course-active-radix-_r_a_-trigger-content-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-deadlines-en-1200-100",
+      "path": "after-course-active-radix-_r_a_-trigger-deadlines-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-announcements-en-1200-100",
+      "path": "after-course-active-radix-_r_a_-trigger-announcements-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-grades-en-1200-100",
+      "path": "after-course-active-radix-_r_a_-trigger-grades-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-files-en-1200-100",
+      "path": "after-course-active-radix-_r_a_-trigger-files-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-notifications-en-1200-100",
+      "path": "after-course-active-radix-_r_a_-trigger-notifications-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-assistant-en-1200-100",
+      "path": "after-course-assistant-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "planner-en-1200-100",
+      "path": "after-planner-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-general-en-1200-100",
+      "path": "after-settings-radix-_r_o_-trigger-general-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-appearance-en-1200-100",
+      "path": "after-settings-radix-_r_o_-trigger-appearance-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-providers-en-1200-100",
+      "path": "after-settings-radix-_r_o_-trigger-providers-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-usage-en-1200-100",
+      "path": "after-settings-radix-_r_o_-trigger-usage-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-storage-en-1200-100",
+      "path": "after-settings-radix-_r_o_-trigger-storage-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-privacy-en-1200-100",
+      "path": "after-settings-radix-_r_o_-trigger-privacy-en-1200-100.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "home-zh-Hant-720-125",
+      "path": "after-home-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "welcome-zh-Hant-720-125",
+      "path": "after-welcome-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "library-zh-Hant-720-125",
+      "path": "after-library-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "reader-zh-Hant-720-125",
+      "path": "after-reader-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "history-zh-Hant-720-125",
+      "path": "after-history-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "courses-zh-Hant-720-125",
+      "path": "after-courses-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "course-content-zh-Hant-720-125",
+      "path": "after-course-content-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "module-zh-Hant-720-125",
+      "path": "after-module-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500 inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm moodle-detail-sheet",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-content-zh-Hant-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-content-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-deadlines-zh-Hant-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-deadlines-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-announcements-zh-Hant-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-announcements-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-grades-zh-Hant-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-grades-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-files-zh-Hant-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-files-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-notifications-zh-Hant-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-notifications-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-assistant-zh-Hant-720-125",
+      "path": "after-course-assistant-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "planner-zh-Hant-720-125",
+      "path": "after-planner-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-general-zh-Hant-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-general-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-appearance-zh-Hant-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-appearance-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-providers-zh-Hant-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-providers-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-usage-zh-Hant-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-usage-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-storage-zh-Hant-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-storage-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-privacy-zh-Hant-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-privacy-zh-Hant-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "home-ja-1600-100",
+      "path": "after-home-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "welcome-ja-1600-100",
+      "path": "after-welcome-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "library-ja-1600-100",
+      "path": "after-library-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "reader-ja-1600-100",
+      "path": "after-reader-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "history-ja-1600-100",
+      "path": "after-history-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "courses-ja-1600-100",
+      "path": "after-courses-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "course-content-ja-1600-100",
+      "path": "after-course-content-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "module-ja-1600-100",
+      "path": "after-module-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500 inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm moodle-detail-sheet",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-content-ja-1600-100",
+      "path": "after-course-active-radix-_r_a_-trigger-content-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-deadlines-ja-1600-100",
+      "path": "after-course-active-radix-_r_a_-trigger-deadlines-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-announcements-ja-1600-100",
+      "path": "after-course-active-radix-_r_a_-trigger-announcements-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-grades-ja-1600-100",
+      "path": "after-course-active-radix-_r_a_-trigger-grades-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-files-ja-1600-100",
+      "path": "after-course-active-radix-_r_a_-trigger-files-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-notifications-ja-1600-100",
+      "path": "after-course-active-radix-_r_a_-trigger-notifications-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-assistant-ja-1600-100",
+      "path": "after-course-assistant-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "planner-ja-1600-100",
+      "path": "after-planner-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-general-ja-1600-100",
+      "path": "after-settings-radix-_r_o_-trigger-general-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-appearance-ja-1600-100",
+      "path": "after-settings-radix-_r_o_-trigger-appearance-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-providers-ja-1600-100",
+      "path": "after-settings-radix-_r_o_-trigger-providers-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-usage-ja-1600-100",
+      "path": "after-settings-radix-_r_o_-trigger-usage-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-storage-ja-1600-100",
+      "path": "after-settings-radix-_r_o_-trigger-storage-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-privacy-ja-1600-100",
+      "path": "after-settings-radix-_r_o_-trigger-privacy-ja-1600-100.png",
+      "width": 1600,
+      "height": 928,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "home-en-XA-720-125",
+      "path": "after-home-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "welcome-en-XA-720-125",
+      "path": "after-welcome-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "library-en-XA-720-125",
+      "path": "after-library-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "reader-en-XA-720-125",
+      "path": "after-reader-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "history-en-XA-720-125",
+      "path": "after-history-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "courses-en-XA-720-125",
+      "path": "after-courses-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "course-content-en-XA-720-125",
+      "path": "after-course-content-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "module-en-XA-720-125",
+      "path": "after-module-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500 inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm moodle-detail-sheet",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-content-en-XA-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-content-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-deadlines-en-XA-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-deadlines-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-announcements-en-XA-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-announcements-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-grades-en-XA-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-grades-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-files-en-XA-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-files-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-active-radix-_r_a_-trigger-notifications-en-XA-720-125",
+      "path": "after-course-active-radix-_r_a_-trigger-notifications-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "course-assistant-en-XA-720-125",
+      "path": "after-course-assistant-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "planner-en-XA-720-125",
+      "path": "after-planner-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-general-en-XA-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-general-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-appearance-en-XA-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-appearance-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-providers-en-XA-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-providers-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-usage-en-XA-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-usage-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-storage-en-XA-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-storage-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "settings-radix-_r_o_-trigger-privacy-en-XA-720-125",
+      "path": "after-settings-radix-_r_o_-trigger-privacy-en-XA-720-125.png",
+      "width": 720,
+      "height": 448,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "theme-ocean-light",
+      "path": "after-theme-ocean-light.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "appearance-ocean-light",
+      "path": "after-appearance-ocean-light.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "theme-ocean-dark",
+      "path": "after-theme-ocean-dark.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "appearance-ocean-dark",
+      "path": "after-appearance-ocean-dark.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "theme-grove-light",
+      "path": "after-theme-grove-light.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "appearance-grove-light",
+      "path": "after-appearance-grove-light.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "theme-grove-dark",
+      "path": "after-theme-grove-dark.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "appearance-grove-dark",
+      "path": "after-appearance-grove-dark.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "theme-ember-light",
+      "path": "after-theme-ember-light.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "appearance-ember-light",
+      "path": "after-appearance-ember-light.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "theme-ember-dark",
+      "path": "after-theme-ember-dark.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "appearance-ember-dark",
+      "path": "after-appearance-ember-dark.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "theme-iris-light",
+      "path": "after-theme-iris-light.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "appearance-iris-light",
+      "path": "after-appearance-iris-light.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "theme-iris-dark",
+      "path": "after-theme-iris-dark.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "appearance-iris-dark",
+      "path": "after-appearance-iris-dark.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [
+        {
+          "cls": "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg settings-dialog",
+          "outside": false
+        }
+      ],
+      "accessibilityChecked": false,
+      "violations": []
+    },
+    {
+      "name": "courses-expired",
+      "path": "after-courses-expired.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    },
+    {
+      "name": "courses-error",
+      "path": "after-courses-error.png",
+      "width": 1200,
+      "height": 768,
+      "overflow": [],
+      "dialogs": [],
+      "accessibilityChecked": true,
+      "violations": []
+    }
+  ],
+  "errors": []
+}

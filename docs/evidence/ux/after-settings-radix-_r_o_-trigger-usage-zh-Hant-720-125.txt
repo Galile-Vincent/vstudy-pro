@@ -1,0 +1,71 @@
+- dialog "設定":
+  - heading "設定" [level=2]
+  - button "關閉設定"
+  - tablist "設定":
+    - tab "一般"
+    - tab "外觀"
+    - tab "供應商"
+    - tab "用量" [selected]
+    - tab "儲存空間"
+    - tab "隱私"
+  - tabpanel "用量":
+    - banner:
+      - heading "用量" [level=2]
+    - region "用量設定":
+      - paragraph: 服務供應商不提供 API 金鑰的帳戶餘額。「剩餘」是指你設定的每月預算或 token 上限。服務供應商的速率限制另外顯示，且僅在收到回報時提供。
+      - region "token 用量總覽":
+        - heading "用量總覽" [level=3]
+        - paragraph: VStudy 在此裝置上記錄的所有服務供應商與文件。
+        - combobox "用量期間": 全部期間
+        - button "重新整理用量"
+        - text: token 總用量
+        - strong: "0"
+        - text: 0 次模型呼叫紀錄
+        - term: 輸入，
+        - definition: "0"
+        - term: 輸出
+        - definition: "0"
+        - term: 快取讀取
+        - definition: "0"
+        - term: 快取寫入
+        - definition: "0"
+        - term: 推理
+        - definition: "0"
+        - text: 已記錄費用
+        - strong: US$0.000
+        - text: 回報及估算費用
+        - paragraph: 此期間尚無模型用量紀錄。傳送訊息後即可開始記錄。
+        - paragraph: 輸入包含快取讀寫，輸出包含推理。CLI 費用為 API 等值估算，並非訂閱費。
+        - figure "每日 token 用量 輸入， 輸出 · 最高0":
+          - strong: 每日 token 用量
+          - text: 輸入， 輸出 · 最高0
+          - img "每日輸入與輸出 token 用量，確切數值請見每日合計表格。"
+          - text: 2026-10-08 2026-11-06
+          - group: 每日合計
+        - paragraph: 合計涵蓋全部期間，圖表顯示最近 30 個日曆日。
+        - strong: 明細
+        - combobox "用量分組方式": 服務供應商
+        - table:
+          - rowgroup:
+            - row "服務供應商 token 用量 呼叫次數 費用":
+              - cell "服務供應商"
+              - cell "token 用量"
+              - cell "呼叫次數"
+              - cell "費用"
+          - rowgroup
+      - heading "服務供應商速率限制" [level=3]
+      - paragraph: 尚無速率限制資訊。Codex CLI 不會透過 exec 回報限制，帳戶查詢也可能無法使用。Claude 的限制會在收到回報時顯示。
+      - heading "預算" [level=3]
+      - paragraph: Token 是文字的小片段。預算留白表示不設上限。警告百分比會在接近每月上限時提醒你。
+      - text: 每月預算（美元）
+      - group "每月預算（美元）":
+        - spinbutton "每月預算（美元）"
+      - text: 每月 token 上限
+      - group "每月 token 上限":
+        - spinbutton "每月 token 上限"
+      - text: 警告門檻（%）
+      - group "警告門檻（%）":
+        - spinbutton "警告門檻（%）": "80"
+      - group: 進階：自訂價格
+      - button "儲存用量設定"
+      - button "匯出 CSV"

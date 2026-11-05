@@ -1,0 +1,67 @@
+- link "［Skïp tö cöntënt～～～～～～］":
+  - /url: "#shell-content"
+- complementary "［Döcümënt lïbráry～～～～～～～］":
+  - text: ［VStüdy Prö～～～～］
+  - list:
+    - listitem:
+      - button "［Hömë～～］"
+    - listitem:
+      - button "［Lïbráry～～～］"
+    - listitem:
+      - button "［Cöürsës～～～］"
+    - listitem:
+      - button "［Hïstöry～～～］"
+  - navigation "［Smárt vïëws～～～～～］":
+    - button "［Áll döcümënts～～～～～～］"
+    - button "［Rëcënt～～～］"
+    - button "［Pïnnëd～～～］"
+    - button "［Ünfïlëd～～～］"
+    - button "［Cönvërtïng / Fáïlëd～～～～～～～～］"
+  - heading "［Földërs～～～］" [level=2]
+  - button "［Nëw földër～～～～］"
+  - paragraph: ［Nö földërs yët～～～～～～］
+  - list:
+    - listitem:
+      - button "［Sëttïngs～～～～］"
+- banner:
+  - button "［Tögglë döcümënt lïbráry～～～～～～～～～～］" [expanded]
+  - text: ［Cöürsës～～～］
+  - button "［Hëlp～～］"
+  - button "［Fïnd á cönvërsátïön～～～～～～～～］"
+- complementary "［Fïrst-tïmë tïp～～～～～～］":
+  - group:
+    - strong: ［Stárt wïth whát ïs düë nëxt～～～～～～～～～～～］
+  - button "［Wátch wálkthröüghs～～～～～～～～］"
+  - button "［Dïsmïss thïs tïp përmánëntly～～～～～～～～～～～～］"
+- main:
+  - button "［Tödáy / Plánnër～～～～～～］"
+  - button "［Áll cöürsës～～～～～］"
+  - paragraph: ［Ëvërythïng yöü nëëd för yöür nëxt cláss, tögëthër.～～～～～～～～～～～～～～～～～～～～］
+  - button "［Cönnëct schööl～～～～～～］"
+  - status
+  - strong: Alex Chen
+  - text: Example University · moodle.example.edu ［Syncëd yesterday～～～～～～］
+  - button "［Rëfrësh cöürsës～～～～～～］"
+  - button "［Dïscönnëct schööl～～～～～～～］"
+  - text: 1151 · CS210
+  - progressbar "［64% cömplëtë～～～～～～～～］"
+  - text: 1151 · CS210
+  - heading "Algorithms and Data Structures for Applied Scientific Research" [level=1]
+  - paragraph: ［Shöwïng cáchëd cöntënt～～～～～～～～～］ · ［Nöt syncëd yët～～～～～～］
+  - paragraph: Professor Alexandra Chen
+  - paragraph: 資訊三乙
+  - button "［Öpën ïn Möödlë～～～～～～］"
+  - group: ［Örïgïnál cöürsë námë～～～～～～～～］ 資料結構與演算法 · Algorithms and Data Structures for Applied Scientific Research
+  - paragraph: ［Üp nëxt～～～］ · Prepare a research report explaining the experimental observations and conclusions · in 2 days
+  - tablist "［Cöürsë sëctïöns～～～～～～］":
+    - tab "［Cöntënt～～～］"
+    - tab "［Dëádlïnës～～～～］"
+    - tab "［Ánnöüncëmënts～～～～～～］"
+    - tab "［Grádës～～～］"
+    - tab "［Fïlës～～］" [selected]
+    - tab "［Nötïfïcátïöns～～～～～～］"
+  - tabpanel "［Fïlës～～］":
+    - heading "［Fïlës～～］" [level=2]
+    - paragraph: ［Öpën á fïlë tö rëád, ánnötátë, ánd ëxplörë ït wïth yöür döcümënt ássïstánt.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - paragraph: ［Nö fïlës ïn thïs cöürsë yët.～～～～～～～～～～～～］
+  - button "［Cöürsë ássïstánt～～～～～～～］"

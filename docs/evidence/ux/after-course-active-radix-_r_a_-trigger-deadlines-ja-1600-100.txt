@@ -1,0 +1,80 @@
+- link "メインコンテンツへ移動":
+  - /url: "#shell-content"
+- complementary "ドキュメントライブラリ":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "ホーム"
+    - listitem:
+      - button "ライブラリ"
+    - listitem:
+      - button "コース"
+    - listitem:
+      - button "履歴"
+  - navigation "スマートビュー":
+    - button "すべてのドキュメント"
+    - button "最近使った項目"
+    - button "ピン留め"
+    - button "未分類"
+    - button "変換中・失敗"
+  - heading "フォルダ" [level=2]
+  - button "新規フォルダ"
+  - paragraph: フォルダはまだありません
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "ライブラリの表示を切り替え" [expanded]
+  - text: コース
+  - button "ヘルプ"
+  - button "会話を探す": 会話を探す ⌘/Ctrl K
+- complementary "初回のヒント":
+  - group:
+    - strong: まず次の締め切りを確認
+    - paragraph: 何も表示されない場合は学校を接続します。同期後、「締め切り間近」に今後 7 日間の課題が表示されます。授業を開くと締め切り一覧と授業アシスタントを使えます。AI の回答にある日付は学校の情報で確認してください。
+  - button "操作ガイドを見る"
+  - button "このヒントを今後表示しない"
+- main:
+  - button "今日 / 学習プラン"
+  - button "すべてのコース"
+  - paragraph: 次の授業に必要な情報を、ひとつに。
+  - button "学校に接続"
+  - status
+  - strong: Alex Chen
+  - text: Example University · moodle.example.edu 昨日 に同期
+  - button "コースを更新"
+  - button "学校との接続を解除"
+  - text: 1151 · CS210
+  - progressbar "64% 完了"
+  - text: 1151 · CS210
+  - heading "資料結構與演算法的科學應用及實驗" [level=1]
+  - paragraph: キャッシュの内容を表示中 · 未同期
+  - paragraph: 陳教授
+  - paragraph: 資訊三乙
+  - button "Moodle で開く"
+  - group: 元のコース名 資料結構與演算法 · Algorithms and Data Structures for Applied Scientific Research
+  - paragraph: 次の締め切り · Prepare a research report explaining the experimental observations and conclusions · 明後日
+  - tablist "コースのセクション":
+    - tab "コンテンツ"
+    - tab "締め切り" [selected]
+    - tab "お知らせ"
+    - tab "成績"
+    - tab "教材"
+    - tab "お知らせ"
+  - tabpanel "締め切り":
+    - heading "締め切り" [level=2]
+    - button "カレンダーに追加"
+    - heading "期限切れ 0" [level=3]
+    - paragraph: 締め切りはありません。ひと息つきましょう。
+    - heading "今週 1" [level=3]
+    - strong: Prepare a research report explaining the experimental observations and conclusions
+    - text: 課題
+    - time: 11月8日 0:31
+    - text: 明後日
+    - button "Prepare a research report explaining the experimental observations and conclusions のリマインダーを設定"
+    - button "Prepare a research report explaining the experimental observations and conclusions をカレンダーに追加"
+    - heading "今後 0" [level=3]
+    - paragraph: 締め切りはありません。ひと息つきましょう。
+    - heading "提出済み 0" [level=3]
+    - paragraph: 締め切りはありません。ひと息つきましょう。
+  - button "コースアシスタント"

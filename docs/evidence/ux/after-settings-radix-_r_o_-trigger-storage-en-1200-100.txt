@@ -1,0 +1,57 @@
+- dialog "Settings":
+  - heading "Settings" [level=2]
+  - button "Close settings"
+  - tablist "Settings":
+    - tab "General"
+    - tab "Appearance"
+    - tab "Providers"
+    - tab "Usage"
+    - tab "Storage" [selected]
+    - tab "Privacy"
+  - tabpanel "Storage":
+    - banner:
+      - heading "Storage" [level=2]
+    - paragraph: Manage local files and keep a recoverable copy of your library.
+    - heading "Space on disk" [level=3]
+    - text: Database
+    - group "Database":
+      - status: 1.4 MiB
+    - text: Original documents
+    - group "Original documents":
+      - status: 800 B
+    - text: Converted files
+    - group "Converted files":
+      - status: 800 B
+    - text: Application cache and converter
+    - group "Application cache and converter":
+      - status: 21.2 MiB
+    - text: Settings and encrypted secrets
+    - group "Settings and encrypted secrets":
+      - status: 0 B
+    - text: Recovery copies
+    - group "Recovery copies":
+      - status: 0 B
+    - text: Other application data
+    - group "Other application data":
+      - status: 239 KiB
+    - paragraph: Moodle response payloads use 0 B inside the database total.
+    - text: Clear Moodle cache
+    - paragraph: "Response cache limit: 32 MiB. Clearing it keeps courses, reminders, conversations, and imported documents."
+    - 'group "Clear Moodle cache Response cache limit: 32 MiB. Clearing it keeps courses, reminders, conversations, and imported documents."':
+      - button "Clear Moodle cache"
+    - text: Clear converted files
+    - paragraph: Remove generated Markdown and AI improvements. Original documents and conversations stay. Retry conversion from each document to read it again.
+    - group "Clear converted files Remove generated Markdown and AI improvements. Original documents and conversations stay. Retry conversion from each document to read it again.":
+      - button "Clear converted files"
+    - heading "Backup and recovery" [level=3]
+    - paragraph: Backups include the database and library with an integrity manifest. They contain private coursework and conversations. Keep them somewhere safe. Passwords, tokens, provider settings, and converter installations are excluded.
+    - text: Export backup
+    - group "Export backup":
+      - button "Export backup"
+    - text: Restore backup
+    - group "Restore backup":
+      - button "Restore backup"
+    - text: Check database integrity
+    - group "Check database integrity":
+      - button "Check database integrity"
+    - status

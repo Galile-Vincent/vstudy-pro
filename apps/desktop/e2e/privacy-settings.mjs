@@ -14,9 +14,11 @@ try {
  for(const language of ['en','zh-Hant','ja']) for(const theme of ['light','dark']) for(const width of [720,1200]) {
   await app.evaluate(({BrowserWindow},width)=>BrowserWindow.getAllWindows()[0].setSize(width,800),width);
   await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});
-  await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language,onboardingCompleted:false});window.localStorage.setItem('vstudy-route',JSON.stringify({view:'home'}));},language);await page.reload();
+  await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language,onboardingCompleted:false});window.localStorage.removeItem('vstudy-onboarding-v1');window.localStorage.setItem('vstudy-route',JSON.stringify({view:'home'}));},language);await page.reload();
   await page.locator('.onboarding[data-state=open]').waitFor();await page.locator('.onboarding footer button').last().click();
-  const toggles=page.locator('.onboarding .provider-row [role=checkbox]');await toggles.first().waitFor();assert.equal(await toggles.count(),3);for(const toggle of await toggles.all())assert.equal(await toggle.isChecked(),false);
+  assert.equal(await page.locator('.onboarding input[type=password]').count(),0);
+  const cliProviders=await page.evaluate(()=>window.desktop.invoke('providers:list',{}).then(providers=>providers.filter(provider=>provider.config.kind==='cli')));
+  assert.equal(cliProviders.length,3);assert.ok(cliProviders.every(provider=>!provider.config.enabled));
   for(const screen of ['onboarding','providers','privacy']) {
    if(screen==='providers') {await page.keyboard.press('Escape');await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'})));await page.reload();await page.getByTestId('bridge-status').waitFor({state:'attached'});await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[data-state=open]').waitFor();await page.locator('.settings-tabs [role=tab]').nth(2).click();}
    if(screen==='privacy')await page.locator('.settings-tabs [role=tab]').last().click();

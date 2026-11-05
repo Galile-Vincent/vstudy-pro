@@ -1,0 +1,75 @@
+- link "［Skïp tö cöntënt～～～～～～］":
+  - /url: "#shell-content"
+- complementary "［Döcümënt lïbráry～～～～～～～］":
+  - text: ［VStüdy Prö～～～～］
+  - list:
+    - listitem:
+      - button "［Hömë～～］"
+    - listitem:
+      - button "［Lïbráry～～～］"
+    - listitem:
+      - button "［Cöürsës～～～］"
+    - listitem:
+      - button "［Hïstöry～～～］"
+  - navigation "［Smárt vïëws～～～～～］":
+    - button "［Áll döcümënts～～～～～～］"
+    - button "［Rëcënt～～～］"
+    - button "［Pïnnëd～～～］"
+    - button "［Ünfïlëd～～～］"
+    - button "［Cönvërtïng / Fáïlëd～～～～～～～～］"
+  - heading "［Földërs～～～］" [level=2]
+  - button "［Nëw földër～～～～］"
+  - paragraph: ［Nö földërs yët～～～～～～］
+  - list:
+    - listitem:
+      - button "［Sëttïngs～～～～］"
+- banner:
+  - button "［Tögglë döcümënt lïbráry～～～～～～～～～～］" [expanded]
+  - text: ［Hömë～～］
+  - button "［Hëlp～～］"
+  - button "［Fïnd á cönvërsátïön～～～～～～～～］"
+- main:
+  - heading "［Gööd mörnïng～～～～～］" [level=1]
+  - paragraph:
+    - group "［Á lïttlë cürïösïty göës á löng wáy.～～～～～～～～～～～～～～］"
+  - button "［Höw tö üsë～～～～］ · ［Try ït～～～］"
+  - region "［Gëttïng stártëd～～～～～～］":
+    - heading "［Gëttïng stártëd～～～～～～］" [level=2]
+    - text: ［1 öf 4 cömplëtë～～～～～～～～～～～～～～］
+    - paragraph: ［Á fëw üsëfül fïrst stëps. Rëöpën ány öf thëm whënëvër yöü nëëd á rëmïndër.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - list:
+      - listitem:
+        - button "［Chöösë yöür stártïng pöïnt～～～～～～～～～～～］"
+      - listitem:
+        - button "［Ádd á döcümënt ör sámplë～～～～～～～～～～］ ［Cömplëtëd～～～～］"
+      - listitem:
+        - button "［Föllöw á wálkthröügh～～～～～～～～］"
+      - listitem:
+        - button "［Fïnd Hëlp ánd shörtcüts～～～～～～～～～～］"
+    - button "［Rësümë sëtüp～～～～～］"
+  - region "［Brïng á döcümënt～～～～～～～］":
+    - heading "［Brïng á döcümënt～～～～～～～］" [level=2]
+    - paragraph: ［Dröp á fïlë hërë. Rëád, sëlëct á pásságë, ánd ëxplörë ït tögëthër.～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - paragraph: ［PDF, DÖCX, XLSX, PPTX, HTML, CSV, Márkdöwn, ör tëxt. Üp tö 50 MB për fïlë. Scánnëd PDFs árë nöt süppörtëd.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - button "［Chöösë á fïlë～～～～～～］"
+    - button "［Try á sámplë döcümënt～～～～～～～～～］"
+  - region "［Cöntïnüë rëádïng～～～～～～～］":
+    - heading "［Cöntïnüë rëádïng～～～～～～～］" [level=2]
+    - article:
+      - heading "Reading sample" [level=3]
+      - 'button "［Cöntïnüë rëádïng～～～～～～～］: Reading sample"': ［Cöntïnüë rëádïng～～～～～～～］
+  - region "［Yöür stüdy rhythm～～～～～～～］":
+    - heading "［Yöür stüdy rhythm～～～～～～～］" [level=2]
+    - strong: ［1 dáy～～～～～～～］
+    - paragraph: ［Á lïttlë lëárnïng, álrëády párt öf tödáy.～～～～～～～～～～～～～～～～～］
+    - list:
+      - listitem "2026-10-31": "S ［2026-10-31: nö stüdy rëcördëd～～～～～～～～～～～］"
+      - listitem "2026-11-01": "S ［2026-11-01: nö stüdy rëcördëd～～～～～～～～～～～］"
+      - listitem "2026-11-02": "M ［2026-11-02: nö stüdy rëcördëd～～～～～～～～～～～］"
+      - listitem "2026-11-03": "T ［2026-11-03: nö stüdy rëcördëd～～～～～～～～～～～］"
+      - listitem "2026-11-04": "W ［2026-11-04: nö stüdy rëcördëd～～～～～～～～～～～］"
+      - listitem "2026-11-05": "T ［2026-11-05: nö stüdy rëcördëd～～～～～～～～～～～］"
+      - listitem "2026-11-06": "F ［2026-11-06: stüdïëd～～～～～～～］"
+    - text: "［Bëst rhythm: 1 dáy～～～～～～～～～～～～］"
+  - region "［Rëcënt áctïvïty～～～～～～］":
+    - group: ［Rëcënt áctïvïty～～～～～～］

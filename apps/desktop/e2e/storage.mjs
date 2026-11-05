@@ -1,4 +1,5 @@
 /** Verify storage controls in one isolated Electron instance, including a real restart restore. */
+import { waitForDocumentStatus } from './helpers/document-status.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
@@ -27,7 +28,7 @@ try {
   let page=await launch();
   await app.evaluate(({dialog},zip)=>{dialog.showSaveDialog=async()=>({canceled:false,filePath:zip});dialog.showOpenDialog=async()=>({canceled:false,filePaths:[zip]});dialog.showMessageBox=async()=>({response:1,checkboxChecked:false});},zip);
   const imported=await page.evaluate(()=>window.desktop.invoke('documents:importSample',{language:'en'}));
-  await page.waitForFunction(async id=>(await window.desktop.invoke('documents:get',{documentId:id}))?.status==='ready',imported.id);
+  await waitForDocumentStatus(page, imported.id);
   await writeFile(join(evidence,'import.json'),JSON.stringify(imported,null,2));
   const original=await page.evaluate(id=>window.desktop.invoke('documents:read',{documentId:id}),imported.id);
   for(const language of ['en','zh-Hant','ja'])for(const theme of ['light','dark']){
@@ -47,7 +48,7 @@ try {
   await panel.getByRole('button',{name:strings.export,exact:true}).click();await panel.getByRole('status').filter({hasText:strings.done}).waitFor();
   const archiveCheck=execFileSync('/usr/bin/unzip',['-t',zip],{encoding:'utf8'});assert.ok(archiveCheck.includes('No errors detected'));
   await panel.getByRole('button',{name:strings.clear_converted,exact:true}).click();
-  await page.waitForFunction(async id=>(await window.desktop.invoke('documents:get',{documentId:id}))?.status==='failed',imported.id);
+  await waitForDocumentStatus(page, imported.id, 'failed');
   await panel.getByRole('button',{name:strings.clear_cache,exact:true}).click();await panel.getByRole('status').filter({hasText:strings.done}).waitFor();
   await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,chatSide:'left'});});
   await panel.getByRole('button',{name:strings.restore,exact:true}).click();await panel.getByRole('status').filter({hasText:strings.scheduled}).waitFor();

@@ -1,0 +1,159 @@
+- link "メインコンテンツへ移動":
+  - /url: "#shell-content"
+- complementary "ドキュメントライブラリ":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "ホーム"
+    - listitem:
+      - button "ライブラリ"
+    - listitem:
+      - button "コース"
+    - listitem:
+      - button "履歴"
+  - navigation "スマートビュー":
+    - button "すべてのドキュメント"
+    - button "最近使った項目"
+    - button "ピン留め"
+    - button "未分類"
+    - button "変換中・失敗"
+  - heading "フォルダ" [level=2]
+  - button "新規フォルダ"
+  - paragraph: フォルダはまだありません
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "ライブラリの表示を切り替え" [expanded]
+  - text: VStudy Pro とは？
+  - button "ヘルプ"
+  - button "会話を探す": 会話を探す ⌘/Ctrl K
+- main "VStudy Pro の紹介":
+  - button "アニメーションを停止"
+  - button "閉じる"
+  - navigation "セクション":
+    - button "「概要」へ移動"
+    - button "「デモ」へ移動"
+    - button "「できること」へ移動"
+    - button "「対象」へ移動"
+    - button "「モデル」へ移動"
+    - button "「データ」へ移動"
+    - button "「はじめる」へ移動"
+  - region "読んだところから、ひとつずつ理解する。":
+    - paragraph: Mac で使う、AI 読書パートナー
+    - heading "読んだところから、ひとつずつ理解する。" [level=1]
+    - paragraph: 対応文書を開き、文章を選んで AI モデルに質問できます。ライブラリは Mac に保存されます。質問、会話履歴、文書のメタデータ、選択した文章を選んだプロバイダーへ送信します。選択がない場合は見出しと冒頭の抜粋を含めます。
+    - button "続きを読む"
+    - button "使い方を見る"
+    - img "イラスト：ライブラリのドキュメント、本文でハイライトされた箇所、出典チップ付きの回答。"
+  - region "質問から会話までの流れを見る":
+    - heading "質問から会話までの流れを見る" [level=2]
+    - paragraph: サンプルドキュメントを使ったデモです。モデルは呼び出しません。
+    - list "4つのステップ":
+      - listitem: 1 箇所を選択
+      - listitem: 2 自分の言葉で質問
+      - listitem: 3 その内容に基づいた回答
+      - listitem: 4 出典から原文へ戻る
+    - text: 例
+    - paragraph: 会話を反対側に置きたい場合は、ツールバーから切り替えられます。
+    - heading "試してみる" [level=3]
+    - paragraph: サンプルを取り込み、ページの準備ができるまで待ちます。文をドラッグして選択し、チャットに「この文を説明して」と入力してモデルを選び送信します。引用番号を開き、出典と回答を比べましょう。送信前にAIの設定が必要な場合があります。
+    - button "サンプルで練習"
+  - region "読んで、質問して、出典で確かめる":
+    - heading "読んで、質問して、出典で確かめる" [level=2]
+    - paragraph: VStudy Pro が丁寧に取り組んでいる 3つのことです。
+    - heading "対応文書を読みやすく" [level=3]
+    - paragraph: PDF、Word、Excel、PowerPoint、HTML、CSV、Markdown、テキストを、整った Markdown に変換します。PDF はまず独自のパーサーで処理し、必要に応じて MarkItDown を使います。元のファイルもそのまま保存されます。
+    - heading "選んだ箇所について、そのまま質問" [level=3]
+    - paragraph: 文章やセクション全体を選び、自分の言葉で質問できます。モデルには、その本文に基づき、根拠が足りない場合はそう伝えるよう指示します。
+    - heading "回答から出典を確認" [level=3]
+    - paragraph: モデルが章やページを引用したときは、クリックして原文に戻り、ご自身で確認できます。
+    - term: "8"
+    - definition: 種類のファイル形式
+    - term: "6"
+    - definition: モデルの接続方法 種類
+    - term: "3"
+    - definition:
+      - text: 表示言語 種類
+      - paragraph: English · 繁體中文 · 日本語
+  - region "学ぶために読む人のために":
+    - heading "学ぶために読む人のために" [level=2]
+    - paragraph: 4人の、4種類の資料。読み方はひとつです。
+    - heading "大学生" [level=3]
+    - paragraph: 来週は中間試験。講義の PDF と長いスライド、ノートは日本語・英語・中国語が混ざっています。
+    - paragraph: スライドをテキストで読み、選んだ言語で説明を求められます。
+    - strong: 最初に使う機能
+    - paragraph: スライドの文章を選択して「わかりやすく説明して」と質問。設定で回答の言語を選びます。
+    - heading "研究者" [level=3]
+    - paragraph: 文献レビューのために論文を読み進めながら、結果の表に何が書かれているかを確かめたい。
+    - paragraph: 論文や罫線付きの表を読み、引用された章やページを確認できます。
+    - strong: 最初に使う機能
+    - paragraph: ページへ移動できる出典と、プロジェクトごとのフォルダ。
+    - heading "ビジネスパーソン" [level=3]
+    - paragraph: 木曜の会議までに、Word の取引先契約書、PDF の四半期報告書、その元になった Excel に目を通す必要があります。
+    - paragraph: 条項や数値について質問し、判断に使う前に引用元を確認できます。
+    - strong: 最初に使う機能
+    - paragraph: 「このセクションを使う」で条項全体について質問。Excel のシートは表として読めます。
+    - heading "語学学習者" [level=3]
+    - paragraph: 日本語と英語の対訳記事を読みながら、ある言い回しがなぜ使われているのかを知りたい。
+    - paragraph: 原文を保ち、選んだ回答言語で文法やニュアンス、言葉の使い方を質問できます。
+    - strong: 最初に使う機能
+    - paragraph: 回答の言語を選んでから、一文だけを選択して質問します。
+  - region "お手持ちのモデルで":
+    - heading "お手持ちのモデルで" [level=2]
+    - paragraph: すでに契約しているサービスをコマンドラインツール経由で使うか、ご自身の API キーを追加します。モデルを接続しなくても、ドキュメントの閲覧や整理はできます。
+    - heading "Claude CLI" [level=3]
+    - paragraph: 既存のサインインを使用
+    - paragraph: ターミナルで一度実行してサインイン：
+    - code: claude auth login
+    - button "コピー"
+    - heading "Codex CLI" [level=3]
+    - paragraph: 既存のサインインを使用
+    - paragraph: ターミナルでサインイン：
+    - code: codex login
+    - button "コピー"
+    - heading "Antigravity CLI" [level=3]
+    - paragraph: 既存のサインインを使用
+    - paragraph: ターミナルで一度実行してサインイン：
+    - code: agy
+    - button "コピー"
+    - heading "Anthropic" [level=3]
+    - paragraph: ご自身の API キー
+    - paragraph: 設定でキーを貼り付けます。
+    - heading "OpenAI" [level=3]
+    - paragraph: ご自身の API キー
+    - paragraph: 設定でキーを貼り付けます。
+    - heading "OpenAI 互換" [level=3]
+    - paragraph: ベース URL と API キー
+    - paragraph: OpenAI 互換のエンドポイントを提供するサービス向けです。
+    - paragraph: VStudy Pro は CLI を起動せずにインストール状況を確認します。有効にした後、モデル選択を開くか設定で更新するとモデルを検出します。API キーは macOS キーチェーンで暗号化します。CLI モデルはツールを使用せず、VStudy Pro が送信した文章だけを受け取ります。
+    - button "モデルを設定"
+  - region "ライブラリは Mac の中に":
+    - heading "ライブラリは Mac の中に" [level=2]
+    - paragraph: インポートしたものはすべて、この Mac のライブラリに保存され、考えやすい形で整理できます。
+    - heading "整理する" [level=3]
+    - list:
+      - listitem: フォルダ、ピン留め、保存したフィルター
+      - listitem: 英語だけでなく、日本語や中国語の語句も見つかる検索
+      - listitem: 種類、フォルダ、タグ、日付、サイズで絞り込み
+    - heading "記録を見る" [level=3]
+    - list:
+      - listitem: 今月のトークン数と推定コスト
+      - listitem: 必要に応じて月の予算を設定
+      - listitem: 読む・質問する・インポートするを数える学習の連続記録
+    - heading "プライバシーを守る" [level=3]
+    - list:
+      - listitem: ドキュメントと元のファイルは、この Mac に保存されます
+      - listitem: 保存する API キーは macOS キーチェーンで暗号化。セッションキーはメモリにのみ保持
+      - listitem: VStudy Pro 自体は分析データを送信しません
+      - listitem: 有効にした CLI は独自のサービスに接続する場合があります。質問と関連する文書は選択したプロバイダーに送信されます。
+    - img "ホームのカードの例：7 日間の学習記録と、14 日間のトークン使用量の推移。"
+    - paragraph:
+      - strong: 補足
+      - text: · VStudy Pro は macOS 用のアプリです。PDF はテキストレイヤーを読み取るため、OCR にはまだ対応しておらず、スキャンしたページは読めません。Word・Excel・PowerPoint は .docx・.xlsx・.pptx 形式で、1ファイル 50 MB までです。デバイス間の同期やノート機能はありません。初回の変換時のみ、変換ツールの準備のためにインターネット接続が必要です。 初回の変換では PyPI のパッケージと、必要に応じて GitHub の Python のダウンロードを確認します。オフラインでも Markdown とテキストを読めます。準備ができたら変換を再試行してください。
+  - region "まずは、ドキュメントを一つ。":
+    - heading "まずは、ドキュメントを一つ。" [level=2]
+    - paragraph: 今週しっかり理解したい資料を選んでみてください。
+    - button "ドキュメントを追加"
+    - button "サンプルを試す"
+    - button "ホームへ"

@@ -1,0 +1,23 @@
+- main:
+  - status
+- dialog "Bring your courses together":
+  - heading "Bring your courses together" [level=2]
+  - paragraph: Connect any school that supports the official Moodle mobile service.
+  - list "Connection steps":
+    - listitem: 1 Find your school
+    - listitem: 2 Check site
+    - listitem: 3 Sign in
+  - text: School name, country, or Moodle URL
+  - combobox "School name, country, or Moodle URL" [expanded]
+  - text: Search stays on this device. Choosing a school or checking a URL contacts that school and may download its logo. Requests appear in Settings > Privacy.
+  - button "Find my school"
+  - status: 4 schools found
+  - listbox "Schools":
+    - group "School directory":
+      - option "Chung Yuan Christian University CYCU ilearning.cycu.edu.tw · Taiwan"
+      - option "University College London moodle.ucl.ac.uk · United Kingdom"
+      - option "University of Warwick moodle.warwick.ac.uk · United Kingdom"
+      - option "UNSW Sydney moodle.telt.unsw.edu.au · Australia"
+  - button "Add by URL"
+  - text: You can connect several schools and accounts. Existing connections stay signed in.
+  - button "Close"

@@ -75,6 +75,22 @@ try {
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => window.document.querySelector('.moodle-chat-button')?.getAttribute('aria-expanded') === 'false');
   console.log('PASS. Nested finder Escape preserves assistant, then assistant Escape restores its trigger.');
+  await page.evaluate(() => window.localStorage.setItem('vstudy-route', JSON.stringify({ view: 'courses' })));
+  await page.reload();
+  await page.locator('.moodle-course-card').first().waitFor();
+  await page.getByRole('button', { name: 'Refresh courses', exact: true }).click();
+  await page.getByRole('alert').getByText('Could not refresh. Showing your last synced courses.', { exact: true }).waitFor();
+  assert.equal(await page.locator('.moodle-course-card').count(), 1);
+  await page.screenshot({ path: join(evidence, 'after-offline-stale.png') });
+  await page.evaluate(() => window.dispatchEvent(new window.CustomEvent('vstudy:open-settings', { detail: { tab: 'privacy' } })));
+  const privacy = page.getByTestId('privacy-settings');
+  await privacy.getByRole('button', { name: 'Offline mode', exact: true }).click();
+  await privacy.getByText('Current mode: offline. Only Markdown and text files work.', { exact: true }).waitFor();
+  assert.equal((await page.evaluate(() => window.desktop.invoke('settings:get', {}))).converterOffline, true);
+  await privacy.getByRole('button', { name: 'Offline mode', exact: true }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: join(evidence, 'after-offline-mode.png') });
+  await page.keyboard.press('Escape');
+  console.log('PASS. Failed sync preserves cached courses. Offline conversion mode persists and explains supported files.');
   assert.ok(results.every(result => result.closed), 'Escape closes History before and after guide replay');
 } finally {
   await app?.close();

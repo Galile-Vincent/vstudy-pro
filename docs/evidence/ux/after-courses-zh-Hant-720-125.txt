@@ -1,0 +1,72 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "顯示或隱藏文件庫" [expanded]
+  - text: 課程
+  - button "說明"
+  - button "尋找對話"
+- complementary "首次使用提示":
+  - group:
+    - strong: 先查看即將到期的作業
+  - button "觀看操作示範"
+  - button "不再顯示這則提示"
+- main:
+  - button "今天 / 讀書計畫"
+  - heading "課程" [level=1]
+  - paragraph: 掌握課程近況，專注下一步。
+  - button "連結學校"
+  - status
+  - strong: Alex Chen
+  - text: Example University · moodle.example.edu 已於 昨天 同步
+  - button "重新整理課程"
+  - button "解除學校連結"
+  - heading "即將截止" [level=2]
+  - text: 未來 7 天
+  - article:
+    - text: 1151 · CS210
+    - progressbar "已完成 64%"
+    - heading "Prepare a research report explaining the experimental observations and conclusions" [level=3]:
+      - button "Prepare a research report explaining the experimental observations and conclusions"
+    - paragraph: 陳教授
+    - paragraph: 資訊三乙
+    - time: 後天 11月8日 上午12:31
+    - button "為「Prepare a research report explaining the experimental observations and conclusions」設定提醒"
+  - heading "你的課程 3" [level=2]
+  - text: 1 則未讀通知
+  - tablist "課程學期":
+    - tab "目前 1" [selected]
+    - tab "即將開始 1"
+    - tab "過去 1"
+    - tab "全部 3"
+  - tabpanel "目前 1":
+    - article "資料結構與演算法 · Algorithms and Data Structures for Applied Scientific Research":
+      - text: 1151 · CS210
+      - progressbar "已完成 64%"
+      - heading "資料結構與演算法的科學應用及實驗" [level=3]:
+        - button "資料結構與演算法的科學應用及實驗"
+      - paragraph: 陳教授
+      - paragraph: 資訊三乙
+      - text: 1 項即將截止 0 則未讀

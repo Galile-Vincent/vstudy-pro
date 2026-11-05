@@ -1,0 +1,151 @@
+- link "［Skïp tö cöntënt～～～～～～］":
+  - /url: "#shell-content"
+- complementary "［Döcümënt lïbráry～～～～～～～］":
+  - text: ［VStüdy Prö～～～～］
+  - list:
+    - listitem:
+      - button "［Hömë～～］"
+    - listitem:
+      - button "［Lïbráry～～～］"
+    - listitem:
+      - button "［Cöürsës～～～］"
+    - listitem:
+      - button "［Hïstöry～～～］"
+  - navigation "［Smárt vïëws～～～～～］":
+    - button "［Áll döcümënts～～～～～～］"
+    - button "［Rëcënt～～～］"
+    - button "［Pïnnëd～～～］"
+    - button "［Ünfïlëd～～～］"
+    - button "［Cönvërtïng / Fáïlëd～～～～～～～～］"
+  - heading "［Földërs～～～］" [level=2]
+  - button "［Nëw földër～～～～］"
+  - paragraph: ［Nö földërs yët～～～～～～］
+  - list:
+    - listitem:
+      - button "［Sëttïngs～～～～］"
+- banner:
+  - button "［Tögglë döcümënt lïbráry～～～～～～～～～～］" [expanded]
+  - text: ［Whát ïs VStüdy Prö?～～～～～～～～］
+  - button "［Hëlp～～］"
+  - button "［Fïnd á cönvërsátïön～～～～～～～～］"
+- main "［Ïntrödüctïön tö VStüdy Prö～～～～～～～～～～～］":
+  - button "［Páüsë ánïmátïöns～～～～～～～］"
+  - button "［Clösë～～］"
+  - region "［Ündërstánd whát yöü rëád, önë pásságë át á tïmë.～～～～～～～～～～～～～～～～～～～～］":
+    - paragraph: ［Án ÁÏ rëádïng cömpánïön för yöür Mác～～～～～～～～～～～～～～～］
+    - heading "［Ündërstánd whát yöü rëád, önë pásságë át á tïmë.～～～～～～～～～～～～～～～～～～～～］" [level=1]
+    - paragraph: ［Öpën á süppörtëd döcümënt, sëlëct á pásságë, ánd ásk án ÁÏ mödël áböüt ït. Yöür lïbráry stáys ön yöür Mác. Qüëstïöns, cönvërsátïön hïstöry, döcümënt mëtádátá ánd sëlëctëd tëxt gö tö yöür chösën prövïdër; wïthöüt á sëlëctïön, án öütlïnë ánd öpënïng ëxcërpt árë ïnclüdëd.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - button "［Cöntïnüë rëádïng～～～～～～～］"
+    - button "［Sëë höw ït wörks～～～～～～～］"
+    - 'img "［Ïllüstrátïön: á döcümënt ïn thë Lïbráry, á hïghlïghtëd pásságë ïn thë rëádër, ánd án ánswër wïth á cïtátïön chïp.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］"'
+  - region "［Sëë höw á qüëstïön bëcömës á cönvërsátïön～～～～～～～～～～～～～～～～～］":
+    - heading "［Sëë höw á qüëstïön bëcömës á cönvërsátïön～～～～～～～～～～～～～～～～～］" [level=2]
+    - paragraph: ［Á scrïptëd ëxámplë üsïng thë sámplë döcümënt. Nö mödël ïs cállëd.～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - list "［Höw ït wörks, ïn föür stëps～～～～～～～～～～～］":
+      - listitem: 1 ［Sëlëct á pásságë～～～～～～～］
+      - listitem: 2 ［Ásk ïn yöür öwn wörds～～～～～～～～～］
+      - listitem: 3 ［Gët án ánswër gröündëd ïn thát tëxt～～～～～～～～～～～～～～］
+      - listitem: 4 ［Föllöw thë cïtátïön báck tö thë söürcë～～～～～～～～～～～～～～～～］
+    - text: ［Ëxámplë～～～］
+    - paragraph: ［Prëfër thë chát ön thë öthër sïdë? Swáp ït fröm thë töölbár.～～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Try ït～～～］" [level=3]
+    - paragraph: ［Ïmpört thë sámplë, thën wáït üntïl ïts págës árë rëády. Sëlëct á sëntëncë by drággïng ácröss ït, typë “Ëxpláïn thïs sëntëncë” ïn Chát, chöösë á mödël ánd sënd. Öpën á nümbërëd cïtátïön ánd cömpárë ïts söürcë wïth thë ánswër. ÁÏ sëtüp máy bë nëëdëd bëförë sëndïng.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - button "［Öpën sámplë tö práctïcë～～～～～～～～～～］"
+  - region "［Rëád, ásk, ánd chëck thë söürcë～～～～～～～～～～～～～］":
+    - heading "［Rëád, ásk, ánd chëck thë söürcë～～～～～～～～～～～～～］" [level=2]
+    - paragraph: ［Thrëë thïngs VStüdy Prö döës, ánd döës cárëfülly.～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Süppörtëd döcümënts, mádë rëádáblë～～～～～～～～～～～～～～］" [level=3]
+    - paragraph: ［PDF, Wörd, Ëxcël, PöwërPöïnt, HTML, CSV, Márkdöwn ánd pláïn tëxt bëcömë clëán Márkdöwn. PDFs gö thröügh öür öwn pársër fïrst, wïth MárkÏtDöwn ás á fállbáck. Yöür örïgïnál fïlë ïs këpt álöngsïdë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Ásk áböüt ëxáctly whát yöü sëlëctëd～～～～～～～～～～～～～～］" [level=3]
+    - paragraph: ［Sëlëct á pásságë, ör üsë á whölë sëctïön, ánd ásk ïn yöür öwn wörds. Thë mödël ïs ïnstrüctëd tö üsë thát tëxt ánd tö sáy whën ït döës nöt süppört án ánswër.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Ánswërs cán cïtë thë söürcë～～～～～～～～～～～］" [level=3]
+    - paragraph: ［Whën thë mödël cïtës á sëctïön ör págë, clïck thë cïtátïön tö jümp thërë ánd chëck ït yöürsëlf.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - term: "8"
+    - definition: ［fïlë typës～～～～］
+    - term: "6"
+    - definition: ［wáys tö cönnëct á mödël～～～～～～～～～～］
+    - term: "3"
+    - definition:
+      - text: ［ïntërfácë lángüágës～～～～～～～～］
+      - paragraph: English · 繁體中文 · 日本語
+  - region "［Mádë för pëöplë whö rëád tö lëárn～～～～～～～～～～～～～～］":
+    - heading "［Mádë för pëöplë whö rëád tö lëárn～～～～～～～～～～～～～～］" [level=2]
+    - paragraph: ［Föür pëöplë, föür kïnds öf döcümënts, önë wáy öf wörkïng.～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Ünïvërsïty stüdënt～～～～～～～～］" [level=3]
+    - paragraph: "［Mïdtërms nëxt wëëk: lëctürë PDFs, á löng PöwërPöïnt dëck, ánd nötës ïn Chïnësë, Jápánësë ánd Ënglïsh.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］"
+    - paragraph: ［Rëád slïdës ás tëxt ánd ásk för án ëxplánátïön ïn yöür prëfërrëd lángüágë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - strong: ［Stárts wïth～～～～～］
+    - paragraph: ［Sëlëct á slïdë's tëxt ánd ásk "Ëxpláïn thïs sïmply." Sët Rëply lángüágë ïn Sëttïngs.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Rësëárchër～～～～］" [level=3]
+    - paragraph: ［Wörkïng thröügh á stáck öf pápërs för á lïtërátürë rëvïëw, ánd nëëdïng tö chëck whát á rësülts táblë áctüálly rëpörts.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - paragraph: ［Rëád pápërs ánd rülëd táblës, thën chëck ány cïtëd sëctïöns ör págës.～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - strong: ［Stárts wïth～～～～～］
+    - paragraph: ［Cïtátïöns thát jümp tö thë págë, ánd önë földër për pröjëct.～～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Pröfëssïönál～～～～～］" [level=3]
+    - paragraph: "［Bëförë Thürsdáy's mëëtïng: á süpplïër cöntráct ïn Wörd, á qüártërly rëpört ás á PDF, ánd thë sprëádshëët bëhïnd ït.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］"
+    - paragraph: ［Ásk áböüt á cláüsë ör fïgürë ánd chëck cïtëd ëvïdëncë bëförë rëlyïng ön ït.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - strong: ［Stárts wïth～～～～～］
+    - paragraph: ［"Üsë thïs sëctïön" tö ásk áböüt á whölë cláüsë. Ëxcël shëëts rëád ás táblës.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Lángüágë lëárnër～～～～～～～］" [level=3]
+    - paragraph: ［Rëádïng á bïlïngüál ártïclë, önë lángüágë për lïnë, ánd wöndërïng why á phrásë ïs üsëd thë wáy ït ïs.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - paragraph: ［Këëp thë örïgïnál ánd ásk áböüt grámmár, nüáncë ánd wörd chöïcë ïn yöür rëply lángüágë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - strong: ［Stárts wïth～～～～～］
+    - paragraph: ［Pïck á Rëply lángüágë, thën sëlëct á sïnglë sëntëncë ánd ásk áböüt ït.～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+  - region "［Brïng yöür öwn mödël～～～～～～～～］":
+    - heading "［Brïng yöür öwn mödël～～～～～～～～］" [level=2]
+    - paragraph: ［Üsë á sübscrïptïön yöü álrëády hávë thröügh ïts cömmánd-lïnë tööl, ör ádd yöür öwn ÁPÏ këy. Yöü cán rëád ánd örgánïsë döcümënts wïthöüt cönnëctïng ánythïng.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "Claude CLI" [level=3]
+    - paragraph: ［Üsës yöür ëxïstïng sïgn-ïn～～～～～～～～～～～］
+    - paragraph: ［Rün öncë ïn Tërmïnál ánd sïgn ïn:～～～～～～～～～～～～～～］
+    - code: claude auth login
+    - button "［Cöpy～～］"
+    - heading "Codex CLI" [level=3]
+    - paragraph: ［Üsës yöür ëxïstïng sïgn-ïn～～～～～～～～～～～］
+    - paragraph: ［Sïgn ïn fröm Tërmïnál:～～～～～～～～～］
+    - code: codex login
+    - button "［Cöpy～～］"
+    - heading "Antigravity CLI" [level=3]
+    - paragraph: ［Üsës yöür ëxïstïng sïgn-ïn～～～～～～～～～～～］
+    - paragraph: ［Rün öncë ïn Tërmïnál ánd sïgn ïn:～～～～～～～～～～～～～～］
+    - code: agy
+    - button "［Cöpy～～］"
+    - heading "Anthropic" [level=3]
+    - paragraph: ［Yöür ÁPÏ këy～～～～～］
+    - paragraph: ［Pástë yöür këy ïn Sëttïngs.～～～～～～～～～～～］
+    - heading "OpenAI" [level=3]
+    - paragraph: ［Yöür ÁPÏ këy～～～～～］
+    - paragraph: ［Pástë yöür këy ïn Sëttïngs.～～～～～～～～～～～］
+    - heading "［ÖpënÁÏ cömpátïblë～～～～～～～］" [level=3]
+    - paragraph: ［Básë ÜRL ánd ÁPÏ këy～～～～～～～～］
+    - paragraph: ［För sërvïcës thát öffër án ÖpënÁÏ-cömpátïblë ëndpöïnt.～～～～～～～～～～～～～～～～～～～～～～］
+    - paragraph: "［VStüdy Prö fïnds ïnstállëd CLÏs wïthöüt láünchïng thëm. Áftër yöü ënáblë á prövïdër, öpënïng thë mödël pïckër ör rëfrëshïng Sëttïngs chëcks ïts mödëls. ÁPÏ këys árë ëncryptëd wïth thë mácÖS Këycháïn. CLÏ mödëls gët nö tööls: thëy sëë önly thë tëxt VStüdy Prö sënds.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］"
+    - button "［Sët üp á mödël～～～～～～］"
+  - region "［Yöür lïbráry, ön yöür Mác～～～～～～～～～～］":
+    - heading "［Yöür lïbráry, ön yöür Mác～～～～～～～～～～］" [level=2]
+    - paragraph: ［Ëvërythïng yöü ïmpört lïvës ïn á lïbráry ön thïs Mác, örgánïsëd thë wáy yöü thïnk.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Örgánïsë～～～～］" [level=3]
+    - list:
+      - listitem: ［Földërs, pïns ánd sávëd fïltërs～～～～～～～～～～～～～］
+      - listitem: ［Sëárch thát fïnds Chïnësë ánd Jápánësë wörds, nöt jüst Ënglïsh～～～～～～～～～～～～～～～～～～～～～～～～～］
+      - listitem: ［Fïltër by typë, földër, tág, dátë ör sïzë～～～～～～～～～～～～～～～～～］
+    - heading "［Këëp tráck～～～～］" [level=3]
+    - list:
+      - listitem: ［Tökëns ánd ëstïmátëd cöst för thë mönth～～～～～～～～～～～～～～～～］
+      - listitem: ［Á mönthly büdgët, ïf yöü wánt önë～～～～～～～～～～～～～～］
+      - listitem: ［Á stüdy strëák thát cöünts rëádïng, áskïng ánd ïmpörtïng～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Stáy prïvátë～～～～～］" [level=3]
+    - list:
+      - listitem: ［Döcümënts ánd thëïr örïgïnáls árë störëd ön thïs Mác～～～～～～～～～～～～～～～～～～～～～］
+      - listitem: ［Sávëd ÁPÏ këys üsë mácÖS Këycháïn ëncryptïön; sëssïön këys stáy ïn mëmöry～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+      - listitem: ［VStüdy Prö ïtsëlf sënds nö ánálytïcs～～～～～～～～～～～～～～～］
+      - listitem: ［Ënáblëd CLÏ tööls máy cöntáct thëïr öwn sërvïcës. Qüëstïöns ánd rëlëvánt döcümënt tëxt gö tö yöür sëlëctëd prövïdër.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - 'img "［Ëxámplë Hömë cárds: á stüdy strëák wïth sëvën dáys ánd á 14-dáy tökën spárklïnë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］"'
+    - paragraph:
+      - strong: ［Gööd tö knöw～～～～～］
+      - text: · ［VStüdy Prö ïs á mácÖS ápp. Ït rëáds thë tëxt láyër öf PDFs ánd hás nö ÖCR yët, sö scánnëd págës cán't bë rëád. Wörd, Ëxcël ánd PöwërPöïnt mëáns .döcx, .xlsx ánd .pptx, üp tö 50 MB për fïlë. Ït döësn't sync bëtwëën dëvïcës ánd ïsn't á nötë-tákïng ápp. Thë fïrst cönvërsïön nëëds ïntërnët öncë tö sët üp thë cönvërtër. Thë fïrst cönvërsïön ásks tö döwnlöád páckágës fröm PyPÏ ánd pössïbly Pythön fröm GïtHüb. Chöösë Öfflïnë tö rëád Márkdöwn ánd tëxt; rëtry cönvërsïön whën rëády.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+  - region "［Stárt wïth önë döcümënt.～～～～～～～～～～］":
+    - heading "［Stárt wïth önë döcümënt.～～～～～～～～～～］" [level=2]
+    - paragraph: ［Pïck sömëthïng yöü áctüálly nëëd tö ündërstánd thïs wëëk.～～～～～～～～～～～～～～～～～～～～～～～］
+    - button "［Brïng á döcümënt～～～～～～～］"
+    - button "［Try á sámplë döcümënt～～～～～～～～～］"
+    - button "［Gö tö Hömë～～～～］"

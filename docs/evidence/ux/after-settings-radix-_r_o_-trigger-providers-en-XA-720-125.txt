@@ -1,0 +1,84 @@
+- dialog "［Sëttïngs～～～～］":
+  - heading "［Sëttïngs～～～～］" [level=2]
+  - button "［Clösë sëttïngs～～～～～～］"
+  - tablist "［Sëttïngs～～～～］":
+    - tab "［Gënërál～～～］"
+    - tab "［Áppëáráncë～～～～］"
+    - tab "［Prövïdërs～～～～］" [selected]
+    - tab "［Üságë～～］"
+    - tab "［Störágë～～～］"
+    - tab "［Prïvácy～～～］"
+  - tabpanel "［Prövïdërs～～～～］":
+    - banner:
+      - heading "［Prövïdërs～～～～］" [level=2]
+      - paragraph: ［Këys árë sávëd sëcürëly ïn thë dësktöp ápp ánd nëvër rëád báck.～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - text: ［Rëád-önly strüctürëd táblës (ÁPÏ prövïdërs önly)～～～～～～～～～～～～～～～～～～～～］
+    - paragraph: ［Öptïönál táblë prësëntátïöns. Öff by dëfáült. CLÏ tööls rëmáïn dïsáblëd.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - group "［Rëád-önly strüctürëd táblës (ÁPÏ prövïdërs önly)～～～～～～～～～～～～～～～～～～～～］ ［Öptïönál táblë prësëntátïöns. Öff by dëfáült. CLÏ tööls rëmáïn dïsáblëd.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］":
+      - switch "［Rëád-önly strüctürëd táblës (ÁPÏ prövïdërs önly)～～～～～～～～～～～～～～～～～～～～］"
+    - heading "［Prövïdërs～～～～］" [level=3]
+    - strong: Anthropic
+    - text: ［Nö këy sávëd～～～～～］
+    - button "［Gët á këy～～～～］"
+    - button "［Tëst cönnëctïön～～～～～～］"
+    - paragraph: ［Án ÁPÏ këy ïs á sëcrët cödë fröm yöür ÁÏ sërvïcë’s dëvëlöpër wëbsïtë. Á chát lögïn ïs dïffërënt. Thë sërvïcë máy chárgë yöü för üsë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - paragraph: ［Ön Mác, sávïng máy ásk för yöür Mác lögïn pásswörd sö VStüdy Prö cán üsë Këycháïn. Á sëssïön këy lásts önly üntïl yöü qüït thë ápp.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - textbox "［Anthropic ÁPÏ këy～～～～～～～～］":
+      - /placeholder: ［Ëntër ÁPÏ këy～～～～～～］
+    - button "［Sávë këy～～～～］" [disabled]
+    - button "［Üsë wïthöüt sávïng këys～～～～～～～～～～］" [disabled]
+    - strong: OpenAI
+    - text: ［Nö këy sávëd～～～～～］
+    - button "［Gët á këy～～～～］"
+    - button "［Tëst cönnëctïön～～～～～～］"
+    - paragraph: ［Án ÁPÏ këy ïs á sëcrët cödë fröm yöür ÁÏ sërvïcë’s dëvëlöpër wëbsïtë. Á chát lögïn ïs dïffërënt. Thë sërvïcë máy chárgë yöü för üsë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - paragraph: ［Ön Mác, sávïng máy ásk för yöür Mác lögïn pásswörd sö VStüdy Prö cán üsë Këycháïn. Á sëssïön këy lásts önly üntïl yöü qüït thë ápp.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - textbox "［OpenAI ÁPÏ këy～～～～～～～～］":
+      - /placeholder: ［Ëntër ÁPÏ këy～～～～～～］
+    - button "［Sávë këy～～～～］" [disabled]
+    - button "［Üsë wïthöüt sávïng këys～～～～～～～～～～］" [disabled]
+    - strong: ［ÖpënÁÏ cömpátïblë～～～～～～～］
+    - text: ［Nö këy sávëd～～～～～］
+    - button "［Gët á këy～～～～］"
+    - button "［Tëst cönnëctïön～～～～～～］"
+    - paragraph: ［Án ÁPÏ këy ïs á sëcrët cödë fröm yöür ÁÏ sërvïcë’s dëvëlöpër wëbsïtë. Á chát lögïn ïs dïffërënt. Thë sërvïcë máy chárgë yöü för üsë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - paragraph: ［Ön Mác, sávïng máy ásk för yöür Mác lögïn pásswörd sö VStüdy Prö cán üsë Këycháïn. Á sëssïön këy lásts önly üntïl yöü qüït thë ápp.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - textbox "［［ÖpënÁÏ cömpátïblë～～～～～～～］ ÁPÏ këy～～～～～～～～］":
+      - /placeholder: ［Ëntër ÁPÏ këy～～～～～～］
+    - button "［Sávë këy～～～～］" [disabled]
+    - button "［Üsë wïthöüt sávïng këys～～～～～～～～～～］" [disabled]
+    - textbox "［ÖpënÁÏ cömpátïblë básë ÜRL～～～～～～～～～～～］": http://localhost:11434/v1
+    - button "［Sávë ÜRL～～～～］"
+    - strong: Claude CLI
+    - text: ［Föünd ön dïsk — lögïn nöt chëckëd～～～～～～～～～～～～～～］
+    - paragraph: ［Ïnstáll thïs tööl fröm ïts öffïcïál wëbsïtë, thën öpën Tërmïnál ánd rün claude tö sïgn ïn. Cömë báck ánd chëck ágáïn.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - button "［Chëck ágáïn～～～～～］"
+    - switch "［Üsë yöür Claude CLI lögïn?～～～～～～～～～～～～］"
+    - text: ［Üsë yöür Claude CLI lögïn?～～～～～～～～～～～～］
+    - paragraph: ［Öff — nö CLÏ ïs láünchëd～～～～～～～～～～］
+    - paragraph:
+      - text: "［Rësölvëd ëxëcütáblë～～～～～～～～］:"
+      - code: /Users/vc/.local/share/claude/versions/2.1.318
+    - button "［Chángë～～～］"
+    - strong: Codex CLI
+    - text: ［Föünd ön dïsk — lögïn nöt chëckëd～～～～～～～～～～～～～～］
+    - paragraph: ［Ïnstáll thïs tööl fröm ïts öffïcïál wëbsïtë, thën öpën Tërmïnál ánd rün codex login tö sïgn ïn. Cömë báck ánd chëck ágáïn.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - button "［Chëck ágáïn～～～～～］"
+    - switch "［Üsë yöür Codex CLI lögïn?～～～～～～～～～～～～］"
+    - text: ［Üsë yöür Codex CLI lögïn?～～～～～～～～～～～～］
+    - paragraph: ［Öff — nö CLÏ ïs láünchëd～～～～～～～～～～］
+    - paragraph:
+      - text: "［Rësölvëd ëxëcütáblë～～～～～～～～］:"
+      - code: /Users/vc/.codex/packages/standalone/releases/0.166.0-aarch64-apple-darwin/bin/codex
+    - button "［Chángë～～～］"
+    - strong: Antigravity CLI
+    - text: ［Föünd ön dïsk — lögïn nöt chëckëd～～～～～～～～～～～～～～］
+    - paragraph: ［Ïnstáll thïs tööl fröm ïts öffïcïál wëbsïtë, thën öpën Tërmïnál ánd rün agy tö sïgn ïn. Cömë báck ánd chëck ágáïn.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - button "［Chëck ágáïn～～～～～］"
+    - switch "［Üsë yöür Antigravity CLI lögïn?～～～～～～～～～～～～］"
+    - text: ［Üsë yöür Antigravity CLI lögïn?～～～～～～～～～～～～］
+    - paragraph: ［Öff — nö CLÏ ïs láünchëd～～～～～～～～～～］
+    - paragraph:
+      - text: "［Rësölvëd ëxëcütáblë～～～～～～～～］:"
+      - code: /Users/vc/.local/bin/agy
+    - button "［Chángë～～～］"

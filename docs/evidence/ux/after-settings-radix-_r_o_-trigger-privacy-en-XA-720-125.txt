@@ -1,0 +1,35 @@
+- dialog "［Sëttïngs～～～～］":
+  - heading "［Sëttïngs～～～～］" [level=2]
+  - button "［Clösë sëttïngs～～～～～～］"
+  - tablist "［Sëttïngs～～～～］":
+    - tab "［Gënërál～～～］"
+    - tab "［Áppëáráncë～～～～］"
+    - tab "［Prövïdërs～～～～］"
+    - tab "［Üságë～～］"
+    - tab "［Störágë～～～］"
+    - tab "［Prïvácy～～～］" [selected]
+  - tabpanel "［Prïvácy～～～］":
+    - banner:
+      - heading "［Prïvácy～～～］" [level=2]
+    - heading "［Nëtwörk áctïvïty～～～～～～～］" [level=3]
+    - text: ［Sëssïön-önly ïnvëntöry öf ápp-ïnïtïátëd rëqüësts ánd CLÏ láünchës. CLÏ-mánágëd ëndpöïnts ánd Chrömïüm báckgröünd tráffïc árë nöt ïndïvïdüálly vïsïblë; thïs ïs nöt á páckët cáptürë. Bytës árë ünknöwn ünlëss shöwn.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - group "［Sëssïön-önly ïnvëntöry öf ápp-ïnïtïátëd rëqüësts ánd CLÏ láünchës. CLÏ-mánágëd ëndpöïnts ánd Chrömïüm báckgröünd tráffïc árë nöt ïndïvïdüálly vïsïblë; thïs ïs nöt á páckët cáptürë. Bytës árë ünknöwn ünlëss shöwn.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］":
+      - button "［Rëfrësh～～～］"
+    - text: ［Nö áctïvïty rëcördëd thïs sëssïön.～～～～～～～～～～～～～～］
+    - heading "［Döcümënt cönvërtër～～～～～～～～］" [level=3]
+    - status: "［Cürrënt mödë: önlïnë. Döwnlöáds árë állöwëd.～～～～～～～～～～～～～～～～～～］"
+    - text: ［Stöp cönvërtër áftër ïdlë mïnütës～～～～～～～～～～～～～～］
+    - paragraph: ［Fïrst cönvërsïön ásks bëförë döwnlöádïng löckëd páckágës fröm pypï.örg ánd fïlës.pythönhöstëd.örg; üv máy döwnlöád Pythön fröm GïtHüb. Öfflïnë mödë süppörts Márkdöwn ánd tëxt. Cönvërsïön rüns löcálly wïthöüt nëtwörk áccëss ön mácÖS.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - group "［Stöp cönvërtër áftër ïdlë mïnütës～～～～～～～～～～～～～～］ ［Fïrst cönvërsïön ásks bëförë döwnlöádïng löckëd páckágës fröm pypï.örg ánd fïlës.pythönhöstëd.örg; üv máy döwnlöád Pythön fröm GïtHüb. Öfflïnë mödë süppörts Márkdöwn ánd tëxt. Cönvërsïön rüns löcálly wïthöüt nëtwörk áccëss ön mácÖS.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］":
+      - spinbutton "［Stöp cönvërtër áftër ïdlë mïnütës～～～～～～～～～～～～～～］": "5"
+    - text: ［Cönvërtër mödë～～～～～～］
+    - group "［Cönvërtër mödë～～～～～～］":
+      - button "［Ënáblë döwnlöáds ánd rëtry～～～～～～～～～～～］"
+      - button "［Öfflïnë mödë～～～～～］"
+    - heading "［Dëlëtë áll dátá～～～～～～］" [level=3]
+    - text: ［Dëlëtë áll dátá～～～～～～］
+    - paragraph: ［Përmánëntly rëmövë thïs ápp’s döcümënts, cönvërsátïöns, sávëd këys, ápp cáchës ánd cönvërtër ënvïrönmënt, thën qüït. Örïgïnál fïlës öütsïdë thë lïbráry, CLÏ lögïns ánd shárëd Pythön döwnlöád cáchës árë këpt.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - group "［Dëlëtë áll dátá～～～～～～］ ［Përmánëntly rëmövë thïs ápp’s döcümënts, cönvërsátïöns, sávëd këys, ápp cáchës ánd cönvërtër ënvïrönmënt, thën qüït. Örïgïnál fïlës öütsïdë thë lïbráry, CLÏ lögïns ánd shárëd Pythön döwnlöád cáchës árë këpt.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］":
+      - textbox "［Typë DËLËTË tö cönfïrm～～～～～～～～～］":
+        - /placeholder: ［DËLËTË～～～］
+      - button "［Dëlëtë áll dátá～～～～～～］" [disabled]

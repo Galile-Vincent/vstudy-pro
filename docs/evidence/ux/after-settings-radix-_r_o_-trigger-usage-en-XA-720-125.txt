@@ -1,0 +1,71 @@
+- dialog "［Sëttïngs～～～～］":
+  - heading "［Sëttïngs～～～～］" [level=2]
+  - button "［Clösë sëttïngs～～～～～～］"
+  - tablist "［Sëttïngs～～～～］":
+    - tab "［Gënërál～～～］"
+    - tab "［Áppëáráncë～～～～］"
+    - tab "［Prövïdërs～～～～］"
+    - tab "［Üságë～～］" [selected]
+    - tab "［Störágë～～～］"
+    - tab "［Prïvácy～～～］"
+  - tabpanel "［Üságë～～］":
+    - banner:
+      - heading "［Üságë～～］" [level=2]
+    - region "［Üságë sëttïngs～～～～～～］":
+      - paragraph: ［Nö prövïdër ëxpösës án áccöünt báláncë för ÁPÏ këys. “Lëft” mëáns yöür üsër-sët mönthly büdgët ör tökën cáp. Prövïdër rátë lïmïts árë sëpárátë ánd áppëár önly whën rëpörtëd.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+      - region "［Övëráll tökën dáshböárd～～～～～～～～～～］":
+        - heading "［Övëráll üságë～～～～～～］" [level=3]
+        - paragraph: ［Áll prövïdërs ánd döcümënts rëcördëd by VStüdy ön thïs dëvïcë.～～～～～～～～～～～～～～～～～～～～～～～～～］
+        - combobox "［Üságë përïöd～～～～～］": ［Áll tïmë～～～～］
+        - button "［Rëfrësh üságë～～～～～～］"
+        - text: ［Tötál tökëns～～～～～］
+        - strong: "0"
+        - text: 0 ［rëcördëd mödël cálls～～～～～～～～］
+        - term: ［Ïnpüt～～］
+        - definition: "0"
+        - term: ［Öütpüt～～～］
+        - definition: "0"
+        - term: ［Cáchë rëád～～～～］
+        - definition: "0"
+        - term: ［Cáchë wrïtë～～～～～］
+        - definition: "0"
+        - term: ［Rëásönïng～～～～］
+        - definition: "0"
+        - text: ［Rëcördëd cöst～～～～～～］
+        - strong: $0.000
+        - text: ［Rëpörtëd ánd ëstïmátëd cösts～～～～～～～～～～～～］
+        - paragraph: ［Nö mödël üságë rëcördëd ïn thïs përïöd. Sënd á chát tö stárt tráckïng.～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+        - paragraph: ［Ïnpüt ïnclüdës cáchë rëáds ánd wrïtës. Öütpüt ïnclüdës rëásönïng. CLÏ cösts árë ÁPÏ-ëqüïválënt (sübscrïptïön), nöt sübscrïptïön chárgës.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+        - figure "［Dáïly tökëns～～～～～］ ［Ïnpüt～～］ ［Öütpüt · pëák～～～～～～］0":
+          - strong: ［Dáïly tökëns～～～～～］
+          - text: ［Ïnpüt～～］ ［Öütpüt · pëák～～～～～～］0
+          - img "［Dáïly ïnpüt ánd öütpüt tökëns. Ëxáct válüës árë áváïláblë ïn thë dáïly tötáls táblë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］"
+          - text: 2026-10-08 2026-11-06
+          - group: ［Dáïly tötáls～～～～～］
+        - paragraph: ［Tötáls cövër áll tïmë; thë chárt shöws thë lást 30 cálëndár dáys.～～～～～～～～～～～～～～～～～～～～～～～～～～］
+        - strong: ［Brëákdöwn～～～～］
+        - combobox "［Gröüp üságë by～～～～～～］": ［Prövïdër～～～～］
+        - table:
+          - rowgroup:
+            - row "［Prövïdër～～～～］ ［Tökëns～～～］ ［Cálls～～］ ［Cöst～～］":
+              - cell "［Prövïdër～～～～］"
+              - cell "［Tökëns～～～］"
+              - cell "［Cálls～～］"
+              - cell "［Cöst～～］"
+          - rowgroup
+      - heading "［Prövïdër rátë lïmïts～～～～～～～～］" [level=3]
+      - paragraph: ［Nö rátë-lïmït ïnförmátïön rëpörtëd yët. Cödëx CLÏ döës nöt rëpört rátë lïmïts thröügh ëxëc; ïts áccöünt pröbë máy bë ünáváïláblë. Cláüdë lïmïts áppëár whën rëpörtëd.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+      - heading "［Büdgëts～～～］" [level=3]
+      - paragraph: ［Tökëns árë smáll pïëcës öf wörds. Lëávë á büdgët blánk för nö lïmït. Thë wárnïng përcëntágë tëlls yöü whën yöü árë nëár yöür mönthly lïmït.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+      - text: ［Mönthly büdgët (ÜSD)～～～～～～～～］
+      - group "［Mönthly büdgët (ÜSD)～～～～～～～～］":
+        - spinbutton "［Mönthly büdgët (ÜSD)～～～～～～～～］"
+      - text: ［Mönthly tökën cáp～～～～～～～］
+      - group "［Mönthly tökën cáp～～～～～～～］":
+        - spinbutton "［Mönthly tökën cáp～～～～～～～］"
+      - text: ［Wárn át (%)～～～～～］
+      - group "［Wárn át (%)～～～～～］":
+        - spinbutton "［Wárn át (%)～～～～～］": "80"
+      - group: "［Ádváncëd: cüstöm prïcës～～～～～～～～～～］"
+      - button "［Sávë üságë sëttïngs～～～～～～～～］"
+      - button "［Ëxpört CSV～～～～］"

@@ -1,0 +1,35 @@
+- dialog "設定":
+  - heading "設定" [level=2]
+  - button "關閉設定"
+  - tablist "設定":
+    - tab "一般"
+    - tab "外觀"
+    - tab "供應商"
+    - tab "用量"
+    - tab "儲存空間"
+    - tab "隱私" [selected]
+  - tabpanel "隱私":
+    - banner:
+      - heading "隱私" [level=2]
+    - heading "網路活動" [level=3]
+    - text: 僅記錄本次工作階段由應用程式發起的請求與 CLI 啟動。無法逐一查看 CLI 管理的端點與 Chromium 背景流量；這不是封包擷取。未顯示的位元組數為未知。
+    - group "僅記錄本次工作階段由應用程式發起的請求與 CLI 啟動。無法逐一查看 CLI 管理的端點與 Chromium 背景流量；這不是封包擷取。未顯示的位元組數為未知。":
+      - button "重新整理"
+    - text: 本次工作階段尚無活動紀錄。
+    - heading "文件轉換器" [level=3]
+    - status: 目前模式：線上。允許下載。
+    - text: 轉換器閒置幾分鐘後停止
+    - paragraph: 首次轉換會先詢問，再從 pypi.org 與 files.pythonhosted.org 下載鎖定版本的套件；uv 也可能從 GitHub 下載 Python。離線模式支援 Markdown 與純文字。macOS 上的轉換在本機執行，禁止網路存取。
+    - group "轉換器閒置幾分鐘後停止 首次轉換會先詢問，再從 pypi.org 與 files.pythonhosted.org 下載鎖定版本的套件；uv 也可能從 GitHub 下載 Python。離線模式支援 Markdown 與純文字。macOS 上的轉換在本機執行，禁止網路存取。":
+      - spinbutton "轉換器閒置幾分鐘後停止": "5"
+    - text: 轉換器模式
+    - group "轉換器模式":
+      - button "允許下載並重試"
+      - button "離線模式"
+    - heading "刪除所有資料" [level=3]
+    - text: 刪除所有資料
+    - paragraph: 永久移除本應用程式的文件、對話、儲存的金鑰、應用程式快取及轉換器環境，然後結束程式。資料庫外的原始檔案、CLI 登入與共用的 Python 下載快取會保留。
+    - group "刪除所有資料 永久移除本應用程式的文件、對話、儲存的金鑰、應用程式快取及轉換器環境，然後結束程式。資料庫外的原始檔案、CLI 登入與共用的 Python 下載快取會保留。":
+      - textbox "輸入 DELETE 以確認":
+        - /placeholder: DELETE
+      - button "刪除所有資料" [disabled]

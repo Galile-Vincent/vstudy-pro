@@ -1,0 +1,28 @@
+- dialog "［Sëttïngs～～～～］":
+  - heading "［Sëttïngs～～～～］" [level=2]
+  - button "［Clösë sëttïngs～～～～～～］"
+  - tablist "［Sëttïngs～～～～］":
+    - tab "［Gënërál～～～］" [selected]
+    - tab "［Áppëáráncë～～～～］"
+    - tab "［Prövïdërs～～～～］"
+    - tab "［Üságë～～］"
+    - tab "［Störágë～～～］"
+    - tab "［Prïvácy～～～］"
+  - tabpanel "［Gënërál～～～］":
+    - banner:
+      - heading "［Gënërál～～～］" [level=2]
+    - heading "［Lángüágë～～～～］" [level=3]
+    - text: ［Ïntërfácë lángüágë～～～～～～～～］
+    - group "［Ïntërfácë lángüágë～～～～～～～～］":
+      - combobox "［Ïntërfácë lángüágë～～～～～～～～］": ［Psëüdö-lángüágë (láyöüt tëstïng)～～～～～～～～～～～～～］
+    - text: ［Rëply lángüágë～～～～～～］
+    - paragraph: ［Döcümënts árë tránslátëd önly whën yöü ásk.～～～～～～～～～～～～～～～～～～］
+    - group "［Rëply lángüágë～～～～～～］ ［Döcümënts árë tránslátëd önly whën yöü ásk.～～～～～～～～～～～～～～～～～～］":
+      - combobox "［Rëply lángüágë～～～～～～］": ［Föllöw yöür látëst mësságë～～～～～～～～～～～］
+    - heading "［Wëlcömë～～～］" [level=3]
+    - text: ［Wëlcömë güïdë～～～～～～］
+    - group "［Wëlcömë güïdë～～～～～～］":
+      - button "［Shöw wëlcömë güïdë～～～～～～～～］"
+    - text: ［Áböüt VStüdy Prö～～～～～～～］
+    - group "［Áböüt VStüdy Prö～～～～～～～］":
+      - button "［Whát ïs VStüdy Prö?～～～～～～～～］ · ［Try ït～～～］"

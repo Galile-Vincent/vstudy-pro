@@ -1,0 +1,92 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "顯示或隱藏文件庫" [expanded]
+  - text: 課程
+  - button "說明"
+  - button "尋找對話"
+- complementary "首次使用提示":
+  - group:
+    - strong: 先查看即將到期的作業
+  - button "觀看操作示範"
+  - button "不再顯示這則提示"
+- main:
+  - button "今天 / 讀書計畫"
+  - button "所有課程"
+  - paragraph: 下次上課所需的一切，都在這裡。
+  - button "連結學校"
+  - status
+  - strong: Alex Chen
+  - text: Example University · moodle.example.edu 已於 昨天 同步
+  - button "重新整理課程"
+  - button "解除學校連結"
+  - text: 1151 · CS210
+  - progressbar "已完成 64%"
+  - text: 1151 · CS210
+  - heading "資料結構與演算法的科學應用及實驗" [level=1]
+  - paragraph: 顯示快取內容 · 尚未同步
+  - paragraph: 陳教授
+  - paragraph: 資訊三乙
+  - button "在 Moodle 開啟"
+  - group: 原始課程名稱 資料結構與演算法 · Algorithms and Data Structures for Applied Scientific Research
+  - paragraph: 近期截止 · Prepare a research report explaining the experimental observations and conclusions · 後天
+  - tablist "課程分頁":
+    - tab "課程內容"
+    - tab "截止日期"
+    - tab "課程公告"
+    - tab "成績"
+    - tab "教材"
+    - tab "通知" [selected]
+  - tabpanel "通知":
+    - heading "通知" [level=2]
+    - article:
+      - heading "未讀 Materials for the next laboratory session" [level=3]:
+        - img "未讀"
+        - text: Materials for the next laboratory session
+      - time: 昨天
+      - paragraph: Read the lecture notes before class and bring your lab notebook.
+      - button "標示為已讀"
+      - button "說明我需要準備什麼"
+  - region "課程助理":
+    - button "收合課程助理"
+    - complementary "課程助理":
+      - heading "課程助理" [level=2]
+      - heading "做好準備，從容上課。" [level=3]
+      - paragraph: 整理課程通知，把下一個作業截止化為執行計畫。
+      - button "說明我需要準備什麼"
+      - button "摘要最新通知" [disabled]
+      - button "規劃這一週" [disabled]
+      - button "幫我趕上進度" [disabled]
+      - button "準備考試" [disabled]
+      - group "選取的已轉換教材":
+        - text: 選取的已轉換教材
+        - paragraph: 請先在閱讀器開啟課程檔案完成轉換，再選取要摘要或練習的文件。
+        - button "摘要選取的教材" [disabled]
+        - button "用選取的教材練習" [disabled]
+      - status:
+        - paragraph: 請先連接 AI 幫手
+        - button "開啟供應商設定"
+      - text: 建議只能變更這門課程。助理會參考跨課程的已存任務、考試與讀書時段，避免衝突。所有變更都需要你的核准。

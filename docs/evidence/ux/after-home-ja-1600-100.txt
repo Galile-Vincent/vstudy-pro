@@ -1,0 +1,75 @@
+- link "メインコンテンツへ移動":
+  - /url: "#shell-content"
+- complementary "ドキュメントライブラリ":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "ホーム"
+    - listitem:
+      - button "ライブラリ"
+    - listitem:
+      - button "コース"
+    - listitem:
+      - button "履歴"
+  - navigation "スマートビュー":
+    - button "すべてのドキュメント"
+    - button "最近使った項目"
+    - button "ピン留め"
+    - button "未分類"
+    - button "変換中・失敗"
+  - heading "フォルダ" [level=2]
+  - button "新規フォルダ"
+  - paragraph: フォルダはまだありません
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "ライブラリの表示を切り替え" [expanded]
+  - text: ホーム
+  - button "ヘルプ"
+  - button "会話を探す": 会話を探す ⌘/Ctrl K
+- main:
+  - heading "おはようございます" [level=1]
+  - paragraph:
+    - group "小さな疑問から、理解が広がります。"
+  - button "使い方 · 試してみる"
+  - region "使い始める":
+    - heading "使い始める" [level=2]
+    - text: 4 項目中 1 完了
+    - paragraph: 最初に役立つ手順です。いつでも開いて確認できます。
+    - list:
+      - listitem:
+        - button "始め方を選ぶ"
+      - listitem:
+        - button "資料やサンプルを追加 完了"
+      - listitem:
+        - button "操作ガイドを見る"
+      - listitem:
+        - button "ヘルプとショートカットを確認"
+    - button "設定を再開"
+  - region "ドキュメントを追加":
+    - heading "ドキュメントを追加" [level=2]
+    - paragraph: ここにファイルをドロップ。読みながら気になる箇所を選んで質問できます。
+    - paragraph: PDF、DOCX、XLSX、PPTX、HTML、CSV、Markdown、テキストに対応。1 ファイル 50 MB まで。スキャンした PDF には対応していません。
+    - button "ファイルを選ぶ"
+    - button "サンプルを試す"
+  - region "続きを読む":
+    - heading "続きを読む" [level=2]
+    - article:
+      - heading "Reading sample" [level=3]
+      - 'button "続きを読む: Reading sample"': 続きを読む
+  - region "学びのリズム":
+    - heading "学びのリズム" [level=2]
+    - strong: 1 日
+    - paragraph: 今日も学びの時間がありました。
+    - list:
+      - listitem "2026-10-31": 土 2026-10-31：学習の記録なし
+      - listitem "2026-11-01": 日 2026-11-01：学習の記録なし
+      - listitem "2026-11-02": 月 2026-11-02：学習の記録なし
+      - listitem "2026-11-03": 火 2026-11-03：学習の記録なし
+      - listitem "2026-11-04": 水 2026-11-04：学習の記録なし
+      - listitem "2026-11-05": 木 2026-11-05：学習の記録なし
+      - listitem "2026-11-06": 金 2026-11-06：学習あり
+    - text: 最長：1 日
+  - region "最近のアクティビティ":
+    - group: 最近のアクティビティ

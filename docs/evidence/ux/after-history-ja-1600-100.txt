@@ -1,0 +1,46 @@
+- link "メインコンテンツへ移動":
+  - /url: "#shell-content"
+- complementary "ドキュメントライブラリ":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "ホーム"
+    - listitem:
+      - button "ライブラリ"
+    - listitem:
+      - button "コース"
+    - listitem:
+      - button "履歴"
+  - navigation "スマートビュー":
+    - button "すべてのドキュメント"
+    - button "最近使った項目"
+    - button "ピン留め"
+    - button "未分類"
+    - button "変換中・失敗"
+  - heading "フォルダ" [level=2]
+  - button "新規フォルダ"
+  - paragraph: フォルダはまだありません
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "ライブラリの表示を切り替え" [expanded]
+  - text: 履歴
+  - button "ヘルプ"
+  - button "会話を探す": 会話を探す ⌘/Ctrl K
+- main:
+  - heading "履歴" [level=1]
+  - paragraph: すべてのチャットの質問、回答、アイデアを検索します。
+  - region "履歴":
+    - searchbox "チャット履歴を検索"
+    - button "すべて" [pressed]
+    - button "コース別"
+    - button "文書別"
+    - button "一般"
+    - button "ピン留め"
+    - group: その他のフィルター
+    - button "新しい会話 Nov 6":
+      - strong: 新しい会話
+      - time: Nov 6
+    - paragraph: Reading sample · fake
+    - button "その他のオプション"

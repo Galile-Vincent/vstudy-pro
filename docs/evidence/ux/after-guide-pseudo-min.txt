@@ -1,0 +1,15 @@
+- dialog "［Yöür cöürsëwörk, wïth á wáy förwárd～～～～～～～～～～～～～～］":
+  - status: ［Stëp 1 öf 6～～～～～～～～～～～～］
+  - button "［Sávë ánd lëávë～～～～～～］"
+  - heading "［Yöür cöürsëwörk, wïth á wáy förwárd～～～～～～～～～～～～～～］" [level=1]
+  - paragraph: ［Brïng schööl dëádlïnës ánd yöür rëádïng ïntö önë plácë. Öpën á döcümënt, ündërstánd á pásságë, ánd chëck whát tö dö nëxt.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+  - region "［Yöür cöürsëwörk, wïth á wáy förwárd～～～～～～～～～～～～～～］":
+    - img "［Rëádër ánd gröündëd chát prëvïëw～～～～～～～～～～～～～］":
+      - paragraph: ［Rëádïng bëcömës ündërstándïng whën wë cönnëct nëw ïdëás.～～～～～～～～～～～～～～～～～～～～～～～］
+      - mark: ［Cönnëct nëw ïdëás.～～～～～～～～］
+      - strong: ［Höw döës thïs hëlp më lëárn?～～～～～～～～～～～～］
+      - paragraph: ［Lïnk á nëw cöncëpt tö sömëthïng yöü álrëády knöw.～～～～～～～～～～～～～～～～～～～～］
+      - text: ［Fröm yöür döcümënt · 1～～～～～～～～～］
+    - paragraph: ［Nö schööl cönnëctïön ör ÁÏ ïs stártëd by thïs güïdë. Yöü cán lëávë nöw ánd rësümë fröm Hömë ör Hëlp.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+  - contentinfo:
+    - button "［Cöntïnüë～～～～］"
