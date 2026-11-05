@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import { app, dialog, Notification } from 'electron';
 import { moodleChannels } from '../../shared/moodle';
 import { moodleProgressChannel,moodleProgressSchema } from '../../shared/ipc';
@@ -47,7 +48,7 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   registrar.handle(moodleChannels.openFile,async ({fileId}) => {
     const {file,account} = repository.file(fileId);
     if (file.documentId && documents.get(documentIdSchema.parse(file.documentId))) return documentIdSchema.parse(file.documentId);
-    return documentIdSchema.parse(await importMoodleFile(repository,fileId,account.siteUrl,await service.token(account.id),documents));
+    return documentIdSchema.parse(await importMoodleFile(repository,fileId,account.siteUrl,await service.token(account.id),documents,undefined,join(app.getPath("userData"),"moodle-downloads")));
   });
   registrar.handle(moodleChannels.markRead,async ({notificationId}) => { await service.markRead(notificationId); return {ok:true}; });
   registrar.handle(moodleChannels.createReminder,input => {
@@ -63,5 +64,5 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     await exportText(text,result.filePath);
     return {saved:true};
   });
-  return async () => { stopReminders(); sso.dispose(); await service.dispose(); };
+  return Object.assign(async () => { stopReminders(); sso.dispose(); await service.dispose(); }, {waitForIdle:()=>service.waitForIdle()});
 }
