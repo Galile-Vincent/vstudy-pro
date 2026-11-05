@@ -11,14 +11,20 @@ import { desktop } from './bridge';
 import { ProviderSettings, type Providers } from './providers';
 function GlobalSettings() {
   const [open, setOpen] = useState(false);
+  const [initialTab, setInitialTab] = useState('general');
   const [providers, setProviders] = useState<Providers>([]);
   const refresh = async () => setProviders(await desktop.invoke('providers:list', {}));
   useEffect(() => {
-    const show = () => { setOpen(true); void refresh(); };
+    const show = (event: Event) => {
+      const tab = (event as CustomEvent<{ tab?: string }>).detail?.tab;
+      setInitialTab(tab ?? 'general');
+      setOpen(true);
+      void refresh();
+    };
     window.addEventListener('vstudy:open-settings', show);
     return () => window.removeEventListener('vstudy:open-settings', show);
   }, []);
-  return open ? <ProviderSettings initialTab="providers" providers={providers} onClose={() => { setOpen(false); window.dispatchEvent(new Event("vstudy:providers-changed")); }} onRefresh={refresh}/> : null;
+  return open ? <ProviderSettings initialTab={initialTab} providers={providers} onClose={() => { setOpen(false); window.dispatchEvent(new Event("vstudy:providers-changed")); }} onRefresh={refresh}/> : null;
 }
 function Views() {
   const { route } = useNavigate();

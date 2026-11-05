@@ -15,9 +15,9 @@ export function PrivacySettings() {
   const [offline, setOffline] = useState<boolean>();
   const [modeStatus, setModeStatus] = useState('');
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState('');
   const load = () => desktop.invoke('settings:get', {}).then(s => { setIdle(s.converterIdleMinutes); setOffline(s.converterOffline); setLoaded(true); setError(''); }).catch(() => setError(tr('settings:load_failed')));
   const [confirmation, setConfirmation] = useState('');
-  const [error, setError] = useState('');
   const refresh = () =>
     desktop
       .invoke('settings:networkActivity', {})

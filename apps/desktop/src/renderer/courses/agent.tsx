@@ -107,7 +107,7 @@ export function CourseAgentPanel({
           });
         if (!live) return;
         setConversations(c && !list.length ? [c] : list);
-        if (c) { await load(c); setStatus("idle"); }
+        if (c) { await load(c); setStatus(current => current === "unavailable" ? "idle" : current); }
         else setStatus("unavailable");
       })
       .catch(() => {
@@ -283,7 +283,7 @@ export function CourseAgentPanel({
                       .catch(onError);
                   }}
                   onSettings={() => {
-                    window.dispatchEvent(new Event("vstudy:open-settings"));
+                    window.dispatchEvent(new CustomEvent("vstudy:open-settings", { detail: { tab: "providers" } }));
                   }}
                   onProvidersChanged={refreshProviders}
                   onUsage={() => {}}
@@ -298,7 +298,7 @@ export function CourseAgentPanel({
           </>
         )}
         {status === "unavailable" && (
-          <div role="status"><p>{tr("moodle:connect_helper")}</p><Button onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}>{tr("moodle:providers_settings")}</Button></div>
+          <div role="status"><p>{tr("moodle:connect_helper")}</p><Button onClick={() => window.dispatchEvent(new CustomEvent("vstudy:open-settings", { detail: { tab: "providers" } }))}>{tr("moodle:providers_settings")}</Button></div>
         )}
         {status === "done" && (
           <p role="status">
