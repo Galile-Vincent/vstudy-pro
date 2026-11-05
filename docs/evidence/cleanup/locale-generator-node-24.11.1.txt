@@ -1,0 +1,10 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  00:24:40
+   Duration  159ms (transform 12ms, setup 0ms, import 16ms, tests 95ms, environment 0ms)
+
+Done in 451ms using pnpm v12.8.1

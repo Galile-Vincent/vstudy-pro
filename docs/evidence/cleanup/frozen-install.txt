@@ -1,0 +1,9 @@
+Scope: all 2 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+. prepare$ node apps/desktop/scripts/generate-locales.mjs && node scripts/install-hooks.mjs
+. prepare: Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop/src/shared/locales.generated.ts (17 namespaces).
+. prepare: sync hooks: ✔️(commit-msg, pre-push, pre-commit)
+. prepare: Done
+Done in 780ms using pnpm v10.28.2
