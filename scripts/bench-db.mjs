@@ -8,6 +8,7 @@ const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const require=createRequire(join(root,'apps/desktop/package.json'));
 const ts=require('typescript');
 registerHooks({resolve(specifier,context,next){try{return next(specifier,context);}catch(e){if(specifier.startsWith('.')){for(const suffix of ['.ts','/index.ts']){try{return next(specifier+suffix,context);}catch{}}}throw e;}},load(url,context,next){if(url.endsWith('.ts'))return {format:'module',source:ts.transpileModule(readFileSync(fileURLToPath(url),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText,shortCircuit:true};return next(url,context);}});
+if(process.argv.includes('--storage')) {const {runStorageBench}=await import('./bench-storage.mjs');await runStorageBench(root,require);process.exit(process.exitCode ?? 0);}
 const {openStore}=await import('../apps/desktop/src/main/db/index.ts');
 const {LibraryService}=await import('../apps/desktop/src/main/services/library.ts');
 const {getDashboard}=await import('../apps/desktop/src/main/services/dashboard.ts');
