@@ -1231,7 +1231,7 @@
 .moodle-assistant-panel
   .moodle-agent[data-conversation="true"]
   .moodle-agent-body
-  > p {
+  > p:not([role="status"]) {
   display: none;
 }
 .moodle-assistant-panel .moodle-course-chat {
