@@ -1,4 +1,5 @@
-import { activeConversions } from "./conversion-state";
+import { rm } from 'node:fs/promises';
+import { activeConversions, activePurges } from "./conversion-state";
 import { randomUUID } from 'node:crypto';
 import { readFileSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -147,7 +148,7 @@ export class LibraryService {
     reorderPins(table: 'documents' | 'folders', ids: string[]) { this.transaction(() => ids.forEach((id, i) => this.store.db.prepare(`UPDATE ${table} SET pinnedAt=? WHERE id=? AND pinned=1`).run(new Date(Date.now() - i).toISOString(), id))); }
     rename(id: string, title: string) { this.require(id); this.store.db.prepare('UPDATE documents SET title=? WHERE id=?').run(title, id); }
     softDelete(id: string) { this.store.db.prepare('UPDATE documents SET deletedAt=coalesce(deletedAt,?) WHERE id=?').run(new Date().toISOString(), id); }
-    restore(id: string, reason: 'undo' | 'import' = 'undo') { this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath,activeVersion FROM documents WHERE id=?').get(id); if (!r)
+    restore(id: string, reason: 'undo' | 'import' = 'undo') { if(activePurges.has(id))throw new Error('storage.busy'); this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath,activeVersion FROM documents WHERE id=?').get(id); if (!r)
         throw new Error('Document not found'); if (r.deletedAt === null)
         return; if (reason === 'undo' && Date.now() - Date.parse(String(r.deletedAt)) > 30000)
         throw new Error('Undo expired'); this.store.db.prepare('UPDATE documents SET deletedAt=NULL WHERE id=?').run(id); if (r.markdownPath) {
@@ -169,6 +170,19 @@ export class LibraryService {
         }
         this.store.db.prepare('DELETE FROM documents WHERE id=? AND deletedAt IS NOT NULL').run(String(d.id));
     } }
+    async purgeAsync(): Promise<void> {
+        for (const d of this.store.db.prepare('SELECT id,sourceHash FROM documents WHERE deletedAt<=?').all(new Date(Date.now()-30000).toISOString())) {
+            const id=String(d.id);
+            if(activeConversions.has(id) || activePurges.has(id))continue;
+            activePurges.add(id);
+            try {
+                const path=join(this.root,String(d.sourceHash));
+                try {containedPath(this.root,path);await rm(path,{recursive:true,force:true,maxRetries:3});}
+                catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+                this.store.db.prepare('DELETE FROM documents WHERE id=? AND deletedAt IS NOT NULL').run(id);
+            } finally {activePurges.delete(id);}
+        }
+    }
     tags() { return this.store.db.prepare('SELECT * FROM tags ORDER BY name COLLATE NOCASE').all().map(r => tagSchema.parse(r)); }
     saveTag(input: {
         id?: string | undefined;

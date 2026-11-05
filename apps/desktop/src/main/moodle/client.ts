@@ -1,3 +1,4 @@
+import type { MoodleResponseCache, ResourceKind } from "../cache";
 import { log } from '../logging';
 import { diagnosticIdentifier, issueDiagnostics, responseShape } from './diagnostics';
 import type { MoodleScheduler } from './scheduler';
@@ -42,7 +43,37 @@ const gradeWire = z.object({ usergrades:z.array(z.object({gradeitems:z.array(z.o
 export const siteInfoSchema = z.object({userid:integer, fullname:z.string(),siteurl:z.string().optional(),version:z.string().optional(),release:z.string().optional(),functions:z.array(z.object({name:z.string(),version:z.union([z.string(),z.number()]).optional()})).optional(),advancedfeatures:z.array(z.object({name:z.string(),value:z.union([z.string(),z.number(),z.boolean()])})).default([]),userprivateaccesskey:z.string().optional()});
 export { publicConfigSchema } from './discovery';
 
+const cachedFunctions: Record<string, ResourceKind> = {
+  core_enrol_get_users_courses: 'courses', core_course_get_enrolled_courses_by_timeline_classification: 'courses',
+  core_course_get_contents: 'contents', core_completion_get_activities_completion_status: 'deadlines',
+  mod_assign_get_assignments: 'deadlines', mod_assign_get_submission_status: 'deadlines', mod_quiz_get_quizzes_by_courses: 'deadlines',
+  mod_quiz_get_user_attempts: 'deadlines', core_calendar_get_calendar_upcoming_view: 'deadlines', core_calendar_get_action_events_by_timesort: 'deadlines',
+  core_message_get_messages: 'notifications', message_popup_get_popup_notifications: 'notifications',
+  gradereport_user_get_grade_items: 'grades', core_enrol_get_enrolled_users: 'teachers', tool_mobile_get_config: 'configuration',
+  mod_forum_get_forums_by_courses: 'announcements', mod_forum_get_forum_discussions: 'announcements',
+  mod_forum_get_forum_discussions_paginated: 'announcements', mod_forum_get_discussion_posts: 'announcements',
+};
 export class MoodleClient {
+  offline = false;
+  lastSyncedAt: string | undefined;
+  private cache?: { store: MoodleResponseCache; accountId: string; refresh: boolean };
+  setCache(store: MoodleResponseCache, accountId: string, refresh = false): void { this.cache = {store,accountId,refresh}; }
+  async call<S extends z.ZodTypeAny>(name: string, params: Record<string,string>, schema: S, retryLanguage = true, signal?: AbortSignal): Promise<z.output<S>> {
+    const kind = cachedFunctions[name];
+    if (!this.cache || !kind) return this.uncachedCall(name,params,schema,retryLanguage,signal);
+    const result = await this.cache.store.get({
+      accountId:this.cache.accountId, kind, key:JSON.stringify([this.host,this.language,name,Object.entries(params).sort(([a],[b]) => a.localeCompare(b))]),
+      schema:z.unknown(), mode:this.cache.refresh ? 'refresh' : 'swr', canUseOffline:error => error instanceof MoodleError && error.kind === 'network',
+    }, async (_validators, abort) => {
+      const value: unknown = await this.uncachedCall(name,params,z.unknown(),retryLanguage,signal ? AbortSignal.any([signal,abort]) : abort);
+      schema.parse(value);
+      return {status:'modified',value};
+    });
+    if (result.state === "offline") this.offline = true;
+    if (!this.lastSyncedAt || result.lastSyncedAt < this.lastSyncedAt) this.lastSyncedAt = result.lastSyncedAt;
+    return schema.parse(result.value);
+  }
+
   private functions: Set<string> | undefined;
   private userId = 0;
   private language = 'zh-tw';
@@ -51,7 +82,7 @@ export class MoodleClient {
   setFunctions(functions: string[] | undefined) { this.functions = functions ? new Set(functions) : undefined; }
   wsAvailable(name: string) { return !this.functions || this.functions.has(name); }
   constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = moodleFetch, private readonly scheduling?: {queue:MoodleScheduler;priority:number;timing?:(call:MoodleCallTiming)=>void}, private readonly negative = new Map<string,MoodleError>()) {}
-  async call<S extends z.ZodTypeAny>(name: string, params: Record<string,string>, schema: S, retryLanguage = true, signal?: AbortSignal): Promise<z.output<S>> {
+  private async uncachedCall<S extends z.ZodTypeAny>(name: string, params: Record<string,string>, schema: S, retryLanguage = true, signal?: AbortSignal): Promise<z.output<S>> {
     if (name !== 'core_webservice_get_site_info' && !this.wsAvailable(name)) throw new MoodleError('unsupported');
     const run = async (queueMs:number) => {
       const cached = this.negative.get(name);
@@ -76,7 +107,13 @@ export class MoodleClient {
     if (!response.ok) throw new MoodleError('network');
     timing.reused = connectionTiming.get(response)?.reused ?? null;
     let text:string;
-    try { text=await response.text(); } catch { throw new MoodleError('network'); }
+    try {
+      if(!response.body)throw new MoodleError('service');
+      const reader=response.body.getReader(),chunks:Uint8Array[]=[];let bytes=0;
+      try {while(true){const part=await reader.read();if(part.done)break;bytes+=part.value.byteLength;if(bytes>16*1024*1024)throw new MoodleError('service');chunks.push(part.value);}}
+      finally{await reader.cancel().catch(()=>{});reader.releaseLock();}
+      text=Buffer.concat(chunks).toString('utf8');
+    } catch(error) { if(error instanceof MoodleError)throw error;throw new MoodleError('network'); }
     timing.bytes += Buffer.byteLength(text);
     let raw:unknown;
     try { raw = JSON.parse(text); } catch { throw new MoodleError('service'); }

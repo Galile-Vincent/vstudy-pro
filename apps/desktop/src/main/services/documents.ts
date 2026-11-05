@@ -1,9 +1,11 @@
+import { atomicWrite, syncDirectory } from "../storage/atomic";
+import { reconcileLibrary } from "../storage/reconcile";
 import { backfillMetadata } from "./metadata";
 import { safeDocumentLabel } from "../security";
 import { activeConversions } from "./conversion-state";
 import { chmodSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { validateImport } from "./import-security";
+import { validateImportAsync } from "./import-security";
 import { containedPath, LibraryService } from "./library";
 import { SearchService } from "./search";
 import { ActivityService } from "./activity";
@@ -11,7 +13,7 @@ import { profileStage } from "../../../resources/converter/profile";
 import { decodeHtmlEntities } from "../../shared/html";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
-import { link, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { link, mkdir, mkdtemp, open, readFile, rm, stat } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -40,12 +42,11 @@ export class DocumentService {
     this.library = join(options.userData, "library");
     mkdirSync(this.library, { recursive: true, mode: 0o700 });
     chmodSync(this.library, 0o700);
-    this.metadata = backfillMetadata(options.store.db, this.library, () => this.stopped).catch(() => {
-      console.error("Metadata backfill interrupted; pending startup recovery");
-    });
-    for (const document of this.list()) {
-      if (document.status === "converting") this.enqueue(document);
-    }
+    this.metadata = reconcileLibrary(this.library).then(async () => {
+      for (const document of this.list()) if (document.status === "converting") this.enqueue(document);
+      await backfillMetadata(options.store.db, this.library, () => this.stopped);
+    }).catch(() => { console.error("Storage reconciliation interrupted; pending startup recovery"); });
+    this.operations = this.metadata;
   }
 
   list(): Document[] { return this.options.store.documents.list(); }
@@ -76,7 +77,7 @@ export class DocumentService {
       if (!metadata.isFile()) throw new Error("Import requires a regular file");
       if (metadata.size === 0) throw new Error('empty file');
       if (metadata.size > MAX_SOURCE_BYTES) throw new Error("Document exceeds 50 MiB");
-      validateImport(path, extension);
+      await validateImportAsync(path, extension);
       await mkdir(this.library, { recursive: true, mode: 0o700 });
       const staging = await mkdtemp(join(this.library, ".import-"));
       try {
@@ -93,7 +94,9 @@ export class DocumentService {
           },
         }), createWriteStream(source, { flags: "wx", mode: 0o600 }));
         copied();
-        validateImport(source, extension);
+        await validateImportAsync(source, extension);
+        const handle = await open(source, "r");
+        try { await handle.sync(); } finally { await handle.close(); }
         const sourceHash = hash.digest("hex");
         const existing = this.options.store.documents.findByHash(sourceHash);
         if (existing) return this.reuseImport(existing.id);
@@ -102,6 +105,8 @@ export class DocumentService {
         // A hash names immutable bytes. Publish each source exclusively, including after a crash.
         try { await link(source, join(directory, `source.${extension}`)); }
         catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
+        await syncDirectory(directory);
+        await syncDirectory(this.library);
         await rm(source, { force: true });
         const published = this.options.store.documents.findByHash(sourceHash);
         if (published) return this.reuseImport(published.id);
@@ -114,13 +119,18 @@ export class DocumentService {
         const raced = this.options.store.documents.findByHash(sourceHash);
         if (raced) return this.reuseImport(raced.id);
         const inserted = profileStage("DB insert");
-        const document = this.options.store.documents.insert(documentSchema.parse({
+        this.options.store.db.exec("SAVEPOINT import_document");
+        let document: Document;
+        try {
+        document = this.options.store.documents.insert(documentSchema.parse({
           id: randomUUID(), title: safeDocumentLabel(title), sourceName: safeDocumentLabel(basename(path)),
           sourceHash, sourcePath: join(directory, `source.${extension}`), mime,
           markdownPath: join(directory, "content.md"), status: "converting", createdAt: new Date().toISOString(),
         }));
         this.options.store.db.prepare("UPDATE documents SET sizeBytes=?,metadataBackfilled=1 WHERE id=?").run(size, document.id);
         new ActivityService(this.options.store).record("import", document.id, 0, document.id);
+        this.options.store.db.exec("RELEASE import_document");
+        } catch (error) { this.options.store.db.exec("ROLLBACK TO import_document; RELEASE import_document"); throw error; }
         inserted();
         this.enqueue(document);
         return document;
@@ -181,14 +191,13 @@ export class DocumentService {
       if (this.stopped) return;
       try {
         const source = containedPath(this.library, document.sourcePath);
-        validateImport(source, extname(source).slice(1).toLowerCase());
+        await validateImportAsync(source, extname(source).slice(1).toLowerCase());
         let converter: Document["converter"] = "markitdown";
         const extension = extname(document.sourcePath).toLowerCase();
         if (extension === ".md" || extension === ".txt") {
           const content = await readFile(document.sourcePath);
           if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
-          await writeFile(`${document.markdownPath}.tmp`, content, { mode: 0o600 });
-          await rename(`${document.markdownPath}.tmp`, document.markdownPath);
+          await atomicWrite(document.markdownPath, content);
         } else converter = await this.options.convert(document.sourcePath, document.markdownPath, message => this.options.onProgress?.(document.id, message)) ?? "markitdown";
         if ((await stat(document.markdownPath)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
         if (!this.stopped && this.options.store.documents.getIncludingDeleted(document.id)) {
@@ -218,6 +227,6 @@ export class DocumentService {
     this.queue = recovered;
   }
 
-  async waitForIdle(): Promise<void> { await this.operations; await this.queue; await this.metadata; }
+  async waitForIdle(): Promise<void> { await this.metadata; await this.operations; await this.queue; }
   dispose(): void { this.stopped = true; }
 }

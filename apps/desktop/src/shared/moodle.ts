@@ -147,6 +147,8 @@ export const moodleCourseDetailSchema = z
     panelErrors:z.record(moodlePanelSchema,z.enum(['auth','permission','service','network','unsupported'])).optional(),
     contentsPartial:z.boolean().optional(),
     fetchState: z.enum(['idle','loading','error']).optional(),
+    lastSyncedAt: timestamp.nullable().optional(),
+    cacheState: z.enum(['fresh','stale','offline']).optional(),
     sections: z.array(moodleSectionSchema),
     announcements: z.array(moodleAnnouncementSchema),
   })

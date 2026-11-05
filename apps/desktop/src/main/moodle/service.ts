@@ -4,7 +4,7 @@ import { log } from '../logging';
 import type { MoodleCallTiming } from './client';
 import type { MoodleProgress } from '../../shared/ipc';
 import { completionState } from './contents';
-import { moodleImage } from './files';
+import { clearMoodleImages, moodleImage } from './files';
 import { MoodleAuthError, tokensSchema, type MoodleTokens } from './auth';
 import { normalizeSiteUrl, moodleFetch } from './site-url';
 import { randomUUID } from 'node:crypto';
@@ -117,11 +117,21 @@ export class MoodleService {
   }
   async disconnect(id: string) {
     this.repository.account(id);
+    const account = this.repository.account(id);
+    const courseIds=this.repository.overview(id).courses.map(course=>course.id);
+    const token = await this.token(id).catch(() => undefined);
+    clearMoodleImages(account.siteUrl,token);
     this.repository.disconnect(id);
     this.failures.delete(id);
     this.signInStorage.delete(id);
     this.secrets.delete(moodleSecretId(id));
-    await this.pending.get(id);
+    await Promise.allSettled([this.pending.get(id),...courseIds.map(courseId=>this.detailPending.get(courseId))]);
+    clearMoodleImages(account.siteUrl,token);
+    this.lastAttempt.delete(id);
+    for(const courseId of courseIds){
+      this.detailAttempts.delete(courseId);this.detailErrors.delete(courseId);this.panelErrors.delete(courseId);
+      this.panelFresh.delete(courseId);this.panels.delete(courseId);this.partialContents.delete(courseId);this.teacherCache.delete(courseId);
+    }
   }
   overview(accountId?: string) {
     const snapshot = this.repository.overview(accountId);
@@ -137,7 +147,9 @@ export class MoodleService {
       if (!this.repository.detailCache(id)) await this.contentReady.get(id);
       void work;
     } else if (!this.repository.detailCache(id)) await this.contentReady.get(id);
-    return {...this.repository.course(id),panels:{...this.panels.get(id)},panelErrors:{...this.panelErrors.get(id)},contentsPartial:this.partialContents.has(id),fetchState:this.detailPending.has(id) ? 'loading' as const : this.detailErrors.has(id) ? 'error' as const : 'idle' as const};
+    const lastSyncedAt = this.repository.detailCache(id)?.refreshedAt ?? this.repository.account(cached.course.accountId).syncedAt;
+    const cacheState = this.detailErrors.get(id) === 'network' ? 'offline' as const : !lastSyncedAt || Date.now() - Date.parse(lastSyncedAt) >= 5*60_000 ? 'stale' as const : 'fresh' as const;
+    return {...this.repository.course(id),lastSyncedAt,cacheState,panels:{...this.panels.get(id)},panelErrors:{...this.panelErrors.get(id)},contentsPartial:this.partialContents.has(id),fetchState:this.detailPending.has(id) ? 'loading' as const : this.detailErrors.has(id) ? 'error' as const : 'idle' as const};
   }
   refreshCourse(id: string): Promise<void> {
     const pending = this.detailPending.get(id);
@@ -166,6 +178,7 @@ export class MoodleService {
       const detail = this.repository.course(id);
       const account = this.repository.account(detail.course.accountId);
       const client = new MoodleClient(account.siteUrl,await this.token(account.id),this.request,{queue:this.queue,priority:10},this.sessionFailures(account.id));
+      client.setCache(this.repository.cache,account.id,true);
       client.setUserId(account.remoteUserId);
       const functions = this.repository.capabilities(account.id)?.functions;
       client.setFunctions(functions);
@@ -191,7 +204,7 @@ export class MoodleService {
       const contents=await optional('core_course_get_contents',() => client.courseContents(detail.course));
       if (contents && active()) {
         if (contents.partial) this.partialContents.add(id); else this.partialContents.delete(id);
-        this.repository.saveDetail(id,{sections:contents.sections},contents.files);
+        this.repository.saveDetail(id,{sections:contents.sections},contents.files,client.offline ? client.lastSyncedAt : undefined);
       }
       ready();
       this.progress({accountId:account.id,courseId:id,state:'loading',completed:1,total:1});
@@ -220,7 +233,7 @@ export class MoodleService {
             this.repository.saveCourse({...latest,progress:100 * tracked.filter(status => status.state > 0).length / tracked.length,identity:{...latest.identity,hasProgress:true}});
           }
         }
-        if (active()) this.repository.saveDetail(id,{sections:contents.sections},contents.files);
+        if (active()) this.repository.saveDetail(id,{sections:contents.sections},contents.files,client.offline ? client.lastSyncedAt : undefined);
       }
       })(),(async () => {
       if (detail.course.identity.teacherSource !== 'contacts' && Date.now() - (this.teacherCache.get(id) ?? 0) > 3600_000) {
@@ -241,8 +254,9 @@ export class MoodleService {
         }
       })(),(async () => {
       const announcements = await optional('mod_forum_get_forums_by_courses',() => client.announcements(this.repository.course(id).course));
-      if (announcements && active()) this.repository.saveDetail(id,{announcements});
+      if (announcements && active()) this.repository.saveDetail(id,{announcements},undefined,client.offline ? client.lastSyncedAt : undefined);
       })()]);
+      if (client.offline) this.detailErrors.set(id,'network');
     } finally {
       ready();
     }
@@ -296,6 +310,7 @@ export class MoodleService {
     const account = this.repository.account(id);
     if (account.status === 'expired') throw new MoodleError('auth');
     const client = new MoodleClient(account.siteUrl,await this.token(id),this.request,{queue:this.queue,priority:0,timing:call => calls.push(call)},this.sessionFailures(id));
+    client.setCache(this.repository.cache,account.id,true);
     client.setLanguage(this.language());
     const info = await client.siteInfo();
     if (info.userid !== account.remoteUserId || info.siteurl && normalizeSiteUrl(info.siteurl) !== account.siteUrl) throw new MoodleError('auth');
@@ -335,19 +350,23 @@ export class MoodleService {
         this.repository.apply(id,{courses:[course],deadlines,notifications:[],grades,files:contents?.files ?? this.repository.fileRecords(course.id)},course.id);
         if (contents) {
           if (contents.partial) this.partialContents.add(course.id); else this.partialContents.delete(course.id);
-          this.repository.saveDetail(course.id,{sections:contents.sections},contents.files);
+          this.repository.saveDetail(course.id,{sections:contents.sections},contents.files,client.offline ? client.lastSyncedAt : undefined);
         }
         this.progress({accountId:id,state:'loading',completed:++completed,total:current.length});
       }
     }));
     const rejected=outcomes.find(outcome => outcome.status === 'rejected');
     if (rejected?.status === 'rejected') throw rejected.reason;
-    if (active()) this.repository.apply(id,{courses,deadlines:[],notifications,grades:[],files:[]},'@notifications');
+    if (active()) {
+      this.repository.apply(id,{courses,deadlines:[],notifications,grades:[],files:[]},'@notifications');
+      if(client.offline) {this.repository.saveAccount({...this.repository.account(id),syncedAt:account.syncedAt});errors.push('network');}
+    }
     this.progress({accountId:id,state:errors.length ? 'error' : 'idle',completed:current.length,total:current.length});
     return {errors};
     } catch (error) {this.progress({accountId:id,state:'error',completed:0,total:0});throw error;}
     finally {log({phase:'moodle-sync',ms:performance.now()-started,calls:calls.reduce((sum,call)=>sum+call.requests,0),bytes:calls.reduce((sum,call)=>sum+call.bytes,0),slowest:[...calls].sort((a,b)=>b.ms-a.ms).slice(0,5)});}
   }
 
+  async waitForIdle() { await Promise.allSettled([...this.pending.values(),...this.detailPending.values()]); await this.repository.cache.waitForIdle(); }
   async dispose() { this.stopped = true; await Promise.allSettled([...this.pending.values(),...this.detailPending.values()]); }
 }
