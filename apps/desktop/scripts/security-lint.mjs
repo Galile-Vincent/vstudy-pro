@@ -3,5 +3,5 @@ import { ESLint } from 'eslint';
 const engine = new ESLint({ overrideConfig: [{ files: ['src/main/**/*.ts'], ignores: ['**/*.test.ts'], plugins: { 'electron-security': electronSecurity }, rules: Object.fromEntries(Object.keys(electronSecurity.rules).map(name => [`electron-security/${name}`, 'warn'])) }] });
 const results = await engine.lintFiles(['src/main']);
 console.log(await (await engine.loadFormatter('stylish')).format(results));
-// SSO launch URLs pass networkUrl immediately before shell.openExternal.
-if (results.some(result => result.errorCount || result.messages.some(message => message.severity === 1 && !(message.ruleId === 'electron-security/no-open-external-with-dynamic-url' && (result.filePath.endsWith('/src/main/ipc/index.ts') || result.filePath.endsWith('/src/main/moodle/sso-protocol.ts')))))) process.exitCode = 1;
+// The app and Moodle page openers confirm natively. SSO validates its launch URL.
+if (results.some(result => result.errorCount || result.messages.some(message => message.severity === 1 && !(message.ruleId === 'electron-security/no-open-external-with-dynamic-url' && (result.filePath.endsWith('/src/main/ipc/index.ts') || result.filePath.endsWith('/src/main/moodle/sso-protocol.ts') || result.filePath.endsWith('/src/main/moodle/webview.ts')))))) process.exitCode = 1;

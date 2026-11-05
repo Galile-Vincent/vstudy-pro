@@ -26,4 +26,4 @@ node e2e/planner.mjs
 
 The evaluation in `eval.test.ts` compares drafts with `__fixtures__/expected.json`. A mocked model streams those recorded actions through the course action parser. Heavy-week, imminent-exam, and missing-submission scenarios check capacity, source deadlines, and explicit unallocated work. Corrupted proposals must be rejected. These recordings test contract behavior. They do not measure live-model teaching quality.
 
-Migration 19 is in `db/planner-migration.ts`. Opening an existing database first creates a private `before-v19` backup after checkpointing WAL. See `docs/AGENT_DESIGN.md` for product decisions and limits.
+Migration 21 is in `db/planner-migration.ts`. Opening an existing database first creates a private `before-v21` backup using the shared WAL-aware snapshot mechanism. See `docs/AGENT_DESIGN.md` for product decisions and limits.

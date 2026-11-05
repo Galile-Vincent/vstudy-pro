@@ -104,7 +104,7 @@ export class ChatService {
   }
   private accept(request: ChatRequest, owner: ChatOwner): void {
     if (this.stopped) throw new Error("Chat service is closed");
-    if (request.scope !== "course" && request.scope !== "general" && this.deleting.has(request.documentId)) throw new Error("Document is deleting");
+    if (request.scope !== "course" && request.scope !== "general" && this.deleting.has(request.documentId) || request.scope === "course" && request.materials?.documentIds.some(id => this.deleting.has(id))) throw new Error("Document is deleting");
     if (owner.isDestroyed()) throw new Error("Chat window unavailable");
     if (this.active.has(request.requestId))
       throw new Error("Request already active");
@@ -189,7 +189,7 @@ export class ChatService {
   }
   abortDocument(documentId: import("../../shared/domain").Document["id"]): void {
     for (const entry of this.active.values())
-      if (entry.request.scope !== "course" && entry.request.scope !== "general" && entry.request.documentId === documentId) this.abort(entry.request.requestId, entry.owner);
+      if (entry.request.scope === "course" ? entry.request.materials?.documentIds.includes(documentId) : entry.request.scope !== "general" && entry.request.documentId === documentId) this.abort(entry.request.requestId, entry.owner);
   }
   async waitForIdle(): Promise<void> { await Promise.all(this.producers); }
   async dispose(): Promise<void> {
@@ -329,6 +329,7 @@ export class ChatService {
             : {}),
         });
       }
+      entry.controller.signal.throwIfAborted();
       entry.promptChars = prompt.length;
       for await (const rawEvent of adapter.stream(
         { ...entry.request, prompt, allowPresentation, onUsageSnapshot: (usage, models) => { if (this.active.get(entry.request.requestId) === entry) { entry.usage = usageSchema.parse(usage); if (models) entry.usageModels = models.map(m => ({modelId: m.modelId, usage: usageSchema.parse(m.usage)})); } } },

@@ -22,7 +22,7 @@ Students need an answer to "what can I finish today?" A list of deadlines alone 
 
 Existing Moodle reminders keep their current behavior. Planner reminders can point at tasks or exams as well as deadlines. Export includes selected deadlines, tasks, exams, or blocks as stable-UID calendar events. It uses the native save dialog.
 
-Student-owned records live in normalized `planner_tasks`, `planner_exams`, `planner_goals`, `planner_plans`, `planner_blocks`, and `planner_reminders` tables. Migration 19 lives in its own file. Course and deadline references use `ON DELETE SET NULL`, so sync cannot erase a student's plan. Before an existing database migrates, checkpoint WAL and create a mode-0600 `before-v19` backup. Forward migration is transactional. Downgrade is manual from the backup.
+Student-owned records live in normalized `planner_tasks`, `planner_exams`, `planner_goals`, `planner_plans`, `planner_blocks`, and `planner_reminders` tables. Migration 21 lives in its own file. Course and deadline references use `ON DELETE SET NULL`, so sync cannot erase a student's plan. Before an existing database migrates, use the shared WAL-aware snapshot mechanism to create a mode-0600 `before-v21` backup. Forward migration is transactional. Downgrade is manual from the backup.
 
 ## Runtime and trust boundaries
 
@@ -44,6 +44,6 @@ Two candidates were considered. Extending Moodle reminders into tasks would make
 
 ## Verification and limits
 
-Repository tests cover persistence, rollback, references, idempotency, course removal, and the v18-to-v19 backup. Context tests cover byte budgets, relevance, malicious page text, and sync invalidation. Recorded scenario outputs cover a heavy week, an exam in three days, and missing submissions. A mocked model emits the recordings through the same action parser. Constraint tests reject overbooking and late blocks. Run the fixture evaluation with `pnpm exec vitest run src/main/planner/eval.test.ts --pool=forks --maxWorkers=2` in `apps/desktop`.
+Repository tests cover persistence, rollback, references, idempotency, course removal, and the v20-to-v21 backup. Context tests cover byte budgets, relevance, malicious page text, and sync invalidation. Recorded scenario outputs cover a heavy week, an exam in three days, and missing submissions. A mocked model emits the recordings through the same action parser. Constraint tests reject overbooking and late blocks. Run the fixture evaluation with `pnpm exec vitest run src/main/planner/eval.test.ts --pool=forks --maxWorkers=2` in `apps/desktop`.
 
 The fixture evaluation checks contract behavior, not a live model's educational quality. The planner has no class timetable, external calendar availability, OCR, or submission authority. Unknown exam scope and missing materials remain visible uncertainties. Summaries and quizzes need a configured provider and still require student verification.

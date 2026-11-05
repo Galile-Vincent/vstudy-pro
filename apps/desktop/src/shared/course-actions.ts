@@ -10,7 +10,7 @@ export function assertCourseAction(action: MoodleAgentAction, detail: MoodleCour
   if (action.type === "export-calendar") {
     const refs = [
       ...(action.deadlineIds ?? []).map(id => detail.deadlines.find(d => d.id === id)),
-      ...(action.taskIds ?? []).map(id => context.snapshot.tasks.find(t => t.id === id && t.courseId === detail.course.id)),
+      ...(action.taskIds ?? []).map(id => context.snapshot.tasks.find(t => t.id === id && t.courseId === detail.course.id && t.dueAt)),
       ...(action.examIds ?? []).map(id => context.snapshot.exams.find(e => e.id === id && e.courseId === detail.course.id)),
       ...(action.blockIds ?? []).map(id => context.snapshot.blocks.find(b => b.id === id && b.courseId === detail.course.id)),
     ];

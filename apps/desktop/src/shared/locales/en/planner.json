@@ -40,7 +40,7 @@
   "overdue": "Overdue",
   "source_deadlines": "School deadlines",
   "submitted_unknown": "Submission status unknown. Check Moodle.",
-  "source_moodle": "Linked to Moodle",
+  "source_moodle": "From Moodle",
   "source_user": "Added by you",
   "source_agent": "Suggested by assistant",
   "status_todo": "To do",

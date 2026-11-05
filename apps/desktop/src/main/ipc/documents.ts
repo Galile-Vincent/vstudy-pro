@@ -24,7 +24,7 @@ export function registerDocumentsIpc(
   implemented: Set<IpcChannel>,
   deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(),
   providers?:ProviderRegistry,
-): (() => Promise<void>) & { resume: (id: import("../../shared/domain").Document["id"]) => void; stopAi:(id:import("../../shared/domain").Document["id"])=>Promise<void>; importPath:DocumentService["importPath"]; get:DocumentService["get"] } {
+): (() => Promise<void>) & { resume: (id: import("../../shared/domain").Document["id"]) => void; waitForIdle:()=>Promise<void>; stopAi:(id:import("../../shared/domain").Document["id"])=>Promise<void>; importPath:DocumentService["importPath"]; get:DocumentService["get"] } {
   const aiOwners=new Map<string,Electron.WebContents>();
   const drops = new DropTokens();
   const library = new LibraryService(store, join(app.getPath("userData"), "library"));
@@ -102,5 +102,5 @@ export function registerDocumentsIpc(
     return { ok: true };
   });
   const dispose = registrar.dispose;
-  return Object.assign(async () => { await ai?.dispose(); ipcMain.removeListener('vstudy:preload-drop', captureDrop); documents.dispose(); dispose(); await converter.dispose(); await documents.waitForIdle(); }, {importPath:documents.importPath.bind(documents),get:documents.get.bind(documents),stopAi:async(id:import("../../shared/domain").Document["id"])=>{ai?.cancel(id);await ai?.waitForIdle();},resume: (id: import("../../shared/domain").Document["id"]) => documents.resume(id)});
+  return Object.assign(async () => { await ai?.dispose(); ipcMain.removeListener('vstudy:preload-drop', captureDrop); documents.dispose(); dispose(); await converter.dispose(); await documents.waitForIdle(); }, {waitForIdle:async()=>{await ai?.waitForIdle();await documents.waitForIdle();},importPath:documents.importPath.bind(documents),get:documents.get.bind(documents),stopAi:async(id:import("../../shared/domain").Document["id"])=>{ai?.cancel(id);await ai?.waitForIdle();},resume: (id: import("../../shared/domain").Document["id"]) => documents.resume(id)});
 }

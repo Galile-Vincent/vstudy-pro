@@ -1,4 +1,5 @@
 import { registerPlannerIpc } from "./planner";
+import { registerStorageIpc } from "./storage";
 import { applyNativeTheme } from '../theme';
 import { registerMoodleIpc } from './moodle';
 import { showAttachedMessage } from '../dialogs';
@@ -81,11 +82,12 @@ export function registerIpc(
   const disposePlanner = registerPlannerIpc(registrar, store, implemented);
   const disposeMoodle = registerMoodleIpc(registrar, store, secrets, implemented, disposeDocuments, restoreMainWindow);
   const disposeLibrary = registerLibraryIpc(registrar, store, implemented, async (id, remove) => {await disposeDocuments.stopAi(id);return chat.deleteDocument(id, remove);}, disposeDocuments.resume);
+  registerStorageIpc(registrar,store,implemented,async()=>{await disposeMoodle.waitForIdle();await chat.waitForIdle();await disposeDocuments.waitForIdle();await disposeLibrary.waitForIdle();});
   for (const channel of Object.keys(ipcContract) as IpcChannel[]) {
     if (!implemented.has(channel))
       registrar.handle(channel, () => {
         throw new Error("not implemented");
       });
   }
-  return async () => { registrar.dispose(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { registrar.dispose(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }

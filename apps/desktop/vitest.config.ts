@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 export default defineConfig({
   resolve: { alias: { "@": resolve("src/renderer") } },
   test: {
-    environment: "node", include: ["src/**/*.test.{ts,tsx}"],
+    pool: "forks", maxWorkers: 2, environment: "node", include: ["src/**/*.test.{ts,tsx}"],
     // Node's process-wide Web Storage must not shadow jsdom's per-window storage.
     execArgv: ["--no-experimental-webstorage"],
   },

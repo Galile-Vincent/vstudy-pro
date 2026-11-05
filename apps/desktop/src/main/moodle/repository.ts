@@ -1,3 +1,4 @@
+import { responseCache } from "../cache";
 import { moodleSectionSchema, moodleAnnouncementSchema, type MoodleSection, type MoodleAnnouncement } from '../../shared/moodle-course';
 import { parseCourseIdentity, courseLifecycle } from './identity';
 import type { DatabaseSync } from 'node:sqlite';
@@ -39,20 +40,24 @@ export class MoodleRepository {
   private rows<T>(sql: string, schema: z.ZodType<T,z.ZodTypeDef,unknown>, ...params: string[]): T[] {
     return this.db.prepare(sql).all(...params).map(row => schema.parse(JSON.parse(payload.parse(row).data)));
   }
+  get cache() { return responseCache(this.db); }
   capabilities(id: string) { return this.rows('SELECT data FROM moodle_capabilities WHERE accountId=?',capabilitiesSchema,id)[0]; }
   saveCapabilities(id: string, capabilities: z.infer<typeof capabilitiesSchema>) {
     this.db.prepare('INSERT INTO moodle_capabilities VALUES (?,?) ON CONFLICT(accountId) DO UPDATE SET data=excluded.data').run(id,JSON.stringify(capabilitiesSchema.parse(capabilities)));
   }
   accounts() { return this.rows('SELECT data FROM moodle_accounts ORDER BY id',moodleAccountSchema); }
   account(id: string): MoodleAccount {
-    const account = this.accounts().find(account => account.id === id);
+    const account = this.rows('SELECT data FROM moodle_accounts WHERE id=?',moodleAccountSchema,id)[0];
     if (!account) throw new Error('Moodle account not found');
     return account;
   }
   saveAccount(account: MoodleAccount) {
     this.db.prepare('INSERT INTO moodle_accounts(id,siteUrl,remoteUserId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(account.id,account.siteUrl,account.remoteUserId,JSON.stringify(moodleAccountSchema.parse(account)));
   }
-  disconnect(id: string) { this.db.prepare('DELETE FROM moodle_accounts WHERE id=?').run(id); }
+  disconnect(id: string) {
+    if (this.db.prepare("SELECT 1 FROM sqlite_master WHERE name='moodle_response_cache'").get()) this.cache.clear(id);
+    this.db.prepare('DELETE FROM moodle_accounts WHERE id=?').run(id);
+  }
   expired(id: string) { this.saveAccount({...this.account(id),status:'expired'}); }
   overview(accountId?: string): MoodleOverview {
     const accounts = this.accounts().filter(account => !accountId || account.id === accountId);
@@ -68,18 +73,25 @@ export class MoodleRepository {
     if (!course) throw new Error('Moodle course not found');
     const cache = this.detailCache(id);
     const deadlines = this.rows('SELECT data FROM moodle_deadlines WHERE courseId=?',moodleDeadlineSchema,id).filter(item => !item.orphaned);
-    return {course,deadlines,notifications:this.rows('SELECT data FROM moodle_notifications WHERE accountId=?',moodleNotificationSchema,course.accountId).filter(item => item.courseId === id),grades:this.rows('SELECT data FROM moodle_grades WHERE courseId=?',moodleGradeItemSchema,id),files:this.files(id),reminders:this.reminders().filter(item => deadlines.some(deadline => deadline.id === item.deadlineId)),sections:cache?.sections ?? [],announcements:cache?.announcements ?? []};
+    return {course,deadlines,notifications:this.rows("SELECT data FROM moodle_notifications WHERE accountId=? AND json_extract(data,'$.courseId')=?",moodleNotificationSchema,course.accountId,id),grades:this.rows('SELECT data FROM moodle_grades WHERE courseId=?',moodleGradeItemSchema,id),files:this.files(id),reminders:this.rows('SELECT r.data FROM moodle_reminders r JOIN moodle_deadlines d ON d.id=r.deadlineId WHERE d.courseId=?',moodleReminderSchema,id),sections:cache?.sections ?? [],announcements:cache?.announcements ?? []};
   }
   detailCache(id: string) {
     return this.rows('SELECT data FROM moodle_course_details WHERE courseId=?',z.object({sections:z.array(moodleSectionSchema).default([]),announcements:z.array(moodleAnnouncementSchema).default([]),refreshedAt:z.string()}),id)[0];
   }
-  saveDetail(id: string, panels: {sections?:MoodleSection[];announcements?:MoodleAnnouncement[]}, files?:MoodleSnapshot['files']) {
-    this.course(id);
+  saveDetail(id: string, panels: {sections?:MoodleSection[];announcements?:MoodleAnnouncement[]}, files?:MoodleSnapshot['files'], syncedAt?: string) {
+    if (!this.db.prepare('SELECT 1 FROM moodle_courses WHERE id=?').get(id)) throw new Error('Moodle course not found');
     const previous = this.detailCache(id);
-    const data = {...previous,...panels,refreshedAt:new Date().toISOString()};
+    const data = {...previous,...panels,refreshedAt:syncedAt ?? new Date().toISOString()};
+    const serialized=JSON.stringify(data);
+    if(Buffer.byteLength(serialized)>8*1024*1024)throw new Error('Moodle course detail exceeds cache limit');
     this.db.exec('SAVEPOINT moodle_detail');
     try {
-      this.db.prepare('INSERT INTO moodle_course_details(courseId,data) VALUES (?,?) ON CONFLICT(courseId) DO UPDATE SET data=excluded.data').run(id,JSON.stringify(data));
+      this.db.prepare('INSERT INTO moodle_course_details(courseId,data) VALUES (?,?) ON CONFLICT(courseId) DO UPDATE SET data=excluded.data').run(id,serialized);
+      let bytes=Number(this.db.prepare('SELECT coalesce(sum(length(CAST(data AS BLOB))),0) bytes FROM moodle_course_details').get()?.bytes);
+      for(const row of this.db.prepare("SELECT courseId,length(CAST(data AS BLOB)) bytes FROM moodle_course_details ORDER BY json_extract(data,'$.refreshedAt'),courseId").all()){
+        if(bytes<=64*1024*1024)break;
+        if(row.courseId!==id){this.db.prepare('DELETE FROM moodle_course_details WHERE courseId=?').run(row.courseId!);bytes-=Number(row.bytes);}
+      }
       if (files) {
         for (const item of files) {
           if (item.value.courseId !== id) throw new Error('Moodle course mismatch');
@@ -101,12 +113,16 @@ export class MoodleRepository {
     const row = this.db.prepare('SELECT data,url,documentId FROM moodle_files WHERE id=?').get(id);
     if (!row) throw new Error('Moodle file not found');
     const file = moodleFileSchema.parse({...JSON.parse(payload.parse(row).data),documentId:row.documentId});
-    return {file,url:z.string().parse(row.url),account:this.account(this.course(file.courseId).course.accountId)};
+    return {file,url:z.string().parse(row.url),account:this.account(String(this.db.prepare('SELECT accountId FROM moodle_courses WHERE id=?').get(file.courseId)!.accountId))};
   }
   gradeRecords(courseId: string) {
     return this.db.prepare('SELECT data,remoteKey FROM moodle_grades WHERE courseId=?').all(courseId).map(row => ({remoteKey:z.string().parse(row.remoteKey),value:moodleGradeItemSchema.parse(JSON.parse(payload.parse(row).data))}));
   }
-  fileRecords(courseId: string) { return this.files(courseId).map(value => ({value,url:this.file(value.id).url})); }
+  fileRecords(courseId: string) {
+    return this.db.prepare('SELECT data,url,documentId FROM moodle_files WHERE courseId=?').all(courseId).map(row => ({
+      value:moodleFileSchema.parse({...JSON.parse(payload.parse(row).data),documentId:row.documentId}),url:z.string().parse(row.url),
+    }));
+  }
   linkFile(id: string, documentId: string, revision: Pick<MoodleFile,'modifiedAt'|'size'>) { this.db.prepare("UPDATE moodle_files SET documentId=? WHERE id=? AND json_extract(data,'$.modifiedAt') IS ? AND json_extract(data,'$.size')=?").run(documentId,id,revision.modifiedAt,revision.size); }
   apply(accountId: string, snapshot: MoodleSnapshot, scope?: string) {
     this.db.exec('SAVEPOINT moodle_sync');

@@ -1,11 +1,10 @@
+import { atomicWriteSync } from "../storage/atomic";
 import { AI_PARSE_SYSTEM } from '../prompt/ai-parse';
 import { configuredCliPath } from './executable-pins';
 import {
   existsSync,
   readFileSync,
   mkdirSync,
-  writeFileSync,
-  renameSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { z } from "zod";
@@ -140,10 +139,7 @@ export class ProviderRegistry {
     if (this.configFile) {
       try {
         mkdirSync(dirname(this.configFile), { recursive: true });
-        writeFileSync(`${this.configFile}.tmp`, JSON.stringify(next), {
-          mode: 0o600,
-        });
-        renameSync(`${this.configFile}.tmp`, this.configFile);
+        atomicWriteSync(this.configFile, JSON.stringify(next));
       } catch {
         throw new Error("Provider configuration could not be saved");
       }

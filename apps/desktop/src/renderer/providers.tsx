@@ -1,5 +1,6 @@
+import { StorageSettings } from "./settings/storage";
 import { Switch } from './components/ui/switch';
-import { SlidersHorizontal, Palette, KeyRound, BarChart3, Shield, X } from 'lucide-react';
+import { SlidersHorizontal, Palette, KeyRound, BarChart3, Shield, HardDrive, X } from 'lucide-react';
 import { SettingsGroup, SettingsRow } from './settings/layout';
 import { AppearanceSection } from './settings/appearance';
 import './settings/settings.css';
@@ -75,20 +76,21 @@ export function ProviderSettings({
                 ['appearance', Palette],
                 ['providers', KeyRound],
                 ['usage', BarChart3],
+                ['storage', HardDrive],
                 ['privacy', Shield],
               ] as const
             ).map(([id, Icon]) => (
               <TabsTrigger key={id} value={id}>
                 <Icon size={16} />
-                {tr(`settings:${id}`)}
+                {tr(id === 'storage' ? 'storage:title' : `settings:${id}`)}
               </TabsTrigger>
             ))}
           </TabsList>
-          {['general', 'appearance', 'providers', 'usage', 'privacy'].map((id) => (
+          {['general', 'appearance', 'providers', 'usage', 'storage', 'privacy'].map((id) => (
             <TabsContent forceMount hidden={tab !== id} value={id} key={id} className="settings-pane">
               <div className="settings-pane-inner">
                 <header className="settings-section-header">
-                  <h2>{tr(`settings:${id}`)}</h2>
+                  <h2>{tr(id === 'storage' ? 'storage:title' : `settings:${id}`)}</h2>
                   {id === 'providers' && (
                     <p className="muted">
                       {tr('common:keys_are_saved_securely_in_the_desktop_app_and_never_read_back')}
@@ -124,6 +126,8 @@ export function ProviderSettings({
                     </>
                   ) : id === 'appearance' ? (
                     <AppearanceSection />
+                  ) : id === 'storage' ? (
+                    <StorageSettings />
                   ) : id === 'privacy' ? (
                     <PrivacySettings />
                   ) : id === 'usage' ? (

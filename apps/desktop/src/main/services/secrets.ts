@@ -1,10 +1,9 @@
+import { atomicWriteSync } from "../storage/atomic";
 import {
   chmodSync,
   existsSync,
   mkdirSync,
   readFileSync,
-  renameSync,
-  writeFileSync,
 } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { dirname } from "node:path";
@@ -31,10 +30,7 @@ export function createSecretStore(file: string, encryption: Encryption) {
   }
   function write(values: Record<string, string>): void {
     mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
-    const temporary = `${file}.tmp`;
-    writeFileSync(temporary, JSON.stringify(values), { mode: 0o600 });
-    chmodSync(temporary, 0o600);
-    renameSync(temporary, file);
+    atomicWriteSync(file, JSON.stringify(values));
   }
   async function access<T>(operation: () => Promise<T>): Promise<T> {
     try { return await operation(); }

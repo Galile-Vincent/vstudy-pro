@@ -1,6 +1,6 @@
 import { containedPath } from "./file-paths";
 import { dirname, join } from 'node:path';
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import type { DatabaseSync } from 'node:sqlite';
 import { documentIdSchema } from '../../shared/domain';
 export function indexedText(content: string): string {
@@ -29,7 +29,7 @@ export class SearchService {
             throw e;
         }
     }
-    rebuild() {
+    async rebuild(): Promise<void> {
         try {
             this.db.exec("INSERT INTO document_fts(document_fts) VALUES('integrity-check')");
         }
@@ -43,12 +43,15 @@ export class SearchService {
             const title = indexedText(String(row.title)), filename = indexedText(String(row.filename)), content = indexedText(String(row.content));
             if (title !== row.title || filename !== row.filename || content !== row.content || Number(row.chars) > 1_000_000)
                 this.db.prepare('UPDATE document_fts SET title=?,filename=?,content=? WHERE rowid=?').run(title,filename,content,rowid!);
+            await new Promise<void>(resolve=>setImmediate(resolve));
         }
         const missing = this.db.prepare("WITH indexed AS MATERIALIZED (SELECT documentId,count(*) copies,max(length(content)) chars FROM document_fts GROUP BY documentId) SELECT d.id,d.markdownPath,d.activeVersion FROM documents d LEFT JOIN indexed f ON f.documentId=d.id WHERE d.status='ready' AND d.deletedAt IS NULL AND (coalesce(f.copies,0)!=1)").all();
         for (const d of missing) {
             try {
                 const path = d.activeVersion==='ai' ? join(dirname(String(d.markdownPath)),'content.ai.md') : String(d.markdownPath);
-                this.update(String(d.id), readFileSync(this.root ? containedPath(this.root, path) : path, 'utf8'));
+                const content = await readFile(this.root ? containedPath(this.root, path) : path, 'utf8');
+                const latest=this.db.prepare('SELECT status,activeVersion FROM documents WHERE id=? AND deletedAt IS NULL').get(d.id!);
+                if(latest?.status==='ready' && latest.activeVersion===d.activeVersion)this.update(String(d.id),content);
             }
             catch { /* A missing source is retried on the next startup. */ }
         }

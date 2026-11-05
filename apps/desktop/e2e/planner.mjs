@@ -13,6 +13,7 @@ const launch = () => electron.launch({ args: [resolve("."), `--user-data-dir=${d
 const results = [];
 try {
   await mkdir(evidence, { recursive: true });
+  await rm(join(evidence, "failure.png"), { force: true });
   app = await launch();
   let page = await app.firstWindow();
   await page.waitForFunction(() => !!window.desktop?.invoke);

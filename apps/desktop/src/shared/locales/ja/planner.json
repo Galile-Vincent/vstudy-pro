@@ -40,7 +40,7 @@
   "overdue": "締切超過",
   "source_deadlines": "学校の締切",
   "submitted_unknown": "提出状況が不明です。Moodle で確認してください。",
-  "source_moodle": "Moodle に連携",
+  "source_moodle": "Moodle から追加",
   "source_user": "自分で追加",
   "source_agent": "アシスタントの提案",
   "status_todo": "未着手",

@@ -1,5 +1,6 @@
+import { atomicWrite } from "../storage/atomic";
 import { randomUUID, createHash } from 'node:crypto';
-import { readFile, writeFile, rename, rm } from 'node:fs/promises';
+import { readFile, rm } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { z } from 'zod';
 import { aiParseRequestSchema, aiParseStateSchema, type AiParseRequest, type AiParseEstimate, type AiParseState } from '../../shared/ai-parse';
@@ -81,8 +82,8 @@ export class AiParseService {
   const rows=this.rows(d.id), path=this.path(d);
   const markdown=pages.map((p,i)=>`<!-- page ${i+1} -->\n\n${rows.find(r=>r.page===i+1 && r.status==='done')?.markdown??p}`).join('\n\n');
   if(Buffer.byteLength(markdown)>8*1024*1024)throw new Error('ai_parse.size');
-  const temporary=path+'.'+randomUUID()+'.tmp';await writeFile(temporary,markdown,{mode:0o600,flag:'wx'});await rename(temporary,path);
-  const provenance=path+'.'+randomUUID()+'.json';await writeFile(provenance,JSON.stringify({...this.status(d.id),provenance:this.store.db.prepare('SELECT page,provenance FROM ai_parse_pages WHERE documentId=? ORDER BY page').all(d.id)}),{mode:0o600,flag:'wx'});await rename(provenance,path+'.json');
+  await atomicWrite(path,markdown);
+  await atomicWrite(path+'.json',JSON.stringify({...this.status(d.id),provenance:this.store.db.prepare('SELECT page,provenance FROM ai_parse_pages WHERE documentId=? ORDER BY page').all(d.id)}));
   this.store.db.prepare('UPDATE documents SET aiSizeBytes=? WHERE id=?').run(Buffer.byteLength(markdown),d.id);
   if(this.document(d.id).activeVersion==='ai')new SearchService(this.store.db).update(d.id,markdown);
  }
