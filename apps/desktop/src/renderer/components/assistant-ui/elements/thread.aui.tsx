@@ -705,7 +705,7 @@ const MessageError: FC = () => {
   return (
     <MessagePrimitive.Error>
       <ErrorPrimitive.Root className="aui-message-error-root border-destructive bg-destructive/10 text-destructive dark:bg-destructive/5 mt-2 rounded-md border p-3 text-sm dark:text-red-200">
-        <span className="aui-message-error-message">{tr(typeof error === 'string' && /network|fetch|offline/i.test(error) ? 'library:chat_network_error' : 'library:chat_error')}</span>
+        <span className="aui-message-error-message">{typeof error === 'string' ? error : tr('library:chat_error')}</span>
         <ActionBarPrimitive.Reload asChild><Button type="button" variant="outline" size="sm">{tr('common:retry')}</Button></ActionBarPrimitive.Reload>
       </ErrorPrimitive.Root>
     </MessagePrimitive.Error>

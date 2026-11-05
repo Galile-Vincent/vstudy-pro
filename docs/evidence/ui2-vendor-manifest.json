@@ -133,9 +133,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx",
       "registrySha256": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da",
-      "patchedSha256": "88acc5e13a310472640a03501234feedb8f5c26a26b7edffb529e5e5dbd39482",
+      "patchedSha256": "b698234661aa6e2769c5d1a385b3facaebc28de30d177e06e76327a282f134e0",
       "patch": "docs/vendor-patches/assistant-ui--elements--thread.aui.tsx.patch",
-      "reason": "Add composition slots for app-owned document selection, usage/budget guard, IME input, safe Markdown, citations, clipboard and announcements; translate labels; omit unsupported durable branch switching. Styling stays upstream. The one-line standalone presentation-table grouping exception is application-specific; it can move out when upstream exposes a grouping slot."
+      "reason": "Add composition slots for app-owned document selection, usage/budget guard, IME input, safe Markdown, citations, clipboard and announcements; translate labels; omit unsupported durable branch switching. Styling stays upstream. The one-line standalone presentation-table grouping exception is application-specific; it can move out when upstream exposes a grouping slot. Preserve localized error categories so recovery guidance remains specific to rate limits, authentication and provider availability."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-approval-questions.tsx",
