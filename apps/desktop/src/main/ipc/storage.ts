@@ -15,7 +15,7 @@ export function registerStorageIpc(registrar:ReturnType<typeof createIpcRegistra
   const root=app.getPath('userData');
   const confirm=async(key:string)=>(await showAttachedMessage({type:'warning',message:tr('storage:'+key),detail:tr('storage:'+key+'_copy'),buttons:[tr('common:cancel'),tr('storage:continue')],defaultId:0,cancelId:0})).response===1;
   registrar.handle('storage:usage',()=>storageUsage(root,store));
-  registrar.handle('storage:clearCache',async()=>{if(await confirm('clear_cache'))await exclusiveStorage(settle,async()=>{clearResponseCache(store);});return {ok:true};});
+  registrar.handle('storage:clearCache',async()=>{if(await confirm('clear_cache'))await exclusiveStorage(settle,async()=>{await clearResponseCache(store,root);});return {ok:true};});
   registrar.handle('storage:clearConverted',async()=>{if(await confirm('clear_converted'))await exclusiveStorage(settle,()=>clearConverted(root,store));return {ok:true};});
   registrar.handle('storage:integrity',()=>exclusiveStorage(settle,()=>checkIntegrity(store,root)));
   registrar.handle('storage:export',async()=>{

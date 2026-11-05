@@ -19,7 +19,7 @@ async function launch(){
 async function openSettings(page,language){
   await page.evaluate(async language=>{const settings=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...settings,language,onboardingCompleted:true,welcomeSeen:true});window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}));},language);
   await page.reload();await page.getByTestId('bridge-status').waitFor({state:'attached'});
-  await page.evaluate(()=>window.dispatchEvent(new Event('vstudy:open-settings')));
+  await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));
   const strings=JSON.parse(await readFile(`src/shared/locales/${language}/storage.json`,'utf8'));
   await page.getByRole('tab',{name:strings.title,exact:true}).click();await page.getByTestId('storage-settings').locator('output').first().waitFor();return strings;
 }

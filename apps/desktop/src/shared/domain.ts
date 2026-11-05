@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { themePreferencesSchema } from './themes';
 import { moodleAgentActionSchema } from "./moodle";
 
 export const documentIdSchema = z.string().uuid().brand<"DocumentId">();
@@ -220,6 +221,7 @@ export const chatEventSchema = z.discriminatedUnion("type", [
 export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
   .object({
+    ...themePreferencesSchema.shape,
     uiScale: z.union([z.literal(100),z.literal(125),z.literal(150),z.literal(200)]).default(100),
     density: z.enum(['comfortable','compact']).default('comfortable'),
     accent: z.enum(['neutral','blue','green','violet','amber']).default('neutral'),
@@ -249,6 +251,7 @@ export const settingsSchema = z
   .strict();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
+  ...themePreferencesSchema.parse({}),
   uiScale:100, density:"comfortable", accent:"neutral", readerFont:"system", readerSize:"m", material:"glass",
   language: "auto", replyLanguage: "auto", welcomeSeen: false,
   chatSide: "left",

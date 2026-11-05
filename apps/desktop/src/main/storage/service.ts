@@ -6,6 +6,7 @@ import { mkdtemp } from 'node:fs/promises';
 import type { Store } from '../db';
 import type { StorageCategory } from '../../shared/storage';
 import { responseCache } from '../cache';
+import { MoodleLogoCache } from '../moodle/logos';
 import { clearMoodleImages } from '../moodle/files';
 import { libraryFiles } from './backup';
 import { retryBusy } from './atomic';
@@ -37,8 +38,9 @@ export async function storageUsage(root:string,store:Store){
 }
 
 /** Clear refetchable responses and thumbnails while retaining courses, reminders, and imported originals. */
-export function clearResponseCache(store:Store):void{
+export async function clearResponseCache(store:Store,root:string):Promise<void>{
   responseCache(store.db).clear();clearMoodleImages();
+  await new MoodleLogoCache(()=>join(root,'moodle','logos')).clear();
   store.db.exec("DELETE FROM moodle_course_details; UPDATE moodle_courses SET data=json_set(data,'$.imageUrl',NULL)");
 }
 

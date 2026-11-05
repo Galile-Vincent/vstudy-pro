@@ -209,7 +209,7 @@
   overflow: hidden;
   height: 142px;
   padding: var(--space-5);
-  background: color-mix(in oklab, var(--course-color) 12%, var(--surface));
+  background: linear-gradient(135deg,var(--course-start),var(--course-end));
   color: var(--course-color);
 }
 .moodle-cover > svg {

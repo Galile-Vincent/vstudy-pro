@@ -44,3 +44,13 @@ it('backs up every migration, rejects edited history, and rolls a failed migrati
     expect(() => migrate(db,[{...first,sql:first.sql+' SELECT 1;'}],path)).toThrow('checksum mismatch');
   } finally {db.close();rmSync(dir,{recursive:true,force:true});}
 });
+
+it('applies every migration through the latest version from an empty database',()=>{
+  const db=new DatabaseSync(':memory:');
+  try {
+    db.exec('PRAGMA foreign_keys=ON');migrate(db,migrations);
+    expect(db.prepare('SELECT version,checksum FROM migrations ORDER BY version').all()).toEqual([...migrations].sort((a,b)=>a.version-b.version).map(m=>({version:m.version,checksum:migrationChecksum(m.sql)})));
+    expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    expect(db.prepare('PRAGMA integrity_check').get()?.integrity_check).toBe('ok');
+  }finally{db.close();}
+});

@@ -1,0 +1,135 @@
+{
+  "result": "PASS",
+  "artifact": "Production Electron. Real settings, library, and reader. Fixture Moodle overview. No school network.",
+  "screenshots": [
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-light-library.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-light-courses.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-light-reader-chat.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-light-settings.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-light-interface.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-dark-library.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-dark-courses.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-dark-reader-chat.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-dark-settings.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ocean-dark-interface.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-light-library.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-light-courses.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-light-reader-chat.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-light-settings.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-light-interface.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-dark-library.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-dark-courses.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-dark-reader-chat.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-dark-settings.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/grove-dark-interface.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-light-library.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-light-courses.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-light-reader-chat.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-light-settings.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-light-interface.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-dark-library.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-dark-courses.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-dark-reader-chat.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-dark-settings.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/ember-dark-interface.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-light-library.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-light-courses.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-light-reader-chat.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-light-settings.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-light-interface.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-dark-library.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-dark-courses.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-dark-reader-chat.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-dark-settings.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/iris-dark-interface.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/editor-live-preview.png",
+    "/Users/vc/.t3/worktrees/vstudy-pro/t3-cd31ce51/docs/evidence/themes/editor-contrast-warning.png"
+  ],
+  "checks": [
+    {
+      "themeId": "ocean",
+      "scheme": "light",
+      "background": "rgb(238, 247, 249)",
+      "native": {
+        "background": "#EEF7F9",
+        "source": "light"
+      }
+    },
+    {
+      "themeId": "ocean",
+      "scheme": "dark",
+      "background": "rgb(14, 34, 44)",
+      "native": {
+        "background": "#0E222C",
+        "source": "dark"
+      }
+    },
+    {
+      "themeId": "grove",
+      "scheme": "light",
+      "background": "rgb(240, 245, 236)",
+      "native": {
+        "background": "#F0F5EC",
+        "source": "light"
+      }
+    },
+    {
+      "themeId": "grove",
+      "scheme": "dark",
+      "background": "rgb(23, 35, 27)",
+      "native": {
+        "background": "#17231B",
+        "source": "dark"
+      }
+    },
+    {
+      "themeId": "ember",
+      "scheme": "light",
+      "background": "rgb(252, 242, 235)",
+      "native": {
+        "background": "#FCF2EB",
+        "source": "light"
+      }
+    },
+    {
+      "themeId": "ember",
+      "scheme": "dark",
+      "background": "rgb(42, 28, 24)",
+      "native": {
+        "background": "#2A1C18",
+        "source": "dark"
+      }
+    },
+    {
+      "themeId": "iris",
+      "scheme": "light",
+      "background": "rgb(245, 241, 251)",
+      "native": {
+        "background": "#F5F1FB",
+        "source": "light"
+      }
+    },
+    {
+      "themeId": "iris",
+      "scheme": "dark",
+      "background": "rgb(36, 27, 48)",
+      "native": {
+        "background": "#241B30",
+        "source": "dark"
+      }
+    }
+  ],
+  "behaviors": [
+    "Theme keyboard selection",
+    "Light/dark persistence",
+    "Editor live preview and cancel restoration",
+    "Create and save",
+    "Export JSON",
+    "Reject invalid JSON",
+    "Import JSON",
+    "Contrast keyboard control",
+    "System media changes",
+    "Custom theme reload"
+  ],
+  "errors": []
+}

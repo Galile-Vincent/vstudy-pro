@@ -1,0 +1,19 @@
+Scope: all 2 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +838
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 838, reused 838, downloaded 0, added 584
+Progress: resolved 838, reused 838, downloaded 0, added 838, done
+
+. prepare$ node scripts/install-hooks.mjs
+. prepare: Done
+╭ Warning ─────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│   Ignored build scripts: electron-winstaller@5.4.0, lefthook@2.2.2,          │
+│   libxmljs2@0.37.0.                                                          │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+│   to run scripts.                                                            │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+Done in 2s using pnpm v10.28.2
