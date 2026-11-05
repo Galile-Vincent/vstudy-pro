@@ -79,3 +79,24 @@ it('ignores a result that arrives after the filters changed', async () => {
   await act(() => { resolveOld({ items: [], nextCursor: null }); });
   expect(host.textContent).toContain('Your conversations will appear here');
 });
+
+it('keeps result nodes, focus and scroll during pagination and refresh without repeat search announcements',async()=>{
+  vi.useFakeTimers();
+  let settle!:(value:unknown)=>void;let searches=0;
+  const cursor={rank:0,updatedAt:hit.updatedAt,id:hit.id};
+  invoke.mockImplementation(channel=>channel==='chats:facets'?Promise.resolve({courses:[],documents:[],models:[]}):++searches===1?Promise.resolve({items:[hit],nextCursor:cursor}):new Promise(resolve=>{settle=resolve;}));
+  const host=await render(<HistorySearch onOpen={()=>{}}/>);await act(()=>vi.advanceTimersByTimeAsync(150));
+  const result=host.querySelector<HTMLButtonElement>('[data-history-result]')!,list=host.querySelector<HTMLElement>('.history-results')!;
+  result.focus();list.scrollTop=150;
+  const more=[...host.querySelectorAll('button')].find(b=>b.textContent==='Load more')!;
+  await act(()=>more.click());
+  expect(host.querySelector('[data-history-result]')).toBe(result);expect(document.activeElement).toBe(result);expect(list.scrollTop).toBe(150);
+  expect(list.querySelector('[role=status]')?.textContent??'').toBe('');
+  await act(()=>settle({items:[],nextCursor:null}));
+  await act(()=>window.dispatchEvent(new Event('vstudy:history-changed')));
+  await act(()=>vi.advanceTimersByTimeAsync(150));
+  expect(host.querySelector('[data-history-result]')).toBe(result);expect(document.activeElement).toBe(result);
+  expect(list.querySelector('[role=status]')?.textContent??'').toBe('');
+  await act(()=>settle({items:[hit],nextCursor:null}));
+  expect(host.querySelector('[data-history-result]')).toBe(result);
+});

@@ -118,9 +118,9 @@ export function HistorySearch({ onOpen, documentId, courseId, compact = false }:
   {undo && <div role="status" className="history-undo">{tr('history:updated')}<button onClick={() => { void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { setUndo(null); setRevision(n => n + 1); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}>{tr('history:undo')}</button></div>}
   {error && <p role="alert">{tr('history:error')} <button onClick={() => setRevision(n => n + 1)}>{tr('common:retry')}</button></p>}
   <div className="history-results" aria-busy={loading}>
-   {loading && <p role="status">{tr('history:searching')}</p>}
+   <p role="status">{loading && !page.items.length ? tr('history:searching') : ''}</p>
    {!loading && !page.items.length && !error && <div className="history-empty"><Search size={28}/><h2>{tr(filters.query ? 'history:no_results' : 'history:empty')}</h2><p>{tr(filters.query ? 'history:no_results_hint' : 'history:empty_hint')}</p></div>}
-   {!loading && <HistoryResults items={page.items} onOpen={onOpen} onUpdate={(h, p) => { void update(h, p); }} onRename={h => { setTitle(h.title); setRenaming(h); }} groupByCourse={grouped}/>}
+   {<HistoryResults items={page.items} onOpen={onOpen} onUpdate={(h, p) => { void update(h, p); }} onRename={h => { setTitle(h.title); setRenaming(h); }} groupByCourse={grouped}/>}
    {page.nextCursor && <button disabled={loading} onClick={() => void more()}>{tr('history:more')}</button>}
   </div>
   <Dialog open={!!renaming} onOpenChange={open => { if (!open)
