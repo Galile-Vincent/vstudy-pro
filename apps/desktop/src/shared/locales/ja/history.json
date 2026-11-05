@@ -46,5 +46,6 @@
   "general_note": "一般の会話です。重要な内容は確認してください。",
   "general_context": "文書やコースは添付されていません",
   "save": "保存",
-  "shortcut": "⌘/Ctrl K"
+  "shortcut": "⌘/Ctrl K",
+  "model_change_error": "モデルを変更できませんでした。現在のチャットは引き続き利用できます。もう一度お試しください。"
 }

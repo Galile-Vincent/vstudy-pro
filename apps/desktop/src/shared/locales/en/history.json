@@ -46,5 +46,6 @@
   "general_note": "General conversation. Check important details.",
   "general_context": "No document or course attached",
   "save": "Save",
-  "shortcut": "⌘/Ctrl K"
+  "shortcut": "⌘/Ctrl K",
+  "model_change_error": "The model could not be changed. Your current chat is still available. Try again."
 }
