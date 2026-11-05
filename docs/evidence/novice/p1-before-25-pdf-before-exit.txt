@@ -1,0 +1,56 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗 1"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- complementary "首次使用提示":
+  - group:
+    - strong: 試著選取一句話
+    - paragraph: 在閱讀區拖曳選取文字，再按「詢問這段內容」。閱讀區有焦點時，也能用 Shift + 方向鍵選取。選取內容會出現在聊天輸入框上方；傳送前先選擇模型。聊天上方的對話選單可搜尋這份文件的聊天記錄。
+  - button "觀看操作示範"
+  - button "不再顯示這則提示"
+- main:
+  - heading "文件庫" [level=1]
+  - button "文件庫"
+  - button "匯入文件"
+  - text: novice-reading
+  - button "對話紀錄"
+  - button "新增對話" [disabled]
+  - button "說明"
+  - text: 工作區已連線
+  - button "切換對話位置"
+  - button "開啟設定"
+  - region "對話":
+    - heading "一起想，一起理解" [level=2]
+    - paragraph:
+      - group "有哪些值得記住的核心想法？"
+    - textbox "針對文件提問" [disabled]:
+      - /placeholder: 針對文件提問…
+    - combobox "模型": 選擇模型
+  - separator "調整面板大小"
+  - region "文件":
+    - text: novice-reading.pdf
+    - button "刪除文件"
+    - button "用 AI 重新解析"
+    - status:
+      - paragraph: 正在準備讀取文字…

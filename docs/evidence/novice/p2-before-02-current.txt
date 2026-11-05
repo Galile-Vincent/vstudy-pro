@@ -1,0 +1,15 @@
+- dialog "Your coursework, with a way forward":
+  - status: Step 1 of 6
+  - button "Save and leave"
+  - heading "Your coursework, with a way forward" [level=1]
+  - paragraph: Bring school deadlines and your reading into one place. Open a document, understand a passage, and check what to do next.
+  - region "Your coursework, with a way forward":
+    - img "Reader and grounded chat preview":
+      - paragraph: Reading becomes understanding when we connect new ideas.
+      - mark: Connect new ideas.
+      - strong: How does this help me learn?
+      - paragraph: Link a new concept to something you already know.
+      - text: From your document · 1
+    - paragraph: No school connection or AI is started by this guide. You can leave now and resume from Home or Help.
+  - contentinfo:
+    - button "Continue"

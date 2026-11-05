@@ -1,0 +1,302 @@
+
+> vstudy-pro@ build /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc
+> pnpm --filter @vstudy/desktop build
+
+
+> @vstudy/desktop@0.1.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop
+> node scripts/generate-locales.mjs && electron-vite build
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop/src/shared/locales.generated.ts (18 namespaces).
+vite v7.3.7 building ssr environment for production...
+transforming...
+✓ 433 modules transformed.
+rendering chunks...
+out/main/search-worker.js                0.92 kB
+out/main/chunks/library-4kaRIlDG.js    187.17 kB
+out/main/index.js                    1,565.48 kB
+✓ built in 508ms
+vite v7.3.7 building ssr environment for production...
+transforming...
+✓ 16 modules transformed.
+rendering chunks...
+out/preload/index.js  181.81 kB
+✓ built in 44ms
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 4148 modules transformed.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop/src/renderer/markdown.tsx is dynamically imported by /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop/src/renderer/lazy-reader.tsx but also statically imported by /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop/src/renderer/document-markdown.tsx, /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop/src/renderer/welcome/index.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop/src/renderer/chat.tsx is dynamically imported by /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop/src/renderer/history/index.tsx, /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop/src/renderer/workspace/index.tsx but also statically imported by /Users/vc/.t3/worktrees/vstudy-pro/t3-622b95cc/apps/desktop/src/renderer/courses/agent.tsx, dynamic import will not move module into another chunk.
+
+../../out/renderer/index.html                                           0.51 kB
+../../out/renderer/assets/documents.zh-Hant-DSB4DNKQ.vtt                0.58 kB
+../../out/renderer/assets/school.zh-Hant-BaewqBXT.vtt                   0.61 kB
+../../out/renderer/assets/documents.en-qopnbkdc.vtt                     0.62 kB
+../../out/renderer/assets/school.en-DDnOM8Ty.vtt                        0.67 kB
+../../out/renderer/assets/documents.ja-VlDQQT_D.vtt                     0.80 kB
+../../out/renderer/assets/school.ja-DmZLUEcX.vtt                        0.83 kB
+../../out/renderer/assets/KaTeX_Size3-Regular-CTq5MqoE.woff             4.42 kB
+../../out/renderer/assets/KaTeX_Size4-Regular-Dl5lxZxV.woff2            4.93 kB
+../../out/renderer/assets/KaTeX_Size2-Regular-Dy4dx90m.woff2            5.21 kB
+../../out/renderer/assets/KaTeX_Size1-Regular-mCD8mA8B.woff2            5.47 kB
+../../out/renderer/assets/KaTeX_Size4-Regular-BF-4gkZK.woff             5.98 kB
+../../out/renderer/assets/KaTeX_Size2-Regular-oD1tc_U0.woff             6.19 kB
+../../out/renderer/assets/KaTeX_Size1-Regular-C195tn64.woff             6.50 kB
+../../out/renderer/assets/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2      6.91 kB
+../../out/renderer/assets/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2         6.91 kB
+../../out/renderer/assets/KaTeX_Size3-Regular-DgpXs0kz.ttf              7.59 kB
+../../out/renderer/assets/KaTeX_Caligraphic-Regular-CTRA-rTL.woff       7.66 kB
+../../out/renderer/assets/KaTeX_Caligraphic-Bold-BEiXGLvX.woff          7.72 kB
+../../out/renderer/assets/KaTeX_Script-Regular-D3wIWfF6.woff2           9.64 kB
+../../out/renderer/assets/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2       10.34 kB
+../../out/renderer/assets/KaTeX_Size4-Regular-DWFBv043.ttf             10.36 kB
+../../out/renderer/assets/KaTeX_Script-Regular-D5yQViql.woff           10.59 kB
+../../out/renderer/assets/KaTeX_Fraktur-Regular-CTYiF6lA.woff2         11.32 kB
+../../out/renderer/assets/KaTeX_Fraktur-Bold-CL6g_b3V.woff2            11.35 kB
+../../out/renderer/assets/KaTeX_Size2-Regular-B7gKUWhC.ttf             11.51 kB
+../../out/renderer/assets/KaTeX_SansSerif-Italic-C3H0VqGB.woff2        12.03 kB
+../../out/renderer/assets/KaTeX_SansSerif-Bold-D1sUS0GD.woff2          12.22 kB
+../../out/renderer/assets/KaTeX_Size1-Regular-Dbsnue_I.ttf             12.23 kB
+../../out/renderer/assets/KaTeX_SansSerif-Regular-CS6fqUqJ.woff        12.32 kB
+../../out/renderer/assets/KaTeX_Caligraphic-Regular-wX97UBjC.ttf       12.34 kB
+../../out/renderer/assets/KaTeX_Caligraphic-Bold-ATXxdsX0.ttf          12.37 kB
+../../out/renderer/assets/KaTeX_Fraktur-Regular-Dxdc4cR9.woff          13.21 kB
+../../out/renderer/assets/KaTeX_Fraktur-Bold-BsDP51OF.woff             13.30 kB
+../../out/renderer/assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2      13.57 kB
+../../out/renderer/assets/KaTeX_SansSerif-Italic-DN2j7dab.woff         14.11 kB
+../../out/renderer/assets/KaTeX_SansSerif-Bold-DbIhKOiC.woff           14.41 kB
+../../out/renderer/assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff       16.03 kB
+../../out/renderer/assets/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2         16.40 kB
+../../out/renderer/assets/KaTeX_Math-Italic-t53AETM-.woff2             16.44 kB
+../../out/renderer/assets/KaTeX_Script-Regular-C5JkGWo-.ttf            16.65 kB
+../../out/renderer/assets/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2         16.78 kB
+../../out/renderer/assets/KaTeX_Main-Italic-NWA7e6Wa.woff2             16.99 kB
+../../out/renderer/assets/KaTeX_Math-BoldItalic-iY-2wyZ7.woff          18.67 kB
+../../out/renderer/assets/KaTeX_Math-Italic-DA0__PXp.woff              18.75 kB
+../../out/renderer/assets/KaTeX_Main-BoldItalic-SpSLRI95.woff          19.41 kB
+../../out/renderer/assets/KaTeX_SansSerif-Regular-BNo7hRIc.ttf         19.44 kB
+../../out/renderer/assets/KaTeX_Fraktur-Regular-CB_wures.ttf           19.57 kB
+../../out/renderer/assets/KaTeX_Fraktur-Bold-BdnERNNW.ttf              19.58 kB
+../../out/renderer/assets/KaTeX_Main-Italic-BMLOBm91.woff              19.68 kB
+../../out/renderer/assets/KaTeX_SansSerif-Italic-YYjJ1zSn.ttf          22.36 kB
+../../out/renderer/assets/KaTeX_SansSerif-Bold-CFMepnvq.ttf            24.50 kB
+../../out/renderer/assets/KaTeX_Main-Bold-Cx986IdX.woff2               25.32 kB
+../../out/renderer/assets/KaTeX_Main-Regular-B22Nviop.woff2            26.27 kB
+../../out/renderer/assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf        27.56 kB
+../../out/renderer/assets/school-BuYOSv4N.webm                         27.64 kB
+../../out/renderer/assets/KaTeX_AMS-Regular-BQhdFMY1.woff2             28.08 kB
+../../out/renderer/assets/KaTeX_Main-Bold-Jm3AIy58.woff                29.91 kB
+../../out/renderer/assets/KaTeX_Main-Regular-Dr94JaBh.woff             30.77 kB
+../../out/renderer/assets/KaTeX_Math-BoldItalic-B3XSjfu4.ttf           31.20 kB
+../../out/renderer/assets/KaTeX_Math-Italic-flOr_0UB.ttf               31.31 kB
+../../out/renderer/assets/documents-C9lEq7bf.webm                      31.56 kB
+../../out/renderer/assets/KaTeX_Main-BoldItalic-DzxPMmG6.ttf           32.97 kB
+../../out/renderer/assets/KaTeX_AMS-Regular-DMm9YOAa.woff              33.52 kB
+../../out/renderer/assets/KaTeX_Main-Italic-3WenGoN9.ttf               33.58 kB
+../../out/renderer/assets/KaTeX_Main-Bold-waoOVXN0.ttf                 51.34 kB
+../../out/renderer/assets/KaTeX_Main-Regular-ypZvNtVU.ttf              53.58 kB
+../../out/renderer/assets/KaTeX_AMS-Regular-DRggAlZN.ttf               63.63 kB
+../../out/renderer/assets/index-fOz8v9Kv.css                           27.88 kB
+../../out/renderer/assets/math-plugins-DvZyl1bz.css                    28.95 kB
+../../out/renderer/assets/index-BFULCrAl.css                          393.97 kB
+../../out/renderer/assets/plaintext-CAzEOfci.js                         1.28 kB
+../../out/renderer/assets/erb-Bt1Ofd6y.js                               1.33 kB
+../../out/renderer/assets/vbscript-html-C1H5k3vj.js                     1.41 kB
+../../out/renderer/assets/ldif-Be4tzE5W.js                              1.43 kB
+../../out/renderer/assets/clojure-repl-LhLgg3ES.js                      1.45 kB
+../../out/renderer/assets/bnf-Cx9lv4XY.js                               1.60 kB
+../../out/renderer/assets/node-repl-BqKjk0zI.js                         1.65 kB
+../../out/renderer/assets/python-repl-Br64JxiM.js                       1.69 kB
+../../out/renderer/assets/shell-CYCA_c1w.js                             1.70 kB
+../../out/renderer/assets/mojolicious-aoguqJFN.js                       1.71 kB
+../../out/renderer/assets/fix-CpAKXQTS.js                               1.75 kB
+../../out/renderer/assets/mizar-BU-1OGo2.js                             1.78 kB
+../../out/renderer/assets/dockerfile-D2UJxu2o.js                        1.83 kB
+../../out/renderer/assets/tap-Bu_VSMeR.js                               1.87 kB
+../../out/renderer/assets/dust-DZ4UuoG0.js                              1.88 kB
+../../out/renderer/assets/ebnf-DWKu-RGc.js                              1.90 kB
+../../out/renderer/assets/profile-D0ij78QN.js                           1.91 kB
+../../out/renderer/assets/subunit-Cfg7Ao8R.js                           1.93 kB
+../../out/renderer/assets/gherkin-CXYEaR9R.js                           1.99 kB
+../../out/renderer/assets/julia-repl-DCo2dcq3.js                        2.04 kB
+../../out/renderer/assets/parser3-D0WLc13M.js                           2.07 kB
+../../out/renderer/assets/csp-BiD4zinJ.js                               2.07 kB
+../../out/renderer/assets/taggerscript-ulDK5jdL.js                      2.09 kB
+../../out/renderer/assets/clean-DuBj2GqM.js                             2.10 kB
+../../out/renderer/assets/json-D847U0O_.js                              2.12 kB
+../../out/renderer/assets/brainfuck-BdIrDhdb.js                         2.16 kB
+../../out/renderer/assets/golo-SKqGxOTA.js                              2.19 kB
+../../out/renderer/assets/php-template-qsm5SK5U.js                      2.24 kB
+../../out/renderer/assets/awk-CRdavXe-.js                               2.25 kB
+../../out/renderer/assets/q-DN6pJNRA.js                                 2.29 kB
+../../out/renderer/assets/flix-C_atTUoP.js                              2.30 kB
+../../out/renderer/assets/dsconfig-f7sN40c1.js                          2.30 kB
+../../out/renderer/assets/vala-CjrOQcQZ.js                              2.31 kB
+../../out/renderer/assets/diff-Bk-widJn.js                              2.35 kB
+../../out/renderer/assets/erlang-repl-CDF4O1fK.js                       2.37 kB
+../../out/renderer/assets/rib-CazXo_X2.js                               2.38 kB
+../../out/renderer/assets/abnf-CmcrZuru.js                              2.42 kB
+../../out/renderer/assets/step21-CMwjkbd3.js                            2.42 kB
+../../out/renderer/assets/thrift-ZzwudR85.js                            2.45 kB
+../../out/renderer/assets/protobuf-CoC1p46-.js                          2.45 kB
+../../out/renderer/assets/jboss-cli-Ci_bwXPz.js                         2.46 kB
+../../out/renderer/assets/inform7-BobKZw6u.js                           2.50 kB
+../../out/renderer/assets/graphql-C_XBffer.js                           2.50 kB
+../../out/renderer/assets/nestedtext-B48B2WG-.js                        2.51 kB
+../../out/renderer/assets/prolog-B5ocWbdn.js                            2.54 kB
+../../out/renderer/assets/properties-BRVtYDIv.js                        2.56 kB
+../../out/renderer/assets/smalltalk-BSb0lgPq.js                         2.57 kB
+../../out/renderer/assets/roboconf-Wxrf4-Pf.js                          2.60 kB
+../../out/renderer/assets/pony-DQNaadm2.js                              2.62 kB
+../../out/renderer/assets/pf-9cmAas4Y.js                                2.66 kB
+../../out/renderer/assets/capnproto-BC6sDC9U.js                         2.66 kB
+../../out/renderer/assets/leaf-Csi-nrch.js                              2.81 kB
+../../out/renderer/assets/makefile-BZs2y2bY.js                          2.91 kB
+../../out/renderer/assets/accesslog-DY2m_u8j.js                         2.92 kB
+../../out/renderer/assets/scilab-CfHHYCgV.js                            3.01 kB
+../../out/renderer/assets/http-CLvkeJW7.js                              3.01 kB
+../../out/renderer/assets/openscad-B8UEwJsb.js                          3.08 kB
+../../out/renderer/assets/sml-B9iiC_pH.js                               3.13 kB
+../../out/renderer/assets/ocaml-DzlfyMJl.js                             3.18 kB
+../../out/renderer/assets/autohotkey-Cf17IM11.js                        3.27 kB
+../../out/renderer/assets/django-zEY9MyLE.js                            3.30 kB
+../../out/renderer/assets/ini-B6DxdeR7.js                               3.31 kB
+../../out/renderer/assets/smali-EMYm-XPX.js                             3.31 kB
+../../out/renderer/assets/dns-C6FwPWRa.js                               3.37 kB
+../../out/renderer/assets/rsl-CWAgDN11.js                               3.38 kB
+../../out/renderer/assets/crmsh-Bz3UpiHl.js                             3.46 kB
+../../out/renderer/assets/apache-Bg6YaDTO.js                            3.47 kB
+../../out/renderer/assets/ceylon-CgdIOGvI.js                            3.49 kB
+../../out/renderer/assets/dos-DNgqgfWR.js                               3.60 kB
+../../out/renderer/assets/elm-C1iWaGQk.js                               3.61 kB
+../../out/renderer/assets/avrasm-Di3EWMwU.js                            3.69 kB
+../../out/renderer/assets/cmake-DuCkkenx.js                             3.69 kB
+../../out/renderer/assets/cal-6A5iBOKI.js                               3.70 kB
+../../out/renderer/assets/haml-ZbTEqZkF.js                              3.72 kB
+../../out/renderer/assets/oxygene-CMnEVOCJ.js                           3.73 kB
+../../out/renderer/assets/lua-DsJkFLn9.js                               3.75 kB
+../../out/renderer/assets/lisp-AjPuvwx7.js                              3.76 kB
+../../out/renderer/assets/cos-uxfxZW-a.js                               3.81 kB
+../../out/renderer/assets/purebasic-C3GMNH98.js                         3.83 kB
+../../out/renderer/assets/dts-DWkW2pPp.js                               3.92 kB
+../../out/renderer/assets/zephir-7YBeoJj_.js                            3.93 kB
+../../out/renderer/assets/wasm-etbPzpbk.js                              3.99 kB
+../../out/renderer/assets/mercury-C0yenD1Z.js                           4.02 kB
+../../out/renderer/assets/monkey-D-gHJhOK.js                            4.13 kB
+../../out/renderer/assets/actionscript-RyVFCcwO.js                      4.15 kB
+../../out/renderer/assets/nim-CnQO3RZo.js                               4.18 kB
+../../out/renderer/assets/gradle-S6cTz9JJ.js                            4.19 kB
+../../out/renderer/assets/axapta-D7jpjxld.js                            4.19 kB
+../../out/renderer/assets/reasonml-BmqsbkWZ.js                          4.20 kB
+../../out/renderer/assets/matlab-90-Ul4Yk.js                            4.21 kB
+../../out/renderer/assets/nginx-JdwOt4b5.js                             4.24 kB
+../../out/renderer/assets/tp-Di_WGpnK.js                                4.24 kB
+../../out/renderer/assets/go-7psmuAW2.js                                4.30 kB
+../../out/renderer/assets/tcl-BtFkR7H2.js                               4.49 kB
+../../out/renderer/assets/mipsasm-DWJLzhKw.js                           4.59 kB
+../../out/renderer/assets/xl-CY5iMGVD.js                                4.60 kB
+../../out/renderer/assets/vbscript-DlhXrJAe.js                          4.70 kB
+../../out/renderer/assets/moonscript-BNZtyDWy.js                        4.75 kB
+../../out/renderer/assets/groovy-CERWbJGb.js                            4.77 kB
+../../out/renderer/assets/vhdl-gtopNa51.js                              4.85 kB
+../../out/renderer/assets/basic-DdVJxptA.js                             4.89 kB
+../../out/renderer/assets/hsp-DLQ20khh.js                               4.89 kB
+../../out/renderer/assets/angelscript-BmxixICh.js                       4.89 kB
+../../out/renderer/assets/applescript-BRCRTm7A.js                       4.90 kB
+../../out/renderer/assets/llvm-0aUCwAIm.js                              5.02 kB
+../../out/renderer/assets/hy-CSt7nb-E.js                                5.09 kB
+../../out/renderer/assets/d-Bepe_kCN.js                                 5.28 kB
+../../out/renderer/assets/gcode-DZJ18nUs.js                             5.28 kB
+../../out/renderer/assets/ruleslanguage-DJ--D0K6.js                     5.29 kB
+../../out/renderer/assets/haxe-DyeVMfzN.js                              5.35 kB
+../../out/renderer/assets/scala-C5INoptA.js                             5.40 kB
+../../out/renderer/assets/armasm-BGaS8c19.js                            5.50 kB
+../../out/renderer/assets/qml-ghkudpr0.js                               5.57 kB
+../../out/renderer/assets/twig-pNXgxsC1.js                              5.64 kB
+../../out/renderer/assets/vbnet-2exeaP3l.js                             5.65 kB
+../../out/renderer/assets/delphi-BLMc-H1d.js                            5.82 kB
+../../out/renderer/assets/yaml-C_sxzRCZ.js                              5.82 kB
+../../out/renderer/assets/dart-BmkK4zDI.js                              5.87 kB
+../../out/renderer/assets/lasso-BB9fd9k7.js                             5.96 kB
+../../out/renderer/assets/gams-BnLCFd-k.js                              6.04 kB
+../../out/renderer/assets/scheme-N5agn7yi.js                            6.08 kB
+../../out/renderer/assets/objectivec-im05ZsBv.js                        6.16 kB
+../../out/renderer/assets/routeros-CXEKWCJR.js                          6.27 kB
+../../out/renderer/assets/erlang-BJkritlY.js                            6.36 kB
+../../out/renderer/assets/wren-CwU74oRe.js                              6.37 kB
+../../out/renderer/assets/markdown-RkZ9j9h6.js                          6.40 kB
+../../out/renderer/assets/aspectj-CVGK9coW.js                           6.43 kB
+../../out/renderer/assets/haskell-i1yohSAG.js                           6.46 kB
+../../out/renderer/assets/xml-CpDwtMtz.js                               6.49 kB
+../../out/renderer/assets/irpf90-BXTzjAyo.js                            6.50 kB
+../../out/renderer/assets/ada-xACmpwP-.js                               6.60 kB
+../../out/renderer/assets/puppet-D5FyZurI.js                            6.67 kB
+../../out/renderer/assets/elixir-m5qoTuYH.js                            7.00 kB
+../../out/renderer/assets/java-YvbB2QG-.js                              7.18 kB
+../../out/renderer/assets/clojure-C-krrqRt.js                           7.28 kB
+../../out/renderer/assets/n1ql-BCUCfhQt.js                              7.29 kB
+../../out/renderer/assets/rust-OKRh7INa.js                              7.30 kB
+../../out/renderer/assets/handlebars-CEENveLl.js                        7.51 kB
+../../out/renderer/assets/asciidoc-CThNUq2K.js                          7.69 kB
+../../out/renderer/assets/bash-CeFwpoNJ.js                              7.97 kB
+../../out/renderer/assets/r-D6M02N98.js                                 8.22 kB
+../../out/renderer/assets/nix-BVy7XmTu.js                               8.27 kB
+../../out/renderer/assets/coffeescript-DYk6Mu6X.js                      8.27 kB
+../../out/renderer/assets/kotlin-D2ZP_OGH.js                            8.34 kB
+../../out/renderer/assets/coq-CBvsTuuz.js                               8.45 kB
+../../out/renderer/assets/julia-Nlpq9iD6.js                             8.46 kB
+../../out/renderer/assets/crystal-D4fgVJPE.js                           8.57 kB
+../../out/renderer/assets/livescript-B3PuxdQt.js                        8.64 kB
+../../out/renderer/assets/powershell-DvstHLHA.js                        8.72 kB
+../../out/renderer/assets/processing-c1f0wIMH.js                        8.79 kB
+../../out/renderer/assets/latex-DHKtrfdC.js                             9.22 kB
+../../out/renderer/assets/c-B3dNgXE2.js                                 9.27 kB
+../../out/renderer/assets/xquery-DtCcSMK3.js                            9.55 kB
+../../out/renderer/assets/glsl-D6ib448z.js                              9.60 kB
+../../out/renderer/assets/csharp-Cdfmq809.js                           10.10 kB
+../../out/renderer/assets/sas-CSca5P5x.js                              10.18 kB
+../../out/renderer/assets/arcade-3fAvBqVt.js                           10.24 kB
+../../out/renderer/assets/python-B4STI5qm.js                           10.32 kB
+../../out/renderer/assets/livecodeserver-cKxdEnhL.js                   10.51 kB
+../../out/renderer/assets/autoit-BdXigkK_.js                           10.76 kB
+../../out/renderer/assets/vim-mCuQbwWU.js                              10.84 kB
+../../out/renderer/assets/ruby-rcC5LDOD.js                             10.84 kB
+../../out/renderer/assets/excel-B_0_x9TY.js                            11.25 kB
+../../out/renderer/assets/fortran-DdGECVUM.js                          11.28 kB
+../../out/renderer/assets/perl-BQSYzCRG.js                             11.30 kB
+../../out/renderer/assets/nsis-CzRRyuXQ.js                             11.80 kB
+../../out/renderer/assets/stan-CgvN0UVA.js                             11.99 kB
+../../out/renderer/assets/verilog-uI_zv0bh.js                          12.10 kB
+../../out/renderer/assets/sql-Dsi_6aPQ.js                              13.04 kB
+../../out/renderer/assets/cpp-CMLXwZ5N.js                              13.51 kB
+../../out/renderer/assets/lsl-CmaO8kWi.js                              13.58 kB
+../../out/renderer/assets/fsharp-6aQnl-bd.js                           14.83 kB
+../../out/renderer/assets/php-GhOy-0Dg.js                              16.12 kB
+../../out/renderer/assets/gauss-CnZELZZm.js                            16.57 kB
+../../out/renderer/assets/mel-CuZr0jxS.js                              17.75 kB
+../../out/renderer/assets/stata-lwG8jscM.js                            18.09 kB
+../../out/renderer/assets/javascript-Cc50l0Ht.js                       18.63 kB
+../../out/renderer/assets/document-presentation-ggMMYp5M.js            19.80 kB
+../../out/renderer/assets/swift-Bc6HDe_q.js                            21.27 kB
+../../out/renderer/assets/x86asm-Cue3VQQb.js                           21.32 kB
+../../out/renderer/assets/css-CoLtQUsT.js                              21.44 kB
+../../out/renderer/assets/typescript-OsclSife.js                       21.63 kB
+../../out/renderer/assets/arduino-C6U4ED8H.js                          21.74 kB
+../../out/renderer/assets/stylus-Dnn3UVs-.js                           21.78 kB
+../../out/renderer/assets/scss-3Rng_WcL.js                             21.92 kB
+../../out/renderer/assets/less-BLmDmrIO.js                             23.93 kB
+../../out/renderer/assets/pgsql-Dq8hNnNT.js                            25.63 kB
+../../out/renderer/assets/maxima-DYy0Sl5b.js                           30.69 kB
+../../out/renderer/assets/index-OJdlMkfq.js                            39.03 kB
+../../out/renderer/assets/1c-Cm9CBzgj.js                               59.83 kB
+../../out/renderer/assets/sqf-DbNyQ1vO.js                              62.80 kB
+../../out/renderer/assets/isbl-C8zbtEzC.js                             81.89 kB
+../../out/renderer/assets/gml-Dm7KXLf8.js                              84.90 kB
+../../out/renderer/assets/highlight-plugin-Bn9Pw5ZP.js                 97.27 kB
+../../out/renderer/assets/mathematica-D7F0ZdfL.js                     163.11 kB
+../../out/renderer/assets/math-plugins-CePU33Ts.js                    518.91 kB
+../../out/renderer/assets/index-DSwqOxl-.js                         4,533.82 kB
+✓ built in 2.36s

@@ -1,0 +1,5 @@
+- listbox:
+  - option "使用系統語言" [selected]
+  - option "English"
+  - option "繁體中文"
+  - option "日本語"

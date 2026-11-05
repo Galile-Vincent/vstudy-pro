@@ -1,0 +1,20 @@
+- dialog "你想先做什麼？":
+  - status: 第 4 步，共 6 步
+  - button "儲存進度並離開"
+  - heading "你想先做什麼？" [level=1]
+  - paragraph: 先選一個起點，之後仍可使用其他功能。
+  - region "你想先做什麼？":
+    - group "你想先做什麼？":
+      - text: 你想先做什麼？
+      - radio "連接學校的 Moodle 查看課程、作業期限與公告。需要學校帳號登入。"
+      - strong: 連接學校的 Moodle
+      - text: 查看課程、作業期限與公告。需要學校帳號登入。
+      - radio "匯入自己的文件 閱讀這台 Mac 上的筆記、論文或教材。"
+      - strong: 匯入自己的文件
+      - text: 閱讀這台 Mac 上的筆記、論文或教材。
+      - radio "先用範例試試看 不需要學校帳號、下載套件或 AI 金鑰。" [checked]
+      - strong: 先用範例試試看
+      - text: 不需要學校帳號、下載套件或 AI 金鑰。
+  - contentinfo:
+    - button "上一步"
+    - button "繼續"

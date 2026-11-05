@@ -1,0 +1,23 @@
+[
+  {
+    "language": "zh-Hant",
+    "goal": "school",
+    "firstTaskMs": 1491,
+    "totalMs": 3317,
+    "privacyShownAtMs": 904,
+    "schoolAuthentication": "main-process fixture; no live school or Keychain",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "zh-Hant-school-welcome.png",
+      "zh-Hant-school-goal.png",
+      "zh-Hant-school-start.png",
+      "zh-Hant-school-school-picker.png",
+      "zh-Hant-school-school-result.png",
+      "zh-Hant-school-due-work.png",
+      "zh-Hant-school-first-task.png",
+      "zh-Hant-school-shortcuts.png"
+    ],
+    "violations": [],
+    "errors": []
+  }
+]

@@ -1,0 +1,8 @@
+ts	phase	decision	why	evidence	result
+2026-11-05T17:13:26.253312+00:00	baseline	Keep source and task scripts unread during initial personas	Preserve naive observation	observations.md	three initial profiles recorded
+2026-11-05T17:13:26.253420+00:00	native	Correct the apparent frozen import diagnosis	Renderer captures omitted the waiting native consent sheet	p3-before-native-consent.jpg	sample readable after declining download
+2026-11-05T17:13:26.253422+00:00	setup	Use presentation-only AI guidance and an explicit school-support fallback	No AI key is a legitimate student state	p2-recheck-no-key-fallback.png	no-key path verified
+2026-11-05T17:13:26.253423+00:00	restart	Persist the route after workspace import and deletion	The route restored the previous document after restart	p1-recheck-fixture-answer.png	imported PDF retained after restart
+2026-11-05T17:13:26.253424+00:00	verification	Use fixture answers and keep live account limits explicit	No real school credentials or paid AI account were supplied	recheck-results.json	three persona rechecks passed
+2026-11-05T17:13:26.253425+00:00	checks	Run the full security check with the required fork limit	Verify renderer changes without bypassing security rules	commands/security-check.log	942 tests passed; 14 skipped
+2026-11-05T17:13:26.253425+00:00	handoff	Leave production acceptance open for external accounts and a clean Mac	Fixture success does not establish those environments	../../NOVICE_TEST.md	open acceptance gaps recorded

@@ -1,0 +1,11 @@
+- dialog "選擇你習慣的語言":
+  - status: 第 2 步，共 6 步
+  - button "儲存進度並離開"
+  - heading "選擇你習慣的語言" [level=1]
+  - paragraph: 這會變更按鈕和操作說明的語言，不會翻譯文件。之後可在設定中修改。
+  - region "選擇你習慣的語言":
+    - text: 選擇介面語言
+    - combobox "選擇介面語言": 使用系統語言
+  - contentinfo:
+    - button "上一步"
+    - button "繼續"

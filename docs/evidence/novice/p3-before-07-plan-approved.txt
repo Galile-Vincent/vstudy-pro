@@ -1,0 +1,90 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed 2"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - text: Courses
+  - button "Help"
+  - button "Find a conversation": Find a conversation ⌘/Ctrl K
+- complementary "First-time tip":
+  - group:
+    - strong: Start with what is due next
+    - paragraph: Connect your school if this page is empty. After syncing, Due soon shows the next seven days. Open a course for Deadlines and the course assistant. Check dates against your school before acting on an AI answer.
+  - button "Watch walkthroughs"
+  - button "Dismiss this tip permanently"
+- main:
+  - button "Back to courses"
+  - region "Today / Planner":
+    - heading "Today / Planner" [level=1]
+    - paragraph: Turn what is due into a plan you can finish. Your school deadlines stay linked to Moodle.
+    - button "Refresh planner"
+    - status: Saved to your planner.
+    - group:
+      - text: Add task What do you need to do?
+      - textbox "What do you need to do?"
+      - text: Course
+      - combobox "Course":
+        - option "Personal task" [selected]
+      - text: Due
+      - textbox "Due"
+      - text: Estimated minutes
+      - spinbutton "Estimated minutes": "30"
+      - button "Add task"
+    - group: Add exam
+    - region "Plan my week":
+      - text: Study minutes per day
+      - spinbutton "Study minutes per day": "120"
+      - text: Available from
+      - spinbutton "Available from": "18"
+      - text: Available until
+      - spinbutton "Available until": "22"
+      - paragraph: Assume 18:00 to 22:00 is available each day in Asia/Taipei. Change these hours to match your schedule.
+      - button "Plan my week"
+      - button "Plan today"
+      - button "Export study blocks"
+      - paragraph: Review first. The assistant saves changes only after you approve.
+    - tablist "Today / Planner":
+      - tab "Today" [selected]
+      - tab "Next 7 days"
+    - tabpanel "Today":
+      - heading "Today" [level=2]
+      - list:
+        - listitem:
+          - button "Mark Review my PDF notes done"
+          - strong: Review my PDF notes
+          - text: Personal task · 30 min Added by you · To do
+      - heading "School deadlines" [level=2]
+      - list
+      - heading "Exams" [level=2]
+      - paragraph: Add an exam and its topics to start preparing before the last night.
+      - region "Next 7 days":
+        - heading "Next 7 days" [level=2]
+        - heading "Fri, Nov 6" [level=3]
+        - text: 30 min reserved
+        - list:
+          - listitem:
+            - strong: Review my PDF notes
+            - text: Personal task
+            - time: 6:00 PM · 30 min

@@ -1,0 +1,254 @@
+[
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 720,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 720,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 720,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 1200,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 1200,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "light",
+    "width": 1200,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 720,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 720,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 720,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 1200,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 1200,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "en",
+    "theme": "dark",
+    "width": 1200,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 720,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 720,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 720,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 1200,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 1200,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "light",
+    "width": 1200,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 720,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 720,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 720,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 1200,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 1200,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "zh-Hant",
+    "theme": "dark",
+    "width": 1200,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 720,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 720,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 720,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 1200,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 1200,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "light",
+    "width": 1200,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 720,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 720,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 720,
+    "screen": "privacy",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 1200,
+    "screen": "onboarding",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 1200,
+    "screen": "providers",
+    "violations": []
+  },
+  {
+    "language": "ja",
+    "theme": "dark",
+    "width": 1200,
+    "screen": "privacy",
+    "violations": []
+  }
+]

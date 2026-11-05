@@ -1,0 +1,3 @@
+PASS p1/zh-Hant: reading, no-key fallback, PDF selection, fixture answer, history, theme, language
+PASS p2/en: reading, no-key fallback, PDF selection, fixture answer, history, theme, language
+PASS p3/en: reading, no-key fallback, PDF selection, fixture answer, history, theme, language
