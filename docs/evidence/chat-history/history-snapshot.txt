@@ -1,0 +1,56 @@
+- link "メインコンテンツへ移動":
+  - /url: "#shell-content"
+- complementary "ドキュメントライブラリ":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "ホーム"
+    - listitem:
+      - button "ライブラリ"
+    - listitem:
+      - button "コース"
+    - listitem:
+      - button "履歴"
+  - navigation "スマートビュー":
+    - button "すべてのドキュメント"
+    - button "最近使った項目"
+    - button "ピン留め"
+    - button "未分類"
+    - button "変換中・失敗"
+  - heading "フォルダ" [level=2]
+  - button "新規フォルダ"
+  - paragraph: フォルダはまだありません
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "ライブラリの表示を切り替え" [expanded]
+  - text: 履歴
+- main:
+  - heading "履歴" [level=1]
+  - paragraph: すべてのチャットの質問、回答、アイデアを検索します。
+  - region "履歴":
+    - searchbox "チャット履歴を検索": 学習
+    - button "すべて" [pressed]
+    - button "コース別"
+    - button "文書別"
+    - button "一般"
+    - button "ピン留め"
+    - group: その他のフィルター
+    - button "Calculus study ピン留め Nov 5":
+      - strong: Calculus study
+      - img "ピン留め"
+      - time: Nov 5
+    - paragraph: 一般 · fake
+    - 'button "回答… Conversation history (quoted context): User question: calculus 資料 学習 😀 <img src=x> ```"':
+      - text: "回答… Conversation history (quoted context): User question: calculus 資料"
+      - mark: 学習
+      - text: "😀 <img src=x> ```"
+    - button "質問calculus 資料 学習 😀 <img src=x>":
+      - text: 質問calculus 資料
+      - mark: 学習
+      - text: 😀 <img src=x>
+    - button "その他のオプション"
+  - region "会話":
+    - button "履歴に戻る"
+    - status: 会話を読み込み中

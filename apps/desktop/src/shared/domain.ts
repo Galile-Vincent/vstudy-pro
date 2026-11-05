@@ -9,6 +9,7 @@ export const requestIdSchema = z.string().uuid().brand<"RequestId">();
 export const conversationScopeSchema = z.discriminatedUnion("scope", [
  z.object({ scope: z.literal("document").optional(), documentId: documentIdSchema }).strict(),
  z.object({ scope: z.literal("course"), courseId: z.string().uuid() }).strict(),
+ z.object({ scope: z.literal("general") }).strict(),
 ]);
 export type ConversationScope = z.infer<typeof conversationScopeSchema>;
 
@@ -98,10 +99,12 @@ const conversationFields = {
 export const conversationCreateSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
  conversationScopeSchema.options[1].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
+ conversationScopeSchema.options[2].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
 ]);
 export const conversationSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend(conversationFields),
  conversationScopeSchema.options[1].extend(conversationFields),
+ conversationScopeSchema.options[2].extend(conversationFields),
 ]);
 export type Conversation = z.infer<typeof conversationSchema>;
 export const rateLimitSchema = z.object({
@@ -205,7 +208,8 @@ const chatFields = {
 export const chatRequestSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend({...chatFields, selection: selectionSchema.optional()}),
  conversationScopeSchema.options[1].extend(chatFields),
-]).refine(r => r.scope === "course" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
+ conversationScopeSchema.options[2].extend(chatFields),
+]).refine(r => r.scope === "course" || r.scope === "general" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 export const chatEventSchema = z.discriminatedUnion("type", [
  z.object({type: z.literal("proposals"), actions: z.array(moodleAgentActionSchema).max(5)}).strict(),

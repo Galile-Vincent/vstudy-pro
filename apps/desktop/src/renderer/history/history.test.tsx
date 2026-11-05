@@ -1,0 +1,52 @@
+// @vitest-environment jsdom
+/** User-visible search behavior, stale results, safe highlighting and undo actions. */
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
+import { afterEach, expect, it, vi } from 'vitest';
+import { HistorySnippet } from './results';
+import { HistorySearch } from './search';
+import { chatHitSchema } from '../../shared/chat-history';
+const invoke = vi.hoisted(() => vi.fn());
+vi.mock('../bridge', () => ({ desktop: { invoke } }));
+(globalThis as {
+  IS_REACT_ACT_ENVIRONMENT?: boolean;
+}).IS_REACT_ACT_ENVIRONMENT = true;
+const roots: ReturnType<typeof createRoot>[] = [];
+afterEach(async () => { for (const root of roots.splice(0))
+  await act(() => root.unmount()); vi.useRealTimers(); vi.resetAllMocks(); });
+async function render(node: React.ReactNode) { const host = document.createElement('div'); document.body.append(host); const root = createRoot(host); roots.push(root); await act(() => root.render(node)); return host; }
+const hit = chatHitSchema.parse({ id: '00000000-0000-4000-8000-000000000001', scope: 'general', documentId: null, courseId: null, courseTitle: null, courseColor: null, term: null, documentTitle: null, title: '資料', titleSnippet: '[mark]資料[/mark]', providerId: 'anthropic-api', modelId: 'fake', createdAt: '2026-11-01T00:00:00Z', updatedAt: '2026-11-01T00:00:00Z', pinned: false, archived: false, hasAttachments: false, hasCitations: false, rank: 0, matches: [{ messageId: '00000000-0000-4000-8000-000000000002', role: 'user', snippet: '[mark]学習[/mark] 😀' }] });
+it('renders multilingual markers and hostile markup as text', async () => {
+  const host = await render(<HistorySnippet text={'<img src=x onerror=alert(1)> [mark]繁體中文 学習 😀[/mark]'}/>);
+  expect(host.querySelector('img')).toBeNull();
+  expect(host.querySelector('mark')?.textContent).toBe('繁體中文 学習 😀');
+});
+it('shows results, opens a matching message and applies pinned filters', async () => {
+  vi.useFakeTimers();
+  invoke.mockImplementation(async (channel) => channel === 'chats:facets' ? { courses: [], documents: [], models: [] } : { items: [hit], nextCursor: null });
+  const open = vi.fn(), host = await render(<HistorySearch onOpen={open}/>);
+  await act(() => vi.advanceTimersByTimeAsync(150));
+  expect(host.textContent).toContain('学習');
+  const match = host.querySelector<HTMLButtonElement>('.history-match')!;
+  await act(() => match.click());
+  expect(open).toHaveBeenCalledWith(hit, hit.matches[0]!.messageId);
+  const pinned = Array.from(host.querySelectorAll('button')).find(b => b.textContent === 'Pinned')!;
+  await act(() => pinned.click());
+  await act(() => vi.advanceTimersByTimeAsync(150));
+  expect(invoke).toHaveBeenLastCalledWith('chats:search', expect.objectContaining({ pinned: true }));
+});
+it('ignores a result that arrives after the filters changed', async () => {
+  vi.useFakeTimers();
+  let resolveOld: (value: unknown) => void = () => { };
+  invoke.mockImplementation((channel) => channel === 'chats:facets' ? Promise.resolve({ courses: [], documents: [], models: [] }) : new Promise(resolve => { resolveOld = resolve; }));
+  const host = await render(<HistorySearch onOpen={() => { }}/>);
+  await act(() => vi.advanceTimersByTimeAsync(150));
+  const old = resolveOld;
+  const chip = Array.from(host.querySelectorAll('button')).find(b => b.textContent === 'General')!;
+  await act(() => chip.click());
+  await act(() => vi.advanceTimersByTimeAsync(150));
+  await act(() => { old({ items: [hit], nextCursor: null }); });
+  expect(host.querySelector('.history-result')).toBeNull();
+  await act(() => { resolveOld({ items: [], nextCursor: null }); });
+  expect(host.textContent).toContain('Your conversations will appear here');
+});
