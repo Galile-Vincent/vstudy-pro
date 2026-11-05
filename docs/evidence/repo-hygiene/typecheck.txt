@@ -1,8 +1,6 @@
-
 > vstudy-pro@ typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
 > pnpm --filter @vstudy/desktop typecheck
 
 
 > @vstudy/desktop@0.1.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/apps/desktop
 > tsc --noEmit
-

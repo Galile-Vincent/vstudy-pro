@@ -1,4 +1,3 @@
-
 > vstudy-pro@ security:static /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
 > node apps/desktop/scripts/security-audit.mjs && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs
 

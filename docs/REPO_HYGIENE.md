@@ -24,7 +24,8 @@ After the index cleanup and checks it measured 2.31 MiB loose and 21.06 MiB pack
 These are shared object-store sizes across concurrent worktrees, not the size of this branch's file tree.
 Removing index entries cannot reclaim historical objects. No garbage collection or history rewrite was attempted.
 The command reports a 64-byte worktree refs item as garbage. This stream left Git metadata untouched.
-Raw snapshots are in [the evidence directory](evidence/repo-hygiene/).
+After the two implementation commits, the shared store measured 2.70 MiB loose and 21.06 MiB packed.
+Snapshots are in [the evidence directory](evidence/repo-hygiene/). Captured logs have trailing whitespace removed.
 
 [CONTRIBUTING](../CONTRIBUTING.md) explains the choice to keep screenshots and video in attachments rather than require Git LFS now.
 
@@ -80,7 +81,7 @@ All commands ran from this worktree. Output logs are in [evidence/repo-hygiene](
 | `pnpm release --tag v0.1.0 --output /tmp/vstudy-h-proposed-changelog.md` | Failed because the script already supplies --output. Corrected command below. |
 | `pnpm release --tag v0.1.0` followed by `pnpm release` | Both passed. Verified proposed-version generation, then restored Unreleased output. No tag created. |
 | `git check-ignore apps/desktop/out/main/index.js apps/desktop/release/test.dmg node_modules/.cache docs/screenshots/moodle/course-dark.png docs/sbom.cdx.json docs/evidence/test/video.webm` | All ignored. |
-| `git diff --check` | Passed. |
+| `git diff --check` | Passed for working changes. The staged log check later found tool-generated trailing whitespace. Logs were normalized and the complete branch diff was checked again. |
 
 ## Verification limits
 

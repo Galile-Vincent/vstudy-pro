@@ -1,4 +1,3 @@
-
 > vstudy-pro@ build /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
 > pnpm --filter @vstudy/desktop build
 
@@ -24,10 +23,10 @@ vite v7.3.7 building client environment for production...
 transforming...
 ✓ 4078 modules transformed.
 rendering chunks...
-[plugin vite:reporter] 
+[plugin vite:reporter]
 (!) /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/apps/desktop/src/renderer/markdown.tsx is dynamically imported by /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/apps/desktop/src/renderer/lazy-reader.tsx but also statically imported by /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/apps/desktop/src/renderer/document-markdown.tsx, /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/apps/desktop/src/renderer/welcome/index.tsx, dynamic import will not move module into another chunk.
 
-[plugin vite:reporter] 
+[plugin vite:reporter]
 (!) /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/apps/desktop/src/renderer/chat.tsx is dynamically imported by /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/apps/desktop/src/renderer/workspace/index.tsx but also statically imported by /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/apps/desktop/src/renderer/courses/agent.tsx, dynamic import will not move module into another chunk.
 
 ../../out/renderer/index.html                                           0.51 kB

@@ -1,4 +1,3 @@
-
 > vstudy-pro@ vendor:check /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
 > node apps/desktop/scripts/vendor-check.mjs
 

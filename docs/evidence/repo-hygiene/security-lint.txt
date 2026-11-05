@@ -1,4 +1,3 @@
-
 /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/apps/desktop/src/main/ipc/index.ts
   45:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
 
@@ -6,4 +5,3 @@
   8:59  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
 
 ✖ 2 problems (0 errors, 2 warnings)
-

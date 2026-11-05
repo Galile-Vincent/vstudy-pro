@@ -1,21 +1,20 @@
-
 > vstudy-pro@ knip /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
 > knip --include files,dependencies,unlisted,binaries
 
 Unused files (5)
 apps/desktop/src/renderer/components/assistant-ui/elements/tool-approval-questions.tsx
-apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback-parts.tsx    
-apps/desktop/src/renderer/components/ui/alert-dialog.tsx                              
-apps/desktop/src/renderer/components/ui/context-menu.tsx                              
-apps/desktop/src/renderer/components/ui/scroll-area.tsx                               
+apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback-parts.tsx
+apps/desktop/src/renderer/components/ui/alert-dialog.tsx
+apps/desktop/src/renderer/components/ui/context-menu.tsx
+apps/desktop/src/renderer/components/ui/scroll-area.tsx
 Unused dependencies (1)
 tw-shimmer  apps/desktop/package.json:45:6
 Unlisted binaries (3)
-openssl  apps/desktop/e2e/moodle-sso-flow.mjs          
+openssl  apps/desktop/e2e/moodle-sso-flow.mjs
 openssl  apps/desktop/src/main/moodle/keepalive.test.ts
-openssl  apps/desktop/src/main/moodle/perf.test.ts     
+openssl  apps/desktop/src/main/moodle/perf.test.ts
 Configuration hints (3)
-src/preload/index.ts   apps/desktop  knip.json  Remove redundant entry pattern                               
-src/renderer/main.tsx  apps/desktop  knip.json  Remove redundant entry pattern                               
+src/preload/index.ts   apps/desktop  knip.json  Remove redundant entry pattern
+src/renderer/main.tsx  apps/desktop  knip.json  Remove redundant entry pattern
 .css                   apps/desktop  knip.json  Compiled extension excluded by project (imports not followed)
  ELIFECYCLE  Command failed with exit code 1.
