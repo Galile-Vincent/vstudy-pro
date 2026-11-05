@@ -18,6 +18,8 @@ it("permits required style and font sources while keeping scripts strict", () =>
   expect(directives.find(d => d.startsWith("script-src"))).toBe("script-src 'self'");
   expect(directives.find(d => d.startsWith("style-src"))).toBe("style-src 'self' 'unsafe-inline'");
   expect(directives.find(d => d.startsWith("font-src"))).toBe("font-src 'self' data:");
+  expect(directives.find(d => d.startsWith("media-src"))).toBe("media-src 'self'");
+  expect(directives.find(d => d.startsWith("connect-src"))).toBe("connect-src 'none'");
 });
 
 it('checks custom app hosts even when URL.origin is opaque', () => {

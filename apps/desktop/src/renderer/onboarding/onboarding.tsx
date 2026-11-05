@@ -46,7 +46,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
       onComplete();
       if (action === 'providers') window.dispatchEvent(new CustomEvent('vstudy:open-settings', { detail: { tab: 'providers' } }));
       else if (action === 'goal') {
-        if (progress.goal === 'school') navigation?.navigate('courses');
+        if (progress.goal === 'school') navigation?.navigate({ view: 'courses', connectSchool: true });
         else if (imported) navigation?.navigate({ view: 'workspace', documentId: imported.id });
         else navigation?.navigate('library');
       }

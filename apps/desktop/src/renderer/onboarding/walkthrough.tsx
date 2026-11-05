@@ -1,4 +1,12 @@
 /** Offline, captioned workflow diagrams. Examples never call a school or AI provider. */
+import schoolVideo from '../../../resources/onboarding/school.webm?url';
+import schoolEn from '../../../resources/onboarding/school.en.vtt?url&no-inline';
+import schoolZh from '../../../resources/onboarding/school.zh-Hant.vtt?url&no-inline';
+import schoolJa from '../../../resources/onboarding/school.ja.vtt?url&no-inline';
+import documentsVideo from '../../../resources/onboarding/documents.webm?url';
+import documentsEn from '../../../resources/onboarding/documents.en.vtt?url&no-inline';
+import documentsZh from '../../../resources/onboarding/documents.zh-Hant.vtt?url&no-inline';
+import documentsJa from '../../../resources/onboarding/documents.ja.vtt?url&no-inline';
 import { useEffect, useState } from 'react';
 import { BookOpen, Check, GraduationCap, MessageCircle, Pause, Play, RotateCcw, Search, TextSelect } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -9,10 +17,12 @@ import './guidance.css';
 
 export const lessons = ['school', 'due', 'agent', 'selection', 'history'] as const;
 export type Lesson = typeof lessons[number];
+const recordings = { school: { video: schoolVideo, captions: { en: schoolEn, 'zh-Hant': schoolZh, ja: schoolJa } }, documents: { video: documentsVideo, captions: { en: documentsEn, 'zh-Hant': documentsZh, ja: documentsJa } } };
 const icons = { school: GraduationCap, due: BookOpen, agent: MessageCircle, selection: TextSelect, history: Search };
 
 export function Walkthrough({ lesson }: { lesson: Lesson }) {
-  useTranslation();
+  const { i18n } = useTranslation();
+  const recording = recordings[lesson === 'school' || lesson === 'due' || lesson === 'agent' ? 'school' : 'documents'];
   const [frame, setFrame] = useState(0);
   const [playing, setPlaying] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [reduced, setReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -37,7 +47,7 @@ export function Walkthrough({ lesson }: { lesson: Lesson }) {
         <div className="walkthrough-rail"><BookOpen size={18}/><MessageCircle size={18}/><Search size={18}/></div>
         <div className="walkthrough-scene-body">
           <strong>{tr(`onboarding:${lesson}_visual_${frame}`)}</strong>
-          {lesson === 'school' && <><div className="walkthrough-field"><Search size={16}/>{tr('onboarding:example_school')}</div><div className="walkthrough-control" data-highlight={frame > 0}>{tr(frame === 2 ? 'onboarding:school_visual_2' : 'onboarding:school_visual_1')}</div></>}
+          {lesson === 'school' && <><div className="walkthrough-field"><Search size={16}/>{tr('schools:search_label')}</div><div className="walkthrough-control" data-highlight={frame > 0}>{tr(frame === 2 ? 'onboarding:school_visual_2' : 'onboarding:school_visual_1')}</div></>}
           {lesson === 'due' && <><div className="walkthrough-tabs"><span>{tr('onboarding:due_visual_1')}</span><span data-highlight={frame === 2}>{tr('moodle:deadlines')}</span></div><div className="walkthrough-field" data-highlight={frame > 0}><BookOpen size={16}/>{tr('onboarding:example_deadline')}</div></>}
           {lesson === 'agent' && <><div className="walkthrough-bubble" data-highlight={frame > 0}>{tr('onboarding:example_deadline_question')}</div><div className="walkthrough-field"><MessageCircle size={16}/>{tr(frame === 2 ? 'onboarding:example_check_deadline' : 'onboarding:agent_visual_1')}</div></>}
           {lesson === 'selection' && <><p className="walkthrough-passage"><mark data-highlight={frame > 0}>{tr('onboarding:preview_passage')}</mark></p><div className="walkthrough-control" data-highlight={frame === 2}>{tr('common:ask_about_this')}</div></>}
@@ -58,5 +68,8 @@ export function Walkthrough({ lesson }: { lesson: Lesson }) {
       <Button variant="ghost" disabled={frame === 2} onClick={() => { setPlaying(false); setFrame(value => Math.min(2, value + 1)); }}>{tr('onboarding:next_caption')}</Button>
     </div>
     <details className="walkthrough-transcript" open={reduced || undefined}><summary>{tr('onboarding:all_instructions')}</summary><ol>{[0, 1, 2].map(index => <li key={index}>{tr(`onboarding:${lesson}_caption_${index}`)}</li>)}</ol></details>
+    <details className="recorded-example"><summary>{tr('onboarding:recorded_video')}</summary><p>{tr('onboarding:recorded_body')}</p><video controls preload="none" playsInline aria-label={tr(`onboarding:lesson_${lesson}`)} src={recording.video}>
+      {(['en', 'zh-Hant', 'ja'] as const).map(language => <track key={language} kind="captions" src={recording.captions[language]} srcLang={language} label={{ en: 'English', 'zh-Hant': '繁體中文', ja: '日本語' }[language]} default={i18n.resolvedLanguage === language}/>)}
+    </video></details>
   </section>;
 }

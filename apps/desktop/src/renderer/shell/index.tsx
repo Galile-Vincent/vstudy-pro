@@ -30,6 +30,7 @@ export type Route = {
   query?: Partial<LibraryQuery> | undefined;
   title?: string | undefined;
   aiParse?: boolean;
+  connectSchool?: boolean;
 };
 type Navigation = { route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void };
 const NavigationContext = createContext<Navigation | null>(null);
@@ -99,7 +100,7 @@ export function AppShell({
     if (next.view === 'welcome' || route.view === 'welcome') startTransition(() => setRoute(next));
     else if ((next.view === 'workspace' && next.documentId) || (route.view === 'workspace' && next.view === 'library')) transitionTo(() => setRoute(next), false, true);
     else transitionTo(() => setRoute(next));
-    try { localStorage.setItem("vstudy-route", JSON.stringify(next)); } catch { /* Route persistence is optional. */ }
+    try { localStorage.setItem("vstudy-route", JSON.stringify({ ...next, connectSchool: undefined })); } catch { /* Route persistence is optional. */ }
   };
   return (
     <NavigationContext.Provider value={{ route, navigate, closeWelcome: () => { navigate(previous.current); setTimeout(() => { const target = returnFocus.current; if (returnSettings.current) { window.dispatchEvent(new Event("vstudy:open-settings")); setTimeout(() => document.getElementById("welcome-settings-entry")?.focus(), 100); } else if (target?.isConnected) target.focus(); else document.getElementById("welcome-entry")?.focus(); }, 350); } }}>

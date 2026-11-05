@@ -53,3 +53,6 @@
 .walkthrough-passage mark { background:transparent; color:inherit; }
 .walkthrough-scene [data-highlight=true] { background:var(--active); outline:2px solid var(--ink); outline-offset:2px; }
 .walkthrough-node { min-height:var(--space-8); padding:var(--space-2); font-size:var(--type-sm); }
+.recorded-example { margin-top:var(--space-4); }
+.recorded-example summary { cursor:pointer; font-weight:500; }
+.recorded-example video { display:block; width:100%; max-height:65dvh; margin-top:var(--space-3); border-radius:var(--r-sm); background:var(--surface); }

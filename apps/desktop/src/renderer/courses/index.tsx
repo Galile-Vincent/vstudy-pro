@@ -131,6 +131,7 @@ export function CoursesView() {
       key={route.courseId ?? "home"}
       api={api}
       courseId={route.courseId}
+      connectOnMount={route.connectSchool}
       onCourse={(courseId) => navigate({ view: "courses", courseId })}
       onDocument={(documentId) =>
         navigate({
@@ -144,11 +145,13 @@ export function CoursesView() {
 export function Courses({
   api,
   courseId,
+  connectOnMount,
   onCourse,
   onDocument,
 }: {
   api: MoodleApi;
   courseId?: string | undefined;
+  connectOnMount?: boolean | undefined;
   onCourse: (id?: string) => void;
   onDocument: (id: string) => void;
 }) {
@@ -161,7 +164,7 @@ export function Courses({
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState("");
-  const [connect, setConnect] = useState(false);
+  const [connect, setConnect] = useState(!!connectOnMount);
   const [tab, setTab] = useState<Tab>("content");
   const [term, setTerm] = useState<MoodleTermFilter>("current");
   const lang = i18n.resolvedLanguage || "en";

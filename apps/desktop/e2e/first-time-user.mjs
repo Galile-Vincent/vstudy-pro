@@ -31,13 +31,14 @@ async function schoolFixture(app) {
 for (const [language, goal] of matrix) {
   const profile = await mkdtemp(join(tmpdir(), 'vstudy-first-time-'));
   const catalog = async ns => JSON.parse(await readFile(`src/shared/locales/${language}/${ns}.json`, 'utf8'));
+  const schools = await catalog('schools'), themes = await catalog('themes');
   const copy = await catalog('onboarding'), common = await catalog('common'), moodle = await catalog('moodle'), home = await catalog('home');
   let app;
   const started = performance.now(), screenshots = [], violations = [], errors = [];
   try {
     const launch = async () => {
-      app = await electron.launch({ args: [resolve('.'), `--user-data-dir=${profile}`], env: { ...process.env, ELECTRON_RUN_AS_NODE: '', VSTUDY_LOCALE: language, VSTUDY_FAKE_PROVIDER: '1' } });
-      const page = await app.firstWindow();
+      app = await electron.launch({ timeout: 15000, args: [resolve('.'), `--user-data-dir=${profile}`], env: { ...process.env, ELECTRON_RUN_AS_NODE: '', VSTUDY_LOCALE: language, VSTUDY_FAKE_PROVIDER: '1' } });
+      const page = await app.firstWindow({ timeout: 15000 });
       await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1200, 900));
       page.on('pageerror', error => errors.push(error.message));
       await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' }); return page;
@@ -58,6 +59,9 @@ for (const [language, goal] of matrix) {
     await next(); await page.locator('.onboarding').getByRole('combobox').click();
     await page.getByRole('option', { name: language === 'en' ? 'English' : language === 'ja' ? '日本語' : '繁體中文', exact: true }).click();
     await next(); await page.locator('#onboarding-title').filter({ hasText: copy.step_appearance }).waitFor();
+    await page.locator('.scheme-grid').getByRole('button', { name: themes.light, exact: true }).click();
+    await page.locator('.themes-grid').getByRole('button', { name: themes.name_ocean, exact: true }).click();
+    await page.waitForFunction(() => window.document.documentElement.dataset.theme === 'ocean');
     if (goal === 'sample') await capture('appearance');
     await next(); await page.locator(`input[value=${goal}]`).check();
     if (language === 'en' && goal === 'sample') {
@@ -93,32 +97,41 @@ for (const [language, goal] of matrix) {
     }
     await capture('start');
     if (goal === 'sample') {
-      await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' }); await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(720, 900));
+      await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
+      await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
+      await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
+      await page.locator('.scheme-grid').getByRole('button', { name: themes.dark, exact: true }).click();
+      await next(); await next(); await next(); await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(720, 900));
       await capture('start-dark-720'); await audit('start-dark-720');
       await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1200, 900)); await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
     }
     await next(); await page.locator('.onboarding').waitFor({ state: 'detached' });
     if (goal === 'school') {
-      await page.getByRole('button', { name: moodle.connect_school, exact: true }).first().click(); const dialog = page.locator('.moodle-connect');
-      await dialog.getByLabel(moodle.site_address, { exact: true }).fill('moodle.example.edu');
+      const dialog = page.locator('.moodle-connect');
+      await dialog.getByRole('combobox', { name: schools.search_label, exact: true }).fill('moodle.example.edu');
+      await capture('school-picker');
       await dialog.getByRole('button', { name: moodle.check_site, exact: true }).click();
+      await capture('school-result');
       await dialog.getByRole('button', { name: moodle.continue_sign_in, exact: true }).click();
       await dialog.getByLabel(moodle.username, { exact: true }).fill('student'); await dialog.getByLabel(moodle.password, { exact: true }).fill('example-only');
       await dialog.getByRole('button', { name: moodle.password_sign_in, exact: true }).click(); await dialog.waitFor({ state: 'hidden' });
       await page.getByRole('heading', { name: moodle.due_soon, exact: true }).waitFor();
       await page.getByRole('button', { name: 'Example lab report', exact: true }).click(); await page.getByRole('tab', { name: moodle.deadlines, exact: true }).click();
+      await capture('due-work');
       await page.getByRole('button', { name: moodle.course_assistant, exact: true }).click(); await page.locator('#course-assistant-panel').waitFor({ state: 'visible' });
     } else {
       await page.getByTestId('document-markdown').waitFor();
       await page.getByTestId('document-markdown').focus();
-      await page.keyboard.press('Shift+ArrowRight');
-      await page.keyboard.press('Shift+ArrowRight');
+      for (let character = 0; character < 32; character++) await page.keyboard.press('Shift+ArrowRight');
       await page.keyboard.press('Meta+Shift+k'); await page.locator('.selection-chip').waitFor();
       if (language === 'en' && goal === 'sample') {
+        await capture('selection');
         const input = page.locator('.aui-composer-input'); await input.fill('Explain this sentence'); await input.press('Enter');
         await page.locator('[data-role=assistant]').first().waitFor();
+        await capture('chat-answer');
         await page.getByRole('button', { name: common.conversations, exact: true }).click();
         await page.getByRole('searchbox', { name: common.search_threads, exact: true }).fill('Explain this sentence');
+        await capture('history-search');
         await page.locator('[data-slot=aui_thread-list-items]').getByText('Explain this sentence', { exact: true }).first().click();
         await page.locator('[data-role=user]').filter({ hasText: 'Explain this sentence' }).waitFor();
       }
@@ -136,6 +149,12 @@ for (const [language, goal] of matrix) {
       if (language === 'en' && goal === 'sample') { await help.evaluate(node => { node.scrollTop = 0; }); await capture(`walkthrough-${lesson}`); }
     }
     if (goal === 'sample') await audit('walkthroughs');
+    if (language === 'en' && goal === 'sample') {
+      await help.locator('.recorded-example > summary').click();
+      const playback = await help.locator('video').evaluate(async video => { await video.play(); await new Promise(resolve => video.addEventListener('timeupdate', resolve, { once: true })); video.pause(); return { width: video.videoWidth, time: video.currentTime, tracks: video.textTracks.length, cues: video.textTracks[0]?.cues?.length ?? 0 }; });
+      assert.equal(playback.width, 960); assert.ok(playback.time > 0); assert.equal(playback.tracks, 3); assert.ok(playback.cues >= 3, 'subtitle file loads');
+      await capture('recorded-video');
+    }
     await help.getByRole('button', { name: common.close, exact: true }).click();
     await page.getByRole('button', { name: copy.help, exact: true }).click(); await page.getByRole('menuitem', { name: copy.help_shortcuts, exact: true }).click(); await capture('shortcuts');
     await page.keyboard.press('Escape'); await page.getByRole('button', { name: copy.help, exact: true }).click(); await page.getByRole('menuitem', { name: copy.help_setup, exact: true }).click();
@@ -145,6 +164,10 @@ for (const [language, goal] of matrix) {
     results.push({ language, goal, firstTaskMs, totalMs: Math.round(performance.now() - started), privacyShownAtMs, schoolAuthentication: goal === 'school' ? 'main-process fixture; no live school or Keychain' : 'not used', ai: language === 'en' && goal === 'sample' ? 'local fake provider; question and chat-history search exercised' : 'local fake provider available; no external AI', screenshots, violations, errors });
     console.log(`PASS ${language}/${goal}: first task ${firstTaskMs}ms`);
   } catch (error) {
-    const page = app ? await app.firstWindow().catch(() => null) : null; await page?.screenshot({ path: join(evidence, `${language}-${goal}-failure.png`) }).catch(() => {}); throw error;
-  } finally { await app?.close(); await rm(profile, { recursive: true, force: true }); await writeFile(join(evidence, 'first-time-user.json'), JSON.stringify(results, null, 2) + '\n'); }
+    const page = app?.windows()[0]; await page?.screenshot({ path: join(evidence, `${language}-${goal}-failure.png`) }).catch(() => {}); throw error;
+  } finally {
+    await app?.close();
+    await rm(profile, { recursive: true, force: true });
+    await writeFile(join(evidence, selected ? `case-${language}-${goal}.json` : 'first-time-user.json'), JSON.stringify(results, null, 2) + '\n');
+  }
 }

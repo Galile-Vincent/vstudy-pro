@@ -110,7 +110,7 @@ if (ownsApplication) void app.whenReady().then(() => {
   protocol.handle('vstudy', async request => {
     const url = new URL(request.url);
     if (request.method !== 'GET' || url.hostname !== 'app' || url.port || url.username || url.password || url.search || !/^\/(?:index\.html|assets\/[a-zA-Z0-9_.-]+)$/.test(url.pathname)) return new Response(null, { status: 404 });
-    const types: Record<string, string> = { html: 'text/html', js: 'text/javascript', css: 'text/css', woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', png: 'image/png', svg: 'image/svg+xml' };
+    const types: Record<string, string> = { html: 'text/html', js: 'text/javascript', css: 'text/css', woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', png: 'image/png', svg: 'image/svg+xml', webm: 'video/webm', vtt: 'text/vtt' };
     const type = types[url.pathname.split('.').at(-1)!];
     if (!type) return new Response(null, { status: 415 });
     try {
