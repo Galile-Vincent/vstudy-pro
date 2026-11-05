@@ -1,0 +1,24 @@
+- dialog "Watch walkthroughs":
+  - banner:
+    - heading "Watch walkthroughs" [level=2]
+    - button "Close"
+  - paragraph: These illustrated examples run offline. They do not sign you in or send questions. Use Next caption to follow at your own pace.
+  - navigation "Watch walkthroughs":
+    - button "Connect school"
+    - button "Find due work"
+    - button "Ask about a deadline"
+    - button "Ask about a passage"
+    - button "Find an old chat" [pressed]
+  - region "Find an old chat":
+    - paragraph: Illustrated example · no live data
+    - paragraph: 1 of 3. Choose History in the sidebar, or press Cmd/Ctrl+K from any screen to find a past conversation.
+    - button "Play"
+    - button "Replay"
+    - button "Next caption"
+    - group:
+      - text: Read all instructions
+      - list:
+        - listitem: Choose History in the sidebar, or press Cmd/Ctrl+K from any screen to find a past conversation.
+        - listitem: Search for words from your question or the answer. Filter by course, document, or general chat to narrow the results.
+        - listitem: Choose a result to return to that conversation. Press Escape to close the quick finder and return to what you were doing.
+    - group: Watch recorded steps

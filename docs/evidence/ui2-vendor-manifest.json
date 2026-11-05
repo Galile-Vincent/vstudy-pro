@@ -144,14 +144,6 @@
       "reason": "Retain localized composition slots, validated presentation grouping, app-owned chat controls, and message IDs for history navigation; apply semantic theme colors."
     },
     {
-      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-approval-questions.tsx",
-      "registrySha256": "8c5ea3315a2234d9c932993cf1423d8ae3d327a0bc682df827cca594c2bb9d88"
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback-parts.tsx",
-      "registrySha256": "82bc62c1a0745b2c9c8e30765af9266511b1fb2b8f7307727acb22535652b44e"
-    },
-    {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback.aui.tsx",
       "registrySha256": "31720ad79fe332a5999cc1873108da740e63c05f4b8f322bde75f8d495cbf853",
       "patchedSha256": "7a9f600e17c1598a972afe5715f994c76822697afaf49789c5acbcac641d7230",
@@ -191,13 +183,6 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/utils/useIsomorphicLayoutEffect.ts",
       "registrySha256": "8db117d730e640655e5099e086af4e00d545c283839d9ef5885ca93419d51893"
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/alert-dialog.tsx",
-      "registrySha256": "e68ead222534ebb6cefe5ca6cfdcd42f1a7851e96eff0074306cf51454826570",
-      "patchedSha256": "9de72d68090ff548ffaba69cfee01ad6812460e4e0493c99b5b8fea52ec561c4",
-      "patch": "docs/vendor-patches/ui--alert-dialog.tsx.patch",
-      "reason": "Use the local cn helper and semantic theme colors for tonal dialog controls."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/avatar.tsx",
@@ -242,13 +227,6 @@
       "reason": "Resolve the registry cn helper to the existing local utility."
     },
     {
-      "path": "apps/desktop/src/renderer/components/ui/context-menu.tsx",
-      "registrySha256": "674445eaa0232db233f6a26dbc5f96504991a182a7db9458e6f08038036452d9",
-      "patchedSha256": "e5f09b2d58bc730d75467fc86da96edff1fbada410db1eb7d4a286bfdb67a674",
-      "patch": "docs/vendor-patches/ui--context-menu.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
       "path": "apps/desktop/src/renderer/components/ui/dialog.tsx",
       "registrySha256": "0d2e82ed5e7040abda714a0471aff54535e05bad6249da049cc0c3bf3ae024e5",
       "patchedSha256": "838213cdfc466ccdf4f2fe94a2f4daf611cc206be5c0f2b54de48565fa7f4f6c",
@@ -281,13 +259,6 @@
       "registrySha256": "cf5de49b1c6d9ba6753d1d2f62820c543935cf426b8af8b49b277cfda6cc2c5b",
       "patchedSha256": "8a61b1b60ca25beac02305bce36dc0ee0d168a1f3c4d0d5ce6f1dac928da9884",
       "patch": "docs/vendor-patches/ui--progress.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/scroll-area.tsx",
-      "registrySha256": "8b73bb9be51300079c7f561bafbe43ee10f6f464cf39c8c1b25123cd4edb94dd",
-      "patchedSha256": "55264573642c8d9182c15434638a3007b6e03e9b929bf05fbb6db8b55d5fcd36",
-      "patch": "docs/vendor-patches/ui--scroll-area.tsx.patch",
       "reason": "Resolve the registry cn helper to the existing local utility."
     },
     {
