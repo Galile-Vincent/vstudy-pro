@@ -67,7 +67,14 @@ export function ContextCoach() {
   const { route } = useNavigate();
   const progress = useLearningProgress();
   const [error, setError] = useState('');
+  const [expanded, setExpanded] = useState(() => !window.matchMedia('(max-height: 600px)').matches);
+  useEffect(() => {
+    const media = window.matchMedia('(max-height: 600px)');
+    const resize = () => setExpanded(!media.matches);
+    media.addEventListener('change', resize);
+    return () => media.removeEventListener('change', resize);
+  }, []);
   const kind = route.view === 'workspace' ? 'workspace' : route.view === 'courses' ? 'courses' : null;
   if (!kind || progress.dismissed.includes(kind)) return null;
-  return <aside className="context-coach" aria-label={tr('onboarding:tip')}><div><strong>{tr(`onboarding:coach_${kind}`)}</strong><p>{tr(`onboarding:coach_${kind}_body`)}</p><Button variant="ghost" onClick={() => openLearningHelp('walkthroughs')}>{tr('onboarding:help_walkthroughs')}</Button>{error && <p role="alert">{error}</p>}</div><Tooltip><TooltipTrigger asChild><Button variant="ghost" aria-label={tr('onboarding:dismiss_tip')} onClick={() => { try { saveProgress({ dismissed: [...progress.dismissed, kind] }); } catch { setError(tr('onboarding:save_error')); } }}><X size={16}/></Button></TooltipTrigger><TooltipContent>{tr('onboarding:dismiss_tip')}</TooltipContent></Tooltip></aside>;
+  return <aside className="context-coach" aria-label={tr('onboarding:tip')}><div><details open={expanded} onToggle={event => setExpanded(event.currentTarget.open)}><summary><strong>{tr(`onboarding:coach_${kind}`)}</strong></summary><p>{tr(`onboarding:coach_${kind}_body`)}</p></details><Button variant="ghost" onClick={() => openLearningHelp('walkthroughs')}>{tr('onboarding:help_walkthroughs')}</Button>{error && <p role="alert">{error}</p>}</div><Tooltip><TooltipTrigger asChild><Button variant="ghost" aria-label={tr('onboarding:dismiss_tip')} onClick={() => { try { saveProgress({ dismissed: [...progress.dismissed, kind] }); } catch { setError(tr('onboarding:save_error')); } }}><X size={16}/></Button></TooltipTrigger><TooltipContent>{tr('onboarding:dismiss_tip')}</TooltipContent></Tooltip></aside>;
 }

@@ -32,7 +32,7 @@ for (const [language, goal] of matrix) {
   const profile = await mkdtemp(join(tmpdir(), 'vstudy-first-time-'));
   const catalog = async ns => JSON.parse(await readFile(`src/shared/locales/${language}/${ns}.json`, 'utf8'));
   const schools = await catalog('schools'), themes = await catalog('themes'), history = await catalog('history'), storage = await catalog('storage');
-  const copy = await catalog('onboarding'), common = await catalog('common'), moodle = await catalog('moodle'), home = await catalog('home');
+  const copy = { ...await catalog('onboarding'), ...JSON.parse(await readFile(`src/renderer/onboarding/locales/${language}.json`, 'utf8')) }, common = await catalog('common'), moodle = await catalog('moodle'), home = await catalog('home');
   let app;
   const started = performance.now(), screenshots = [], violations = [], errors = [];
   try {

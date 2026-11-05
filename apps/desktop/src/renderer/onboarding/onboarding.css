@@ -1,6 +1,6 @@
 /* A focused sequence with a scrollable body and navigation that stays in view. */
 .onboarding { --ob-tone:color-mix(in oklab,var(--ink) 5%,var(--surface)); --ob-tone-strong:color-mix(in oklab,var(--ink) 8%,var(--surface)); width:min(100% - var(--space-8),608px); min-height:min(520px,calc(100dvh - var(--space-8))); max-height:calc(100dvh - var(--space-8)); margin:auto; padding:var(--space-8) var(--space-8) var(--space-6); border:0; border-radius:var(--r-xl); background:var(--material-sheet); color:var(--ink); box-shadow:var(--elevation-floating); overflow:hidden; }
-.onboarding[data-slot=dialog-content][data-state] { display:flex; flex-direction:column; }
+.onboarding[data-slot=dialog-content][data-state] { display:flex; flex-direction:column; gap:0; }
 .onboarding-progress { display:flex; gap:var(--space-1); }
 .onboarding-progress span { width:var(--space-6); height:var(--space-1); border-radius:var(--r-pill); background:color-mix(in oklab,var(--ink) 12%,transparent); }
 .onboarding-progress span:has(~ [data-current=true]) { background:color-mix(in oklab,var(--ink) 40%,transparent); }
