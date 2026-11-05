@@ -2,9 +2,9 @@
   {
     "language": "en",
     "goal": "sample",
-    "firstTaskMs": 3730,
-    "totalMs": 6303,
-    "privacyShownAtMs": 2175,
+    "firstTaskMs": 3655,
+    "totalMs": 6548,
+    "privacyShownAtMs": 2098,
     "schoolAuthentication": "not used",
     "ai": "local fake provider; question and chat-history search exercised",
     "screenshots": [

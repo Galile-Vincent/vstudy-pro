@@ -62,6 +62,7 @@ for (const [language, goal] of matrix) {
     await page.locator('.scheme-grid').getByRole('button', { name: themes.light, exact: true }).click();
     await page.locator('.themes-grid').getByRole('button', { name: themes.name_ocean, exact: true }).click();
     await page.waitForFunction(() => window.document.documentElement.dataset.theme === 'ocean');
+    await page.locator('.theme-card[data-selected=true]').getByRole('button', { name: themes.name_ocean, exact: true }).waitFor();
     if (goal === 'sample') await capture('appearance');
     await next(); await page.locator(`input[value=${goal}]`).check();
     if (language === 'en' && goal === 'sample') {
@@ -153,6 +154,7 @@ for (const [language, goal] of matrix) {
       await help.locator('.recorded-example > summary').click();
       const playback = await help.locator('video').evaluate(async video => { await video.play(); await new Promise(resolve => video.addEventListener('timeupdate', resolve, { once: true })); video.pause(); return { width: video.videoWidth, time: video.currentTime, tracks: video.textTracks.length, cues: video.textTracks[0]?.cues?.length ?? 0 }; });
       assert.equal(playback.width, 960); assert.ok(playback.time > 0); assert.equal(playback.tracks, 3); assert.ok(playback.cues >= 3, 'subtitle file loads');
+      await help.locator('video').scrollIntoViewIfNeeded();
       await capture('recorded-video');
     }
     await help.getByRole('button', { name: common.close, exact: true }).click();
