@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for services encoding.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import {expect,it} from 'vitest';
 import {sniffTextEncoding} from './import-security';
 it('bounds encoding detection and identifies common export encodings', () => {

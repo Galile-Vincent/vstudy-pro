@@ -1,4 +1,11 @@
+/**
+ * Issue short-lived opaque handles for native file-drop paths.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { randomBytes } from 'node:crypto';
+/** Resolve short-lived native drop handles without accepting renderer-owned filesystem paths. */
 export class DropTokens {
   private entries = new Map<string, { path: string; frame: object; expires: number }>();
   issue(path: string, frame: object, now = Date.now()): string {

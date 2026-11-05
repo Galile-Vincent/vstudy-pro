@@ -1,3 +1,9 @@
+/**
+ * Validate Moodle web-service responses and schedule authenticated read operations.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import type { MoodleResponseCache, ResourceKind } from "../cache";
 import { log } from '../logging';
 import { diagnosticIdentifier, issueDiagnostics, responseShape } from './diagnostics';
@@ -20,9 +26,11 @@ import {
 
 export type Fetch = typeof fetch;
 export interface MoodleCallTiming { function:string; ms:number; bytes:number; queueMs:number; reused:boolean | null; ok:boolean; requests:number; diagnostic?:unknown }
+/** Preserve Moodle failure categories so callers do not treat authentication errors as empty data. */
 export class MoodleError extends Error {
   constructor(readonly kind: 'auth' | 'unsupported' | 'service' | 'network' | 'permission', readonly errorcode?:string) { super(`Moodle ${kind} error`); }
 }
+/** Strip markup and bound untrusted text before displaying or logging it. */
 export function plainText(value: string): string {
   return decodeHtmlEntities(value.replace(/\{mlang(?:\s+[^}]*)?\}/gi, '').replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '').replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '').replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
 }
@@ -53,6 +61,7 @@ const cachedFunctions: Record<string, ResourceKind> = {
   mod_forum_get_forums_by_courses: 'announcements', mod_forum_get_forum_discussions: 'announcements',
   mod_forum_get_forum_discussions_paginated: 'announcements', mod_forum_get_discussion_posts: 'announcements',
 };
+/** Schedule and validate authenticated Moodle reads while keeping tokens in main. */
 export class MoodleClient {
   offline = false;
   lastSyncedAt: string | undefined;
@@ -369,6 +378,7 @@ export class MoodleClient {
   }
 
 }
+/** Request a Moodle mobile-service token without passing credentials to the renderer. */
 export async function passwordToken(host: string, username: string, password: string, request: Fetch = moodleFetch): Promise<MoodleTokens> {
   let response: Response;
   try {

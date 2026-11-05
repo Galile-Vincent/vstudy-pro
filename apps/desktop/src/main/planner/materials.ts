@@ -1,3 +1,9 @@
+/**
+ * Read selected contained course materials within the prompt context budget.
+ * Owned by main/planner.
+ * Student data survives Moodle pruning; agent proposals require explicit validated approval.
+ * @packageDocumentation
+ */
 /** Reads only approved, ready, course-linked Markdown. Original file paths and unconverted documents never enter prompts. */
 import { open } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -7,6 +13,7 @@ import { documentIdSchema } from "../../shared/domain";
 import { containedPath } from "../services/file-paths";
 import { quoteUntrusted } from "./context";
 
+/** Read only selected course-linked, ready documents and bound their contribution to the prompt. */
 export async function buildMaterialContext(store: Store, courseId: string, request: MaterialRequest): Promise<string> {
   const materials = [];
   for (const id of [...new Set(request.documentIds)]) {

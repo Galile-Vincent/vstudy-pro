@@ -1,3 +1,9 @@
+/**
+ * Inventory app-owned storage and coordinate confirmed cleanup and backup operations.
+ * Owned by main/storage.
+ * Filesystem operations stay inside the application namespace and preserve recoverable state.
+ * @packageDocumentation
+ */
 /** Storage maintenance preserves original documents, conversation records, and account identity. */
 import { readdir, lstat, rm } from 'node:fs/promises';
 import { join, basename, dirname } from 'node:path';

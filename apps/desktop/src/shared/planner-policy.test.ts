@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for planner-policy.
+ * Owned by shared.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from "vitest";
 import { assertPlannerAction, localDay } from "./planner-policy";
 import { plannerActionSchema, timeZoneSchema } from "./planner";

@@ -1,10 +1,17 @@
+/**
+ * Regression coverage for services metadata.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect,it } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
-import { migrations,openStore } from '../db';
+import { openStore } from '../db';
+import { migrations } from '../db/migrations';
 import { backfillMetadata } from './metadata';
 it.each([1,2,3,4,5,6,7,8,9])('upgrades seeded v%s and backfills legacy metadata with missing sources remaining unknown',async(version)=>{
  const root=await mkdtemp(join(tmpdir(),'vstudy-metadata-'));const file=join(root,'test.sqlite');

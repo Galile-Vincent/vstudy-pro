@@ -1,3 +1,9 @@
+/**
+ * Adapt Antigravity ACP processes to the shared chat event protocol.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { recordEgress } from '../services/egress';
 import { rmSync } from "node:fs";
 import { spawn } from "node:child_process";
@@ -10,11 +16,13 @@ import type { Availability, Model, ProviderAdapter, ProviderRequest } from "./in
 import { cliEnvironment, findCli } from "./cli";
 
 export type AgyErrorCategory = "binary missing" | "not logged in" | "rate limited" | "timeout" | "protocol" | "tools disabled";
+/** Expose a categorized ACP failure without raw provider process output. */
 export class AgyError extends Error {
   constructor(readonly category: AgyErrorCategory) {
     super(category === "not logged in" ? "agy: run `agy` once to sign in" : `agy: ${category}`);
   }
 }
+/** Classify Antigravity failures without exposing raw process output. */
 export function agyError(value: unknown): AgyError {
   const text = typeof value === "string" ? value : JSON.stringify(value) ?? "";
   return new AgyError(/429|RESOURCE_EXHAUSTED|rate.?limit|quota.exceeded/i.test(text) ? "rate limited"
@@ -27,6 +35,7 @@ export const agyArgs = ["acp", "--stdio", "--sandbox", "--include-default-custom
 const messageSchema = z.object({ jsonrpc: z.literal("2.0"), id: z.union([z.number(), z.string()]).optional(), method: z.string().optional(), params: z.unknown().optional(), result: z.unknown().optional(), error: z.unknown().optional() });
 const updateSchema = z.object({ sessionId: z.string(), update: z.object({ sessionUpdate: z.string(), content: z.object({ type: z.string(), text: z.string().optional() }).optional() }) });
 const resultSchema = z.object({ stopReason: z.string(), usage: z.object({ inputTokens: z.number().int().nonnegative(), outputTokens: z.number().int().nonnegative(), cachedReadTokens: z.number().int().nonnegative().optional(), cachedWriteTokens: z.number().int().nonnegative().optional(), thoughtTokens: z.number().int().nonnegative().optional() }).optional() });
+/** Translate supported ACP updates into shared chat events. */
 export function agyUpdate(params: unknown, sessionId: string): ChatEvent[] {
   const { update, sessionId: source } = updateSchema.parse(params);
   if (source !== sessionId) return [];
@@ -34,6 +43,7 @@ export function agyUpdate(params: unknown, sessionId: string): ChatEvent[] {
   return update.sessionUpdate === "agent_message_chunk" && update.content?.type === "text" && update.content.text
     ? [{ type: "text-delta", text: update.content.text }] : [];
 }
+/** Normalize the terminal ACP result into usage and completion events. */
 export function agyResult(value: unknown): ChatEvent[] {
   const result = resultSchema.parse(value);
   if (!["end_turn", "max_tokens"].includes(result.stopReason)) throw new AgyError("protocol");
@@ -42,6 +52,7 @@ export function agyResult(value: unknown): ChatEvent[] {
 }
 interface Options { findBinary?: () => Promise<string | null>; timeoutMs?: number; args?: string[] }
 
+/** Run one bounded ACP session and tear down its process on completion or cancellation. */
 export async function* runAgy(binary: string, args: string[], cwd: string, request: ProviderRequest | undefined, signal: AbortSignal, timeoutMs: number): AsyncIterable<ChatEvent | Model[]> {
   if (signal.aborted) { yield { type: "done" }; return; }
   recordEgress(request ? 'agy_chat' : 'agy_discovery', 'Google / Antigravity CLI managed endpoints');
@@ -131,6 +142,7 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
   }
 }
 
+/** Adapt opted-in ACP sessions to the shared provider contract. */
 export class AgyAdapter implements ProviderAdapter {
   private cache?: { expires: number; availability: Availability; models: Model[] };
   private pending: Promise<NonNullable<AgyAdapter["cache"]>> | undefined;

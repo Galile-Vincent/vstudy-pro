@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for import-error.
+ * Owned by shared.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import {expect,it} from 'vitest';
 import {importError} from './import-error';
 it.each([

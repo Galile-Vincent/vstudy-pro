@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for db ai-parse-repair.
+ * Owned by main/db.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { DatabaseSync } from "node:sqlite";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";

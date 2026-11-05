@@ -1,3 +1,9 @@
+/**
+ * Discover model catalogs and validate requested options against the selected model.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { recordEgress } from '../services/egress';
 import claudeFallback from './fixtures/claude-models.json';
 import codexFallback from './fixtures/codex-models.json';
@@ -12,6 +18,7 @@ import { cliEnvironment, findCli } from './cli-transport';
 import { option } from './model-options';
 export { option } from './model-options';
 const codexCatalog = z.object({ models: z.array(z.object({ slug: z.string(), visibility: z.string().optional(), display_name: z.string().optional(), default_reasoning_level: z.string().optional(), supported_reasoning_levels: z.array(z.object({ effort: z.string() })).optional(), service_tiers: z.array(z.object({ id: z.string() })).optional() })) });
+/** Normalize the Codex catalog into shared model and capability records. */
 export function codexModels(input: unknown): Model[] {
   return codexCatalog.parse(input).models.filter(m => m.visibility !== 'hide').map(m => ({ id: m.slug, name: m.display_name ?? m.slug, options: [
     ...(m.supported_reasoning_levels?.length ? [option('reasoningEffort', 'Effort', m.supported_reasoning_levels.map(e => e.effort), m.default_reasoning_level)] : []),
@@ -19,6 +26,7 @@ export function codexModels(input: unknown): Model[] {
   ] }));
 }
 const claudeCatalog = z.array(z.object({ value: z.string(), resolvedModel: z.string().optional(), displayName: z.string(), supportedEffortLevels: z.array(z.string()).optional(), supportsFastMode: z.boolean().optional(), supportsThinkingOff: z.boolean().optional() }));
+/** Normalize the Claude catalog without assuming every model supports every option. */
 export function claudeModels(input: unknown): Model[] {
   const catalog = claudeCatalog.parse(input);
   return catalog.map(m => {
@@ -36,10 +44,12 @@ export function claudeModels(input: unknown): Model[] {
 }
 const discovery = new Set<ProcessScope>();
 let discoveryStopped = false;
+/** Abort and await model-discovery subprocesses before application shutdown. */
 export async function disposeDiscovery(): Promise<void> {
   discoveryStopped = true;
   await Promise.all([...discovery].map(scope => scope.dispose()));
 }
+/** Capture bounded subprocess output and terminate on timeout or cancellation. */
 export async function capture(binary: string, args: string[], input = '', initialize = false, timeoutMs = 8000): Promise<string> {
   if (discoveryStopped) throw new Error('Model discovery closed');
   const scope = new ProcessScope();
@@ -67,6 +77,7 @@ export async function capture(binary: string, args: string[], input = '', initia
   }
 }
 const catalogs = new Map<string, { expires: number; result: Promise<Model[]> }>();
+/** Discover the opted-in provider catalog with bounded process lifetime. */
 export function discoverModels(kind: 'claude' | 'codex'): Promise<Model[]> {
   const cached = catalogs.get(kind);
   if (cached && cached.expires > Date.now()) return cached.result;
@@ -83,6 +94,7 @@ async function readCatalog(kind: 'claude' | 'codex'): Promise<Model[]> {
   if (kind === 'codex') try { return codexModels(JSON.parse(await readFile(join(homedir(), '.codex/models_cache.json'), 'utf8'))).map(m => ({ ...m, name: `${m.name} (cached)` })); } catch { /* Cache is optional. */ }
   return (kind === 'claude' ? claudeModels(claudeFallback) : codexModels(codexFallback)).map(m => ({ ...m, name: `${m.name} (static fallback)` }));
 }
+/** Reject requested options that the chosen model does not advertise. */
 export function validateOptions(model: Model | undefined, values: Record<string, string | boolean> = {}) {
   for (const [id, value] of Object.entries(values)) {
     const declared = model?.options?.find(o => o.id === id);

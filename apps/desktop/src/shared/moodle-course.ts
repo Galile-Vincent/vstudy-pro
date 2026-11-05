@@ -1,3 +1,9 @@
+/**
+ * Define normalized course identities, lifecycles, sections, modules, and announcements.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 import { z } from "zod";
 
 const timestamp = z.string().datetime();

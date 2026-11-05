@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for security.
+ * Owned by main.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from "vitest";
 import { isAppUrl, productionCsp } from "./security";
 it("denies external origins and alternate local files", () => {

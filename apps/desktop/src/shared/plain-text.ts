@@ -1,7 +1,14 @@
+/**
+ * Reduce untrusted content to bounded plain text for labels and diagnostics.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import type { Nodes } from 'mdast';
 import type { DocumentCitation } from './domain';
+/** Strip markup and bound untrusted text before displaying or logging it. */
 export function plainText(markdown: string, citations: DocumentCitation[] = []): string {
   const source = markdown.replace(/\[\[cite:(s\d+)\]\]/g, (_token, id: string) => {
     const citation = citations.find(c => c.id === id);

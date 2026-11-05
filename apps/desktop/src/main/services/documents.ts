@@ -1,3 +1,9 @@
+/**
+ * Stage, validate, convert, and persist imported documents in the private library.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { atomicWrite, syncDirectory } from "../storage/atomic";
 import { reconcileLibrary } from "../storage/reconcile";
 import { backfillMetadata } from "./metadata";
@@ -25,6 +31,7 @@ export const MAX_SOURCE_BYTES = 50 * 1024 * 1024;
 export { documentFormats } from "../../shared/document-formats";
 import { documentFormats } from "../../shared/document-formats";
 
+/** Own contained import, conversion, and deletion work; settle it before closing persistence. */
 export class DocumentService {
   private readonly library: string;
   private operations: Promise<unknown> = Promise.resolve();

@@ -1,4 +1,11 @@
+/**
+ * Map conversion diagnostics to localized, user-facing error identifiers.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 import type { Status } from './status';
+/** Map structured conversion failures to stable localized error codes. */
 export function importError(error: unknown): Status {
   const message = error instanceof Error ? error.message : String(error);
   const code = /empty|zero.byte/i.test(message) ? 'empty_file'

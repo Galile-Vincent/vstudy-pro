@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle logos.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Logo fixtures exercise persistence and hostile responses without real network access. */
 import { mkdtemp, readdir, rm, lstat } from 'node:fs/promises';
 import { join } from 'node:path';

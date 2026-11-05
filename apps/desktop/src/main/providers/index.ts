@@ -1,3 +1,9 @@
+/**
+ * Register provider adapters and resolve only explicitly enabled integrations.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { atomicWriteSync } from "../storage/atomic";
 import { AI_PARSE_SYSTEM } from '../prompt/ai-parse';
 import { configuredCliPath } from './executable-pins';
@@ -24,7 +30,9 @@ export type Availability =
   | { available: true }
   | { available: false; reason: string };
 export type Model = import("../../shared/domain").Model;
+/** Main-assembled prompt and optional page images, with a usage callback for partial abort accounting. */
 export type ProviderRequest = ChatRequest & { prompt: string; systemPrompt?:string; images?:{mediaType:'image/png'; data:string}[]; allowPresentation?: boolean; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
+/** Adapt one enabled provider to validated events and await resource cleanup when the signal aborts. */
 export interface ProviderAdapter {
   testConnection?(): Promise<"success" | "bad_key" | "offline" | "no_access">;
   detect(): Promise<Availability>;
@@ -35,6 +43,7 @@ export interface ProviderAdapter {
   ): AsyncIterable<ChatEvent>;
 }
 const fakeFailures = new Set<string>();
+/** Deterministic opt-in fixture provider; it never calls a paid or authenticated remote service. */
 export const fakeAdapter: ProviderAdapter = {
   async detect() {
     return { available: true };
@@ -78,6 +87,7 @@ export const fakeAdapter: ProviderAdapter = {
     yield { type: "done" };
   },
 };
+/** Resolve explicitly registered provider adapters by their validated provider identifier. */
 export class ProviderRegistry {
   private readonly adapters = new Map<ProviderConfig["id"], ProviderAdapter>();
   private modelRevision = 0;
@@ -191,6 +201,7 @@ export class ProviderRegistry {
     );
   }
 }
+/** Compose enabled adapters without launching disabled CLI providers. */
 export function createProviderRegistry(
   secrets: SecretStore,
   configFile?: string,

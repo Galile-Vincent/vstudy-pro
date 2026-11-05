@@ -1,3 +1,9 @@
+/**
+ * Persist student goals, tasks, exams, plans, reminders, and idempotent approvals.
+ * Owned by main/planner.
+ * Student data survives Moodle pruning; agent proposals require explicit validated approval.
+ * @packageDocumentation
+ */
 /** SQLite ownership for student plans. Approval rechecks live state and writes a complete plan in one savepoint. */
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
@@ -9,6 +15,7 @@ import {
 import { assertPlannerAction, type PlanningContext } from "../../shared/planner-policy";
 import { MoodleRepository } from "../moodle/repository";
 
+/** Persist student-owned planning data and apply each approved action idempotently. */
 export class PlannerRepository {
   constructor(private readonly db: DatabaseSync, private readonly clock: () => number = Date.now) {}
   snapshot(): PlannerSnapshot {

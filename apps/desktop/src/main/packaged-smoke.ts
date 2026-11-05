@@ -1,6 +1,13 @@
+/**
+ * Exercise the packaged main process with isolated smoke-test data.
+ * Owned by main.
+ * Main owns privileged resources; shutdown must settle work before releasing those resources.
+ * @packageDocumentation
+ */
 import { app, BrowserWindow, dialog } from 'electron';
 import { writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+/** Run opt-in packaged-artifact assertions against an isolated application data directory. */
 export async function runPackagedSmoke(window: BrowserWindow, root: string) {
   try {
     await window.webContents.executeJavaScript(`new Promise(resolve => { const check=()=>window.desktop ? resolve(true) : setTimeout(check,20);check(); })`);

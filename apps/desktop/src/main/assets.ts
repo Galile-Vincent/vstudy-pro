@@ -1,3 +1,9 @@
+/**
+ * Serve library assets through the application protocol without exposing arbitrary filesystem paths.
+ * Owned by main.
+ * Main owns privileged resources; shutdown must settle work before releasing those resources.
+ * @packageDocumentation
+ */
 import { containedPath } from "./services/file-paths";
 import { productionCsp } from "./security";
 import { readFile, stat } from "node:fs/promises";
@@ -10,6 +16,7 @@ function isWithin(root: string, candidate: string): boolean {
   return path !== "" && path !== ".." && !path.startsWith(`..${sep}`) && !isAbsolute(path);
 }
 
+/** Resolve only assets contained by a known library document; reject linked or escaping paths. */
 export async function resolveAssetPath(root: string, encodedPath: string): Promise<string> {
   const path = decodeURIComponent(encodedPath);
   if (!path || path.includes("\\") || [...path].some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127) ||
@@ -26,6 +33,7 @@ const imageTypes: Readonly<Record<string, string>> = {
   ".gif": "image/gif", ".webp": "image/webp",
 };
 
+/** Serve validated assets with the application protocol security headers. */
 export function assetHandler(store: Store, userData: string) {
   return async (request: Request): Promise<Response> => {
     try {

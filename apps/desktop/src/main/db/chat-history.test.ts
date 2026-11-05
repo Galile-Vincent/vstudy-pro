@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for db chat-history.
+ * Owned by main/db.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Search behavior against SQLite, including migration from the shipped v17 schema. */
 import { afterEach, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
@@ -5,7 +11,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdtempSync, rmSync, existsSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { migrations, openStore } from './index';
+import { openStore } from './index';
+import { migrations } from './migrations';
 import { chatSearchSchema } from '../../shared/chat-history';
 import { conversationSchema, messageSchema } from '../../shared/domain';
 const stores: ReturnType<typeof openStore>[] = [];

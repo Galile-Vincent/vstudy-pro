@@ -1,3 +1,9 @@
+/**
+ * Resolve and run opted-in provider CLIs with argv arrays and a scrubbed environment.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { recordEgress } from '../services/egress';
 import { pinnedCli } from './executable-pins';
 import { installDirectories } from './trusted-executable';
@@ -7,6 +13,7 @@ import { spawn } from "node:child_process";
 import { delimiter } from "node:path";
 import { parseStream, type ParserKind } from "./parsers";
 import type { Usage } from "../../shared/domain";
+/** Build a scrubbed provider environment without inheriting unrelated application secrets. */
 export function cliEnvironment(
   source: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv {
@@ -27,9 +34,11 @@ export function cliEnvironment(
   env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';
   return env;
 }
+/** Resolve an approved executable without launching it during disabled-provider discovery. */
 export async function findCli(binary: string): Promise<string | null> {
   return pinnedCli(binary);
 }
+/** Build provider-specific argv while keeping document text out of shell commands. */
 export function cliArgs(kind: "claude" | "codex", modelId: string, options: Record<string, string | boolean> = {}): string[] {
   const extra = kind === "codex"
     ? Object.entries(options).map(([id, value]) => ['-c', `${id === 'reasoningEffort' ? 'model_reasoning_effort' : 'service_tier'}=${JSON.stringify(value)}`]).flat()
@@ -68,6 +77,7 @@ export function cliArgs(kind: "claude" | "codex", modelId: string, options: Reco
         "-",
       ];
 }
+/** Run a provider in its isolated working directory and await process-group cleanup. */
 export async function* runCli(
   binary: string,
   args: string[],

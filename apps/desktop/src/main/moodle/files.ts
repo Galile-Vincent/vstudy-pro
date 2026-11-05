@@ -1,3 +1,9 @@
+/**
+ * Download authenticated course files and resolve bounded Moodle image previews.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import { moodleFetch, siteFetch, siteTarget } from './site-url';
 import { mkdir, mkdtemp, open, rm } from 'node:fs/promises';
 import { extname, join } from 'node:path';
@@ -7,6 +13,7 @@ import { MAX_SOURCE_BYTES } from '../services/documents';
 import type { MoodleRepository } from './repository';
 import type { Fetch } from './client';
 
+/** Attach credentials only to a file URL accepted by the account site policy. */
 export function authenticatedFileUrl(source: string, host: string, token: string): string {
   const url = siteTarget(host,source);
   const root = new URL(host).pathname.replace(/\/$/,'');
@@ -18,10 +25,12 @@ export function authenticatedFileUrl(source: string, host: string, token: string
   url.hash = '';
   return url.href;
 }
+/** Drop process-local authenticated image results when account state changes. */
 export function clearMoodleImages(host?: string, token?: string): void {
   for (const key of imageCache.keys()) if (!host || key.startsWith(`${host}:${token ?? ''}:`)) imageCache.delete(key);
 }
 const imageCache = new Map<string,{expires:number;data:Promise<string | null>;bytes:number}>();
+/** Return a bounded image preview only after authenticated URL and response checks. */
 export function moodleImage(source: string, host: string, token?: string, request: Fetch = moodleFetch): Promise<string | null> {
   const key = `${host}:${token ?? ''}:${source}`;
   const cached = imageCache.get(key);

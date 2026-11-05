@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for assets.
+ * Owned by main.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { afterEach, expect, it } from "vitest";
 import { mkdtemp, mkdir, writeFile, symlink, rm, realpath } from "node:fs/promises";
 import { tmpdir } from "node:os";

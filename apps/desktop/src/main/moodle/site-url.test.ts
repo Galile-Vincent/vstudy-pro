@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle site-url.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it, vi } from 'vitest';
 import { normalizeSiteUrl, publicAddress, resolvePublicHost, siteFetch } from './site-url';
 it('normalizes domains, IDNs, and Moodle subdirectory login links',() => {

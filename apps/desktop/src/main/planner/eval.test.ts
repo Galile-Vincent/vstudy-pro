@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for planner eval.
+ * Owned by main/planner.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { describe, expect, it } from "vitest";
 import recorded from "./__fixtures__/expected.json";
 import { id, now, studentContext, studentDetail, task } from "./__fixtures__/student";

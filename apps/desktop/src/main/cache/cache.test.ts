@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for cache cache.
+ * Owned by main/cache.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Cache contracts use an in-memory SQLite store and an explicit clock. */
 import { afterEach, expect, it, vi } from 'vitest';
 import { z } from 'zod';

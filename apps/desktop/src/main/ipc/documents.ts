@@ -1,3 +1,9 @@
+/**
+ * Register validated documents IPC operations and delegate privileged work to main services.
+ * Owned by main/ipc.
+ * Request and response validation and sender ownership stay at the IPC boundary.
+ * @packageDocumentation
+ */
 import { AiParseService } from '../services/ai-parse';
 import { createPageRenderer } from '../../../resources/converter/ai-pages';
 import { aiParseContract, aiParseProgressChannel } from '../../shared/ai-parse';
@@ -18,6 +24,7 @@ import { documentProgressChannel, documentProgressSchema } from "../../shared/ip
 import type { IpcChannel } from "../../shared/ipc";
 import type { createIpcRegistrar } from "./register";
 
+/** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerDocumentsIpc(
   registrar: ReturnType<typeof createIpcRegistrar>,
   store: Store,

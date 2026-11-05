@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for usage.
+ * Owned by main.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from 'vitest';
 import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -6,7 +12,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { parseStream } from './providers/parsers';
 import { extractUsage, headerRateLimit } from './providers/usage';
 import { estimateCost } from './pricing';
-import { openStore, migrations } from './db';
+import { openStore } from './db';
+import { migrations } from './db/migrations';
 import { defaultSettings, usageRecordSchema, chatEventSchema } from '../shared/domain';
 import { ipcContract } from '../shared/ipc';
 import { budgetState } from '../renderer/usage/budget';

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for providers codex.
+ * Owned by main/providers.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { afterEach, expect, it, vi } from 'vitest';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';

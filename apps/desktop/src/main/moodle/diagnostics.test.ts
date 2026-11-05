@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle diagnostics.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { MoodleClient, MoodleError } from './client';

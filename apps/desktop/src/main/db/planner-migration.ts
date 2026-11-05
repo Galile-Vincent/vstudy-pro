@@ -1,3 +1,9 @@
+/**
+ * Define immutable SQL for planner persistence upgrades.
+ * Owned by main/db.
+ * Applied SQL remains immutable; repositories share one connection and use bound query values.
+ * @packageDocumentation
+ */
 /** Migration 21 adds student-owned plans. Moodle pruning detaches references instead of deleting student work. */
 export const plannerMigration = `
 CREATE TABLE planner_goals (

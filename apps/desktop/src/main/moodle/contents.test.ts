@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle contents.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it, vi } from 'vitest';
 import { contentsWire, parseCourseContents, sanitizeCourseHtml, completionState } from './contents';
 import { MoodleClient } from './client';

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle sso-protocol.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it, expect, vi, beforeEach } from 'vitest';
 const mock = vi.hoisted(() => ({packaged:false,registration:true,handlers:new Map<string,(...args:unknown[]) => void>(),register:vi.fn(),open:vi.fn()}));
 vi.mock('electron',() => ({app:{get isPackaged() {return mock.packaged;},on:(name:string,handler:(...args:unknown[]) => void) => mock.handlers.set(name,handler),whenReady:async () => undefined,setAsDefaultProtocolClient:(scheme:string) => {mock.register(scheme);return mock.registration;}},shell:{openExternal:mock.open}}));

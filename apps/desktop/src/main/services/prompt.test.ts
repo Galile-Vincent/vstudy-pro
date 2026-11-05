@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for services prompt.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from 'vitest';
 import { coalescePrompt } from './prompt';
 it('shares concurrent consent and allows a later retry', async () => {

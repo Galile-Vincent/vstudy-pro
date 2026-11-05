@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for providers agy.
+ * Owned by main/providers.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { readFile, mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";

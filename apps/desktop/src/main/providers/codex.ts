@@ -1,3 +1,9 @@
+/**
+ * Create and verify isolated Codex chat transports with native tools disabled.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { access, chmod, copyFile, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
@@ -12,6 +18,7 @@ import { discoverModels } from './models';
 import type { Availability, ProviderAdapter } from './index';
 
 const execute = promisify(execFile);
+/** Build the macOS profile used to deny child processes for isolated Codex chat. */
 export function buildCodexSandboxProfile(): string {
   return '(version 1)(allow default)(deny process-fork)';
 }
@@ -27,12 +34,14 @@ export const codexChatConfig = {
     'send_message_to_user_async', 'code_mode_only'].map(key => [`features.${key}`, false])),
   'features.skip_host_skill_discovery': true,
 };
+/** Resolve the model catalog entry required by the verified Codex transport. */
 export function codexChatModel(model: string) {
   // Unknown slugs must still resolve to our metadata, never the CLI's tool-enabled fallback.
   return { ...template, slug: model, display_name: model };
 }
 import { assertCodexChatEvent } from './codex-events';
 export { assertCodexChatEvent } from './codex-events';
+/** Create a private request home and return cleanup for its temporary credentials. */
 export async function createCodexChatContext(model: string) {
   const cwd = await mkdtemp(join(tmpdir(), 'vstudy-codex-chat-'));
   const cleanup = () => rm(cwd, { recursive: true, force: true });
@@ -51,6 +60,7 @@ function invocation(binary: string, model: string, args: string[], options = {})
   return ['-p', codexForkProfile, binary, ...cliArgs('codex', model, options).slice(0, -1), ...args, '-'];
 }
 
+/** Verify the pinned Codex executable can satisfy the tool-free transport contract. */
 export async function probeCodexChat(binary: string, model = template.slug, image?:string) {
   const outside = await mkdtemp(join(tmpdir(), 'vstudy-codex-canary-'));
   const secret = `CANARY_${createHash('sha256').update(outside + Date.now()).digest('hex')}`;
@@ -80,6 +90,7 @@ export async function probeCodexChat(binary: string, model = template.slug, imag
   } finally { await rm(outside, { recursive: true, force: true }); }
 }
 
+/** Create a fail-closed Codex adapter backed by the verified isolated transport. */
 export function createCodexAdapter(cacheFile?: string): ProviderAdapter {
   let verification: Promise<Availability> | undefined;
   let identity = '';

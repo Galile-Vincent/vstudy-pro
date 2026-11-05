@@ -1,10 +1,17 @@
+/**
+ * Regression coverage for services library.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { afterEach, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { mkdtempSync, writeFileSync, existsSync, rmSync, symlinkSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { openStore, migrations, type Store } from '../db';
+import { openStore, type Store } from '../db';
+import { migrations } from '../db/migrations';
 import { documentSchema } from '../../shared/domain';
 import { libraryQuerySchema } from '../../shared/library';
 import { LibraryService, containedPath } from './library';

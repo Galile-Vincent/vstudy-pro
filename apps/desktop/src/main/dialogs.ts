@@ -1,3 +1,9 @@
+/**
+ * Attach native message dialogs to the active application window.
+ * Owned by main.
+ * Main owns privileged resources; shutdown must settle work before releasing those resources.
+ * @packageDocumentation
+ */
 import { app, BrowserWindow, dialog, type MessageBoxOptions } from 'electron';
 import { coalescePrompt } from './services/prompt';
 export const showAttachedMessage = coalescePrompt(async (options: MessageBoxOptions) => {

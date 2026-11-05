@@ -1,6 +1,6 @@
-# Library data model
+# Local data model
 
-The authoritative transport schemas are `apps/desktop/src/shared/library.ts`, spread into `shared/ipc.ts`. Library documents contain `{document, folderId, position, pinned, pinnedAt, lastOpenedAt, pageCount, sizeBytes, contentChars}`. The nested `document` preserves the existing reader/chat contract. All paths remain main-owned; export requests accept document IDs only.
+The library transport schemas are `apps/desktop/src/shared/library.ts`, spread into `shared/ipc.ts`. Library documents contain `{document, folderId, position, pinned, pinnedAt, lastOpenedAt, pageCount, sizeBytes, contentChars}`. The nested `document` preserves the existing reader/chat contract. All paths remain main-owned; export requests accept document IDs only.
 
 ```text
 folders --parentId--> folders                 (maximum depth 8)
@@ -92,7 +92,7 @@ Run `node scripts/bench-db.mjs` from the repository root (Node 24). It seeds a t
 
 An initial English search exceeded 80 ms because it produced snippets for all 5,000 matches. Materializing ranked hits and limiting before snippets fixed the miss. Cold startup to interactive (<2 s), actual document first paint (<50 ms), maximum-size Markdown search and real low-memory behavior remain unverified.
 
-Verification after the final review fixes: typecheck, lint, security:check, build, package and packaged smoke passed; the final unit run passed 326 tests with eight skipped (57 files passed, one skipped). The benchmark budgets above are unchanged and all passed again. Full-E2E attempt history and build snapshots are recorded in `final-code-review-response.md`.
+Historical library-stream verification after its final review fixes: typecheck, lint, security:check, build, package and packaged smoke passed; the final unit run passed 326 tests with eight skipped (57 files passed, one skipped). The benchmark budgets above are unchanged and all passed again. Full-E2E attempt history and build snapshots are recorded in `final-code-review-response.md`.
 
 Version 10 retains legacy metadata columns for migration safety and introduces nullable sizeBytes/contentChars. Startup backfill reads contained files in batches of 32, commits a completion marker per document, and yields between batches. Missing files remain NULL. Interrupted batches resume from unmarked rows; missing files that later return require explicit re-conversion to refresh metadata.
 
@@ -101,3 +101,61 @@ Application ownership is acquired through Electron's single-instance lock before
 ## Storage and recovery contract
 
 [STORAGE.md](STORAGE.md) is the current inventory and migration API reference. Migration 19 adds the account response cache and Moodle lookup indexes. The runner records SHA-256 checksums and backs up before every pending migration of an existing disk database. Settings > Storage exposes bounded cache cleanup, converted-file cleanup, validated portable backups, restart recovery, and database integrity checks.
+
+## Current migration registry
+
+`main/db/migrations.ts` is authoritative. `main/db/migrate.ts` applies each pending version transactionally, checks foreign keys, and rejects changed SQL checksums or unknown newer versions. Existing disk stores get a private recoverable backup before each pending migration. In-memory stores skip filesystem backups.
+
+| Version | Change |
+| --- | --- |
+| 1 | Documents, document conversations, messages, settings, and ownership indexes. |
+| 2 | Converter identity on documents. |
+| 3 | Usage events and daily usage rollups. |
+| 4 | Conversation model options. |
+| 5 | Folders, tags, saved filters, library metadata, document FTS, activity, and rollup rebuild. |
+| 6 | Message, usage, and library pagination indexes. |
+| 7 | Message parent links and superseded branches. |
+| 8 | Repaired usage rollup trigger. |
+| 9 | Activity, folder, and normalized recent-open indexes. |
+| 10 | Nullable size/content metadata and resumable backfill marker. |
+| 11 | AI parse versions, state, usage, and rollups. |
+| 12 | Forward repair of AI parse rollup storage. |
+| 13 | Moodle accounts, courses, deadlines, notifications, grades, files, and reminders. |
+| 14 | Course-scoped conversations with preserved message IDs. |
+| 15 | Canonical site identity and account lookup index. |
+| 16 | Account capability inventory. |
+| 17 | Course detail snapshots. |
+| 18 | General chat scope, conversation metadata, and trigger-maintained chat FTS. |
+| 19 | Account response cache and Moodle lookup indexes. |
+| 20 | Course conversation keyset index. |
+| 21 | Student-owned goals, tasks, exams, study plans, blocks, reminders, and approval records. |
+
+Migration SQL bytes and order stay unchanged when modules move. Upgrade tests dry-run every historical version into the current schema.
+
+## Accounts, chat history, and planner relationships
+
+```mermaid
+erDiagram
+  moodle_accounts ||--o{ moodle_courses : owns
+  moodle_accounts ||--o{ moodle_response_cache : scopes
+  moodle_courses ||--o{ moodle_deadlines : owns
+  moodle_courses ||--o{ moodle_files : owns
+  moodle_courses ||--o| moodle_course_details : snapshots
+  documents ||--o{ conversations : document_scope
+  moodle_courses ||--o{ conversations : course_scope
+  conversations ||--o{ messages : contains
+  conversations ||--o{ chat_fts : indexes
+  planner_goals o|--o{ planner_tasks : groups
+  moodle_deadlines o|--o{ planner_tasks : seeds
+  moodle_courses o|--o{ planner_tasks : references
+  moodle_courses o|--o{ planner_exams : references
+  planner_plans o|--o{ planner_blocks : groups
+```
+
+Account uniqueness uses canonical site URL and remote user ID. Public snapshots contain no authentication token. Credentials live in main-only secret storage. Response cache keys include account, resource kind, and request key. Account deletion cascades cache rows, and generation fencing rejects late writes from purged requests.
+
+Conversations have exactly one scope. Document scope requires `documentId` and excludes `courseId`. Course scope requires `courseId` and excludes `documentId`. General scope excludes both. Conversation metadata adds nullable title and deleted time plus pin/archive flags. Soft deletion hides results immediately. History indexing keeps only active messages and updates through insert, edit, supersede, title, and delete triggers. Shared history schemas bound query and cursor shapes.
+
+Planner goals have an active or achieved state. Tasks have todo, doing, or done state and a Moodle, user, or agent source. Their estimate is 5 to 2880 minutes. A non-null deadline ID is unique, so repeated deadline imports do not duplicate tasks. Course, deadline, and goal deletion sets references to NULL instead of deleting student-owned tasks. Exams retain topic and material arrays as validated JSON. Blocks pair target kind and target ID, constrain duration to 5 to 240 minutes, and may outlive their original plan. Plans retain the IANA timezone, assumptions, and a daily budget of 15 to 480 minutes. Reminders persist a fired flag. Approval IDs make repeated application of one approved proposal idempotent.
+
+Planning actions are validated against current target ownership and current time before writing. Polymorphic block and reminder targets require application validation because a single foreign key cannot reference multiple tables. `planner/repository.test.ts` covers approval replay, target checks, timezone policy, and persistence. Moodle reconciliation must not remove student-owned plans.

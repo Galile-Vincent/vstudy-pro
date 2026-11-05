@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for services converter-render.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 // @vitest-environment jsdom
 import { act, createElement, Profiler } from "react";
 import { createRoot } from "react-dom/client";

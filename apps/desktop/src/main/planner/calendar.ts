@@ -1,9 +1,16 @@
+/**
+ * Serialize approved planner blocks as calendar events.
+ * Owned by main/planner.
+ * Student data survives Moodle pruning; agent proposals require explicit validated approval.
+ * @packageDocumentation
+ */
 /** Calendar export resolves IDs against current local state and retains stable event UIDs. */
 import type { z } from "zod";
 import type { plannerCalendarSchema, PlannerSnapshot } from "../../shared/planner";
 import type { MoodleDeadline } from "../../shared/moodle";
 import { calendarEventsText } from "../moodle/reminders";
 
+/** Resolve selected planner items against current state and export calendar timestamps in UTC. */
 export function plannerCalendar(snapshot: PlannerSnapshot, deadlines: MoodleDeadline[], selection: z.infer<typeof plannerCalendarSchema>) {
   const events = [
     ...(selection.deadlineIds ?? []).map(id => {

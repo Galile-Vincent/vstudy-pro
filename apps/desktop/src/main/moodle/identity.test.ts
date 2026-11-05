@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle identity.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from 'vitest';
 import { courseLifecycle, currentTaiwanTerm, filterMultilang, parseCourseIdentity } from './identity';
 import { displayTitle } from '../../shared/moodle-course-display';

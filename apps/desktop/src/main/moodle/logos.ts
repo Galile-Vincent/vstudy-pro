@@ -1,3 +1,9 @@
+/**
+ * Cache verified public raster school logos using content-addressed private files.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import { atomicWrite } from '../storage/atomic';
 /** Same-origin public school logos. Only bounded raster bytes cross IPC; cache paths never do. */
 import { createHash } from 'node:crypto';

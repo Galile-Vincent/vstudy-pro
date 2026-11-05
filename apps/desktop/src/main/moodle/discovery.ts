@@ -1,3 +1,9 @@
+/**
+ * Validate public site configuration and choose the supported authentication plan.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 /** Probe a user-selected HTTPS Moodle root without credentials. Validate public configuration before use. */
 import { z } from 'zod';
 import { getDomain } from 'tldts';
@@ -18,6 +24,7 @@ export const publicConfigSchema = z.object({
   forcedurlscheme:z.string().regex(/^[a-z][a-z0-9+.-]*$/i).optional(),
 });
 export type CheckedSite = MoodleSiteCheck & {config:z.infer<typeof publicConfigSchema>};
+/** Choose a supported login flow from validated public site settings. */
 export function authPlan(config: z.infer<typeof publicConfigSchema>): AuthPlan {
   if (config.maintenanceenabled) return {kind:'unavailable',reason:'maintenance'};
   if (!config.enablewebservices) return {kind:'unavailable',reason:'webservices-disabled'};
@@ -28,10 +35,12 @@ export function authPlan(config: z.infer<typeof publicConfigSchema>): AuthPlan {
   if (config.typeoflogin === 2 || config.showloginform === 0) return {kind:'browser',providers:config.identityproviders};
   return {kind:'password',...(config.identityproviders.length ? {providers:config.identityproviders} : {})};
 }
+/** Compare hosts by exact name or registrable domain, including private suffixes. */
 export function sameSiteDomain(first: string, second: string): boolean {
   const a = new URL(first).hostname, b = new URL(second).hostname;
   return a === b || getDomain(a,{allowPrivateDomains:true}) !== null && getDomain(a,{allowPrivateDomains:true}) === getDomain(b,{allowPrivateDomains:true});
 }
+/** Probe a selected public Moodle root and return validated availability and login guidance. */
 export async function checkSite(input: string, request: typeof fetch = moodleFetch): Promise<CheckedSite> {
   const initial = normalizeSiteUrl(input);
   const discover = async (root: string): Promise<CheckedSite> => {

@@ -1,6 +1,12 @@
+/**
+ * Regression coverage for db moodle-migration.
+ * Owned by main/db.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { DatabaseSync } from 'node:sqlite';
 import { expect, it } from 'vitest';
-import { migrations } from './index';
+import { migrations } from './migrations';
 import { MoodleRepository } from '../moodle/repository';
 it('backfills an existing CYCU account and preserves linked course data',() => {
   const db = new DatabaseSync(':memory:');

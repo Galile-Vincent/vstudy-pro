@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle sso.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it, expect, vi } from 'vitest';
 import { createHash } from 'node:crypto';
 import { diagnosticUrl, MoodleSso } from './sso';

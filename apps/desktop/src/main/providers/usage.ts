@@ -1,3 +1,9 @@
+/**
+ * Normalize provider usage and rate-limit fields without inventing reported values.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { z } from 'zod';
 import { usageSchema, type Usage } from '../../shared/domain';
 const counts = z.object({
@@ -11,6 +17,7 @@ const counts = z.object({
   output_tokens_details: z.object({ thinking_tokens: z.number().int().nonnegative().optional() }).optional(),
 });
 const windowSchema = z.object({ used_percent: z.number().min(0).max(100), window_minutes: z.number().optional(), resets_at: z.number().optional() });
+/** Normalize provider token and cost fields while preserving unknown values. */
 export function extractUsage(data: string, kind: string, previous?: Usage): Usage | undefined {
   if (data === '[DONE]') return previous;
   const wire = z.object({ rate_limit_info: z.object({ rateLimitType: z.string().optional(), utilization: z.number().nonnegative().optional(), resetsAt: z.number().optional() }).optional(), type: z.string().optional(), event: z.unknown().optional(), message: z.object({ usage: counts.optional() }).optional(), usage: counts.nullable().optional(), total_cost_usd: z.number().finite().nonnegative().optional(),
@@ -45,6 +52,7 @@ export function extractUsage(data: string, kind: string, previous?: Usage): Usag
   }
   return usage;
 }
+/** Normalize supported rate-limit headers into the shared quota contract. */
 export function headerRateLimit(headers: Headers, anthropic: boolean): Usage['rateLimit'] {
   const prefix = anthropic ? 'anthropic-ratelimit-' : 'x-ratelimit-';
   const number = (key: string) => { const v = headers.get(prefix + key); return v !== null && Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : undefined; };
@@ -59,6 +67,7 @@ export function headerRateLimit(headers: Headers, anthropic: boolean): Usage['ra
   }
   return remainingTokens === undefined && remainingRequests === undefined && !resetsAt ? undefined : { label: 'Provider rate limit', remainingTokens, remainingRequests, resetsAt };
 }
+/** Associate CLI usage records with the actual reported model identifiers. */
 export function cliModelUsage(data: string): { modelId: string; usage: Usage }[] | undefined {
   if (data === '[DONE]') return undefined;
   const result = z.object({ type: z.string().optional(), modelUsage: z.record(z.object({

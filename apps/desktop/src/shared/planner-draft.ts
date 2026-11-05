@@ -1,3 +1,9 @@
+/**
+ * Draft study blocks within daily budgets and current task and exam constraints.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 /** Deterministic planning draft. It fills explicit local study windows and reports work that capacity cannot cover. */
 import { assertPlannerAction, localDay, type PlanningContext } from "./planner-policy";
 import type { PlannerAction, PlannerTarget } from "./planner";
@@ -12,6 +18,7 @@ export interface DraftOptions {
   title: string;
   assumptions: string[];
 }
+/** Allocate proposed blocks within daily budgets without writing student data. */
 export function draftStudyPlan(context: PlanningContext, options: DraftOptions) {
   const horizon = context.now + Math.min(14, options.days) * 86400000;
   const linked = new Set(context.snapshot.tasks.map(t => t.deadlineId));

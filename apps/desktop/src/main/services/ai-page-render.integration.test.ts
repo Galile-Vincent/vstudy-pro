@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for services ai-page-render.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it,expect } from 'vitest';
 import { copyFile,mkdtemp,readFile,readdir,rm,writeFile } from 'node:fs/promises';
 import { join,resolve } from 'node:path';

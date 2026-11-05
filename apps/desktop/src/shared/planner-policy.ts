@@ -1,3 +1,9 @@
+/**
+ * Validate approved planner actions against current targets, timezones, and limits.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 /** Pure approval rules shared by proposal parsing and SQLite writes. Current capacity and ownership always win over proposals. */
 import type { MoodleDeadline } from "./moodle";
 import { taskSchema } from "./planner";
@@ -10,10 +16,12 @@ export interface PlanningContext {
   documentIds: string[];
   now: number;
 }
+/** Resolve a planner date using the saved IANA timezone. */
 export function localDay(value: string | number, timeZone: string): string {
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(value));
   return ["year", "month", "day"].map(key => parts.find(p => p.type === key)!.value).join("-");
 }
+/** Resolve a planner target only from the current course and student-owned snapshot. */
 export function targetInfo(target: PlannerTarget, context: PlanningContext) {
   if (target.kind === "task") {
     const task = context.snapshot.tasks.find(t => t.id === target.id);
@@ -32,6 +40,7 @@ export function targetInfo(target: PlannerTarget, context: PlanningContext) {
   return { courseId: deadline.courseId, dueAt: deadline.dueAt, title: deadline.title };
 }
 
+/** Validate current targets, dates, and limits immediately before applying an approved action. */
 export function assertPlannerAction(action: PlannerAction, context: PlanningContext, courseId?: string): void {
   const ownsCourse = (id: string | null) => {
     if (id && !context.courseIds.includes(id) || courseId && id !== courseId) throw new Error("Action outside course scope");

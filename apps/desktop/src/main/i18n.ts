@@ -1,9 +1,17 @@
+/**
+ * Resolve application language and keep translations consistent across native and web views.
+ * Owned by main.
+ * Main owns privileged resources; shutdown must settle work before releasing those resources.
+ * @packageDocumentation
+ */
 import { app, Menu, BrowserWindow } from 'electron';
 import { i18n, systemLanguage, tr } from '../shared/i18n';
 import type { Settings } from '../shared';
+/** Apply the explicit locale or resolve the system locale before native labels are read. */
 export function setMainLanguage(language: Settings['language']): void {
   void i18n.changeLanguage(language === 'auto' ? systemLanguage(process.env.VSTUDY_LOCALE ?? app.getLocale()) : language);
 }
+/** Rebuild native menus in the selected language without granting renderer privileges. */
 export function updateApplicationMenu(language: Settings['language']): void {
   setMainLanguage(language);
   Menu.setApplicationMenu(Menu.buildFromTemplate([

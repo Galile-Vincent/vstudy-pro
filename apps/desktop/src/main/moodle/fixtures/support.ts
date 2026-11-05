@@ -1,3 +1,9 @@
+/**
+ * Provide reusable synthetic inputs for subsystem regression tests.
+ * Owned by main/moodle.
+ * Fixture values are test data and must never contain real credentials.
+ * @packageDocumentation
+ */
 import { vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { MoodleAccount } from '../../../shared/moodle';

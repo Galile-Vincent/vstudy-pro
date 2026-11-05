@@ -1,3 +1,9 @@
+/**
+ * Provide reusable synthetic inputs for subsystem regression tests.
+ * Owned by main/planner.
+ * Fixture values are test data and must never contain real credentials.
+ * @packageDocumentation
+ */
 /** Deterministic student data shared by planner verification and recorded evaluations. */
 import type { Store } from "../../db";
 import { MoodleRepository } from "../../moodle/repository";

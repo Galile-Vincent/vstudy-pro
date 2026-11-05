@@ -1,5 +1,12 @@
+/**
+ * Persist usage events and query daily aggregates without reading every event.
+ * Owned by main/db.
+ * Applied SQL remains immutable; repositories share one connection and use bound query values.
+ * @packageDocumentation
+ */
 import type { DatabaseSync } from 'node:sqlite';
 import { usageRecordSchema, type UsagePeriod, type UsageRecord, type UsageSummary } from '../../shared/domain';
+/** Aggregate usage while retaining whether each cost was reported, estimated, or unknown. */
 export function summarize(records: UsageRecord[]): UsageSummary {
   const total = (rows: UsageRecord[]) => ({
     inputTokens: rows.reduce((n,r) => n + r.inputTokens, 0), outputTokens: rows.reduce((n,r) => n + r.outputTokens, 0),
@@ -10,6 +17,7 @@ export function summarize(records: UsageRecord[]): UsageSummary {
   for (const r of records) { const key = JSON.stringify([r.providerId,r.modelId,r.documentId]); groups.set(key, [...(groups.get(key) ?? []),r]); }
   return { ...total(records), groups: [...groups.values()].map(rows => ({ providerId: rows[0]!.providerId, modelId: rows[0]!.modelId, documentId: rows[0]!.documentId, ...total(rows) })) };
 }
+/** Create usage write and rollup operations on the caller-owned connection. */
 export function usageRepository(db: DatabaseSync) {
   const list = (where = '', args: string[] = []): UsageRecord[] => db.prepare(`SELECT payload FROM usage_events ${where} ORDER BY createdAt,id`).all(...args).map(row => usageRecordSchema.parse(JSON.parse(String(row.payload))));
   const localDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;

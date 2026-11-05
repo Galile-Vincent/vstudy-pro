@@ -1,8 +1,20 @@
 # VStudy Pro
 
-A macOS Electron app for reading documents and discussing passages with AI. The interface supports English, Traditional Chinese and Japanese.
+A macOS Electron app for reading documents, connecting Moodle schools, and planning study with AI. The interface supports English, Traditional Chinese, and Japanese.
 
 Import PDF, DOCX, XLSX, PPTX, HTML, CSV, Markdown or plain text (up to 50 MB). Organise documents with folders, pins, tags and saved filters; search the library, select passages, follow answer citations, and track reported or estimated token usage and cost. Read-only structured tables are optional. Documents and originals stay in a local library; there is no device sync.
+
+## Coursework and study
+
+Connect multiple Moodle school accounts through the bundled school directory or a custom public HTTPS URL. Browse course content, deadlines, announcements, grades, notifications, and files. Read supported Moodle pages in isolated in-app views that share the account login. School mobile-service availability and supported functions vary. Password and SSO flows keep tokens in the main process.
+
+The course study agent uses coursework, your planner, and selected ready documents as context. It proposes tasks, exam preparation, study blocks, reminders, and calendar exports. You review and approve actions before they write planner data. Student-owned goals and plans survive removal of their Moodle references.
+
+Search chat history across document, course, and general conversations. Filter by course, document, scope, role, and date. Pin, rename, archive, or delete conversations through the history view.
+
+Appearance offers theme packs with light and dark variants, contrast adjustment, glass opacity, and validated custom pack import and export. Settings > Storage shows local usage, cache cleanup, converted-file cleanup, portable backup, restore, and integrity checks. Backups exclude credentials.
+
+First-run onboarding explains document import, optional providers, conversion consent, school connection, and local storage. It includes a sample document so you can try reading before connecting a school or enabling a provider.
 
 ## Install, run and verify
 
@@ -17,6 +29,8 @@ pnpm test
 pnpm build
 pnpm e2e
 pnpm security:check
+pnpm vendor:check
+pnpm knip
 pnpm smoke
 CSC_IDENTITY_AUTO_DISCOVERY=false pnpm package
 ```
@@ -47,7 +61,7 @@ There is **no OCR**: scanned/image-only PDFs cannot be read. PDF tables require 
 
 ## Packaging and known limits
 
-macOS only. Local packages are ad-hoc signed, unsigned by a Developer ID, and not notarized. macOS may show Gatekeeper warnings and Keychain permission prompts, including after rebuilds. When saving or unlocking a key, macOS may ask to let the app access its login-Keychain encryption key and may request your Keychain password. Granting access permits saved-key use; denying access leaves Retry and session-only use available. A rebuilt ad-hoc app may ask again. The cookie-encryption fuse is OFF because the renderer uses no cookies: Chromium must not read its Safe Storage item before showing the window. API-key safeStorage encryption remains enabled and lazy; expect its prompt only when saving or unlocking a key. Production and packaged smoke do not use `--use-mock-keychain`.
+macOS only. Local packages are ad-hoc signed, unsigned by a Developer ID, and not notarized. macOS may show Gatekeeper warnings and Keychain permission prompts, including after rebuilds. When saving or unlocking a key, macOS may ask to let the app access its login-Keychain encryption key and may request your Keychain password. Granting access permits saved-key use; denying access leaves Retry and session-only use available. A rebuilt ad-hoc app may ask again. The cookie-encryption fuse is OFF. The primary app renderer uses no cookies, and Moodle views use isolated in-memory partitions. Chromium does not need to read its Safe Storage item before showing the main window. API-key safeStorage encryption remains enabled and lazy; expect its prompt only when saving or unlocking a key. Production and packaged smoke do not use `--use-mock-keychain`.
 
 For a release, configure Developer ID signing and notarization through electron-builder credentials (never commit them). Developer ID signing, notarization, stapling, Gatekeeper acceptance and manual VoiceOver review remain release verification tasks. Performance budgets and full E2E acceptance must be judged from current evidence, not historical pass counts.
 
@@ -65,3 +79,5 @@ spctl --assess --type execute --verbose 'apps/desktop/release/mac-arm64/VStudy P
 Verify first-open Gatekeeper behavior on a quarantined copy on a clean Mac before distributing. An ad-hoc build passing smoke checks does not prove Developer ID trust or notarization.
 
 An opt-in AI document-improvement backend and isolated reader panel are available for integration. It creates `content.ai.md` beside the original, with page-level fallback, cost estimates and provenance. The panel is not yet mounted in the reader. See [AI improvement design and remaining limits](docs/AI_PARSE.md) and [the real CH2 evaluation](docs/ai-parse-evaluation.md), including the current admission-cap billing limitation.
+
+See [engineering procedures](docs/ENGINEERING.md), [architecture](docs/ARCHITECTURE.md), and the [documentation index](docs/README.md) for maintenance. [Cleanup verification](docs/ENGINEERING_CLEANUP.md) records check evidence and scoped exceptions. Release 0.2.0 notes are [proposed separately](docs/releases/0.2.0.md); no release tag is created by changelog generation.

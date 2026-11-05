@@ -1,16 +1,25 @@
+/**
+ * Index document text and perform literal multilingual FTS queries.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { containedPath } from "./file-paths";
 import { dirname, join } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import type { DatabaseSync } from 'node:sqlite';
 import { documentIdSchema } from '../../shared/domain';
+/** Normalize Markdown text for literal FTS indexing without trusting embedded markup. */
 export function indexedText(content: string): string {
     return content.slice(0, 1_000_000).replace(/(.)\1{63,}/gs, '$1'.repeat(32));
 }
+/** Reject oversized or empty queries before building a literal FTS expression. */
 export function validateSearchQuery(text: string): string {
     const q = text.trim();
     if ([...q].length < 2 || q.length > 200 || new Set(q.toLocaleLowerCase()).size < 2) throw new Error('Refine your query: use at least two distinct characters');
     return q;
 }
+/** Index and search literal document text with bounded result pagination. */
 export class SearchService {
     constructor(private readonly db: DatabaseSync, private readonly root?: string) { }
     update(id: string, content: string) {

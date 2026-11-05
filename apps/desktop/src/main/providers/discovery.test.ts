@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for providers discovery.
+ * Owned by main/providers.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it, vi } from 'vitest';
 import { mkdtemp,readFile,rm } from 'node:fs/promises';
 import { join } from 'node:path';

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for prompt citations.
+ * Owned by main/prompt.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect,it } from 'vitest';
 import { citationCatalog,citedReferences } from './citations';
 import type { Document } from '../../shared';

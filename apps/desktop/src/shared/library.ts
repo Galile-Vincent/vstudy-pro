@@ -1,3 +1,9 @@
+/**
+ * Define library filters, pagination, folders, tags, activity, and organization contracts.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 import { z } from 'zod';
 import { documentIdSchema, documentSchema, messageSchema, messageIdSchema, conversationIdSchema, usageRecordSchema } from './domain';
 export const folderIdSchema = z.string().uuid().brand<'FolderId'>();
@@ -9,7 +15,9 @@ const ack = z.object({ ok: z.literal(true) }).strict();
 const id = z.object({ documentId: documentIdSchema }).strict();
 export const folderSchema = z.object({ id: folderIdSchema, parentId: folderIdSchema.nullable(), name, color: z.string().max(32).nullable(), icon: z.string().max(64).nullable(), position: z.number(), pinned: z.number().int(), pinnedAt: z.string().nullable(), createdAt: z.string(), updatedAt: z.string(), count: z.number().optional() });
 export const tagSchema = z.object({ id: tagIdSchema, name, color: z.string().max(32).nullable() });
+/** Keep reader-compatible document metadata nested alongside organization and measured file metadata. */
 export const libraryDocumentSchema = z.object({ document: documentSchema, folderId: folderIdSchema.nullable(), position: z.number(), pinned: z.boolean(), pinnedAt: z.string().nullable(), lastOpenedAt: z.string().nullable(), pageCount: z.number().nullable(), sizeBytes: z.number().nullable(), contentChars: z.number().nullable(), tags:z.array(tagSchema).default([]), snippet:z.string().optional() });
+/** Validated metadata filters and keyset pagination; callers cannot supply SQL expressions. */
 export const libraryQuerySchema = z.object({
     view: z.enum(['all', 'recent', 'pinned', 'unfiled', 'converting-failed']).optional(),
     folderId: folderIdSchema.nullable().optional(), subfolders: z.boolean().optional(),

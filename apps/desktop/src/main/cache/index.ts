@@ -1,4 +1,9 @@
-/** Account-scoped Moodle responses. Reads survive network loss. Purges fence late writers. */
+/**
+ * Cache account-scoped Moodle read responses with TTLs and shared in-flight loads.
+ * Owned by main/cache.
+ * Cache entries are account-scoped; stale data never implies a successful refresh.
+ * @packageDocumentation
+ */
 import type { DatabaseSync } from 'node:sqlite';
 import type { z } from 'zod';
 
@@ -9,8 +14,11 @@ export const resourceTtl = {
 } as const;
 export type ResourceKind = keyof typeof resourceTtl;
 export interface Validators { etag?: string; modifiedAt?: string }
+/** A validator hit reuses stored bytes; modified responses must supply a new validated payload. */
 export type CacheResponse<T> = { status: 'modified'; value: T; validators?: Validators } | { status: 'unmodified' };
+/** Freshness describes this read; lastSyncedAt remains the time of the last successful remote response. */
 export interface Cached<T> { value: T; lastSyncedAt: string; state: 'fresh' | 'stale' | 'offline' }
+/** Account, kind, key, and revision identify one validated value; mode selects stale refresh or offline behavior. */
 export interface CacheRequest<T> {
   accountId: string; kind: ResourceKind; key: string; schema: z.ZodType<T, z.ZodTypeDef, unknown>;
   revision?: string; mode?: 'swr' | 'refresh' | 'offline';

@@ -1,3 +1,9 @@
+/**
+ * Register validated moodle IPC operations and delegate privileged work to main services.
+ * Owned by main/ipc.
+ * Request and response validation and sender ownership stay at the IPC boundary.
+ * @packageDocumentation
+ */
 import { join } from 'node:path';
 import { app, dialog, Notification } from 'electron';
 import { moodleChannels } from '../../shared/moodle';
@@ -21,6 +27,7 @@ import { tokensSchema } from '../moodle/auth';
 import { moodleSecretId } from '../services/secrets';
 import { moodleWebviewContract } from '../../shared/moodle-webview';
 
+/** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, secrets: SecretStore, implemented: Set<IpcChannel>, documents: Pick<DocumentService,'importPath'|'get'>, restoreMainWindow: () => void = () => {}) {
   const owners=new Set<Electron.WebContents>();
   const repository = new MoodleRepository(store.db);
