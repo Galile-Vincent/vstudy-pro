@@ -1,3 +1,4 @@
+import { tr } from '../../shared/i18n';
 import { recordEgress } from '../services/egress';
 import { lookup } from 'node:dns/promises';
 import { BlockList, isIP } from 'node:net';
@@ -50,7 +51,7 @@ export function createMoodleFetch(resolver: Resolver = resolveAll): typeof fetch
     const initial = networkUrl(String(input));
     const send = async (url: URL, hops: number): Promise<Response> => {
       networkUrl(url.href);
-      recordEgress('Moodle HTTPS request',url.origin);
+      recordEgress(tr('schools:network_request'),url.origin);
       // Validate every answer at socket creation, rather than trusting a preflight DNS result.
       const response = await new Promise<Response>((resolve,reject) => {
         const req = httpsRequest(url,{
