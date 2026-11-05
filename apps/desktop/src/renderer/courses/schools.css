@@ -1,0 +1,13 @@
+.moodle-school-results { max-height: 280px; overflow-y: auto; }
+.moodle-school-results [aria-selected="true"] { background: var(--subtle); outline: 2px solid var(--ring); outline-offset: -2px; }
+.moodle-school-logo, .moodle-school-monogram {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: var(--r-sm);
+  object-fit: contain;
+  background: var(--subtle);
+}
+.moodle-site-list button > .moodle-school-monogram { flex: 0 0 36px; }
+.moodle-school-monogram { display: grid; place-items: center; font-weight: 600; font-size: 13px; }
+.moodle-site-result > .moodle-school-logo, .moodle-site-result > .moodle-school-monogram { width: 44px; height: 44px; }

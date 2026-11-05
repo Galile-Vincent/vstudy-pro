@@ -1,3 +1,4 @@
+/** Moodle account, school, and transport contracts. Secrets stay in the main process. */
 import { z } from "zod";
 import { moodleCourseIdentitySchema, moodleSectionSchema, moodleAnnouncementSchema } from "./moodle-course";
 
@@ -8,7 +9,11 @@ export const moodleSchoolSchema = z
     id: z.string().regex(/^[a-z0-9-]+$/),
     name: z.string().min(1),
     host: z.string().url().startsWith("https://"),
-    login: z.enum(["sso-launch", "password"]),
+    login: z.enum(["sso-launch", "password", "discover"]),
+    localizedNames: z.record(z.string().max(200)).optional(),
+    country: z.string().regex(/^[A-Z]{2}$/).optional(),
+    logoUrl: z.string().url().startsWith("https://").nullable().optional(),
+    notes: z.string().max(1000).optional(),
   })
   .strict();
 export type MoodleSchool = z.infer<typeof moodleSchoolSchema>;
@@ -204,13 +209,24 @@ export const moodleChannels = {
 
 export const moodleProviderSchema = z.object({name:z.string(),iconurl:z.string(),url:z.string().url()}).strict();
 export const moodleAuthPlanSchema = z.discriminatedUnion('kind',[
-  z.object({kind:z.literal('password')}).strict(),
+  z.object({kind:z.literal('password'),providers:z.array(moodleProviderSchema).optional()}).strict(),
   z.object({kind:z.literal('browser'),providers:z.array(moodleProviderSchema)}).strict(),
   z.object({kind:z.literal('embedded'),providers:z.array(moodleProviderSchema)}).strict(),
-  z.object({kind:z.literal('unavailable'),reason:z.enum(['webservices-disabled','mobile-disabled','maintenance','unsupported-version'])}).strict(),
+  z.object({kind:z.literal('unavailable'),reason:z.enum(['webservices-disabled','mobile-disabled','maintenance','unsupported-version','unsupported-login'])}).strict(),
 ]);
 export type AuthPlan = z.infer<typeof moodleAuthPlanSchema>;
-export const moodleSiteCheckSchema = z.object({siteUrl:moodleSiteUrlSchema,siteName:z.string(),authPlan:moodleAuthPlanSchema,iconUrl:z.string().optional()}).strict();
+/** Public site metadata. Icons contain bounded raster bytes supplied by main, never remote URLs. */
+export const moodleSiteCheckSchema = z.object({
+  siteUrl:moodleSiteUrlSchema,
+  siteName:z.string(),
+  authPlan:moodleAuthPlanSchema,
+  iconUrl:z.string().max(1_400_000).regex(/^data:image\/(?:png|jpeg|gif|webp);base64,[A-Za-z0-9+/=]+$/).optional(),
+  country:z.string().regex(/^[A-Z]{2}$/).optional(),
+  forcedUrlScheme:z.string().regex(/^[a-z][a-z0-9+.-]*$/i).nullable().optional(),
+  registration:z.enum(['disabled','browser']).optional(),
+  qrLogin:z.boolean().optional(),
+  maintenanceMessage:z.string().max(2000).optional(),
+}).strict();
 export type MoodleSiteCheck = z.infer<typeof moodleSiteCheckSchema>;
 
 export type MoodleSsoMode = 'external' | 'embedded';
