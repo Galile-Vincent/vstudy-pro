@@ -54,16 +54,18 @@
    const {
      isComposer,
      src,
-@@ -168,7 +174,7 @@
+@@ -167,9 +173,7 @@
+                       }
                      : undefined
                  }
-                 aria-label={`${src ? `Preview ${name}` : `${typeLabel} attachment ${name}`}${
+-                aria-label={`${src ? `Preview ${name}` : `${typeLabel} attachment ${name}`}${
 -                  isError ? ", upload failed" : isUploading ? ", uploading" : ""
-+                  isError ? tr('common:upload_failed') : isUploading ? ", uploading" : ""
-                 }`}
+-                }`}
++                aria-label={tr('common:attachment_label', {name, type: typeLabel, status: isError ? tr('common:upload_failed') : isUploading ? tr('common:uploading') : ''})}
                >
                  <AttachmentThumb src={src} />
-@@ -205,10 +211,11 @@
+                 {isUploading && (
+@@ -205,10 +209,11 @@
  };
  
  const AttachmentRemove: FC<{ name: string }> = ({ name }) => {
@@ -76,7 +78,7 @@
          className="aui-attachment-tile-remove absolute end-1 top-1 size-5 rounded-full bg-black/50! text-white after:absolute after:-inset-1.5 hover:bg-black/70! hover:text-white! active:scale-[0.96] motion-reduce:transition-none"
          side="top"
        >
-@@ -219,6 +226,7 @@
+@@ -219,6 +224,7 @@
  };
  
  export const UserMessageAttachments: FC = () => {
@@ -84,7 +86,7 @@
    return (
      <div className="aui-user-message-attachments-end col-span-full col-start-1 row-start-1 flex w-full flex-row justify-end gap-2 empty:hidden">
        <MessagePrimitive.Attachments>
-@@ -229,6 +237,7 @@
+@@ -229,6 +235,7 @@
  };
  
  export const ComposerAttachments: FC = () => {
@@ -92,7 +94,7 @@
    return (
      <div className="aui-composer-attachments flex w-full flex-row items-center gap-2 overflow-x-auto empty:hidden">
        <ComposerPrimitive.Attachments>
-@@ -239,15 +248,16 @@
+@@ -239,15 +246,16 @@
  };
  
  export const ComposerAddAttachment: FC = () => {

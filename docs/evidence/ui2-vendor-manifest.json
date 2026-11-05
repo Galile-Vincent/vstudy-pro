@@ -14,9 +14,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/attachment.aui.tsx",
       "registrySha256": "ec4275215b826173f428ec95b94e150b4ca21124f9094eec8a28dbd87033710d",
-      "patchedSha256": "dd5c50898b34f43a465dd10718709e6790cc66ca3cb6dc946c1b14525a8f1511",
+      "patchedSha256": "3c3d24b01cbedec4a184a678f762f8c08244c9c79f46f3cef6634a3136cecd54",
       "patch": "docs/vendor-patches/assistant-ui--elements--attachment.aui.tsx.patch",
-      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+      "reason": "Translate vendor labels, including attachment type and upload status, through the existing locale catalogs; preserve vendor interaction and layout."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/collapsible-root.tsx",
@@ -60,9 +60,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/inline-citation.tsx",
       "registrySha256": "e70551e72d0bb8cb16e9552b22ca31f8b1ed30c062217e98ecef6d86843ac64a",
-      "patchedSha256": "9232efaddb6fb8c8f96818b1ab1d7945e4a6f2f34af9f252e9a3d5f5f82c2552",
+      "patchedSha256": "f27221caf661c64d416e43766a42d657289d94d0d0b02e022a0459da8196dba7",
       "patch": "docs/vendor-patches/assistant-ui--elements--inline-citation.tsx.patch",
-      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+      "reason": "Retain localized labels and publication dates; add a localized first-citation hint with persisted dismissal on preview open or click, synchronized across mounted citations."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/logos.tsx",
