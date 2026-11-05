@@ -1,0 +1,4 @@
+
+> @vstudy/desktop@0.1.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-60804438/apps/desktop
+> tsc --noEmit
+

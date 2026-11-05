@@ -1,3 +1,4 @@
+import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
   useCallback,
   useEffect,
@@ -141,18 +142,29 @@ export function CoursesView() {
     />
   );
 }
-export function Courses({
+export function Courses(props: Parameters<typeof CoursesBody>[0]) {
+  const [reconnect,setReconnect] = useState(false);
+  return <MoodleWebviewProvider onDocument={props.onDocument} onReconnect={() => setReconnect(true)}>
+    <CoursesBody {...props} reconnect={reconnect} onReconnected={() => setReconnect(false)} />
+  </MoodleWebviewProvider>;
+}
+function CoursesBody({
+  reconnect,
+  onReconnected,
   api,
   courseId,
   onCourse,
   onDocument,
 }: {
+  reconnect?: boolean;
+  onReconnected?: () => void;
   api: MoodleApi;
   courseId?: string | undefined;
   onCourse: (id?: string) => void;
   onDocument: (id: string) => void;
 }) {
   useTranslation("moodle");
+  const openMoodle = useMoodleWebview();
   const [overview, setOverview] = useState<MoodleOverview>();
   const [detail, setDetail] = useState<MoodleCourseDetail>();
   const [homeDetails, setHomeDetails] = useState<NonNullable<MoodleOverview["summaries"]>>([]);
@@ -162,6 +174,7 @@ export function Courses({
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState("");
   const [connect, setConnect] = useState(false);
+  useEffect(() => {if (reconnect) {setConnect(true);onReconnected?.();}},[reconnect,onReconnected]);
   const [tab, setTab] = useState<Tab>("content");
   const [term, setTerm] = useState<MoodleTermFilter>("current");
   const lang = i18n.resolvedLanguage || "en";
@@ -304,6 +317,10 @@ export function Courses({
             >
               {d.submitted ? tr("moodle:done") : relative(d.dueAt)}
             </span>
+            {d.url && <Button variant="ghost" aria-label={tr('webview:open')} onClick={() => {
+              const course = overview?.courses.find(c => c.id === d.courseId);
+              if (course && d.url) openMoodle(course.accountId,{kind:'page',url:d.url});
+            }}><ArrowUpRight /></Button>}
             {remind(d)}
             <Button
               variant="ghost"
@@ -349,6 +366,7 @@ export function Courses({
             </div>
             <p>{plainText(n.body)}</p>
             <div className="moodle-notification-actions">
+              {n.url && <Button variant="ghost" onClick={() => openMoodle(n.accountId,{kind:'page',url:n.url!})}>{tr('webview:open')}<ArrowUpRight /></Button>}
               {!n.read && (
                 <Button
                   variant="ghost"
@@ -398,6 +416,7 @@ export function Courses({
           {items
             .filter((f) => f.section === section)
             .map((f) => (
+              <div className="moodle-file-actions" key={f.id}>
               <button
                 type="button"
                 className="moodle-file-row"
@@ -436,6 +455,8 @@ export function Courses({
                   <ArrowUpRight />
                 )}
               </button>
+              <Button variant="ghost" size="icon" aria-label={tr('webview:open')} title={tr('webview:open')} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})}><ArrowUpRight /></Button>
+              </div>
             ))}
         </section>
       ))
@@ -587,6 +608,10 @@ export function Courses({
                   </h1>
                   <IdentityLine value={displayTeachers(detail.course.identity, lang)} label={tr("moodle:teacher_unknown")} />
                   <IdentityLine value={displayClass(detail.course.identity)} label={tr("moodle:class_unknown")} />
+                  <Button variant="outline" onClick={() => {
+                    const account = overview?.accounts.find(a => a.id === detail.course.accountId);
+                    if (account) openMoodle(account.id,{kind:'page',url:account.siteUrl + '/course/view.php?id=' + detail.course.remoteId});
+                  }}><ArrowUpRight />{tr('webview:open')}</Button>
                   <details className="moodle-raw-name">
                     <summary>{tr("moodle:original_name")}</summary>
                     {detail.course.fullName}
@@ -710,7 +735,7 @@ export function Courses({
                   </TabsContent>
                   <TabsContent value="announcements" aria-busy={detail.fetchState === "loading"}>
                     {panelStatus('announcements')}
-                    <Announcements items={detail.announcements} />
+                    <Announcements accountId={detail.course.accountId} items={detail.announcements} />
                   </TabsContent>
                   <TabsContent value="notifications">
                     <section className="moodle-panel">
