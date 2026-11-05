@@ -1,0 +1,68 @@
+name: Unsigned release artifacts
+on:
+  push:
+    tags: ['v*.*.*']
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: macos-14
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Validate version tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync } from 'node:fs';
+          const version = JSON.parse(readFileSync('apps/desktop/package.json')).version;
+          if (!/^v\d+\.\d+\.\d+$/.test(process.env.RELEASE_TAG) || process.env.RELEASE_TAG !== `v${version}`) {
+            throw new Error('Tag must equal v plus the desktop package version');
+          }
+          JS
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test --pool=forks --maxWorkers=2
+      - run: pnpm security:static
+      - run: pnpm vendor:check
+      - run: pnpm knip
+      - run: pnpm build
+      - run: pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish never -c.mac.notarize=false -c.mac.identity=null
+      - name: Checksums
+        working-directory: apps/desktop/release
+        run: shasum -a 256 ./*.dmg > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-${{ github.ref_name }}
+          path: |
+            apps/desktop/release/*.dmg
+            apps/desktop/release/SHA256SUMS.txt
+          if-no-files-found: error
+  publish:
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: unsigned-${{ github.ref_name }}
+          path: artifacts
+      - name: Attach unsigned artifacts to draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --draft --title "$RELEASE_TAG (unsigned)" --notes 'Unsigned CI build for testing. Not notarized or approved for distribution. See CONTRIBUTING.md for signed release checks.'
+          gh release upload "$RELEASE_TAG" artifacts/* --clobber
