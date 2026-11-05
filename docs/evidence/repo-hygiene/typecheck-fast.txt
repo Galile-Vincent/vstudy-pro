@@ -1,0 +1,2 @@
+> vstudy-pro@ typecheck-fast /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
+> pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo

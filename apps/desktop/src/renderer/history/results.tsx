@@ -16,7 +16,7 @@ export function courseColor(id: string | null) {
   let hash = 0;
   for (const char of id ?? '')
     hash = (hash * 31 + char.charCodeAt(0)) | 0;
-  return ['var(--folder-sage)', 'var(--folder-blue)', 'var(--folder-amber)'][Math.abs(hash) % 3];
+  return ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'][Math.abs(hash) % 5];
 }
 type ContextValue = {
   items: ChatHit[];

@@ -6,7 +6,7 @@ The shell History view, Cmd/Ctrl+K finder, and scoped conversation picker use `H
 
 `main/db/chat-history.ts` owns search and metadata writes. Search uses quoted literal FTS5 trigram phrases, BM25 title weighting, and bound parameters. Queries shorter than three Unicode codepoints use escaped literal LIKE. Pagination orders by rank, updated time descending, and UUID descending. Recent browsing uses a zero rank. Concurrent writes can move results between pages. The client discards stale query responses and deduplicates appended pages.
 
-A conversation scope is document, course, or general. Document chats can also be filtered through their linked Moodle file's course. Term comes from cached course identity. Provider and model remain conversation metadata. Citation and attached-passage flags are derived from active message parts. The app does not persist arbitrary file attachments in chat messages. Course dots use a stable course-ID mapping to existing theme colors.
+A conversation scope is document, course, or general. Document chats can also be filtered through their linked Moodle file's course. Term comes from cached course identity. Provider and model remain conversation metadata. Citation and attached-passage flags are derived from active message parts. The app does not persist arbitrary file attachments in chat messages. Course dots use a stable course-ID mapping to chart theme tokens. Highlights use selection-color and message focus uses focus.
 
 The v18 migration lives in its own file. It rebuilds the conversation scope constraint and preserves messages, superseded branches, and parent links before backfilling FTS. It does not rewrite earlier migrations. Existing disk databases get a WAL checkpoint and mode-0600 `.before-v18.bak` before the transaction. Automatic downgrade is unsupported. Coordinate its version number when integrating other migration streams.
 
@@ -21,7 +21,7 @@ Run from `apps/desktop`:
 ```sh
 pnpm typecheck
 pnpm lint
-pnpm test --pool=forks --maxWorkers=2 src/main/db/chat-history.test.ts src/renderer/history/history.test.tsx
+pnpm exec vitest run --pool=forks --maxWorkers=2 src/main/db/chat-history.test.ts src/renderer/history/history.test.tsx
 pnpm build
 node e2e/chat-history.mjs
 ```

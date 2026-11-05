@@ -381,13 +381,13 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
 }
 
 .provider-status-dot.ready {
-  background: var(--folder-sage, oklch(.53 .13 145));
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--folder-sage, oklch(.53 .13 145)) 22%, transparent);
+  background: var(--folder-sage);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--folder-sage) 22%, transparent);
 }
 
 .provider-status-dot.error {
-  background: var(--danger, oklch(.46 .15 25));
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--danger, oklch(.46 .15 25)) 22%, transparent);
+  background: var(--danger);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--danger) 22%, transparent);
 }
 
 .provider-status-dot.idle {

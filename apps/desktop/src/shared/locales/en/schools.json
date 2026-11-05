@@ -1,0 +1,21 @@
+{
+  "search_label": "School name, country, or Moodle URL",
+  "search_placeholder": "Search schools or paste your Moodle address",
+  "privacy_hint": "Search stays on this device. Choosing a school or checking a URL contacts that school and may download its logo. Requests appear in Settings > Privacy.",
+  "results": "Schools",
+  "connected": "Connected schools",
+  "recent": "Recent schools",
+  "directory": "School directory",
+  "result_count_one": "{{count}} school found",
+  "result_count_other": "{{count}} schools found",
+  "no_results": "No matching schools in the bundled directory. You can still connect using your school’s Moodle URL.",
+  "add_url": "Add by URL",
+  "multiple_accounts": "You can connect several schools and accounts. Existing connections stay signed in.",
+  "qr_unsupported": "QR sign-in is not available here. Enter your school’s Moodle address, then use your school account or single sign-on.",
+  "signup_disabled": "Use an existing school account. Self-registration is not available in VStudy. Contact your school if you need an account.",
+  "signup_browser": "Create your account on your school’s Moodle website, then return here to sign in.",
+  "unsupported_login": "This school uses an unsupported login method.",
+  "unsupported_login_next": "Ask your school administrator about Moodle mobile web service access.",
+  "https_required": "Use your school’s HTTPS Moodle address. Insecure HTTP sites are not supported.",
+  "network_request": "Moodle HTTPS request"
+}

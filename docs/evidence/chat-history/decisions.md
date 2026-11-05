@@ -11,3 +11,5 @@ The existing assistant-ui thread list primitives remain the list foundation. The
 The migration is additive and isolated in `chat-history-migration.ts`. Its v18 registration and backup hook are the integration points for stream E. The migration number must remain unique after integration.
 
 The implementation runs in-thread because this is an implementation delegate. No child agents or background servers were started. Vitest uses two fork workers and no watch mode.
+
+Main was merged after streams H, A, and B landed. The locale conflict keeps every history, schools, and themes namespace in each language and pseudo-localization. History now reads semantic theme tokens, including chart colors, selection highlights, and keyboard focus.

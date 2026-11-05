@@ -1,3 +1,4 @@
+/** Probe a user-selected HTTPS Moodle root without credentials. Validate public configuration before use. */
 import { z } from 'zod';
 import { getDomain } from 'tldts';
 import type { AuthPlan, MoodleSiteCheck } from '../../shared/moodle';
@@ -12,6 +13,9 @@ export const publicConfigSchema = z.object({
   enablewebservices:number.default(1),enablemobilewebservice:number.default(1),
   tool_mobile_disabledfeatures:z.string().optional(),version:z.union([z.string(),z.number()]).optional(),
   logourl:z.string().optional(),compactlogourl:z.string().optional(),
+  country:z.string().optional().transform(value => value && /^[a-z]{2}$/i.test(value) ? value.toUpperCase() : undefined),registerauth:z.string().default(''),
+  tool_mobile_qrcodetype:number.default(0),
+  forcedurlscheme:z.string().regex(/^[a-z][a-z0-9+.-]*$/i).optional(),
 });
 export type CheckedSite = MoodleSiteCheck & {config:z.infer<typeof publicConfigSchema>};
 export function authPlan(config: z.infer<typeof publicConfigSchema>): AuthPlan {
@@ -19,9 +23,10 @@ export function authPlan(config: z.infer<typeof publicConfigSchema>): AuthPlan {
   if (!config.enablewebservices) return {kind:'unavailable',reason:'webservices-disabled'};
   if (!config.enablemobilewebservice) return {kind:'unavailable',reason:'mobile-disabled'};
   if (config.version && Number(config.version) < 2018051700) return {kind:'unavailable',reason:'unsupported-version'};
+  if (![1,2,3].includes(config.typeoflogin)) return {kind:'unavailable',reason:'unsupported-login'};
   if (config.typeoflogin === 3) return {kind:'embedded',providers:config.identityproviders};
   if (config.typeoflogin === 2 || config.showloginform === 0) return {kind:'browser',providers:config.identityproviders};
-  return {kind:'password'};
+  return {kind:'password',...(config.identityproviders.length ? {providers:config.identityproviders} : {})};
 }
 export function sameSiteDomain(first: string, second: string): boolean {
   const a = new URL(first).hostname, b = new URL(second).hostname;

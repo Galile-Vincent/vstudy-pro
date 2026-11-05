@@ -1,0 +1,16 @@
+name: Bug report
+description: Report a reproducible problem.
+title: "fix: "
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include the app version, macOS version, and expected and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or screenshots
+      description: Remove tokens, personal documents, school details, and other private data.

@@ -1,0 +1,21 @@
+{
+  "search_label": "学校名、国、または Moodle URL",
+  "search_placeholder": "学校を検索するか Moodle のアドレスを貼り付け",
+  "privacy_hint": "検索はこの端末内で行います。学校の選択や URL の確認時に、その学校に接続し、ロゴをダウンロードする場合があります。接続履歴は「設定 > プライバシー」で確認できます。",
+  "results": "学校",
+  "connected": "接続済みの学校",
+  "recent": "最近利用した学校",
+  "directory": "学校一覧",
+  "result_count_one": "{{count}} 校が見つかりました",
+  "result_count_other": "{{count}} 校が見つかりました",
+  "no_results": "内蔵の一覧に一致する学校はありません。学校の Moodle URL を入力して接続できます。",
+  "add_url": "URL で追加",
+  "multiple_accounts": "複数の学校とアカウントに接続できます。既存の接続はログイン状態を維持します。",
+  "qr_unsupported": "ここでは QR コードでログインできません。学校の Moodle アドレスを入力し、学校のアカウントまたはシングルサインオンを使用してください。",
+  "signup_disabled": "既存の学校アカウントを使用してください。VStudy では新規登録できません。アカウントが必要な場合は学校にお問い合わせください。",
+  "signup_browser": "学校の Moodle サイトでアカウントを作成し、ここに戻ってログインしてください。",
+  "unsupported_login": "この学校のログイン方式には対応していません。",
+  "unsupported_login_next": "Moodle モバイルウェブサービスへのアクセスについて学校の管理者にお問い合わせください。",
+  "https_required": "学校の HTTPS Moodle アドレスを使用してください。暗号化されていない HTTP サイトには対応していません。",
+  "network_request": "Moodle HTTPS リクエスト"
+}

@@ -26,6 +26,7 @@
 - banner:
   - button "ライブラリの表示を切り替え" [expanded]
   - text: 履歴
+  - button "会話を探す": 会話を探す ⌘/Ctrl K
 - main:
   - heading "履歴" [level=1]
   - paragraph: すべてのチャットの質問、回答、アイデアを検索します。
@@ -51,6 +52,3 @@
       - mark: 学習
       - text: 😀 <img src=x>
     - button "その他のオプション"
-  - region "会話":
-    - button "履歴に戻る"
-    - status: 会話を読み込み中

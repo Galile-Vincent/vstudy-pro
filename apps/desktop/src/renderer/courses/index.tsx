@@ -969,6 +969,7 @@ export function Courses({
           </section>
         )}
         <ConnectDialog
+          accounts={overview?.accounts}
           open={connect}
           onOpenChange={setConnect}
           api={api}

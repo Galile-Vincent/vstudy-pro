@@ -64,10 +64,11 @@ try {
   await search.fill('nothing matches here');
   await page.getByText('No matching conversations',{exact:true}).waitFor();
   await page.screenshot({path:join(evidence,'history-no-results.png'),animations:'disabled'});
-  const documentConversation=await page.evaluate(async path=>{
-    const imported=await window.desktop.invoke('documents:importPaths',{paths:[path]});
-    const document=imported.find(r=>r.ok)?.document;
-    if(!document)throw Error('Fixture import failed');
+  await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
+  const importedDocument=await page.evaluate(()=>window.desktop.invoke('documents:import',{}));
+  assert.ok(importedDocument);
+  await page.waitForFunction(async id=>(await window.desktop.invoke('documents:get',{documentId:id}))?.status==='ready',importedDocument.id);
+  const documentConversation=await page.evaluate(async document=>{
     const c=await window.desktop.invoke('conversations:create',{documentId:document.id,providerId:'anthropic-api',modelId:'fake'});
     const requestId=window.crypto.randomUUID();
     await new Promise((resolve,reject)=>{
@@ -76,7 +77,7 @@ try {
     });
     window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace',documentId:document.id}));
     return c;
-  },resolve('e2e/fixtures/reading.md'));
+  },importedDocument);
   await page.reload();await page.getByRole('button',{name:'Conversations',exact:true}).click();
   await page.getByRole('dialog').getByRole('searchbox').fill('scoped history');
   await page.getByRole('dialog').locator('.history-match').first().click();
@@ -91,6 +92,9 @@ try {
     await page.reload();await page.getByRole('searchbox').fill('学習');await page.locator('[data-testid=history-result]').waitFor();
     await page.screenshot({path:join(evidence,'history-'+language+'.png'),animations:'disabled'});
   }
+  await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,themeId:'ocean',colorScheme:'dark'});});
+  await page.reload();await page.getByRole('searchbox').fill('学習');await page.locator('[data-testid=history-result]').waitFor();
+  await page.screenshot({path:join(evidence,'history-ocean-dark.png'),animations:'disabled'});
   const messages=await page.evaluate(id=>window.desktop.invoke('messages:list',{conversationId:id}),conversation.id);
   assert.equal(messages.length,2);
   assert.deepEqual(errors,[]);
