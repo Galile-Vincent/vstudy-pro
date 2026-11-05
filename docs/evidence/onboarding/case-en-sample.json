@@ -2,9 +2,9 @@
   {
     "language": "en",
     "goal": "sample",
-    "firstTaskMs": 3655,
-    "totalMs": 6548,
-    "privacyShownAtMs": 2098,
+    "firstTaskMs": 3300,
+    "totalMs": 6424,
+    "privacyShownAtMs": 1792,
     "schoolAuthentication": "not used",
     "ai": "local fake provider; question and chat-history search exercised",
     "screenshots": [
@@ -23,6 +23,7 @@
       "en-sample-walkthrough-agent.png",
       "en-sample-walkthrough-selection.png",
       "en-sample-walkthrough-history.png",
+      "en-sample-recorded-school.png",
       "en-sample-recorded-video.png",
       "en-sample-shortcuts.png"
     ],

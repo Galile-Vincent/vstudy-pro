@@ -151,11 +151,23 @@ for (const [language, goal] of matrix) {
     }
     if (goal === 'sample') await audit('walkthroughs');
     if (language === 'en' && goal === 'sample') {
-      await help.locator('.recorded-example > summary').click();
-      const playback = await help.locator('video').evaluate(async video => { await video.play(); await new Promise(resolve => video.addEventListener('timeupdate', resolve, { once: true })); video.pause(); return { width: video.videoWidth, time: video.currentTime, tracks: video.textTracks.length, cues: video.textTracks[0]?.cues?.length ?? 0 }; });
-      assert.equal(playback.width, 960); assert.ok(playback.time > 0); assert.equal(playback.tracks, 3); assert.ok(playback.cues >= 3, 'subtitle file loads');
-      await help.locator('video').scrollIntoViewIfNeeded();
-      await capture('recorded-video');
+      for (const lesson of ['school', 'history']) {
+        await help.getByRole('button', { name: copy[`lesson_${lesson}`], exact: true }).click();
+        await help.locator('.recorded-example > summary').click();
+        await help.locator('video').scrollIntoViewIfNeeded();
+        const playback = await help.locator('video').evaluate(async video => {
+          await video.play(); await new Promise(resolve => video.addEventListener('timeupdate', resolve, { once: true })); video.pause();
+          const canvas = window.document.createElement('canvas'); canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+          const context = canvas.getContext('2d'); context.drawImage(video, 0, 0);
+          const colors = new Set();
+          for (let y = 40; y < 650; y += 30) for (let x = 20; x < 940; x += 30) colors.add(context.getImageData(x, y, 1, 1).data.join(','));
+          return { width: video.videoWidth, duration: video.duration, time: video.currentTime, tracks: video.textTracks.length, cues: video.textTracks[0]?.cues?.length ?? 0, colors: colors.size };
+        });
+        assert.equal(playback.width, 960); assert.ok(playback.time > 0); assert.equal(playback.tracks, 3);
+        assert.ok(playback.cues >= 3, 'subtitle file loads'); assert.ok(playback.colors > 8, 'recorded app pixels are visible');
+        assert.ok(playback.duration >= (lesson === 'school' ? 19 : 14), 'last caption retains its duration');
+        await capture(lesson === 'school' ? 'recorded-school' : 'recorded-video');
+      }
     }
     await help.getByRole('button', { name: common.close, exact: true }).click();
     await page.getByRole('button', { name: copy.help, exact: true }).click(); await page.getByRole('menuitem', { name: copy.help_shortcuts, exact: true }).click(); await capture('shortcuts');

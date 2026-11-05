@@ -44,7 +44,6 @@ try {
       const chunks = [];
       recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
       const finished = new Promise((resolve, reject) => { recorder.onstop = resolve; recorder.onerror = reject; });
-      recorder.start();
       for (const image of images) {
         const bitmap = await window.createImageBitmap(new window.Blob([new Uint8Array(image.data)], { type: 'image/png' }));
         context.fillStyle = '#ffffff'; context.fillRect(0, 0, canvas.width, canvas.height);
@@ -55,9 +54,14 @@ try {
           if (context.measureText(`${line} ${word}`).width > 910) { context.fillText(line, 24, y); y += 25; line = word; }
           else line = line ? `${line} ${word}` : word;
         }
-        context.fillText(line, 24, y); track.requestFrame();
+        context.fillText(line, 24, y);
+        if (recorder.state === 'inactive') recorder.start();
+        track.requestFrame();
         await new Promise(resolve => window.setTimeout(resolve, 5000));
       }
+      // A changed final frame preserves the last caption's full duration in WebM.
+      context.fillRect(0, canvas.height - 1, 1, 1);
+      track.requestFrame(); await new Promise(resolve => window.setTimeout(resolve, 100));
       recorder.stop(); await finished; track.stop();
       return Array.from(new Uint8Array(await new window.Blob(chunks).arrayBuffer()));
     }, images);
