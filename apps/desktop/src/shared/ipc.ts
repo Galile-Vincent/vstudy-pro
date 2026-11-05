@@ -1,5 +1,6 @@
 import { moodlePanelSchema, moodleSiteCheckSchema, moodleSiteUrlSchema, moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
 import { aiParseContract } from './ai-parse';
+import { moodleWebviewContract } from './moodle-webview';
 import { statusSchema } from "./status";
 import { folderIdSchema, libraryContract } from "./library";
 import { z } from "zod";
@@ -27,6 +28,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
   ...aiParseContract,
+  ...moodleWebviewContract,
   [moodleChannels.schools]: {request:empty,response:z.array(moodleSchoolSchema)},
   [moodleChannels.checkSite]: {request:z.object({url:z.string().min(1).max(2048)}).strict(),response:moodleSiteCheckSchema},
   [moodleChannels.preflight]: {request:z.object({}).strict(),response:z.object({ready:z.boolean()}).strict()},

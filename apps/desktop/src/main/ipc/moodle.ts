@@ -14,11 +14,24 @@ import { MoodleSso } from '../moodle/sso';
 import { schools } from '../moodle/schools';
 import { importMoodleFile } from '../moodle/files';
 import { startReminders, calendarText } from '../moodle/reminders';
+import { MoodleWebviews } from '../moodle/webview';
+import { tokensSchema } from '../moodle/auth';
+import { moodleSecretId } from '../services/secrets';
+import { moodleWebviewContract } from '../../shared/moodle-webview';
 
 export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, secrets: SecretStore, implemented: Set<IpcChannel>, documents: Pick<DocumentService,'importPath'|'get'>, restoreMainWindow: () => void = () => {}) {
   const owners=new Set<Electron.WebContents>();
   const repository = new MoodleRepository(store.db);
   const sso = new MoodleSso(restoreMainWindow);
+  const webviews = new MoodleWebviews({
+    account:id => repository.account(id), file:id => repository.file(id), documents,
+    credentials:async id => {
+      if (repository.account(id).status !== 'connected') throw new Error('Moodle session expired');
+      const raw = await secrets.getInMainOnly(moodleSecretId(id));
+      if (!raw) throw new Error('Moodle session expired');
+      return tokensSchema.parse(JSON.parse(raw));
+    },
+  });
   const service = new MoodleService(repository,secrets,sso,undefined,() => { const language = store.settings.get().language; return language === 'auto' ? app.getLocale() : language === 'zh-Hant' ? 'zh-tw' : language; },event => {for(const owner of owners)if(!owner.isDestroyed())owner.send(moodleProgressChannel,moodleProgressSchema.parse(event));});
   const stopReminders = startReminders(repository,(title,body) => {
     if (!Notification.isSupported()) return false;
@@ -26,6 +39,11 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     return true;
   });
   for (const channel of Object.values(moodleChannels)) implemented.add(channel);
+  for (const channel of Object.keys(moodleWebviewContract) as (keyof typeof moodleWebviewContract)[]) implemented.add(channel);
+  registrar.handle('moodle:webview-open',({accountId,target},event) => webviews.open(event.sender,accountId,target));
+  registrar.handle('moodle:webview-state',({id},event) => webviews.state(event.sender,id));
+  registrar.handle('moodle:webview-action',({id,action},event) => webviews.action(event.sender,id,action));
+  registrar.handle('moodle:webview-layout',({id,bounds,theme,visible},event) => {webviews.layout(event.sender,id,bounds,theme,visible);return {ok:true};});
   registrar.handle(moodleChannels.schools,() => schools);
   registrar.handle(moodleChannels.checkSite,({url}) => service.checkSite(url));
   registrar.handle(moodleChannels.preflight,async () => {
@@ -36,7 +54,7 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   registrar.handle(moodleChannels.connect,input => service.connect(input));
   registrar.handle(moodleChannels.ssoState,({siteUrl}) => sso.state(siteUrl));
   registrar.handle(moodleChannels.ssoCancel,({siteUrl}) => {sso.cancel(siteUrl);return {ok:true};});
-  registrar.handle(moodleChannels.disconnect,async ({accountId}) => { await service.disconnect(accountId); return {ok:true}; });
+  registrar.handle(moodleChannels.disconnect,async ({accountId}) => { await webviews.disconnect(accountId); await service.disconnect(accountId); return {ok:true}; });
   registrar.handle(moodleChannels.overview,({accountId},event) => {owners.add(event.sender);return service.overview(accountId);});
   registrar.handle(moodleChannels.sync,async ({accountId}) => {
     const accounts = accountId ? [repository.account(accountId)] : repository.accounts();
@@ -63,5 +81,5 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     await exportText(text,result.filePath);
     return {saved:true};
   });
-  return async () => { stopReminders(); sso.dispose(); await service.dispose(); };
+  return async () => { stopReminders(); await webviews.dispose(); sso.dispose(); await service.dispose(); };
 }

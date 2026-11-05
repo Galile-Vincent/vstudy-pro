@@ -16,6 +16,22 @@ export interface WebviewSessionPort {
   exchange(key:string,signal:AbortSignal): Promise<void>;
   clear(): Promise<void>;
 }
+async function autologinKey(response:Response):Promise<string> {
+  if (!response.body) throw new WebviewSessionError('unavailable');
+  const reader = response.body.getReader(), chunks:Uint8Array[] = [];
+  let bytes = 0;
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      bytes += chunk.value.byteLength;
+      if (bytes > 64 * 1024) throw new WebviewSessionError('unavailable');
+      chunks.push(chunk.value);
+    }
+  } finally {await reader.cancel().catch(() => undefined);reader.releaseLock();}
+  try {return z.object({key:z.string().min(1).max(512).regex(/^[\w-]+$/)}).parse(JSON.parse(Buffer.concat(chunks).toString('utf8'))).key;}
+  catch {throw new WebviewSessionError('unavailable');}
+}
 export class MoodleWebviewSession {
   phase: WebviewSessionPhase = 'idle';
   get retryAt() { return this.budget.retryAt; }
@@ -46,19 +62,18 @@ export class MoodleWebviewSession {
         body:new URLSearchParams({wstoken:credentials.token,wsfunction:'tool_mobile_get_autologin_key',moodlewsrestformat:'json',privatetoken:credentials.privateToken}).toString(),
       });
       if (!response.ok) { await response.body?.cancel(); throw new WebviewSessionError('session-expired'); }
-      const data = z.object({key:z.string().min(1).max(512).regex(/^[\w-]+$/)}).safeParse(await response.json());
-      if (!data.success) throw new WebviewSessionError('unavailable',this.retryAt);
+      const key = await autologinKey(response);
       this.active();
       await this.port.clear();
       this.active();
-      await this.port.exchange(data.data.key,signal);
+      await this.port.exchange(key,signal);
       this.active();
       if (!await this.port.hasCookie()) throw new WebviewSessionError('session-expired',this.retryAt);
       this.active();
       this.phase = 'ready';
     } catch (error) {
       if (!this.abort.signal.aborted) this.phase = 'expired';
-      if (error instanceof WebviewSessionError) throw error;
+      if (error instanceof WebviewSessionError) throw new WebviewSessionError(error.code,error.retryAt ?? (this.retryAt || null));
       throw new WebviewSessionError(error instanceof Error && /timeout/i.test(error.name) ? 'timeout' : 'offline',this.retryAt || null);
     }
   }

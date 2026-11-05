@@ -9,6 +9,7 @@ import { createIpcRegistrar } from './register';
 import { registerMoodleIpc } from './moodle';
 import { moodleChannels } from '../../shared/moodle';
 import { moodleProgressSchema, type IpcChannel } from '../../shared/ipc';
+import { moodleWebviewContract } from '../../shared/moodle-webview';
 
 vi.mock('electron',() => ({dialog:{showSaveDialog:vi.fn()},Notification:{isSupported:() => false}}));
 it('registers every Moodle channel behind strict requests and trusted main-frame senders',async () => {
@@ -23,11 +24,13 @@ it('registers every Moodle channel behind strict requests and trusted main-frame
   const invoke = async (channel:string,payload:unknown,event = {sender,senderFrame:frame}) => handlers.get(channel)!(event as unknown as IpcMainInvokeEvent,payload);
   const log = vi.spyOn(console,'error').mockImplementation(() => undefined);
   try {
-    expect([...handlers.keys()].sort()).toEqual(Object.values(moodleChannels).sort());
+    expect([...handlers.keys()].sort()).toEqual([...Object.values(moodleChannels),...Object.keys(moodleWebviewContract)].sort());
     expect(await invoke('moodle:schools',{})).toMatchObject([{id:'cycu',login:'sso-launch'}]);
     expect(await invoke('moodle:overview',{})).toEqual({accounts:[],courses:[],summaries:[],upcoming:[],otherNotifications:[],unreadNotifications:0});
     await expect(invoke('moodle:schools',{}, {sender:{id:2,mainFrame:frame},senderFrame:frame})).rejects.toThrow('Untrusted');
     await expect(invoke('moodle:overview',{}, {sender,senderFrame:{}})).rejects.toThrow('Untrusted');
+    await expect(invoke('moodle:webview-open',{}, {sender,senderFrame:{}})).rejects.toThrow('Untrusted');
+    await expect(invoke('moodle:webview-state',{id:'11111111-1111-4111-a111-111111111111'}, {sender:{id:2,mainFrame:frame},senderFrame:frame})).rejects.toThrow('Untrusted');
     await expect(invoke('moodle:overview',{token:'sensitive-token'})).rejects.toThrow('VSTUDY_STATUS');
     await expect(invoke('moodle:connect',{schoolId:'cycu',password:'sensitive-password'})).rejects.toThrow('VSTUDY_STATUS');
     expect(log).not.toHaveBeenCalled();

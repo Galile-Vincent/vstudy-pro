@@ -1,3 +1,4 @@
+import { useMoodleWebview } from './webview';
 import {
   createElement,
   useEffect,
@@ -92,7 +93,7 @@ export function courseHtmlPreview(html: string) {
     .forEach((node) => node.remove());
   return document.body.textContent?.replace(/\s+/g, " ").trim() || "";
 }
-export function SafeCourseHtml({ html }: { html: string }) {
+export function SafeCourseHtml({ html, onLink }: { html: string; onLink?: ((url:string)=>void) | undefined }) {
   const [failed, setFailed] = useState(false);
   const document = new DOMParser().parseFromString(html, "text/html");
   function render(node: Node, key: number): ReactNode {
@@ -108,7 +109,7 @@ export function SafeCourseHtml({ html }: { html: string }) {
             href={href}
             onClick={(event) => {
               event.preventDefault();
-              openCourseUrl(href, () => setFailed(true));
+              if (onLink) onLink(href); else openCourseUrl(href, () => setFailed(true));
             }}
           >
             {children}
@@ -238,12 +239,13 @@ function WeeklySection({
 export function CourseContent({
   detail,
   openFile,
-  onError,
 }: {
   detail: MoodleCourseDetail;
   openFile: (id: string) => Promise<void>;
   onError: () => void;
 }) {
+  const openMoodle = useMoodleWebview();
+  const original = (url:string) => {setSelected(undefined);openMoodle(detail.course.accountId,{kind:"page",url});};
   const [selected, setSelected] = useState<MoodleModule>();
   const trigger = useRef<HTMLElement | null>(null);
   const [opening, setOpening] = useState(false);
@@ -287,7 +289,7 @@ export function CourseContent({
           {selected && (
             <div className="moodle-sheet-body">
               {selected.descriptionHtml && (
-                <SafeCourseHtml html={selected.descriptionHtml} />
+                <SafeCourseHtml html={selected.descriptionHtml} onLink={original} />
               )}
               {selected.dueAt && (
                 <p>
@@ -329,14 +331,10 @@ export function CourseContent({
               {selected.url && (
                 <Button
                   variant="outline"
-                  onClick={() => openCourseUrl(selected.url!, onError)}
+                  onClick={() => original(selected.url!)}
                 >
                   <Link />
-                  {tr(
-                    selected.kind === "url"
-                      ? "moodle:open_link"
-                      : "moodle:open_moodle",
-                  )}
+                  {tr('webview:original')}
                 </Button>
               )}
               {[
@@ -359,7 +357,9 @@ export function CourseContent({
     </>
   );
 }
-export function Announcements({ items }: { items: MoodleAnnouncement[] }) {
+export function Announcements({ items, accountId }: { items: MoodleAnnouncement[]; accountId?:string }) {
+  const openMoodle = useMoodleWebview();
+  const original = (url:string) => {setSelected(undefined);if (accountId) openMoodle(accountId,{kind:"page",url});};
   const [selected, setSelected] = useState<MoodleAnnouncement>();
   const trigger = useRef<HTMLElement | null>(null);
   return (
@@ -410,7 +410,8 @@ export function Announcements({ items }: { items: MoodleAnnouncement[] }) {
           </SheetHeader>
           {selected && (
             <div className="moodle-sheet-body">
-              <SafeCourseHtml html={selected.bodyHtml} />
+              <SafeCourseHtml html={selected.bodyHtml} onLink={accountId ? original : undefined} />
+              {accountId && selected.url && <Button variant="outline" onClick={() => original(selected.url!)}><Link />{tr('webview:original')}</Button>}
             </div>
           )}
         </SheetContent>
