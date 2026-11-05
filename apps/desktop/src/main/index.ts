@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import { reconcileDownloads } from "./storage/reconcile";
+import { confirmRestoreStartup, rollbackRestoreStartup } from "./storage/restore-startup";
 import { recoverRestore } from "./storage/backup";
 import { applyNativeTheme, nativeBackground } from './theme';
 import { initializeMoodleProtocol } from './moodle/sso-protocol';
@@ -67,7 +68,7 @@ const entryUrl =
   developmentUrl ??
   (app.isPackaged ? "vstudy://app/index.html" : pathToFileURL(join(__dirname, "../renderer/index.html")).href);
 
-function createWindow(): void {
+async function createWindow(): Promise<void> {
   const appearance = store!.settings.get();
   applyNativeTheme(appearance);
   const current = new BrowserWindow({
@@ -106,13 +107,23 @@ function createWindow(): void {
     if (window === current) window = null;
   });
   if (smokeRoot) current.webContents.once('did-finish-load', () => { void runPackagedSmoke(current, realpathSync(smokeRoot)); });
-  void current.loadURL(entryUrl);
+  await new Promise<void>((resolve, reject) => {
+    const loaded = () => { current.webContents.removeListener('did-fail-load', failed); resolve(); };
+    const failed = (_event: Electron.Event, code: number, description: string, _url: string, mainFrame: boolean) => {
+      if (mainFrame && code !== -3) { current.webContents.removeListener('did-finish-load', loaded); reject(new Error(description)); }
+    };
+    current.webContents.once('did-finish-load', loaded);
+    current.webContents.on('did-fail-load', failed);
+    // A user reload can cancel the initial navigation before its load promise settles.
+    void current.loadURL(entryUrl).catch(error => { if (error.code !== 'ERR_ABORTED') reject(error); });
+  });
 }
 
 const ownsApplication = acquireOwnership(app, () => window);
 if (ownsApplication) void app.whenReady().then(async () => {
   const userData = app.getPath("userData");
   mkdirSync(userData, { recursive: true });
+  await rollbackRestoreStartup(userData);
   await recoverRestore(userData);
   await reconcileDownloads(join(userData,"moodle-downloads"));
   store = openStore(join(userData, "vstudy.sqlite"));
@@ -185,11 +196,18 @@ if (ownsApplication) void app.whenReady().then(async () => {
     return { ok: true };
   });
   nativeTheme.on("updated", () => { if (store) applyNativeTheme(store.settings.get()); });
-  createWindow();
+  await createWindow();
+  await confirmRestoreStartup(userData);
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) void createWindow();
   });
 }).catch(async error => {
+  log({phase:"startup-failed",code:(error as NodeJS.ErrnoException).code ?? error.name});
+  await disposeIpc?.();
+  store?.close();store=undefined;
+  if(await rollbackRestoreStartup(app.getPath("userData"))) {
+    app.relaunch();app.exit(1);return;
+  }
   const code=(error as NodeJS.ErrnoException).code;
   log({phase:'startup-storage-failed',code:code ?? 'STORAGE'});
   const key=code==='ENOSPC' ? 'disk_full' : code==='EACCES' || code==='EPERM' ? 'permission' : 'integrity_failed';

@@ -18,14 +18,25 @@ import { MoodleRepository } from "../moodle/repository";
 /** Persist student-owned planning data and apply each approved action idempotently. */
 export class PlannerRepository {
   constructor(private readonly db: DatabaseSync, private readonly clock: () => number = Date.now) {}
-  snapshot(): PlannerSnapshot {
+  readonly invalidRows = new Set<string>();
+  private rows<T>(table: string, order: string, parse: (row: Record<string, unknown>) => T, strict: boolean): T[] {
+    return this.db.prepare(`SELECT * FROM ${table} ORDER BY ${order}`).all().flatMap(row => {
+      try { return [parse(row)]; }
+      catch (error) {
+        if (strict) throw error;
+        this.invalidRows.add(`${table}:${row.id}`);
+        return [];
+      }
+    });
+  }
+  snapshot(strict = false): PlannerSnapshot {
     return {
-      tasks: this.db.prepare("SELECT * FROM planner_tasks ORDER BY dueAt,id").all().map(row => taskSchema.parse(row)),
-      exams: this.db.prepare("SELECT * FROM planner_exams ORDER BY date,id").all().map(row => examSchema.parse({ ...row, scopeTopics: JSON.parse(String(row.scopeTopics)), materialIds: JSON.parse(String(row.materialIds)) })),
-      goals: this.db.prepare("SELECT * FROM planner_goals ORDER BY id").all().map(row => goalSchema.parse(row)),
-      plans: this.db.prepare("SELECT * FROM planner_plans ORDER BY createdAt,id").all().map(row => studyPlanSchema.parse({ ...row, assumptions: JSON.parse(String(row.assumptions)) })),
-      blocks: this.db.prepare("SELECT * FROM planner_blocks ORDER BY startsAt,id").all().map(({ targetKind, targetId, ...row }) => studyBlockSchema.parse({ ...row, target: targetKind ? { kind: targetKind, id: targetId } : null })),
-      reminders: this.db.prepare("SELECT * FROM planner_reminders ORDER BY remindAt,id").all().map(({ targetKind, targetId, fired, ...row }) => plannerReminderSchema.parse({ ...row, target: { kind: targetKind, id: targetId }, fired: fired === 1 })),
+      tasks: this.rows("planner_tasks", "dueAt,id", row => taskSchema.parse(row), strict),
+      exams: this.rows("planner_exams", "date,id", row => examSchema.parse({ ...row, scopeTopics: JSON.parse(String(row.scopeTopics)), materialIds: JSON.parse(String(row.materialIds)) }), strict),
+      goals: this.rows("planner_goals", "id", row => goalSchema.parse(row), strict),
+      plans: this.rows("planner_plans", "createdAt,id", row => studyPlanSchema.parse({ ...row, assumptions: JSON.parse(String(row.assumptions)) }), strict),
+      blocks: this.rows("planner_blocks", "startsAt,id", ({ targetKind, targetId, ...row }) => studyBlockSchema.parse({ ...row, target: targetKind ? { kind: targetKind, id: targetId } : null }), strict),
+      reminders: this.rows("planner_reminders", "remindAt,id", ({ targetKind, targetId, fired, ...row }) => plannerReminderSchema.parse({ ...row, target: { kind: targetKind, id: targetId }, fired: fired === 1 }), strict),
     };
   }
   context(courseId?: string): PlanningContext {

@@ -105,3 +105,12 @@ it("backs up v20 with private permissions and persists planner data after reopen
   expect(new PlannerRepository(reopened.db).snapshot().tasks[0]?.title).toBe("Write report");
   expect(reopened.integrityCheck()).toEqual([{ integrity_check: "ok" }]);
 });
+
+it('skips a corrupt planner row while preserving healthy tasks and reminders',()=>{
+  const {repo,store}=setup();
+  const task=repo.quickAdd(input);
+  store.db.prepare('INSERT INTO planner_goals VALUES (?,?,?,?,?)').run(id(90),'',null,null,'active');
+  expect(repo.snapshot().tasks).toEqual([task]);
+  expect(repo.snapshot().goals).toEqual([]);
+  expect(()=>firePlannerReminders(repo,()=>true)).not.toThrow();
+});

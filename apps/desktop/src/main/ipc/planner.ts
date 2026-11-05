@@ -13,6 +13,8 @@ import type { createIpcRegistrar } from "./register";
 import { PlannerRepository } from "../planner/repository";
 import { plannerCalendar } from "../planner/calendar";
 import { firePlannerReminders } from "../planner/reminders";
+import { showAttachedMessage } from "../dialogs";
+import { tr } from "../i18n";
 import { exportText } from "../services/export-file";
 
 /** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
@@ -30,6 +32,8 @@ export function registerPlannerIpc(registrar: ReturnType<typeof createIpcRegistr
     await exportText(text, result.filePath);
     return { saved: true };
   });
+  repository.snapshot();
+  if (repository.invalidRows.size) void showAttachedMessage({type: "warning", message: tr("planner:corrupt_records"), buttons: [tr("common:close")]});
   const tick = () => firePlannerReminders(repository, (title, body) => {
     if (!Notification.isSupported()) return false;
     new Notification({ title, body }).show();

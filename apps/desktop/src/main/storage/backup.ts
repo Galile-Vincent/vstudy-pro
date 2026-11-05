@@ -11,6 +11,7 @@ import { join, basename, dirname, resolve, sep } from 'node:path';
 import { z } from 'zod';
 import type { Store } from '../db';
 import { openStore } from '../db';
+import { PlannerRepository } from '../planner/repository';
 import { validateRestoreSchema } from './restore-schema';
 import { containedPath } from '../services/file-paths';
 import { atomicWrite, syncDirectory } from './atomic';
@@ -78,6 +79,7 @@ export async function stageRestore(root:string,source:string):Promise<void> {
     try {
       if(store.db.prepare('PRAGMA integrity_check').get()?.integrity_check!=='ok' || store.db.prepare('PRAGMA foreign_key_check').all().length)throw new Error('storage.integrity_failed');
       store.settings.get();
+      new PlannerRepository(store.db).snapshot(true);
       for(const row of store.db.prepare('SELECT id,sourceHash,sourcePath,markdownPath,status,activeVersion FROM documents').all()){
         const hash=String(row.sourceHash),name=basename(String(row.sourcePath)),original=`library/${hash}/${name}`;
         if(!/^[a-f0-9]{64}$/.test(hash) || !/^source\.[a-z0-9]{1,12}$/.test(name) || entries.get(original)?.sha256!==hash)throw new Error('storage.invalid_backup');
@@ -111,5 +113,5 @@ export async function recoverRestore(root:string):Promise<boolean> {
       await syncDirectory(root);await syncDirectory(stage);await syncDirectory(previous);
     }
   }
-  await rm(journal);await syncDirectory(root);return true;
+  await rename(journal,join(root,'restore-startup.json'));await syncDirectory(root);return true;
 }

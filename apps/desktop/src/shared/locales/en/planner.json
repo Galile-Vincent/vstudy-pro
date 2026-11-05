@@ -85,5 +85,6 @@
   "title_field": "Title",
   "status_field": "Status",
   "planner_unavailable": "Your planner could not be loaded. Refresh to try again.",
-  "agent_scope": "Proposals can change this course only. Saved tasks, exams, and study times across courses help avoid conflicts. Changes always need your approval."
+  "agent_scope": "Proposals can change this course only. Saved tasks, exams, and study times across courses help avoid conflicts. Changes always need your approval.",
+  "corrupt_records": "Some planner records could not be read and were skipped. Your other plans are available. Keep a backup before repairing the database."
 }
