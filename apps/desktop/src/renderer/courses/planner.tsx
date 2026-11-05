@@ -5,7 +5,7 @@ import { CalendarDays, Check, Sparkles } from "lucide-react";
 import type { MoodleCourse, MoodleDeadline } from "../../shared/moodle";
 import { emptyPlanner, type PlannerAction } from "../../shared/planner";
 import { draftStudyPlan } from "../../shared/planner-draft";
-import { localDay } from "../../shared/planner-policy";
+import { localDay, plannerTaskDone } from "../../shared/planner-policy";
 import { i18n, tr } from "../../shared/i18n";
 import { displayTitle } from "../../shared/moodle-course-display";
 import { plannerApi, type PlannerApi } from "./planner-api";
@@ -40,7 +40,7 @@ export function Planner({ courses, deadlines, api = plannerApi, clock = Date.now
   }, [api, clock]);
   const today = localDay(now, zone);
   const dayKeys = Array.from({ length: 8 }, (_, index) => localDay(now + index * 86400000, zone)).filter((day, index, all) => all.indexOf(day) === index).slice(0, 7);
-  const tasks = snapshot.tasks.filter(t => t.status !== "done" && (view === "week" || !t.dueAt || localDay(t.dueAt, zone) <= today || snapshot.blocks.some(b => b.target?.kind === "task" && b.target.id === t.id && localDay(b.startsAt, zone) === today)));
+  const tasks = snapshot.tasks.filter(t => !plannerTaskDone(t, deadlines) && (view === "week" || !t.dueAt || localDay(t.dueAt, zone) <= today || snapshot.blocks.some(b => b.target?.kind === "task" && b.target.id === t.id && localDay(b.startsAt, zone) === today)));
   const sourceDeadlines = deadlines.filter(d => !d.submitted && !d.orphaned && !snapshot.tasks.some(t => t.deadlineId === d.id) && localDay(d.dueAt, zone) <= (view === "today" ? today : dayKeys.at(-1)!));
   const exams = snapshot.exams.filter(e => Date.parse(e.date) >= now).sort((a, b) => a.date.localeCompare(b.date));
   const courseTitle = (id: string | null) => { const c = courses.find(c => c.id === id); return c ? displayTitle(c.identity, i18n.resolvedLanguage || "en", c.fullName) : tr("planner:no_course"); };
@@ -106,6 +106,7 @@ export function Planner({ courses, deadlines, api = plannerApi, clock = Date.now
             </div>
           </li>)}</ul>
         </section>
+        {snapshot.tasks.some(t => plannerTaskDone(t, deadlines)) && <section className="planner-panel" data-completed-tasks><h2>{tr("planner:status_done")}</h2><ul>{snapshot.tasks.filter(t => plannerTaskDone(t, deadlines)).map(t => <li key={t.id}>{t.title}</li>)}</ul></section>}
         <section className="planner-panel"><h2>{tr("planner:source_deadlines")}</h2><ul className="planner-task-list">{sourceDeadlines.map(d => <li key={d.id}><div>
           <strong>{d.title}</strong><span>{courseTitle(d.courseId)}</span><time dateTime={d.dueAt} data-overdue={Date.parse(d.dueAt) < now}>{plannerDate(d.dueAt)}</time>
           {Date.parse(d.dueAt) < now && <span>{tr("planner:overdue")}</span>}{d.submitted === null && <span>{tr("planner:submitted_unknown")}</span>}

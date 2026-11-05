@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 /** Deterministic planning draft. It fills explicit local study windows and reports work that capacity cannot cover. */
-import { assertPlannerAction, localDay, type PlanningContext } from "./planner-policy";
+import { assertPlannerAction, localDay, plannerTaskDone, targetInfo, type PlanningContext } from "./planner-policy";
 import type { PlannerAction, PlannerTarget } from "./planner";
 
 type PlanAction = Extract<PlannerAction, { type: "make-study-plan" | "plan-today" }>;
@@ -23,7 +23,7 @@ export function draftStudyPlan(context: PlanningContext, options: DraftOptions) 
   const horizon = context.now + Math.min(14, options.days) * 86400000;
   const linked = new Set(context.snapshot.tasks.map(t => t.deadlineId));
   const work = [
-    ...context.snapshot.tasks.filter(t => t.status !== "done").map(t => ({ title: t.title, courseId: t.courseId, dueAt: t.dueAt, minutes: t.estimateMinutes, target: { kind: "task", id: t.id } as PlannerTarget })),
+    ...context.snapshot.tasks.filter(t => !plannerTaskDone(t, context.deadlines)).map(t => ({ title: t.title, courseId: t.courseId, dueAt: targetInfo({kind: "task", id: t.id}, context).dueAt, minutes: t.estimateMinutes, target: { kind: "task", id: t.id } as PlannerTarget })),
     ...context.snapshot.exams.map(e => ({ title: e.title, courseId: e.courseId, dueAt: e.date, minutes: Math.max(90, e.scopeTopics.length * 45), target: { kind: "exam", id: e.id } as PlannerTarget })),
     ...context.deadlines.filter(d => !d.submitted && !d.orphaned && !linked.has(d.id)).map(d => ({ title: d.title, courseId: d.courseId, dueAt: d.dueAt, minutes: d.kind === "quiz" ? 90 : 60, target: { kind: "deadline", id: d.id } as PlannerTarget })),
   ].filter(w => !w.dueAt || Date.parse(w.dueAt) <= context.now + 14 * 86400000)
