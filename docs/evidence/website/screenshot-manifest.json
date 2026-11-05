@@ -1,0 +1,590 @@
+[
+  {
+    "path": "docs/evidence/website/screenshots/root-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/root-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/root-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/root-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-ai-providers-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-ai-providers-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-ai-providers-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-ai-providers-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-architecture-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-architecture-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-architecture-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-architecture-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-chat-history-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-chat-history-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-chat-history-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-chat-history-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-connect-your-school-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-connect-your-school-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-connect-your-school-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-connect-your-school-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-courses-and-deadlines-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-courses-and-deadlines-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-courses-and-deadlines-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-courses-and-deadlines-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-data-and-storage-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-data-and-storage-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-data-and-storage-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-data-and-storage-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-getting-started-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-getting-started-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-getting-started-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-getting-started-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-keyboard-shortcuts-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-keyboard-shortcuts-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-keyboard-shortcuts-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-keyboard-shortcuts-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-moodle-pages-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-moodle-pages-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-moodle-pages-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-moodle-pages-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-privacy-and-network-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-privacy-and-network-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-privacy-and-network-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-privacy-and-network-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-reading-documents-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-reading-documents-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-reading-documents-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-reading-documents-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-study-planner-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-study-planner-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-study-planner-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-study-planner-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-themes-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-themes-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-themes-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-themes-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-troubleshooting-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-troubleshooting-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-troubleshooting-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-troubleshooting-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-ai-providers-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-ai-providers-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-ai-providers-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-ai-providers-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-architecture-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-architecture-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-architecture-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-architecture-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-chat-history-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-chat-history-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-chat-history-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-chat-history-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-connect-your-school-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-connect-your-school-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-connect-your-school-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-connect-your-school-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-courses-and-deadlines-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-courses-and-deadlines-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-courses-and-deadlines-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-courses-and-deadlines-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-data-and-storage-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-data-and-storage-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-data-and-storage-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-data-and-storage-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-getting-started-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-getting-started-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-getting-started-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-getting-started-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-keyboard-shortcuts-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-keyboard-shortcuts-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-keyboard-shortcuts-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-keyboard-shortcuts-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-moodle-pages-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-moodle-pages-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-moodle-pages-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-moodle-pages-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-privacy-and-network-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-privacy-and-network-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-privacy-and-network-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-privacy-and-network-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-reading-documents-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-reading-documents-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-reading-documents-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-reading-documents-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-study-planner-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-study-planner-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-study-planner-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-study-planner-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-themes-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-themes-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-themes-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-themes-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-troubleshooting-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-troubleshooting-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-troubleshooting-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-troubleshooting-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-ai-providers-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-ai-providers-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-ai-providers-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-ai-providers-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-architecture-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-architecture-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-architecture-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-architecture-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-chat-history-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-chat-history-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-chat-history-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-chat-history-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-connect-your-school-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-connect-your-school-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-connect-your-school-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-connect-your-school-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-courses-and-deadlines-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-courses-and-deadlines-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-courses-and-deadlines-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-courses-and-deadlines-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-data-and-storage-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-data-and-storage-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-data-and-storage-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-data-and-storage-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-getting-started-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-getting-started-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-getting-started-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-getting-started-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-keyboard-shortcuts-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-keyboard-shortcuts-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-keyboard-shortcuts-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-keyboard-shortcuts-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-moodle-pages-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-moodle-pages-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-moodle-pages-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-moodle-pages-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-privacy-and-network-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-privacy-and-network-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-privacy-and-network-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-privacy-and-network-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-reading-documents-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-reading-documents-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-reading-documents-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-reading-documents-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-study-planner-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-study-planner-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-study-planner-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-study-planner-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-themes-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-themes-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-themes-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-themes-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-troubleshooting-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-troubleshooting-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-troubleshooting-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-troubleshooting-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-development-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-development-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-development-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/en-docs-development-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-development-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-development-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-development-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/zh-Hant-docs-development-dark-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-development-light-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-development-light-1440.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-development-dark-390.png"
+  },
+  {
+    "path": "docs/evidence/website/screenshots/ja-docs-development-dark-1440.png"
+  }
+]

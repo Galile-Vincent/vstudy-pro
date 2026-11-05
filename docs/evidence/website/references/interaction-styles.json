@@ -1,0 +1,61 @@
+{
+  "t3": {
+    "hover": {
+      "bg": "oklch(0.571 0.21 264)",
+      "transform": "none"
+    },
+    "states": [
+      ".endorsement-carousel[data-astro-cid-lcdefpme]:hover .endorsement-track[data-astro-cid-lcdefpme], .endorsement-carousel[data-astro-cid-lcdefpme]:focus-within .endorsement-track[data-astro-cid-lcdefpme] { animation-play-state: paused; }",
+      ".btn-primary:hover { background: oklch(0.62 0.2 264); transform: translateY(-1px); }",
+      ".btn-primary:active { transform: translateY(0px); }",
+      ".btn-ghost:hover { color: var(--fg); border-color: var(--border-strong); background: rgba(255, 255, 255, 0.02); }",
+      ":focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }",
+      ".nav[data-astro-cid-ju4pidww].is-scrolled { border-bottom-color: var(--border); }",
+      ".nav-brand[data-astro-cid-ju4pidww]:hover { color: rgb(255, 255, 255); }",
+      ".nav-link[data-astro-cid-ju4pidww]:hover { color: var(--fg); }",
+      ".nav-stars[data-astro-cid-ju4pidww]:hover { color: var(--fg); }"
+    ]
+  },
+  "t3FocusScroll": {
+    "focus": {
+      "outline": "oklch(0.68 0.17 264) solid 2px",
+      "offset": "2px"
+    },
+    "scrolled": {
+      "border": "1px solid rgba(255, 255, 255, 0.08)",
+      "blur": "none"
+    }
+  },
+  "assistant": {
+    "states": [
+      "#main-content:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }",
+      ".prose :where(a:not([data-card]):hover):not(:where([class~=\"not-prose\"], [class~=\"not-prose\"] *)) { opacity: 0.8; }",
+      ".group-hover\\:-translate-x-0\\.5:is(:where(.group):hover *) { --tw-translate-x: calc(var(--spacing) * -.5); translate: var(--tw-translate-x) var(--tw-translate-y); }",
+      ".group-hover\\:translate-x-0\\.5:is(:where(.group):hover *) { --tw-translate-x: calc(var(--spacing) * .5); translate: var(--tw-translate-x) var(--tw-translate-y); }",
+      ".group-hover\\:-translate-y-0\\.5:is(:where(.group):hover *) { --tw-translate-y: calc(var(--spacing) * -.5); translate: var(--tw-translate-x) var(--tw-translate-y); }",
+      ".group-hover\\:bg-foreground\\/30:is(:where(.group):hover *) { background-color: var(--foreground); }",
+      ".group-hover\\:bg-foreground\\/30:is(:where(.group):hover *) { background-color: color-mix(in oklab, var(--foreground) 30%, transparent); }",
+      ".group-hover\\:bg-foreground\\/70:is(:where(.group):hover *) { background-color: var(--foreground); }",
+      ".group-hover\\:bg-foreground\\/70:is(:where(.group):hover *) { background-color: color-mix(in oklab, var(--foreground) 70%, transparent); }",
+      ".group-hover\\:bg-foreground\\/\\[0\\.02\\]:is(:where(.group):hover *) { background-color: var(--foreground); }",
+      ".group-hover\\:bg-foreground\\/\\[0\\.02\\]:is(:where(.group):hover *) { background-color: color-mix(in oklab, var(--foreground) 2%, transparent); }",
+      ".group-hover\\:bg-foreground\\/\\[0\\.03\\]:is(:where(.group):hover *) { background-color: var(--foreground); }",
+      ".group-hover\\:bg-foreground\\/\\[0\\.03\\]:is(:where(.group):hover *) { background-color: color-mix(in oklab, var(--foreground) 3%, transparent); }",
+      ".group-hover\\:bg-muted-foreground\\/40:is(:where(.group):hover *) { background-color: var(--muted-foreground); }",
+      ".group-hover\\:bg-muted-foreground\\/40:is(:where(.group):hover *) { background-color: color-mix(in oklab, var(--muted-foreground) 40%, transparent); }",
+      ".group-hover\\:opacity-50:is(:where(.group):hover *) { opacity: 0.5; }",
+      ".group-hover\\:opacity-70:is(:where(.group):hover *) { opacity: 0.7; }",
+      ".group-hover\\:opacity-100:is(:where(.group):hover *) { opacity: 1; }",
+      ".group-hover\\/attachment\\:opacity-100:is(:where(.group\\/attachment):hover *) { opacity: 1; }",
+      ".group-hover\\/code\\:opacity-100:is(:where(.group\\/code):hover *) { opacity: 1; }"
+    ],
+    "tocWidth": 224,
+    "codeWrapper": [
+      {
+        "parentRadius": "0px",
+        "parentBackground": "rgba(0, 0, 0, 0)",
+        "padding": "14px 0px"
+      }
+    ]
+  }
+}

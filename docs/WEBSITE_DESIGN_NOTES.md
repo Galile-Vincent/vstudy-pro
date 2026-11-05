@@ -105,3 +105,15 @@ The implemented hero deliberately sits between the references' density. At 1440p
 | Focus | Visible keyboard target | 3px palette focus, 4px offset |
 
 Computed values, accessibility results, screenshots, and responsive checks are recorded in docs/evidence/website. No claimed Lighthouse result should be inferred from build success.
+
+The side-by-side hero comparison is saved as evidence/website/hero-comparison.png, in T3, assistant-ui, VStudy order. The comparison confirmed the title scale, action spacing, and frame proportions. Feature-frame nesting was adjusted to 24px, 16px, and 8px with 8px insets.
+
+The final interaction-style capture records T3's primary hover background as oklch(.62 .2 264), a 1px upward hover, a zero-offset active transform, and a 2px focus outline with 2px offset. Its scrolled nav gains a subtle bottom rule. assistant-ui's docs TOC rail measures 224px. Its main-content focus outline is 2px with an inward 2px offset, prose links fade to .8 on hover, and small icon translations use half a spacing unit. Raw rules are in evidence/website/references/interaction-styles.json. VStudy adapts these to tonal hover, 2px action lift, 3px focus with 4px offset, and no layout animation.
+
+Final local Lighthouse 13.6.0 mobile runs score 100 in performance, accessibility, best practices, and SEO on Home and Getting started. These are individual local runs, not a production-hosting benchmark. Both report zero cumulative layout shift. All 196 page captures pass axe after finite entrance animations settle. All nine packs also pass in both schemes. The additional 294 responsive checks complete five widths and two schemes across all 49 pages with no horizontal scroll.
+
+The desktop sidebar disclosure and keyboard access to horizontally scrollable code were corrected from real browser findings. Search was checked with a query, no results, a failed index load, a successful retry, keyboard activation, Escape, and restored trigger focus. Clipboard copy announced success. A language change preserved the docs slug and marked an English fallback article correctly. The skip link focuses main. Manual color preference survives navigation.
+
+The complete home asset budget is 146,583 bytes at the largest locale, including uncompressed HTML, linked CSS and JS, and all home images even when lazy. It excludes OG metadata imagery because browsers do not fetch that as page content. No font downloads occur. The static audit checks 1,947 internal links and fragments.
+
+Screenshots are viewport captures at 390×1000 and 1440×1000, with additional scrolled captures for the agent, privacy, themes, FAQ, and final action. PNG evidence follows the repository's existing ignore rule and remains local. JSON results, manifests, source assets, and verification notes are committed. Reduced-motion behavior is implemented and CSS-audited; the T3 browser API does not expose reduced-motion emulation. Independent parent review and hosted Pages verification remain outside this implementation pass.

@@ -1,0 +1,73 @@
+
+> @vstudy/website@0.1.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-db3a88ac/apps/website
+> astro build
+
+07:18:15 [types] Generated 30ms
+07:18:15 [build] output: "static"
+07:18:15 [build] mode: "static"
+07:18:15 [build] directory: /Users/vc/.t3/worktrees/vstudy-pro/t3-db3a88ac/apps/website/dist/
+07:18:15 [build] Collecting build info...
+07:18:15 [build] ✓ Completed in 39ms.
+07:18:15 [build] Building static entrypoints...
+07:18:15 [vite] ✓ built in 106ms
+07:18:15 [vite] ✓ built in 10ms
+07:18:15 [build] Rearranging server assets...
+
+ generating static routes
+07:18:15   ├─ /en/docs/getting-started/index.html (+4ms)
+07:18:15   ├─ /en/docs/connect-your-school/index.html (+1ms)
+07:18:15   ├─ /en/docs/courses-and-deadlines/index.html (+1ms)
+07:18:15   ├─ /en/docs/study-planner/index.html (+1ms)
+07:18:15   ├─ /en/docs/reading-documents/index.html (+1ms)
+07:18:15   ├─ /en/docs/ai-providers/index.html (+0ms)
+07:18:15   ├─ /en/docs/themes/index.html (+1ms)
+07:18:15   ├─ /en/docs/chat-history/index.html (+1ms)
+07:18:15   ├─ /en/docs/moodle-pages/index.html (+1ms)
+07:18:15   ├─ /en/docs/data-and-storage/index.html (+0ms)
+07:18:15   ├─ /en/docs/privacy-and-network/index.html (+0ms)
+07:18:15   ├─ /en/docs/keyboard-shortcuts/index.html (+0ms)
+07:18:15   ├─ /en/docs/troubleshooting/index.html (+0ms)
+07:18:15   ├─ /en/docs/architecture/index.html (+0ms)
+07:18:15   ├─ /en/docs/development/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/getting-started/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/connect-your-school/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/courses-and-deadlines/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/study-planner/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/reading-documents/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/ai-providers/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/themes/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/chat-history/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/moodle-pages/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/data-and-storage/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/privacy-and-network/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/keyboard-shortcuts/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/troubleshooting/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/architecture/index.html (+0ms)
+07:18:15   ├─ /zh-Hant/docs/development/index.html (+0ms)
+07:18:15   ├─ /ja/docs/getting-started/index.html (+0ms)
+07:18:15   ├─ /ja/docs/connect-your-school/index.html (+0ms)
+07:18:15   ├─ /ja/docs/courses-and-deadlines/index.html (+0ms)
+07:18:15   ├─ /ja/docs/study-planner/index.html (+0ms)
+07:18:15   ├─ /ja/docs/reading-documents/index.html (+0ms)
+07:18:15   ├─ /ja/docs/ai-providers/index.html (+0ms)
+07:18:15   ├─ /ja/docs/themes/index.html (+0ms)
+07:18:15   ├─ /ja/docs/chat-history/index.html (+0ms)
+07:18:15   ├─ /ja/docs/moodle-pages/index.html (+0ms)
+07:18:15   ├─ /ja/docs/data-and-storage/index.html (+0ms)
+07:18:15   ├─ /ja/docs/privacy-and-network/index.html (+0ms)
+07:18:15   ├─ /ja/docs/keyboard-shortcuts/index.html (+0ms)
+07:18:15   ├─ /ja/docs/troubleshooting/index.html (+0ms)
+07:18:15   ├─ /ja/docs/architecture/index.html (+0ms)
+07:18:15   ├─ /ja/docs/development/index.html (+0ms)
+07:18:15   ├─ /en/search.json (+0ms)
+07:18:15   ├─ /zh-Hant/search.json (+0ms)
+07:18:15   ├─ /ja/search.json (+0ms)
+07:18:15   ├─ /en/index.html (+1ms)
+07:18:15   ├─ /zh-Hant/index.html (+1ms)
+07:18:15   ├─ /ja/index.html (+0ms)
+07:18:15   ├─ /index.html (+1ms)
+07:18:15 ✓ Completed in 32ms.
+
+07:18:15 [build] ✓ Completed in 161ms.
+07:18:15 [build] 49 page(s) built in 209ms
+07:18:15 [build] Complete!

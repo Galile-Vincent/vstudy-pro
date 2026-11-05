@@ -1,0 +1,40 @@
+
+> vstudy-pro@ test /Users/vc/.t3/worktrees/vstudy-pro/t3-db3a88ac
+> pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2
+
+
+> @vstudy/desktop@0.1.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-db3a88ac/apps/desktop
+> node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run --pool=forks --maxWorkers=2
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-db3a88ac/apps/desktop/src/shared/locales.generated.ts (18 namespaces).
+(node:43904) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-db3a88ac/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-db3a88ac/apps/desktop/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+VStudy light: WCAG AA passed at every contrast setting
+VStudy dark: WCAG AA passed at every contrast setting
+Ocean light: WCAG AA passed at every contrast setting
+Ocean dark: WCAG AA passed at every contrast setting
+Grove light: WCAG AA passed at every contrast setting
+Grove dark: WCAG AA passed at every contrast setting
+Ember light: WCAG AA passed at every contrast setting
+Ember dark: WCAG AA passed at every contrast setting
+Iris light: WCAG AA passed at every contrast setting
+Iris dark: WCAG AA passed at every contrast setting
+Rose light: WCAG AA passed at every contrast setting
+Rose dark: WCAG AA passed at every contrast setting
+Slate light: WCAG AA passed at every contrast setting
+Slate dark: WCAG AA passed at every contrast setting
+Paper light: WCAG AA passed at every contrast setting
+Paper dark: WCAG AA passed at every contrast setting
+High contrast light: WCAG AA passed at every contrast setting
+High contrast dark: WCAG AA passed at every contrast setting
+23 renderer CSS files use semantic theme tokens
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-db3a88ac/apps/desktop
+
+
+ Test Files  130 passed | 5 skipped (135)
+      Tests  989 passed | 14 skipped (1003)
+   Start at  07:14:49
+   Duration  26.66s (transform 1.60s, setup 0ms, import 14.24s, tests 25.06s, environment 6.86s)
