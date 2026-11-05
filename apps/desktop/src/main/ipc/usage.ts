@@ -17,7 +17,7 @@ export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemen
   registrar.handle('usage:estimate', async ({ conversationId, userMessage }) => {
     const c = store.conversations.get(conversationId);
     if (!c) throw new Error('Conversation not found');
-    const d = c.scope === "course" ? null : store.documents.get(c.documentId);
+    const d = c.scope === "course" || c.scope === "general" ? null : store.documents.get(c.documentId);
     const bytes = d ? Math.min(2_000_000, (await stat(d.markdownPath)).size) : 0;
     const history = store.messages.list(conversationId).reduce((n,m) => n + m.parts.reduce((t,p) => t + p.text.length,0),0);
     const usage = { inputTokens: Math.ceil((Math.min(bytes,100_000) + Math.min(history,100_000) + userMessage.length + 2000) / 4), outputTokens: 1024, costSource: 'estimated' as const };

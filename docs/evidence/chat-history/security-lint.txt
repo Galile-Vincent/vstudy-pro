@@ -1,0 +1,7 @@
+/Users/vc/.t3/worktrees/vstudy-pro/t3-6f2f9632/apps/desktop/src/main/ipc/index.ts
+  46:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-6f2f9632/apps/desktop/src/main/moodle/sso-protocol.ts
+  8:59  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+✖ 2 problems (0 errors, 2 warnings)
