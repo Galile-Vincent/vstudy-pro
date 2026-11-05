@@ -117,7 +117,7 @@ try {
   const beforeMessages = await page.evaluate(id => window.desktop.invoke("messages:list", { conversationId: id }), beforeMaterials[0].id);
   assert.equal(beforeMessages.filter(m => m.role === "user").length, 1);
   await page.locator(".planner-proposal").getByRole("button", { name: "Use these materials", exact: true }).click();
-  await page.locator(".moodle-course-chat").getByText("Practice questions from the approved notes.", { exact: false }).waitFor();
+  await page.locator(".moodle-course-chat").getByText("Practice questions from the approved notes.", { exact: true }).waitFor();
   results.push("PASS material-selection approval starts the quiz request only after confirmation. Model is the deterministic fake provider.");
   await page.getByRole("button", { name: "Close course assistant", exact: true }).click();
   for (const [language, label, themeId, scheme] of [["en", "Today / Planner", "ocean", "dark"], ["zh-Hant", "今天 / 讀書計畫", "grove", "light"], ["ja", "今日 / 学習プラン", "iris", "dark"]]) {

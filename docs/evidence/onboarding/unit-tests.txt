@@ -1,0 +1,103 @@
+
+> @vstudy/desktop@0.1.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/apps/desktop
+> vitest run --pool=forks --maxWorkers=2
+
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/apps/desktop
+
+(node:17654) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17761) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/renderer/courses/connect.test.tsx (11 tests | 11 failed) 3ms
+   × filters suggestions with fuzzy matching 2ms
+   × shows a checked site before asking for a password and clears form secrets on submit 0ms
+   × offers provider buttons without password inputs for browser 0ms
+   × offers provider buttons without password inputs for embedded 0ms
+   × shows an unavailable reason and administrator next steps 0ms
+   × shows a typed authentication error and leaves credentials empty 0ms
+   × ignores a completed check after the dialog closes 0ms
+   × shows the actual external mode and cancels the pending sign-in 0ms
+   × waits for permission before sign-in without timing out 0ms
+   × offers retry and requires a session-only choice after unavailable permission 0ms
+   × keeps an unsaved connection open with a retry button 0ms
+(node:17944) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/renderer/onboarding/progress.test.tsx (4 tests | 4 failed) 2ms
+   × resumes the saved named step and goal after a module reload 1ms
+   × starts safely when stored progress is corrupt or from an unknown version 0ms
+   × marks checklist entries once and retains dismissed hints on restart 0ms
+   × does not claim a save succeeded when storage rejects it 0ms
+(node:17949) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/courses/connect.test.tsx > filters suggestions with fuzzy matching
+ FAIL  src/renderer/courses/connect.test.tsx > shows a checked site before asking for a password and clears form secrets on submit
+ FAIL  src/renderer/courses/connect.test.tsx > offers provider buttons without password inputs for browser
+ FAIL  src/renderer/courses/connect.test.tsx > offers provider buttons without password inputs for embedded
+ FAIL  src/renderer/courses/connect.test.tsx > shows an unavailable reason and administrator next steps
+ FAIL  src/renderer/courses/connect.test.tsx > shows a typed authentication error and leaves credentials empty
+ FAIL  src/renderer/courses/connect.test.tsx > ignores a completed check after the dialog closes
+ FAIL  src/renderer/courses/connect.test.tsx > shows the actual external mode and cancels the pending sign-in
+ FAIL  src/renderer/courses/connect.test.tsx > waits for permission before sign-in without timing out
+ FAIL  src/renderer/courses/connect.test.tsx > offers retry and requires a session-only choice after unavailable permission
+ FAIL  src/renderer/courses/connect.test.tsx > keeps an unsaved connection open with a retry button
+TypeError: Cannot read properties of undefined (reading 'clear')
+ ❯ src/renderer/courses/connect.test.tsx:12:70
+     10| (globalThis as {IS_REACT_ACT_ENVIRONMENT?:boolean}).IS_REACT_ACT_ENVIR…
+     11| let root: Root, host: HTMLDivElement;
+     12| beforeEach(async () => {await i18n.changeLanguage('en');localStorage.c…
+       |                                                                      ^
+     13| afterEach(async () => {await act(async () => root.unmount());host.remo…
+     14| async function click(name: string) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/26]⎯
+
+ FAIL  src/renderer/courses/connect.test.tsx > filters suggestions with fuzzy matching
+ FAIL  src/renderer/courses/connect.test.tsx > shows a checked site before asking for a password and clears form secrets on submit
+ FAIL  src/renderer/courses/connect.test.tsx > offers provider buttons without password inputs for browser
+ FAIL  src/renderer/courses/connect.test.tsx > offers provider buttons without password inputs for embedded
+ FAIL  src/renderer/courses/connect.test.tsx > shows an unavailable reason and administrator next steps
+ FAIL  src/renderer/courses/connect.test.tsx > shows a typed authentication error and leaves credentials empty
+ FAIL  src/renderer/courses/connect.test.tsx > ignores a completed check after the dialog closes
+ FAIL  src/renderer/courses/connect.test.tsx > shows the actual external mode and cancels the pending sign-in
+ FAIL  src/renderer/courses/connect.test.tsx > waits for permission before sign-in without timing out
+ FAIL  src/renderer/courses/connect.test.tsx > offers retry and requires a session-only choice after unavailable permission
+ FAIL  src/renderer/courses/connect.test.tsx > keeps an unsaved connection open with a retry button
+TypeError: Cannot read properties of undefined (reading 'unmount')
+ ❯ src/renderer/courses/connect.test.tsx:13:51
+     11| let root: Root, host: HTMLDivElement;
+     12| beforeEach(async () => {await i18n.changeLanguage('en');localStorage.c…
+     13| afterEach(async () => {await act(async () => root.unmount());host.remo…
+       |                                                   ^
+     14| async function click(name: string) {
+     15|   const button = [...document.querySelectorAll<HTMLButtonElement>('but…
+ ❯ process.env.NODE_ENV.exports.act ../../node_modules/.pnpm/react@19.2.0/node_modules/react/cjs/react.development.js:814:22
+ ❯ src/renderer/courses/connect.test.tsx:13:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/26]⎯
+
+ FAIL  src/renderer/onboarding/progress.test.tsx > resumes the saved named step and goal after a module reload
+ FAIL  src/renderer/onboarding/progress.test.tsx > starts safely when stored progress is corrupt or from an unknown version
+ FAIL  src/renderer/onboarding/progress.test.tsx > marks checklist entries once and retains dismissed hints on restart
+ FAIL  src/renderer/onboarding/progress.test.tsx > does not claim a save succeeded when storage rejects it
+TypeError: Cannot read properties of undefined (reading 'clear')
+ ❯ src/renderer/onboarding/progress.test.tsx:5:33
+      3| import { beforeEach, expect, it, vi } from 'vitest';
+      4|
+      5| beforeEach(() => { localStorage.clear(); vi.resetModules(); });
+       |                                 ^
+      6| async function snapshot() {
+      7|   const progress = await import('./progress');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/26]⎯
+
+
+ Test Files  2 failed | 93 passed | 5 skipped (100)
+      Tests  15 failed | 718 passed | 14 skipped (747)
+   Start at  23:03:48
+   Duration  19.50s (transform 1.14s, setup 0ms, import 5.87s, tests 19.15s, environment 4.18s)
+
+ ELIFECYCLE  Test failed. See above for more details.

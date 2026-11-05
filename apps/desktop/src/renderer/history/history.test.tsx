@@ -5,9 +5,11 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, expect, it, vi } from 'vitest';
 import { HistorySnippet } from './results';
 import { HistorySearch } from './search';
+import { HistoryFinder } from './index';
 import { chatHitSchema } from '../../shared/chat-history';
 const invoke = vi.hoisted(() => vi.fn());
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
+vi.mock('../shell', () => ({ useNavigate: () => ({ navigate: vi.fn() }) }));
 (globalThis as {
   IS_REACT_ACT_ENVIRONMENT?: boolean;
 }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -16,6 +18,16 @@ afterEach(async () => { for (const root of roots.splice(0))
   await act(() => root.unmount()); vi.useRealTimers(); vi.resetAllMocks(); });
 async function render(node: React.ReactNode) { const host = document.createElement('div'); document.body.append(host); const root = createRoot(host); roots.push(root); await act(() => root.render(node)); return host; }
 const hit = chatHitSchema.parse({ id: '00000000-0000-4000-8000-000000000001', scope: 'general', documentId: null, courseId: null, courseTitle: null, courseColor: null, term: null, documentTitle: null, title: '資料', titleSnippet: '[mark]資料[/mark]', providerId: 'anthropic-api', modelId: 'fake', createdAt: '2026-11-01T00:00:00Z', updatedAt: '2026-11-01T00:00:00Z', pinned: false, archived: false, hasAttachments: false, hasCitations: false, rank: 0, matches: [{ messageId: '00000000-0000-4000-8000-000000000002', role: 'user', snippet: '[mark]学習[/mark] 😀' }] });
+it('opens the finder with Command K without intercepting selection or alternate shortcuts', async () => {
+  invoke.mockImplementation(async channel => channel === 'chats:facets' ? { courses: [], documents: [], models: [] } : { items: [], nextCursor: null });
+  await render(<HistoryFinder/>);
+  for (const modifier of [{ shiftKey: true }, { altKey: true }]) {
+    await act(() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ...modifier })));
+    expect(document.querySelector('.history-dialog')).toBeNull();
+  }
+  await act(() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true })));
+  expect(document.querySelector('.history-dialog')).not.toBeNull();
+});
 it('renders multilingual markers and hostile markup as text', async () => {
   const host = await render(<HistorySnippet text={'<img src=x onerror=alert(1)> [mark]繁體中文 学習 😀[/mark]'}/>);
   expect(host.querySelector('img')).toBeNull();

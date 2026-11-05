@@ -1,0 +1,29 @@
+{
+  "elapsedMs": 999,
+  "screens": [
+    {
+      "path": "/Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/docs/evidence/onboarding/after-1.png",
+      "text": "Step 1 of 6\n\nSave and leave\nYour coursework, with a way forward\n\nBring school deadlines and your reading into one place. Open a document, understand a passage, and check what to do next.\n\nReading becomes understanding when we connect new ideas.\n\nConnect new ideas.\nHow does this help me learn?\n\nLink a new concept to something you already know.\n\nFrom your document · 1\n\nNo school connection or AI is started by this guide. You can leave now and resume from Home or Help.\n\nContinue"
+    },
+    {
+      "path": "/Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/docs/evidence/onboarding/after-2.png",
+      "text": "Step 2 of 6\n\nSave and leave\nWhich language feels familiar?\n\nThis changes the buttons and instructions. Your documents keep their original language. Change this later in Settings.\n\nChoose your language\nSystem default\nBack\nContinue"
+    },
+    {
+      "path": "/Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/docs/evidence/onboarding/after-3.png",
+      "text": "Step 3 of 6\n\nSave and leave\nMake it comfortable to read\n\nChoose a theme pack and System, Light, or Dark. These are the same controls as Settings, and you can change them later.\n\nColor scheme\nSystem\nLight\nDark\nThemes\nCreate theme\nAdd theme\nVStudy\nOcean\nGrove\nEmber\nIris\nRose\nSlate\nPaper\nHigh contrast\nINTERFACE\nContrast\n\nStrengthen text, borders, and focus indicators. 100% is the accessible baseline.\n\n100%\nGlass opacity\n\nHigher values make menus, dialogs, and the composer more solid.\n\n80%\nText size\n100%\n125%\n150%\n200%\nDensity\nComfortable\nCompact\nReader font\nSystem\nReader size\nSmall\nMedium\nLarge\nExtra large\nMaterial\nGlass\nSolid\nBack\nContinue"
+    },
+    {
+      "path": "/Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/docs/evidence/onboarding/after-4.png",
+      "text": "Step 4 of 6\n\nSave and leave\nWhat would you like to do first?\n\nChoose one starting point. You can use all three later.\n\nWhat would you like to do first?\nConnect my school’s Moodle\nSee courses, due work, and announcements. You will need your school’s sign-in.\nImport my own documents\nRead lecture notes, papers, or study materials stored on this Mac.\nExplore with a sample\nNo school account, downloads, or AI key needed.\nBack\nContinue"
+    },
+    {
+      "path": "/Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/docs/evidence/onboarding/after-5.png",
+      "text": "Step 5 of 6\n\nSave and leave\nAI is optional\n\nYou can read and organise files without AI. Connect a service only when you want to ask a question.\n\nWhat works without paying for AI\nRead the sample, import Markdown or text, organise your library, and view connected school coursework.\nAn API key is a secret code for an AI account\nOpenAI or Anthropic can charge for questions sent with a key. A ChatGPT or Claude chat subscription does not automatically include API use.\nAlready use Claude Code, Codex, or Antigravity?\nTheir command-line apps use a separate sign-in in Terminal. Enable one in Settings after signing in. Its plan limits and fees still apply. Nothing is enabled here.\nBefore anything leaves this Mac\nAn enabled provider receives your question, chat history, document details, and selected text. Without a selection, it receives an outline and opening excerpt. Earlier selections can remain in history. Enabled command-line apps may also contact their own services. VStudy sends no analytics.\nBefore saving a key\nSaving or unlocking a key may ask for macOS Keychain access. Settings also offers “Use without saving keys” for this session only. Skip setup to avoid these prompts.\nSet up AI in Settings\nBack\nSkip AI for now"
+    },
+    {
+      "path": "/Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/docs/evidence/onboarding/after-6.png",
+      "text": "Step 6 of 6\n\nSave and leave\nTake your first step\n\nFollow the instructions below. Help is always available at the top of the app.\n\nAdd the sample, then open it. Read first. To practice asking about a passage, select a sentence and choose Ask about this. Sending a question needs an AI connection; the walkthrough itself is offline.\n\nTry a sample document\n\nIllustrated example · no live data\n\nAsk about a passage\nOpen a document\n\nReading becomes understanding when we connect new ideas.\n\nAsk about this\n1\nOpen a document\n2\nSelect a sentence\n3\nAsk about this\n\n1 of 3. Add a document or sample in Home or Library, then choose Open. Wait until conversion finishes before selecting text.\n\nPlay\nReplay\nNext caption\nRead all instructions\nAdd a document or sample in Home or Library, then choose Open. Wait until conversion finishes before selecting text.\nDrag across one sentence in the reader. Or focus the reader and hold Shift while pressing an arrow key. Choose Ask about this, or press Command + Shift + K.\nThe selection appears above Chat. Choose a connected model, type “Explain this sentence”, and send. Follow any citation back to the source. Without AI, you can still read and practice selecting.\nWatch recorded steps\nBack\nOpen my document"
+    }
+  ]
+}

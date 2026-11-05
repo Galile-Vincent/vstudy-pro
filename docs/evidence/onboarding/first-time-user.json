@@ -1,0 +1,234 @@
+[
+  {
+    "language": "en",
+    "goal": "school",
+    "firstTaskMs": 1588,
+    "totalMs": 3355,
+    "privacyShownAtMs": 1036,
+    "schoolAuthentication": "main-process fixture; no live school or Keychain",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "en-school-welcome.png",
+      "en-school-goal.png",
+      "en-school-start.png",
+      "en-school-school-picker.png",
+      "en-school-school-result.png",
+      "en-school-due-work.png",
+      "en-school-first-task.png",
+      "en-school-shortcuts.png"
+    ],
+    "violations": [],
+    "errors": []
+  },
+  {
+    "language": "en",
+    "goal": "documents",
+    "firstTaskMs": 1065,
+    "totalMs": 2899,
+    "privacyShownAtMs": 800,
+    "schoolAuthentication": "not used",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "en-documents-welcome.png",
+      "en-documents-goal.png",
+      "en-documents-start.png",
+      "en-documents-first-task.png",
+      "en-documents-shortcuts.png"
+    ],
+    "violations": [],
+    "errors": []
+  },
+  {
+    "language": "en",
+    "goal": "sample",
+    "firstTaskMs": 3227,
+    "totalMs": 5726,
+    "privacyShownAtMs": 1653,
+    "schoolAuthentication": "not used",
+    "ai": "local fake provider; question and chat-history search exercised",
+    "screenshots": [
+      "en-sample-welcome.png",
+      "en-sample-appearance.png",
+      "en-sample-goal.png",
+      "en-sample-ai.png",
+      "en-sample-start.png",
+      "en-sample-start-dark-720.png",
+      "en-sample-selection.png",
+      "en-sample-chat-answer.png",
+      "en-sample-history-search.png",
+      "en-sample-first-task.png",
+      "en-sample-walkthrough-school.png",
+      "en-sample-walkthrough-due.png",
+      "en-sample-walkthrough-agent.png",
+      "en-sample-walkthrough-selection.png",
+      "en-sample-walkthrough-history.png",
+      "en-sample-recorded-video.png",
+      "en-sample-shortcuts.png"
+    ],
+    "violations": [
+      {
+        "name": "welcome",
+        "violations": []
+      },
+      {
+        "name": "ai",
+        "violations": []
+      },
+      {
+        "name": "start-dark-720",
+        "violations": []
+      },
+      {
+        "name": "walkthroughs",
+        "violations": []
+      }
+    ],
+    "errors": []
+  },
+  {
+    "language": "zh-Hant",
+    "goal": "school",
+    "firstTaskMs": 1436,
+    "totalMs": 3155,
+    "privacyShownAtMs": 871,
+    "schoolAuthentication": "main-process fixture; no live school or Keychain",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "zh-Hant-school-welcome.png",
+      "zh-Hant-school-goal.png",
+      "zh-Hant-school-start.png",
+      "zh-Hant-school-school-picker.png",
+      "zh-Hant-school-school-result.png",
+      "zh-Hant-school-due-work.png",
+      "zh-Hant-school-first-task.png",
+      "zh-Hant-school-shortcuts.png"
+    ],
+    "violations": [],
+    "errors": []
+  },
+  {
+    "language": "zh-Hant",
+    "goal": "documents",
+    "firstTaskMs": 1149,
+    "totalMs": 2904,
+    "privacyShownAtMs": 852,
+    "schoolAuthentication": "not used",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "zh-Hant-documents-welcome.png",
+      "zh-Hant-documents-goal.png",
+      "zh-Hant-documents-start.png",
+      "zh-Hant-documents-first-task.png",
+      "zh-Hant-documents-shortcuts.png"
+    ],
+    "violations": [],
+    "errors": []
+  },
+  {
+    "language": "zh-Hant",
+    "goal": "sample",
+    "firstTaskMs": 1768,
+    "totalMs": 3638,
+    "privacyShownAtMs": 1085,
+    "schoolAuthentication": "not used",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "zh-Hant-sample-welcome.png",
+      "zh-Hant-sample-appearance.png",
+      "zh-Hant-sample-goal.png",
+      "zh-Hant-sample-ai.png",
+      "zh-Hant-sample-start.png",
+      "zh-Hant-sample-start-dark-720.png",
+      "zh-Hant-sample-first-task.png",
+      "zh-Hant-sample-shortcuts.png"
+    ],
+    "violations": [
+      {
+        "name": "ai",
+        "violations": []
+      },
+      {
+        "name": "start-dark-720",
+        "violations": []
+      },
+      {
+        "name": "walkthroughs",
+        "violations": []
+      }
+    ],
+    "errors": []
+  },
+  {
+    "language": "ja",
+    "goal": "school",
+    "firstTaskMs": 1447,
+    "totalMs": 3208,
+    "privacyShownAtMs": 842,
+    "schoolAuthentication": "main-process fixture; no live school or Keychain",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "ja-school-welcome.png",
+      "ja-school-goal.png",
+      "ja-school-start.png",
+      "ja-school-school-picker.png",
+      "ja-school-school-result.png",
+      "ja-school-due-work.png",
+      "ja-school-first-task.png",
+      "ja-school-shortcuts.png"
+    ],
+    "violations": [],
+    "errors": []
+  },
+  {
+    "language": "ja",
+    "goal": "documents",
+    "firstTaskMs": 1156,
+    "totalMs": 3004,
+    "privacyShownAtMs": 855,
+    "schoolAuthentication": "not used",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "ja-documents-welcome.png",
+      "ja-documents-goal.png",
+      "ja-documents-start.png",
+      "ja-documents-first-task.png",
+      "ja-documents-shortcuts.png"
+    ],
+    "violations": [],
+    "errors": []
+  },
+  {
+    "language": "ja",
+    "goal": "sample",
+    "firstTaskMs": 1692,
+    "totalMs": 3685,
+    "privacyShownAtMs": 1038,
+    "schoolAuthentication": "not used",
+    "ai": "local fake provider available; no external AI",
+    "screenshots": [
+      "ja-sample-welcome.png",
+      "ja-sample-appearance.png",
+      "ja-sample-goal.png",
+      "ja-sample-ai.png",
+      "ja-sample-start.png",
+      "ja-sample-start-dark-720.png",
+      "ja-sample-first-task.png",
+      "ja-sample-shortcuts.png"
+    ],
+    "violations": [
+      {
+        "name": "ai",
+        "violations": []
+      },
+      {
+        "name": "start-dark-720",
+        "violations": []
+      },
+      {
+        "name": "walkthroughs",
+        "violations": []
+      }
+    ],
+    "errors": []
+  }
+]

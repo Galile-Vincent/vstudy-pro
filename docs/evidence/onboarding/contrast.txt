@@ -1,0 +1,27 @@
+
+> @vstudy/desktop@0.1.0 contrast:check /Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/apps/desktop
+> node scripts/check-contrast.mjs
+
+(node:34018) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-84ada5f4/apps/desktop/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+VStudy light: WCAG AA passed at every contrast setting
+VStudy dark: WCAG AA passed at every contrast setting
+Ocean light: WCAG AA passed at every contrast setting
+Ocean dark: WCAG AA passed at every contrast setting
+Grove light: WCAG AA passed at every contrast setting
+Grove dark: WCAG AA passed at every contrast setting
+Ember light: WCAG AA passed at every contrast setting
+Ember dark: WCAG AA passed at every contrast setting
+Iris light: WCAG AA passed at every contrast setting
+Iris dark: WCAG AA passed at every contrast setting
+Rose light: WCAG AA passed at every contrast setting
+Rose dark: WCAG AA passed at every contrast setting
+Slate light: WCAG AA passed at every contrast setting
+Slate dark: WCAG AA passed at every contrast setting
+Paper light: WCAG AA passed at every contrast setting
+Paper dark: WCAG AA passed at every contrast setting
+High contrast light: WCAG AA passed at every contrast setting
+High contrast dark: WCAG AA passed at every contrast setting
+19 renderer CSS files use semantic theme tokens

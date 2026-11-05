@@ -18,3 +18,9 @@ Current claims were checked against these implementation boundaries:
 | Languages | `shared/locales/{en,zh-Hant,ja}`: three live interface languages; reply-language instruction is model guidance. |
 
 The `welcome` catalogs in all three languages are the shipped copy. Historical reviews under `design-reviews/` are dated evidence, not additional product promises. Animation/VoiceOver/performance acceptance must use current verification results.
+
+## First-run learning guidance
+
+The six-step onboarding sequence now introduces coursework and reading, then language, existing Appearance settings, a school/document/sample goal, optional AI, and a first task. Home and Help resume saved progress. Help also contains five offline walkthroughs and a shortcuts sheet. The reader and Courses show a profile-local hint that stays dismissed. The longer Welcome page remains available independently.
+
+The appearance step imports the shared theme picker. School setup opens the existing Courses connection dialog through a transient route flag. No school credential handling or theme model is duplicated in onboarding. See `FIRST_RUN_AUDIT.md` for fresh-profile observations and current acceptance evidence.
