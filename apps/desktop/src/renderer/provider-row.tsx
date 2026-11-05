@@ -82,6 +82,8 @@ export function ProviderRow({
       </div>
       {isCli && (
         <>
+          <p className="muted">{tr('settings:cli_help', { command: provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex login' : 'agy' })}</p>
+          <Button disabled={busy} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
           <label className="provider-cli-label">
             {settingsView ? (
               <Switch
@@ -134,6 +136,8 @@ export function ProviderRow({
       )}
       {!isCli && (
         <>
+          <p className="muted">{tr('settings:key_help')}</p>
+          <p className="muted">{tr('settings:keychain_help')}</p>
           <form
             onSubmit={(e) => {
               e.preventDefault();

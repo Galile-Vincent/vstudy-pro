@@ -61,8 +61,14 @@ export function UsageSettings() {
 
   const save = async () => {
     if (!settings) return;
+    let priceOverrides;
     try {
-      const priceOverrides = z.record(priceSchema).parse(JSON.parse(overrides));
+      priceOverrides = z.record(priceSchema).parse(JSON.parse(overrides));
+    } catch {
+      setStatus(tr('usage:invalid_prices'));
+      return;
+    }
+    try {
       const latest = await desktop.invoke('settings:get', {});
       const saved = await desktop.invoke('settings:set', {
         ...latest,
@@ -75,7 +81,7 @@ export function UsageSettings() {
       setStatus(tr('common:usage_settings_saved'));
       window.dispatchEvent(new Event('usage-updated'));
     } catch {
-      setStatus(tr('common:check_positive_budgets_warning_percentage_1_100_and_price_json'));
+      setStatus(tr('usage:save_failed'));
     }
   };
 
@@ -126,6 +132,7 @@ export function UsageSettings() {
       {settings && (
         <>
           <SettingsGroup title={tr('settings:budgets')}>
+            <p>{tr('usage:budget_help')}</p>
             <SettingsRow label={tr('common:monthly_budget_usd')}>
               <Input
                 aria-label={tr('common:monthly_budget_usd')}
@@ -166,6 +173,7 @@ export function UsageSettings() {
                 onChange={(e) => setSettings({ ...settings, warnAtPercent: Number(e.target.value) })}
               />
             </SettingsRow>
+            <details><summary>{tr('usage:advanced_prices')}</summary>
             <SettingsRow stack label={tr('common:price_overrides_usd_per_1m_tokens')}>
               <Textarea
                 aria-label={tr('common:price_overrides')}
@@ -182,6 +190,7 @@ export function UsageSettings() {
                 'common:standard_global_defaults_verified_nov_3_2026_estimates_exclude_taxes_tools_and_special_service_tiers_cache_writes_assume_5_minutes_cli_costs_are_api_equivalent_subscription_not_subscription_charges',
               )}
             </p>
+            </details>
             <div className="row">
               <Button variant="default" size="sm" onClick={() => void save()}>
                 {tr('common:save_usage_settings')}

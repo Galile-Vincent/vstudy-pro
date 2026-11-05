@@ -38,6 +38,7 @@ import {
 
 export function openCourseUrl(url: string, onError: () => void) {
   const parsed = externalUrlSchema.safeParse(url);
+  if (!parsed.success) onError();
   if (parsed.success)
     void desktop
       .invoke("shell:openExternal", { url: parsed.data })
@@ -92,6 +93,7 @@ export function courseHtmlPreview(html: string) {
   return document.body.textContent?.replace(/\s+/g, " ").trim() || "";
 }
 export function SafeCourseHtml({ html }: { html: string }) {
+  const [failed, setFailed] = useState(false);
   const document = new DOMParser().parseFromString(html, "text/html");
   function render(node: Node, key: number): ReactNode {
     if (node.nodeType === Node.TEXT_NODE) return node.textContent;
@@ -106,7 +108,7 @@ export function SafeCourseHtml({ html }: { html: string }) {
             href={href}
             onClick={(event) => {
               event.preventDefault();
-              openCourseUrl(href, () => {});
+              openCourseUrl(href, () => setFailed(true));
             }}
           >
             {children}
@@ -119,6 +121,8 @@ export function SafeCourseHtml({ html }: { html: string }) {
   }
   return (
     <div className="moodle-safe-html">
+      {document.querySelector("img,video,audio,iframe,object,embed") && <p role="note">{tr("moodle:media_notice")}</p>}
+      {failed && <p role="alert">{tr("moodle:link_failed")}</p>}
       {Array.from(document.body.childNodes).map(render)}
     </div>
   );

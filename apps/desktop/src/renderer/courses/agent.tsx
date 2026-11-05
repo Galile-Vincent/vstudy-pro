@@ -39,6 +39,12 @@ export function CourseAgentPanel({
   onError: () => void;
   onPendingChange?: ((pending: boolean) => void) | undefined;
 }) {
+  const [setupVersion, setSetupVersion] = useState(0);
+  useEffect(() => {
+    const refresh = () => setSetupVersion(v => v + 1);
+    window.addEventListener("vstudy:providers-changed", refresh);
+    return () => window.removeEventListener("vstudy:providers-changed", refresh);
+  }, []);
   const approving = useRef(false);
   const handledRequest = useRef(0);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -101,7 +107,7 @@ export function CourseAgentPanel({
           });
         if (!live) return;
         setConversations(c && !list.length ? [c] : list);
-        if (c) await load(c);
+        if (c) { await load(c); setStatus(current => current === "unavailable" ? "idle" : current); }
         else setStatus("unavailable");
       })
       .catch(() => {
@@ -110,7 +116,7 @@ export function CourseAgentPanel({
     return () => {
       live = false;
     };
-  }, [detail.course.id, agent]);
+  }, [detail.course.id, agent, setupVersion]);
   const quick = (key: string) => {
     setPromptRequest({ text: tr(`moodle:${key}`), id: Date.now() });
   };
@@ -277,7 +283,7 @@ export function CourseAgentPanel({
                       .catch(onError);
                   }}
                   onSettings={() => {
-                    setStatus("unavailable");
+                    window.dispatchEvent(new CustomEvent("vstudy:open-settings", { detail: { tab: "providers" } }));
                   }}
                   onProvidersChanged={refreshProviders}
                   onUsage={() => {}}
@@ -292,7 +298,7 @@ export function CourseAgentPanel({
           </>
         )}
         {status === "unavailable" && (
-          <p role="status">{tr("moodle:agent_unavailable")}</p>
+          <div role="status"><p>{tr("moodle:connect_helper")}</p><Button onClick={() => window.dispatchEvent(new CustomEvent("vstudy:open-settings", { detail: { tab: "providers" } }))}>{tr("moodle:providers_settings")}</Button></div>
         )}
         {status === "done" && (
           <p role="status">
