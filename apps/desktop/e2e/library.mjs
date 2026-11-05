@@ -159,7 +159,7 @@ try {
     .press("Enter");
   await page
     .getByRole("dialog")
-    .getByRole("button", { name: "Languages", exact: true })
+    .getByRole("button", { name: "Study › Languages", exact: true })
     .press("Enter");
   let docs = await call("library:documents:list", {
     folderId: nested.id,
