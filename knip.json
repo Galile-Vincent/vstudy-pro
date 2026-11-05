@@ -33,6 +33,16 @@
       "ignoreBinaries": [
         "openssl"
       ]
+    },
+    "apps/website": {
+      "entry": [
+        "src/pages/**/*.{astro,ts}",
+        "scripts/*.mjs"
+      ],
+      "project": [
+        "src/**/*.{astro,ts}",
+        "scripts/*.mjs"
+      ]
     }
   }
 }

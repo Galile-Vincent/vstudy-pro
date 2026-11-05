@@ -1,0 +1,75 @@
+---
+import { path } from '../config';
+import { ui, type Language } from '../data/ui';
+interface Props { language: Language; }
+const { language } = Astro.props;
+const t = ui[language];
+---
+<button class="search-trigger" data-search-open>{t.search}<kbd>⌘ K</kbd></button>
+<dialog id="docs-search" aria-labelledby="search-title" data-index={path(`${language}/search.json`)}>
+  <div class="search-top"><h2 id="search-title">{t.search}</h2><button data-search-close aria-label={t.close}>Esc</button></div>
+  <label class="sr-only" for="docs-query">{t.searchHint}</label>
+  <input id="docs-query" type="search" placeholder={t.searchHint} autocomplete="off" />
+  <p class="search-status" role="status" data-start={t.searchStart} data-empty={t.noResults}>{t.searchStart}</p>
+  <ul id="search-results"></ul>
+</dialog>
+<script>
+  interface SearchEntry { title: string; heading: string; text: string; url: string; }
+  const dialog = document.querySelector<HTMLDialogElement>('#docs-search');
+  const input = document.querySelector<HTMLInputElement>('#docs-query');
+  const status = document.querySelector<HTMLElement>('.search-status');
+  const results = document.querySelector<HTMLUListElement>('#search-results');
+  let entries: SearchEntry[] = [];
+  let indexLoaded = false;
+  let loadFailed = false;
+  async function openSearch() {
+    dialog?.showModal();
+    input?.focus();
+    if (!indexLoaded && dialog?.dataset.index) {
+      try {
+        const response = await fetch(dialog.dataset.index);
+        if (!response.ok) throw new Error('Search index unavailable');
+        entries = await response.json();
+        indexLoaded = true;
+        loadFailed = false;
+        search();
+      } catch {
+        loadFailed = true;
+        if (status) status.textContent = document.documentElement.lang === 'ja' ? '検索を読み込めません。閉じて再度開くか、ガイド一覧を使ってください。' : document.documentElement.lang === 'zh-Hant' ? '無法載入搜尋。請關閉後重開，或使用指南目錄。' : 'Search could not load. Close and reopen to retry, or use the docs navigation.';
+      }
+    }
+  }
+  function search() {
+    if (!results || !input || !status || loadFailed) return;
+    const terms = input.value.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
+    const matches = terms.length ? entries.filter(entry => terms.every(term => `${entry.title} ${entry.heading} ${entry.text}`.toLocaleLowerCase().includes(term))).slice(0,12) : [];
+    results.replaceChildren(...matches.map(entry => {
+      const li = document.createElement('li');
+      const link = document.createElement('a');
+      link.href = entry.url;
+      const title = document.createElement('strong');
+      title.textContent = entry.title;
+      const detail = document.createElement('p');
+      detail.textContent = entry.heading;
+      link.append(title,detail);
+      li.append(link);
+      return li;
+    }));
+    status.textContent = !terms.length ? status.dataset.start ?? '' : matches.length ? `${matches.length}` : status.dataset.empty ?? '';
+  }
+  document.querySelector('[data-search-open]')?.addEventListener('click', () => void openSearch());
+  document.querySelector('[data-search-close]')?.addEventListener('click', () => dialog?.close());
+  dialog?.addEventListener('close', () => document.querySelector<HTMLButtonElement>('[data-search-open]')?.focus());
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && dialog?.open) {
+      event.preventDefault();
+      dialog.close();
+      return;
+    }
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k' && !event.isComposing) {
+      event.preventDefault();
+      if (!dialog?.open) void openSearch();
+    }
+  });
+  input?.addEventListener('input',search);
+</script>

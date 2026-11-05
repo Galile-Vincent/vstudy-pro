@@ -7,3 +7,7 @@ onlyBuiltDependencies:
 # minimatch 11 keeps the named CommonJS API used by glob and electron-builder.
 overrides:
   "minimatch@>=7.0.0 <11.0.1": 11.0.1
+
+  "@astrojs/check>@astrojs/language-server": 2.15.4
+  "yaml-language-server>yaml": 2.9.1
+  "yaml-language-server>lodash": 4.18.1
