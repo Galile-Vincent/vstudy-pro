@@ -21,6 +21,18 @@ export function registerChatIpc(
   const compatible = providers.config('openai-compatible');
   if (compatible.kind === 'compatible') secrets.bindCompatibleOrigin(compatible.baseUrl);
   const chat = new ChatService(store, providers);
+  const purgeHistory = setInterval(() => {
+    const expired = store.db.prepare('SELECT id FROM conversations WHERE deletedAt IS NOT NULL AND deletedAt<?').all(new Date(Date.now() - 30_000).toISOString());
+    for (const row of expired) chat.deleteConversation(String(row.id) as import('../../shared/domain').Conversation['id']);
+  }, 30_000);
+  purgeHistory.unref();
+  implemented.add('chats:facets');
+  registrar.handle('chats:facets', () => store.chatHistory.facets());
+  implemented.add('chats:get');
+  registrar.handle('chats:get', ({conversationId}) => store.conversations.get(conversationId));
+  implemented.add('chats:search'); implemented.add('chats:update');
+  registrar.handle('chats:search', input => store.chatHistory.search(input));
+  registrar.handle('chats:update', ({conversationId,patch}) => { store.chatHistory.update(conversationId,patch); return {ok:true}; });
   const channels = [
     "providers:test",
     "providers:list",
@@ -90,6 +102,7 @@ export function registerChatIpc(
   });
   const dispose = registrar.dispose;
   registrar.dispose = () => {
+    clearInterval(purgeHistory);
     chat.dispose();
     dispose();
   };

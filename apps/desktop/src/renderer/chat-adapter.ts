@@ -24,7 +24,7 @@ export function createChatAdapter(
       if (saved?.turnId) {
         const selection = selectionSchema.safeParse(saved.selection);
         const options = modelOptionsSchema.safeParse(saved.options);
-        if (selection.success && details.scope !== "course") details.selection = selection.data;
+        if (selection.success && details.scope !== "course" && details.scope !== "general") details.selection = selection.data;
         if (options.success) details.options = options.data;
       }
       contexts.set(turnId, details);

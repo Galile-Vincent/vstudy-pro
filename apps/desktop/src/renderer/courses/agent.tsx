@@ -3,6 +3,7 @@ import { emptyPlanner, type MaterialRequest } from "../../shared/planner";
 import { assertCourseAction } from "../../shared/course-actions";
 import { plannerApi } from "./planner-api";
 import { PlannerProposal } from "./planner-proposal";
+import { ConversationList } from "../conversation-list";
 import { useEffect, useRef, useState } from "react";
 import { desktop } from "../bridge";
 import { Chat } from "../chat";
@@ -56,6 +57,7 @@ export function CourseAgentPanel({
   const [conversation, setConversation] = useState<Conversation>();
   const [history, setHistory] = useState<Message[]>([]);
   const [providers, setProviders] = useState<Providers>([]);
+  const [historyJump,setHistoryJump]=useState<string>();
   const [draft, setDraft] = useState("");
   const [promptRequest, setPromptRequest] = useState<{
     text: string;
@@ -257,26 +259,18 @@ export function CourseAgentPanel({
                 onClick={() => setActions(current => [...current, { id: crypto.randomUUID(), action: { type, documentIds: selectedDocuments } }])}>{tr(`planner:action_${type}`)}</Button>)}</div>
             </fieldset>
             {conversations.length > 0 && (
-              <select
-                aria-label={tr("moodle:conversations")}
-                value={conversation?.id ?? ""}
-                onChange={(e) => {
-                  const c = conversations.find((c) => c.id === e.target.value);
-                  if (c) void load(c).catch(onError);
-                }}
-              >
-                {conversations.map((c, i) => (
-                  <option key={c.id} value={c.id}>
-                    {tr("moodle:conversation_number", { number: i + 1 })}
-                  </option>
-                ))}
-              </select>
+              <ConversationList current={conversation ?? null} canCreate={!!conversation} onSelect={(c,messageId)=>{setHistoryJump(messageId);void load(c).catch(onError);}} onNew={async()=>{
+                if(!conversation)return;
+                const c=await desktop.invoke('conversations:create',{scope:'course',courseId:detail.course.id,providerId:conversation.providerId,modelId:conversation.modelId});
+                setConversations(list=>[c,...list]);setHistoryJump(undefined);await load(c);
+              }}/>
             )}
             {conversation && (
               <div className="moodle-course-chat">
                 <Chat
                   key={conversation.id}
                   conversation={conversation}
+                  jumpMessageId={historyJump}
                   draft={draft}
                   onDraft={setDraft}
                   history={history}
@@ -330,7 +324,7 @@ export function CourseAgentPanel({
         {actions.map(proposal => <PlannerProposal key={proposal.id} action={proposal.action} snapshot={snapshot} courses={[detail.course]} deadlines={detail.deadlines} files={detail.files}
           busy={status === "busy"} onApprove={() => void approve(proposal)} onDismiss={() => setActions(current => current.filter(item => item.id !== proposal.id))} />)}
       </div>
-      <footer>{tr("moodle:agent_scope")}</footer>
+      <footer>{tr("planner:agent_scope")}</footer>
     </aside>
   );
 }

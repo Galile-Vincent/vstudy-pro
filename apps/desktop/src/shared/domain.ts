@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { materialRequestSchema } from "./planner";
+import { themePreferencesSchema } from './themes';
 import { moodleAgentActionSchema } from "./moodle";
 
 export const documentIdSchema = z.string().uuid().brand<"DocumentId">();
@@ -10,6 +11,7 @@ export const requestIdSchema = z.string().uuid().brand<"RequestId">();
 export const conversationScopeSchema = z.discriminatedUnion("scope", [
  z.object({ scope: z.literal("document").optional(), documentId: documentIdSchema }).strict(),
  z.object({ scope: z.literal("course"), courseId: z.string().uuid() }).strict(),
+ z.object({ scope: z.literal("general") }).strict(),
 ]);
 export type ConversationScope = z.infer<typeof conversationScopeSchema>;
 
@@ -99,10 +101,12 @@ const conversationFields = {
 export const conversationCreateSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
  conversationScopeSchema.options[1].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
+ conversationScopeSchema.options[2].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
 ]);
 export const conversationSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend(conversationFields),
  conversationScopeSchema.options[1].extend(conversationFields),
+ conversationScopeSchema.options[2].extend(conversationFields),
 ]);
 export type Conversation = z.infer<typeof conversationSchema>;
 export const rateLimitSchema = z.object({
@@ -206,7 +210,8 @@ const chatFields = {
 export const chatRequestSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend({...chatFields, selection: selectionSchema.optional()}),
  conversationScopeSchema.options[1].extend({...chatFields, materials: materialRequestSchema.optional()}),
-]).refine(r => r.scope === "course" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
+ conversationScopeSchema.options[2].extend(chatFields),
+]).refine(r => r.scope === "course" || r.scope === "general" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
 export const chatEventSchema = z.discriminatedUnion("type", [
  z.object({type: z.literal("proposals"), actions: z.array(moodleAgentActionSchema).max(5)}).strict(),
@@ -221,6 +226,7 @@ export const chatEventSchema = z.discriminatedUnion("type", [
 export type ChatEvent = z.infer<typeof chatEventSchema>;
 export const settingsSchema = z
   .object({
+    ...themePreferencesSchema.shape,
     uiScale: z.union([z.literal(100),z.literal(125),z.literal(150),z.literal(200)]).default(100),
     density: z.enum(['comfortable','compact']).default('comfortable'),
     accent: z.enum(['neutral','blue','green','violet','amber']).default('neutral'),
@@ -250,6 +256,7 @@ export const settingsSchema = z
   .strict();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
+  ...themePreferencesSchema.parse({}),
   uiScale:100, density:"comfortable", accent:"neutral", readerFont:"system", readerSize:"m", material:"glass",
   language: "auto", replyLanguage: "auto", welcomeSeen: false,
   chatSide: "left",

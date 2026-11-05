@@ -1,3 +1,4 @@
+import { applyNativeTheme, nativeBackground } from './theme';
 import { initializeMoodleProtocol } from './moodle/sso-protocol';
 import { log } from './logging';
 import { showAttachedMessage } from './dialogs';
@@ -7,7 +8,7 @@ import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { runPackagedSmoke } from './packaged-smoke';
-import { app, BrowserWindow, session, safeStorage, protocol, ipcMain } from "electron";
+import { app, BrowserWindow, nativeTheme, session, safeStorage, protocol, ipcMain } from "electron";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { mkdirSync } from "node:fs";
@@ -59,12 +60,15 @@ const entryUrl =
   (app.isPackaged ? "vstudy://app/index.html" : pathToFileURL(join(__dirname, "../renderer/index.html")).href);
 
 function createWindow(): void {
+  const appearance = store!.settings.get();
+  applyNativeTheme(appearance);
   const current = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 720,
     minHeight: 480,
     show: false,
+    backgroundColor: nativeBackground(appearance),
     title: "VStudy Pro",
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
@@ -77,6 +81,7 @@ function createWindow(): void {
     },
   });
   window = current;
+  applyNativeTheme(appearance);
   current.webContents.on('will-frame-navigate', event => { if (!event.isMainFrame) event.preventDefault(); });
   current.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   current.webContents.on("will-navigate", (event, url) => {
@@ -169,6 +174,7 @@ if (ownsApplication) void app.whenReady().then(() => {
     app.exit();
     return { ok: true };
   });
+  nativeTheme.on("updated", () => { if (store) applyNativeTheme(store.settings.get()); });
   createWindow();
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

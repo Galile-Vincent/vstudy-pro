@@ -1,4 +1,4 @@
-/** Migration 18 adds student-owned plans. Moodle pruning detaches references instead of deleting student work. */
+/** Migration 19 adds student-owned plans. Moodle pruning detaches references instead of deleting student work. */
 export const plannerMigration = `
 CREATE TABLE planner_goals (
   id TEXT PRIMARY KEY, title TEXT NOT NULL, courseId TEXT REFERENCES moodle_courses(id) ON DELETE SET NULL,

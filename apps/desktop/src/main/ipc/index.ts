@@ -1,4 +1,5 @@
 import { registerPlannerIpc } from "./planner";
+import { applyNativeTheme } from '../theme';
 import { registerMoodleIpc } from './moodle';
 import { showAttachedMessage } from '../dialogs';
 import { disposeSearchWorkers } from '../services/search-runner';
@@ -60,7 +61,7 @@ export function registerIpc(
   registrar.handle("settings:appearance", () => ({reducedTransparency:nativeTheme.prefersReducedTransparency}));
   registrar.handle("settings:systemLocale", () => process.env.VSTUDY_LOCALE ?? app.getLocale());
   registrar.handle("settings:get", () => store.settings.get());
-  registrar.handle("settings:set", (settings) => { const saved = store.settings.set(settings); updateApplicationMenu(saved.language); return saved; });
+  registrar.handle("settings:set", (settings) => { const saved = store.settings.set(settings); updateApplicationMenu(saved.language); applyNativeTheme(saved); return saved; });
   registrar.handle("secrets:set", async ({ providerId, key }) => {
     await secrets.set(providerId, key);
     providers.configure({ ...providers.config(providerId), enabled: true });

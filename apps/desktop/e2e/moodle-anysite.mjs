@@ -36,11 +36,11 @@ try {
   await page.reload(); await page.emulateMedia({reducedMotion:'reduce'});
   const open = () => page.getByRole('button',{name:'Connect school',exact:true}).first().click();
   const dialog = page.getByRole('dialog');
-  const find = async url => {await dialog.getByLabel('School Moodle URL or domain').fill(url);await dialog.getByRole('button',{name:'Find my school',exact:true}).click();};
+  const find = async url => {await dialog.getByRole('combobox').fill(url);await dialog.getByRole('button',{name:'Find my school',exact:true}).click();};
   const shot = name => page.screenshot({path:join(evidence,name)});
-  await open(); await dialog.getByLabel('School Moodle URL or domain').fill('moodle.example.edu/campus');
+  await open(); await dialog.getByRole('combobox').fill('moodle.example.edu/campus');
   await shot('01-find-school.png');
-  await dialog.getByLabel('School Moodle URL or domain').press('Enter');
+  await dialog.getByRole('combobox').press('Enter');
   await dialog.getByText('Example University',{exact:true}).waitFor();
   assert.equal(await dialog.locator('input[type=password]').count(),0); await shot('02-site-result.png');
   await dialog.getByRole('button',{name:'Continue to sign in',exact:true}).click();

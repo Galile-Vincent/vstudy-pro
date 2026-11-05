@@ -46,3 +46,6 @@
 @media (prefers-contrast: more) {
   .planner-panel, .planner-proposal { outline: 1px solid var(--ink); }
 }
+
+.planner-view-tabs [data-slot=tabs-trigger] { color: var(--ink); }
+.planner-view-tabs [data-slot=tabs-list] { margin-bottom: var(--space-4); }

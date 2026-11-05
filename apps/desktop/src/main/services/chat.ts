@@ -73,7 +73,7 @@ export class ChatService {
     input: import("zod").z.infer<typeof import("../../shared/domain").conversationCreateSchema>,
   ): Conversation {
     if (input.scope === "course") new MoodleRepository(this.store.db).course(input.courseId);
-    else {
+    else if (input.scope !== "general") {
       if (this.deleting.has(input.documentId)) throw new Error("Document is deleting");
       if (!this.store.documents.get(input.documentId))
         throw new Error("Document not found");
@@ -104,7 +104,7 @@ export class ChatService {
   }
   private accept(request: ChatRequest, owner: ChatOwner): void {
     if (this.stopped) throw new Error("Chat service is closed");
-    if (request.scope !== "course" && this.deleting.has(request.documentId)) throw new Error("Document is deleting");
+    if (request.scope !== "course" && request.scope !== "general" && this.deleting.has(request.documentId)) throw new Error("Document is deleting");
     if (owner.isDestroyed()) throw new Error("Chat window unavailable");
     if (this.active.has(request.requestId))
       throw new Error("Request already active");
@@ -115,18 +115,18 @@ export class ChatService {
     )
       throw new Error("Conversation already streaming");
     const conversation = this.store.conversations.get(request.conversationId);
-    const document = request.scope === "course" ? null : this.store.documents.get(request.documentId);
+    const document = request.scope === "course" || request.scope === "general" ? null : this.store.documents.get(request.documentId);
     if (
       !conversation ||
-      (request.scope === "course" ? conversation.scope !== "course" || conversation.courseId !== request.courseId : conversation.scope === "course" || conversation.documentId !== request.documentId) ||
+      (request.scope === "general" ? conversation.scope !== "general" : request.scope === "course" ? conversation.scope !== "course" || conversation.courseId !== request.courseId : conversation.scope === "course" || conversation.scope === "general" || conversation.documentId !== request.documentId) ||
       conversation.providerId !== request.providerId ||
       conversation.modelId !== request.modelId ||
-      (request.scope !== "course" && request.selection && request.selection.documentId !== request.documentId)
+      (request.scope !== "course" && request.scope !== "general" && request.selection && request.selection.documentId !== request.documentId)
     )
       throw new Error("Chat context mismatch");
-    if (request.scope !== "course" && (!document || document.status !== "ready"))
+    if (request.scope !== "course" && request.scope !== "general" && (!document || document.status !== "ready"))
       throw new Error("Document is not ready");
-    if(request.scope !== "course" && request.selection && (request.selection.version ?? "original")!==document?.activeVersion)throw new Error("Selection version mismatch");
+    if(request.scope !== "course" && request.scope !== "general" && request.selection && (request.selection.version ?? "original")!==document?.activeVersion)throw new Error("Selection version mismatch");
     const adapter = this.providers.get(request.providerId);
     const messages = this.store.messages.list(request.conversationId);
     const replayIndex = request.turnId ? messages.findIndex(m => m.role === 'user' && (m.id === request.turnId || m.parts.some(p => p.turnId === request.turnId))) : -1;
@@ -155,7 +155,7 @@ export class ChatService {
         this.persist(request, "user", request.userMessage, "complete", undefined, userMessageId);
         this.store.messages.supersede(superseded, userMessageId);
       }
-      if (request.scope !== "course") new ActivityService(this.store).record("chat", request.documentId, 0, request.requestId);
+      if (request.scope !== "course" && request.scope !== "general") new ActivityService(this.store).record("chat", request.documentId, 0, request.requestId);
       this.store.db.exec("RELEASE accept_chat");
     } catch (error) {
       this.store.db.exec("ROLLBACK TO accept_chat; RELEASE accept_chat");
@@ -189,7 +189,7 @@ export class ChatService {
   }
   abortDocument(documentId: import("../../shared/domain").Document["id"]): void {
     for (const entry of this.active.values())
-      if (entry.request.scope !== "course" && entry.request.documentId === documentId) this.abort(entry.request.requestId, entry.owner);
+      if (entry.request.scope !== "course" && entry.request.scope !== "general" && entry.request.documentId === documentId) this.abort(entry.request.requestId, entry.owner);
   }
   async waitForIdle(): Promise<void> { await Promise.all(this.producers); }
   async dispose(): Promise<void> {
@@ -217,7 +217,7 @@ export class ChatService {
         id,
         conversationId: request.conversationId,
         role,
-        parts: [{ type: "text", text, status, ...extras, modelId: request.modelId, options: request.options, turnId: request.turnId, ...(error ? { error } : {}), ...(usage ? { usage } : {}), ...(role === "user" && request.scope !== "course" && request.selection ? { selection: request.selection } : {}) }],
+        parts: [{ type: "text", text, status, ...extras, modelId: request.modelId, options: request.options, turnId: request.turnId, ...(error ? { error } : {}), ...(usage ? { usage } : {}), ...(role === "user" && request.scope !== "course" && request.scope !== "general" && request.selection ? { selection: request.selection } : {}) }],
         createdAt,
       }),
     );
@@ -269,7 +269,7 @@ export class ChatService {
       if (entry.usage && !entry.text && !reported && !entry.usage.inputTokens && !entry.usage.outputTokens && !entry.usage.cacheReadTokens && !entry.usage.cacheWriteTokens && !entry.usage.reasoningTokens) delete entry.usage;
       if (entry.usage) {
         entry.usage = priceUsage(modelId, entry.usage, this.store.settings.get().priceOverrides);
-        for (const model of reported && entry.usageModels?.length ? entry.usageModels : [{ modelId, usage: entry.usage }]) this.store.usage.record({ ...priceUsage(model.modelId, model.usage, this.store.settings.get().priceOverrides), aborted: entry.controller.signal.aborted, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: canonicalModelId(model.modelId), kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.scope === "course" ? undefined : entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
+        for (const model of reported && entry.usageModels?.length ? entry.usageModels : [{ modelId, usage: entry.usage }]) this.store.usage.record({ ...priceUsage(model.modelId, model.usage, this.store.settings.get().priceOverrides), aborted: entry.controller.signal.aborted, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: canonicalModelId(model.modelId), kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.scope === "course" || entry.request.scope === "general" ? undefined : entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
       if (!restoreBranch && (entry.text || entry.proposals?.length || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error")) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined, { ...(entry.proposals?.length ? {proposals: entry.proposals} : {}), ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
@@ -302,6 +302,8 @@ export class ChatService {
           new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone, planner, syncedAt);
         if (entry.request.materials) prompt += "\n\n" + await buildMaterialContext(this.store, entry.request.courseId, entry.request.materials);
         entry.rawCourseText = "";
+      } else if (entry.request.scope === 'general') {
+        prompt = buildPrompt({document:{title:'General conversation',markdown:''},history,userMessage:entry.request.userMessage,replyLanguage:this.store.settings.get().replyLanguage});
       } else {
         if (!document) throw new Error("Document unavailable");
         const file = await open(containedPath(dirname(document.sourcePath), document.activeVersion==='ai' ? join(dirname(document.markdownPath),'content.ai.md') : document.markdownPath), "r");
@@ -351,7 +353,7 @@ export class ChatService {
           continue;
         }
         if (event.type === 'citations') {
-          const ids = new Set(event.citations.filter(c => entry.request.scope !== "course" && c.documentId === entry.request.documentId).map(c => c.id));
+          const ids = new Set(event.citations.filter(c => entry.request.scope !== "course" && entry.request.scope !== "general" && c.documentId === entry.request.documentId).map(c => c.id));
           entry.citations = (entry.citationCatalog ?? []).filter(c => ids.has(c.id));
           this.send(entry,{type:'citations',citations:entry.citations});
           continue;

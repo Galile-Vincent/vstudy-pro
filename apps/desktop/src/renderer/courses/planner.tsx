@@ -13,7 +13,7 @@ import { PlannerProposal, plannerDate } from "./planner-proposal";
 import { PlannerForms } from "./planner-forms";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import "./planner.css";
 export function Planner({ courses, deadlines, api = plannerApi, clock = Date.now }: {
   courses: MoodleCourse[]; deadlines: MoodleDeadline[]; api?: PlannerApi; clock?: () => number;
@@ -92,8 +92,8 @@ export function Planner({ courses, deadlines, api = plannerApi, clock = Date.now
       </section>
       {unallocated.length > 0 && <section className="planner-panel" aria-label={tr("planner:unallocated")}><h2>{tr("planner:unallocated")}</h2><ul>{unallocated.map((item, index) => <li key={index}>{tr(`planner:unallocated_${item.reason}`, { title: item.title, minutes: item.minutes })}</li>)}</ul></section>}
       {pending && <PlannerProposal action={pending.action} courses={courses} deadlines={deadlines} snapshot={snapshot} busy={busy} onApprove={() => void approve()} onDismiss={() => setPending(undefined)} />}
-      <Tabs value={view} onValueChange={setView}><TabsList aria-label={tr("planner:title")}><TabsTrigger value="today">{tr("planner:today")}</TabsTrigger><TabsTrigger value="week">{tr("planner:week")}</TabsTrigger></TabsList></Tabs>
-      <div className="planner-columns"><div>
+      <Tabs value={view} onValueChange={setView} className="planner-view-tabs"><TabsList aria-label={tr("planner:title")}><TabsTrigger value="today">{tr("planner:today")}</TabsTrigger><TabsTrigger value="week">{tr("planner:week")}</TabsTrigger></TabsList>
+      <TabsContent value={view}><div className="planner-columns"><div>
         <section className="planner-panel"><h2>{tr(view === "today" ? "planner:today" : "planner:week")}</h2>
           {!tasks.length && <p className="planner-muted">{tr("planner:empty_today")}</p>}
           <ul className="planner-task-list">{tasks.map(task => <li key={task.id}>
@@ -111,7 +111,7 @@ export function Planner({ courses, deadlines, api = plannerApi, clock = Date.now
           {Date.parse(d.dueAt) < now && <span>{tr("planner:overdue")}</span>}{d.submitted === null && <span>{tr("planner:submitted_unknown")}</span>}
         </div></li>)}</ul></section>
         <section className="planner-panel"><h2>{tr("planner:exams")}</h2>{!exams.length && <p className="planner-muted">{tr("planner:empty_exams")}</p>}
-          {exams.map(exam => <article className="planner-exam" key={exam.id}><strong>{tr("planner:countdown", { title: exam.title, days: Math.max(0, Math.ceil((Date.parse(exam.date) - now) / 86400000)) })}</strong>
+          {exams.map(exam => <article className="planner-exam" key={exam.id}><strong>{tr("planner:countdown", { title: exam.title, days: Math.max(0, Math.round((Date.parse(localDay(exam.date, zone)) - Date.parse(today)) / 86400000)) })}</strong>
             <p>{courseTitle(exam.courseId)} · {plannerDate(exam.date)}</p><p>{exam.scopeTopics.join(" · ") || tr("planner:scope_unknown")}</p></article>)}
         </section>
       </div><section className="planner-panel planner-week" aria-label={tr("planner:week")}>
@@ -123,7 +123,7 @@ export function Planner({ courses, deadlines, api = plannerApi, clock = Date.now
             <ol>{blocks.map(b => <li key={b.id}><strong>{b.title}</strong><span>{courseTitle(b.courseId)}</span><time dateTime={b.startsAt}>{tr("planner:duration_window", { start: new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { hour: "numeric", minute: "2-digit", timeZone: zone }).format(new Date(b.startsAt)), minutes: b.durationMinutes })}</time></li>)}</ol>
           </section>;
         })}
-      </section></div>
+      </section></div></TabsContent></Tabs>
     </>}
   </section>;
 }

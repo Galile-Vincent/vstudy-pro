@@ -84,5 +84,6 @@
   "updated_fields": "建議的任務變更",
   "title_field": "名稱",
   "status_field": "狀態",
-  "planner_unavailable": "無法載入讀書計畫，請重新整理再試一次。"
+  "planner_unavailable": "無法載入讀書計畫，請重新整理再試一次。",
+  "agent_scope": "建議只能變更這門課程。助理會參考跨課程的已存任務、考試與讀書時段，避免衝突。所有變更都需要你的核准。"
 }

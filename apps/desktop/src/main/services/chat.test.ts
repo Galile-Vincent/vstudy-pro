@@ -82,7 +82,7 @@ async function setup(adapter: ProviderAdapter) {
     store.close();
     await rm(cwd, { recursive: true, force: true });
   });
-  if (request.scope === "course") throw new Error("Expected document fixture");
+  if (request.scope === "course" || request.scope === "general") throw new Error("Expected document fixture");
   return { chat, store, request, cwd, owner: new Owner() };
 }
 const available = {
@@ -376,7 +376,7 @@ it('retains explicitly reported zero usage on a completed call',async()=>{
 });
 it('persists and forwards reasoning, validated citations and a bounded API presentation before one terminal event', async () => {
   const fixture = await setup({...available,async *stream(req) {
-    if (req.scope === 'course') throw new Error('Expected document fixture');
+    if (req.scope === 'course' || req.scope === 'general') throw new Error('Expected document fixture');
     expect(req.allowPresentation).toBe(true);
     yield {type:'reasoning-delta',text:'Reported summary'};
     yield {type:'citations',citations:[{id:'s0',documentId:req.documentId,title:'Forged title',offset:999,quote:'Forged quote'}]};

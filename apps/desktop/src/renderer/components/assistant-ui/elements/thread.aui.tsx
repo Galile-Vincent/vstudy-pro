@@ -338,6 +338,7 @@ const SpokenText: TextMessagePartComponent = ({ text }) => (
 const SpokenMessage: FC = () => {
   useTranslation();
   const role = useAuiState((s) => s.message.role);
+  const historyMessageId = useAuiState(s => s.message.id);
   const position = useVoiceRunPosition();
   const isSpeaking = useAuiState(
     (s) =>
@@ -349,6 +350,7 @@ const SpokenMessage: FC = () => {
     <MessagePrimitive.Root
       data-slot="aui_spoken-message-root"
       data-role={role}
+      data-message-id={historyMessageId}
       data-voice-run={position}
       className={cn(
         "aui-spoken-message bg-muted/40 mx-2 px-3 py-1.5 [contain-intrinsic-size:auto_48px] [content-visibility:auto]",
@@ -714,6 +716,7 @@ const MessageError: FC = () => {
 
 const AssistantMessage: FC = () => {
   useTranslation();
+  const historyMessageId = useAuiState(s => s.message.id);
   const {
     ToolFallback: ToolFallbackComponent = ToolFallback,
     ToolGroup,
@@ -735,6 +738,7 @@ const AssistantMessage: FC = () => {
       role="article"
       aria-label={tr("common:chat_author_assistant")}
       data-role="assistant"
+      data-message-id={historyMessageId}
       className="fade-in slide-in-from-bottom-1 animate-in relative -mb-7.5 pb-7.5 duration-150"
     >
       <div
@@ -911,6 +915,7 @@ const UserImagePart: ImageMessagePartComponent = (part) => (
 
 const UserMessage: FC = () => {
   useTranslation();
+  const historyMessageId = useAuiState(s => s.message.id);
   const { UserMessagePrefix } = useContext(ThreadComponentsContext);
   return (
     <MessagePrimitive.Root
@@ -919,6 +924,7 @@ const UserMessage: FC = () => {
       role="article"
       aria-label={tr("common:chat_author_you")}
       data-role="user"
+      data-message-id={historyMessageId}
     >
       <UserMessageAttachments />
 

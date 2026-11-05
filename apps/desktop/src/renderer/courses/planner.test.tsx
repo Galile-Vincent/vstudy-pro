@@ -54,6 +54,8 @@ it("shows draft assumptions and dates without writing until approval, and suppor
   expect(host.querySelector(".planner-proposal")).toBeNull();
   await act(async () => [...host.querySelectorAll<HTMLButtonElement>("[role=tab]")].find(b => b.textContent === "Next 7 days")!.focus());
   expect(host.querySelectorAll(".planner-day")).toHaveLength(7);
+  const active = host.querySelector('[role="tab"][aria-selected="true"]')!;
+  expect(document.getElementById(active.getAttribute("aria-controls")!)?.getAttribute("role")).toBe("tabpanel");
 });
 it("a changed deadline rejects approval and leaves the proposal reviewable", async () => {
   const { api, repo } = await mount();

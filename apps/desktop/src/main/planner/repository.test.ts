@@ -77,18 +77,18 @@ it("fires an approved task reminder once and exports blocks with duration and es
   expect(text).toContain("DTEND:20300101T103000Z");
   expect(text).toContain("SUMMARY:Read\\, then\\nrecall");
 });
-it("backs up v17 with private permissions and persists planner data after reopening", () => {
+it("backs up v18 with private permissions and persists planner data after reopening", () => {
   const dir = mkdtempSync(join(tmpdir(), "vstudy-planner-")); dirs.push(dir);
   const path = join(dir, "db.sqlite"), db = new DatabaseSync(path);
   db.exec("CREATE TABLE migrations(version INTEGER PRIMARY KEY,appliedAt TEXT NOT NULL)");
-  for (const m of migrations.filter(m => m.version <= 17)) {
+  for (const m of migrations.filter(m => m.version <= 18)) {
     db.exec(m.sql); db.prepare("INSERT INTO migrations VALUES (?,?)").run(m.version, "2030-01-01");
   }
   db.prepare("INSERT INTO settings VALUES (?,?)").run("sentinel", JSON.stringify("課業 日本語"));
   db.close();
   const store = openStore(path);
-  expect(statSync(path + ".before-v18.bak").mode & 0o777).toBe(0o600);
-  const backup = new DatabaseSync(path + ".before-v18.bak");
+  expect(statSync(path + ".before-v19.bak").mode & 0o777).toBe(0o600);
+  const backup = new DatabaseSync(path + ".before-v19.bak");
   expect(backup.prepare("SELECT value FROM settings WHERE key='sentinel'").get()?.value).toBe(JSON.stringify("課業 日本語"));
   expect(backup.prepare("SELECT name FROM sqlite_master WHERE name='planner_tasks'").get()).toBeUndefined();
   backup.close();
