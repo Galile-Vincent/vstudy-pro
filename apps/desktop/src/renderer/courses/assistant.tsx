@@ -48,6 +48,7 @@ export function CourseAssistant(
       }
       if (
         event.key === "Escape" &&
+        !event.defaultPrevented &&
         !document.querySelector('[data-slot="sheet-content"]')
       ) {
         event.preventDefault();

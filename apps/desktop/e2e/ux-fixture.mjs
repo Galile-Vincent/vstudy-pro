@@ -1,0 +1,18 @@
+/** Deterministic school content for renderer UX checks. No school credentials or network. */
+export async function installSchoolFixture(app) {
+  await app.evaluate(({ ipcMain }) => {
+    const id = n => `10000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+    const at = days => new Date(Date.now() + days * 86400000).toISOString();
+    const account = { id: id(1), siteUrl: 'https://moodle.example.edu', siteName: 'Example University', remoteUserId: 42, displayName: 'Alex Chen', status: 'connected', syncedAt: at(-1) };
+    const courses = ['current', 'future', 'past'].map((lifecycle, i) => ({ id: id(10 + i), accountId: account.id, remoteId: i + 1, fullName: '資料結構與演算法 · Algorithms and Data Structures for Applied Scientific Research', shortName: `CS${210+i}`, imageUrl: null, progress: 64, startAt: at(-60), endAt: at(60), favourite: false, identity: { title: { zh: '資料結構與演算法的科學應用及實驗', en: 'Algorithms and Data Structures for Applied Scientific Research' }, teachers: [{ zh: '陳教授', en: 'Professor Alexandra Chen' }], code: `CS${210+i}`, term: '1151', classLabel: { zh: '資訊三乙', en: 'Computer science · Year 3 B' }, lifecycle, lifecycleSource: 'server', hidden: false, hasProgress: true, format: 'weeks', summaryHtml: null } }));
+    const detail = course => ({ course, fetchState: 'idle', deadlines: [{ id: id(100), courseId: course.id, title: 'Prepare a research report explaining the experimental observations and conclusions', kind: 'assignment', dueAt: at(2), url: null, submitted: false }], notifications: [{ id: id(101), accountId: account.id, courseId: course.id, subject: 'Materials for the next laboratory session', body: 'Read the lecture notes before class and bring your lab notebook.', createdAt: at(-1), read: false, url: null }], grades: [{ courseId: course.id, name: 'Research methods and experimental design', grade: '27', max: 30, percentage: 90, gradedAt: at(-2) }], files: [], reminders: [], sections: [{ id: id(102), number: 1, name: 'Week 1 · Scientific research and experimental design', summaryHtml: '<p>Read the material, then prepare your research question.</p>', accessible: true, current: true, weekStart: at(-2), modules: [{ id: id(103), cmid: 103, kind: 'page', modname: 'page', name: 'Read the complete laboratory instructions before the first experiment', descriptionHtml: '<h3>Learning objectives</h3><p>Review the material and record your observations.</p><table><thead><tr><th>Step</th><th>Action</th></tr></thead><tbody><tr><td>1</td><td>Prepare your diagram.</td></tr></tbody></table>', url: 'https://moodle.example.edu/mod/page/view.php?id=103', accessible: true, completion: 'incomplete', dueAt: null, submitted: null, fileIds: [] }] }], announcements: [{ id: id(104), subject: 'Before the first laboratory session', author: 'Professor Alexandra Chen', createdAt: at(-1), bodyHtml: '<p>Read the lecture notes and bring your notebook.</p>', url: null }] });
+    globalThis.uxSchoolState = 'ready';
+    const handlers = {
+      'moodle:overview': () => { if (globalThis.uxSchoolState === 'error') throw new Error('Offline'); return { accounts: [{ ...account, status: globalThis.uxSchoolState === 'expired' ? 'expired' : 'connected' }], courses, upcoming: detail(courses[0]).deadlines, otherNotifications: [], unreadNotifications: 1 }; },
+      'moodle:course': (_event, { courseId }) => detail(courses.find(course => course.id === courseId) ?? courses[0]),
+      'moodle:sync': () => { throw new Error('Offline'); },
+      'moodle:check-site': () => { throw new Error('Offline'); },
+    };
+    for (const [channel, handler] of Object.entries(handlers)) { ipcMain.removeHandler(channel); ipcMain.handle(channel, handler); }
+  });
+}
