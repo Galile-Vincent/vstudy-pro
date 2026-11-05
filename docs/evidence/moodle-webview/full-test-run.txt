@@ -1,0 +1,127 @@
+
+> @vstudy/desktop@0.1.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-60804438/apps/desktop
+> node scripts/check-contrast.mjs && vitest run --pool=forks --maxWorkers=2
+
+(node:32517) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-60804438/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-60804438/apps/desktop/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+VStudy light: WCAG AA passed at every contrast setting
+VStudy dark: WCAG AA passed at every contrast setting
+Ocean light: WCAG AA passed at every contrast setting
+Ocean dark: WCAG AA passed at every contrast setting
+Grove light: WCAG AA passed at every contrast setting
+Grove dark: WCAG AA passed at every contrast setting
+Ember light: WCAG AA passed at every contrast setting
+Ember dark: WCAG AA passed at every contrast setting
+Iris light: WCAG AA passed at every contrast setting
+Iris dark: WCAG AA passed at every contrast setting
+Rose light: WCAG AA passed at every contrast setting
+Rose dark: WCAG AA passed at every contrast setting
+Slate light: WCAG AA passed at every contrast setting
+Slate dark: WCAG AA passed at every contrast setting
+Paper light: WCAG AA passed at every contrast setting
+Paper dark: WCAG AA passed at every contrast setting
+High contrast light: WCAG AA passed at every contrast setting
+High contrast dark: WCAG AA passed at every contrast setting
+19 renderer CSS files use semantic theme tokens
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-60804438/apps/desktop
+
+(node:32541) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:32568) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/renderer/courses/connect.test.tsx (12 tests | 12 failed) 3ms
+   × filters suggestions with fuzzy matching 1ms
+   × shows a checked site before asking for a password and clears form secrets on submit 0ms
+   × offers provider buttons without password inputs for browser 0ms
+   × offers provider buttons without password inputs for embedded 0ms
+   × shows an unavailable reason and administrator next steps 0ms
+   × shows a typed authentication error and leaves credentials empty 0ms
+   × ignores a completed check after the dialog closes 0ms
+   × shows the actual external mode and cancels the pending sign-in 0ms
+   × waits for permission before sign-in without timing out 0ms
+   × offers retry and requires a session-only choice after unavailable permission 0ms
+   × keeps an unsaved connection open with a retry button 0ms
+   × offers an alternate SSO provider alongside a password form 0ms
+(node:32700) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/renderer/settings/apply-appearance.test.ts (3 tests | 3 failed) 2ms
+   × paints authoritative settings before marking the UI ready 1ms
+   × follows system appearance changes only for System 0ms
+   × applies every token and works when localStorage is unavailable 0ms
+(node:32734) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/courses/connect.test.tsx > filters suggestions with fuzzy matching
+ FAIL  src/renderer/courses/connect.test.tsx > shows a checked site before asking for a password and clears form secrets on submit
+ FAIL  src/renderer/courses/connect.test.tsx > offers provider buttons without password inputs for browser
+ FAIL  src/renderer/courses/connect.test.tsx > offers provider buttons without password inputs for embedded
+ FAIL  src/renderer/courses/connect.test.tsx > shows an unavailable reason and administrator next steps
+ FAIL  src/renderer/courses/connect.test.tsx > shows a typed authentication error and leaves credentials empty
+ FAIL  src/renderer/courses/connect.test.tsx > ignores a completed check after the dialog closes
+ FAIL  src/renderer/courses/connect.test.tsx > shows the actual external mode and cancels the pending sign-in
+ FAIL  src/renderer/courses/connect.test.tsx > waits for permission before sign-in without timing out
+ FAIL  src/renderer/courses/connect.test.tsx > offers retry and requires a session-only choice after unavailable permission
+ FAIL  src/renderer/courses/connect.test.tsx > keeps an unsaved connection open with a retry button
+ FAIL  src/renderer/courses/connect.test.tsx > offers an alternate SSO provider alongside a password form
+TypeError: Cannot read properties of undefined (reading 'clear')
+ ❯ src/renderer/courses/connect.test.tsx:12:70
+     10| (globalThis as {IS_REACT_ACT_ENVIRONMENT?:boolean}).IS_REACT_ACT_ENVIR…
+     11| let root: Root, host: HTMLDivElement;
+     12| beforeEach(async () => {await i18n.changeLanguage('en');localStorage.c…
+       |                                                                      ^
+     13| afterEach(async () => {await act(async () => root.unmount());host.remo…
+     14| async function click(name: string) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/27]⎯
+
+ FAIL  src/renderer/courses/connect.test.tsx > filters suggestions with fuzzy matching
+ FAIL  src/renderer/courses/connect.test.tsx > shows a checked site before asking for a password and clears form secrets on submit
+ FAIL  src/renderer/courses/connect.test.tsx > offers provider buttons without password inputs for browser
+ FAIL  src/renderer/courses/connect.test.tsx > offers provider buttons without password inputs for embedded
+ FAIL  src/renderer/courses/connect.test.tsx > shows an unavailable reason and administrator next steps
+ FAIL  src/renderer/courses/connect.test.tsx > shows a typed authentication error and leaves credentials empty
+ FAIL  src/renderer/courses/connect.test.tsx > ignores a completed check after the dialog closes
+ FAIL  src/renderer/courses/connect.test.tsx > shows the actual external mode and cancels the pending sign-in
+ FAIL  src/renderer/courses/connect.test.tsx > waits for permission before sign-in without timing out
+ FAIL  src/renderer/courses/connect.test.tsx > offers retry and requires a session-only choice after unavailable permission
+ FAIL  src/renderer/courses/connect.test.tsx > keeps an unsaved connection open with a retry button
+ FAIL  src/renderer/courses/connect.test.tsx > offers an alternate SSO provider alongside a password form
+TypeError: Cannot read properties of undefined (reading 'unmount')
+ ❯ src/renderer/courses/connect.test.tsx:13:51
+     11| let root: Root, host: HTMLDivElement;
+     12| beforeEach(async () => {await i18n.changeLanguage('en');localStorage.c…
+     13| afterEach(async () => {await act(async () => root.unmount());host.remo…
+       |                                                   ^
+     14| async function click(name: string) {
+     15|   const button = [...document.querySelectorAll<HTMLButtonElement>('but…
+ ❯ process.env.NODE_ENV.exports.act ../../node_modules/.pnpm/react@19.2.0/node_modules/react/cjs/react.development.js:814:22
+ ❯ src/renderer/courses/connect.test.tsx:13:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/27]⎯
+
+ FAIL  src/renderer/settings/apply-appearance.test.ts > paints authoritative settings before marking the UI ready
+ FAIL  src/renderer/settings/apply-appearance.test.ts > follows system appearance changes only for System
+ FAIL  src/renderer/settings/apply-appearance.test.ts > applies every token and works when localStorage is unavailable
+TypeError: Cannot read properties of undefined (reading 'clear')
+ ❯ src/renderer/settings/apply-appearance.test.ts:14:16
+     12|   state.dark=false;state.change=()=>{};state.invoke.mockReset();
+     13|   state.invoke.mockResolvedValue(defaultSettings);
+     14|   localStorage.clear();
+       |                ^
+     15|   document.documentElement.removeAttribute('style');
+     16|   vi.stubGlobal('matchMedia', () => ({matches:state.dark,addEventListe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/27]⎯
+
+
+ Test Files  2 failed | 100 passed | 5 skipped (107)
+      Tests  15 failed | 832 passed | 14 skipped (861)
+   Start at  23:21:08
+   Duration  17.98s (transform 1.13s, setup 0ms, import 5.90s, tests 17.20s, environment 3.54s)
+
+ ELIFECYCLE  Test failed. See above for more details.
