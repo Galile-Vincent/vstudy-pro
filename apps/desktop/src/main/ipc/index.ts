@@ -1,3 +1,4 @@
+import { registerPlannerIpc } from "./planner";
 import { registerStorageIpc } from "./storage";
 import { applyNativeTheme } from '../theme';
 import { registerMoodleIpc } from './moodle';
@@ -78,6 +79,7 @@ export function registerIpc(
   registerUsageIpc(registrar, store, implemented, () => providers.config('codex-cli').enabled);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
   const disposeDocuments = registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove), providers);
+  const disposePlanner = registerPlannerIpc(registrar, store, implemented);
   const disposeMoodle = registerMoodleIpc(registrar, store, secrets, implemented, disposeDocuments, restoreMainWindow);
   const disposeLibrary = registerLibraryIpc(registrar, store, implemented, async (id, remove) => {await disposeDocuments.stopAi(id);return chat.deleteDocument(id, remove);}, disposeDocuments.resume);
   registerStorageIpc(registrar,store,implemented,async()=>{await disposeMoodle.waitForIdle();await chat.waitForIdle();await disposeDocuments.waitForIdle();await disposeLibrary.waitForIdle();});
@@ -87,5 +89,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { registrar.dispose(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { registrar.dispose(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { materialRequestSchema } from "./planner";
 import { themePreferencesSchema } from './themes';
 import { moodleAgentActionSchema } from "./moodle";
 
@@ -208,7 +209,7 @@ const chatFields = {
 };
 export const chatRequestSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend({...chatFields, selection: selectionSchema.optional()}),
- conversationScopeSchema.options[1].extend(chatFields),
+ conversationScopeSchema.options[1].extend({...chatFields, materials: materialRequestSchema.optional()}),
  conversationScopeSchema.options[2].extend(chatFields),
 ]).refine(r => r.scope === "course" || r.scope === "general" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
 export type ChatRequest = z.infer<typeof chatRequestSchema>;

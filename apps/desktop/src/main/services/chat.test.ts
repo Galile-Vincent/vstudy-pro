@@ -537,7 +537,7 @@ it('persists action-only course replies and never executes a proposal', async ()
   const deadlineId = '00000000-0000-4000-8000-000000000012';
   const accountId = '00000000-0000-4000-8000-000000000013';
   const course = {id:courseId,accountId,remoteId:1,fullName:'Lab',shortName:'LAB',imageUrl:null,progress:null,startAt:null,endAt:null,favourite:false};
-  fixture.store.db.prepare("INSERT INTO moodle_accounts VALUES (?,'cycu',1,'{}')").run(accountId);
+  fixture.store.db.prepare("INSERT INTO moodle_accounts VALUES (?,?,1,?)").run(accountId, 'https://school.example', JSON.stringify({ id: accountId, siteUrl: 'https://school.example', siteName: 'School', remoteUserId: 1, displayName: 'Student', status: 'connected', syncedAt: null }));
   fixture.store.db.prepare('INSERT INTO moodle_courses VALUES (?,?,?)').run(courseId,accountId,JSON.stringify(course));
   fixture.store.db.prepare('INSERT INTO moodle_deadlines VALUES (?,?,?)').run(deadlineId,courseId,JSON.stringify({id:deadlineId,courseId,title:'Lab report',kind:'assignment',dueAt:'2099-01-01T00:00:00Z',url:null,submitted:false}));
   const conversation = fixture.chat.createConversation({scope:'course',courseId,providerId:'anthropic-api',modelId:'fake'});
@@ -549,4 +549,54 @@ it('persists action-only course replies and never executes a proposal', async ()
   expect(fixture.owner.events).toEqual([{type:'proposals',actions:[{type:'export-calendar',deadlineIds:['00000000-0000-4000-8000-000000000012']}]},{type:'done'}]);
   expect(fixture.store.messages.list(conversation.id).at(-1)?.parts[0]?.proposals).toEqual([{type:'export-calendar',deadlineIds:['00000000-0000-4000-8000-000000000012']}]);
   expect(fixture.store.db.prepare('SELECT * FROM moodle_reminders').all()).toEqual([]);
+});
+
+it("sends converted course excerpts only for an explicit material request and never applies model proposals", async () => {
+  const prompts: string[] = [];
+  const fixture = await setup({ ...available, async *stream(req) {
+    prompts.push(req.prompt);
+    yield { type: "text-delta", text: 'Read the approved notes.\n```vstudy-action\n' + JSON.stringify({ type: "create-task", task: { title: "Practice recall", courseId: "00000000-0000-4000-8000-000000000001", dueAt: null, estimateMinutes: 30 } }) + '\n```' };
+    yield { type: "done" };
+  } });
+  const { seedStudent, id } = await import("../planner/__fixtures__/student");
+  seedStudent(fixture.store);
+  const documentId = fixture.request.documentId;
+  const file = { id: id(30), courseId: id(1), section: "Notes", module: "Resource", name: "Study notes", mime: "text/markdown", size: 40, modifiedAt: null, documentId };
+  fixture.store.db.prepare("INSERT INTO moodle_files VALUES (?,?,?,?,?)").run(file.id, file.courseId, "https://school.example/notes.md", JSON.stringify(file), documentId);
+  const c = fixture.chat.createConversation({ scope: "course", courseId: id(1), providerId: "anthropic-api", modelId: "fake" });
+  const request = chatRequestSchema.parse({ scope: "course", courseId: id(1), conversationId: c.id, providerId: c.providerId, modelId: c.modelId, requestId: randomUUID(), userMessage: "Help me study" });
+  fixture.chat.start(request, fixture.owner); await fixture.chat.waitForIdle();
+  expect(prompts[0]).not.toContain("Exact selected passage");
+  fixture.chat.start(chatRequestSchema.parse({ ...request, requestId: randomUUID(), materials: { mode: "quiz", documentIds: [documentId] } }), fixture.owner);
+  await fixture.chat.waitForIdle();
+  expect(prompts[1]).toContain("Exact selected passage");
+  expect(prompts[1]).toContain("<UNTRUSTED_MATERIALS>");
+  expect(prompts[1]).toContain("Create five practice questions");
+  expect(fixture.store.db.prepare("SELECT * FROM planner_tasks").all()).toEqual([]);
+  expect(fixture.owner.events.some(event => event.type === "proposals" && event.actions[0]?.type === "create-task")).toBe(true);
+  fixture.chat.start(chatRequestSchema.parse({ ...request, requestId: randomUUID(), materials: { mode: "summary", documentIds: [id(99)] } }), fixture.owner);
+  await fixture.chat.waitForIdle();
+  expect(prompts).toHaveLength(2);
+  expect(fixture.owner.events.at(-1)?.type).toBe("error");
+});
+
+it("aborts a course material request when its selected document is deleted", async () => {
+  let started = false, aborted = false;
+  const fixture = await setup({ ...available, async *stream(_request, signal) {
+    started = true;
+    await new Promise<void>(resolve => signal.addEventListener("abort", () => { aborted = true; resolve(); }, { once: true }));
+    yield { type: "done" };
+  } });
+  const { seedStudent, id } = await import("../planner/__fixtures__/student");
+  seedStudent(fixture.store);
+  const documentId = fixture.request.documentId;
+  const file = { id: id(30), courseId: id(1), section: "Notes", module: "Resource", name: "Notes", mime: "text/markdown", size: 40, modifiedAt: null, documentId };
+  fixture.store.db.prepare("INSERT INTO moodle_files VALUES (?,?,?,?,?)").run(file.id, file.courseId, "https://school.example/notes.md", JSON.stringify(file), documentId);
+  const c = fixture.chat.createConversation({ scope: "course", courseId: id(1), providerId: "anthropic-api", modelId: "fake" });
+  fixture.chat.start(chatRequestSchema.parse({ scope: "course", courseId: id(1), conversationId: c.id, providerId: c.providerId, modelId: c.modelId, requestId: randomUUID(), userMessage: "Summarize", materials: { mode: "summary", documentIds: [documentId] } }), fixture.owner);
+  await until(() => started);
+  await fixture.chat.deleteDocument(documentId, async () => { fixture.store.documents.delete(documentId); });
+  await fixture.chat.waitForIdle();
+  expect(aborted).toBe(true);
+  expect(fixture.owner.events.at(-1)).toEqual({ type: "done" });
 });

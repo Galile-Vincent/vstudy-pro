@@ -53,7 +53,7 @@ export function Chat({
   conversation: Conversation;
   jumpMessageId?: string | undefined;
   onProposals?: (actions: import("../shared/moodle").MoodleAgentAction[]) => void;
-  promptRequest?: {text:string; id:number};
+  promptRequest?: {text:string; id:number; materials?: import("../shared/planner").MaterialRequest};
   autoFocus?: boolean;
   draft: string;
   onDraft: (value: string) => void;
@@ -77,6 +77,7 @@ export function Chat({
   const budget = useBudgetGuard(usage.data, conversation.id, draft);
   const available = providers.find(p => p.config.id === conversation.providerId);
   const unavailable = !available?.config.enabled || !available.availability.available;
+  const approvedMaterials = useRef<import("../shared/planner").MaterialRequest | undefined>(undefined);
   const current = useRef({ conversation, selection, onClearSelection, onProposals });
   current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, onClearSelection, onProposals };
   const connection = useMemo(
@@ -85,9 +86,11 @@ export function Chat({
         desktop,
         async () => {
           const { conversation: c, selection: s } = current.current;
+          const materials = approvedMaterials.current;
+          approvedMaterials.current = undefined;
           return {
             conversationId: c.id,
-            ...(c.scope === "course" ? {scope:"course" as const,courseId:c.courseId} : c.scope === "general" ? {scope:"general" as const} : {documentId:c.documentId}),
+            ...(c.scope === "course" ? {scope:"course" as const,courseId:c.courseId,...(materials ? {materials} : {})} : c.scope === "general" ? {scope:"general" as const} : {documentId:c.documentId}),
             providerId: c.providerId,
             modelId: c.modelId,
             options: c.options,
@@ -117,7 +120,7 @@ export function Chat({
       metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage, modelId: m.parts[0]?.modelId, options: m.parts[0]?.options, selection: m.parts[0]?.selection, turnId: m.parts[0]?.turnId, citations: m.parts[0]?.citations } },
     })),
   });
-  useEffect(() => { if (promptRequest) runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}]}); }, [promptRequest?.id]);
+  useEffect(() => { if (promptRequest) { approvedMaterials.current = promptRequest.materials; runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}]}); } }, [promptRequest?.id]);
   useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
   useEffect(() => {
     if (!jumpMessageId) return;
@@ -139,7 +142,7 @@ export function Chat({
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
     {unavailable && <p role="alert">{tr('common:this_conversation_s_provider_is_unavailable_add_an_api_key_or_enable_it_in_settings')}</p>}
     <Thread components={documentComponents} autoFocus={autoFocus} />
-    <p className="composer-note">{conversation.scope === 'course' ? tr('moodle:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
+    <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }
 

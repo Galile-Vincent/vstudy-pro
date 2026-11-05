@@ -1,5 +1,6 @@
 /** Moodle account, school, and transport contracts. Secrets stay in the main process. */
 import { z } from "zod";
+import { plannerActionSchemas, exportCalendarActionSchema } from "./planner";
 import { moodleCourseIdentitySchema, moodleSectionSchema, moodleAnnouncementSchema } from "./moodle-course";
 
 const timestamp = z.string().datetime();
@@ -181,12 +182,8 @@ export const moodleAgentActionSchema = z.discriminatedUnion("type", [
       note: z.string().max(280),
     })
     .strict(),
-  z
-    .object({
-      type: z.literal("export-calendar"),
-      deadlineIds: z.array(moodleDeadlineSchema.shape.id).min(1).max(50),
-    })
-    .strict(),
+  exportCalendarActionSchema,
+  ...plannerActionSchemas,
 ]);
 export type MoodleAgentAction = z.infer<typeof moodleAgentActionSchema>;
 

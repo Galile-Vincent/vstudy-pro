@@ -1,3 +1,4 @@
+import { plannerMigration } from './planner-migration';
 import { storageMigration } from "../cache/migration";
 /** Main SQLite owner. Repositories share one connection and use nested savepoints. */
 import { migrate } from "./migrate";
@@ -107,6 +108,7 @@ export const migrations = [
   { version:18, sql:chatHistoryMigration },
   { version:19, sql:storageMigration },
   { version:20, sql:"CREATE INDEX IF NOT EXISTS conversations_course_page ON conversations(courseId,createdAt DESC,id DESC);" },
+  { version:21, sql:plannerMigration },
 ];
 const documentRow = z
   .object({

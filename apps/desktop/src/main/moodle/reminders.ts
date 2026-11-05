@@ -15,7 +15,7 @@ export function startReminders(repository: MoodleRepository, notify: (title: str
   return () => clearInterval(timer);
 }
 const escape = (value: string) => value.replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r/g,'');
-const stamp = (value: string) => value.replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+const stamp = (value: string) => new Date(value).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
 function fold(line: string): string {
   const lines: string[] = [];
   let part = '';
@@ -27,5 +27,8 @@ function fold(line: string): string {
   return lines.join('\r\n');
 }
 export function calendarText(deadlines: MoodleDeadline[], now = new Date().toISOString()): string {
-  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//VStudy//Moodle//EN','CALSCALE:GREGORIAN',...deadlines.flatMap(item => ['BEGIN:VEVENT',`UID:${item.id}@vstudy`,`DTSTAMP:${stamp(now)}`,`DTSTART:${stamp(item.dueAt)}`,`SUMMARY:${escape(item.title)}`,...(item.url ? [`URL:${escape(item.url)}`] : []),'END:VEVENT']),'END:VCALENDAR',''].map(fold).join('\r\n');
+  return calendarEventsText(deadlines.map(d => ({id:d.id,title:d.title,startsAt:d.dueAt,url:d.url})),now);
+}
+export function calendarEventsText(events: {id:string;title:string;startsAt:string;endsAt?:string;url?:string|null}[], now = new Date().toISOString()): string {
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//VStudy//Planner//EN','CALSCALE:GREGORIAN',...events.flatMap(item => ['BEGIN:VEVENT',`UID:${item.id}@vstudy`,`DTSTAMP:${stamp(now)}`,`DTSTART:${stamp(item.startsAt)}`,...(item.endsAt ? [`DTEND:${stamp(item.endsAt)}`] : []),`SUMMARY:${escape(item.title)}`,...(item.url ? [`URL:${escape(item.url)}`] : []),'END:VEVENT']),'END:VCALENDAR',''].map(fold).join('\r\n');
 }

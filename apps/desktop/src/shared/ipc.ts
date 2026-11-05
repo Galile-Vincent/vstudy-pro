@@ -1,6 +1,7 @@
 import { storageContract } from "./storage";
 import { chatHistoryContract } from './chat-history';
 import { moodlePanelSchema, moodleSiteCheckSchema, moodleSiteUrlSchema, moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
+import { plannerIpc } from "./planner";
 import { aiParseContract } from './ai-parse';
 import { moodleWebviewContract } from './moodle-webview';
 import { statusSchema } from "./status";
@@ -29,6 +30,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
 export const ipcContract = {
+  ...plannerIpc,
   ...aiParseContract,
   ...moodleWebviewContract,
   ...storageContract,

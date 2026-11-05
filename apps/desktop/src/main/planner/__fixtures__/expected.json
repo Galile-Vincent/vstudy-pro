@@ -1,0 +1,172 @@
+[
+  {
+    "name": "heavy week",
+    "action": {
+      "type": "make-study-plan",
+      "title": "Study draft",
+      "timeZone": "UTC",
+      "dailyBudgetMinutes": 60,
+      "assumptions": [
+        "10:00 to 12:00 UTC is assumed available.",
+        "Deadline estimate 60 minutes; exam estimate 45 per topic, minimum 90."
+      ],
+      "blocks": [
+        {
+          "title": "Write report",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "task",
+            "id": "00000000-0000-4000-8000-000000000004"
+          },
+          "startsAt": "2030-01-01T10:00:00.000Z",
+          "durationMinutes": 30
+        },
+        {
+          "title": "Write report",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "task",
+            "id": "00000000-0000-4000-8000-000000000004"
+          },
+          "startsAt": "2030-01-02T10:00:00.000Z",
+          "durationMinutes": 30
+        },
+        {
+          "title": "Write report",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "task",
+            "id": "00000000-0000-4000-8000-000000000004"
+          },
+          "startsAt": "2030-01-01T10:30:00.000Z",
+          "durationMinutes": 30
+        },
+        {
+          "title": "Write report",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "task",
+            "id": "00000000-0000-4000-8000-000000000004"
+          },
+          "startsAt": "2030-01-02T10:30:00.000Z",
+          "durationMinutes": 30
+        }
+      ]
+    },
+    "unallocated": [
+      {
+        "title": "Write report",
+        "minutes": 480,
+        "reason": "capacity"
+      }
+    ]
+  },
+  {
+    "name": "exam in three days",
+    "action": {
+      "type": "make-study-plan",
+      "title": "Study draft",
+      "timeZone": "UTC",
+      "dailyBudgetMinutes": 60,
+      "assumptions": [
+        "10:00 to 12:00 UTC is assumed available.",
+        "Deadline estimate 60 minutes; exam estimate 45 per topic, minimum 90."
+      ],
+      "blocks": [
+        {
+          "title": "Physics exam",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "exam",
+            "id": "00000000-0000-4000-8000-000000000005"
+          },
+          "startsAt": "2030-01-01T10:00:00.000Z",
+          "durationMinutes": 30
+        },
+        {
+          "title": "Physics exam",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "exam",
+            "id": "00000000-0000-4000-8000-000000000005"
+          },
+          "startsAt": "2030-01-02T10:00:00.000Z",
+          "durationMinutes": 30
+        },
+        {
+          "title": "Physics exam",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "exam",
+            "id": "00000000-0000-4000-8000-000000000005"
+          },
+          "startsAt": "2030-01-03T10:00:00.000Z",
+          "durationMinutes": 30
+        },
+        {
+          "title": "Physics exam",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "exam",
+            "id": "00000000-0000-4000-8000-000000000005"
+          },
+          "startsAt": "2030-01-01T10:30:00.000Z",
+          "durationMinutes": 30
+        },
+        {
+          "title": "Physics exam",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "exam",
+            "id": "00000000-0000-4000-8000-000000000005"
+          },
+          "startsAt": "2030-01-02T10:30:00.000Z",
+          "durationMinutes": 15
+        }
+      ]
+    },
+    "unallocated": []
+  },
+  {
+    "name": "missing submissions",
+    "action": {
+      "type": "plan-today",
+      "title": "Study draft",
+      "timeZone": "UTC",
+      "dailyBudgetMinutes": 60,
+      "assumptions": [
+        "10:00 to 12:00 UTC is assumed available.",
+        "Deadline estimate 60 minutes; exam estimate 45 per topic, minimum 90."
+      ],
+      "blocks": [
+        {
+          "title": "Lab report",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "deadline",
+            "id": "00000000-0000-4000-8000-000000000003"
+          },
+          "startsAt": "2030-01-01T10:00:00.000Z",
+          "durationMinutes": 30
+        },
+        {
+          "title": "Lab report",
+          "courseId": "00000000-0000-4000-8000-000000000001",
+          "target": {
+            "kind": "deadline",
+            "id": "00000000-0000-4000-8000-000000000003"
+          },
+          "startsAt": "2030-01-01T10:30:00.000Z",
+          "durationMinutes": 30
+        }
+      ]
+    },
+    "unallocated": [
+      {
+        "title": "Missing submission",
+        "minutes": 60,
+        "reason": "overdue"
+      }
+    ]
+  }
+]

@@ -46,7 +46,15 @@ export const fakeAdapter: ProviderAdapter = {
     if (request.userMessage === 'test error' && !fakeFailures.has(request.turnId ?? request.requestId)) { fakeFailures.add(request.turnId ?? request.requestId); yield { type: 'error', message: 'Provider rate limited' }; return; }
     if (request.scope === 'course') {
       const data = JSON.parse(request.prompt.split('<UNTRUSTED_COURSE_DATA>\n')[1]!.split('\n</UNTRUSTED_COURSE_DATA>')[0]!);
-      const deadline = data.deadlines.find((d: {dueAt:string}) => Date.parse(d.dueAt) > Date.now() + 7200000);
+      const deadline = (data.deadlines ?? []).find((d: {dueAt:string}) => Date.parse(d.dueAt) > Date.now() + 7200000);
+      if (request.materials) {
+        yield { type: 'text-delta', text: request.materials.mode === 'quiz' ? 'Practice questions from the approved notes.\n\n1. Explain the main concept.\n\nAnswer key\n\n1. Check your explanation against the selected source.' : 'Summary of the approved course notes. Review the source before relying on this summary.' };
+        yield { type: 'done' }; return;
+      }
+      if (request.userMessage === 'test planner task') {
+        yield { type: 'text-delta', text: 'Review this task before saving.\n```vstudy-action\n' + JSON.stringify({ type: 'create-task', task: { title: 'Draft lab discussion', courseId: data.course.id, dueAt: deadline?.dueAt ?? null, estimateMinutes: 45 } }) + '\n```' };
+        yield { type: 'done' }; return;
+      }
       yield {type:'text-delta',text:'Review your course materials before the next deadline.\n'};
       if (deadline) yield {type:'text-delta',text:'```vstudy-action\n'+JSON.stringify({type:'create-reminder',deadlineId:deadline.id,remindAt:new Date(Date.parse(deadline.dueAt)-3600000).toISOString(),note:'Review course materials'})+'\n```'};
       yield {type:'done'};
