@@ -1,0 +1,849 @@
+{
+  "url": "http://localhost:4321/vstudy-pro/en/",
+  "width": 1440,
+  "scheme": "dark",
+  "roles": [
+    {
+      "sel": "body",
+      "text": "Skip to contentVStudy ProFeaturesDocsGitHubDo",
+      "rect": {
+        "x": 0,
+        "y": -2349.5,
+        "w": 1440,
+        "h": 7324.78125
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "0px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgb(23, 27, 40)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "nav",
+      "text": "VStudy ProFeaturesDocsGitHubDownload↓Language",
+      "rect": {
+        "x": 120,
+        "y": 0,
+        "w": 1200,
+        "h": 71
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "0px 120px",
+        "gap": "24px",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "header",
+      "text": "VStudy ProFeaturesDocsGitHubDownload↓Language",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 1440,
+        "h": 72
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "0px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "color(srgb 0.0901961 0.105882 0.156863 / 0.96)",
+        "color": "rgb(238, 241, 250)",
+        "border": "",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "sticky",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "h1",
+      "text": "Your semester, with room to think.",
+      "rect": {
+        "x": 260,
+        "y": -2181.5,
+        "w": 920,
+        "h": 152.625
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "72px",
+        "fontWeight": "600",
+        "lineHeight": "76.32px",
+        "letterSpacing": "-2.52px",
+        "padding": "0px",
+        "margin": "0px 140px",
+        "gap": "normal",
+        "maxWidth": "920px",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "h2",
+      "text": "A little setup. A clearer next step.",
+      "rect": {
+        "x": 120,
+        "y": -708.859375,
+        "w": 600,
+        "h": 44.796875
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "40px",
+        "fontWeight": "600",
+        "lineHeight": "44.8px",
+        "letterSpacing": "-1px",
+        "padding": "0px",
+        "margin": "0px",
+        "gap": "normal",
+        "maxWidth": "600px",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "h2",
+      "text": "Less switching. More studying.",
+      "rect": {
+        "x": 120,
+        "y": -359.875,
+        "w": 1200,
+        "h": 44.796875
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "40px",
+        "fontWeight": "600",
+        "lineHeight": "44.8px",
+        "letterSpacing": "-1px",
+        "padding": "0px",
+        "margin": "0px 0px 80px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "h3",
+      "text": "Make yourself at home",
+      "rect": {
+        "x": 120,
+        "y": -556.0625,
+        "w": 368,
+        "h": 26
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "20px",
+        "fontWeight": "600",
+        "lineHeight": "26px",
+        "letterSpacing": "-0.4px",
+        "padding": "0px",
+        "margin": "0px 0px 12px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "h3",
+      "text": "Bring your coursework",
+      "rect": {
+        "x": 536,
+        "y": -556.0625,
+        "w": 368,
+        "h": 26
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "20px",
+        "fontWeight": "600",
+        "lineHeight": "26px",
+        "letterSpacing": "-0.4px",
+        "padding": "0px",
+        "margin": "0px 0px 12px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "main",
+      "text": "Your semester, with room to think.Bring Moodl",
+      "rect": {
+        "x": 0,
+        "y": -2277.5,
+        "w": 1440,
+        "h": 6979
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "0px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "section",
+      "text": "Your semester, with room to think.Bring Moodl",
+      "rect": {
+        "x": 120,
+        "y": -2277.5,
+        "w": 1200,
+        "h": 1456.640625
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "96px 0px 0px",
+        "margin": "0px 120px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "section",
+      "text": "A little setup. A clearer next step.1Make you",
+      "rect": {
+        "x": 120,
+        "y": -820.859375,
+        "w": 1200,
+        "h": 460.984375
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "112px 0px",
+        "margin": "0px 120px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "p",
+      "text": "Bring Moodle courses, study plans, and AI-ass",
+      "rect": {
+        "x": 395,
+        "y": -2004.875,
+        "w": 650,
+        "h": 64
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "20px",
+        "fontWeight": "400",
+        "lineHeight": "32px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "24px 275px 0px",
+        "gap": "normal",
+        "maxWidth": "650px",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(183, 193, 214)",
+        "border": "0px none rgb(183, 193, 214)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "p",
+      "text": "macOS · Apple silicon · v0.1.0",
+      "rect": {
+        "x": 120,
+        "y": -1844.875,
+        "w": 1200,
+        "h": 19.796875
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "19.8px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "16px 0px 0px",
+        "gap": "8px",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(183, 193, 214)",
+        "border": "0px none rgb(183, 193, 214)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "button",
+      "text": "",
+      "rect": {
+        "x": 1280,
+        "y": 15.5,
+        "w": 40,
+        "h": 40
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "8px",
+        "margin": "0px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "8px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.18s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1)",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "button",
+      "text": "VStudy",
+      "rect": {
+        "x": 120,
+        "y": 2513.2734375,
+        "w": 126.21875,
+        "h": 107.796875
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "19.8px",
+        "letterSpacing": "normal",
+        "padding": "16px 4px",
+        "margin": "0px",
+        "gap": "12px",
+        "maxWidth": "none",
+        "borderRadius": "12px",
+        "backgroundColor": "rgb(48, 60, 85)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.18s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1)",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": ".hero",
+      "text": "Your semester, with room to think.Bring Moodl",
+      "rect": {
+        "x": 120,
+        "y": -2277.5,
+        "w": 1200,
+        "h": 1456.640625
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "96px 0px 0px",
+        "margin": "0px 120px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": ".hero-sub",
+      "text": "Bring Moodle courses, study plans, and AI-ass",
+      "rect": {
+        "x": 395,
+        "y": -2004.875,
+        "w": 650,
+        "h": 64
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "20px",
+        "fontWeight": "400",
+        "lineHeight": "32px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "24px 275px 0px",
+        "gap": "normal",
+        "maxWidth": "650px",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(183, 193, 214)",
+        "border": "0px none rgb(183, 193, 214)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": ".container",
+      "text": "VStudy ProFeaturesDocsGitHubDownload↓Language",
+      "rect": {
+        "x": 120,
+        "y": 0,
+        "w": 1200,
+        "h": 71
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "0px 120px",
+        "gap": "24px",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": ".container",
+      "text": "Your semester, with room to think.Bring Moodl",
+      "rect": {
+        "x": 120,
+        "y": -2277.5,
+        "w": 1200,
+        "h": 1456.640625
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "96px 0px 0px",
+        "margin": "0px 120px",
+        "gap": "normal",
+        "maxWidth": "none",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "img",
+      "text": "",
+      "rect": {
+        "x": 128,
+        "y": -1721.078125,
+        "w": 1184,
+        "h": 856.421875
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "0px",
+        "gap": "normal",
+        "maxWidth": "100%",
+        "borderRadius": "16px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    },
+    {
+      "sel": "img",
+      "text": "",
+      "rect": {
+        "x": 664,
+        "y": -187.078125,
+        "w": 640,
+        "h": 409.59375
+      },
+      "css": {
+        "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26.4px",
+        "letterSpacing": "normal",
+        "padding": "0px",
+        "margin": "0px",
+        "gap": "normal",
+        "maxWidth": "100%",
+        "borderRadius": "8px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(238, 241, 250)",
+        "border": "0px none rgb(238, 241, 250)",
+        "boxShadow": "none",
+        "transition": "all",
+        "position": "static",
+        "backdropFilter": "none"
+      }
+    }
+  ],
+  "tokens": [
+    [
+      "--font",
+      "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+    ],
+    [
+      "--space-16",
+      "64px"
+    ],
+    [
+      "--r-xs",
+      "6px"
+    ],
+    [
+      "--r-md",
+      "12px"
+    ],
+    [
+      "--space-20",
+      "80px"
+    ],
+    [
+      "--on-accent",
+      "#171b28"
+    ],
+    [
+      "--motion-fast",
+      ".12s"
+    ],
+    [
+      "--motion-ui",
+      ".18s"
+    ],
+    [
+      "--accent",
+      "#a7baff"
+    ],
+    [
+      "--ease-ui",
+      "cubic-bezier(.4,0,.2,1)"
+    ],
+    [
+      "--space-2",
+      "8px"
+    ],
+    [
+      "--r-lg",
+      "16px"
+    ],
+    [
+      "--space-4",
+      "16px"
+    ],
+    [
+      "--text-lg",
+      "20px"
+    ],
+    [
+      "--space-3",
+      "12px"
+    ],
+    [
+      "--text-title",
+      "40px"
+    ],
+    [
+      "--r-xl",
+      "24px"
+    ],
+    [
+      "--space-8",
+      "32px"
+    ],
+    [
+      "--space-32",
+      "128px"
+    ],
+    [
+      "--active",
+      "#303c55"
+    ],
+    [
+      "--mono",
+      "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+    ],
+    [
+      "--line",
+      "#455572"
+    ],
+    [
+      "--ink",
+      "#eef1fa"
+    ],
+    [
+      "--text-xs",
+      "12px"
+    ],
+    [
+      "--space-1",
+      "4px"
+    ],
+    [
+      "--motion-enter",
+      ".32s"
+    ],
+    [
+      "--muted",
+      "#b7c1d6"
+    ],
+    [
+      "--background",
+      "#171b28"
+    ],
+    [
+      "--space-10",
+      "40px"
+    ],
+    [
+      "--text-display",
+      "72px"
+    ],
+    [
+      "--focus",
+      "#a7baff"
+    ],
+    [
+      "--header",
+      "72px"
+    ],
+    [
+      "--r-pill",
+      "999px"
+    ],
+    [
+      "--space-12",
+      "48px"
+    ],
+    [
+      "--r-sm",
+      "8px"
+    ],
+    [
+      "--subtle",
+      "#1b2131"
+    ],
+    [
+      "--text-xl",
+      "24px"
+    ],
+    [
+      "--elevation",
+      "0 24px 64px -24px #0009"
+    ],
+    [
+      "--text-sm",
+      "14px"
+    ],
+    [
+      "--surface",
+      "#202637"
+    ],
+    [
+      "--ease-out",
+      "cubic-bezier(.16,1,.3,1)"
+    ],
+    [
+      "--space-6",
+      "24px"
+    ],
+    [
+      "--text-base",
+      "16px"
+    ],
+    [
+      "--space-28",
+      "112px"
+    ],
+    [
+      "--space-5",
+      "20px"
+    ],
+    [
+      "--space-24",
+      "96px"
+    ],
+    [
+      "--container",
+      "1200px"
+    ]
+  ],
+  "animations": [],
+  "buttons": [
+    {
+      "text": "",
+      "label": "Change color scheme"
+    },
+    {
+      "text": "VStudy",
+      "label": null
+    },
+    {
+      "text": "Ocean",
+      "label": null
+    },
+    {
+      "text": "Grove",
+      "label": null
+    },
+    {
+      "text": "Ember",
+      "label": null
+    },
+    {
+      "text": "Iris",
+      "label": null
+    },
+    {
+      "text": "Rose",
+      "label": null
+    },
+    {
+      "text": "Slate",
+      "label": null
+    },
+    {
+      "text": "Paper",
+      "label": null
+    },
+    {
+      "text": "High contrast",
+      "label": null
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+---
+import Home from '../../components/Home.astro';
+import { languages } from '../../data/ui';
+export function getStaticPaths() { return languages.map(language => ({ params:{lang:language}, props:{language} })); }
+const { language } = Astro.props;
+---
+<Home {language} />

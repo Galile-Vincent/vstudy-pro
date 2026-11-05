@@ -1,0 +1,11 @@
+---
+import { path } from '../config';
+import { guides, groups, getGuide } from '../data/docs';
+import { ui, type Language } from '../data/ui';
+interface Props { language: Language; slug: string; }
+const { language, slug } = Astro.props;
+const groupNames = language === 'zh-Hant' ? ['從這裡開始','使用 VStudy 學習','你的工作空間','參考資料'] : language === 'ja' ? ['ここから始める','VStudy で学ぶ','ワークスペース','リファレンス'] : groups;
+---
+<nav aria-label={ui[language].contents}>
+  {groups.map((group,index) => <div class="sidebar-group"><p>{groupNames[index]}</p>{guides.filter(item => item.group === group).map(item => <a href={path(`${language}/docs/${item.slug}/`)} aria-current={item.slug === slug ? 'page' : undefined}>{getGuide(item.slug,language).title}</a>)}</div>)}
+</nav>

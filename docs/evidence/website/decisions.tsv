@@ -1,0 +1,7 @@
+ts	phase	decision	why	evidence	result
+2026-11-05T23:23:49Z	start	Record the completed implementation decisions for parent review	This log summarizes choices from the website implementation session	docs/WEBSITE_DESIGN_NOTES.md	recorded
+2026-11-05T23:23:49Z	design	Use native type and the app's full palette roles	Measured references favor type and spacing over decoration	docs/evidence/website/references/measurements.json	implemented
+2026-11-05T23:23:49Z	architecture	Use static Astro routes and one guide registry	One record supplies navigation and search without a client app	apps/website/src/data/docs.ts	49 pages built
+2026-11-05T23:23:49Z	toolchain	Keep current Astro and scope checker dependency overrides	An older Astro introduced advisories and the new checker failed to load	apps/website/README.md	security check passes
+2026-11-05T23:23:49Z	verification	Make code blocks keyboard focusable	The mobile axe sweep found inaccessible horizontal scrolling	docs/evidence/website/fixed-accessibility-findings.json	final axe sweep passes
+2026-11-05T23:23:49Z	delivery	Prepare Pages without pushing or changing settings	The brief permits a workflow but excludes publication	.github/workflows/pages.yml	not deployed

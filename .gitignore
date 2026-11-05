@@ -32,3 +32,6 @@ docs/security-evidence/**/*.png
 
 # Derived from src/shared/locales by install, dev, build, test, and typecheck.
 apps/desktop/src/shared/locales.generated.ts
+
+# Astro-generated build metadata.
+apps/website/.astro/

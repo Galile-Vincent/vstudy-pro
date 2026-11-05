@@ -1,0 +1,8 @@
+---
+import Docs from '../../../components/Docs.astro';
+import { guides } from '../../../data/docs';
+import { languages } from '../../../data/ui';
+export function getStaticPaths() { return languages.flatMap(language => guides.map(guide => ({params:{lang:language,slug:guide.slug},props:{language,slug:guide.slug}}))); }
+const { language, slug } = Astro.props;
+---
+<Docs {language} {slug} />

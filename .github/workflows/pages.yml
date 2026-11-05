@@ -1,0 +1,42 @@
+name: Deploy website to GitHub Pages
+on:
+  push:
+    branches: [main]
+    paths: ['apps/website/**', 'apps/desktop/package.json', 'apps/desktop/src/shared/themes/palettes.json', 'pnpm-lock.yaml', '.github/workflows/pages.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts --filter @vstudy/website...
+      - run: pnpm --filter @vstudy/website build
+        env:
+          SITE_URL: https://ava-apple.github.io
+          BASE_PATH: ${{ vars.WEBSITE_BASE_PATH || '/vstudy-pro' }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/website/dist
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
