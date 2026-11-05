@@ -7,10 +7,13 @@ import type { Document } from '../../shared';
 import type { z } from 'zod';
 import type { folderSchema } from '../../shared/library';
 import { tr } from '../../shared/i18n';
+import { useOptionalNavigation } from '../shell';
 import { desktop } from '../bridge';
 import { errorText, statusText } from '../status';
 export function UploadCard({ folders = [], onImported, showSample = true }: { showSample?: boolean; folders?: z.infer<typeof folderSchema>[]; onImported?: (document: Document) => void }) {
   useTranslation();
+  const navigation = useOptionalNavigation();
+  const [imported, setImported] = useState<Document>();
   const [folderId, setFolderId] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -27,7 +30,7 @@ export function UploadCard({ folders = [], onImported, showSample = true }: { sh
       const failed = results?.find(r => !r.ok);
       if (failed && !failed.ok) setError(errorText(new Error(failed.error)));
       if (folderId && documents.length) await desktop.invoke('library:documents:move', { documentIds: documents.map(d => d.id), folderId: folders.find(f => f.id === folderId)!.id });
-      documents.forEach(d => { owned.current.add(d.id); onImported?.(d); });
+      documents.forEach(d => { owned.current.add(d.id); setImported(d); onImported?.(d); });
       setMessage(documents.length ? tr('home:imported') : '');
       window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed'));
     } catch (error) { setError(errorText(error)); setMessage(''); }
@@ -39,10 +42,12 @@ export function UploadCard({ folders = [], onImported, showSample = true }: { sh
     if (paths.length && paths.every(Boolean)) void upload(paths); else setError(tr('home:drop_error'));
   }}>
     <Upload aria-hidden="true"/><p>{tr('home:upload_hint')}</p>
+    <p>{tr('home:file_help')}</p>
     <label>{tr('home:destination')}<Select value={folderId} onChange={e => setFolderId(e.target.value)} disabled={busy}><option value="">{tr('library:unfiled')}</option>{folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</Select></label>
     <Button variant="outline" className="primary" disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</Button>
-    {showSample && <Button variant="outline" className="ghost" disabled={busy} onClick={() => { setBusy(true); void desktop.invoke('documents:importSample', {language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}).then(d => { onImported?.(d); window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</Button>}
+    {showSample && <Button variant="outline" className="ghost" disabled={busy} onClick={() => { setError(''); setMessage(''); setBusy(true); void desktop.invoke('documents:importSample', {language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}).then(d => { setImported(d); onImported?.(d); setMessage(tr('home:imported')); window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</Button>}
 
+    {imported && navigation && <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>{tr('home:open_imported', { title: imported.title })}</Button>}
     {busy && <progress aria-label={tr('home:importing')}/>}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
   </div>;
 }

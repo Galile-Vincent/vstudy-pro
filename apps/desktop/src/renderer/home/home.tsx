@@ -67,8 +67,9 @@ export function Home({ navigate, onUsage, onFolder, name, initialData }: { navig
   const percent = Math.max(settings?.monthlyBudgetUsd ? (data?.month.costUsd ?? 0) / settings.monthlyBudgetUsd * 100 : 0, settings?.monthlyTokenBudget ? tokens / settings.monthlyTokenBudget * 100 : 0);
   const displayName = name ?? settings?.displayName;
   return <main className="home-page"><div className="home-content">
-    <header className="home-greeting"><div><h1>{tr(`home:${hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'}`)}{displayName ? tr('home:greeting_name', { name: displayName }) : ''}</h1><p><AnimatedText texts={[tr('home:prompt_1'), tr('home:prompt_2'), tr('home:prompt_3')]} /></p></div><Button variant="ghost" id="welcome-entry" className="ghost" onClick={() => navigate("welcome")}><Info size={14}/>{tr("welcome:entry")}</Button></header>
+    <header className="home-greeting"><div><h1>{tr(`home:${hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'}`)}{displayName ? tr('home:greeting_name', { name: displayName }) : ''}</h1><p><AnimatedText texts={[tr('home:prompt_1'), tr('home:prompt_2'), tr('home:prompt_3')]} /></p></div><Button variant="ghost" id="welcome-entry" className="ghost" onClick={() => navigate("welcome")}><Info size={14}/>{tr("home:how_to_use")}</Button></header>
     {error && <div role="alert">{error}<Button variant="ghost" onClick={refresh}>{tr('common:retry')}</Button></div>}
+    <Card title={tr('home:upload')}><UploadCard folders={folders} onImported={refresh}/></Card>
     {!data ? !error && <div className="home-grid" role="status" aria-busy="true" aria-label={tr('home:loading')}>{Array.from({ length: 6 }, (_, i) => <Skeleton className="home-card home-skeleton" key={i}/>)}</div> : <div className="home-grid">
       {!!data.recentDocuments.length && <Card title={tr('home:continue')} className="home-recent-section">
         <div className="home-recent-grid">{data.recentDocuments.slice(0, 6).map((recent, index) => <article key={recent.document.id} className={`home-reading-card${index === 0 ? ' home-continue' : ''}`}>
@@ -78,7 +79,6 @@ export function Home({ navigate, onUsage, onFolder, name, initialData }: { navig
         </article>)}</div>
       </Card>}
       <div className="home-secondary" data-empty={!data.recentDocuments.length}>
-      <Card title={tr('home:upload')}><UploadCard folders={folders} onImported={refresh}/></Card>
       {!!data.month.calls && <Card title={tr('home:usage')}><strong className="home-stat" title={fmt.number(tokens)} aria-label={fmt.number(tokens)}>{fmt.number(tokens, { notation: tokens >= 1e6 ? "compact" : "standard", maximumFractionDigits: 1 })}</strong><p>{tr('home:month_tokens', { cost: fmt.currency(data.month.costUsd) })}</p><Sparkline series={data.series}/>{!!(settings?.monthlyBudgetUsd || settings?.monthlyTokenBudget) && <><label>{tr('home:budget', { percent: fmt.number(percent) })}<Progress aria-label={tr('common:monthly_budget_used')} value={Math.min(100, percent)}/></label></>}<Button variant="ghost" onClick={onUsage}>{tr('home:view_usage')}</Button></Card>}
       {data.streak.best > 0 && <Card title={tr('home:streak')}><Streak streak={data.streak}/></Card>}
       </div>

@@ -11,7 +11,7 @@
   "api_provider": "API provider",
   "key": "API key",
   "save_key": "Save and connect",
-  "key_saved": "Connected. Your key is stored securely.",
+  "key_saved": "Key saved. The connection has not been tested.",
   "bring": "Start with something you care about",
   "bring_body": "Add your notes, a paper, or a short sample. Your original file is kept alongside a readable copy. The first conversion asks to download packages from PyPI and possibly Python from GitHub. Choose Offline to read Markdown and text; retry conversion when ready.",
   "sample": "Try a sample document",
@@ -33,5 +33,7 @@
   "preview_highlight": "Connect new ideas.",
   "preview_question": "How does this help me learn?",
   "preview_answer": "Link a new concept to something you already know.",
-  "preview_citation": "From your document · 1"
+  "preview_citation": "From your document · 1",
+  "setup_help": "AI comes from another service. Reading files is free of AI charges. To ask AI, first set up an account with OpenAI or Anthropic. An API key is a secret code from that account; API use can cost extra, even with a chat subscription. CLI means a separate app that you install and sign in to before refreshing this list. You can skip this and read a sample now.",
+  "read_only": "Read without AI"
 }

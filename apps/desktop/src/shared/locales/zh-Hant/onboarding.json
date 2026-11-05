@@ -11,7 +11,7 @@
   "api_provider": "API 服務供應商",
   "key": "API 金鑰",
   "save_key": "儲存並連線",
-  "key_saved": "已連線。金鑰已安全儲存。",
+  "key_saved": "金鑰已儲存，尚未測試連線。",
   "bring": "從你在意的內容開始",
   "bring_body": "匯入筆記、論文，或先試讀一份短範例。原始檔案會和可閱讀的版本一起保留。 首次轉換會詢問是否從 PyPI 下載套件，並可能從 GitHub 下載 Python。選擇離線仍可閱讀 Markdown 和文字，準備好後再重試轉換。",
   "sample": "試讀範例文件",
@@ -33,5 +33,7 @@
   "preview_highlight": "串連新的想法。",
   "preview_question": "這如何幫助我學習？",
   "preview_answer": "試著把新概念與你已經知道的事連結起來。",
-  "preview_citation": "來自你的文件 · 1"
+  "preview_citation": "來自你的文件 · 1",
+  "setup_help": "AI 來自其他服務。只讀文件不會產生 AI 費用。要問 AI，請先建立 OpenAI 或 Anthropic 帳號。API 金鑰是帳號提供的秘密代碼；即使訂閱聊天方案，使用 API 仍可能另外收費。CLI 是需要另外安裝並登入的程式，完成後再重新整理清單。你可以先跳過，直接讀範例。",
+  "read_only": "不連接 AI，先閱讀"
 }
