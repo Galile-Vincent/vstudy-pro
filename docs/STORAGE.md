@@ -61,13 +61,13 @@ Legacy version rows have no historical checksum to verify. The first upgrade rec
 |---|---:|
 | Courses, course contents, grades, announcements | Five minutes |
 | Deadlines, completion, notification reads | One minute |
-| Teachers, mobile configuration | One hour |
+| Teachers, safe configuration loaders | One hour |
 
 The default mode returns a fresh row without network work. A stale row returns immediately while one shared promise revalidates it. Cold callers also share one promise. `refresh` waits for revalidation and accepts a cached fallback only when the caller identifies the error as recoverable. `offline` never calls the loader. Explicit account purge cancels pending loaders and invalidates their generation even when a transport ignores cancellation.
 
 Loaders receive cached ETag and modification-time validators. An `unmodified` response advances the sync timestamp without changing bytes. A changed caller-supplied `revision` invalidates the old payload. Moodle's REST POST functions used here do not expose a useful ETag or conditional timeModified contract, so the adapter uses TTL and validated full responses. It does not invent conditional REST requests. Imported Moodle files separately compare the server's `modifiedAt` and size before reusing a local document link.
 
-`MoodleClient.setCache(cache, accountId, refresh)` caches an explicit read-function whitelist. Keys include site URL, normalized language, function, and sorted parameters. Login, site info containing private keys, tokens, and read mutations never enter the response cache. Wire responses are capped at 16 MiB while streaming. Oversized successful responses can be used without persisting them.
+`MoodleClient.setCache(cache, accountId, refresh)` caches an explicit read-function whitelist. Keys include site URL, normalized language, function, and sorted parameters. Login, site info containing private keys, raw mobile configuration, tokens, and read mutations never enter the response cache. Wire responses are capped at 16 MiB while streaming. Oversized successful responses can be used without persisting them.
 
 The service already returns the durable course mirror before refreshing. It uses `refresh` mode inside those background jobs, preserving that user-visible stale-while-revalidate behavior. Cached network fallbacks retain the last real sync time. Course details now expose `cacheState` and `lastSyncedAt` to the renderer. Opening a course shows the saved-content state and sync time. Explicit refresh still attempts the network. Auth and permission errors are never hidden as successful network fallbacks.
 

@@ -43,5 +43,9 @@
   "cached_stale": "Showing cached content",
   "cached_offline": "Offline · showing cached content",
   "last_synced": "Last synced {{time}}",
-  "never_synced": "Not synced yet"
+  "never_synced": "Not synced yet",
+  "bytes": "{{value}} B",
+  "kibibytes": "{{value}} KiB",
+  "mebibytes": "{{value}} MiB",
+  "gibibytes": "{{value}} GiB"
 }

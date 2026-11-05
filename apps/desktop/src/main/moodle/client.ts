@@ -49,7 +49,7 @@ const cachedFunctions: Record<string, ResourceKind> = {
   mod_assign_get_assignments: 'deadlines', mod_assign_get_submission_status: 'deadlines', mod_quiz_get_quizzes_by_courses: 'deadlines',
   mod_quiz_get_user_attempts: 'deadlines', core_calendar_get_calendar_upcoming_view: 'deadlines', core_calendar_get_action_events_by_timesort: 'deadlines',
   core_message_get_messages: 'notifications', message_popup_get_popup_notifications: 'notifications',
-  gradereport_user_get_grade_items: 'grades', core_enrol_get_enrolled_users: 'teachers', tool_mobile_get_config: 'configuration',
+  gradereport_user_get_grade_items: 'grades', core_enrol_get_enrolled_users: 'teachers',
   mod_forum_get_forums_by_courses: 'announcements', mod_forum_get_forum_discussions: 'announcements',
   mod_forum_get_forum_discussions_paginated: 'announcements', mod_forum_get_discussion_posts: 'announcements',
 };

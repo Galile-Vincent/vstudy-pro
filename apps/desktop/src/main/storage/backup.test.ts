@@ -69,3 +69,14 @@ it('drains accepted IPC before maintenance and rejects concurrent work until com
   expect(()=>enterStorageRequest()).toThrow('storage.busy');await Promise.resolve();expect(ran).toBe(false);
   release();await pending;expect(ran).toBe(true);expect(storageBusy()).toBe(false);
 });
+
+it('preserves an existing backup when an original is missing from the live library',async()=>{
+  const root=await mkdtemp(join(tmpdir(),'vstudy-incomplete-export-')),output=await mkdtemp(join(tmpdir(),'vstudy-backup-output-'));
+  const {store,directory}=await fixture(root);const path=join(output,'backup.zip');
+  try {
+    await exportBackup(store,root,path);const good=await readFile(path);
+    await rm(join(directory,'source.md'));
+    await expect(exportBackup(store,root,path)).rejects.toThrow('storage.invalid_backup');
+    expect(await readFile(path)).toEqual(good);
+  }finally{store.close();await rm(root,{recursive:true,force:true});await rm(output,{recursive:true,force:true});}
+});

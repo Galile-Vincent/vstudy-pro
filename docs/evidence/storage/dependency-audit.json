@@ -1,0 +1,12 @@
+{
+  "unreviewed": [
+    {
+      "id": 1244623,
+      "package": "minimatch",
+      "severity": "moderate",
+      "title": "minimatch has potential denial of service via globparts amplification",
+      "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249"
+    }
+  ],
+  "dependencyChangesByStreamE": false
+}

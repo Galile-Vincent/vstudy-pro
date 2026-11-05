@@ -79,6 +79,6 @@ export async function runStorageBench(root,require){
     assert.equal(requests,1);assert.equal(db.prepare('SELECT count(*) n FROM documents').get().n,10000);assert.equal(repository.overview().courses.length,40);
     assert.equal(store.integrityCheck()[0].integrity_check,'ok');
     const maxRssMiB=process.resourceUsage().maxRSS/1024;assert.ok(maxRssMiB<1024,`RSS ${maxRssMiB} MiB exceeds limit`);
-    console.log(JSON.stringify({node:process.version,baseline,shape:{documents:10000,courses:40,filesPerCourse:40,ftsCharactersPerDoc:1000},results,cache:{coldMs,warmMs,concurrentReads:40,networkLoads:requests},checks,failures:0,maxRssMiB,scope:'Warm synchronous repository APIs on disk WAL. Excludes renderer, IPC, network latency, and actual library file reads.'},null,2));
+    console.log(JSON.stringify({node:process.version,baseline,shape:{documents:10000,courses:40,filesPerCourse:40,ftsCharactersPerDoc:'資料の通信と学習 science '.repeat(40).length},results,cache:{coldMs,warmMs,concurrentReads:40,networkLoads:requests},checks,failures:0,maxRssMiB,scope:'Warm synchronous repository APIs on disk WAL. Excludes renderer, IPC, network latency, and actual library file reads.'},null,2));
   }finally{store.close();rmSync(directory,{recursive:true,force:true});}
 }

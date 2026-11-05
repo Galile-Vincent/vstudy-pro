@@ -21,7 +21,8 @@ export async function fingerprint(path: string): Promise<{bytes:number;sha256:st
 
 /** Write a standard ZIP with bounded metadata and 64 KiB streaming file reads. */
 export async function writeZip(destination: string, files: ArchiveFile[]): Promise<void> {
-  if (files.length > 65534 || files.some(f => !allowedBackupPath(f.name))) throw new Error('storage.invalid_backup');
+  if (files.length > 50000 || files.some(f => !allowedBackupPath(f.name))) throw new Error('storage.invalid_backup');
+  if(files.some(file=>file.bytes>maxBytes) || files.reduce((sum,file)=>sum+file.bytes+Buffer.byteLength(file.name)*2+76,22)>maxBytes)throw new Error('storage.backup_too_large');
   await validateDestination(destination);
   const temporary=`${destination}.${randomUUID()}.tmp`;
   try {

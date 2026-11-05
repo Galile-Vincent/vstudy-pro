@@ -8,4 +8,4 @@
 
 Run `pnpm exec vitest run src/main/storage --pool=forks --maxWorkers=2` from `apps/desktop`. `e2e/storage.mjs` checks the built Electron UI and a real restore across restart. It refuses to launch while another Electron test instance exists.
 
-See [the storage reference](../../../../../../docs/STORAGE.md) for the inventory, format, migration contract, and remaining limits.
+See [the storage reference](../../../../../docs/STORAGE.md) for the inventory, format, migration contract, and remaining limits.

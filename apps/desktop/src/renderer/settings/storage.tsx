@@ -9,7 +9,10 @@ import { errorText } from '../status';
 import { Button } from '../components/ui/button';
 import { SettingsGroup, SettingsRow } from './layout';
 type Usage=z.infer<typeof storageUsageSchema>;
-const bytes=(value:number):string=>new Intl.NumberFormat(i18n.language,{style:'unit',unit:'byte',notation:'compact',maximumFractionDigits:1}).format(value);
+const bytes=(value:number):string=>{
+  const unit=value>=1024**3 ? 3 : value>=1024**2 ? 2 : value>=1024 ? 1 : 0;
+  return tr('storage:'+['bytes','kibibytes','mebibytes','gibibytes'][unit],{value:new Intl.NumberFormat(i18n.language,{maximumFractionDigits:unit ? 1 : 0}).format(value/1024**unit)});
+};
 
 export function StorageSettings(){
   useTranslation();

@@ -187,7 +187,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
   const code=(error as NodeJS.ErrnoException).code;
   log({phase:'startup-storage-failed',code:code ?? 'STORAGE'});
   const key=code==='ENOSPC' ? 'disk_full' : code==='EACCES' || code==='EPERM' ? 'permission' : 'integrity_failed';
-  await showAttachedMessage({type:'error',message:tr('storage:'+key),buttons:['OK']});
+  await showAttachedMessage({type:'error',message:tr('storage:'+key),buttons:[tr('common:close')]});
   app.exit(1);
 });
 app.on("window-all-closed", () => {

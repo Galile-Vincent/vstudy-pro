@@ -41,6 +41,14 @@ export async function exportBackup(store:Store,root:string,destination:string):P
     try {if(db.prepare('PRAGMA integrity_check').get()?.integrity_check!=='ok')throw new Error('storage.integrity_failed');}finally{db.close();}
     const files:ArchiveFile[]=[{name:'vstudy.sqlite',path:snapshot,...await fingerprint(snapshot)}];
     for(const name of await libraryFiles(join(root,'library')))files.push({name,path:join(root,name),...await fingerprint(join(root,name))});
+    const inventory=new Map(files.map(file=>[file.name,file]));
+    const snapshotDb=new DatabaseSync(snapshot,{readOnly:true});
+    try {
+      for(const row of snapshotDb.prepare('SELECT sourceHash,sourcePath,status,activeVersion FROM documents').all()){
+        const hash=String(row.sourceHash),source=`library/${hash}/${basename(String(row.sourcePath))}`;
+        if(inventory.get(source)?.sha256!==hash || row.status==='ready' && !inventory.has(`library/${hash}/content.md`) || row.activeVersion==='ai' && !inventory.has(`library/${hash}/content.ai.md`))throw new Error('storage.invalid_backup');
+      }
+    } finally {snapshotDb.close();}
     const manifest=manifestSchema.parse({format:'vstudy-backup',version:1,createdAt:new Date().toISOString(),files:files.map(f=>({path:f.name,bytes:f.bytes,sha256:f.sha256}))});
     const path=join(stage,'manifest.json');await atomicWrite(path,JSON.stringify(manifest,null,2));
     files.push({name:'manifest.json',path,...await fingerprint(path)});

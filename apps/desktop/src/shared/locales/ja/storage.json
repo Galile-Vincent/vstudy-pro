@@ -43,5 +43,9 @@
   "cached_stale": "キャッシュの内容を表示中",
   "cached_offline": "オフライン · キャッシュの内容を表示中",
   "last_synced": "最終同期 {{time}}",
-  "never_synced": "未同期"
+  "never_synced": "未同期",
+  "bytes": "{{value}} バイト",
+  "kibibytes": "{{value}} KiB",
+  "mebibytes": "{{value}} MiB",
+  "gibibytes": "{{value}} GiB"
 }

@@ -43,5 +43,9 @@
   "cached_stale": "顯示快取內容",
   "cached_offline": "離線 · 顯示快取內容",
   "last_synced": "上次同步 {{time}}",
-  "never_synced": "尚未同步"
+  "never_synced": "尚未同步",
+  "bytes": "{{value}} 位元組",
+  "kibibytes": "{{value}} KiB",
+  "mebibytes": "{{value}} MiB",
+  "gibibytes": "{{value}} GiB"
 }

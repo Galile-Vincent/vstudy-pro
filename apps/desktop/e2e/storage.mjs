@@ -32,11 +32,14 @@ try {
   const original=await page.evaluate(id=>window.desktop.invoke('documents:read',{documentId:id}),imported.id);
   for(const language of ['en','zh-Hant','ja'])for(const theme of ['light','dark']){
     await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setSize(1200,900));
-    await openSettings(page,language);
+    const localized=await openSettings(page,language);
     const panel=page.getByTestId('storage-settings');assert.equal(await panel.locator('output').count(),7);
     const axe=await new AxeBuilder({page}).setLegacyMode(true).include('.settings-dialog').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
     results.push({language,theme,violations:axe.violations});
-    await page.screenshot({path:join(evidence,`${language}-${theme}.png`),animations:'disabled'});await page.keyboard.press('Escape');
+    await page.screenshot({path:join(evidence,`${language}-${theme}.png`),animations:'disabled'});
+    await panel.getByRole('button',{name:localized.export,exact:true}).scrollIntoViewIfNeeded();
+    await page.screenshot({path:join(evidence,`${language}-${theme}-actions.png`),animations:'disabled'});
+    await page.keyboard.press('Escape');
   }
   const strings=await openSettings(page,'en');const panel=page.getByTestId('storage-settings');
   await panel.getByRole('button',{name:strings.integrity,exact:true}).click();await panel.getByRole('status').filter({hasText:strings.integrity_ok}).waitFor();
