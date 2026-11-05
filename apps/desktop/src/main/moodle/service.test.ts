@@ -328,7 +328,7 @@ it('offers a browser plan after the password endpoint requires SSO',async () => 
   const {service,request} = await setup();
   request.mockImplementation(async target => String(target).includes('token.php') ? Response.json({errorcode:'ssorequired'}) : Response.json([{error:false,data:{typeoflogin:1,sitename:'School',identityproviders:[{name:'Campus',iconurl:'',url:'https://ilearning.cycu.edu.tw/auth/oauth2/login.php?id=3'}]}}]));
   await expect(service.connect({siteUrl:account.siteUrl,username:'student',password:'secret'})).rejects.toMatchObject({code:'sso-required'});
-  expect(await service.checkSite(account.siteUrl)).toEqual({siteUrl:'https://ilearning.cycu.edu.tw',siteName:'School',authPlan:{kind:'browser',providers:[{name:'Campus',iconurl:'',url:'https://ilearning.cycu.edu.tw/auth/oauth2/login.php?id=3'}]}});
+  expect(await service.checkSite(account.siteUrl)).toMatchObject({siteUrl:'https://ilearning.cycu.edu.tw',siteName:'School',authPlan:{kind:'browser',providers:[{name:'Campus',iconurl:'',url:'https://ilearning.cycu.edu.tw/auth/oauth2/login.php?id=3'}]}});
   await service.dispose();
 });
 
@@ -570,4 +570,21 @@ it('connects in memory only after an explicit session choice', async () => {
   expect(secrets.has(moodleSecretId(result.id))).toBe(false);
   expect(await service.token(result.id)).toBe('token');
   await service.dispose();
+});
+
+it('routes a selected alternate identity provider through SSO instead of the password endpoint',async () => {
+  const {repository,secrets,request,service:initial}=await setup();
+  await initial.dispose();
+  const transport=request.getMockImplementation()!;
+  request.mockImplementation(async (url,options) => String(url).includes('service-nologin.php') ? Response.json([{error:false,data:{typeoflogin:1,identityproviders:[{name:'Campus ID',iconurl:'',url:`${account.siteUrl}/auth/oauth2/login.php?id=3`}]}}]) : transport(url,options));
+  const used:number[]=[];
+  const service=new MoodleService(repository,secrets,{login:async (site,provider,accept) => {
+    expect(site.authPlan).toMatchObject({kind:'browser',providers:[{name:'Campus ID'}]});
+    used.push(provider!);return accept({token:'token'});
+  }},request);
+  try {
+    expect(await service.connect({siteUrl:account.siteUrl,provider:0})).toMatchObject({id:account.id,status:'connected'});
+    expect(used).toEqual([0]);
+    expect(request.mock.calls.some(call => String(call[0]).includes('/login/token.php'))).toBe(false);
+  } finally {await service.dispose();}
 });
