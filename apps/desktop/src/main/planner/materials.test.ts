@@ -42,3 +42,13 @@ it("rejects unlinked, unready and symlinked documents before providing model con
   store.db.prepare("UPDATE documents SET markdownPath=? WHERE id=?").run(link, document.id);
   await expect(buildMaterialContext(store, id(1), { mode: "summary", documentIds: [document.id] }, dir)).rejects.toThrow("Symlink");
 });
+
+it('uses the same active Markdown version as the document reader',async()=>{
+  const {store,document,dir}=await setup('Original extraction');
+  await writeFile(join(dir,'content.ai.md'),'Improved active notes');
+  store.db.prepare("UPDATE documents SET activeVersion='ai' WHERE id=?").run(document.id);
+  const prompt=await buildMaterialContext(store,id(1),{mode:'summary',documentIds:[document.id]},dir);
+  expect(prompt).toContain('Improved active notes');expect(prompt).not.toContain('Original extraction');
+  store.db.prepare("UPDATE documents SET activeVersion='original' WHERE id=?").run(document.id);
+  expect(await buildMaterialContext(store,id(1),{mode:'summary',documentIds:[document.id]},dir)).toContain('Original extraction');
+});

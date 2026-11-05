@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 /** Reads only approved, ready, course-linked Markdown. Original file paths and unconverted documents never enter prompts. */
+import { dirname, join } from "node:path";
 import { open } from "node:fs/promises";
 import type { Store } from "../db";
 import type { MaterialRequest } from "../../shared/planner";
@@ -19,7 +20,7 @@ export async function buildMaterialContext(store: Store, courseId: string, reque
     if (!store.db.prepare("SELECT 1 FROM moodle_files WHERE courseId=? AND documentId=?").get(courseId, id)) throw new Error("Material outside course");
     const document = store.documents.get(documentIdSchema.parse(id));
     if (!document || document.status !== "ready") throw new Error("Material is not ready");
-    const file = await open(containedPath(libraryRoot, document.markdownPath), "r");
+    const file = await open(containedPath(libraryRoot, document.activeVersion === "ai" ? join(dirname(document.markdownPath), "content.ai.md") : document.markdownPath), "r");
     try {
       const buffer = Buffer.alloc(8001);
       const { bytesRead } = await file.read(buffer, 0, buffer.length, 0);
