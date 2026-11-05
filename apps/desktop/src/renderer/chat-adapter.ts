@@ -1,3 +1,4 @@
+import { materialRequestSchema } from "../shared/planner";
 import { statusText, errorText } from "./status";
 import type { ChatModelAdapter } from "@assistant-ui/react";
 import { modelOptionsSchema, selectionSchema } from "../shared";
@@ -21,6 +22,8 @@ export function createChatAdapter(
       const turnId = String(user?.metadata?.custom?.turnId ?? user?.id ?? crypto.randomUUID());
       const details = contexts.get(turnId) ?? await context();
       const saved = user?.metadata?.custom;
+      const materials = materialRequestSchema.safeParse(saved?.materials);
+      if (details.scope === "course" && materials.success) details.materials = materials.data;
       if (saved?.turnId) {
         const selection = selectionSchema.safeParse(saved.selection);
         const options = modelOptionsSchema.safeParse(saved.options);
