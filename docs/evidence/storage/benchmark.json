@@ -1,0 +1,64 @@
+{
+  "node": "v24.19.0",
+  "baseline": "8e429e0477ccbd64245e661ff7d64734bb48d2bc",
+  "shape": {
+    "documents": 10000,
+    "courses": 40,
+    "filesPerCourse": 40,
+    "ftsCharactersPerDoc": 680
+  },
+  "results": [
+    {
+      "name": "library page with 10k documents",
+      "before": {
+        "medianMs": 0.5458750000000236,
+        "minMs": 0.37987499999997,
+        "maxMs": 0.9729580000000624
+      },
+      "after": {
+        "medianMs": 1.0073750000000246,
+        "minMs": 0.3677500000000009,
+        "maxMs": 2.059791999999902
+      },
+      "runs": 5
+    },
+    {
+      "name": "40-course file inventory with 40 files per course",
+      "before": {
+        "medianMs": 189.87412499999982,
+        "minMs": 185.93083300000012,
+        "maxMs": 214.3944160000001
+      },
+      "after": {
+        "medianMs": 4.21245799999997,
+        "minMs": 3.7938329999999496,
+        "maxMs": 6.228624999999965
+      },
+      "runs": 5
+    },
+    {
+      "name": "40-course detail reads",
+      "before": {
+        "medianMs": 5.45595800000001,
+        "minMs": 5.182125000000042,
+        "maxMs": 8.204457999999931
+      },
+      "after": {
+        "medianMs": 5.667957999999999,
+        "minMs": 4.942042000000129,
+        "maxMs": 6.724249999999984
+      },
+      "runs": 5
+    }
+  ],
+  "cache": {
+    "coldMs": 25.114290999999866,
+    "warmMs": 2.171041999999943,
+    "concurrentReads": 40,
+    "networkLoads": 1
+  },
+  "checks": 30,
+  "failures": 0,
+  "maxRssMiB": 439.5,
+  "scope": "Warm synchronous repository APIs on disk WAL. Excludes renderer, IPC, network latency, and actual library file reads."
+}

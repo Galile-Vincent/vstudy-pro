@@ -1,10 +1,11 @@
+import { atomicWrite } from "../../src/main/storage/atomic";
 import { recordEgress } from '../../src/main/services/egress';
 import { resolveInstalledExecutable, installDirectories } from '../../src/main/providers/trusted-executable';
 import { ProcessScope } from "./process-scope";
 import { profileStage } from "./profile";
 import { WarmWorker } from "./warm-worker";
 import { spawn } from "node:child_process";
-import { access, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { constants } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
@@ -144,7 +145,7 @@ export function createConverter(options: {
       }
       await run(python, ["-c", "import markitdown, pdfplumber"], cwd);
       checkOpen();
-      await writeFile(marker, fingerprint);
+      await atomicWrite(marker, fingerprint);
       report("Converter ready");
       return python;
     } finally { await rm(cwd, { recursive: true, force: true }); }
@@ -191,8 +192,7 @@ export function createConverter(options: {
               if ((await stat(path)).size > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
               const content = await readFile(path);
               if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Markdown exceeds 8 MiB");
-              await writeFile(`${output}.partial.tmp`, content, { mode: 0o600 });
-              await rename(`${output}.partial.tmp`, `${output}.partial`);
+              await atomicWrite(`${output}.partial`, content);
             }
             report(message);
           });
@@ -204,8 +204,7 @@ export function createConverter(options: {
         const content = await readFile(temporaryOutput);
         if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Converted Markdown exceeds 8 MiB");
         // The library may be on another volume, so publish via a sibling file.
-        await writeFile(`${output}.tmp`, content, { mode: 0o600 });
-        await rename(`${output}.tmp`, output);
+        await atomicWrite(output, content);
         const metadata: unknown = JSON.parse(await readFile(`${temporaryOutput}.json`, "utf8"));
         if (typeof metadata !== "object" || metadata === null || !("converter" in metadata) || (metadata.converter !== "pdf_md" && metadata.converter !== "markitdown")) throw new Error("Invalid converter metadata");
         return metadata.converter;

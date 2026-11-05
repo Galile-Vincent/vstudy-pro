@@ -49,6 +49,7 @@ Security rules (non-negotiable):
 - SQLite via `node:sqlite`, WAL mode, `PRAGMA foreign_keys=ON`, versioned migrations table, all queries parameterized.
 - Library files under `app.getPath('userData')/library/<hash>/{source.ext,content.md}`.
 - Settings (layout side, last provider/model) in SQLite `settings` table.
+- [Storage ownership, cache limits, migrations, and backup format](STORAGE.md) define persistence and recovery. Settings > Storage owns confirmed maintenance actions.
 
 ## Converter
 

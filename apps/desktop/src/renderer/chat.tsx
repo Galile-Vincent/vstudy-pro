@@ -32,6 +32,7 @@ import { type Providers } from "./providers";
 
 export function Chat({
   conversation,
+  jumpMessageId,
   onProposals = () => {},
   promptRequest,
   autoFocus = true,
@@ -50,6 +51,7 @@ export function Chat({
   documentTitle = tr('common:document'),
 }: {
   conversation: Conversation;
+  jumpMessageId?: string | undefined;
   onProposals?: (actions: import("../shared/moodle").MoodleAgentAction[]) => void;
   promptRequest?: {text:string; id:number};
   autoFocus?: boolean;
@@ -85,7 +87,7 @@ export function Chat({
           const { conversation: c, selection: s } = current.current;
           return {
             conversationId: c.id,
-            ...(c.scope === "course" ? {scope:"course" as const,courseId:c.courseId} : {documentId:c.documentId}),
+            ...(c.scope === "course" ? {scope:"course" as const,courseId:c.courseId} : c.scope === "general" ? {scope:"general" as const} : {documentId:c.documentId}),
             providerId: c.providerId,
             modelId: c.modelId,
             options: c.options,
@@ -117,22 +119,32 @@ export function Chat({
   });
   useEffect(() => { if (promptRequest) runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}]}); }, [promptRequest?.id]);
   useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
+  useEffect(() => {
+    if (!jumpMessageId) return;
+    let frame=0,remaining=60;
+    const jump=()=>{const element=Array.from(document.querySelectorAll<HTMLElement>('[data-message-id]')).find(el=>el.dataset.messageId===jumpMessageId);
+      if(element){element.scrollIntoView({block:'center',behavior:'instant'});element.classList.add('history-jump');element.tabIndex=-1;element.focus({preventScroll:true});}
+      else if(--remaining>0)frame=requestAnimationFrame(jump);
+    };
+    frame=requestAnimationFrame(jump);
+    return()=>{cancelAnimationFrame(frame);document.querySelectorAll('.history-jump').forEach(el=>el.classList.remove('history-jump'));};
+  },[jumpMessageId]);
   const statuses = new Map(history.flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
-    selection, onClearSelection, usage, budget, unavailable, onUsage, isCourse: conversation.scope === "course",
+    selection, onClearSelection, usage, budget, unavailable, onUsage, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
     picker: <ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
     {unavailable && <p role="alert">{tr('common:this_conversation_s_provider_is_unavailable_add_an_api_key_or_enable_it_in_settings')}</p>}
     <Thread components={documentComponents} autoFocus={autoFocus} />
-    <p className="composer-note">{conversation.scope === 'course' ? tr('moodle:agent_scope') : tr('common:grounded_in_your_document_check_important_details')}</p>
+    <p className="composer-note">{conversation.scope === 'course' ? tr('moodle:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }
 
 type DocumentChat = {
-  isCourse: boolean;
+  isCourse: boolean; isGeneral: boolean;
   selection: Selection | null; onClearSelection: () => void;
   usage: ReturnType<typeof useUsage>; budget: ReturnType<typeof useBudgetGuard>;
   unavailable: boolean; onUsage: () => void; picker: React.ReactNode;
@@ -142,8 +154,8 @@ const DocumentChatContext = createContext<DocumentChat | null>(null);
 const useDocumentChat = () => useContext(DocumentChatContext)!;
 function ComposerSelection() {
   useTranslation();
-  const {selection,onClearSelection} = useDocumentChat();
-  return <><p>{tr(selection ? 'library:context_selection' : 'library:context_document')}</p>{selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label={tr('common:remove_selection')} onClick={onClearSelection}>×</button></div>}</>;
+  const {selection,onClearSelection,isGeneral} = useDocumentChat();
+  return <><p>{tr(isGeneral ? 'history:general_context' : selection ? 'library:context_selection' : 'library:context_document')}</p>{selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label={tr('common:remove_selection')} onClick={onClearSelection}>×</button></div>}</>;
 }
 function ComposerBanner() {
   useTranslation();

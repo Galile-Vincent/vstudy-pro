@@ -1,3 +1,4 @@
+import { HistoryView, HistoryFinder } from "./history";
 import { lazy, Suspense, useEffect, useMemo, useState, type ComponentType } from "react";
 let loadedWelcome: ComponentType | undefined;
 const loadWelcome = () => import("./welcome").then(module => { loadedWelcome = module.default; return module; });
@@ -37,7 +38,7 @@ function Views() {
   }, []);
   return route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "workspace" ? (
     <Workspace />
-  ) : route.view === "courses" ? (
+  ) : route.view === "history" ? (<HistoryView/>) : route.view === "courses" ? (
     <CoursesView />
   ) : route.view === "library" ? (
     <LibraryView key={JSON.stringify(route.query)} />
@@ -48,7 +49,7 @@ function Views() {
 export function App() {
   return (
     <AppShell sidebar={<LibrarySidebar />}>
-      <ContextCoach /><Views /><GlobalSettings /><LearningHelp />
+      <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/>
     </AppShell>
   );
 }

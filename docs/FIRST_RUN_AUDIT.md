@@ -90,3 +90,11 @@ These are scripted times in milliseconds, including automated UI checks before t
 | ja | sample | 1692 | 3685 | [First task](evidence/onboarding/ja-sample-first-task.png) |
 
 Model the Domain shaped the saved step, goal, status, document ID, checklist, and dismissal record. Experience First put a useful task ahead of optional AI setup. Prove It Works required fresh Electron profiles, actual restarts, visible controls, and decoder/subtitle checks.
+
+### C/E integration merge
+
+Merged main at `a215c76` after the webview and data/storage streams landed. The app mounts HistoryFinder beside LearningHelp and ContextCoach. The shell keeps History navigation and Find alongside Help. Courses keeps the webview provider, reconnect effect, and onboarding's initial connection flag. Storage settings remain mounted through the shared settings view. Every locale namespace from main is retained.
+
+Typecheck, lint, and 157 focused tests in 13 files pass. An additional four-test History run covers the Cmd/Ctrl+K modifier collision, so Cmd/Ctrl+Shift+K remains available for selected-text questions. The English sample Electron path passes against the merged app, including the new scoped History UI, global finder, Storage tab, Help replay, and media playback. The full suite was not repeated. Outputs are the `ce-merge-*.txt` files beside the earlier evidence.
+
+One follow-up remains observed in the combined runtime. After replaying setup and playing a clip, Escape did not dismiss the global History finder. Its visible Close button works and is used in this acceptance path. The finder dismissal implementation is retained from main. `ce-merge-history-escape.png` records the open finder after the key press. This observation does not establish whether the cause is focus timing in automation or an application defect.

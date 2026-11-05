@@ -31,7 +31,7 @@ async function schoolFixture(app) {
 for (const [language, goal] of matrix) {
   const profile = await mkdtemp(join(tmpdir(), 'vstudy-first-time-'));
   const catalog = async ns => JSON.parse(await readFile(`src/shared/locales/${language}/${ns}.json`, 'utf8'));
-  const schools = await catalog('schools'), themes = await catalog('themes');
+  const schools = await catalog('schools'), themes = await catalog('themes'), history = await catalog('history'), storage = await catalog('storage');
   const copy = await catalog('onboarding'), common = await catalog('common'), moodle = await catalog('moodle'), home = await catalog('home');
   let app;
   const started = performance.now(), screenshots = [], violations = [], errors = [];
@@ -131,9 +131,9 @@ for (const [language, goal] of matrix) {
         await page.locator('[data-role=assistant]').first().waitFor();
         await capture('chat-answer');
         await page.getByRole('button', { name: common.conversations, exact: true }).click();
-        await page.getByRole('searchbox', { name: common.search_threads, exact: true }).fill('Explain this sentence');
+        await page.getByRole('searchbox', { name: history.search, exact: true }).fill('Explain this sentence');
         await capture('history-search');
-        await page.locator('[data-slot=aui_thread-list-items]').getByText('Explain this sentence', { exact: true }).first().click();
+        await page.locator('.history-dialog [data-testid=history-result] .history-result-title').first().click();
         await page.locator('[data-role=user]').filter({ hasText: 'Explain this sentence' }).waitFor();
       }
     }
@@ -173,7 +173,20 @@ for (const [language, goal] of matrix) {
     await page.getByRole('button', { name: copy.help, exact: true }).click(); await page.getByRole('menuitem', { name: copy.help_shortcuts, exact: true }).click(); await capture('shortcuts');
     await page.keyboard.press('Escape'); await page.getByRole('button', { name: copy.help, exact: true }).click(); await page.getByRole('menuitem', { name: copy.help_setup, exact: true }).click();
     await page.locator('#onboarding-title').filter({ hasText: copy.step_welcome }).waitFor(); await page.keyboard.press('Escape');
+    await page.locator('.onboarding').waitFor({ state: 'detached' });
     assert.equal((await page.evaluate(() => window.desktop.invoke('settings:get', {}))).onboardingCompleted, true);
+    if (language === 'en' && goal === 'sample') {
+      await page.keyboard.press('Meta+k');
+      await page.locator('.history-dialog').getByRole('searchbox', { name: history.search, exact: true }).waitFor();
+      await capture('global-history');
+      await page.locator('.history-dialog').getByRole('button', { name: common.close, exact: true }).click();
+      await page.locator('.history-dialog').waitFor({ state: 'detached' });
+      await page.getByRole('button', { name: common.open_settings, exact: true }).click();
+      await page.locator('.settings-dialog').getByRole('tab', { name: storage.title, exact: true }).click();
+      await page.getByTestId('storage-settings').waitFor();
+      await capture('storage-settings');
+      await page.keyboard.press('Escape');
+    }
     assert.deepEqual(errors, [], 'renderer errors');
     results.push({ language, goal, firstTaskMs, totalMs: Math.round(performance.now() - started), privacyShownAtMs, schoolAuthentication: goal === 'school' ? 'main-process fixture; no live school or Keychain' : 'not used', ai: language === 'en' && goal === 'sample' ? 'local fake provider; question and chat-history search exercised' : 'local fake provider available; no external AI', screenshots, violations, errors });
     console.log(`PASS ${language}/${goal}: first task ${firstTaskMs}ms`);

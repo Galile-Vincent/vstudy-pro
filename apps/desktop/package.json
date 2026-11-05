@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
-    "test": "node scripts/check-contrast.mjs && vitest run --pool=forks --maxWorkers=2",
+    "test": "node scripts/check-contrast.mjs && vitest run",
     "contrast:check": "node scripts/check-contrast.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

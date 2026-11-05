@@ -1,5 +1,5 @@
 /** Logo fixtures exercise persistence and hostile responses without real network access. */
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, rm, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -43,4 +43,20 @@ it('cancels an oversized streamed response without a content length',async () =>
   const request: typeof fetch = async () => new Response(new ReadableStream({start(controller) {controller.enqueue(new Uint8Array(1024*1024+1));},cancel}),{headers:{'content-type':'image/png'}});
   expect(await new MoodleLogoCache(() => path,request).get('/logo','https://school.example')).toBeNull();
   expect(cancel).toHaveBeenCalledOnce();
+});
+
+it('bounds persistent logo bytes and clear forces a refetch',async()=>{
+  const path=await directory(),request=vi.fn<typeof fetch>(async()=>new Response(png,{headers:{'content-type':'image/png'}}));
+  const cache=new MoodleLogoCache(()=>path,request,Date.now,128);
+  await cache.get('/first','https://school.example');await cache.get('/second','https://school.example');
+  let bytes=0;for(const name of await readdir(path))bytes+=(await lstat(join(path,name))).size;
+  expect(bytes).toBeLessThanOrEqual(128);await cache.clear();
+  await cache.get('/first','https://school.example');expect(request).toHaveBeenCalledTimes(3);
+});
+it('revalidates expired logos and keeps a valid offline fallback',async()=>{
+  const path=await directory();let now=Date.now();
+  const request=vi.fn<typeof fetch>().mockResolvedValueOnce(new Response(png,{headers:{'content-type':'image/png'}})).mockRejectedValue(new Error('offline'));
+  const cache=new MoodleLogoCache(()=>path,request,()=>now);
+  const original=await cache.get('/ttl','https://school.example');now+=86400_001;
+  expect(await cache.get('/ttl','https://school.example')).toBe(original);expect(request).toHaveBeenCalledTimes(2);
 });

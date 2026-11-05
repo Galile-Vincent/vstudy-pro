@@ -16,15 +16,17 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { Home, BookOpen, ArrowLeft, Menu, Settings, GraduationCap } from "lucide-react";
+import { Home, BookOpen, ArrowLeft, Menu, Settings, GraduationCap, Search, History as HistoryIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
 import type { Document } from "../../shared";
 import type { LibraryQuery } from "../../shared/library";
 import "./shell.css";
-export type View = "home" | "library" | "workspace" | "welcome" | "courses";
+export type View = "home" | "library" | "workspace" | "welcome" | "courses" | "history";
 export type Route = {
   view: View;
+  conversationId?: import("../../shared/domain").Conversation["id"] | undefined;
+  messageId?: string | undefined;
   courseId?: string | undefined;
   documentId?: Document["id"] | undefined;
   query?: Partial<LibraryQuery> | undefined;
@@ -72,7 +74,7 @@ export function AppShell({
       const saved = JSON.parse(
         localStorage.getItem("vstudy-route") ?? "null",
       ) as Route | null;
-      if (saved && ["home", "library", "workspace", "courses"].includes(saved.view))
+      if (saved && ["home", "library", "workspace", "courses", "history"].includes(saved.view))
         return saved;
     } catch {
       /* Storage can be unavailable. */
@@ -131,6 +133,7 @@ export function AppShell({
               {tr("common:library")}
             </SidebarMenuButton></SidebarMenuItem>
             <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "courses" ? "page" : undefined} onClick={() => navigate("courses")}><GraduationCap />{tr("moodle:courses")}</SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "history" ? "page" : undefined} onClick={() => navigate("history")}><HistoryIcon/>{tr("history:title")}</SidebarMenuButton></SidebarMenuItem>
           </SidebarMenu></SidebarGroup>
           {sidebar}</SidebarContent><SidebarFooter><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
         </Sidebar>
@@ -161,10 +164,11 @@ export function AppShell({
               <span>
                 {route.view === "home"
                   ? tr("library:home")
-                  : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
+                  : route.view === "history" ? tr("history:title") : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
               </span>
             )}
             <HelpMenu />
+            <Button variant="ghost" aria-label={tr('history:find')} title={tr('history:find') + ' (' + tr('history:shortcut') + ')'} onClick={() => window.dispatchEvent(new Event('vstudy:find-history'))}><Search size={16}/><span>{tr('history:find')}</span><kbd>{tr('history:shortcut')}</kbd></Button>
           </header>
           <div id="shell-content" role={route.view === "library" ? "main" : undefined} className="shell-content" tabIndex={-1}>
             {children}

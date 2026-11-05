@@ -1,3 +1,4 @@
+import { storageBusy } from "../storage/maintenance";
 import { searchInWorker } from '../services/search-runner';
 import { documentIdSchema } from '../../shared/domain';
 import { app, dialog, shell } from 'electron';
@@ -12,7 +13,8 @@ import { ActivityService } from '../services/activity';
 import { getDashboard } from '../services/dashboard';
 export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>, deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(), resume: (id: import("../../shared/domain").Document["id"]) => void = () => {}) {
     const library = new LibraryService(store, join(app.getPath('userData'), 'library')), activity = new ActivityService(store);
-    library.search.rebuild();
+    const startup=library.search.rebuild().catch(()=>{console.error("Search rebuild deferred until next startup");});
+    let purging: Promise<void> = Promise.resolve();
     const handle: typeof registrar.handle = (channel, handler) => { implemented.add(channel); registrar.handle(channel, handler); };
     handle('messages:page',r=>store.messages.page(r.conversationId,r.limit,r.cursor));
     handle('usage:page',r=>store.usage.page(r.limit,r.cursor));
@@ -30,7 +32,7 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     handle('library:documents:rename', r => { library.rename(r.documentId, r.title); return { ok: true }; });
     handle('library:documents:softDelete', async (r) => { await deleteDocument(documentIdSchema.parse(r.documentId), async () => { library.softDelete(r.documentId); }); return { ok: true }; });
     handle('library:documents:restore', r => { library.restore(r.documentId); resume(documentIdSchema.parse(r.documentId)); return { ok: true }; });
-    handle('library:documents:purge', () => { library.purge(); return { ok: true }; });
+    handle('library:documents:purge', async () => { await library.purgeAsync(); return { ok: true }; });
     handle('library:tags:list', () => library.tags());
     handle('library:tags:save', r => library.saveTag(r));
     handle('library:tags:delete', r => { library.deleteTag(r.tagId); return { ok: true }; });
@@ -63,10 +65,10 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     handle('library:openOriginal', async (r) => { const d = library.require(r.documentId), path = containedPath(library.root, d.sourcePath); if (!['.pdf', '.docx', '.xlsx', '.pptx', '.md', '.txt', '.csv'].includes(extname(path).toLowerCase()))
         throw new Error('File type cannot be opened'); const error = await shell.openPath(path); if (error)
         throw new Error('Open failed'); return { ok: true }; });
-    const purge = setInterval(() => { try {
-        library.purge();
-    }
-    catch { /* Failed filesystem purges remain queued for the next idle pass. */ } }, 30000);
+    const purge = setInterval(() => {
+        if(storageBusy())return;
+        purging=library.purgeAsync().catch(()=>{console.error('Library purge deferred until next idle pass');});
+    }, 30000);
     purge.unref();
-    return () => clearInterval(purge);
+    return Object.assign(() => clearInterval(purge), {waitForIdle:async()=>{await startup;await purging;}});
 }

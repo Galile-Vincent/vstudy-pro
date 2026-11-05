@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync, renameSync, existsSync } from 'node:fs';
+import { atomicWriteSync } from "../storage/atomic";
+import { readFileSync, existsSync } from 'node:fs';
 import { z } from 'zod';
 import { executableMetadata, executableIdentity, resolveInstalledExecutable, type ExecutableIdentity } from './trusted-executable';
 const identitySchema = z.object({ path:z.string(), mtime:z.number(), hash:z.string() });
@@ -10,8 +11,7 @@ export class ExecutablePins {
     if (existsSync(file)) this.pins = pinsSchema.parse(JSON.parse(readFileSync(file, 'utf8')));
   }
   private save() {
-    writeFileSync(this.file + '.tmp', JSON.stringify(this.pins), {mode:0o600});
-    renameSync(this.file + '.tmp', this.file);
+    atomicWriteSync(this.file, JSON.stringify(this.pins));
   }
   async choose(binary: string, path: string) {
     const identity = await executableIdentity(path);
