@@ -1,4 +1,5 @@
 import { storageContract } from "./storage";
+import { chatHistoryContract } from './chat-history';
 import { moodlePanelSchema, moodleSiteCheckSchema, moodleSiteUrlSchema, moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
 import { aiParseContract } from './ai-parse';
 import { statusSchema } from "./status";
@@ -29,6 +30,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 export const ipcContract = {
   ...aiParseContract,
   ...storageContract,
+  ...chatHistoryContract,
   [moodleChannels.schools]: {request:empty,response:z.array(moodleSchoolSchema)},
   [moodleChannels.checkSite]: {request:z.object({url:z.string().min(1).max(2048)}).strict(),response:moodleSiteCheckSchema},
   [moodleChannels.preflight]: {request:z.object({}).strict(),response:z.object({ready:z.boolean()}).strict()},

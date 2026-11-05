@@ -54,3 +54,17 @@ it('applies every migration through the latest version from an empty database',(
     expect(db.prepare('PRAGMA integrity_check').get()?.integrity_check).toBe('ok');
   }finally{db.close();}
 });
+
+it('accepts chat history v18 after a pre-merge storage v19 database and restores dependent indexes',()=>{
+  const db=new DatabaseSync(':memory:');
+  try {
+    db.exec('PRAGMA foreign_keys=ON');
+    migrate(db,migrations.filter(m=>m.version!==18 && m.version<20));
+    db.prepare('INSERT INTO settings VALUES(?,?)').run('order',JSON.stringify('retained'));
+    migrate(db,migrations);
+    expect(db.prepare("SELECT name FROM sqlite_master WHERE name='conversations_course_page'").get()?.name).toBe('conversations_course_page');
+    expect(db.prepare("SELECT name FROM sqlite_master WHERE name='chat_fts'").get()?.name).toBe('chat_fts');
+    expect(db.prepare('PRAGMA integrity_check').get()?.integrity_check).toBe('ok');
+    expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+  } finally {db.close();}
+});

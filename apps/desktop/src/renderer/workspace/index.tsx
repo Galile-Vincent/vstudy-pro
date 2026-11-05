@@ -43,8 +43,7 @@ export function Workspace() {
   const [providers, setProviders] = useState<Providers>([]),
     [model, setModel] = useState("");
   const [settingsTab, setSettingsTab] = useState("providers");
-  const [conversations, setConversations] = useState<Conversation[]>([]),
-    [conversation, setConversation] = useState<Conversation | null>(null),
+  const [conversation, setConversation] = useState<Conversation | null>(null),
     [history, setHistory] = useState<Message[] | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null),
     [showSettings, setShowSettings] = useState(false),
@@ -56,6 +55,7 @@ export function Workspace() {
   useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   const [draft, setDraft] = useState("");
   const [loadedConversationDocument,setLoadedConversationDocument] = useState<Document['id'] | null>(null);
+  const [historyJump,setHistoryJump] = useState<string>();
   const [focusChat,setFocusChat] = useState(false);
   const [newModelPickerOpen,setNewModelPickerOpen] = useState(false);
   const initialConversation = useRef('');
@@ -161,7 +161,6 @@ export function Workspace() {
     setSelection(null);
     setConversation(null);
     setHistory(null);
-    setConversations([]);
     setLoadedConversationDocument(null);
     setNewModelPickerOpen(false);
     setFocusChat(false);
@@ -170,7 +169,6 @@ export function Workspace() {
       .invoke("conversations:list", { documentId })
       .then((list) => {
         if (active) {
-          setConversations(list);
           setLoadedConversationDocument(documentId);
           let remembered: string | null = null;
           try { remembered = localStorage.getItem(`vstudy-conversation:${documentId}`); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
@@ -186,7 +184,7 @@ export function Workspace() {
   }, [documentId, report]);
   useEffect(() => {
     if (!conversation) return;
-    try { localStorage.setItem(`vstudy-conversation:${(conversation.scope === "course" ? conversation.courseId : conversation.documentId)}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
+    try { localStorage.setItem(`vstudy-conversation:${(conversation.scope === "course" ? conversation.courseId : conversation.scope === "general" ? "general" : conversation.documentId)}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
   }, [conversation?.id]);
   useEffect(() => {
     let active = true;
@@ -247,7 +245,7 @@ export function Workspace() {
         if (messages.length) { await newConversation(value); return; }
         try {
           const next = await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId});
-          setConversation(next); setConversations(list => list.map(c => c.id === next.id ? next : c));
+          setConversation(next);
         } catch (error) {
           if (error instanceof Error && error.message.includes('errors.conversation_not_empty')) await newConversation(value);
           else throw error;
@@ -289,8 +287,7 @@ export function Workspace() {
         providerId: value.slice(0, slash) as ProviderConfig["id"],
         modelId: value.slice(slash + 1),
       });
-      if(created.scope === "course" || activeDocument.current!==created.documentId)return;
-      setConversations((list) => [created, ...list]);
+      if(created.scope === "course" || created.scope === "general" || activeDocument.current!==created.documentId)return;
       if(activate)setCompactPane("chat");
       setFocusChat(activate);
       setConversation(created);
@@ -327,7 +324,7 @@ export function Workspace() {
       <div className="workspace-conversations">
 
         <div className="row">
-          <ConversationList conversations={conversations} current={conversation} providers={providers} canCreate={!!canChat && !busy} onSelect={c => {setFocusChat(true);setConversation(c);setModel(`${c.providerId}/${c.modelId}`);}} onNew={() => newConversation()} onDelete={async id => {if (!window.confirm(tr('common:delete_this_conversation'))) return; await desktop.invoke('conversations:delete',{conversationId:id});setConversations(list=>list.filter(c=>c.id!==id));if(conversation?.id===id){setConversation(null);setHistory(null);}}}/>
+          <ConversationList current={conversation} canCreate={!!canChat && !busy} onSelect={(c,messageId) => {setHistoryJump(messageId);setFocusChat(!messageId);setConversation(c);setModel(c.providerId+'/'+c.modelId);}} onNew={() => newConversation()}/>
 
           <button
             disabled={!canChat || busy}
@@ -347,6 +344,7 @@ export function Workspace() {
           documentTitle={doc?.sourceName ?? tr('common:document')}
             onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
           key={conversation.id}
+          jumpMessageId={historyJump}
           autoFocus={focusChat}
           draft={draft}
           onDraft={setDraft}
