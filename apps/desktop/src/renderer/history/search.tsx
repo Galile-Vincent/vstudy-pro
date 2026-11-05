@@ -49,7 +49,7 @@ export function HistorySearch({ onOpen, documentId, courseId, compact = false }:
       await desktop.invoke('chats:update', { conversationId: hit.id, patch });
       const previous: ChatPatch = {};
       if (patch.title !== undefined)
-        previous.title = hit.title || tr('common:new_chat');
+        previous.title = hit.title;
       if (patch.pinned !== undefined)
         previous.pinned = hit.pinned;
       if (patch.archived !== undefined)
