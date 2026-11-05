@@ -80,6 +80,23 @@ export function createApiAdapter(
   const key = () => secrets.getInMainOnly(getConfig().id);
   const noKeyRequired = () => getConfig().kind === "compatible" && isLoopback(base());
   return {
+    async testConnection() {
+      const token = await key();
+      if (!token && !noKeyRequired()) return 'bad_key';
+      try {
+        recordEgress('provider_request', new URL(base()).origin);
+        const response = await fetcher(`${base()}/models${anthropic() ? '?limit=1' : ''}`, {
+          headers: anthropic() ? { 'x-api-key': token ?? '', 'anthropic-version': '2023-06-01' } : token ? { Authorization: `Bearer ${token}` } : {},
+          signal: AbortSignal.timeout(10000),
+          redirect: 'error',
+        });
+        await response.body?.cancel();
+        if (response.ok) return 'success';
+        return response.status === 401 ? 'bad_key' : 'no_access';
+      } catch {
+        return 'offline';
+      }
+    },
     async detect() {
       return secrets.isUnlocked?.(getConfig().id) || (secrets.has ? secrets.has(getConfig().id) : await key()) || noKeyRequired()
         ? { available: true }

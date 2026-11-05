@@ -26,6 +26,7 @@ export function ProviderRow({
     provider.config.kind === 'compatible' ? provider.config.baseUrl : '',
   );
   const [error, setError] = useState('');
+  const [testResult, setTestResult] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -136,6 +137,15 @@ export function ProviderRow({
       )}
       {!isCli && (
         <>
+          <Button variant="link" onClick={() => void perform(() => desktop.invoke('shell:openExternal', { url: provider.config.id === 'anthropic-api' ? 'https://platform.claude.com/settings/keys' : provider.config.id === 'openai-api' ? 'https://platform.openai.com/api-keys' : new URL(baseUrl).origin }))}>{tr('settings:get_key')}</Button>
+          <Button disabled={busy} onClick={() => void perform(async () => {
+            const id = provider.config.id;
+            if (id !== 'anthropic-api' && id !== 'openai-api' && id !== 'openai-compatible') return;
+            setTestResult('');
+            const result = await desktop.invoke('providers:test', { providerId: id });
+            setTestResult(tr(result === 'success' ? 'settings:connection_success' : `errors:connection_${result}`));
+          })}>{tr('settings:test_connection')}</Button>
+          {testResult && <p role="status">{testResult}</p>}
           <p className="muted">{tr('settings:key_help')}</p>
           <p className="muted">{tr('settings:keychain_help')}</p>
           <form

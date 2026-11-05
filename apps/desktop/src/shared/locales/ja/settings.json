@@ -89,5 +89,8 @@
   "mode_online": "現在：オンライン。ダウンロードが許可されています。",
   "mode_offline": "現在：オフライン。Markdownとテキストのみ使えます。",
   "mode_saved": "モードを変更しました。",
-  "enable_downloads": "ダウンロードを許可して再試行"
+  "enable_downloads": "ダウンロードを許可して再試行",
+  "get_key": "キーを取得",
+  "test_connection": "接続を確認",
+  "connection_success": "接続できました。キーは使えます。"
 }

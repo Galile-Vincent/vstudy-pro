@@ -123,6 +123,7 @@ export const ipcContract = {
       }),
     ),
   },
+  "providers:test": { request: z.object({ providerId: z.enum(["anthropic-api", "openai-api", "openai-compatible"]) }).strict(), response: z.enum(["success", "bad_key", "offline", "no_access"]) },
   "providers:configure": { request: providerConfigSchema, response: ack },
   "secrets:set": {
     request: z

@@ -89,5 +89,8 @@
   "mode_online": "目前模式：線上。允許下載。",
   "mode_offline": "目前模式：離線。僅支援 Markdown 和文字檔。",
   "mode_saved": "已變更模式。",
-  "enable_downloads": "允許下載並重試"
+  "enable_downloads": "允許下載並重試",
+  "get_key": "取得金鑰",
+  "test_connection": "測試連線",
+  "connection_success": "連線成功！金鑰可以使用。"
 }

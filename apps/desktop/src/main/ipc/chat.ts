@@ -1,3 +1,4 @@
+import { createApiAdapter } from "../providers/api";
 import { validateOptions } from "../providers/models";
 import { app } from "electron";
 import { join } from "node:path";
@@ -21,6 +22,7 @@ export function registerChatIpc(
   if (compatible.kind === 'compatible') secrets.bindCompatibleOrigin(compatible.baseUrl);
   const chat = new ChatService(store, providers);
   const channels = [
+    "providers:test",
     "providers:list",
     "providers:configure",
     "chat:start",
@@ -33,6 +35,11 @@ export function registerChatIpc(
     "messages:list",
   ] as const;
   for (const channel of channels) implemented.add(channel);
+  registrar.handle("providers:test", async ({providerId}) => {
+    const config = providers.config(providerId);
+    const adapter = createApiAdapter(() => config, secrets);
+    return adapter.testConnection!();
+  });
   registrar.handle("providers:list", ({discover}) => providers.list(discover));
   registrar.handle("providers:configure", (config, event) => {
     const previous = providers.config(config.id);

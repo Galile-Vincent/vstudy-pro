@@ -31,11 +31,12 @@ it("registers every chat handler with validated repository round trips and dispo
   );
   const implemented = new Set<IpcChannel>();
   const deletedKeys = vi.fn();
+  let testKey: string | null = null;
   registerChatIpc(
     registrar,
     store,
     {
-      preflight: async () => {}, getInMainOnly: async () => null,
+      preflight: async () => {}, getInMainOnly: async () => testKey,
       has: () => false,
       set: async () => {},
       bindCompatibleOrigin: () => {},
@@ -59,7 +60,22 @@ it("registers every chat handler with validated repository round trips and dispo
     return callback(event, payload);
   };
   try {
-    expect(implemented.size).toBe(10);
+    expect(implemented.size).toBe(11);
+    expect(await invoke('providers:test', {providerId:'anthropic-api'})).toEqual('bad_key');
+    await expect(invoke('providers:test', {providerId:'claude-cli'})).rejects.toThrow();
+    testKey = 'private-test-key';
+    const fetcher = vi.spyOn(globalThis, 'fetch');
+    try {
+      for (const [status, result] of [[200, 'success'], [401, 'bad_key'], [403, 'no_access']] as const) {
+        fetcher.mockResolvedValueOnce(new Response(null, {status}));
+        expect(await invoke('providers:test', {providerId:'anthropic-api'})).toBe(result);
+      }
+      fetcher.mockRejectedValueOnce(new Error('private-test-key'));
+      expect(await invoke('providers:test', {providerId:'openai-api'})).toBe('offline');
+    } finally {
+      fetcher.mockRestore();
+      testKey = null;
+    }
     await invoke('providers:configure',{kind:'compatible',id:'openai-compatible',baseUrl:'http://localhost:11434/v1',enabled:true});
     expect(deletedKeys).not.toHaveBeenCalled();
     await invoke('providers:configure',{kind:'compatible',id:'openai-compatible',baseUrl:'https://new-host.example/v1',enabled:true});
