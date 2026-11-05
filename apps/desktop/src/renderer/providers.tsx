@@ -117,7 +117,7 @@ export function ProviderSettings({
                               onClose();
                             }}
                           >
-                            {tr('welcome:entry')}
+                            {tr('welcome:entry')} · {tr('welcome:try_title')}
                           </Button>
                         </SettingsRow>
                       </SettingsGroup>

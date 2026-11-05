@@ -3,7 +3,7 @@ import { formatters } from "../../../../shared/format";
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
 
-import type { ComponentProps } from "react";
+import { useEffect, useId, useState, type ComponentProps } from "react";
 import { PreviewCard } from "@base-ui/react/preview-card";
 import { cn } from "@/lib/utils";
 import { floating, mono } from "./surfaces";
@@ -43,16 +43,33 @@ export function Citation({
   ...props
 }: CitationProps) {
   useTranslation();
+  const hintId = useId();
+  const [hintSeen, setHintSeen] = useState(() => {
+    try { return localStorage.getItem('vstudy:citation-hint-seen') === '1'; } catch { return false; }
+  });
+  useEffect(() => {
+    const update = () => setHintSeen(true);
+    window.addEventListener('vstudy:citation-hint-seen', update);
+    return () => window.removeEventListener('vstudy:citation-hint-seen', update);
+  }, []);
+  const markHintSeen = () => {
+    setHintSeen(true);
+    try { localStorage.setItem('vstudy:citation-hint-seen', '1'); } catch { setHintSeen(true); }
+    window.dispatchEvent(new Event('vstudy:citation-hint-seen'));
+  };
+  const showHint = index === 0 && !hintSeen;
   const domain = source.domain ?? hostOf(source.url);
   const href = safeHref(source.url);
   const publishedAt = formatPublishedAt(source.publishedAt);
   const hasMetadata = domain !== undefined || publishedAt !== undefined;
 
   return (
-    <PreviewCard.Root open={open} onOpenChange={onOpenChange}>
+    <PreviewCard.Root open={open} onOpenChange={next => { if (next) markHintSeen(); onOpenChange?.(next); }}>
+      {showHint && <span id={hintId} className="text-xs text-muted-foreground">{tr('welcome:citation_hint')}</span>}
       <PreviewCard.Trigger
         delay={0}
-        render={<button type="button" {...props} />}
+        render={<button type="button" {...props} onClick={event => { markHintSeen(); props.onClick?.(event); }} />}
+        aria-describedby={showHint ? hintId : undefined}
         aria-label={tr('common:source_title',{number:index+1,title:source.title})}
         className={cn(
           "bg-foreground/[0.06] text-muted-foreground hover:text-foreground/90 data-[popup-open]:bg-foreground data-[popup-open]:text-background ms-0.5 inline-flex h-4 min-w-4 translate-y-[-2px] cursor-default items-center justify-center rounded-[5px] px-1 align-middle font-mono text-[10px] font-medium tabular-nums transition-colors motion-reduce:transition-none",

@@ -33,6 +33,7 @@ import { ProviderSettings, type Providers } from "../providers";
 export function Workspace() {
   const { route, navigate } = useNavigate();
   useTranslation();
+  const [practice, setPractice] = useState(() => { try { return sessionStorage.getItem('vstudy:practice'); } catch { return null; } });
   const [settings, setSettings] = useState<Settings>(defaultSettings),
     [connected, setConnected] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]),
@@ -389,6 +390,7 @@ export function Workspace() {
   );
   const reading = (
     <section id="reading-content" tabIndex={-1} className="pane reading-pane" aria-label={tr('common:document')}>
+      {practice === doc?.id && <aside><strong>{tr('welcome:try_title')}</strong><p>{tr('welcome:try_steps')}</p><Button variant="ghost" onClick={() => { setPractice(null); try { sessionStorage.removeItem('vstudy:practice'); } catch { return; } }}>{tr('welcome:try_hide')}</Button></aside>}
       <div className="pane-toolbar">
         <span className="eyebrow">{doc?.sourceName ?? tr('common:reading_space')}</span>
         {doc && <button className="icon-button" title={tr('common:delete_document')} aria-label={tr('common:delete_document')} onClick={() => {
