@@ -10,7 +10,7 @@ import { tr } from '../../shared/i18n';
 import { useOptionalNavigation } from '../shell';
 import { desktop } from '../bridge';
 import { errorText, statusText } from '../status';
-export function UploadCard({ folders = [], onImported, showSample = true }: { showSample?: boolean; folders?: z.infer<typeof folderSchema>[]; onImported?: (document: Document) => void }) {
+export function UploadCard({ folders = [], onImported, showSample = true, showOpen = true }: { showOpen?: boolean; showSample?: boolean; folders?: z.infer<typeof folderSchema>[]; onImported?: (document: Document) => void }) {
   useTranslation();
   const navigation = useOptionalNavigation();
   const [imported, setImported] = useState<Document>();
@@ -47,7 +47,7 @@ export function UploadCard({ folders = [], onImported, showSample = true }: { sh
     <Button variant="outline" className="primary" disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</Button>
     {showSample && <Button variant="outline" className="ghost" disabled={busy} onClick={() => { setError(''); setMessage(''); setBusy(true); void desktop.invoke('documents:importSample', {language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}).then(d => { setImported(d); onImported?.(d); setMessage(tr('home:imported')); window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</Button>}
 
-    {imported && navigation && <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>{tr('home:open_imported', { title: imported.title })}</Button>}
+    {showOpen && imported && navigation && <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>{tr('home:open_imported', { title: imported.title })}</Button>}
     {busy && <progress aria-label={tr('home:importing')}/>}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
   </div>;
 }

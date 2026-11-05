@@ -20,7 +20,7 @@ try {
  await page.emulateMedia({reducedMotion:'no-preference'});await page.waitForTimeout(100);
  assert.ok(await page.locator('#welcome-title .w-word').evaluateAll(nodes=>nodes.every(n=>window.getComputedStyle(n).opacity==='1')));results.pausedReopenReadable=true;
 
- await page.getByRole('button',{name:'Pause animations',exact:true}).click();
+ await page.getByRole('button',{name:'Play animations',exact:true}).click();
  await page.emulateMedia({reducedMotion:'no-preference'});await page.waitForTimeout(1600);
  const entrances=()=>page.locator('#welcome-hero').evaluate(e=>e.getAnimations({subtree:true}).filter(a=>['w-word-in','w-in','w-card-in'].includes(a.animationName)).map(a=>({name:a.animationName,time:a.currentTime})));
  const before=await entrances();await page.locator('#welcome-pause').click();await page.waitForTimeout(100);await page.locator('#welcome-pause').click();const after=await entrances();assert.deepEqual(after.map(a=>a.name),before.map(a=>a.name));assert.ok(after.every((a,i)=>a.time>=before[i].time));assert.ok(await page.locator('#welcome-title .w-word').evaluateAll(nodes=>nodes.every(n=>window.getComputedStyle(n).opacity==='1')));results.resumeDoesNotReplay=true;
@@ -42,7 +42,7 @@ try {
  await page.getByRole('button',{name:'Try a sample document',exact:true}).click();await page.locator('.workspace [data-testid=document-markdown]').waitFor();
  assert.equal(await page.evaluate(()=>window.transitions.length),0);results.reducedTransitionsSkipped=true;
  await goHome();
- await page.emulateMedia({reducedMotion:'no-preference'});const snapshotCount=await page.evaluate(()=>window.transitions.length);await page.getByRole('button',{name:'Continue reading',exact:true}).click();
+ await page.emulateMedia({reducedMotion:'no-preference'});const snapshotCount=await page.evaluate(()=>window.transitions.length);await page.locator('.home-continue .home-reading-action').click();
  await page.getByTestId('document-markdown').waitFor();assert.equal(await page.evaluate(()=>window.transitions.length),snapshotCount);results.documentNavigationSkipsSnapshots=true;
  await page.evaluate(()=>{window.document.startViewTransition=()=>{throw new Error('forced failure');};});
  await goHome();await page.locator('.home-page').waitFor();results.throwingTransitionStillNavigates=true;
