@@ -50,6 +50,7 @@ export function Citation({
 
   return (
     <PreviewCard.Root open={open} onOpenChange={onOpenChange}>
+      {index === 0 && <span className="text-xs text-muted-foreground">{tr('welcome:citation_hint')}</span>}
       <PreviewCard.Trigger
         delay={0}
         render={<button type="button" {...props} />}

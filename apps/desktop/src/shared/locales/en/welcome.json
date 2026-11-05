@@ -110,5 +110,10 @@
   "hero_excerpt": "Explain one idea in your own words, then return to it later.",
   "hero_answer": "Answer a question from memory tomorrow, then again next week.",
   "demo_selection": "A useful habit is to explain one idea in your own words.",
-  "example_usage": "Tokens this month: 1.2 M · ≈ $3.40 estimated"
+  "example_usage": "Tokens this month: 1.2 M · ≈ $3.40 estimated",
+  "try_title": "Try it",
+  "try_steps": "Import the sample, then wait until its pages are ready. Select a sentence by dragging across it, type “Explain this sentence” in Chat, choose a model and send. Open a numbered citation and compare its source with the answer. AI setup may be needed before sending.",
+  "try_open": "Open sample to practice",
+  "try_hide": "Hide exercise",
+  "citation_hint": "Open a citation number to read the source and check whether it supports the answer."
 }

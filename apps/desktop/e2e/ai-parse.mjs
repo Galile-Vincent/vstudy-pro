@@ -37,7 +37,7 @@ try {
  assert.equal(await panel.getByRole('button',{name:'Confirm and improve',exact:true}).isEnabled(),false);checks++;
 
  await panel.getByRole('button',{name:'Estimate cost',exact:true}).click();
- await panel.getByText(/tokens · USD/).waitFor();checks++;
+ await panel.getByText(/text pieces .* · USD/).waitFor();checks++;
  const audit=async()=>{const result=await new AxeBuilder({page}).setLegacyMode(true).include('.ai-parse-popover').analyze();await writeFile(join(evidence,'axe.json'),JSON.stringify(result.violations,null,2));assert.deepEqual(result.violations.map(v=>v.id),[]);axeScans++;};
  for(const theme of ['light','dark']) {await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await page.waitForTimeout(350);await page.screenshot({path:join(evidence,`panel-${theme}.png`)});await audit();}
  await panel.getByRole('button',{name:'Confirm and improve',exact:true}).click();
