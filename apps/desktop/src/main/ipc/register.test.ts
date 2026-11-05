@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for ipc register.
+ * Owned by main/ipc.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from "vitest";
 import type { IpcMainInvokeEvent } from "electron";
 import { defaultSettings } from "../../shared";

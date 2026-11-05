@@ -1,0 +1,6 @@
+Baseline 726b8be. Comparison excludes generated output and preserves migration SQL bytes.
+204 existing TypeScript modules emit identical JavaScript after comment removal.
+11 test modules only migrate the registry import.
+221 main/shared modules have package documentation headers.
+Unexpected runtime changes outside the three refactor targets: []
+Missing module headers: []

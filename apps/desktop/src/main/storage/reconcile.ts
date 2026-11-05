@@ -1,3 +1,9 @@
+/**
+ * Recover staged restores and reconcile database metadata with contained files.
+ * Owned by main/storage.
+ * Filesystem operations stay inside the application namespace and preserve recoverable state.
+ * @packageDocumentation
+ */
 /** Startup removes recognized incomplete writes. Untracked originals are preserved for recovery. */
 import { readdir, rm, lstat } from 'node:fs/promises';
 import { join } from 'node:path';

@@ -1,3 +1,9 @@
+/**
+ * Search conversation titles and active messages with literal text and bounded pagination.
+ * Owned by main/db.
+ * Applied SQL remains immutable; repositories share one connection and use bound query values.
+ * @packageDocumentation
+ */
 /** Local history repository. Rank before snippets and use keysets with a stable UUID tie breaker. */
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { chatSearchSchema, chatHitSchema, type ChatSearch, type ChatPatch } from '../../shared/chat-history';
@@ -7,6 +13,7 @@ const course = `coalesce(c.courseId,(SELECT courseId FROM moodle_files WHERE doc
 const term = `json_extract(mc.data,'$.identity.term')`;
 const phrase = (q: string) => `"${q.replaceAll('"', '""')}"`;
 const like = (q: string) => `%${q.replace(/[\\%_]/g, '\\$&')}%`;
+/** Return a bounded text snippet with inert match markers rather than trusted HTML. */
 export function markedSnippet(text: string, query: string): string {
   if (!query)
     return text.slice(0, 240);
@@ -16,6 +23,7 @@ export function markedSnippet(text: string, query: string): string {
   const start = Math.max(0, at - 70), end = Math.min(text.length, at + query.length + 100);
   return `${start ? '…' : ''}${text.slice(start, at)}[mark]${text.slice(at, at + query.length)}[/mark]${text.slice(at + query.length, end)}${end < text.length ? '…' : ''}`;
 }
+/** Create conversation search and metadata operations on the caller-owned SQLite connection. */
 export function chatHistoryRepository(db: DatabaseSync) {
   return {
     facets() {

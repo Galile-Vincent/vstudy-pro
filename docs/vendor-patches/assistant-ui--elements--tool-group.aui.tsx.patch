@@ -1,0 +1,20 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/tool-group.aui.tsx
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/tool-group.aui.tsx
+@@ -28,7 +28,7 @@
+       muted: "border-muted-foreground/30 bg-muted/30 rounded-lg border py-3",
+     },
+   },
+-  defaultVariants: { variant: "outline" },
++  defaultVariants: { variant: "ghost" },
+ });
+ 
+ export type ToolGroupRootProps = Omit<
+@@ -72,7 +72,7 @@
+     <Collapsible
+       ref={collapsibleRef}
+       data-slot="tool-group-root"
+-      data-variant={variant ?? "outline"}
++      data-variant={variant ?? "ghost"}
+       open={isOpen}
+       onOpenChange={handleOpenChange}
+       className={cn(

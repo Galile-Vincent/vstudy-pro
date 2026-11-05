@@ -1,3 +1,9 @@
+/**
+ * Coordinate account verification, synchronization, file imports, and Moodle repository reads.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import { applyAuthoritativeTeachers } from './identity';
 import { MoodleScheduler } from './scheduler';
 import { log } from '../logging';
@@ -16,6 +22,7 @@ import { MoodleClient, MoodleError, passwordToken, plainText, type Fetch } from 
 import { MoodleRepository } from './repository';
 import { checkSite, type CheckedSite } from './discovery';
 
+/** Coordinate verified accounts and synchronization; dispose owned timers and transports on shutdown. */
 export class MoodleService {
   private readonly pending = new Map<string,Promise<{errors:string[]}>>();
   private stopped = false;

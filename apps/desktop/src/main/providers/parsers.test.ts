@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for providers parsers.
+ * Owned by main/providers.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from "vitest";
 import { parseProviderEvent, parseStream } from "./parsers";
 async function* split(text: string) {

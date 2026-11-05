@@ -6,6 +6,59 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 ## Unreleased
 
 ### Documentation
+- docs(repo): normalize verification logs and record final size (5d83019)
+- docs: record Moodle webview integration and verification (8155252)
+- docs(storage): map ownership and add bounded database benchmark (e6210a1)
+- docs: record first-run audit and merged onboarding acceptance (59cc0fa)
+
+### Features
+- feat: add student planning domain and approval-based course tools (8af5a45)
+- feat: add searchable chat history across scopes (1bbb2c6)
+- feat: add Moodle school registry and cached branding (42040dc)
+- feat: add searchable multi-school Moodle connection flow (39734c2)
+- feat: add validated whole-system theme packs (e5573b9)
+- feat: add appearance theme picker and safe JSON editor (8668a20)
+- feat(history): merge searchable chat history (f83675a)
+- feat: model isolated Moodle web sessions and navigation policy (ee405c8)
+- feat: open authenticated Moodle pages in a sandboxed pane (439926f)
+- feat(webview): merge authenticated Moodle webview (9728b01)
+- feat(storage): add validated backups and maintenance settings (41414e7)
+- feat(storage): merge data layer, cache and backup (a215c76)
+- feat: guide first-time students through setup and their first task (58176e5)
+- feat: integrate onboarding with schools, themes, and recorded guides (a01dcf6)
+- feat(onboarding): merge guided first run (0f74be5)
+- feat(agent): merge study planner and agent actions (726b8be)
+
+### Fixes
+- fix: preserve Moodle pane focus and themed loading (41c7390)
+- fix(storage): harden migrations, file publication, and Moodle caching (635ebd0)
+- fix(storage): validate exports and finish integrated verification (6a3b1a0)
+- fix: preserve recorded walkthrough frames and caption duration (b333be6)
+
+### Maintenance
+- chore(repo): stop tracking generated release evidence (1e1a681)
+- chore(repo): add contributor checks and release workflow (ce83d96)
+- chore: merge main and align history with theme packs (5c03183)
+- chore: merge school theme and chat history streams (0997ddd)
+- chore: merge schools, themes, and repository hygiene (fba1c7a)
+- chore: merge chat history without dropping Moodle contracts (34d36d9)
+- chore: merge main into data layer (6fb989b)
+- chore: merge chat history into data layer (72ff1f2)
+- chore: merge storage and webview with planner migration 21 (90b67d7)
+- chore: merge main school and theme streams (7ca480c)
+- chore: merge webview history and storage integration (b868f6a)
+- chore: merge guided onboarding and verify planner integration (7a47597)
+- chore: repair dependency and vendor verification gates (c121263)
+
+### Refactoring
+- refactor: route renderer colors through semantic theme tokens (9b72fa1)
+- refactor: document subsystem ownership and separate chat context (3f23392)
+
+### Tests
+- test: capture selected themes and visible recorded playback (85423de)
+## v0.1.0
+
+### Documentation
 - docs: architecture contract (38186cc)
 - docs(pdf): record final corpus validation and remaining limits (7e47319)
 - docs: document captured CLI usage shapes and estimation limits (fcb2bb9)
@@ -232,7 +285,6 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 - chore: configure Electron knip entrypoints and remove proven unused dependency and module (6b805a0)
 - build: require explicit signing credentials for distribution packages (f8f3aa8)
 - chore: preserve unfinished assistant-ui setup before worktree cleanup (6c2a778)
-- chore(repo): stop tracking generated release evidence (1e1a681)
 
 ### Other changes
 - Initial commit (2996dee)

@@ -28,7 +28,7 @@ Read [architecture](ARCHITECTURE.md), [the data model](DATA_MODEL.md), and [secu
 2. Run `pnpm dev` on a macOS machine with enough available RAM. Electron and Vite start together. Stop with Ctrl+C.
 3. Reproduce the issue using synthetic documents and a local test provider before using student data or paid providers.
 
-GUI commands in this guide were deliberately not launched during stream H verification because of the operator's memory constraint.
+Run only one Electron instance at a time. Stop every process started for verification.
 
 ## Check a change
 
@@ -55,7 +55,7 @@ Run one test file during development.
 pnpm --filter @vstudy/desktop exec vitest run src/main/ipc/register.test.ts --pool=forks --maxWorkers=2
 ```
 
-When GUI verification is authorized, `pnpm smoke` builds and launches Electron. `pnpm e2e` builds, prepares converter dependencies and an unsigned package, then launches Electron tests. Both require more memory and may create child processes. See [README](../README.md) for converter environment overrides.
+For GUI verification, `pnpm smoke` builds and launches Electron. `pnpm e2e` builds, prepares converter dependencies and an unsigned package, then launches Electron tests. Both require more memory and may create child processes. See [README](../README.md) for converter environment overrides.
 
 ## Debug a failure
 
@@ -75,17 +75,17 @@ Keep `contextIsolation`, sandboxing, and sender validation enabled. Never expose
 
 ## Add a migration
 
-1. Append a unique increasing `{version, sql}` entry to the `migrations` array in `src/main/db/index.ts`. Put large SQL in a domain migration module.
+1. Append a unique increasing `{version, sql}` entry to the `migrations` array in `src/main/db/migrations.ts`. Put large SQL in a domain migration module.
 2. Keep applied migrations unchanged. Add a forward migration instead of rewriting old SQL.
 3. Extend the repository and its schema parsing together. Bind query parameters.
 4. Test a fresh store and an upgrade from the prior schema with populated rows. Check foreign keys, indexes, rollback, data preservation, and repeated opens.
-5. For a destructive migration, add and test a backup policy before applying it. Existing backup special cases do not automatically cover a new version.
+5. For a destructive migration, add and test a backup policy before applying it. The migration runner backs up existing disk databases before every pending version. Test the domain-specific recovery path as well.
 
 ## Add a locale string
 
 1. Add the same key to the matching JSON namespace under `src/shared/locales/en`, `zh-Hant`, and `ja`.
 2. Use the namespace-qualified key through the existing translation helper or React translation hook. Preserve interpolation names across locales.
-3. For a new namespace, register it in `src/shared/i18n.ts` for every language and the pseudo-locale.
+3. For a new namespace, create its JSON file in all three locale directories. `scripts/generate-locales.mjs` discovers namespaces automatically and rejects differing inventories. Install, dev, build, test, and typecheck run it. Never edit the ignored `src/shared/locales.generated.ts`.
 4. Run lint and locale tests. Check narrow layouts with long and pseudo-localized labels when GUI work is authorized.
 
 ## Add a Moodle function call
@@ -102,4 +102,12 @@ Use read-only Moodle functions unless the user explicitly approves a write actio
 
 Follow [CONTRIBUTING](../CONTRIBUTING.md). `pnpm release` regenerates the changelog only. Signed packaging uses `pnpm package:signed` and requires external credentials. Unsigned tag builds are test artifacts.
 
-See [the stream H command report](REPO_HYGIENE.md) for commands run, failures, and checks deliberately deferred in this checkout.
+See [cleanup verification](ENGINEERING_CLEANUP.md) for current command results and explicit Knip exceptions. [The stream H report](REPO_HYGIENE.md) is historical.
+
+## Test Node and locale changes
+
+Vitest runs with `pool: forks`, `maxWorkers: 2`, and `execArgv: ["--no-experimental-webstorage"]`. Node's process-wide storage must not shadow jsdom's per-window storage. Plain `pnpm test` applies this configuration without caller environment flags. For a comparison run, use `NODE_OPTIONS=--no-experimental-webstorage pnpm test --pool=forks --maxWorkers=2`.
+
+Direct `pnpm exec vitest` also reads this configuration. After adding a namespace, run `pnpm --filter @vstudy/desktop locales:generate` before invoking Vitest directly. Normal install and package scripts already generate the registry. Locale contract tests check translated keys and interpolation names. `en-XA` derives from English at runtime.
+
+Knip does not follow the CSS imports in the current project configuration. Its CSS-only dependency exceptions are enumerated in `knip.json`. `openssl` is a required host binary for local TLS fixtures, not an npm dependency. Never add a blanket source-directory exclusion to silence vendor or dead-code checks.

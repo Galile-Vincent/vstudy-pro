@@ -1,0 +1,66 @@
+
+> vstudy-pro@ security:check /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580
+> node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test --pool=forks --maxWorkers=2
+
+{"vulnerabilities":{"info":0,"low":1,"moderate":4,"high":11,"critical":1},"unreviewed":[]}
+
+> vstudy-pro@ lint /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580
+> pnpm --filter @vstudy/desktop lint
+
+
+> @vstudy/desktop@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop
+> eslint .
+
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop/src/main/ipc/index.ts
+  55:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop/src/main/moodle/sso-protocol.ts
+  14:59  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop/src/main/moodle/webview.ts
+  224:89  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+✖ 3 problems (0 errors, 3 warnings)
+
+
+> vstudy-pro@ test /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580
+> pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2
+
+
+> @vstudy/desktop@0.1.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop
+> node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run --pool=forks --maxWorkers=2
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop/src/shared/locales.generated.ts (17 namespaces).
+(node:69187) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+VStudy light: WCAG AA passed at every contrast setting
+VStudy dark: WCAG AA passed at every contrast setting
+Ocean light: WCAG AA passed at every contrast setting
+Ocean dark: WCAG AA passed at every contrast setting
+Grove light: WCAG AA passed at every contrast setting
+Grove dark: WCAG AA passed at every contrast setting
+Ember light: WCAG AA passed at every contrast setting
+Ember dark: WCAG AA passed at every contrast setting
+Iris light: WCAG AA passed at every contrast setting
+Iris dark: WCAG AA passed at every contrast setting
+Rose light: WCAG AA passed at every contrast setting
+Rose dark: WCAG AA passed at every contrast setting
+Slate light: WCAG AA passed at every contrast setting
+Slate dark: WCAG AA passed at every contrast setting
+Paper light: WCAG AA passed at every contrast setting
+Paper dark: WCAG AA passed at every contrast setting
+High contrast light: WCAG AA passed at every contrast setting
+High contrast dark: WCAG AA passed at every contrast setting
+22 renderer CSS files use semantic theme tokens
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop
+
+
+ Test Files  118 passed | 5 skipped (123)
+      Tests  933 passed | 14 skipped (947)
+   Start at  00:21:42
+   Duration  22.40s (transform 1.28s, setup 0ms, import 7.51s, tests 27.06s, environment 4.46s)
+

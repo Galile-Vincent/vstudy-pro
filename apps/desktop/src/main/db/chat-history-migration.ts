@@ -1,3 +1,9 @@
+/**
+ * Define immutable SQL for chat history persistence upgrades.
+ * Owned by main/db.
+ * Applied SQL remains immutable; repositories share one connection and use bound query values.
+ * @packageDocumentation
+ */
 /** Forward-only v18 migration. Preserve message IDs and parent links while adding general scope. */
 export const chatHistoryMigration = `
 CREATE TABLE conversations_history (

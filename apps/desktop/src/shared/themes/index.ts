@@ -1,3 +1,9 @@
+/**
+ * Validate complete light and dark theme packs and derive contrast-adjusted token colors.
+ * Owned by shared/themes.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 /** Whole-system theme packs. Imported colors are opaque hex values, never executable CSS. */
 import { z } from 'zod';
 import palettes from './palettes.json' with { type: 'json' };
@@ -15,6 +21,7 @@ export const themeTokensSchema = z.object(Object.fromEntries(
   tokenNames.map(key => [key, colorSchema]),
 ) as Record<ThemeToken, typeof colorSchema>).strict();
 export type ThemeTokens = z.infer<typeof themeTokensSchema>;
+/** A complete light and dark pack with opaque color tokens, inert metadata, and no unknown fields. */
 export const themePackSchema = z.object({
   version: z.literal(1),
   id: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/),
@@ -25,6 +32,7 @@ export const themePackSchema = z.object({
 }).strict();
 export type ThemePack = z.infer<typeof themePackSchema>;
 export type ColorScheme = 'light' | 'dark';
+/** Persist scheme and pack selection with bounded contrast, opacity, and custom pack inventory. */
 export const themePreferencesSchema = z.object({
   themeId: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/).default('vstudy'),
   colorScheme: z.enum(['system', 'light', 'dark']).default('system'),
@@ -73,6 +81,7 @@ export function resolveTheme(preferences: ThemePreferences): ThemePack {
     ?? builtinThemes[0]!;
 }
 
+/** Compute WCAG relative-luminance contrast for validated opaque colors. */
 export function contrastRatio(foreground: string, background: string): number {
   const luminance = (hex: string) => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
     .map(c => c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4)

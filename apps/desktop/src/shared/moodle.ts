@@ -1,3 +1,9 @@
+/**
+ * Define public Moodle account and course contracts that exclude credentials.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 /** Moodle account, school, and transport contracts. Secrets stay in the main process. */
 import { z } from "zod";
 import { plannerActionSchemas, exportCalendarActionSchema } from "./planner";
@@ -23,6 +29,7 @@ export const moodleSiteUrlSchema = z.string().url().refine(value => {
   try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password && !url.port && !url.search && !url.hash && !value.endsWith('/'); } catch { return false; }
 }, 'Expected an HTTPS Moodle root');
 
+/** Public account state. Tokens and cookie contents are never part of this contract. */
 export const moodleAccountSchema = z.discriminatedUnion("status", [
   z
     .object({
@@ -51,6 +58,7 @@ export const moodleAccountSchema = z.discriminatedUnion("status", [
 ]);
 export type MoodleAccount = z.infer<typeof moodleAccountSchema>;
 
+/** Public account-scoped course snapshot with normalized identity and nullable remote metadata. */
 export const moodleCourseSchema = z
   .object({
     id: z.string().uuid(),
@@ -140,6 +148,7 @@ export type MoodleReminder = z.infer<typeof moodleReminderSchema>;
 
 export const moodlePanelSchema=z.enum(['contents','teachers','completion','assignments','quizzes','announcements','grades']);
 export type MoodlePanel=z.infer<typeof moodlePanelSchema>;
+/** Represent loading, supported, unsupported, and failed panel states explicitly. */
 export const moodlePanelStateSchema=z.enum(['loading','idle','error']);
 export const moodleCourseDetailSchema = z
   .object({
@@ -173,6 +182,7 @@ export const moodleOverviewSchema = z
   .strict();
 export type MoodleOverview = z.infer<typeof moodleOverviewSchema>;
 
+/** Agent proposals are typed data. Main validates live target ownership again after explicit approval. */
 export const moodleAgentActionSchema = z.discriminatedUnion("type", [
   z
     .object({

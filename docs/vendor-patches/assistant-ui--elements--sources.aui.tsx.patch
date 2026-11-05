@@ -1,0 +1,11 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/sources.aui.tsx
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/sources.aui.tsx
+@@ -42,7 +42,7 @@
+       },
+     },
+     defaultVariants: {
+-      variant: "outline",
++      variant: "muted",
+       size: "default",
+     },
+   },

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for cache client-cache.
+ * Owned by main/cache.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** The client cache whitelist excludes credential-bearing and mutating calls. */
 import { expect, it, vi } from 'vitest';
 import { z } from 'zod';

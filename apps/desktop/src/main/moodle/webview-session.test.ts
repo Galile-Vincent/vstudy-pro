@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle webview-session.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Fake-clock checks for autologin rate limits, cookie reuse, expiry, and cancellation. */
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { AUTOLOGIN_INTERVAL, MoodleWebviewSession, WebviewSessionError } from './webview-session';

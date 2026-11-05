@@ -1,6 +1,15 @@
+/**
+ * Record local study activity and compute timezone-aware streaks.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import type { Store } from '../db';
+/** Resolve a calendar date using an explicit IANA timezone. */
 export function localDate(now: Date, zone: string): string { return new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now); }
+/** Shift a calendar date without assuming every local day has 24 hours. */
 export function shiftDay(date: string, days: number) { const d = new Date(`${date}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + days); return d.toISOString().slice(0, 10); }
+/** Compute study streaks with the yesterday grace period and an explicit clock and timezone. */
 export function computeStreak(rows: {
     date: string;
     chatCount: number;
@@ -20,6 +29,7 @@ export function computeStreak(rows: {
     }
     return { current, best, today: days.has(today), days: Array.from({ length: 7 }, (_, i) => { const date = shiftDay(today, i - 6); return { date, studied: days.has(date) }; }) };
 }
+/** Record idempotent study events and query local-day activity aggregates. */
 export class ActivityService {
     constructor(private readonly store: Store, readonly zone = Intl.DateTimeFormat().resolvedOptions().timeZone, private readonly clock = () => new Date()) { }
     record(kind: 'chat' | 'import' | 'read', documentId: string, seconds = 0, eventId?: string) {

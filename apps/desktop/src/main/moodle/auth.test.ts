@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle auth.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it, vi } from 'vitest';
 import { passwordToken } from './client';
 import { verifyCallback } from './callback';

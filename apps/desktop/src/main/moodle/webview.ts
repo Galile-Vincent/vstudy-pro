@@ -1,3 +1,9 @@
+/**
+ * Own sandboxed course-content views and their account-scoped session lifecycle.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 /** Owns isolated Moodle WebContentsViews. Only the trusted app frame can control a view; remote content has no preload. */
 import { BrowserWindow, WebContentsView, session, clipboard, shell, dialog, type WebContents, type Session } from 'electron';
 import { randomUUID, createHash } from 'node:crypto';
@@ -28,6 +34,7 @@ export interface MoodleWebviewDependencies {
   request?:Fetch;
   configuredHosts?:{ssoOrigins?:string[];cdnOrigins?:string[];loopback?:boolean};
 }
+/** Own account-scoped sandboxed views and route downloads through document validation. */
 export class MoodleWebviews {
   private readonly accounts = new Map<string,AccountSession>();
   private readonly budgets = new Map<string,{retryAt:number}>();

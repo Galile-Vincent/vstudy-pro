@@ -1,6 +1,12 @@
+/**
+ * Regression coverage for db ai-parse-migration.
+ * Owned by main/db.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it,expect } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { migrations } from './index';
+import { migrations } from './migrations';
 it('adds AI versions to a populated version-10 schema without changing original data',()=>{
  const db=new DatabaseSync(':memory:');try {
   db.exec('PRAGMA foreign_keys=ON');for(const migration of migrations.filter(m=>m.version<=10))db.exec(migration.sql);

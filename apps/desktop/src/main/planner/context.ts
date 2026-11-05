@@ -1,3 +1,9 @@
+/**
+ * Build bounded, quoted course and planner context and cache it by revision.
+ * Owned by main/planner.
+ * Student data survives Moodle pruning; agent proposals require explicit validated approval.
+ * @packageDocumentation
+ */
 /** Ranked course context with a conservative UTF-8 token budget. Cached rows invalidate on local writes and external SQLite commits. */
 import type { DatabaseSync } from "node:sqlite";
 import { displayTitle } from "../../shared/moodle-course-display";
@@ -16,6 +22,7 @@ export interface ContextOptions {
   fileState?: (id: string) => string;
 }
 interface RankedItem { group: string; value: unknown; score: number }
+/** Bound context text while preserving the caller-selected priority order. */
 export function budgetContext(base: Record<string, unknown>, items: RankedItem[], maxTokens: number) {
   if (!Number.isInteger(maxTokens) || maxTokens < 512) throw new Error("Context budget must be at least 512 tokens");
   const result: Record<string, unknown> = { ...base, omitted: items.length };
@@ -33,6 +40,7 @@ export function budgetContext(base: Record<string, unknown>, items: RankedItem[]
   const json = encoded();
   return { json, estimatedTokens: Buffer.byteLength(json, "utf8"), omitted: items.length - included };
 }
+/** Combine current coursework and student plans within the prompt budget. */
 export function buildPlanningContext(detail: MoodleCourseDetail, planner: PlannerSnapshot = emptyPlanner(), options: ContextOptions) {
   const clip = (text: string, length = 160) => text.slice(0, length);
   const now = options.now.getTime(), horizon = now + 14 * 86400000;
@@ -60,6 +68,7 @@ export function buildPlanningContext(detail: MoodleCourseDetail, planner: Planne
   for (const r of detail.reminders.slice(0, 30)) add("reminders", { ...r, note: clip(r.note) }, 45);
   return budgetContext({ course: { id: detail.course.id, name: clip(displayTitle(detail.course.identity, options.locale, detail.course.fullName)) }, now: options.now.toISOString(), timezone: options.timeZone, locale }, items, options.maxTokens ?? 6000);
 }
+/** Reuse bounded planning context until the course or planner revision changes. */
 export class CourseContextCache {
   private revision = "";
   private readonly entries = new Map<string, { detail: MoodleCourseDetail; planner: PlannerSnapshot; syncedAt: string | null }>();

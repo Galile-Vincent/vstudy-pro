@@ -1,0 +1,78 @@
+--- a/apps/desktop/src/renderer/components/assistant-ui/elements/suggestions.tsx
++++ b/apps/desktop/src/renderer/components/assistant-ui/elements/suggestions.tsx
+@@ -2,14 +2,14 @@
+ 
+ import type { ComponentProps } from "react";
+ import { cn } from "@/lib/utils";
+-import { paper } from "./surfaces";
+ 
+ export interface SuggestionsProps extends Omit<
+   ComponentProps<"div">,
+   "children"
+ > {
+-  suggestions: readonly string[];
+-  selectedSuggestion: string | null;
++  suggestions: readonly (string | { id: string; label: string })[];
++  selectedSuggestion?: string | null;
++  disabled?: boolean;
+   cycle: number;
+   onSuggestion: (suggestion: string) => void;
+   variant?: "pills" | "list";
+@@ -19,6 +19,7 @@
+   suggestions,
+   selectedSuggestion,
+   cycle,
++  disabled,
+   onSuggestion,
+   variant = "pills",
+   className,
+@@ -36,29 +37,28 @@
+           : "flex max-w-md flex-wrap justify-center gap-2",
+         className,
+       )}
+-
+       {...props}
+     >
+-      {suggestions.map((suggestion, index) => (
+-        <button
+-          key={suggestion}
+-          type="button"
+-          aria-pressed={selectedSuggestion === suggestion}
+-          onClick={() => onSuggestion(suggestion)}
+-          className={cn(
+-            paper,
+-            "fade-in slide-in-from-bottom-2 animate-in fill-mode-both flex items-center text-[13px] transition-transform duration-300 hover:-translate-y-px active:scale-[0.96] motion-reduce:animate-none",
+-            list
+-              ? "w-full rounded-2xl px-4 py-2.5 text-start"
+-              : "rounded-full px-4 py-2",
+-            selectedSuggestion === suggestion &&
+-              "bg-foreground text-background",
+-          )}
+-          style={{ animationDelay: `${index * 70}ms` }}
+-        >
+-          {suggestion}
+-        </button>
+-      ))}
++      {suggestions.map((item) => {
++        const suggestion = typeof item === "string" ? { id: item, label: item } : item;
++        return (
++          <button
++            key={suggestion.id}
++            type="button"
++            aria-pressed={selectedSuggestion === undefined ? undefined : selectedSuggestion === suggestion.id}
++            disabled={disabled}
++            onClick={() => onSuggestion(suggestion.id)}
++            className={cn(
++              "aui-suggestion flex items-center rounded-(--r-pill) border-0 px-(--space-3) py-(--space-2) text-(length:--type-base) text-(--ink)",
++              list
++                ? "w-full text-start"
++                : "text-center",
++            )}
++          >
++            {suggestion.label}
++          </button>
++        );
++      })}
+     </div>
+   );
+ }

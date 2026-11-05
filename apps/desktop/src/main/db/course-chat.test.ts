@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for db course-chat.
+ * Owned by main/db.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from "vitest";
 import { conversationSchema, messageSchema } from "../../shared/domain";
 import { openStore } from "./index";

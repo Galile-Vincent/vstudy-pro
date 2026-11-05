@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for i18n.
+ * Owned by shared.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { describe, it, expect } from 'vitest';
 import { resources, i18n, systemLanguage, pseudo } from './i18n';
 const variables = (s: string) => [...s.matchAll(/{{\s*([^}]+)\s*}}/g)].map(m => m[1]).sort();

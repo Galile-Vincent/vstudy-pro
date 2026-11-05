@@ -1,3 +1,9 @@
+/**
+ * Probe provider quota state with bounded subprocess and cache lifetimes.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { recordEgress } from '../services/egress';
 import { createInterface } from 'node:readline';
 import { z } from 'zod';
@@ -5,6 +11,7 @@ import { ProcessScope } from '../../../resources/converter/process-scope';
 import { cliEnvironment, findCli } from './cli';
 import type { Usage } from '../../shared/domain';
 const windowSchema = z.object({ usedPercent: z.number().min(0).max(100), windowDurationMins: z.number().nullable().optional(), resetsAt: z.number().nullable().optional() });
+/** Read Codex quota information through the bounded, opted-in discovery transport. */
 export async function probeCodexRateLimits(binary: string, args = ['app-server'], timeoutMs = 2500): Promise<Usage['rateLimit']> {
   recordEgress('codex_quota', 'OpenAI / Codex CLI managed endpoints');
   const scope = new ProcessScope();
@@ -42,6 +49,7 @@ export async function probeCodexRateLimits(binary: string, args = ['app-server']
     });
   } finally { clearTimeout(timer); lines.close(); await scope.dispose(); }
 }
+/** Create a cached quota probe that shares concurrent work and supports cleanup. */
 export function createRateLimitProbe(load = async () => { const binary = await findCli('codex'); return binary ? probeCodexRateLimits(binary) : undefined; }) {
   let cached: { expires: number; value: Usage['rateLimit'] } | undefined;
   let pending: Promise<Usage['rateLimit']> | undefined;

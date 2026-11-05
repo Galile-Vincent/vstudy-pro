@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for domain.
+ * Owned by shared.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import {

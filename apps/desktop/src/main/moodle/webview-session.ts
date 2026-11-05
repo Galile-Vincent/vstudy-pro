@@ -1,3 +1,9 @@
+/**
+ * Model webview cookie exchange, expiry, and recovery as explicit session states.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 /** Account-scoped autologin lifecycle. A failed attempt also consumes the six-minute key budget. */
 import { z } from 'zod';
 import type { MoodleTokens } from './auth';
@@ -6,10 +12,12 @@ import { moodleFetch } from './site-url';
 import type { WebviewError } from '../../shared/moodle-webview';
 
 export const AUTOLOGIN_INTERVAL = 6 * 60_000;
+/** Report a stable webview recovery category without exposing account tokens. */
 export class WebviewSessionError extends Error {
   constructor(readonly code:WebviewError, readonly retryAt:number|null = null) { super(code); }
 }
 export type WebviewSessionPhase = 'idle'|'authenticating'|'ready'|'expired'|'disposed';
+/** Inject account credentials and isolated-partition IO without exposing either to the renderer. */
 export interface WebviewSessionPort {
   credentials(): Promise<MoodleTokens>;
   hasCookie(): Promise<boolean>;
@@ -32,6 +40,7 @@ async function autologinKey(response:Response):Promise<string> {
   try {return z.object({key:z.string().min(1).max(512).regex(/^[\w-]+$/)}).parse(JSON.parse(Buffer.concat(chunks).toString('utf8'))).key;}
   catch {throw new WebviewSessionError('unavailable');}
 }
+/** Coordinate isolated cookie establishment and explicit recovery states for one account. */
 export class MoodleWebviewSession {
   phase: WebviewSessionPhase = 'idle';
   get retryAt() { return this.budget.retryAt; }

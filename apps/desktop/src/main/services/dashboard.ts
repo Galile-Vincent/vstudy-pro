@@ -1,8 +1,15 @@
+/**
+ * Assemble dashboard metadata and usage rollups without loading document bodies.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { plainText } from '../../shared/plain-text';
 import type { DocumentCitation } from '../../shared/domain';
 import { LibraryService } from './library';
 import { ActivityService, localDate, shiftDay } from './activity';
 import { dashboardSchema, libraryQuerySchema } from '../../shared/library';
+/** Combine metadata, activity, and daily usage rollups for the home view. */
 export function getDashboard(library: LibraryService, activity: ActivityService, now = new Date()) {
     const db = library.store.db, today = localDate(now, activity.zone), month = today.slice(0, 7) + '-01';
     const totals = "coalesce(sum(inputTokens),0) inputTokens,coalesce(sum(outputTokens),0) outputTokens,coalesce(sum(costUsd),0) costUsd,coalesce(sum(calls),0) calls";

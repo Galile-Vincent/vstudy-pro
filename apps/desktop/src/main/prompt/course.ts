@@ -1,3 +1,9 @@
+/**
+ * Build untrusted course context and validate proposed actions against current course state.
+ * Owned by main/prompt.
+ * Document and course content is untrusted data, never application instructions.
+ * @packageDocumentation
+ */
 /** Course chat proposes strict actions only. Source content and history have no tool authority. */
 import type { Message, Settings } from "../../shared/domain";
 import { moodleAgentActionSchema, type MoodleAgentAction, type MoodleCourseDetail } from "../../shared/moodle";
@@ -8,6 +14,7 @@ import { buildPlanningContext, quoteUntrusted } from "../planner/context";
 
 export const MAX_COURSE_ACTIONS = 5;
 
+/** Separate visible text from bounded action proposals and reject stale or foreign targets. */
 export function parseCourseActions(reply: string, detail: MoodleCourseDetail, now = Date.now(), planner = emptyPlanner(), documentIds = detail.files.flatMap(f => f.documentId ? [f.documentId] : [])) {
   const actions: MoodleAgentAction[] = [];
   const pending = [...planner.blocks];
@@ -40,6 +47,7 @@ const actionGuide = [
   'summarize-course-materials and generate-practice-quiz: {"type":"summarize-course-materials","documentIds":["ready document id"]}. Select 1 to 6 converted course documents. Ask the student to open missing files first. Do not summarize content you have not received.',
   'Never overlap blocks or exceed the stated daily budget including ALL courses. End blocks before the source due time or exam. Plan within 14 days. Show unallocated work. For overdue work suggest checking submission rules and agreeing a recovery date. Never invent grades, availability, submission status, exam dates, or confirmed scope.',
 ].join("\n");
+/** Quote course and planner context as untrusted data and include only supported action instructions. */
 export function buildCoursePrompt(
   detail: MoodleCourseDetail, history: Pick<Message, "role" | "parts">[], question: string,
   language: Settings["replyLanguage"] = "auto", fileState: (id: string) => string = () => "unknown",

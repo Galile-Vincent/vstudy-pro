@@ -7,6 +7,24 @@
  
  import {
    createContext,
+@@ -32,7 +34,7 @@
+     },
+   },
+   defaultVariants: {
+-    variant: "outline",
++    variant: "ghost",
+   },
+ });
+ 
+@@ -110,7 +112,7 @@
+     <Collapsible
+       ref={ref}
+       data-slot="reasoning-root"
+-      data-variant={variant}
++      data-variant={variant ?? "ghost"}
+       open={isOpen}
+       onOpenChange={handleOpenChange}
+       className={cn(
 @@ -136,6 +138,7 @@
    className,
    ...props

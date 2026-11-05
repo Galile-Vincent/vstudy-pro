@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for shutdown.
+ * Owned by main.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect,it } from 'vitest';
 import { coordinateShutdown } from './shutdown';
 it('joins reentrant quit and closes the store only after producers and workers exit',async()=>{

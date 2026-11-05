@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle schools.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Registry fixtures assert offline metadata and stable roots, not live school availability. */
 import { expect, it } from 'vitest';
 import { schools } from './schools';

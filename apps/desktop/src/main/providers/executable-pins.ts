@@ -1,9 +1,16 @@
+/**
+ * Persist approved CLI executable identities and reject unconfirmed changes.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { atomicWriteSync } from "../storage/atomic";
 import { readFileSync, existsSync } from 'node:fs';
 import { z } from 'zod';
 import { executableMetadata, executableIdentity, resolveInstalledExecutable, type ExecutableIdentity } from './trusted-executable';
 const identitySchema = z.object({ path:z.string(), mtime:z.number(), hash:z.string() });
 const pinsSchema = z.record(identitySchema);
+/** Persist user-approved executable hashes and require renewed approval when files change. */
 export class ExecutablePins {
   private pins: Record<string, ExecutableIdentity> = {};
   private pending = new Map<string, Promise<string | null>>();
@@ -39,7 +46,10 @@ export class ExecutablePins {
   }
 }
 let active: ExecutablePins | undefined;
+/** Install the application-owned executable trust store for CLI resolution. */
 export function setExecutablePins(pins: ExecutablePins) { active = pins; }
+/** Resolve an executable only when its current identity matches user approval. */
 export function pinnedCli(binary: string) { return active ? active.resolve(binary) : resolveInstalledExecutable(binary); }
 
+/** Read an explicit CLI path without executing the configured binary. */
 export function configuredCliPath(binary: string) { return active ? active.describe(binary) : resolveInstalledExecutable(binary); }

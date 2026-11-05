@@ -1,10 +1,18 @@
+/**
+ * Validate AI page output before accepting a replacement document version.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import type { Root, RootContent } from 'mdast';
+/** Estimate page tokens for conversion budgeting without calling a provider. */
 export function pageTokens(text:string):string[] {
  return text.normalize('NFKC').toLowerCase().replace(/\\[a-z]+/gi,' ').replace(/([\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}])/gu,' $1 ').match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]|[\p{L}\p{N}]+/gu) ?? [];
 }
+/** Reject malformed or unsafe AI page output before replacing stored Markdown. */
 export function validateAiPage(source:string, output:string):{accepted:boolean; missing:number; added:number} {
  if (!output.trim() || Buffer.byteLength(output)>256*1024) throw new Error('ai_parse.size');
  const tree:Root = unified().use(remarkParse).use(remarkGfm).parse(output);
@@ -22,6 +30,7 @@ export function validateAiPage(source:string, output:string):{accepted:boolean; 
  const missing=(input.length-overlap)/input.length, added=(result.length-overlap)/Math.max(1,result.length);
  return {accepted:missing<=.08 && added<=.25,missing,added};
 }
+/** Split converted Markdown into bounded pages while retaining page markers. */
 export function splitParsePages(markdown:string):string[] {
  const parts=markdown.split(/<!--\s*page\s+\d+\s*-->/i);
  return parts.length===1 ? parts : parts.slice(1).map((p,i)=>i===0 && parts[0]?.trim() ? `${parts[0]}\n${p}` : p);

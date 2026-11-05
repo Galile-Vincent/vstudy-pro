@@ -6,15 +6,16 @@
   "author": "vstudy",
   "main": "out/main/index.js",
   "scripts": {
-    "dev": "electron-vite dev",
-    "build": "electron-vite build",
-    "test": "node scripts/check-contrast.mjs && vitest run",
+    "dev": "node scripts/generate-locales.mjs && electron-vite dev",
+    "build": "node scripts/generate-locales.mjs && electron-vite build",
+    "test": "node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run",
     "contrast:check": "node scripts/check-contrast.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node scripts/generate-locales.mjs && tsc --noEmit",
     "lint": "eslint .",
     "package": "pnpm build && electron-builder --mac dmg dir",
     "smoke": "pnpm build && node scripts/smoke.mjs",
-    "package:verify": "npx --no-install @electron/fuses read --app \"release/mac-arm64/VStudy Pro.app\" && python3 scripts/verify-packaged.py"
+    "package:verify": "npx --no-install @electron/fuses read --app \"release/mac-arm64/VStudy Pro.app\" && python3 scripts/verify-packaged.py",
+    "locales:generate": "node scripts/generate-locales.mjs"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.32",

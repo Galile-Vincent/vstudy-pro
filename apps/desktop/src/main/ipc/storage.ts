@@ -1,3 +1,9 @@
+/**
+ * Register validated storage IPC operations and delegate privileged work to main services.
+ * Owned by main/ipc.
+ * Request and response validation and sender ownership stay at the IPC boundary.
+ * @packageDocumentation
+ */
 /** Native dialogs own backup paths. Maintenance is exclusive and destructive actions require confirmation. */
 import { app, dialog } from 'electron';
 import type { Store } from '../db';
@@ -10,6 +16,7 @@ import { exclusiveStorage, holdStorageUntilRestart } from '../storage/maintenanc
 import { exportBackup, stageRestore } from '../storage/backup';
 import { storageUsage, clearResponseCache, clearConverted, checkIntegrity } from '../storage/service';
 
+/** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerStorageIpc(registrar:ReturnType<typeof createIpcRegistrar>,store:Store,implemented:Set<IpcChannel>,settle:()=>Promise<void>):void{
   for(const channel of Object.keys(storageContract) as (keyof typeof storageContract)[])implemented.add(channel);
   const root=app.getPath('userData');

@@ -1,3 +1,9 @@
+/**
+ * Own Electron startup, application protocols, main-window creation, and ordered shutdown.
+ * Owned by main.
+ * Main owns privileged resources; shutdown must settle work before releasing those resources.
+ * @packageDocumentation
+ */
 import { reconcileDownloads } from "./storage/reconcile";
 import { recoverRestore } from "./storage/backup";
 import { applyNativeTheme, nativeBackground } from './theme';

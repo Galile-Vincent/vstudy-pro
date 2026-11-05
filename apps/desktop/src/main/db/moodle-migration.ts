@@ -1,3 +1,9 @@
+/**
+ * Define immutable SQL for moodle persistence upgrades.
+ * Owned by main/db.
+ * Applied SQL remains immutable; repositories share one connection and use bound query values.
+ * @packageDocumentation
+ */
 export const moodleMigration = `
 CREATE TABLE moodle_accounts (id TEXT PRIMARY KEY, schoolId TEXT NOT NULL, remoteUserId INTEGER NOT NULL, data TEXT NOT NULL CHECK(json_valid(data)), UNIQUE(schoolId,remoteUserId));
 CREATE TABLE moodle_courses (id TEXT PRIMARY KEY, accountId TEXT NOT NULL REFERENCES moodle_accounts(id) ON DELETE CASCADE, data TEXT NOT NULL CHECK(json_valid(data)));

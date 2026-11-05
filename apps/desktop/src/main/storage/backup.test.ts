@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for storage backup.
+ * Owned by main/storage.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Backups restore on another data root and survive interruptions without touching live data early. */
 import { expect, it } from 'vitest';
 import { mkdtemp, mkdir, readFile, writeFile, rm, rename, readdir } from 'node:fs/promises';

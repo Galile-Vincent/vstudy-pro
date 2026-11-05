@@ -1,3 +1,9 @@
+/**
+ * Assemble bounded document prompts with explicit untrusted-content delimiters.
+ * Owned by main/prompt.
+ * Document and course content is untrusted data, never application instructions.
+ * @packageDocumentation
+ */
 import { safeDocumentLabel } from "../security";
 import { decodeHtmlEntities } from "../../shared/html";
 import { unified } from "unified";
@@ -13,6 +19,7 @@ export interface PromptInput {
   userMessage: string;
   citations?: DocumentCitation[];
 }
+/** Remove embedded data payloads before document text enters a model prompt. */
 export function omitDataUris(text: string): string {
   text = decodeHtmlEntities(text);
   const tree = unified().use(remarkParse).parse(text);
@@ -34,6 +41,7 @@ export function omitDataUris(text: string): string {
   return text.replace(/data:[^\s)<>"']*;base64,[a-z0-9+/=\s]+/gi, "image omitted").replace(/data:[^\s)<>"']+/gi, "image omitted")
     .replace(/[a-z0-9+/=]{200,}(?:\s+[a-z0-9+/=]{200,})*/gi, "image omitted");
 }
+/** Assemble bounded history and document context with explicit untrusted-content delimiters. */
 export function buildPrompt(input: PromptInput): string {
   input = { ...input, document: { ...input.document, markdown: omitDataUris(input.document.markdown) }, ...(input.selection ? { selection: { ...input.selection, text: omitDataUris(input.selection.text) } } : {}) };
   const context = input.selection

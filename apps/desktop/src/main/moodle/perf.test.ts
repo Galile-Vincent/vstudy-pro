@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle perf.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it, expect } from 'vitest';
 import { createServer, request as httpsRequest, Agent } from 'node:https';
 import { execFileSync } from 'node:child_process';

@@ -1,3 +1,9 @@
+/**
+ * Search the bundled school directory and normalize public recent-site hints.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 /** Bundled school hints. Listing and searching this directory never make network requests. */
 import { moodleSchoolSchema } from '../../shared/moodle';
 

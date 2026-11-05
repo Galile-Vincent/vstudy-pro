@@ -1,7 +1,14 @@
+/**
+ * Extract course names, teachers, and lifecycle hints from multilingual Moodle metadata.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import { emptyCourseIdentity, type MoodleCourseIdentity } from '../../shared/moodle-course';
 import { decodeHtmlEntities } from '../../shared/html';
 
 const normalizeLanguage = (language: string) => language.toLowerCase().replace(/_/g, '-');
+/** Select the requested Moodle multilang content with a fallback to available text. */
 export function filterMultilang(raw: string, language: string, fallback = 'en'): string {
   const lang = normalizeLanguage(language);
   const parent = lang.split('-')[0]!;
@@ -22,9 +29,11 @@ export function filterMultilang(raw: string, language: string, fallback = 'en'):
   const result = replace(lang);
   return found ? result : replace('other');
 }
+/** Normalize identity text without exposing markup as a display label. */
 export function identityText(value: string): string {
   return decodeHtmlEntities(value.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi,'').replace(/<[^>]*>/g,' ')).replace(/\s+/g,' ').trim();
 }
+/** Extract a bounded teacher label from the available Moodle metadata. */
 export function teacherName(value: string) { return identityText(value).replace(/^\s*\d+\s*[-:]?\s*/, '').trim(); }
 const cjk = /[\u3400-\u9fff]/;
 function personalName(value: string): boolean {
@@ -72,6 +81,7 @@ function candidate(raw: string, teacherLength?: number) {
   const teacher = separator < 0 ? '' : body.slice(separator+1).trim();
   return {term:match[1]!,code:match[3]!,title,classLabel,teachers:teacher.split(/、|\s*\/\s*|\s*;\s*/).map(teacherName).filter(Boolean)};
 }
+/** Infer display identity while retaining raw names and the source of lifecycle hints. */
 export function parseCourseIdentity(fullName: string, shortName: string, hasProgress = false): MoodleCourseIdentity {
   const raw = identityText(fullName);
   const identity = emptyCourseIdentity(raw,hasProgress);
@@ -113,12 +123,14 @@ export function parseCourseIdentity(fullName: string, shortName: string, hasProg
   return identity;
 }
 
+/** Calculate the academic term from the supplied clock rather than persisting a stale term. */
 export function currentTaiwanTerm(now: Date): string {
   const local = new Date(now.getTime() + 8 * 3600_000);
   const year = local.getUTCFullYear() - 1911;
   const month = local.getUTCMonth() + 1;
   return `${month < 9 ? year - 1 : year}${month >= 9 || month === 1 ? 1 : month >= 7 ? 3 : 2}`;
 }
+/** Prefer authoritative dates and preserve unknown lifecycle when evidence is insufficient. */
 export function courseLifecycle(input: {completed?:boolean;startAt:string|null;endAt:string|null;term:string|null;server?:'past'|'current'|'future'}, now = new Date()): Pick<MoodleCourseIdentity,'lifecycle'|'lifecycleSource'> {
   if (input.server) return {lifecycle:input.server,lifecycleSource:'server'};
   if (input.completed || input.endAt && Date.parse(input.endAt) < now.getTime()) return {lifecycle:'past',lifecycleSource:'dates'};
@@ -131,6 +143,7 @@ export function courseLifecycle(input: {completed?:boolean;startAt:string|null;e
   return {lifecycle:'unknown',lifecycleSource:'none'};
 }
 
+/** Replace inferred teacher labels only when authoritative teacher data is available. */
 export function applyAuthoritativeTeachers(identity: MoodleCourseIdentity, teachers: MoodleCourseIdentity['teachers']): MoodleCourseIdentity {
   const title = {...identity.title};
   for (const lang of ['zh','en'] as const) {

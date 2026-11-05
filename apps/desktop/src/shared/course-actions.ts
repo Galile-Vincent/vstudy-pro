@@ -1,6 +1,13 @@
+/**
+ * Validate course agent proposals against the current course and target inventory.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 /** Course proposals may only reference the current course, even when global workload is provided for conflict checks. */
 import type { MoodleAgentAction, MoodleCourseDetail } from "./moodle";
 import { assertPlannerAction, type PlanningContext } from "./planner-policy";
+/** Reject proposals whose targets do not belong to the current course snapshot. */
 export function assertCourseAction(action: MoodleAgentAction, detail: MoodleCourseDetail, context: PlanningContext) {
   if (action.type === "create-reminder") {
     const due = detail.deadlines.find(d => d.id === action.deadlineId && !d.submitted && !d.orphaned);

@@ -1,3 +1,9 @@
+/**
+ * Execute search requests in a dedicated process and return structured results.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { DatabaseSync } from 'node:sqlite';
 import { LibraryService } from './library';
 import type { Store } from '../db';

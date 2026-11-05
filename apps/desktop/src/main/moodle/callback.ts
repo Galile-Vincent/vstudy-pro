@@ -1,11 +1,19 @@
+/**
+ * Verify signed Moodle SSO callbacks against the one-time passport and expected site.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import { MoodleAuthError, type MoodleTokens } from './auth';
 import { createHash, timingSafeEqual } from 'node:crypto';
 
+/** Recognize a token-shaped custom-scheme callback without treating recognition as authorization. */
 export function isCallbackCandidate(target: string): boolean {
   const match = /^([a-z][a-z0-9+.-]*):\/\/token=([A-Za-z0-9+/=%_-]+)$/i.exec(target);
   return !!match && !['http','https'].includes(match[1]!.toLowerCase());
 }
 
+/** Verify the callback signature and one-time passport before returning credentials. */
 export function verifyCallback(callback: string, siteUrl: string | readonly string[], passport: string, verifiedSite?: (site: string) => void): MoodleTokens {
   const match = /^[a-z][a-z0-9+.-]*:\/\/token=([A-Za-z0-9+/=%_-]+)$/i.exec(callback);
   if (!isCallbackCandidate(callback) || !match || callback.length > 40_000 || !passport) throw new MoodleAuthError('callback-invalid','malformed');

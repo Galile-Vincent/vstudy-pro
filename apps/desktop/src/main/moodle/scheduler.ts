@@ -1,3 +1,9 @@
+/**
+ * Bound concurrent Moodle requests and apply retry scheduling for read calls.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 export class MoodleScheduler {
   private active = 0;
   private readonly queue: {priority:number;start:() => void}[] = [];

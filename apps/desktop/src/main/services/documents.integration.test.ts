@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for services documents.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
 import { cp, copyFile, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";

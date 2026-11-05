@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle scheduler.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from 'vitest';
 import { MoodleScheduler } from './scheduler';
 it('bounds concurrency and moves visible requests ahead of queued background work',async () => {

@@ -1,10 +1,17 @@
+/**
+ * Regression coverage for planner repository.
+ * Owned by main/planner.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { afterEach, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
 import { mkdtempSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { openStore, migrations } from "../db";
+import { openStore } from "../db";
+import { migrations } from "../db/migrations";
 import { PlannerRepository } from "./repository";
 import { id, now, seedStudent } from "./__fixtures__/student";
 import { emptyPlanner, type PlannerAction } from "../../shared/planner";

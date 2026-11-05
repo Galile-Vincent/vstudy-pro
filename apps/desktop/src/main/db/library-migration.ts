@@ -1,3 +1,9 @@
+/**
+ * Define immutable SQL for library persistence upgrades.
+ * Owned by main/db.
+ * Applied SQL remains immutable; repositories share one connection and use bound query values.
+ * @packageDocumentation
+ */
 export const libraryMigration = `
 CREATE TABLE folders(id TEXT PRIMARY KEY,parentId TEXT REFERENCES folders(id),name TEXT NOT NULL COLLATE NOCASE,color TEXT,icon TEXT,position REAL NOT NULL DEFAULT 0,pinned INTEGER NOT NULL DEFAULT 0,pinnedAt TEXT,createdAt TEXT NOT NULL,updatedAt TEXT NOT NULL);
 CREATE UNIQUE INDEX folder_siblings ON folders(ifnull(parentId,''),name COLLATE NOCASE);

@@ -18,8 +18,8 @@
     "knip": "knip --include files,dependencies,unlisted,binaries",
     "package:signed": "node apps/desktop/scripts/package-signed.mjs",
     "vendor:check": "node apps/desktop/scripts/vendor-check.mjs",
-    "typecheck-fast": "pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo",
-    "prepare": "node scripts/install-hooks.mjs",
+    "typecheck-fast": "node apps/desktop/scripts/generate-locales.mjs && pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo",
+    "prepare": "node apps/desktop/scripts/generate-locales.mjs && node scripts/install-hooks.mjs",
     "release": "git-cliff --output CHANGELOG.md",
     "security:static": "node apps/desktop/scripts/security-audit.mjs && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs"
   },
@@ -28,6 +28,7 @@
     "@commitlint/config-conventional": "21.2.4",
     "git-cliff": "2.14.2",
     "knip": "6.44.1",
-    "lefthook": "2.2.2"
+    "lefthook": "2.2.2",
+    "zod": "3.24.2"
   }
 }

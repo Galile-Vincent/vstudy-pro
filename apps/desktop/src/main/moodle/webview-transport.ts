@@ -1,3 +1,9 @@
+/**
+ * Exchange Moodle tokens for partition cookies and probe authenticated session state.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 /** Exchanges a one-use key without navigating a document. net.request exposes redirects before following them. */
 import { net, type Session } from 'electron';
 import { WebviewSessionError } from './webview-session';
@@ -24,12 +30,14 @@ function cookieRequest(browser:Session,url:string,signal:AbortSignal,body?:strin
   });
 }
 
+/** Exchange the account token into the isolated Electron session without a renderer token URL. */
 export async function exchangeWebviewCookie(browser:Session,policy:WebviewPolicy,userId:number,key:string,signal:AbortSignal):Promise<void> {
   const body = new URLSearchParams({userid:String(userId),key,urltogo:policy.site.pathname.replace(/\/$/,'') + '/my/'}).toString();
   const response = await cookieRequest(browser,policy.site.href.replace(/\/$/,'') + '/admin/tool/mobile/autologin.php',signal,body);
   if (![301,302,303].includes(response.status) || response.method !== 'GET' || !response.location || webviewNavigation(response.location,policy) !== 'internal') throw new WebviewSessionError('session-expired');
 }
 
+/** Check whether the isolated partition still has an authenticated Moodle session. */
 export async function probeWebviewSession(browser:Session,policy:WebviewPolicy,signal:AbortSignal):Promise<boolean> {
   const response = await cookieRequest(browser,policy.site.href.replace(/\/$/,'') + '/my/',signal);
   if (response.location && webviewLoginPage(response.location,policy)) return false;

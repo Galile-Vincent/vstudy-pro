@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle webview-files.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** File links preserve authentication while the validated library owns all permanent writes. */
 import { expect, it, vi } from 'vitest';
 import { readFile, stat } from 'node:fs/promises';
