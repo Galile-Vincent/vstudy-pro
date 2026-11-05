@@ -15,6 +15,8 @@ describe('Moodle navigation policy',() => {
     ['https://school.example.evil/campus','external'],
     ['https://school.example/campus-other','blocked'],
     ['https://school.example/campus/../secret','blocked'],
+    ['https://school.example/campus/%2f..%2fsecret','blocked'],
+    ['https://school.example/campus/%5c..%5csecret','blocked'],
     ['https://school.example/other','blocked'],
     ['http://school.example/campus','blocked'],
     ['https://user:password@school.example/campus','blocked'],

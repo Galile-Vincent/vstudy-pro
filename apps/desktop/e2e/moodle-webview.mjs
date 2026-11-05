@@ -59,7 +59,9 @@ try {
     const identity = {title:{zh:null,en:'Electronics laboratory'},teachers:[{zh:null,en:'Professor Chen'}],code:'EE204',term:'1151',classLabel:{zh:null,en:'A'},lifecycle:'current',lifecycleSource:'server',hidden:false,hasProgress:false,format:'weeks',summaryHtml:null};
     const course = {id:input.courseId,accountId:account.id,remoteId:4,fullName:'Electronics laboratory',shortName:'EE204',imageUrl:null,progress:null,startAt:null,endAt:null,favourite:false,identity};
     const overview = {accounts:[{...account,siteUrl:'https://school.example'}],courses:[course],upcoming:[],otherNotifications:[],unreadNotifications:0};
-    const detail = {course,deadlines:[],notifications:[],grades:[],files:[],reminders:[],sections:[],announcements:[]};
+    const module = {id:'66666666-6666-4666-a666-666666666666',cmid:2,kind:'page',modname:'page',name:'Teacher page',descriptionHtml:'<p>Read the teacher instructions.</p><script>throw Error("MUST_NOT_RUN")</script>',url:'https://school.example/course/view.php?id=4',accessible:true,completion:'none',dueAt:null,submitted:null,fileIds:[]};
+    const section = {id:'55555555-5555-4555-a555-555555555555',number:4,name:'Week 4',summaryHtml:null,accessible:true,current:true,weekStart:null,modules:[module]};
+    const detail = {course,deadlines:[],notifications:[],grades:[],files:[],reminders:[],sections:[section],announcements:[]};
     for (const [channel,value] of [['moodle:overview',overview],['moodle:course',detail]]) {ipcMain.removeHandler(channel);ipcMain.handle(channel,() => value);}
     const userData = app.getPath('userData');
     const store = fixture.openStore(process.getBuiltinModule('path').join(userData,'vstudy.sqlite'));
@@ -85,7 +87,12 @@ try {
   },{accountId,courseId,siteUrl,module:join(directory,'bundle/webview.cjs')});
   await page.evaluate(courseId => window.localStorage.setItem('vstudy-route',JSON.stringify({view:'courses',courseId})),courseId);
   await page.reload();await page.emulateMedia({reducedMotion:'reduce'});
-  await page.getByRole('button',{name:'Open in Moodle',exact:true}).click();
+  await page.getByRole('button',{name:/Teacher page/}).click();
+  const detailSheet = page.locator('[data-slot=sheet-content]');
+  await detailSheet.getByText('Read the teacher instructions.',{exact:true}).waitFor();
+  assert.equal(await detailSheet.locator('script,iframe,img').count(),0);
+  await page.screenshot({path:join(evidence,'00-native-module-detail.png')});
+  await detailSheet.getByRole('button',{name:'View original page',exact:true}).click();
   const pane = page.getByTestId('moodle-webview');
   await pane.waitFor();
   const native = () => app.evaluate(({BrowserWindow}) => {
@@ -125,9 +132,23 @@ try {
   await page.screenshot({path:join(evidence,'02-full-overlay.png')});
   await page.getByRole('button',{name:'Close Moodle page',exact:true}).click();
   await pane.waitFor({state:'hidden'});
+  await page.waitForFunction(() => window.document.activeElement?.classList.contains('moodle-module'));
+  report.push('PASS. The module sheet renders sanitized content before View original page. Closing the native pane restores focus to the module row.');
+  await page.evaluate(async () => {
+    const settings = await window.desktop.invoke('settings:get',{});
+    await window.desktop.invoke('settings:set',{...settings,themeId:'ocean',colorScheme:'dark'});
+  });
+  await page.reload();
   await page.getByRole('button',{name:'Open in Moodle',exact:true}).click();
   await page.waitForFunction(() => window.document.querySelector('.moodle-webview-header strong')?.textContent === 'Week 4 · Moodle');
   assert.equal(keys,1);nativeId=await native();
+  const expectedBackground = await page.evaluate(() => window.getComputedStyle(window.document.documentElement).getPropertyValue('--reader-background').trim());
+  const actualBackground = await app.evaluate(async ({webContents},id) => webContents.fromId(id).executeJavaScript('getComputedStyle(document.documentElement).getPropertyValue("--vstudy-bg").trim()'),nativeId);
+  assert.equal(actualBackground,expectedBackground);
+  await page.screenshot({path:join(evidence,'02-ocean-dark-pane.png')});
+  const darkPng = await app.evaluate(async ({webContents},id) => (await webContents.fromId(id).capturePage()).toPNG().toString('base64'),nativeId);
+  await writeFile(join(evidence,'02-ocean-dark-page-content.png'),Buffer.from(darkPng,'base64'));
+  report.push('PASS. The Ocean dark theme reaches the pane and its native Moodle document through the shared reader tokens. Native content screenshots are separate from Chromium toolbar screenshots.');
   report.push('PASS. Closing destroys the view. Reopening reuses the account cookie and does not request another autologin key.');
   const isolated = await app.evaluate(async ({session}) => {
     const partitions = ['moodle-content-' + process.getBuiltinModule('crypto').createHash('sha256').update('33333333-3333-4333-a333-333333333333' + '\0' + globalThis.webviewFixtureInputs.account.siteUrl).digest('hex')];
@@ -159,6 +180,7 @@ try {
   await app.evaluate(async () => {await globalThis.webviewManager.dispose();});
   await page.keyboard.press('Escape');
   await writeFile(join(evidence,'verification.txt'),report.join('\n') + '\n');
+  await rm(join(evidence,'failure.png'),{force:true});
   console.log(report.join('\n'));
 } catch (error) {
   console.error({keys,exchanges,requests});

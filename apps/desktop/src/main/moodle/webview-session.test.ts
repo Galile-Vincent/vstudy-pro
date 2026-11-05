@@ -58,6 +58,21 @@ it('isolates rate limits across accounts',async () => {
   await first.session.ensure(); await second.session.ensure();
   expect(first.request).toHaveBeenCalledTimes(1);expect(second.request).toHaveBeenCalledTimes(1);
 });
+it('retains the account budget when a disposed partition is recreated',async () => {
+  const first = fixture(), budget = {retryAt:0};
+  const session = new MoodleWebviewSession('https://school.example',first.port,Date.now,first.request,budget);
+  await session.ensure();await session.dispose();
+  const second = fixture();
+  const reopened = new MoodleWebviewSession('https://school.example',second.port,Date.now,second.request,budget);
+  await expect(reopened.ensure()).rejects.toMatchObject({code:'session-expired',retryAt:1_000_000 + AUTOLOGIN_INTERVAL});
+  expect(second.request).not.toHaveBeenCalled();
+});
+it('rejects oversized or malformed key responses without attempting a cookie exchange',async () => {
+  const {session,request,port} = fixture();
+  request.mockResolvedValueOnce(new Response('x'.repeat(65 * 1024)));
+  await expect(session.ensure()).rejects.toMatchObject({code:'unavailable'});
+  expect(port.exchange).not.toHaveBeenCalled();
+});
 it('aborts an in-flight exchange on disconnect and clears any late cookies',async () => {
   const {session,port} = fixture();
   let finish!:()=>void;

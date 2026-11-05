@@ -97,11 +97,11 @@ export class MoodleWebviews {
     contents.on('will-navigate',(event,url) => { if (this.guard(pane,url)) event.preventDefault(); });
     contents.on('will-redirect',(event,url) => { if (this.guard(pane,url)) event.preventDefault(); });
     contents.on('will-frame-navigate',event => { if (!event.isMainFrame && webviewNavigation(event.url,account.policy) !== 'internal') event.preventDefault(); });
-    contents.on('did-start-loading',() => { if (state.status !== 'error' && state.status !== 'closed') state.status = 'loading'; this.deadline(pane); });
+    contents.on('did-start-navigation',(_event,_url,inPlace,isMainFrame) => { if (isMainFrame && !inPlace && state.status !== 'error' && state.status !== 'closed') {state.status = 'loading';view.setVisible(false);this.deadline(pane);} });
     contents.on('did-stop-loading',() => { clearTimeout(pane.timer); });
     contents.on('did-navigate',(_event,url) => this.committed(pane,url));
     contents.on('did-navigate-in-page',(_event,url,isMainFrame) => { if (isMainFrame) this.committed(pane,url); });
-    contents.on('did-finish-load',() => { if (state.status === 'loading') state.status = 'ready'; void this.style(pane); });
+    contents.on('did-finish-load',() => {void this.style(pane).then(() => {if (!pane.abort.signal.aborted && state.status === 'loading') {state.status = 'ready';view.setVisible(pane.visible);} });});
     contents.on('page-title-updated',(_event,title) => { state.title = title.replace(/[\p{Cc}\p{Cf}]/gu,'').slice(0,300); });
     contents.on('did-fail-load',(_event,code,_description,_url,isMainFrame) => { if (isMainFrame && code !== -3) this.fail(pane,new WebviewSessionError(webviewLoadError(code))); });
     contents.on('render-process-gone',() => this.fail(pane,new WebviewSessionError('load-failed')));
@@ -155,7 +155,6 @@ export class MoodleWebviews {
     if (webviewNavigation(url,pane.account.policy) !== 'internal') {this.fail(pane,new WebviewSessionError('blocked'));return;}
     pane.state.url = publicWebviewUrl(url); pane.state.secure = new URL(url).protocol === 'https:';
     pane.target = url;
-    pane.view.setVisible(pane.visible && !pane.state.error);
   }
   private async importFile(pane:Pane,url:string) {
     if (pane.importing || pane.abort.signal.aborted) return;
@@ -183,7 +182,8 @@ export class MoodleWebviews {
     const x = Math.min(Math.round(bounds.x * zoom),width), y = Math.min(Math.round(bounds.y * zoom),height);
     pane.view.setBounds({x,y,width:Math.min(Math.round(bounds.width * zoom),width - x),height:Math.min(Math.round(bounds.height * zoom),height - y)});
     pane.visible = visible && bounds.width > 0 && bounds.height > 0;
-    pane.view.setVisible(pane.visible && ['ready','loading'].includes(pane.state.status) && !pane.state.error && !pane.importing);
+    pane.view.setBackgroundColor(theme.background);
+    pane.view.setVisible(pane.visible && pane.state.status === 'ready' && !pane.state.error && !pane.importing);
     if (JSON.stringify(theme) !== JSON.stringify(pane.theme)) { pane.theme = theme; void this.style(pane); }
   }
   private async style(pane:Pane) {

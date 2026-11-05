@@ -3,7 +3,7 @@ import { createContext, useContext, useRef, useState, type ReactNode } from 'rea
 import type { WebviewTarget } from '../../shared/moodle-webview';
 import { MoodleWebviewPane } from './webview-pane';
 
-type OpenMoodle = (accountId:string,target:WebviewTarget) => void;
+type OpenMoodle = (accountId:string,target:WebviewTarget,returnFocus?:HTMLElement|null) => void;
 const Context = createContext<OpenMoodle>(() => {});
 export function useMoodleWebview() { return useContext(Context); }
 export function MoodleWebviewProvider({children,onDocument,onReconnect}:{children:ReactNode;onDocument:(id:string)=>void;onReconnect:()=>void}) {
@@ -11,8 +11,8 @@ export function MoodleWebviewProvider({children,onDocument,onReconnect}:{childre
   const sequence = useRef(0);
   const trigger = useRef<HTMLElement|null>(null);
   const close = () => {setRequest(undefined);setTimeout(() => trigger.current?.isConnected && trigger.current.focus(),0);};
-  return <Context.Provider value={(accountId,target) => {
-    trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  return <Context.Provider value={(accountId,target,returnFocus) => {
+    trigger.current = returnFocus ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     setRequest({accountId,target,key:++sequence.current});
   }}>
     {children}

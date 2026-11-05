@@ -245,7 +245,7 @@ export function CourseContent({
   onError: () => void;
 }) {
   const openMoodle = useMoodleWebview();
-  const original = (url:string) => {setSelected(undefined);openMoodle(detail.course.accountId,{kind:"page",url});};
+  const original = (url:string) => {setSelected(undefined);openMoodle(detail.course.accountId,{kind:"page",url},trigger.current);};
   const [selected, setSelected] = useState<MoodleModule>();
   const trigger = useRef<HTMLElement | null>(null);
   const [opening, setOpening] = useState(false);
@@ -359,7 +359,7 @@ export function CourseContent({
 }
 export function Announcements({ items, accountId }: { items: MoodleAnnouncement[]; accountId?:string }) {
   const openMoodle = useMoodleWebview();
-  const original = (url:string) => {setSelected(undefined);if (accountId) openMoodle(accountId,{kind:"page",url});};
+  const original = (url:string) => {setSelected(undefined);if (accountId) openMoodle(accountId,{kind:"page",url},trigger.current);};
   const [selected, setSelected] = useState<MoodleAnnouncement>();
   const trigger = useRef<HTMLElement | null>(null);
   return (
