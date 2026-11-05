@@ -1,5 +1,5 @@
 /** Shell History and Cmd/Ctrl+K finder. Both navigate to the same persistent conversation. */
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import type { ChatHit } from '../../shared/chat-history';
@@ -13,6 +13,7 @@ const Chat = lazy(() => import('../chat').then(m => ({ default: m.Chat })));
 export function HistoryFinder() {
   useTranslation();
   const { navigate } = useNavigate(), [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLElement | null>(null);
   useEffect(() => {
     let titles: Record<string, string> = {};
     try {
@@ -39,14 +40,17 @@ export function HistoryFinder() {
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k' && !e.isComposing) {
       e.preventDefault();
+      if (!open) trigger.current = document.activeElement as HTMLElement;
       setOpen(o => !o);
     } };
-    const show = () => setOpen(true);
+    const show = () => { trigger.current = document.activeElement as HTMLElement; setOpen(true); };
     window.addEventListener('keydown', key);
     window.addEventListener('vstudy:find-history', show);
     return () => { window.removeEventListener('keydown', key); window.removeEventListener('vstudy:find-history', show); };
-  }, []);
-  return <Dialog open={open} onOpenChange={setOpen}><DialogContent className="history-dialog"><DialogTitle>{tr('history:title')}</DialogTitle><DialogDescription>{tr('history:subtitle')}</DialogDescription><HistorySearch compact onOpen={(hit, messageId) => { setOpen(false); navigate({ view: 'history', conversationId: hit.id, messageId }); }}/><button onClick={() => { setOpen(false); navigate('history'); }}>{tr('history:full_history')}</button></DialogContent></Dialog>;
+  }, [open]);
+  return <Dialog open={open} onOpenChange={setOpen}><DialogContent className="history-dialog" onKeyDown={event => {
+    if (event.key === 'Escape' && !event.defaultPrevented) { event.preventDefault(); setOpen(false); }
+  }} onCloseAutoFocus={event => { event.preventDefault(); trigger.current?.focus(); }}><DialogTitle>{tr('history:title')}</DialogTitle><DialogDescription>{tr('history:subtitle')}</DialogDescription><HistorySearch compact onOpen={(hit, messageId) => { setOpen(false); navigate({ view: 'history', conversationId: hit.id, messageId }); }}/><button onClick={() => { setOpen(false); navigate('history'); }}>{tr('history:full_history')}</button></DialogContent></Dialog>;
 }
 export function HistoryView() {
   useTranslation();
