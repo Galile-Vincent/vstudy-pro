@@ -1,4 +1,5 @@
 import { HelpMenu } from "../onboarding/help";
+import { AiSetupNotice } from '../ai-setup';
 import { Textarea } from '../components/ui/textarea';
 import { AiParseControls } from '../ai-parse/ai-parse-controls';
 import { Button } from '../components/ui/button';
@@ -267,6 +268,7 @@ export function Workspace() {
       if (imported) {
         setDocuments(await desktop.invoke("documents:list", {}));
         setDocumentId(imported.id);
+        navigate({ view: 'workspace', documentId: imported.id });
       }
     } catch (error) {
       report(error);
@@ -361,6 +363,7 @@ export function Workspace() {
       ) : (
         <div className="chat-start">
           <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onQuestion={text => { setDraft(text); void newConversation(); }} />
+          {connected && !providers.some(p => p.config.enabled && p.availability.available && p.models.length > 0) && <AiSetupNotice onSettings={() => { setSettingsTab('providers'); setShowSettings(true); }} />}
           {selection && (
             <div className="selection-chip">
               <SelectionPreview selection={selection} />
@@ -395,11 +398,12 @@ export function Workspace() {
           if (!window.confirm(tr('library:delete_document',{title:doc.title}))) return;
           void desktop.invoke("documents:delete", { documentId: doc.id }).then(async () => {
             const list = await desktop.invoke("documents:list", {}); setDocuments(list); setDocumentId(list[0]?.id ?? null);
+            navigate(list[0] ? { view: 'workspace', documentId: list[0].id } : 'library');
           }).catch(report);
         }}><Trash2 size={16} /></button>}
         {doc && <AiParseControls key={`${doc.id}-${aiOpen}`} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse || aiOpen>0} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
         <span className="muted">
-          {doc?.status === "ready" ? tr('common:converter_label',{converter:doc.converter}) : ""}
+          {doc?.status === "ready" ? tr('novice:ready_to_read') : ""}
         </span>
       </div>
       {!doc ? (
@@ -446,7 +450,7 @@ export function Workspace() {
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
-        <><div className="document-conversion-hint"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div><DocumentMarkdown
+        <>{doc.mime !== 'text/markdown' && doc.mime !== 'text/plain' && <div className="document-conversion-hint"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div>}<DocumentMarkdown
           key={`${doc.id}-${readerVersion}-${readerRevision}`}
           version={readerVersion}
           source={source}

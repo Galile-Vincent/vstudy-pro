@@ -1,4 +1,5 @@
 import { StorageSettings } from "./settings/storage";
+import { AiSetupGuide } from './ai-setup';
 import { Switch } from './components/ui/switch';
 import { SlidersHorizontal, Palette, KeyRound, BarChart3, Shield, HardDrive, X } from 'lucide-react';
 import { SettingsGroup, SettingsRow } from './settings/layout';
@@ -134,6 +135,15 @@ export function ProviderSettings({
                     <UsageSettings />
                   ) : (
                     <>
+                      <AiSetupGuide onClose={onClose} />
+                      <SettingsGroup title={tr('novice:ai_services')}>
+                        {providers.filter(provider => provider.config.kind === 'api').map(provider => (
+                          <ProviderRow settingsView key={provider.config.id} provider={provider} onRefresh={onRefresh} />
+                        ))}
+                      </SettingsGroup>
+                      <details>
+                      <summary>{tr('novice:advanced')}</summary>
+                      <p>{tr('novice:advanced_help')}</p>
                       <SettingsGroup>
                         <SettingsRow
                           label={tr('common:read_only_structured_tables_api_providers_only')}
@@ -157,7 +167,7 @@ export function ProviderSettings({
                         {featureError && <p role="alert">{featureError}</p>}
                       </SettingsGroup>
                       <SettingsGroup title={tr('common:providers')}>
-                        {providers.map((provider) => (
+                        {providers.filter(provider => provider.config.kind !== 'api').map((provider) => (
                           <ProviderRow
                             settingsView
                             key={provider.config.id}
@@ -166,6 +176,7 @@ export function ProviderSettings({
                           />
                         ))}
                       </SettingsGroup>
+                      </details>
                     </>
                   ))}
               </div>

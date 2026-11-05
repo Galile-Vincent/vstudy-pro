@@ -7,7 +7,8 @@ import { ModelSelector } from './components/assistant-ui/elements/model-selector
 import { ClaudeLogo, OpenAILogo, GeminiLogo } from './components/assistant-ui/elements/logos';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './components/ui/select';
 import { Toggle } from './components/ui/toggle';
-export function ModelControls({providers, model, onModel, onProvidersChanged, onOpenChange, values = {}, onChange}: {
+import { Button } from './components/ui/button';
+export function ModelControls({providers, model, onModel, onSettings, onProvidersChanged, onOpenChange, values = {}, onChange}: {
  providers: Providers; model: string; onModel: (value:string)=>void; onSettings:()=>void;
  onOpenChange?:(open:boolean)=>void; onProvidersChanged?:()=>Promise<void>; values?:Record<string,string|boolean>; onChange?:(values:Record<string,string|boolean>)=>void;
 }) {
@@ -30,6 +31,7 @@ export function ModelControls({providers, model, onModel, onProvidersChanged, on
     </ModelSelector.List>
    </ModelSelector.Content>
   </ModelSelector.Root>
+  {!all.some(m=>m.available) && <Button variant="ghost" size="sm" onClick={onSettings}>{tr('novice:connect_ai')}</Button>}
   {effort&&<Select value={String(values[effort.id]??effort.default)} onValueChange={value=>onChange?.({...values,[effort.id]:value})}><SelectTrigger aria-label={optionLabel(effort.id,effort.label)} size="sm"><SelectValue/></SelectTrigger><SelectContent>{effort.values.map(v=><SelectItem key={v.id} value={v.id}>{effort.id==='thinking'?tr(v.id==='enabled'?'picker:enabled':'picker:disabled'):effortLabel(v.id)}</SelectItem>)}</SelectContent></Select>}
   {speed&&<Toggle size="sm" pressed={fast} aria-label={tr('common:fast')} onPressedChange={checked=>onChange?.({...values,[speed.id]:speed.id==='fastMode'?checked:checked?'priority':'default'})}><Zap size={14}/></Toggle>}
  </div>;

@@ -1,0 +1,20 @@
+/** Keep the optional-AI explanation readable inside chat and settings panes. */
+.ai-setup-notice, .ai-setup-guide {
+  padding: var(--space-4);
+  border-radius: var(--r-md);
+  background: var(--subtle);
+  text-align: start;
+}
+.ai-setup-notice p, .ai-setup-guide p, .ai-setup-guide li {
+  margin-block: var(--space-2);
+  line-height: 1.5;
+}
+.ai-setup-guide ol { padding-inline-start: var(--space-6); }
+.ai-setup-guide blockquote {
+  margin-block: var(--space-3);
+  margin-inline: 0;
+  padding: var(--space-3);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  user-select: text;
+}
