@@ -1,0 +1,15 @@
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mpre-commit[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  lint-staged ❯ 
+
+┃  typecheck ❯ 
+
+> vstudy-pro@ typecheck-fast /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
+> pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo
+
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 1.35 seconds)
+✓ lint-staged (0.35 seconds)
+✓ typecheck (1.00 seconds)

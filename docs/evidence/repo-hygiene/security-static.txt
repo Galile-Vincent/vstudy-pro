@@ -1,0 +1,6 @@
+
+> vstudy-pro@ security:static /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
+> node apps/desktop/scripts/security-audit.mjs && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs
+
+{"vulnerabilities":{"info":0,"low":1,"moderate":6,"high":11,"critical":1},"unreviewed":["1244623"]}
+ ELIFECYCLE  Command failed with exit code 1.

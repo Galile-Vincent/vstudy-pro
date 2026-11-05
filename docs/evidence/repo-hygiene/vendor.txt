@@ -1,0 +1,14 @@
+
+> vstudy-pro@ vendor:check /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
+> node apps/desktop/scripts/vendor-check.mjs
+
+apps/desktop/src/renderer/components/assistant-ui/elements/reasoning.tsx: unreviewed drift
+apps/desktop/src/renderer/components/assistant-ui/elements/sources.aui.tsx: unreviewed drift
+apps/desktop/src/renderer/components/assistant-ui/elements/suggestions.tsx: unreviewed drift
+apps/desktop/src/renderer/components/assistant-ui/elements/tool-group.aui.tsx: unreviewed drift
+apps/desktop/src/renderer/components/assistant-ui/generative-ui.css: unreviewed drift
+apps/desktop/src/renderer/components/ui/button.tsx: unreviewed drift
+apps/desktop/src/renderer/components/ui/card.tsx: unreviewed drift
+apps/desktop/src/renderer/components/ui/checkbox.tsx: unreviewed drift
+apps/desktop/src/renderer/components/assistant-ui/elements/suggestions.test.tsx: untracked vendor source
+ ELIFECYCLE  Command failed with exit code 1.

@@ -1,0 +1,9 @@
+count: 525
+size: 2.31 MiB
+in-pack: 9508
+packs: 3
+size-pack: 21.06 MiB
+prune-packable: 1
+garbage: 1
+size-garbage: 64 bytes
+warning: garbage found: /Users/vc/.t3/projects/vstudy-pro/.git/worktrees/t3-cfdb651c/refs

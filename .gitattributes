@@ -1,0 +1,15 @@
+* text=auto eol=lf
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.dmg binary
+*.zip binary
+*.mp4 binary
+*.webm binary
+*.woff2 binary
+# Resolve lockfile conflicts by regenerating with pnpm install, never concatenation.
+pnpm-lock.yaml text eol=lf merge=binary

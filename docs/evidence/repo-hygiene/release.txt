@@ -1,0 +1,5 @@
+
+> vstudy-pro@ release /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c
+> git-cliff --output CHANGELOG.md
+
+[32;1mINFO [0m [1m[90mgit_cliff[39m[0m > Using configuration from: /Users/vc/.t3/worktrees/vstudy-pro/t3-cfdb651c/cliff.toml

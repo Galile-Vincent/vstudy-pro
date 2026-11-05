@@ -1,0 +1,9 @@
+count: 522
+size: 2.30 MiB
+in-pack: 9508
+packs: 3
+size-pack: 21.06 MiB
+prune-packable: 1
+garbage: 1
+size-garbage: 64 bytes
+Warning: worktree refs reported as garbage. No pruning performed.
