@@ -11,6 +11,8 @@ import type { createIpcRegistrar } from './register';
 import { MoodleRepository } from '../moodle/repository';
 import { MoodleService } from '../moodle/service';
 import { MoodleSso } from '../moodle/sso';
+import { join } from 'node:path';
+import { MoodleLogoCache } from '../moodle/logos';
 import { schools } from '../moodle/schools';
 import { importMoodleFile } from '../moodle/files';
 import { startReminders, calendarText } from '../moodle/reminders';
@@ -32,7 +34,8 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
       return tokensSchema.parse(JSON.parse(raw));
     },
   });
-  const service = new MoodleService(repository,secrets,sso,undefined,() => { const language = store.settings.get().language; return language === 'auto' ? app.getLocale() : language === 'zh-Hant' ? 'zh-tw' : language; },event => {for(const owner of owners)if(!owner.isDestroyed())owner.send(moodleProgressChannel,moodleProgressSchema.parse(event));});
+  const service = new MoodleService(repository,secrets,sso,undefined,() => { const language = store.settings.get().language; return language === 'auto' ? app.getLocale() : language === 'zh-Hant' ? 'zh-tw' : language; },event => {for(const owner of owners)if(!owner.isDestroyed())owner.send(moodleProgressChannel,moodleProgressSchema.parse(event));},new MoodleLogoCache(() => join(app.getPath('userData'),'moodle','logos')));
+
   const stopReminders = startReminders(repository,(title,body) => {
     if (!Notification.isSupported()) return false;
     new Notification({title,body}).show();

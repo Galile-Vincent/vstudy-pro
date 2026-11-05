@@ -1,25 +1,29 @@
-import { URL } from 'node:url';
-import {readFileSync} from 'node:fs';
+/** Checks the actual shipped theme model and prevents new fixed renderer CSS colors. */
+import { readdir, readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-const css=readFileSync(new URL('../src/renderer/tokens.css',import.meta.url),'utf8');
-const themes=css.split('@media(prefers-color-scheme:dark)').slice(0,2);
-for(const [i,theme] of themes.entries()) {
- const values=Object.fromEntries([...theme.matchAll(/--(surface|ink|muted|line|focus):oklch\(([.\d]+) 0 0\)/g)].map(m=>[m[1],Number(m[2])**3]));
- for(const [fg,bg,min] of [['ink','surface',4.5],['muted','surface',4.5],['line','surface',3],['focus','surface',3]]) {
-  const a=values[fg],b=values[bg];assert.ok(a!==undefined&&b!==undefined);
-  const contrast=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
-  console.log(`${i?'dark':'light'} ${fg}/${bg}: ${contrast.toFixed(2)} (minimum ${min})`); assert.ok(contrast>=min);
- }
+import { URL } from 'node:url';
+import { builtinThemes, adjustedTokens, contrastFailures } from '../src/shared/themes/index.ts';
+
+for (const theme of builtinThemes) {
+  for (const scheme of ['light','dark']) {
+    for (let contrast=100;contrast<=150;contrast++) {
+      const failures=contrastFailures(adjustedTokens(theme[scheme],scheme,contrast));
+      assert.deepEqual(failures,[],`${theme.id} ${scheme} ${contrast}%`);
+    }
+    console.log(`${theme.name} ${scheme}: WCAG AA passed at every contrast setting`);
+  }
 }
-const luminance = hex => {
- const channels=hex.match(/[a-f\d]{2}/gi).map(value=>parseInt(value,16)/255).map(value=>value<=.04045?value/12.92:((value+.055)/1.055)**2.4);
- return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722;
-};
-for (const [theme,background,palettes] of [['light','f2f2f2',[12,13,14]],['dark','181818',[27,28,29,14]]]) {
- for (const palette of palettes) {
-  const matches=[...css.matchAll(new RegExp(`--palette-${palette}:#([a-f0-9]{6})`,'g'))];
-  const color=matches[theme==='dark'?matches.length-1:0][1];
-  const a=luminance(color), b=luminance(background), contrast=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
-  console.log(`${theme} syntax palette-${palette}: ${contrast.toFixed(2)}`);assert.ok(contrast>=4.5);
- }
+let count=0;
+async function audit(url) {
+  for (const entry of await readdir(url,{withFileTypes:true})) {
+    const path=new URL(entry.name+(entry.isDirectory()?'/':''),url);
+    if (entry.isDirectory()) await audit(path);
+    else if (entry.name.endsWith('.css')) {
+      const css=await readFile(path,'utf8');
+      assert.equal(/#[a-f\d]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|oklch|lab|lch)\(|prefers-color-scheme|--palette-\d+|:\s*(?:white|black)\b|,\s*(?:white|black)\s+\d/.test(css),false,`Fixed CSS color or scheme override in ${path.pathname}`);
+      count++;
+    }
+  }
 }
+await audit(new URL('../src/renderer/',import.meta.url));
+console.log(`${count} renderer CSS files use semantic theme tokens`);

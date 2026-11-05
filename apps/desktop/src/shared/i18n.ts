@@ -1,6 +1,12 @@
 import webviewEn from './locales/en/webview.json';
 import webviewZh from './locales/zh-Hant/webview.json';
 import webviewJa from './locales/ja/webview.json';
+import schools0 from './locales/en/schools.json';
+import schools1 from './locales/zh-Hant/schools.json';
+import schools2 from './locales/ja/schools.json';
+import themesEn from './locales/en/themes.json';
+import themesZh from './locales/zh-Hant/themes.json';
+import themesJa from './locales/ja/themes.json';
 import catalog2moodle from './locales/ja/moodle.json';
 import catalog1moodle from './locales/zh-Hant/moodle.json';
 import catalog0moodle from './locales/en/moodle.json';
@@ -46,10 +52,10 @@ export function pseudo(text: string): string {
   return `［${text.split(/({{.*?}})/).map(part => part.startsWith('{{') ? part : part.replace(/[aeiouAEIOU]/g, c => accents[c]!)).join('')}${'～'.repeat(Math.ceil(text.length * .4))}］`;
 }
 export const resources = {
-'en': {common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker, welcome: catalog0welcome, moodle: catalog0moodle, webview: webviewEn},
-'zh-Hant': {common: catalog1common, chat: catalog1chat, library: catalog1library, home: catalog1home, onboarding: catalog1onboarding, settings: catalog1settings, usage: catalog1usage, errors: catalog1errors, picker: catalog1picker, welcome: catalog1welcome, moodle: catalog1moodle, webview: webviewZh},
-'ja': {common: catalog2common, chat: catalog2chat, library: catalog2library, home: catalog2home, onboarding: catalog2onboarding, settings: catalog2settings, usage: catalog2usage, errors: catalog2errors, picker: catalog2picker, welcome: catalog2welcome, moodle: catalog2moodle, webview: webviewJa},
-'en-XA': Object.fromEntries(Object.entries({common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker, welcome: catalog0welcome, moodle: catalog0moodle, webview: webviewEn}).map(([ns,catalog]) => [ns,Object.fromEntries(Object.entries(catalog).map(([k,v]) => [k,pseudo(v)]))])),
+'en': {themes:themesEn,common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker, welcome: catalog0welcome, moodle: catalog0moodle, schools: schools0, webview: webviewEn},
+'zh-Hant': {themes:themesZh,common: catalog1common, chat: catalog1chat, library: catalog1library, home: catalog1home, onboarding: catalog1onboarding, settings: catalog1settings, usage: catalog1usage, errors: catalog1errors, picker: catalog1picker, welcome: catalog1welcome, moodle: catalog1moodle, schools: schools1, webview: webviewZh},
+'ja': {themes:themesJa,common: catalog2common, chat: catalog2chat, library: catalog2library, home: catalog2home, onboarding: catalog2onboarding, settings: catalog2settings, usage: catalog2usage, errors: catalog2errors, picker: catalog2picker, welcome: catalog2welcome, moodle: catalog2moodle, schools: schools2, webview: webviewJa},
+'en-XA': Object.fromEntries(Object.entries({themes:themesEn,common: catalog0common, chat: catalog0chat, library: catalog0library, home: catalog0home, onboarding: catalog0onboarding, settings: catalog0settings, usage: catalog0usage, errors: catalog0errors, picker: catalog0picker, welcome: catalog0welcome, moodle: catalog0moodle, schools: schools0, webview: webviewEn}).map(([ns,catalog]) => [ns,Object.fromEntries(Object.entries(catalog).map(([k,v]) => [k,pseudo(v)]))])),
 };
 export const i18n = i18next.createInstance();
 void i18n.use(initReactI18next).init({ resources, lng:'en', fallbackLng:'en', defaultNS:'common', keySeparator:false, interpolation:{escapeValue:false}, initImmediate:false });

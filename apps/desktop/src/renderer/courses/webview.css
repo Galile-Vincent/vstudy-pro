@@ -1,6 +1,6 @@
 /** The native content view sits only inside the slot. Keep all app controls outside its bounds. */
-.moodle-webview-backdrop { position:fixed; inset:0; z-index:100; background:color-mix(in oklab,var(--ink) 25%,transparent); }
-.moodle-webview-pane { position:absolute; top:var(--space-4); right:var(--space-4); bottom:var(--space-4); display:flex; flex-direction:column; max-width:calc(100vw - var(--space-8)); background:var(--surface); color:var(--ink); border-radius:var(--r-lg); box-shadow:0 16px 64px #0004; overflow:hidden; }
+.moodle-webview-backdrop { position:fixed; inset:0; z-index:100; background:var(--overlay); }
+.moodle-webview-pane { position:absolute; top:var(--space-4); right:var(--space-4); bottom:var(--space-4); display:flex; flex-direction:column; max-width:calc(100vw - var(--space-8)); background:var(--surface); color:var(--ink); border-radius:var(--r-lg); box-shadow:var(--elevation-floating); overflow:hidden; }
 .moodle-webview-pane[data-full=true] { inset:var(--space-4); max-width:none; }
 .moodle-webview-header { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-3) var(--space-4); }
 .moodle-webview-header > div { flex:1; min-width:0; display:flex; flex-direction:column; gap:var(--space-1); }
@@ -11,7 +11,7 @@
 .moodle-webview-location span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .moodle-webview-location svg { width:14px; height:14px; flex-shrink:0; }
 .moodle-webview-slot { position:relative; flex:1; min-height:0; }
-.moodle-webview-progress { position:absolute; z-index:1; top:116px; width:100%; height:2px; accent-color:var(--focus); }
+.moodle-webview-progress { position:absolute; z-index:1; top:116px; width:100%; height:2px; accent-color:var(--accent-color); }
 .moodle-webview-message { display:flex; height:100%; flex-direction:column; align-items:center; justify-content:center; gap:var(--space-4); padding:var(--space-8); text-align:center; }
 .moodle-webview-message p { color:var(--muted); max-width:48ch; }
 .moodle-webview-message h2 { font-size:18px; font-weight:600; }

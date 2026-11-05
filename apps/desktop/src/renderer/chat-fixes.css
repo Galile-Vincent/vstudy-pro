@@ -140,7 +140,7 @@
 }
 .workspace .chat-start { padding:var(--space-4) var(--space-8) var(--space-6); }
 .workspace .aui-root {
- --composer-bg:color-mix(in oklab,var(--ink) 4%,var(--surface))!important;
+ --composer-bg:var(--material-card)!important;
  --composer-radius:var(--r-lg)!important;
  --composer-padding:var(--space-3)!important;
 }
@@ -155,12 +155,13 @@
 .workspace .new-chat-composer {
  border:0;
  border-radius:var(--r-lg);
- background:color-mix(in oklab,var(--ink) 4%,var(--surface));
+ background:var(--material-card);
+ backdrop-filter:var(--material-filter);
  box-shadow:var(--elevation-floating);
 }
 .workspace .new-chat-composer { padding:var(--space-3); }
 .workspace [data-slot=aui_composer-shell]:focus-within {
- background:color-mix(in oklab,var(--ink) 6%,var(--surface));
+ background:var(--material-card);
 }
 .workspace .aui-composer-input { padding:var(--space-2); line-height:var(--chat-leading); }
 .workspace .aui-composer-action-wrapper { gap:var(--space-2); }

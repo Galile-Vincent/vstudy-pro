@@ -11,3 +11,46 @@ References: t3.codes, pingdotgg/t3code, assistant-ui.com. Calm, dense, typograph
 6. Use assistant-ui components (`components/assistant-ui/elements/*`, `@assistant-ui/react` primitives) wherever a chat, thread list, suggestion, attachment, reasoning, sources, tool, or citation surface exists.
 7. Keep every existing a11y attribute, i18n key (en, zh-Hant, ja), data-testid, and focus ring. Focus indicator stays visible.
 8. Dark mode and `prefers-contrast: more` must still work (contrast mode may restore borders).
+
+## Themes
+
+Appearance separates a color scheme from a theme pack. System follows the operating system. Light and Dark override it. Every pack has both variants. VStudy, Ocean, Grove, Ember, Iris, Rose, Slate, Paper, and High contrast ship with the app. The scheme cards preview the selected pack. Each theme card previews its light and dark palettes with two orbs.
+
+`apps/desktop/src/shared/themes/index.ts` owns the version 1 `ThemePack` schema, built-in registry, contrast calculations, and import validation. A pack contains `id`, `name`, `light`, `dark`, and `orbs`. Each variant requires all 31 tokens below. Every color is an opaque six-digit hex value. Imported JSON cannot contain CSS expressions, URLs, scripts, unknown fields, or built-in IDs. Imports have a 32 KB limit. Settings allow up to 30 custom packs with unique IDs. Export assigns a custom ID so a built-in pack can be shared and imported without replacing the original.
+
+`themeId`, `colorScheme`, `contrast`, `glassOpacity`, and `customThemes` persist in the existing SQLite settings record. Zod supplies defaults for old records. Unknown or removed theme IDs resolve to VStudy. The legacy `accent` field remains readable for old settings and callers. Theme packs now own the accent color.
+
+The renderer validates its local appearance cache synchronously, then loads authoritative settings before mounting React. It hides content until initialization finishes. The native window uses the same saved background before it opens. `apply-appearance.ts` sets CSS properties, the resolved `data-scheme`, and the Tailwind `dark` class on `documentElement`. System changes reapply the selected variant. Main updates `nativeTheme.themeSource`, the window background, and vibrancy. Solid material and reduced-transparency preferences override glass.
+
+Contrast ranges from 100% to 150%. The baseline meets WCAG AA. Increasing contrast strengthens text, boundaries, and focus indicators without changing surface hues. Glass opacity ranges from 50% to 100%. The editor previews both variants across the app and reports AA warnings. The editor controls retain a validated built-in palette so poor draft colors cannot hide the controls or warnings. Cancel restores the saved appearance. Custom colors can fail AA, so warnings remain visible while authoring.
+
+### Token reference
+
+Theme keys map to CSS properties of the same name. `sidebar` maps to `--sidebar-surface` because `--sidebar` is the existing component alias. Components derive hover, pressed, translucent, and disabled treatments from these tokens. Add color roles here instead of adding fixed CSS colors.
+
+| Theme token | Use |
+| --- | --- |
+| `background` | App canvas and native window background |
+| `surface` | Cards, controls, and popovers |
+| `sidebar` | Sidebar background |
+| `subtle` | Secondary panels and tonal groups |
+| `active` | Active rows and selected controls |
+| `ink`, `muted` | Primary and secondary text |
+| `line` | Control boundaries |
+| `accent-color`, `accent-foreground` | Primary action and text on that action |
+| `selection-color` | Text selection background |
+| `focus` | Keyboard focus indicator |
+| `danger`, `success`, `warning`, `info` | Semantic status colors |
+| `chart-1` through `chart-5` | Chart series and legends |
+| `glass-tint` | Translucent layer color |
+| `shadow-color` | Source color for elevation and overlays |
+| `reader-background`, `reader-ink` | Reading canvas and document text |
+| `code-background` | Code block background |
+| `syntax-keyword`, `syntax-string`, `syntax-number` | Code syntax colors |
+| `course-start`, `course-end` | Generated course cover gradient |
+
+`--material-card` and `--material-sheet` derive from `glass-tint` and `--glass-opacity`. `--elevation-raised`, `--elevation-floating`, and the shadow aliases derive from `shadow-color`. Folder colors derive from status tokens. Component aliases such as `--primary`, `--foreground`, and `--sidebar` resolve to the same semantic colors. Branding in provider SVG logos and document images retains its source colors.
+
+`pnpm --filter @vstudy/desktop contrast:check` checks every pack and scheme at every contrast step. It checks text at 4.5:1 and control boundaries, focus indicators, and chart colors at 3:1. It also audits every renderer CSS file for fixed colors, old numbered palette tokens, and direct OS color-scheme overrides. `pnpm test` runs this check before Vitest, so CI test runs fail on regressions.
+
+`node e2e/themes.mjs` from `apps/desktop` runs one production Electron instance and closes it afterward. It captures four packs in both schemes across Library, Courses, Reader and Chat, and Appearance. It checks the editor, JSON validation, keyboard interaction, persistence, native scheme, and Appearance accessibility. Courses use deterministic Moodle fixtures. Evidence is in `docs/evidence/themes/`.

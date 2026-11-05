@@ -7,21 +7,18 @@ import { tr } from '../../shared/i18n';
 import type { WebviewAction, WebviewState, WebviewTarget, WebviewTheme } from '../../shared/moodle-webview';
 import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
+import { builtinThemes, type ThemeToken } from '../../shared/themes';
 import './webview.css';
 
 function theme():WebviewTheme {
   const style = getComputedStyle(document.documentElement);
-  const color = (token:string,fallback:string) => {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    if (!context) return fallback;
-    context.fillStyle = style.getPropertyValue(token).trim() || fallback;
-    context.fillRect(0,0,1,1);
-    const [r=0,g=0,b=0] = context.getImageData(0,0,1,1).data;
-    return '#' + [r,g,b].map(value => value.toString(16).padStart(2,'0')).join('');
+  const dark = document.documentElement.dataset.scheme === 'dark';
+  const defaults = builtinThemes[0]![dark ? 'dark' : 'light'];
+  const color = (token:ThemeToken) => {
+    const value = style.getPropertyValue('--' + token).trim();
+    return /^#[0-9a-f]{6}$/i.test(value) ? value : defaults[token];
   };
-  const background = color('--surface','#fafafa');
-  return {dark:parseInt(background.slice(1,3),16) < 128,background,foreground:color('--ink','#171717'),accent:color('--focus','#5667df')};
+  return {dark,background:color('reader-background'),foreground:color('reader-ink'),accent:color('accent-color')};
 }
 export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconnect}:{accountId:string;target:WebviewTarget;onClose:()=>void;onDocument:(id:string)=>void;onReconnect:()=>void}) {
   useTranslation('webview');
@@ -87,7 +84,7 @@ export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconne
     const observer = new ResizeObserver(update);
     if (slot.current) observer.observe(slot.current);
     const mutation = new MutationObserver(update);
-    mutation.observe(document.documentElement,{attributes:true,attributeFilter:['class','style','data-theme','data-mode']});
+    mutation.observe(document.documentElement,{attributes:true,attributeFilter:['class','style','data-theme','data-scheme']});
     const scheme = window.matchMedia('(prefers-color-scheme: dark)');
     scheme.addEventListener('change',update);
     window.addEventListener('resize',update); document.addEventListener('visibilitychange',update);update();

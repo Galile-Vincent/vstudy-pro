@@ -9,15 +9,8 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 100%;
-  color: var(--palette-0);
-  background: var(--palette-1);
-  color-scheme: light dark;
-  --surface: var(--palette-2);
-  --subtle: var(--palette-3);
-  --line: var(--palette-4);
-  --muted: var(--palette-5);
-  --active: var(--palette-6);
-  --ink: var(--palette-0);
+  color: var(--ink);
+  background: var(--background);
 }
 * {
   box-sizing: border-box;
@@ -50,7 +43,7 @@ button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [
 button:focus-visible,
 select:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--palette-7);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 input:not([data-slot]):not([cmdk-input]),
@@ -221,7 +214,7 @@ h3 {
   background: var(--surface);
 }
 .chat-pane {
-  background: var(--palette-1);
+  background: var(--background);
 }
 .pane-toolbar {
   height: 48px;
@@ -271,7 +264,7 @@ h3 {
   font-size: 0.75rem;
 }
 .empty-symbol {
-  color: var(--palette-9);
+  color: var(--muted);
   font-size: 1.6875rem;
   margin-bottom: 4px;
 }
@@ -333,7 +326,7 @@ h3 {
   overflow-wrap: anywhere;
 }
 .chat-error {
-  color: var(--palette-10);
+  color: var(--danger);
   font-size: 0.75rem;
 }
 .composer {
@@ -490,7 +483,7 @@ h3 {
   padding-left: 4px;
 }
 .markdown input[type="checkbox"] {
-  accent-color: var(--palette-5);
+  accent-color: var(--muted);
   margin-right: 8px;
 }
 .markdown table {
@@ -556,18 +549,18 @@ h3 {
 }
 .hljs-keyword,
 .hljs-selector-tag {
-  color: var(--palette-12);
+  color: var(--syntax-keyword);
 }
 .hljs-string,
 .hljs-title {
-  color: var(--palette-13);
+  color: var(--syntax-string);
 }
 .hljs-comment {
   color: var(--muted);
 }
 .hljs-number,
 .hljs-literal {
-  color: var(--palette-14);
+  color: var(--syntax-number);
 }
 .section-action,.paragraph-action {
   position: absolute;
@@ -620,7 +613,7 @@ h3 {
   margin: auto;
 }
 .settings-dialog::backdrop {
-  background: var(--palette-17);
+  background: var(--overlay);
 }
 .dialog-title {
   display: flex;
@@ -727,31 +720,7 @@ h3 {
     max-width: 100px;
   }
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: var(--palette-20);
-    background: var(--palette-21);
-    --surface: var(--palette-22);
-    --subtle: var(--palette-23);
-    --line: var(--palette-24);
-    --muted: var(--palette-25);
-    --active: var(--palette-26);
-    --ink: var(--palette-20);
-  }
-  .chat-pane {
-    background: var(--palette-21);
-  }
-  .hljs-keyword {
-    color: var(--palette-27);
-  }
-  .hljs-string,
-  .hljs-title {
-    color: var(--palette-28);
-  }
-  .hljs-number {
-    color: var(--palette-29);
-  }
-}
+
 .model-picker {
   position: relative;
 }
@@ -783,7 +752,7 @@ h3 {
   width: 100%;
 }
 .inline-key p {
-  color: var(--palette-18);
+  color: var(--danger);
   font-size: var(--type-xs);
 }
 .icon-button { width: 28px; height: 28px; padding: 3px; border: 0; background: transparent; font-size: 1.0625rem; flex-shrink: 0; }
@@ -823,8 +792,8 @@ h3 {
   --color-foreground: var(--ink);
   --color-popover: var(--surface);
   --color-popover-foreground: var(--ink);
-  --color-primary: var(--ink);
-  --color-primary-foreground: var(--surface);
+  --color-primary: var(--accent-color);
+  --color-primary-foreground: var(--accent-foreground);
   --color-secondary: var(--subtle);
   --color-secondary-foreground: var(--ink);
   --color-muted: var(--subtle);
@@ -833,8 +802,8 @@ h3 {
   --color-accent-foreground: var(--ink);
   --color-border: var(--line);
   --color-input: var(--line);
-  --color-ring: var(--muted);
-  --color-destructive: var(--palette-30);
+  --color-ring: var(--focus);
+  --color-destructive: var(--danger);
   --radius-lg: 10px;
   --radius-md: 6px;
   --radius-sm: 4px;
@@ -872,9 +841,9 @@ h3 {
 
 }
 }
-:root { --muted: var(--palette-31); }
-@media (prefers-color-scheme: dark) { :root { --muted: var(--palette-32); } }
-.aui-root { min-height: 0; flex: 1; --composer-bg: var(--surface) !important; --composer-radius: 10px !important; --composer-padding: 10px !important; }
+
+
+.aui-root { min-height: 0; flex: 1; --composer-bg: var(--material-card) !important; --composer-radius: 10px !important; --composer-padding: 10px !important; }
 .aui-composer-input { min-height: 64px; width: 100%; resize: none; border: 0; outline: none; padding: 4px; color: var(--ink); background: transparent; line-height: 1.6; }
 .aui-composer-action-wrapper { gap: 8px; min-width: 0; }
 .aui-composer-action-start { min-width: 0; flex: 1; }
@@ -900,7 +869,7 @@ h3 {
 .model-row:hover .model-favorite, .model-favorite:focus-visible, .model-favorite[aria-pressed=true] { opacity: 1; }
 .model-row [cmdk-item] > span.absolute { right: 29px; }
 .availability-dot { display: block; width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--muted); }
-.availability-dot.available { background: var(--palette-33); }
+.availability-dot.available { background: var(--success); }
 .model-traits { width: 134px; flex-shrink: 0; padding: 12px 8px; border-left: 1px solid var(--line); }
 .model-traits:empty { display: none; }
 .model-traits h4 { font-size: 0.75rem; font-weight: 600; margin: 0 0 6px; }
@@ -920,7 +889,7 @@ h3 {
 @media (max-width: 950px) { .model-picker-body { flex-direction: column; } .model-traits { width: auto; border-left: 0; border-top: 1px solid var(--line); } .speed-section { margin-top: 10px; } .fast-mode { justify-content: space-between; gap: 12px; } .model-popover [cmdk-list] { max-height: 180px; } }
 @media (prefers-reduced-motion: reduce) { .aui-root *, .model-popover { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 .aui-composer-action-wrapper > div:last-child { max-width: 48%; flex-shrink: 0; }
-:root { --foreground: var(--ink); --background: var(--surface); --aui-panel: var(--subtle); --aui-success: var(--palette-33); --aui-warning: var(--palette-34); }
+:root { --foreground: var(--ink); --background: var(--surface); --aui-panel: var(--subtle); --aui-success: var(--success); --aui-warning: var(--warning); }
 .document-source { border: 0; background: transparent; padding: 3px 0; margin: 4px 4px 0 0; min-height: 28px; }
 .document-presentation { margin-top: 12px; max-width: 100%; overflow-x: auto; }
 .document-presentation h4 { font-size: 0.8125rem; font-weight: 600; margin-bottom: 8px; }
@@ -964,7 +933,7 @@ h3 {
 @custom-variant data-open (&:where([data-state="open"], [data-open]:not([data-open="false"])));
 
 @custom-variant data-closed (&:where([data-state="closed"], [data-closed]:not([data-closed="false"])));
-:root { --primary:var(--accent-color); --primary-foreground:var(--surface); --secondary:var(--subtle); --secondary-foreground:var(--ink); --muted-foreground:var(--muted); --accent:oklch(from var(--accent-color) var(--accent-surface-l) c h); --accent-foreground:var(--ink); --border:var(--hairline); --input:var(--hairline); --ring:oklch(from var(--accent-color) var(--focus-l) c h); --radius:var(--r-sm); --card:var(--surface); --card-foreground:var(--ink); --popover:var(--surface); --popover-foreground:var(--ink); --sidebar:var(--subtle); --sidebar-foreground:var(--ink); --sidebar-primary:var(--accent-color); --sidebar-primary-foreground:var(--surface); --sidebar-accent:var(--active); --sidebar-accent-foreground:var(--ink); --sidebar-border:var(--hairline); --sidebar-ring:var(--focus); }
+:root { --primary:var(--accent-color); --primary-foreground:var(--accent-foreground); --secondary:var(--subtle); --secondary-foreground:var(--ink); --muted-foreground:var(--muted); --accent:var(--active); --accent-foreground:var(--ink); --border:var(--hairline); --input:var(--hairline); --ring:var(--focus); --radius:var(--r-sm); --card:var(--surface); --card-foreground:var(--ink); --popover:var(--surface); --popover-foreground:var(--ink); --sidebar:var(--sidebar-surface); --sidebar-foreground:var(--ink); --sidebar-primary:var(--accent-color); --sidebar-primary-foreground:var(--accent-foreground); --sidebar-accent:var(--active); --sidebar-accent-foreground:var(--ink); --sidebar-border:var(--hairline); --sidebar-ring:var(--focus); }
 [data-slot=sidebar-wrapper] { min-height:0; height:100%; }
 .shell-sidebar { display:flex; flex-direction:column; }
 .shell-sidebar[hidden] { display:none; }

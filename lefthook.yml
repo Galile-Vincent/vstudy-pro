@@ -1,0 +1,18 @@
+pre-commit:
+  parallel: false
+  commands:
+    typecheck:
+      glob: "apps/desktop/**/*.{ts,tsx}"
+      run: '[ -n "$CI" ] || pnpm typecheck-fast'
+    lint-staged:
+      glob: "apps/desktop/**/*.{ts,tsx,js,mjs,cjs}"
+      root: apps/desktop/
+      run: '[ -n "$CI" ] || pnpm exec eslint {staged_files}'
+commit-msg:
+  commands:
+    conventional:
+      run: '[ -n "$CI" ] || pnpm exec commitlint --edit "{1}"'
+pre-push:
+  commands:
+    test:
+      run: '[ -n "$CI" ] || pnpm test --pool=forks --maxWorkers=2'

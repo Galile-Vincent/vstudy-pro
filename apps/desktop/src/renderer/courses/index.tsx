@@ -994,6 +994,7 @@ function CoursesBody({
           </section>
         )}
         <ConnectDialog
+          accounts={overview?.accounts}
           open={connect}
           onOpenChange={setConnect}
           api={api}
