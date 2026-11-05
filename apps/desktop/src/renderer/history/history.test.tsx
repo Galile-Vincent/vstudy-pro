@@ -92,11 +92,38 @@ it('keeps result nodes, focus and scroll during pagination and refresh without r
   await act(()=>more.click());
   expect(host.querySelector('[data-history-result]')).toBe(result);expect(document.activeElement).toBe(result);expect(list.scrollTop).toBe(150);
   expect(list.querySelector('[role=status]')?.textContent??'').toBe('');
-  await act(()=>settle({items:[],nextCursor:null}));
+  const added = { ...hit, id: '00000000-0000-4000-8000-000000000003' as typeof hit.id, titleSnippet: 'Second conversation' };
+  await act(()=>settle({items:[added],nextCursor:null}));
+  expect(host.querySelectorAll('[data-history-result]')).toHaveLength(2);
+  expect(host.querySelector('[data-history-result]')).toBe(result);
+  expect(document.activeElement).toBe(result);
+  expect(list.scrollTop).toBe(150);
   await act(()=>window.dispatchEvent(new Event('vstudy:history-changed')));
   await act(()=>vi.advanceTimersByTimeAsync(150));
   expect(host.querySelector('[data-history-result]')).toBe(result);expect(document.activeElement).toBe(result);
   expect(list.querySelector('[role=status]')?.textContent??'').toBe('');
-  await act(()=>settle({items:[hit],nextCursor:null}));
+  await act(()=>settle({items:[hit,added],nextCursor:null}));
   expect(host.querySelector('[data-history-result]')).toBe(result);
+});
+
+
+it.each([false, true])('replaces existing results safely when a filter returns an empty set = %s', async empty => {
+  vi.useFakeTimers();
+  const replacement = { ...hit, id: '00000000-0000-4000-8000-000000000004' as typeof hit.id, titleSnippet: 'Replacement conversation' };
+  invoke.mockImplementation(async (channel, request) => channel === 'chats:facets'
+    ? { courses: [], documents: [], models: [] }
+    : { items: request.pinned ? empty ? [] : [replacement] : [hit], nextCursor: null });
+  const open = vi.fn(), host = await render(<HistorySearch onOpen={open}/>);
+  await act(() => vi.advanceTimersByTimeAsync(150));
+  expect(host.querySelectorAll('[data-history-result]')).toHaveLength(1);
+  const pinned = [...host.querySelectorAll('button')].find(b => b.textContent === 'Pinned')!;
+  await act(() => pinned.click());
+  await act(() => vi.advanceTimersByTimeAsync(150));
+  expect(host.querySelectorAll('[data-history-result]')).toHaveLength(empty ? 0 : 1);
+  if (empty) expect(host.textContent).toContain('Your conversations will appear here');
+  else {
+    expect(host.textContent).toContain('Replacement conversation');
+    await act(() => host.querySelector<HTMLButtonElement>('[data-history-result]')!.click());
+    expect(open).toHaveBeenCalledWith(replacement, replacement.matches[0]!.messageId);
+  }
 });

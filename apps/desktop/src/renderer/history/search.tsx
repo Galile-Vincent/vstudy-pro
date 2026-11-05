@@ -6,15 +6,20 @@ import { tr } from '../../shared/i18n';
 import type { ChatHit, ChatPatch, ChatSearch } from '../../shared/chat-history';
 import type { IpcResponse } from '../../shared/ipc';
 import { desktop } from '../bridge';
+import { SurfaceErrorBoundary } from '../components/surface-error-boundary';
 import { HistoryResults } from './results';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
 import './history.css';
-export function HistorySearch({ onOpen, documentId, courseId, compact = false }: {
+type HistorySearchProps = {
   onOpen: (hit: ChatHit, messageId?: string) => void;
   documentId?: ChatSearch['documentId'];
   courseId?: string | undefined;
   compact?: boolean;
-}) {
+};
+export function HistorySearch(props: HistorySearchProps) {
+  return <SurfaceErrorBoundary><SearchContent {...props}/></SurfaceErrorBoundary>;
+}
+function SearchContent({ onOpen, documentId, courseId, compact = false }: HistorySearchProps) {
   useTranslation();
   const [filters, setFilters] = useState<ChatSearch>({ scope: 'all', limit: 30, query: '', ...(documentId ? { documentId } : {}), ...(courseId ? { courseIds: [courseId] } : {}) });
   const [page, setPage] = useState<IpcResponse<'chats:search'>>({ items: [], nextCursor: null });

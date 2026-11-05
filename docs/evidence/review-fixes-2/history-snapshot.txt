@@ -1,0 +1,193 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - text: History
+  - button "Help"
+  - button "Find a conversation": Find a conversation ⌘/Ctrl K
+- main:
+  - heading "History" [level=1]
+  - paragraph: Find your questions, answers and ideas across every chat.
+  - region "History":
+    - searchbox "Search chat history"
+    - button "All" [pressed]
+    - button "By course"
+    - button "By document"
+    - button "General"
+    - button "Pinned"
+    - group: More filters
+    - status
+    - button "Study topic 31 Nov 6":
+      - strong: Study topic 31
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 29 Nov 6":
+      - strong: Study topic 29
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 30 Nov 6":
+      - strong: Study topic 30
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 27 Nov 6":
+      - strong: Study topic 27
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 28 Nov 6":
+      - strong: Study topic 28
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 26 Nov 6":
+      - strong: Study topic 26
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 24 Nov 6":
+      - strong: Study topic 24
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 23 Nov 6":
+      - strong: Study topic 23
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 22 Nov 6":
+      - strong: Study topic 22
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 25 Nov 6":
+      - strong: Study topic 25
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 21 Nov 6":
+      - strong: Study topic 21
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 19 Nov 6":
+      - strong: Study topic 19
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 20 Nov 6":
+      - strong: Study topic 20
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 17 Nov 6":
+      - strong: Study topic 17
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 16 Nov 6":
+      - strong: Study topic 16
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 18 Nov 6":
+      - strong: Study topic 18
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 15 Nov 6":
+      - strong: Study topic 15
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 13 Nov 6":
+      - strong: Study topic 13
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 14 Nov 6":
+      - strong: Study topic 14
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 10 Nov 6":
+      - strong: Study topic 10
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 12 Nov 6":
+      - strong: Study topic 12
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 9 Nov 6":
+      - strong: Study topic 9
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 11 Nov 6":
+      - strong: Study topic 11
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 8 Nov 6":
+      - strong: Study topic 8
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 6 Nov 6":
+      - strong: Study topic 6
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 7 Nov 6":
+      - strong: Study topic 7
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 3 Nov 6":
+      - strong: Study topic 3
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 4 Nov 6":
+      - strong: Study topic 4
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 5 Nov 6":
+      - strong: Study topic 5
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Study topic 0 Nov 6":
+      - strong: Study topic 0
+      - time: Nov 6
+    - paragraph: General · fake
+    - button "More options"
+    - button "Load more"

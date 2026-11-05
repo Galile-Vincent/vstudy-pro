@@ -108,14 +108,25 @@ async function createWindow(): Promise<void> {
   });
   if (smokeRoot) current.webContents.once('did-finish-load', () => { void runPackagedSmoke(current, realpathSync(smokeRoot)); });
   await new Promise<void>((resolve, reject) => {
-    const loaded = () => { current.webContents.removeListener('did-fail-load', failed); resolve(); };
-    const failed = (_event: Electron.Event, code: number, description: string, _url: string, mainFrame: boolean) => {
-      if (mainFrame && code !== -3) { current.webContents.removeListener('did-finish-load', loaded); reject(new Error(description)); }
+    const settle = (error?: unknown) => {
+      current.removeListener('closed', closed);
+      current.webContents.removeListener('destroyed', closed);
+      current.webContents.removeListener('did-finish-load', loaded);
+      current.webContents.removeListener('did-fail-load', failed);
+      if (error) reject(error);
+      else resolve();
     };
+    const loaded = () => settle();
+    const closed = () => settle();
+    const failed = (_event: Electron.Event, code: number, description: string, _url: string, mainFrame: boolean) => {
+      if (mainFrame && code !== -3) settle(new Error(description));
+    };
+    current.once('closed', closed);
+    current.webContents.once('destroyed', closed);
     current.webContents.once('did-finish-load', loaded);
     current.webContents.on('did-fail-load', failed);
-    // A user reload can cancel the initial navigation before its load promise settles.
-    void current.loadURL(entryUrl).catch(error => { if (error.code !== 'ERR_ABORTED') reject(error); });
+    // A reload cancels the initial navigation; wait for its replacement or window closure.
+    void current.loadURL(entryUrl).catch(error => { if (error.code !== 'ERR_ABORTED') settle(error); });
   });
 }
 
@@ -196,11 +207,11 @@ if (ownsApplication) void app.whenReady().then(async () => {
     return { ok: true };
   });
   nativeTheme.on("updated", () => { if (store) applyNativeTheme(store.settings.get()); });
-  await createWindow();
-  await confirmRestoreStartup(userData);
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) void createWindow();
   });
+  await createWindow();
+  await confirmRestoreStartup(userData);
 }).catch(async error => {
   log({phase:"startup-failed",code:(error as NodeJS.ErrnoException).code ?? error.name});
   await disposeIpc?.();

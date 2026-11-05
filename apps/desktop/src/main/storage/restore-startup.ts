@@ -6,7 +6,7 @@ import { syncDirectory } from './atomic';
 const journalSchema = z.object({directory:z.string().regex(/^\.restore-[a-zA-Z0-9]+$/)}).strict();
 const exists = (path:string) => lstat(path).then(()=>true).catch(error=>{if(error.code==='ENOENT')return false;throw error;});
 
-/** Mark restored data as accepted only after services and the renderer have loaded. */
+/** Mark restored data as accepted after services are ready and initial window navigation has settled. */
 export async function confirmRestoreStartup(root:string):Promise<void> {
   await rm(join(root,'restore-startup.json'),{force:true});
   await syncDirectory(root);
