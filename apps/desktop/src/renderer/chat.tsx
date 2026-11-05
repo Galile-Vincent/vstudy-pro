@@ -51,7 +51,7 @@ export function Chat({
 }: {
   conversation: Conversation;
   onProposals?: (actions: import("../shared/moodle").MoodleAgentAction[]) => void;
-  promptRequest?: {text:string; id:number};
+  promptRequest?: {text:string; id:number; materials?: import("../shared/planner").MaterialRequest};
   autoFocus?: boolean;
   draft: string;
   onDraft: (value: string) => void;
@@ -75,6 +75,7 @@ export function Chat({
   const budget = useBudgetGuard(usage.data, conversation.id, draft);
   const available = providers.find(p => p.config.id === conversation.providerId);
   const unavailable = !available?.config.enabled || !available.availability.available;
+  const approvedMaterials = useRef<import("../shared/planner").MaterialRequest | undefined>(undefined);
   const current = useRef({ conversation, selection, onClearSelection, onProposals });
   current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, onClearSelection, onProposals };
   const connection = useMemo(
@@ -83,9 +84,11 @@ export function Chat({
         desktop,
         async () => {
           const { conversation: c, selection: s } = current.current;
+          const materials = approvedMaterials.current;
+          approvedMaterials.current = undefined;
           return {
             conversationId: c.id,
-            ...(c.scope === "course" ? {scope:"course" as const,courseId:c.courseId} : {documentId:c.documentId}),
+            ...(c.scope === "course" ? {scope:"course" as const,courseId:c.courseId,...(materials ? {materials} : {})} : {documentId:c.documentId}),
             providerId: c.providerId,
             modelId: c.modelId,
             options: c.options,
@@ -115,7 +118,7 @@ export function Chat({
       metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage, modelId: m.parts[0]?.modelId, options: m.parts[0]?.options, selection: m.parts[0]?.selection, turnId: m.parts[0]?.turnId, citations: m.parts[0]?.citations } },
     })),
   });
-  useEffect(() => { if (promptRequest) runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}]}); }, [promptRequest?.id]);
+  useEffect(() => { if (promptRequest) { approvedMaterials.current = promptRequest.materials; runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}]}); } }, [promptRequest?.id]);
   useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
   const statuses = new Map(history.flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));

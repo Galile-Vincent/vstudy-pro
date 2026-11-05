@@ -1,3 +1,4 @@
+import { plannerMigration } from './planner-migration';
 import { moodleMigration, moodleSiteMigration, moodleCapabilitiesMigration, moodleCourseDetailsMigration } from './moodle-migration';
 import { aiParseMigration, aiParseRollupRepair } from './ai-parse-migration';
 import { chmodSync, copyFileSync, existsSync, statSync } from "node:fs";
@@ -99,6 +100,7 @@ export const migrations = [
   { version:15, sql:moodleSiteMigration },
   { version:16, sql:moodleCapabilitiesMigration },
   { version:17, sql:moodleCourseDetailsMigration },
+  { version:18, sql:plannerMigration },
 ];
 const documentRow = z
   .object({
@@ -159,7 +161,7 @@ export function openStore(path: string) {
       throw new Error("Database version is newer than this application");
     for (const migration of migrations) {
       if (versions.includes(migration.version)) continue;
-      if (!fresh && [5,8].includes(migration.version)) {
+      if (!fresh && [5,8,18].includes(migration.version)) {
         db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
         copyFileSync(path, `${path}.before-v${migration.version}.bak`);
         chmodSync(`${path}.before-v${migration.version}.bak`, 0o600);

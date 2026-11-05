@@ -53,6 +53,7 @@ import {
 import type { MoodleTermFilter } from "../../shared/moodle-course";
 import "./courses.css";
 import { ConnectDialog } from "./connect";
+import { Planner } from "./planner";
 export { ConnectDialog } from "./connect";
 
 const week = 7 * 86400000;
@@ -153,6 +154,7 @@ export function Courses({
   onDocument: (id: string) => void;
 }) {
   useTranslation("moodle");
+  const [showPlanner, setShowPlanner] = useState(false);
   const [overview, setOverview] = useState<MoodleOverview>();
   const [detail, setDetail] = useState<MoodleCourseDetail>();
   const [homeDetails, setHomeDetails] = useState<NonNullable<MoodleOverview["summaries"]>>([]);
@@ -443,9 +445,14 @@ export function Courses({
       <p className="moodle-empty-inline">{tr("moodle:no_files")}</p>
     );
   };
+  if (showPlanner) return <main className="moodle-page"><div className="moodle-content">
+    <Button variant="ghost" className="moodle-back" onClick={() => setShowPlanner(false)}><ArrowLeft />{tr("planner:back")}</Button>
+    <Planner courses={overview?.courses ?? []} deadlines={overview?.upcoming ?? []} />
+  </div></main>;
   return (
     <main className="moodle-page">
       <div className="moodle-content">
+        <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
         <header className="moodle-header">
           <div>
             {courseId && (

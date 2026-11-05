@@ -1,3 +1,6 @@
+import { CourseContextCache } from "../planner/context";
+import { PlannerRepository } from "../planner/repository";
+import { buildMaterialContext } from "../planner/materials";
 import { MoodleRepository } from "../moodle/repository";
 import { buildCoursePrompt, parseCourseActions } from "../prompt/course";
 import type { MoodleAgentAction } from "../../shared/moodle";
@@ -52,6 +55,7 @@ interface ActiveRequest {
   supersedeOnSave?: import("../../shared/domain").Message["id"][];
 }
 export class ChatService {
+  private readonly courseContext: CourseContextCache;
   private stopped = false;
   private readonly producers = new Set<Promise<void>>();
   private readonly deleting = new Set<string>();
@@ -64,7 +68,7 @@ export class ChatService {
   constructor(
     private readonly store: Store,
     private readonly providers: ProviderRegistry,
-  ) {}
+  ) { this.courseContext = new CourseContextCache(store.db); }
   createConversation(
     input: import("zod").z.infer<typeof import("../../shared/domain").conversationCreateSchema>,
   ): Conversation {
@@ -292,9 +296,11 @@ export class ChatService {
       let prompt: string;
       let allowPresentation = false;
       if (entry.request.scope === "course") {
-        const detail = new MoodleRepository(this.store.db).course(entry.request.courseId);
+        const { detail, planner, syncedAt } = this.courseContext.get(entry.request.courseId);
         prompt = buildCoursePrompt(detail, history, entry.request.userMessage, this.store.settings.get().replyLanguage,
-          id => this.store.documents.get(id as import("../../shared/domain").Document["id"])?.status ?? "not-opened");
+          id => this.store.documents.get(id as import("../../shared/domain").Document["id"])?.status ?? "not-opened",
+          new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone, planner, syncedAt);
+        if (entry.request.materials) prompt += "\n\n" + await buildMaterialContext(this.store, entry.request.courseId, entry.request.materials);
         entry.rawCourseText = "";
       } else {
         if (!document) throw new Error("Document unavailable");
@@ -364,7 +370,8 @@ export class ChatService {
         if (event.type === "proposals") continue;
         if (event.type !== "text-delta") {
           if (event.type === "done" && entry.request.scope === "course") {
-            const result = parseCourseActions(entry.rawCourseText ?? "", new MoodleRepository(this.store.db).course(entry.request.courseId));
+            const planning = new PlannerRepository(this.store.db).context(entry.request.courseId);
+            const result = parseCourseActions(entry.rawCourseText ?? "", new MoodleRepository(this.store.db).course(entry.request.courseId), planning.now, planning.snapshot, planning.documentIds);
             entry.text = result.text;
             entry.proposals = result.actions;
             if (result.text) this.send(entry, {type:"text-delta", text:result.text});

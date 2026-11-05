@@ -1,3 +1,8 @@
+/** Course chat keeps model output as proposals. Only confirmation cards invoke planner writes or approve material access. */
+import { emptyPlanner, type MaterialRequest } from "../../shared/planner";
+import { assertCourseAction } from "../../shared/course-actions";
+import { plannerApi } from "./planner-api";
+import { PlannerProposal } from "./planner-proposal";
 import { useEffect, useRef, useState } from "react";
 import { desktop } from "../bridge";
 import { Chat } from "../chat";
@@ -9,7 +14,7 @@ import type {
   MoodleCourseDetail,
 } from "../../shared/moodle";
 import { moodleAgentActionSchema } from "../../shared/moodle";
-import { tr, i18n } from "../../shared/i18n";
+import { tr } from "../../shared/i18n";
 import { Button } from "../components/ui/button";
 import { Suggestions } from "../components/assistant-ui/elements/suggestions";
 import type { MoodleApi } from "./api";
@@ -55,6 +60,7 @@ export function CourseAgentPanel({
   const [promptRequest, setPromptRequest] = useState<{
     text: string;
     id: number;
+    materials?: MaterialRequest;
   }>();
   const refreshProviders = async () => {
     setProviders(await desktop.invoke("providers:list", { discover: true }));
@@ -118,7 +124,8 @@ export function CourseAgentPanel({
     };
   }, [detail.course.id, agent, setupVersion]);
   const quick = (key: string) => {
-    setPromptRequest({ text: tr(`moodle:${key}`), id: Date.now() });
+    const promptKey = key === "plan_week" ? "planner:plan_prompt" : key === "catch_up" ? "planner:catch_up_prompt" : key === "exam_prep" ? "planner:exam_prompt" : `moodle:${key}`;
+    setPromptRequest({ text: tr(promptKey), id: Date.now() });
   };
   useEffect(() => {
     if (requested > handledRequest.current && conversation) {
@@ -126,7 +133,14 @@ export function CourseAgentPanel({
       quick("explain_prepare");
     }
   }, [requested, conversation?.id]);
-  const [actions, setActions] = useState<MoodleAgentAction[]>([]);
+  const [actions, setActions] = useState<{ id: string; action: MoodleAgentAction }[]>([]);
+  const [snapshot, setSnapshot] = useState(emptyPlanner);
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+  useEffect(() => {
+    let live = true;
+    void plannerApi.snapshot().then(value => { if (live) setSnapshot(value); }).catch(() => {});
+    return () => { live = false; };
+  }, [detail.course.id]);
   useEffect(() => { onPendingChange?.(actions.length > 0); }, [actions.length, onPendingChange]);
   const [status, setStatus] = useState<
     "idle" | "busy" | "unavailable" | "done"
@@ -146,27 +160,8 @@ export function CourseAgentPanel({
           })
         ).map((candidate) => {
           const action = moodleAgentActionSchema.parse(candidate);
-          const ids =
-            action.type === "create-reminder"
-              ? [action.deadlineId]
-              : action.deadlineIds;
-          if (
-            ids.some(
-              (id) => !detail.deadlines.some((deadline) => deadline.id === id),
-            )
-          )
-            throw new Error("Action outside course scope");
-          if (
-            action.type === "create-reminder" &&
-            (Date.parse(action.remindAt) <= Date.now() ||
-              Date.parse(action.remindAt) >=
-                Date.parse(
-                  detail.deadlines.find((d) => d.id === action.deadlineId)!
-                    .dueAt,
-                ))
-          )
-            throw new Error("Reminder must be in the future");
-          return action;
+          assertCourseAction(action, detail, { snapshot, deadlines: detail.deadlines, courseIds: [detail.course.id], documentIds: detail.files.flatMap(f => f.documentId ? [f.documentId] : []), now: Date.now() });
+          return { id: crypto.randomUUID(), action };
         }),
       );
       setStatus("idle");
@@ -177,7 +172,8 @@ export function CourseAgentPanel({
   };
   const panel = useRef<HTMLElement>(null);
   useEffect(() => { if (status === "done") panel.current?.focus(); }, [status]);
-  const approve = async (action: MoodleAgentAction) => {
+  const approve = async (proposal: { id: string; action: MoodleAgentAction }) => {
+    const { action } = proposal;
     if (approving.current) return;
     approving.current = true;
     setStatus("busy");
@@ -189,8 +185,20 @@ export function CourseAgentPanel({
           note: action.note,
           createdBy: "agent",
         });
-      else if (!(await api.exportCalendar(action.deadlineIds)).saved) { setStatus("idle"); return; }
-      setActions((current) => current.filter((a) => a !== action));
+      else if (action.type === "export-calendar") {
+        const saved = action.taskIds?.length || action.examIds?.length || action.blockIds?.length
+          ? await plannerApi.exportCalendar({ deadlineIds: action.deadlineIds, taskIds: action.taskIds, examIds: action.examIds, blockIds: action.blockIds })
+          : await api.exportCalendar(action.deadlineIds ?? []);
+        if (!saved.saved) { setStatus("idle"); return; }
+      } else {
+        const result = await plannerApi.approve(proposal.id, action, detail.course.id);
+        if (!result.replayed && (action.type === "summarize-course-materials" || action.type === "generate-practice-quiz")) {
+          const mode = action.type === "summarize-course-materials" ? "summary" : "quiz";
+          setPromptRequest({ text: tr(mode === "summary" ? "planner:run_summary" : "planner:run_quiz"), id: Date.now(), materials: { mode, documentIds: action.documentIds } });
+        }
+        setSnapshot(await plannerApi.snapshot());
+      }
+      setActions((current) => current.filter((a) => a.id !== proposal.id));
       await onChange();
       setStatus("done");
     } catch {
@@ -227,7 +235,9 @@ export function CourseAgentPanel({
               <Suggestions
                 suggestions={[
                   { id: "summarize_notifications", label: tr("moodle:summarize_notifications") },
-                  { id: "plan_week", label: tr("moodle:plan_week") },
+                  { id: "plan_week", label: tr("planner:plan_week") },
+                  { id: "catch_up", label: tr("planner:catch_up") },
+                  { id: "exam_prep", label: tr("planner:exam_prep") },
                 ]}
                 disabled={!conversation}
                 cycle={0}
@@ -235,6 +245,17 @@ export function CourseAgentPanel({
                 onSuggestion={quick}
               />
             </div>
+            <fieldset className="planner-materials">
+              <legend>{tr("planner:materials")}</legend>
+              <p>{tr("planner:material_hint")}</p>
+              {detail.files.filter(f => f.documentId).map(file => <label key={file.id}>
+                <input type="checkbox" checked={selectedDocuments.includes(file.documentId!)} disabled={!selectedDocuments.includes(file.documentId!) && selectedDocuments.length >= 6}
+                  onChange={e => setSelectedDocuments(current => e.target.checked ? [...current, file.documentId!] : current.filter(id => id !== file.documentId))} />
+                {file.name}
+              </label>)}
+              <div className="planner-actions">{(["summarize-course-materials", "generate-practice-quiz"] as const).map(type => <Button key={type} variant="ghost" disabled={!conversation || !selectedDocuments.length || status === "busy"}
+                onClick={() => setActions(current => [...current, { id: crypto.randomUUID(), action: { type, documentIds: selectedDocuments } }])}>{tr(`planner:action_${type}`)}</Button>)}</div>
+            </fieldset>
             {conversations.length > 0 && (
               <select
                 aria-label={tr("moodle:conversations")}
@@ -289,7 +310,7 @@ export function CourseAgentPanel({
                   onUsage={() => {}}
                   documentTitle={detail.course.fullName}
                   onProposals={(next) =>
-                    setActions((current) => [...current, ...next])
+                    setActions((current) => [...current, ...next.map(action => ({ id: crypto.randomUUID(), action }))])
                   }
                   {...(promptRequest ? { promptRequest } : {})}
                 />
@@ -306,55 +327,8 @@ export function CourseAgentPanel({
             {tr("moodle:action_done")}
           </p>
         )}
-        {actions.map((action, index) => (
-          <div className="moodle-proposal" key={index}>
-            <h3>{tr("moodle:confirm_action")}</h3>
-            <p>
-              {action.type === "create-reminder"
-                ? tr("moodle:reminder_proposal", {
-                    title:
-                      detail.deadlines.find((d) => d.id === action.deadlineId)
-                        ?.title ?? "",
-                    date: new Date(action.remindAt).toLocaleString(
-                      i18n.resolvedLanguage,
-                    ),
-                  })
-                : tr("moodle:calendar_proposal", {
-                    count: action.deadlineIds.length,
-                  })}
-            </p>
-            {action.type === "export-calendar" && (
-              <ul>
-                {action.deadlineIds.map((id) => {
-                  const deadline = detail.deadlines.find((d) => d.id === id);
-                  return deadline ? (
-                    <li key={id}>
-                      {deadline.title} ·{" "}
-                      {new Date(deadline.dueAt).toLocaleString(
-                        i18n.resolvedLanguage,
-                      )}
-                    </li>
-                  ) : null;
-                })}
-              </ul>
-            )}
-            {action.type === "create-reminder" && <p>{action.note}</p>}
-            <Button
-              disabled={status === "busy"}
-              onClick={() => void approve(action)}
-            >
-              {tr("moodle:approve")}
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() =>
-                setActions((current) => current.filter((a) => a !== action))
-              }
-            >
-              {tr("moodle:dismiss")}
-            </Button>
-          </div>
-        ))}
+        {actions.map(proposal => <PlannerProposal key={proposal.id} action={proposal.action} snapshot={snapshot} courses={[detail.course]} deadlines={detail.deadlines} files={detail.files}
+          busy={status === "busy"} onApprove={() => void approve(proposal)} onDismiss={() => setActions(current => current.filter(item => item.id !== proposal.id))} />)}
       </div>
       <footer>{tr("moodle:agent_scope")}</footer>
     </aside>
