@@ -1,0 +1,48 @@
+History: Expected values to be strictly deep-equal:
++ actual - expected
+
++ [
++   "Cannot read properties of undefined (reading 'courseTitle')"
++ ]
+- []
+
+Startup: Startup must register the activate handler after the initial window closes.
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
++ [
++   'History: Expected values to be strictly deep-equal:\n' +
++     '+ actual - expected\n' +
++     '\n' +
++     '+ [\n' +
++     `+   "Cannot read properties of undefined (reading 'courseTitle')"\n` +
++     '+ ]\n' +
++     '- []\n',
++   'Startup: Startup must register the activate handler after the initial window closes.'
++ ]
+- []
+
+    at file:///Users/vc/.t3/worktrees/vstudy-pro/t3-31af8b62/apps/desktop/e2e/history-startup-regressions.mjs:95:8
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [
+    'History: Expected values to be strictly deep-equal:\n' +
+      '+ actual - expected\n' +
+      '\n' +
+      '+ [\n' +
+      `+   "Cannot read properties of undefined (reading 'courseTitle')"\n` +
+      '+ ]\n' +
+      '- []\n',
+    'Startup: Startup must register the activate handler after the initial window closes.'
+  ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.9.0
