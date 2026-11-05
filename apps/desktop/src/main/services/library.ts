@@ -1,3 +1,9 @@
+/**
+ * Query and organize library metadata, folders, tags, pins, and soft deletion.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { rm } from 'node:fs/promises';
 import { activeConversions, activePurges } from "./conversion-state";
 import { randomUUID } from 'node:crypto';
@@ -10,6 +16,7 @@ import { folderSchema, libraryDocumentSchema, libraryQuerySchema, savedFilterSch
 import { SearchService, validateSearchQuery } from './search';
 import { containedPath } from "./file-paths";
 export { containedPath } from "./file-paths";
+/** Organize and page library metadata without reading full document bodies. */
 export class LibraryService {
     readonly search: SearchService;
     constructor(readonly store: Store, readonly root: string) { this.search = new SearchService(store.db, root); }

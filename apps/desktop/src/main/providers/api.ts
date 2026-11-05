@@ -1,3 +1,9 @@
+/**
+ * Adapt HTTP streaming providers and classify public transport failures.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { recordEgress } from '../services/egress';
 import { option } from "./model-options";
 import { z } from "zod";
@@ -16,9 +22,11 @@ const errorMessages = {
   'server error': 'Provider server error. Try again.',
   budget: 'Provider budget exceeded. Check your quota or billing.',
 };
+/** Expose stable transport failures without raw provider response data. */
 export class ProviderError extends Error {
   constructor(readonly category: keyof typeof errorMessages, message = errorMessages[category]) { super(message); }
 }
+/** Map HTTP status to a stable provider error without exposing response bodies. */
 export function httpError(status: number): ProviderError {
   if (status === 401 || status === 403) return new ProviderError('auth failed');
   if ([429, 529].includes(status)) return new ProviderError('rate limited');
@@ -27,7 +35,9 @@ export function httpError(status: number): ProviderError {
   if (status >= 500) return new ProviderError('server error', `Provider server error (HTTP ${status}). Try again.`);
   return new ProviderError('bad request');
 }
+/** Recognize the explicit loopback exception supported by local compatible providers. */
 export function isLoopback(value: string): boolean { return ["localhost", "[::1]"].includes(new URL(value).hostname) || /^127\.\d+\.\d+\.\d+$/.test(new URL(value).hostname); }
+/** Validate configured provider endpoints before sending credentials or prompts. */
 export function validateBaseUrl(value: string): string {
   const url = new URL(value);
   if (
@@ -46,6 +56,7 @@ export function validateBaseUrl(value: string): string {
     );
   return url.href.replace(/\/$/, "");
 }
+/** Decode streamed UTF-8 chunks and release the reader on completion or cancellation. */
 export async function* responseText(
   body: ReadableStream<Uint8Array>,
 ): AsyncIterable<string> {
@@ -63,6 +74,7 @@ export async function* responseText(
     reader.releaseLock();
   }
 }
+/** Create an HTTP provider adapter with validated events and abortable streaming. */
 export function createApiAdapter(
   getConfig: () => ProviderConfig,
   secrets: { getInMainOnly: (id: ProviderConfig["id"]) => string | null | Promise<string | null>; has?: SecretStore["has"]; isUnlocked?: SecretStore["isUnlocked"] },

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle-locales.
+ * Owned by shared.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import {expect,it} from 'vitest';
 import {i18n} from './i18n';
 

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for planner materials.
+ * Owned by main/planner.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { afterEach, expect, it } from "vitest";
 import { mkdtemp, writeFile, symlink, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";

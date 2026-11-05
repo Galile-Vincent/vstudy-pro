@@ -1,3 +1,9 @@
+/**
+ * Persist account-scoped Moodle snapshots and preserve linked document identities.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import { responseCache } from "../cache";
 import { moodleSectionSchema, moodleAnnouncementSchema, type MoodleSection, type MoodleAnnouncement } from '../../shared/moodle-course';
 import { parseCourseIdentity, courseLifecycle } from './identity';
@@ -28,6 +34,7 @@ const storedCourseSchema = z.preprocess(value => {
   return {...(value as Record<string,unknown>),identity};
 },moodleCourseSchema);
 const payload = z.object({data:z.string()});
+/** Persist account-scoped snapshots without deleting linked library documents. */
 export class MoodleRepository {
   constructor(private readonly db: DatabaseSync) {
     for (const row of db.prepare("SELECT id,data FROM moodle_courses WHERE json_type(data,'$.identity') IS NULL").all()) {

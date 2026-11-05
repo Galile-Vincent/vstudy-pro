@@ -1,6 +1,13 @@
+/**
+ * Backfill file metadata in bounded batches that resume after interruption.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import type { DatabaseSync } from 'node:sqlite';
 import { readFile, stat } from 'node:fs/promises';
 import { containedPath } from './file-paths';
+/** Resume missing metadata in bounded batches and yield between batches. */
 export async function backfillMetadata(db: DatabaseSync, root: string, stopped: () => boolean, batchSize = 32): Promise<void> {
   while (!stopped()) {
     const rows = db.prepare('SELECT id,sourcePath,markdownPath FROM documents WHERE metadataBackfilled=0 LIMIT ?').all(batchSize);

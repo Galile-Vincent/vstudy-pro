@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for services ai-parse-evaluation.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it } from 'vitest';
 import { readFile,writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';

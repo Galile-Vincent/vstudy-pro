@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle discovery.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it, vi } from 'vitest';
 import { checkSite } from './discovery';
 const envelope = (data: unknown) => Response.json([{error:false,data}]);

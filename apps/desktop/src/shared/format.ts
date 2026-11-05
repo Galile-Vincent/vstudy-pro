@@ -1,4 +1,11 @@
+/**
+ * Create locale-aware number, date, and cost formatters for presentation.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 import { i18n } from './i18n';
+/** Create locale-aware formatters without persisting display strings in the database. */
 export function formatters(requestedLocale = i18n.language) {
  const locale=requestedLocale === 'en-XA' ? 'en' : requestedLocale;
  return {

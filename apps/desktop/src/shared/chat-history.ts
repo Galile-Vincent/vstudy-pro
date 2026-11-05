@@ -1,6 +1,13 @@
+/**
+ * Define bounded conversation search, search results, and metadata edit contracts.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 /** Search transport for local chat history. Snippet markers are plain text, never HTML. */
 import { z } from 'zod';
 import { conversationSchema, conversationIdSchema, documentIdSchema, messageIdSchema, providerIdSchema } from './domain';
+/** Bounded literal history query with filters and a stable rank, timestamp, and ID cursor. */
 export const chatSearchSchema = z.object({
   query: z.string().trim().max(300).default(''),
   scope: z.enum(['all', 'courses', 'documents', 'general']).default('all'),
@@ -15,6 +22,7 @@ export const chatSearchSchema = z.object({
   limit: z.number().int().min(1).max(100).default(30),
   cursor: z.object({ rank: z.number().finite(), updatedAt: z.string(), id: conversationIdSchema }).strict().optional(),
 }).strict().refine(q => !q.from || !q.to || q.from <= q.to, 'Invalid date range');
+/** Public history result with inert snippet markers; snippet text must never be treated as HTML. */
 export const chatHitSchema = z.object({
   id: conversationIdSchema, scope: z.enum(['document', 'course', 'general']),
   documentId: documentIdSchema.nullable(), courseId: z.string().uuid().nullable(),
@@ -24,6 +32,7 @@ export const chatHitSchema = z.object({
   pinned: z.boolean(), archived: z.boolean(), hasAttachments: z.boolean(), hasCitations: z.boolean(),
   rank: z.number(), matches: z.array(z.object({ messageId: messageIdSchema, role: z.enum(['user', 'assistant', 'system']), snippet: z.string() }).strict()),
 }).strict();
+/** Editable conversation metadata. Absence preserves a field; deletion uses a separate boolean intent. */
 export const chatPatchSchema = z.object({
   title: z.string().trim().min(1).max(300).optional(), pinned: z.boolean().optional(),
   archived: z.boolean().optional(), deleted: z.boolean().optional(),

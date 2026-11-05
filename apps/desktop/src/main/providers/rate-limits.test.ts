@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for providers rate-limits.
+ * Owned by main/providers.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it, vi } from 'vitest';
 import { probeCodexRateLimits, createRateLimitProbe } from './rate-limits';
 it('initializes app-server, reads account limits, and kills it after the reply', async () => {

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for prompt index.
+ * Owned by main/prompt.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from "vitest";
 import { selectionSchema } from "../../shared/domain";
 import { buildPrompt, MAX_PROMPT_CHARS, omitDataUris } from "./index";

@@ -1,3 +1,9 @@
+/**
+ * Keep credentials in main and encrypt explicitly saved keys through the injected OS boundary.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { atomicWriteSync } from "../storage/atomic";
 import {
   chmodSync,
@@ -19,6 +25,7 @@ export interface Encryption {
   encryptStringAsync(value: string): Promise<Buffer>;
   decryptStringAsync(value: Buffer): Promise<{ result: string }>;
 }
+/** Create main-only credential storage with explicit save and unlock operations. */
 export function createSecretStore(file: string, encryption: Encryption) {
   if (existsSync(file)) chmodSync(file, 0o600);
   function read(): Record<string, string> {

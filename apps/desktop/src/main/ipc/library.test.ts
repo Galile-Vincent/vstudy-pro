@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for ipc library.
+ * Owned by main/ipc.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it, expect, vi } from 'vitest';
 import { mkdtempSync, rmSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';

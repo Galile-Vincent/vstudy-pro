@@ -1,3 +1,9 @@
+/**
+ * Normalize public HTTPS Moodle roots and validate DNS and redirects at the network boundary.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import { tr } from '../../shared/i18n';
 import { recordEgress } from '../services/egress';
 import { lookup } from 'node:dns/promises';
@@ -15,16 +21,19 @@ const globalV6 = new BlockList();
 globalV6.addSubnet('2000::',3,'ipv6');
 for (const [address,prefix] of [['2001::',23],['2001:db8::',32],['2002::',16],['3fff::',20]] as const) blocked.addSubnet(address,prefix,'ipv6');
 
+/** Reject local, private, and reserved destinations before opening a Moodle connection. */
 export function publicAddress(address: string): boolean {
   const family = isIP(address);
   return family === 4 ? !blocked.check(address,'ipv4') : family === 6 && globalV6.check(address,'ipv6') && !blocked.check(address,'ipv6');
 }
+/** Parse a network destination under the Moodle HTTPS and credential policy. */
 export function networkUrl(input: string, allowedPorts: readonly number[] = []): URL {
   const url = new URL(input);
   const host = url.hostname.replace(/^\[|\]$/g,'');
   if (url.protocol !== 'https:' || url.username || url.password || url.port && !allowedPorts.includes(Number(url.port)) || !host || host.endsWith('.') || host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || isIP(host) && !publicAddress(host)) throw new Error('Unsafe Moodle site URL');
   return url;
 }
+/** Canonicalize a public Moodle root, including pasted page URLs and subdirectories. */
 export function normalizeSiteUrl(input: string, allowedPorts: readonly number[] = []): string {
   const text = input.trim();
   const url = networkUrl(/^[a-z][a-z\d+.-]*:/i.test(text) && !/^[^/?#]+:\d+(?:\/|$)/.test(text) ? text : `https://${text}`,allowedPorts);
@@ -32,12 +41,14 @@ export function normalizeSiteUrl(input: string, allowedPorts: readonly number[] 
   url.pathname = url.pathname.replace(/\/(?:login|course|my|admin|mod|user|webservice|lib|auth)(?:\/.*)?$/i,'').replace(/\/index\.php(?:\/.*)?$/i,'').replace(/\/+$/,'');
   return url.href.replace(/\/$/,'');
 }
+/** Validate a destination against the selected Moodle root. */
 export function siteTarget(root: string, input: string): URL {
   const site = networkUrl(root);
   const target = networkUrl(input);
   if (site.origin !== target.origin || !(target.pathname === site.pathname.replace(/\/$/,'') || target.pathname.startsWith(site.pathname.replace(/\/$/,'') + '/'))) throw new Error('Moodle request outside site root');
   return target;
 }
+/** Resolve and validate every candidate address at the socket boundary. */
 export async function resolvePublicHost(host: string, resolver: Resolver = resolveAll) {
   host = host.replace(/^\[|\]$/g,'');
   const addresses = (isIP(host) ? [{address:host,family:isIP(host)}] : await resolver(host)).filter(item => publicAddress(item.address));
@@ -45,6 +56,7 @@ export async function resolvePublicHost(host: string, resolver: Resolver = resol
   return addresses;
 }
 
+/** Create a bounded transport that revalidates DNS and redirect targets. */
 export function createMoodleFetch(resolver: Resolver = resolveAll): typeof fetch {
   const agent = new Agent({keepAlive:true,maxSockets:6,maxTotalSockets:32,maxFreeSockets:6,timeout:30_000});
   return async (input, options = {}) => {

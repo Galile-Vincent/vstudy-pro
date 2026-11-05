@@ -1,4 +1,11 @@
+/**
+ * Limit generated presentations to validated read-only tables.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 import { z } from 'zod';
+/** Only read-only structured tables are supported. Arbitrary HTML and executable tool output reject. */
 export const presentationSchema = z.object({
   title: z.string().min(1).max(200),
   columns: z.array(z.string().min(1).max(100)).min(1).max(8),

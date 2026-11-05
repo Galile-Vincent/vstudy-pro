@@ -1,3 +1,9 @@
+/**
+ * Register validated usage IPC operations and delegate privileged work to main services.
+ * Owned by main/ipc.
+ * Request and response validation and sender ownership stay at the IPC boundary.
+ * @packageDocumentation
+ */
 import { readUsageHistory, readUsageCsv } from "../db/usage-reader";
 import { tr } from "../i18n";
 import { createRateLimitProbe } from "../providers/rate-limits";
@@ -12,6 +18,7 @@ import type { IpcChannel } from '../../shared/ipc';
 import { usageCsv } from '../db/usage-csv';
 export { usageCsv };
 
+/** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemented: Set<IpcChannel>, codexEnabled: () => boolean = () => false) {
   const probe = createRateLimitProbe();
   registrar.handle('usage:estimate', async ({ conversationId, userMessage }) => {

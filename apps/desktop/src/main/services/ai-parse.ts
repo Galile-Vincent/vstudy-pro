@@ -1,3 +1,9 @@
+/**
+ * Coordinate budgeted AI page conversion, version persistence, and cancellation.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { atomicWrite } from "../storage/atomic";
 import { randomUUID, createHash } from 'node:crypto';
 import { readFile, rm } from 'node:fs/promises';
@@ -15,12 +21,14 @@ import { containedPath } from './file-paths';
 import { SearchService } from './search';
 import type { AiPage } from '../../../resources/converter/ai-pages';
 const pageRow=z.object({page:z.number(),cacheKey:z.string(),status:z.enum(['pending','running','done','kept-original','failed']),markdown:z.string().nullable(),code:z.string().nullable()});
+/** Estimate AI conversion cost using selected pages and known model prices. */
 export function estimateParse(pages:string[], modelId:string, images:boolean, overrides:Parameters<typeof priceUsage>[2]={}):Pick<AiParseEstimate,'pages'|'inputTokens'|'outputTokens'|'costUsd'> {
  const inputTokens=pages.reduce((n,p)=>n+Math.ceil((AI_PARSE_SYSTEM.length+aiParsePrompt(p).length)/4)+(images?4096:0),0);
  const outputTokens=pages.reduce((n,p)=>n+Math.max(256,Math.ceil(p.length/3)),0);
  const usage=priceUsage(modelId,{inputTokens,outputTokens,costSource:'estimated'},overrides);
  return {pages:pages.length,inputTokens,outputTokens,...(usage.costUsd===undefined?{}:{costUsd:usage.costUsd})};
 }
+/** Own budgeted AI conversion jobs and persist accepted page versions atomically. */
 export class AiParseService {
  private active=new Map<string,{controller:AbortController; promise:Promise<void>}>();
  private stopped=false;

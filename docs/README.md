@@ -1,6 +1,6 @@
 # Documentation index
 
-README is the current user guide. Audit reports and design reviews record dated snapshots; their historical pass counts are not current acceptance.
+[The project README](../README.md) is the current user guide. Audit reports and design reviews record dated snapshots; their historical pass counts are not current acceptance.
 
 | Document | Purpose |
 | --- | --- |
@@ -41,3 +41,12 @@ Other project documentation:
 | [Converter performance](../apps/desktop/resources/converter/PERFORMANCE.md) | Historical baselines, progressive-delivery targets and current probes. |
 | [Provider fixture provenance](../apps/desktop/src/main/providers/fixtures/README.md) | Provider catalog/parser fixture origins. |
 | [PDF golden fixtures](../apps/desktop/test-fixtures/pdf_md/README.md) | PDF extraction fixtures and expected behavior. |
+
+## Current engineering and subsystem references
+
+- [Engineering procedures](ENGINEERING.md) describe setup, checks, IPC, migrations, locale generation, and releases.
+- [Cleanup verification](ENGINEERING_CLEANUP.md) records current commands and scoped exceptions.
+- [Storage and recovery](STORAGE.md) describes persistence ownership, cache limits, and portable backups.
+- [Vendor patches](VENDOR_PATCHES.md) records source hashes and exact reviewed diffs.
+- [Proposed 0.2.0 notes](releases/0.2.0.md) describe the release candidate without creating a tag.
+- [Moodle](../apps/desktop/src/main/moodle/README.md), [database](../apps/desktop/src/main/db/README.md), [cache](../apps/desktop/src/main/cache/README.md), [storage](../apps/desktop/src/main/storage/README.md), [services](../apps/desktop/src/main/services/README.md), [providers](../apps/desktop/src/main/providers/README.md), [planner](../apps/desktop/src/main/planner/README.md), [IPC](../apps/desktop/src/main/ipc/README.md), and [themes](../apps/desktop/src/shared/themes/README.md) document subsystem data flow and invariants.

@@ -1,3 +1,9 @@
+/**
+ * Adapt Claude CLI output and process lifetime to the shared provider interface.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { createCodexAdapter } from './codex';
 import { discoverModels } from './models';
 import { cliArgs, findCli, runCli } from './cli-transport';
@@ -6,6 +12,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { ProviderAdapter } from './index';
+/** Create the opted-in CLI adapter using the shared event and cancellation contract. */
 export function createCliAdapter(
   binary: "claude" | "codex" | "agy",
 ): ProviderAdapter {

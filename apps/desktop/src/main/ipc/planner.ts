@@ -1,3 +1,9 @@
+/**
+ * Register validated planner IPC operations and delegate privileged work to main services.
+ * Owned by main/ipc.
+ * Request and response validation and sender ownership stay at the IPC boundary.
+ * @packageDocumentation
+ */
 /** Planner IPC is an explicit approval boundary. Model streaming never calls these handlers. */
 import { dialog, Notification } from "electron";
 import type { Store } from "../db";
@@ -9,6 +15,7 @@ import { plannerCalendar } from "../planner/calendar";
 import { firePlannerReminders } from "../planner/reminders";
 import { exportText } from "../services/export-file";
 
+/** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerPlannerIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>) {
   const repository = new PlannerRepository(store.db);
   for (const channel of Object.keys(plannerIpc) as (keyof typeof plannerIpc)[]) implemented.add(channel);

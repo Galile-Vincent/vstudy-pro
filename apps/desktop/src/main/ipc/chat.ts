@@ -1,3 +1,9 @@
+/**
+ * Register validated chat IPC operations and delegate privileged work to main services.
+ * Owned by main/ipc.
+ * Request and response validation and sender ownership stay at the IPC boundary.
+ * @packageDocumentation
+ */
 import { createApiAdapter } from "../providers/api";
 import { validateOptions } from "../providers/models";
 import { app } from "electron";
@@ -8,6 +14,7 @@ import { ChatService } from "../services/chat";
 import { createProviderRegistry, type ProviderRegistry } from "../providers";
 import type { IpcChannel } from "../../shared/ipc";
 import type { createIpcRegistrar } from "./register";
+/** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerChatIpc(
   registrar: ReturnType<typeof createIpcRegistrar>,
   store: Store,

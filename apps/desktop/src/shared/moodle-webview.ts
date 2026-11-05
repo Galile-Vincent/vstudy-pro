@@ -1,9 +1,16 @@
+/**
+ * Define validated webview targets, appearance, bounds, actions, and state events.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 /** The app-owned Moodle pane contract. Remote pages never receive this bridge or account credentials. */
 import { z } from 'zod';
 import { documentIdSchema } from './domain';
 
 const id = z.string().uuid();
 const url = z.string().url().max(8192);
+/** Identify an account-owned Moodle target without accepting renderer credentials. */
 export const webviewTargetSchema = z.discriminatedUnion('kind', [
   z.object({kind:z.literal('page'), url}).strict(),
   z.object({kind:z.literal('file'), fileId:id}).strict(),
@@ -14,6 +21,7 @@ export const webviewThemeSchema = z.object({
   foreground:z.string().regex(/^#[0-9a-f]{6}$/i), accent:z.string().regex(/^#[0-9a-f]{6}$/i),
 }).strict();
 export type WebviewTheme = z.infer<typeof webviewThemeSchema>;
+/** Bound content-view geometry before native window operations. */
 export const webviewBoundsSchema = z.object({
   x:z.number().int().min(0).max(20000), y:z.number().int().min(0).max(20000),
   width:z.number().int().min(0).max(20000), height:z.number().int().min(0).max(20000),
@@ -21,6 +29,7 @@ export const webviewBoundsSchema = z.object({
 export type WebviewBounds = z.infer<typeof webviewBoundsSchema>;
 export const webviewErrorSchema = z.enum(['offline','timeout','blocked','certificate','session-expired','unavailable','file-unsupported','load-failed']);
 export type WebviewError = z.infer<typeof webviewErrorSchema>;
+/** Public view lifecycle and recovery state without account tokens or cookie data. */
 export const webviewStateSchema = z.object({
   id, status:z.enum(['connecting','loading','ready','error','closed']),
   url:z.string(), title:z.string().max(300), secure:z.boolean(),

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle webview-policy.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Adversarial navigation cases for the untrusted Moodle browser boundary. */
 import { describe, expect, it } from 'vitest';
 import { webviewPolicy, webviewNavigation, webviewResource, webviewLoginPage, webviewPermission, webviewFile, publicWebviewUrl, webviewLoadError } from './webview-policy';

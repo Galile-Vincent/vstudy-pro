@@ -1,3 +1,9 @@
+/**
+ * Own isolated login windows, one-time callback verification, and SSO cleanup.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import { log } from '../logging';
 import { tr } from '../../shared/i18n';
 import { isCallbackCandidate, verifyCallback } from './callback';
@@ -11,6 +17,7 @@ import type { MoodleSsoMode } from '../../shared/moodle';
 
 type Outcome = {kind:'success';tokens:MoodleTokens} | {kind:'error';error:MoodleAuthError};
 type Pending = {mode:MoodleSsoMode;cancel:(error:MoodleAuthError) => void};
+/** Retain only safe origin or scheme metadata from an SSO URL. */
 export function diagnosticUrl(target: string): {scheme:string;host?:string;port?:string} {
   try {
     const url = new URL(target);
@@ -29,6 +36,7 @@ function loadCode(code: unknown): string {
   return typeof code === 'string' && [...loadCodes.values()].includes(code) ? code : 'LOAD_FAILED';
 }
 
+/** Own one isolated login attempt and clean up listeners and sessions on every terminal path. */
 export class MoodleSso {
   private readonly pending = new Map<string,Pending>();
   private disposed = false;

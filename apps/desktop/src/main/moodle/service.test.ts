@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle service.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it, expect, vi, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { readFile, access, writeFile } from 'node:fs/promises';

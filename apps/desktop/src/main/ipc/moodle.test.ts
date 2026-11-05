@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for ipc moodle.
+ * Owned by main/ipc.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it, expect, vi } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';

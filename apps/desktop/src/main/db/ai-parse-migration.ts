@@ -1,3 +1,9 @@
+/**
+ * Define immutable SQL for ai parse persistence upgrades.
+ * Owned by main/db.
+ * Applied SQL remains immutable; repositories share one connection and use bound query values.
+ * @packageDocumentation
+ */
 export const aiParseMigration = `
 ALTER TABLE documents ADD COLUMN activeVersion TEXT NOT NULL DEFAULT 'original' CHECK(activeVersion IN ('original','ai'));
 ALTER TABLE documents ADD COLUMN aiSizeBytes INTEGER;

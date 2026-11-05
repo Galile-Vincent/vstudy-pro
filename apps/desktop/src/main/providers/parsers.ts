@@ -1,3 +1,9 @@
+/**
+ * Parse fixture-backed provider streams into validated application events.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { z } from "zod";
 import { cliModelUsage, extractUsage } from "./usage";
 import type { Usage, ChatEvent } from "../../shared/domain";
@@ -25,6 +31,7 @@ const wireEvent = z
   })
   .passthrough();
 export type ParserKind = "anthropic" | "openai" | "claude" | "codex";
+/** Translate one supported provider wire event into shared application events. */
 export function parseProviderEvent(
   kind: ParserKind,
   data: string,
@@ -64,6 +71,7 @@ export function parseProviderEvent(
   }
   return [];
 }
+/** Parse bounded stream records while preserving usage and terminal-event semantics. */
 export async function* parseStream(
   chunks: AsyncIterable<string>,
   kind: ParserKind,

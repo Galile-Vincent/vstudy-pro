@@ -1,3 +1,9 @@
+/**
+ * Register validated register IPC operations and delegate privileged work to main services.
+ * Owned by main/ipc.
+ * Request and response validation and sender ownership stay at the IPC boundary.
+ * @packageDocumentation
+ */
 import { enterStorageRequest } from "../storage/maintenance";
 import { MoodleAuthError } from '../moodle/auth';
 import { importError } from '../../shared/import-error';
@@ -14,6 +20,7 @@ export function channelPolicy(channel: string) {
   return { bytes: channel === 'chat:start' || channel === 'usage:estimate' ? 8 * 1024 * 1024 : 512 * 1024,
     requests: expensive ? 12 : channel === 'activity:heartbeat' ? 120 : 600, windowMs: 60_000 };
 }
+/** Validate sender, request, and response at one boundary before exposing a service operation. */
 export function createIpcRegistrar(
   ipc: Pick<IpcMain, "handle" | "removeHandler">,
   isTrusted: (event: IpcMainInvokeEvent) => boolean,

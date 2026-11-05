@@ -1,0 +1,5 @@
+
+> vstudy-pro@ typecheck-fast /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580
+> node apps/desktop/scripts/generate-locales.mjs && pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-e7c5c580/apps/desktop/src/shared/locales.generated.ts (17 namespaces).

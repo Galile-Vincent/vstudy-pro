@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for services chat.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { EventEmitter } from "node:events";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";

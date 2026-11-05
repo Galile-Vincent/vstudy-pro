@@ -1,3 +1,9 @@
+/**
+ * Register validated index IPC operations and delegate privileged work to main services.
+ * Owned by main/ipc.
+ * Request and response validation and sender ownership stay at the IPC boundary.
+ * @packageDocumentation
+ */
 import { registerPlannerIpc } from "./planner";
 import { registerStorageIpc } from "./storage";
 import { applyNativeTheme } from '../theme';
@@ -19,6 +25,7 @@ import { createIpcRegistrar } from "./register";
 import { registerDocumentsIpc } from "./documents";
 import { registerChatIpc } from "./chat";
 
+/** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerIpc(
   store: Store,
   secrets: SecretStore,

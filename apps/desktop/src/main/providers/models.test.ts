@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for providers models.
+ * Owned by main/providers.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from 'vitest';
 import codex from './fixtures/codex-models.json';
 import claude from './fixtures/claude-models.json';

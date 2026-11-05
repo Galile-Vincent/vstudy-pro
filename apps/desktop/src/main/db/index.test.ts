@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for db index.
+ * Owned by main/db.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { afterEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -9,7 +15,8 @@ import {
   documentSchema,
   messageSchema,
 } from "../../shared";
-import { openStore, migrations, type Store } from "./index";
+import { openStore, type Store } from "./index";
+import { migrations } from "./migrations";
 const stores: Store[] = [];
 const paths: string[] = [];
 afterEach(() => {

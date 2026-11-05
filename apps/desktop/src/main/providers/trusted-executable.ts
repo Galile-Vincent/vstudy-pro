@@ -1,9 +1,16 @@
+/**
+ * Resolve executable metadata and hashes from trusted installation directories.
+ * Owned by main/providers.
+ * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
+ * @packageDocumentation
+ */
 import { access, realpath, stat } from 'node:fs/promises';
 import { constants, createReadStream } from 'node:fs';
 import { dirname, isAbsolute, join } from 'node:path';
 import { homedir } from 'node:os';
 import { createHash } from 'node:crypto';
 export const installDirectories = () => [join(homedir(), '.local/bin'), '/opt/homebrew/bin', '/usr/local/bin', join(homedir(), '.claude/local'), join(homedir(), '.codex/bin')];
+/** Read executable file metadata without launching or hashing the binary. */
 export async function executableMetadata(path: string) {
   if (!isAbsolute(path)) throw new Error('Executable path must be absolute');
   const resolved = await realpath(path);
@@ -13,12 +20,14 @@ export async function executableMetadata(path: string) {
   await access(resolved, constants.X_OK);
   return { path: resolved, mtime: file.mtimeMs };
 }
+/** Hash a validated executable to detect changes that require confirmation. */
 export async function executableIdentity(path: string) {
   const metadata = await executableMetadata(path);
   const digest = createHash('sha256');
   for await (const chunk of createReadStream(metadata.path)) digest.update(chunk);
   return {...metadata,hash:digest.digest('hex')};
 }
+/** Search trusted installation directories without trusting inherited PATH. */
 export async function resolveInstalledExecutable(binary: string, directories = installDirectories()): Promise<string | null> {
   if (!/^[a-z0-9.]+$/i.test(binary)) return null;
   for (const directory of directories) {

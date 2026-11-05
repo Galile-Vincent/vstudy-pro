@@ -1,3 +1,9 @@
+/**
+ * Map Moodle course wire data into sanitized, bounded course content.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 import { z } from 'zod';
 import type { MoodleCourse, MoodleFile } from '../../shared/moodle';
 import type { MoodleCompletion, MoodleModuleKind, MoodleSection } from '../../shared/moodle-course';
@@ -7,6 +13,7 @@ import { moodleSectionSchema } from '../../shared/moodle-course';
 import { identityText } from './identity';
 import { remoteId } from './remote-id';
 
+/** Accept absolute HTTPS URLs without credentials and strip token or sesskey query parameters. */
 export function safeUrl(value?: string | null): string | null {
   try {
     const parsed = new URL(value ?? '');
@@ -15,6 +22,7 @@ export function safeUrl(value?: string | null): string | null {
     return parsed.href;
   } catch { return null; }
 }
+/** Remove active content and unsafe links before course HTML crosses the process boundary. */
 export function sanitizeCourseHtml(value?: string | null): string | null {
   if (!value) return null;
   const allowed = new Set(['p','br','div','span','strong','b','em','i','u','ul','ol','li','h1','h2','h3','h4','blockquote','pre','code','table','thead','tbody','tr','th','td','hr']);
@@ -25,6 +33,7 @@ const visible = z.union([z.boolean(),z.number(),z.string()]).nullish();
 const fileWire = z.object({type:z.string(),filename:z.string(),fileurl:z.string().nullish(),filesize:number.pipe(z.number().nonnegative()).nullish(),mimetype:z.string().nullish(),timemodified:number.nullish()}).passthrough();
 const moduleWire = z.object({id:number.pipe(z.number().positive()),name:z.string(),modname:z.string().nullish().transform(value => value ?? 'other'),description:z.string().nullish(),url:z.string().nullish(),visible,uservisible:visible,instance:number.nullish(),customdata:z.string().nullish(),contents:z.array(fileWire).nullish(),completiondata:z.object({state:number.nullish(),tracking:number.nullish()}).passthrough().nullish()}).passthrough();
 const sectionWire = z.object({id:number.pipe(z.number().positive()),name:z.string().nullish(),section:number.pipe(z.number().nonnegative()).nullish(),summary:z.string().nullish(),visible,uservisible:visible,highlighted:visible,current:visible,component:z.string().nullish(),itemid:number.nullish(),modules:z.array(z.unknown()).nullish()}).passthrough();
+/** Validate the complete contents response before mapping any section. */
 export function parseContentsWire(raw: unknown[], diagnostic: (issues:z.ZodIssue[],path:(string|number)[],raw:unknown)=>void) {
   return raw.flatMap((row,index) => {
     const section = sectionWire.safeParse(row);
@@ -40,10 +49,12 @@ export function parseContentsWire(raw: unknown[], diagnostic: (issues:z.ZodIssue
 export const contentsWire = z.array(z.unknown()).transform(raw => parseContentsWire(raw,(issues,path,row) => log({phase:'moodle-call',function:'core_course_get_contents',diagnostic:{kind:'validation',issues:issueDiagnostics(issues,path),shape:responseShape(row)}})));
 const isVisible = (value: unknown) => value !== false && value !== 0 && value !== '0';
 const isTrue = (value: unknown) => value === true || value === 1 || value === '1';
+/** Normalize Moodle completion fields to a stable application state. */
 export function completionState(state: number | null | undefined, tracking = 1): MoodleCompletion {
   if (!tracking || state == null) return 'none';
   return ({0:'incomplete',1:'complete',2:'pass',3:'fail'} as const)[state as 0|1|2|3] ?? 'none';
 }
+/** Map validated contents into normalized sections while preserving locked and hidden states. */
 export function parseCourseContents(raw: z.infer<typeof contentsWire>, course: MoodleCourse, now = new Date()) {
   const files: {url:string;value:MoodleFile}[] = [];
   const seen = new Set<number>();

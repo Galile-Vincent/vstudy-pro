@@ -1,3 +1,9 @@
+/**
+ * Run SQLite search in killable workers with a fixed timeout.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import type { EventEmitter } from 'node:events';
 import { utilityProcess } from 'electron';
 import { fork } from 'node:child_process';
@@ -5,11 +11,13 @@ import { join } from 'node:path';
 import type { IpcRequest, IpcResponse } from '../../shared/ipc';
 const searches = new Set<() => Promise<void>>();
 let stopped = false;
+/** Terminate and await all search workers before closing their underlying store. */
 export async function disposeSearchWorkers(): Promise<void> {
   stopped = true;
   await Promise.all([...searches].map(stop => stop()));
 }
 export const SEARCH_TIMEOUT = 'Search took too long; refine your query';
+/** Execute a bounded search in a killable process and reject when its deadline expires. */
 export function searchInWorker<C extends 'library:search' | 'library:documents:list'>(channel: C, request: IpcRequest<C>, path: string, root: string, timeoutMs = 1500, entry = join(__dirname, 'search-worker.js')): Promise<IpcResponse<C>> {
   if (stopped) return Promise.reject(new Error("Search service closed"));
   return new Promise((resolve, reject) => {

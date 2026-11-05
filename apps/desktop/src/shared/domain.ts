@@ -1,3 +1,9 @@
+/**
+ * Define validated document, conversation, provider, chat-event, and settings domain models.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 import { z } from "zod";
 import { materialRequestSchema } from "./planner";
 import { themePreferencesSchema } from './themes';
@@ -8,6 +14,7 @@ export const conversationIdSchema = z.string().uuid().brand<"ConversationId">();
 export const messageIdSchema = z.string().uuid().brand<"MessageId">();
 export const requestIdSchema = z.string().uuid().brand<"RequestId">();
 
+/** Exactly one document, course, or general context. Missing scope retains the legacy document form. */
 export const conversationScopeSchema = z.discriminatedUnion("scope", [
  z.object({ scope: z.literal("document").optional(), documentId: documentIdSchema }).strict(),
  z.object({ scope: z.literal("course"), courseId: z.string().uuid() }).strict(),
@@ -36,6 +43,7 @@ const documentFields = {
   markdownPath: z.string().min(1),
   createdAt: timestamp,
 };
+/** Conversion state controls whether an error is required; source paths remain main-owned. */
 export const documentSchema = z.discriminatedUnion("status", [
   z.object({ ...documentFields, status: z.literal("converting") }).strict(),
   z.object({ ...documentFields, status: z.literal("ready") }).strict(),
@@ -48,6 +56,7 @@ export const documentSchema = z.discriminatedUnion("status", [
     .strict(),
 ]);
 export type Document = z.infer<typeof documentSchema>;
+/** Allowed conversion transitions, including explicit re-conversion of a ready document. */
 export const documentTransitions: Record<
   Document["status"],
   readonly Document["status"][]
@@ -60,6 +69,7 @@ export type DocumentTransition =
   | { status: "ready"; converter?: "pdf_md" | "markitdown" }
   | { status: "failed"; error: string }
   | { status: "converting" };
+/** Apply only the allowed conversion state transitions and preserve failure invariants. */
 export function transitionDocument(
   document: Document,
   next: DocumentTransition,
@@ -71,6 +81,7 @@ export function transitionDocument(
   const fields = z.object(documentFields).parse(document);
   return documentSchema.parse({ ...fields, ...next });
 }
+/** Offsets refer to stored Markdown in the selected document version, not rendered DOM text. */
 export const selectionSchema = z
   .object({
     documentId: documentIdSchema,
@@ -98,11 +109,13 @@ const conversationFields = {
     options: modelOptionsSchema.optional(),
     createdAt: timestamp,
 };
+/** Creation input omits generated identity and timestamps but fixes provider, model, and context ownership. */
 export const conversationCreateSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
  conversationScopeSchema.options[1].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
  conversationScopeSchema.options[2].extend({providerId: providerIdSchema, modelId: conversationFields.modelId, options: modelOptionsSchema.optional()}),
 ]);
+/** Persisted conversation identity with exactly one context and optional model options. */
 export const conversationSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend(conversationFields),
  conversationScopeSchema.options[1].extend(conversationFields),
@@ -114,6 +127,7 @@ export const rateLimitSchema = z.object({
   remainingTokens: z.number().nonnegative().optional(), remainingRequests: z.number().nonnegative().optional(),
   resetsAt: z.string().datetime().optional(),
 }).strict();
+/** Normalized tokens and USD cost with an explicit reported, estimated, or unknown provenance. */
 export const usageSchema = z.object({
   inputTokens: z.number().int().nonnegative(), outputTokens: z.number().int().nonnegative(),
   cacheReadTokens: z.number().int().nonnegative().optional(), cacheWriteTokens: z.number().int().nonnegative().optional(),
@@ -123,6 +137,7 @@ export const usageSchema = z.object({
 export type Usage = z.infer<typeof usageSchema>;
 export const priceSchema = z.object({ input: z.number().finite().nonnegative(), output: z.number().finite().nonnegative(), cacheRead: z.number().finite().nonnegative(), cacheWrite: z.number().finite().nonnegative() }).strict();
 export type Price = z.infer<typeof priceSchema>;
+/** Persisted usage attribution; parse and general-chat usage may omit a document or conversation reference. */
 export const usageRecordSchema = usageSchema.extend({
   aborted: z.boolean().optional(),
   id: z.string().uuid(), createdAt: timestamp, providerId: providerIdSchema, modelId: z.string().min(1).max(300),
@@ -154,10 +169,12 @@ export const toolCallSchema = z.object({
   args: z.record(z.unknown()), result: z.unknown().optional(), isError: z.boolean().optional(),
 }).strict();
 export type ToolCall = z.infer<typeof toolCallSchema>;
+/** Persisted content and turn metadata, including abort state and context exclusion. */
 export const messagePartSchema = z
   .object({ type: z.literal("text"), text: z.string(), proposals: z.array(moodleAgentActionSchema).max(5).optional(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .extend({ contextExcluded: z.boolean().optional() })
   .strict();
+/** Validated stored message parts; model and selection metadata stay associated with their original turn. */
 export const messageSchema = z
   .object({
     id: messageIdSchema,
@@ -168,6 +185,7 @@ export const messageSchema = z
   })
   .strict();
 export type Message = z.infer<typeof messageSchema>;
+/** Provider configuration deliberately excludes API keys and CLI login credentials. */
 export const providerConfigSchema = z.discriminatedUnion("kind", [
   z
     .object({
@@ -207,12 +225,14 @@ const chatFields = {
     turnId: z.string().max(200).optional(),
     contextTurnIds: z.array(z.string().max(200)).max(10000).optional(),
 };
+/** Bounded chat input whose scope and selected documents must be checked against live main-owned records. */
 export const chatRequestSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[0].extend({...chatFields, selection: selectionSchema.optional()}),
  conversationScopeSchema.options[1].extend({...chatFields, materials: materialRequestSchema.optional()}),
  conversationScopeSchema.options[2].extend(chatFields),
 ]).refine(r => r.scope === "course" || r.scope === "general" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
+/** Validated stream events; terminal state and request ownership are enforced by the chat service. */
 export const chatEventSchema = z.discriminatedUnion("type", [
  z.object({type: z.literal("proposals"), actions: z.array(moodleAgentActionSchema).max(5)}).strict(),
   z.object({ type: z.literal("reasoning-delta"), text: z.string().max(2_000_000) }).strict(),
@@ -224,6 +244,7 @@ export const chatEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("error"), message: z.string(), code:z.string().max(100).optional(), params:z.record(z.union([z.string(),z.number()])).optional() }).strict(),
 ]);
 export type ChatEvent = z.infer<typeof chatEventSchema>;
+/** Complete persisted settings with defaults that migrate older records on read. */
 export const settingsSchema = z
   .object({
     ...themePreferencesSchema.shape,

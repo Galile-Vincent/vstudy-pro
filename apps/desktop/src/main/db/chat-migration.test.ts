@@ -1,9 +1,16 @@
+/**
+ * Regression coverage for db chat-migration.
+ * Owned by main/db.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import {DatabaseSync} from 'node:sqlite';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {expect,it} from 'vitest';
-import {migrations,openStore} from './index';
+import { openStore } from './index';
+import { migrations } from './migrations';
 it('adds nullable branch links to a version-six database without losing existing messages', () => {
  const directory=mkdtempSync(join(tmpdir(),'vstudy-chat-migration-'));
  const path=join(directory,'db.sqlite');

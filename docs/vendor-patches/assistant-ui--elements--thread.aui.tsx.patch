@@ -1,17 +1,16 @@
 --- a/apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx
 +++ b/apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx
-@@ -1,5 +1,10 @@
+@@ -1,4 +1,9 @@
 -"use client";
- 
++
 +
 +
 +
 +import { useTranslation } from "react-i18next";
 +import { tr } from '../../../../shared/i18n';
-+
+ 
  import {
    ComposerAddAttachment,
-   ComposerAttachments,
 @@ -23,6 +28,8 @@
    ToolGroupTrigger,
  } from "@/components/assistant-ui/elements/tool-group.aui";
@@ -50,9 +49,9 @@
  import {
    createContext,
    useContext,
--  useLayoutEffect,
-   useRef,
-+  useLayoutEffect,
++  useRef,
+   useLayoutEffect,
+-  useRef,
    useState,
    type ComponentType,
    type FC,
@@ -151,15 +150,25 @@
    const { AssistantMessage: AssistantMessageComponent = AssistantMessage } =
      useContext(ThreadComponentsContext);
    const role = useAuiState((s) => s.message.role);
-@@ -313,6 +336,7 @@
+@@ -313,7 +336,9 @@
  );
  
  const SpokenMessage: FC = () => {
 +  useTranslation();
    const role = useAuiState((s) => s.message.role);
++  const historyMessageId = useAuiState(s => s.message.id);
    const position = useVoiceRunPosition();
    const isSpeaking = useAuiState(
-@@ -340,7 +364,7 @@
+     (s) =>
+@@ -325,6 +350,7 @@
+     <MessagePrimitive.Root
+       data-slot="aui_spoken-message-root"
+       data-role={role}
++      data-message-id={historyMessageId}
+       data-voice-run={position}
+       className={cn(
+         "aui-spoken-message bg-muted/40 mx-2 px-3 py-1.5 [contain-intrinsic-size:auto_48px] [content-visibility:auto]",
+@@ -340,7 +366,7 @@
            className="text-muted-foreground mb-1.5 flex items-center gap-1.5 text-xs"
          >
            <PhoneIcon className="size-3" aria-hidden />
@@ -168,7 +177,7 @@
          </div>
        )}
        <div
-@@ -355,7 +379,7 @@
+@@ -355,7 +381,7 @@
            )}
          </span>
          <span className="sr-only">
@@ -177,7 +186,7 @@
          </span>
          <div className="min-w-0 flex-1 wrap-break-word">
            <MessagePrimitive.Parts components={{ Text: SpokenText }} />
-@@ -364,7 +388,7 @@
+@@ -364,7 +390,7 @@
                data-slot="aui_spoken-message-indicator"
                role="status"
                className="text-muted-foreground ms-1 animate-pulse font-sans"
@@ -186,7 +195,7 @@
              >
                ●
              </span>
-@@ -377,6 +401,7 @@
+@@ -377,6 +403,7 @@
  };
  
  const SpokenActionBar: FC = () => {
@@ -194,7 +203,7 @@
    return (
      <ActionBarPrimitive.Root
        hideWhenRunning
-@@ -384,7 +409,7 @@
+@@ -384,7 +411,7 @@
        className="aui-spoken-action-bar text-muted-foreground flex shrink-0 gap-1"
      >
        <ActionBarPrimitive.Copy asChild>
@@ -203,7 +212,7 @@
            <AuiIf condition={(s) => s.message.isCopied}>
              <CheckIcon className="animate-in zoom-in-50 fade-in duration-200 ease-out" />
            </AuiIf>
-@@ -415,6 +440,7 @@
+@@ -415,6 +442,7 @@
  };
  
  const ThreadLoadEarlier: FC = () => {
@@ -211,7 +220,7 @@
    const visible = useAuiState(
      (s) => s.thread.hasEarlier || s.thread.isLoadingEarlier,
    );
-@@ -443,7 +469,7 @@
+@@ -443,7 +471,7 @@
        }}
      >
        <span role="status" className="sr-only">
@@ -220,7 +229,7 @@
        </span>
        {visible && (
          <ThreadPrimitive.LoadEarlier asChild>
-@@ -456,7 +482,7 @@
+@@ -456,7 +484,7 @@
              <span
                className={cn(loading && "shimmer motion-reduce:animate-none")}
              >
@@ -229,7 +238,7 @@
              </span>
            </Button>
          </ThreadPrimitive.LoadEarlier>
-@@ -466,10 +492,11 @@
+@@ -466,10 +494,11 @@
  };
  
  const ThreadScrollToBottom: FC = () => {
@@ -242,7 +251,7 @@
          variant="outline"
          className="aui-thread-scroll-to-bottom dark:border-border dark:bg-background dark:hover:bg-accent absolute -top-12 z-10 self-center rounded-full p-4 disabled:invisible"
        >
-@@ -480,16 +507,19 @@
+@@ -480,16 +509,19 @@
  };
  
  const ThreadWelcome: FC = () => {
@@ -264,7 +273,7 @@
    return (
      <div className="aui-thread-welcome-suggestions flex w-full flex-col">
        <ThreadPrimitive.Suggestions>
-@@ -500,6 +530,7 @@
+@@ -500,6 +532,7 @@
  };
  
  const ThreadSuggestionItem: FC = () => {
@@ -272,15 +281,16 @@
    return (
      <div className="aui-thread-welcome-suggestion-display fade-in slide-in-from-bottom-2 animate-in fill-mode-both duration-200">
        <SuggestionPrimitive.Trigger send asChild>
-@@ -524,22 +555,28 @@
+@@ -524,22 +557,28 @@
  };
  
  const Composer: FC<{ autoFocus: boolean }> = ({ autoFocus }) => {
+-  return (
+-    <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col">
 +  useTranslation();
 +  const { ComposerPrefix, ComposerBanner, ComposerInput, useComposerBindings } = useContext(ThreadComponentsContext);
 +  const bindings = useComposerBindings?.();
-   return (
--    <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col">
++  return (
 +    <ComposerPrimitive.Root onSubmitCapture={bindings?.onSubmitCapture} className="aui-composer-root relative flex w-full flex-col">
        <ComposerPrimitive.AttachmentDropzone asChild>
          <div
@@ -305,7 +315,7 @@
            <ComposerAction />
          </div>
        </ComposerPrimitive.AttachmentDropzone>
-@@ -548,7 +585,9 @@
+@@ -548,7 +587,9 @@
  };
  
  const ComposerAction: FC = () => {
@@ -316,7 +326,7 @@
    // The stop control only cancels the send while no run it could stop is going.
    const isSending = useAuiState(
      (s) =>
-@@ -560,24 +599,24 @@
+@@ -560,24 +601,24 @@
      <div className="aui-composer-action-wrapper relative flex items-center justify-between">
        {ComposerExtra ? (
          <div className="aui-composer-action-start flex items-center gap-1.5">
@@ -345,7 +355,7 @@
                >
                  <MicIcon className="aui-composer-dictate-icon size-4" />
                </TooltipIconButton>
-@@ -586,13 +625,13 @@
+@@ -586,13 +627,13 @@
            <AuiIf condition={(s) => s.composer.dictation != null}>
              <ComposerPrimitive.StopDictation asChild>
                <TooltipIconButton
@@ -361,7 +371,7 @@
                >
                  <SquareIcon className="aui-composer-stop-dictation-icon size-3.5 animate-pulse fill-current" />
                </TooltipIconButton>
-@@ -607,15 +646,15 @@
+@@ -607,15 +648,15 @@
              !shouldShowComposerResume(s)
            }
          >
@@ -380,7 +390,7 @@
              >
                <ArrowUpIcon className="aui-composer-send-icon size-4" />
              </TooltipIconButton>
-@@ -624,13 +663,13 @@
+@@ -624,13 +665,13 @@
          <AuiIf condition={shouldShowComposerResume}>
            <ComposerPrimitive.Resume asChild>
              <TooltipIconButton
@@ -396,7 +406,7 @@
              >
                <PlayIcon className="aui-composer-resume-icon size-4" />
              </TooltipIconButton>
-@@ -643,13 +682,13 @@
+@@ -643,13 +684,13 @@
                s.composer.submission !== undefined)
            }
          >
@@ -412,7 +422,7 @@
              >
                <SquareIcon className="aui-composer-cancel-icon size-3.5 fill-current" />
              </Button>
-@@ -661,21 +700,28 @@
+@@ -661,21 +702,29 @@
  };
  
  const MessageError: FC = () => {
@@ -431,6 +441,7 @@
  
  const AssistantMessage: FC = () => {
 +  useTranslation();
++  const historyMessageId = useAuiState(s => s.message.id);
    const {
      ToolFallback: ToolFallbackComponent = ToolFallback,
      ToolGroup,
@@ -442,7 +453,7 @@
    } = useContext(ThreadComponentsContext);
    const groupBy = TaskGroupComponent ? taskAwareGroupBy : messageGroupBy;
  
-@@ -686,8 +732,10 @@
+@@ -686,8 +735,11 @@
    return (
      <MessagePrimitive.Root
        data-slot="aui_assistant-message-root"
@@ -450,11 +461,12 @@
 +      aria-label={tr("common:chat_author_assistant")}
        data-role="assistant"
 -      className="fade-in slide-in-from-bottom-1 animate-in relative -mb-7.5 pb-7.5 duration-150 [contain-intrinsic-size:auto_200px] [content-visibility:auto]"
++      data-message-id={historyMessageId}
 +      className="fade-in slide-in-from-bottom-1 animate-in relative -mb-7.5 pb-7.5 duration-150"
      >
        <div
          data-slot="aui_assistant-message-content"
-@@ -729,11 +777,13 @@
+@@ -729,11 +781,13 @@
                  );
                }
                case "text":
@@ -469,7 +481,7 @@
                case "data":
                  return part.dataRendererUI;
                case "file":
-@@ -749,28 +799,21 @@
+@@ -749,28 +803,21 @@
                    </div>
                  );
                case "indicator":
@@ -501,7 +513,7 @@
          <AssistantActionBar />
        </div>
      </MessagePrimitive.Root>
-@@ -778,26 +821,19 @@
+@@ -778,26 +825,19 @@
  };
  
  const AssistantActionBar: FC = () => {
@@ -532,7 +544,7 @@
              className="data-[submitted=true]:bg-accent data-[submitted=true]:text-accent-foreground"
            >
              <ThumbsUpIcon />
-@@ -805,7 +841,7 @@
+@@ -805,7 +845,7 @@
          </ActionBarPrimitive.FeedbackPositive>
          <ActionBarPrimitive.FeedbackNegative asChild>
            <TooltipIconButton
@@ -541,7 +553,7 @@
              className="data-[submitted=true]:bg-accent data-[submitted=true]:text-accent-foreground"
            >
              <ThumbsDownIcon />
-@@ -813,14 +849,16 @@
+@@ -813,14 +853,16 @@
          </ActionBarPrimitive.FeedbackNegative>
        </AuiIf>
        <ActionBarPrimitive.Reload asChild>
@@ -560,7 +572,7 @@
              className="data-[state=open]:bg-accent"
            >
              <MoreHorizontalIcon />
-@@ -835,8 +873,7 @@
+@@ -835,8 +877,7 @@
            <ActionBarPrimitive.ExportMarkdown asChild>
              <ActionBarMorePrimitive.Item className="aui-action-bar-more-item hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm outline-none select-none">
                <DownloadIcon className="size-4" />
@@ -570,7 +582,7 @@
            </ActionBarPrimitive.ExportMarkdown>
          </ActionBarMorePrimitive.Content>
        </ActionBarMorePrimitive.Root>
-@@ -845,6 +882,7 @@
+@@ -845,6 +886,7 @@
  };
  
  const MessageFile: FileMessagePartComponent = (part) => {
@@ -578,11 +590,12 @@
    const image = part.mimeType.toLowerCase().startsWith("image/")
      ? getFileHref(part.data, part.mimeType, part.sourceType)
      : null;
-@@ -872,16 +910,21 @@
+@@ -872,16 +914,23 @@
  );
  
  const UserMessage: FC = () => {
 +  useTranslation();
++  const historyMessageId = useAuiState(s => s.message.id);
 +  const { UserMessagePrefix } = useContext(ThreadComponentsContext);
    return (
      <MessagePrimitive.Root
@@ -592,6 +605,7 @@
 +      role="article"
 +      aria-label={tr("common:chat_author_you")}
        data-role="user"
++      data-message-id={historyMessageId}
      >
        <UserMessageAttachments />
  
@@ -601,7 +615,7 @@
            <MessagePrimitive.Parts
              components={{ File: UserFilePart, Image: UserImagePart }}
            />
-@@ -891,15 +934,13 @@
+@@ -891,15 +940,13 @@
          </div>
        </div>
  
@@ -619,7 +633,7 @@
    return (
      <ActionBarPrimitive.Root
        hideWhenRunning
-@@ -907,7 +948,7 @@
+@@ -907,7 +954,7 @@
        className="aui-user-action-bar-root flex flex-col items-end"
      >
        <ActionBarPrimitive.Edit asChild>
@@ -628,7 +642,7 @@
            <PencilIcon />
          </TooltipIconButton>
        </ActionBarPrimitive.Edit>
-@@ -916,26 +957,26 @@
+@@ -916,26 +963,26 @@
  };
  
  const EditComposer: FC = () => {
@@ -660,7 +674,7 @@
            </ComposerPrimitive.Send>
          </div>
        </ComposerPrimitive.Root>
-@@ -943,32 +984,3 @@
+@@ -943,32 +990,3 @@
    );
  };
  

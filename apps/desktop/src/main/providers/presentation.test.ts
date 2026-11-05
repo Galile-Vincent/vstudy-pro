@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for providers presentation.
+ * Owned by main/providers.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it,expect } from 'vitest';
 import { createApiAdapter } from './api';
 import { chatRequestSchema } from '../../shared';

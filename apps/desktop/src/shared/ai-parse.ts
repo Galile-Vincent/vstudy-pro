@@ -1,3 +1,9 @@
+/**
+ * Define validated AI conversion requests, estimates, progress, and persisted page state.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 import { z } from 'zod';
 import { documentIdSchema, providerIdSchema, modelOptionsSchema } from './domain';
 export const aiParseOptionsSchema = z.object({ concurrency:z.number().int().min(1).max(4).default(2), hardCapUsd:z.number().positive().max(100).optional(), confirmBudgetOverride:z.boolean().default(false), modelOptions:modelOptionsSchema.default({}) }).strict();

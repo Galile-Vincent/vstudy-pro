@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for themes themes.
+ * Owned by shared/themes.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Theme validation and migration tests exercise externally visible settings guarantees. */
 import { describe, it, expect } from 'vitest';
 import { settingsSchema, defaultSettings } from '../domain';

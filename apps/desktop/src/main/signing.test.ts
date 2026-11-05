@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for signing.
+ * Owned by main.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import {expect,it} from 'vitest';
 import {spawnSync} from 'node:child_process';
 it('fails before building when a signing identity is missing', () => {

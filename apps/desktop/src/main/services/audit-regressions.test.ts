@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for services audit-regressions.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from 'vitest';
 import { DropTokens } from './drop-tokens';
 import { indexedText, validateSearchQuery } from './search';

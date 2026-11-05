@@ -1,3 +1,10 @@
+/**
+ * Drain asynchronous work before closing shared resources and exiting Electron.
+ * Owned by main.
+ * Main owns privileged resources; shutdown must settle work before releasing those resources.
+ * @packageDocumentation
+ */
+/** Join repeated quit requests and force exit only when ordered cleanup fails or exceeds its deadline. */
 export function coordinateShutdown(phases: {
   stopWork(): Promise<void>;
   flush(): void;

@@ -14,9 +14,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/attachment.aui.tsx",
       "registrySha256": "ec4275215b826173f428ec95b94e150b4ca21124f9094eec8a28dbd87033710d",
-      "patchedSha256": "3c3d24b01cbedec4a184a678f762f8c08244c9c79f46f3cef6634a3136cecd54",
+      "patchedSha256": "7909377c582b63af8b119284a2da63481491c49aa676242466c32121f81a9eb6",
       "patch": "docs/vendor-patches/assistant-ui--elements--attachment.aui.tsx.patch",
-      "reason": "Translate vendor labels, including attachment type and upload status, through the existing locale catalogs; preserve vendor interaction and layout."
+      "reason": "Use semantic theme colors for attachment controls while preserving localized labels and attachment policy."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/collapsible-root.tsx",
@@ -103,17 +103,23 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/reasoning.tsx",
       "registrySha256": "02c42a1cad5fd56f4479fe65c779e9f9934c03a6e935ac92ebf98cbb46ef3cc7",
-      "patchedSha256": "8896f424d037181c7a8eba64bc85a2eb612615d8d455408d7a982a0cbda014db",
+      "patchedSha256": "73d1bc537da871e31b882f830cf6b62cf6f58c1768eeb1b7763274e2f7dbea56",
       "patch": "docs/vendor-patches/assistant-ui--elements--reasoning.tsx.patch",
-      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+      "reason": "Use tonal reasoning rows and semantic theme colors while preserving translated state labels."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/sources.aui.tsx",
-      "registrySha256": "032a55cdcb9e9067c10667c21f09f4d17efdd1ca4bba58c8e11601f50480b354"
+      "registrySha256": "032a55cdcb9e9067c10667c21f09f4d17efdd1ca4bba58c8e11601f50480b354",
+      "patchedSha256": "03539776b22ada18786655e03ee7ae92aaba2f0465ffae160a49bd3880559a7e",
+      "patch": "docs/vendor-patches/assistant-ui--elements--sources.aui.tsx.patch",
+      "reason": "Use tonal source cards and semantic theme colors without changing source actions."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/suggestions.tsx",
-      "registrySha256": "6cc8d4e06028e9c3f3c233d57efc4f4960b473d3c8fa2930ace56d6e7835c99c"
+      "registrySha256": "6cc8d4e06028e9c3f3c233d57efc4f4960b473d3c8fa2930ace56d6e7835c99c",
+      "patchedSha256": "3f620b723c3f3107bbb4d914ee9ae4917ca1fac302ba0f5ad5b1a9331534d38e",
+      "patch": "docs/vendor-patches/assistant-ui--elements--suggestions.tsx.patch",
+      "reason": "Wrap suggestion labels for long translations and use semantic theme colors."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/surfaces.tsx",
@@ -133,9 +139,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx",
       "registrySha256": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da",
-      "patchedSha256": "b698234661aa6e2769c5d1a385b3facaebc28de30d177e06e76327a282f134e0",
+      "patchedSha256": "25cf2f48a8c0fbd68240a1c0aa14a8a012e7aebc6f08065eb3a385f809061610",
       "patch": "docs/vendor-patches/assistant-ui--elements--thread.aui.tsx.patch",
-      "reason": "Add composition slots for app-owned document selection, usage/budget guard, IME input, safe Markdown, citations, clipboard and announcements; translate labels; omit unsupported durable branch switching. Styling stays upstream. The one-line standalone presentation-table grouping exception is application-specific; it can move out when upstream exposes a grouping slot. Preserve localized error categories so recovery guidance remains specific to rate limits, authentication and provider availability."
+      "reason": "Retain localized composition slots, validated presentation grouping, app-owned chat controls, and message IDs for history navigation; apply semantic theme colors."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-approval-questions.tsx",
@@ -154,7 +160,10 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-group.aui.tsx",
-      "registrySha256": "757caf28ee232d4f500c8af7d6837fe7d6d2b144774a6a0bcdaff8c0c517bd9e"
+      "registrySha256": "757caf28ee232d4f500c8af7d6837fe7d6d2b144774a6a0bcdaff8c0c517bd9e",
+      "patchedSha256": "04b1ddf84898ac0b96340a7a5eb698060e60245c6f342a55143b3e49d4aa4363",
+      "patch": "docs/vendor-patches/assistant-ui--elements--tool-group.aui.tsx.patch",
+      "reason": "Use tonal tool groups and semantic theme colors while retaining existing interactions."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tooltip-icon-button.tsx",
@@ -162,7 +171,10 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/generative-ui.css",
-      "registrySha256": "f9408bde84aea14f9b27a9d36abf24b81109a869304af08b93219177ae878ba2"
+      "registrySha256": "f9408bde84aea14f9b27a9d36abf24b81109a869304af08b93219177ae878ba2",
+      "patchedSha256": "87e84a7a03136fb00e9929f30c895fe59be84c8cfd722789cfecad3cb67a66c8",
+      "patch": "docs/vendor-patches/assistant-ui--generative-ui.css.patch",
+      "reason": "Apply semantic theme tokens and tonal styling to optional generated presentation elements."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/utils/href.ts",
@@ -183,9 +195,9 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/alert-dialog.tsx",
       "registrySha256": "e68ead222534ebb6cefe5ca6cfdcd42f1a7851e96eff0074306cf51454826570",
-      "patchedSha256": "003810dd96fa9b29b83562d04cb14687e12b53e68ae6ddb9db07582ea089807f",
+      "patchedSha256": "9de72d68090ff548ffaba69cfee01ad6812460e4e0493c99b5b8fea52ec561c4",
       "patch": "docs/vendor-patches/ui--alert-dialog.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
+      "reason": "Use the local cn helper and semantic theme colors for tonal dialog controls."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/avatar.tsx",
@@ -196,28 +208,31 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/badge.tsx",
-      "registrySha256": "d8386d947b8a8c6d965de680503e6af5ed66068cd61b4d9ecc722a4cee1d6ffc"
+      "registrySha256": "d8386d947b8a8c6d965de680503e6af5ed66068cd61b4d9ecc722a4cee1d6ffc",
+      "patchedSha256": "e9908fa7ebf536aa860fadeec29fb8dbd5ed61f7f9bd1ea6fc41d046bceb503a",
+      "patch": "docs/vendor-patches/ui--badge.tsx.patch",
+      "reason": "Use semantic theme colors for badge states."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/button.tsx",
       "registrySha256": "79dd6f75f8136394442202d6b8b922fb269eaad0a5dba579397c9d5b41f893bb",
-      "patchedSha256": "557e27d5d3159c338da761c5aec138dcd32d313b5a55774ea8001c3f3bfc620c",
+      "patchedSha256": "6bda08e1ce580d7aeaba64120a638975b840f67a03e2023dc0b3cd068dcd7af2",
       "patch": "docs/vendor-patches/ui--button.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
+      "reason": "Use the local cn helper and semantic theme colors for tonal button states."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/card.tsx",
       "registrySha256": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059",
-      "patchedSha256": "39480d5b63e46554f1cfcedaa91052c848bda5c45d7a5dda80fe91e7be604fb0",
+      "patchedSha256": "b8e6dbae3605e13cda623e495657d17bb56cb37fa29ba41ae40662bab586592d",
       "patch": "docs/vendor-patches/ui--card.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
+      "reason": "Use the local cn helper and semantic theme colors for tonal card surfaces."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/checkbox.tsx",
       "registrySha256": "d3da4d7c35a3e3ebc80724fca69407e892127851d3c89d707ae1cc0d4d13dfb6",
-      "patchedSha256": "6b11e8c6c0898ab3c8b8e248cab30f12e1f3db69663c7d1293298c46bca5fc9c",
+      "patchedSha256": "9b09bfa4425d410dd854e43d6143d84dbd0d31472feb5a053f87e5868c6edc7b",
       "patch": "docs/vendor-patches/ui--checkbox.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
+      "reason": "Use the local cn helper and semantic theme colors for checkbox states."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/command.tsx",
@@ -236,9 +251,9 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/dialog.tsx",
       "registrySha256": "0d2e82ed5e7040abda714a0471aff54535e05bad6249da049cc0c3bf3ae024e5",
-      "patchedSha256": "9e3076edb0d8349806572c868134af3e7e4753e580a303124bedc6cf59457837",
+      "patchedSha256": "838213cdfc466ccdf4f2fe94a2f4daf611cc206be5c0f2b54de48565fa7f4f6c",
       "patch": "docs/vendor-patches/ui--dialog.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility. Translate accessible labels."
+      "reason": "Use the local cn helper, localized accessible labels, and semantic theme colors."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/dropdown-menu.tsx",
@@ -292,9 +307,9 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/sheet.tsx",
       "registrySha256": "7e4e3e2a5976ad75c1e0f63624fb3748ad84b27ca1ec85c0a6d33e6f300dc80d",
-      "patchedSha256": "f85d549c986492dcbcdf89367686dc78d1ca2bf96b0a7cd3153fd8a08438b35a",
+      "patchedSha256": "daebae471ad1bac14d8825d884318c35a55b67314072d1b57b89badc419ae824",
       "patch": "docs/vendor-patches/ui--sheet.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility. Translate accessible labels."
+      "reason": "Use the local cn helper, localized accessible labels, and semantic theme colors."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/sidebar.tsx",
@@ -366,6 +381,13 @@
     {
       "path": "apps/desktop/src/renderer/hooks/use-mobile.ts",
       "registrySha256": "ad0936f84f1df79d3697bfbff9c18f8ad58431c1cbaf2359c6a853b0fcc9f28b"
+    }
+  ],
+  "applicationFiles": [
+    {
+      "path": "apps/desktop/src/renderer/components/assistant-ui/elements/suggestions.test.tsx",
+      "sha256": "f2edc0a196fb9513547ebf2fde9028c25d8d4e0c0445f1fe01a260068c11624f",
+      "reason": "Application-authored regression test for wrapping long suggestion labels; no upstream source exists."
     }
   ]
 }

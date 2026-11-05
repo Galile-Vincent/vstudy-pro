@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for services ai-parse.
+ * Owned by main/services.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it,expect } from 'vitest';
 import { mkdtemp,writeFile,readFile,rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';

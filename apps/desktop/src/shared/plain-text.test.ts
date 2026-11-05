@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for plain-text.
+ * Owned by shared.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import {expect,it} from 'vitest';
 import {plainText} from './plain-text';
 import type {DocumentCitation} from './domain';

@@ -1,3 +1,9 @@
+/**
+ * Define response-cache tables and lookup indexes for schema version 19.
+ * Owned by main/cache.
+ * Cache entries are account-scoped; stale data never implies a successful refresh.
+ * @packageDocumentation
+ */
 /** Bounded remote response cache and indexes for dependent Moodle lookups and cascades. */
 export const storageMigration = `
 CREATE TABLE moodle_response_cache (

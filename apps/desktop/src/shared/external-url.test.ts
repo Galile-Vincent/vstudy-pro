@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for external-url.
+ * Owned by shared.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from "vitest";
 import { ipcContract, externalUrlSchema } from "./ipc";
 

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for db migrate.
+ * Owned by main/db.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Every released schema must upgrade without losing existing records or mutating its backup. */
 import { expect, it } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
@@ -5,7 +11,7 @@ import { mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { migrate, migrationChecksum } from './migrate';
-import { migrations } from './index';
+import { migrations } from './migrations';
 it.each(migrations.map(m => m.version))('dry-runs an upgrade from historical version %s', version => {
   const db = new DatabaseSync(':memory:');
   try {

@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for planner context.
+ * Owned by main/planner.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { afterEach, expect, it } from "vitest";
 import { budgetContext, buildPlanningContext, CourseContextCache } from "./context";
 import { id, now, seedStudent, studentDetail, task } from "./__fixtures__/student";

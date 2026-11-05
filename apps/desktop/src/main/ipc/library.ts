@@ -1,3 +1,9 @@
+/**
+ * Register validated library IPC operations and delegate privileged work to main services.
+ * Owned by main/ipc.
+ * Request and response validation and sender ownership stay at the IPC boundary.
+ * @packageDocumentation
+ */
 import { storageBusy } from "../storage/maintenance";
 import { searchInWorker } from '../services/search-runner';
 import { documentIdSchema } from '../../shared/domain';
@@ -11,6 +17,7 @@ import type { createIpcRegistrar } from './register';
 import { LibraryService, containedPath } from '../services/library';
 import { ActivityService } from '../services/activity';
 import { getDashboard } from '../services/dashboard';
+/** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>, deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(), resume: (id: import("../../shared/domain").Document["id"]) => void = () => {}) {
     const library = new LibraryService(store, join(app.getPath('userData'), 'library')), activity = new ActivityService(store);
     const startup=library.search.rebuild().catch(()=>{console.error("Search rebuild deferred until next startup");});

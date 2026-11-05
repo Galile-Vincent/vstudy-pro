@@ -1,11 +1,19 @@
+/**
+ * Reject unsafe signatures, archive entries, links, and text encodings before conversion.
+ * Owned by main/services.
+ * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
+ * @packageDocumentation
+ */
 import { lstat, readFile } from "node:fs/promises";
 import { readFileSync, lstatSync } from 'node:fs';
+/** Validate file signatures and archive declarations before staging conversion. */
 export function validateImport(path: string, extension: string) {
     if (!lstatSync(path).isFile() || lstatSync(path).isSymbolicLink() || lstatSync(path).nlink !== 1)
         throw new Error('Symlink imports are not allowed');
     if (lstatSync(path).size > 50 * 1024 * 1024) throw new Error("Document exceeds 50 MiB");
     validateImportBytes(readFileSync(path), extension);
 }
+/** Validate imports through the asynchronous IO boundary with the same file policy. */
 export async function validateImportAsync(path: string, extension: string): Promise<void> {
     const info = await lstat(path);
     if (!info.isFile() || info.nlink !== 1) throw new Error("Symlink imports are not allowed");
@@ -64,6 +72,7 @@ function validateImportBytes(data: Buffer, extension: string): void {
     }
 }
 
+/** Recognize supported text encodings and reject binary content masquerading as text. */
 export function sniffTextEncoding(data: Uint8Array): string {
     const sample = data.subarray(0, 64 * 1024);
     if (sample[0] === 0xff && sample[1] === 0xfe) return 'UTF-16LE';

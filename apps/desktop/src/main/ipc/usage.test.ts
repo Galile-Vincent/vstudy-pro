@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for ipc usage.
+ * Owned by main/ipc.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect,it,vi } from 'vitest';
 import type { IpcMainInvokeEvent } from 'electron';
 import { openStore } from '../db';

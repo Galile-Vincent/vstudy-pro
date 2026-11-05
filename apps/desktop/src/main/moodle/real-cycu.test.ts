@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle real-cycu.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import {readFileSync} from 'node:fs';
 import {expect,it} from 'vitest';
 import {parseCourseIdentity,courseLifecycle,applyAuthoritativeTeachers} from './identity';

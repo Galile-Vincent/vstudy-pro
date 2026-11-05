@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for storage atomic.
+ * Owned by main/storage.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 /** Atomic publication and startup cleanup preserve committed bytes and user originals. */
 import { expect, it, vi } from 'vitest';
 import { mkdtemp, readFile, mkdir, writeFile, readdir, rm, symlink } from 'node:fs/promises';

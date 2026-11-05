@@ -1,3 +1,9 @@
+/**
+ * Classify Moodle webview navigation, resources, login pages, and file destinations.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 /** Pure URL and permission rules shared by navigation, resource filtering, downloads, and clipboard output. */
 import { networkUrl } from './site-url';
 
@@ -7,6 +13,7 @@ export interface WebviewPolicy {
   resourceOrigins: ReadonlySet<string>;
   loopback: boolean;
 }
+/** Build the navigation policy for one verified account and target. */
 export function webviewPolicy(siteUrl: string, configured: {ssoOrigins?:string[];cdnOrigins?:string[];loopback?:boolean} = {}): WebviewPolicy {
   const loopback = configured.loopback === true;
   const parse = (value:string) => loopback && /^http:\/\/127\.0\.0\.1:\d+(?:\/|$)/.test(value) ? new URL(value) : networkUrl(value);
@@ -14,6 +21,7 @@ export function webviewPolicy(siteUrl: string, configured: {ssoOrigins?:string[]
   const navigationOrigins = new Set([site.origin,...(configured.ssoOrigins ?? []).map(value => parse(value).origin)]);
   return {site,navigationOrigins,resourceOrigins:new Set([...navigationOrigins,...(configured.cdnOrigins ?? []).map(value => parse(value).origin)]),loopback};
 }
+/** Resolve a target URL before applying the account navigation policy. */
 export function normalizeWebviewUrl(input: string, policy: WebviewPolicy): URL | null {
   if (!input || input.length > 8192 || [...input].some(char => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127 || char === '\\')) return null;
   try {
@@ -26,6 +34,7 @@ export function normalizeWebviewUrl(input: string, policy: WebviewPolicy): URL |
     return url;
   } catch { return null; }
 }
+/** Classify a navigation as allowed content, login, download, external, or blocked. */
 export function webviewNavigation(input: string, policy: WebviewPolicy): 'internal'|'external'|'blocked' {
   const url = normalizeWebviewUrl(input,policy);
   if (!url) return 'blocked';
@@ -33,10 +42,12 @@ export function webviewNavigation(input: string, policy: WebviewPolicy): 'intern
   const root = policy.site.pathname.replace(/\/$/,'');
   return url.origin !== policy.site.origin || url.pathname === root || url.pathname.startsWith(root + '/') ? 'internal' : 'blocked';
 }
+/** Check subresources against the account-scoped webview policy. */
 export function webviewResource(input: string, policy: WebviewPolicy): boolean {
   const url = normalizeWebviewUrl(input,policy);
   return !!url && policy.resourceOrigins.has(url.origin);
 }
+/** Detect login destinations so expiry enters recovery rather than exposing credentials. */
 export function webviewLoginPage(input: string, policy: WebviewPolicy): boolean {
   try {
     const url = new URL(input);
@@ -44,10 +55,12 @@ export function webviewLoginPage(input: string, policy: WebviewPolicy): boolean 
     return url.origin === policy.site.origin && new RegExp(`^${root.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}/login/(?:index|logout)\\.php$`,'i').test(url.pathname);
   } catch { return false; }
 }
+/** Identify file destinations that must use the contained download pipeline. */
 export function webviewFile(input: string, policy: WebviewPolicy): boolean {
   const url = normalizeWebviewUrl(input,policy);
   return !!url && url.origin === policy.site.origin && webviewNavigation(input,policy) === 'internal' && /\/(?:webservice\/)?pluginfile\.php(?:\/|$)/i.test(url.pathname);
 }
+/** Remove sensitive URL components before exposing webview state to the renderer. */
 export function publicWebviewUrl(input: string): string {
   try {
     const url = new URL(input);
@@ -59,6 +72,7 @@ export function publicWebviewUrl(input: string): string {
 /** The Moodle content view has no device, clipboard, notification, or filesystem permissions. */
 export function webviewPermission(permission: string): boolean { void permission; return false; }
 
+/** Map load failures to stable recovery states without leaking navigation details. */
 export function webviewLoadError(code: number) {
   if (code <= -200 && code >= -299) return 'certificate' as const;
   if ([-106,-105,-109,-118].includes(code)) return code === -118 ? 'timeout' as const : 'offline' as const;

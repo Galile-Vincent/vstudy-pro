@@ -1,3 +1,9 @@
+/**
+ * Import webview downloads through the existing document security pipeline.
+ * Owned by main/moodle.
+ * Credentials and authenticated transports stay in main; renderer results use shared schemas.
+ * @packageDocumentation
+ */
 /** Streams authenticated pluginfile responses into DocumentService's bounded, validated import pipeline. Never writes Downloads. */
 import { mkdtemp, open, rm } from 'node:fs/promises';
 import { extname, join } from 'node:path';
@@ -8,6 +14,7 @@ import { safeFilename } from '../security';
 import { WebviewSessionError } from './webview-session';
 import { webviewFile, type WebviewPolicy } from './webview-policy';
 
+/** Route an authenticated webview download through contained staging and document import validation. */
 export async function importWebviewFile(url:string, policy:WebviewPolicy, request:(url:string,init:RequestInit)=>Promise<Response>, documents:Pick<DocumentService,'importPath'>, signal:AbortSignal): Promise<string> {
   if (!webviewFile(url,policy)) throw new WebviewSessionError('blocked');
   const parsed = new URL(url);

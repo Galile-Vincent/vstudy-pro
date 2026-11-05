@@ -1,3 +1,9 @@
+/**
+ * Define student-owned goals, tasks, exams, blocks, and explicit approval contracts.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 /** Student-owned planning records and strict proposals. UTC instants cross IPC; local days use an explicit IANA zone. */
 import { z } from "zod";
 
@@ -51,6 +57,7 @@ export const plannerSnapshotSchema = z.object({
 }).strict();
 export type PlannerSnapshot = z.infer<typeof plannerSnapshotSchema>;
 export const emptyPlanner = (): PlannerSnapshot => ({ tasks: [], exams: [], goals: [], plans: [], blocks: [], reminders: [] });
+/** Bound selected document IDs and optional excerpts; main checks ready state and course membership. */
 export const materialRequestSchema = z.object({ mode: z.enum(["summary", "quiz"]), documentIds: z.array(id).min(1).max(6) }).strict();
 export type MaterialRequest = z.infer<typeof materialRequestSchema>;
 
@@ -65,6 +72,7 @@ export const plannerActionSchemas = [
   z.object({ type: z.literal("summarize-course-materials"), documentIds: materialRequestSchema.shape.documentIds }).strict(),
   z.object({ type: z.literal("generate-practice-quiz"), documentIds: materialRequestSchema.shape.documentIds }).strict(),
 ] as const;
+/** Proposed planner mutations are data until the user approves and main revalidates current state. */
 export const plannerActionSchema = z.discriminatedUnion("type", plannerActionSchemas);
 export type PlannerAction = z.infer<typeof plannerActionSchema>;
 export const plannerCalendarSchema = z.object({
@@ -72,6 +80,7 @@ export const plannerCalendarSchema = z.object({
   examIds: z.array(id).max(50).optional(), blockIds: z.array(id).max(56).optional(),
 }).strict();
 export const exportCalendarActionSchema = plannerCalendarSchema.extend({ type: z.literal("export-calendar") });
+/** Transport contracts for student-owned planning reads, approved writes, and calendar export. */
 export const plannerIpc = {
   "planner:export-calendar": { request: plannerCalendarSchema, response: z.object({ saved: z.boolean() }).strict() },
   "planner:snapshot": { request: z.object({}).strict(), response: plannerSnapshotSchema },

@@ -1,6 +1,13 @@
+/**
+ * Regression coverage for db usage-rollup.
+ * Owned by main/db.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { afterEach, expect, it, vi } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { migrations, openStore, type Store } from './index';
+import { openStore, type Store } from './index';
+import { migrations } from './migrations';
 import { usageRepository, summarize } from './usage';
 import { usageRecordSchema } from '../../shared/domain';
 import { randomUUID } from 'node:crypto';

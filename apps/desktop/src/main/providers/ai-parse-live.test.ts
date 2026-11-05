@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for providers ai-parse-live.
+ * Owned by main/providers.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { it, expect } from 'vitest';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createCliAdapter } from './cli';

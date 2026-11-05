@@ -1,3 +1,9 @@
+/**
+ * Replace private files atomically and sync directory entries for crash recovery.
+ * Owned by main/storage.
+ * Filesystem operations stay inside the application namespace and preserve recoverable state.
+ * @packageDocumentation
+ */
 /** Durable replacement of main-owned files. Temporary files stay beside their destination. */
 import { randomUUID } from 'node:crypto';
 import { open, rename, rm, lstat } from 'node:fs/promises';

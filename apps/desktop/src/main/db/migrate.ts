@@ -1,3 +1,9 @@
+/**
+ * Back up, checksum, and transactionally apply forward-only SQLite migrations.
+ * Owned by main/db.
+ * Applied SQL remains immutable; repositories share one connection and use bound query values.
+ * @packageDocumentation
+ */
 /** Forward-only SQLite migrations. Legacy version rows adopt checksums on their first verified open. */
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';

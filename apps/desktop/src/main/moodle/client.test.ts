@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for moodle client.
+ * Owned by main/moodle.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { describe, it, expect, vi } from 'vitest';
 import { createHash, randomUUID } from 'node:crypto';
 import { MoodleClient, passwordToken, plainText } from './client';

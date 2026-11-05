@@ -13,3 +13,6 @@
 *.woff2 binary
 # Resolve lockfile conflicts by regenerating with pnpm install, never concatenation.
 pnpm-lock.yaml text eol=lf merge=binary
+
+# Unified patch context lines use a leading space for empty source lines.
+docs/vendor-patches/*.patch whitespace=-blank-at-eol

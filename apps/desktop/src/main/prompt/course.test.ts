@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for prompt course.
+ * Owned by main/prompt.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { expect, it } from "vitest";
 import { buildCoursePrompt, parseCourseActions } from "./course";
 import type { MoodleCourseDetail } from "../../shared/moodle";

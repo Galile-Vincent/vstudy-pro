@@ -1,3 +1,9 @@
+/**
+ * Validate, export, and stage portable backups without credentials or arbitrary paths.
+ * Owned by main/storage.
+ * Filesystem operations stay inside the application namespace and preserve recoverable state.
+ * @packageDocumentation
+ */
 /** Portable backups contain SQLite and immutable library files. Secrets and executables are excluded. */
 import { backup, DatabaseSync } from 'node:sqlite';
 import { mkdtemp, readdir, readFile, rm, mkdir, lstat, rename } from 'node:fs/promises';

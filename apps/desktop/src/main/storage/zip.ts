@@ -1,3 +1,9 @@
+/**
+ * Read and write the bounded portable backup archive format.
+ * Owned by main/storage.
+ * Filesystem operations stay inside the application namespace and preserve recoverable state.
+ * @packageDocumentation
+ */
 /** Streaming ZIP32 storage. Only this app's uncompressed, regular-file backup format is accepted. */
 import { createReadStream } from 'node:fs';
 import { open, rename, rm, mkdir } from 'node:fs/promises';

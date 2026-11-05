@@ -1,3 +1,9 @@
+/**
+ * Define the validated request, response, and event contracts exposed by preload.
+ * Owned by shared.
+ * This module is importable by both processes and must not depend on Electron or privileged IO.
+ * @packageDocumentation
+ */
 import { storageContract } from "./storage";
 import { chatHistoryContract } from './chat-history';
 import { moodlePanelSchema, moodleSiteCheckSchema, moodleSiteUrlSchema, moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
@@ -24,11 +30,13 @@ import {
 
 const empty = z.object({}).strict();
 const ack = z.object({ ok: z.literal(true) }).strict();
+/** Allowed browser and mail destinations; opening still requires native confirmation. */
 export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
   if ([...value].some((char) => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127) || value.includes("\\")) return false;
   try { return ["http:", "https:", "mailto:"].includes(new URL(value).protocol); }
   catch { return false; }
 }, "Only http, https and mailto URLs are allowed");
+/** Source of request and response types for the narrow preload bridge. Every main handler validates both directions. */
 export const ipcContract = {
   ...plannerIpc,
   ...aiParseContract,
@@ -166,12 +174,15 @@ export type IpcResponse<C extends IpcChannel> = z.infer<
   (typeof ipcContract)[C]["response"]
 >;
 export const documentProgressChannel = "documents:progress";
+/** Conversion progress is a validated event rather than an invoke result. */
 export const documentProgressSchema = z.object({ documentId: documentIdSchema, code:statusSchema.shape.code.optional(), params:statusSchema.shape.params.optional(), message: z.string().min(1).max(200) }).strict();
 export const chatEventChannel = "chat:events";
+/** Multiplex streams on a fixed event channel and filter by validated request ID. */
 export const chatEnvelopeSchema = z
   .object({ requestId: requestIdSchema, event: chatEventSchema })
   .strict();
 export type ChatEnvelope = z.infer<typeof chatEnvelopeSchema>;
+/** Renderer capability boundary. Invoke only declared channels and unsubscribe event listeners on teardown. */
 export interface DesktopApi {
   onMoodleProgress?(listener:(event:MoodleProgress)=>void):()=>void;
   onDocumentProgress?(listener: (event: z.infer<typeof documentProgressSchema>) => void): () => void;

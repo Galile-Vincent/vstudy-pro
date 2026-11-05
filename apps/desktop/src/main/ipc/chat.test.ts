@@ -1,3 +1,9 @@
+/**
+ * Regression coverage for ipc chat.
+ * Owned by main/ipc.
+ * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
+ * @packageDocumentation
+ */
 import { EventEmitter } from "node:events";
 import { randomUUID } from "node:crypto";
 import { expect, it, vi } from "vitest";
