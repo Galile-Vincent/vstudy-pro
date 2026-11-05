@@ -1,3 +1,4 @@
+import { HelpMenu } from "../onboarding/help";
 import { useSidebarOverlay } from './use-sidebar-overlay';
 import { applyAppearance } from '../settings/appearance';
 import { Button } from '../components/ui/button';
@@ -162,6 +163,7 @@ export function AppShell({
                   : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
               </span>
             )}
+            <HelpMenu />
           </header>
           <div id="shell-content" role={route.view === "library" ? "main" : undefined} className="shell-content" tabIndex={-1}>
             {children}

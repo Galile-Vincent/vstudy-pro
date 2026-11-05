@@ -1,67 +1,97 @@
-import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { errorText } from "../status";
-import { useOptionalNavigation } from "../shell";
-import { Select } from "../components/select";
+/** Resumable first-run sequence. School and appearance setup stay with their owning features. */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Document, IpcResponse, Settings } from '../../shared';
+import type { Document, Settings } from '../../shared';
 import { tr } from '../../shared/i18n';
+import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
+import { Button } from '../components/ui/button';
+import { Select } from '../components/select';
 import { desktop } from '../bridge';
 import { saveLanguage } from '../i18n';
-import { ProviderRow } from '../provider-row';
-import { providerName } from '../provider-metadata';
-import { AnimatedText } from '../motion/animated-text';
+import { useOptionalNavigation } from '../shell';
+import { AppearanceSection } from '../settings/appearance';
 import { UploadCard } from '../home/upload-card';
-import './onboarding.css';
+import { errorText } from '../status';
 import { ProductPreview } from './product-preview';
+import { goals, saveProgress, steps, useLearningProgress, type LearningProgress } from './progress';
+import { Walkthrough } from './walkthrough';
+import './onboarding.css';
+
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
   useTranslation();
   const navigation = useOptionalNavigation();
-  const [imported, setImported] = useState<Document>();
-  const [step, setStep] = useState(0);
-  const [providers, setProviders] = useState<IpcResponse<'providers:list'>>([]);
+  const progress = useLearningProgress();
+  const [step, setStep] = useState<LearningProgress['step']>(() => progress.status === 'completed' ? 'welcome' : progress.step);
   const [language, setLanguage] = useState<Settings['language']>('auto');
-  const [name, setName] = useState('');
-  const [providerId, setProviderId] = useState<'openai-api' | 'anthropic-api'>('openai-api');
-  const [key, setKey] = useState('');
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [imported, setImported] = useState<Document>();
   const [busy, setBusy] = useState(false);
-  const [waitingKeychain,setWaitingKeychain] = useState(false);
-
+  const [error, setError] = useState('');
   const heading = useRef<HTMLHeadingElement>(null);
-  const refresh = async () => { try { setProviders(await desktop.invoke('providers:list', {})); } catch { setError(tr('errors:generic')); } };
+  const index = steps.indexOf(step);
   useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
-
-    void desktop.invoke('settings:get', {}).then(s => { setLanguage(s.language); setName(s.displayName ?? ''); }).catch(() => setError(tr('errors:generic')));
-    void refresh();
-    return () => { if (previous?.isConnected && previous !== document.body) previous.focus(); else document.getElementById("shell-content")?.focus(); };
+    void desktop.invoke('settings:get', {}).then(s => setLanguage(s.language)).catch(e => setError(errorText(e)));
+    if (progress.documentId) void desktop.invoke('documents:get', { documentId: progress.documentId }).then(doc => { if (doc) setImported(doc); }).catch(e => setError(errorText(e)));
   }, []);
-  useEffect(() => { heading.current?.focus(); setError(''); setNotice(''); }, [step]);
-  const finish = async (tour = false, documentId?: Document['id']) => {
-    setBusy(true);
-    try { const settings = await desktop.invoke('settings:get', {}); await desktop.invoke('settings:set', { ...settings, displayName: name.trim() || undefined, onboardingCompleted: true }); onComplete(); if (documentId) navigation?.navigate({ view: 'workspace', documentId }); else if (tour) navigation?.navigate("welcome"); }
-    catch { setError(tr('errors:generic')); } finally { setBusy(false); }
+  useEffect(() => { heading.current?.focus(); }, [step]);
+  const move = (next: LearningProgress['step']) => {
+    try { saveProgress({ step: next, status: 'active' }); setStep(next); setError(''); }
+    catch { setError(tr('onboarding:save_error')); }
   };
-  const advance = () => { if (step < 3) setStep(step + 1); else void finish(); };
-  const titles = ['welcome', 'connect', 'bring', 'coach'];
-  return <Dialog open onOpenChange={open=>{if(!open&&!busy)void finish();}}><DialogContent showCloseButton={false} aria-describedby={undefined} className="onboarding" aria-labelledby="onboarding-title" onPointerDownOutside={event=>event.preventDefault()} onOpenAutoFocus={event=>{event.preventDefault();heading.current?.focus();}}>
-
-    <div className="onboarding-progress" role="group" aria-label={tr('onboarding:progress', { current: step + 1, total: 4 })}>{titles.map((title, index) => <span key={title} data-current={index === step} aria-hidden="true" />)}</div>
-    <DialogTitle asChild><h1 ref={heading} tabIndex={-1} id="onboarding-title">{tr(`onboarding:${titles[step]}`)}</h1></DialogTitle>
-    <p className="onboarding-intro"><AnimatedText texts={[tr(`onboarding:${titles[step]}_body`)]}/></p>
-    <div className="onboarding-content" key={step}>
-      {step === 0 && <><ProductPreview/><label>{tr('onboarding:language')}<Select value={language} disabled={busy} onChange={e => { const value = e.target.value as Settings['language']; setBusy(true); void saveLanguage('language', value).then(() => setLanguage(value)).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}><option value="auto">{tr('common:auto')}</option><option value="en" lang="en">English</option><option value="zh-Hant" lang="zh-Hant">繁體中文</option><option value="ja" lang="ja">日本語</option></Select></label><label>{tr('onboarding:name')}<Input maxLength={100} value={name} onChange={e => setName(e.target.value)}/></label></>}
-      {step === 1 && <><p>{tr('onboarding:setup_help')}</p><Button variant="outline" onClick={() => setStep(2)}>{tr('onboarding:read_only')}</Button><div className="onboarding-providers">{providers.filter(p => p.config.kind === 'cli').map(p => <ProviderRow key={p.config.id} provider={p} onRefresh={refresh} />)}</div><p className="muted">{tr('onboarding:signin')}</p><Button variant="outline" disabled={busy} onClick={() => void refresh()}>{tr('onboarding:refresh')}</Button><form onSubmit={e => { e.preventDefault(); setBusy(true); setWaitingKeychain(true); setError(''); void (async () => { try { await desktop.invoke('secrets:set', { providerId, key: key.trim() }); setKey(''); await desktop.invoke('providers:configure', { kind: 'api', id: providerId, enabled: true }); setNotice(tr('onboarding:key_saved')); await refresh(); } catch (error) { setError(errorText(error)); } finally { setWaitingKeychain(false); setBusy(false); } })(); }}><label>{tr('onboarding:api_provider')}<Select value={providerId} onChange={e => setProviderId(e.target.value as typeof providerId)}><option value="openai-api">{providerName['openai-api']}</option><option value="anthropic-api">{providerName['anthropic-api']}</option></Select></label><label>{tr('onboarding:key')}<Input type="password" autoComplete="off" maxLength={16384} value={key} onChange={e => setKey(e.target.value)}/></label><Button variant="outline" disabled={busy || !key.trim()}>{tr(error && key.trim() ? 'settings:retry' : 'onboarding:save_key')}</Button><Button variant="outline" type="button" disabled={busy || !key.trim()} onClick={() => {setBusy(true);setError('');void desktop.invoke('secrets:session',{providerId,key:key.trim()}).then(async()=>{setKey('');setNotice(tr('settings:session_ready'));await refresh();}).catch(error=>setError(errorText(error))).finally(()=>setBusy(false));}}>{tr('settings:session_key')}</Button></form></>}
-      {step === 2 && <><UploadCard showOpen={false} showSample={false} onImported={setImported}/><Button variant="outline" disabled={busy} onClick={() => { setBusy(true); void desktop.invoke('documents:importSample', { language: language === 'auto' ? document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en' : language }).then(d => { setImported(d); setNotice(tr('onboarding:sample_added')); window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</Button></>}
-      {step === 3 && <ol className="onboarding-tips">{['select', 'pin', 'usage'].map(tip => <li key={tip}>{tr(`onboarding:tip_${tip}`)}</li>)}</ol>}
-    </div>
-    {imported && <Button variant="outline" disabled={busy} onClick={() => { void finish(false, imported.id); }}>{tr('home:open_imported', { title: imported.title })}</Button>}
-    {waitingKeychain && <p role="status">{tr("settings:waiting")}</p>}
-    {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
-    <footer>{step === 3 && <Button variant="outline" className="ghost" disabled={busy} onClick={() => void finish(true)}>{tr("welcome:tour")}</Button>}{step > 0 && <Button variant="outline" disabled={busy} onClick={() => setStep(step - 1)}>{tr('onboarding:back')}</Button>}{step < 3 && <Button variant="outline" className="ghost" disabled={busy} onClick={advance}>{tr('onboarding:skip')}</Button>}<Button variant="outline" className="primary" disabled={busy} onClick={advance}>{tr(step === 3 ? 'onboarding:finish' : 'onboarding:next')}</Button></footer>
-  </DialogContent></Dialog>;
+  const exit = async (complete: boolean, action?: 'goal' | 'providers') => {
+    setBusy(true); setError('');
+    try {
+      const settings = await desktop.invoke('settings:get', {});
+      await desktop.invoke('settings:set', { ...settings, onboardingCompleted: true });
+      saveProgress({ step, status: complete ? 'completed' : 'paused', done: complete ? [...new Set([...progress.done, 'setup' as const])] : progress.done });
+      onComplete();
+      if (action === 'providers') window.dispatchEvent(new CustomEvent('vstudy:open-settings', { detail: { tab: 'providers' } }));
+      else if (action === 'goal') {
+        if (progress.goal === 'school') navigation?.navigate('courses');
+        else if (imported) navigation?.navigate({ view: 'workspace', documentId: imported.id });
+        else navigation?.navigate('library');
+      }
+    } catch (e) { setError(errorText(e)); }
+    finally { setBusy(false); }
+  };
+  const addSample = async () => {
+    setBusy(true); setError('');
+    try {
+      const language = document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en';
+      const sample = await desktop.invoke('documents:importSample', { language });
+      setImported(sample);
+      saveProgress({ documentId: sample.id, done: [...new Set([...progress.done, 'document' as const])] });
+      window.dispatchEvent(new Event('library-changed')); window.dispatchEvent(new Event('activity-updated'));
+    } catch (e) { setError(errorText(e)); }
+    finally { setBusy(false); }
+  };
+  const chooseLanguage = async (value: Settings['language']) => {
+    setBusy(true);
+    try { await saveLanguage('language', value); setLanguage(value); setError(''); }
+    catch (e) { setError(errorText(e)); }
+    finally { setBusy(false); }
+  };
+  return <Dialog open onOpenChange={open => { if (!open && !busy) void exit(false); }}>
+    <DialogContent showCloseButton={false} className="onboarding" aria-labelledby="onboarding-title" aria-describedby="onboarding-intro" onPointerDownOutside={event => event.preventDefault()} onOpenAutoFocus={event => { event.preventDefault(); heading.current?.focus(); }}>
+      <div className="onboarding-top"><p role="status">{tr('onboarding:progress', { current: index + 1, total: steps.length })}</p><Button variant="ghost" disabled={busy} onClick={() => void exit(false)}>{tr('onboarding:later')}</Button></div>
+      <div className="onboarding-progress" aria-hidden="true">{steps.map(item => <span key={item} data-current={item === step}/>)}</div>
+      <DialogTitle asChild><h1 id="onboarding-title" ref={heading} tabIndex={-1}>{tr(`onboarding:step_${step}`)}</h1></DialogTitle>
+      <p id="onboarding-intro" className="onboarding-intro">{tr(`onboarding:step_${step}_body`)}</p>
+      <div className="onboarding-content" key={step} tabIndex={0} role="region" aria-labelledby="onboarding-title">
+        {step === 'welcome' && <><ProductPreview/><p>{tr('onboarding:offline_promise')}</p></>}
+        {step === 'language' && <label>{tr('onboarding:language')}<Select value={language} disabled={busy} onChange={e => void chooseLanguage(e.target.value as Settings['language'])}><option value="auto">{tr('common:auto')}</option><option value="en" lang="en">English</option><option value="zh-Hant" lang="zh-Hant">繁體中文</option><option value="ja" lang="ja">日本語</option></Select></label>}
+        {step === 'appearance' && <AppearanceSection/>}
+        {step === 'goal' && <fieldset className="onboarding-goals"><legend className="motion-sr">{tr('onboarding:step_goal')}</legend>{goals.map(goal => <label key={goal} data-selected={progress.goal === goal}><input type="radio" name="onboarding-goal" value={goal} checked={progress.goal === goal} onChange={() => { try { saveProgress({ goal, documentId: undefined }); setImported(undefined); } catch { setError(tr('onboarding:save_error')); } }}/><span><strong>{tr(`onboarding:goal_${goal}`)}</strong><small>{tr(`onboarding:goal_${goal}_body`)}</small></span></label>)}</fieldset>}
+        {step === 'ai' && <><dl className="onboarding-ai">{['free', 'paid', 'login', 'privacy', 'keychain'].map(item => <div key={item}><dt>{tr(`onboarding:ai_${item}`)}</dt><dd>{tr(`onboarding:ai_${item}_body`)}</dd></div>)}</dl></>}
+        {step === 'start' && <>
+          <p>{tr(`onboarding:before_${progress.goal}`)}</p>
+          {progress.goal === 'documents' && <UploadCard showOpen={false} showSample={false} onImported={doc => { setImported(doc); try { saveProgress({ documentId: doc.id, done: [...new Set([...progress.done, 'document' as const])] }); } catch { setError(tr('onboarding:save_error')); } }}/>}
+          {progress.goal === 'sample' && <Button variant="outline" disabled={busy || !!imported} onClick={() => void addSample()}>{tr(imported ? 'onboarding:sample_added' : 'onboarding:sample')}</Button>}
+          <Walkthrough lesson={progress.goal === 'school' ? 'school' : 'selection'}/>
+        </>}
+      </div>
+      {imported && <p role="status">{tr('onboarding:ready_to_open', { title: imported.title })}</p>}
+      {error && <p role="alert">{error}</p>}
+      <footer>{step === 'ai' && <Button variant="outline" disabled={busy} onClick={() => void exit(false, 'providers')}>{tr('onboarding:configure_ai')}</Button>}{index > 0 && <Button variant="outline" disabled={busy} onClick={() => move(steps[index - 1]!)}>{tr('onboarding:back')}</Button>}<Button className="primary" disabled={busy || (step === 'start' && progress.goal === 'sample' && !imported)} onClick={() => step === 'start' ? void exit(true, 'goal') : move(steps[index + 1]!)}>{tr(step === 'start' ? progress.goal === 'school' ? 'onboarding:open_courses' : imported || progress.goal === 'sample' ? 'onboarding:open_document' : 'onboarding:open_library' : step === 'ai' ? 'onboarding:skip_ai' : 'onboarding:next')}</Button></footer>
+    </DialogContent>
+  </Dialog>;
 }

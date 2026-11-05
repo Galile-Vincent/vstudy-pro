@@ -1,3 +1,4 @@
+import { HelpMenu } from "../onboarding/help";
 import { Textarea } from '../components/ui/textarea';
 import { AiParseControls } from '../ai-parse/ai-parse-controls';
 import { Button } from '../components/ui/button';
@@ -67,7 +68,6 @@ export function Workspace() {
   const [progress, setProgress] = useState<Record<string, string>>({});
   const [readerVersion,setReaderVersion] = useState<'original'|'ai'>('original');
   const [readerRevision,setReaderRevision] = useState(0);
-  const [readerHint,setReaderHint] = useState(true);
   const [aiOpen,setAiOpen] = useState(0);
   const [partialSource, setPartialSource] = useState("");
   useEffect(() => {
@@ -448,7 +448,7 @@ export function Workspace() {
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
-        <>{readerHint && <div role="status"><p>{tr('library:reader_hint')}</p><Button variant="ghost" onClick={()=>setReaderHint(false)}>{tr('common:dismiss')}</Button></div>}<div className="document-conversion-hint"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div><DocumentMarkdown
+        <><div className="document-conversion-hint"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div><DocumentMarkdown
           key={`${doc.id}-${readerVersion}-${readerRevision}`}
           version={readerVersion}
           source={source}
@@ -488,6 +488,7 @@ export function Workspace() {
         </div>
         {chatControls}
         <div className="row">
+          <HelpMenu />
           <span className={`connection-status ${connected && !isMock ? "motion-sr" : ""}`} data-testid="bridge-status">
             {isMock
               ? tr('common:preview_mock_bridge')
