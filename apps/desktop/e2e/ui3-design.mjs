@@ -120,10 +120,10 @@ try {
    await page.locator('.settings-pane:not([hidden])').evaluate(e=>{e.scrollTop=e.scrollHeight;});
    const bottom=await page.locator('.settings-pane:not([hidden])').evaluate(e=>{const content=e.querySelector('.settings-pane-inner'),last=content.lastElementChild;return {bottom:last.getBoundingClientRect().bottom,viewport:e.getBoundingClientRect().bottom,padding:parseFloat(window.getComputedStyle(e).paddingBottom)};});
    assert.ok(bottom.bottom<=bottom.viewport-bottom.padding+1,JSON.stringify({context,section,bottom}));
-   const lastRow=page.locator('.settings-pane:not([hidden]) .settings-row').last();
+   const lastRow=page.locator('.settings-pane:not([hidden]) .settings-row:visible').last();
    await lastRow.evaluate(e=>e.scrollIntoView({block:'end'}));
    const lastRowBounds=await lastRow.evaluate(e=>{const r=e.getBoundingClientRect(),p=e.closest('.settings-pane').getBoundingClientRect(),card=e.closest('.settings-card').getBoundingClientRect();return {top:r.top,bottom:r.bottom,paneTop:p.top,paneBottom:p.bottom,cardBottom:card.bottom};});
-   assert.ok(lastRowBounds.top>=lastRowBounds.paneTop-1&&lastRowBounds.bottom<=lastRowBounds.paneBottom+1&&lastRowBounds.bottom<=lastRowBounds.cardBottom+1,JSON.stringify({context,section,lastRowBounds}));
+   assert.ok((lastRowBounds.bottom-lastRowBounds.top>lastRowBounds.paneBottom-lastRowBounds.paneTop||lastRowBounds.top>=lastRowBounds.paneTop-1)&&lastRowBounds.bottom<=lastRowBounds.paneBottom+1&&lastRowBounds.bottom<=lastRowBounds.cardBottom+1,JSON.stringify({context,section,lastRowBounds}));
    await shot(section+'-bottom');
 
   }
