@@ -55,5 +55,8 @@
   "streak_days_one": "{{formatted}} 天",
   "streak_days_other": "{{formatted}} 天",
   "best_one": "最長連續：{{formatted}} 天",
-  "best_other": "最長連續：{{formatted}} 天"
+  "best_other": "最長連續：{{formatted}} 天",
+  "how_to_use": "如何使用",
+  "open_imported": "開啟 {{title}}",
+  "file_help": "選擇 PDF、EPUB、文字或 Office 檔案。Office 檔案須小於 50 MB。掃描的 PDF 可能需要先辨識文字。"
 }

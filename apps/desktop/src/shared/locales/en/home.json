@@ -55,5 +55,8 @@
   "streak_days_one": "{{formatted}} day",
   "streak_days_other": "{{formatted}} days",
   "best_one": "Best rhythm: {{formatted}} day",
-  "best_other": "Best rhythm: {{formatted}} days"
+  "best_other": "Best rhythm: {{formatted}} days",
+  "how_to_use": "How to use",
+  "open_imported": "Open {{title}}",
+  "file_help": "Choose a PDF, EPUB, text or Office file. Office files must be under 50 MB. Scanned PDFs may need text recognition first."
 }
