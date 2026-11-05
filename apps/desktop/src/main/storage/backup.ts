@@ -11,6 +11,8 @@ import { join, basename, dirname, resolve, sep } from 'node:path';
 import { z } from 'zod';
 import type { Store } from '../db';
 import { openStore } from '../db';
+import { validateRestoreSchema } from './restore-schema';
+import { containedPath } from '../services/file-paths';
 import { atomicWrite, syncDirectory } from './atomic';
 import { allowedBackupPath, extractZip, fingerprint, writeZip, type ArchiveFile } from './zip';
 
@@ -71,6 +73,7 @@ export async function stageRestore(root:string,source:string):Promise<void> {
     const manifest=manifestSchema.parse(JSON.parse(await readFile(join(stage,'manifest.json'),'utf8')));
     if(manifest.files.length+1!==entries.size || new Set(manifest.files.map(f=>f.path)).size!==manifest.files.length)throw new Error('storage.invalid_backup');
     for(const expected of manifest.files){const actual=entries.get(expected.path);if(!actual || actual.bytes!==expected.bytes || actual.sha256!==expected.sha256)throw new Error('storage.invalid_backup');}
+    validateRestoreSchema(join(stage,'vstudy.sqlite'));
     const store=openStore(join(stage,'vstudy.sqlite'));
     try {
       if(store.db.prepare('PRAGMA integrity_check').get()?.integrity_check!=='ok' || store.db.prepare('PRAGMA foreign_key_check').all().length)throw new Error('storage.integrity_failed');
@@ -80,6 +83,8 @@ export async function stageRestore(root:string,source:string):Promise<void> {
         if(!/^[a-f0-9]{64}$/.test(hash) || !/^source\.[a-z0-9]{1,12}$/.test(name) || entries.get(original)?.sha256!==hash)throw new Error('storage.invalid_backup');
         if(row.status==='ready' && !entries.has(`library/${hash}/content.md`))throw new Error('storage.invalid_backup');
         if(row.activeVersion==='ai' && !entries.has(`library/${hash}/content.ai.md`))throw new Error('storage.invalid_backup');
+        containedPath(join(stage,'library'),join(stage,original));
+        if(row.status==='ready')containedPath(join(stage,'library'),join(stage,'library',hash,'content.md'));
         store.db.prepare('UPDATE documents SET sourcePath=?,markdownPath=? WHERE id=?').run(join(root,original),join(root,'library',hash,'content.md'),row.id!);
       }
       store.documents.list();

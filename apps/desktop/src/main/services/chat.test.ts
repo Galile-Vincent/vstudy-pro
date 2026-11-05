@@ -62,7 +62,7 @@ async function setup(adapter: ProviderAdapter) {
       createdAt: new Date().toISOString(),
     }),
   );
-  const chat = new ChatService(store, registry);
+  const chat = new ChatService(store, registry, cwd);
   const conversation = chat.createConversation({
     documentId: document.id,
     providerId: "anthropic-api",
@@ -605,4 +605,18 @@ it("aborts a course material request when its selected document is deleted", asy
   await fixture.chat.waitForIdle();
   expect(aborted).toBe(true);
   expect(fixture.owner.events.at(-1)).toEqual({ type: "done" });
+});
+
+it("never sends Markdown outside the configured library even when both database paths are forged", async () => {
+  let called=false;
+  const {chat,store,request,owner,cwd}=await setup({...available,async *stream(){called=true;yield {type:"done"};}});
+  const outside=await mkdtemp(join(tmpdir(),"vstudy-outside-"));
+  try {
+    const path=join(outside,"secret.md");await writeFile(path,"PRIVATE DATA");
+    store.db.prepare("UPDATE documents SET sourcePath=?,markdownPath=? WHERE id=?").run(path,path,request.documentId);
+    chat.start(request,owner);
+    await until(()=>owner.events.some(e=>e.type==='error'));
+    expect(called).toBe(false);
+    expect(cwd).not.toBe(outside);
+  } finally {await rm(outside,{recursive:true,force:true});}
 });

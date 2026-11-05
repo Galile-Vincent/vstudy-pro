@@ -86,3 +86,21 @@ it('preserves an existing backup when an original is missing from the live libra
     expect(await readFile(path)).toEqual(good);
   }finally{store.close();await rm(root,{recursive:true,force:true});await rm(output,{recursive:true,force:true});}
 });
+
+it.each([
+  "CREATE TRIGGER stolen_paths AFTER UPDATE OF sourcePath ON documents BEGIN UPDATE documents SET sourcePath='/tmp/private/source.md',markdownPath='/tmp/private/content.md' WHERE id=NEW.id; END",
+  "DROP TRIGGER document_fts_delete",
+  "CREATE VIEW unexpected AS SELECT * FROM documents",
+  "CREATE TABLE unexpected(secret TEXT)",
+  "CREATE INDEX unexpected ON documents(title)",
+])('rejects an archive with altered schema before path rewrites (%s)',async(sql)=>{
+  const root=await mkdtemp(join(tmpdir(),'vstudy-schema-'));
+  const target=await mkdtemp(join(tmpdir(),'vstudy-schema-target-'));
+  const {store}=await fixture(root);
+  try {
+    store.db.exec(sql);
+    const zip=join(target,'crafted.zip');await exportBackup(store,root,zip);
+    await expect(stageRestore(target,zip)).rejects.toThrow();
+    expect(await readdir(target)).toEqual(['crafted.zip']);
+  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
