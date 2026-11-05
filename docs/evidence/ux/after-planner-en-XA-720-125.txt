@@ -1,0 +1,85 @@
+- link "［Skïp tö cöntënt～～～～～～］":
+  - /url: "#shell-content"
+- complementary "［Döcümënt lïbráry～～～～～～～］":
+  - text: ［VStüdy Prö～～～～］
+  - list:
+    - listitem:
+      - button "［Hömë～～］"
+    - listitem:
+      - button "［Lïbráry～～～］"
+    - listitem:
+      - button "［Cöürsës～～～］"
+    - listitem:
+      - button "［Hïstöry～～～］"
+  - navigation "［Smárt vïëws～～～～～］":
+    - button "［Áll döcümënts～～～～～～］"
+    - button "［Rëcënt～～～］"
+    - button "［Pïnnëd～～～］"
+    - button "［Ünfïlëd～～～］"
+    - button "［Cönvërtïng / Fáïlëd～～～～～～～～］"
+  - heading "［Földërs～～～］" [level=2]
+  - button "［Nëw földër～～～～］"
+  - paragraph: ［Nö földërs yët～～～～～～］
+  - list:
+    - listitem:
+      - button "［Sëttïngs～～～～］"
+- banner:
+  - button "［Tögglë döcümënt lïbráry～～～～～～～～～～］" [expanded]
+  - text: ［Cöürsës～～～］
+  - button "［Hëlp～～］"
+  - button "［Fïnd á cönvërsátïön～～～～～～～～］"
+- complementary "［Fïrst-tïmë tïp～～～～～～］":
+  - group:
+    - strong: ［Stárt wïth whát ïs düë nëxt～～～～～～～～～～～］
+  - button "［Wátch wálkthröüghs～～～～～～～～］"
+  - button "［Dïsmïss thïs tïp përmánëntly～～～～～～～～～～～～］"
+- main:
+  - button "［Báck tö cöürsës～～～～～～］"
+  - region "［Tödáy / Plánnër～～～～～～］":
+    - heading "［Tödáy / Plánnër～～～～～～］" [level=1]
+    - paragraph: ［Türn whát ïs düë ïntö á plán yöü cán fïnïsh. Yöür schööl dëádlïnës stáy lïnkëd tö Möödlë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - button "［Rëfrësh plánnër～～～～～～］"
+    - group:
+      - text: ［Ádd tásk～～～～］ ［Whát dö yöü nëëd tö dö?～～～～～～～～～～］
+      - textbox "［Whát dö yöü nëëd tö dö?～～～～～～～～～～］"
+      - text: ［Cöürsë～～～］
+      - combobox "［Cöürsë～～～］":
+        - option "［Përsönál tásk～～～～～～］" [selected]
+        - option "Algorithms and Data Structures for Applied Scientific Research"
+        - option "Algorithms and Data Structures for Applied Scientific Research"
+        - option "Algorithms and Data Structures for Applied Scientific Research"
+      - text: ［Düë～～］
+      - textbox "［Düë～～］"
+      - text: ［Ëstïmátëd mïnütës～～～～～～～］
+      - spinbutton "［Ëstïmátëd mïnütës～～～～～～～］": "30"
+      - button "［Ádd tásk～～～～］"
+    - group: ［Ádd ëxám～～～～］
+    - region "［Plán my wëëk～～～～～］":
+      - text: ［Stüdy mïnütës për dáy～～～～～～～～～］
+      - spinbutton "［Stüdy mïnütës për dáy～～～～～～～～～］": "120"
+      - text: ［Áváïláblë fröm～～～～～～］
+      - spinbutton "［Áváïláblë fröm～～～～～～］": "18"
+      - text: ［Áváïláblë üntïl～～～～～～］
+      - spinbutton "［Áváïláblë üntïl～～～～～～］": "22"
+      - paragraph: ［Ássümë 18:00 tö 22:00 ïs áváïláblë ëách dáy ïn Asia/Taipei. Chángë thësë höürs tö mátch yöür schëdülë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+      - button "［Plán my wëëk～～～～～］"
+      - button "［Plán tödáy～～～～］"
+      - button "［Ëxpört stüdy blöcks～～～～～～～～］" [disabled]
+      - paragraph: ［Rëvïëw fïrst. Thë ássïstánt sávës chángës önly áftër yöü ápprövë.～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - tablist "［Tödáy / Plánnër～～～～～～］":
+      - tab "［Tödáy～～］" [selected]
+      - tab "［Nëxt 7 dáys～～～～～］"
+    - tabpanel "［Tödáy～～］":
+      - heading "［Tödáy～～］" [level=2]
+      - paragraph: ［Á clëár dáy stárts hërë. Ádd önë tásk, thën plán á stüdy blöck. Wörk düë látër áppëárs ïn thë wëëk vïëw.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+      - list
+      - heading "［Schööl dëádlïnës～～～～～～～］" [level=2]
+      - list
+      - heading "［Ëxáms～～］" [level=2]
+      - paragraph: ［Ádd án ëxám ánd ïts töpïcs tö stárt prëpárïng bëförë thë lást nïght.～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+      - region "［Nëxt 7 dáys～～～～～］":
+        - heading "［Nëxt 7 dáys～～～～～］" [level=2]
+        - paragraph: ［Nö stüdy blöcks yët. Plán my wëëk crëátës á dráft för yöü tö rëvïëw bëförë sávïng.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+        - heading "Fri, Nov 6" [level=3]
+        - text: ［0 mïn rësërvëd～～～～～～～～～～］
+        - list

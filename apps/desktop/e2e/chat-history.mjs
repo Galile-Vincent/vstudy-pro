@@ -1,4 +1,5 @@
 /** Real Electron coverage for History search, actions, keyboard navigation and message jumps. */
+import { waitForDocumentStatus } from './helpers/document-status.mjs';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, mkdir, writeFile } from 'node:fs/promises';
@@ -67,7 +68,7 @@ try {
   await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
   const importedDocument=await page.evaluate(()=>window.desktop.invoke('documents:import',{}));
   assert.ok(importedDocument);
-  await page.waitForFunction(async id=>(await window.desktop.invoke('documents:get',{documentId:id}))?.status==='ready',importedDocument.id);
+  await waitForDocumentStatus(page, importedDocument.id);
   const documentConversation=await page.evaluate(async document=>{
     const c=await window.desktop.invoke('conversations:create',{documentId:document.id,providerId:'anthropic-api',modelId:'fake'});
     const requestId=window.crypto.randomUUID();

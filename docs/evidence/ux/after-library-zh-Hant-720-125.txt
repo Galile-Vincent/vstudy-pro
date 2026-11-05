@@ -1,0 +1,44 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "顯示或隱藏文件庫" [expanded]
+  - button "說明"
+  - button "尋找對話"
+- main:
+  - region "文件庫":
+    - heading "文件庫" [level=1]
+    - paragraph: 1 份文件
+    - button "匯入文件"
+    - textbox "搜尋文件"
+    - button "篩選"
+    - combobox "排序依據": 手動排序
+    - button "反轉排序方向": ↑
+    - button "切換清單或格狀檢視"
+    - list "文件":
+      - listitem:
+        - button "Reading sample"
+        - button "文件選項：Reading sample"
+    - text: 已載入 1 份文件

@@ -1,0 +1,71 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - text: Courses
+  - button "Help"
+  - button "Find a conversation": Find a conversation ⌘/Ctrl K
+- complementary "First-time tip":
+  - strong: Start with what is due next
+  - paragraph: Connect your school if this page is empty. After syncing, Due soon shows the next seven days. Open a course for Deadlines and the course assistant. Check dates against your school before acting on an AI answer.
+  - button "Watch walkthroughs"
+  - button "Dismiss this tip permanently"
+- main:
+  - button "Today / Planner"
+  - heading "Courses" [level=1]
+  - paragraph: A clear view of your courses. A little more room to focus.
+  - button "Connect school"
+  - status
+  - strong: Alex Chen
+  - text: Example University · moodle.example.edu Synced yesterday
+  - button "Refresh courses"
+  - button "Disconnect school"
+  - heading "Due soon" [level=2]
+  - text: The next 7 days
+  - article:
+    - text: 1151 · CS210
+    - progressbar "64% complete"
+    - heading "Prepare a research report explaining the experimental observations and conclusions" [level=3]:
+      - button "Prepare a research report explaining the experimental observations and conclusions"
+    - paragraph: Professor Alexandra Chen
+    - paragraph: 資訊三乙
+    - time: in 2 days Nov 8, 12:10 AM
+    - button "Set reminder for Prepare a research report explaining the experimental observations and conclusions"
+  - heading "Your courses 3" [level=2]
+  - text: 1 unread updates
+  - tablist "Course terms":
+    - tab "Current 1" [selected]
+    - tab "Upcoming 1"
+    - tab "Past 1"
+    - tab "All 3"
+  - article "資料結構與演算法 · Algorithms and Data Structures for Applied Scientific Research":
+    - text: 1151 · CS210
+    - progressbar "64% complete"
+    - heading "Algorithms and Data Structures for Applied Scientific Research" [level=3]:
+      - button "Algorithms and Data Structures for Applied Scientific Research"
+    - paragraph: Professor Alexandra Chen
+    - paragraph: 資訊三乙
+    - text: 1 due soon 0 unread

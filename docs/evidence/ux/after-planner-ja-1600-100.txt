@@ -1,0 +1,86 @@
+- link "メインコンテンツへ移動":
+  - /url: "#shell-content"
+- complementary "ドキュメントライブラリ":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "ホーム"
+    - listitem:
+      - button "ライブラリ"
+    - listitem:
+      - button "コース"
+    - listitem:
+      - button "履歴"
+  - navigation "スマートビュー":
+    - button "すべてのドキュメント"
+    - button "最近使った項目"
+    - button "ピン留め"
+    - button "未分類"
+    - button "変換中・失敗"
+  - heading "フォルダ" [level=2]
+  - button "新規フォルダ"
+  - paragraph: フォルダはまだありません
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "ライブラリの表示を切り替え" [expanded]
+  - text: コース
+  - button "ヘルプ"
+  - button "会話を探す": 会話を探す ⌘/Ctrl K
+- complementary "初回のヒント":
+  - group:
+    - strong: まず次の締め切りを確認
+    - paragraph: 何も表示されない場合は学校を接続します。同期後、「締め切り間近」に今後 7 日間の課題が表示されます。授業を開くと締め切り一覧と授業アシスタントを使えます。AI の回答にある日付は学校の情報で確認してください。
+  - button "操作ガイドを見る"
+  - button "このヒントを今後表示しない"
+- main:
+  - button "コースに戻る"
+  - region "今日 / 学習プラン":
+    - heading "今日 / 学習プラン" [level=1]
+    - paragraph: 締切を、無理なく終えられる計画に。課題の提出状況は Moodle で確認できます。
+    - button "学習プランを更新"
+    - group:
+      - text: タスクを追加 何をする必要がありますか？
+      - textbox "何をする必要がありますか？"
+      - text: コース
+      - combobox "コース":
+        - option "個人のタスク" [selected]
+        - option "資料結構與演算法的科學應用及實驗"
+        - option "資料結構與演算法的科學應用及實驗"
+        - option "資料結構與演算法的科學應用及實驗"
+      - text: 締切
+      - textbox "締切"
+      - text: 見積もり時間（分）
+      - spinbutton "見積もり時間（分）": "30"
+      - button "タスクを追加"
+    - group: 試験を追加
+    - region "今週の計画を立てる":
+      - text: 1日の学習時間（分）
+      - spinbutton "1日の学習時間（分）": "120"
+      - text: 開始時刻
+      - spinbutton "開始時刻": "18"
+      - text: 終了時刻
+      - spinbutton "終了時刻": "22"
+      - paragraph: 毎日 18:00 から 22:00（Asia/Taipei）が空いていると仮定します。予定に合わせて変更してください。
+      - button "今週の計画を立てる"
+      - button "今日の計画を立てる"
+      - button "学習時間をエクスポート" [disabled]
+      - paragraph: 内容を確認してください。承認するまで変更は保存されません。
+    - tablist "今日 / 学習プラン":
+      - tab "今日" [selected]
+      - tab "今後7日間"
+    - tabpanel "今日":
+      - heading "今日" [level=2]
+      - paragraph: まず1つタスクを追加し、学習時間を確保しましょう。後日の締切は週間表示で確認できます。
+      - list
+      - heading "学校の締切" [level=2]
+      - list
+      - heading "試験" [level=2]
+      - paragraph: 試験と出題範囲を追加して、早めに準備を始めましょう。
+      - region "今後7日間":
+        - heading "今後7日間" [level=2]
+        - paragraph: 学習時間はまだありません。「今週の計画を立てる」で下書きを作り、確認してから保存できます。
+        - heading "11月6日(金)" [level=3]
+        - text: 0分を確保済み
+        - list

@@ -28,6 +28,23 @@ it('opens the finder with Command K without intercepting selection or alternate 
   await act(() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true })));
   expect(document.querySelector('.history-dialog')).not.toBeNull();
 });
+
+it('closes with Escape and restores focus to the shortcut origin', async () => {
+  invoke.mockImplementation(async channel => channel === 'chats:facets' ? { courses: [], documents: [], models: [] } : { items: [], nextCursor: null });
+  await render(<HistoryFinder/>);
+  const trigger = document.createElement('button');
+  trigger.textContent = 'Find a conversation';
+  document.body.append(trigger);
+  trigger.focus();
+  await act(() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true })));
+  const input = document.querySelector<HTMLInputElement>('.history-dialog input')!;
+  input.focus();
+  await act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })));
+  expect(document.querySelector('.history-dialog')).toBeNull();
+  await act(() => new Promise(resolve => setTimeout(resolve, 0)));
+  expect(document.activeElement).toBe(trigger);
+  trigger.remove();
+});
 it('renders multilingual markers and hostile markup as text', async () => {
   const host = await render(<HistorySnippet text={'<img src=x onerror=alert(1)> [mark]繁體中文 学習 😀[/mark]'}/>);
   expect(host.querySelector('img')).toBeNull();

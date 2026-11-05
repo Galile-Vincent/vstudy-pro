@@ -1,0 +1,1 @@
+PASS. History guidance captured in English, Traditional Chinese, and Japanese in the merged production app.

@@ -1,0 +1,84 @@
+- main:
+  - region "Library": 1 document loaded
+- dialog "Settings":
+  - heading "Settings" [level=2]
+  - button "Close settings"
+  - tablist "Settings":
+    - tab "General"
+    - tab "Appearance" [selected]
+    - tab "Providers"
+    - tab "Usage"
+    - tab "Storage"
+    - tab "Privacy"
+  - tabpanel "Appearance":
+    - banner:
+      - heading "Appearance" [level=2]
+    - region "Color scheme":
+      - heading "Color scheme" [level=3]
+      - button "System"
+      - button "Light" [pressed]
+      - button "Dark"
+    - region "Themes":
+      - heading "Themes" [level=3]
+      - button "Create theme"
+      - button "Add theme"
+      - button "VStudy"
+      - button "Export VStudy"
+      - button "Ocean"
+      - button "Export Ocean"
+      - button "Grove" [pressed]
+      - button "Export Grove"
+      - button "Ember"
+      - button "Export Ember"
+      - button "Iris"
+      - button "Export Iris"
+      - button "Rose"
+      - button "Export Rose"
+      - button "Slate"
+      - button "Export Slate"
+      - button "Paper"
+      - button "Export Paper"
+      - button "High contrast"
+      - button "Export High contrast"
+    - heading "Interface" [level=3]
+    - text: Contrast
+    - paragraph: Strengthen text, borders, and focus indicators. 100% is the accessible baseline.
+    - group "Contrast Strengthen text, borders, and focus indicators. 100% is the accessible baseline.":
+      - status "100": 100%
+      - slider "Contrast": "100"
+    - text: Glass opacity
+    - paragraph: Higher values make menus, dialogs, and the composer more solid.
+    - group "Glass opacity Higher values make menus, dialogs, and the composer more solid.":
+      - status "80": 80%
+      - slider "Glass opacity": "80"
+    - text: Text size
+    - group "Text size":
+      - radiogroup "Text size":
+        - radio "100%" [checked]
+        - radio "125%"
+        - radio "150%"
+        - radio "200%"
+    - text: Density
+    - group "Density":
+      - radiogroup "Density":
+        - radio "Comfortable"
+        - radio "Compact" [checked]
+    - text: Reader font
+    - group "Reader font":
+      - combobox "Reader font": System
+    - text: Reader size
+    - group "Reader size":
+      - radiogroup "Reader size":
+        - radio "Small"
+        - radio "Medium" [checked]
+        - radio "Large"
+        - radio "Extra large"
+    - text: Material
+    - group "Material":
+      - radiogroup "Material":
+        - radio "Glass" [checked]
+        - radio "Solid"
+    - heading "Reading notes" [level=3]
+    - paragraph: The quick brown fox jumps over the lazy dog. 字體預覽 Aa 你好 日本語
+    - paragraph: Ask about this document
+    - text: Selected passage

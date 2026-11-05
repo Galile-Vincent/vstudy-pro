@@ -32,13 +32,6 @@
       ],
       "ignoreBinaries": [
         "openssl"
-      ],
-      "ignore": [
-        "src/renderer/components/assistant-ui/elements/tool-approval-questions.tsx",
-        "src/renderer/components/assistant-ui/elements/tool-fallback-parts.tsx",
-        "src/renderer/components/ui/alert-dialog.tsx",
-        "src/renderer/components/ui/context-menu.tsx",
-        "src/renderer/components/ui/scroll-area.tsx"
       ]
     }
   }

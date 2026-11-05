@@ -1,0 +1,18 @@
+- main:
+  - status
+- dialog "Read the complete laboratory instructions before the first experiment":
+  - heading "Read the complete laboratory instructions before the first experiment" [level=2]
+  - paragraph: ページ
+  - heading "Learning objectives" [level=3]
+  - paragraph: Review the material and record your observations.
+  - table:
+    - rowgroup:
+      - row "Step Action":
+        - cell "Step"
+        - cell "Action"
+    - rowgroup:
+      - row "1 Prepare your diagram.":
+        - cell "1"
+        - cell "Prepare your diagram."
+  - button "元のページを表示"
+  - button "閉じる"

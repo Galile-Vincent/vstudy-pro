@@ -1,0 +1,84 @@
+- dialog "設定":
+  - heading "設定" [level=2]
+  - button "設定を閉じる"
+  - tablist "設定":
+    - tab "一般"
+    - tab "外観"
+    - tab "プロバイダー" [selected]
+    - tab "使用量"
+    - tab "ストレージ"
+    - tab "プライバシー"
+  - tabpanel "プロバイダー":
+    - banner:
+      - heading "プロバイダー" [level=2]
+      - paragraph: キーはデスクトップアプリに安全に保存され、再表示されません。
+    - text: 読み取り専用の構造化テーブル（API プロバイダーのみ）
+    - paragraph: 任意で有効にできる表形式の表示です。初期設定はオフです。CLI ツールは無効のままです。
+    - group "読み取り専用の構造化テーブル（API プロバイダーのみ） 任意で有効にできる表形式の表示です。初期設定はオフです。CLI ツールは無効のままです。":
+      - switch "読み取り専用の構造化テーブル（API プロバイダーのみ）"
+    - heading "プロバイダー" [level=3]
+    - strong: Anthropic
+    - text: キーは未保存です
+    - button "キーを取得"
+    - button "接続を確認"
+    - paragraph: APIキーはAIサービスの開発者サイトで取得する秘密のコードです。チャットのログインとは別で、利用料金がかかる場合があります。
+    - paragraph: Macでは保存時にキーチェーンへのアクセスのためMacのログインパスワードを求められる場合があります。一時キーはアプリ終了まで有効です。
+    - textbox "Anthropic の API キー":
+      - /placeholder: API キーを入力
+    - button "キーを保存" [disabled]
+    - button "キーを保存せずに使用" [disabled]
+    - strong: OpenAI
+    - text: キーは未保存です
+    - button "キーを取得"
+    - button "接続を確認"
+    - paragraph: APIキーはAIサービスの開発者サイトで取得する秘密のコードです。チャットのログインとは別で、利用料金がかかる場合があります。
+    - paragraph: Macでは保存時にキーチェーンへのアクセスのためMacのログインパスワードを求められる場合があります。一時キーはアプリ終了まで有効です。
+    - textbox "OpenAI の API キー":
+      - /placeholder: API キーを入力
+    - button "キーを保存" [disabled]
+    - button "キーを保存せずに使用" [disabled]
+    - strong: OpenAI 互換
+    - text: キーは未保存です
+    - button "キーを取得"
+    - button "接続を確認"
+    - paragraph: APIキーはAIサービスの開発者サイトで取得する秘密のコードです。チャットのログインとは別で、利用料金がかかる場合があります。
+    - paragraph: Macでは保存時にキーチェーンへのアクセスのためMacのログインパスワードを求められる場合があります。一時キーはアプリ終了まで有効です。
+    - textbox "OpenAI 互換 の API キー":
+      - /placeholder: API キーを入力
+    - button "キーを保存" [disabled]
+    - button "キーを保存せずに使用" [disabled]
+    - textbox "OpenAI 互換のベース URL": http://localhost:11434/v1
+    - button "URL を保存"
+    - strong: Claude CLI
+    - text: 実行ファイルあり — ログインは未確認
+    - paragraph: 公式サイトからツールをインストールし、ターミナルで claude を実行してログインしてください。その後もう一度確認してください。
+    - button "もう一度確認"
+    - switch "Claude CLI のログインを使用しますか？"
+    - text: Claude CLI のログインを使用しますか？
+    - paragraph: オフ — CLI は起動しません
+    - paragraph:
+      - text: "実行ファイルのパス:"
+      - code: /Users/vc/.local/share/claude/versions/2.1.318
+    - button "変更"
+    - strong: Codex CLI
+    - text: 実行ファイルあり — ログインは未確認
+    - paragraph: 公式サイトからツールをインストールし、ターミナルで codex login を実行してログインしてください。その後もう一度確認してください。
+    - button "もう一度確認"
+    - switch "Codex CLI のログインを使用しますか？"
+    - text: Codex CLI のログインを使用しますか？
+    - paragraph: オフ — CLI は起動しません
+    - paragraph:
+      - text: "実行ファイルのパス:"
+      - code: /Users/vc/.codex/packages/standalone/releases/0.166.0-aarch64-apple-darwin/bin/codex
+    - button "変更"
+    - strong: Antigravity CLI
+    - text: 実行ファイルあり — ログインは未確認
+    - paragraph: 公式サイトからツールをインストールし、ターミナルで agy を実行してログインしてください。その後もう一度確認してください。
+    - button "もう一度確認"
+    - switch "Antigravity CLI のログインを使用しますか？"
+    - text: Antigravity CLI のログインを使用しますか？
+    - paragraph: オフ — CLI は起動しません
+    - paragraph:
+      - text: "実行ファイルのパス:"
+      - code: /Users/vc/.local/bin/agy
+    - button "変更"

@@ -1,0 +1,74 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - text: Courses
+  - button "Help"
+  - button "Find a conversation": Find a conversation ⌘/Ctrl K
+- complementary "First-time tip":
+  - group:
+    - strong: Start with what is due next
+    - paragraph: Connect your school if this page is empty. After syncing, Due soon shows the next seven days. Open a course for Deadlines and the course assistant. Check dates against your school before acting on an AI answer.
+  - button "Watch walkthroughs"
+  - button "Dismiss this tip permanently"
+- main:
+  - button "Today / Planner"
+  - button "All courses"
+  - paragraph: Everything you need for your next class, together.
+  - button "Connect school"
+  - status
+  - strong: Alex Chen
+  - text: Example University · moodle.example.edu Synced yesterday
+  - button "Refresh courses"
+  - button "Disconnect school"
+  - text: 1151 · CS210
+  - progressbar "64% complete"
+  - text: 1151 · CS210
+  - heading "Algorithms and Data Structures for Applied Scientific Research" [level=1]
+  - paragraph: Showing cached content · Not synced yet
+  - paragraph: Professor Alexandra Chen
+  - paragraph: 資訊三乙
+  - button "Open in Moodle"
+  - group: Original course name 資料結構與演算法 · Algorithms and Data Structures for Applied Scientific Research
+  - paragraph: Up next · Prepare a research report explaining the experimental observations and conclusions · in 2 days
+  - tablist "Course sections":
+    - tab "Content"
+    - tab "Deadlines"
+    - tab "Announcements"
+    - tab "Grades"
+    - tab "Files"
+    - tab "Notifications" [selected]
+  - tabpanel "Notifications":
+    - heading "Notifications" [level=2]
+    - article:
+      - heading "Unread Materials for the next laboratory session" [level=3]:
+        - img "Unread"
+        - text: Materials for the next laboratory session
+      - time: yesterday
+      - paragraph: Read the lecture notes before class and bring your lab notebook.
+      - button "Mark as read"
+      - button "Explain what I need to prepare"
+  - button "Course assistant"

@@ -1,0 +1,13 @@
+- dialog "History":
+  - heading "History" [level=2]
+  - paragraph: Find your questions, answers and ideas across every chat.
+  - searchbox "Search chat history"
+  - button "All" [pressed]
+  - button "By course"
+  - button "By document"
+  - button "General"
+  - button "Pinned"
+  - group: More filters
+  - status: Searching…
+  - button "Open full History"
+  - button "Close"

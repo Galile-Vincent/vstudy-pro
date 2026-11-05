@@ -1,0 +1,45 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - button "Help"
+  - button "Find a conversation": Find a conversation ⌘/Ctrl K
+- main:
+  - region "Library":
+    - heading "Library" [level=1]
+    - paragraph: 1 document
+    - button "Import document"
+    - textbox "Search your documents"
+    - button "Filters"
+    - combobox "Sort by": Manual order
+    - button "Reverse sort direction": ↑
+    - button "Switch list or grid view"
+    - list "Documents":
+      - listitem:
+        - button "Reading sample"
+        - text: Unfiled 0.8 kB 11/6/2026 MD
+        - 'button "Document options: Reading sample"'
+    - text: 1 document loaded

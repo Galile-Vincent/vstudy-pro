@@ -6,6 +6,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { Walkthrough } from './walkthrough';
 import { i18n } from '../../shared/i18n';
 vi.mock('./progress', () => ({ markLearned: vi.fn() }));
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 let host: HTMLDivElement, root: Root, reduced = false;
 beforeEach(async () => {
   vi.useFakeTimers();
@@ -39,4 +40,15 @@ it('starts static with the transcript open when reduced motion is requested', as
   expect(active()).toContain('Open a document');
   await act(async () => button('Next caption').click());
   expect(active()).toContain('Select a sentence');
+});
+
+it('teaches global History search and the Escape return path in every language', async () => {
+  for (const language of ['en', 'zh-Hant', 'ja', 'en-XA']) {
+    await act(async () => { await i18n.changeLanguage(language); root.render(<Walkthrough key={language} lesson="history"/>); });
+    const text = host.querySelector('.walkthrough-transcript')!.textContent!;
+    expect(text).toContain('Cmd/Ctrl+K');
+    expect(text).toMatch(/Escape|Ëscápë/);
+    expect(text).not.toContain('ux:');
+    expect(text).not.toContain('not all coursework');
+  }
 });

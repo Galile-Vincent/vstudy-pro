@@ -1,0 +1,52 @@
+- link "［Skïp tö cöntënt～～～～～～］":
+  - /url: "#shell-content"
+- complementary "［Fïrst-tïmë tïp～～～～～～］":
+  - group:
+    - strong: ［Try sëlëctïng önë sëntëncë～～～～～～～～～～～］
+  - button "［Wátch wálkthröüghs～～～～～～～～］"
+  - button "［Dïsmïss thïs tïp përmánëntly～～～～～～～～～～～～］"
+- main:
+  - heading "［Döcümënt lïbráry～～～～～～～］" [level=1]
+  - button "［Lïbráry～～～］"
+  - button "［Ïmpört döcümënt～～～～～～］"
+  - text: Reading sample
+  - button "［Cönvërsátïöns～～～～～～］"
+  - button "［Nëw Chát～～～～］"
+  - button "［Hëlp～～］"
+  - button "［Swáp chát sïdë～～～～～～］"
+  - button "［Öpën sëttïngs～～～～～～］"
+  - tablist "［Yöür wörkspácë～～～～～～］":
+    - tab "［Döcümënt～～～～］" [selected]
+    - tab "［Chát～～］"
+  - region "［Döcümënt～～～～］":
+    - text: en.md
+    - button "［Dëlëtë döcümënt～～～～～～］"
+    - button "［Ïmprövë wïth ÁÏ～～～～～～］"
+    - text: ［Márkdöwn · markitdown～～～～～～～～～～］ ［Cönvërsïön lööks ïncömplëtë?～～～～～～～～～～～～］
+    - button "［Ïmprövë wïth ÁÏ～～～～～～］"
+    - document:
+      - heading "Small questions, deeper reading ［Üsë sëctïön Small questions, deeper reading～～～～～～～～～］" [level=1]:
+        - text: Small questions, deeper reading
+        - button "［Üsë sëctïön Small questions, deeper reading～～～～～～～～～］": ［Üsë thïs sëctïön～～～～～～～］
+      - paragraph:
+        - text: "Reading is an active conversation with an idea. Pause after a paragraph and ask:"
+        - strong: What is the claim? What evidence supports it?
+        - button "［Ásk áböüt thïs párágráph～～～～～～～～～～］": ［Ásk áböüt thïs～～～～～～］
+      - paragraph:
+        - text: A useful habit is to explain one idea in your own words. For example, instead of memorizing “spaced practice”, revisit a question tomorrow and again next week. The pause gives you a chance to retrieve what you remember.
+        - button "［Ásk áböüt thïs párágráph～～～～～～～～～～］": ［Ásk áböüt thïs～～～～～～］
+      - heading "Try it ［Üsë sëctïön Try it～～～～～～～～～］" [level=2]:
+        - text: Try it
+        - button "［Üsë sëctïön Try it～～～～～～～～～］": ［Üsë thïs sëctïön～～～～～～～］
+      - paragraph:
+        - text: Select the paragraph above and ask for a practical example. Then ask which assumptions deserve a closer look.
+        - button "［Ásk áböüt thïs párágráph～～～～～～～～～～］": ［Ásk áböüt thïs～～～～～～］
+      - heading "一點中文 / A little Chinese ［Üsë sëctïön 一點中文 / A little Chinese～～～～～～～～～］" [level=2]:
+        - text: 一點中文 / A little Chinese
+        - button "［Üsë sëctïön 一點中文 / A little Chinese～～～～～～～～～］": ［Üsë thïs sëctïön～～～～～～～］
+      - paragraph:
+        - text: 學習不只是記住答案，也是在練習提出好問題。把一個想法說給別人聽，常常能發現自己還不懂的地方。
+        - button "［Ásk áböüt thïs párágráph～～～～～～～～～～］": ［Ásk áböüt thïs～～～～～～］
+      - paragraph:
+        - text: Learning includes asking better questions. Explaining an idea often reveals what we still want to understand.
+        - button "［Ásk áböüt thïs párágráph～～～～～～～～～～］": ［Ásk áböüt thïs～～～～～～］

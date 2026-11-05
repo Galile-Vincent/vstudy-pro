@@ -1,0 +1,1 @@
+PASS History: real general chat, CJK search, safe text, rename, pin, archive/delete undo, keyboard navigation, message jump, Cmd+K, en/zh-Hant/ja

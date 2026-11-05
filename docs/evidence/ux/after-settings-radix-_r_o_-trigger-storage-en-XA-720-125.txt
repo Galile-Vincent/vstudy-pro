@@ -1,0 +1,57 @@
+- dialog "［Sëttïngs～～～～］":
+  - heading "［Sëttïngs～～～～］" [level=2]
+  - button "［Clösë sëttïngs～～～～～～］"
+  - tablist "［Sëttïngs～～～～］":
+    - tab "［Gënërál～～～］"
+    - tab "［Áppëáráncë～～～～］"
+    - tab "［Prövïdërs～～～～］"
+    - tab "［Üságë～～］"
+    - tab "［Störágë～～～］" [selected]
+    - tab "［Prïvácy～～～］"
+  - tabpanel "［Störágë～～～］":
+    - banner:
+      - heading "［Störágë～～～］" [level=2]
+    - paragraph: ［Mánágë löcál fïlës ánd këëp á rëcövëráblë cöpy öf yöür lïbráry.～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - heading "［Spácë ön dïsk～～～～～～］" [level=3]
+    - text: ［Dátábásë～～～～］
+    - group "［Dátábásë～～～～］":
+      - status: ［1.4 MïB～～～～～～］
+    - text: ［Örïgïnál döcümënts～～～～～～～～］
+    - group "［Örïgïnál döcümënts～～～～～～～～］":
+      - status: ［800 B～～～～～］
+    - text: ［Cönvërtëd fïlës～～～～～～］
+    - group "［Cönvërtëd fïlës～～～～～～］":
+      - status: ［800 B～～～～～］
+    - text: ［Ápplïcátïön cáchë ánd cönvërtër～～～～～～～～～～～～～］
+    - group "［Ápplïcátïön cáchë ánd cönvërtër～～～～～～～～～～～～～］":
+      - status: ［21.2 MïB～～～～～～］
+    - text: ［Sëttïngs ánd ëncryptëd sëcrëts～～～～～～～～～～～～］
+    - group "［Sëttïngs ánd ëncryptëd sëcrëts～～～～～～～～～～～～］":
+      - status: ［0 B～～～～～］
+    - text: ［Rëcövëry cöpïës～～～～～～］
+    - group "［Rëcövëry cöpïës～～～～～～］":
+      - status: ［0 B～～～～～］
+    - text: ［Öthër ápplïcátïön dátá～～～～～～～～～］
+    - group "［Öthër ápplïcátïön dátá～～～～～～～～～］":
+      - status: ［432.3 KïB～～～～～～］
+    - paragraph: ［Möödlë rëspönsë páylöáds üsë ［0 B～～～～～］ ïnsïdë thë dátábásë tötál.～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - text: ［Clëár Möödlë cáchë～～～～～～～～］
+    - paragraph: "［Rëspönsë cáchë lïmït: 32 MïB. Clëárïng ït këëps cöürsës, rëmïndërs, cönvërsátïöns, ánd ïmpörtëd döcümënts.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］"
+    - 'group "［Clëár Möödlë cáchë～～～～～～～～］ ［Rëspönsë cáchë lïmït: 32 MïB. Clëárïng ït këëps cöürsës, rëmïndërs, cönvërsátïöns, ánd ïmpörtëd döcümënts.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］"':
+      - button "［Clëár Möödlë cáchë～～～～～～～～］"
+    - text: ［Clëár cönvërtëd fïlës～～～～～～～～～］
+    - paragraph: ［Rëmövë gënërátëd Márkdöwn ánd ÁÏ ïmprövëmënts. Örïgïnál döcümënts ánd cönvërsátïöns stáy. Rëtry cönvërsïön fröm ëách döcümënt tö rëád ït ágáïn.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - group "［Clëár cönvërtëd fïlës～～～～～～～～～］ ［Rëmövë gënërátëd Márkdöwn ánd ÁÏ ïmprövëmënts. Örïgïnál döcümënts ánd cönvërsátïöns stáy. Rëtry cönvërsïön fröm ëách döcümënt tö rëád ït ágáïn.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］":
+      - button "［Clëár cönvërtëd fïlës～～～～～～～～～］"
+    - heading "［Bácküp ánd rëcövëry～～～～～～～～］" [level=3]
+    - paragraph: ［Bácküps ïnclüdë thë dátábásë ánd lïbráry wïth án ïntëgrïty mánïfëst. Thëy cöntáïn prïvátë cöürsëwörk ánd cönvërsátïöns. Këëp thëm sömëwhërë sáfë. Pásswörds, tökëns, prövïdër sëttïngs, ánd cönvërtër ïnstállátïöns árë ëxclüdëd.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - text: ［Ëxpört bácküp～～～～～～］
+    - group "［Ëxpört bácküp～～～～～～］":
+      - button "［Ëxpört bácküp～～～～～～］"
+    - text: ［Rëstörë bácküp～～～～～～］
+    - group "［Rëstörë bácküp～～～～～～］":
+      - button "［Rëstörë bácküp～～～～～～］"
+    - text: ［Chëck dátábásë ïntëgrïty～～～～～～～～～～］
+    - group "［Chëck dátábásë ïntëgrïty～～～～～～～～～～］":
+      - button "［Chëck dátábásë ïntëgrïty～～～～～～～～～～］"
+    - status

@@ -168,6 +168,8 @@ try {
     limit: 50,
   });
   assert.equal(docs.items.length, 3);
+  assert.ok(await page.locator('.folder-tree').evaluate(el => el.clientHeight >= 32), 'folder navigation keeps a visible row above the footer');
+  await shot('folder-tree');
   await page
     .getByRole("treeitem", { name: "Study", exact: true })
     .getByRole("button")

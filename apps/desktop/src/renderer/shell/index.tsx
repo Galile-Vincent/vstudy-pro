@@ -168,7 +168,7 @@ export function AppShell({
               </span>
             )}
             <HelpMenu />
-            <Button variant="ghost" aria-label={tr('history:find')} title={tr('history:find') + ' (' + tr('history:shortcut') + ')'} onClick={() => window.dispatchEvent(new Event('vstudy:find-history'))}><Search size={16}/><span>{tr('history:find')}</span><kbd>{tr('history:shortcut')}</kbd></Button>
+            <Button variant="ghost" className="shell-history-trigger" aria-label={tr('history:find')} title={tr('history:find') + ' (' + tr('history:shortcut') + ')'} onClick={() => window.dispatchEvent(new Event('vstudy:find-history'))}><Search size={16}/><span>{tr('history:find')}</span><kbd>{tr('history:shortcut')}</kbd></Button>
           </header>
           <div id="shell-content" role={route.view === "library" ? "main" : undefined} className="shell-content" tabIndex={-1}>
             {children}

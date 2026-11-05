@@ -1,0 +1,52 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "首次使用提示":
+  - group:
+    - strong: 試著選取一句話
+  - button "觀看操作示範"
+  - button "不再顯示這則提示"
+- main:
+  - heading "文件庫" [level=1]
+  - button "文件庫"
+  - button "匯入文件"
+  - text: Reading sample
+  - button "對話紀錄"
+  - button "新增對話"
+  - button "說明"
+  - button "切換對話位置"
+  - button "開啟設定"
+  - tablist "你的工作區":
+    - tab "文件" [selected]
+    - tab "對話"
+  - region "文件":
+    - text: en.md
+    - button "刪除文件"
+    - button "用 AI 重新解析"
+    - text: Markdown · markitdown 轉換結果不完整？
+    - button "用 AI 重新解析"
+    - document:
+      - heading "Small questions, deeper reading 使用章節「Small questions, deeper reading」" [level=1]:
+        - text: Small questions, deeper reading
+        - button "使用章節「Small questions, deeper reading」": 使用此章節
+      - paragraph:
+        - text: "Reading is an active conversation with an idea. Pause after a paragraph and ask:"
+        - strong: What is the claim? What evidence supports it?
+        - button "詢問此段落": 針對這段提問
+      - paragraph:
+        - text: A useful habit is to explain one idea in your own words. For example, instead of memorizing “spaced practice”, revisit a question tomorrow and again next week. The pause gives you a chance to retrieve what you remember.
+        - button "詢問此段落": 針對這段提問
+      - heading "Try it 使用章節「Try it」" [level=2]:
+        - text: Try it
+        - button "使用章節「Try it」": 使用此章節
+      - paragraph:
+        - text: Select the paragraph above and ask for a practical example. Then ask which assumptions deserve a closer look.
+        - button "詢問此段落": 針對這段提問
+      - heading "一點中文 / A little Chinese 使用章節「一點中文 / A little Chinese」" [level=2]:
+        - text: 一點中文 / A little Chinese
+        - button "使用章節「一點中文 / A little Chinese」": 使用此章節
+      - paragraph:
+        - text: 學習不只是記住答案，也是在練習提出好問題。把一個想法說給別人聽，常常能發現自己還不懂的地方。
+        - button "詢問此段落": 針對這段提問
+      - paragraph:
+        - text: Learning includes asking better questions. Explaining an idea often reveals what we still want to understand.
+        - button "詢問此段落": 針對這段提問

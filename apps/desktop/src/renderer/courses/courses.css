@@ -105,6 +105,7 @@
 }
 .moodle-section-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
@@ -125,6 +126,8 @@
   margin: 0 0 var(--space-4);
 }
 .moodle-section-heading h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
   margin: 0;
 }
 .moodle-due-section {
@@ -479,6 +482,10 @@
   gap: var(--space-2);
 }
 .moodle-notification-actions button {
+  max-width: 100%;
+  min-width: 0;
+  flex-shrink: 1;
+  overflow-wrap: anywhere;
   height: auto;
   padding: var(--space-1) var(--space-2);
   font-size: var(--type-xs);

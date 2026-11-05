@@ -67,6 +67,7 @@ const tabs = [
   "notifications",
 ] as const;
 type Tab = (typeof tabs)[number];
+const termFilters = ["current", "future", "past", "all"] as const;
 export function deadlineGroup(deadline: MoodleDeadline, now = Date.now()) {
   if (deadline.submitted) return "done";
   const remaining = Date.parse(deadline.dueAt) - now;
@@ -900,7 +901,7 @@ function CoursesBody({
                 className="moodle-term-tabs"
               >
                 <TabsList aria-label={tr("moodle:term_filter")}>
-                  {(["current", "future", "past", "all"] as const).map(
+                  {termFilters.map(
                     (filter) => (
                       <TabsTrigger key={filter} value={filter}>
                         {tr(`moodle:term_${filter}`)}
@@ -915,63 +916,67 @@ function CoursesBody({
                     ),
                   )}
                 </TabsList>
-              </Tabs>
-              {!overview.courses.some((course) =>
-                matchesTerm(course, term),
-              ) && (
-                <p className="moodle-empty-inline">
-                  {tr("moodle:no_term_courses")}
-                </p>
-              )}
-              <div className="moodle-grid">
-                {overview.courses
-                  .filter((course) => matchesTerm(course, term))
-                  .map((course) => (
-                    <article
-                      key={course.id}
-                      className="moodle-course-card"
-                      title={[course.fullName, course.identity.lifecycle === "unknown" ? tr("moodle:dates_unavailable") : null].filter(Boolean).join(" · ")}
-                    >
-                      <Cover course={course} />
-                      <div className="moodle-card-body">
-                        <h3>
-                          <button
-                            type="button"
-                            onClick={() => onCourse(course.id)}
+                {termFilters.map((filter) => (
+                  <TabsContent key={filter} value={filter}>
+                    {!overview.courses.some((course) =>
+                      matchesTerm(course, filter),
+                    ) && (
+                      <p className="moodle-empty-inline">
+                        {tr("moodle:no_term_courses")}
+                      </p>
+                    )}
+                    <div className="moodle-grid">
+                      {overview.courses
+                        .filter((course) => matchesTerm(course, filter))
+                        .map((course) => (
+                          <article
+                            key={course.id}
+                            className="moodle-course-card"
+                            title={[course.fullName, course.identity.lifecycle === "unknown" ? tr("moodle:dates_unavailable") : null].filter(Boolean).join(" · ")}
                           >
-                            {displayTitle(
-                              course.identity,
-                              lang,
-                              course.fullName,
-                            )}
-                          </button>
-                        </h3>
-                        <IdentityLine value={displayTeachers(course.identity, lang)} label={tr("moodle:teacher_unknown")} />
-                        <IdentityLine value={displayClass(course.identity)} label={tr("moodle:class_unknown")} />
-                        <footer>
-                          <span>
-                            <CalendarDays />
-                            {tr("moodle:due_count", {
-                              count: dueSoon.filter(
-                                (d) => d.courseId === course.id,
-                              ).length,
-                            })}
-                          </span>
-                          <span>
-                            {tr("moodle:course_unread", {
-                              count:
-                                homeDetails
-                                  .find((d) => d.course.id === course.id)
-                                  ?.notifications.filter((n) => !n.read)
-                                  .length ?? 0,
-                            })}
-                            <ArrowUpRight />
-                          </span>
-                        </footer>
-                      </div>
-                    </article>
-                  ))}
-              </div>
+                            <Cover course={course} />
+                            <div className="moodle-card-body">
+                              <h3>
+                                <button
+                                  type="button"
+                                  onClick={() => onCourse(course.id)}
+                                >
+                                  {displayTitle(
+                                    course.identity,
+                                    lang,
+                                    course.fullName,
+                                  )}
+                                </button>
+                              </h3>
+                              <IdentityLine value={displayTeachers(course.identity, lang)} label={tr("moodle:teacher_unknown")} />
+                              <IdentityLine value={displayClass(course.identity)} label={tr("moodle:class_unknown")} />
+                              <footer>
+                                <span>
+                                  <CalendarDays />
+                                  {tr("moodle:due_count", {
+                                    count: dueSoon.filter(
+                                      (d) => d.courseId === course.id,
+                                    ).length,
+                                  })}
+                                </span>
+                                <span>
+                                  {tr("moodle:course_unread", {
+                                    count:
+                                      homeDetails
+                                        .find((d) => d.course.id === course.id)
+                                        ?.notifications.filter((n) => !n.read)
+                                        .length ?? 0,
+                                  })}
+                                  <ArrowUpRight />
+                                </span>
+                              </footer>
+                            </div>
+                          </article>
+                        ))}
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
             </section>
           </>
         ) : (

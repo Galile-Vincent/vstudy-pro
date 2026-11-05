@@ -1,0 +1,26 @@
+[
+  {
+    "replay": false,
+    "shortcut": "Meta+k",
+    "closed": true,
+    "focus": "Find a conversation"
+  },
+  {
+    "replay": false,
+    "shortcut": "Control+k",
+    "closed": true,
+    "focus": "Find a conversation"
+  },
+  {
+    "replay": true,
+    "shortcut": "Meta+k",
+    "closed": true,
+    "focus": "Find a conversation"
+  },
+  {
+    "replay": true,
+    "shortcut": "Control+k",
+    "closed": true,
+    "focus": "Find a conversation"
+  }
+]

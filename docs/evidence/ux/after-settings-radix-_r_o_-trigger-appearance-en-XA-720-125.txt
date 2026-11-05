@@ -1,0 +1,82 @@
+- dialog "［Sëttïngs～～～～］":
+  - heading "［Sëttïngs～～～～］" [level=2]
+  - button "［Clösë sëttïngs～～～～～～］"
+  - tablist "［Sëttïngs～～～～］":
+    - tab "［Gënërál～～～］"
+    - tab "［Áppëáráncë～～～～］" [selected]
+    - tab "［Prövïdërs～～～～］"
+    - tab "［Üságë～～］"
+    - tab "［Störágë～～～］"
+    - tab "［Prïvácy～～～］"
+  - tabpanel "［Áppëáráncë～～～～］":
+    - banner:
+      - heading "［Áppëáráncë～～～～］" [level=2]
+    - region "［Cölör schëmë～～～～～］":
+      - heading "［Cölör schëmë～～～～～］" [level=3]
+      - button "［Systëm～～～］" [pressed]
+      - button "［Lïght～～］"
+      - button "［Dárk～～］"
+    - region "［Thëmës～～～］":
+      - heading "［Thëmës～～～］" [level=3]
+      - button "［Crëátë thëmë～～～～～］"
+      - button "［Ádd thëmë～～～～］"
+      - button "［VStüdy～～～］" [pressed]
+      - button "［Ëxpört VStudy～～～～～～］"
+      - button "［Öcëán～～］"
+      - button "［Ëxpört Ocean～～～～～～］"
+      - button "［Grövë～～］"
+      - button "［Ëxpört Grove～～～～～～］"
+      - button "［Ëmbër～～］"
+      - button "［Ëxpört Ember～～～～～～］"
+      - button "［Ïrïs～～］"
+      - button "［Ëxpört Iris～～～～～～］"
+      - button "［Rösë～～］"
+      - button "［Ëxpört Rose～～～～～～］"
+      - button "［Slátë～～］"
+      - button "［Ëxpört Slate～～～～～～］"
+      - button "［Pápër～～］"
+      - button "［Ëxpört Paper～～～～～～］"
+      - button "［Hïgh cöntrást～～～～～～］"
+      - button "［Ëxpört High contrast～～～～～～］"
+    - heading "［Ïntërfácë～～～～］" [level=3]
+    - text: ［Cöntrást～～～～］
+    - paragraph: ［Strëngthën tëxt, bördërs, ánd föcüs ïndïcátörs. 100% ïs thë áccëssïblë básëlïnë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - group "［Cöntrást～～～～］ ［Strëngthën tëxt, bördërs, ánd föcüs ïndïcátörs. 100% ïs thë áccëssïblë básëlïnë.～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～］":
+      - status "100": 100%
+      - slider "［Cöntrást～～～～］": "100"
+    - text: ［Gláss öpácïty～～～～～～］
+    - paragraph: ［Hïghër válüës mákë mënüs, dïálögs, ánd thë cömpösër mörë sölïd.～～～～～～～～～～～～～～～～～～～～～～～～～～］
+    - group "［Gláss öpácïty～～～～～～］ ［Hïghër válüës mákë mënüs, dïálögs, ánd thë cömpösër mörë sölïd.～～～～～～～～～～～～～～～～～～～～～～～～～～］":
+      - status "80": 80%
+      - slider "［Gláss öpácïty～～～～～～］": "80"
+    - text: ［Tëxt sïzë～～～～］
+    - group "［Tëxt sïzë～～～～］":
+      - radiogroup "［Tëxt sïzë～～～～］":
+        - radio "100%"
+        - radio "125%" [checked]
+        - radio "150%"
+        - radio "200%"
+    - text: ［Dënsïty～～～］
+    - group "［Dënsïty～～～］":
+      - radiogroup "［Dënsïty～～～］":
+        - radio "［Cömförtáblë～～～～～］"
+        - radio "［Cömpáct～～～］" [checked]
+    - text: ［Rëádër fönt～～～～～］
+    - group "［Rëádër fönt～～～～～］":
+      - combobox "［Rëádër fönt～～～～～］": ［Systëm～～～］
+    - text: ［Rëádër sïzë～～～～～］
+    - group "［Rëádër sïzë～～～～～］":
+      - radiogroup "［Rëádër sïzë～～～～～］":
+        - radio "［Smáll～～］"
+        - radio "［Mëdïüm～～～］" [checked]
+        - radio "［Lárgë～～］"
+        - radio "［Ëxtrá lárgë～～～～～］"
+    - text: ［Mátërïál～～～～］
+    - group "［Mátërïál～～～～］":
+      - radiogroup "［Mátërïál～～～～］":
+        - radio "［Gláss～～］" [checked]
+        - radio "［Sölïd～～］"
+    - heading "［Rëádïng nötës～～～～～～］" [level=3]
+    - paragraph: ［Thë qüïck bröwn föx jümps övër thë lázy dög.～～～～～～～～～～～～～～～～～～］ ［字體預覽 Áá 你好 日本語～～～～～～］
+    - paragraph: ［Ásk áböüt thïs döcümënt～～～～～～～～～～］
+    - text: ［Sëlëctëd pásságë～～～～～～～］

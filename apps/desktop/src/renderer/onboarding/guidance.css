@@ -33,6 +33,9 @@
 .getting-started button { white-space:normal; text-align:start; height:auto; min-height:var(--control-height); justify-content:start; }
 .getting-started small { color:var(--muted); }
 .context-coach { display:flex; justify-content:space-between; align-items:flex-start; gap:var(--space-4); padding:var(--space-3) var(--space-6); margin:var(--space-3) var(--space-6) 0; background:var(--active); border-radius:var(--r-md); }
+.context-coach > div { min-width:0; }
+.context-coach summary { cursor:pointer; }
+.context-coach summary:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 .context-coach p { margin-block:var(--space-1); line-height:1.6; max-width:75ch; }
 .learning-shortcuts { display:grid; gap:var(--space-4); }
 .learning-shortcuts > div { display:flex; justify-content:space-between; gap:var(--space-4); }

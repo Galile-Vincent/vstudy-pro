@@ -1,0 +1,82 @@
+- dialog "設定":
+  - heading "設定" [level=2]
+  - button "關閉設定"
+  - tablist "設定":
+    - tab "一般"
+    - tab "外觀" [selected]
+    - tab "供應商"
+    - tab "用量"
+    - tab "儲存空間"
+    - tab "隱私"
+  - tabpanel "外觀":
+    - banner:
+      - heading "外觀" [level=2]
+    - region "色彩模式":
+      - heading "色彩模式" [level=3]
+      - button "跟隨系統" [pressed]
+      - button "淺色"
+      - button "深色"
+    - region "主題":
+      - heading "主題" [level=3]
+      - button "建立主題"
+      - button "加入主題"
+      - button "VStudy" [pressed]
+      - button "匯出 VStudy"
+      - button "海洋"
+      - button "匯出 Ocean"
+      - button "林地"
+      - button "匯出 Grove"
+      - button "餘燼"
+      - button "匯出 Ember"
+      - button "鳶尾"
+      - button "匯出 Iris"
+      - button "玫瑰"
+      - button "匯出 Rose"
+      - button "石板"
+      - button "匯出 Slate"
+      - button "紙張"
+      - button "匯出 Paper"
+      - button "高對比"
+      - button "匯出 High contrast"
+    - heading "介面" [level=3]
+    - text: 對比度
+    - paragraph: 提高文字、邊框與焦點的對比度。100% 為無障礙基準。
+    - group "對比度 提高文字、邊框與焦點的對比度。100% 為無障礙基準。":
+      - status "100": 100%
+      - slider "對比度": "100"
+    - text: 玻璃不透明度
+    - paragraph: 數值越高，選單、對話框與輸入區越不透明。
+    - group "玻璃不透明度 數值越高，選單、對話框與輸入區越不透明。":
+      - status "80": 80%
+      - slider "玻璃不透明度": "80"
+    - text: 文字大小
+    - group "文字大小":
+      - radiogroup "文字大小":
+        - radio "100%"
+        - radio "125%" [checked]
+        - radio "150%"
+        - radio "200%"
+    - text: 間距
+    - group "間距":
+      - radiogroup "間距":
+        - radio "寬鬆"
+        - radio "緊密" [checked]
+    - text: 閱讀字體
+    - group "閱讀字體":
+      - combobox "閱讀字體": 系統
+    - text: 閱讀字級
+    - group "閱讀字級":
+      - radiogroup "閱讀字級":
+        - radio "小"
+        - radio "中" [checked]
+        - radio "大"
+        - radio "特大"
+    - text: 材質
+    - group "材質":
+      - radiogroup "材質":
+        - radio "玻璃" [checked]
+        - radio "實色"
+    - heading "閱讀筆記" [level=3]
+    - paragraph: The quick brown fox jumps over the lazy dog. 字體預覽 Aa 你好 日本語
+    - paragraph: 詢問這份文件
+    - text: 已選取段落

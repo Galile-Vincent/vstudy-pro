@@ -1,0 +1,151 @@
+- link "跳至主要內容":
+  - /url: "#shell-content"
+- complementary "文件庫":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "首頁"
+    - listitem:
+      - button "文件庫"
+    - listitem:
+      - button "課程"
+    - listitem:
+      - button "聊天紀錄"
+  - navigation "智慧檢視":
+    - button "所有文件"
+    - button "最近開啟"
+    - button "已釘選"
+    - button "未分類"
+    - button "轉換中／失敗"
+  - heading "資料夾" [level=2]
+  - button "新增資料夾"
+  - paragraph: 尚無資料夾
+  - list:
+    - listitem:
+      - button "設定"
+- banner:
+  - button "顯示或隱藏文件庫" [expanded]
+  - text: VStudy Pro 是什麼？
+  - button "說明"
+  - button "尋找對話"
+- main "VStudy Pro 介紹":
+  - button "暫停動畫"
+  - button "關閉"
+  - region "一段一段，讀懂你手上的資料。":
+    - paragraph: Mac 上的 AI 閱讀夥伴
+    - heading "一段一段，讀懂你手上的資料。" [level=1]
+    - paragraph: 開啟支援的文件、選取段落，再向 AI 模型提問。資料庫保留在 Mac 上。問題、對話紀錄、文件中繼資料與選取文字會傳給你選擇的供應商；未選取文字時，會附上大綱與開頭節錄。
+    - button "繼續閱讀"
+    - button "看看怎麼運作"
+    - img "示意圖：文件庫中的一份文件、閱讀區裡被標示的一段文字，以及附有引用標籤的回答。"
+  - region "看看提問如何變成對話":
+    - heading "看看提問如何變成對話" [level=2]
+    - paragraph: 以範例文件示範的腳本動畫，不會呼叫任何模型。
+    - list "四個步驟看懂怎麼用":
+      - listitem: 1 選取一段內容
+      - listitem: 2 用自己的話提問
+      - listitem: 3 得到以那段內容為依據的回答
+      - listitem: 4 點引用，回到原文
+    - text: 範例
+    - paragraph: 想把對話放在另一側？在工具列切換即可。
+    - heading "試試看" [level=3]
+    - paragraph: 匯入範例，等待頁面準備完成。拖曳選取一句話，在聊天輸入「解釋這句話」，選擇模型並送出。開啟引用編號，比較來源與回答。送出前可能需要先設定 AI。
+    - button "開啟範例練習"
+  - region "讀、問，再回到出處確認":
+    - heading "讀、問，再回到出處確認" [level=2]
+    - paragraph: VStudy Pro 專心做好的三件事。
+    - heading "將支援的文件轉為易讀文字" [level=3]
+    - paragraph: PDF、Word、Excel、PowerPoint、HTML、CSV、Markdown 和純文字，都會轉成乾淨的 Markdown。PDF 先交給我們自己的解析器處理，再由 MarkItDown 補位。原始檔案也會一起保留。
+    - heading "問的就是你選的那一段" [level=3]
+    - paragraph: 選取段落或整個章節，用自己的話提問。模型會收到指示，依據這些文字回答，並在內容不足以支持答案時說明。
+    - heading "回答可以引用原文" [level=3]
+    - paragraph: 當模型引用章節或頁碼時，點擊引用即可跳回原文，自己查證。
+    - term: "8"
+    - definition: 種檔案類型
+    - term: "6"
+    - definition: 種模型連接方式
+    - term: "3"
+    - definition:
+      - text: 種介面語言
+      - paragraph: English · 繁體中文 · 日本語
+  - region "為了讀懂而讀的人":
+    - heading "為了讀懂而讀的人" [level=2]
+    - paragraph: 四種人、四種文件，同一種讀法。
+    - heading "大學生" [level=3]
+    - paragraph: 下週期中考：一疊講義 PDF、一份很長的 PowerPoint，筆記裡中、英、日文都有。
+    - paragraph: 將投影片轉為文字，用你選擇的語言詢問解釋。
+    - strong: 先從這裡開始
+    - paragraph: 選取投影片的文字，問「用簡單的話解釋」。在設定中指定回覆語言。
+    - heading "研究人員" [level=3]
+    - paragraph: 正在為文獻回顧讀一疊論文，想確認某張結果表格到底寫了什麼。
+    - paragraph: 閱讀論文與有框線的表格，查證回答所引用的章節或頁碼。
+    - strong: 先從這裡開始
+    - paragraph: 能跳回原頁的引用，以及每個專案一個資料夾。
+    - heading "專業工作者" [level=3]
+    - paragraph: 週四開會前要看完：Word 格式的供應商合約、PDF 季報，還有背後那份 Excel。
+    - paragraph: 詢問條款或數字的意思，在採用答案前查證引用內容。
+    - strong: 先從這裡開始
+    - paragraph: 用「使用此章節」詢問整段條款；Excel 工作表會以表格呈現。
+    - heading "語言學習者" [level=3]
+    - paragraph: 正在讀一篇中日對照的文章，想知道某個說法為什麼這樣用。
+    - paragraph: 保留原文，用你選擇的回覆語言詢問文法、語感與用字。
+    - strong: 先從這裡開始
+    - paragraph: 先選好回覆語言，再選取一句話直接問。
+  - region "用你自己的模型":
+    - heading "用你自己的模型" [level=2]
+    - paragraph: 透過命令列工具使用你已經訂閱的服務，或加入自己的 API 金鑰。不連接任何模型，也能閱讀與整理文件。
+    - heading "Claude CLI" [level=3]
+    - paragraph: 沿用你現有的登入
+    - paragraph: 在終端機執行一次並登入：
+    - code: claude auth login
+    - button "複製"
+    - heading "Codex CLI" [level=3]
+    - paragraph: 沿用你現有的登入
+    - paragraph: 在終端機登入：
+    - code: codex login
+    - button "複製"
+    - heading "Antigravity CLI" [level=3]
+    - paragraph: 沿用你現有的登入
+    - paragraph: 在終端機執行一次並登入：
+    - code: agy
+    - button "複製"
+    - heading "Anthropic" [level=3]
+    - paragraph: 你的 API 金鑰
+    - paragraph: 在設定中貼上金鑰。
+    - heading "OpenAI" [level=3]
+    - paragraph: 你的 API 金鑰
+    - paragraph: 在設定中貼上金鑰。
+    - heading "OpenAI 相容服務" [level=3]
+    - paragraph: 服務網址與 API 金鑰
+    - paragraph: 適用於提供 OpenAI 相容端點的服務。
+    - paragraph: VStudy Pro 只檢查已安裝的 CLI，不會自動啟動。啟用提供者後，開啟模型選單或在設定重新整理才會探索模型。API 金鑰透過 macOS 鑰匙圈加密。CLI 模型沒有工具權限，只看得到 VStudy Pro 傳送的文字。
+    - button "設定模型"
+  - region "你的文件庫，就在你的 Mac 上":
+    - heading "你的文件庫，就在你的 Mac 上" [level=2]
+    - paragraph: 匯入的所有文件都存放在這台 Mac 的文件庫裡，用你習慣的方式整理。
+    - heading "整理" [level=3]
+    - list:
+      - listitem: 資料夾、釘選與已儲存的篩選條件
+      - listitem: 搜尋也找得到中文和日文詞彙，不只英文
+      - listitem: 依類型、資料夾、標籤、日期或大小篩選
+    - heading "掌握用量" [level=3]
+    - list:
+      - listitem: 本月 token 用量與估計費用
+      - listitem: 需要的話，可設定每月預算
+      - listitem: 閱讀、提問、匯入都算數的學習紀錄
+    - heading "保有隱私" [level=3]
+    - list:
+      - listitem: 文件與原始檔案都存放在這台 Mac 上
+      - listitem: 儲存的 API 金鑰使用 macOS 鑰匙圈加密；暫用金鑰只保留在記憶體
+      - listitem: VStudy Pro 本身不傳送分析資料
+      - listitem: 你啟用的 CLI 工具可能連線至其服務；問題及相關文件內容會送至你選擇的供應商。
+    - img "首頁卡片範例：七天的學習紀錄，以及 14 天的 token 用量走勢。"
+    - paragraph:
+      - strong: 請先了解
+      - text: · VStudy Pro 是 macOS 應用程式。PDF 讀取的是文字層，目前還不支援 OCR，掃描的頁面無法讀取。Word、Excel、PowerPoint 指的是 .docx、.xlsx、.pptx，每個檔案上限 50 MB。不提供跨裝置同步，也不是筆記軟體。第一次轉換時需要連網一次，以安裝轉換工具。 首次轉換會詢問是否從 PyPI 下載套件，並可能從 GitHub 下載 Python。選擇離線仍可閱讀 Markdown 和文字，準備好後再重試轉換。
+  - region "從一份文件開始。":
+    - heading "從一份文件開始。" [level=2]
+    - paragraph: 挑一份這週真的需要讀懂的資料。
+    - button "帶一份文件來"
+    - button "試讀範例文件"
+    - button "前往首頁"

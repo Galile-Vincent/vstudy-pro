@@ -1,0 +1,1 @@
+PASS ja/sample: first task 1797ms

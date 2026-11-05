@@ -1,0 +1,20 @@
+- dialog "AI is optional":
+  - status: Step 5 of 6
+  - button "Save and leave"
+  - heading "AI is optional" [level=1]
+  - paragraph: You can read and organise files without AI. Connect a service only when you want to ask a question.
+  - region "AI is optional":
+    - term: What works without paying for AI
+    - definition: Read the sample, import Markdown or text, organise your library, and view connected school coursework.
+    - term: An API key is a secret code for an AI account
+    - definition: OpenAI or Anthropic can charge for questions sent with a key. A ChatGPT or Claude chat subscription does not automatically include API use.
+    - term: Already use Claude Code, Codex, or Antigravity?
+    - definition: Their command-line apps use a separate sign-in in Terminal. Enable one in Settings after signing in. Its plan limits and fees still apply. Nothing is enabled here.
+    - term: Before anything leaves this Mac
+    - definition: An enabled provider receives your question, chat history, document details, and selected text. Without a selection, it receives an outline and opening excerpt. Earlier selections can remain in history. Enabled command-line apps may also contact their own services. VStudy sends no analytics.
+    - term: Before saving a key
+    - definition: Saving or unlocking a key may ask for macOS Keychain access. Settings also offers “Use without saving keys” for this session only. Skip setup to avoid these prompts.
+  - contentinfo:
+    - button "Set up AI in Settings"
+    - button "Back"
+    - button "Skip AI for now"

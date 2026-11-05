@@ -1,0 +1,35 @@
+- dialog "Settings":
+  - heading "Settings" [level=2]
+  - button "Close settings"
+  - tablist "Settings":
+    - tab "General"
+    - tab "Appearance"
+    - tab "Providers"
+    - tab "Usage"
+    - tab "Storage"
+    - tab "Privacy" [selected]
+  - tabpanel "Privacy":
+    - banner:
+      - heading "Privacy" [level=2]
+    - heading "Network activity" [level=3]
+    - text: Session-only inventory of app-initiated requests and CLI launches. CLI-managed endpoints and Chromium background traffic are not individually visible; this is not a packet capture. Bytes are unknown unless shown.
+    - group "Session-only inventory of app-initiated requests and CLI launches. CLI-managed endpoints and Chromium background traffic are not individually visible; this is not a packet capture. Bytes are unknown unless shown.":
+      - button "Refresh"
+    - text: No activity recorded this session.
+    - heading "Document converter" [level=3]
+    - status: "Current mode: online. Downloads are allowed."
+    - text: Stop converter after idle minutes
+    - paragraph: First conversion asks before downloading locked packages from pypi.org and files.pythonhosted.org; uv may download Python from GitHub. Offline mode supports Markdown and text. Conversion runs locally without network access on macOS.
+    - group "Stop converter after idle minutes First conversion asks before downloading locked packages from pypi.org and files.pythonhosted.org; uv may download Python from GitHub. Offline mode supports Markdown and text. Conversion runs locally without network access on macOS.":
+      - spinbutton "Stop converter after idle minutes": "5"
+    - text: Converter mode
+    - group "Converter mode":
+      - button "Enable downloads and retry"
+      - button "Offline mode"
+    - heading "Delete all data" [level=3]
+    - text: Delete all data
+    - paragraph: Permanently remove this app’s documents, conversations, saved keys, app caches and converter environment, then quit. Original files outside the library, CLI logins and shared Python download caches are kept.
+    - group "Delete all data Permanently remove this app’s documents, conversations, saved keys, app caches and converter environment, then quit. Original files outside the library, CLI logins and shared Python download caches are kept.":
+      - textbox "Type DELETE to confirm":
+        - /placeholder: DELETE
+      - button "Delete all data" [disabled]

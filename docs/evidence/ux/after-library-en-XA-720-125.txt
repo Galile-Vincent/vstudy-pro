@@ -1,0 +1,44 @@
+- link "［Skïp tö cöntënt～～～～～～］":
+  - /url: "#shell-content"
+- complementary "［Döcümënt lïbráry～～～～～～～］":
+  - text: ［VStüdy Prö～～～～］
+  - list:
+    - listitem:
+      - button "［Hömë～～］"
+    - listitem:
+      - button "［Lïbráry～～～］"
+    - listitem:
+      - button "［Cöürsës～～～］"
+    - listitem:
+      - button "［Hïstöry～～～］"
+  - navigation "［Smárt vïëws～～～～～］":
+    - button "［Áll döcümënts～～～～～～］"
+    - button "［Rëcënt～～～］"
+    - button "［Pïnnëd～～～］"
+    - button "［Ünfïlëd～～～］"
+    - button "［Cönvërtïng / Fáïlëd～～～～～～～～］"
+  - heading "［Földërs～～～］" [level=2]
+  - button "［Nëw földër～～～～］"
+  - paragraph: ［Nö földërs yët～～～～～～］
+  - list:
+    - listitem:
+      - button "［Sëttïngs～～～～］"
+- banner:
+  - button "［Tögglë döcümënt lïbráry～～～～～～～～～～］" [expanded]
+  - button "［Hëlp～～］"
+  - button "［Fïnd á cönvërsátïön～～～～～～～～］"
+- main:
+  - region "［Lïbráry～～～］":
+    - heading "［Lïbráry～～～］" [level=1]
+    - paragraph: ［1 döcümënt～～～～～～～～～］
+    - button "［Ïmpört döcümënt～～～～～～］"
+    - textbox "［Sëárch yöür döcümënts～～～～～～～～～］"
+    - button "［Fïltërs～～～］"
+    - combobox "［Sört by～～～］": ［Mánüál ördër～～～～～］
+    - button "［Rëvërsë sört dïrëctïön～～～～～～～～～］": ↑
+    - button "［Swïtch lïst ör grïd vïëw～～～～～～～～～～］"
+    - list "［Döcümënts～～～～］":
+      - listitem:
+        - button "Reading sample"
+        - 'button "［Döcümënt öptïöns: Reading sample～～～～～～～～～～～］"'
+    - text: ［1 döcümënt löádëd～～～～～～～～～～～～］

@@ -1,0 +1,57 @@
+- dialog "設定":
+  - heading "設定" [level=2]
+  - button "關閉設定"
+  - tablist "設定":
+    - tab "一般"
+    - tab "外觀"
+    - tab "供應商"
+    - tab "用量"
+    - tab "儲存空間" [selected]
+    - tab "隱私"
+  - tabpanel "儲存空間":
+    - banner:
+      - heading "儲存空間" [level=2]
+    - paragraph: 管理本機檔案，並保留可復原的文件庫備份。
+    - heading "磁碟使用量" [level=3]
+    - text: 資料庫
+    - group "資料庫":
+      - status: 1.4 MiB
+    - text: 原始文件
+    - group "原始文件":
+      - status: 800 位元組
+    - text: 轉換檔案
+    - group "轉換檔案":
+      - status: 800 位元組
+    - text: 應用程式快取與轉換器
+    - group "應用程式快取與轉換器":
+      - status: 21.2 MiB
+    - text: 設定與加密憑證
+    - group "設定與加密憑證":
+      - status: 0 位元組
+    - text: 復原副本
+    - group "復原副本":
+      - status: 0 位元組
+    - text: 其他應用程式資料
+    - group "其他應用程式資料":
+      - status: 303.6 KiB
+    - paragraph: Moodle 回應快取在資料庫中占用 0 位元組，已包含於資料庫總量。
+    - text: 清除 Moodle 快取
+    - paragraph: 回應快取上限為 32 MiB。清除後仍保留課程、提醒、對話與匯入文件。
+    - group "清除 Moodle 快取 回應快取上限為 32 MiB。清除後仍保留課程、提醒、對話與匯入文件。":
+      - button "清除 Moodle 快取"
+    - text: 清除轉換檔案
+    - paragraph: 移除產生的 Markdown 與 AI 改善版本。原始文件與對話會保留。請在各文件中重新轉換以繼續閱讀。
+    - group "清除轉換檔案 移除產生的 Markdown 與 AI 改善版本。原始文件與對話會保留。請在各文件中重新轉換以繼續閱讀。":
+      - button "清除轉換檔案"
+    - heading "備份與復原" [level=3]
+    - paragraph: 備份包含資料庫、文件庫與完整性清單，其中有私人課業內容與對話，請妥善保管。不包含密碼、權杖、服務供應商設定與轉換器安裝檔。
+    - text: 匯出備份
+    - group "匯出備份":
+      - button "匯出備份"
+    - text: 從備份復原
+    - group "從備份復原":
+      - button "從備份復原"
+    - text: 檢查資料庫完整性
+    - group "檢查資料庫完整性":
+      - button "檢查資料庫完整性"
+    - status

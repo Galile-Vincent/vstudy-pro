@@ -1,0 +1,84 @@
+- dialog "Settings":
+  - heading "Settings" [level=2]
+  - button "Close settings"
+  - tablist "Settings":
+    - tab "General"
+    - tab "Appearance"
+    - tab "Providers" [selected]
+    - tab "Usage"
+    - tab "Storage"
+    - tab "Privacy"
+  - tabpanel "Providers":
+    - banner:
+      - heading "Providers" [level=2]
+      - paragraph: Keys are saved securely in the desktop app and never read back.
+    - text: Read-only structured tables (API providers only)
+    - paragraph: Optional table presentations. Off by default. CLI tools remain disabled.
+    - group "Read-only structured tables (API providers only) Optional table presentations. Off by default. CLI tools remain disabled.":
+      - switch "Read-only structured tables (API providers only)"
+    - heading "Providers" [level=3]
+    - strong: Anthropic
+    - text: No key saved
+    - button "Get a key"
+    - button "Test connection"
+    - paragraph: An API key is a secret code from your AI service’s developer website. A chat login is different. The service may charge you for use.
+    - paragraph: On Mac, saving may ask for your Mac login password so VStudy Pro can use Keychain. A session key lasts only until you quit the app.
+    - textbox "Anthropic API key":
+      - /placeholder: Enter API key
+    - button "Save key" [disabled]
+    - button "Use without saving keys" [disabled]
+    - strong: OpenAI
+    - text: No key saved
+    - button "Get a key"
+    - button "Test connection"
+    - paragraph: An API key is a secret code from your AI service’s developer website. A chat login is different. The service may charge you for use.
+    - paragraph: On Mac, saving may ask for your Mac login password so VStudy Pro can use Keychain. A session key lasts only until you quit the app.
+    - textbox "OpenAI API key":
+      - /placeholder: Enter API key
+    - button "Save key" [disabled]
+    - button "Use without saving keys" [disabled]
+    - strong: OpenAI compatible
+    - text: No key saved
+    - button "Get a key"
+    - button "Test connection"
+    - paragraph: An API key is a secret code from your AI service’s developer website. A chat login is different. The service may charge you for use.
+    - paragraph: On Mac, saving may ask for your Mac login password so VStudy Pro can use Keychain. A session key lasts only until you quit the app.
+    - textbox "OpenAI compatible API key":
+      - /placeholder: Enter API key
+    - button "Save key" [disabled]
+    - button "Use without saving keys" [disabled]
+    - textbox "OpenAI compatible base URL": http://localhost:11434/v1
+    - button "Save URL"
+    - strong: Claude CLI
+    - text: Found on disk — login not checked
+    - paragraph: Install this tool from its official website, then open Terminal and run claude to sign in. Come back and check again.
+    - button "Check again"
+    - switch "Use your Claude CLI login?"
+    - text: Use your Claude CLI login?
+    - paragraph: Off — no CLI is launched
+    - paragraph:
+      - text: "Resolved executable:"
+      - code: /Users/vc/.local/share/claude/versions/2.1.318
+    - button "Change"
+    - strong: Codex CLI
+    - text: Found on disk — login not checked
+    - paragraph: Install this tool from its official website, then open Terminal and run codex login to sign in. Come back and check again.
+    - button "Check again"
+    - switch "Use your Codex CLI login?"
+    - text: Use your Codex CLI login?
+    - paragraph: Off — no CLI is launched
+    - paragraph:
+      - text: "Resolved executable:"
+      - code: /Users/vc/.codex/packages/standalone/releases/0.166.0-aarch64-apple-darwin/bin/codex
+    - button "Change"
+    - strong: Antigravity CLI
+    - text: Found on disk — login not checked
+    - paragraph: Install this tool from its official website, then open Terminal and run agy to sign in. Come back and check again.
+    - button "Check again"
+    - switch "Use your Antigravity CLI login?"
+    - text: Use your Antigravity CLI login?
+    - paragraph: Off — no CLI is launched
+    - paragraph:
+      - text: "Resolved executable:"
+      - code: /Users/vc/.local/bin/agy
+    - button "Change"

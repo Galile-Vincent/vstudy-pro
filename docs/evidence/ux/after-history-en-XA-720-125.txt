@@ -1,0 +1,46 @@
+- link "［Skïp tö cöntënt～～～～～～］":
+  - /url: "#shell-content"
+- complementary "［Döcümënt lïbráry～～～～～～～］":
+  - text: ［VStüdy Prö～～～～］
+  - list:
+    - listitem:
+      - button "［Hömë～～］"
+    - listitem:
+      - button "［Lïbráry～～～］"
+    - listitem:
+      - button "［Cöürsës～～～］"
+    - listitem:
+      - button "［Hïstöry～～～］"
+  - navigation "［Smárt vïëws～～～～～］":
+    - button "［Áll döcümënts～～～～～～］"
+    - button "［Rëcënt～～～］"
+    - button "［Pïnnëd～～～］"
+    - button "［Ünfïlëd～～～］"
+    - button "［Cönvërtïng / Fáïlëd～～～～～～～～］"
+  - heading "［Földërs～～～］" [level=2]
+  - button "［Nëw földër～～～～］"
+  - paragraph: ［Nö földërs yët～～～～～～］
+  - list:
+    - listitem:
+      - button "［Sëttïngs～～～～］"
+- banner:
+  - button "［Tögglë döcümënt lïbráry～～～～～～～～～～］" [expanded]
+  - text: ［Hïstöry～～～］
+  - button "［Hëlp～～］"
+  - button "［Fïnd á cönvërsátïön～～～～～～～～］"
+- main:
+  - heading "［Hïstöry～～～］" [level=1]
+  - paragraph: ［Fïnd yöür qüëstïöns, ánswërs ánd ïdëás ácröss ëvëry chát.～～～～～～～～～～～～～～～～～～～～～～～］
+  - region "［Hïstöry～～～］":
+    - searchbox "［Sëárch chát hïstöry～～～～～～～～］"
+    - button "［Áll～～］" [pressed]
+    - button "［By cöürsë～～～～］"
+    - button "［By döcümënt～～～～～］"
+    - button "［Gënërál～～～］"
+    - button "［Pïnnëd～～～］"
+    - group: ［Mörë fïltërs～～～～～］
+    - button "［Nëw Chát～～～～］ Nov 6":
+      - strong: ［Nëw Chát～～～～］
+      - time: Nov 6
+    - paragraph: Reading sample · fake
+    - button "［Mörë öptïöns～～～～～］"

@@ -1,0 +1,24 @@
+- dialog "觀看操作示範":
+  - banner:
+    - heading "觀看操作示範" [level=2]
+    - button "關閉"
+  - paragraph: 這些圖解範例可離線觀看，不會登入帳號或傳送問題。按「下一段說明」即可依自己的步調閱讀。
+  - navigation "觀看操作示範":
+    - button "連接學校"
+    - button "找到待辦作業"
+    - button "詢問作業期限"
+    - button "針對段落提問"
+    - button "尋找聊天記錄" [pressed]
+  - region "尋找聊天記錄":
+    - paragraph: 圖解範例・非即時資料
+    - paragraph: 第 1 段，共 3 段。 在側邊欄選擇「聊天紀錄」，或在任一畫面按 Cmd/Ctrl+K 尋找先前的對話。
+    - button "播放"
+    - button "重播"
+    - button "下一段說明"
+    - group:
+      - text: 閱讀完整步驟
+      - list:
+        - listitem: 在側邊欄選擇「聊天紀錄」，或在任一畫面按 Cmd/Ctrl+K 尋找先前的對話。
+        - listitem: 輸入問題或回答中的關鍵字。可依課程、文件或一般對話篩選，縮小搜尋範圍。
+        - listitem: 選擇搜尋結果即可回到該對話。按 Escape 關閉快速搜尋，回到原本的畫面。
+    - group: 觀看實際畫面步驟

@@ -24,8 +24,8 @@ Commands run from the repository root unless a different directory is stated. Te
 | `pnpm test` | Pass. 933 passed, 14 optional tests skipped. |
 | `NODE_OPTIONS=--no-experimental-webstorage pnpm test --pool=forks --maxWorkers=2` | Pass. 933 passed, 14 skipped. |
 | `pnpm security:check` | Pass. Dependency baseline, full lint, security lint, contrast checks, and tests. 933 passed, 14 skipped. |
-| `pnpm vendor:check` | Pass. 60 vendor sources and one application file. |
-| `pnpm knip` | Pass with the explicit scope waivers below. |
+| `pnpm vendor:check` | Pass. The renderer follow-up leaves 55 vendor sources and one application file. |
+| `pnpm knip` | Pass. The renderer follow-up removed the five temporary file waivers. |
 | `pnpm build` | Pass. Main, preload, and renderer production bundles. |
 | `CSC_IDENTITY_AUTO_DISCOVERY=false pnpm --filter @vstudy/desktop exec electron-builder --mac dir --publish never` | Pass. Unsigned arm64 directory artifact; no publish. |
 | `pnpm smoke` | Pass. One real Electron instance closed after window, security, bridge, and persistence assertions. |
@@ -37,13 +37,7 @@ The [semantic check](evidence/cleanup/semantic-check.txt) verifies that document
 
 ## Explicit scope waivers
 
-Five known-unused vendored renderer files remain in `knip.json` because this stream is forbidden to edit renderer code. This is an explicit temporary dead-code waiver, not evidence those components are used. The renderer owner should remove them and their vendor manifest entries together, then delete these exclusions. Review by 2026-11-13.
-
-- `src/renderer/components/assistant-ui/elements/tool-approval-questions.tsx`.
-- `src/renderer/components/assistant-ui/elements/tool-fallback-parts.tsx`.
-- `src/renderer/components/ui/alert-dialog.tsx`.
-- `src/renderer/components/ui/context-menu.tsx`.
-- `src/renderer/components/ui/scroll-area.tsx`.
+The UX stream verified that the five listed components had no consumers, removed them and their vendor manifest entries, and removed all five file exclusions from `knip.json`. No temporary renderer file waivers remain.
 
 `tw-shimmer` is retained because `src/renderer/style.css` imports it. Removing the package reproduced a production build failure. Knip does not follow these CSS imports in its current configuration, so the package is listed with the existing CSS-only exceptions. `openssl` is listed as a host binary because three local TLS fixture suites execute it. The root benchmark script's Zod use is declared as an exact root development dependency.
 

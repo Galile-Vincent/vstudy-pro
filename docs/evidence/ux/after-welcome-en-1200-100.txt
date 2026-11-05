@@ -1,0 +1,159 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - text: What is VStudy Pro?
+  - button "Help"
+  - button "Find a conversation": Find a conversation ⌘/Ctrl K
+- main "Introduction to VStudy Pro":
+  - button "Pause animations"
+  - button "Close"
+  - navigation "Sections":
+    - button "Go to Overview"
+    - button "Go to Demo"
+    - button "Go to What it does"
+    - button "Go to Who it's for"
+    - button "Go to Models"
+    - button "Go to Your data"
+    - button "Go to Start"
+  - region "Understand what you read, one passage at a time.":
+    - paragraph: An AI reading companion for your Mac
+    - heading "Understand what you read, one passage at a time." [level=1]
+    - paragraph: Open a supported document, select a passage, and ask an AI model about it. Your library stays on your Mac. Questions, conversation history, document metadata and selected text go to your chosen provider; without a selection, an outline and opening excerpt are included.
+    - button "Bring a document"
+    - button "See how it works"
+    - 'img "Illustration: a document in the Library, a highlighted passage in the reader, and an answer with a citation chip."'
+  - region "See how a question becomes a conversation":
+    - heading "See how a question becomes a conversation" [level=2]
+    - paragraph: A scripted example using the sample document. No model is called.
+    - list "How it works, in four steps":
+      - listitem: 1 Select a passage
+      - listitem: 2 Ask in your own words
+      - listitem: 3 Get an answer grounded in that text
+      - listitem: 4 Follow the citation back to the source
+    - text: Example
+    - paragraph: Prefer the chat on the other side? Swap it from the toolbar.
+    - heading "Try it" [level=3]
+    - paragraph: Import the sample, then wait until its pages are ready. Select a sentence by dragging across it, type “Explain this sentence” in Chat, choose a model and send. Open a numbered citation and compare its source with the answer. AI setup may be needed before sending.
+    - button "Open sample to practice"
+  - region "Read, ask, and check the source":
+    - heading "Read, ask, and check the source" [level=2]
+    - paragraph: Three things VStudy Pro does, and does carefully.
+    - heading "Supported documents, made readable" [level=3]
+    - paragraph: PDF, Word, Excel, PowerPoint, HTML, CSV, Markdown and plain text become clean Markdown. PDFs go through our own parser first, with MarkItDown as a fallback. Your original file is kept alongside.
+    - heading "Ask about exactly what you selected" [level=3]
+    - paragraph: Select a passage, or use a whole section, and ask in your own words. The model is instructed to use that text and to say when it does not support an answer.
+    - heading "Answers can cite the source" [level=3]
+    - paragraph: When the model cites a section or page, click the citation to jump there and check it yourself.
+    - term: "8"
+    - definition: file types
+    - term: "6"
+    - definition: ways to connect a model
+    - term: "3"
+    - definition:
+      - text: interface languages
+      - paragraph: English · 繁體中文 · 日本語
+  - region "Made for people who read to learn":
+    - heading "Made for people who read to learn" [level=2]
+    - paragraph: Four people, four kinds of documents, one way of working.
+    - heading "University student" [level=3]
+    - paragraph: "Midterms next week: lecture PDFs, a long PowerPoint deck, and notes in Chinese, Japanese and English."
+    - paragraph: Read slides as text and ask for an explanation in your preferred language.
+    - strong: Starts with
+    - paragraph: Select a slide's text and ask "Explain this simply." Set Reply language in Settings.
+    - heading "Researcher" [level=3]
+    - paragraph: Working through a stack of papers for a literature review, and needing to check what a results table actually reports.
+    - paragraph: Read papers and ruled tables, then check any cited sections or pages.
+    - strong: Starts with
+    - paragraph: Citations that jump to the page, and one folder per project.
+    - heading "Professional" [level=3]
+    - paragraph: "Before Thursday's meeting: a supplier contract in Word, a quarterly report as a PDF, and the spreadsheet behind it."
+    - paragraph: Ask about a clause or figure and check cited evidence before relying on it.
+    - strong: Starts with
+    - paragraph: "\"Use this section\" to ask about a whole clause. Excel sheets read as tables."
+    - heading "Language learner" [level=3]
+    - paragraph: Reading a bilingual article, one language per line, and wondering why a phrase is used the way it is.
+    - paragraph: Keep the original and ask about grammar, nuance and word choice in your reply language.
+    - strong: Starts with
+    - paragraph: Pick a Reply language, then select a single sentence and ask about it.
+  - region "Bring your own model":
+    - heading "Bring your own model" [level=2]
+    - paragraph: Use a subscription you already have through its command-line tool, or add your own API key. You can read and organise documents without connecting anything.
+    - heading "Claude CLI" [level=3]
+    - paragraph: Uses your existing sign-in
+    - paragraph: "Run once in Terminal and sign in:"
+    - code: claude auth login
+    - button "Copy"
+    - heading "Codex CLI" [level=3]
+    - paragraph: Uses your existing sign-in
+    - paragraph: "Sign in from Terminal:"
+    - code: codex login
+    - button "Copy"
+    - heading "Antigravity CLI" [level=3]
+    - paragraph: Uses your existing sign-in
+    - paragraph: "Run once in Terminal and sign in:"
+    - code: agy
+    - button "Copy"
+    - heading "Anthropic" [level=3]
+    - paragraph: Your API key
+    - paragraph: Paste your key in Settings.
+    - heading "OpenAI" [level=3]
+    - paragraph: Your API key
+    - paragraph: Paste your key in Settings.
+    - heading "OpenAI compatible" [level=3]
+    - paragraph: Base URL and API key
+    - paragraph: For services that offer an OpenAI-compatible endpoint.
+    - paragraph: "VStudy Pro finds installed CLIs without launching them. After you enable a provider, opening the model picker or refreshing Settings checks its models. API keys are encrypted with the macOS Keychain. CLI models get no tools: they see only the text VStudy Pro sends."
+    - button "Set up a model"
+  - region "Your library, on your Mac":
+    - heading "Your library, on your Mac" [level=2]
+    - paragraph: Everything you import lives in a library on this Mac, organised the way you think.
+    - heading "Organise" [level=3]
+    - list:
+      - listitem: Folders, pins and saved filters
+      - listitem: Search that finds Chinese and Japanese words, not just English
+      - listitem: Filter by type, folder, tag, date or size
+    - heading "Keep track" [level=3]
+    - list:
+      - listitem: Tokens and estimated cost for the month
+      - listitem: A monthly budget, if you want one
+      - listitem: A study streak that counts reading, asking and importing
+    - heading "Stay private" [level=3]
+    - list:
+      - listitem: Documents and their originals are stored on this Mac
+      - listitem: Saved API keys use macOS Keychain encryption; session keys stay in memory
+      - listitem: VStudy Pro itself sends no analytics
+      - listitem: Enabled CLI tools may contact their own services. Questions and relevant document text go to your selected provider.
+    - 'img "Example Home cards: a study streak with seven days and a 14-day token sparkline."'
+    - paragraph:
+      - strong: Good to know
+      - text: · VStudy Pro is a macOS app. It reads the text layer of PDFs and has no OCR yet, so scanned pages can't be read. Word, Excel and PowerPoint means .docx, .xlsx and .pptx, up to 50 MB per file. It doesn't sync between devices and isn't a note-taking app. The first conversion needs internet once to set up the converter. The first conversion asks to download packages from PyPI and possibly Python from GitHub. Choose Offline to read Markdown and text; retry conversion when ready.
+  - region "Start with one document.":
+    - heading "Start with one document." [level=2]
+    - paragraph: Pick something you actually need to understand this week.
+    - button "Bring a document"
+    - button "Try a sample document"
+    - button "Go to Home"

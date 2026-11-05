@@ -1,0 +1,28 @@
+- dialog "設定":
+  - heading "設定" [level=2]
+  - button "設定を閉じる"
+  - tablist "設定":
+    - tab "一般" [selected]
+    - tab "外観"
+    - tab "プロバイダー"
+    - tab "使用量"
+    - tab "ストレージ"
+    - tab "プライバシー"
+  - tabpanel "一般":
+    - banner:
+      - heading "一般" [level=2]
+    - heading "言語" [level=3]
+    - text: 表示言語
+    - group "表示言語":
+      - combobox "表示言語": 日本語
+    - text: 回答の言語
+    - paragraph: ドキュメントは依頼された場合にのみ翻訳します。
+    - group "回答の言語 ドキュメントは依頼された場合にのみ翻訳します。":
+      - combobox "回答の言語": 最新のメッセージに合わせる
+    - heading "ようこそ" [level=3]
+    - text: ウェルカムガイド
+    - group "ウェルカムガイド":
+      - button "はじめてのガイドを開く"
+    - text: VStudy Pro について
+    - group "VStudy Pro について":
+      - button "VStudy Pro とは？ · 試してみる"

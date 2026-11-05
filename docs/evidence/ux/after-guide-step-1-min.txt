@@ -1,0 +1,11 @@
+- dialog "Which language feels familiar?":
+  - status: Step 2 of 6
+  - button "Save and leave"
+  - heading "Which language feels familiar?" [level=1]
+  - paragraph: This changes the buttons and instructions. Your documents keep their original language. Change this later in Settings.
+  - region "Which language feels familiar?":
+    - text: Choose your language
+    - combobox "Choose your language": System default
+  - contentinfo:
+    - button "Back"
+    - button "Continue"

@@ -1,0 +1,92 @@
+- link "メインコンテンツへ移動":
+  - /url: "#shell-content"
+- complementary "ドキュメントライブラリ":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "ホーム"
+    - listitem:
+      - button "ライブラリ"
+    - listitem:
+      - button "コース"
+    - listitem:
+      - button "履歴"
+  - navigation "スマートビュー":
+    - button "すべてのドキュメント"
+    - button "最近使った項目"
+    - button "ピン留め"
+    - button "未分類"
+    - button "変換中・失敗"
+  - heading "フォルダ" [level=2]
+  - button "新規フォルダ"
+  - paragraph: フォルダはまだありません
+  - list:
+    - listitem:
+      - button "設定"
+- complementary "初回のヒント":
+  - group:
+    - strong: 文章を選んでみましょう
+    - paragraph: 本文をドラッグして「この部分について質問」を選びます。本文にフォーカスがあるときは Shift と矢印キーでも選択できます。選択内容はチャットの上に表示されます。送信前にモデルを選びます。チャット上部の会話メニューから、この資料の会話を検索できます。
+  - button "操作ガイドを見る"
+  - button "このヒントを今後表示しない"
+- main:
+  - heading "ドキュメントライブラリ" [level=1]
+  - button "ライブラリ"
+  - button "ドキュメントをインポート"
+  - text: Reading sample
+  - button "会話一覧"
+  - button "新しい会話"
+  - button "ヘルプ"
+  - text: ワークスペースに接続しました
+  - button "会話の位置を切り替え"
+  - button "設定を開く"
+  - region "会話":
+    - status
+    - heading "一緒に考える場所" [level=2]
+    - paragraph:
+      - group "覚えておきたい三つのポイントは？"
+    - button "このドキュメントを要約してください"
+    - button "重要な考え方を説明してください"
+    - button "主な論点を比較してください"
+    - status
+    - paragraph: 文書全体を使います。
+    - textbox "ドキュメントについて質問":
+      - /placeholder: ドキュメントについて質問してください…
+    - combobox "モデル": Fake (test only)
+    - combobox "Effort": 低
+    - button "会話の使用量": 0 トークン
+    - button "メッセージを送信" [disabled]
+    - paragraph: ドキュメントに基づいて回答します。重要な情報はご確認ください。
+  - separator "パネルのサイズを変更"
+  - region "ドキュメント":
+    - text: en.md
+    - button "ドキュメントを削除"
+    - button "AIで再解析"
+    - text: Markdown · markitdown 変換結果が不完全ですか？
+    - button "AIで再解析"
+    - document:
+      - heading "Small questions, deeper reading 「Small questions, deeper reading」のセクションを使う" [level=1]:
+        - text: Small questions, deeper reading
+        - button "「Small questions, deeper reading」のセクションを使う": このセクションを使う
+      - paragraph:
+        - text: "Reading is an active conversation with an idea. Pause after a paragraph and ask:"
+        - strong: What is the claim? What evidence supports it?
+        - button "この段落について質問": この箇所について質問
+      - paragraph:
+        - text: A useful habit is to explain one idea in your own words. For example, instead of memorizing “spaced practice”, revisit a question tomorrow and again next week. The pause gives you a chance to retrieve what you remember.
+        - button "この段落について質問": この箇所について質問
+      - heading "Try it 「Try it」のセクションを使う" [level=2]:
+        - text: Try it
+        - button "「Try it」のセクションを使う": このセクションを使う
+      - paragraph:
+        - text: Select the paragraph above and ask for a practical example. Then ask which assumptions deserve a closer look.
+        - button "この段落について質問": この箇所について質問
+      - heading "一點中文 / A little Chinese 「一點中文 / A little Chinese」のセクションを使う" [level=2]:
+        - text: 一點中文 / A little Chinese
+        - button "「一點中文 / A little Chinese」のセクションを使う": このセクションを使う
+      - paragraph:
+        - text: 學習不只是記住答案，也是在練習提出好問題。把一個想法說給別人聽，常常能發現自己還不懂的地方。
+        - button "この段落について質問": この箇所について質問
+      - paragraph:
+        - text: Learning includes asking better questions. Explaining an idea often reveals what we still want to understand.
+        - button "この段落について質問": この箇所について質問

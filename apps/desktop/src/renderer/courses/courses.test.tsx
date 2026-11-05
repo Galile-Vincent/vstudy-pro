@@ -87,6 +87,18 @@ describe("Courses", () => {
       "Amplifier lab report",
     );
   });
+  it("associates every term tab with its course panel", async () => {
+    await mount(createMockMoodleApi());
+    const tabs = [...host.querySelectorAll<HTMLElement>('.moodle-term-tabs [role=tab]')];
+    expect(tabs).toHaveLength(4);
+    for (const trigger of tabs) {
+      await act(async () => trigger.focus());
+      const panel = document.getElementById(trigger.getAttribute('aria-controls')!);
+      expect(panel?.getAttribute('role')).toBe('tabpanel');
+      expect(panel?.getAttribute('aria-labelledby')).toBe(trigger.id);
+      expect(panel?.hidden).toBe(false);
+    }
+  });
   it("opens a course file and hands its document ID to workspace navigation", async () => {
     const api = createMockMoodleApi(),
       onDocument = vi.fn();
@@ -565,6 +577,10 @@ it("keeps the assistant mounted across tabs and returns focus on Escape", async 
   const panel = host.querySelector(".moodle-agent");
   await tab("Grades");
   expect(host.querySelector(".moodle-agent")).toBe(panel);
+  const nestedEscape = new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
+  nestedEscape.preventDefault();
+  await act(async () => { document.dispatchEvent(nestedEscape); });
+  expect(button.getAttribute("aria-expanded")).toBe("true");
   await act(async () =>
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),

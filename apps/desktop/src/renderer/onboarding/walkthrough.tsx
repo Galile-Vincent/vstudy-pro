@@ -14,6 +14,7 @@ import { tr } from '../../shared/i18n';
 import { Button } from '../components/ui/button';
 import { markLearned } from './progress';
 import './guidance.css';
+import './history-guidance';
 
 export const lessons = ['school', 'due', 'agent', 'selection', 'history'] as const;
 export type Lesson = typeof lessons[number];
@@ -46,28 +47,28 @@ export function Walkthrough({ lesson }: { lesson: Lesson }) {
       <div className="walkthrough-scene" data-frame={frame} key={lesson}>
         <div className="walkthrough-rail"><BookOpen size={18}/><MessageCircle size={18}/><Search size={18}/></div>
         <div className="walkthrough-scene-body">
-          <strong>{tr(`onboarding:${lesson}_visual_${frame}`)}</strong>
+          <strong>{tr(`${lesson === 'history' ? 'ux' : 'onboarding'}:${lesson}_visual_${frame}`)}</strong>
           {lesson === 'school' && <><div className="walkthrough-field"><Search size={16}/>{tr('schools:search_label')}</div><div className="walkthrough-control" data-highlight={frame > 0}>{tr(frame === 2 ? 'onboarding:school_visual_2' : 'onboarding:school_visual_1')}</div></>}
           {lesson === 'due' && <><div className="walkthrough-tabs"><span>{tr('onboarding:due_visual_1')}</span><span data-highlight={frame === 2}>{tr('moodle:deadlines')}</span></div><div className="walkthrough-field" data-highlight={frame > 0}><BookOpen size={16}/>{tr('onboarding:example_deadline')}</div></>}
           {lesson === 'agent' && <><div className="walkthrough-bubble" data-highlight={frame > 0}>{tr('onboarding:example_deadline_question')}</div><div className="walkthrough-field"><MessageCircle size={16}/>{tr(frame === 2 ? 'onboarding:example_check_deadline' : 'onboarding:agent_visual_1')}</div></>}
           {lesson === 'selection' && <><p className="walkthrough-passage"><mark data-highlight={frame > 0}>{tr('onboarding:preview_passage')}</mark></p><div className="walkthrough-control" data-highlight={frame === 2}>{tr('common:ask_about_this')}</div></>}
-          {lesson === 'history' && <><div className="walkthrough-field"><Search size={16}/>{frame === 2 ? tr('onboarding:example_search') : tr('common:search_threads')}</div><div className="walkthrough-control" data-highlight={frame === 2}>{tr('onboarding:example_chat_title')}</div></>}
+          {lesson === 'history' && <><div className="walkthrough-field"><Search size={16}/>{frame === 2 ? tr('onboarding:example_search') : tr('history:search')}</div><div className="walkthrough-control" data-highlight={frame === 2}>{tr('onboarding:example_chat_title')}</div></>}
         </div>
       </div>
       <div className="walkthrough-diagram">
         {[0, 1, 2].map(index => <div key={index} className="walkthrough-node" data-active={index === frame} data-done={index < frame}>
-          <span>{index < frame ? <Check size={16}/> : index + 1}</span><strong>{tr(`onboarding:${lesson}_visual_${index}`)}</strong>
+          <span>{index < frame ? <Check size={16}/> : index + 1}</span><strong>{tr(`${lesson === 'history' ? 'ux' : 'onboarding'}:${lesson}_visual_${index}`)}</strong>
         </div>)}
       </div>
       <div className="walkthrough-track" key={frame}><span /></div>
     </div>
-    <p className="walkthrough-caption" aria-live="polite">{tr('onboarding:caption_step', { current: frame + 1, total: 3 })} {tr(`onboarding:${lesson}_caption_${frame}`)}</p>
+    <p className="walkthrough-caption" aria-live="polite">{tr('onboarding:caption_step', { current: frame + 1, total: 3 })} {tr(`${lesson === 'history' ? 'ux' : 'onboarding'}:${lesson}_caption_${frame}`)}</p>
     <div className="learning-actions">
       <Button variant="outline" onClick={() => { if (frame === 2) { setFrame(0); setPlaying(true); } else setPlaying(value => !value); }}>{playing && frame < 2 ? <Pause size={16}/> : <Play size={16}/>}{tr(playing && frame < 2 ? 'onboarding:pause' : 'onboarding:play')}</Button>
       <Button variant="ghost" onClick={() => { setFrame(0); setPlaying(!reduced); }}><RotateCcw size={16}/>{tr('onboarding:replay_clip')}</Button>
       <Button variant="ghost" disabled={frame === 2} onClick={() => { setPlaying(false); setFrame(value => Math.min(2, value + 1)); }}>{tr('onboarding:next_caption')}</Button>
     </div>
-    <details className="walkthrough-transcript" open={reduced || undefined}><summary>{tr('onboarding:all_instructions')}</summary><ol>{[0, 1, 2].map(index => <li key={index}>{tr(`onboarding:${lesson}_caption_${index}`)}</li>)}</ol></details>
+    <details className="walkthrough-transcript" open={reduced || undefined}><summary>{tr('onboarding:all_instructions')}</summary><ol>{[0, 1, 2].map(index => <li key={index}>{tr(`${lesson === 'history' ? 'ux' : 'onboarding'}:${lesson}_caption_${index}`)}</li>)}</ol></details>
     <details className="recorded-example"><summary>{tr('onboarding:recorded_video')}</summary><p>{tr('onboarding:recorded_body')}</p><video controls preload="none" playsInline aria-label={tr(`onboarding:lesson_${lesson}`)} src={recording.video}>
       {(['en', 'zh-Hant', 'ja'] as const).map(language => <track key={language} kind="captions" src={recording.captions[language]} srcLang={language} label={{ en: 'English', 'zh-Hant': '繁體中文', ja: '日本語' }[language]} default={i18n.resolvedLanguage === language}/>)}
     </video></details>

@@ -1,0 +1,71 @@
+- dialog "Settings":
+  - heading "Settings" [level=2]
+  - button "Close settings"
+  - tablist "Settings":
+    - tab "General"
+    - tab "Appearance"
+    - tab "Providers"
+    - tab "Usage" [selected]
+    - tab "Storage"
+    - tab "Privacy"
+  - tabpanel "Usage":
+    - banner:
+      - heading "Usage" [level=2]
+    - region "Usage settings":
+      - paragraph: No provider exposes an account balance for API keys. “Left” means your user-set monthly budget or token cap. Provider rate limits are separate and appear only when reported.
+      - region "Overall token dashboard":
+        - heading "Overall usage" [level=3]
+        - paragraph: All providers and documents recorded by VStudy on this device.
+        - combobox "Usage period": All time
+        - button "Refresh usage"
+        - text: Total tokens
+        - strong: "0"
+        - text: 0 recorded model calls
+        - term: Input
+        - definition: "0"
+        - term: Output
+        - definition: "0"
+        - term: Cache read
+        - definition: "0"
+        - term: Cache write
+        - definition: "0"
+        - term: Reasoning
+        - definition: "0"
+        - text: Recorded cost
+        - strong: $0.000
+        - text: Reported and estimated costs
+        - paragraph: No model usage recorded in this period. Send a chat to start tracking.
+        - paragraph: Input includes cache reads and writes. Output includes reasoning. CLI costs are API-equivalent (subscription), not subscription charges.
+        - figure "Daily tokens Input Output · peak0":
+          - strong: Daily tokens
+          - text: Input Output · peak0
+          - img "Daily input and output tokens. Exact values are available in the daily totals table."
+          - text: 2026-10-08 2026-11-06
+          - group: Daily totals
+        - paragraph: Totals cover all time; the chart shows the last 30 calendar days.
+        - strong: Breakdown
+        - combobox "Group usage by": Provider
+        - table:
+          - rowgroup:
+            - row "Provider Tokens Calls Cost":
+              - cell "Provider"
+              - cell "Tokens"
+              - cell "Calls"
+              - cell "Cost"
+          - rowgroup
+      - heading "Provider rate limits" [level=3]
+      - paragraph: No rate-limit information reported yet. Codex CLI does not report rate limits through exec; its account probe may be unavailable. Claude limits appear when reported.
+      - heading "Budgets" [level=3]
+      - paragraph: Tokens are small pieces of words. Leave a budget blank for no limit. The warning percentage tells you when you are near your monthly limit.
+      - text: Monthly budget (USD)
+      - group "Monthly budget (USD)":
+        - spinbutton "Monthly budget (USD)"
+      - text: Monthly token cap
+      - group "Monthly token cap":
+        - spinbutton "Monthly token cap"
+      - text: Warn at (%)
+      - group "Warn at (%)":
+        - spinbutton "Warn at (%)": "80"
+      - group: "Advanced: custom prices"
+      - button "Save usage settings"
+      - button "Export CSV"

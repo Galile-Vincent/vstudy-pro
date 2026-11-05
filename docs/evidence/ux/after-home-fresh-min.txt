@@ -1,0 +1,55 @@
+- link "Skip to content":
+  - /url: "#shell-content"
+- complementary "Document library":
+  - text: VStudy Pro
+  - list:
+    - listitem:
+      - button "Home"
+    - listitem:
+      - button "Library"
+    - listitem:
+      - button "Courses"
+    - listitem:
+      - button "History"
+  - navigation "Smart views":
+    - button "All documents"
+    - button "Recent"
+    - button "Pinned"
+    - button "Unfiled"
+    - button "Converting / Failed"
+  - heading "Folders" [level=2]
+  - button "New folder"
+  - paragraph: No folders yet
+  - list:
+    - listitem:
+      - button "Settings"
+- banner:
+  - button "Toggle document library" [expanded]
+  - text: Home
+  - button "Help"
+  - button "Find a conversation"
+- main:
+  - heading "Good morning" [level=1]
+  - paragraph:
+    - group "A little curiosity goes a long way."
+  - button "How to use · Try it"
+  - region "Getting started":
+    - heading "Getting started" [level=2]
+    - text: 0 of 4 complete
+    - paragraph: A few useful first steps. Reopen any of them whenever you need a reminder.
+    - list:
+      - listitem:
+        - button "Choose your starting point"
+      - listitem:
+        - button "Add a document or sample"
+      - listitem:
+        - button "Follow a walkthrough"
+      - listitem:
+        - button "Find Help and shortcuts"
+    - button "Resume setup"
+  - region "Bring a document":
+    - heading "Bring a document" [level=2]
+    - paragraph: Drop a file here. Read, select a passage, and explore it together.
+    - paragraph: PDF, DOCX, XLSX, PPTX, HTML, CSV, Markdown, or text. Up to 50 MB per file. Scanned PDFs are not supported.
+    - button "Choose a file"
+    - button "Try a sample document"

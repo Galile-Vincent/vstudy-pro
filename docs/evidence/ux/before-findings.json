@@ -1,0 +1,21 @@
+[
+  {
+    "name": "courses-en-1200-100",
+    "path": "before-courses-en-1200-100.png",
+    "width": 1200,
+    "height": 768,
+    "overflow": [],
+    "dialogs": [],
+    "violations": [
+      {
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "targets": [
+          [
+            "#radix-_r_d_-trigger-current"
+          ]
+        ]
+      }
+    ]
+  }
+]
