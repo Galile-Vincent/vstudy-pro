@@ -208,5 +208,9 @@
   "keychain_error": "安全儲存遭拒或無法使用。請重試，或僅在本次使用期間連線。結束應用程式後將清除登入資訊。",
   "keychain_unsaved": "無法安全儲存登入資訊。目前仍可在本次使用期間連線。你可以重試儲存，無須重新登入。",
   "keychain_retry": "重試安全儲存",
-  "keychain_session": "僅在本次使用期間使用"
+  "keychain_session": "僅在本次使用期間使用",
+  "connect_helper": "請先連接 AI 幫手",
+  "providers_settings": "開啟供應商設定",
+  "media_notice": "此處未顯示部分圖片、影片或音訊。請在 Moodle 開啟活動以查看全部內容。",
+  "link_failed": "無法開啟此連結。請在 Moodle 開啟活動。"
 }

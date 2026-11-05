@@ -208,5 +208,9 @@
   "keychain_error": "Secure storage was denied or is unavailable. Retry, or connect for this session only. Your sign-in will clear when you quit.",
   "keychain_unsaved": "Could not save your sign-in securely. You are connected for this session. Retry saving without signing in again.",
   "keychain_retry": "Retry secure storage",
-  "keychain_session": "Use for this session only"
+  "keychain_session": "Use for this session only",
+  "connect_helper": "Connect an AI helper first",
+  "providers_settings": "Open Providers settings",
+  "media_notice": "Some pictures, video or sound are hidden here. Open this activity in Moodle to see everything.",
+  "link_failed": "Could not open this link. Try opening the activity in Moodle."
 }

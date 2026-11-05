@@ -18,7 +18,7 @@ function GlobalSettings() {
     window.addEventListener('vstudy:open-settings', show);
     return () => window.removeEventListener('vstudy:open-settings', show);
   }, []);
-  return open ? <ProviderSettings providers={providers} onClose={() => setOpen(false)} onRefresh={refresh}/> : null;
+  return open ? <ProviderSettings initialTab="providers" providers={providers} onClose={() => { setOpen(false); window.dispatchEvent(new Event("vstudy:providers-changed")); }} onRefresh={refresh}/> : null;
 }
 function Views() {
   const { route } = useNavigate();

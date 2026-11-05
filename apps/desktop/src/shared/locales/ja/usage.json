@@ -21,5 +21,9 @@
   "minute_window": "{{count}} 分間の上限",
   "provider_window": "プロバイダーの上限",
   "unknown_calls_one": "{{count}} 件は料金不明のため、合計は最低額です。",
-  "unknown_calls_other": "{{count}} 件は料金不明のため、合計は最低額です。"
+  "unknown_calls_other": "{{count}} 件は料金不明のため、合計は最低額です。",
+  "budget_help": "トークンは単語の小さな断片です。予算を空欄にすると上限なしになります。警告の割合は月の上限が近いことを知らせます。",
+  "advanced_prices": "詳細設定：独自の料金",
+  "invalid_prices": "料金のJSONを確認してください。下の例を参考にしてください。",
+  "save_failed": "保存できませんでした。予算の値を確認して再試行してください。"
 }

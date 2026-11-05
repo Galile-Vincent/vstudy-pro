@@ -79,5 +79,15 @@
   "deletePlaceholder": "DELETE",
   "welcomeGuide": "歡迎導覽",
   "aboutApp": "關於 VStudy Pro",
-  "budgets": "預算"
+  "budgets": "預算",
+  "key_help": "API 金鑰是從 AI 服務開發者網站取得的秘密代碼，與聊天帳號登入不同。使用時可能收費。",
+  "keychain_help": "在 Mac 儲存時，可能需要輸入 Mac 登入密碼，讓 VStudy Pro 使用鑰匙圈。暫存金鑰只保留到關閉程式。",
+  "detect_again": "重新偵測",
+  "cli_help": "請從官方網站安裝此工具，再開啟終端機執行 {{command}} 登入，然後回來重新偵測。",
+  "idle_range": "請輸入 1 到 60 的整數。",
+  "load_failed": "無法載入設定。請重試。",
+  "mode_online": "目前模式：線上。允許下載。",
+  "mode_offline": "目前模式：離線。僅支援 Markdown 和文字檔。",
+  "mode_saved": "已變更模式。",
+  "enable_downloads": "允許下載並重試"
 }

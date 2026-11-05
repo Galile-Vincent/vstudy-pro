@@ -11,7 +11,11 @@ import { errorText } from './status';
 export function PrivacySettings() {
   useTranslation();
   const [events, setEvents] = useState<IpcResponse<'settings:networkActivity'>>([]);
-  const [idle, setIdle] = useState(5);
+  const [idle, setIdle] = useState<number | string>('');
+  const [offline, setOffline] = useState<boolean>();
+  const [modeStatus, setModeStatus] = useState('');
+  const [loaded, setLoaded] = useState(false);
+  const load = () => desktop.invoke('settings:get', {}).then(s => { setIdle(s.converterIdleMinutes); setOffline(s.converterOffline); setLoaded(true); setError(''); }).catch(() => setError(tr('settings:load_failed')));
   const [confirmation, setConfirmation] = useState('');
   const [error, setError] = useState('');
   const refresh = () =>
@@ -22,15 +26,13 @@ export function PrivacySettings() {
 
   useEffect(() => {
     void refresh();
-    void desktop
-      .invoke('settings:get', {})
-      .then((s) => setIdle(s.converterIdleMinutes));
+    void load();
   }, []);
 
   const mode = (offline: boolean) =>
     desktop
       .invoke('converter:mode', { offline })
-      .then(refresh)
+      .then(() => { setOffline(offline); setModeStatus(tr('settings:mode_saved')); return refresh(); })
       .catch((e) => setError(errorText(e)));
 
   return (
@@ -57,6 +59,10 @@ export function PrivacySettings() {
         )}
       </SettingsGroup>
       <SettingsGroup title={tr('settings:converter')}>
+        {!loaded && <Button onClick={() => void load()}>{tr('settings:retry')}</Button>}
+        {offline !== undefined && <p role="status">{tr(offline ? 'settings:mode_offline' : 'settings:mode_online')}</p>}
+        {modeStatus && <p role="status">{modeStatus}</p>}
+        {loaded && (!Number.isInteger(Number(idle)) || Number(idle) < 1 || Number(idle) > 60) && <p role="alert">{tr('settings:idle_range')}</p>}
         <SettingsRow
           label={tr('settings:idle_minutes')}
           description={tr('settings:converter_copy')}
@@ -66,10 +72,11 @@ export function PrivacySettings() {
             type="number"
             min={1}
             max={60}
+            disabled={!loaded}
             value={idle}
             onChange={(e) => {
               const value = Number(e.target.value);
-              setIdle(value);
+              setIdle(e.target.value);
               if (Number.isInteger(value) && value >= 1 && value <= 60)
                 void desktop
                   .invoke('settings:get', {})
@@ -85,7 +92,7 @@ export function PrivacySettings() {
         </SettingsRow>
         <SettingsRow label={tr('settings:converterMode')}>
           <Button size="sm" variant="secondary" onClick={() => void mode(false)}>
-            {tr('settings:retry')}
+            {tr('settings:enable_downloads')}
           </Button>
           <Button size="sm" variant="secondary" onClick={() => void mode(true)}>
             {tr('settings:offline')}

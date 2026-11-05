@@ -79,5 +79,15 @@
   "deletePlaceholder": "DELETE",
   "welcomeGuide": "Welcome guide",
   "aboutApp": "About VStudy Pro",
-  "budgets": "Budgets"
+  "budgets": "Budgets",
+  "key_help": "An API key is a secret code from your AI service’s developer website. A chat login is different. The service may charge you for use.",
+  "keychain_help": "On Mac, saving may ask for your Mac login password so VStudy Pro can use Keychain. A session key lasts only until you quit the app.",
+  "detect_again": "Check again",
+  "cli_help": "Install this tool from its official website, then open Terminal and run {{command}} to sign in. Come back and check again.",
+  "idle_range": "Enter a whole number from 1 to 60.",
+  "load_failed": "Could not load settings. Try again.",
+  "mode_online": "Current mode: online. Downloads are allowed.",
+  "mode_offline": "Current mode: offline. Only Markdown and text files work.",
+  "mode_saved": "Mode changed.",
+  "enable_downloads": "Enable downloads and retry"
 }

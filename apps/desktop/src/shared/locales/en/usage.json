@@ -21,5 +21,9 @@
   "minute_window": "the {{count}} min window",
   "provider_window": "the provider window",
   "unknown_calls_one": "{{count}} call unpriced; total is a lower bound.",
-  "unknown_calls_other": "{{count}} calls unpriced; total is a lower bound."
+  "unknown_calls_other": "{{count}} calls unpriced; total is a lower bound.",
+  "budget_help": "Tokens are small pieces of words. Leave a budget blank for no limit. The warning percentage tells you when you are near your monthly limit.",
+  "advanced_prices": "Advanced: custom prices",
+  "invalid_prices": "Check the price JSON. Use the example below.",
+  "save_failed": "Could not save. Check your budget values and try again."
 }
