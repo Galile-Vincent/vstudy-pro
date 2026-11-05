@@ -27,7 +27,7 @@ export function registerPlannerIpc(registrar: ReturnType<typeof createIpcRegistr
   registrar.handle("planner:export-calendar", async selection => {
     const context = repository.context();
     const text = plannerCalendar(context.snapshot, context.deadlines, selection);
-    const result = await dialog.showSaveDialog({ defaultPath: "vstudy-study-plan.ics", filters: [{ name: "Calendar", extensions: ["ics"] }] });
+    const result = await dialog.showSaveDialog({ defaultPath: "vstudy-study-plan.ics", filters: [{ name: tr("planner:calendar_file"), extensions: ["ics"] }] });
     if (result.canceled || !result.filePath) return { saved: false };
     await exportText(text, result.filePath);
     return { saved: true };
