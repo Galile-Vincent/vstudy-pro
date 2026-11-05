@@ -14,5 +14,7 @@ commit-msg:
       run: '[ -n "$CI" ] || pnpm exec commitlint --edit "{1}"'
 pre-push:
   commands:
+    readme-links:
+      run: node scripts/check-readme-links.mjs
     test:
       run: '[ -n "$CI" ] || pnpm test --pool=forks --maxWorkers=2'
