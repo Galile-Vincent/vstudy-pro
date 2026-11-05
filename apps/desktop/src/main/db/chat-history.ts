@@ -101,7 +101,7 @@ export function chatHistoryRepository(db: DatabaseSync) {
       for (const key of ['title', 'pinned', 'archived'] as const)
         if (patch[key] !== undefined) {
           sets.push(`${key}=?`);
-          values.push(key === 'title' ? patch[key] as string : Number(patch[key]));
+          values.push(key === 'title' ? patch[key] || null : Number(patch[key]));
         }
       if (patch.deleted !== undefined) {
         sets.push('deletedAt=?');

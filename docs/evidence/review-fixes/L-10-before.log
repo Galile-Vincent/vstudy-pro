@@ -1,0 +1,212 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+ ❯ src/main/db/chat-history.test.ts (6 tests | 1 failed) 127ms
+   × clears a renamed title so future messages can supply its automatic title 10ms
+stderr | src/renderer/history/rename-undo.test.tsx > undoes rename to the original empty title through the validated patch contract
+An update to HistorySearch inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/renderer/history/rename-undo.test.tsx > undoes rename to the original empty title through the validated patch contract
+An update to HistorySearch inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HistorySearch inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HistorySearch inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/renderer/history/rename-undo.test.tsx > undoes rename to the original empty title through the validated patch contract
+An update to HistorySearch inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HistorySearch inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HistorySearch inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ❯ src/renderer/history/rename-undo.test.tsx (1 test | 1 failed) 62ms
+   × undoes rename to the original empty title through the validated patch contract 62ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/db/chat-history.test.ts > clears a renamed title so future messages can supply its automatic title
+AssertionError: expected '' to be 'Automatic title' // Object.is equality
+
+- Expected
++ Received
+
+- Automatic title
+
+ ❯ src/main/db/chat-history.test.ts:138:40
+    136|   const s=setup(),{c}=conversation(s,'Automatic title');
+    137|   s.chatHistory.update(c.id,{title:'Renamed'});s.chatHistory.update(c.…
+    138|   expect(search(s,{}).items[0]?.title).toBe('Automatic title');
+       |                                        ^
+    139| });
+    140|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/renderer/history/rename-undo.test.tsx > undoes rename to the original empty title through the validated patch contract
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'chats:update', { …(2) } ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "chats:update",
+-   {
+-     "conversationId": "00000000-0000-4000-8000-000000000001",
+-     "patch": {
+-       "title": "",
+-     },
+-   },
++   "chats:facets",
++   {},
+  ]
+
+  2nd vi.fn() call:
+
+  [
+-   "chats:update",
++   "chats:search",
+    {
+-     "conversationId": "00000000-0000-4000-8000-000000000001",
+-     "patch": {
+-       "title": "",
+-     },
++     "limit": 30,
++     "query": "",
++     "scope": "all",
+    },
+  ]
+
+  3rd vi.fn() call:
+
+  [
+    "chats:update",
+    {
+      "conversationId": "00000000-0000-4000-8000-000000000001",
+      "patch": {
+-       "title": "",
++       "title": "New title",
+      },
+    },
+  ]
+
+  4th vi.fn() call:
+
+  [
+-   "chats:update",
+-   {
+-     "conversationId": "00000000-0000-4000-8000-000000000001",
+-     "patch": {
+-       "title": "",
+-     },
+-   },
++   "chats:facets",
++   {},
+  ]
+
+  5th vi.fn() call:
+
+  [
+    "chats:update",
+    {
+      "conversationId": "00000000-0000-4000-8000-000000000001",
+      "patch": {
+-       "title": "",
++       "title": "New Chat",
+      },
+    },
+  ]
+
+  6th vi.fn() call:
+
+  [
+-   "chats:update",
+-   {
+-     "conversationId": "00000000-0000-4000-8000-000000000001",
+-     "patch": {
+-       "title": "",
+-     },
+-   },
++   "chats:facets",
++   {},
+  ]
+
+
+Number of calls: 6
+
+ ❯ src/renderer/history/rename-undo.test.tsx:28:20
+     26|     await act(()=>input.closest('form')!.dispatchEvent(new Event('subm…
+     27|     await act(()=>host.querySelector<HTMLButtonElement>('.history-undo…
+     28|     expect(invoke).toHaveBeenCalledWith('chats:update',{conversationId…
+       |                    ^
+     29|     expect(host.querySelector('.history-undo')).toBeNull();
+     30|   }finally{await act(()=>root.unmount());host.remove();vi.useRealTimer…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 5 passed (7)
+   Start at  00:59:17
+   Duration  540ms (transform 136ms, setup 0ms, import 305ms, tests 189ms, environment 168ms)
+

@@ -1,0 +1,52 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+ ❯ src/renderer/chat-material-runtime.test.tsx (1 test | 1 failed) 48ms
+   × sends the explicitly approved materials on the initial appended turn 48ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/chat-material-runtime.test.tsx > sends the explicitly approved materials on the initial appended turn
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'chat:start', ObjectContaining{…} ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    "chat:start",
+-   ObjectContaining {
+-     "materials": {
+-       "documentIds": [
+-         "00000000-0000-4000-8000-000000000003",
+-       ],
+-       "mode": "summary",
+-     },
++   {
++     "contextTurnIds": [],
++     "conversationId": "00000000-0000-4000-8000-000000000001",
++     "courseId": "00000000-0000-4000-8000-000000000002",
++     "modelId": "fake",
++     "options": {},
++     "providerId": "anthropic-api",
++     "requestId": "25c404e0-99d4-4b03-bc79-18aefd128170",
++     "scope": "course",
++     "turnId": "kEYJcxv",
++     "userMessage": "Summarize",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/renderer/chat-material-runtime.test.tsx:22:20
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  01:03:24
+   Duration  1.00s (transform 164ms, setup 0ms, import 593ms, tests 48ms, environment 269ms)
+

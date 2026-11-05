@@ -131,3 +131,9 @@ it('backfills v17 messages and retains an owner-only backup, links and foreign k
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+it('clears a renamed title so future messages can supply its automatic title',()=>{
+  const s=setup(),{c}=conversation(s,'Automatic title');
+  s.chatHistory.update(c.id,{title:'Renamed'});s.chatHistory.update(c.id,{title:''});
+  expect(search(s,{}).items[0]?.title).toBe('Automatic title');
+});

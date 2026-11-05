@@ -1,0 +1,58 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+ ❯ src/main/services/chat.test.ts (32 tests | 1 failed) 1060ms
+   × never sends Markdown outside the configured library even when both database paths are forged 572ms
+ ❯ src/main/storage/backup.test.ts (13 tests | 5 failed) 1281ms
+   × rejects an archive with altered schema before path rewrites (CREATE TRIGGER stolen_paths AFTER UPDATE OF sourcePath ON documents BEGIN UPDATE documents SET sourcePath='/tmp/private/source.md',markdownPath='/tmp/private/content.md' WHERE id=NEW.id; END) 63ms
+   × rejects an archive with altered schema before path rewrites (DROP TRIGGER document_fts_delete) 58ms
+   × rejects an archive with altered schema before path rewrites (CREATE VIEW unexpected AS SELECT * FROM documents) 61ms
+   × rejects an archive with altered schema before path rewrites (CREATE TABLE unexpected(secret TEXT)) 70ms
+   × rejects an archive with altered schema before path rewrites (CREATE INDEX unexpected ON documents(title)) 55ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/services/chat.test.ts > never sends Markdown outside the configured library even when both database paths are forged
+Error: Timed out waiting for stream
+ ❯ until src/main/services/chat.test.ts:107:9
+    105|     await new Promise((r) => setTimeout(r, 5));
+    106|   }
+    107|   throw new Error("Timed out waiting for stream");
+       |         ^
+    108| }
+    109| it("persists both messages and streams selection-grounded prompt only …
+ ❯ src/main/services/chat.test.ts:618:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/main/storage/backup.test.ts > rejects an archive with altered schema before path rewrites (CREATE TRIGGER stolen_paths AFTER UPDATE OF sourcePath ON documents BEGIN UPDATE documents SET sourcePath='/tmp/private/source.md',markdownPath='/tmp/private/content.md' WHERE id=NEW.id; END)
+ FAIL  src/main/storage/backup.test.ts > rejects an archive with altered schema before path rewrites (DROP TRIGGER document_fts_delete)
+ FAIL  src/main/storage/backup.test.ts > rejects an archive with altered schema before path rewrites (CREATE VIEW unexpected AS SELECT * FROM documents)
+ FAIL  src/main/storage/backup.test.ts > rejects an archive with altered schema before path rewrites (CREATE TABLE unexpected(secret TEXT))
+ FAIL  src/main/storage/backup.test.ts > rejects an archive with altered schema before path rewrites (CREATE INDEX unexpected ON documents(title))
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/main/storage/backup.test.ts:103:42
+    101|     store.db.exec(sql);
+    102|     const zip=join(target,'crafted.zip');await exportBackup(store,root…
+    103|     await expect(stageRestore(target,zip)).rejects.toThrow();
+       |                                          ^
+    104|     expect(await readdir(target)).toEqual(['crafted.zip']);
+    105|   } finally {store.close();await rm(root,{recursive:true,force:true});…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 39 passed (45)
+   Start at  00:51:05
+   Duration  1.56s (transform 326ms, setup 0ms, import 478ms, tests 2.34s, environment 0ms)
+

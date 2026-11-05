@@ -34,7 +34,7 @@ export const chatHitSchema = z.object({
 }).strict();
 /** Editable conversation metadata. Absence preserves a field; deletion uses a separate boolean intent. */
 export const chatPatchSchema = z.object({
-  title: z.string().trim().min(1).max(300).optional(), pinned: z.boolean().optional(),
+  title: z.string().trim().max(300).optional(), pinned: z.boolean().optional(),
   archived: z.boolean().optional(), deleted: z.boolean().optional(),
 }).strict();
 export const chatHistoryContract = {

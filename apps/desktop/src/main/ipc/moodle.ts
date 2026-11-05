@@ -4,6 +4,7 @@
  * Request and response validation and sender ownership stay at the IPC boundary.
  * @packageDocumentation
  */
+import { tr } from '../i18n';
 import { join } from 'node:path';
 import { app, dialog, Notification } from 'electron';
 import { moodleChannels } from '../../shared/moodle';
@@ -86,7 +87,7 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   registrar.handle(moodleChannels.deleteReminder,({reminderId}) => { repository.deleteReminder(reminderId); return {ok:true}; });
   registrar.handle(moodleChannels.exportCalendar,async ({deadlineIds}) => {
     const text = calendarText(repository.deadlines(deadlineIds));
-    const result = await dialog.showSaveDialog({defaultPath:'vstudy-deadlines.ics',filters:[{name:'Calendar',extensions:['ics']}]});
+    const result = await dialog.showSaveDialog({defaultPath:'vstudy-deadlines.ics',filters:[{name:tr('planner:calendar_file'),extensions:['ics']}]});
     if (result.canceled || !result.filePath) return {saved:false};
     await exportText(text,result.filePath);
     return {saved:true};

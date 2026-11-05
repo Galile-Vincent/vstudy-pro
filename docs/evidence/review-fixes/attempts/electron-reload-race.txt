@@ -1,0 +1,4 @@
+Error: page.reload: Target page, context or browser has been closed
+Call log:
+[2m  - waiting for navigation until "load"[22m
+[2m    - navigated to "file:///Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop/out/renderer/index.html"[22m

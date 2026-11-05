@@ -78,6 +78,7 @@ export class ChatService {
   constructor(
     private readonly store: Store,
     private readonly providers: ProviderRegistry,
+    private readonly libraryRoot: string,
   ) { this.courseContext = new CourseContextCache(store.db); }
   createConversation(
     input: import("zod").z.infer<typeof import("../../shared/domain").conversationCreateSchema>,
@@ -294,13 +295,13 @@ export class ChatService {
         prompt = buildCoursePrompt(detail, history, entry.request.userMessage, this.store.settings.get().replyLanguage,
           id => this.store.documents.get(id as import("../../shared/domain").Document["id"])?.status ?? "not-opened",
           new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone, planner, syncedAt);
-        if (entry.request.materials) prompt += "\n\n" + await buildMaterialContext(this.store, entry.request.courseId, entry.request.materials);
+        if (entry.request.materials) prompt += "\n\n" + await buildMaterialContext(this.store, entry.request.courseId, entry.request.materials, this.libraryRoot);
         entry.rawCourseText = "";
       } else if (entry.request.scope === 'general') {
         prompt = buildPrompt({document:{title:'General conversation',markdown:''},history,userMessage:entry.request.userMessage,replyLanguage:this.store.settings.get().replyLanguage});
       } else {
         if (!document) throw new Error("Document unavailable");
-        const file = await open(containedPath(dirname(document.sourcePath), document.activeVersion==='ai' ? join(dirname(document.markdownPath),'content.ai.md') : document.markdownPath), "r");
+        const file = await open(containedPath(this.libraryRoot, document.activeVersion==='ai' ? join(dirname(document.markdownPath),'content.ai.md') : document.markdownPath), "r");
         let markdown: string;
         try {
           const buffer = Buffer.alloc(2_000_000);

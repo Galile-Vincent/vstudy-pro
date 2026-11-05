@@ -27,6 +27,8 @@ export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconne
   const [full,setFull] = useState(window.innerWidth < 1000);
   const [width,setWidth] = useState(Math.min(800,window.innerWidth - 80));
   const [copied,setCopied] = useState(false);
+  useEffect(() => { if (!copied) return; const timer = setTimeout(() => setCopied(false), 2000); return () => clearTimeout(timer); }, [copied]);
+  useEffect(() => setCopied(false), [state?.url]);
   const pane = useRef<HTMLDivElement>(null), slot = useRef<HTMLDivElement>(null), closeButton = useRef<HTMLButtonElement>(null);
   const id = useRef<string|undefined>(undefined);
   const callbacks = useRef({onClose,onDocument,onReconnect});
@@ -39,8 +41,10 @@ export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconne
   },[]);
   const action = useCallback(async (action:WebviewAction) => {
     if (!id.current) return;
+    if (action === 'copy') setCopied(false);
     try {
       const next = await desktop.invoke('moodle:webview-action',{id:id.current,action});
+      if (action === 'copy') setCopied(true);
       if (next.status === 'closed') close(); else setState(next);
     } catch {setFailed(true);}
   },[close]);
@@ -135,7 +139,7 @@ export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconne
         <Button variant="ghost" size="icon" aria-label={tr('webview:zoom-out')} disabled={!state || state.zoom <= .5} onClick={() => void action('zoom-out')}><Minus /></Button>
         <Button variant="ghost" aria-label={tr('webview:zoom-reset')} onClick={() => void action('zoom-reset')}>{zoom}</Button>
         <Button variant="ghost" size="icon" aria-label={tr('webview:zoom-in')} disabled={!state || state.zoom >= 2} onClick={() => void action('zoom-in')}><Plus /></Button>
-        <Button variant="ghost" onClick={() => {void action('copy');setCopied(true);}}>{tr('webview:copy')}</Button>
+        <Button variant="ghost" onClick={() => void action('copy')}>{tr('webview:copy')}</Button>
         <Button variant="ghost" aria-label={tr('webview:focus')} onClick={() => void action('focus')} disabled={!state || state.status !== 'ready'}>{tr('webview:focus')}</Button>
       </footer>
     </div>

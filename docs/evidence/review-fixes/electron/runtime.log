@@ -1,0 +1,10 @@
+Error occurred in handler for 'settings:get': Error: VSTUDY_STATUS:{"code":"storage.busy","params":{}}
+    at /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop/out/main/index.js:28975:19
+    at Session.<anonymous> (node:electron/js2c/browser_init:2:117737)
+    at Session.emit (node:events:509:28)
+Debugger ending on ws://127.0.0.1:61571/9f03fa8a-cebd-4b54-b9e0-601b2e4c7f72
+For help, see: https://nodejs.org/learn/getting-started/debugging
+{"phase":"main-exit","code":0}
+Debugger ending on ws://127.0.0.1:61576/97b62665-2ed2-4bd8-bad1-499614a87cdc
+For help, see: https://nodejs.org/learn/getting-started/debugging
+{"phase":"main-exit","code":0}

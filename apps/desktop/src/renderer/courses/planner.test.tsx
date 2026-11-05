@@ -66,3 +66,14 @@ it("a changed deadline rejects approval and leaves the proposal reviewable", asy
   expect(host.querySelector(".planner-proposal")).not.toBeNull();
   expect(host.textContent).toContain("changed deadline");
 });
+
+it('shows a submitted-linked task as done and keeps it out of the proposal',async()=>{
+  const {detail}=seedStudent(store),repo=new PlannerRepository(store.db,()=>now);
+  const task=repo.quickAdd({title:'Submitted lab',courseId:detail.course.id,deadlineId:detail.deadlines[0]!.id,dueAt:detail.deadlines[0]!.dueAt,estimateMinutes:60});
+  detail.deadlines[0]!.submitted=true;
+  const api:PlannerApi={snapshot:async()=>repo.snapshot(),quickAdd:async input=>repo.quickAdd(input),approve:vi.fn(),exportCalendar:vi.fn()};
+  await act(async()=>root.render(<Planner courses={[detail.course]} deadlines={detail.deadlines} api={api} clock={()=>now}/>));
+  expect(host.querySelector('[data-completed-tasks]')?.textContent).toContain(task.title);
+  expect(host.querySelector('[data-completed-tasks]')?.textContent).toContain('Done');
+  await click('Plan my week');expect(host.querySelector('.planner-proposal')).toBeNull();
+});

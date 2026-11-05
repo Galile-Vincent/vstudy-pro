@@ -7,7 +7,7 @@
 /** Pure approval rules shared by proposal parsing and SQLite writes. Current capacity and ownership always win over proposals. */
 import type { MoodleDeadline } from "./moodle";
 import { taskSchema } from "./planner";
-import type { PlannerAction, PlannerSnapshot, PlannerTarget, StudyBlock } from "./planner";
+import type { PlannerAction, PlannerSnapshot, PlannerTarget, PlannerTask, StudyBlock } from "./planner";
 
 export interface PlanningContext {
   snapshot: PlannerSnapshot;
@@ -20,6 +20,10 @@ export interface PlanningContext {
 export function localDay(value: string | number, timeZone: string): string {
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(value));
   return ["year", "month", "day"].map(key => parts.find(p => p.type === key)!.value).join("-");
+}
+/** A submitted Moodle assignment completes its linked task for planning and presentation. */
+export function plannerTaskDone(task: PlannerTask, deadlines: MoodleDeadline[]): boolean {
+  return task.status === "done" || deadlines.some(d => d.id === task.deadlineId && d.submitted === true);
 }
 /** Resolve a planner target only from the current course and student-owned snapshot. */
 export function targetInfo(target: PlannerTarget, context: PlanningContext) {

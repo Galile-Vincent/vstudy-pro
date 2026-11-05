@@ -59,12 +59,13 @@ export function HistoryView() {
     conversation: Conversation;
     messages: Message[];
   } | null>(null);
-  const [providers, setProviders] = useState<Providers>([]), [draft, setDraft] = useState(''), [failed, setFailed] = useState(false);
+  const [providers, setProviders] = useState<Providers>([]), [draft, setDraft] = useState(''), [failed, setFailed] = useState(false), [modelError, setModelError] = useState(false);
   const refreshProviders = async () => setProviders(await desktop.invoke('providers:list', {}));
   useEffect(() => { void refreshProviders().catch(() => setFailed(true)); }, []);
   useEffect(() => {
     let live = true;
     setLoaded(null);
+    setModelError(false);
     setDraft('');
     setFailed(false);
     if (route.conversationId)
@@ -84,7 +85,9 @@ export function HistoryView() {
     const slash = value.indexOf('/'), providerId = value.slice(0, slash) as Conversation['providerId'], modelId = value.slice(slash + 1);
     try {
       const c = loaded.conversation;
-      if (!loaded.messages.length) {
+      setModelError(false);
+      const messages = await desktop.invoke('messages:list', { conversationId: c.id });
+      if (!messages.length) {
         const next = await desktop.invoke('conversations:model', { conversationId: c.id, providerId, modelId });
         setLoaded({ ...loaded, conversation: next });
         return;
@@ -93,13 +96,14 @@ export function HistoryView() {
       navigate({ view: 'history', conversationId: next.id });
     }
     catch {
-      setFailed(true);
+      setModelError(true);
     }
   };
   const settings = () => window.dispatchEvent(new Event('vstudy:open-settings'));
   return <main className="history-page"><header><h1>{tr('history:title')}</h1><p>{tr('history:subtitle')}</p></header><div className="history-layout">
   <section className="history-browser" aria-label={tr('history:title')}><HistorySearch onOpen={open}/></section>
   {route.conversationId && <section className="history-conversation chat-pane" aria-label={tr('common:chat')}><button className="history-back" onClick={() => navigate('history')}>{tr('history:back')}</button>
+   {modelError && <p role="alert">{tr('history:model_change_error')}</p>}
    {failed ? <p role="alert">{tr('history:unavailable')}</p> : loaded ? <Suspense fallback={<p role="status">{tr('common:loading_conversation')}</p>}><Chat key={loaded.conversation.id} conversation={loaded.conversation} history={loaded.messages} jumpMessageId={route.messageId} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={() => { }} providers={providers} model={loaded.conversation.providerId + '/' + loaded.conversation.modelId} onModel={value => { void changeModel(value); }} onSettings={settings} onProvidersChanged={refreshProviders} onUsage={settings}/></Suspense> : <p role="status">{tr('common:loading_conversation')}</p>}
   </section>}
  </div></main>;

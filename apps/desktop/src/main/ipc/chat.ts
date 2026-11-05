@@ -27,7 +27,7 @@ export function registerChatIpc(
 ): ChatService {
   const compatible = providers.config('openai-compatible');
   if (compatible.kind === 'compatible') secrets.bindCompatibleOrigin(compatible.baseUrl);
-  const chat = new ChatService(store, providers);
+  const chat = new ChatService(store, providers, join(app.getPath("userData"), "library"));
   const purgeHistory = setInterval(() => {
     const expired = store.db.prepare('SELECT id FROM conversations WHERE deletedAt IS NOT NULL AND deletedAt<?').all(new Date(Date.now() - 30_000).toISOString());
     for (const row of expired) chat.deleteConversation(String(row.id) as import('../../shared/domain').Conversation['id']);

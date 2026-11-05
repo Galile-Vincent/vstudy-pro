@@ -1,0 +1,101 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+stderr | src/renderer/courses/webview-pane.test.tsx > announces copy only on success and clears it (failure false)
+An update to MoodleWebviewPane inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/renderer/courses/webview-pane.test.tsx > announces copy only on success and clears it (failure false)
+An update to MoodleWebviewPane inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/renderer/courses/webview-pane.test.tsx > announces copy only on success and clears it (failure true)
+An update to MoodleWebviewPane inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/renderer/courses/webview-pane.test.tsx > announces copy only on success and clears it (failure true)
+An update to MoodleWebviewPane inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ❯ src/renderer/courses/webview-pane.test.tsx (2 tests | 2 failed) 57ms
+   × announces copy only on success and clears it (failure false) 51ms
+   × announces copy only on success and clears it (failure true) 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/courses/webview-pane.test.tsx > announces copy only on success and clears it (failure false)
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/renderer/courses/webview-pane.test.tsx:23:83
+     21|     expect(footer.querySelector('[role=status]')?.textContent.includes…
+     22|     await act(()=>vi.advanceTimersByTimeAsync(2200));
+     23|     expect(footer.querySelector('[role=status]')?.textContent.includes…
+       |                                                                                   ^
+     24|     if(!fail){await act(()=>document.querySelector<HTMLButtonElement>(…
+     25|   }finally{await act(()=>root.unmount());host.remove();vi.useRealTimer…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/renderer/courses/webview-pane.test.tsx > announces copy only on success and clears it (failure true)
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/renderer/courses/webview-pane.test.tsx:21:83
+     19|     const footer=document.querySelector('footer.moodle-webview-footer'…
+     20|     await act(()=>copy.click());
+     21|     expect(footer.querySelector('[role=status]')?.textContent.includes…
+       |                                                                                   ^
+     22|     await act(()=>vi.advanceTimersByTimeAsync(2200));
+     23|     expect(footer.querySelector('[role=status]')?.textContent.includes…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  01:00:27
+   Duration  633ms (transform 85ms, setup 0ms, import 227ms, tests 57ms, environment 259ms)
+

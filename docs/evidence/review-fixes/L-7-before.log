@@ -1,0 +1,111 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+ ❯ src/renderer/history/model-change.test.tsx (2 tests | 2 failed) 21ms
+   × starts a new conversation after the first send even though initial history was empty 17ms
+   × keeps the working chat mounted and shows an inline model-change error 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/history/model-change.test.tsx > starts a new conversation after the first send even though initial history was empty
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'conversations:create', …(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "conversations:create",
+-   {
+-     "modelId": "next",
+-     "providerId": "anthropic-api",
+-     "scope": "general",
+-   },
++   "providers:list",
++   {},
+  ]
+
+  2nd vi.fn() call:
+
+  [
+-   "conversations:create",
++   "chats:get",
+    {
+-     "modelId": "next",
+-     "providerId": "anthropic-api",
+-     "scope": "general",
++     "conversationId": "00000000-0000-4000-8000-000000000001",
+    },
+  ]
+
+  3rd vi.fn() call:
+
+  [
+-   "conversations:create",
++   "messages:list",
+    {
+-     "modelId": "next",
+-     "providerId": "anthropic-api",
+-     "scope": "general",
++     "conversationId": "00000000-0000-4000-8000-000000000001",
+    },
+  ]
+
+  4th vi.fn() call:
+
+  [
+-   "conversations:create",
++   "conversations:model",
+    {
++     "conversationId": "00000000-0000-4000-8000-000000000001",
+      "modelId": "next",
+      "providerId": "anthropic-api",
+-     "scope": "general",
+    },
+  ]
+
+
+Number of calls: 4
+
+ ❯ src/renderer/history/model-change.test.tsx:31:18
+     29| it('starts a new conversation after the first send even though initial…
+     30|   await mount();await act(async()=>host.querySelector('button:not(.his…
+     31|   expect(invoke).toHaveBeenCalledWith('conversations:create',{scope:'g…
+       |                  ^
+     32|   expect(navigate).toHaveBeenCalledWith({view:'history',conversationId…
+     33| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/renderer/history/model-change.test.tsx > keeps the working chat mounted and shows an inline model-change error
+AssertionError: expected null to be <div data-working-chat="true">…(1)</div> // Object.is equality
+
+- Expected:
+<div
+  data-working-chat="true"
+>
+  Working chat
+  <button>
+    Change model
+  </button>
+</div>
+
++ Received:
+null
+
+ ❯ src/renderer/history/model-change.test.tsx:37:53
+     35|   await mount(true);const chat=host.querySelector('[data-working-chat]…
+     36|   await act(async()=>host.querySelector('button:not(.history-back)')!.…
+     37|   expect(host.querySelector('[data-working-chat]')).toBe(chat);expect(…
+       |                                                     ^
+     38| });
+     39|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  00:57:21
+   Duration  600ms (transform 74ms, setup 0ms, import 216ms, tests 21ms, environment 273ms)
+

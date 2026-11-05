@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { openStore } from '../db';
 import { documentSchema } from '../../shared/domain';
+import { confirmRestoreStartup, rollbackRestoreStartup } from './restore-startup';
 import { exportBackup, stageRestore, recoverRestore } from './backup';
 import { clearConverted, checkIntegrity, storageUsage } from './service';
 import { exclusiveStorage, enterStorageRequest, storageBusy } from './maintenance';
@@ -85,4 +86,62 @@ it('preserves an existing backup when an original is missing from the live libra
     await expect(exportBackup(store,root,path)).rejects.toThrow('storage.invalid_backup');
     expect(await readFile(path)).toEqual(good);
   }finally{store.close();await rm(root,{recursive:true,force:true});await rm(output,{recursive:true,force:true});}
+});
+
+it.each([
+  "CREATE TRIGGER stolen_paths AFTER UPDATE OF sourcePath ON documents BEGIN UPDATE documents SET sourcePath='/tmp/private/source.md',markdownPath='/tmp/private/content.md' WHERE id=NEW.id; END",
+  "DROP TRIGGER document_fts_delete",
+  "CREATE VIEW unexpected AS SELECT * FROM documents",
+  "CREATE TABLE unexpected(secret TEXT)",
+  "CREATE INDEX unexpected ON documents(title)",
+])('rejects an archive with altered schema before path rewrites (%s)',async(sql)=>{
+  const root=await mkdtemp(join(tmpdir(),'vstudy-schema-'));
+  const target=await mkdtemp(join(tmpdir(),'vstudy-schema-target-'));
+  const {store}=await fixture(root);
+  try {
+    store.db.exec(sql);
+    const zip=join(target,'crafted.zip');await exportBackup(store,root,zip);
+    await expect(stageRestore(target,zip)).rejects.toThrow();
+    expect(await readdir(target)).toEqual(['crafted.zip']);
+  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
+
+it.each([
+  "INSERT INTO planner_tasks VALUES ('00000000-0000-4000-8000-000000000001','',NULL,NULL,60,'todo','user',NULL,NULL,'bad','bad')",
+  "INSERT INTO planner_exams VALUES ('00000000-0000-4000-8000-000000000001','Exam',NULL,'2030-01-01T00:00:00Z','{}','[]',NULL,'2030-01-01T00:00:00Z')",
+  "INSERT INTO planner_goals VALUES ('00000000-0000-4000-8000-000000000001','',NULL,NULL,'active')",
+  "INSERT INTO planner_plans VALUES ('00000000-0000-4000-8000-000000000001','Plan','Invalid/Zone',60,'[\"Study\"]','2030-01-01T00:00:00Z')",
+  "INSERT INTO planner_blocks VALUES ('00000000-0000-4000-8000-000000000001',NULL,'Study',NULL,NULL,NULL,'bad',30)",
+  "INSERT INTO planner_reminders VALUES ('00000000-0000-4000-8000-000000000001','task','bad','bad','Note',0)",
+])('rejects corrupt planner records before publishing (%s)',async sql=>{
+  const root=await mkdtemp(join(tmpdir(),'vstudy-planner-restore-'));
+  const target=await mkdtemp(join(tmpdir(),'vstudy-planner-target-'));
+  const {store}=await fixture(root);
+  try {
+    store.db.exec(sql);const zip=join(target,'bad.zip');await exportBackup(store,root,zip);
+    await expect(stageRestore(target,zip)).rejects.toThrow();
+    expect(await readdir(target)).toEqual(['bad.zip']);
+  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
+
+it.each(['failure','interrupted-rollback','success'])('recovers startup after restore (%s)',async outcome=>{
+  const root=await mkdtemp(join(tmpdir(),'vstudy-startup-source-'));
+  const target=await mkdtemp(join(tmpdir(),'vstudy-startup-target-'));
+  try {
+    const original=await fixture(root);const zip=join(target,'backup.zip');
+    await exportBackup(original.store,root,zip);original.store.close();
+    const previous=await fixture(target);previous.store.settings.set({...previous.store.settings.get(),chatSide:'left'});previous.store.close();
+    await stageRestore(target,zip);await recoverRestore(target);
+    if(outcome==='success')await confirmRestoreStartup(target);
+    if(outcome==='interrupted-rollback') {
+      const {directory}=JSON.parse(await readFile(join(target,'restore-startup.json'),'utf8'));
+      const stage=join(target,directory);await mkdir(join(stage,'failed'));
+      await rename(join(target,'vstudy.sqlite'),join(stage,'failed','vstudy.sqlite'));
+      await rename(join(stage,'previous','vstudy.sqlite'),join(target,'vstudy.sqlite'));
+    }
+    expect(await rollbackRestoreStartup(target)).toBe(outcome!=='success');
+    expect(await rollbackRestoreStartup(target)).toBe(false);
+    const restored=openStore(join(target,'vstudy.sqlite'));
+    try {expect(restored.settings.get().chatSide).toBe(outcome==='success'?'right':'left');expect(await readFile(restored.documents.get(id as never)!.sourcePath,'utf8')).toBe(previous.bytes);} finally {restored.close();}
+  } finally {await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });

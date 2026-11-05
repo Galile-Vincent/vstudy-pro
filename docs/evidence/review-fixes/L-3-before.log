@@ -1,0 +1,52 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-9a702fb0/apps/desktop
+
+ ❯ src/main/moodle/webview-files.test.ts (8 tests | 2 failed) 17ms
+   × rejects native downloads during maintenance before network or document writes 3ms
+   × drains a native download before maintenance touches storage 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/moodle/webview-files.test.ts > rejects native downloads during maintenance before network or document writes
+AssertionError: expected [Function] to throw error including 'storage.busy' but got 'Cannot read properties of undefined (…'
+
+Expected: "storage.busy"
+Received: "Cannot read properties of undefined (reading 'ok')"
+
+ ❯ src/main/moodle/webview-files.test.ts:54:75
+     52|   const request=vi.fn(), importPath=vi.fn();
+     53|   await exclusiveStorage(async()=>{},async()=>{
+     54|     await expect(importWebviewFile(url,policy,request,{importPath},sig…
+       |                                                                           ^
+     55|     expect(request).not.toHaveBeenCalled();expect(importPath).not.toHa…
+     56|   });
+ ❯ exclusiveStorage src/main/storage/maintenance.ts:21:62
+ ❯ src/main/moodle/webview-files.test.ts:53:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/main/moodle/webview-files.test.ts > drains a native download before maintenance touches storage
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/main/moodle/webview-files.test.ts:66:70
+     64|   let maintained=false;
+     65|   const maintenance=exclusiveStorage(async()=>{},async()=>{maintained=…
+     66|   await Promise.resolve();await Promise.resolve();expect(maintained).t…
+       |                                                                      ^
+     67|   const result=expect(download).rejects.toThrow('test import rejected'…
+     68|   downloaded(new Response('# Notes'));await result;await maintenance;e…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  00:54:41
+   Duration  239ms (transform 96ms, setup 0ms, import 139ms, tests 17ms, environment 0ms)
+

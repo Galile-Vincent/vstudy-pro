@@ -7,7 +7,7 @@ import { mkdtemp, mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
-const evidence=resolve('../../docs/evidence/storage');await mkdir(evidence,{recursive:true});
+const evidence=resolve(process.env.VSTUDY_STORAGE_EVIDENCE ?? '../../docs/evidence/storage');await mkdir(evidence,{recursive:true});
 const root=await mkdtemp(join(tmpdir(),'vstudy-storage-e2e-')),userData=join(root,'user-data'),zip=join(root,'backup.zip');
 let app;let logs='';const results=[];
 async function launch(){

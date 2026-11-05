@@ -46,3 +46,24 @@ it('removes the temporary file when the import pipeline rejects its contents',as
   await expect(importWebviewFile(url,policy,async () => new Response('bad content'),{importPath:async value => {path=value;throw Error('Invalid file');}},signal)).rejects.toThrow('Invalid file');
   await expect(stat(path)).rejects.toThrow();
 });
+
+it('rejects native downloads during maintenance before network or document writes',async()=>{
+  const {exclusiveStorage}=await import('../storage/maintenance');
+  const request=vi.fn(), importPath=vi.fn();
+  await exclusiveStorage(async()=>{},async()=>{
+    await expect(importWebviewFile(url,policy,request,{importPath},signal)).rejects.toThrow('storage.busy');
+    expect(request).not.toHaveBeenCalled();expect(importPath).not.toHaveBeenCalled();
+  });
+});
+it('drains a native download before maintenance touches storage',async()=>{
+  const {exclusiveStorage}=await import('../storage/maintenance');
+  let downloaded!:(value:Response)=>void;
+  const request=vi.fn(()=>new Promise<Response>(resolve=>{downloaded=resolve;}));
+  const download=importWebviewFile(url,policy,request,{importPath:async()=>{throw new Error('test import rejected');}},signal);
+  while(!request.mock.calls.length)await new Promise(resolve=>setTimeout(resolve,1));
+  let maintained=false;
+  const maintenance=exclusiveStorage(async()=>{},async()=>{maintained=true;});
+  await Promise.resolve();await Promise.resolve();expect(maintained).toBe(false);
+  const result=expect(download).rejects.toThrow('test import rejected');
+  downloaded(new Response('# Notes'));await result;await maintenance;expect(maintained).toBe(true);
+});
