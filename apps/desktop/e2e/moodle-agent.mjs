@@ -57,7 +57,8 @@ try {
   const db = new DatabaseSync(join(path, "vstudy.sqlite"));
   const account = {
     id: accountId,
-    schoolId: "cycu",
+    siteUrl: "https://ilearning.cycu.edu.tw",
+    siteName: "CYCU",
     remoteUserId: 1,
     displayName: "Test student",
     status: "connected",
@@ -97,7 +98,7 @@ try {
   };
   db.prepare("INSERT INTO moodle_accounts VALUES (?,?,?,?)").run(
     accountId,
-    "cycu",
+    account.siteUrl,
     1,
     JSON.stringify(account),
   );
@@ -134,6 +135,7 @@ try {
   );
   await page.reload();
   await page.locator(".moodle-course-card").first().click();
+  await page.getByRole("button", { name: "Course assistant", exact: true }).click();
   await page.locator(".moodle-agent .aui-composer-input").waitFor();
   await page
     .getByRole("button", {
