@@ -132,6 +132,7 @@ export function CoursesView() {
       key={route.courseId ?? "home"}
       api={api}
       courseId={route.courseId}
+      connectOnMount={route.connectSchool}
       onCourse={(courseId) => navigate({ view: "courses", courseId })}
       onDocument={(documentId) =>
         navigate({
@@ -153,6 +154,7 @@ function CoursesBody({
   onReconnected,
   api,
   courseId,
+  connectOnMount,
   onCourse,
   onDocument,
 }: {
@@ -160,6 +162,7 @@ function CoursesBody({
   onReconnected?: () => void;
   api: MoodleApi;
   courseId?: string | undefined;
+  connectOnMount?: boolean | undefined;
   onCourse: (id?: string) => void;
   onDocument: (id: string) => void;
 }) {
@@ -173,7 +176,7 @@ function CoursesBody({
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState("");
-  const [connect, setConnect] = useState(false);
+  const [connect, setConnect] = useState(!!connectOnMount);
   useEffect(() => {if (reconnect) {setConnect(true);onReconnected?.();}},[reconnect,onReconnected]);
   const [tab, setTab] = useState<Tab>("content");
   const [term, setTerm] = useState<MoodleTermFilter>("current");

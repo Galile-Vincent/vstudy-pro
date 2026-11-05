@@ -44,7 +44,7 @@ function Pins({ kind, items, onOpen, refresh, onError }: { kind: 'documents' | '
     <Button variant="ghost" className="home-row" lang={contentLanguage(item.title) ?? "en"} title={item.title} onClick={() => onOpen(item.id)}>{item.title}</Button><Button variant="ghost" disabled={!i} aria-label={tr('home:move_up', { title: item.title })} onClick={() => void reorder(i, i - 1)}>↑</Button><Button variant="ghost" disabled={i === items.length - 1} aria-label={tr('home:move_down', { title: item.title })} onClick={() => void reorder(i, i + 1)}>↓</Button>
   </li>)}</ul> : <p className="home-empty">{tr(kind === 'documents' ? 'home:no_pinned_documents' : 'home:no_pinned_folders')}</p>;
 }
-export function Home({ navigate, onUsage, onFolder, name, initialData }: { navigate: HomeNavigate; onUsage: () => void; onFolder?: (id: z.infer<typeof folderSchema>['id']) => void; name?: string; initialData?: Dashboard }) {
+export function Home({ navigate, onUsage, onFolder, name, initialData, guidance }: { navigate: HomeNavigate; onUsage: () => void; onFolder?: (id: z.infer<typeof folderSchema>['id']) => void; name?: string; initialData?: Dashboard; guidance?: ReactNode }) {
   useTranslation();
   const fmt = useFormat();
   const [data, setData] = useState(initialData);
@@ -68,6 +68,7 @@ export function Home({ navigate, onUsage, onFolder, name, initialData }: { navig
   const displayName = name ?? settings?.displayName;
   return <main className="home-page"><div className="home-content">
     <header className="home-greeting"><div><h1>{tr(`home:${hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'}`)}{displayName ? tr('home:greeting_name', { name: displayName }) : ''}</h1><p><AnimatedText texts={[tr('home:prompt_1'), tr('home:prompt_2'), tr('home:prompt_3')]} /></p></div><Button variant="ghost" id="welcome-entry" className="ghost" onClick={() => navigate("welcome")}><Info size={14}/>{tr("home:how_to_use")} · {tr('welcome:try_title')}</Button></header>
+    {guidance}
     {error && <div role="alert">{error}<Button variant="ghost" onClick={refresh}>{tr('common:retry')}</Button></div>}
     <Card title={tr('home:upload')}><UploadCard folders={folders} onImported={refresh}/></Card>
     {!data ? !error && <div className="home-grid" role="status" aria-busy="true" aria-label={tr('home:loading')}>{Array.from({ length: 6 }, (_, i) => <Skeleton className="home-card home-skeleton" key={i}/>)}</div> : <div className="home-grid">

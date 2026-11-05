@@ -6,6 +6,7 @@ const WelcomeView = lazy(loadWelcome);
 import { LibraryView, LibrarySidebar } from "./library";
 import { AppShell, useNavigate } from "./shell";
 import { CoursesView } from "./courses";
+import { LearningHelp, ContextCoach } from "./onboarding/help";
 import { HomeView } from "./home";
 import { Workspace } from "./workspace";
 import { desktop } from './bridge';
@@ -48,7 +49,7 @@ function Views() {
 export function App() {
   return (
     <AppShell sidebar={<LibrarySidebar />}>
-      <Views /><GlobalSettings /><HistoryFinder/>
+      <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/>
     </AppShell>
   );
 }
