@@ -8,11 +8,11 @@ import { atomicWriteSync } from "../storage/atomic";
 import { readFileSync, existsSync } from 'node:fs';
 import { z } from 'zod';
 import { executableMetadata, executableIdentity, resolveInstalledExecutable, type ExecutableIdentity } from './trusted-executable';
-const identitySchema = z.object({ path:z.string(), mtime:z.number(), hash:z.string() });
+const identitySchema = z.object({ path:z.string(), mtime:z.number(), hash:z.string(), source:z.enum(['custom', 'managed']).optional() });
 const pinsSchema = z.record(identitySchema);
 /** Persist user-approved executable hashes and require renewed approval when files change. */
 export class ExecutablePins {
-  private pins: Record<string, ExecutableIdentity> = {};
+  private pins: Record<string, ExecutableIdentity & { source?: 'custom' | 'managed' | undefined }> = {};
   private managed: (binary: string) => ExecutableIdentity | null = () => null;
   setManagedResolver(resolve: (binary: string) => ExecutableIdentity | null) { this.managed = resolve; }
   private pending = new Map<string, Promise<string | null>>();
@@ -24,13 +24,18 @@ export class ExecutablePins {
   }
   async choose(binary: string, path: string) {
     const identity = await executableIdentity(path);
-    this.pins[binary] = identity;
+    this.pins[binary] = { ...identity, source: 'custom' };
     this.save();
     return identity.path;
   }
-  describe(binary: string): Promise<string | null> { const path = this.managed(binary)?.path ?? this.pins[binary]?.path; return path ? executableMetadata(path).then(metadata=>metadata.path).catch(()=>null) : resolveInstalledExecutable(binary); }
+  activateManaged(binary: string) {
+    const identity = this.managed(binary);
+    if (!identity) throw new Error('Managed executable unavailable');
+    this.pins[binary] = { ...identity, source: 'managed' }; this.save();
+  }
+  describe(binary: string): Promise<string | null> { const pin = this.pins[binary]; const path = pin?.source === 'custom' ? pin.path : this.managed(binary)?.path ?? pin?.path; return path ? executableMetadata(path).then(metadata=>metadata.path).catch(()=>null) : resolveInstalledExecutable(binary); }
   resolve(binary: string): Promise<string | null> {
-    const managed = this.managed(binary);
+    const managed = this.pins[binary]?.source === 'custom' ? null : this.managed(binary);
     const key = `${binary}:${managed?.path ?? this.pins[binary]?.path ?? ''}`;
     const pending = this.pending.get(key);
     if (pending) return pending;
@@ -44,9 +49,12 @@ export class ExecutablePins {
     const path = managed?.path ?? previous?.path ?? await resolveInstalledExecutable(binary);
     if (!path) return null;
     const current = await executableIdentity(path);
-    if (previous && JSON.stringify(previous) !== JSON.stringify(current) && !await this.confirm(previous, current)) return null;
-    this.pins[binary] = current;
-    this.save();
+    const expected = previous ? { path: previous.path, mtime: previous.mtime, hash: previous.hash } : null;
+    if (expected && JSON.stringify(expected) !== JSON.stringify(current) && !await this.confirm(expected, current)) return null;
+    if (this.pins[binary] === pin) {
+      this.pins[binary] = { ...current, source: managed ? 'managed' : pin?.source };
+      this.save();
+    }
     return current.path;
   }
 }

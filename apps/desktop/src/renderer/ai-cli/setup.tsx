@@ -13,6 +13,7 @@ import { useCliTools } from './use-tools';
 import { useCliAction } from './use-action';
 import { ActionPreview } from './preview';
 import { ProviderChoice } from './choice';
+import { ManualInstall } from './manual-install';
 import { CliTerminal } from './terminal';
 import { AdvancedShell } from './preferences';
 import './setup.css';
@@ -105,6 +106,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
           </div>{updatePlan && !updatePlan.available && <p>{tr(`ai-cli:failure_${updatePlan.reason ?? 'unsupported'}`)}</p>}</section>
         </>}
         <ProviderChoice />
+        <ManualInstall key={provider} provider={provider} />
         <AdvancedShell busy={busy} onPreview={() => void review('advanced-shell')} />
         <details className="ai-cli-help"><summary>{tr('ai-cli:ask_title')}</summary><p>{tr('ai-cli:ask_body')}</p><blockquote>{tr('ai-cli:school_request', { provider: cliNames[provider] })}</blockquote><Button variant="secondary" onClick={() => void navigator.clipboard.writeText(tr('ai-cli:school_request', { provider: cliNames[provider] })).then(() => setCopied(true)).catch(() => setLocalError(true))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_request')}</Button></details>
         {localError && <p role="alert">{tr('ai-cli:load_error')}</p>}

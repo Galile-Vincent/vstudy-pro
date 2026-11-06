@@ -17,8 +17,7 @@ it('switches new sessions while a real old transport remains leased and can roll
   const old = script('old'), next = script('new');
   const first = await store.install(payloadRelease(old), payloadNetwork(old), signal(), () => {});
   const confirm = vi.fn(async () => false), pins = new ExecutablePins(join(directory, 'pins.json'), confirm);
-  await pins.choose('claude', first.identity.path);
-  pins.setManagedResolver(binary => store.identity(binary)); setExecutablePins(pins);
+  pins.setManagedResolver(binary => store.identity(binary)); pins.activateManaged('claude'); setExecutablePins(pins);
   const stream = runCli(first.identity.path, [], '', directory, 'claude', new AbortController().signal);
   let newStream: ReturnType<typeof runCli> | undefined;
   try {
@@ -80,16 +79,18 @@ it('extracts only the expected regular executable and preserves its verified byt
   expect(await readFile(result.identity.path)).toEqual(bytes);
   await chmod(result.identity.path, 0o700);
 });
-it('does not reuse an old pending pin check for a newly activated executable', async () => {
+it.each([false, true])('keeps a newly activated executable when an old pending check resolves with %s', async approved => {
   const directory = await temporary(), store = new SetupStore(join(directory, 'tools')), bytes = Buffer.from('#!/bin/sh\nexit 0\n');
   const first = await store.install(payloadRelease(bytes), payloadNetwork(bytes), signal(), () => {});
   let approve!: (allowed: boolean) => void, started!: () => void;
   const waiting = new Promise<void>(resolve => { started = resolve; });
   const pins = new ExecutablePins(join(directory, 'pins.json'), () => { started(); return new Promise<boolean>(resolve => { approve = resolve; }); });
-  await pins.choose('claude', first.identity.path); pins.setManagedResolver(binary => store.identity(binary));
+  pins.setManagedResolver(binary => store.identity(binary)); pins.activateManaged('claude');
   await writeFile(first.identity.path, '#!/bin/sh\nexit 1\n');
   const oldResolution = pins.resolve('claude'); await waiting;
   const second = await store.install(payloadRelease(bytes, '1.1.0'), payloadNetwork(bytes), signal(), () => {});
+  pins.activateManaged('claude');
   try { expect(await pins.resolve('claude')).toBe(second.identity.path); }
-  finally { approve(false); await oldResolution; }
+  finally { approve(approved); await oldResolution; }
+  expect(await pins.resolve('claude')).toBe(second.identity.path);
 });

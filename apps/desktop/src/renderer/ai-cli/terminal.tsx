@@ -15,6 +15,7 @@ export function CliTerminal({ session }: { session: CliActionSession }) {
   const previous = useRef('');
   const latest = useRef(session);
   latest.current = session;
+  const acceptsInput = (value: CliActionSession) => value.phase === 'running' && (value.actionId.startsWith('login-') || value.actionId === 'advanced-shell');
   const [error, setError] = useState(false);
   const openLink = (url: string) => {
     if (!url.startsWith('https://')) return;
@@ -22,12 +23,13 @@ export function CliTerminal({ session }: { session: CliActionSession }) {
   };
   useEffect(() => {
     if (!host.current) return;
-    Terminal.strings = { promptLabel: tr('ai-cli:terminal_input'), tooMuchOutput: tr('ai-cli:too_much_output') };
+    Terminal.strings.promptLabel = tr('ai-cli:terminal_input');
+    Terminal.strings.tooMuchOutput = tr('ai-cli:too_much_output');
     const term = new Terminal({
       allowProposedApi: false, convertEol: true, scrollback: 2000, fontSize: 13,
       fontFamily: 'ui-monospace, monospace', cursorBlink: false,
       screenReaderMode: true,
-      disableStdin: latest.current.phase !== 'running',
+      disableStdin: !acceptsInput(latest.current),
       linkHandler: { activate: (_event, text) => openLink(text) },
     });
     terminal.current = term;
@@ -55,7 +57,7 @@ export function CliTerminal({ session }: { session: CliActionSession }) {
     const observer = new ResizeObserver(resize); observer.observe(host.current);
     const theme = new MutationObserver(colors); theme.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class', 'data-scheme'] });
     const input = term.onData(data => {
-      if (latest.current.phase !== 'running') return;
+      if (!acceptsInput(latest.current)) return;
       for (let start = 0; start < data.length; start += 4096) void desktop.invoke('ai-cli:input', {
         id: latest.current.id, data: data.slice(start, start + 4096),
       }).catch(() => setError(true));
@@ -73,7 +75,7 @@ export function CliTerminal({ session }: { session: CliActionSession }) {
   useEffect(() => {
     const term = terminal.current;
     if (!term) return;
-    term.options.disableStdin = session.phase !== 'running';
+    term.options.disableStdin = !acceptsInput(session);
     const delta = terminalDelta(previous.current, session.output);
     if (delta.reset) term.reset();
     if (delta.text) term.write(delta.text);

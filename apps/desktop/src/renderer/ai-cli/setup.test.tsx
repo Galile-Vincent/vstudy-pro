@@ -7,9 +7,11 @@ import { i18n } from '../../shared/i18n';
 import { cliFixture } from './test-fixture';
 
 const bridge = vi.hoisted(() => ({ invoke: vi.fn() }));
+const terminalStrings = vi.hoisted(() => ({ promptLabel: '', tooMuchOutput: '' }));
 const terminal = vi.hoisted(() => ({ writes: [] as string[], resets: 0, data: undefined as ((value: string) => void) | undefined }));
 vi.mock('../bridge', () => ({ desktop: bridge }));
 vi.mock('@xterm/xterm', () => ({ Terminal: class {
+  static get strings() { return terminalStrings; }
   options = {}; cols = 80; rows = 24; buffer = { active: { getLine: () => undefined } };
   loadAddon() {} open() {} dispose() {} reset() { terminal.resets++; }
   write(value: string) { terminal.writes.push(value); }
@@ -56,14 +58,14 @@ it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through exp
   await allow();
   expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('Download, verify SHA-256');
   expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('/main/owned/folder');
-  expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('Installation plan');
+  expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('Action plan');
   expect([...document.querySelectorAll('button')].some(item => item.textContent === 'Open in my own Terminal')).toBe(false);
   expect(runs()).toHaveLength(0);
   await click('Run this plan');
   expect(document.body.textContent).toContain('Connect your account.');
   await click('Run this action');
   expect(document.body.textContent).toContain('Try your first answer.');
-  await click('Run this action');
+  await click('Test it');
   expect(document.body.textContent).toContain('Ready to study');
   expect(document.body.textContent).toContain('Your tool answered. Ready to study.');
   expect(runs().map(call => call.payload.actionId)).toEqual([`install-${provider}`, `login-${provider}`, `test-${provider}`]);
@@ -241,4 +243,12 @@ it('keeps a manual terminal fallback when embedded sign-in is unsupported', asyn
   await click('Open in my own Terminal');
   expect(runs()).toHaveLength(0);
   expect(fixture.calls.some(call => call.channel === 'ai-cli:openTerminal')).toBe(true);
+});
+
+it('recovers an unsupported existing Codex version by offering the audited managed install', async () => {
+  Object.assign(fixture.tools[1]!, { consented: true, path: '/existing/codex', version: '0.167.0', status: 'error', error: { code: 'wrong-version', hint: 'wrong-version' } });
+  await mount(<AiCliSetup initialProvider="codex" onClose={close} />);
+  expect(document.querySelector('.ai-cli-steps [aria-current=step]')?.textContent).toContain('Install');
+  await click('Run this plan');
+  expect(runs()[0]?.payload.actionId).toBe('install-codex');
 });

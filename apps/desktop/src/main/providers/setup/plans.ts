@@ -4,12 +4,15 @@
  */
 import { randomUUID } from 'node:crypto';
 import { dirname, join } from 'node:path';
-import { cliEnvironment } from '../cli-transport';
+import { cliEnvironment, cliArgs } from '../cli-transport';
+import { agyArgs } from '../agy';
 import { systemExecutable } from '../../platform/process';
 import type { CliActionId, CliActionPlan, CliFailure, CliProvider } from '../../../shared/ai-cli';
 import { SetupError, type Release } from './types';
 import type { TerminalPlan } from './pty';
+import { tr } from '../../../shared/i18n';
 export type Verb = 'install' | 'update' | 'rollback' | 'login' | 'status' | 'test' | 'advanced-shell';
+export type PlanTarget = 'embedded' | 'own-terminal';
 export interface ActionPlan extends TerminalPlan { public: CliActionPlan; provider: CliProvider | null; verb: Verb; binary: string | null; release: Release | null }
 export function actionParts(action: CliActionId): { provider: CliProvider | null; verb: Verb } {
   if (action === 'advanced-shell') return { provider: null, verb: action };
@@ -23,8 +26,8 @@ export function actionArgs(provider: CliProvider, verb: Verb): string[] {
 }
 /** Display-only quoting never becomes a shell command executed by main. */
 export function displayCommand(executable: string, args: readonly string[], platform = process.platform) {
-  const quote = (arg: string) => platform === 'win32' ? `"${arg.replaceAll('"', '\\"')}"` : `'${arg.replaceAll("'", "'\\''")}'`;
-  return [executable, ...args].map(quote).join(' ');
+  const quote = (arg: string) => platform === 'win32' ? `'${arg.replaceAll("'", "''")}'` : `'${arg.replaceAll("'", "'\\''")}'`;
+  return (platform === 'win32' ? '& ' : '') + [executable, ...args].map(quote).join(' ');
 }
 export function buildPlan(actionId: CliActionId, cwd: string, binary: string | null, release: Release | null, reason: CliFailure | null, now: number, interpreters: readonly string[] = []): ActionPlan {
   const { provider, verb } = actionParts(actionId);
@@ -39,9 +42,10 @@ export function buildPlan(actionId: CliActionId, cwd: string, binary: string | n
     args = ['-p', profile, binary, ...args]; executable = '/usr/bin/sandbox-exec';
   }
   const command = verb === 'install' || verb === 'update'
-    ? `VStudy download + verify ${release?.url ?? provider} -> ${join(dirname(cwd), provider ?? '', release?.version ?? '')}`
-    : verb === 'rollback' ? `VStudy activate previous verified ${provider} version`
-      : verb === 'test' ? `${displayCommand(executable, provider === 'agy' ? ['acp', '--stdio', '--sandbox'] : provider === 'claude' ? ['-p', '--safe-mode', '--tools', '', '--output-format', 'stream-json'] : ['exec', '--json', '--sandbox', 'read-only'])} [VStudy tool-free test]`
+    ? tr('ai-cli:download_plan', { url: release?.url ?? provider, path: join(dirname(cwd), provider ?? '', release?.version ?? '') })
+    : verb === 'rollback' ? tr('ai-cli:rollback_description', { provider })
+      : verb === 'test' ? `${tr('ai-cli:transport_plan')}\n${displayCommand(executable, provider === 'agy' ? agyArgs : cliArgs(provider!, 'default'))}\n${tr('ai-cli:test_prompt_label')}: Reply with the single word OK. Do not use tools.\n${tr('ai-cli:transport_plan_footer')}`
+        : actionId === 'status-agy' ? `${displayCommand(executable, args)}\ninitialize\nsession/new\n${tr('ai-cli:status_plan')}`
         : displayCommand(executable, args);
   return Object.freeze({ public: Object.freeze({ actionId, token: randomUUID(), command, cwd, available: reason === null, reason, expiresAt: now + 120_000 }), provider, verb, binary, executable, args: Object.freeze(args), cwd, env: Object.freeze(env), release: release ? Object.freeze({ ...release }) : null });
 }
@@ -53,11 +57,12 @@ export class PreviewTokens<Owner extends object> {
     this.tokens.set(plan.public.token, { owner, plan });
     return { ...plan.public };
   }
-  consume(owner: Owner, actionId: CliActionId, token: string, now: number) {
+  consume(owner: Owner, actionId: CliActionId, token: string, now: number, target: PlanTarget = 'embedded') {
     const entry = this.tokens.get(token);
     if (!entry || entry.owner !== owner || entry.plan.public.actionId !== actionId) throw new SetupError('blocked');
     this.tokens.delete(token);
-    if (entry.plan.public.expiresAt <= now || !entry.plan.public.available) throw new SetupError(entry.plan.public.reason ?? 'blocked');
+    const manualLogin = target === 'own-terminal' && entry.plan.verb === 'login' && entry.plan.binary !== null && entry.plan.public.reason === 'unsupported';
+    if (entry.plan.public.expiresAt <= now || !entry.plan.public.available && !manualLogin) throw new SetupError(entry.plan.public.reason ?? 'blocked');
     return entry.plan;
   }
   remove(owner: Owner) { for (const [token, entry] of this.tokens) if (entry.owner === owner) this.tokens.delete(token); }

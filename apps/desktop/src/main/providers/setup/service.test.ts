@@ -107,3 +107,31 @@ it('cancels a live login when the existing provider configuration revokes consen
   await expect.poll(() => service.sessions.read(owner, session.id).phase).toBe('cancelled');
   expect((await service.list())[0]?.consented).toBe(false);
 });
+
+it('keeps an existing account through manual update and rollback without requesting sign-in again', async () => {
+  const root = await temporary(), fixture = setupFixture(root), { service, source, pins } = fixture;
+  active.push(service); setExecutablePins(pins); const owner = new Owner();
+  await service.consent('claude', true); await run(service, owner, 'install-claude');
+  await writeFile(join(root, 'auth'), 'signed in');
+  await run(service, owner, 'status-claude');
+  const payload = claudeFixture(root, '1.1.0'), release = payloadRelease(payload, '1.1.0');
+  source.installable = async () => release;
+  source.network.download = payloadNetwork(payload).download.bind(payloadNetwork(payload));
+  expect(await run(service, owner, 'update-claude')).toMatchObject({ phase: 'succeeded' });
+  expect((await service.list())[0]).toMatchObject({ version: '1.1.0', status: 'ready', tested: false, appliesToNewChats: true });
+  expect(await run(service, owner, 'rollback-claude')).toMatchObject({ phase: 'succeeded' });
+  expect((await service.list())[0]).toMatchObject({ version: '1.0.0', status: 'ready', appliesToNewChats: true });
+});
+it('rejects an in-flight preview if its document reloads during release discovery', async () => {
+  const fixture = setupFixture(await temporary()), { service, source } = fixture;
+  active.push(service); const owner = new Owner();
+  await service.consent('claude', true);
+  const installable = source.installable.bind(source);
+  let finish!: () => void, started!: () => void;
+  const waiting = new Promise<void>(resolve => { started = resolve; });
+  source.installable = async (...args) => { started(); await new Promise<void>(resolve => { finish = resolve; }); return installable(...args); };
+  const preview = service.preview(owner, 'install-claude');
+  const rejected = expect(preview).rejects.toMatchObject({ code: 'cancelled' });
+  await waiting; await service.resetOwner(owner); finish();
+  await rejected;
+});

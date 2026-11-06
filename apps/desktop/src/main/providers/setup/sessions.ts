@@ -67,6 +67,12 @@ export class ActionSessions {
     for (const action of actions) action.controller.abort();
     await Promise.all(actions.map(a => a.done));
   }
+  async resetOwner(owner: SetupOwner) {
+    const actions = [...this.actions.values()].filter(action => action.owner === owner);
+    for (const action of actions) action.controller.abort();
+    await Promise.all(actions.map(action => action.done));
+    for (const action of actions) this.actions.delete(action.session.id);
+  }
   async dispose() {
     this.disposed = true;
     for (const action of this.actions.values()) action.controller.abort();

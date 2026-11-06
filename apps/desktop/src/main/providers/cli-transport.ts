@@ -40,7 +40,7 @@ export function cliEnvironment(
   env.DISABLE_TELEMETRY = '1';
   env.DISABLE_UPDATES = '1';
   env.DISABLE_AUTOUPDATER = '1';
-  env.AGY_CLI_DISABLE_AUTO_UPDATE = '1';
+  env.AGY_CLI_DISABLE_AUTO_UPDATE = 'true';
   env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';
   return env;
 }

@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 import { recordEgress } from '../../services/egress';
+import { tr } from '../../../shared/i18n';
 import { EventEmitter } from 'node:events';
 import { join } from 'node:path';
 import type { CliActionId, CliPreferences, CliProvider, CliToolState } from '../../../shared/ai-cli';
@@ -12,7 +13,7 @@ import { configuredCliPath, type ExecutablePins } from '../executable-pins';
 import { hasExecutableLeases, leaseExecutable } from './leases';
 import { ReleaseSource, auditedCodex } from './releases';
 import { SetupStore, privateDirectory } from './store';
-import { actionParts, buildPlan, PreviewTokens, type ActionPlan } from './plans';
+import { actionArgs, actionParts, buildPlan, displayCommand, PreviewTokens, type ActionPlan, type PlanTarget } from './plans';
 import { ActionSessions, type RunningAction, type SetupOwner } from './sessions';
 import { authStatus, probeVersion, tinyTest } from './probes';
 import { ActionPty } from './pty';
@@ -35,6 +36,7 @@ export class AiCliSetup {
   private readonly tokens = new PreviewTokens<SetupOwner>();
   private readonly states = new Map<CliProvider, CliToolState>(providers.map(p => [p, initialState(p)]));
   private readonly owners = new Map<SetupOwner, () => void>();
+  private readonly documentRevision = new WeakMap<SetupOwner, number>();
   private readonly background = new BackgroundOwner();
   private checking: Promise<CliToolState[]> | undefined;
   private timer: ReturnType<typeof setInterval> | undefined;
@@ -90,6 +92,7 @@ export class AiCliSetup {
   }
   async preview(owner: SetupOwner, actionId: CliActionId) {
     this.attach(owner);
+    const revision = this.documentRevision.get(owner);
     if (this.stopped) throw new SetupError('cancelled');
     await this.list();
     const { provider, verb } = actionParts(actionId);
@@ -112,17 +115,37 @@ export class AiCliSetup {
         } catch (error) { reason = failure(error); }
       }
     }
-    if (owner.isDestroyed()) throw new SetupError('cancelled');
+    if (owner.isDestroyed() || revision !== this.documentRevision.get(owner)) throw new SetupError('cancelled');
     return this.tokens.issue(owner, buildPlan(actionId, join(this.deps.store.root, 'actions'), binary, release, reason, this.now(), this.deps.loginInterpreters));
   }
-  takePlan(owner: SetupOwner, actionId: CliActionId, token: string) {
+  private takePlan(owner: SetupOwner, actionId: CliActionId, token: string, target: PlanTarget = 'embedded') {
     if (this.stopped) throw new SetupError('cancelled');
-    const plan = this.tokens.consume(owner, actionId, token, this.now());
+    const plan = this.tokens.consume(owner, actionId, token, this.now(), target);
     if (plan.provider && !this.enabled(plan.provider) || !plan.provider && !this.preferences().advancedShell) throw new SetupError('not-consented');
     if (this.sessions.providerBusy(plan.provider)) throw new SetupError('busy');
     return plan;
   }
+  async terminalPlan(owner: SetupOwner, actionId: CliActionId, token: string) {
+    const revision = this.documentRevision.get(owner);
+    const plan = this.takePlan(owner, actionId, token, 'own-terminal');
+    await this.trustedPlan(plan);
+    if (this.stopped || owner.isDestroyed() || revision !== this.documentRevision.get(owner)) throw new SetupError('cancelled');
+    if (plan.provider && !this.enabled(plan.provider) || !plan.provider && !this.preferences().advancedShell) throw new SetupError('not-consented');
+    if (this.sessions.providerBusy(plan.provider)) throw new SetupError('busy');
+    const command = plan.verb === 'login' && plan.provider && plan.binary ? displayCommand(plan.binary, actionArgs(plan.provider, plan.verb)) : plan.public.command;
+    const env = { ...plan.env };
+    delete env.BROWSER;
+    if (process.platform === 'linux') for (const key of ['DISPLAY', 'WAYLAND_DISPLAY', 'XAUTHORITY', 'DBUS_SESSION_BUS_ADDRESS', 'XDG_RUNTIME_DIR']) {
+      if (process.env[key]) env[key] = process.env[key];
+    }
+    return { command, cwd: plan.cwd, env };
+  }
   run(owner: SetupOwner, actionId: CliActionId, token: string) { return this.start(owner, this.takePlan(owner, actionId, token)); }
+  async resetOwner(owner: SetupOwner) {
+    this.documentRevision.set(owner, (this.documentRevision.get(owner) ?? 0) + 1);
+    this.tokens.remove(owner);
+    await this.sessions.resetOwner(owner);
+  }
   private start(owner: SetupOwner, plan: ActionPlan, automatic = false) {
     return this.sessions.start(owner, plan, async action => {
       const consentWatcher = setInterval(() => { if (plan.provider && !this.enabled(plan.provider)) action.controller.abort(); }, 100);
@@ -148,6 +171,7 @@ export class AiCliSetup {
       return;
     }
     if (['install', 'update', 'rollback'].includes(verb)) {
+      const hadAccount = ['ready', 'update-available'].includes(this.state(provider).status);
       const revision = this.deps.chatRevision();
       const canActivate = () => this.enabled(provider) && (!automatic || !this.deps.chatBusy() && this.deps.chatRevision() === revision && !hasExecutableLeases() && !this.sessions.otherBusy(action));
       if (!canActivate()) throw new SetupError('busy');
@@ -156,11 +180,13 @@ export class AiCliSetup {
       let lastBytes = 0;
       try {
         const installed = verb === 'rollback' ? await this.deps.store.rollback(provider) : await this.deps.store.install(plan.release!, this.deps.source.network, signal, bytes => {
-          if (bytes - lastBytes > 4_000_000) { this.sessions.append(action, `${bytes} bytes downloaded\r\n`); lastBytes = bytes; }
+          if (bytes - lastBytes > 4_000_000) { this.sessions.append(action, tr('ai-cli:download_progress', { bytes }) + '\r\n'); lastBytes = bytes; }
         }, canActivate, (binary, version) => (this.deps.version ?? probeVersion)(binary, provider, version, plan.cwd, signal).then(() => {}));
+        this.deps.pins.activateManaged(provider);
         this.states.set(provider, { ...this.state(provider), path: installed.identity.path, version: installed.release.version, previousVersion: installed.previous, managed: true, tested: false, appliesToNewChats: verb !== 'install' });
         this.apply(provider, { type: 'installed' });
-        this.sessions.append(action, 'Verified installation activated for new chats.\r\n');
+        if (verb !== 'install' && hadAccount) this.apply(provider, { type: 'ready' });
+        this.sessions.append(action, tr('ai-cli:installation_complete') + '\r\n');
       } finally { if (watcher) clearInterval(watcher); }
       return;
     }
@@ -190,7 +216,7 @@ export class AiCliSetup {
         this.sessions.append(action, answer + '\r\n');
         this.states.set(provider, { ...this.state(provider), tested: true });
       }
-      this.sessions.append(action, verb === 'test' ? 'Tool-free test completed.\r\n' : 'Sign-in verified.\r\n');
+      this.sessions.append(action, tr(verb === 'test' ? 'ai-cli:test_complete' : 'ai-cli:signin_verified') + '\r\n');
     } finally { releaseLease(); }
   }
   private async loginAgy(action: RunningAction) {

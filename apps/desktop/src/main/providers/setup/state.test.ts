@@ -41,3 +41,23 @@ it('consumes a main-issued preview exactly once and rejects another owner, actio
   const expired = tokens.issue(owner, buildPlan('status-claude', '/private/empty', '/private/bin', null, null, Date.now()));
   expect(() => tokens.consume(owner, 'status-claude', expired.token, expired.expiresAt)).toThrow('blocked');
 });
+it('keeps manual login tokens bound to their owner, action, and expiry', () => {
+  const owner = new Owner(), other = new Owner(), tokens = new PreviewTokens<Owner>();
+  const issue = () => tokens.issue(owner, buildPlan('login-claude', '/private/empty', '/private/cli', null, 'unsupported', Date.now()));
+  const preview = issue();
+  expect(() => tokens.consume(other, 'login-claude', preview.token, Date.now(), 'own-terminal')).toThrow('blocked');
+  expect(() => tokens.consume(owner, 'status-claude', preview.token, Date.now(), 'own-terminal')).toThrow('blocked');
+  expect(tokens.consume(owner, 'login-claude', preview.token, Date.now(), 'own-terminal').binary).toBe('/private/cli');
+  expect(() => tokens.consume(owner, 'login-claude', preview.token, Date.now(), 'own-terminal')).toThrow('blocked');
+  const expired = issue();
+  expect(() => tokens.consume(owner, 'login-claude', expired.token, expired.expiresAt, 'own-terminal')).toThrow('unsupported');
+});
+it.each([
+  ['login-claude', null, 'unsupported'],
+  ['login-claude', '/private/cli', 'not-consented'],
+  ['status-claude', '/private/cli', 'unsupported'],
+] as const)('does not allow a manual terminal for %s with binary %s and reason %s', (actionId, binary, reason) => {
+  const owner = new Owner(), tokens = new PreviewTokens<Owner>();
+  const preview = tokens.issue(owner, buildPlan(actionId, '/private/empty', binary, null, reason, Date.now()));
+  expect(() => tokens.consume(owner, actionId, preview.token, Date.now(), 'own-terminal')).toThrow(reason);
+});

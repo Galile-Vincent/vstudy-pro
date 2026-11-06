@@ -15,10 +15,10 @@ it('passes argv literally, supports quoted paths, and scrubs inherited secrets a
   const plan = { ...base, executable: process.execPath, args: ['-e', 'console.log(JSON.stringify({arg:process.argv[1],secret:process.env.ANTHROPIC_API_KEY,browser:process.env.BROWSER,updates:process.env.DISABLE_AUTOUPDATER,agy:process.env.AGY_CLI_DISABLE_AUTO_UPDATE}))', arg] };
   const result = await new ActionPty().run(plan, AbortSignal.timeout(5000), () => {});
   expect(result.exitCode).toBe(0);
-  expect(JSON.parse(result.output)).toMatchObject({ arg, browser: process.platform === 'win32' ? expect.stringContaining('where.exe') : '/usr/bin/true', updates: '1', agy: '1' });
+  expect(JSON.parse(result.output)).toMatchObject({ arg, browser: process.platform === 'win32' ? expect.stringContaining('where.exe') : '/usr/bin/true', updates: '1', agy: 'true' });
   expect(JSON.parse(result.output)).not.toHaveProperty('secret');
   await expect(readFile(join(cwd, 'PWNED'))).rejects.toMatchObject({ code: 'ENOENT' });
-  expect(displayCommand('/fake/a b', ['quote\'here'])).toContain("'quote'\\''here'");
+  expect(displayCommand('/fake/a b', ['quote\'here'], 'darwin')).toContain("'quote'\\''here'");
 });
 it('accepts bounded input and resize, then awaits cancellation of a TERM-resistant tree', async () => {
   const cwd = await temporary(), pty = new ActionPty(), controller = new AbortController();
@@ -69,5 +69,16 @@ it('caps session output in memory and awaits close before releasing the provider
   await expect.poll(() => sessions.read(owner, session.id).truncated).toBe(true);
   expect(sessions.read(owner, session.id).output).toHaveLength(262144);
   await sessions.close(owner, session.id); expect(sessions.isBusy).toBe(false);
+  await sessions.dispose();
+});
+it('stops a native action on document reset and removes its output and input capability', async () => {
+  const owner = new Owner(), sessions = new ActionSessions();
+  const plan = { ...buildPlan('login-claude', await temporary(), process.execPath, null, null, Date.now()), executable: process.execPath, args: ['-e', "console.log('READY');process.stdin.resume();setInterval(()=>{},1000)"] };
+  const session = sessions.start(owner, plan, async action => { await action.pty.run(plan, action.controller.signal, data => sessions.append(action, data)); }, () => {});
+  await expect.poll(() => sessions.read(owner, session.id).output).toContain('READY');
+  await sessions.resetOwner(owner);
+  expect(sessions.isBusy).toBe(false);
+  expect(() => sessions.read(owner, session.id)).toThrow('blocked');
+  expect(() => sessions.input(owner, session.id, 'data')).toThrow('blocked');
   await sessions.dispose();
 });
