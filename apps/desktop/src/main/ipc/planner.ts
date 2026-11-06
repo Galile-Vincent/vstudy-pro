@@ -13,7 +13,7 @@ import type { createIpcRegistrar } from "./register";
 import { PlannerRepository } from "../planner/repository";
 import { plannerCalendar } from "../planner/calendar";
 import { firePlannerReminders } from "../planner/reminders";
-import { showAttachedMessage } from "../dialogs";
+import { showAttachedMessage, ownerWindow } from "../dialogs";
 import { tr } from "../i18n";
 import { exportText } from "../services/export-file";
 
@@ -24,10 +24,10 @@ export function registerPlannerIpc(registrar: ReturnType<typeof createIpcRegistr
   registrar.handle("planner:snapshot", () => repository.snapshot());
   registrar.handle("planner:quick-add", input => repository.quickAdd(input));
   registrar.handle("planner:approve", ({ approvalId, action, courseId }) => repository.approve(approvalId, action, courseId));
-  registrar.handle("planner:export-calendar", async selection => {
+  registrar.handle("planner:export-calendar", async (selection, event) => {
     const context = repository.context();
     const text = plannerCalendar(context.snapshot, context.deadlines, selection);
-    const result = await dialog.showSaveDialog({ defaultPath: "vstudy-study-plan.ics", filters: [{ name: tr("planner:calendar_file"), extensions: ["ics"] }] });
+    const result = await dialog.showSaveDialog(ownerWindow(event.sender), { defaultPath: "vstudy-study-plan.ics", filters: [{ name: tr("planner:calendar_file"), extensions: ["ics"] }] });
     if (result.canceled || !result.filePath) return { saved: false };
     await exportText(text, result.filePath);
     return { saved: true };

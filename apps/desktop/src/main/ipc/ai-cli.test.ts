@@ -76,7 +76,7 @@ it('registers the entire contract with strict sender, subframe, and request vali
   expect([...implemented].filter(channel => channel.startsWith('ai-cli:'))).toEqual(Object.keys(aiCliContract));
   await expect(invoke('ai-cli:list', {}, stranger)).rejects.toThrow('Untrusted IPC sender');
   await expect(invoke('ai-cli:list', {}, undefined, {})).rejects.toThrow('Untrusted IPC sender');
-  const logging = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const logging = vi.spyOn(console, 'log').mockImplementation(() => {});
   await expect(invoke('ai-cli:preview', { actionId: 'advanced-shell', executable: '/bin/sh' })).rejects.toThrow('VSTUDY_STATUS');
   expect(logging).toHaveBeenCalled();
   expect(await invoke('ai-cli:preferences', {})).toEqual({ updateChecks: false, autoUpdateWhenIdle: false, advancedShell: false });
@@ -168,7 +168,7 @@ it.each(['darwin', 'win32'] as const)('confirms the official manual command befo
     approval.show.mockResolvedValueOnce({ response: 0, checkboxChecked: false });
     expect(await invoke('ai-cli:openTerminal', { actionId: 'terminal-agy', token: preview.token })).toEqual({ ok: false });
     expect(electron.clipboard.writeText).not.toHaveBeenCalled(); expect(execFile).not.toHaveBeenCalled(); expect(spawn).not.toHaveBeenCalled();
-    expect(approval.show).toHaveBeenLastCalledWith(expect.objectContaining({ detail: expect.stringContaining(preview.command), defaultId: 0, cancelId: 0 }));
+    expect(approval.show).toHaveBeenLastCalledWith(expect.objectContaining({ detail: expect.stringContaining(preview.command), defaultId: 0, cancelId: 0 }),expect.objectContaining({id:1}));
     const opening = invoke('ai-cli:openTerminal', { actionId: 'terminal-agy', token: preview.token });
     if (platform === 'darwin') {
       await expect(opening).rejects.toThrow('VSTUDY_STATUS');

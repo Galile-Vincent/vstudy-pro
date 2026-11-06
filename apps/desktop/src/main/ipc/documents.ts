@@ -9,7 +9,7 @@ import { createPageRenderer } from '../../../resources/converter/ai-pages';
 import { aiParseContract, aiParseProgressChannel } from '../../shared/ai-parse';
 import type { ProviderRegistry } from '../providers';
 import { importError } from '../../shared/import-error';
-import { showAttachedMessage } from '../dialogs';
+import { showAttachedMessage, ownerWindow } from '../dialogs';
 import { DropTokens } from '../services/drop-tokens';
 import { readFile } from "node:fs/promises";
 import { LibraryService } from '../services/library';
@@ -82,7 +82,7 @@ export function registerDocumentsIpc(
     const document = await documents.importPath(path); store.db.prepare('UPDATE documents SET title=? WHERE id=?').run(tr('common:sample_title'),document.id); owners.set(document.id, event.sender); return documents.get(document.id)!;
   });
   registrar.handle("documents:import", async ({ folderId }, event) => {
-    const result = await dialog.showOpenDialog({
+    const result = await dialog.showOpenDialog(ownerWindow(event.sender), {
       title:tr("picker:import_title"), buttonLabel:tr("picker:import_title"),
       properties: ["openFile", "multiSelections"],
       filters: [{ name: tr("picker:documents"), extensions: Object.keys(documentFormats) }],

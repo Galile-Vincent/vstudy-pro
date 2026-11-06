@@ -4,6 +4,7 @@
  * Request and response validation and sender ownership stay at the IPC boundary.
  * @packageDocumentation
  */
+import { log, redact } from '../logging';
 import { enterStorageRequest } from "../storage/maintenance";
 import { MoodleAuthError } from '../moodle/auth';
 import { importError } from '../../shared/import-error';
@@ -55,7 +56,7 @@ export function createIpcRegistrar(
             const code=errno==='ENOSPC' ? 'disk_full' : errno==='EACCES' || errno==='EPERM' ? 'permission' : errno==='EBUSY' ? 'busy' : error instanceof Error && error.message.startsWith('storage.') ? error.message.slice(8) : 'failed';
             throw new Error('VSTUDY_STATUS:'+JSON.stringify({code:'storage.'+code,params:{}}));
           }
-          if (!channel.startsWith('moodle:')) console.error(`[ipc] ${channel} failed:`, error instanceof Error ? error.stack ?? error.message : String(error));
+          if (!channel.startsWith('moodle:')) log({phase:'ipc-failed', channel, stack:redact(error instanceof Error ? error.stack ?? error.message : String(error))});
           if (channel === 'moodle:connect' && error instanceof MoodleAuthError && error.code === 'cancelled') return {moodleAuthCancelled:true};
           if (error instanceof MoodleAuthError) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'moodle.auth_' + error.code.replaceAll('-','_'),params:error.reason ? {reason:error.reason} : {}}));
           if (channel.startsWith('moodle:')) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'errors.generic',params:{}}));

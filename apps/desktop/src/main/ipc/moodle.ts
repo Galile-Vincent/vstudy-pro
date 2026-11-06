@@ -1,3 +1,4 @@
+import { ownerWindow } from '../dialogs';
 /**
  * Register validated moodle IPC operations and delegate privileged work to main services.
  * Owned by main/ipc.
@@ -85,9 +86,9 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     return repository.createReminder(input);
   });
   registrar.handle(moodleChannels.deleteReminder,({reminderId}) => { repository.deleteReminder(reminderId); return {ok:true}; });
-  registrar.handle(moodleChannels.exportCalendar,async ({deadlineIds}) => {
+  registrar.handle(moodleChannels.exportCalendar,async ({deadlineIds},event) => {
     const text = calendarText(repository.deadlines(deadlineIds));
-    const result = await dialog.showSaveDialog({defaultPath:'vstudy-deadlines.ics',filters:[{name:tr('planner:calendar_file'),extensions:['ics']}]});
+    const result = await dialog.showSaveDialog(ownerWindow(event.sender), {defaultPath:'vstudy-deadlines.ics',filters:[{name:tr('planner:calendar_file'),extensions:['ics']}]});
     if (result.canceled || !result.filePath) return {saved:false};
     await exportText(text,result.filePath);
     return {saved:true};

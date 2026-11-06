@@ -4,15 +4,15 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { McpRuntime } from './mcp/runtime';
 
 const mocks = vi.hoisted(() => ({
-  confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
-  showMessage: vi.fn(), log: vi.fn(), registerIpc: vi.fn(),
+  initialize:vi.fn(), confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
+  showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), log: vi.fn(), registerIpc: vi.fn(), restore: undefined as undefined | (() => void),
 }));
 const electron = await vi.hoisted(async () => {
   const { EventEmitter } = await import('node:events');
   class Window extends EventEmitter {
     static instances: Window[] = [];
     destroyed = false;
-    webContents = Object.assign(new EventEmitter(), { setWindowOpenHandler: vi.fn(), isDestroyed: () => this.destroyed });
+    webContents = Object.assign(new EventEmitter(), { setWindowOpenHandler: vi.fn(), reload: vi.fn(), isDestroyed: () => this.destroyed });
     loadURL = vi.fn(() => Promise.reject(Object.assign(new Error('reload interrupted navigation'), { code: 'ERR_ABORTED' })));
     show = vi.fn();
     focus = vi.fn();
@@ -26,7 +26,7 @@ const electron = await vi.hoisted(async () => {
     enableSandbox: vi.fn(), exit: vi.fn(), quit: vi.fn(), relaunch: vi.fn(), setAppUserModelId: vi.fn(),
   });
   return {
-    app, BrowserWindow: Window, nativeTheme: new EventEmitter(), safeStorage: {}, ipcMain: { removeHandler: vi.fn() },
+    app, dialog: { showMessageBox: vi.fn(async () => ({ response: 1 })) }, BrowserWindow: Window, nativeTheme: new EventEmitter(), safeStorage: {}, ipcMain: { removeHandler: vi.fn() },
     protocol: { registerSchemesAsPrivileged: vi.fn(), handle: vi.fn() },
     session: { defaultSession: {
       setDevicePermissionHandler: vi.fn(), setPermissionRequestHandler: vi.fn(), setPermissionCheckHandler: vi.fn(),
@@ -43,14 +43,15 @@ vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
 vi.mock('./services/delete-data', () => ({ deleteAllData: vi.fn() }));
 vi.mock('./assets', () => ({ assetHandler: vi.fn() }));
 vi.mock('./theme', () => ({ applyNativeTheme: vi.fn(), nativeBackground: () => '#ffffff' }));
-vi.mock('./moodle/sso-protocol', () => ({ initializeMoodleProtocol: vi.fn() }));
+vi.mock('./moodle/sso-protocol', () => ({ initializeMoodleProtocol: mocks.initialize }));
 vi.mock('./storage/reconcile', () => ({ reconcileDownloads: vi.fn() }));
 vi.mock('./storage/restore-startup', () => ({ confirmRestoreStartup: mocks.confirm, rollbackRestoreStartup: mocks.rollback }));
 vi.mock('./storage/backup', () => ({ recoverRestore: vi.fn() }));
-vi.mock('./logging', () => ({ log: mocks.log }));
-vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage }));
+vi.mock('./logging', () => ({ log: mocks.log, copyDiagnostics: mocks.copyDiagnostics }));
+vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage, showStartupError: mocks.fatal }));
+vi.mock('./window-state', () => ({readWindowState: () => ({width:1200,height:800,maximized:false}), trackWindowState:vi.fn()}));
 vi.mock('./shutdown', () => ({ coordinateShutdown: () => vi.fn() }));
-vi.mock('./ownership', () => ({ acquireOwnership: () => true }));
+vi.mock('./ownership', () => ({ acquireOwnership: (_app: unknown, _window: unknown, restore: () => void) => { mocks.restore = restore; return true; } }));
 vi.mock('./i18n', () => ({ tr: (key: string) => key }));
 vi.mock('./packaged-smoke', () => ({ runPackagedSmoke: vi.fn() }));
 
@@ -66,6 +67,8 @@ beforeEach(() => {
   electron.BrowserWindow.instances = [];
 });
 afterEach(() => {
+  vi.useRealTimers();
+  for (const window of electron.BrowserWindow.instances) window.close();
   for (const [event, before] of processListeners) {
     for (const listener of eventProcess.rawListeners(event)) {
       if (!before.includes(listener)) eventProcess.removeListener(event, listener as (...args: unknown[]) => void);
@@ -90,7 +93,7 @@ it.each(['closed', 'destroyed'])('completes startup after an aborted reload foll
   expect(window.webContents.listenerCount('did-fail-load')).toBe(0);
   expect(window.webContents.listenerCount('destroyed')).toBe(0);
   electron.app.emit('activate');
-  expect(electron.BrowserWindow.instances).toHaveLength(2);
+  await vi.waitFor(() => expect(electron.BrowserWindow.instances).toHaveLength(2));
   electron.BrowserWindow.instances[1]!.webContents.emit('did-finish-load');
 });
 it('waits through a reload cancellation until its replacement navigation finishes', async () => {
@@ -107,6 +110,7 @@ it('rejects a real main-frame load failure and removes the pending navigation li
   window.webContents.emit('did-fail-load', {}, -105, 'ERR_NAME_NOT_RESOLVED', 'file://app', true);
   await vi.waitFor(() => expect(electron.app.exit).toHaveBeenCalledWith(1));
   expect(mocks.confirm).not.toHaveBeenCalled();
+  expect(mocks.fatal).toHaveBeenCalledWith(expect.any(Error), 'window');
   expect(mocks.closeStore).toHaveBeenCalledOnce();
   expect(window.webContents.listenerCount('did-finish-load')).toBe(0);
   expect(window.webContents.listenerCount('did-fail-load')).toBe(0);
@@ -196,4 +200,114 @@ it.each(['enabled', 'throwing', 'absent', 'corrupt'] as const)('restores %s MCP 
     process.argv.splice(0, process.argv.length, ...previousArgv);
     await runtime?.dispose();
   }
+});
+
+it.each(['render-process-gone', 'unresponsive'])('bounds automatic reloads for main-window %s and offers diagnostics', async event => {
+  const window = await start();
+  window.webContents.emit('did-finish-load');
+  await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
+  const emit = () => event === 'unresponsive' ? window.emit(event) : window.webContents.emit(event, {}, {reason:'crashed', exitCode:1});
+  emit(); emit(); emit(); emit();
+  expect(window.webContents.reload).toHaveBeenCalledTimes(2);
+  expect(electron.dialog.showMessageBox).toHaveBeenCalledOnce();
+  expect(electron.dialog.showMessageBox).toHaveBeenCalledWith(window, expect.objectContaining({buttons:['common:menu_quit','common:copy_diagnostics']}));
+  await vi.waitFor(() => expect(mocks.copyDiagnostics).toHaveBeenCalledOnce());
+  expect(electron.app.exit).not.toHaveBeenCalled();
+});
+it('allows recovery again after the 60-second reload budget expires', async () => {
+  vi.useFakeTimers();
+  const window = await start();
+  for (let i=0; i<2; i++) window.emit('unresponsive');
+  await vi.advanceTimersByTimeAsync(60_001);
+  window.emit('unresponsive');
+  expect(window.webContents.reload).toHaveBeenCalledTimes(3);
+  expect(electron.dialog.showMessageBox).not.toHaveBeenCalled();
+});
+it.each([false,true])('shows the ready timeout fallback only for foreground launches (background=%s)', async background => {
+  vi.useFakeTimers();
+  if (background) process.argv.push('--mcp-background');
+  try {
+    const window = await start();
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(window.show).toHaveBeenCalledTimes(background ? 0 : 1);
+    window.emit('ready-to-show');
+    expect(window.show).toHaveBeenCalledTimes(background ? 0 : 1);
+  } finally { if (background) process.argv.pop(); }
+});
+it('quits through ordered shutdown when recovery is exhausted and Quit is selected', async () => {
+  electron.dialog.showMessageBox.mockResolvedValueOnce({response:0});
+  const window = await start();
+  window.emit('unresponsive'); window.emit('unresponsive'); window.emit('unresponsive');
+  await vi.waitFor(() => expect(electron.app.quit).toHaveBeenCalledOnce());
+});
+it('settles initial navigation when renderer recovery is exhausted', async () => {
+  const window = await start();
+  for (let i=0;i<3;i++) window.webContents.emit('render-process-gone', {}, {reason:'crashed',exitCode:1});
+  await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
+});
+
+it('queues second launches until startup and the store are ready', async () => {
+  let release!: () => void;
+  mocks.rollback.mockImplementationOnce(() => new Promise<boolean>(resolve => {release=()=>resolve(false);}));
+  await import('./index');
+  await vi.waitFor(() => expect(mocks.rollback).toHaveBeenCalledOnce());
+  mocks.restore!(); mocks.restore!();
+  await Promise.resolve();
+  expect(electron.BrowserWindow.instances).toHaveLength(0);
+  expect(electron.app.exit).not.toHaveBeenCalled();
+  release();
+  await vi.waitFor(() => expect(electron.BrowserWindow.instances).toHaveLength(1));
+  const window = electron.BrowserWindow.instances[0]!;
+  window.webContents.emit('did-finish-load');
+  await vi.waitFor(() => expect(window.focus).toHaveBeenCalled());
+  expect(electron.BrowserWindow.instances).toHaveLength(1);
+});
+function rejectInMain(reason: unknown) {
+  const listener = eventProcess.rawListeners('unhandledRejection').find(listener => !processListeners.get('unhandledRejection')!.includes(listener))!;
+  listener(reason);
+}
+it('logs unhandled rejections after startup and keeps the app running', async () => {
+  const window = await start(); window.webContents.emit('did-finish-load');
+  await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
+  rejectInMain(Error('runtime failure'));
+  expect(mocks.log).toHaveBeenCalledWith(expect.objectContaining({phase:'main-unhandled-rejection'}));
+  expect(electron.app.exit).not.toHaveBeenCalled();
+  expect(mocks.fatal).not.toHaveBeenCalled();
+});
+it('shows fatal startup rejections before exiting', async () => {
+  await start();
+  const error = Error('startup rejection'); rejectInMain(error);
+  expect(mocks.fatal).toHaveBeenCalledWith(error, 'window');
+  expect(electron.app.exit).toHaveBeenCalledWith(1);
+});
+it('settles deferred second launches after startup fails', async () => {
+  mocks.rollback.mockRejectedValueOnce(Error('restore failed'));
+  await import('./index'); mocks.restore!();
+  await vi.waitFor(() => expect(electron.app.exit).toHaveBeenCalledWith(1));
+  expect(electron.BrowserWindow.instances).toHaveLength(0);
+  expect(mocks.fatal).toHaveBeenCalledWith(expect.any(Error), 'recovery');
+});
+
+it('reports synchronous bootstrap failure before any window or store exists', async () => {
+  const error=Error('protocol registration failed');
+  mocks.initialize.mockImplementationOnce(()=>{throw error;});
+  await expect(import('./index')).resolves.toBeDefined();
+  expect(mocks.fatal).toHaveBeenCalledWith(error,'services');
+  expect(electron.app.exit).toHaveBeenCalledWith(1);
+  expect(electron.BrowserWindow.instances).toHaveLength(0);
+});
+it('reports uncaught startup exceptions with a safe fatal message', async () => {
+  await start();
+  const error=Error('uncaught during startup');
+  const listener=eventProcess.rawListeners('uncaughtExceptionMonitor').find(listener=>!processListeners.get('uncaughtExceptionMonitor')!.includes(listener))!;
+  listener(error);
+  expect(mocks.fatal).toHaveBeenCalledWith(error,'window');
+  expect(electron.app.exit).toHaveBeenCalledWith(1);
+});
+
+it('does not recover renderer failures belonging to another window', async () => {
+  const main=await start();
+  electron.app.emit('render-process-gone', {}, {reload:vi.fn()}, {reason:'crashed',exitCode:1});
+  expect(main.webContents.reload).not.toHaveBeenCalled();
+  expect(electron.dialog.showMessageBox).not.toHaveBeenCalled();
 });

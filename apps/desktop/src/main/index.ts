@@ -9,15 +9,16 @@ import { confirmRestoreStartup, rollbackRestoreStartup } from "./storage/restore
 import { recoverRestore } from "./storage/backup";
 import { applyNativeTheme, nativeBackground } from './theme';
 import { initializeMoodleProtocol } from './moodle/sso-protocol';
-import { log } from './logging';
-import { showAttachedMessage } from './dialogs';
+import { log, copyDiagnostics } from './logging';
+import { showAttachedMessage, showStartupError, type StartupStage } from './dialogs';
+import { readWindowState, trackWindowState } from './window-state';
 import { coordinateShutdown } from './shutdown';
 import { acquireOwnership } from './ownership';
 import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { runPackagedSmoke } from './packaged-smoke';
-import { app, BrowserWindow, nativeTheme, session, safeStorage, protocol, ipcMain } from "electron";
+import { app, BrowserWindow, nativeTheme, session, safeStorage, protocol, ipcMain, dialog } from "electron";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { mkdirSync } from "node:fs";
@@ -35,25 +36,49 @@ import { isPathWithin } from './platform/paths';
 import { relative } from 'node:path';
 import { prepareDistributionSmoke, runDistributionSmoke } from './distribution-smoke';
 
-const distributionSmokeRoot = prepareDistributionSmoke();
-initializeMoodleProtocol();
-
-protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({ scheme, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } })));
-
-const smokeRoot = process.env.VSTUDY_PACKAGED_SMOKE_DIR;
-if (smokeRoot) {
-  const canonical = realpathSync(smokeRoot), temporary = realpathSync(tmpdir());
-  if (!isPathWithin(temporary, canonical) || !/^vstudy-packaged-smoke-[^/\\]+$/.test(relative(temporary, canonical)) || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
-  const isolated = join(canonical, 'user-data');
-  mkdirSync(isolated, {recursive:true,mode:0o700});
-  if (lstatSync(isolated).isSymbolicLink() || realpathSync(isolated) !== isolated) throw new Error('Smoke user data must be an isolated directory');
-  app.setPath('userData', isolated);
+let startupStage: StartupStage = 'services';
+let startupComplete = false;
+let startupFailed = false;
+let resolveAppReady!: (ready: boolean) => void;
+const appReady = new Promise<boolean>(resolve => { resolveAppReady = resolve; });
+function failStartup(error: unknown): void {
+  if (startupFailed) return;
+  startupFailed = true;
+  resolveAppReady(false);
+  log({phase:'startup-failed', stage:startupStage, error: error instanceof Error ? error.stack ?? error.message : error});
+  showStartupError(error, startupStage);
 }
+function requestMainWindow(): void {
+  void restoreMainWindow().catch(error => log({phase:'window-restore-failed', error}));
+}
+let distributionSmokeRoot: ReturnType<typeof prepareDistributionSmoke>;
+const smokeRoot = process.env.VSTUDY_PACKAGED_SMOKE_DIR;
+try {
+  distributionSmokeRoot = prepareDistributionSmoke();
+  initializeMoodleProtocol();
+
+  protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({ scheme, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } })));
+
+  if (smokeRoot) {
+    const canonical = realpathSync(smokeRoot), temporary = realpathSync(tmpdir());
+    if (!isPathWithin(temporary, canonical) || !/^vstudy-packaged-smoke-[^/\\]+$/.test(relative(temporary, canonical)) || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
+    const isolated = join(canonical, 'user-data');
+    mkdirSync(isolated, {recursive:true,mode:0o700});
+    if (lstatSync(isolated).isSymbolicLink() || realpathSync(isolated) !== isolated) throw new Error('Smoke user data must be an isolated directory');
+    app.setPath('userData', isolated);
+  }
+} catch (error) { failStartup(error); app.exit(1); }
 process.on('exit', code => log({phase:'main-exit',code}));
 app.on('child-process-gone', (_event,details) => log({phase:'main-child-process-gone',code:details.exitCode,reason:details.reason,type:details.type}));
 app.on('render-process-gone', (_event,_contents,details) => log({phase:'main-render-process-gone',code:details.exitCode,reason:details.reason}));
-process.on('uncaughtExceptionMonitor', error => log({phase:'main-uncaught-exception',code:(error as NodeJS.ErrnoException).code ?? error.name}));
-process.on('unhandledRejection', () => { log({phase:'main-unhandled-rejection',code:'UNHANDLED_REJECTION'}); app.exit(1); });
+process.on('uncaughtExceptionMonitor', error => {
+  log({phase:'main-uncaught-exception',code:(error as NodeJS.ErrnoException).code ?? error.name});
+  if (!startupComplete) { failStartup(error); app.exit(1); }
+});
+process.on('unhandledRejection', error => {
+  log({phase:'main-unhandled-rejection', error: error instanceof Error ? error.stack ?? error.message : error});
+  if (!startupComplete) { failStartup(error); app.exit(1); }
+});
 process.umask(0o077);
 app.enableSandbox();
 if (app.isPackaged) {
@@ -73,8 +98,10 @@ const entryUrl =
   developmentUrl ??
   (app.isPackaged ? "vstudy://app/index.html" : pathToFileURL(join(__dirname, "../renderer/index.html")).href);
 
+let reloads: number[] = [];
 let openingWindow: Promise<void> | undefined;
 async function restoreMainWindow(): Promise<void> {
+  if (!await appReady) return;
   if (window && !window.isDestroyed()) {window.show();window.focus();return;}
   await (openingWindow ??= createWindow().finally(() => {openingWindow=undefined;}));
 }
@@ -83,9 +110,10 @@ async function createWindow(show = true): Promise<void> {
   const appearance = store!.settings.get();
   applyNativeTheme(appearance);
   if (!app.isPackaged && process.platform === "darwin") app.dock?.setIcon(join(__dirname, "../../build/icon-mac.png"));
+  const state = readWindowState(app.getPath('userData'));
+  const { x, y, width, height } = state;
   const current = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    ...(x === undefined ? {} : {x}), ...(y === undefined ? {} : {y}), width, height,
     minWidth: 720,
     minHeight: 480,
     show: false,
@@ -106,6 +134,7 @@ async function createWindow(show = true): Promise<void> {
     },
   });
   window = current;
+  trackWindowState(current, app.getPath('userData'), state);
   applyNativeTheme(appearance);
   current.webContents.on('will-frame-navigate', event => { if (!event.isMainFrame) event.preventDefault(); });
   current.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
@@ -118,8 +147,41 @@ async function createWindow(show = true): Promise<void> {
   current.webContents.on("will-attach-webview", (event) =>
     event.preventDefault(),
   );
-  current.once("ready-to-show", () => {if (show) current.show();});
+  let shown = false;
+  const showWindow = () => {
+    if (show && !shown && !current.isDestroyed()) { shown = true; current.show(); }
+  };
+  const showTimeout = setTimeout(showWindow, 10_000);
+  showTimeout.unref();
+  current.once('ready-to-show', () => { clearTimeout(showTimeout); showWindow(); });
+  let settleNavigation = () => {};
+  let recoveryDialogOpen = false;
+  const recoverRenderer = () => {
+    if (current.isDestroyed()) return;
+    const now = Date.now();
+    reloads = reloads.filter(time => now - time < 60_000);
+    if (reloads.length < 2) {
+      reloads.push(now);
+      current.webContents.reload();
+      return;
+    }
+    settleNavigation();
+    if (recoveryDialogOpen) return;
+    recoveryDialogOpen = true;
+    void dialog.showMessageBox(current, {
+      type: 'error', message: tr('errors:window_unavailable'),
+      buttons: [tr('common:menu_quit'), tr('common:copy_diagnostics')], defaultId: 0, cancelId: 1,
+    }).then(({ response }) => { if (response === 0) app.quit(); else copyDiagnostics(); })
+      .catch(error => log({phase:'window-recovery-dialog-failed', error}))
+      .finally(() => { recoveryDialogOpen = false; });
+  };
+  current.webContents.on('render-process-gone', (_event, details) => {
+    log({phase:'main-window-render-process-gone', reason:details.reason, code:details.exitCode});
+    recoverRenderer();
+  });
+  current.on('unresponsive', () => { log({phase:'main-window-unresponsive'}); recoverRenderer(); });
   current.on("closed", () => {
+    clearTimeout(showTimeout);
     if (window === current) window = null;
   });
   if (smokeRoot) current.webContents.once('did-finish-load', () => { void runPackagedSmoke(current, realpathSync(smokeRoot)); });
@@ -132,6 +194,7 @@ async function createWindow(show = true): Promise<void> {
       if (error) reject(error);
       else resolve();
     };
+    settleNavigation = () => settle();
     const loaded = () => settle();
     const closed = () => settle();
     const failed = (_event: Electron.Event, code: number, description: string, _url: string, mainFrame: boolean) => {
@@ -146,15 +209,18 @@ async function createWindow(show = true): Promise<void> {
   });
 }
 
-const ownsApplication = acquireOwnership(app, () => window, () => {void restoreMainWindow();});
+const ownsApplication = !startupFailed && acquireOwnership(app, () => window, requestMainWindow);
 if (ownsApplication) void app.whenReady().then(async () => {
   if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
+  startupStage = 'recovery';
   const userData = app.getPath("userData");
   mkdirSync(userData, { recursive: true });
   await rollbackRestoreStartup(userData);
   await recoverRestore(userData);
   await reconcileDownloads(join(userData,"moodle-downloads"));
+  startupStage = 'database';
   store = openStore(join(userData, "vstudy.sqlite"));
+  startupStage = 'services';
   protocol.handle("vstudy-asset", assetHandler(store, userData));
   protocol.handle('vstudy', async request => {
     const url = new URL(request.url);
@@ -201,13 +267,13 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.sender === window.webContents &&
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
-    () => {void restoreMainWindow();},
+    restoreMainWindow,
     process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {},
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deleteAllData');
-  deletion.handle('settings:deleteAllData', async () => {
-    const result = await showAttachedMessage({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 });
+  deletion.handle('settings:deleteAllData', async (_request, event) => {
+    const result = await showAttachedMessage({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 }, event.sender);
     if (result.response !== 1) return { ok: true };
     await deleteAllData(userData, async () => {
       window?.destroy();
@@ -224,23 +290,22 @@ if (ownsApplication) void app.whenReady().then(async () => {
   });
   nativeTheme.on("updated", () => { if (store) applyNativeTheme(store.settings.get()); });
   app.on("activate", () => {
-    void restoreMainWindow();
+    requestMainWindow();
   });
+  startupStage = 'window';
   await createWindow(!process.argv.includes('--mcp-background'));
   if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
+  startupComplete = true;
+  resolveAppReady(true);
 }).catch(async error => {
-  log({phase:"startup-failed",code:(error as NodeJS.ErrnoException).code ?? error.name});
-  await disposeIpc?.();
-  store?.close();store=undefined;
-  if(await rollbackRestoreStartup(app.getPath("userData"))) {
-    app.relaunch();app.exit(1);return;
-  }
-  const code=(error as NodeJS.ErrnoException).code;
-  log({phase:'startup-storage-failed',code:code ?? 'STORAGE'});
-  const key=code==='ENOSPC' ? 'disk_full' : code==='EACCES' || code==='EPERM' ? 'permission' : 'integrity_failed';
-  await showAttachedMessage({type:'error',message:tr('storage:'+key),buttons:[tr('common:close')]});
-  app.exit(1);
+  failStartup(error);
+  try {
+    await disposeIpc?.();
+    store?.close(); store = undefined;
+    if (await rollbackRestoreStartup(app.getPath('userData'))) app.relaunch();
+  } catch (cleanupError) { log({phase:'startup-cleanup-failed', error:cleanupError}); }
+  finally { app.exit(1); }
 });
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();

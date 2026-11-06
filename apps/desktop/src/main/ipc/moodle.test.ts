@@ -8,7 +8,8 @@ import { it, expect, vi } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { IpcMainInvokeEvent } from 'electron';
+import { dialog, type IpcMainInvokeEvent } from 'electron';
+import { seedStudent, id } from '../planner/__fixtures__/student';
 import { openStore } from '../db';
 import { createSecretStore } from '../services/secrets';
 import { createIpcRegistrar } from './register';
@@ -17,7 +18,7 @@ import { moodleChannels } from '../../shared/moodle';
 import { moodleProgressSchema, type IpcChannel } from '../../shared/ipc';
 import { moodleWebviewContract } from '../../shared/moodle-webview';
 
-vi.mock('electron',() => ({dialog:{showSaveDialog:vi.fn()},Notification:{isSupported:() => false}}));
+vi.mock('electron',() => ({BrowserWindow:{fromWebContents:()=>({id:1,isDestroyed:()=>false})},dialog:{showSaveDialog:vi.fn(async()=>({canceled:true}))},Notification:{isSupported:() => false}}));
 it('registers every Moodle channel behind strict requests and trusted main-frame senders',async () => {
   const directory = mkdtempSync(join(tmpdir(),'moodle-ipc-'));
   const store = openStore(':memory:');
@@ -41,6 +42,9 @@ it('registers every Moodle channel behind strict requests and trusted main-frame
     await expect(invoke('moodle:overview',{token:'sensitive-token'})).rejects.toThrow('VSTUDY_STATUS');
     await expect(invoke('moodle:connect',{schoolId:'cycu',password:'sensitive-password'})).rejects.toThrow('VSTUDY_STATUS');
     expect(log).not.toHaveBeenCalled();
+    seedStudent(store);
+    expect(await invoke('moodle:export-calendar',{deadlineIds:[id(3)]})).toEqual({saved:false});
+    expect(dialog.showSaveDialog).toHaveBeenCalledWith(expect.objectContaining({id:1}),expect.objectContaining({defaultPath:'vstudy-deadlines.ics'}));
   } finally { log.mockRestore(); registrar.dispose(); await dispose(); store.close(); rmSync(directory,{force:true,recursive:true}); }
 });
 it('returns cancellation as a handled result rather than an Electron handler rejection',async () => {

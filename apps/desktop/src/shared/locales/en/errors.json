@@ -38,5 +38,10 @@
   "ai_parse.changed_too_much": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
   "connection_bad_key": "Your key did not work. Save a new key and try again.",
   "connection_offline": "Could not reach the provider. Check your internet and saved URL, then try again.",
-  "connection_no_access": "The provider did not allow this test. Check your account access and billing, then try again."
+  "connection_no_access": "The provider did not allow this test. Check your account access and billing, then try again.",
+  "startup_recovery": "VStudy could not recover local data. Keep your files and try restarting.",
+  "startup_database": "VStudy could not open the local database. Keep your files and try restarting.",
+  "startup_services": "VStudy could not initialize application services. Try restarting.",
+  "startup_window": "VStudy could not open the study window. Try restarting.",
+  "window_unavailable": "The study window stopped responding. Automatic recovery has stopped. Quit and reopen VStudy, or copy diagnostics for support."
 }

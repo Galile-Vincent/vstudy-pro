@@ -58,10 +58,10 @@ export function registerAiCliIpc(registrar: ReturnType<typeof createIpcRegistrar
   safe.handle('ai-cli:resize', async ({ id, columns, rows }, event) => { (await ready).sessions.resize(event.sender, id, columns, rows); return { ok: true }; });
   safe.handle('ai-cli:close', async ({ id }, event) => { await (await ready).sessions.close(event.sender, id); return { ok: true }; });
   safe.handle('ai-cli:preferences', async () => (await ready).preferences());
-  safe.handle('ai-cli:setPreferences', async preferences => {
+  safe.handle('ai-cli:setPreferences', async (preferences,event) => {
     const setup = await ready;
     if (preferences.advancedShell && !setup.preferences().advancedShell) {
-      const result = await showAttachedMessage({ type: 'warning', message: tr('ai-cli:advanced_title'), detail: tr('ai-cli:pref_advancedShell_help'), buttons: [tr('common:cancel'), tr('settings:allow')], defaultId: 0, cancelId: 0 });
+      const result = await showAttachedMessage({ type: 'warning', message: tr('ai-cli:advanced_title'), detail: tr('ai-cli:pref_advancedShell_help'), buttons: [tr('common:cancel'), tr('settings:allow')], defaultId: 0, cancelId: 0 },event.sender);
       if (result.response !== 1) return setup.preferences();
     }
     return setup.setPreferences(preferences);
@@ -73,7 +73,7 @@ export function registerAiCliIpc(registrar: ReturnType<typeof createIpcRegistrar
       const { provider } = actionParts(actionId), command = provider && manualInstallCommand(provider, process.platform);
       if (!command) throw new Error('Unsupported manual installation');
       const terminal = tr(process.platform === 'win32' ? 'ai-cli:open_terminal_windows' : 'ai-cli:open_terminal');
-      const result = await showAttachedMessage({ type: 'question', message: terminal, detail: tr('ai-cli:manual_terminal_confirm', { command }), buttons: [tr('common:cancel'), terminal], defaultId: 0, cancelId: 0 });
+      const result = await showAttachedMessage({ type: 'question', message: terminal, detail: tr('ai-cli:manual_terminal_confirm', { command }), buttons: [tr('common:cancel'), terminal], defaultId: 0, cancelId: 0 },event.sender);
       if (result.response !== 1) return { ok: false };
     }
     const plan = await setup.terminalPlan(event.sender, actionId, token);

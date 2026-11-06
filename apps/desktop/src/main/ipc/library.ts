@@ -1,3 +1,4 @@
+import { ownerWindow } from '../dialogs';
 /**
  * Register validated library IPC operations and delegate privileged work to main services.
  * Owned by main/ipc.
@@ -62,7 +63,8 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
                 throw new Error('Export rate limited');
             exports.set(event.sender.id, now);
             const d = library.require(r.documentId), path = containedPath(library.root, channel === 'library:exportMarkdown' ? d.activeVersion === 'ai' ? join(d.markdownPath, '..', 'content.ai.md') : d.markdownPath : d.sourcePath);
-            const result = await dialog.showSaveDialog({ defaultPath: channel === 'library:exportMarkdown' ? safeFilename(`${basename(d.sourceName, extname(d.sourceName))}.md`) : safeFilename(basename(d.sourceName)) });
+            const result = await dialog.showSaveDialog(ownerWindow(event.sender), { defaultPath: channel === 'library:exportMarkdown' ? safeFilename(`${basename(d.sourceName, extname(d.sourceName))}.md`) : safeFilename(basename(d.sourceName)) });
+
             if (result.canceled || !result.filePath)
                 return { saved: false };
             await exportFile(path, result.filePath);

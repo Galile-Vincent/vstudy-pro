@@ -8,7 +8,7 @@ import { i18n } from '../../shared/i18n';
 import type { IpcMainInvokeEvent } from 'electron';
 const {save,warning}=vi.hoisted(()=>({save:vi.fn(async()=>({canceled:true})),warning:vi.fn(async()=>({response:0}))}));
 vi.mock('electron',()=>({dialog:{showSaveDialog:save},Notification:{isSupported:()=>false}}));
-vi.mock('../dialogs',()=>({showAttachedMessage:warning}));
+vi.mock('../dialogs',()=>({ownerWindow:()=>({id:1,isDestroyed:()=>false}),showAttachedMessage:warning}));
 afterEach(async()=>{await i18n.changeLanguage('en');vi.clearAllMocks();});
 it.each([['en','Calendar'],['zh-Hant','行事曆'],['ja','カレンダー']])('localizes calendar dialog in %s',async(language,label)=>{
   await i18n.changeLanguage(language);
@@ -16,7 +16,7 @@ it.each([['en','Calendar'],['zh-Hant','行事曆'],['ja','カレンダー']])('l
   const registrar=createIpcRegistrar({handle:(channel,callback)=>{callbacks.set(channel,callback);},removeHandler:()=>{}},()=>true);
   seedStudent(store);
   const cleanup=registerPlannerIpc(registrar,store,new Set());
-  try {await callbacks.get('planner:export-calendar')!({} as IpcMainInvokeEvent,{deadlineIds:[id(3)]});expect(save).toHaveBeenCalledWith(expect.objectContaining({filters:[{name:label,extensions:['ics']}]}));}
+  try {await callbacks.get('planner:export-calendar')!({} as IpcMainInvokeEvent,{deadlineIds:[id(3)]});expect(save).toHaveBeenCalledWith(expect.objectContaining({id:1}),expect.objectContaining({filters:[{name:label,extensions:['ics']}]}));}
   finally{cleanup();registrar.dispose();store.close();}
 });
 it('starts with a visible warning while skipping corrupt planner rows',async()=>{

@@ -17,6 +17,7 @@ import { createIpcRegistrar } from "./register";
 
 const mock = vi.hoisted(() => ({ userData: "", dialog: vi.fn(), resume: undefined as (() => void) | undefined }));
 vi.mock("electron", () => ({
+  BrowserWindow: {fromWebContents:()=>({id:1,isDestroyed:()=>false})},
   ipcMain: {on:vi.fn(),removeListener:vi.fn()},
   app: { getPath: () => mock.userData, getAppPath: () => process.cwd(), isPackaged: false },
   dialog: { showOpenDialog: mock.dialog },
@@ -65,7 +66,7 @@ it("registers document routes, validates drop paths, owns the native dialog and 
     expect(await invoke("documents:import", {})).toBeNull();
     mock.dialog.mockResolvedValueOnce({ canceled: false, filePaths: [resolve("test-fixtures/converter/sample.md")] });
     const document = documentSchema.parse(await invoke("documents:import", {}));
-    expect(mock.dialog).toHaveBeenLastCalledWith(expect.objectContaining({
+    expect(mock.dialog).toHaveBeenLastCalledWith(expect.objectContaining({id:1}),expect.objectContaining({
       properties: ["openFile","multiSelections"],
       filters: [expect.objectContaining({ extensions: expect.arrayContaining(["docx", "pdf", "md", "csv"]) })],
     }));

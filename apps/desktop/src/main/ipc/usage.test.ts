@@ -5,13 +5,13 @@
  * @packageDocumentation
  */
 import { expect,it,vi } from 'vitest';
-import type { IpcMainInvokeEvent } from 'electron';
+import { dialog, type IpcMainInvokeEvent } from 'electron';
 import { openStore } from '../db';
 import { createIpcRegistrar } from './register';
 import { registerUsageIpc,usageCsv } from './usage';
 import { usageRecordSchema } from '../../shared/domain';
 import type { IpcChannel } from '../../shared/ipc';
-vi.mock('electron',()=>({dialog:{showSaveDialog:vi.fn(async()=>({canceled:true}))}}));
+vi.mock('electron',()=>({BrowserWindow:{fromWebContents:()=>({id:1,isDestroyed:()=>false})},dialog:{showSaveDialog:vi.fn(async()=>({canceled:true}))}}));
 it('registers usage handlers through trusted sender and strict payload/response validation',async()=>{
   const handlers=new Map<string,(event:IpcMainInvokeEvent,payload:unknown)=>unknown>();
   let trusted=true;
@@ -25,6 +25,7 @@ it('registers usage handlers through trusted sender and strict payload/response 
     await expect(invoke('usage:summary',{period:'month',rawSql:'secret'})).rejects.toThrow();
     await expect(invoke('usage:forConversation',{conversationId:'bad'})).rejects.toThrow();
     await expect(invoke('usage:export',{})).resolves.toEqual({saved:false});
+    expect(dialog.showSaveDialog).toHaveBeenCalledWith(expect.objectContaining({id:1}),expect.objectContaining({defaultPath:'vstudy-usage.csv'}));
     trusted=false;await expect(invoke('usage:summary',{period:'month'})).rejects.toThrow('Untrusted IPC sender');
   } finally {store.close();registrar.dispose();}
 });
