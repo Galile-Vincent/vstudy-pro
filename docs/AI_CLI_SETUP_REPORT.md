@@ -112,6 +112,12 @@ The following results are retained in [the security check record](evidence/ai-cl
 
 The repeat after the final slot release also passed both process guards, repaired only the loader-selected Release helper, and produced identical packaged results. No source code changed or full test suite reran for this repeat.
 
+## Native Windows fixture follow-up
+
+Windows run `42170686410`, job `127737543788`, exposed 21 owned fixture failures. The follow-up keeps product validation and PTY code unchanged. It replaces shebang-only assumptions with explicit Node execution, adds platform-correct PE metadata fixtures and executable names, models IPC filesystem permissions consistently, and handles ConPTY control output. Native leased transports use real Node executable copies on Windows. Two embedded-login cases now match the existing macOS-only policy, while all Windows PTY lifecycle cases remain active and a new test asserts ConPTY selection. Two publisher-verification cases gain Windows coverage.
+
+The full macOS suite passes 1,184 tests with 15 skips. Final affected-fixture checks pass 24 tests with one platform skip. Typecheck, lint, Knip, vendor checks, and static security checks pass. No Electron process launched for this follow-up. [The complete ten-file fixture list, gate reasons, evidence, and Windows rerun command](AI_CLI_WINDOWS_FIXTURES.md) is the handoff to P. Native Windows acceptance of these changes remains pending P's CI rerun.
+
 ## Integration seams and remaining work
 
 Stream M can import `openAiCliSetup(provider?: 'claude' | 'codex' | 'agy')` from `renderer/ai-cli/entry.ts` and call `desktop.invoke('ai-cli:list', {})` for file-only state. It should link a missing client to this sheet. No MCP files were edited. The coordinator received this seam during implementation.
