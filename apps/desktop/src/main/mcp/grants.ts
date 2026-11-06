@@ -77,9 +77,10 @@ export class GrantStore {
 
   /** Mint once at pair.finish. Replacement revokes old grants for the same client. */
   issue(clientId: string, clientName: string, scopes: Scope[], accountIds: string[]): {grant: string; grantInfo: Grant} {
-    const at = new Date(this.now()).toISOString();
+    const now = this.now();
+    const at = new Date(now).toISOString();
     const grant = randomBytes(32).toString('base64url');
-    const grantInfo: Grant = {id: randomUUID(), clientId, clientName, scopes: [...new Set(scopes)], accountIds: [...new Set(accountIds)], createdAt: at, expiresAt: new Date(this.now() + GRANT_LIFETIME_MS).toISOString(), lastUsedAt: null, revokedAt: null};
+    const grantInfo: Grant = {id: randomUUID(), clientId, clientName, scopes: [...new Set(scopes)], accountIds: [...new Set(accountIds)], createdAt: at, expiresAt: new Date(now + GRANT_LIFETIME_MS).toISOString(), lastUsedAt: null, revokedAt: null};
     const grants = this.current.grants.filter(item => !item.revokedAt && Date.parse(item.expiresAt) > this.now()).map(item => item.clientId === clientId ? {...item, revokedAt: at} : item);
     if (grants.length >= 100) throw new McpFailure('RATE_LIMITED');
     this.save({...this.current, grants: [...grants, {...grantInfo, tokenHash: hash(grant)}]});

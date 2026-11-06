@@ -9,7 +9,7 @@ const hidden = '[redacted]';
 export class McpRedactor {
   private readonly secrets: string[];
   constructor(secretValues: readonly string[] = []) {
-    this.secrets = [...new Set(secretValues.filter(Boolean).flatMap(value => [value, encodeURIComponent(value)]))].sort((a, b) => b.length - a.length);
+    this.secrets = [...new Set(secretValues.filter(Boolean).flatMap(value => [value, encodeURIComponent(value), Buffer.from(value).toString('base64'), Buffer.from(value).toString('base64url')]))].sort((a, b) => b.length - a.length);
   }
 
   /** Return plain text, with active markup, remote links, and credentials removed. */
@@ -31,7 +31,7 @@ export class McpRedactor {
       .replace(/\b(?:core|mod|tool|gradereport|message)_\w+/g, hidden)
       .replace(/\b[a-f0-9]{32,}\b/gi, hidden)
       .replace(/\beyJ[a-z0-9_-]+\.[a-z0-9_-]+(?:\.[a-z0-9_-]+)?\b/gi, hidden)
-      .replace(/\b[a-z0-9_+/=-]{40,}\b/gi, hidden)
+      .replace(/(?<![a-z0-9_+/=-])[a-z0-9_+/=-]{40,}(?![a-z0-9_+/=-])/gi, hidden)
       .replace(/[\u007f\u202a-\u202e\u2066-\u2069]/g, '');
     text = [...text].filter(char => char.charCodeAt(0) >= 32 || '\t\n\r'.includes(char)).join('');
     for (const secret of this.secrets) text = text.split(secret).join(hidden);
@@ -39,19 +39,19 @@ export class McpRedactor {
   }
 
   /** Limit recursion, node count, arrays, and total text as well as individual strings. */
-  value(input: unknown, maxChars = 48_000): unknown {
+  value(input: unknown, maxChars = 48_000, maxString = 8000, maxItems = 50): unknown {
     let remaining = maxChars;
     let nodes = 1200;
     const visit = (value: unknown, depth: number): unknown => {
       if (--nodes < 0 || depth > 8 || remaining <= 0) return '[truncated]';
       if (typeof value === 'string') {
-        const text = this.text(value, Math.min(8000, remaining));
+        const text = this.text(value, Math.min(maxString, remaining));
         remaining -= text.length;
         return text;
       }
       if (value === null || typeof value === 'boolean') return value;
       if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-      if (Array.isArray(value)) return value.slice(0, 50).map(item => visit(item, depth + 1));
+      if (Array.isArray(value)) return value.slice(0, maxItems).map(item => visit(item, depth + 1));
       if (typeof value !== 'object') return null;
       const result: Record<string, unknown> = {};
       for (const [key, item] of Object.entries(value).slice(0, 100)) {
@@ -66,8 +66,8 @@ export class McpRedactor {
   }
 
   /** Consent and log payloads retain record shape without retaining raw school content. */
-  record(input: Record<string, unknown>, maxChars = 4000): Record<string, unknown> {
-    return this.value(input, maxChars) as Record<string, unknown>;
+  record(input: Record<string, unknown>, maxChars = 4000, maxString = 8000, maxItems = 50): Record<string, unknown> {
+    return this.value(input, maxChars, maxString, maxItems) as Record<string, unknown>;
   }
 
   /** The summary is application-owned; all backend text stays in the untrusted envelope. */
