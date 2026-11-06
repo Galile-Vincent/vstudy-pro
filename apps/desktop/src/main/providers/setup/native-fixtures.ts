@@ -1,5 +1,8 @@
 /** Platform-correct test images and explicit Node argv. Never imported by production code. @packageDocumentation */
-import { readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { spawn } from 'node-pty';
 import { cliEnvironment } from '../cli-transport';
 import { captureCommand } from './captured';
@@ -55,9 +58,25 @@ export async function fixtureVersion(binary: string, _provider: string, expected
   return version;
 }
 
-/** Real old/new Windows transports need runnable images so their managed paths remain leased. */
+let transportImage: Buffer | undefined;
+function windowsTransportImage(): Buffer {
+  if (transportImage) return transportImage;
+  const directory = mkdtempSync(join(tmpdir(), 'vstudy-transport-fixture-'));
+  try {
+    const source = join(directory, 'transport.cs'), executable = join(directory, 'transport.exe');
+    const systemRoot = process.env.SystemRoot ?? process.env.SYSTEMROOT ?? 'C:\\Windows';
+    const compiler = ['Framework64', 'Framework'].map(arch => join(systemRoot, 'Microsoft.NET', arch, 'v4.0.30319', 'csc.exe')).find(existsSync);
+    if (!compiler) throw new Error('Windows transport fixture requires the .NET Framework compiler');
+    writeFileSync(source, 'class Transport { static void Main(string[] args) { System.Console.WriteLine(args[0]); System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite); } }');
+    execFileSync(compiler, ['/nologo', '/optimize+', '/target:exe', `/out:${executable}`, source], {env: cliEnvironment(), windowsHide: true, timeout: 20000});
+    transportImage = readFileSync(executable);
+    return transportImage;
+  } finally { rmSync(directory, {recursive: true, force: true}); }
+}
+
+/** A small real process keeps each managed path leased without copying the complete Node runtime. */
 export function transportFixture(label: string): { bytes: Buffer; args: string[] } {
   const record = JSON.stringify({ type: 'stream_event', event: { type: 'content_block_delta', delta: { type: 'text_delta', text: label } } });
-  if (process.platform === 'win32') return { bytes: readFileSync(process.execPath), args: ['-e', `console.log(${JSON.stringify(record)});setInterval(()=>{},1000)`] };
+  if (process.platform === 'win32') return { bytes: windowsTransportImage(), args: [record] };
   return { bytes: Buffer.from(`#!/bin/sh\nprintf '%s\\n' '${record}'\nwhile :; do /bin/sleep 1; done\n`), args: [] };
 }

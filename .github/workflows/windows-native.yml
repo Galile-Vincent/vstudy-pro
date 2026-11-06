@@ -66,4 +66,4 @@ jobs:
           src/main/index.test.ts src/main/ipc/ai-cli.test.ts
           src/main/providers/setup/store.test.ts src/main/providers/setup/service.test.ts
           src/main/providers/setup/authenticity.test.ts src/main/providers/setup/adversarial-review.test.ts
-          src/renderer/ai-cli/setup.test.tsx --pool=forks --maxWorkers=2
+          src/renderer/ai-cli/setup.test.tsx --pool=forks --maxWorkers=2 --reporter=verbose
