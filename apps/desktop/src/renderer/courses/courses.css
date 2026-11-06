@@ -215,20 +215,6 @@
   background: linear-gradient(135deg,var(--course-start),var(--course-end));
   color: var(--course-color);
 }
-.moodle-cover > svg {
-  width: 32px;
-  height: 32px;
-  position: absolute;
-  top: var(--space-5);
-  left: var(--space-5);
-}
-.moodle-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  inset: 0;
-}
 .moodle-course-code {
   position: absolute;
   inset: auto auto var(--space-4) var(--space-5);

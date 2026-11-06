@@ -13,9 +13,10 @@
 .soft-art::before {
   content:""; position:absolute; pointer-events:none;
   width:110%; height:160%; left:38%; top:28%; border-radius:50%;
-  background:linear-gradient(155deg,color-mix(in oklab,var(--surface) 14%,transparent),transparent 65%);
+  background:linear-gradient(155deg,color-mix(in oklab,var(--surface) 6%,transparent),transparent 65%);
   transform:rotate(-24deg);
 }
+.moodle-cover .soft-art::before,.art-reader-cover.soft-art::before { display:none; }
 :root[data-theme=contrast] .soft-art { background:var(--surface); }
 :root[data-theme=contrast] .soft-art::before { display:none; }
 @media(prefers-contrast:more), (forced-colors:active) {
