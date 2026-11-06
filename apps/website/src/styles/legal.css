@@ -1,0 +1,78 @@
+.legal-shell { width:min(calc(100% - var(--space-16)),1040px); margin-inline:auto; display:grid; grid-template-columns:minmax(0,72ch) 200px; gap:var(--space-16); justify-content:space-between; }
+.legal-main { min-width:0; padding-block:var(--space-12) var(--space-20); }
+.legal-prose { font-size:17px; line-height:1.75; }
+.legal-prose:lang(zh-Hant) { line-height:1.9; letter-spacing:.01em; }
+.legal-prose:lang(ja) { line-height:1.95; word-break:auto-phrase; line-break:strict; }
+.legal-prose h1 { font-size:40px; line-height:1.15; letter-spacing:-.035em; }
+.legal-prose:lang(ja) h1,.legal-prose:lang(zh-Hant) h1 { letter-spacing:0; line-height:1.3; }
+.legal-meta { margin-top:var(--space-3); font-size:var(--text-sm); }
+.legal-lead { margin-top:var(--space-6); font-size:19px; line-height:1.65; color:var(--ink); text-wrap:pretty; }
+.legal-prose section { counter-increment:legal-section; }
+.legal-prose { counter-reset:legal-section; }
+.legal-prose h2 { font-size:var(--text-xl); line-height:1.35; margin-top:var(--space-12); scroll-margin-top:var(--space-6); }
+.legal-prose h2 a { display:inline-block; color:var(--ink); }
+.legal-prose h2 a::before { content:counter(legal-section) "."; display:inline-block; min-width:2ch; margin-right:var(--space-2); color:var(--accent); font-variant-numeric:tabular-nums; }
+.legal-prose h3 { font-size:var(--text-base); line-height:1.4; letter-spacing:0; margin-top:var(--space-8); color:var(--ink); }
+.heading-hash { color:var(--accent); font-size:var(--text-lg); padding-left:var(--space-2); opacity:0; transition:opacity var(--motion-ui) ease-out; }
+.legal-prose h2 a:hover .heading-hash,.legal-prose h2 a:focus-visible .heading-hash { opacity:1; }
+.legal-prose section > p,.legal-prose li { color:var(--ink); text-wrap:pretty; }
+.legal-prose section > h2 + p,.legal-prose section > h2 + ul,.legal-prose section > h2 + table { margin-top:var(--space-5); }
+.legal-prose section > * + p,.legal-prose section > * + ul { margin-top:var(--space-4); }
+.legal-prose h3 + p,.legal-prose h3 + ul { margin-top:var(--space-3); }
+.legal-prose ul { padding-left:var(--space-6); }
+.legal-prose li { padding-left:var(--space-1); margin-top:var(--space-2); }
+.legal-prose li::marker { color:var(--accent); }
+.legal-prose a { color:var(--accent); text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; }
+.legal-prose a:hover { text-decoration-thickness:2px; }
+.legal-prose h2 a,.legal-prose .text-link { text-decoration:none; }
+.legal-prose code { font:.88em/1 var(--mono); padding:.15em .4em; border-radius:var(--r-xs); background:var(--subtle); color:var(--ink); overflow-wrap:anywhere; }
+.legal-prose strong { font-weight:600; color:var(--ink); }
+.legal-prose .legal-summary { list-style:none; padding:var(--space-6); background:var(--subtle); border-radius:var(--r-lg); }
+.legal-summary li { padding-left:var(--space-6); position:relative; }
+.legal-summary li:first-child { margin-top:0; }
+.legal-summary li::before { content:""; position:absolute; left:0; top:.8em; width:8px; height:8px; border-radius:var(--r-pill); background:var(--accent); }
+.owner-todo { background:color-mix(in srgb,var(--accent) 20%,transparent); color:var(--ink); padding:.05em .3em; border-radius:var(--r-xs); box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+.legal-toc-inline { display:none; margin-top:var(--space-8); background:var(--subtle); border-radius:var(--r-sm); font-size:var(--text-sm); }
+.legal-toc-inline > summary { display:flex; justify-content:space-between; align-items:center; min-height:44px; padding:var(--space-3); }
+.legal-toc-inline nav { padding:0 var(--space-3) var(--space-4); }
+.legal-toc-inline ol,.legal-toc ol { margin:0; padding-left:var(--space-6); }
+.legal-toc-inline li { margin-top:var(--space-1); }
+.legal-toc-inline li a { display:inline-block; padding-block:var(--space-1); font-size:var(--text-sm); text-decoration:none; }
+.legal-toc { position:sticky; top:calc(var(--header) + var(--space-12)); align-self:start; max-height:calc(100dvh - var(--header) - var(--space-16)); overflow-y:auto; font-size:var(--text-xs); padding-top:var(--space-12); scrollbar-width:thin; }
+.legal-toc > p { margin-bottom:var(--space-4); font-weight:600; color:var(--ink); }
+.legal-toc li { margin-top:var(--space-3); line-height:1.5; padding-left:var(--space-1); }
+.legal-toc li::marker { color:var(--muted); font-variant-numeric:tabular-nums; }
+.legal-toc a { color:var(--muted); }
+.legal-toc a:hover { color:var(--ink); }
+.legal-table { width:100%; margin-top:var(--space-6); border-collapse:collapse; font-size:var(--text-sm); line-height:1.6; }
+.legal-prose .legal-table + *,.legal-prose .legal-table + p { margin-top:var(--space-6); }
+.legal-table caption { text-align:start; padding-bottom:var(--space-3); font-size:var(--text-xs); font-weight:600; letter-spacing:.02em; color:var(--muted); }
+.legal-table th,.legal-table td { text-align:start; vertical-align:top; padding:var(--space-3) var(--space-4) var(--space-3) 0; border-top:1px solid var(--line); }
+.legal-table th { font-size:var(--text-xs); color:var(--muted); font-weight:600; }
+.legal-table tbody th,.legal-table td:first-child { font-weight:600; color:var(--ink); width:28%; }
+.legal-table td { color:var(--ink); }
+.legal-table tbody tr:last-child td { border-bottom:1px solid var(--line); }
+.legal-footer { margin-top:var(--space-16); padding-top:var(--space-6); border-top:1px solid var(--line); }
+@media(max-width:1099px) {
+  .legal-shell { display:block; width:min(calc(100% - var(--space-16)),72ch); }
+  .legal-toc { display:none; }
+  .legal-toc-inline { display:block; }
+}
+@media(max-width:767px) {
+  .legal-shell { width:calc(100% - var(--space-10)); }
+  .legal-main { padding-block:var(--space-8) var(--space-16); }
+  .legal-prose { font-size:var(--text-base); }
+  .legal-prose h1 { font-size:32px; }
+  .legal-lead { font-size:18px; }
+  .legal-prose h2 { margin-top:var(--space-10); }
+}
+@media(max-width:639px) {
+  .legal-table,.legal-table tbody,.legal-table tr,.legal-table td { display:block; }
+  .legal-table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  .legal-table caption { display:block; }
+  .legal-table tr { padding-block:var(--space-3); border-top:1px solid var(--line); }
+  .legal-table td,.legal-table td:first-child { border:0; padding:var(--space-1) 0; width:auto; }
+  .legal-table td::before { content:attr(data-label); display:block; font-size:var(--text-xs); font-weight:600; color:var(--muted); }
+  .legal-table td:first-child { font-size:var(--text-base); padding-bottom:var(--space-2); }
+  .legal-table td:first-child::before { content:none; }
+}

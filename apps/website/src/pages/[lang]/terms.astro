@@ -1,0 +1,7 @@
+---
+import Legal from '../../components/Legal.astro';
+import { languages } from '../../data/ui';
+export function getStaticPaths() { return languages.map(language => ({ params: { lang: language }, props: { language } })); }
+const { language } = Astro.props;
+---
+<Legal {language} slug="terms" />

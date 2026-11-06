@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import LegalText from './LegalText.astro';
+import { LEGAL_UPDATED, path } from '../config';
+import { getLegal, legalSlugs, type LegalSlug } from '../data/legal';
+import type { Language } from '../data/ui';
+import '../styles/legal.css';
+interface Props { language: Language; slug: LegalSlug; }
+const { language, slug } = Astro.props;
+const { chrome, doc } = getLegal(slug, language);
+const other = legalSlugs.find(item => item !== slug)!;
+const locale = { en: 'en', 'zh-Hant': 'zh-TW', ja: 'ja-JP' }[language];
+const updated = new Date(`${LEGAL_UPDATED}T00:00:00Z`).toLocaleDateString(locale, { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });
+---
+<Base {language} title={doc.title} description={doc.description} page={`${slug}/`}>
+  <div class="legal-shell">
+    <main class="legal-main" id="main" tabindex="-1">
+      <article class="legal-prose">
+        <header class="legal-header">
+          <h1>{doc.title}</h1>
+          <p class="legal-meta">{chrome.updated} <time datetime={LEGAL_UPDATED}>{updated}</time></p>
+          <p class="legal-lead"><LegalText text={doc.lead} {language} {chrome} /></p>
+        </header>
+        <details class="legal-toc-inline">
+          <summary>{chrome.toc}<span aria-hidden="true">+</span></summary>
+          <nav aria-label={chrome.toc}>
+            <ol>{doc.sections.map(section => <li><a href={`#${section.id}`}>{section.title}</a></li>)}</ol>
+          </nav>
+        </details>
+        {doc.sections.map(section => <section aria-labelledby={section.id}>
+          <h2 id={section.id}><a href={`#${section.id}`}>{section.title}<span class="heading-hash" aria-hidden="true">#</span></a></h2>
+          {section.blocks.map(block => {
+            if (block.type === 'p') return <p><LegalText text={block.text} {language} {chrome} /></p>;
+            if (block.type === 'h3') return <h3>{block.text}</h3>;
+            if (block.type === 'list') return <ul>{block.items.map(item => <li><LegalText text={item} {language} {chrome} /></li>)}</ul>;
+            if (block.type === 'summary') return <ul class="legal-summary">{block.items.map(item => <li><LegalText text={item} {language} {chrome} /></li>)}</ul>;
+            return <table class="legal-table" role="table">
+              <caption>{block.caption}</caption>
+              <thead role="rowgroup"><tr role="row">{block.head.map(cell => <th scope="col" role="columnheader">{cell}</th>)}</tr></thead>
+              <tbody role="rowgroup">{block.rows.map(row => <tr role="row">{row.map((cell, index) => <td role="cell" data-label={block.head[index]}><LegalText text={cell} {language} {chrome} /></td>)}</tr>)}</tbody>
+            </table>;
+          })}
+        </section>)}
+        <footer class="legal-footer"><a class="text-link" href={path(`${language}/${other}/`)}>{chrome.related[other]}<span aria-hidden="true">→</span></a></footer>
+      </article>
+    </main>
+    <aside class="legal-toc" aria-label={chrome.toc}>
+      <p>{chrome.toc}</p>
+      <nav><ol>{doc.sections.map(section => <li><a href={`#${section.id}`}>{section.title}</a></li>)}</ol></nav>
+    </aside>
+  </div>
+</Base>
