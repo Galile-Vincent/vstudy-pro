@@ -23,19 +23,20 @@ What happens next
 
 Install your AI tool.
 
-VStudy cannot independently confirm this download comes from the provider. Install it with the official command in your own terminal, then choose the program in Settings > Providers.
+We can't verify this tool's download automatically, so you install it yourself from the official source.
 
-Allow VStudy to run Antigravity
-Optional. No tool launches until you allow it and run a reviewed action.
+Official source
+Allow VStudy to use Antigravity once it is installed
+You can install it first. VStudy will only use it after you allow it here.
 Account and cost
 Install another way
-
-VStudy cannot independently confirm this download comes from the provider. Install it with the official command in your own terminal, then choose the program in Settings > Providers.
-
-If installing here fails, you or your IT team can use the official installer in your own terminal. It uses the vendor's folders and defaults, outside VStudy's managed copy. VStudy does not run this command. After installation, use Settings > Providers > Change to choose that executable, then check its status here.
-
+Copy the command.
+Open Terminal (Mac), paste it and press Enter.
+Come back here and press Check again.
 curl -fsSL https://antigravity.google/cli/install.sh | bash
 Copy command
+Open Terminal
+Check again
 Keep your tool ready
 
 Updates and rollback apply to new chats. Ongoing sessions continue with their current version.
