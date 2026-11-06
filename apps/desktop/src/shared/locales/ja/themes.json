@@ -8,7 +8,6 @@
   "create": "テーマを作成",
   "add": "テーマを追加",
   "untitled": "マイテーマ",
-  "interface": "インターフェース",
   "contrast": "コントラスト",
   "contrast_hint": "文字、境界線、フォーカスのコントラストを高めます。100% がアクセシビリティの基準です。",
   "glassOpacity": "ガラスの不透明度",
@@ -72,5 +71,7 @@
   "token_syntax-string": "コードの文字列",
   "token_syntax-number": "コードの数値",
   "token_course-start": "コースのグラデーション開始",
-  "token_course-end": "コースのグラデーション終了"
+  "token_course-end": "コースのグラデーション終了",
+  "custom": "カスタムテーマ",
+  "custom_hint": "テーマを作成、またはファイルから読み込みます。"
 }

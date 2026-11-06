@@ -1,7 +1,8 @@
-/* Settings dialog shell and layout */
+/* Settings dialog: one fixed size, fixed header and tab list, only the pane scrolls. */
 .settings-dialog.settings-dialog[data-slot=dialog-content]:not(.library-dialog) {
-  width: min(880px, calc(100vw - var(--space-8)));
-  height: min(640px, calc(100dvh - var(--space-8)));
+  --settings-control: 16rem;
+  width: min(1000px, calc(100vw - var(--space-8)));
+  height: min(700px, calc(100dvh - var(--space-8)));
   max-width: calc(100vw - var(--space-8));
   max-height: calc(100dvh - var(--space-8));
   padding: 0;
@@ -22,8 +23,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-inline: var(--space-6);
-  border-bottom: 0;
+  padding-inline: var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .settings-header h2 {
@@ -36,27 +37,26 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
+  grid-template-columns: 200px minmax(0, 1fr);
   gap: 0;
   container: settings / inline-size;
 }
 
-/* Sidebar navigation */
 .settings-tabs[data-slot=tabs-list] {
   width: 100%;
   height: 100%;
   margin: 0;
   padding: var(--space-3);
-  border-inline-end: 0;
+  border-inline-end: 1px solid var(--hairline);
   justify-content: start;
   align-items: stretch;
-  gap: var(--space-1);
+  gap: 2px;
   background: transparent;
 }
 
 .settings-tabs [data-slot=tabs-trigger] {
   flex: none;
-  height: 38px;
+  height: 36px;
   padding: 0 var(--space-3);
   gap: var(--space-3);
   font-size: var(--type-base);
@@ -79,7 +79,7 @@
 }
 
 .settings-tabs [data-slot=tabs-trigger]:hover:not([data-state=active]) {
-  background: color-mix(in oklab, var(--ink) 4%, transparent);
+  background: color-mix(in oklab, var(--ink) 5%, transparent);
   color: var(--ink);
 }
 
@@ -94,12 +94,15 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   box-shadow: none;
 }
 
-/* Content panes */
 .settings-pane {
   overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--ink) 25%, transparent) transparent;
   min-width: 0;
   min-height: 0;
-  padding: var(--space-6) var(--space-8) calc(var(--space-8) * 2);
+  padding: var(--space-6) var(--space-8) var(--space-8);
+  mask-image: linear-gradient(to bottom, transparent, #000 var(--space-4), #000 calc(100% - var(--space-8)), transparent);
   container: settings-pane / inline-size;
 }
 
@@ -108,15 +111,35 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 }
 
 .settings-pane-inner {
-  max-width: 720px;
+  max-width: 680px;
   margin-inline: auto;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
-.settings-section-header {
-  margin-bottom: var(--space-6);
+.settings-pane-inner > * {
+  margin: 0;
 }
 
+[data-testid=privacy-settings],
+[data-testid=storage-settings],
+.agents-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.settings-pane .agents-settings > * {
+  margin-block: 0;
+}
+
+.settings-pane .agents-intro {
+  font-size: var(--type-sm);
+}
+
+/* One type scale: pane title, section title, row label, helper text. */
 .settings-section-header h2 {
   font-size: var(--type-lg);
   font-weight: 600;
@@ -124,60 +147,60 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   color: var(--ink);
 }
 
-.settings-section-header p {
+.settings-section-header p,
+.settings-intro {
   margin-top: var(--space-1);
-  font-size: var(--type-base);
+  font-size: var(--type-sm);
   line-height: 1.5;
   color: var(--muted);
-  max-width: 60ch;
+  max-width: 62ch;
 }
 
-/* Grouped flat tonal sections */
-.settings-group + .settings-group {
-  margin-top: var(--space-6);
-}
-
-.settings-group h3 {
-  font-size: var(--type-xs);
-  color: var(--muted);
+.settings-group h3,
+.agents-section > h3 {
+  font-size: var(--type-md);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin: 0 0 var(--space-2) var(--space-1);
+  line-height: 1.4;
+  color: var(--ink);
+  margin: 0 0 var(--space-2);
 }
 
+/* Groups: hairline frame, hairline dividers between rows. */
 .settings-card {
-  border: 0;
+  border: 1px solid var(--hairline);
   border-radius: var(--r-md);
-  background: color-mix(in oklab, var(--ink) 4%, var(--surface));
+  background: transparent;
   box-shadow: none;
   overflow: hidden;
   min-width: 0;
 }
 
+.settings-card > * + * {
+  border-top: 1px solid var(--hairline);
+}
+
+.settings-card > :is(p, div, details, [role=status], [role=alert]):not(.settings-row, .provider-row, .network-event, .analytics-details, .ai-cli-preferences, .row, .appearance-preview, .ai-cli-tool-row) {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--type-sm);
+  line-height: 1.5;
+}
+
 .settings-card[data-danger=true] {
-  background: color-mix(in oklab, var(--danger) 5%, var(--surface));
+  border-color: color-mix(in oklab, var(--danger) 35%, transparent);
 }
 
 .settings-danger {
   color: var(--danger);
 }
 
-/* Settings rows: left labels, right controls */
 .settings-row {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3) var(--space-6);
-  padding: var(--space-4) var(--space-5);
-  min-height: 56px;
+  gap: var(--space-2) var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  min-height: 52px;
   min-width: 0;
-  transition: background-color var(--motion-fast) var(--ease-standard);
-}
-
-.settings-row:hover {
-  background: color-mix(in oklab, var(--ink) 2%, transparent);
 }
 
 .settings-row[data-layout=stack] {
@@ -185,26 +208,24 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   align-items: stretch;
 }
 
-.settings-row[data-layout=stack] .settings-label {
-  flex: none;
-}
-
 .settings-row[data-layout=stack] .settings-control {
   margin-inline-start: 0;
   width: 100%;
   flex: none;
+  justify-content: flex-start;
 }
 
 .settings-label {
-  flex: 1 1 14rem;
+  flex: 1 1 auto;
   min-width: 0;
   font-size: var(--type-base);
   font-weight: 500;
+  line-height: 1.4;
   color: var(--ink);
 }
 
 .settings-label p {
-  margin-top: var(--space-1);
+  margin-top: 2px;
   font-size: var(--type-sm);
   font-weight: 400;
   color: var(--muted);
@@ -212,7 +233,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 }
 
 .settings-control {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
   max-width: 100%;
   margin-inline-start: auto;
@@ -223,71 +244,61 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   justify-content: flex-end;
 }
 
-/* Filled controls without field outlines */
-.settings-pane input:not([type=checkbox]):not([type=radio]),
+/* Controls: filled, with a 3:1 edge from the line token. */
+.settings-pane input:not([type=checkbox], [type=radio], [type=range]),
 .settings-pane textarea,
-.settings-control input,
-.settings-control textarea {
-  border: 0;
+.settings-pane [data-slot=select-trigger] {
+  border: 1px solid var(--line);
   outline: none;
-  background: color-mix(in oklab, var(--ink) 5%, var(--surface));
+  background: var(--surface);
   border-radius: var(--r-sm);
-  padding: var(--space-2) var(--space-3);
   font-size: var(--type-base);
   color: var(--ink);
   box-shadow: none;
-  transition: background-color var(--motion-fast) var(--ease-standard);
+  transition: border-color var(--motion-fast) var(--ease-standard);
 }
 
-.settings-pane input:not([type=checkbox]):not([type=radio]):hover:not(:disabled),
-.settings-pane textarea:hover:not(:disabled),
-.settings-control input:hover:not(:disabled),
-.settings-control textarea:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--ink) 8%, var(--surface));
+.settings-pane input:not([type=checkbox], [type=radio], [type=range]),
+.settings-pane textarea {
+  padding: var(--space-2) var(--space-3);
 }
 
-html[data-input-modality=keyboard] .settings-pane input:not([type=checkbox]):not([type=radio]):focus-visible,
-html[data-input-modality=keyboard] .settings-pane textarea:focus-visible,
-html[data-input-modality=keyboard] .settings-control input:focus-visible,
-html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
+.settings-pane :is(input:not([type=checkbox], [type=radio], [type=range]), textarea, [data-slot=select-trigger]):hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--surface);
+}
+
+html[data-input-modality=keyboard] .settings-pane :is(input, textarea, [data-slot=select-trigger], summary):focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
 .settings-control input {
-  width: 11rem;
+  width: 8rem;
   max-width: 100%;
 }
 
-.settings-control [data-slot=select-trigger],
-.settings-pane [data-slot=select-trigger] {
-  width: 14rem;
+.settings-control input[type=number] {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-control [data-slot=select-trigger] {
+  width: var(--settings-control);
   max-width: 100%;
-  border: 0;
-  background: color-mix(in oklab, var(--ink) 5%, var(--surface));
-  border-radius: var(--r-sm);
-  box-shadow: none;
-  transition: background-color var(--motion-fast) var(--ease-standard);
 }
 
-.settings-control [data-slot=select-trigger]:hover:not(:disabled),
-.settings-pane [data-slot=select-trigger]:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--ink) 8%, var(--surface));
+.settings-pane [data-slot=switch][data-state=unchecked] {
+  border-color: var(--line);
 }
 
-.settings-control [data-testid=replyLanguage] {
-  width: 16rem;
-  min-width: min(16rem, 100%);
-}
-
-/* Toggle group filled container */
 .settings-control [data-slot=toggle-group] {
   flex-wrap: nowrap;
   max-width: 100%;
-  border: 0;
-  background: color-mix(in oklab, var(--ink) 5%, var(--surface));
+  border: 1px solid var(--line);
+  background: transparent;
   border-radius: var(--r-sm);
-  padding: 3px;
+  padding: 2px;
   gap: 2px;
 }
 
@@ -297,7 +308,7 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   font-size: var(--type-sm);
   white-space: nowrap;
   padding-inline: var(--space-3);
-  min-height: 2rem;
+  min-height: 1.75rem;
   height: auto;
   color: var(--muted);
   box-shadow: none;
@@ -305,18 +316,16 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
 }
 
 .settings-control [data-slot=toggle-group-item][data-state=on] {
-  background: var(--surface);
-  color: var(--ink);
+  background: var(--ink);
+  color: var(--surface);
   font-weight: 600;
-  box-shadow: 0 1px 2px color-mix(in oklab, var(--ink) 8%, transparent);
 }
 
 .settings-control [data-slot=toggle-group-item]:hover:not([data-state=on]) {
   color: var(--ink);
-  background: color-mix(in oklab, var(--ink) 4%, transparent);
+  background: color-mix(in oklab, var(--ink) 6%, transparent);
 }
 
-/* Buttons in settings */
 .settings-pane button:not([data-slot=toggle-group-item]),
 .settings-pane :is(input, textarea, [data-slot=select-trigger]) {
   font-size: var(--type-base);
@@ -324,29 +333,204 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
 
 .settings-pane button {
   border-radius: var(--r-sm);
-  transition: background-color var(--motion-fast) var(--ease-standard), opacity var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+  transition: background-color var(--motion-fast) var(--ease-standard), opacity var(--motion-fast) var(--ease-standard);
 }
 
-.settings-pane button:active:not(:disabled) {
-  transform: scale(0.98);
+.settings-pane [data-slot=button][data-variant=default] { background: var(--ink); color: var(--surface); }
+.settings-pane [data-slot=button]:is([data-variant=secondary], [data-variant=outline]) { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.settings-pane [data-slot=button]:is([data-variant=secondary], [data-variant=outline]):hover:not(:disabled) { background: color-mix(in oklab, var(--ink) 6%, transparent); }
+
+/* Disclosures: one quiet row with a chevron, content below. */
+.settings-disclosure {
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  min-width: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .settings-pane button:active:not(:disabled) {
-    transform: none;
-  }
+.settings-disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--type-base);
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--r-md);
 }
 
-/* Provider rows with status dot */
+.settings-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-disclosure > summary:hover {
+  background: color-mix(in oklab, var(--ink) 4%, transparent);
+}
+
+.settings-disclosure > summary small {
+  margin-inline-start: auto;
+  font-size: var(--type-sm);
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.settings-disclosure-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-2) var(--space-4) var(--space-4);
+}
+
+.settings-disclosure-body > p {
+  font-size: var(--type-sm);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.settings-disclosure-body .settings-card {
+  margin-inline: calc(var(--space-4) * -1);
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+}
+
+.settings-disclosure-body:has(> .settings-group:last-child) {
+  padding-bottom: 0;
+}
+
+.settings-disclosure-body > .settings-group:last-child .settings-card {
+  border-radius: 0 0 var(--r-md) var(--r-md);
+}
+
+.settings-pane details:not(.settings-disclosure) > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: fit-content;
+  list-style: none;
+  cursor: pointer;
+}
+
+.settings-pane details:not(.settings-disclosure) > summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-pane :is(details:not(.settings-disclosure) > summary, .settings-disclosure > summary)::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex: none;
+  margin-inline: 2px var(--space-1);
+  border-inline-end: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.settings-pane details[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+[data-testid=storage-settings] > .settings-intro:first-child,
+.usage-settings > .settings-intro:first-child,
+.settings-pane .agents-settings > .agents-intro:first-child {
+  margin-top: calc(var(--space-5) * -1);
+}
+
+/* AI tools: one row per tool, one action per row. */
+.ai-cli-tool-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-cli-tool {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  background: transparent;
+  color: var(--ink);
+  text-align: start;
+  border-radius: 0;
+}
+
+.ai-cli-tool:hover {
+  background: color-mix(in oklab, var(--ink) 4%, transparent);
+}
+
+html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.ai-cli-tool-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ai-cli-tool-name strong {
+  font-size: var(--type-base);
+  font-weight: 500;
+}
+
+.ai-cli-tool-name small,
+.ai-cli-tool-status {
+  font-size: var(--type-sm);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-cli-tool svg {
+  color: var(--muted);
+}
+
+.ai-cli-tool-row > [data-slot=button] {
+  align-self: flex-start;
+  margin: 0 var(--space-4) var(--space-2);
+}
+
+.ai-cli-tool-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.ai-cli-tool-actions .ai-cli-inventory-entry {
+  width: auto;
+  font-weight: 500;
+}
+
+.ai-cli-tool-actions [data-slot=button] svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ai-cli-tool-notes {
+  color: var(--muted);
+}
+
+/* Setup guide inside its disclosure: the summary is the title. */
+.settings-disclosure .ai-setup-guide {
+  padding: 0;
+  background: transparent;
+}
+
+.settings-disclosure .ai-setup-guide > h3 {
+  display: none;
+}
+
+/* Provider rows: name and state, then the key form, then help. */
 .settings-dialog .provider-row {
   margin: 0;
-  display: block;
-  padding: var(--space-4) var(--space-5);
-  transition: background-color var(--motion-fast) var(--ease-standard);
-}
-
-.settings-dialog .provider-row:hover {
-  background: color-mix(in oklab, var(--ink) 2%, transparent);
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 0;
 }
 
 .provider-row .row {
@@ -354,13 +538,26 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-2) var(--space-4);
   font-size: var(--type-base);
 }
 
 .provider-row .row strong {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ink);
+}
+
+.provider-row .provider-title {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.provider-row .provider-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
 }
 
 .provider-status {
@@ -377,21 +574,14 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   border-radius: var(--r-pill);
   flex-shrink: 0;
   background: color-mix(in oklab, var(--ink) 25%, transparent);
-  transition: background-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
 }
 
 .provider-status-dot.ready {
-  background: var(--folder-sage);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--folder-sage) 22%, transparent);
+  background: var(--ink);
 }
 
 .provider-status-dot.error {
   background: var(--danger);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--danger) 22%, transparent);
-}
-
-.provider-status-dot.idle {
-  background: color-mix(in oklab, var(--ink) 20%, transparent);
 }
 
 .provider-cli-label {
@@ -401,14 +591,12 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   font-size: var(--type-sm);
   color: var(--ink);
   cursor: pointer;
-  margin-top: var(--space-2);
 }
 
 .settings-dialog .provider-row form {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-top: var(--space-3);
   align-items: center;
 }
 
@@ -416,14 +604,19 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   flex: 1 1 12rem;
   min-width: 0;
   width: auto;
-  font-size: var(--type-base);
+  text-align: start;
 }
 
 .settings-dialog .provider-row p {
   font-size: var(--type-sm);
   color: var(--muted);
-  margin-top: var(--space-2);
+  line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+.settings-dialog .provider-row .provider-help {
+  display: grid;
+  gap: var(--space-1);
 }
 
 .settings-dialog .provider-row p:has(code) {
@@ -437,9 +630,6 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: color-mix(in oklab, var(--ink) 6%, var(--surface));
-  padding: 2px 6px;
-  border-radius: var(--r-xs);
   font-family: var(--font-mono);
   font-size: var(--type-xs);
 }
@@ -451,19 +641,14 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   justify-content: space-between;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-5);
+  padding: var(--space-2) var(--space-4);
   font-size: var(--type-sm);
   overflow-wrap: anywhere;
-  transition: background-color var(--motion-fast) var(--ease-standard);
-}
-
-.network-event:hover {
-  background: color-mix(in oklab, var(--ink) 2%, transparent);
 }
 
 .network-event.empty {
   color: var(--muted);
-  padding-block: var(--space-4);
+  padding-block: var(--space-3);
 }
 
 .network-event time {
@@ -471,37 +656,17 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   color: var(--muted);
 }
 
-/* Appearance section and live preview */
-.appearance-layout {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-/* Controls occupy the same full-width rows as General; preview follows them */
-.appearance-layout > .settings-group {
-  order: 0;
-}
-
+/* Appearance live preview */
 .appearance-preview {
-  order: 1;
-}
-
-.appearance-preview {
-  padding: var(--space-5) var(--space-6);
-  background: color-mix(in oklab, var(--ink) 3%, var(--surface));
-  border-radius: var(--r-md);
-  border: 0;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
 }
 
 .appearance-preview h3 {
-  font-size: var(--type-lg);
+  font-size: var(--type-base);
   font-weight: 600;
   color: var(--ink);
-}
-
-.appearance-preview p {
-  margin-block: var(--space-3);
 }
 
 .preview-reader {
@@ -514,78 +679,19 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   font-size: var(--chat-size);
   background: var(--active);
   border-radius: var(--r-sm);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   line-height: var(--chat-leading);
 }
 
-.preview-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
-
-.preview-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  padding: 0 var(--space-4);
-  background: var(--accent-color);
-  color: var(--surface);
-  border-radius: var(--r-sm);
-  font-size: var(--type-sm);
-  font-weight: 500;
-}
-
 .preview-selected {
-  padding: var(--space-1) var(--space-3);
+  justify-self: start;
+  padding: 2px var(--space-2);
   background: var(--selection-color);
   border-radius: var(--r-xs);
   font-size: var(--type-sm);
-  display: inline-block;
 }
 
-.accent-swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-
-.accent-swatches button {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--r-pill);
-  border: 0;
-  cursor: pointer;
-  transition: transform var(--motion-fast) var(--ease-standard);
-}
-
-.accent-swatches button:hover {
-  transform: scale(1.1);
-}
-
-.accent-swatches [aria-checked=true] {
-  outline: 2px solid var(--focus);
-  outline-offset: 3px;
-  transform: scale(1.05);
-}
-
-/* Usage settings inside settings dialog */
-.settings-pane .usage-dashboard,
-.settings-pane .usage-overview {
-  border: 0;
-}
-
-.settings-pane .usage-overview {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.settings-pane .usage-dashboard-toolbar,
-.settings-pane .usage-breakdown-heading {
-  flex-wrap: wrap;
-}
-
+/* Usage pane */
 .settings-pane .usage-settings {
   display: flex;
   flex-direction: column;
@@ -596,10 +702,14 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   margin: 0;
 }
 
-.settings-pane .usage-settings .settings-control input {
-  width: 8rem;
-  text-align: end;
-  font-variant-numeric: tabular-nums;
+.settings-pane .usage-dashboard,
+.settings-pane .usage-overview {
+  border: 0;
+}
+
+.settings-pane .usage-dashboard-toolbar,
+.settings-pane .usage-breakdown-heading {
+  flex-wrap: wrap;
 }
 
 .settings-pane .usage-settings .settings-control textarea {
@@ -609,32 +719,122 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   font: var(--type-sm) var(--font-mono);
 }
 
-.settings-pane .usage-settings .settings-card > p {
-  padding: var(--space-4) var(--space-5);
-  overflow-wrap: anywhere;
-  font-size: var(--type-sm);
-  color: var(--muted);
-}
-
 .settings-pane .usage-settings .settings-card > .row {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
   flex-wrap: wrap;
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4);
 }
 
-.usage-overview-content,
-.settings-copy {
-  padding: var(--space-4) var(--space-5);
+.settings-pane .usage-dashboard-toolbar h3 {
+  font-size: var(--type-md);
 }
 
-.usage-overview-content > .muted {
-  margin-bottom: var(--space-6);
+.settings-pane .usage-trend {
+  background: transparent;
+  border: 1px solid var(--hairline);
+}
+
+.settings-pane .usage-breakdown {
+  background: transparent;
+  border: 1px solid var(--hairline);
+}
+
+.settings-pane .usage-breakdown th {
+  text-transform: none;
+  letter-spacing: 0;
   font-size: var(--type-sm);
 }
 
-/* Responsive containers */
+.settings-pane .usage-stat-tile {
+  background: transparent;
+  border: 1px solid var(--hairline);
+}
+
+.settings-pane .usage-stat-label {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--type-sm);
+}
+
+.settings-intro p + p {
+  margin-top: var(--space-2);
+}
+
+.settings-card > details > summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.settings-card > details .settings-row {
+  padding-inline: 0;
+}
+
+.storage-bytes { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); }
+
+/* Privacy: consent detail, CLI privacy choices. Wording lives in analytics-ui and ai-cli. */
+.settings-card > .analytics-details {
+  padding: var(--space-4);
+  gap: var(--space-3);
+  font-size: var(--type-sm);
+  line-height: 1.5;
+}
+
+.settings-pane .analytics-details > p {
+  color: var(--muted);
+}
+
+.settings-pane .analytics-details details > summary {
+  width: fit-content;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.settings-pane .analytics-details ul {
+  list-style: disc;
+  padding-inline-start: var(--space-5);
+  margin-top: var(--space-2);
+  color: var(--muted);
+}
+
+.settings-pane .analytics-details > [data-slot=button],
+.settings-pane .analytics-deletion [data-slot=button] {
+  justify-self: start;
+}
+
+.settings-pane .analytics-id code {
+  font-size: var(--type-xs);
+}
+
+.settings-pane .ai-cli-preferences p,
+.settings-pane .ai-cli-consent {
+  font-size: var(--type-base);
+  line-height: 1.5;
+}
+
+.settings-pane .ai-cli-consent small {
+  font-size: var(--type-sm);
+}
+
+.settings-pane .ai-cli-consent input {
+  accent-color: var(--ink);
+}
+
+.settings-pane .ai-cli-preferences [data-slot=button] {
+  min-height: 0;
+}
+
+/* Narrow windows: tab list becomes a scrolling row above the pane. */
+@container settings-shell (max-width: 40rem) {
+  .settings-body[data-slot=tabs] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 44px minmax(0, 1fr);
+  }
+}
+
 @container settings (max-width: 40rem) {
   .settings-tabs[data-slot=tabs-list] {
     grid-column: 1 / -1;
@@ -642,7 +842,7 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
     height: 44px;
     overflow-x: auto;
     border-inline-end: 0;
-    border-bottom: 0;
+    border-bottom: 1px solid var(--hairline);
     padding: var(--space-1);
   }
   .settings-tabs [data-slot=tabs-trigger] {
@@ -654,45 +854,44 @@ html[data-input-modality=keyboard] .settings-control textarea:focus-visible {
   }
 }
 
-@container settings-shell (max-width: 40rem) {
-  .settings-body[data-slot=tabs] {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: 44px minmax(0, 1fr);
+@container settings-pane (max-width: 34rem) {
+  .settings-row {
+    flex-wrap: wrap;
   }
 }
 
-@media (max-width: 672px) {
-  .settings-body[data-slot=tabs] {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: 44px minmax(0, 1fr);
-  }
-}
-
-/* High contrast mode restores structural borders */
 @media (prefers-contrast: more), (forced-colors: active) {
-  .settings-card {
-    border: 1px solid var(--hairline);
+  .settings-card,
+  .settings-disclosure,
+  .settings-header,
+  .settings-tabs[data-slot=tabs-list] {
+    border-color: var(--hairline);
+  }
+  .settings-card > * + * {
+    border-top-color: var(--hairline);
   }
   .settings-card[data-danger=true] {
     border-color: var(--danger);
   }
-  .settings-pane input:not([type=checkbox]):not([type=radio]),
-  .settings-pane textarea,
-  .settings-control input,
-  .settings-control textarea,
-  .settings-control [data-slot=select-trigger] {
-    border: 1px solid var(--hairline);
+  .settings-pane {
+    mask-image: none;
   }
 }
 
-.settings-dialog .provider-row { border:0; }
-.settings-dialog .provider-row + .provider-row { margin-top:var(--space-2); }
-.settings-pane [data-slot=button][data-variant=default] { background:var(--ink); color:var(--surface); }
-.settings-pane [data-slot=button]:is([data-variant=secondary],[data-variant=outline]) { background:color-mix(in oklab,var(--ink) 9%,var(--surface)); color:var(--ink); }
-.settings-pane [data-slot=button]:is([data-variant=secondary],[data-variant=outline]):hover:not(:disabled) { background:var(--active); }
-@media(prefers-contrast:more), (forced-colors:active) {
- .settings-dialog .provider-row { border:1px solid var(--ink); }
+@media (forced-colors: active) {
+  .settings-control [data-slot=toggle-group-item][data-state=on] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+  .provider-status-dot {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
 }
 
-.settings-storage-intro { margin-bottom: var(--space-6); }
-.storage-bytes { font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) {
+  .settings-pane summary::before {
+    transition: none;
+  }
+}

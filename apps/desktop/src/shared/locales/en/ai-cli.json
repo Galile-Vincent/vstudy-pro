@@ -131,7 +131,6 @@
   "terminal_input": "Active action terminal input",
   "too_much_output": "More output is available in Readable output and sign-in codes.",
   "row_help": "Use guided setup to install, sign in, and test here. The enable switch remains available for an existing installation.",
-  "onboarding_login_body": "Use guided AI tool setup to install and sign in here. Each tool needs your permission before it runs. Provider plan limits and fees still apply.",
   "which_tool": "Which tool should I choose?",
   "which_tool_help": "Start with an account your school approves. Installing a tool is free. Service access and limits depend on the provider and your account. Check the current offer before paying.",
   "current_plans": "Check {{provider}} plans",

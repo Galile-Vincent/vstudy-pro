@@ -94,5 +94,12 @@
   "test_connection": "測試連線",
   "connection_success": "連線成功！金鑰可以使用。",
   "event_newsletter_subscribe": "產品更新訂閱",
-  "event_analytics_capture": "使用分析"
+  "event_analytics_capture": "使用分析",
+  "show": "顯示",
+  "open": "開啟",
+  "welcome_guide_hint": "重看第一次使用時的導覽。",
+  "about_hint": "了解功能，並試用範例。",
+  "text_reading": "文字與閱讀",
+  "advanced": "進階",
+  "api_keys": "API 金鑰"
 }

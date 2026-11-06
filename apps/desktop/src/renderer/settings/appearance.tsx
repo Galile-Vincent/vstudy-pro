@@ -8,6 +8,7 @@ import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { ToggleGroup, ToggleGroupItem } from '../components/ui/toggle-group';
 import { Select } from '../components/select';
+import { Button } from '../components/ui/button';
 import { SettingsGroup, SettingsRow } from './layout';
 import { applyAppearance } from './apply-appearance';
 import { ThemeEditor, ThemeTransfer } from './theme-editor';
@@ -54,27 +55,38 @@ export function AppearanceSection() {
   if (!settings) return error ? <p role="alert">{error}</p> : <p role="status">{tr('themes:loading')}</p>;
   const theme = resolveTheme(settings);
   const packs = [...builtinThemes,...settings.customThemes];
+  const slider = (field: 'contrast' | 'glassOpacity') => <SettingsRow key={field} label={tr(`themes:${field}`)} description={tr(`themes:${field}_hint`)}>
+    <label className="theme-slider"><output>{settings[field]}%</output><input type="range" min={field === 'contrast' ? 100 : 50} max={field === 'contrast' ? 150 : 100} step="1"
+      aria-label={tr(`themes:${field}`)} value={settings[field]} onChange={e => { const value=Number(e.target.value); const next={...settings,[field]:value}; setSettings(next); applyAppearance(next, true); }}
+      onPointerUp={e => void update({[field]:Number(e.currentTarget.value)})} onKeyUp={e => void update({[field]:Number(e.currentTarget.value)})} onBlur={e => void update({[field]:Number(e.currentTarget.value)})}/></label>
+  </SettingsRow>;
   return <div className="appearance-layout">
-    <section aria-labelledby="color-scheme-label">
+    <section className="settings-group" aria-labelledby="color-scheme-label">
       <h3 id="color-scheme-label">{tr('themes:scheme')}</h3>
       <div className="scheme-grid">
         {(['system','light','dark'] as const).map(scheme => <button type="button" key={scheme} className="scheme-card"
           aria-pressed={settings.colorScheme === scheme} onClick={() => void update({colorScheme:scheme})}>
-          <ThemePreview theme={theme} scheme={scheme}/><span>{tr(`themes:${scheme}`)}</span>
+          <ThemePreview theme={theme} scheme={scheme}/>
+          <span className="scheme-card-label">{tr(`themes:${scheme}`)}<span className="scheme-card-check" aria-hidden="true">{settings.colorScheme === scheme && <Check/>}</span></span>
         </button>)}
       </div>
     </section>
-    <section aria-labelledby="themes-label">
-      <div className="theme-heading"><h3 id="themes-label">{tr('themes:themes')}</h3><div>
-        <button type="button" onClick={() => setEditor({...theme, id:`custom-${crypto.randomUUID()}`,name:tr('themes:untitled')})}><Pencil/>{tr('themes:create')}</button>
-        <button type="button" onClick={() => setTransfer('import')}><Plus/>{tr('themes:add')}</button>
-      </div></div>
+    <SettingsGroup title={tr('settings:text_reading')}>
+      {(['uiScale','density','readerFont','readerSize'] as const).map(field => <SettingsRow key={field} label={tr(`settings:${field}`)}>
+        {field === 'readerFont' ? <Select aria-label={tr('settings:readerFont')} value={settings.readerFont} onChange={e => void update({readerFont:e.target.value as Settings['readerFont']})}>
+          {['system','serif','mono'].map(v => <option key={v} value={v}>{tr(`settings:${v}`)}</option>)}
+        </Select> : field === 'uiScale' ? toggles(field,[100,125,150,200]) : field === 'density' ? toggles(field,['comfortable','compact']) : toggles(field,['s','m','l','xl'])}
+      </SettingsRow>)}
+      <div className="appearance-preview"><h3>{tr('settings:sampleTitle')}</h3><p className="preview-reader">{tr('settings:sampleReader')}<br/>{tr('settings:sampleCjk')}</p><p className="preview-chat">{tr('settings:sampleChat')}</p><span className="preview-selected">{tr('themes:selection')}</span></div>
+    </SettingsGroup>
+    <section className="settings-group" aria-labelledby="themes-label">
+      <h3 id="themes-label">{tr('themes:themes')}</h3>
       <div className="themes-grid">
         {packs.map(pack => <div className="theme-card" key={pack.id} data-selected={settings.themeId === pack.id}>
           <button type="button" className="theme-select" aria-pressed={settings.themeId === pack.id} onClick={() => void update({themeId:pack.id})}>
-            <span className="theme-orbs" aria-hidden="true">{(['light','dark'] as const).map(s => <span key={s} className="theme-orb"
-              style={{background:`radial-gradient(circle at 28% 20%, ${pack.orbs[s][0]}, ${pack.orbs[s][1]} 85%)`}}/>)}</span>
-            <span className="theme-name">{builtinThemes.some(t => t.id === pack.id) ? tr(`themes:name_${pack.id}`) : pack.name}{settings.themeId === pack.id && <Check aria-hidden="true"/>}</span>
+            <span className="theme-orbs" aria-hidden="true">{(['light','dark'] as const).map(s => <span key={s} className="theme-orb" style={{background:pack.orbs[s][1]}}/>)}</span>
+            <span className="theme-name">{builtinThemes.some(t => t.id === pack.id) ? tr(`themes:name_${pack.id}`) : pack.name}</span>
+            {settings.themeId === pack.id && <Check className="theme-check" aria-hidden="true"/>}
           </button>
           <div className="theme-card-tools">
             {settings.customThemes.some(t => t.id === pack.id) && <button type="button" aria-label={tr('themes:edit_named',{name:pack.name})} onClick={() => setEditor(pack)}><Pencil/></button>}
@@ -83,19 +95,20 @@ export function AppearanceSection() {
         </div>)}
       </div>
     </section>
-    <SettingsGroup title={tr('themes:interface')}>
-      {(['contrast','glassOpacity'] as const).map(field => <SettingsRow key={field} label={tr(`themes:${field}`)} description={tr(`themes:${field}_hint`)}>
-        <label className="theme-slider"><output>{settings[field]}%</output><input type="range" min={field === 'contrast' ? 100 : 50} max={field === 'contrast' ? 150 : 100} step="1"
-          aria-label={tr(`themes:${field}`)} value={settings[field]} onChange={e => { const value=Number(e.target.value); const next={...settings,[field]:value}; setSettings(next); applyAppearance(next, true); }}
-          onPointerUp={e => void update({[field]:Number(e.currentTarget.value)})} onKeyUp={e => void update({[field]:Number(e.currentTarget.value)})} onBlur={e => void update({[field]:Number(e.currentTarget.value)})}/></label>
-      </SettingsRow>)}
-      {(['uiScale','density','readerFont','readerSize','material'] as const).map(field => <SettingsRow key={field} label={tr(`settings:${field}`)}>
-        {field === 'readerFont' ? <Select aria-label={tr('settings:readerFont')} value={settings.readerFont} onChange={e => void update({readerFont:e.target.value as Settings['readerFont']})}>
-          {['system','serif','mono'].map(v => <option key={v} value={v}>{tr(`settings:${v}`)}</option>)}
-        </Select> : field === 'uiScale' ? toggles(field,[100,125,150,200]) : field === 'density' ? toggles(field,['comfortable','compact']) : field === 'readerSize' ? toggles(field,['s','m','l','xl']) : toggles(field,['glass','solid'])}
-      </SettingsRow>)}
-    </SettingsGroup>
-    <div className="appearance-preview"><h3>{tr('settings:sampleTitle')}</h3><p className="preview-reader">{tr('settings:sampleReader')}<br/>{tr('settings:sampleCjk')}</p><p className="preview-chat">{tr('settings:sampleChat')}</p><span className="preview-selected">{tr('themes:selection')}</span></div>
+    <details className="settings-disclosure">
+      <summary>{tr('settings:advanced')}</summary>
+      <div className="settings-disclosure-body">
+        <SettingsGroup>
+          <SettingsRow label={tr('settings:material')}>{toggles('material',['glass','solid'])}</SettingsRow>
+          {slider('contrast')}
+          {slider('glassOpacity')}
+          <SettingsRow label={tr('themes:custom')} description={tr('themes:custom_hint')}>
+            <Button size="sm" variant="secondary" onClick={() => setEditor({...theme, id:`custom-${crypto.randomUUID()}`,name:tr('themes:untitled')})}><Pencil/>{tr('themes:create')}</Button>
+            <Button size="sm" variant="secondary" onClick={() => setTransfer('import')}><Plus/>{tr('themes:add')}</Button>
+          </SettingsRow>
+        </SettingsGroup>
+      </div>
+    </details>
     {error && <p role="alert">{error}</p>}
     {editor && <ThemeEditor theme={editor} settings={settings} onClose={() => setEditor(undefined)} onSave={saveTheme}/>}
     {transfer && <ThemeTransfer theme={transfer} onClose={() => setTransfer(undefined)} onSave={saveTheme}/>}

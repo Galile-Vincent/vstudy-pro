@@ -12,3 +12,7 @@
 .analytics-sources input,.analytics-check input { accent-color:var(--ink); }
 .analytics-details summary { cursor:pointer; }
 @media(max-width:480px) { .analytics-sources { grid-template-columns:1fr; } }
+.analytics-disclosure details { display:grid; gap:var(--space-3); }
+.analytics-disclosure summary { width:fit-content; cursor:pointer; color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
+.analytics-disclosure details[open] summary { color:var(--ink); }
+.analytics-disclosure details > p { color:var(--muted); font-size:var(--type-sm); }

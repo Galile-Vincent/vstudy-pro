@@ -622,3 +622,55 @@ it('reports cancelled login separately and never reports success followed by fai
   expect(track.mock.calls.map(c=>c[0])).toEqual(['moodle_connection_started','moodle_connection_failed']);
   await service.dispose();await failed.dispose();
 });
+
+it('keeps local unread across server sync without writing unread to Moodle',async () => {
+  const {service,repository,request,store} = await setup();
+  await service.sync(account.id);
+  const notification = repository.notificationRecords(account.id)[0]!.value;
+  await service.markRead(notification.id);
+  request.mockClear();
+  await service.markRead(notification.id,false);
+  expect(request).not.toHaveBeenCalled();
+  expect(new MoodleRepository(store.db).notification(notification.id)).toMatchObject({read:false,localUnread:true,pendingRemoteRead:false});
+  await service.sync(account.id);
+  expect(repository.notification(notification.id)).toMatchObject({read:false,localUnread:true});
+  expect(repository.notification(notification.id)?.pendingRemoteRead).not.toBe(true);
+  expect(request.mock.calls.some(call => String(call[1]?.body).includes('wsfunction=core_message_mark_notification_read'))).toBe(false);
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (target,options) => new URLSearchParams(String(options?.body)).get('wsfunction') === 'core_message_mark_notification_read' ? Response.json({}) : base(target,options));
+  await service.markRead(notification.id);
+  expect(repository.notification(notification.id)).toMatchObject({read:true,localUnread:false,pendingRemoteRead:false});
+  await service.dispose();
+});
+
+it('persists local pins across sync and reopening, scopes them to the account, and removes vanished courses', async () => {
+  const {repository,service,directory} = await setup();
+  await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  repository.setPinned(account.id,course.id,true);
+  repository.setPinned(account.id,course.id,true);
+  await service.sync(account.id);
+  expect(repository.overview().pinnedCourseIds).toEqual([course.id]);
+  const other = {...account,id:randomUUID(),remoteUserId:400};repository.saveAccount(other);
+  expect(() => repository.setPinned(other.id,course.id,true)).toThrow('Moodle course not found');
+  expect(repository.overview(other.id).pinnedCourseIds).toEqual([]);
+  const filename = join(directory,'pin-persistence.sqlite');
+  const disk = openStore(filename);stores.push(disk);
+  const local = new MoodleRepository(disk.db);local.saveAccount(account);
+  const snapshot = {courses:[course],deadlines:[],notifications:[],grades:[],files:[]};
+  local.apply(account.id,snapshot);local.setPinned(account.id,course.id,true);
+  disk.settings.set({...disk.settings.get(),coursesSort:{current:'name',all:'name'}});
+  disk.close();stores.splice(stores.indexOf(disk),1);
+  const reopened = openStore(filename);stores.push(reopened);
+  const restored = new MoodleRepository(reopened.db);
+  expect(restored.overview().pinnedCourseIds).toEqual([course.id]);
+  expect(reopened.settings.get().coursesSort).toEqual({current:'name',all:'name'});
+  restored.apply(account.id,snapshot);
+  expect(restored.overview().pinnedCourseIds).toEqual([course.id]);
+  restored.setPinned(account.id,course.id,false);expect(restored.overview().pinnedCourseIds).toEqual([]);
+  restored.setPinned(account.id,course.id,true);
+  restored.apply(account.id,{...snapshot,courses:[]});
+  expect(restored.overview().pinnedCourseIds).toEqual([]);
+  expect(reopened.db.prepare('SELECT count(*) AS count FROM moodle_course_pins').get()?.count).toBe(0);
+  await service.dispose();
+});

@@ -49,6 +49,7 @@ try {
     await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));
     await page.getByRole('tab',{name:'Appearance',exact:true}).click();
     await page.locator('.themes-grid').waitFor();
+    await page.locator('.appearance-layout details').evaluate(details=>{details.open=true;});
   };
   const shot=async(name)=>{const path=join(evidence,`${name}.png`);await page.screenshot({path,animations:'disabled'});screenshots.push(path);};
   for (const themeId of ['ocean','grove','ember','iris']) for (const scheme of ['light','dark']) {

@@ -72,6 +72,11 @@ export class MoodleRepository {
     this.db.prepare('DELETE FROM moodle_accounts WHERE id=?').run(id);
   }
   expired(id: string) { this.saveAccount({...this.account(id),status:'expired'}); }
+  setPinned(accountId: string, courseId: string, pinned: boolean) {
+    if (!this.db.prepare('SELECT 1 FROM moodle_courses WHERE id=? AND accountId=?').get(courseId,accountId)) throw new Error('Moodle course not found');
+    if (pinned) this.db.prepare('INSERT INTO moodle_course_pins(courseId,accountId) VALUES (?,?) ON CONFLICT(courseId) DO NOTHING').run(courseId,accountId);
+    else this.db.prepare('DELETE FROM moodle_course_pins WHERE courseId=? AND accountId=?').run(courseId,accountId);
+  }
   overview(accountId?: string): MoodleOverview {
     const accounts = this.accounts().filter(account => !accountId || account.id === accountId);
     const courses = this.rows('SELECT data FROM moodle_courses ORDER BY id',storedCourseSchema).filter(course => accounts.some(account => account.id === course.accountId));
@@ -79,7 +84,7 @@ export class MoodleRepository {
     const upcoming = this.rows('SELECT data FROM moodle_deadlines',moodleDeadlineSchema).filter(item => ids.has(item.courseId) && !item.submitted && !item.orphaned).sort((a,b) => a.dueAt.localeCompare(b.dueAt));
     const notifications = this.rows('SELECT data FROM moodle_notifications',moodleNotificationSchema).filter(item => accounts.some(account => account.id === item.accountId));
     const reminders=this.reminders();
-    return {accounts,courses,upcoming,summaries:courses.map(course => ({course,notifications:notifications.filter(item => item.courseId === course.id),reminders:reminders.filter(item => upcoming.some(deadline => deadline.courseId === course.id && deadline.id === item.deadlineId))})),otherNotifications:notifications.filter(item => item.courseId === null),unreadNotifications:notifications.filter(item => !item.read).length};
+    return {accounts,courses,pinnedCourseIds:this.db.prepare('SELECT courseId FROM moodle_course_pins').all().map(row => z.string().parse(row.courseId)).filter(id => ids.has(id)),upcoming,summaries:courses.map(course => ({course,notifications:notifications.filter(item => item.courseId === course.id),reminders:reminders.filter(item => upcoming.some(deadline => deadline.courseId === course.id && deadline.id === item.deadlineId))})),otherNotifications:notifications.filter(item => item.courseId === null),unreadNotifications:notifications.filter(item => !item.read).length};
   }
   course(id: string): MoodleCourseDetail {
     const course = this.rows('SELECT data FROM moodle_courses WHERE id=?',storedCourseSchema,id)[0];
@@ -160,7 +165,7 @@ export class MoodleRepository {
       for (const {remoteId,value:item} of snapshot.notifications) {
         if (item.accountId !== accountId || item.courseId && !courseIds.has(item.courseId)) throw new Error('Moodle account mismatch');
         const existing = this.notification(item.id);
-        this.db.prepare('INSERT INTO moodle_notifications(id,remoteId,accountId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(item.id,remoteId,accountId,JSON.stringify({...item,read:item.read || existing?.read === true,...(existing?.pendingRemoteRead ? {pendingRemoteRead:true} : {})}));
+        this.db.prepare('INSERT INTO moodle_notifications(id,remoteId,accountId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(item.id,remoteId,accountId,JSON.stringify({...item,read:existing?.localUnread ? false : item.read || existing?.read === true,...(existing?.localUnread ? {localUnread:true} : {}),...(existing?.pendingRemoteRead ? {pendingRemoteRead:true} : {})}));
       }
       for (const item of snapshot.grades) this.db.prepare('INSERT INTO moodle_grades(id,remoteKey,courseId,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(remoteId(accountId,'grade',`${item.value.courseId}:${item.remoteKey}`),item.remoteKey,item.value.courseId,JSON.stringify(item.value));
       for (const item of snapshot.files) this.db.prepare(`INSERT INTO moodle_files(id,courseId,url,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET url=excluded.url,data=excluded.data,documentId=CASE WHEN json_extract(moodle_files.data,'$.modifiedAt') IS json_extract(excluded.data,'$.modifiedAt') AND json_extract(moodle_files.data,'$.size')=json_extract(excluded.data,'$.size') THEN moodle_files.documentId ELSE NULL END`).run(item.value.id,item.value.courseId,item.url,JSON.stringify(item.value));
@@ -191,6 +196,7 @@ export class MoodleRepository {
       prune('grades',new Set(snapshot.grades.map(item => remoteId(accountId,'grade',`${item.value.courseId}:${item.remoteKey}`))));
       prune('files',new Set(snapshot.files.map(item => item.value.id)));
       prune('courses',courseIds);
+      if (!scope) for (const row of this.db.prepare('SELECT courseId FROM moodle_course_pins WHERE accountId=?').all(accountId)) if (!courseIds.has(String(row.courseId))) this.db.prepare('DELETE FROM moodle_course_pins WHERE courseId=?').run(row.courseId!);
       this.saveAccount({...account,status:'connected',syncedAt:new Date().toISOString()});
       this.db.exec('RELEASE moodle_sync');
     } catch (error) { this.db.exec('ROLLBACK TO moodle_sync; RELEASE moodle_sync'); throw error; }
@@ -199,10 +205,10 @@ export class MoodleRepository {
     return this.db.prepare('SELECT data,remoteId FROM moodle_notifications WHERE accountId=?').all(accountId).map(row => ({remoteId:z.number().int().parse(row.remoteId),value:moodleNotificationSchema.parse(JSON.parse(payload.parse(row).data))}));
   }
   notification(id: string) { return this.rows('SELECT data FROM moodle_notifications WHERE id=?',moodleNotificationSchema,id)[0]; }
-  markRead(id: string) {
+  markRead(id: string, read = true) {
     const item = this.notification(id);
     if (!item) throw new Error('Moodle notification not found');
-    this.db.prepare('UPDATE moodle_notifications SET data=? WHERE id=?').run(JSON.stringify({...item,read:true,pendingRemoteRead:true}),id);
+    this.db.prepare('UPDATE moodle_notifications SET data=? WHERE id=?').run(JSON.stringify({...item,read,localUnread:!read,pendingRemoteRead:read}),id);
   }
   acknowledgeRead(id: string) {
     const item = this.notification(id);

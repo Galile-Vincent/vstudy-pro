@@ -87,15 +87,13 @@ export function UsageSettings() {
 
   return (
     <section className="usage-settings" aria-label={tr('common:usage_settings')}>
-      <SettingsGroup>
-        <div className="usage-overview-content">
-          <p>{tr('novice:usage_help')}</p>
-          <p className="muted">{balanceNote()}</p>
-          <UsageDashboard documents={documents} />
-        </div>
-      </SettingsGroup>
+      <div className="settings-intro">
+        <p>{tr('novice:usage_help')}</p>
+        <p>{balanceNote()}</p>
+      </div>
+      <UsageDashboard documents={documents} />
       <SettingsGroup title={tr('common:provider_rate_limits')}>
-        <div className="settings-copy">
+        <div>
           {!limits.length && (
             <p className="muted">
               {tr(

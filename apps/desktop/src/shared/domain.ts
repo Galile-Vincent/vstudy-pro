@@ -251,10 +251,11 @@ export const settingsSchema = z
     ...themePreferencesSchema.shape,
     uiScale: z.union([z.literal(100),z.literal(125),z.literal(150),z.literal(200)]).default(100),
     density: z.enum(['comfortable','compact']).default('comfortable'),
+    coursesSort: z.object({future:z.enum(['smart','name']).optional(),current:z.enum(['smart','name']).optional(),past:z.enum(['smart','name']).optional(),all:z.enum(['smart','name']).optional()}).strict().optional(),
     accent: z.enum(['neutral','blue','green','violet','amber']).default('neutral'),
     readerFont: z.enum(['system','serif','mono']).default('system'),
     readerSize: z.enum(['s','m','l','xl']).default('m'),
-    material: z.enum(['glass','solid']).default('glass'),
+    material: z.enum(['glass','solid']).default('solid'),
     onboardingCompleted: z.boolean().optional(),
     welcomeSeen: z.boolean().default(false),
     displayName: z.string().trim().max(100).optional(),
@@ -279,7 +280,7 @@ export const settingsSchema = z
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
   ...themePreferencesSchema.parse({}),
-  uiScale:100, density:"comfortable", accent:"neutral", readerFont:"system", readerSize:"m", material:"glass",
+  uiScale:100, density:"comfortable", accent:"neutral", readerFont:"system", readerSize:"m", material:"solid",
   language: "auto", replyLanguage: "auto", welcomeSeen: false,
   chatSide: "left",
   converterIdleMinutes: 5, converterOffline: false, enableGenerativeUI: false, modelDisplayNames: {},

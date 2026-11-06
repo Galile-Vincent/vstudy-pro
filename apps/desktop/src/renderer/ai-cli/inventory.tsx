@@ -1,16 +1,17 @@
 /** Persistent, non-interrupting AI tools entry. Inventory is file-only until a student requests an action. */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sparkles } from 'lucide-react';
+import { ChevronRight, Sparkles } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
+import { SettingsGroup } from '../settings/layout';
 import { aiCliChanged, openAiCliSetup } from './entry';
 import { cliNames } from './model';
 import { useCliTools } from './use-tools';
 import './setup.css';
 
-export function AiCliInventory({ compact = false }: { compact?: boolean }) {
+export function AiCliInventory({ compact = false, settings = false }: { compact?: boolean; settings?: boolean }) {
   useTranslation();
   const { tools, error, refresh } = useCliTools();
   const [busy, setBusy] = useState(false);
@@ -18,15 +19,36 @@ export function AiCliInventory({ compact = false }: { compact?: boolean }) {
   const [checked, setChecked] = useState(false);
   const ready = tools.some(tool => tool.consented && tool.tested);
   const updates = tools.some(tool => tool.status === 'update-available');
-  return <section className="ai-cli-inventory" data-compact={compact} aria-label={tr('ai-cli:tools')}>
-    <Button variant="ghost" className="ai-cli-inventory-entry" onClick={() => { openAiCliSetup(); }}><Sparkles size={16} aria-hidden="true" /><span>{tr('ai-cli:tools')}</span><span className="ai-cli-dot" data-ready={ready} aria-hidden="true" /><span className="sr-only">{tr(ready ? 'ai-cli:ready_title' : 'ai-cli:setup_needed')}</span></Button>
-    <div className="ai-cli-versions">{tools.map(tool => <div key={tool.provider} className="ai-cli-version-entry"><button type="button" className="ai-cli-version" title={tr(`ai-cli:status_${tool.status}`)} onClick={() => { openAiCliSetup(tool.provider); }}><span>{cliNames[tool.provider]}</span><code>{tool.version ?? tr('ai-cli:missing')}</code><small>{tr(tool.status === 'update-available' && tool.manualUpdateRequired ? 'ai-cli:manual_update' : `ai-cli:status_${tool.status}`)}</small></button>{tool.status === 'update-available' && tool.manualUpdateRequired && tool.releaseNotesUrl && <Button variant="link" onClick={() => void desktop.invoke('shell:openExternal', { url: tool.releaseNotesUrl! }).catch(() => setCheckError(true))}>{tr('ai-cli:vendor_install_link')}</Button>}</div>)}</div>
+  const statusLabel = (tool: typeof tools[number]) => tr(tool.status === 'update-available' && tool.manualUpdateRequired ? 'ai-cli:manual_update' : `ai-cli:status_${tool.status}`);
+  const releaseNotes = (tool: typeof tools[number]) => tool.status === 'update-available' && tool.manualUpdateRequired && tool.releaseNotesUrl && <Button variant="link" onClick={() => void desktop.invoke('shell:openExternal', { url: tool.releaseNotesUrl! }).catch(() => setCheckError(true))}>{tr('ai-cli:vendor_install_link')}</Button>;
+  const checkUpdates = <Button variant={settings ? 'secondary' : 'ghost'} size={settings ? 'sm' : 'default'} disabled={busy} onClick={() => {
+    setBusy(true); setCheckError(false); setChecked(false);
+    void desktop.invoke('ai-cli:checkUpdates', {}).then(async () => { await refresh(); aiCliChanged(); setChecked(true); }).catch(() => setCheckError(true)).finally(() => setBusy(false));
+  }}>{tr(busy ? 'ai-cli:checking' : 'ai-cli:check_now')}</Button>;
+  const notes = <>
     {updates && <p className="ai-cli-update-note">{tr('ai-cli:updates_available')}</p>}
-    <Button variant="ghost" disabled={busy} onClick={() => {
-      setBusy(true); setCheckError(false); setChecked(false);
-      void desktop.invoke('ai-cli:checkUpdates', {}).then(async () => { await refresh(); aiCliChanged(); setChecked(true); }).catch(() => setCheckError(true)).finally(() => setBusy(false));
-    }}>{tr(busy ? 'ai-cli:checking' : 'ai-cli:check_now')}</Button>
     {checked && <p role="status">{tr('ai-cli:checked')}</p>}
     {(error || checkError) && <p role="status">{tr('ai-cli:inventory_error')}</p>}
+  </>;
+  if (settings) return <SettingsGroup title={tr('ai-cli:tools')}>
+    {tools.map(tool => <div key={tool.provider} className="ai-cli-tool-row">
+      <button type="button" className="ai-cli-tool" onClick={() => { openAiCliSetup(tool.provider); }}>
+        <span className="ai-cli-tool-name"><strong>{cliNames[tool.provider]}</strong><small>{tool.version ?? tr('ai-cli:missing')}</small></span>
+        <span className="ai-cli-tool-status">{statusLabel(tool)}</span>
+        <ChevronRight size={16} aria-hidden="true" />
+      </button>
+      {releaseNotes(tool)}
+    </div>)}
+    <div className="settings-row ai-cli-tool-actions">
+      <Button variant="secondary" size="sm" className="ai-cli-inventory-entry" onClick={() => { openAiCliSetup(); }}><Sparkles size={14} aria-hidden="true" />{tr('ai-cli:wizard')}<span className="sr-only">{tr(ready ? 'ai-cli:ready_title' : 'ai-cli:setup_needed')}</span></Button>
+      {checkUpdates}
+    </div>
+    {(updates || checked || error || checkError) && <div className="ai-cli-tool-notes">{notes}</div>}
+  </SettingsGroup>;
+  return <section className="ai-cli-inventory" data-compact={compact} aria-label={tr('ai-cli:tools')}>
+    <Button variant="ghost" className="ai-cli-inventory-entry" onClick={() => { openAiCliSetup(); }}><Sparkles size={16} aria-hidden="true" /><span>{tr('ai-cli:tools')}</span><span className="ai-cli-dot" data-ready={ready} aria-hidden="true" /><span className="sr-only">{tr(ready ? 'ai-cli:ready_title' : 'ai-cli:setup_needed')}</span></Button>
+    <div className="ai-cli-versions">{tools.map(tool => <div key={tool.provider} className="ai-cli-version-entry"><button type="button" className="ai-cli-version" title={tr(`ai-cli:status_${tool.status}`)} onClick={() => { openAiCliSetup(tool.provider); }}><span>{cliNames[tool.provider]}</span><code>{tool.version ?? tr('ai-cli:missing')}</code><small>{statusLabel(tool)}</small></button>{releaseNotes(tool)}</div>)}</div>
+    {checkUpdates}
+    {notes}
   </section>;
 }

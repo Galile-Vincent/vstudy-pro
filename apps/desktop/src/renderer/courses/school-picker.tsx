@@ -6,7 +6,7 @@ import type { MoodleAccount, MoodleSchool, MoodleSiteCheck } from '../../shared/
 import { tr } from '../../shared/i18n';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { countryNames, fuzzySiteMatch, schoolMonogram, schoolSearchText } from './school-search';
+import { countryNames, fuzzySiteMatch, schoolMonogram, schoolSearchText, sortedSchools } from './school-search';
 import './schools.css';
 
 type Choice = {url:string;name:string;search:string;group:'connected'|'recent'|'directory';icon?:string;country?:string};
@@ -30,7 +30,7 @@ export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind}
   };
   accounts.forEach(site => add({url:site.siteUrl,name:site.siteName,search:search(site.siteUrl,site.siteName),group:'connected'}));
   recent.forEach(site => add({url:site.siteUrl,name:site.siteName,search:`${search(site.siteUrl,site.siteName)} ${countryNames(site.country)}`,group:'recent',...(site.country ? {country:site.country} : {}),...(site.iconUrl ? {icon:site.iconUrl} : {})}));
-  schools.forEach(site => add({url:site.host,name:site.localizedNames?.[language] ?? site.name,search:schoolSearchText(site),group:'directory',...(site.country ? {country:site.country} : {})}));
+  sortedSchools(schools,language,navigator.language).forEach(site => add({url:site.host,name:site.localizedNames?.[language] ?? site.name,search:schoolSearchText(site),group:'directory',...(site.country ? {country:site.country} : {})}));
   const results = choices.filter(choice => fuzzySiteMatch(input,choice.search));
   const selected = results[active];
   const urlLike = /^https:\/\/[^\s]+$/i.test(input.trim()) || /^(?:https:\/\/)?[^\s/?#]+\.[^\s]+$/i.test(input.trim());

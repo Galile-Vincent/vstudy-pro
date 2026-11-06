@@ -53,10 +53,11 @@ for (const [persona, language] of [['p1', 'zh-Hant'], ['p2', 'en'], ['p3', 'en']
     });
     await task('no-key-fallback', async () => {
       await page.getByRole('button', { name: copy.connect_ai, exact: true }).first().click();
+      await page.locator('.settings-pane:not([hidden]) summary', { hasText: copy.setup_title }).click();
       await page.getByRole('heading', { name: copy.no_account, exact: true }).waitFor();
       await page.getByRole('heading', { name: copy.no_account, exact: true }).scrollIntoViewIfNeeded();
       assert.equal(await page.locator('.ai-setup-guide blockquote').innerText(), copy.school_request);
-      assert.equal(await page.locator('.settings-pane details').getAttribute('open'), null, 'technical tools start collapsed');
+      assert.equal(await page.locator('.settings-pane:not([hidden]) details').last().getAttribute('open'), null, 'technical tools start collapsed');
       assert.equal(await page.getByRole('switch', { name: /CLI/ }).count(), 0, 'no CLI controls exposed by default');
     });
     await task('return-to-reading', async () => {

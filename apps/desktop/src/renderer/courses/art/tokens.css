@@ -1,21 +1,8 @@
-/** Scoped art roles derive from the active theme. The scrim and label share a tested pair. */
+
 :root {
   --course-radius: var(--art-reader-radius, 20px);
-  --course-media-radius: 12px;
   --course-control-radius: var(--art-reader-control, 10px);
-  --course-art-ink: light-dark(var(--surface), var(--ink));
-  --course-art-base: light-dark(var(--ink), var(--background));
   --course-glass: var(--art-reader-glass, color-mix(in oklab, var(--glass-tint) var(--glass-opacity), transparent));
   --course-shadow: var(--art-reader-shadow, 0 0 0 1px color-mix(in oklab, var(--ink) 8%, transparent), 0 12px 24px color-mix(in oklab, var(--shadow-color) 6%, transparent));
   --course-ease: cubic-bezier(.2,.8,.2,1);
 }
-.moodle-artwork { position:absolute; inset:0; overflow:hidden; }
-.moodle-art-scrim { position:absolute; inset:0; background:linear-gradient(180deg,transparent 45%,color-mix(in oklab,var(--course-art-base) 40%,transparent)); }
-:root[data-theme="contrast"] .moodle-artwork { background:var(--surface); }
-:root[data-theme="contrast"] .moodle-art-scrim { display:none; }
-@media (prefers-contrast: more), (forced-colors: active) {
-  .moodle-artwork { background:var(--surface); }
-  .moodle-art-scrim { display:none; }
-}
-:root[data-theme="contrast"] { --course-art-ink:var(--ink); --course-art-base:var(--surface); }
-@media(prefers-contrast:more), (forced-colors:active) { :root { --course-art-ink:var(--ink); --course-art-base:var(--surface); } }

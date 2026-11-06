@@ -101,6 +101,7 @@ export const moodleNotificationSchema = z
     createdAt: timestamp,
     read: z.boolean(),
     pendingRemoteRead: z.boolean().optional(),
+    localUnread: z.boolean().optional(),
     url: z.string().url().nullable(),
   })
   .strict();
@@ -175,6 +176,7 @@ export const moodleOverviewSchema = z
     accounts: z.array(moodleAccountSchema),
     courses: z.array(moodleCourseSchema),
     upcoming: z.array(moodleDeadlineSchema),
+    pinnedCourseIds: z.array(z.string().uuid()).optional(),
     otherNotifications: z.array(moodleNotificationSchema).optional(),
     unreadNotifications: z.number().int().nonnegative(),
     summaries: z.array(z.object({course:moodleCourseSchema,notifications:z.array(moodleNotificationSchema),reminders:z.array(moodleReminderSchema)}).strict()).optional(),
@@ -211,6 +213,7 @@ export const moodleChannels = {
   course: "moodle:course",
   openFile: "moodle:open-file",
   markRead: "moodle:mark-read",
+  setPinned: "moodle:set-pinned",
   createReminder: "moodle:create-reminder",
   deleteReminder: "moodle:delete-reminder",
   exportCalendar: "moodle:export-calendar",

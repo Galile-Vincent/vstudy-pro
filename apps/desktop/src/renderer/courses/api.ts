@@ -8,6 +8,7 @@ import type {
 import { createMockMoodleApi } from "../dev-mock";
 import { desktop, isMock } from "../bridge";
 import type { IpcChannel, IpcRequest } from "../../shared/ipc";
+import type { CourseSort, CourseSortPreferences } from "../../shared/moodle-course-order";
 import { moodleChannels } from "../../shared/moodle";
 
 export interface MoodleApi {
@@ -24,7 +25,10 @@ export interface MoodleApi {
   onProgress?(listener:(event:import("../../shared/ipc").MoodleProgress)=>void):()=>void;
   course(courseId: string, refresh?:boolean): Promise<MoodleCourseDetail>;
   openFile(fileId: string): Promise<{ documentId: string }>;
-  markRead(notificationId: string): Promise<void>;
+  sortPreferences(): Promise<CourseSortPreferences>;
+  setSort(term: keyof CourseSortPreferences, sort: CourseSort): Promise<void>;
+  setPinned(accountId: string, courseId: string, pinned: boolean): Promise<void>;
+  markRead(notificationId: string, read?: boolean): Promise<void>;
   createReminder(input: {
     deadlineId: string;
     remindAt: string;
@@ -61,8 +65,11 @@ function createBridgeMoodleApi(): MoodleApi {
     openFile: async (fileId) => ({
       documentId: await call(moodleChannels.openFile, { fileId }),
     }),
-    markRead: async (notificationId) => {
-      await call(moodleChannels.markRead, { notificationId });
+    sortPreferences: async () => (await call('settings:get',{})).coursesSort ?? {},
+    setSort: async (term,sort) => {const settings=await call('settings:get',{});await call('settings:set',{...settings,coursesSort:{...settings.coursesSort,[term]:sort}});},
+    setPinned: async (accountId,courseId,pinned) => {await call(moodleChannels.setPinned,{accountId,courseId,pinned});},
+    markRead: async (notificationId, read = true) => {
+      await call(moodleChannels.markRead, { notificationId, read });
     },
     createReminder: ({ deadlineId, remindAt, note, createdBy = "user" }) =>
       call(moodleChannels.createReminder, {

@@ -121,12 +121,12 @@ export function ProviderSettings({
                         <LanguageSettings />
                       </SettingsGroup>
                       <SettingsGroup title={tr('settings:welcome')}>
-                        <SettingsRow label={tr('settings:welcomeGuide')}>
+                        <SettingsRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
                           <Button size="sm" variant="secondary" onClick={() => setGuide(true)}>
-                            {tr('onboarding:replay')}
+                            {tr('settings:show')}
                           </Button>
                         </SettingsRow>
-                        <SettingsRow label={tr('settings:aboutApp')}>
+                        <SettingsRow label={tr('settings:aboutApp')} description={tr('settings:about_hint')}>
                           <Button
                             size="sm"
                             variant="secondary"
@@ -136,7 +136,7 @@ export function ProviderSettings({
                               onClose();
                             }}
                           >
-                            {tr('welcome:entry')} · {tr('welcome:try_title')}
+                            {tr('settings:open')}
                           </Button>
                         </SettingsRow>
                       </SettingsGroup>
@@ -153,15 +153,19 @@ export function ProviderSettings({
                     <UsageSettings />
                   ) : (
                     <>
-                      <AiCliInventory />
-                      <AiSetupGuide onClose={onClose} />
-                      <SettingsGroup title={tr('novice:ai_services')}>
+                      <details className="settings-disclosure">
+                        <summary>{tr('novice:setup_title')}</summary>
+                        <div className="settings-disclosure-body"><AiSetupGuide onClose={onClose} /></div>
+                      </details>
+                      <AiCliInventory settings />
+                      <SettingsGroup title={tr('settings:api_keys')}>
                         {providers.filter(provider => provider.config.kind === 'api').map(provider => (
                           <ProviderRow settingsView key={provider.config.id} provider={provider} onRefresh={onRefresh} />
                         ))}
                       </SettingsGroup>
-                      <details>
+                      <details className="settings-disclosure">
                       <summary>{tr('novice:advanced')}</summary>
+                      <div className="settings-disclosure-body">
                       <p>{tr('novice:advanced_help')}</p>
                       <SettingsGroup>
                         <SettingsRow
@@ -195,6 +199,7 @@ export function ProviderSettings({
                           />
                         ))}
                       </SettingsGroup>
+                      </div>
                       </details>
                     </>
                   ))}

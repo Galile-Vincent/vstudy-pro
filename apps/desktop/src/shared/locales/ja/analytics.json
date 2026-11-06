@@ -45,5 +45,7 @@
   "source_search_engine": "検索エンジン",
   "source_teacher_school": "先生・学校",
   "source_other": "その他",
-  "source_prefer_not_to_say": "回答しない"
+  "source_prefer_not_to_say": "回答しない",
+  "intro": "利用データの共有で VStudy Pro の改善にご協力ください。氏名、資料、質問、回答は一切収集しません。どちらを選んでも学習機能は同じです。",
+  "details_toggle": "収集する内容"
 }

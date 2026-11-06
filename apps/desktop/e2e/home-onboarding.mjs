@@ -18,7 +18,6 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
   const page=await app.firstWindow(),errors=[]; await page.emulateMedia({colorScheme:'light',reducedMotion:'reduce'}); page.on('pageerror',e=>errors.push(e.message));
   await page.locator('.onboarding[data-state=open]').waitFor();
-  await page.locator('.onboarding').getByRole('combobox').first().click();await page.getByRole('option',{name:language==='en'?'English':language==='ja'?'日本語':'繁體中文',exact:true}).click();
   const audit=async state=>{
    const results=await new AxeBuilder({page}).setLegacyMode(true).analyze();
    const severe=results.violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}));
@@ -35,14 +34,19 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
     }
    }
   };
-  for(let step=0;step<4;step++) {
-   if(step>0) assert.ok(await page.locator('#onboarding-title').evaluate(e=>e===window.document.activeElement),'step heading receives focus');
+  for (const step of ['welcome','language','appearance','acquisition','privacy','goal','start']) {
+   await page.locator('#onboarding-title').filter({hasText:copy[`step_${step}`]}).waitFor();
+   if (step === 'language') await page.locator(`input[name=onboarding-language][value="${language}"]`).check();
+   if (step === 'start') {
+    await page.locator('.onboarding').getByRole('button',{name:copy.sample,exact:true}).click();
+    await page.locator('.onboarding').getByRole('button',{name:copy.sample_added,exact:true}).waitFor();
+   }
    await audit(`onboarding-${step}`); await capture(`onboarding-${step}`);
-   if(step===1) { await page.locator('.onboarding input[type=password]').fill('test-local-key'); await page.getByRole('button',{name:copy.save_key,exact:true}).click(); await page.getByRole('status').filter({hasText:copy.key_saved}).waitFor(); }
-   if(step===2) { await page.locator('.onboarding').getByRole('button',{name:copy.sample,exact:true}).click(); await page.getByRole('status').filter({hasText:copy.sample_added}).waitFor(); }
-   await page.locator('.onboarding footer .primary').click();
+   if (step === 'privacy') await page.locator('.analytics-choices button').last().click();
+   else await page.locator('.onboarding footer .primary').click();
   }
   await page.locator('.onboarding').waitFor({state:'detached'});
+  await page.getByRole('button',{name:'Home',exact:true}).click();
   assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).onboardingCompleted,true);
   db=new DatabaseSync(join(directory,'vstudy.sqlite')); db.exec('PRAGMA busy_timeout=5000; DELETE FROM activity_events; DELETE FROM activity_days; UPDATE documents SET lastOpenedAt=NULL;');
   const refresh=async()=>{

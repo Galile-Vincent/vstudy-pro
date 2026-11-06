@@ -65,7 +65,8 @@ export const ipcContract = {
   [moodleChannels.sync]: {request:z.object({accountId:z.string().uuid().optional()}).strict(),response:moodleOverviewSchema.extend({errors:z.array(z.string())})},
   [moodleChannels.course]: {request:z.object({courseId:z.string().uuid(),refresh:z.boolean().optional()}).strict(),response:moodleCourseDetailSchema},
   [moodleChannels.openFile]: {request:z.object({fileId:z.string().uuid()}).strict(),response:documentIdSchema},
-  [moodleChannels.markRead]: {request:z.object({notificationId:z.string().uuid()}).strict(),response:ack},
+  [moodleChannels.setPinned]: {request:z.object({accountId:z.string().uuid(),courseId:z.string().uuid(),pinned:z.boolean()}).strict(),response:ack},
+  [moodleChannels.markRead]: {request:z.object({notificationId:z.string().uuid(),read:z.boolean().optional()}).strict(),response:ack},
   [moodleChannels.createReminder]: {request:moodleReminderSchema.omit({id:true,fired:true}),response:moodleReminderSchema},
   [moodleChannels.deleteReminder]: {request:z.object({reminderId:z.string().uuid()}).strict(),response:ack},
   [moodleChannels.exportCalendar]: {request:z.object({deadlineIds:z.array(z.string().uuid()).min(1).max(50)}).strict(),response:z.object({saved:z.boolean()}).strict()},
@@ -192,8 +193,14 @@ export const chatEnvelopeSchema = z
   .object({ requestId: requestIdSchema, event: chatEventSchema })
   .strict();
 export type ChatEnvelope = z.infer<typeof chatEnvelopeSchema>;
+export const trackpadScrollBeginChannel = "navigation:scroll-begin";
+export const trackpadScrollEndChannel = "navigation:scroll-end";
+export const trackpadEventArgumentsSchema = z.tuple([]);
+
 /** Renderer capability boundary. Invoke only declared channels and unsubscribe event listeners on teardown. */
 export interface DesktopApi {
+  onTrackpadScrollBegin?(listener: () => void): () => void;
+  onTrackpadScrollEnd?(listener: () => void): () => void;
   onMoodleProgress?(listener:(event:MoodleProgress)=>void):()=>void;
   onDocumentProgress?(listener: (event: z.infer<typeof documentProgressSchema>) => void): () => void;
   getPathForFile?(file: File): string;

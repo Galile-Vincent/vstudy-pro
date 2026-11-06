@@ -1,3 +1,5 @@
+import { HistorySwipeNavigation, hasNavigationOverlay } from './history-swipe-navigation';
+import { createRouteHistory, pushRoute, moveHistory, canMoveHistory, historyRoute, type HistoryDirection } from './navigation-history';
 /** Navigation frame and profile-local routes shared by the study views. */
 import { Brand } from '../components/brand';
 import { useScrollChrome } from './use-scroll-chrome';
@@ -40,7 +42,7 @@ export type Route = {
   aiParse?: boolean;
   connectSchool?: boolean;
 };
-type Navigation = { route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void };
+type Navigation = { route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void; canGoBack: boolean; canGoForward: boolean; goBack: () => void; goForward: () => void };
 const NavigationContext = createContext<Navigation | null>(null);
 export function useOptionalNavigation() { return useContext(NavigationContext); }
 export function useNavigate() {
@@ -90,7 +92,7 @@ export function AppShell({
         localStorage.getItem("vstudy-route") ?? "null",
       ) as Route | null;
       if (saved && ["home", "library", "workspace", "courses", "history"].includes(saved.view))
-        return saved;
+        return historyRoute(saved);
     } catch {
       /* Storage can be unavailable. */
     }
@@ -107,20 +109,40 @@ export function AppShell({
     const frame = requestAnimationFrame(() => { document.getElementById("shell-content")?.focus(); });
     return () => cancelAnimationFrame(frame);
   }, [route.view, route.documentId, route.courseId]);
+  const [history, setHistory] = useState(() => createRouteHistory(route));
+  const historyRef = useRef(history);
+  const lastHistoryMove = useRef(-Infinity);
+  const persistRoute = (next: Route) => {
+    if (next.view === "welcome") return;
+    try { localStorage.setItem("vstudy-route", JSON.stringify(historyRoute(next))); } catch { /* Route persistence is optional. */ }
+  };
+  const goHistory = (direction: HistoryDirection) => {
+    if (performance.now() - lastHistoryMove.current < 300 || hasNavigationOverlay()) return;
+    const nextHistory = moveHistory(historyRef.current, direction);
+    if (nextHistory === historyRef.current) return;
+    lastHistoryMove.current = performance.now();
+    historyRef.current = nextHistory;
+    const next = nextHistory.entries[nextHistory.index]!;
+    if (sidebarOverlay) closeSidebar();
+    transitionTo(() => { setHistory(nextHistory); setRoute(next); }, false, false, direction);
+    persistRoute(next);
+  };
   const previous = useRef<Route>({ view: "home" });
   const returnSettings = useRef(false);
   const returnFocus = useRef<HTMLElement | null>(null);
   const navigate: Navigation["navigate"] = (value) => {
     if (sidebarOverlay) closeSidebar();
     const next = typeof value === "string" ? { view: value } : value;
-    if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = route; returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
+    historyRef.current = pushRoute(historyRef.current, next);
+    setHistory(historyRef.current);
+    if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = historyRoute(route); returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
     if (next.view === 'welcome' || route.view === 'welcome') startTransition(() => setRoute(next));
     else if ((next.view === 'workspace' && next.documentId) || (route.view === 'workspace' && next.view === 'library')) transitionTo(() => setRoute(next), false, true);
     else transitionTo(() => setRoute(next));
-    try { localStorage.setItem("vstudy-route", JSON.stringify({ ...next, connectSchool: undefined })); } catch { /* Route persistence is optional. */ }
+    persistRoute(next);
   };
   return (
-    <NavigationContext.Provider value={{ route, navigate, closeWelcome: () => { navigate(previous.current); setTimeout(() => { const target = returnFocus.current; if (returnSettings.current) { window.dispatchEvent(new Event("vstudy:open-settings")); setTimeout(() => document.getElementById("welcome-settings-entry")?.focus(), 100); } else if (target?.isConnected) target.focus(); else document.getElementById("welcome-entry")?.focus(); }, 350); } }}>
+    <NavigationContext.Provider value={{ route, navigate, canGoBack: canMoveHistory(history, 'back'), canGoForward: canMoveHistory(history, 'forward'), goBack: () => goHistory('back'), goForward: () => goHistory('forward'), closeWelcome: () => { navigate(previous.current); setTimeout(() => { const target = returnFocus.current; if (returnSettings.current) { window.dispatchEvent(new Event("vstudy:open-settings")); setTimeout(() => document.getElementById("welcome-settings-entry")?.focus(), 100); } else if (target?.isConnected) target.focus(); else document.getElementById("welcome-entry")?.focus(); }, 350); } }}>
       <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view} data-sidebar-overlay={sidebarOverlay}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
@@ -189,6 +211,7 @@ export function AppShell({
           {route.view === 'workspace' && <div className="shell-workspace-status">{status}</div>}
           <div id="shell-content" role={route.view === "library" ? "main" : undefined} className="shell-content" tabIndex={-1}>
             {children}
+            <HistorySwipeNavigation canGoBack={canMoveHistory(history, "back")} canGoForward={canMoveHistory(history, "forward")} onNavigate={goHistory} />
           </div>
         </div>
       </div></SidebarProvider>

@@ -50,3 +50,16 @@ it("uses the title language for teachers and Chinese class labels across app lan
   expect(displayTeachers({...identity,teachers:[{zh:'湯松年',en:null}]},'en')).toBe('湯松年');
   expect(displayClass({...identity,classLabel:{zh:null,en:'CSB'}})).toBe('CSB');
 });
+
+it('removes only a known term prefix and an exactly matching teacher suffix', async () => {
+  const {identity} = (await createMockMoodleApi().overview()).courses[0]!;
+  const metadata = {...identity,term:'1151',teachers:[{zh:'範例教師',en:'EXAMPLE TEACHER'}]};
+  const title = (en: string) => displayTitle({...metadata,title:{zh:null,en}},'en');
+  expect(title('1151Operating Systems-EXAMPLE TEACHER')).toBe('Operating Systems');
+  expect(title('1151 Operating Systems - Example Teacher')).toBe('Operating Systems');
+  expect(title('Operating Systems-Unknown Teacher')).toBe('Operating Systems-Unknown Teacher');
+  expect(title('1151Operating Systems-Unknown Teacher')).toBe('1151Operating Systems-Unknown Teacher');
+  expect(title('Human-Computer Interaction')).toBe('Human-Computer Interaction');
+  expect(title('1151')).toBe('1151');
+  expect(displayTitle({...metadata,teachers:[{zh:null,en:'A. Example (Guest)'}],title:{zh:null,en:'1151 Seminar-A. Example (Guest)'}},'en')).toBe('Seminar');
+});

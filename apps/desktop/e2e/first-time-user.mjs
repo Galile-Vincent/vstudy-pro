@@ -31,7 +31,8 @@ async function schoolFixture(app) {
 for (const [language, goal] of matrix) {
   const profile = await mkdtemp(join(tmpdir(), 'vstudy-first-time-'));
   const catalog = async ns => JSON.parse(await readFile(`src/shared/locales/${language}/${ns}.json`, 'utf8'));
-  const schools = await catalog('schools'), themes = await catalog('themes'), history = await catalog('history'), storage = await catalog('storage');
+  const readerCopy = await catalog('art-reader');
+  const schools = await catalog('schools'), history = await catalog('history'), storage = await catalog('storage');
   const copy = { ...await catalog('onboarding'), ...JSON.parse(await readFile(`src/renderer/onboarding/locales/${language}.json`, 'utf8')) }, common = await catalog('common'), moodle = await catalog('moodle'), home = await catalog('home');
   let app;
   const started = performance.now(), screenshots = [], violations = [], errors = [];
@@ -56,15 +57,16 @@ for (const [language, goal] of matrix) {
     const next = () => page.locator('.onboarding footer .primary').click();
     await page.locator('.onboarding').waitFor(); await capture('welcome');
     if (language === 'en' && goal === 'sample') await audit('welcome');
-    await next(); await page.locator('.onboarding').getByRole('combobox').click();
-    await page.getByRole('option', { name: language === 'en' ? 'English' : language === 'ja' ? '日本語' : '繁體中文', exact: true }).click();
+    await next(); await page.locator(`input[name=onboarding-language][value="${language}"]`).check();
     await next(); await page.locator('#onboarding-title').filter({ hasText: copy.step_appearance }).waitFor();
-    await page.locator('.scheme-grid').getByRole('button', { name: themes.light, exact: true }).click();
-    await page.locator('.themes-grid').getByRole('button', { name: themes.name_ocean, exact: true }).click();
-    await page.waitForFunction(() => window.document.documentElement.dataset.theme === 'ocean');
-    await page.locator('.theme-card[data-selected=true]').getByRole('button', { name: themes.name_ocean, exact: true }).waitFor();
+    await page.locator('input[name=onboarding-scheme][value=light]').check();
+    await page.waitForFunction(() => window.document.documentElement.dataset.scheme === 'light');
+    assert.equal((await page.evaluate(() => window.desktop.invoke('settings:get', {}))).themeId, 'vstudy');
+    assert.equal(await page.locator('.onboarding .themes-grid, .onboarding .appearance-layout').count(), 0);
     if (goal === 'sample') await capture('appearance');
-    await next(); await page.locator(`input[value=${goal}]`).check();
+    await next(); await page.locator('#onboarding-title').filter({ hasText: copy.step_acquisition }).waitFor();
+    await next(); await page.locator('.analytics-choices button').last().click();
+    await page.locator(`input[value=${goal}]`).check();
     if (language === 'en' && goal === 'sample') {
       await page.getByRole('button', { name: copy.later, exact: true }).click(); await page.locator('.onboarding').waitFor({ state: 'detached' });
       await app.close(); app = undefined; page = await launch();
@@ -72,10 +74,8 @@ for (const [language, goal] of matrix) {
       await page.locator('#onboarding-title').filter({ hasText: copy.step_goal }).waitFor();
       assert.equal(await page.locator('input[value=sample]').isChecked(), true);
     }
-    await capture('goal'); await next(); await page.locator('#onboarding-title').filter({ hasText: copy.step_ai }).waitFor();
+    await capture('goal'); await next();
     assert.equal(await page.locator('.onboarding input[type=password]').count(), 0, 'no early secret prompt');
-    if (goal === 'sample') { await capture('ai'); await audit('ai'); }
-    await page.getByRole('button', { name: copy.skip_ai, exact: true }).click();
     await page.locator('#onboarding-title').filter({ hasText: copy.step_start }).waitFor();
     const privacyShownAtMs = Math.round(performance.now() - started);
     if (goal === 'school') await schoolFixture(app);
@@ -98,11 +98,9 @@ for (const [language, goal] of matrix) {
     }
     await capture('start');
     if (goal === 'sample') {
-      await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
-      await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
-      await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
-      await page.locator('.scheme-grid').getByRole('button', { name: themes.dark, exact: true }).click();
-      await next(); await next(); await next(); await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(720, 900));
+      for (let step = 0; step < 5; step++) await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
+      await page.locator('input[name=onboarding-scheme][value=dark]').check();
+      for (let step = 0; step < 5; step++) await next(); await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(720, 900));
       await capture('start-dark-720'); await audit('start-dark-720');
       await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1200, 900)); await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
     }
@@ -138,8 +136,9 @@ for (const [language, goal] of matrix) {
       }
     }
     await capture('first-task'); const firstTaskMs = Math.round(performance.now() - started);
+    if (goal !== 'school') await page.getByRole('button', { name: readerCopy.tip, exact: true }).click();
     await page.getByRole('button', { name: copy.dismiss_tip, exact: true }).click(); await page.reload(); await page.waitForFunction(() => !!window.desktop?.invoke);
-    assert.equal(await page.locator('.context-coach').count(), 0, 'dismissed tip stays dismissed');
+    assert.equal(await page.locator('.context-coach, .art-reader-coach-trigger').count(), 0, 'dismissed tip stays dismissed');
     await page.emulateMedia({ reducedMotion: 'no-preference', colorScheme: 'light' });
     await page.getByRole('button', { name: copy.help, exact: true }).click(); await page.getByRole('menuitem', { name: copy.help_walkthroughs, exact: true }).click();
     const help = page.locator('.learning-dialog');

@@ -359,10 +359,11 @@ export class MoodleService {
     const previous = this.repository.capabilities(account.id);
     this.repository.saveCapabilities(account.id,{functions:info.functions?.map(item => item.name),release:info.release,version:info.version,advancedfeatures:info.advancedfeatures,mobileConfig:previous?.mobileConfig ?? {}});
   }
-  async markRead(id: string) {
+  async markRead(id: string, read = true) {
     const item = this.repository.notification(id);
     if (!item) throw new Error('Moodle notification not found');
-    this.repository.markRead(id);
+    this.repository.markRead(id,read);
+    if (!read) return;
     const account = this.repository.account(item.accountId);
     const remote = this.repository.notificationRecords(account.id).find(row => row.value.id === id)!;
     try { await new MoodleClient(account.siteUrl,await this.token(account.id),this.request).markRead(remote.remoteId); this.repository.acknowledgeRead(id); }

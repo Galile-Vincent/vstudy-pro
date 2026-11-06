@@ -328,6 +328,8 @@ export function createMockMoodleApi(): MoodleApi {
         notifications:[],reminders:[]};
     }));
   }
+  const pins = new Set<string>();
+  let courseSort: import("../shared/moodle-course-order").CourseSortPreferences = {};
   const active = () => details.filter(d => accounts.some(a => a.id === d.course.accountId));
   return {
     schools: async () => structuredClone(schools),
@@ -341,7 +343,7 @@ export function createMockMoodleApi(): MoodleApi {
       accounts = [account]; return structuredClone(account);
     },
     disconnect: async accountId => { accounts = accounts.filter(a => a.id !== accountId); },
-    overview: async () => structuredClone({ accounts, summaries: active().map(d => ({course:d.course,notifications:d.notifications,reminders:d.reminders})), courses: active().map(d => d.course), upcoming: active().flatMap(d => d.deadlines).filter(d => !d.submitted).sort((a, b) => a.dueAt.localeCompare(b.dueAt)), unreadNotifications: active().flatMap(d => d.notifications).filter(n => !n.read).length }),
+    overview: async () => structuredClone({ accounts, summaries: active().map(d => ({course:d.course,notifications:d.notifications,reminders:d.reminders})), pinnedCourseIds:[...pins], courses: active().map(d => d.course), upcoming: active().flatMap(d => d.deadlines).filter(d => !d.submitted).sort((a, b) => a.dueAt.localeCompare(b.dueAt)), unreadNotifications: active().flatMap(d => d.notifications).filter(n => !n.read).length }),
     sync: async accountId => { accounts = accounts.map(a => !accountId || a.id === accountId ? { ...a, syncedAt: at(0) } : a); },
     course: async courseId => { const detail = active().find(d => d.course.id === courseId); if (!detail) throw new Error('Course unavailable'); return structuredClone(detail); },
     openFile: async fileId => {
@@ -358,7 +360,10 @@ export function createMockMoodleApi(): MoodleApi {
       moodleDocumentSources.set(file.documentId, `# ${file.name.replace(/\.[^.]+$/, '')}\n\n${detail.course.fullName} · ${file.section}\n\n## Before class\n\n${preparation}\n\n## Preparation checklist\n\n- Review the lecture material.\n- Write down two questions for discussion.\n- Bring a first attempt at the practice task.\n\n## Reflection\n\nExplain one idea in your own words and connect it to a previous lesson.\n`);
       return { documentId: file.documentId };
     },
-    markRead: async notificationId => { const notification = active().flatMap(d => d.notifications).find(n => n.id === notificationId); if (notification) notification.read = true; },
+    sortPreferences: async () => courseSort,
+    setSort: async (term,sort) => {courseSort={...courseSort,[term]:sort};},
+    setPinned: async (_accountId,courseId,pinned) => {if(pinned)pins.add(courseId);else pins.delete(courseId);},
+    markRead: async (notificationId, read = true) => { const notification = active().flatMap(d => d.notifications).find(n => n.id === notificationId); if (notification) notification.read = read; },
     createReminder: async input => {
       const detail = active().find(d => d.deadlines.some(deadline => deadline.id === input.deadlineId));
       if (!detail) throw new Error('Deadline unavailable');
