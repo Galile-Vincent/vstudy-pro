@@ -256,6 +256,30 @@ it('rolls back restored startup when renderer recovery is exhausted', async () =
   window.webContents.emit('did-finish-load');
   expect(mocks.confirm).not.toHaveBeenCalled();
 });
+it.each([false,true].flatMap(restoring => [0,1].map(response => ({restoring,response}))))('waits for first-load recovery diagnostics before exiting (restore=$restoring, response=$response)', async ({restoring,response}) => {
+  let answer!: (result: {response:number}) => void;
+  electron.dialog.showMessageBox.mockImplementationOnce(() => new Promise(resolve => {answer=resolve;}));
+  mocks.rollback.mockResolvedValueOnce(false).mockResolvedValueOnce(restoring);
+  const window=await start();
+  for (let i=0;i<3;i++) window.webContents.emit('render-process-gone', {}, {reason:'crashed',exitCode:1});
+  await vi.waitFor(() => expect(electron.dialog.showMessageBox).toHaveBeenCalledOnce());
+  expect(electron.dialog.showMessageBox).toHaveBeenCalledWith(window,expect.objectContaining({buttons:['common:menu_quit','common:copy_diagnostics']}));
+  await new Promise(resolve => setTimeout(resolve,20));
+  expect(electron.app.exit).not.toHaveBeenCalled();
+  expect(electron.app.quit).not.toHaveBeenCalled();
+  expect(mocks.fatal).not.toHaveBeenCalled();
+  expect(mocks.closeStore).not.toHaveBeenCalled();
+  window.webContents.emit('did-finish-load');
+  expect(mocks.confirm).not.toHaveBeenCalled();
+  answer({response});
+  await vi.waitFor(() => expect(electron.app.exit).toHaveBeenCalledWith(1));
+  expect(mocks.copyDiagnostics).toHaveBeenCalledTimes(response===1?1:0);
+  expect(mocks.closeStore).toHaveBeenCalledOnce();
+  expect(mocks.rollback).toHaveBeenCalledTimes(2);
+  expect(electron.app.relaunch).toHaveBeenCalledTimes(restoring?1:0);
+  expect(mocks.confirm).not.toHaveBeenCalled();
+  expect(mocks.fatal).not.toHaveBeenCalled();
+});
 
 it('queues second launches until startup and the store are ready', async () => {
   let release!: () => void;
