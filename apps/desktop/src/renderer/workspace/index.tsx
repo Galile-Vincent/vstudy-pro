@@ -57,6 +57,7 @@ export function Workspace() {
 
   const [startupError, setStartupError] = useState(''), [sourceError, setSourceError] = useState(''),
     [conversationError, setConversationError] = useState(''), [historyError, setHistoryError] = useState('');
+  const startup = useRef<{ settings?: Settings; documents?: Document[]; providers?: Providers }>({});
   const [startupRevision, setStartupRevision] = useState(0);
   const [conversationRevision, setConversationRevision] = useState(0);
   const [historyRevision, setHistoryRevision] = useState(0);
@@ -148,11 +149,11 @@ export function Workspace() {
     let active = true;
     setStartupError('');
     void Promise.all([
-      desktop.invoke("settings:get", {}),
-      (route.documentId
+      startup.current.settings ? Promise.resolve(startup.current.settings) : desktop.invoke("settings:get", {}).then(value => { startup.current.settings = value; return value; }),
+      (startup.current.documents ? Promise.resolve(startup.current.documents) : (route.documentId
         ? desktop.invoke("documents:get", {documentId:route.documentId}).then(doc => doc ? [doc] : [])
-        : desktop.invoke("documents:list", {})).then(rows => { if (active) setDocuments(rows); return rows; }),
-      desktop.invoke("providers:list", {discover:false}),
+        : desktop.invoke("documents:list", {}))).then(rows => { startup.current.documents = rows; if (active) setDocuments(rows); return rows; }),
+      startup.current.providers ? Promise.resolve(startup.current.providers) : desktop.invoke("providers:list", {discover:false}).then(value => { startup.current.providers = value; return value; }),
     ])
       .then(([s, d, p]) => {
         if (!active) return;

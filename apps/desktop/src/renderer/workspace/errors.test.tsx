@@ -94,3 +94,19 @@ it('only exposes tabpanels and their Tab stops while the compact tablist is show
     expect(container.querySelector('[role=tabpanel]')).toBeNull();
   }finally{vi.unstubAllGlobals();}
 });
+
+it.each(['settings:get','documents:get','providers:list'])('retries only a failed startup %s request',async failingChannel=>{
+  setup();let fail=true;
+  const original=state.invoke.getMockImplementation()!;
+  state.invoke.mockImplementation(async(channel,...args)=>{
+    if(channel===failingChannel&&fail)throw new Error('Startup unavailable');
+    return original(channel,...args);
+  });
+  render(<Workspace/>);
+  const alert=await screen.findByRole('alert');
+  fail=false;state.invoke.mockClear();
+  fireEvent.click(within(alert).getByRole('button',{name:tr('common:retry')}));
+  await screen.findByText('Readable document');
+  const startupRequests=state.invoke.mock.calls.filter(([channel,args])=>channel==='settings:get'||channel==='documents:get'||(channel==='providers:list'&&args?.discover===false));
+  expect(startupRequests.map(([channel])=>channel)).toEqual([failingChannel]);
+});
