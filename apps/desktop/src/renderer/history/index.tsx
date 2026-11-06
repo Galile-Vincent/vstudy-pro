@@ -1,3 +1,5 @@
+import { LoadError } from '../components/load-error';
+import { errorText } from '../status';
 /** Shell History and Cmd/Ctrl+K finder. Both navigate to the same persistent conversation. */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -63,25 +65,24 @@ function HistoryContent() {
     conversation: Conversation;
     messages: Message[];
   } | null>(null);
-  const [providers, setProviders] = useState<Providers>([]), [draft, setDraft] = useState(''), [failed, setFailed] = useState(false), [modelError, setModelError] = useState(false);
+  const [providers, setProviders] = useState<Providers>([]), [draft, setDraft] = useState(''), [failed, setFailed] = useState(''), [modelError, setModelError] = useState(false);
+  const [revision, setRevision] = useState(0);
   const refreshProviders = async () => setProviders(await desktop.invoke('providers:list', {}));
-  useEffect(() => { void refreshProviders().catch(() => setFailed(true)); }, []);
   useEffect(() => {
     let live = true;
     setLoaded(null);
     setModelError(false);
     setDraft('');
-    setFailed(false);
+    setFailed('');
     if (route.conversationId)
-      void Promise.all([desktop.invoke('chats:get', { conversationId: route.conversationId }), desktop.invoke('messages:list', { conversationId: route.conversationId })]).then(([conversation, messages]) => { if (live) {
+      void Promise.all([refreshProviders(), desktop.invoke('chats:get', { conversationId: route.conversationId }), desktop.invoke('messages:list', { conversationId: route.conversationId })]).then(([, conversation, messages]) => { if (live) {
         if (conversation)
           setLoaded({ conversation, messages });
         else
-          setFailed(true);
-      } }).catch(() => { if (live)
-        setFailed(true); });
+          setFailed(tr('history:unavailable'));
+      } }).catch(error => { if (live) setFailed(errorText(error)); });
     return () => { live = false; };
-  }, [route.conversationId]);
+  }, [route.conversationId, revision]);
   const open = (hit: ChatHit, messageId?: string) => navigate({ view: 'history', conversationId: hit.id, messageId });
   const changeModel = async (value: string) => {
     if (!loaded)
@@ -108,7 +109,7 @@ function HistoryContent() {
   <section className="history-browser" aria-label={tr('history:title')}><HistorySearch onOpen={open}/></section>
   {route.conversationId && <section className="history-conversation chat-pane" aria-label={tr('common:chat')}><button className="history-back" onClick={() => navigate('history')}>{tr('history:back')}</button>
    {modelError && <p role="alert">{tr('history:model_change_error')}</p>}
-   {failed ? <p role="alert">{tr('history:unavailable')}</p> : loaded ? <Suspense fallback={<p role="status">{tr('common:loading_conversation')}</p>}><Chat key={loaded.conversation.id} conversation={loaded.conversation} history={loaded.messages} jumpMessageId={route.messageId} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={() => { }} providers={providers} model={loaded.conversation.providerId + '/' + loaded.conversation.modelId} onModel={value => { void changeModel(value); }} onSettings={settings} onProvidersChanged={refreshProviders} onUsage={settings}/></Suspense> : <p role="status">{tr('common:loading_conversation')}</p>}
+   {failed ? <LoadError message={failed} retry={() => setRevision(value => value + 1)}/> : loaded ? <Suspense fallback={<p role="status">{tr('common:loading_conversation')}</p>}><Chat key={loaded.conversation.id} conversation={loaded.conversation} history={loaded.messages} jumpMessageId={route.messageId} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={() => { }} providers={providers} model={loaded.conversation.providerId + '/' + loaded.conversation.modelId} onModel={value => { void changeModel(value); }} onSettings={settings} onProvidersChanged={refreshProviders} onUsage={settings}/></Suspense> : <p role="status">{tr('common:loading_conversation')}</p>}
   </section>}
  </div></main>;
 }

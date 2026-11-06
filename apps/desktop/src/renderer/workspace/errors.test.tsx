@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { Workspace } from './index';
 import { defaultSettings } from '../../shared';
@@ -7,6 +7,7 @@ import { tr } from '../../shared/i18n';
 const state=vi.hoisted(()=>({invoke:vi.fn(),getPathForFile:vi.fn(),route:{documentId:'00000000-0000-4000-8000-000000000001'},navigate:vi.fn()}));
 vi.mock('../bridge',()=>({desktop:state,isMock:false}));
 vi.mock('../shell',()=>({useNavigate:()=>({route:state.route,navigate:state.navigate})}));
+vi.mock('../chat',()=>({Chat:()=> <p>Recovered chat</p>}));
 vi.mock('../lazy-reader',()=>({DocumentMarkdown:({source}:{source:string})=><p>{source}</p>}));
 vi.mock('../model-controls',()=>({ModelControls:()=>null}));
 vi.mock('../home/use-reading-activity',()=>({useReadingActivity:()=>{}}));
@@ -33,4 +34,29 @@ it('shows the dropped filename and typed import reason without exposing its toke
   fireEvent.drop(container.querySelector('.workspace')??container.firstElementChild!,{dataTransfer:{files:[new File(['x'],'Lecture.exe')]}});
   await waitFor(()=>expect(container.textContent).toContain('Lecture.exe: '+tr('errors:unsupported_type')));
   expect(container.textContent).not.toContain('drop:');
+});
+it('keeps document load errors visible with Retry until the document loads',async()=>{
+  setup(true);render(<Workspace/>);
+  const alert=await screen.findByRole('alert');expect(alert.textContent).toContain(tr('errors:network'));
+  fireEvent.click(within(alert).getByRole('button',{name:tr('common:retry')}));
+  expect(await screen.findByText('Readable document')).toBeTruthy();
+  expect(screen.queryByRole('alert')).toBeNull();
+});
+
+it.each(['documents:get','conversations:list','messages:list'])('retries persistent %s failures',async failingChannel=>{
+  setup();let fail=true;
+  const original=state.invoke.getMockImplementation()!;
+  state.invoke.mockImplementation(async(channel,...args)=>{
+    if(channel===failingChannel&&fail)throw new Error('VSTUDY_STATUS:'+JSON.stringify({code:'errors.network',params:{}}));
+    if(channel==='conversations:list')return [{id:'chat',providerId:'anthropic-api',modelId:'fake'}];
+    if(channel==='messages:list')return [];
+    return original(channel,...args);
+  });
+  render(<Workspace/>);
+  const alert=await screen.findByRole('alert');
+  expect(alert.textContent).toContain(tr('errors:network'));
+  expect(within(alert).queryByRole('button',{name:'×'})).toBeNull();
+  fail=false;fireEvent.click(within(alert).getByRole('button',{name:tr('common:retry')}));
+  expect(await screen.findByText('Readable document')).toBeTruthy();
+  await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
 });
