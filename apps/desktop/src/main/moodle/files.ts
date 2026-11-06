@@ -13,25 +13,20 @@ import { MAX_SOURCE_BYTES } from '../services/documents';
 import type { MoodleRepository } from './repository';
 import type { Fetch } from './client';
 
-/** Bound a portable path component; callers sharing a directory supply occupied names. */
-export function sanitizeMoodleFilename(name: string, usedNames: readonly string[] = []): string {
+/** Bound a portable filename inside each download's private staging directory. */
+export function sanitizeMoodleFilename(name: string): string {
   const cleaned = Array.from(name,char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127 || '/\\:?*<>|"'.includes(char) ? '_' : char).join('').replace(/^\.+/,'_').replace(/[. ]+$/,'');
   const extension = extname(cleaned);
   if (!/^\.[a-z0-9]{1,12}$/i.test(extension)) throw new Error('Unsupported Moodle file extension');
   let stem = cleaned.slice(0,-extension.length).replace(/[. ]+$/,'') || 'source';
   if (/^(con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:[. ]|$)/i.test(stem)) stem = `_${stem}`;
-  const occupied = new Set(usedNames.map(value => value.toLowerCase()));
-  for (let index = 1; ; index++) {
-    const suffix = `${index === 1 ? '' : `-${index}`}${extension}`;
-    let bounded = '', bytes = Buffer.byteLength(suffix);
-    for (const char of stem) {
-      bytes += Buffer.byteLength(char);
-      if (bytes > 200) break;
-      bounded += char;
-    }
-    const candidate = bounded + suffix;
-    if (!occupied.has(candidate.toLowerCase())) return candidate;
+  let bounded = '', bytes = Buffer.byteLength(extension);
+  for (const char of stem) {
+    bytes += Buffer.byteLength(char);
+    if (bytes > 120) break;
+    bounded += char;
   }
+  return bounded + extension;
 }
 
 /** Attach credentials only to a file URL accepted by the account site policy. */
