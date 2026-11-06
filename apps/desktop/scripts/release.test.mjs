@@ -243,7 +243,7 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
     await writeFile(join(input, 'signing.json'), JSON.stringify({ schemaVersion: 1, target: target.key, mode: 'unsigned', signed: false, notarized: false }));
     await writeFile(join(smoke, 'smoke-result.json'), JSON.stringify(smokeReport(target)));
     if (target.platform === 'win') await writeFile(join(smoke, 'installer-smoke.json'), JSON.stringify({
-      schemaVersion: 1, target: target.key, ok: true, administrator: false, installed: true, launched: true, startMenu: true, uninstalled: true,
+      schemaVersion: 1, target: target.key, ok: true, administrator: false, installed: true, launched: true, startMenu: true, uninstalled: true, protocolRegistered: true,
       mcpStartup: {disabled: true, enabled: true},
     }));
     if (target.platform === 'win') {

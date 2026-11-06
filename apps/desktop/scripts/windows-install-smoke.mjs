@@ -37,7 +37,7 @@ const uninstaller = join(installDirectory, 'Uninstall VStudy Pro.exe');
 const shortcut = join(process.env.APPDATA, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'VStudy Pro.lnk');
 if (existsSync(installDirectory) || existsSync(shortcut)) throw new Error('Installer smoke requires no previous VStudy installation');
 const report = { schemaVersion: 1, target: target.key, administrator, installDirectory, ok: false, installed: false, launched: false, uninstalled: false, startMenu: false,
-  mcpStartup: {disabled: false, enabled: false} };
+  protocolRegistered: false, mcpStartup: {disabled: false, enabled: false} };
 async function run(exe, args, name, timeout = 180000) {
   try {
     const stdout = execFileSync(exe, args, { encoding: 'utf8', timeout, windowsHide: true, maxBuffer: 1024 * 1024 });
@@ -53,6 +53,10 @@ try {
   await access(executable);
   await access(uninstaller);
   await access(shortcut);
+  const protocol = query("$key=[Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Software\\Classes\\vstudymoodle\\shell\\open\\command'); if($null -eq $key){throw 'Protocol missing'}; try{[Console]::Out.Write($key.GetValue(''))}finally{$key.Dispose()}");
+  const registered = /^"([^"]+)"\s+(.+)$/.exec(protocol);
+  if (!registered || registered[1].toLowerCase() !== executable.toLowerCase() || !registered[2].includes('%1')) throw new Error('Per-user sign-in protocol does not point to the installed executable');
+  report.protocolRegistered = true;
   report.installed = true;
   report.startMenu = true;
   await run(process.execPath, [fileURLToPath(new URL('distribution-smoke.mjs', import.meta.url)), '--target', target.key,
@@ -69,7 +73,7 @@ try {
   while ((existsSync(executable) || existsSync(shortcut)) && Date.now() < deadline) await setTimeout(200);
   if (existsSync(executable) || existsSync(shortcut)) throw new Error('Uninstall left the application executable or Start menu shortcut');
   report.uninstalled = report.installed;
-  report.ok = report.installed && report.launched && report.startMenu && report.uninstalled && report.mcpStartup.disabled && report.mcpStartup.enabled;
+  report.ok = report.installed && report.launched && report.startMenu && report.uninstalled && report.protocolRegistered && report.mcpStartup.disabled && report.mcpStartup.enabled;
   if (report.uninstalled) await rm(installDirectory, { recursive: true, force: true });
 } catch (error) { failure ??= error; }
 if (failure) report.error = String(failure);

@@ -32,7 +32,7 @@ export async function stageAssets({ target, version, input, smoke, output, env =
     installation = JSON.parse(await readFile(join(smoke, 'installer-smoke.json'), 'utf8'));
     if (installation.schemaVersion !== 1 || installation.target !== target.key || installation.ok !== true ||
         installation.administrator !== false || installation.installed !== true || installation.launched !== true ||
-        installation.startMenu !== true || installation.uninstalled !== true || installation.mcpStartup?.disabled !== true ||
+        installation.startMenu !== true || installation.uninstalled !== true || installation.protocolRegistered !== true || installation.mcpStartup?.disabled !== true ||
         installation.mcpStartup?.enabled !== true) throw new Error('Windows installer smoke did not verify non-admin install, MCP-off/on launch, Start menu, and uninstall');
     mcpEnabledSmoke = JSON.parse(await readFile(join(smoke, 'mcp-enabled', 'smoke-result.json'), 'utf8'));
     validateSmokeReport(mcpEnabledSmoke, target, true);
