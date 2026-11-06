@@ -14,7 +14,7 @@ import { targets, targetFor, assetNames, packagedExecutable, releaseIntent, sign
 import { runSmoke, validateSmokeReport } from './distribution-smoke.mjs';
 import { stageAssets, assembleAssets } from './release-assets.mjs';
 import { withAppleApiKey } from './signing-key.mjs';
-import { nativeRequirements, verifyNativeConverter } from './converter-native.mjs';
+import { assertStaticLinkage, nativeRequirements, verifyNativeConverter } from './converter-native.mjs';
 
 const version = '1.2.3';
 const desktop = fileURLToPath(new URL('..', import.meta.url));
@@ -149,6 +149,15 @@ test('native converter artifacts retain upstream hashes and reject changed wheel
   await writeFile(join(root, 'wheels', file), wheel);
   await writeFile(join(root, 'requirements.lock.txt'), lock + '# changed\n');
   await assert.rejects(verifyNativeConverter(root), /stale or invalid/);
+});
+
+test('native linkage distinguishes the Mach-O self identity from external load dependencies', () => {
+  const self = '@rpath/_rust.abi3.so';
+  const system = '/private/build/cryptography.so:\n\t@rpath/_rust.abi3.so (compatibility version 0.0.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0)\n';
+  assertStaticLinkage(system, self);
+  for (const dependency of ['@rpath/libssl.3.dylib', '/usr/local/opt/openssl/libcrypto.3.dylib', '/private/build/openssl/libcrypto.3.dylib']) {
+    assert.throws(() => assertStaticLinkage(system + `\t${dependency} (compatibility version 3.0.0)\n`, self), /non-system load dependency/);
+  }
 });
 
 test('all native targets retain stable aliases and architecture-specific outputs', () => {

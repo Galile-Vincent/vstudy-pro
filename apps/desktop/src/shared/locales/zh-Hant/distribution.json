@@ -5,5 +5,5 @@
   "storage_failed": "無法存取 Windows 安全儲存空間。請重試，或僅在本次工作階段使用金鑰而不儲存。",
   "school_storage_help": "Windows DPAPI 依您的 Windows 帳戶保護已儲存的學校登入資料。Windows 通常不會顯示密碼提示。您也可以選擇僅在本次工作階段連線。",
   "before_school": "選擇下方「連接我的學校」，用校名、國家或 Moodle 網址搜尋。檢查網站時會連接該站並可能下載校徽。確認網站後再登入。Windows DPAPI 保護已儲存的登入資料。不要把學校密碼貼進 AI 聊天。",
-  "converter_copy": "PDF 與 Office 轉換需要在您同意後下載一次工具。文件保留在這台電腦上。下載來自 PyPI；Python 可能來自 GitHub。在 Windows 上，Python 網路限制不是核心沙箱，原生函式庫可能繞過限制，也沒有檔案描述元與核心傾印限制。選擇離線模式即可閱讀 Markdown 和文字，無須下載安裝工具。"
+  "converter_copy": "PDF 與 Office 轉換需要在您同意後下載一次工具。文件保留在這台電腦上。下載來自 PyPI；Python 可能來自 GitHub。在 Windows 上，Python 網路限制不是核心沙箱，原生函式庫可能繞過限制，也沒有檔案描述元與核心傾印限制。選擇離線模式即可閱讀 Markdown 和文字，無須下載安裝工具。 ARM64 裝置的文件轉換需要 Windows 11。"
 }

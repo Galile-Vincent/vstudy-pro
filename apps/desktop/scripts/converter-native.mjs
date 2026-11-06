@@ -24,6 +24,17 @@ export function nativeRequirements(lock, version, wheelHash) {
   return lock.replace(header, `${header}    --hash=sha256:${wheelHash} \\\n`);
 }
 
+/** otool -L includes LC_ID_DYLIB before load dependencies; that self identity does not load another file. */
+export function assertStaticLinkage(linkage, identity) {
+  for (const line of linkage.split('\n').slice(1)) {
+    const library = line.trim().split(' (compatibility version')[0];
+    if (!library || library === identity) continue;
+    if (!library.startsWith('/usr/lib/') && !library.startsWith('/System/Library/')) {
+      throw new Error(`Native wheel has a non-system load dependency: ${library}`);
+    }
+  }
+}
+
 /** Packaging must never start a compiler after signing credentials enter its environment. */
 export async function verifyNativeConverter(directory = resources) {
   const lock = await readFile(join(directory, 'requirements.lock.txt'), 'utf8');
@@ -72,13 +83,13 @@ async function buildNativeConverter() {
   if (!sourceUrl || sourceUrl.protocol !== 'https:' || sourceUrl.hostname !== 'files.pythonhosted.org' || sourceUrl.port || sourceUrl.username || sourceUrl.password || !entry.includes(`--hash=sha256:${source.digests.sha256}`)) {
     throw new Error('The cryptography source must match an upstream hash already in the runtime lock');
   }
+  const rust = execFileSync('rustc', ['--version'], { encoding: 'utf8' }).trim();
   const root = await mkdtemp(join(tmpdir(), 'vstudy-converter-build-'));
   const wheels = join(resources, 'wheels');
   const environment = { ...process.env, MACOSX_DEPLOYMENT_TARGET: '13.0', CARGO_BUILD_JOBS: '2',
     OPENSSL_DIR: join(root, 'openssl'), OPENSSL_STATIC: '1', CFLAGS: '-mmacosx-version-min=13.0 -march=x86-64', RUSTFLAGS: '-C target-cpu=x86-64' };
   const execute = (command, args, cwd = root) => execFileSync(command, args, { cwd, env: environment, stdio: 'inherit', timeout: 20 * 60 * 1000 });
   const uv = join(homedir(), '.local', 'bin', 'uv');
-  const rust = execFileSync('rustc', ['--version'], { encoding: 'utf8' }).trim();
   try {
     const [cryptoArchive, opensslArchive] = await Promise.all([download(source.url, source.digests.sha256), download(openssl.url, openssl.sha256)]);
     const cryptoSource = join(root, 'cryptography.tar.gz');
@@ -92,7 +103,7 @@ async function buildNativeConverter() {
     execute('/usr/bin/make', ['install_sw'], sourceDirectory);
     const builder = join(root, 'builder');
     const python = join(builder, 'bin', 'python');
-    execute(uv, ['--no-config', 'venv', '--python', '3.12', builder]);
+    execute(uv, ['--no-config', 'venv', '--python', '3.10', builder]);
     execute(uv, ['--no-config', 'pip', 'install', '--require-hashes', '--python', python, '-r', join(resources, 'requirements-build.lock.txt')]);
     await rm(wheels, { recursive: true, force: true });
     await mkdir(wheels, { recursive: true });
@@ -106,7 +117,8 @@ async function buildNativeConverter() {
     if (!member) throw new Error('Native wheel does not contain the expected cryptography binding');
     await writeFile(binary, execFileSync('/usr/bin/unzip', ['-p', wheelPath, member], { maxBuffer: 64 * 1024 * 1024 }));
     const linkage = execFileSync('/usr/bin/otool', ['-L', binary], { encoding: 'utf8' });
-    if (linkage.split('\n').slice(1).some(line => line.trim() && !/^\s+\/(?:usr\/lib|System\/Library)\//.test(line))) throw new Error('Native wheel must not depend on Homebrew or CI build directories');
+    const identity = execFileSync('/usr/bin/otool', ['-D', binary], { encoding: 'utf8' }).split('\n').slice(1).map(line => line.trim()).find(Boolean);
+    assertStaticLinkage(linkage, identity);
     const wheelHash = digest(await readFile(wheelPath));
     const manifest = { schemaVersion: 1, file: files[0], version: cryptoVersion, sha256: wheelHash,
       sourceLockSha256: digest(lock), buildLockSha256: digest(await readFile(join(resources, 'requirements-build.lock.txt'))),

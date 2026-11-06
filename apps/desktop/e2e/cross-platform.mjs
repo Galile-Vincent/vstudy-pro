@@ -1,7 +1,7 @@
 /** Native Electron verification for platform labels, lazy secure storage, and window chrome. */
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const directory = await mkdtemp(join(tmpdir(), 'vstudy-platform-ui-'));
@@ -21,13 +21,16 @@ try {
     }
     globalThis.platformStorageCalls = () => calls;
     const preferences = current.webContents.getLastWebPreferences();
-    return {minimumSize: current.getMinimumSize(), contextIsolation: preferences.contextIsolation, sandbox: preferences.sandbox, nodeIntegration: preferences.nodeIntegration};
+    return {minimumSize: current.getMinimumSize(), nativeHandle: current.getNativeWindowHandle().some(byte => byte !== 0), menuBarVisible: current.isMenuBarVisible(), contextIsolation: preferences.contextIsolation, sandbox: preferences.sandbox, nodeIntegration: preferences.nodeIntegration};
   });
   assert.deepEqual(chrome.minimumSize, [720, 480]);
   assert.equal(chrome.contextIsolation, true);
   assert.equal(chrome.sandbox, true);
   assert.equal(chrome.nodeIntegration, false);
+  assert.equal(chrome.nativeHandle, true);
+  if (process.platform === 'win32') assert.equal(chrome.menuBarVisible, false);
   for (const language of ['en', 'zh-Hant', 'ja']) {
+    const labels = JSON.parse(await readFile(resolve('src/shared/locales', language, 'settings.json'), 'utf8'));
     await page.evaluate(async language => {
       const settings = await window.desktop.invoke('settings:get', {});
       await window.desktop.invoke('settings:set', {...settings, language, onboardingCompleted: true, welcomeSeen: true});
@@ -38,17 +41,22 @@ try {
     assert.ok((await page.locator('.shell-history-trigger kbd').innerText()).includes(process.platform === 'darwin' ? 'Cmd' : 'Ctrl'));
     await page.evaluate(() => window.dispatchEvent(new window.Event('vstudy:open-settings')));
     await page.locator('.settings-dialog[data-state=open]').waitFor();
-    await page.locator('.settings-tabs [role=tab]').nth(2).click();
+    await page.getByRole('tab', {name: labels.providers, exact: true}).click();
     const providers = await page.evaluate(() => window.desktop.invoke('providers:list', {}));
     assert.ok(providers.filter(row => row.config.kind === 'cli').every(row => !row.config.enabled));
-    if (process.platform === 'win32') assert.equal(await page.locator('.provider-row [role=note]').count(), 1);
+    if (process.platform === 'win32') {
+      assert.equal(await page.locator('.provider-row [role=note]').count(), 1);
+      const codex = providers.find(row => row.config.id === 'codex-cli');
+      assert.equal(codex.availability.available, false);
+      assert.ok(codex.availability.reason);
+    }
     await page.locator('.provider-row').first().scrollIntoViewIfNeeded();
     await page.screenshot({path: join(evidence, `${process.platform}-${language}-providers.png`), animations: 'disabled'});
-    await page.locator('.settings-tabs [role=tab]').last().click();
+    await page.getByRole('tab', {name: labels.privacy, exact: true}).click();
     await page.getByTestId('privacy-settings').waitFor();
     await page.screenshot({path: join(evidence, `${process.platform}-${language}-privacy.png`), animations: 'disabled'});
     assert.equal(await app.evaluate(() => globalThis.platformStorageCalls()), 0);
-    reports.push({language, platform: process.platform, credentialsUnlocked: false, chrome});
+    reports.push({language, platform: process.platform, keyboardModifier: process.platform === 'darwin' ? 'Cmd' : 'Ctrl', credentialsUnlocked: false, chrome});
     await page.keyboard.press('Escape');
   }
   console.log(JSON.stringify({result: 'PASS', reports}));
