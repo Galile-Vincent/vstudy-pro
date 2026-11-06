@@ -1,0 +1,97 @@
+{
+  "sourceCommit": "5641e5567c8108146b9251d9fb2f1ca9482495b8",
+  "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42168618179",
+  "job": "https://github.com/ava-apple/vstudy-pro/actions/runs/42168618179/job/127731257599",
+  "integration": "Before M/C merge; later native terminal and MCP-off/on gates were not present.",
+  "schemaVersion": 1,
+  "ok": true,
+  "exitCode": 0,
+  "platform": "win32",
+  "arch": "x64",
+  "appVersion": "0.2.2",
+  "windowCreated": true,
+  "rendererLoaded": true,
+  "database": {
+    "engine": "node:sqlite",
+    "version": "3.53.3",
+    "integrity": "ok",
+    "writeRead": true,
+    "persisted": true
+  },
+  "safeStorage": {
+    "backend": "dpapi",
+    "roundTrip": true,
+    "ciphertextCleared": true
+  },
+  "converter": {
+    "resourcesPresent": true,
+    "uvAvailable": true,
+    "bootstrapAttempted": false,
+    "conversionTested": false
+  },
+  "installer": {
+    "schemaVersion": 1,
+    "target": "win-x64",
+    "administrator": false,
+    "ok": true,
+    "installed": true,
+    "launched": true,
+    "uninstalled": true,
+    "startMenu": true
+  },
+  "ui": [
+    {
+      "language": "en",
+      "platform": "win32",
+      "keyboardModifier": "Ctrl",
+      "credentialsUnlocked": false,
+      "chrome": {
+        "minimumSize": [
+          720,
+          480
+        ],
+        "nativeHandle": true,
+        "menuBarVisible": false,
+        "contextIsolation": true,
+        "sandbox": true,
+        "nodeIntegration": false
+      }
+    },
+    {
+      "language": "zh-Hant",
+      "platform": "win32",
+      "keyboardModifier": "Ctrl",
+      "credentialsUnlocked": false,
+      "chrome": {
+        "minimumSize": [
+          720,
+          480
+        ],
+        "nativeHandle": true,
+        "menuBarVisible": false,
+        "contextIsolation": true,
+        "sandbox": true,
+        "nodeIntegration": false
+      }
+    },
+    {
+      "language": "ja",
+      "platform": "win32",
+      "keyboardModifier": "Ctrl",
+      "credentialsUnlocked": false,
+      "chrome": {
+        "minimumSize": [
+          720,
+          480
+        ],
+        "nativeHandle": true,
+        "menuBarVisible": false,
+        "contextIsolation": true,
+        "sandbox": true,
+        "nodeIntegration": false
+      }
+    }
+  ],
+  "signingVerified": false,
+  "publicReleaseCreated": false
+}

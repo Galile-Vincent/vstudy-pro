@@ -70,7 +70,7 @@ Assembly requires exactly one artifact directory per target and verifies every m
 
 All `ci/**` pushes and default `workflow_dispatch` dry runs use the unsigned step. That step has no signing-secret references. The separate automatic signing step is skipped, and every secret expression checks publication intent and target platform before referencing a secret. Only the tag-gated publish job has `contents: write`. The publishing script repeats the event and tag checks. Electron-builder always uses `publish: never` and a generic feed, which emits metadata without uploading anything.
 
-An actual push of `v<desktop-version>`, or `workflow_dispatch` with `dry_run: false` against that exact tag, permits signing and publication. Non-dry dispatch against a branch fails during planning. Partial credential groups fail before packaging. Release notes come from `docs/releases/<version>.md`. The publish job creates a non-draft release with `--verify-tag --latest`, then requires HTTP 200 from all four stable latest-download URLs. Publication is serialized across tags.
+An actual push of `v<desktop-version>`, or `workflow_dispatch` with `dry_run: false` against that exact tag, permits signing and publication. Non-dry dispatch against a branch fails during planning. Partial credential groups fail before packaging. Release notes come from `docs/releases/<version>.md`. The publish job creates a non-draft release with `--verify-tag --latest`, then requires HTTP 200 from every enabled stable latest-download URL. Publication is serialized across tags.
 
 | Mode | Required configuration |
 | --- | --- |
@@ -116,18 +116,18 @@ node scripts/package-release.mjs --target win-x64 --unsigned
 node scripts/windows-install-smoke.mjs --target win-x64
 ```
 
-To stage and assemble without publishing, run these from the repository root after all four native packages and smoke reports exist.
+To assemble a qualification run without publishing, use `--scope qualification` after all four native packages and smoke reports exist. Publication assembly uses the default release scope and requires only enabled targets. Run these from the repository root:
 
 ```sh
 node apps/desktop/scripts/release-assets.mjs stage --target mac-arm64
 node apps/desktop/scripts/release-assets.mjs stage --target mac-x64
 node apps/desktop/scripts/release-assets.mjs stage --target win-x64
 node apps/desktop/scripts/release-assets.mjs stage --target win-arm64
-node apps/desktop/scripts/release-assets.mjs assemble
+node apps/desktop/scripts/release-assets.mjs assemble --scope qualification
 ```
 
 Local verification on this Mac passed 13 release-helper tests, desktop typecheck, desktop lint, build, actionlint, vendor checks, and security static checks. Security lint retained three existing warnings and zero errors. The full unit suite passed 1,024 tests with 14 skipped across 133 passing files and five skipped files. Tests exercise real helper filesystem output, fake Node processes, failure exits, deadlines, and a synthetic Windows fuse wire. They do not launch Electron.
 
-The base package configuration and every signed or unsigned overlay passed the installed electron-builder v26.15.0 schema validator. Windows installer execution, native Windows DPAPI, hosted architecture packaging, downloaded artifact launches, signing, notarization, and public HTTP checks remain unverified here. The new smoke module is intentionally unused until the parent wires it, so the standalone worker checkout reports that file in knip. No other knip error remains.
+Worker-time limits: the base configuration and every signing overlay passed electron-builder v26.15.0 schema validation, but that worker did not execute Windows. Subsequent parent integration wired the smoke module and native adapters. Windows x64 NSIS install/launch/uninstall, DPAPI, SQLite, the renderer, and three-language settings passed on the hosted runner in run 42168618179 at 5641e55. This predates the M/C merge. The integrated acceptance additionally requires node-pty and Windows MCP-off/on startup; see [current verification](VERIFICATION.md) for the latest source, results, and remaining limits. Real signing, notarization, and public stable download HTTP checks remain unverified.
 
 All actions in the two owned workflows use complete upstream-verified SHAs. Refs were checked with `git ls-remote` against their official repositories for checkout v7.0.1, setup-node v7.1.0, pnpm/action-setup v6.1.1, upload-artifact v7.0.2, and download-artifact v8.0.2.
