@@ -6,7 +6,7 @@ Read course documents, keep Moodle deadlines together, and turn coursework into 
 
 ![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
 
-![VStudy Pro reading workspace with a Traditional Chinese sample and optional AI chat](docs/assets/readme/reader.webp)
+![Graph traversal notes with a selected passage, demo answer, and source citation](docs/assets/readme/reader.webp)
 
 ## Download and install
 
@@ -82,61 +82,65 @@ For non-text document conversion, install **uv** or **Python 3.10+** separately.
 
 ## The pages
 
-Screenshots are existing real-app test captures with synthetic school and AI data. Some predate current navigation or controls. They illustrate the layout, not live-school or live-provider acceptance. [Image sources](docs/assets/readme/README.md) record their provenance.
+Screenshots show the current built app with curated demo coursework, local documents, and simulated saved AI conversations. They do not establish live-school or live-provider acceptance. [Capture pipeline and image sources](docs/assets/readme/README.md).
 
 ### Home
 
 Start with the setup checklist, import a document, or try the sample. Return to recent reading and your study activity.
 
-![Home with a setup checklist and document import](docs/assets/readme/home.webp)
+![Home with recent readings and a completed setup checklist](docs/assets/readme/home.webp)
 
 ### Library
 
 Browse and search documents. Use folders, tags, pins, recent items, saved filters, and conversion-status views to find what you need.
 
-![Library in the Grove light theme](docs/assets/readme/library.webp)
+![A library of English and Traditional Chinese study notes in two folders](docs/assets/readme/library.webp)
 
 ### Reader and chat
 
 Read converted Markdown beside document chat. Select text to ask a focused question, follow citations back to the source, and reopen a document's conversations. Reading works without AI.
 
-![Reader with a sample document and AI setup prompt](docs/assets/readme/reader.webp)
+![Graph traversal notes with a selected passage, demo answer, and source citation](docs/assets/readme/reader.webp)
 
 ### Courses home
 
 Connect or reconnect schools, sync accounts, see the next seven days of unsubmitted work, and browse current, future, past, or all courses.
 
-![Courses with a sample school and Iris light theme](docs/assets/readme/courses.webp)
+![Art-led course cards with teachers, deadlines, and progress](docs/assets/readme/courses.webp)
 
 ### Course page
 
 The tabs are **Content**, **Deadlines**, **Announcements**, **Grades**, **Files**, and **Notifications**. Open materials, set deadline reminders, or ask the course assistant. Unsupported school functions remain unavailable.
 
-![Isolated Moodle teacher page opened over a course](docs/assets/readme/webview.webp)
+![Algorithms & Data Structures with current-week materials and deadlines](docs/assets/readme/course.webp)
+
+![A styled demo Moodle teacher page inside the isolated app pane](docs/assets/readme/webview.webp)
 
 ### Planner / Today
 
 Open the planner from Courses. Switch between today and the week, add tasks and exams, set time capacity, review schedule proposals, and export study blocks to a calendar file.
 
-![Today and Planner task entry](docs/assets/readme/planner.webp)
+![Today planner with study tasks and a statistics exam](docs/assets/readme/planner.webp)
 
 ### History
 
 Search across conversations and reopen matching messages. Filters distinguish course, document, and general chats; pinned conversations stay accessible.
 
-![History search across sample conversations](docs/assets/readme/history.webp)
+![Command-K conversation search with matching saved study chats](docs/assets/readme/history.webp)
 
 ### Settings
 
 **General** changes language and reopens setup or Welcome. **Appearance** changes themes and contrast. **Providers** connects AI. **Usage** shows token and cost records. **Storage** manages backups and cleanup. **Privacy** controls conversion installation, offline mode, network inventory, and data deletion.
 
-![Appearance with light and dark previews for theme packs](docs/assets/readme/themes.webp)
+![Appearance settings with whole-app light and dark theme packs](docs/assets/readme/themes.webp)
+
+![Storage settings with local usage categories](docs/assets/readme/storage.webp)
 
 ### Help and Welcome
 
 Help reopens setup, illustrated or recorded walkthroughs, and keyboard shortcuts. Welcome explains the app and offers a sample so you can begin without school or AI credentials.
 
-![Onboarding with an offline sample and selection walkthrough](docs/assets/readme/onboarding.webp)
+![Welcome onboarding with a preview of the reading workspace](docs/assets/readme/onboarding.webp)
 
 ### Keyboard shortcuts
 
@@ -253,6 +257,7 @@ Run from the repository root after installing dependencies. Run checks sequentia
 | `pnpm e2e` | Build and run serial real-Electron E2E tests. |
 | `pnpm smoke` | Build and launch a real-Electron smoke test. |
 | `pnpm package` | Build and package with configured signing defaults. |
+| `node apps/desktop/scripts/marketing-shots.mjs` | Generate the curated marketing screenshot matrix after `pnpm build`. |
 | `node scripts/check-readme-links.mjs` | Check local links in all three READMEs and the docs index. |
 
 E2E requires **uv**, or an existing hash-locked converter environment via `VSTUDY_CONVERTER_VENV`. It prepares an unsigned package and may download Python dependencies. Evidence defaults to `/tmp/vstudy-final/e2e`; override with `VSTUDY_E2E_EVIDENCE`. Live-provider checks require explicit opt-in and authentication. A skip does not prove live operation.

@@ -1,0 +1,1 @@
+PASS. Occupied loopback port rejects the capture with EADDRINUSE and exits with code 1 instead of leaving the Electron process running.

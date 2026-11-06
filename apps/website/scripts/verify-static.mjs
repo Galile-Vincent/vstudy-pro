@@ -13,6 +13,7 @@ async function files(dir) {
 const htmlFiles = (await files(root)).filter(file => extname(file) === '.html');
 let links = 0;
 let largestHome = 0;
+let largestHomeImages = 0;
 for (const file of htmlFiles) {
   const html = await readFile(file, 'utf8');
   assert.equal((html.match(/<h1[\s>]/g) ?? []).length, 1, file);
@@ -38,9 +39,13 @@ for (const file of htmlFiles) {
     if (/\.(css|js|webp|png|svg)$/.test(target)) assets.add(target);
   }
   if (dirname(file) === root.replace(/\/$/,'') || /\/(en|zh-Hant|ja)\/index.html$/.test(file)) {
+    const imagePaths = new Set([...html.matchAll(/<img[^>]+src="([^"]+)"/g)].map(match => join(root,match[1].slice(base.length))));
+    const imageBytes = (await Promise.all([...imagePaths].map(async image => (await stat(image)).size))).reduce((a,b) => a+b,0);
+    assert.ok(imageBytes < 400_000, `Home images exceed 400 KB: ${imageBytes}`);
+    largestHomeImages = Math.max(largestHomeImages,imageBytes);
     const bytes = Buffer.byteLength(html) + (await Promise.all([...assets].map(async asset => (await stat(asset)).size))).reduce((a,b) => a+b,0);
     assert.ok(bytes < 1_500_000, `Home budget exceeded: ${bytes}`);
     largestHome = Math.max(largestHome,bytes);
   }
 }
-console.log(JSON.stringify({pages:htmlFiles.length,checkedLinks:links,largestHomeBytes:largestHome,budgetBytes:1_500_000,failures:0},null,2));
+console.log(JSON.stringify({pages:htmlFiles.length,checkedLinks:links,largestHomeBytes:largestHome,largestHomeImageBytes:largestHomeImages,imageBudgetBytes:400_000,budgetBytes:1_500_000,failures:0},null,2));

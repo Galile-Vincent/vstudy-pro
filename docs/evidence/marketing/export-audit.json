@@ -1,0 +1,14 @@
+{
+  "shots": 132,
+  "formats": [
+    "webp",
+    "avif"
+  ],
+  "dimensions": [
+    2880,
+    1800
+  ],
+  "maxWebpBytes": 186566,
+  "maxAvifBytes": 104291,
+  "failures": 0
+}
