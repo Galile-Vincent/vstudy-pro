@@ -57,8 +57,9 @@ export function Workspace() {
 
   const [startupError, setStartupError] = useState(''), [sourceError, setSourceError] = useState(''),
     [conversationError, setConversationError] = useState(''), [historyError, setHistoryError] = useState('');
-  const [loadRevision, setLoadRevision] = useState(0);
-  const retryLoad = () => setLoadRevision(value => value + 1);
+  const [startupRevision, setStartupRevision] = useState(0);
+  const [conversationRevision, setConversationRevision] = useState(0);
+  const [historyRevision, setHistoryRevision] = useState(0);
   const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
   useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   useEffect(() => {
@@ -160,7 +161,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [report, loadRevision]);
+  }, [report, startupRevision]);
   useEffect(() => {
     if (!documents.some((d) => d.status === "converting")) return;
     const timer = setInterval(() => {
@@ -174,7 +175,6 @@ export function Workspace() {
   useEffect(() => {
     let active = true;
     setConversationError('');
-    setSource("");
     setSelection(null);
     setConversation(null);
     setHistory(null);
@@ -198,7 +198,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [documentId, report, loadRevision]);
+  }, [documentId, report, conversationRevision]);
   useEffect(() => {
     if (!conversation) return;
     try { localStorage.setItem(`vstudy-conversation:${(conversation.scope === "course" ? conversation.courseId : conversation.scope === "general" ? "general" : conversation.documentId)}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
@@ -221,7 +221,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [doc?.id, doc?.status, readerRevision, report, loadRevision]);
+  }, [doc?.id, doc?.status, readerRevision, report]);
   useEffect(() => {
     let active = true;
     setHistoryError('');
@@ -236,7 +236,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [conversation?.id, report, loadRevision]);
+  }, [conversation?.id, report, historyRevision]);
   const saveSettings = async (next: Partial<Settings>) => {
     try {
       const saved = await desktop.invoke("settings:set", next);
@@ -357,7 +357,7 @@ export function Workspace() {
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
       <header className="art-reader-chat-header"><span><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</span>{chatControls}</header>
-      {conversationError || historyError ? <LoadError message={conversationError || historyError} retry={retryLoad}/> : conversation && history ? (
+      {conversationError || historyError ? <LoadError message={conversationError || historyError} retry={() => conversationError ? setConversationRevision(value => value + 1) : setHistoryRevision(value => value + 1)}/> : conversation && history ? (
         <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}>{chatDocument === documentId ? <Chat
           documentPageCount={documentPageCount}
           documentTitle={doc?.title ?? tr('common:document')}
@@ -466,7 +466,7 @@ export function Workspace() {
           >
             {tr('common:retry_conversion')}</button><p>{tr('library:retry_hint')}</p>
         </div>
-      ) : sourceError ? <LoadError message={sourceError} retry={retryLoad}/> : loadingSource ? (
+      ) : sourceError ? <LoadError message={sourceError} retry={() => setReaderRevision(value => value + 1)}/> : loadingSource ? (
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
@@ -538,7 +538,7 @@ export function Workspace() {
           </button>
         </div>
       </header>
-      {startupError && <LoadError message={startupError} retry={retryLoad}/>}
+      {startupError && <LoadError message={startupError} retry={() => setStartupRevision(value => value + 1)}/>}
       {notice && (
         <div className="notice" role="status">
           <span>{notice}</span>

@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
+import { useEffect } from 'react';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { Workspace } from './index';
 import { defaultSettings } from '../../shared';
 import { tr } from '../../shared/i18n';
-const state=vi.hoisted(()=>({invoke:vi.fn(),getPathForFile:vi.fn(),route:{documentId:'00000000-0000-4000-8000-000000000001'},navigate:vi.fn()}));
+const state=vi.hoisted(()=>({invoke:vi.fn(),getPathForFile:vi.fn(),route:{documentId:'00000000-0000-4000-8000-000000000001'},navigate:vi.fn(),mounts:0}));
 vi.mock('../bridge',()=>({desktop:state,isMock:false}));
 vi.mock('../shell',()=>({useNavigate:()=>({route:state.route,navigate:state.navigate})}));
-vi.mock('../chat',()=>({Chat:()=> <p>Recovered chat</p>}));
+vi.mock('../chat',()=>({Chat:()=> {useEffect(()=>{state.mounts++;},[]);return <p>Recovered chat</p>;}}));
 vi.mock('../lazy-reader',()=>({DocumentMarkdown:({source}:{source:string})=><p>{source}</p>}));
 vi.mock('../model-controls',()=>({ModelControls:()=>null}));
 vi.mock('../home/use-reading-activity',()=>({useReadingActivity:()=>{}}));
@@ -59,4 +60,22 @@ it.each(['documents:get','conversations:list','messages:page'])('retries persist
   fail=false;fireEvent.click(within(alert).getByRole('button',{name:tr('common:retry')}));
   expect(await screen.findByText('Readable document')).toBeTruthy();
   await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
+});
+
+it('retries only the document source and preserves the mounted chat',async()=>{
+  setup(true);state.mounts=0;
+  const original=state.invoke.getMockImplementation()!;
+  state.invoke.mockImplementation(async(channel,...args)=>{
+    if(channel==='conversations:list')return [{id:'chat',providerId:'anthropic-api',modelId:'fake'}];
+    if(channel==='messages:page')return {items:[],nextCursor:null};
+    return original(channel,...args);
+  });
+  render(<Workspace/>);
+  await screen.findByText('Recovered chat');
+  const alert=await screen.findByRole('alert');
+  state.invoke.mockClear();
+  fireEvent.click(within(alert).getByRole('button',{name:tr('common:retry')}));
+  await screen.findByText('Readable document');
+  expect(state.mounts).toBe(1);
+  expect(state.invoke.mock.calls.map(([channel])=>channel)).toEqual(['documents:read']);
 });
