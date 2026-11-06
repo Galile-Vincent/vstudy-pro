@@ -5,7 +5,7 @@ import { appendFile, copyFile, mkdir, readFile, readdir, stat, writeFile } from 
 import { basename, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
-import { assetNames, releaseVersion, targetFor, targets } from './release-contract.mjs';
+import { assetNames, releaseVersion, targetFor, targetsFor } from './release-contract.mjs';
 import { validateSmokeReport } from './distribution-smoke.mjs';
 
 async function digest(path, algorithm, encoding = 'hex') {
@@ -66,13 +66,20 @@ export async function stageAssets({ target, version, input, smoke, output, env =
   return provenance;
 }
 
-export async function assembleAssets({ version, input, output, notes }) {
+export async function assembleAssets({ version, input, output, notes, scope = 'release' }) {
   releaseVersion(version);
+  const targets = targetsFor(scope);
+  const artifactDirectories = await readdir(input);
+  for (const directory of artifactDirectories) {
+    if (!targets.some(target => [target.key, `distribution-${target.key}-signed`, `distribution-${target.key}-unsigned`].includes(directory))) {
+      throw new Error(`Unexpected target artifact in ${scope} scope: ${directory}`);
+    }
+  }
   await mkdir(output, { recursive: true });
   if ((await readdir(output)).length) throw new Error('Release assembly directory must be empty');
   const builds = [];
   for (const target of targets) {
-    const directories = (await readdir(input)).filter(name => [target.key, `distribution-${target.key}-signed`, `distribution-${target.key}-unsigned`].includes(name));
+    const directories = artifactDirectories.filter(name => [target.key, `distribution-${target.key}-signed`, `distribution-${target.key}-unsigned`].includes(name));
     if (directories.length !== 1) throw new Error(`Expected exactly one artifact directory for ${target.key}`);
     const directory = join(input, directories[0]);
     const manifestFile = `target-${target.key}.json`;
@@ -89,7 +96,7 @@ export async function assembleAssets({ version, input, output, notes }) {
     for (const file of actualFiles) await copyFile(join(directory, file), join(output, file));
     builds.push(manifest);
   }
-  await writeJson(join(output, 'distribution-manifest.json'), { schemaVersion: 1, version, builds });
+  await writeJson(join(output, 'distribution-manifest.json'), { schemaVersion: 1, version, scope, builds });
   const assets = await inventory(output);
   await writeFile(join(output, 'SHA256SUMS.txt'), assets.map(asset => `${asset.sha256}  ${asset.file}\n`).join(''));
   const releaseNotes = await readFile(notes, 'utf8');
@@ -99,7 +106,7 @@ export async function assembleAssets({ version, input, output, notes }) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const { values, positionals } = parseArgs({ allowPositionals: true, options: {
-    target: { type: 'string' }, version: { type: 'string' }, input: { type: 'string' }, output: { type: 'string' }, smoke: { type: 'string' }, notes: { type: 'string' },
+    target: { type: 'string' }, version: { type: 'string' }, input: { type: 'string' }, output: { type: 'string' }, smoke: { type: 'string' }, notes: { type: 'string' }, scope: { type: 'string' },
   } });
   const version = values.version ?? JSON.parse(await readFile('apps/desktop/package.json', 'utf8')).version;
   if (positionals[0] === 'stage') {
@@ -107,7 +114,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     await stageAssets({ target, version, input: values.input ?? `apps/desktop/release/${target.key}`,
       smoke: values.smoke ?? `apps/desktop/release/smoke/${target.key}`, output: values.output ?? `artifacts/${target.key}` });
   } else if (positionals[0] === 'assemble') {
-    const notes = await assembleAssets({ version, input: values.input ?? 'artifacts', output: values.output ?? 'release-assets', notes: values.notes ?? `docs/releases/${version}.md` });
+    const notes = await assembleAssets({ version, input: values.input ?? 'artifacts', output: values.output ?? 'release-assets', notes: values.notes ?? `docs/releases/${version}.md`, scope: values.scope ?? 'release' });
     await writeFile('release-notes.md', notes);
   } else throw new Error('Use release-assets.mjs stage or assemble');
 }

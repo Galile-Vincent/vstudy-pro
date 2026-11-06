@@ -1,12 +1,16 @@
 /** Define the supported distribution targets and reject incomplete signing credentials at the boundary. */
 import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { URL } from 'node:url';
 
-export const targets = [
-  { key: 'mac-arm64', platform: 'mac', arch: 'arm64', runner: 'macos-latest', installer: 'dmg', app: 'mac-arm64/VStudy Pro.app' },
-  { key: 'mac-x64', platform: 'mac', arch: 'x64', runner: 'macos-15-intel', installer: 'dmg', app: 'mac/VStudy Pro.app' },
-  { key: 'win-x64', platform: 'win', arch: 'x64', runner: 'windows-latest', installer: 'exe', app: 'win-unpacked/VStudy Pro.exe' },
-  { key: 'win-arm64', platform: 'win', arch: 'arm64', runner: 'windows-11-arm', installer: 'exe', app: 'win-arm64-unpacked/VStudy Pro.exe' },
-];
+export const targets = JSON.parse(readFileSync(new URL('../distribution-targets.json', import.meta.url), 'utf8'));
+
+/** Publication uses qualified targets; branch runs continue to test planned architectures. */
+export function targetsFor(scope) {
+  if (scope === 'release') return targets.filter(target => target.releaseEnabled);
+  if (scope === 'qualification') return targets;
+  throw new Error('Distribution scope must be release or qualification');
+}
 
 export function targetFor(key) {
   const target = targets.find(item => item.key === key);

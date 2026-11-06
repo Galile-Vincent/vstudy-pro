@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setTimeout } from 'node:timers/promises';
-import { releaseIntent, targets, assetNames } from './release-contract.mjs';
+import { releaseIntent, targets, targetsFor, assetNames } from './release-contract.mjs';
 
 const { fetch, AbortSignal } = globalThis;
 
@@ -14,8 +14,15 @@ if (!intent.publish) throw new Error('Release publication is prohibited for bran
 const repository = process.env.GITHUB_REPOSITORY;
 if (!/^[\w.-]+\/[\w.-]+$/.test(repository ?? '')) throw new Error('Invalid repository');
 const assets = (await readdir('release-assets')).sort().map(file => join('release-assets', file));
+const manifest = JSON.parse(await readFile('release-assets/distribution-manifest.json', 'utf8'));
+const expected = targetsFor('release').map(target => target.key).sort();
+if (manifest.schemaVersion !== 1 || manifest.version !== version || manifest.scope !== 'release' ||
+    JSON.stringify(manifest.builds.map(build => build.target).sort()) !== JSON.stringify(expected) ||
+    targets.filter(target => !target.releaseEnabled).some(target => assets.some(file => file.includes(`-${target.key}.`)))) {
+  throw new Error('Release assets must contain exactly the enabled publication targets');
+}
 execFileSync('gh', ['release', 'create', intent.tag, '--repo', repository, '--verify-tag', '--latest', '--title', `VStudy Pro ${version}`, '--notes-file', 'release-notes.md', ...assets], { stdio: 'inherit' });
-for (const target of targets) {
+for (const target of targetsFor('release')) {
   const url = `https://github.com/${repository}/releases/latest/download/${assetNames(target, version).stable}`;
   let verified = false;
   for (let attempt = 0; attempt < 6; attempt++) {

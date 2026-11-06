@@ -1,7 +1,7 @@
 /** Exercise release policy and retained artifacts with local process fixtures, without launching Electron. */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, writeFile, readdir, rm } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, writeFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
@@ -10,7 +10,7 @@ import { createHash } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { getCurrentFuseWire, FuseV1Options as F, FuseState } from '@electron/fuses';
 import afterPack, { fuseTarget } from './after-pack.mjs';
-import { targets, targetFor, assetNames, packagedExecutable, releaseIntent, signingMode, signingConfiguration, unsignedEnvironment } from './release-contract.mjs';
+import { targets, targetsFor, targetFor, assetNames, packagedExecutable, releaseIntent, signingMode, signingConfiguration, unsignedEnvironment } from './release-contract.mjs';
 import { runSmoke, validateSmokeReport } from './distribution-smoke.mjs';
 import { stageAssets, assembleAssets } from './release-assets.mjs';
 import { withAppleApiKey } from './signing-key.mjs';
@@ -162,6 +162,9 @@ test('native linkage distinguishes the Mach-O self identity from external load d
 
 test('all native targets retain stable aliases and architecture-specific outputs', () => {
   assert.equal(targets.length, 4);
+  assert.deepEqual(targetsFor('release').map(target => target.key), ['mac-arm64', 'win-x64']);
+  assert.equal(targetsFor('qualification').length, 4);
+  assert.throws(() => targetsFor('all'), /scope/);
   assert.equal(targets.some(target => target.runner === 'macos-14'), false);
   for (const target of targets) {
     const names = assetNames(target, version);
@@ -253,11 +256,24 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
   const notes = join(root, 'notes.md');
   await writeFile(notes, '# Release 1.2.3\n\nStudent release.');
   const output = join(root, 'release');
-  const result = await assembleAssets({ version, input: join(root, 'artifacts'), output, notes });
+  const result = await assembleAssets({ version, input: join(root, 'artifacts'), output, notes, scope: 'qualification' });
   assert.match(result, /Student release/);
   assert.match(result, /Unsigned/);
   assert.match(result, /do not download dependencies/);
   assert.equal(JSON.parse(await readFile(join(output, 'distribution-manifest.json'), 'utf8')).builds.length, 4);
+  await assert.rejects(assembleAssets({ version, input: join(root, 'artifacts'), output: join(root, 'blocked-release'), notes }), /Unexpected target artifact/);
+  const releaseInput = join(root, 'release-input');
+  await mkdir(releaseInput);
+  for (const target of targetsFor('release')) {
+    const directory = `distribution-${target.key}-unsigned`;
+    await cp(join(root, 'artifacts', directory), join(releaseInput, directory), {recursive: true});
+  }
+  const releaseOutput = join(root, 'enabled-release');
+  await assembleAssets({version, input: releaseInput, output: releaseOutput, notes});
+  const releaseManifest = JSON.parse(await readFile(join(releaseOutput, 'distribution-manifest.json'), 'utf8'));
+  assert.equal(releaseManifest.scope, 'release');
+  assert.deepEqual(releaseManifest.builds.map(build => build.target), ['mac-arm64', 'win-x64']);
+  assert.equal((await readdir(releaseOutput)).some(file => /mac-x64|win-arm64/.test(file)), false);
   const sums = await readFile(join(output, 'SHA256SUMS.txt'), 'utf8');
   for (const line of sums.trim().split('\n')) {
     const [hash, file] = line.split('  ');
@@ -265,7 +281,7 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
   }
   const target = targets[0];
   await writeFile(join(root, 'artifacts', `distribution-${target.key}-unsigned`, assetNames(target, version).stable), 'corrupted');
-  await assert.rejects(assembleAssets({ version, input: join(root, 'artifacts'), output: join(root, 'corrupt'), notes }), /Checksum mismatch/);
+  await assert.rejects(assembleAssets({ version, input: join(root, 'artifacts'), output: join(root, 'corrupt'), notes, scope: 'qualification' }), /Checksum mismatch/);
 });
 
 test('workflow exposes no signing credentials to branch or dry-run steps, and every action is SHA-pinned', async () => {
@@ -293,7 +309,24 @@ test('branch release planning cannot become publishable from dry_run=false', asy
   assert.match(await readFile(output, 'utf8'), /publish=false/);
   const matrix = (await readFile(output, 'utf8')).split('\n').find(line => line.startsWith('matrix=')).slice('matrix='.length);
   assert.equal(JSON.parse(matrix).include.length, 4);
+  assert.match(await readFile(output, 'utf8'), /scope=qualification/);
   assert.deepEqual((await readdir(root)), ['outputs']);
+});
+
+test('a stable tag publishes only enabled targets without including qualification candidates', async t => {
+  const root = await temporary(t);
+  const output = join(root, 'outputs');
+  const packageVersion = JSON.parse(await readFile(join(desktop, 'package.json'), 'utf8')).version;
+  const result = spawnSync(process.execPath, ['apps/desktop/scripts/release-plan.mjs'], {
+    cwd: repository, encoding: 'utf8', env: { ...process.env, GITHUB_EVENT_NAME: 'push',
+      GITHUB_REF: `refs/tags/v${packageVersion}`, GITHUB_OUTPUT: output },
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const text = await readFile(output, 'utf8');
+  assert.match(text, /publish=true/);
+  assert.match(text, /scope=release/);
+  const matrix = JSON.parse(text.split('\n').find(line => line.startsWith('matrix=')).slice('matrix='.length));
+  assert.deepEqual(matrix.include.map(target => target.key), ['mac-arm64', 'win-x64']);
 });
 
 test('the publisher refuses branches and dry runs before invoking GitHub', async () => {
@@ -307,5 +340,22 @@ test('the publisher refuses branches and dry runs before invoking GitHub', async
     });
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /Release publication is prohibited for branch pushes and dry runs/);
+  }
+});
+
+test('the publisher rejects qualification manifests and disabled installer files before invoking GitHub', async t => {
+  const root = await temporary(t);
+  await mkdir(join(root, 'apps', 'desktop'), {recursive: true});
+  await mkdir(join(root, 'release-assets'));
+  await writeFile(join(root, 'apps', 'desktop', 'package.json'), JSON.stringify({version}));
+  const manifest = {schemaVersion: 1, version, scope: 'release', builds: targetsFor('release').map(target => ({target: target.key}))};
+  for (const scope of ['qualification', 'release']) {
+    await writeFile(join(root, 'release-assets', 'distribution-manifest.json'), JSON.stringify({...manifest, scope}));
+    if (scope === 'release') await writeFile(join(root, 'release-assets', 'VStudy-Pro-mac-x64.dmg'), 'not-qualified');
+    const result = spawnSync(process.execPath, [join(desktop, 'scripts', 'release-publish.mjs')], {
+      cwd: root, encoding: 'utf8', env: {PATH: '', GITHUB_EVENT_NAME: 'push', GITHUB_REF: `refs/tags/v${version}`, GITHUB_REPOSITORY: 'ava-apple/vstudy-pro'},
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /exactly the enabled publication targets/);
   }
 });

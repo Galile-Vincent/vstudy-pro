@@ -1,0 +1,6 @@
+[
+  {"key":"mac-arm64","platform":"mac","arch":"arm64","runner":"macos-latest","installer":"dmg","app":"mac-arm64/VStudy Pro.app","label":"macOS · Apple silicon","releaseEnabled":true},
+  {"key":"mac-x64","platform":"mac","arch":"x64","runner":"macos-15-intel","installer":"dmg","app":"mac/VStudy Pro.app","label":"macOS · Intel","releaseEnabled":false},
+  {"key":"win-x64","platform":"win","arch":"x64","runner":"windows-latest","installer":"exe","app":"win-unpacked/VStudy Pro.exe","label":"Windows · x64","releaseEnabled":true},
+  {"key":"win-arm64","platform":"win","arch":"arm64","runner":"windows-11-arm","installer":"exe","app":"win-arm64-unpacked/VStudy Pro.exe","label":"Windows · ARM64","releaseEnabled":false}
+]
