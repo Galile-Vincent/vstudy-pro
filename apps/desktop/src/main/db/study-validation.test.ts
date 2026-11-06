@@ -53,3 +53,18 @@ it('rejects wrong test concepts, unknown answer items and unconfirmed effects',(
   db.prepare("INSERT INTO study_attempt_items(attemptId,itemId,conceptKey,correct,appliedAt) VALUES(?,'item','chain',1,?)").run(attempt,at);expect(()=>validateStudyData(db)).toThrow();
  }finally{db.close();}
 });
+it('restores ready historical artifacts after their document is unlinked or deleted',()=>{
+ const db=fixture();try{
+  artifactFixture(db);const document='44444444-4444-4444-a444-444444444444',unit='55555555-5555-4555-a555-555555555555',hash='a'.repeat(64);
+  db.prepare("INSERT INTO documents(id,title,sourceName,sourceHash,sourcePath,mime,status,markdownPath,createdAt) VALUES(?,'Text','text.md',?,'/source.md','text/markdown','ready','/content.md',?)").run(document,hash,at);
+  db.prepare('INSERT INTO study_course_documents VALUES(?,?,?)').run(courseId,document,at);
+  db.prepare("INSERT INTO study_units(id,courseId,kind,ordinal,title,sourceKey) VALUES(?,?,'document',0,'Text',?)").run(unit,courseId,document);
+  db.prepare('UPDATE study_artifacts SET scopeJson=?,resolvedScopeJson=?').run(JSON.stringify({kind:'units',unitIds:[unit]}),JSON.stringify({unitIds:[unit],documentIds:[document],conceptKeys:[],from:null,to:null,timeZone:'UTC',sources:[{documentId:document,version:'original',excerptHash:hash}],assumptions:[]}));
+  validateStudyData(db);
+  db.prepare('DELETE FROM study_course_documents WHERE documentId=?').run(document);
+  db.prepare('DELETE FROM study_units WHERE id=?').run(unit);
+  expect(()=>validateStudyData(db)).not.toThrow();
+  db.prepare('DELETE FROM documents WHERE id=?').run(document);
+  expect(()=>validateStudyData(db)).not.toThrow();
+ }finally{db.close();}
+});

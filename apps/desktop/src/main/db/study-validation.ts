@@ -34,9 +34,17 @@ export function validateStudyData(db:DatabaseSync):void {
   check('study_artifacts',row=>{
    const artifact=artifactSchema.parse(row); const scope=studyScopeSchema.parse(json(artifact.scopeJson,8192));
    const resolved=studyResolvedScopeSchema.parse(json(artifact.resolvedScopeJson,65536));
-   for(const unitId of [...resolved.unitIds,...(scope.kind==='units'?scope.unitIds:[])])courseMember('study_units','id',unitId,artifact.courseId);
+   // Ready artifacts retain immutable source snapshots after unlink or deletion.
+   // Existing units still have to belong to this course; retries must resolve live sources anew.
+   for(const unitId of [...resolved.unitIds,...(scope.kind==='units'?scope.unitIds:[])]){
+    const historical=artifact.status==='ready'&&resolved.unitIds.includes(unitId)&&!db.prepare('SELECT 1 FROM study_units WHERE id=?').get(unitId);
+    if(!historical)courseMember('study_units','id',unitId,artifact.courseId);
+   }
    for(const key of [...resolved.conceptKeys,...(scope.kind==='concepts'?scope.conceptKeys:[])])courseMember('study_concepts','key',key,artifact.courseId);
-   for(const documentId of [...resolved.documentIds,...(scope.kind==='documents'?scope.documentIds:[])])documentMember(documentId,artifact.courseId);
+   for(const documentId of [...resolved.documentIds,...(scope.kind==='documents'?scope.documentIds:[])]){
+    const historical=artifact.status==='ready'&&resolved.sources.some(source=>source.documentId===documentId);
+    if(!historical)documentMember(documentId,artifact.courseId);
+   }
    for(const source of resolved.sources)if(!resolved.documentIds.includes(source.documentId))throw new Error('unresolved source');
    if(scope.kind==='dates'){
     if(scope.fromDate>=scope.toDate||Date.parse(scope.toDate)-Date.parse(scope.fromDate)>366*86400000)throw new Error('invalid dates');
