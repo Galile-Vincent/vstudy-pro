@@ -32,7 +32,8 @@ public static class VStudyForeignPipeProbe {
             impersonated = true;
             WindowsIdentity current = WindowsIdentity.GetCurrent();
             if (current.User.Value == original || current.User.Value != expectedSid ||
-                new WindowsPrincipal(current).IsInRole(WindowsBuiltInRole.Administrator)) throw new InvalidOperationException("Foreign ordinary-user identity was not established");
+                new WindowsPrincipal(current).IsInRole(WindowsBuiltInRole.Administrator) ||
+                new WindowsPrincipal(current).IsInRole(new SecurityIdentifier(WellKnownSidType.NetworkSid, null))) throw new InvalidOperationException("Foreign ordinary-user identity was not established");
             foreach (uint access in new uint[] {1u, 2u, 3u}) {
                 using (SafeFileHandle handle = CreateFile("\\\\.\\pipe\\" + pipe, access, 3u, IntPtr.Zero, 3u, 0x40110000u, IntPtr.Zero)) {
                     if (!handle.IsInvalid) return 0;
@@ -70,4 +71,4 @@ try {
     if ($null -ne $account) { Remove-LocalUser -SID $account.SID }
 }
 if ($null -ne (Get-LocalUser -SID $account.SID -ErrorAction SilentlyContinue)) { throw 'Temporary account was not removed' }
-[pscustomobject]@{schemaVersion=1; differentUser=$true; administrator=$false; accessDenied=$denied; win32Error=5; accountRemoved=$true} | ConvertTo-Json -Compress
+[pscustomobject]@{schemaVersion=1; differentUser=$true; administrator=$false; accessModes=@('read','write','duplex'); accessDenied=$denied; win32Error=5; accountRemoved=$true} | ConvertTo-Json -Compress

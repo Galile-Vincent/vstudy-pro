@@ -43,10 +43,12 @@ it.skipIf(process.platform !== 'win32')('round-trips bytes only through the curr
         '-File', resolve('test-fixtures/windows/foreign-pipe-user.ps1'), '-PipeName', name], {
         encoding: 'utf8', windowsHide: true, timeout: 120000, stdio: ['ignore', 'pipe', 'pipe'],
       }));
-      expect(result).toEqual({schemaVersion: 1, differentUser: true, administrator: false, accessDenied: true, win32Error: 5, accountRemoved: true});
+      expect(result).toEqual({schemaVersion: 1, differentUser: true, administrator: false, accessModes: ['read', 'write', 'duplex'], accessDenied: true, win32Error: 5, accountRemoved: true});
+      console.info('Cross-user kernel pipe probe passed', result);
       const evidence = resolve('../../docs/evidence/distribution');
       await mkdir(evidence, {recursive: true});
-      await writeFile(resolve(evidence, 'win32-pipe-isolation.json'), JSON.stringify(result, null, 2) + '\n');
+      await writeFile(resolve(evidence, 'win32-pipe-isolation.json'), JSON.stringify({...result, platform: process.platform, arch: process.arch,
+        run: process.env.GITHUB_RUN_ID, commit: process.env.GITHUB_SHA}, null, 2) + '\n');
     }
     const peer = createConnection(`\\\\.\\pipe\\${name}`);
     try {
