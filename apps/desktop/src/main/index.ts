@@ -175,12 +175,25 @@ async function createWindow(show = true): Promise<void> {
       .catch(error => log({phase:'window-recovery-dialog-failed', error}))
       .finally(() => { recoveryDialogOpen = false; });
   };
+  let unresponsiveTimeout: ReturnType<typeof setTimeout> | undefined;
+  const cancelUnresponsive = () => { clearTimeout(unresponsiveTimeout); unresponsiveTimeout = undefined; };
   current.webContents.on('render-process-gone', (_event, details) => {
+    cancelUnresponsive();
     log({phase:'main-window-render-process-gone', reason:details.reason, code:details.exitCode});
-    recoverRenderer();
+    if (!quitting && details.reason !== 'clean-exit') recoverRenderer();
   });
-  current.on('unresponsive', () => { log({phase:'main-window-unresponsive'}); recoverRenderer(); });
+  current.on('unresponsive', () => {
+    log({phase:'main-window-unresponsive'});
+    if (unresponsiveTimeout) return;
+    unresponsiveTimeout = setTimeout(() => {
+      unresponsiveTimeout = undefined;
+      if (!quitting) recoverRenderer();
+    }, 10_000);
+    unresponsiveTimeout.unref();
+  });
+  current.on('responsive', cancelUnresponsive);
   current.on("closed", () => {
+    cancelUnresponsive();
     clearTimeout(showTimeout);
     if (window === current) window = null;
   });

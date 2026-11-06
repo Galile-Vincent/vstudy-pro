@@ -203,11 +203,14 @@ it.each(['enabled', 'throwing', 'absent', 'corrupt'] as const)('restores %s MCP 
 });
 
 it.each(['render-process-gone', 'unresponsive'])('bounds automatic reloads for main-window %s and offers diagnostics', async event => {
+  vi.useFakeTimers();
   const window = await start();
   window.webContents.emit('did-finish-load');
   await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
   const emit = () => event === 'unresponsive' ? window.emit(event) : window.webContents.emit(event, {}, {reason:'crashed', exitCode:1});
-  emit(); emit(); emit(); emit();
+  if (event === 'unresponsive') {
+    for (let i=0;i<3;i++) { emit(); await vi.advanceTimersByTimeAsync(10_000); }
+  } else { emit(); emit(); emit(); emit(); }
   expect(window.webContents.reload).toHaveBeenCalledTimes(2);
   expect(electron.dialog.showMessageBox).toHaveBeenCalledOnce();
   expect(electron.dialog.showMessageBox).toHaveBeenCalledWith(window, expect.objectContaining({buttons:['common:menu_quit','common:copy_diagnostics']}));
@@ -217,9 +220,9 @@ it.each(['render-process-gone', 'unresponsive'])('bounds automatic reloads for m
 it('allows recovery again after the 60-second reload budget expires', async () => {
   vi.useFakeTimers();
   const window = await start();
-  for (let i=0; i<2; i++) window.emit('unresponsive');
+  for (let i=0; i<2; i++) window.webContents.emit('render-process-gone', {}, {reason:'crashed',exitCode:1});
   await vi.advanceTimersByTimeAsync(60_001);
-  window.emit('unresponsive');
+  window.webContents.emit('render-process-gone', {}, {reason:'crashed',exitCode:1});
   expect(window.webContents.reload).toHaveBeenCalledTimes(3);
   expect(electron.dialog.showMessageBox).not.toHaveBeenCalled();
 });
@@ -237,7 +240,9 @@ it.each([false,true])('shows the ready timeout fallback only for foreground laun
 it('quits through ordered shutdown when recovery is exhausted and Quit is selected', async () => {
   electron.dialog.showMessageBox.mockResolvedValueOnce({response:0});
   const window = await start();
-  window.emit('unresponsive'); window.emit('unresponsive'); window.emit('unresponsive');
+  window.webContents.emit('did-finish-load');
+  await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
+  for (let i=0;i<3;i++) window.webContents.emit('render-process-gone', {}, {reason:'crashed',exitCode:1});
   await vi.waitFor(() => expect(electron.app.quit).toHaveBeenCalledOnce());
 });
 it('rolls back restored startup when renderer recovery is exhausted', async () => {
@@ -316,4 +321,35 @@ it('does not recover renderer failures belonging to another window', async () =>
   electron.app.emit('render-process-gone', {}, {reload:vi.fn()}, {reason:'crashed',exitCode:1});
   expect(main.webContents.reload).not.toHaveBeenCalled();
   expect(electron.dialog.showMessageBox).not.toHaveBeenCalled();
+});
+
+it('waits ten seconds before recovering a persistently unresponsive renderer', async () => {
+  vi.useFakeTimers();
+  const window=await start();
+  window.emit('unresponsive');
+  await vi.advanceTimersByTimeAsync(9_999);
+  expect(window.webContents.reload).not.toHaveBeenCalled();
+  window.emit('unresponsive');
+  await vi.advanceTimersByTimeAsync(1);
+  expect(window.webContents.reload).toHaveBeenCalledOnce();
+});
+it.each(['responsive','closed','render-process-gone'])('cancels pending hang recovery on %s', async event => {
+  vi.useFakeTimers();
+  const window=await start();
+  window.emit('unresponsive');
+  await vi.advanceTimersByTimeAsync(5_000);
+  if (event==='render-process-gone') window.webContents.emit(event,{}, {reason:'crashed',exitCode:1});
+  else window.emit(event);
+  await vi.advanceTimersByTimeAsync(10_000);
+  expect(window.webContents.reload).toHaveBeenCalledTimes(event==='render-process-gone' ? 1 : 0);
+  if (event==='responsive') {
+    window.emit('unresponsive');
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(window.webContents.reload).toHaveBeenCalledOnce();
+  }
+});
+it('does not reload a clean renderer exit', async () => {
+  const window=await start();
+  window.webContents.emit('render-process-gone',{}, {reason:'clean-exit',exitCode:0});
+  expect(window.webContents.reload).not.toHaveBeenCalled();
 });
