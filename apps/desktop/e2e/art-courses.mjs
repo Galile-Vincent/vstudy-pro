@@ -8,6 +8,8 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { temporaryPath } from '../scripts/platform.mjs';
 import { seedArtCourses } from './fixtures/art-courses.mjs';
 
 const phase = process.env.ART_PHASE ?? 'final';
@@ -17,7 +19,7 @@ if (phase === 'before') {
   const browser = await chromium.launch({channel:"chrome"});
   try {
     const page = await browser.newPage({viewport:{width:1200,height:650},deviceScaleFactor:1});
-    await page.goto('file:///tmp/vstudy-courses-prototypes.html');
+    await page.goto(pathToFileURL(process.env.VSTUDY_COURSES_PROTOTYPE ?? temporaryPath('vstudy-courses-prototypes.html')).href);
     await page.screenshot({path:join(evidence,'prototypes.png'),fullPage:true});
   } finally {await browser.close();}
 }

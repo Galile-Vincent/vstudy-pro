@@ -4,11 +4,12 @@ import { mkdtemp, copyFile, rm, writeFile, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import assert from "node:assert/strict";
+import { temporaryPath } from '../scripts/platform.mjs';
 const directory = await mkdtemp(join(tmpdir(), "vstudy-library-perf-"));
 let app;
 try {
   await copyFile(
-    process.env.VSTUDY_BENCH_DB ?? "/tmp/vstudy-library-bench/bench.sqlite",
+    process.env.VSTUDY_BENCH_DB ?? temporaryPath('vstudy-library-bench/bench.sqlite'),
     join(directory, "vstudy.sqlite"),
   );
   app = await electron.launch({
@@ -137,15 +138,15 @@ try {
     })));
     console.log('metadataPaintMs',metadata.at(-1));
     if(n===0) {await page.getByTestId('document-markdown').waitFor();evidence.coldFirstDocumentOpenMs=await page.evaluate(()=>new Promise(resolve=>window.requestAnimationFrame(()=>resolve(window.performance.now()-window.vstudyOpenStart))));}
-    if(n===0 && profiler) {const {profile}=await profiler.send('Profiler.stop');await mkdir('/tmp/vstudy-final',{recursive:true});await writeFile('/tmp/vstudy-final/metadata-first-open.cpuprofile',JSON.stringify(profile));}
+    if(n===0 && profiler) {const {profile}=await profiler.send('Profiler.stop');await mkdir(temporaryPath('vstudy-final'),{recursive:true});await writeFile(temporaryPath('vstudy-final/metadata-first-open.cpuprofile'),JSON.stringify(profile));}
     if(metadata.at(-1)<0) break;
     await page.locator('.app-header').getByRole('button',{name:'Library',exact:true}).click();await page.locator('.library-document').first().waitFor();
   }
-  if(profiler) {const profile=await app.evaluate(async()=>{const session=globalThis.vstudyMetadataProfile;const result=await new Promise((resolve,reject)=>session.post('Profiler.stop',(error,result)=>error?reject(error):resolve(result.profile)));session.disconnect();delete globalThis.vstudyMetadataProfile;return result;});await writeFile('/tmp/vstudy-final/metadata-main.cpuprofile',JSON.stringify(profile));const complete=new Promise(resolve=>profiler.once('Tracing.tracingComplete',resolve));await profiler.send('Tracing.end');await complete;await writeFile(process.env.VSTUDY_PERF_TRACE_FILE ?? '/tmp/vstudy-final/metadata-timeline.json',JSON.stringify({traceEvents:trace}));}
+  if(profiler) {const profile=await app.evaluate(async()=>{const session=globalThis.vstudyMetadataProfile;const result=await new Promise((resolve,reject)=>session.post('Profiler.stop',(error,result)=>error?reject(error):resolve(result.profile)));session.disconnect();delete globalThis.vstudyMetadataProfile;return result;});await writeFile(temporaryPath('vstudy-final/metadata-main.cpuprofile'),JSON.stringify(profile));const complete=new Promise(resolve=>profiler.once('Tracing.tracingComplete',resolve));await profiler.send('Tracing.end');await complete;await writeFile(process.env.VSTUDY_PERF_TRACE_FILE ?? temporaryPath('vstudy-final/metadata-timeline.json'),JSON.stringify({traceEvents:trace}));}
   const validMetadata=metadata.filter(value=>value>=0).sort((a,b)=>a-b);Object.assign(evidence,{metadataPaintSamples:validMetadata.length,metadataPaintTimeouts:metadata.length-validMetadata.length,metadataPaintP50:validMetadata[Math.floor(validMetadata.length/2)],metadataPaintMax:validMetadata.at(-1)});
-  await mkdir("/tmp/vstudy-library", { recursive: true });
+  await mkdir(temporaryPath('vstudy-library'), { recursive: true });
   await writeFile(
-    "/tmp/vstudy-library/performance.json",
+    temporaryPath('vstudy-library/performance.json'),
     JSON.stringify(evidence, null, 2),
   );
   console.log(evidence);

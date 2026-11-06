@@ -49,14 +49,14 @@ Git-cliff fits this single-app repository without a changeset file per change or
 
 The owner may authorize pushing a reviewed branch under `ci/**` to trigger a branch-only dry run. That authorization is not permission to tag or publish. A CI push receives no signing credentials, creates no release, and uploads no files to Releases. Retain installers and reports as Actions artifacts.
 
-Manual dispatch is also nonpublishing. Use the GitHub Actions **Run workflow** form on the reviewed branch, or the commands below after confirming the workflow's dispatch inputs. Replace the branch placeholder. If the workflow exposes a dry-run input, select its nonpublishing value explicitly.
+Manual dispatch with `dry_run: true` is also unsigned and nonpublishing. Use the GitHub Actions **Run workflow** form on the reviewed branch, or the commands below. Replace the branch placeholder and keep the dry-run value explicit.
 
 ```sh
 gh workflow view release.yml --repo ava-apple/vstudy-pro --yaml
-gh workflow run release.yml --repo ava-apple/vstudy-pro --ref YOUR_REVIEWED_BRANCH
+gh workflow run release.yml --repo ava-apple/vstudy-pro --ref YOUR_REVIEWED_BRANCH -f dry_run=true
 ```
 
-Only the owner-controlled `v*.*.*` tag path may publish a non-draft release. The tag version must match `apps/desktop/package.json`, and its release notes come from `docs/releases/X.Y.Z.md`. Never publish from `workflow_dispatch` or `ci/**`, move an existing release tag, or call `gh release create` as part of a dry run. A successful dry run alone does not authorize publishing.
+Only an owner-approved `v*.*.*` tag may publish a non-draft release. The tag version must match `apps/desktop/package.json`, and its release notes come from `docs/releases/X.Y.Z.md`. Pushing that tag publishes. Dispatching with `dry_run: false` against that exact tag also publishes and needs the same owner approval. Non-dry dispatch against a branch fails. Never move an existing release tag or call `gh release create` as part of a dry run. A successful dry run alone does not authorize publishing.
 
 The latest published release must contain these stable assets, versioned archives, and checksums. Signing must not change their names.
 

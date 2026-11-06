@@ -102,7 +102,7 @@ Use read-only Moodle functions unless the user explicitly approves a write actio
 
 Follow [the release checklist](../CONTRIBUTING.md#release-checklist). The desktop package version is authoritative. `pnpm release --tag vX.Y.Z` regenerates the changelog only. Write the owner-reviewed release body in `docs/releases/X.Y.Z.md`. Do not create or push a tag during implementation or a dry run.
 
-The release workflow supports dry runs on `ci/**` branch pushes and `workflow_dispatch`. Push only a branch the owner has authorized. A `ci/**` push must never use signing secrets, create a release, or upload to Releases. It retains unsigned installers and reports as Actions artifacts. Manual dispatch is also nonpublishing. Confirm its inputs in `.github/workflows/release.yml` before dispatching.
+The release workflow supports dry runs on `ci/**` branch pushes and `workflow_dispatch` with `dry_run: true`. Push only a branch the owner has authorized. A `ci/**` push and a manual dry run receive no signing secrets, create no release, and upload no files to Releases. They retain unsigned installers and reports as Actions artifacts. A non-dry dispatch is allowed only against the exact version tag and publishes that release. It requires the same owner approval as pushing the tag.
 
 Inspect real GitHub-hosted Mac and Windows packaging and launch results. A source build, a local Mac smoke, or an uploaded artifact alone does not prove a Windows installer works. See [the distribution plan](DISTRIBUTION_PLAN.md) for targets and the packaged smoke contract. Codex is disabled on Windows because this implementation has no equivalent verified kernel sandbox. API providers remain the cross-platform alternative.
 

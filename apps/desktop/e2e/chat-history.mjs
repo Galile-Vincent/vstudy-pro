@@ -100,6 +100,6 @@ try {
   assert.equal(messages.length,2);
   assert.deepEqual(errors,[]);
   await writeFile(join(evidence,'history-snapshot.txt'),await page.locator('body').ariaSnapshot());
-  console.log('PASS History: real general chat, CJK search, safe text, rename, pin, archive/delete undo, keyboard navigation, message jump, Cmd+K, en/zh-Hant/ja');
+  console.log('PASS History: real general chat, CJK search, safe text, rename, pin, archive/delete undo, keyboard navigation, message jump, Cmd/Ctrl+K, en/zh-Hant/ja');
 } catch(error) {if(app){const page=await app.firstWindow();await page.screenshot({path:join(evidence,'failure.png')});console.log(await page.locator('body').innerText());}throw error;}
 finally {await app?.close();await rm(directory,{recursive:true,force:true});}

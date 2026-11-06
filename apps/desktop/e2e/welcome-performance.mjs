@@ -34,4 +34,4 @@ const failures=results.filter(result=>{
  if(result.name==='offscreen-idle')return result.animations!==0;
  return result.droppedFrames>0||result.cls!==0||result.longFrames.some(ms=>ms>50);
 });
-assert.deepEqual(failures,[],'Welcome performance budget exceeded; see /tmp/vstudy-welcome2/performance-both-themes.json');
+assert.deepEqual(failures,[],`Welcome performance budget exceeded; see ${temporaryPath('vstudy-welcome2/performance-both-themes.json')}`);

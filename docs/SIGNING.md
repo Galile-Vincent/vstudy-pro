@@ -2,7 +2,7 @@
 
 Use this guide to give the release engineer credentials for macOS and Windows. Follow [the release procedure](../CONTRIBUTING.md#release-checklist) before publishing. Signing setup does not authorize a release.
 
-A `ci/**` branch push is an unsigned dry run. It must not receive signing secrets, publish a release, or upload to Releases. Manual workflow dispatch is also nonpublishing. Only an owner-approved version tag can publish.
+A `ci/**` branch push and manual workflow dispatch with `dry_run: true` are unsigned dry runs. They receive no signing secrets, publish no release, and upload no files to Releases. Only an owner-approved version tag can publish, either through its push or through a dispatch against that exact tag with `dry_run: false`.
 
 For trusted jobs permitted to sign, the distribution contract supports unsigned builds when no credentials exist. A complete credential set enables signing in the same build targets. Partial credentials or failed signing must fail the build. Never label an artifact signed merely because secrets exist. Verify the downloaded artifact.
 
@@ -14,7 +14,7 @@ For trusted jobs permitted to sign, the distribution contract supports unsigned 
 - [ ] Confirm Azure eligibility before buying a subscription. Taiwan is not on the current Public Trust eligibility list.
 - [ ] Add secrets through GitHub Settings or `gh secret set`. Share secret names, expiration dates, and account owners with the engineer, never secret values in chat or tickets.
 - [ ] Confirm the workflow reads the exact names below, materializes the Apple key safely, and only exposes platform-specific credentials to trusted packaging jobs.
-- [ ] Run the unsigned branch-only dry run first. For later owner-authorized signing verification, use a trusted nonpublishing dispatch with credential access explicitly enabled by the workflow. Retain installers, checksums, signing results, and packaged smoke reports for both platforms.
+- [ ] Run the unsigned branch-only dry run first. For owner-authorized signing verification before publication, run `node scripts/package-release.mjs --target <native-target>` from `apps/desktop` on a trusted matching native host with signing credentials. The helper uses `publish: never`. The workflow's dry-run mode cannot access signing secrets. Retain installers, checksums, signing results, and packaged smoke reports for both platforms.
 - [ ] Verify actual downloaded files on clean machines. Record Team ID, publisher subject, certificate expiry, notarization result, workflow URL, and commit.
 - [ ] Obtain owner approval before the non-draft tag release. Keep manual updates until the separate updater review is complete.
 
@@ -177,7 +177,7 @@ Use repository secrets or an explicitly wired protected GitHub Environment. An e
 
 Do not use `echo`, `printenv`, `set -x`, shell tracing, debug environment dumps, or CI artifacts to inspect secret values. GitHub masking is a fallback, not a guarantee for transformed values. Store temporary keys outside the checkout, limit permissions, delete them after use, and keep encrypted recovery copies outside CI.
 
-Track P12 expiry, API key owner, Azure client secret expiry, profile validity, HSM access, and authorized release approvers. Rotate by creating replacement credentials, updating the secrets, running a nonpublishing signed build, and verifying its downloads. Then revoke the old API key or client secret and remove old runner files. On suspected compromise, stop releases and revoke affected access immediately. Coordinate certificate revocation and publisher changes with the owner because existing installs and future updater trust may depend on them.
+Track P12 expiry, API key owner, Azure client secret expiry, profile validity, HSM access, and authorized release approvers. Rotate by creating replacement credentials, updating the secrets, running a nonpublishing signed build on a trusted native host as described in the checklist, and verifying its retained artifacts. Then revoke the old API key or client secret and remove old runner files. On suspected compromise, stop releases and revoke affected access immediately. Coordinate certificate revocation and publisher changes with the owner because existing installs and future updater trust may depend on them.
 
 ## Keep updates manual until signing is proven
 
