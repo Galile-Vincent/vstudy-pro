@@ -19,7 +19,7 @@
     "package:signed": "node apps/desktop/scripts/package-signed.mjs",
     "vendor:check": "node apps/desktop/scripts/vendor-check.mjs",
     "typecheck-fast": "node apps/desktop/scripts/generate-locales.mjs && pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo",
-    "prepare": "node apps/desktop/scripts/generate-locales.mjs && node scripts/install-hooks.mjs",
+    "prepare": "node scripts/ensure-pty-helper.mjs && node apps/desktop/scripts/generate-locales.mjs && node scripts/install-hooks.mjs",
     "release": "git-cliff --output CHANGELOG.md",
     "security:static": "node apps/desktop/scripts/security-audit.mjs && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs",
     "brand": "node scripts/make-brand.mjs"

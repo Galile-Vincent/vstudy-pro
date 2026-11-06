@@ -4,7 +4,7 @@ import ts from "typescript-eslint";
 export default ts.config(
   { ignores: ["out/**", "release/**"] },
   { files:["src/renderer/**/*.tsx"], ignores:["**/*.test.*"], plugins:{local:{rules:{"no-literal-string":i18nRule}}}, rules:{"local/no-literal-string":"error"} },
-  { files: ['src/**/*.{ts,tsx}', 'resources/**/*.ts'], ignores: ['**/*.test.*'], rules: {
+  { files: ['src/**/*.{ts,tsx,mts}', 'resources/**/*.ts'], ignores: ['**/*.test.*'], rules: {
     'no-eval': 'error', 'no-implied-eval': 'error', 'no-new-func': 'error',
     'no-restricted-syntax': ['error',
       { selector: "Property[key.name='shell'][value.value=true]", message: 'Use argv arrays with shell:false.' },

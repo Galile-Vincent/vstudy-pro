@@ -39,6 +39,16 @@ it('stops an output flood rather than storing or processing it without a bound',
   await expect(new ActionPty().run(terminalPlan(await temporary(), "process.stdout.write('x'.repeat(3000000));setInterval(()=>{},1000)"), AbortSignal.timeout(5000), data => { bytes += data.length; })).rejects.toMatchObject({ code: 'blocked' });
   expect(bytes).toBeLessThanOrEqual(2_000_000);
 });
+it('keeps one native terminal when concurrent calls await helper preparation and native loading', async () => {
+  const pty = new ActionPty(), controller = new AbortController();
+  const plan = terminalPlan(await temporary(), "console.log('READY');setInterval(()=>{},1000)");
+  let output = '';
+  const running = pty.run(plan, controller.signal, data => { output += data; });
+  const stopped = expect(running).rejects.toMatchObject({ code: 'cancelled' });
+  const busy = expect(pty.run(plan, controller.signal, () => {})).rejects.toMatchObject({ code: 'busy' });
+  try { await busy; await expect.poll(() => output).toContain('READY'); }
+  finally { controller.abort(); await stopped; }
+});
 it('drops OSC links and clipboard sequences even when their terminator crosses output chunks', () => {
   const filter = new TerminalText(), esc = String.fromCharCode(27), bell = String.fromCharCode(7);
   expect(filter.filter(`visible${esc}]52;c;secret`)).toBe('visible');

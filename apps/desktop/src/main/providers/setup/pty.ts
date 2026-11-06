@@ -7,6 +7,7 @@ import { execFile } from 'node:child_process';
 import type { IPty, IPtyForkOptions } from 'node-pty';
 import { systemExecutable } from '../../platform/process';
 import { SetupError } from './types';
+import { preparePtyHelper } from './pty-helper.mjs';
 export interface TerminalPlan { executable: string; args: readonly string[]; cwd: string; env: Readonly<Record<string, string>> }
 export type PtySpawn = (file: string, args: string[], options: IPtyForkOptions) => IPty;
 export interface PtyResult { exitCode: number; output: string }
@@ -14,7 +15,7 @@ export class ActionPty {
   private terminal: IPty | undefined;
   private inputBytes = 0;
   private inputWindow = { at: 0, bytes: 0 };
-  constructor(private readonly spawn?: PtySpawn) {}
+  constructor(private readonly spawn?: PtySpawn, private readonly prepareHelper = preparePtyHelper) {}
   write(data: string) {
     if (!this.terminal || Buffer.byteLength(data) > 4096) throw new SetupError('blocked');
     const bytes = Buffer.byteLength(data), now = Date.now();
@@ -28,7 +29,10 @@ export class ActionPty {
     this.terminal?.resize(columns, rows);
   }
   async run(plan: TerminalPlan, signal: AbortSignal, output: (data: string) => void, timeout = 180_000): Promise<PtyResult> {
-    const spawn = this.spawn ?? (await import('node-pty')).spawn;
+    signal.throwIfAborted();
+    let spawn: PtySpawn;
+    try { this.prepareHelper(); spawn = this.spawn ?? (await import('node-pty')).spawn; }
+    catch { throw new SetupError('terminal-unavailable'); }
     signal.throwIfAborted();
     if (this.terminal) throw new SetupError('busy');
     const terminal = spawn(plan.executable, [...plan.args], { name: 'xterm-256color', cols: 90, rows: 24, cwd: plan.cwd, env: { ...plan.env }, encoding: 'utf8' });

@@ -114,6 +114,7 @@
   "recovery_agy": "For Antigravity, use the keyboard in the first-run screen to sign in with an eligible Google account. Ask IT if your school blocks this sign-in.",
   "failure_offline": "Check your internet connection, then retry. Cached update information is kept.",
   "failure_permission-denied": "VStudy could not write or launch the tool. Ask IT for permission to use the app data folder. Do not disable device protections.",
+  "failure_terminal-unavailable": "VStudy could not prepare its terminal helper. Reinstall or repair VStudy, or ask IT to restore the helper's execution permission. You can still copy the sign-in command and use your own terminal.",
   "failure_blocked": "Your device or school policy blocked this action. Copy the help request below for IT.",
   "failure_wrong-version": "This version is not supported by VStudy's verified connection. Use a compatible managed version or ask IT. Newer is not always compatible.",
   "failure_browser-not-opened": "Open the sign-in URL shown below and follow the provider's instructions. If it expired, stop and start sign-in again.",
