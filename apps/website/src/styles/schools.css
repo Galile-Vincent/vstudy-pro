@@ -1,0 +1,48 @@
+/** The static list is the baseline. Enhancement overlaps equal-height slides without changing the stage size. */
+.schools-section { display:grid; grid-template-columns:1fr 1.15fr; align-items:center; gap:var(--space-16); padding-block:var(--space-20) var(--space-28); }
+.school-promise { font-size:var(--text-lg); color:var(--ink); margin-block:var(--space-6) var(--space-3); }
+.school-intro .text-link { margin-top:var(--space-6); }
+.school-origin { font-size:var(--text-xs); margin-top:var(--space-6); max-width:52ch; }
+.school-demo { background:var(--subtle); border-radius:var(--r-xl); padding:var(--space-6); min-width:0; }
+.school-demo-note { font-size:var(--text-xs); margin-bottom:var(--space-5); }
+.school-stage { display:grid; gap:var(--space-5); }
+.school-slide { min-width:0; }
+.school-search { display:flex; gap:var(--space-3); align-items:center; background:var(--surface); border-radius:var(--r-sm); height:48px; padding-inline:var(--space-4); margin-bottom:var(--space-4); font-size:var(--text-sm); }
+.school-search > span:first-child { font-size:24px; }
+.school-search [data-school-query] { white-space:nowrap; overflow:hidden; }
+.school-result { background:var(--surface); border-radius:var(--r-lg); padding:var(--space-6); display:grid; grid-template-columns:56px 1fr; column-gap:var(--space-4); align-items:center; }
+.school-monogram { display:grid; place-items:center; width:56px; height:56px; border-radius:var(--r-md); font-size:var(--text-lg); font-weight:600; color:var(--ink); background:linear-gradient(var(--tile-angle),var(--active),var(--subtle)); }
+.school-identity { min-width:0; }
+.school-identity h3 { font-size:var(--text-lg); line-height:1.3; overflow-wrap:anywhere; }
+.school-identity p { font-size:var(--text-xs); margin-top:var(--space-1); }
+.school-detected { grid-column:1/-1; justify-self:start; font-size:var(--text-xs); color:var(--ink); display:flex; align-items:center; gap:var(--space-2); margin-block:var(--space-5); padding:var(--space-2) var(--space-3); background:var(--subtle); border-radius:var(--r-sm); }
+.school-connect { grid-column:1/-1; min-height:44px; width:100%; display:flex; align-items:center; justify-content:center; gap:var(--space-3); background:var(--ink); color:var(--background); font-size:var(--text-sm); }
+.school-connect:active { transform:scale(.97); }
+.school-connect.is-connecting { animation:school-connect 480ms ease-out; }
+@keyframes school-connect { 50% { transform:scale(.97); opacity:.65; } }
+.school-signin { display:flex; align-items:baseline; gap:var(--space-3); font-size:var(--text-xs); margin-top:var(--space-5); }
+.school-signin > span { font:11px var(--mono); color:var(--ink); }
+.school-controls { display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); margin-top:var(--space-3); }
+.school-controls[hidden] { display:none; }
+.school-controls button { min-height:44px; min-width:44px; font-size:var(--text-xs); background:transparent; padding:var(--space-2); }
+.school-controls button:hover { background:var(--active); }
+.school-paging { display:flex; align-items:center; }
+.school-controls .school-dot { min-width:28px; width:28px; display:grid; place-items:center; }
+.school-dot span { width:6px; height:6px; border-radius:50%; background:var(--muted); }
+.school-dot[aria-current=true] span { background:var(--ink); transform:scale(1.5); }
+@media(prefers-reduced-motion:no-preference) {
+  .school-demo[data-enhanced] .school-stage { grid-template:1fr / 1fr; min-height:332px; gap:0; }
+  .school-demo[data-enhanced] .school-slide { grid-area:1/1; opacity:0; transform:translateY(8px); visibility:hidden; pointer-events:none; transition:opacity 320ms ease-out,transform 320ms ease-out; }
+  .school-demo[data-enhanced] .school-slide[data-active] { opacity:1; transform:none; visibility:visible; pointer-events:auto; }
+}
+@media(max-width:1023px) { .schools-section { grid-template-columns:1fr; gap:var(--space-8); max-width:720px; } }
+@media(max-width:767px) {
+  .schools-section { padding-block:var(--space-16); }
+  .school-demo { padding:var(--space-4); }
+  .school-result { padding:var(--space-4); grid-template-columns:48px 1fr; column-gap:var(--space-3); }
+  .school-monogram { width:48px; height:48px; font-size:var(--text-base); }
+  .school-identity h3 { font-size:18px; }
+  .school-controls .school-dot { min-width:24px; width:24px; }
+  .school-controls button { min-width:36px; }
+}
+@media(prefers-reduced-motion:reduce) { .school-controls { display:none; } }

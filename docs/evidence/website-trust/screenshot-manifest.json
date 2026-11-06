@@ -1,0 +1,226 @@
+[
+  {
+    "file": "frame-01-playing.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 105027,
+    "sha256": "1eac43d8d3b24e7b0f76635cda5d2f7e69bee2ea8542c0463cc3c0148078e358"
+  },
+  {
+    "file": "frame-02-advanced.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 105598,
+    "sha256": "b804a26e0859fab90e6bd62e4be21ae96d2415304fbdb1c2bff9608e288c1800"
+  },
+  {
+    "file": "frame-03-hover-paused.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 105591,
+    "sha256": "7009d47812be8c620fddfadcb6c7e16365427d385e432f20a1df2a623dd9a4e6"
+  },
+  {
+    "file": "frame-04-hover-still-paused.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 105754,
+    "sha256": "ef145b8ee3ba3fa0cfc8c6df5cf90c19a21d500fe242638908eccc20fefd783c"
+  },
+  {
+    "file": "frame-05-manually-paused.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 104782,
+    "sha256": "ccc66b0388a65f5cb57da311c9b1018a5bd667fe46adbfcd5d64cdaa7ffe9931"
+  },
+  {
+    "file": "frame-06-manually-still-paused.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 104789,
+    "sha256": "aeb050613a48e6e3c79873b36630b75b4e2e461887395727cb1d207666097410"
+  },
+  {
+    "file": "frame-07-reduced-motion-static.png",
+    "width": 350,
+    "height": 1670,
+    "bytes": 84467,
+    "sha256": "0d192440d9dd90195453751cafb714d689b6d256993bcb06d00af473402225f5"
+  },
+  {
+    "file": "frame-08-reduced-motion-unchanged.png",
+    "width": 350,
+    "height": 1670,
+    "bytes": 84467,
+    "sha256": "0d192440d9dd90195453751cafb714d689b6d256993bcb06d00af473402225f5"
+  },
+  {
+    "file": "providers-en-1440-dark.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 139281,
+    "sha256": "337a39db6d41dc2535338c6f2ba3c2aea1e3a4cf8882e8b9ea48dc9ff6a531da"
+  },
+  {
+    "file": "providers-en-1440-light.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 142498,
+    "sha256": "a07c796fcd197814336d7aa7a94f1c9c1422fa9ecd6f6d0654135d565fd5e030"
+  },
+  {
+    "file": "providers-en-390-dark.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 52494,
+    "sha256": "85cf839d9348fcf4ac2a8996f78c6e56006c1595c6a2932d38895b4a570921ad"
+  },
+  {
+    "file": "providers-en-390-light.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 51464,
+    "sha256": "442ebe3d2026e3785a0b5e1a073ac1b586c9ca9116d4f0541149612ef4d4435a"
+  },
+  {
+    "file": "providers-ja-1440-dark.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 163351,
+    "sha256": "2a86b11efae1e06baf60a9db39c623b14a55e85ef070abf3d548742069b45d28"
+  },
+  {
+    "file": "providers-ja-1440-light.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 166325,
+    "sha256": "a28cd7f841282e0f81f024bcc3e479670558913e3c66afe39f16f17d4b5a25a6"
+  },
+  {
+    "file": "providers-ja-390-dark.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 63369,
+    "sha256": "9c2c7663c12efa726cb24d4cb9edc0c82618b2942a6d255add96c1ff60ceb63d"
+  },
+  {
+    "file": "providers-ja-390-light.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 62182,
+    "sha256": "f079b0e7497c8efcfcaf01cd9e73515e8d0aee8bbb3de71216cc8518ddfcd312"
+  },
+  {
+    "file": "providers-zh-Hant-1440-dark.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 154041,
+    "sha256": "3857f8146f1fbbcbf70ef9f9f5b896d719f071802b42ba7305dee4794d4430b4"
+  },
+  {
+    "file": "providers-zh-Hant-1440-light.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 156897,
+    "sha256": "099407720fa9826e8e41e2288ff4ec5d6173ab764710a70e7244e16d5f370beb"
+  },
+  {
+    "file": "providers-zh-Hant-390-dark.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 68099,
+    "sha256": "2df8b8216ebffb3413ed2f0667e6107ad60e430690191efc444e331be98f9f3a"
+  },
+  {
+    "file": "providers-zh-Hant-390-light.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 66946,
+    "sha256": "13884cf5128a92ab3b9b44e61df44732ccfdb04744a4d570ff63bd3b59e92583"
+  },
+  {
+    "file": "schools-en-1440-dark.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 119177,
+    "sha256": "6a233ba056f8aa21d053a37bd73dd8086635508880621ac07c24f21e4131ab47"
+  },
+  {
+    "file": "schools-en-1440-light.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 114793,
+    "sha256": "844eb6a2b49baf11295d91e00821a5441ffb3979963f028b52a3bc38424ed46f"
+  },
+  {
+    "file": "schools-en-390-dark.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 60368,
+    "sha256": "6101cc477e8d1dc70bb046740a1451263a5e1a303ed71aca7b5fb2c534a66d9f"
+  },
+  {
+    "file": "schools-en-390-light.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 60730,
+    "sha256": "86d875751cf801439ed73ba3c019554b61e9a172cc2588d860dfe80476a3e920"
+  },
+  {
+    "file": "schools-ja-1440-dark.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 146614,
+    "sha256": "701715ac8bb5df5514997cb2f4c07a1c8f1da3e210ead02867687e0630ade269"
+  },
+  {
+    "file": "schools-ja-1440-light.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 142354,
+    "sha256": "d6175f060403406d1490219b0bc10ffa3f61b898d6e4741856df7a20ad219486"
+  },
+  {
+    "file": "schools-ja-390-dark.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 78191,
+    "sha256": "43322b94f90dace1d664324907612887baa5e51eaa8b214a354c3340a793607a"
+  },
+  {
+    "file": "schools-ja-390-light.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 77820,
+    "sha256": "17680ddd0523b4c89d42ac89ee9012e6bba137144ccc2f3d208673fe23c08097"
+  },
+  {
+    "file": "schools-zh-Hant-1440-dark.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 143697,
+    "sha256": "3135895c57f57665bb7fdc3d42c7386a674df20de0b9e09da520140ec7e73e1c"
+  },
+  {
+    "file": "schools-zh-Hant-1440-light.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 139221,
+    "sha256": "5d1cbf5253fb27e8d1f2b93f60a938e512b3b6ab39ad71ddf9846df642035699"
+  },
+  {
+    "file": "schools-zh-Hant-390-dark.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 74572,
+    "sha256": "7727dd9396874b77bd1218751472474fc22167a31160ba6771a5a1741dfc9256"
+  },
+  {
+    "file": "schools-zh-Hant-390-light.png",
+    "width": 390,
+    "height": 1000,
+    "bytes": 73395,
+    "sha256": "676954b1a075f7901c673bd3ba9918814fbb2fe867575d271a11ba50749601cc"
+  }
+]
