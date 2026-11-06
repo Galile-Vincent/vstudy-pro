@@ -1,0 +1,3585 @@
+{
+  "result": "PASS",
+  "artifact": "Built Electron. Original striped SVG cover fixture inputs retained. Seven course cards, real local document import. No school network.",
+  "zoom": "Electron webContents.setZoomFactor(2), confirmed 720 CSS pixels in a 1440-pixel window. Native Electron capturePage crops at CSS bounds multiplied by the verified zoom factor. All seven cover crops form the 2x grid, including both formerly striped covers.",
+  "results": [
+    {
+      "theme": "vstudy",
+      "scheme": "light",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 238.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 269.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 267.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 311.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 282.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 312.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 255.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 289.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 250.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 282.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 303.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 343.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 291.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 327.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 238.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 269.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 267.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 311.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 282.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 312.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 255.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 289.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 250.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 282.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 303.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 343.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 291.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 327.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "vstudy",
+      "scheme": "dark",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 242.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 273.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 271.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 315.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 286.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 316.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 259.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 293.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 254.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 286.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 307.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 347.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 295.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 331.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 242.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 273.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 271.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 315.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 286.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 316.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 259.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 293.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 254.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 286.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 307.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 347.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 295.142), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 331.142), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.270891 -0.000474721 -0.0329296 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "ocean",
+      "scheme": "light",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 196.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 227.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 225.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 269.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 240.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 270.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 213.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 247.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 208.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 240.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 261.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 301.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 249.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 285.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 196.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 227.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 225.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 269.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 240.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 270.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 213.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 247.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 208.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 240.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 261.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 301.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 249.733), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 285.733), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.995038 -0.00261763 -0.00217795 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "ocean",
+      "scheme": "dark",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 192.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 223.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 221.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 265.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 236.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 266.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 209.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 243.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 204.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 236.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 257.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 297.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 245.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 281.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 192.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 223.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 221.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 265.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 236.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 266.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 209.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 243.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 204.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 236.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 257.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 297.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 245.801), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 281.801), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.291401 -0.0235081 -0.0311674 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "grove",
+      "scheme": "light",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 115.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 146.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 144.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 188.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 159.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 189.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 132.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 166.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 127.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 159.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 180.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 220.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 168.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 204.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 115.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 146.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 144.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 188.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 159.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 189.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 132.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 166.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 127.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 159.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 180.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 220.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 168.58), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 204.58), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.994131 -0.0038482 0.00569677 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "grove",
+      "scheme": "dark",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 106.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 137.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 135.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 179.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 150.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 180.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 123.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 157.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 118.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 150.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 171.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 211.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 159.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 195.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 106.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 137.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 135.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 179.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 150.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 180.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 123.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 157.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 118.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 150.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 171.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 211.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 159.622), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 195.622), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.294649 -0.0268754 0.0107476 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "ember",
+      "scheme": "light",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 11.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 42.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 40.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 84.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 55.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 85.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 28.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 62.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 23.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 55.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 76.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 116.629), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 64.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 100.629), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 11.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 42.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 40.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 84.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 55.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 85.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 28.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 62.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 23.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 55.6294), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 76.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 116.629), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 64.6294), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 100.629), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.992252 0.00160345 0.00600511 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "ember",
+      "scheme": "dark",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 27.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 58.2065), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 56.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 100.207), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 71.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 101.207), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 44.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 78.2065), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 39.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 71.2065), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 92.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 132.207), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 80.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 116.207), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 27.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 58.2065), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 56.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 100.207), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 71.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 101.207), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 44.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 78.2065), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 39.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 71.2065), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 92.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 132.207), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 80.2065), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 116.207), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.290871 0.0208745 0.0197108 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "iris",
+      "scheme": "light",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 274.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 305.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 303.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 347.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 318.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 348.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 291.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 325.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 286.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 318.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 339.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 19.9634), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 327.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 3.96344), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 274.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 305.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 303.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 347.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 318.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 348.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 291.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 325.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 286.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 318.963), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 339.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 19.9634), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 327.963), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 3.96344), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.991492 0.00457689 -0.00409609 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "iris",
+      "scheme": "dark",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 274.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 305.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 303.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 347.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 318.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 348.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 291.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 325.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 286.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 318.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 339.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 19.5431), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 327.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 3.54306), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 274.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 305.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 303.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 347.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 318.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 348.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 291.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 325.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 286.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 318.543), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 339.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 19.5431), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 327.543), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 3.54306), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.28941 0.0263431 -0.0406106 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "rose",
+      "scheme": "light",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 326.984), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 357.984), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 355.984), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 39.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 10.9836), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 40.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 343.984), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 17.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 338.984), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 10.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 31.9836), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 71.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 19.9836), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 55.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 326.984), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 357.984), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 355.984), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 39.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 10.9836), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 40.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 343.984), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 17.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 338.984), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 10.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 31.9836), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 71.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 19.9836), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 55.9836), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.989768 0.00625247 -0.00219226 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "rose",
+      "scheme": "dark",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 321.067), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 352.067), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 350.067), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 34.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 5.06689), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 35.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 338.067), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 12.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 333.067), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 5.06689), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 26.0669), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 66.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 14.0669), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 50.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 321.067), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 352.067), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 350.067), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 34.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 5.06689), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 35.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 338.067), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 12.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 333.067), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 5.06689), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 26.0669), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 66.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 14.0669), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 50.0669), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.298949 0.0357381 -0.0100131 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "slate",
+      "scheme": "light",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 216.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 247.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 245.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 289.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 260.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 290.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 233.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 267.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 228.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 260.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 281.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 321.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 269.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 305.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 216.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 247.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 245.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 289.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 260.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 290.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 233.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 267.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 228.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 260.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 281.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 321.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 269.513), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 305.513), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.993565 -0.000596941 -0.00155652 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "slate",
+      "scheme": "dark",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 214.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 245.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 243.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 287.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 258.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 288.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 231.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 265.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 226.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 258.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 279.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 319.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 267.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 303.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 214.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 245.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 243.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 287.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 258.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 288.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 231.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 265.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 226.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 258.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 279.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 319.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 267.605), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 303.605), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.300199 -0.00832051 -0.0212513 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "paper",
+      "scheme": "light",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 46.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 77.9778), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 75.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 119.978), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 90.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 120.978), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 63.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 97.9778), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 58.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 90.9778), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 111.978), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 151.978), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 99.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 135.978), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.8 0.085 46.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 77.9778), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.8 0.085 75.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 119.978), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.8 0.085 90.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 120.978), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.8 0.085 63.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 97.9778), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.8 0.085 58.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 90.9778), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.8 0.085 111.978), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 151.978), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.8 0.085 99.9778), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.72 0.08 135.978), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.985703 0.000627846 0.0166751 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "paper",
+      "scheme": "dark",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 56.7728), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 87.7728), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 85.7728), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 129.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 100.773), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 130.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 73.7728), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 107.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 68.7728), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 100.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 121.773), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 161.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 109.773), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 145.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 66%, oklch(0.46 0.07 56.7728), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 87.7728), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 32% 65%, oklch(0.46 0.07 85.7728), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 129.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 42% 38%, oklch(0.46 0.07 100.773), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 130.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 67% 68%, oklch(0.46 0.07 73.7728), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 107.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 76% 35%, oklch(0.46 0.07 68.7728), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 100.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 58% 60%, oklch(0.46 0.07 121.773), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 161.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "radial-gradient(at 81% 22%, oklch(0.46 0.07 109.773), rgba(0, 0, 0, 0) 72%), radial-gradient(at 90% 80%, oklch(0.36 0.065 145.773), rgba(0, 0, 0, 0) 75%), none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.310647 0.000745624 0.0216228 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "contrast",
+      "scheme": "light",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.999994 0.0000455678 0.0000200868 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    },
+    {
+      "theme": "contrast",
+      "scheme": "dark",
+      "normal": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "zoom": [
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        },
+        {
+          "classes": "moodle-artwork soft-art",
+          "children": [
+            {
+              "tag": "SPAN",
+              "class": "moodle-art-scrim"
+            }
+          ],
+          "background": "none",
+          "curveDisplay": "none",
+          "curveBackground": "linear-gradient(155deg, oklab(0.134408 0.00000612438 0.00000268966 / 0.06), rgba(0, 0, 0, 0) 65%)"
+        }
+      ],
+      "courses": [
+        "CS305",
+        "SCI108"
+      ],
+      "documentViews": [
+        "home",
+        "library"
+      ]
+    }
+  ],
+  "pixels": [
+    {
+      "source": "before",
+      "code": "CS305",
+      "maximumSecondDifference": 26
+    },
+    {
+      "source": "before",
+      "code": "SCI108",
+      "maximumSecondDifference": 21
+    },
+    {
+      "source": "after",
+      "theme": "vstudy",
+      "scheme": "light",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "vstudy",
+      "scheme": "light",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "vstudy",
+      "scheme": "dark",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "vstudy",
+      "scheme": "dark",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "ocean",
+      "scheme": "light",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "ocean",
+      "scheme": "light",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "ocean",
+      "scheme": "dark",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "ocean",
+      "scheme": "dark",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "grove",
+      "scheme": "light",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "grove",
+      "scheme": "light",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "grove",
+      "scheme": "dark",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "grove",
+      "scheme": "dark",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "ember",
+      "scheme": "light",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "ember",
+      "scheme": "light",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "ember",
+      "scheme": "dark",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "ember",
+      "scheme": "dark",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "iris",
+      "scheme": "light",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "iris",
+      "scheme": "light",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "iris",
+      "scheme": "dark",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "iris",
+      "scheme": "dark",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "rose",
+      "scheme": "light",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "rose",
+      "scheme": "light",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "rose",
+      "scheme": "dark",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "rose",
+      "scheme": "dark",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "slate",
+      "scheme": "light",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "slate",
+      "scheme": "light",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "slate",
+      "scheme": "dark",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "slate",
+      "scheme": "dark",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "paper",
+      "scheme": "light",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "paper",
+      "scheme": "light",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "paper",
+      "scheme": "dark",
+      "code": "CS305",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "paper",
+      "scheme": "dark",
+      "code": "SCI108",
+      "maximumSecondDifference": 6
+    },
+    {
+      "source": "after",
+      "theme": "contrast",
+      "scheme": "light",
+      "code": "CS305",
+      "maximumSecondDifference": 0
+    },
+    {
+      "source": "after",
+      "theme": "contrast",
+      "scheme": "light",
+      "code": "SCI108",
+      "maximumSecondDifference": 0
+    },
+    {
+      "source": "after",
+      "theme": "contrast",
+      "scheme": "dark",
+      "code": "CS305",
+      "maximumSecondDifference": 0
+    },
+    {
+      "source": "after",
+      "theme": "contrast",
+      "scheme": "dark",
+      "code": "SCI108",
+      "maximumSecondDifference": 0
+    }
+  ],
+  "pixelMethod": "Maximum horizontal/vertical RGB second difference inside an undecorated central field crop. Limit 8 allows gradient quantization. The original CS305 and SCI108 stripe crops must fail this same threshold.",
+  "errors": []
+}

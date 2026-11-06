@@ -17,11 +17,11 @@ The [all-theme comparison](../evidence/art/clean/prototypes/all-themes.png) cont
 
 `courseArt(id, term)` returns deterministic CSS variables for hue, field position, and the deadline accent.
 The hue offset stays within 35 degrees of the theme accent. The second field is 30 to 50 degrees away.
-`soft-art.css` owns two large radial fields, a low-chroma base, and one low-contrast filled curve.
+`soft-art.css` owns two large radial fields and a low-chroma base. The fields-only follow-up disables the curve on cards and retains it at six percent in heroes.
 The fields use OKLCH relative colors. They need no raster assets, filters, grain, dots, contour strokes, or dither.
 Course cards and heroes use the same treatment. Home and Library document cards share it through `DocumentArt`.
 Empty course states use diluted fields. High contrast and forced colors use flat surfaces.
-Remote course images remain supported and retain their existing scrim and failure fallback.
+Course-provided image URLs no longer render as decoration. The fields-only follow-up removes that path because supplied images can contain stripes or other patterns. See [the follow-up verification](fields-only-verification.md).
 
 ## Borderless chrome
 
