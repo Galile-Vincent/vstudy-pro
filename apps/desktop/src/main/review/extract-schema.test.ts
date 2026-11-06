@@ -65,3 +65,25 @@ it('retains an explicit wrong attempt alongside gave-up evidence',()=>{
  const output={...value,concepts:[{...value.concepts[0],wrong_attempt:true}]};
  expect(guardExtraction(output,{...context,messages:[{role:'user',text}]}).observations[0]).toMatchObject({signal:'gave_up',wrongAttempt:true});
 });
+it('does not discard a polite Japanese question as an answer-only preference',()=>{
+ const value=fixture();const text='微分について教えてください。私は x² の微分は x だと思います';
+ value.concepts[0]!.evidence=text;value.concepts[0]!.difficulty_signal='wrong_attempt';value.concepts[0]!.error_type='mistake';
+ expect(guardExtraction(value,{...context,messages:[{role:'user',text}]}).observations[0]).toMatchObject({signal:'wrong',wrongAttempt:true});
+});
+it('excludes an initial wrong guess at a tutor probe but permits a repeated belief after help',()=>{
+ const value=fixture();value.concepts[0]!.evidence='u=e^x';value.concepts[0]!.difficulty_signal='wrong_attempt';
+ const messages=[{role:'assistant' as const,text:'Which u?',move:'probe' as const},{role:'user' as const,text:'u=e^x'}];
+ expect(guardExtraction(value,{...context,messages}).observations[0]).toMatchObject({signal:'asked',wrongAttempt:false});
+ expect(guardExtraction(value,{...context,messages:[...messages,{role:'assistant',text:'Try the term that simplifies.',move:'worked-step'},{role:'user',text:'u=e^x'}]}).observations[0]).toMatchObject({signal:'wrong',wrongAttempt:true});
+});
+it('records a wrong then corrected student restatement as resolved with reduced negative evidence',()=>{
+ const value=fixture();value.resolved='yes';value.concepts[0]!.evidence='The derivative of x squared is 2x';value.concepts[0]!.difficulty_signal='wrong_attempt';
+ const messages=[{role:'user' as const,text:'The derivative is x'},{role:'assistant' as const,text:'Use the power rule.'},{role:'user' as const,text:value.concepts[0]!.evidence}];
+ expect(guardExtraction(value,{...context,messages}).observations[0]).toMatchObject({signal:'wrong',wrongAttempt:true,resolved:true});
+ value.concepts[0]!.evidence='The derivative is x';
+ expect(guardExtraction(value,{...context,messages}).observations[0]!.resolved).toBe(false);
+});
+it('records a corrected asserted misconception even without Socratic help metadata',()=>{
+ const value=fixture();const text='Infinity is a number';value.help_level_used=0;value.concepts[0]!.evidence=text;value.concepts[0]!.difficulty_signal='wrong_attempt';value.concepts[0]!.error_type='misconception';
+ expect(guardExtraction(value,{...context,messages:[{role:'user',text},{role:'assistant',text:'Infinity is not a real number.'}]}).observations[0]!.errorType).toBe('misconception');
+});

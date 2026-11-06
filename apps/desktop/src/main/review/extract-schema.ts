@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { exitPreference } from '../prompt/tutor-mode';
 import { matchConcept } from './concept-match';
 const short = z.string().trim().max(140);
 const id = z.string().min(1).max(240);
@@ -21,7 +22,7 @@ export const extractionSchema = z.object({
   affect_flag:z.enum(['none','frustrated','bored','confused']),exclude_from_memory:z.boolean(),
 }).strict();
 export type ExtractionResult = z.infer<typeof extractionSchema>;
-export interface ExtractionMessage {role:'user'|'assistant';text:string;id?:string;threadId?:string;step?:number}
+export interface ExtractionMessage {role:'user'|'assistant';text:string;id?:string;threadId?:string;step?:number;move?:'probe'|'worked-step'|'answer'}
 export interface ExtractionConcept {id:string;courseId:string;key:string;label:string;unitId?:string|null}
 export interface ExtractionContext {
   messages:readonly ExtractionMessage[];
@@ -37,7 +38,7 @@ export interface GuardedObservation {
 }
 export interface GuardedExtraction {courseId:string|null;confidence:number;questionSummary:string;observations:GuardedObservation[]}
 const normalizeEvidence = (value:string) => value.normalize('NFKC').replace(/\s+/gu,' ').trim();
-const directPreference = /just (?:tell me|answer)|answer directly|i want the answer|give me (?:the )?answer|直接(?:告訴|回答)|給我答案|直接給(?:我)?答案|答案就好|教えて|答えだけ/iu;
+const directPreference = exitPreference;
 const affirmation = /^(?:yes|yeah|ok(?:ay)?|thanks?|understood|懂了|是|好|了解|はい|わかった)[.!。！\s]*$/iu;
 /** This verifies provenance and membership, not whether a student's mathematical claim is true. */
 export function guardExtraction(value:unknown,context:ExtractionContext):GuardedExtraction {
@@ -62,7 +63,10 @@ export function guardExtraction(value:unknown,context:ExtractionContext):Guarded
     if(keys.has(key)) continue;
     keys.add(key);
     const preference=directPreference.test(evidence);
-    const substantive=quoted && !preference && !affirmation.test(evidence);
+    const evidenceIndex=context.messages.map((message,index)=>message.role==='user' && normalizeEvidence(message.text).includes(evidence)?index:-1).filter(index=>index>=0).at(-1) ?? -1;
+    const prior=context.messages[evidenceIndex-1];
+    const probeGuess=prior?.role==='assistant' && prior.move==='probe' && !/(?:i (?:think|believe)|我(?:覺得|認為)|と思|私の考え)/iu.test(evidence) && !context.messages.slice(0,evidenceIndex).some(message=>message.role==='user' && normalizeEvidence(message.text).includes(evidence));
+    const substantive=quoted && !preference && !probeGuess && !affirmation.test(evidence);
     const wrongAttempt=substantive && (concept.wrong_attempt===true || ['wrong_attempt','repeated_wrong'].includes(concept.difficulty_signal));
     let signal:GuardedObservation['signal']='asked';
     let errorType:GuardedObservation['errorType']='none';
@@ -70,13 +74,13 @@ export function guardExtraction(value:unknown,context:ExtractionContext):Guarded
       if(wrongAttempt && concept.difficulty_signal!=='gave_up') signal='wrong';
       else if(concept.difficulty_signal==='gave_up' && /(?:do(?:n't| not) (?:know|understand)|cannot|can't|give up|不知道|不懂|不會|放棄|わからない|分からない)/iu.test(evidence)) signal='gave_up';
       else if(concept.difficulty_signal==='asked_again') signal='confused';
-      if(wrongAttempt && concept.error_type==='misconception' && !/[?？]/u.test(evidence) && result.help_level_used>0) errorType='misconception';
+      if(wrongAttempt && concept.error_type==='misconception' && !/[?？]/u.test(evidence) && context.messages.slice(evidenceIndex+1).some(message=>message.role==='assistant')) errorType='misconception';
       else if(wrongAttempt && ['slip','mistake'].includes(concept.error_type)) errorType=concept.error_type as 'slip'|'mistake';
       else if(signal==='gave_up' && concept.error_type==='knowledge_gap') errorType='gap';
     }
     // A bare affirmation after a worked example is not a demonstration of understanding.
-    const resolved=substantive && !tutors.some(text=>text.includes(evidence)) && result.resolved==='yes' && !wrongAttempt && context.messages.some((message,index)=>message.role==='assistant' && context.messages.slice(index+1).some(next=>next.role==='user' && normalizeEvidence(next.text).includes(evidence)));
-    if(resolved){signal='resolved';errorType='none';}
+    const resolved=substantive && !tutors.some(text=>text.includes(evidence)) && result.resolved==='yes' && evidenceIndex===(context.messages.map((message,index)=>message.role==='user'?index:-1).filter(index=>index>=0).at(-1) ?? -1) && context.messages.some((message,index)=>message.role==='assistant' && context.messages.slice(index+1).some(next=>next.role==='user' && normalizeEvidence(next.text).includes(evidence)));
+    if(resolved && !wrongAttempt){signal='resolved';errorType='none';}
     observations.push({unitId:concept.unit_id ?? matched?.unitId ?? null,conceptKey:matched?.key ?? null,proposedLabel:matched?null:concept.label,
       signal,errorType,evidenceQuote:concept.evidence,evidenceKind:quoted?'quote':'paraphrase',weaknessNote:errorType!=='none'?concept.misconception_text:null,
       confidence:quoted?concept.confidence:Math.min(0.5,concept.confidence),resolved,wrongAttempt});
