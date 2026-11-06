@@ -16,6 +16,7 @@ const {AjvJsonSchemaValidator}=requireMcp('@modelcontextprotocol/sdk/validation/
 const root=await mkdtemp('/private/tmp/vm-e2e-'),data=join(root,'data'),home=join(root,'home');
 const evidence=resolve('../../docs/evidence/mcp');
 const serverBin=process.env.VSTUDY_MCP_TEST_BIN ?? resolve('../mcp/dist/vstudy-mcp.cjs');
+const peerHelper=process.env.VSTUDY_MCP_PEER_HELPER ?? resolve('resources/mcp-peer');
 const fixture=await startMcpSchool();
 let app,client,transport,stderr='';
 const report=[];
@@ -23,7 +24,7 @@ const errors=[];
 try {
   await mkdir(data,{mode:0o700});await mkdir(home,{mode:0o700});await mkdir(evidence,{recursive:true});
   const entry=join(root,'entry.ts');
-  await writeFile(entry,mcpAppSource({desktop:resolve('.'),userData:data,serverBin,peerHelper:resolve('resources/mcp-peer'),accountId,courseId,pageId,quizId,assignId,fileId,school,functions,token,privateToken,malicious,fixtureUrl:fixture.url}));
+  await writeFile(entry,mcpAppSource({desktop:resolve('.'),userData:data,serverBin,peerHelper,accountId,courseId,pageId,quizId,assignId,fileId,school,functions,token,privateToken,malicious,fixtureUrl:fixture.url}));
   await build({configFile:false,logLevel:'error',resolve:{conditions:['node']},build:{outDir:join(root,'bundle'),lib:{entry,formats:['cjs'],fileName:()=>'app.cjs'},rollupOptions:{external:['electron',/^node:/]}}});
   await writeFile(join(root,'package.json'),JSON.stringify({name:'vstudy-mcp-acceptance',main:'bundle/app.cjs'}));
   const launch=async()=>{
