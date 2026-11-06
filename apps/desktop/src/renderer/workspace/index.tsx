@@ -264,7 +264,7 @@ export function Workspace() {
 
   };
   const importing = useRef(false);
-  const importDocument = async (paths?: string[]) => {
+  const importDocument = async (paths?: string[], names?: string[]) => {
     if (!connected) { setNotice(tr('common:workspace_is_still_connecting_try_importing_again_in_a_moment')); return; }
     if (importing.current) return;
     importing.current = true;
@@ -272,7 +272,7 @@ export function Workspace() {
     try {
       const results = paths ? await desktop.invoke("documents:importPaths", { paths }) : null;
       const imported = results ? results.find(r => r.ok)?.document : await desktop.invoke("documents:import", {});
-      if (results) setNotice(results.filter(r => !r.ok).map(r => `${r.path}: ${tr('errors:conversion_failed')}`).join("\n"));
+      if (results) setNotice(results.flatMap((r, index) => r.ok ? [] : [`${names?.[index] ?? tr('common:document')}: ${errorText(new Error(r.error))}`]).join("\n"));
       if (imported) {
         setDocuments(await desktop.invoke("documents:list", {}));
         setDocumentId(imported.id);
@@ -487,7 +487,7 @@ export function Workspace() {
         try {
           const paths = Array.from(e.dataTransfer.files, (file) => desktop.getPathForFile?.(file) ?? "");
           if (!paths.length || paths.some((path) => !path)) throw new Error(tr('common:dropped_files_have_no_accessible_local_path'));
-          void importDocument(paths);
+          void importDocument(paths, Array.from(e.dataTransfer.files, file => file.name));
         } catch (error) { report(error); }
       }}
     >
