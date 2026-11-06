@@ -168,7 +168,7 @@ export function createApiAdapter(
               ? [{ name:presentationTool.name,description:presentationTool.description,input_schema:presentationTool.parameters }]
               : [{ type:'function',function:presentationTool }], ...(!isAnthropic ? {parallel_tool_calls:false} : {}) } : {}),
             ...(request.options?.reasoning_effort ? { reasoning_effort: request.options.reasoning_effort } : {}),
-            ...(isAnthropic ? { max_tokens: 8192 } : { stream_options: { include_usage: true } }),
+            ...(isAnthropic ? { max_tokens: request.maxOutputTokens ?? 8192 } : { stream_options: { include_usage: true }, ...(request.maxOutputTokens ? getConfig().kind === 'compatible' ? {max_tokens:request.maxOutputTokens} : {max_completion_tokens:request.maxOutputTokens} : {}) }),
             ...(request.systemPrompt && isAnthropic ? {system:request.systemPrompt} : {}),
             messages: [...(request.systemPrompt && !isAnthropic ? [{role:'system',content:request.systemPrompt}] : []), { role: "user", content: request.images?.length ? [
               ...(isAnthropic ? [{type:'text',text:request.prompt}] : [{type:'text',text:request.prompt}]),
