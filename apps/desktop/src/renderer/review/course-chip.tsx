@@ -29,23 +29,9 @@ export function CourseChip({ conversationId }: { conversationId: string }) {
         if (!active) return;
         all.push(...page.items); cursor = page.nextCursor ?? undefined;
       } while (cursor);
-      setCourses(all);
-      do {
-        const page: IpcResponse<'review:chat:inbox'> = await desktop.invoke('review:chat:inbox', { limit: 50, ...(cursor ? { cursor } : {}) });
-        if (!active) return;
-        const link = page.items.find(item => item.conversationId === conversationId);
-        if (link) { setCourseId(null); setExcluded(link.excludeFromMemory); return; }
-        cursor = page.nextCursor ?? undefined;
-      } while (cursor);
-      // W1 has no chat-link read channel. Eligible summaries provide a read-only fallback.
-      for (const course of all) {
-        do {
-          const page: IpcResponse<'review:jobs:page'> = await desktop.invoke('review:jobs:page', { courseId: course.id, limit: 50, ...(cursor ? { cursor } : {}) });
-          if (!active) return;
-          if (page.items.some(item => item.conversationId === conversationId)) { setCourseId(course.id); return; }
-          cursor = page.nextCursor ?? undefined;
-        } while (cursor);
-      }
+      const link = await desktop.invoke('review:chat:link-get', { conversationId });
+      if (!active) return;
+      setCourses(all); setCourseId(link?.courseId ?? null); setExcluded(link?.excludeFromMemory ?? false);
     }
     void load().catch(() => { if (active) setError(true); });
     return () => { active = false; };
