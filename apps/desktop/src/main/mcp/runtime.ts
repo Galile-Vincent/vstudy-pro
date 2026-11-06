@@ -1,5 +1,6 @@
 /** Compose the bridge with app-owned services and drain prepared work before storage closes. @packageDocumentation */
 import type { McpBackend, PreparedMcpCall } from '../../shared/mcp';
+import type { McpStatePersistence } from '../../shared/mcp-platform';
 import { createMcpEngine } from './engine';
 import { createPlatformBridge, type McpTransport, type McpTransportFactory } from './transport';
 import { enterStorageRequest } from '../storage/maintenance';
@@ -9,6 +10,7 @@ export interface McpRuntimeOptions {
   userData:string;
   peerHelper?:string;
   transport?:McpTransportFactory;
+  persistence?:McpStatePersistence;
   backend:McpBackend;
   secretValues:()=>readonly string[];
   restoreWindow:()=>void;
@@ -40,7 +42,7 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
       return call;
     },
   };
-  const engine = createMcpEngine({userData:options.userData,backend,secretValues:options.secretValues,onChange:() => {
+  const engine = createMcpEngine({userData:options.userData,backend,secretValues:options.secretValues,...(options.persistence?{persistence:options.persistence}:{}),onChange:() => {
     if (stopped) return;
     const state = engine.state();
     const pending = [...state.pairings,...state.proposals].map(item => item.id);

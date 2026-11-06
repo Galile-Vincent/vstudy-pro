@@ -13,3 +13,9 @@ export interface McpTransportOptions {
 }
 /** Verify the peer before parsing frames. Windows implementations must restrict the pipe ACL to the current user SID. */
 export type McpTransportFactory=(options:McpTransportOptions)=>Promise<McpTransport>;
+
+/** Platform storage must verify current-user ownership, private access, size limits, and atomic durable replacement. */
+export interface McpStatePersistence {
+  read:(userData:string)=>string|undefined;
+  write:(userData:string,text:string)=>void;
+}

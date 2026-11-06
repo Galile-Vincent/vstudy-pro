@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { activitySchema, grantSchema, type AgentActivity, type Grant, type Scope } from '../../shared/mcp';
 import { atomicWriteSync } from '../storage/atomic';
 import { McpFailure } from './errors';
+import type { McpStatePersistence } from '../../shared/mcp-platform';
 
 export const GRANT_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
 export const ACTIVITY_LIMIT = 1000;
@@ -35,20 +36,12 @@ function publicGrant({tokenHash: _hash, ...grant}: StoredGrant): Grant { void _h
 /** One main-process owner serializes state updates through synchronous durable replacement. */
 export class GrantStore {
   private current: StoredState;
-  private readonly file: string;
-  constructor(private readonly userData: string, private readonly now = Date.now) {
-    this.file = join(privateMcpDirectory(userData), 'state.json');
+  constructor(private readonly userData: string, private readonly now = Date.now, private readonly persistence:McpStatePersistence=unixStatePersistence) {
     try {
-      const file = openSync(this.file, constants.O_RDONLY | constants.O_NOFOLLOW);
-      try {
-        const info = fstatSync(file);
-        if (!info.isFile() || info.nlink !== 1 || info.uid !== process.getuid?.() || (info.mode & 0o077) !== 0 || info.size > 8 * 1024 * 1024) throw new McpFailure('DENIED');
-        this.current = stateSchema.parse(JSON.parse(readFileSync(file, 'utf8')));
-      } finally { closeSync(file); }
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new McpFailure('DENIED');
-      this.current = {version: 1, enabled: false, grants: [], activity: []};
-    }
+      const text=persistence.read(userData);
+      if (text!==undefined && Buffer.byteLength(text)>8*1024*1024) throw new McpFailure('DENIED');
+      this.current=text===undefined ? {version:1,enabled:false,grants:[],activity:[]} : stateSchema.parse(JSON.parse(text));
+    } catch {throw new McpFailure('DENIED');}
     this.current.activity = this.retained(this.current.activity);
   }
 
@@ -63,12 +56,7 @@ export class GrantStore {
 
   private save(next: StoredState): void {
     try {
-      privateMcpDirectory(this.userData);
-      try {
-        const info = lstatSync(this.file);
-        if (!info.isFile() || info.isSymbolicLink() || info.nlink !== 1 || info.uid !== process.getuid?.()) throw new McpFailure('DENIED');
-      } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-      atomicWriteSync(this.file, JSON.stringify(next));
+      this.persistence.write(this.userData,JSON.stringify(next));
       this.current = next;
     } catch { throw new McpFailure('INTERNAL'); }
   }
@@ -115,3 +103,28 @@ export class GrantStore {
 
   record(activity: AgentActivity): void { this.save({...this.current, activity: this.retained([...this.current.activity, activity])}); }
 }
+
+/** Unix implementation. Windows supplies an ACL-backed persistence adapter through the engine options. */
+export const unixStatePersistence:McpStatePersistence = {
+  read(userData) {
+    const path=join(privateMcpDirectory(userData),'state.json');
+    let file:number;
+    try {file=openSync(path,constants.O_RDONLY|constants.O_NOFOLLOW);} catch(error) {
+      if ((error as NodeJS.ErrnoException).code==='ENOENT') return undefined;
+      throw new McpFailure('DENIED');
+    }
+    try {
+      const info=fstatSync(file);
+      if (!info.isFile() || info.nlink!==1 || info.uid!==process.getuid?.() || (info.mode&0o077)!==0 || info.size>8*1024*1024) throw new McpFailure('DENIED');
+      return readFileSync(file,'utf8');
+    } finally {closeSync(file);}
+  },
+  write(userData,text) {
+    const path=join(privateMcpDirectory(userData),'state.json');
+    try {
+      const info=lstatSync(path);
+      if (!info.isFile() || info.isSymbolicLink() || info.nlink!==1 || info.uid!==process.getuid?.()) throw new McpFailure('DENIED');
+    } catch(error) {if ((error as NodeJS.ErrnoException).code!=='ENOENT') throw error;}
+    atomicWriteSync(path,text);
+  },
+};

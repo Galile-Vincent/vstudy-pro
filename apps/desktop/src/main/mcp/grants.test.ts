@@ -85,3 +85,13 @@ it('retains at most 1000 sanitized activity records for 30 days', () => {
   now += 31 * 86400_000;
   expect(new GrantStore(root, () => now).activity).toEqual([]);
 });
+it('keeps grant policy independent of platform private-file enforcement',()=>{
+  let text:string|undefined;
+  const persistence={read:()=>text,write:(_root:string,value:string)=>{text=value;}};
+  const store=new GrantStore('C:\\profile',Date.now,persistence);store.setEnabled(true);
+  const {grant,grantInfo}=store.issue(randomUUID(),'Windows client',['read:courses'],[randomUUID()]);
+  expect(text).not.toContain(grant);expect(text).toContain('tokenHash');
+  const restarted=new GrantStore('C:\\profile',Date.now,persistence);
+  expect(restarted.authorize(grant).id).toBe(grantInfo.id);
+  restarted.revoke(grantInfo.id);expect(()=>restarted.authorize(grant)).toThrow('DENIED');
+});

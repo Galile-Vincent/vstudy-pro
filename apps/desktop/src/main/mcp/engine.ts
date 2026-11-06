@@ -11,10 +11,12 @@ import { failureCode, McpFailure, publicFailure } from './errors';
 import { GrantStore } from './grants';
 import { CallLimiter, waitForStart } from './rate-limit';
 import { McpRedactor } from './redaction';
+import type { McpStatePersistence } from '../../shared/mcp-platform';
 
 export interface McpEngineOptions {
   userData: string;
   backend: McpBackend;
+  persistence?:McpStatePersistence;
   secretValues?: () => readonly string[];
   onChange?: () => void;
   now?: () => number;
@@ -46,7 +48,7 @@ export class McpEngine {
 
   constructor(private readonly options: McpEngineOptions) {
     this.now = options.now ?? Date.now;
-    this.store = new GrantStore(options.userData, this.now);
+    this.store = new GrantStore(options.userData, this.now,options.persistence);
     this.pairings = new PairingQueue(() => this.changed(), this.now);
     this.approvals = new ApprovalQueue(() => this.changed(), this.now);
     this.limiter = new CallLimiter(this.now, options.limits?.spacingMs, options.limits?.jitterMs);
