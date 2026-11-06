@@ -272,6 +272,7 @@ export function createMockBridge(): DesktopApi {
   };
   return {
     invoke,
+    onReviewProgress() { return () => {}; },
     onChatEvent(id, listener) {
       listeners.set(id, listener);
       return () => {

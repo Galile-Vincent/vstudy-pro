@@ -17,13 +17,14 @@ export const studyResolvedScopeSchema=z.object({
  assumptions:z.array(z.string().min(1).max(500)).max(50),
 }).strict().refine(value=>(value.from===null)===(value.to===null)&&(value.from===null||value.from<value.to!));
 const source=z.object({documentId:id,version:z.enum(['original','ai']),excerptHash:hash,quote:z.string().min(1).max(2000)}).strict();
-const common={id:text,conceptKey:text,stem:z.string().min(1).max(2000),explanation:z.string().max(4000),source};
+const metadata={unitId:id.nullable().optional(),bloom:z.enum(['remember_understand','apply','analyze_evaluate']).optional(),difficulty:z.enum(['easy','medium','hard']).optional(),nextStep:z.string().max(500).optional(),optionRationales:z.array(z.string().min(1).max(1000)).max(6).optional(),misconceptions:z.array(z.object({option:z.number().int().min(0).max(5),id:text.nullable(),inferred:z.boolean()}).strict()).max(6).optional()};
+const common={...metadata,id:text,conceptKey:text,stem:z.string().min(1).max(2000),explanation:z.string().max(4000),source};
 export const studyTestItemSchema=z.discriminatedUnion('type',[
  z.object({...common,type:z.literal('mcq'),options:z.array(z.string().min(1).max(1000)).min(2).max(6),answer:z.number().int().min(0).max(5)}).strict(),
  z.object({...common,type:z.literal('cloze'),answer:z.string().min(1).max(240),alternatives:z.array(text).max(10)}).strict(),
  z.object({...common,type:z.literal('true_false'),answer:z.boolean()}).strict(),
 ]);
-export const studyTestSchema=z.object({version:z.literal(1),items:z.array(studyTestItemSchema).min(1).max(100)}).strict().superRefine((value,ctx)=>{
+export const studyTestSchema=z.object({version:z.literal(1),items:z.array(studyTestItemSchema).min(1).max(100),excludedStemHashes:z.array(hash).max(1000).optional(),warnings:z.array(z.string().max(500)).max(100).optional(),validationNotice:z.string().max(200).optional()}).strict().superRefine((value,ctx)=>{
  if(new Set(value.items.map(item=>item.id)).size!==value.items.length)ctx.addIssue({code:z.ZodIssueCode.custom,message:'Duplicate item ids'});
  for(const item of value.items)if(item.type==='mcq'&&item.answer>=item.options.length)ctx.addIssue({code:z.ZodIssueCode.custom,message:'Answer is outside options'});
 });
