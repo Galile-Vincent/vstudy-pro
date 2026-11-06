@@ -29,7 +29,7 @@ import { moodleSecretId } from '../services/secrets';
 import { moodleWebviewContract } from '../../shared/moodle-webview';
 
 /** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
-export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, secrets: SecretStore, implemented: Set<IpcChannel>, documents: Pick<DocumentService,'importPath'|'get'>, restoreMainWindow: () => void = () => {}) {
+export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, secrets: SecretStore, implemented: Set<IpcChannel>, documents: Pick<DocumentService,'importPath'|'get'>, restoreMainWindow: () => void = () => {}, request?:typeof fetch) {
   const owners=new Set<Electron.WebContents>();
   const repository = new MoodleRepository(store.db);
   const sso = new MoodleSso(restoreMainWindow);
@@ -42,7 +42,7 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
       return tokensSchema.parse(JSON.parse(raw));
     },
   });
-  const service = new MoodleService(repository,secrets,sso,undefined,() => { const language = store.settings.get().language; return language === 'auto' ? app.getLocale() : language === 'zh-Hant' ? 'zh-tw' : language; },event => {for(const owner of owners)if(!owner.isDestroyed())owner.send(moodleProgressChannel,moodleProgressSchema.parse(event));},new MoodleLogoCache(() => join(app.getPath('userData'),'moodle','logos')));
+  const service = new MoodleService(repository,secrets,sso,request,() => { const language = store.settings.get().language; return language === 'auto' ? app.getLocale() : language === 'zh-Hant' ? 'zh-tw' : language; },event => {for(const owner of owners)if(!owner.isDestroyed())owner.send(moodleProgressChannel,moodleProgressSchema.parse(event));},new MoodleLogoCache(() => join(app.getPath('userData'),'moodle','logos')));
 
   const stopReminders = startReminders(repository,(title,body) => {
     if (!Notification.isSupported()) return false;
