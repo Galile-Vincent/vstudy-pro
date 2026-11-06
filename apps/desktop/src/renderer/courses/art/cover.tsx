@@ -1,5 +1,5 @@
 /** Deterministic course artwork. Only layout values and semantic token references enter CSS. */
-import { useState, type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import type { MoodleCourse } from '../../../shared/moodle';
 import { tr } from '../../../shared/i18n';
 
@@ -22,12 +22,10 @@ export function courseArt(id: string, term: string | null) {
   };
 }
 
-/** Decorative generated or remote cover. A failed remote image leaves the generated artwork visible. */
+/** Decorative fields only. Course-supplied images cannot add uncontrolled patterns. */
 export function CourseArtwork({course}: {course: MoodleCourse}) {
   const art = courseArt(course.id, course.identity.term);
-  const [failedImage, setFailedImage] = useState<string>();
   return <div className="moodle-artwork soft-art" style={art.style} aria-hidden="true">
-    {course.imageUrl && failedImage !== course.imageUrl && <img src={course.imageUrl} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailedImage(course.imageUrl!)} />}
     <span className="moodle-art-scrim" />
   </div>;
 }

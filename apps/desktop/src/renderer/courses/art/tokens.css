@@ -10,13 +10,12 @@
   --course-ease: cubic-bezier(.2,.8,.2,1);
 }
 .moodle-artwork { position:absolute; inset:0; overflow:hidden; }
-.moodle-artwork > img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.5; mix-blend-mode:luminosity; }
 .moodle-art-scrim { position:absolute; inset:0; background:linear-gradient(180deg,transparent 45%,color-mix(in oklab,var(--course-art-base) 40%,transparent)); }
 :root[data-theme="contrast"] .moodle-artwork { background:var(--surface); }
-:root[data-theme="contrast"] :is(.moodle-art-scrim,.moodle-artwork img) { display:none; }
+:root[data-theme="contrast"] .moodle-art-scrim { display:none; }
 @media (prefers-contrast: more), (forced-colors: active) {
   .moodle-artwork { background:var(--surface); }
-  :is(.moodle-art-scrim,.moodle-artwork img) { display:none; }
+  .moodle-art-scrim { display:none; }
 }
 :root[data-theme="contrast"] { --course-art-ink:var(--ink); --course-art-base:var(--surface); }
 @media(prefers-contrast:more), (forced-colors:active) { :root { --course-art-ink:var(--ink); --course-art-base:var(--surface); } }
