@@ -48,5 +48,6 @@
   "save": "儲存",
   "shortcut": "{{modifier}} K",
   "model_change_error": "無法切換模型。目前的對話仍可使用，請再試一次。",
-  "message_not_found": "找不到這則訊息。你仍可繼續閱讀對話。"
+  "message_not_found": "找不到這則訊息。你仍可繼續閱讀對話。",
+  "providers_error": "無法載入 AI 供應商。請重試以使用輸入框，你仍可閱讀此對話。"
 }
