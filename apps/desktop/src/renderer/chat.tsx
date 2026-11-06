@@ -86,6 +86,7 @@ export function Chat({
   const unavailable = !available?.config.enabled || !available.availability.available;
   const current = useRef({ conversation, selection, onClearSelection, onProposals });
   current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, onClearSelection, onProposals };
+  const partialHistory = useRef(!!historyCursor);
   const connection = useMemo(
     () =>
       createChatAdapter(
@@ -106,7 +107,7 @@ export function Chat({
           current.current.onClearSelection();
         },
         actions => current.current.onProposals(actions),
-        () => !!historyCursor,
+        () => partialHistory.current,
       ),
     [],
   );
@@ -137,7 +138,8 @@ export function Chat({
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
-    <EarlierMessages jumpMessageId={jumpMessageId} runtime={runtime} conversationId={conversation.id} cursor={historyCursor} onLoaded={messages => {
+    <EarlierMessages jumpMessageId={jumpMessageId} runtime={runtime} conversationId={conversation.id} cursor={historyCursor} onLoaded={(messages, nextCursor) => {
+      partialHistory.current = !!nextCursor;
       setEarlierHistory(current => [...messages, ...current]);
       for (const message of messages) for (const part of message.parts) if (part.selection) selections.current.set(message.id, part.selection);
     }}/>

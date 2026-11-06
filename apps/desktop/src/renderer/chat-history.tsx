@@ -22,7 +22,7 @@ export function chatHistoryMessages(history: Message[]): ThreadMessageLike[] {
     }));
 }
 
-export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jumpMessageId,onLoaded}:{runtime:AssistantRuntime;conversationId:Conversation['id'];cursor?:MessageCursor|null|undefined;jumpMessageId?:string|undefined;onLoaded:(messages:Message[])=>void}) {
+export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jumpMessageId,onLoaded}:{runtime:AssistantRuntime;conversationId:Conversation['id'];cursor?:MessageCursor|null|undefined;jumpMessageId?:string|undefined;onLoaded:(messages:Message[],cursor:MessageCursor|null)=>void}) {
   useTranslation();
   const running = useAuiState(state => state.thread.isRunning);
   const [cursor,setCursor] = useState(initialCursor), [loading,setLoading] = useState(false), [error,setError] = useState('');
@@ -39,7 +39,7 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jum
       const older = ExportedMessageRepository.fromArray(chatHistoryMessages(page.items.filter(message => !ids.has(message.id))));
       const parentId = older.messages.at(-1)?.message.id;
       if (parentId) runtime.thread.import({...current,messages:[...older.messages,...current.messages.map(item => item.parentId === null ? {...item,parentId} : item)]});
-      setCursor(page.nextCursor); onLoaded(page.items);
+      setCursor(page.nextCursor); onLoaded(page.items,page.nextCursor);
     } catch (failure) { if (live.current) setError(errorText(failure)); }
     finally { pending.current = false; if (live.current) setLoading(false); }
   }, [cursor, runtime, conversationId, onLoaded]);

@@ -43,3 +43,18 @@ it('stops automatic search paging on failure and resumes only after Retry',async
   expect(await screen.findByText('old-target')).toBeTruthy();
   expect(bridge.invoke).toHaveBeenCalledTimes(2);
 });
+
+it('sends explicit branch context once the final earlier page is loaded',async()=>{
+  await i18n.changeLanguage('en');
+  bridge.invoke.mockImplementation(async channel=>{
+    if(channel==='messages:page')return {items:[message('old-question','user'),message('old-answer')],nextCursor:null};
+    if(channel==='chat:start')bridge.listener?.({type:'done'});
+    return {ok:true};
+  });
+  mount([message('recent-question','user'),message('recent-answer')],{id:'recent-question',createdAt:'2026-11-02T00:00:00Z'});
+  fireEvent.click(screen.getByRole('button',{name:tr('common:load_earlier_messages')}));
+  await screen.findByText('old-question');
+  fireEvent.change(screen.getByRole('textbox'),{target:{value:'Follow up'}});
+  fireEvent.click(screen.getByRole('button',{name:'Send'}));
+  await waitFor(()=>expect(bridge.invoke).toHaveBeenCalledWith('chat:start',expect.objectContaining({contextTurnIds:['old-question','recent-question']})));
+});
