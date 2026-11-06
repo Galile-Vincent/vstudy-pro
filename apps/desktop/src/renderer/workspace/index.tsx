@@ -1,3 +1,4 @@
+import { PaneTabs } from './pane-tabs';
 import { ContextCoach, HelpMenu } from "../onboarding/help";
 import { ReaderOfflineNotice } from './offline-notice';
 import { ReaderWelcome } from './reader-welcome';
@@ -541,10 +542,7 @@ export function Workspace() {
           </button>
         </div>
       )}
-      <div className="workspace-tabs" role="tablist" aria-label={tr('common:your_workspace')}>
-        <button role="tab" aria-selected={compactPane === 'reading'} onClick={() => setCompactPane('reading')}>{tr('common:document')}</button>
-        <button role="tab" aria-selected={compactPane === 'chat'} onClick={() => setCompactPane('chat')}>{tr('common:chat')}</button>
-      </div>
+      <PaneTabs value={compactPane} onChange={setCompactPane} />
       <div className="workspace-body">
         <PanelGroup direction="horizontal" className="panels">
           {(settings.chatSide === "left"
@@ -561,6 +559,9 @@ export function Workspace() {
               <Panel
                 key={pane}
                 id={pane}
+                role="tabpanel"
+                aria-labelledby={`workspace-tab-${pane}`}
+                tabIndex={0}
                 order={index}
                 minSize={25}
                 defaultSize={pane === "chat" ? 42 : 58}
