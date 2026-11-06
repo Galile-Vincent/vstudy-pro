@@ -17,6 +17,9 @@ explicit Privacy Retry, never on launch. After native download consent it create
 using `requirements.lock.txt` with required hashes. A requirements hash marks
 successful installation. Offline mode prevents installation downloads. Failed installation can be retried by calling
 `ensureReady` or converting again. `onProgress` receives bootstrap milestones.
+Managed Python lives under `userData/converter-python`, outside the temporary
+bootstrap HOME, so removing the bootstrap directory cannot break the venv.
+The installer does not register that interpreter globally or add it to PATH.
 Conversion uses a temporary working directory, a scrubbed environment, a
 120-second timeout, and bounded process output. The worker stops after idle time
 (default five minutes, configurable one to sixty) and restarts on demand. On macOS

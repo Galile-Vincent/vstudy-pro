@@ -1,7 +1,8 @@
 /** Build the missing Intel Mac cryptography wheel from verified sources before tests or packaging. */
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
@@ -89,7 +90,11 @@ async function buildNativeConverter() {
   const environment = { ...process.env, MACOSX_DEPLOYMENT_TARGET: '13.0', CARGO_BUILD_JOBS: '2',
     OPENSSL_DIR: join(root, 'openssl'), OPENSSL_STATIC: '1', CFLAGS: '-mmacosx-version-min=13.0 -march=x86-64', RUSTFLAGS: '-C target-cpu=x86-64' };
   const execute = (command, args, cwd = root) => execFileSync(command, args, { cwd, env: environment, stdio: 'inherit', timeout: 20 * 60 * 1000 });
-  const uv = join(homedir(), '.local', 'bin', 'uv');
+  let uv;
+  for (const candidate of [join(homedir(), '.local', 'bin', 'uv'), '/usr/local/bin/uv', '/opt/homebrew/bin/uv']) {
+    if (await access(candidate, constants.X_OK).then(() => true, () => false)) { uv = candidate; break; }
+  }
+  if (!uv) throw new Error('Install uv in its standard user or Homebrew location before building the native converter');
   try {
     const [cryptoArchive, opensslArchive] = await Promise.all([download(source.url, source.digests.sha256), download(openssl.url, openssl.sha256)]);
     const cryptoSource = join(root, 'cryptography.tar.gz');

@@ -25,10 +25,13 @@ export async function runProcess(
   cacheDirectory?: string,
   scope?: ProcessScope,
   diagnostic?: Progress,
+  managedPythonDirectory?: string,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const child = (scope ? scope.spawn.bind(scope) : spawn)(executable, args, {
-      cwd, env: { ...scrubbedEnvironment(cwd), ...(cacheDirectory ? { PIP_CACHE_DIR: cacheDirectory, UV_CACHE_DIR: cacheDirectory } : {}) }, shell: false, stdio: ["ignore", "pipe", "pipe"],
+      cwd, env: { ...scrubbedEnvironment(cwd), ...(cacheDirectory ? { PIP_CACHE_DIR: cacheDirectory, UV_CACHE_DIR: cacheDirectory } : {}),
+        ...(managedPythonDirectory ? { UV_PYTHON_INSTALL_DIR: managedPythonDirectory, UV_PYTHON_INSTALL_BIN: '0', UV_PYTHON_INSTALL_REGISTRY: '0' } : {}),
+      }, shell: false, stdio: ["ignore", "pipe", "pipe"],
     });
     let bytes = 0;
     let stderr = "";
@@ -91,7 +94,7 @@ export function createConverter(options: {
   const scope = new ProcessScope();
   let disposed = false;
   const checkOpen = () => { if (disposed) throw new Error('Converter closed'); };
-  const run: typeof runProcess = (executable, args, cwd, timeout, max, progress, cache) => runProcess(executable, args, cwd, timeout, max, progress, cache, scope, options.diagnostic);
+  const run: typeof runProcess = (executable, args, cwd, timeout, max, progress, cache) => runProcess(executable, args, cwd, timeout, max, progress, cache, scope, options.diagnostic, join(options.userData, 'converter-python'));
   const venv = join(options.userData, "converter-venv");
   const python = join(venv, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   let worker: WarmWorker | undefined;

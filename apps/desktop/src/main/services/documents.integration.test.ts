@@ -6,10 +6,13 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { cp, copyFile, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { cp, copyFile, mkdir, mkdtemp, readFile, realpath, rm, stat } from "node:fs/promises";
+import { homedir, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { createConverter, runProcess, scrubbedEnvironment } from "../../../resources/converter";
+import { installDirectories, resolveInstalledExecutable } from '../providers/trusted-executable';
+import { isPathWithin } from '../platform/paths';
+import { managedConverterPython } from '../platform/process';
 
 const available = ["uv", "python3", "python"].some((command) => spawnSync(command, ["--version"]).status === 0);
 describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3.10+; skipped when neither is installed)", () => {
@@ -87,6 +90,31 @@ with zipfile.ZipFile(sys.argv[1]) as original, zipfile.ZipFile(sys.argv[2], 'w',
     expect(await readFile(join(directory, "retried.md"), "utf8")).toContain("VStudy fixture");
   });
 });
+
+it('keeps downloaded Python alive after removing the isolated bootstrap HOME', async context => {
+  const uv = await resolveInstalledExecutable('uv', installDirectories());
+  if (!uv) { context.skip(); return; }
+  const root = await mkdtemp(join(tmpdir(), 'vstudy-managed-python-'));
+  const bootstrap = join(root, 'bootstrap');
+  const owned = join(root, 'user-data');
+  const managed = join(owned, 'converter-python');
+  const venv = join(owned, 'converter-venv');
+  try {
+    await mkdir(bootstrap);
+    await mkdir(owned);
+    await runProcess(uv, ['venv', '--managed-python', '--python', managedConverterPython(), venv], bootstrap,
+      300000, 1024 * 1024, undefined, join(homedir(), '.cache', 'uv'), undefined, undefined, managed);
+    await rm(bootstrap, {recursive: true, force: true});
+    const executable = join(venv, process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python');
+    const result = spawnSync(executable, ['-I', '-S', '-c', 'import json,sys;print(json.dumps({"base":sys.base_prefix,"version":list(sys.version_info[:2])}))'], {
+      cwd: owned, env: scrubbedEnvironment(owned), encoding: 'utf8', windowsHide: true, timeout: 10000,
+    });
+    expect(result.status, result.stderr).toBe(0);
+    const runtime = JSON.parse(result.stdout);
+    expect(runtime.version).toEqual([3, 12]);
+    expect(isPathWithin(await realpath(managed), await realpath(runtime.base))).toBe(true);
+  } finally { await rm(root, {recursive: true, force: true, maxRetries: 3}); }
+}, 330000);
 
 it("caps subprocess output, times out, and scrubs inherited secrets", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "vstudy-process-test-"));

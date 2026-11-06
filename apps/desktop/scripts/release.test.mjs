@@ -162,6 +162,7 @@ test('native linkage distinguishes the Mach-O self identity from external load d
 
 test('all native targets retain stable aliases and architecture-specific outputs', () => {
   assert.equal(targets.length, 4);
+  assert.equal(targets.some(target => target.runner === 'macos-14'), false);
   for (const target of targets) {
     const names = assetNames(target, version);
     assert.equal(names.stable, `VStudy-Pro-${target.key}.${target.installer}`);
@@ -277,6 +278,7 @@ test('workflow exposes no signing credentials to branch or dry-run steps, and ev
   assert.match(unsigned, /--unsigned/);
   for (const file of ['ci.yml', 'release.yml']) {
     const contents = await readFile(join(repository, '.github/workflows', file), 'utf8');
+    assert.doesNotMatch(contents, /\bruns-on:\s*macos-14\b/);
     for (const line of contents.split('\n')) if (line.includes('uses:')) assert.match(line, /@[a-f0-9]{40}\b/);
   }
 });

@@ -1,5 +1,7 @@
 /** Native Electron verification for platform labels, lazy secure storage, and window chrome. */
 import { _electron as electron } from 'playwright';
+import electronBinary from 'electron';
+import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -9,8 +11,15 @@ const evidence = resolve('../../docs/evidence/distribution');
 await mkdir(evidence, {recursive: true});
 let app;
 const reports = [];
+const environment = {...process.env, VSTUDY_LOCALE: 'en', VSTUDY_FAKE_PROVIDER: '1'};
+for (const key of ['ELECTRON_RUN_AS_NODE', 'NODE_OPTIONS', 'ELECTRON_RENDERER_URL']) delete environment[key];
 try {
-  app = await electron.launch({args: [resolve('.'), `--user-data-dir=${directory}`], env: {...process.env, ELECTRON_RUN_AS_NODE: '', VSTUDY_LOCALE: 'en', VSTUDY_FAKE_PROVIDER: '1'}});
+  if (process.platform === 'win32') {
+    const probe = spawnSync(electronBinary, ['--version'], {env: environment, encoding: 'utf8', windowsHide: true, timeout: 10000});
+    await writeFile(join(evidence, 'win32-launch.json'), JSON.stringify({executable: electronBinary, code: probe.status, signal: probe.signal, stdout: probe.stdout, stderr: probe.stderr, error: probe.error?.message}, null, 2) + '\n');
+    assert.equal(probe.status, 0, probe.stderr);
+  }
+  app = await electron.launch({args: [resolve('.'), `--user-data-dir=${directory}`], env: environment});
   const page = await app.firstWindow();
   page.setDefaultTimeout(15000);
   const chrome = await app.evaluate(({BrowserWindow, safeStorage}) => {
@@ -60,6 +69,9 @@ try {
     await page.keyboard.press('Escape');
   }
   console.log(JSON.stringify({result: 'PASS', reports}));
+} catch (error) {
+  await writeFile(join(evidence, `${process.platform}-launch-error.log`), error.stack ?? String(error));
+  throw error;
 } finally {
   await app?.close();
   await rm(directory, {recursive: true, force: true, maxRetries: 3});
