@@ -54,15 +54,13 @@
   "retry_unavailable": "Retry will be available when the memory worker is connected.",
   "memory_title": "Study memory",
   "memory_enabled": "Remember questions for review",
-  "memory_notice": "Study memory is on by default. You can turn it off or erase it at any time.",
-  "acknowledge": "Got it",
   "erase_memory": "Erase study memory",
   "erase_confirm": "Erase study memory?",
   "erase_confirm_copy": "This permanently removes study courses, summaries, evidence, and review artifacts. Your chats remain.",
   "erase_done": "Study memory erased.",
   "exclude_chat": "Don't remember this chat",
   "chat_excluded": "This chat is excluded from study memory.",
-  "memory_disclosure": "Study memory is stored on this device. When recording questions, your provider receives a limited excerpt of the conversation and possible course and concept names. When creating review content, it receives excerpts from your course materials. Review budgets cover review calls; chat and document processing have separate limits.",
+  "memory_disclosure": "Study memory is stored on this device. While it is on, after each answer in a chat, VStudy sends one extra request to the provider and model you are chatting with. It contains a limited excerpt of the conversation (up to the last 24 messages, including the tutor's replies, which may quote your documents) and your course, unit and concept names. That request uses your own quota or credit. When you create review content, excerpts from your course materials are sent too. Turn this off or erase it any time in Settings > Privacy. Chats you exclude are not recorded. Review budgets cover review calls; chat and document processing have separate limits.",
   "related_units": "Related units",
   "include_chat": "Remember this chat",
   "scope_title": "Review scope",
@@ -143,5 +141,9 @@
   "asked_fallback": "Based on when you asked",
   "sources": "Sources",
   "scope_short": "Short (8 items)",
-  "scope_long": "Long (20 items)"
+  "scope_long": "Long (20 items)",
+  "consent_title": "Remember your questions for review?",
+  "consent_turn_on": "Turn on",
+  "consent_not_now": "Not now",
+  "consent_done": "Study memory is on. You can change this any time in Settings > Privacy."
 }

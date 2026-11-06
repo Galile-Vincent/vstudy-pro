@@ -28,3 +28,7 @@
 @media (prefers-contrast:more) {.review-list>li,.review-page input,.review-page select {outline:1px solid var(--ink);}}
 
 .review-page button:hover:not(:disabled) {background:var(--active);}
+
+.review-consent {margin-block:var(--space-5);padding:var(--space-5);border-radius:var(--r-md);background:color-mix(in oklab,var(--ink) 4%,var(--surface));}
+.review-consent h2 {margin-top:0;}
+.review-consent-done {margin-block:var(--space-3);}
