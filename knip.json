@@ -32,7 +32,8 @@
       ],
       "ignoreBinaries": [
         "iconutil",
-        "openssl"
+        "openssl",
+        "rustc"
       ]
     },
     "apps/website": {

@@ -38,4 +38,4 @@ it.each([1,2,3,4,5,6,7,8,9])('upgrades seeded v%s and backfills legacy metadata 
    expect(store.db.prepare('PRAGMA integrity_check').get()?.integrity_check).toBe('ok');expect(store.db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
   } finally {store.close();}
  } finally {await rm(root,{recursive:true,force:true});}
-}, 30000);
+});
