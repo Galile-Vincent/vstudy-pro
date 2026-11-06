@@ -19,6 +19,6 @@ export async function readBoundedJson(response: Response): Promise<{value:unknow
       chunks.push(part.value);
     }
   } finally { await reader.cancel().catch(() => {});reader.releaseLock(); }
-  try { return {value:JSON.parse(Buffer.concat(chunks,bytes).toString('utf8')) as unknown,bytes}; }
+  try { return {value:JSON.parse(new TextDecoder('utf-8').decode(Buffer.concat(chunks,bytes))) as unknown,bytes}; }
   catch { throw new JsonResponseError(); }
 }
