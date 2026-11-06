@@ -18,6 +18,7 @@ it('keeps state out of arguments and inherited secrets and decodes only verified
     expect(options.windowsHide).toBe(true);
     expect(options.env).not.toHaveProperty('VSTUDY_STATE_SENTINEL');
     if (args.at(-1) === 'write') {
+      expect(options.input.endsWith('\n')).toBe(true);
       expect(Buffer.from(options.input, 'base64').toString('utf8')).toBe(body);
       return 'ok';
     }
@@ -54,7 +55,7 @@ it.skipIf(process.platform !== 'win32')('persists and replaces state with a prot
   const root = await mkdtemp(join(tmpdir(), 'vstudy-state-native-'));
   const diagnostics: string[] = [];
   const store = createWindowsStatePersistence({script: resolve('resources/mcp/windows-state.ps1'), execute: (executable, args, options) => {
-    try { return execFileSync(executable, args, options); }
+    try { return execFileSync(executable, args, {...options, env: {...options.env, VSTUDY_STATE_FIXTURE_TRACE: '1'}}); }
     catch (error) {
       if (error instanceof Error && 'stderr' in error) diagnostics.push(String(error.stderr).slice(-2400));
       throw error;

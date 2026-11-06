@@ -6,6 +6,10 @@ param(
 $ErrorActionPreference = 'Stop'
 $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
 $maximum = 8 * 1024 * 1024
+function Trace-Stage([string]$Stage) {
+    if ($env:VSTUDY_STATE_FIXTURE_TRACE -eq '1') { [Console]::Error.WriteLine('state-stage ' + $Stage) }
+}
+Trace-Stage 'start'
 
 function Assert-Path([string]$Path, [bool]$Directory) {
     $item = Get-Item -LiteralPath $Path -Force
@@ -58,12 +62,14 @@ while ($cursor) {
     $cursor = $ancestor.FullName
 }
 $directory = [System.IO.Path]::Combine($parent, 'mcp')
+Trace-Stage 'ancestors-verified'
 if (-not [System.IO.Directory]::Exists($directory)) {
     if ($Operation -eq 'read') { [Console]::Out.Write('missing'); exit 0 }
     [void][System.IO.Directory]::CreateDirectory($directory, (New-PrivateSecurity $true))
 }
 Assert-Path $directory $true
 Assert-Private (Get-Acl -LiteralPath $directory) $true
+Trace-Stage 'directory-verified'
 $path = [System.IO.Path]::Combine($directory, 'state.json')
 if ($Operation -eq 'read') {
     if (-not [System.IO.File]::Exists($path)) { [Console]::Out.Write('missing'); exit 0 }
@@ -81,7 +87,9 @@ if ($Operation -eq 'read') {
     exit 0
 }
 
-$bytes = [Convert]::FromBase64String([Console]::In.ReadToEnd())
+Trace-Stage 'before-input'
+$bytes = [Convert]::FromBase64String([Console]::In.ReadLine())
+Trace-Stage 'input-read'
 if ($bytes.Length -gt $maximum) { throw 'State exceeds limit' }
 if ([System.IO.File]::Exists($path)) {
     $existing = Open-VerifiedState $path
@@ -96,9 +104,11 @@ try {
         Assert-Private ($file.GetAccessControl()) $false
         $file.Write($bytes, 0, $bytes.Length)
         $file.Flush($true)
+        Trace-Stage 'file-flushed'
     } finally { $file.Dispose() }
     if ([System.IO.File]::Exists($path)) { [System.IO.File]::Replace($temporary, $path, $null) }
     else { [System.IO.File]::Move($temporary, $path) }
+    Trace-Stage 'file-published'
     $published = Open-VerifiedState $path
     $published.Dispose()
     [Console]::Out.Write('ok')

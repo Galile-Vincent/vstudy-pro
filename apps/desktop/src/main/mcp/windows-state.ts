@@ -68,7 +68,7 @@ export function createWindowsStatePersistence(options: WindowsStateOptions = {})
       const path = check(userData);
       (options.present ?? statePresent)(path);
       if (Buffer.byteLength(text) > maximum) throw new WindowsStateError();
-      if (execute(userData, 'write', Buffer.from(text, 'utf8').toString('base64')) !== 'ok') throw new WindowsStateError();
+      if (execute(userData, 'write', Buffer.from(text, 'utf8').toString('base64') + '\n') !== 'ok') throw new WindowsStateError();
     },
   };
 }
