@@ -1,6 +1,6 @@
 # Main MCP security and Unix bridge
 
-This subsystem lets a global agent read granted accounts and propose actions through VStudy's existing session. School credentials stay in main. The fixed contracts are in `../../shared/mcp.ts`. Backend implementations, renderer IPC registration, and application lifecycle belong to the parent integration.
+This subsystem lets a global agent read granted accounts and propose actions through VStudy's existing session. School credentials stay in main. The fixed contracts are in `../../shared/mcp.ts`. The backend modules implement account-owned Moodle and planner tools. `runtime.ts` owns transport startup and shutdown. `main/ipc/mcp.ts` registers trusted renderer controls, composed in `main/ipc/index.ts`.
 
 ## Factories and exports
 
@@ -10,6 +10,7 @@ This subsystem lets a global agent read granted accounts and propose actions thr
 | --- | --- |
 | `userData` | Existing app-owned directory. State lives in its `mcp` child. |
 | `backend` | The fixed shared `McpBackend`. |
+| `persistence` | Optional current-user-private atomic state adapter. Unix mode-checked files are the default. |
 | `secretValues` | Optional `() => readonly string[]` of known school secrets. Called only in main at outward boundaries. Never send its return value to the renderer. |
 | `onChange` | Optional `() => void` for state notifications and restoring the app for consent. |
 | `now` | Optional millisecond clock for tests. |
@@ -101,4 +102,14 @@ Run `pnpm exec vitest run src/main/mcp --pool=forks --maxWorkers=2` from `apps/d
 
 The implementation was also checked with desktop `pnpm typecheck`, `pnpm lint`, full `pnpm test --pool=forks --maxWorkers=2`, repository `pnpm security:check`, and `node --check scripts/build-mcp-peer.mjs`. The security audit has no unreviewed advisories. Its accepted baseline and the existing three allowlisted Electron external-link warnings remain unchanged.
 
-Desktop IPC wiring, packaging the helper, stdio MCP integration, Electron acceptance, and live-school acceptance belong to the parent integration. These tests do not claim independent review or live-school acceptance.
+The integrated artifact checks and their acceptance limits are recorded under `docs/evidence/mcp`. Unit tests do not establish live-school acceptance.
+
+## Platform integration contract
+
+`shared/mcp-platform.ts` defines `McpEndpoint`, `McpTransportOptions`, `McpTransportFactory`, and `McpStatePersistence`. `transport.ts` adapts the existing Unix listener. `runtime.ts` accepts injected `transport` and `persistence` adapters. The main IPC composition exposes those seams as `AppIpcOptions.mcpTransport` and `mcpPersistence`. No renderer can supply them.
+
+Windows stream P supplies the named-pipe host and ACL-backed app state. The current default fails closed without that adapter. `endpoint.ts` derives a local pipe name from the current Windows SID using SHA-256, truncated to 32 hexadecimal characters. The name is `\\.\pipe\vstudy-<hash>`. A name is not an access control. The host must create a protected current-user-SID-only DACL and validate the peer SID before forwarding any bytes. The state adapter must verify private ACLs before reading and perform private atomic durable replacement. Unix mode bits are not Windows ACL enforcement.
+
+Framing is exactly four unsigned big-endian bytes containing the UTF-8 JSON body length, followed by that many bytes. Zero-length bodies and lengths above 1,048,576 bytes are invalid. The maximum excludes the four-byte header. JSON-RPC is version 2.0, with string request IDs up to 100 characters and only shared `bridgeRequestSchema` methods. UTF-8 must decode without replacement. Each accepted connection gets a host-generated identity for pairing and disconnect cancellation. The same rules apply to request and response frames. `protocol.ts` exports the incremental `RequestFrames` decoder and `responseFrame` encoder. The host must preserve boundaries and never trust a client-supplied connection identity.
+
+Only authenticated connections reach `engine.handleRequest`. The engine does not inspect a Unix socket, process UID, or named pipe. A host process can proxy bytes through this boundary. Close and shutdown must call `onDisconnect` for each connection and await `dispose` before storage closes. The app's authoritative directory is Electron userData. CLI defaults share `main/platform/app-data.ts`.
