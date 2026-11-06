@@ -24,3 +24,5 @@ SHOT_THEMES=ocean SHOT_MODES=dark SHOT_ONLY=reader-chat-with-answer node apps/de
 ```
 
 Filtered runs update matching entries in the evidence manifest and regenerate its contact sheet. Run the complete matrix to start the evidence set again. Raw PNGs stay under `docs/evidence/marketing/raw/`. `docs/evidence/marketing/manifest.json` records dimensions and encoded sizes. `docs/evidence/marketing/contact-sheet.png` is the review sheet. Existing filename aliases remain stable for README links. Astro generates smaller website derivatives and lazy-loads images below the hero.
+
+The website v2 refresh regenerated the full matrix after main `6d26b91`. Course and document art now use soft color fields without stripe, contour, or glyph overlays. All 132 views were visually reviewed across the six packs and both schemes. Review sheets and validation results are in `docs/evidence/website-v2/final/`. The English, Traditional Chinese, and Japanese READMEs share the refreshed filename aliases above.

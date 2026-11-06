@@ -1,0 +1,74 @@
+[
+  {
+    "width": 390,
+    "lang": "en",
+    "scheme": "light",
+    "path": "round-2/home-en-390-light.png"
+  },
+  {
+    "width": 390,
+    "lang": "en",
+    "scheme": "dark",
+    "path": "round-2/home-en-390-dark.png"
+  },
+  {
+    "width": 390,
+    "lang": "zh-Hant",
+    "scheme": "light",
+    "path": "round-2/home-zh-Hant-390-light.png"
+  },
+  {
+    "width": 390,
+    "lang": "zh-Hant",
+    "scheme": "dark",
+    "path": "round-2/home-zh-Hant-390-dark.png"
+  },
+  {
+    "width": 390,
+    "lang": "ja",
+    "scheme": "light",
+    "path": "round-2/home-ja-390-light.png"
+  },
+  {
+    "width": 390,
+    "lang": "ja",
+    "scheme": "dark",
+    "path": "round-2/home-ja-390-dark.png"
+  },
+  {
+    "width": 1440,
+    "lang": "en",
+    "scheme": "light",
+    "path": "round-2/home-en-1440-light.png"
+  },
+  {
+    "width": 1440,
+    "lang": "en",
+    "scheme": "dark",
+    "path": "round-2/home-en-1440-dark.png"
+  },
+  {
+    "width": 1440,
+    "lang": "zh-Hant",
+    "scheme": "light",
+    "path": "round-2/home-zh-Hant-1440-light.png"
+  },
+  {
+    "width": 1440,
+    "lang": "zh-Hant",
+    "scheme": "dark",
+    "path": "round-2/home-zh-Hant-1440-dark.png"
+  },
+  {
+    "width": 1440,
+    "lang": "ja",
+    "scheme": "light",
+    "path": "round-2/home-ja-1440-light.png"
+  },
+  {
+    "width": 1440,
+    "lang": "ja",
+    "scheme": "dark",
+    "path": "round-2/home-ja-1440-dark.png"
+  }
+]

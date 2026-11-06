@@ -4,7 +4,7 @@
 
 macOS と Windows で教材を読み、Moodle の締め切りをまとめ、課題を学習計画に変えるアプリです。
 
-![バージョン 0.2.1](https://img.shields.io/badge/version-0.2.1-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
+![バージョン 0.2.2](https://img.shields.io/badge/version-0.2.2-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
 
 ![グラフのノート、選択した文章、デモ回答と出典の引用](docs/assets/readme/reader.webp)
 

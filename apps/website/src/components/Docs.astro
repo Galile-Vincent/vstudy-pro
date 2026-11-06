@@ -40,7 +40,7 @@ const url = (item: string) => path(`${language}/docs/${item}/`);
           {section.paragraphs.map(paragraph => <p>{paragraph}</p>)}
           {slug === 'getting-started' && section.id === 'install' && <Download {language} />}
           {section.steps && <ol>{section.steps.map(step => <li>{step}</li>)}</ol>}
-          {section.code && <div class="code-block"><button class="copy-code" data-copy data-label={t.copy} data-copied={t.copied} data-failed={t.copyFailed}>{t.copy}</button><pre tabindex="0" aria-label={section.title}><code>{section.code}</code></pre></div>}
+          {section.code && <div class="code-block" data-label={language === 'zh-Hant' ? '終端機' : language === 'ja' ? 'ターミナル' : 'Terminal'}><button class="copy-code" data-copy data-label={t.copy} data-copied={t.copied} data-failed={t.copyFailed}>{t.copy}</button><pre tabindex="0" aria-label={section.title}><code>{section.code}</code></pre></div>}
           {section.image && <figure><img src={media.get(section.image.name)?.src ?? path(`assets/${section.image.name}.webp`)} width={section.image.width} height={section.image.height} alt={section.image.alt} loading="lazy" decoding="async" /></figure>}
           {section.diagram && <Architecture />}
         </section>)}
