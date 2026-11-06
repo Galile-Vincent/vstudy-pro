@@ -30,7 +30,7 @@ for (const name of (await readdir(originals)).filter(name => name.endsWith('.svg
   assert.ok(meanError < 0.2, `${name} render changed by ${meanError}`);
   await writeFile(join(generated, name), svg);
   vectors.set(name, svg);
-  report.push({ name, originalBytes: source.length, optimizedBytes: svg.length, meanChannelError: meanError });
+  report.push({ name, originalBytes: Buffer.byteLength(source), optimizedBytes: Buffer.byteLength(svg), meanChannelError: meanError });
 }
 const get = name => vectors.get(`VStudyPro-${name}.svg`);
 // The owner lockup has generous export padding. Tight viewBoxes keep the wordmark legible at nav size.

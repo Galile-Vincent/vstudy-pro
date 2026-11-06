@@ -1,0 +1,10 @@
+{
+  "screenshots": 2,
+  "errors": [],
+  "axe": [
+    {
+      "view": "onboarding",
+      "axe": []
+    }
+  ]
+}

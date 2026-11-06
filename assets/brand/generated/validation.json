@@ -1,56 +1,56 @@
 [
   {
     "name": "VStudyPro-AppIcon-Dark.svg",
-    "originalBytes": 3589,
-    "optimizedBytes": 2631,
+    "originalBytes": 3591,
+    "optimizedBytes": 2633,
     "meanChannelError": 0
   },
   {
     "name": "VStudyPro-AppIcon-Light.svg",
-    "originalBytes": 3590,
-    "optimizedBytes": 2628,
+    "originalBytes": 3592,
+    "optimizedBytes": 2630,
     "meanChannelError": 0
   },
   {
     "name": "VStudyPro-Lockup-Dark.svg",
-    "originalBytes": 5976,
-    "optimizedBytes": 4948,
+    "originalBytes": 5978,
+    "optimizedBytes": 4950,
     "meanChannelError": 0.006336304470854556
   },
   {
     "name": "VStudyPro-Lockup-ForDark.svg",
-    "originalBytes": 5895,
-    "optimizedBytes": 4746,
+    "originalBytes": 5897,
+    "optimizedBytes": 4748,
     "meanChannelError": 0.01052136389360498
   },
   {
     "name": "VStudyPro-Lockup-Light.svg",
-    "originalBytes": 5972,
-    "optimizedBytes": 4986,
+    "originalBytes": 5974,
+    "optimizedBytes": 4988,
     "meanChannelError": 0.006078805885681947
   },
   {
     "name": "VStudyPro-Lockup.svg",
-    "originalBytes": 5890,
-    "optimizedBytes": 4787,
+    "originalBytes": 5892,
+    "optimizedBytes": 4789,
     "meanChannelError": 0.006229485002829655
   },
   {
     "name": "VStudyPro-Symbol-Dark.svg",
-    "originalBytes": 3567,
-    "optimizedBytes": 2574,
+    "originalBytes": 3569,
+    "optimizedBytes": 2576,
     "meanChannelError": 0
   },
   {
     "name": "VStudyPro-Symbol-Light.svg",
-    "originalBytes": 3568,
-    "optimizedBytes": 2571,
+    "originalBytes": 3570,
+    "optimizedBytes": 2573,
     "meanChannelError": 0
   },
   {
     "name": "VStudyPro-Symbol.svg",
-    "originalBytes": 3487,
-    "optimizedBytes": 2373,
+    "originalBytes": 3489,
+    "optimizedBytes": 2375,
     "meanChannelError": 0
   }
 ]

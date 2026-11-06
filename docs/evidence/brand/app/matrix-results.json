@@ -1,0 +1,66 @@
+{
+  "screenshots": 82,
+  "errors": [],
+  "axe": [
+    {
+      "themeId": "vstudy",
+      "colorScheme": "light",
+      "language": "en",
+      "view": "home",
+      "axe": []
+    },
+    {
+      "themeId": "vstudy",
+      "colorScheme": "light",
+      "language": "en",
+      "view": "library",
+      "axe": []
+    },
+    {
+      "themeId": "vstudy",
+      "colorScheme": "light",
+      "language": "en",
+      "view": "workspace",
+      "axe": []
+    },
+    {
+      "themeId": "vstudy",
+      "colorScheme": "light",
+      "language": "en",
+      "view": "welcome",
+      "axe": []
+    },
+    {
+      "themeId": "vstudy",
+      "colorScheme": "dark",
+      "language": "en",
+      "view": "home",
+      "axe": []
+    },
+    {
+      "themeId": "vstudy",
+      "colorScheme": "dark",
+      "language": "en",
+      "view": "library",
+      "axe": []
+    },
+    {
+      "themeId": "vstudy",
+      "colorScheme": "dark",
+      "language": "en",
+      "view": "workspace",
+      "axe": []
+    },
+    {
+      "themeId": "vstudy",
+      "colorScheme": "dark",
+      "language": "en",
+      "view": "welcome",
+      "axe": []
+    },
+    {
+      "view": "onboarding",
+      "axe": []
+    }
+  ]
+}

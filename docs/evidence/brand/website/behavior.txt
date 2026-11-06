@@ -1,0 +1,1 @@
+PASS. Session, replay, reduced motion, hidden-tab pause, desktop/mobile counts, docs exclusion, and twelve WCAG audits.

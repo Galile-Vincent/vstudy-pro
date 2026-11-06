@@ -11,7 +11,7 @@ const report=[];
 let app;
 try {
   await mkdir(evidence,{recursive:true});
-  app=await electron.launch({executablePath:process.env.VSTUDY_EXECUTABLE,args:[resolve('.'),`--user-data-dir=${profile}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
+  app=await electron.launch({timeout:30000,args:[resolve('.'),`--user-data-dir=${profile}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
   const page=await app.firstWindow();
   await page.emulateMedia({reducedMotion:'reduce'});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
