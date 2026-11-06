@@ -34,3 +34,19 @@ it('returns focus without a cosmetic delay under reduced motion',async()=>{
   await mount();await click('welcome-entry');reduced=true;await click('close-welcome');
   await act(async()=>vi.advanceTimersByTime(0));expect(document.activeElement?.id).toBe('welcome-entry');
 });
+it('cancels pending return focus when the shell unmounts',async()=>{
+  await mount();await click('welcome-entry');await click('close-welcome');
+  const fallback=document.createElement('button');document.body.append(fallback);fallback.focus();
+  await act(async()=>root.render(null));await act(async()=>vi.advanceTimersByTime(500));
+  expect(document.activeElement).toBe(fallback);fallback.remove();
+});
+it('reopens settings and restores its Welcome entry after it is ready',async()=>{
+  await mount();
+  const opener=host.querySelector<HTMLButtonElement>('#welcome-entry')!;opener.className='settings-dialog';
+  const entry=document.createElement('button');entry.id='welcome-settings-entry';entry.className='settings-dialog';
+  const reopen=()=>{document.body.append(entry);entry.focus();};window.addEventListener('vstudy:open-settings',reopen);
+  try {
+    await click('welcome-entry');await click('close-welcome');
+    await act(async()=>vi.advanceTimersByTime(1));expect(document.activeElement).toBe(entry);
+  } finally {window.removeEventListener('vstudy:open-settings',reopen);entry.remove();}
+});
