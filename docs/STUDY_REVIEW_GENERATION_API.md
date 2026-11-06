@@ -101,3 +101,33 @@ assignment/exclusion lookup. Concept mastery responses include nullable UTC
 negative evidence and confirmed results. See `STUDY_REVIEW_API.md` for the reset,
 same-session and deletion rules. These fields use the shared IPC schemas and
 require no separate preload allowlist or database migration.
+
+## Pedagogy audit integration limits
+
+`validateTest` accepts an optional fourth `TestBalanceContext` argument:
+`{acceptedItems, plannedMcqCount, plannedTrueFalseCount}`. With at least four planned
+items of a type, it drops only new MCQs exceeding `floor(plannedMcqCount * 0.4)`
+answers at one index, or new true/false items exceeding `ceil(plannedTrueFalseCount / 2)`
+answers of one truth value. It reports the item ID and reason in `warnings`; accepted
+items stay intact so the existing three-round slot retry can regenerate the rejected
+slots. Shorter tests cannot enforce those proportions meaningfully. Unique longest
+MCQ keys, option counts other than four and all/none shortcuts are always rejected.
+
+The concurrent generation integration must pass the complete blueprint counts and
+all previously accepted items at the test-only validator call, include remaining
+answer-position/truth-value capacity in the next prompt, and collect gate warnings.
+The current call site does not yet pass this context, so whole-test distribution is
+not enforced in production until that integration lands. Leave context absent for
+note citation validation, whose synthetic true/false rows are not quiz items.
+
+`Excerpt.kind` may carry the source kind. Known `assignment` and `exam` kinds are
+refused by the validator; the prompt additionally forbids deriving answer keys from
+assignment/exam problem excerpts. The production excerpt reader currently omits
+kind, so it must pass document kind to enable this deterministic refusal for those
+sources. Text alone cannot reliably distinguish an assignment from a worked example.
+
+Recorded quoted misconceptions can be used without a positive `help_level_used`.
+The extraction schema lacks a per-concept explicit corrected-assertion flag, so an
+ordinary asked/confused question cannot safely be treated as a recorded misconception.
+Such distractors still use source-stated confusions or explicitly inferred examples,
+not invented student history. This requires a schema change to broaden safely.
