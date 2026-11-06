@@ -1,0 +1,101 @@
+
+> @vstudy/website@0.1.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-6068bbec/apps/website
+> astro build
+
+10:54:49 [types] Generated 28ms
+10:54:49 [build] output: "static"
+10:54:49 [build] mode: "static"
+10:54:49 [build] directory: /Users/vc/.t3/worktrees/vstudy-pro/t3-6068bbec/apps/website/dist/
+10:54:49 [build] Collecting build info...
+10:54:49 [build] ✓ Completed in 36ms.
+10:54:49 [build] Building static entrypoints...
+10:54:49 [vite] ✓ built in 151ms
+10:54:49 [vite] ✓ built in 8ms
+10:54:49 [build] Rearranging server assets...
+
+ generating static routes
+10:54:49   ├─ /en/docs/getting-started/index.html (+5ms)
+10:54:49   ├─ /en/docs/connect-your-school/index.html (+1ms)
+10:54:49   ├─ /en/docs/courses-and-deadlines/index.html (+1ms)
+10:54:49   ├─ /en/docs/study-planner/index.html (+1ms)
+10:54:49   ├─ /en/docs/reading-documents/index.html (+1ms)
+10:54:49   ├─ /en/docs/ai-providers/index.html (+1ms)
+10:54:49   ├─ /en/docs/themes/index.html (+1ms)
+10:54:49   ├─ /en/docs/chat-history/index.html (+1ms)
+10:54:49   ├─ /en/docs/moodle-pages/index.html (+1ms)
+10:54:49   ├─ /en/docs/data-and-storage/index.html (+1ms)
+10:54:49   ├─ /en/docs/privacy-and-network/index.html (+0ms)
+10:54:49   ├─ /en/docs/keyboard-shortcuts/index.html (+0ms)
+10:54:49   ├─ /en/docs/troubleshooting/index.html (+0ms)
+10:54:49   ├─ /en/docs/architecture/index.html (+0ms)
+10:54:49   ├─ /en/docs/development/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/getting-started/index.html (+1ms)
+10:54:49   ├─ /zh-Hant/docs/connect-your-school/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/courses-and-deadlines/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/study-planner/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/reading-documents/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/ai-providers/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/themes/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/chat-history/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/moodle-pages/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/data-and-storage/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/privacy-and-network/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/keyboard-shortcuts/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/troubleshooting/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/architecture/index.html (+0ms)
+10:54:49   ├─ /zh-Hant/docs/development/index.html (+0ms)
+10:54:49   ├─ /ja/docs/getting-started/index.html (+1ms)
+10:54:49   ├─ /ja/docs/connect-your-school/index.html (+0ms)
+10:54:49   ├─ /ja/docs/courses-and-deadlines/index.html (+0ms)
+10:54:49   ├─ /ja/docs/study-planner/index.html (+0ms)
+10:54:49   ├─ /ja/docs/reading-documents/index.html (+0ms)
+10:54:49   ├─ /ja/docs/ai-providers/index.html (+0ms)
+10:54:49   ├─ /ja/docs/themes/index.html (+0ms)
+10:54:49   ├─ /ja/docs/chat-history/index.html (+0ms)
+10:54:49   ├─ /ja/docs/moodle-pages/index.html (+0ms)
+10:54:49   ├─ /ja/docs/data-and-storage/index.html (+0ms)
+10:54:49   ├─ /ja/docs/privacy-and-network/index.html (+0ms)
+10:54:49   ├─ /ja/docs/keyboard-shortcuts/index.html (+0ms)
+10:54:49   ├─ /ja/docs/troubleshooting/index.html (+0ms)
+10:54:49   ├─ /ja/docs/architecture/index.html (+0ms)
+10:54:49   ├─ /ja/docs/development/index.html (+0ms)
+10:54:49   ├─ /en/search.json (+1ms)
+10:54:49   ├─ /zh-Hant/search.json (+0ms)
+10:54:49   ├─ /ja/search.json (+0ms)
+10:54:49   ├─ /en/index.html (+1ms)
+10:54:49   ├─ /zh-Hant/index.html (+1ms)
+10:54:49   ├─ /ja/index.html (+1ms)
+10:54:49   ├─ /index.html (+1ms)
+10:54:49 ✓ Completed in 40ms.
+
+ generating optimized images
+10:54:49 [vite] ✓ built in 5ms
+10:54:50   ▶ /_astro/themes-settings.B94rYXBv_wK1fI.webp (before: 63kB, after: 28kB) (+129ms) (1/24)
+10:54:50   ▶ /_astro/onboarding-welcome.DNLhkOex_6pnbu.webp (before: 66kB, after: 26kB) (+129ms) (2/24)
+10:54:50   ▶ /_astro/course-page.HHcpNqej_1nUNSt.webp (before: 110kB, after: 44kB) (+129ms) (3/24)
+10:54:50   ▶ /_astro/courses-home.CPwEmw0O_2wAy4u.webp (before: 107kB, after: 45kB) (+129ms) (4/24)
+10:54:50   ▶ /_astro/courses-home-ocean-light.DU8liUd4_1Ch1jw.webp (before: 111kB, after: 13kB) (+129ms) (5/24)
+10:54:50   ▶ /_astro/courses-home-ember-light.B_rXDa2B_1bh872.webp (before: 108kB, after: 13kB) (+129ms) (6/24)
+10:54:50   ▶ /_astro/courses-home-grove-light.7Uu8J18g_1hNY4A.webp (before: 104kB, after: 13kB) (+129ms) (7/24)
+10:54:50   ▶ /_astro/courses-home-iris-light.CFwp_wXU_k9Mfd.webp (before: 105kB, after: 13kB) (+129ms) (8/24)
+10:54:50   ▶ /_astro/history-search.CUPgpaJ0_1XqS1.webp (before: 67kB, after: 26kB) (+129ms) (9/24)
+10:54:50   ▶ /_astro/moodle-webview.CC9rdZQo_Z1oteTu.webp (before: 142kB, after: 60kB) (+193ms) (10/24)
+10:54:50   ▶ /_astro/courses-home.CPwEmw0O_ZMOjFb.webp (before: 107kB, after: 13kB) (+64ms) (11/24)
+10:54:50   ▶ /_astro/course-page.HHcpNqej_12XU9w.webp (before: 110kB, after: 25kB) (+69ms) (12/24)
+10:54:50   ▶ /_astro/planner-today.H8oK7FHU_ZUkMJd.webp (before: 105kB, after: 42kB) (+198ms) (13/24)
+10:54:50   ▶ /_astro/reader-chat-with-answer.BFZ7W0UR_Z1Y663z.webp (before: 172kB, after: 71kB) (+198ms) (14/24)
+10:54:50   ▶ /_astro/courses-home-vstudy-dark.HY8fWOKc_YLQcY.webp (before: 93kB, after: 11kB) (+69ms) (15/24)
+10:54:50   ▶ /_astro/courses-home-rose-light.BaRPSVc6_wCW8r.webp (before: 104kB, after: 13kB) (+69ms) (16/24)
+10:54:50   ▶ /_astro/courses-home-ocean-dark.ZbXh2nD9_BDWyC.webp (before: 94kB, after: 11kB) (+69ms) (17/24)
+10:54:50   ▶ /_astro/courses-home-grove-dark.CoDsNrHQ_18Vku2.webp (before: 94kB, after: 11kB) (+69ms) (18/24)
+10:54:50   ▶ /_astro/courses-home-ember-dark.CAhOGzbL_9U496.webp (before: 95kB, after: 11kB) (+76ms) (19/24)
+10:54:50   ▶ /_astro/courses-home-iris-dark.D2m2CIsd_ydh9T.webp (before: 92kB, after: 11kB) (+76ms) (20/24)
+10:54:50   ▶ /_astro/courses-home-rose-dark.DTxp_o96_ZkmB13.webp (before: 92kB, after: 11kB) (+76ms) (21/24)
+10:54:50   ▶ /_astro/moodle-webview.CC9rdZQo_Z19Sd5K.webp (before: 142kB, after: 16kB) (+20ms) (22/24)
+10:54:50   ▶ /_astro/courses-home.CPwEmw0O_ZonVAD.webp (before: 107kB, after: 14kB) (+21ms) (23/24)
+10:54:50   ▶ /_astro/reader-chat-with-answer.BFZ7W0UR_Z2jP0Jx.webp (before: 172kB, after: 38kB) (+31ms) (24/24)
+10:54:50 ✓ Completed in 230ms.
+
+10:54:50 [build] ✓ Completed in 446ms.
+10:54:50 [build] 49 page(s) built in 498ms
+10:54:50 [build] Complete!

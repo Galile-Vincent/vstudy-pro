@@ -4,7 +4,7 @@
 
 Replace the boring, tinted marketing site with a clean neutral presentation, expressive product hero, interactive bento cards, smooth theme changes, and a header without a rule. Keep the documentation structure, three languages, and factual limitations.
 
-Implemented on `t3/website-v2`. The final U4 integration step is pending. Main remains `ec24a40` and does not contain the clean-art work or `docs/MCP.md`. Do not treat this pass as the final screenshot refresh.
+This file records the initial pre-U4 pass on `t3/website-v2`. Step 6 is now complete after merging main `6d26b91`. See [the final integration report](final/VERIFICATION.md) for regenerated images, the real-scroll header regression, and current check results. The results below remain the historical first-pass record.
 
 ## Design evidence
 
@@ -75,11 +75,6 @@ node /tmp/vstudy-website-qa/node_modules/lighthouse/cli/index.js \
   --output=json --output-path=docs/evidence/website-v2/lighthouse-home.json --quiet
 ```
 
-## Resume after U4
+## Completed U4 integration
 
-1. Confirm the clean-art merge is on main, then merge main into `t3/website-v2`.
-2. Check whether `docs/MCP.md` has arrived. Replace the coming-soon tile and FAQ with accurate shipped behavior when it has.
-3. Run `pnpm build && node apps/desktop/scripts/marketing-shots.mjs`. The existing pipeline writes website assets and README derivatives. This pending command owns the allowed shared screenshot outputs.
-4. Inspect the contact sheet and the large product captures for hierarchy, readable crop, clipping, contrast, sample-data quality, and theme consistency. Fix capture or placement problems before rebuilding.
-5. Rebuild the website, check README links, repeat static/browser/axe/Lighthouse checks, and capture final evidence with the clean art.
-6. Have the coordinator run independent review. This implementation sub-agent created no PR and spawned no reviewers.
+Main `6d26b91` was merged, the desktop app and all 132 captures were rebuilt, and the site and shared README image derivatives were refreshed. The final browser, Lighthouse, repository, and image checks pass. MCP remains coming soon because its documentation is absent from this merged main. See [final/VERIFICATION.md](final/VERIFICATION.md).

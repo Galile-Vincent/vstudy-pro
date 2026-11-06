@@ -150,6 +150,14 @@ The first pass found mobile overflow caused by the drifting glow. The glow's own
 
 The v2 HTML sketches stay outside the repository. The coordinator requested that remaining evidence be committed. This task therefore commits its PNG captures alongside JSON audits, screenshot manifests, design decisions, and verification instructions. T3 captures can rasterize at a different size than their CSS viewport. The manifest records the CSS width used for each capture.
 
-### Integration gate
+### Initial integration gate
 
-At this pass, main is `ec24a40` and has neither the U4 clean-art merge nor `docs/MCP.md`. The MCP tile and FAQ therefore say coming soon in all three languages. The final step must merge main after U4 lands, update MCP copy if its documentation has arrived, run `pnpm build && node apps/desktop/scripts/marketing-shots.mjs`, inspect the generated contact sheet, rebuild the site and README derivatives, and rerun checks. Current screenshots still use the pre-U4 art.
+Before U4 merged, main was `ec24a40` and had neither the U4 clean-art merge nor `docs/MCP.md`. The MCP tile and FAQ therefore say coming soon in all three languages. The final step must merge main after U4 lands, update MCP copy if its documentation has arrived, run `pnpm build && node apps/desktop/scripts/marketing-shots.mjs`, inspect the generated contact sheet, rebuild the site and README derivatives, and rerun checks. Current screenshots still use the pre-U4 art.
+
+### Completed U4 integration
+
+Merged main `6d26b91` as `67755ea` and regenerated all 132 app captures. Every capture passed visual review across the twelve theme/scheme sheets. Course covers now show soft fields without stripe, contour, image, or glyph overlays. The website and shared images used by the three READMEs now use the regenerated files. All 264 encoded variants retain 2880×1800 dimensions, and all 22 alias/format combinations match their source captures by hash.
+
+A real-wheel header regression covers home/docs, desktop/mobile, and light/dark. Every settled state shows backdrop opacity 1, 16px blur, an 85% neutral fill, and no bottom rule. Navigation stays legible over screenshots and prose. The earlier dark overlap was not reproduced after real scrolling and the fade settled, so no CSS change was needed.
+
+The final run passes 490 responsive states and 232 axe page/palette states. Home and Getting started each score 100 in all four local mobile Lighthouse categories, with zero CLS. Home images total 144,274 bytes. Typecheck, lint, knip, and 1,026 tests pass; 14 existing tests remain skipped. The static audit checks 49 pages and 2,007 links/fragments; README links also pass. Full evidence and command outputs are in [the final report](evidence/website-v2/final/VERIFICATION.md). `docs/MCP.md` is absent from this merged main, so MCP remains accurately marked coming soon.

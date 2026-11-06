@@ -1,0 +1,88 @@
+{
+  "main": "6d26b91",
+  "merged": "67755ea",
+  "shots": 132,
+  "errors": [],
+  "maxWebpBytes": 186564,
+  "maxAvifBytes": 104281,
+  "readmeAliases": [
+    {
+      "name": "courses-home",
+      "alias": "courses",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "course-page",
+      "alias": "course",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "planner-today",
+      "alias": "planner",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "alias": "reader",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "history-search",
+      "alias": "history",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "library",
+      "alias": "library",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "home",
+      "alias": "home",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "themes-settings",
+      "alias": "themes",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "moodle-webview",
+      "alias": "webview",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "storage-settings",
+      "alias": "storage",
+      "webpMatches": true,
+      "avifMatches": true
+    },
+    {
+      "name": "onboarding-welcome",
+      "alias": "onboarding",
+      "webpMatches": true,
+      "avifMatches": true
+    }
+  ],
+  "readmes": [
+    "README.md",
+    "README.zh-Hant.md",
+    "README.ja.md"
+  ],
+  "visualReview": {
+    "groups": 12,
+    "viewsPerGroup": 11,
+    "courseArt": "Soft fields only. No stripe, contour, image, or glyph overlays.",
+    "dialogs": "Only intended history search, appearance, storage, and onboarding panels. No stray dialogs.",
+    "decision": "pass"
+  }
+}

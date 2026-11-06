@@ -20,4 +20,4 @@ The scheme initializes inline before first paint. Color interpolation starts onl
 
 ## Evidence
 
-See ../../docs/WEBSITE_DESIGN_NOTES.md and ../../docs/evidence/website-v2/VERIFICATION.md for the decision, browser checks, source captures, and remaining integration gate.
+See ../../docs/WEBSITE_DESIGN_NOTES.md and ../../docs/evidence/website-v2/VERIFICATION.md for the decision, browser checks, source captures, and completed integration checks.
