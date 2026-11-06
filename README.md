@@ -168,11 +168,13 @@ Imports copy your original into a content-addressed library. Markdown and text o
 
 AI is optional. Open **AI tools** in the sidebar, or **Set up AI** from onboarding, the Reader, or **Settings > Providers**. Choose Claude Code (`claude`), Codex (`codex`), or Antigravity (`agy`), then allow that tool individually. Discovery checks files without launching a disabled tool.
 
-1. **Install.** Review the official download and private destination, then run the action. VStudy verifies the download and keeps each version in its own app-managed folder. It needs no administrator password and changes no shell profile or PATH.
+1. **Install.** Review the official download and private destination, then run the action. Managed downloads require an app-pinned hash or independently verified publisher signature before execution. Claude and audited macOS Codex 0.166.0 support this. Antigravity uses **Install another way**, with the official command to run in your own terminal. Managed versions need no administrator password or PATH changes.
 2. **Sign in.** Run the reviewed action in the embedded terminal on macOS. Follow its link or device code, then return to VStudy. Links ask for confirmation. You can also copy the command or open your own Terminal. Windows and Linux use that external-terminal fallback for sign-in.
 3. **Test.** Choose **Test it** to send a tiny prompt through the real provider. It contains no document text and may count toward your provider usage. Specific recovery hints and a request to copy to your teacher or IT team are available in the same sheet.
 
 The sidebar shows versions and update state. **Check for updates now** requests a one-time version check. Background checks and automatic updates while idle start off in **Settings > Privacy**. A requested update installs beside the current version. Running chats keep their executable, new chats use the update, and rollback keeps the previous version available. VStudy does not update a separately installed CLI. The copy-only vendor installer fallback explains how to select an existing executable in Providers settings.
+
+An update without independent publisher proof shows **New version available: install it yourself** and a vendor link. Revoking provider consent or either update preference cancels a pending automatic update before it can execute or activate.
 
 VStudy includes no AI subscription. Account access and free or paid usage follow the provider's terms. API keys remain available for Anthropic, OpenAI, and OpenAI-compatible endpoints, saved or just for the session. Codex requires the audited CLI **0.166.0**, macOS, and `/usr/bin/sandbox-exec`. Its managed installer uses that version; a newer release cannot bypass transport verification. See [Codex transport limits](docs/codex-tool-free.md), [setup design and acceptance limits](docs/AI_CLI_SETUP_DESIGN.md), and [implementation evidence](docs/AI_CLI_SETUP_REPORT.md).
 

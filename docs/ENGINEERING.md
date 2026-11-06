@@ -42,6 +42,8 @@ If the helper is missing, blocked by permissions, or cannot be repaired on a rea
 
 `src/main/providers/setup/pty-helper.test.ts` copies a real helper into temporary packages, sets `0644`, and checks repair, repeated calls, denied chmod, symlink escape refusal, and ASAR-unpacked resolution. These tests run under Node and do not launch Electron. Recheck node-pty's `lib/utils.js` loader contract when changing its pinned version.
 
+For the packaged regression, `node e2e/ai-cli-packaged.mjs` from `apps/desktop` sets the owned package's helper to `0644`, checks its signature and release fuses, then launches one isolated smoke profile. It asserts a native PTY answer, action teardown, and repaired execute bits. Its cleanup restores the original helper mode. Run it only when the shared Electron slot is available. Building the package and inspecting its signature do not launch the app.
+
 ## Check a change
 
 Run these commands sequentially on a memory-constrained machine.

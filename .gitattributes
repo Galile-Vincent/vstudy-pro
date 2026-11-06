@@ -16,3 +16,5 @@ pnpm-lock.yaml text eol=lf merge=binary
 
 # Unified patch context lines use a leading space for empty source lines.
 docs/vendor-patches/*.patch whitespace=-blank-at-eol
+# Preserve raw command output, including tool-emitted trailing spaces and blank lines.
+docs/evidence/ai-cli/security/*.log whitespace=-blank-at-eol,-blank-at-eof

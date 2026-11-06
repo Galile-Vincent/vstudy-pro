@@ -1,6 +1,6 @@
 # Guided AI tool setup
 
-Students must be able to install, sign in, test, and update Claude Code, Codex, and Antigravity without using a separate terminal.
+Students can set up Claude Code, Codex, and Antigravity through guided steps. Managed installation requires independent publisher proof. When that proof is unavailable, the same sheet explains why and shows the official command for the user's own terminal.
 
 ## Study evidence
 
@@ -32,7 +32,7 @@ The domain is `CliToolState`, `CliActionPlan`, and `CliActionSession`, validated
 
 Detection reads safe installed paths without executing them. Status, login, and tests require the existing per-provider opt-in. Executable resolution reuses `ExecutablePins`. A changed file still requires the existing native confirmation. A user-requested verified managed install can pin its resulting executable. Disable vendor self-updates for managed sessions. Preserve Codex's macOS-only audited 0.166.0 transport. Show newer releases as incompatible until audited. Installing a newer release must never bypass that policy.
 
-Install under `userData/ai-tools/<provider>/<version>/`. Download to a private staging directory, enforce HTTPS vendor hosts, cap sizes, verify checksum and available publisher signature, validate version, then rename to the version directory. Atomically replace only an application-owned JSON pointer. Keep the prior version for rollback. Never delete versions used by this process. Prefer conservative retention across restarts over deleting a possibly running executable. New chats resolve a new absolute path while already spawned chats retain their original binary. Never mutate a user's globally installed CLI, npm prefix, shell profile, or PATH.
+Install under `userData/ai-tools/<provider>/<version>/`. Download to a private staging directory, enforce HTTPS vendor hosts, cap sizes, and verify independent authenticity before any `--version` execution. Only then validate the version and rename to its directory. Atomically replace only an application-owned JSON pointer. Keep the prior version for rollback. Never delete versions used by this process. Prefer conservative retention across restarts over deleting a possibly running executable. New chats resolve a new absolute path while already spawned chats retain their original binary. Never mutate a user's globally installed CLI, npm prefix, shell profile, or PATH.
 
 Update checking is a separate default-off preference. Check on launch and every four hours after opt-in, cache results to disk, throttle Check now, preserve cached state offline, and inventory every request in Settings > Privacy. Install and update remain explicit clicks unless the user enables automatic updates while idle. Idle includes real provider turns and setup actions.
 
@@ -61,3 +61,25 @@ The embedded sign-in PTY is currently enabled on macOS only. Its sandbox prevent
 The Advanced preference requires main's native confirmation before enabling the general shell. Reloading the main document revokes its preview tokens and stops setup processes. Previews awaiting network metadata also become invalid. Existing chat sessions are not owned by this setup cleanup. The terminal scrolls into view once when an action starts, keeping sign-in codes visible.
 
 Package acceptance uses the actual ASAR app with release fuses enabled and the native node-pty library unpacked. The build restores the executable bit on node-pty's spawn helper because the published prebuild lacks it on this host. Developer ID signing and notarization still require release credentials. Retention intentionally keeps all verified versions rather than risking deletion of a binary used by another process after an app restart.
+
+## Independent artifact trust after security review
+
+A feed-controlled checksum detects transfer damage, but a compromised feed can replace both bytes and checksum. `SetupStore` therefore enforces authenticity itself before every probe, reuse, or rollback. Calling the store directly cannot bypass this rule. The execution policy is centralized in `setup/authenticity.ts`.
+
+| Provider and platform | Execution authority shipped in the app | Install and update behavior |
+| --- | --- | --- |
+| Claude on supported native platforms | OpenPGP fingerprint `31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE`. Verify the detached manifest signature, version, platform, native executable name, and executable SHA-256. | Managed installation and dynamic updates can proceed only after signature verification. A feed or receipt cannot choose the trusted fingerprint. |
+| Codex 0.166.0 on macOS arm64 and x64 | Exact archive and extracted executable SHA-256 values in `setup/codex-pins.ts`. | Both app-embedded hashes must match before the probe. Future versions without pins show a manual update notice. The existing macOS-only transport audit still applies. |
+| Antigravity on every platform | No supported independent proof is configured. Its feed-supplied SHA-512 is insufficient. | No managed installation or activation. Show **Install another way**, the exact official command, and the reason. Update chips link to the vendor through external-link confirmation. |
+
+The [Codex audit](evidence/ai-cli/security/codex-pins.json) records the official 0.166.0 assets, sizes, archive hashes, executable hashes, and strict Apple-anchored signature verification. The x64 pin was newly established in this audit. Neither downloaded binary nor installer ran. Runtime authorization uses the reviewed in-app hashes, rather than future release metadata.
+
+Read-only inspection of installed vendor binaries found Anthropic Team ID `Q6L2SF6YDW`, OpenAI `2DC432GLL2`, and Google `EQHXZ8M8AV`. `codesign -dv --verbose=4` identifies the publisher and `codesign --verify --strict` passes for each. `spctl --assess --type execute --verbose=4` returns exit 3 for each standalone CLI, with "code valid but does not seem to be an app". [The exact commands and outputs](evidence/ai-cli/security/local-publishers.json) preserve this limitation. No runtime Team ID exception or unverified Windows Authenticode identity was added. A future dynamic native-signature path must meet the full pinned-publisher verification policy before execution.
+
+Installation receipts and active pointers are untrusted local metadata. Every managed launch rehashes the executable and re-verifies its app pin or signed Claude manifest. This is the record-authentication option used here; no new Keychain secret is required. `ExecutablePins` keeps the prior approved identity as the expected identity. Only the main-owned successful installer or rollback result can replace that pin without another dialog. A pointer changed outside that operation requires changed-executable confirmation and still must pass authenticity verification.
+
+An automatic action captures provider consent and the update-preference revision. It rechecks provider opt-in, both update preferences, chat activity, executable leases, and other setup actions after asynchronous work, before probes, before promotion retries, and immediately before pointer replacement. Revocation aborts its owner and removes staging or an unactivated promoted version. Turning preferences back on does not resume an action authorized by an older revision. Manual updates retain their existing side-by-side behavior during active chats.
+
+The terminal filter is a bounded streaming parser. It handles repeated ESC, C1 controls, split terminators, and cancellation. It removes every OSC, DCS, APC, PM, and SOS string while preserving ordinary ANSI CSI. Tests run the pinned xterm 6.0.0 parser, reproduce title and hidden-link registration without filtering, and verify zero title or link registrations after filtering under varied chunking. This Node proof does not establish DOM link activation behavior.
+
+The helper exec-bit repair from main is part of this branch. Its confined runtime guard handles `0644` helpers and ASAR-unpacked paths, with localized failure when repair is impossible. See [the engineering guide](ENGINEERING.md#native-pty-helper-permissions).
