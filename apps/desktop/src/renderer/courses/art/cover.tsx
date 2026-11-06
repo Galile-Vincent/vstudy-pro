@@ -3,21 +3,19 @@ import { useState, type CSSProperties } from 'react';
 import type { MoodleCourse } from '../../../shared/moodle';
 import { tr } from '../../../shared/i18n';
 
+import '../../shell/soft-art.css';
+
 const colors = ['--chart-1', '--chart-2', '--chart-3', '--chart-4', '--chart-5'] as const;
-const patterns = ['orbits', 'contours', 'waves', 'grid'] as const;
 
 /** Stable artwork identity includes the term so repeated enrollments have a distinct cover. */
 export function courseArt(id: string, term: string | null) {
   let hash = 2166136261;
   for (const character of `${id}:${term ?? ''}`) hash = Math.imul(hash ^ character.charCodeAt(0), 16777619) >>> 0;
   return {
-    pattern: patterns[hash % patterns.length]!,
     style: {
       '--course-color': `var(${colors[hash % colors.length]})`,
-      '--art-hue-offset': `${(hash >>> 12) % 161 - 80}`,
-      '--art-hue-gap': `${40 + (hash >>> 20) % 51}`,
-      '--art-lightness': `${.64 + (hash >>> 16) % 12 / 100}`,
-      '--art-angle': `${hash % 180 + 80}deg`,
+      '--art-hue-offset': `${(hash >>> 12) % 71 - 35}`,
+      '--art-hue-gap': `${30 + (hash >>> 20) % 21}`,
       '--art-x': `${20 + hash % 65}%`,
       '--art-y': `${10 + (hash >>> 8) % 60}%`,
     } as CSSProperties,
@@ -28,9 +26,9 @@ export function courseArt(id: string, term: string | null) {
 export function CourseArtwork({course}: {course: MoodleCourse}) {
   const art = courseArt(course.id, course.identity.term);
   const [failedImage, setFailedImage] = useState<string>();
-  return <div className="moodle-artwork" data-pattern={art.pattern} style={art.style} aria-hidden="true">
+  return <div className="moodle-artwork soft-art" style={art.style} aria-hidden="true">
     {course.imageUrl && failedImage !== course.imageUrl && <img src={course.imageUrl} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailedImage(course.imageUrl!)} />}
-    <svg className="moodle-art-pattern" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">{[0,1,2,3,4].map(index => <ellipse key={index} cx="360" cy="120" rx={85 + index * 44} ry={150 + index * 50} />)}</svg><span className="moodle-art-grain" /><span className="moodle-art-scrim" />
+    <span className="moodle-art-scrim" />
   </div>;
 }
 

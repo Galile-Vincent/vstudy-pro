@@ -12,8 +12,8 @@ describe('Course artwork',()=>{
     expect(courseArt('course-a','1151')).toEqual(first);
     expect(courseArt('course-a','1152')).not.toEqual(first);
     expect(new Set(Array.from({length:8},(_,index)=>JSON.stringify(courseArt(`course-${index}`,'1151')))).size).toBe(8);
-    expect(Number(first.style['--art-hue-gap' as keyof typeof first.style])).toBeGreaterThanOrEqual(40);
-    expect(Number(first.style['--art-hue-gap' as keyof typeof first.style])).toBeLessThanOrEqual(90);
+    expect(Number(first.style['--art-hue-gap' as keyof typeof first.style])).toBeGreaterThanOrEqual(30);
+    expect(Number(first.style['--art-hue-gap' as keyof typeof first.style])).toBeLessThanOrEqual(50);
     expect(Object.values(first.style).join(' ')).toMatch(/var\(--chart-\d\)/);
   });
   it('retains generated artwork and a readable code when the remote cover fails',async()=>{
@@ -26,7 +26,8 @@ describe('Course artwork',()=>{
       expect(host.querySelector('img')).toBeNull();
       expect(host.querySelector('.moodle-cover-due')?.textContent).toBe('Due tomorrow');
       expect(host.querySelector('.moodle-cover progress')).not.toBeNull();
-      expect(host.querySelector('.moodle-art-pattern')).not.toBeNull();
+      expect(host.querySelector('.soft-art')).not.toBeNull();
+      expect(host.querySelector('.moodle-art-pattern,.moodle-art-grain')).toBeNull();
       expect(host.querySelector('.moodle-course-code')?.textContent).toContain(course.identity.code);
       expect(host.querySelector('.moodle-artwork')?.getAttribute('aria-hidden')).toBe('true');
     } finally {await act(async()=>root.unmount());}
