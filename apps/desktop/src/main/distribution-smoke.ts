@@ -15,7 +15,8 @@ import { promisify } from 'node:util';
 import type { Store } from './db';
 import { installDirectories, resolveInstalledExecutable } from './providers/trusted-executable';
 import { scrubbedEnvironment } from '../../resources/converter/contracts';
-import { managedConverterPython } from './platform/process';
+import { managedConverterPython, systemExecutable } from './platform/process';
+import { ActionPty } from './providers/setup/pty';
 
 const execute = promisify(execFile);
 
@@ -116,6 +117,15 @@ export async function runDistributionSmoke(window: BrowserWindow, store: Store, 
     } else {
       report.safeStorage = { probed: false, reason: 'Mac Keychain remains lazy during distribution smoke' };
     }
+    const environment = Object.fromEntries(Object.entries(scrubbedEnvironment(app.getPath('userData')))
+      .filter((entry): entry is [string, string] => typeof entry[1] === 'string'));
+    const terminal = await new ActionPty().run({
+      executable: process.platform === 'win32' ? systemExecutable('cmd.exe') : '/bin/sh',
+      args: process.platform === 'win32' ? ['/d', '/c', 'echo VSTUDY_PTY_READY'] : ['-c', 'printf VSTUDY_PTY_READY'],
+      cwd: app.getPath('userData'), env: environment,
+    }, new AbortController().signal, () => {}, 15_000);
+    if (terminal.exitCode !== 0 || !terminal.output.includes('VSTUDY_PTY_READY')) throw new Error('Packaged native terminal round-trip failed');
+    report.nativeTerminal = {engine: 'node-pty', architecture: process.arch, roundTrip: true, exitCode: terminal.exitCode};
     report.converter = await converterProbe(app.getPath('userData'));
     report.ok = true;
     report.exitCode = 0;

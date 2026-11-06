@@ -59,7 +59,7 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     await cached.dispose();
     expect(progress).toEqual([]);
   }, 900_000);
-  afterAll(async () => { await converter?.dispose(); if (directory) await rm(directory, { recursive: true, force: true }); });
+  afterAll(async () => { await converter?.dispose(); if (directory) await rm(directory, { recursive: true, force: true, maxRetries: 10 }); });
   it.each(["docx", "pptx", "xlsx", "html", "pdf", "csv"])("converts a real %s fixture", async (extension) => {
     const output = join(directory, `result-${extension}.md`);
     const parser = await converter.convert(resolve(`test-fixtures/converter/sample.${extension}`), output);

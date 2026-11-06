@@ -42,6 +42,7 @@ function smokeReport(target) {
       ...(target.key === 'mac-x64' ? { nativeWheel: { verified: true, sha256: 'a'.repeat(64) } } : {}),
     },
     safeStorage: target.platform === 'win' ? { backend: 'dpapi', roundTrip: true, ciphertextCleared: true } : { probed: false },
+    nativeTerminal: {engine: 'node-pty', architecture: target.arch, roundTrip: true, exitCode: 0},
   };
 }
 
@@ -195,6 +196,8 @@ test('packaged smoke rejects wrong architecture, failed DB writes, and invented 
   }
   const win = targetFor('win-x64');
   assert.throws(() => validateSmokeReport({ ...smokeReport(win), safeStorage: { probed: false } }, win), /DPAPI/);
+  assert.throws(() => validateSmokeReport({ ...smokeReport(win), nativeTerminal: undefined }, win), /node-pty/);
+  assert.throws(() => validateSmokeReport({ ...smokeReport(win), nativeTerminal: {engine: 'node-pty', architecture: 'arm64', roundTrip: true, exitCode: 0} }, win), /node-pty/);
   const intel = targetFor('mac-x64');
   assert.throws(() => validateSmokeReport({ ...smokeReport(intel), converter: { ...smokeReport(intel).converter, nativeWheel: undefined } }, intel), /native converter wheel/);
   const arm = targetFor('win-arm64');

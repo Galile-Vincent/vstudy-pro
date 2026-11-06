@@ -9,6 +9,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { WarmWorker } from "../../../resources/converter/warm-worker";
+import { ProcessScope } from "../../../resources/converter/process-scope";
 
 it("reuses a worker, recovers after job errors, and restarts after a crash", async () => {
   const directory = await mkdtemp(join(tmpdir(), "vstudy-worker-test-"));
@@ -28,7 +29,8 @@ for line in sys.stdin:
   print(json.dumps({'progress': str(os.getpid())}), flush=True)
   print(json.dumps({'done': True}), flush=True)
 `);
-  const worker = new WarmWorker(process.platform === 'win32' ? 'python' : 'python3', script, directory);
+  const scope = new ProcessScope();
+  const worker = new WarmWorker(process.platform === 'win32' ? 'python' : 'python3', script, directory, scope);
   try {
     const pids: string[] = [];
     await worker.run("one", "", "", pid => pids.push(pid));
@@ -46,7 +48,7 @@ for line in sys.stdin:
     await rejected;
     vi.useRealTimers();
     await worker.run("after-timeout", "", "");
-  } finally { vi.useRealTimers(); worker.stop(); await rm(directory, { recursive: true, force: true }); }
+  } finally { vi.useRealTimers(); worker.stop(); await scope.dispose(); await rm(directory, { recursive: true, force: true, maxRetries: 10 }); }
 });
 
 it.skipIf(process.platform === 'win32')('cancels bootstrap, reaps its process group and allows immediate venv removal', async () => {

@@ -23,6 +23,10 @@ export function validateSmokeReport(report, target) {
   if (target.platform === 'win' && (report.safeStorage?.backend !== 'dpapi' || report.safeStorage?.roundTrip !== true || report.safeStorage?.ciphertextCleared !== true)) {
     throw new Error('Windows packaged smoke did not verify the native DPAPI round-trip');
   }
+  if (report.nativeTerminal?.engine !== 'node-pty' || report.nativeTerminal?.architecture !== target.arch ||
+      report.nativeTerminal?.roundTrip !== true || report.nativeTerminal?.exitCode !== 0) {
+    throw new Error('Packaged smoke did not verify the native node-pty terminal for its architecture');
+  }
   if (target.key === 'mac-x64' && (report.converter.nativeWheel?.verified !== true || !/^[a-f0-9]{64}$/.test(report.converter.nativeWheel?.sha256 ?? ''))) {
     throw new Error('Intel Mac packaged smoke did not verify its supplemental native converter wheel');
   }

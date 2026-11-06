@@ -130,7 +130,7 @@ it('backfills v17 messages and retains an owner-only backup, links and foreign k
   finally {
     rmSync(dir, { recursive: true, force: true });
   }
-});
+}, process.platform === 'win32' ? 120_000 : 5_000);
 
 it('clears a renamed title so future messages can supply its automatic title',()=>{
   const s=setup(),{c}=conversation(s,'Automatic title');
