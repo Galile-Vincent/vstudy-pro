@@ -674,7 +674,7 @@ it('keeps empty count slots, caps the visible number, and orders the accessible 
   expect(host.querySelector('.course-unread-count')?.textContent).toBe('99+');
   expect(host.querySelector('.course-unread-count')?.getAttribute('title')).toBe('120 unread updates');
   expect(host.querySelector('.course-counts')?.children).toHaveLength(2);
-  expect(host.querySelector('.course-column-headings')?.getAttribute('aria-hidden')).toBe('true');
+  expect(host.querySelector('.course-heading-row')?.getAttribute('aria-hidden')).toBe('true');
   expect(host.querySelector('.course-column-headings')?.textContent).toBe('OverdueUnread');
   const button = host.querySelector<HTMLButtonElement>('.course-open')!;
   const labels = button.getAttribute('aria-labelledby')!.split(' ').map(id=>document.getElementById(id)!.textContent);
@@ -714,4 +714,48 @@ it('pins without opening a course, exposes pressed state, and keeps the course b
   await act(async () => pin.click());
   expect(pin.getAttribute('aria-pressed')).toBe('false');
   expect(host.querySelector('.course-group-label')).toBeNull();
+});
+
+describe("Courses view switch", () => {
+  afterEach(() => localStorage.clear());
+  const list = () => host.querySelector<HTMLElement>(".moodle-grid")!;
+  const switchButton = (label: string) => host.querySelector<HTMLButtonElement>(`.course-view-switch button[aria-label="${label}"]`)!;
+
+  it("starts as a list and exposes a labelled two-button group", async () => {
+    await mount(createMockMoodleApi());
+    expect(list().dataset.view).toBe("list");
+    const group = host.querySelector(".course-view-switch")!;
+    expect(group.getAttribute("role")).toBe("group");
+    expect(group.getAttribute("aria-label")).toBe("View");
+    expect(switchButton("List").getAttribute("aria-pressed")).toBe("true");
+    expect(switchButton("Cards").getAttribute("aria-pressed")).toBe("false");
+    expect(switchButton("Cards").title).toBe("Cards");
+  });
+
+  it("switches to cards, keeps every row and its accessible name, and remembers the choice", async () => {
+    await mount(createMockMoodleApi());
+    const before = [...host.querySelectorAll(".course-open")].map(button => button.getAttribute("aria-labelledby"));
+    await act(async () => switchButton("Cards").click());
+    expect(list().dataset.view).toBe("cards");
+    expect(switchButton("Cards").getAttribute("aria-pressed")).toBe("true");
+    expect(switchButton("List").getAttribute("aria-pressed")).toBe("false");
+    expect([...host.querySelectorAll(".course-open")].map(button => button.getAttribute("aria-labelledby"))).toEqual(before);
+    await act(async () => root.unmount());
+    root = createRoot(host);
+    await mount(createMockMoodleApi());
+    expect(list().dataset.view).toBe("cards");
+  });
+
+  it("treats an unknown stored value as a list", async () => {
+    localStorage.setItem("vstudy.courses.view", "carousel");
+    await mount(createMockMoodleApi());
+    expect(list().dataset.view).toBe("list");
+  });
+
+  it("keeps the repeated column labels out of the accessibility tree", async () => {
+    await mount(createMockMoodleApi());
+    const row = host.querySelector(".course-heading-row")!;
+    expect(row.getAttribute("aria-hidden")).toBe("true");
+    expect(row.querySelectorAll(".course-column-headings")).toHaveLength(2);
+  });
 });

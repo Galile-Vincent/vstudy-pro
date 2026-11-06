@@ -242,5 +242,8 @@
   "pinned_courses": "已釘選",
   "sort_courses": "課程排序",
   "sort_smart": "智慧排序",
-  "sort_name": "名稱"
+  "sort_name": "名稱",
+  "view_label": "檢視方式",
+  "view_list": "清單",
+  "view_cards": "卡片"
 }

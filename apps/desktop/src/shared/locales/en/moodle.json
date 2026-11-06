@@ -242,5 +242,8 @@
   "pinned_courses": "Pinned",
   "sort_courses": "Sort courses",
   "sort_smart": "Smart",
-  "sort_name": "Name"
+  "sort_name": "Name",
+  "view_label": "View",
+  "view_list": "List",
+  "view_cards": "Cards"
 }

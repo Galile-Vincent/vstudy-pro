@@ -242,5 +242,8 @@
   "pinned_courses": "ピン留め",
   "sort_courses": "コースの並び順",
   "sort_smart": "スマート",
-  "sort_name": "名前"
+  "sort_name": "名前",
+  "view_label": "表示",
+  "view_list": "リスト",
+  "view_cards": "カード"
 }

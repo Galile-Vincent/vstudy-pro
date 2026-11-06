@@ -67,6 +67,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { UpdatesInbox } from "./updates";
 import { useScrollFades } from "./scroll-fades";
 import "./home.css";
+import { CourseViewSwitch } from "./view-switch";
+import { loadCourseViewMode, saveCourseViewMode, type CourseViewMode } from "./view-mode";
 export { ConnectDialog } from "./connect";
 
 const week = 7 * 86400000;
@@ -169,6 +171,8 @@ function CoursesBody({
   const [orderSnapshot,setOrderSnapshot] = useState<{data:MoodleOverview;now:number}>();
   const [sortPreferences,setSortPreferences] = useState<CourseSortPreferences>({});
   const [pinBusy,setPinBusy] = useState<string>();
+  const [view,setView] = useState<CourseViewMode>(loadCourseViewMode);
+  const changeView = (mode: CourseViewMode) => {setView(mode);saveCourseViewMode(mode);};
   const prepareMovement = useRef<() => void>(() => {});
   const [detail, setDetail] = useState<MoodleCourseDetail>();
   const [homeDetails, setHomeDetails] = useState<NonNullable<MoodleOverview["summaries"]>>([]);
@@ -895,12 +899,12 @@ function CoursesBody({
               <Tabs value={selectedTerm} onValueChange={value => {prepareMovement.current();setTerm(value as MoodleTermFilter);}} className="moodle-term-tabs">
                 <div className="course-list-toolbar"><TabsList aria-label={tr("moodle:term_filter")}>
                   {availableTerms.map(filter => <TabsTrigger key={filter} value={filter}>{tr(`moodle:term_${filter}`)}<span className="moodle-chip">{overview.courses.filter(course => matchesTerm(course,filter)).length}</span></TabsTrigger>)}
-                </TabsList><Select value={sort} onValueChange={value => void changeSort(value)}><SelectTrigger className="course-sort" size="sm" aria-label={tr("moodle:sort_courses")}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="smart">{tr("moodle:sort_smart")}</SelectItem><SelectItem value="name">{tr("moodle:sort_name")}</SelectItem></SelectContent></Select></div>
+                </TabsList><div className="course-list-controls"><Select value={sort} onValueChange={value => void changeSort(value)}><SelectTrigger className="course-sort" size="sm" aria-label={tr("moodle:sort_courses")}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="smart">{tr("moodle:sort_smart")}</SelectItem><SelectItem value="name">{tr("moodle:sort_name")}</SelectItem></SelectContent></Select><CourseViewSwitch value={view} onChange={changeView} /></div></div>
                 {termFilters.map(filter => <TabsContent key={filter} value={filter}>
                   {!overview.courses.some(course => matchesTerm(course,filter)) && <p className="moodle-empty-inline">{tr("moodle:no_term_courses")}</p>}
-                  <div className="course-column-headings" aria-hidden="true"><span>{tr("moodle:overdue_column")}</span><span>{tr("moodle:unread_column")}</span></div>
+                  <div className="course-heading-row" aria-hidden="true">{[false,true].map(repeat => <div key={String(repeat)} className="course-column-headings" data-repeat={repeat}><span>{tr("moodle:overdue_column")}</span><span>{tr("moodle:unread_column")}</span></div>)}</div>
                   {pinsVisible && orderedCourses.some(item => item.pinned && matchesTerm(item.course,filter)) && <div className="course-group-label"><h3>{tr("moodle:pinned_courses")}</h3></div>}
-                  <ul className="moodle-grid" data-view="list" role="list">
+                  <ul className="moodle-grid" data-view={view} role="list">
                     {orderedCourses.filter(item => matchesTerm(item.course,filter)).map(({course,pinned},index,items) => {
                       const attention = courseAttention(course.id, overview.upcoming, updates);
                       const name = displayTitle(course.identity,lang,course.fullName);
