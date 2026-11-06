@@ -77,11 +77,17 @@ export class ArtifactRepository {
         }
         if (units.length > 100)
             throw new Error('review.scope_limit');
-        concepts ??= conceptsWhere('unitId IN (SELECT value FROM json_each(?))', unitIdsOf(units, 'id'));
+        concepts ??= conceptsWhere('(unitId IS NULL OR unitId IN (SELECT value FROM json_each(?)))', unitIdsOf(units, 'id'));
         const links = this.db.prepare('SELECT du.unitId,du.documentId FROM study_document_units du JOIN documents d ON d.id=du.documentId WHERE du.courseId=? AND d.deletedAt IS NULL AND d.status=\'ready\' AND du.unitId IN (SELECT value FROM json_each(?)) LIMIT 1001').all(courseId, unitIdsOf(units, 'id'));
         if (concepts.length > 100 || links.length > 1000)
             throw new Error('review.scope_limit');
-        return { units: units.map(u => ({ id: String(u.id), startsAt: u.startsAt as string | null, endsAt: u.endsAt as string | null, documentIds: links.filter(l => l.unitId === u.id).map(l => String(l.documentId)) })), documents: [...new Set(links.map(l => String(l.documentId)))], concepts: concepts.map(c => ({ key: String(c.key), unitId: c.unitId as string | null, ...(scope.kind === 'weak' ? { weak: true } : {}) })), observations };
+        // Unitless concepts belong to the whole course, so their sources are every ready document.
+        const courseDocuments = (scope.kind === 'concepts' || scope.kind === 'weak') && concepts.some(c => c.unitId === null)
+            ? this.db.prepare('SELECT DISTINCT du.documentId FROM study_document_units du JOIN documents d ON d.id=du.documentId WHERE du.courseId=? AND d.deletedAt IS NULL AND d.status=\'ready\' LIMIT 1001').all(courseId).map(row => String(row.documentId))
+            : [];
+        if (courseDocuments.length > 1000)
+            throw new Error('review.scope_limit');
+        return { units: units.map(u => ({ id: String(u.id), startsAt: u.startsAt as string | null, endsAt: u.endsAt as string | null, documentIds: links.filter(l => l.unitId === u.id).map(l => String(l.documentId)) })), documents: [...new Set([...links.map(l => String(l.documentId)), ...courseDocuments])], concepts: concepts.map(c => ({ key: String(c.key), unitId: c.unitId as string | null, ...(scope.kind === 'weak' ? { weak: true } : {}) })), observations };
     }
     /** Which of `ids` are still ready, linked to a unit of this course. */
     liveDocuments(courseId: string, ids: readonly string[]): string[] {
