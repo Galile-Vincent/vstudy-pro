@@ -1,7 +1,8 @@
 ---
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
-import { path, REPO_URL, RELEASES_URL, VERSION } from '../config';
+import Download from '../components/Download.astro';
+import { path, REPO_URL, VERSION } from '../config';
 import { languages, languageNames, ui, type Language } from '../data/ui';
 interface Props { language: Language; title: string; description: string; slug?: string; docs?: boolean; }
 const { language, title, description, slug = '', docs = false } = Astro.props;
@@ -43,7 +44,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           <a class="desktop-link" href={path(`${language}/#features`)}>{t.features}</a>
           <a href={path(`${language}/docs/getting-started/`)} aria-current={docs ? 'page' : undefined}>{t.docs}</a>
           <a class="desktop-link" href={REPO_URL}>GitHub</a>
-          <a class="button compact nav-download" href={RELEASES_URL}>{t.download}<span aria-hidden="true">↓</span></a>
+          <Download {language} compact />
         </div>
         <div class="nav-tools">
           <label class="sr-only" for="site-language">{t.language}</label>

@@ -1,0 +1,78 @@
+---
+import { path, RELEASES_URL } from '../config';
+import { downloadBase, installers, releaseMetadata } from '../data/downloads';
+import { downloadCopy } from '../data/download-copy';
+import type { Language } from '../data/ui';
+interface Props { language: Language; compact?: boolean; }
+const { language, compact = false } = Astro.props;
+const t = downloadCopy[language];
+const initial = installers[0];
+---
+<div class:list={['download-picker', { compact }]} data-download-picker data-download-label={t.download}>
+  <div class="download-actions">
+    <a class:list={['button', { compact }]} data-download-primary href={`${downloadBase}/${initial.file}`}>
+      <span data-download-text>{t.download} {initial.label}</span><span aria-hidden="true">↓</span>
+    </a>
+    {!compact && <a class="intel-alternative" href={`${downloadBase}/${installers[1].file}`}>{t.intel}</a>}
+    <details class="download-platforms">
+      <summary>{t.other}</summary>
+      <ul>
+        {installers.map(installer => <li>
+          <a href={`${downloadBase}/${installer.file}`} data-installer={installer.id}>
+            {installer.label}
+            {releaseMetadata[installer.id] && <small>v{releaseMetadata[installer.id]!.version} · {new Intl.NumberFormat(language, { style: 'unit', unit: 'megabyte', maximumFractionDigits: 1 }).format(releaseMetadata[installer.id]!.bytes / 1_000_000)}</small>}
+          </a>
+        </li>)}
+        <li><a href={`${downloadBase}/SHA256SUMS.txt`}>{t.checksums}</a></li>
+        <li><a href={RELEASES_URL}>{t.releases}</a></li>
+      </ul>
+    </details>
+  </div>
+  {!compact && <div class="download-notes">
+    <p>{t.requirements}</p>
+    <p>{t.status}</p>
+    <a href={path(`${language}/docs/getting-started/`)}>{t.help}</a>
+    <details><summary>{t.safety}</summary><p>{t.unsigned}</p><p>{t.mac}</p><p>{t.win}</p><p>{t.signed}</p></details>
+  </div>}
+</div>
+<script>
+  import { downloadBase, installers, recommendedInstaller, type PlatformHints } from '../data/downloads';
+  const browser = navigator as Navigator & { userAgentData?: PlatformHints & {
+    getHighEntropyValues?: (keys: string[]) => Promise<PlatformHints>;
+  } };
+  function recommend(hints?: PlatformHints) {
+    const id = recommendedInstaller(browser.userAgent, hints);
+    const installer = installers.find(item => item.id === id);
+    if (!installer) return;
+    document.querySelectorAll<HTMLElement>('[data-download-picker]').forEach(picker => {
+      const link = picker.querySelector<HTMLAnchorElement>('[data-download-primary]');
+      const label = picker.querySelector('[data-download-text]');
+      if (link && label) {
+        link.href = `${downloadBase}/${installer.file}`;
+        label.textContent = `${picker.dataset.downloadLabel} ${installer.label}`;
+      }
+    });
+  }
+  recommend(browser.userAgentData);
+  try {
+    browser.userAgentData?.getHighEntropyValues?.(['platform', 'architecture', 'bitness'])
+      .then(recommend).catch(() => {});
+  } catch {}
+</script>
+<style>
+  .download-picker { min-width: 0; }
+  .download-actions { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  .intel-alternative, summary { font-size: .875rem; }
+  summary { cursor: pointer; }
+  summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+  .download-platforms { position: relative; text-align: start; }
+  .download-platforms ul { list-style: none; padding: .5rem; margin: .5rem 0 0; border: 1px solid var(--line); border-radius: .5rem; background: var(--surface); }
+  .download-platforms a { display: block; padding: .5rem; }
+  .download-platforms small { display: block; color: var(--muted); }
+  .download-notes { max-width: 42rem; margin: 1rem auto; font-size: .875rem; color: var(--muted); line-height: 1.6; }
+  .download-notes p { margin: .5rem 0; }
+  .download-notes details { margin-top: .75rem; }
+  .compact .download-actions { gap: .5rem; }
+  .compact .download-platforms ul { position: absolute; right: 0; z-index: 20; width: min(18rem, 85vw); }
+  @media (max-width: 760px) { .compact [data-download-primary] { display: none; } }
+</style>
