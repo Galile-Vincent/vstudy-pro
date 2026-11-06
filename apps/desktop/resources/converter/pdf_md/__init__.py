@@ -95,14 +95,17 @@ def extraction_limits(seconds=72, stream_bytes=64 * 1024 * 1024):
     def expired(*_):
         raise ExtractionTimeout("PDF extraction time budget exceeded")
 
-    old_handler = signal.signal(signal.SIGALRM, expired)
+    native_timer = hasattr(signal, "SIGALRM") and hasattr(signal, "setitimer")
+    old_handler = signal.signal(signal.SIGALRM, expired) if native_timer else None
     types.zlib = BoundedZlib
-    signal.setitimer(signal.ITIMER_REAL, seconds)
+    if native_timer:
+        signal.setitimer(signal.ITIMER_REAL, seconds)
     try:
         yield
     finally:
-        signal.setitimer(signal.ITIMER_REAL, 0)
-        signal.signal(signal.SIGALRM, old_handler)
+        if native_timer:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, old_handler)
         types.zlib = original
         PDFLayoutAnalyzer.paint_path = original_path
 
