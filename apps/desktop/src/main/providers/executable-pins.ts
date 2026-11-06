@@ -13,6 +13,8 @@ const pinsSchema = z.record(identitySchema);
 /** Persist user-approved executable hashes and require renewed approval when files change. */
 export class ExecutablePins {
   private pins: Record<string, ExecutableIdentity> = {};
+  private managed: (binary: string) => ExecutableIdentity | null = () => null;
+  setManagedResolver(resolve: (binary: string) => ExecutableIdentity | null) { this.managed = resolve; }
   private pending = new Map<string, Promise<string | null>>();
   constructor(private file: string, private confirm: (previous: ExecutableIdentity, current: ExecutableIdentity) => Promise<boolean>) {
     if (existsSync(file)) this.pins = pinsSchema.parse(JSON.parse(readFileSync(file, 'utf8')));
@@ -26,7 +28,7 @@ export class ExecutablePins {
     this.save();
     return identity.path;
   }
-  describe(binary: string): Promise<string | null> { return this.pins[binary] ? executableMetadata(this.pins[binary]!.path).then(metadata=>metadata.path).catch(()=>null) : resolveInstalledExecutable(binary); }
+  describe(binary: string): Promise<string | null> { const path = this.managed(binary)?.path ?? this.pins[binary]?.path; return path ? executableMetadata(path).then(metadata=>metadata.path).catch(()=>null) : resolveInstalledExecutable(binary); }
   resolve(binary: string): Promise<string | null> {
     const pending = this.pending.get(binary);
     if (pending) return pending;
@@ -35,8 +37,10 @@ export class ExecutablePins {
     return work;
   }
   private async check(binary: string) {
-    const previous = this.pins[binary];
-    const path = previous?.path ?? await resolveInstalledExecutable(binary);
+    const managed = this.managed(binary);
+    const pin = this.pins[binary];
+    const previous = managed && managed.path !== pin?.path ? managed : pin;
+    const path = managed?.path ?? previous?.path ?? await resolveInstalledExecutable(binary);
     if (!path) return null;
     const current = await executableIdentity(path);
     if (previous && JSON.stringify(previous) !== JSON.stringify(current) && !await this.confirm(previous, current)) return null;
