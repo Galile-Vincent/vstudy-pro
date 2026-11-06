@@ -1,4 +1,6 @@
 ---
+import Logo from './Logo.astro';
+import Butterflies from './Butterflies.astro';
 import Base from '../layouts/Base.astro';
 import Window from './Window.astro';
 import Bento from './Bento.astro';
@@ -16,7 +18,9 @@ const doc = (slug: string) => path(`${language}/docs/${slug}/`);
 ---
 <Base {language} title={t.hero} description={t.sub}>
   <main id="main" tabindex="-1">
+    <Butterflies />
     <section class="hero container">
+      <button class="hero-brand" aria-label={{en:"Replay butterfly flight", "zh-Hant":"重播蝴蝶飛舞", ja:"蝶の飛翔をもう一度"}[language]}><Logo /></button>
       <h1><span>{v.hero[0]}</span><span>{v.hero[1]}</span></h1>
       <p class="hero-sub">{t.sub}</p>
       <div class="hero-actions"><a class="button" href={RELEASES_URL}>{t.downloadMac}<span aria-hidden="true">↓</span></a><a class="button secondary" href={doc('getting-started')}>{t.readDocs}<span aria-hidden="true">↗</span></a></div>

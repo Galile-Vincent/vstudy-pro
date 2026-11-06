@@ -189,3 +189,36 @@ Official pages fetched on 2026-11-06. These entries report the pages' wording an
 | OpenAI-compatible endpoints | Desktop `api.ts` and shared provider IDs, rather than a separate brand kit | A protocol connection category, not a separate endorsed vendor. Endpoint privacy depends on the configured service. | Plain descriptive chip. No model vendor logos or claims about every model. |
 
 All three locales include the trademark and non-affiliation disclaimer. New sections add no images, fonts, libraries, or external requests. Verification results are recorded in `docs/evidence/website-trust/VERIFICATION.md`.
+
+
+## Butterfly arrival, 2026-11-06
+
+The owner's 2026-11-06 butterfly supplies the silhouette and blue-to-violet gradients. The arrival leaves the headline, description, and download controls clear, then returns to a still page.
+
+### Direction study
+
+`scripts/brand-motion-study.mjs` renders twelve frames across 7.6 seconds for each of three cubic paths in light and dark. The six contact sheets and 72 frames are in `docs/evidence/brand/motion/`. These are deterministic layout studies. Live browser screenshots verify the implemented home page separately.
+
+- **Arc, selected.** Wide early separation leaves open space over the headline. The butterflies descend along opposite product-window edges. One returns toward the nav logo and rests for 1.1 seconds before fading.
+- **Ribbon.** Control-point spread is 55 percent of the arc. The butterflies cluster near the center, and keep-out clipping makes their passage less continuous.
+- **Orbit.** Spread is 125 percent of the arc, and the lower control points reach 115 percent of the viewport flight depth. The steeper sweep draws attention away from the product.
+
+The second visual pass corrected two issues. Text keep-out rectangles now use text ranges and individual CTA links, rather than full-width block boxes. The macOS icon comparison exposed a hard contact shadow; the generator now uses only the diffuse shadow.
+
+### Motion parameters
+
+`butterfly-model.ts` owns `Point`, `Rect`, and `Flight`. A flight has four cubic control points, a size, opacity, delay, and a settlement flag. There are four butterflies on desktop, or three below 768px, with Save Data, at most four reported CPU cores, or at most 4GB reported device memory. The browser does not expose a portable low-power-mode signal.
+
+Sizes are 18 to 27px. Peak opacities are .42 to .64. Start times differ by 290ms. Wings fold independently around the center, with a 1.04-second sine cycle, .40 to .96 horizontal scale, and a slight opposing skew. The outer symbol moves only with transform and opacity. A radius of .8 times the butterfly size expands each protected text rectangle, including the rotated wing corners.
+
+The origin is the hero logo. The lower flight depth stops 40px above the viewport edge or at the product-window bottom. One endpoint sits beside the nav mark. All butterflies disappear by 7.6 seconds. No animation frame is scheduled after completion.
+
+The script runs only on home pages. It starts after load and idle, stores `vstudy-butterflies-v1` in session storage, and replays from the hero or nav logo. Storage denial does not prevent the page from working. Reduced motion displays no flight. The page's existing pause control and hidden tabs pause the loop. Resize or scroll ends a running arrival so stale geometry cannot cross the copy. CSS containment, fixed positioning, decorative semantics, and pointer-events none prevent layout changes or input interception.
+
+The onboarding uses a static lockup. Another idle animation competes with its existing preview and adds little value.
+
+### Header and brand treatment
+
+Both app and website headers remain borderless at rest and on scroll. The website retains a translucent blur without elevation. Desktop symbols retain brand colors across packs; outlined lockup lettering switches with the resolved scheme, through the existing whole-page theme transition. README picture sources follow GitHub's color scheme.
+
+`pnpm brand` validates the originals, optimizes SVG geometry conservatively, compares rasterized results, and generates icons and metadata. macOS uses an 824px rounded body at 100px from each edge of a 1024px transparent canvas, with a 12px diffuse shadow at 22 percent opacity and a 12px vertical offset. The supplied 226px corner radius becomes about 182px at that size, close to the stock macOS body. Windows and Linux use the supplied full-canvas artwork. `scripts/check-brand.mjs` checks body size, transparency, shadow alpha, cubic endpoints, lifecycle, and protected text.

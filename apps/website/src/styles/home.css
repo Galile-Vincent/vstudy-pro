@@ -134,3 +134,6 @@
   .final-section { padding:var(--space-16) var(--space-5); margin-bottom:var(--space-16); }
 }
 @media(prefers-reduced-motion:reduce) { .reveal-ready { opacity:1; transform:none; } .product-depth { transform:none !important; will-change:auto; } #motion-toggle { display:none; } }
+
+.hero-brand { display:grid; place-items:center; width:56px; height:48px; margin:0 auto var(--space-6); padding:0; background:transparent; }
+.hero :is(h1,.hero-sub,.hero-actions,.release-meta) { position:relative; z-index:2; }
