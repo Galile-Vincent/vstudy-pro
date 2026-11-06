@@ -2,5 +2,9 @@
   "chat_title": "会話 {{number}} · {{model}}",
   "section_label": "「{{title}}」のセクションを使う",
   "completed_task": "完了したタスク",
-  "incomplete_task": "未完了のタスク"
+  "incomplete_task": "未完了のタスク",
+  "socratic_mode": "ソクラテス式モード",
+  "socratic_description": "小さなステップとヒントで理解を助け、必要なときは直接答えます。",
+  "answer_directly": "直接答える",
+  "answer_directly_request": "前の質問の答えを直接教えてください。"
 }

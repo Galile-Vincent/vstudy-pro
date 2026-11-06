@@ -2,5 +2,9 @@
   "chat_title": "對話 {{number}} · {{model}}",
   "section_label": "使用章節「{{title}}」",
   "completed_task": "已完成的任務",
-  "incomplete_task": "未完成的任務"
+  "incomplete_task": "未完成的任務",
+  "socratic_mode": "蘇格拉底模式",
+  "socratic_description": "用小步驟和提示一起理解，需要時隨時直接給答案。",
+  "answer_directly": "直接回答",
+  "answer_directly_request": "直接告訴我上一題的答案。"
 }
