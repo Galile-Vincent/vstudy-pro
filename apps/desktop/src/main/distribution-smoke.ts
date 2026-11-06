@@ -35,7 +35,7 @@ export function prepareDistributionSmoke(): string | undefined {
 
 async function converterProbe(userData: string) {
   const resources = join(process.resourcesPath, 'converter');
-  for (const file of ['convert.py', 'requirements.lock.txt', 'pdf_md/__init__.py']) await access(join(resources, file));
+  for (const file of ['convert.py', 'limits.py', 'requirements.lock.txt', 'pdf_md/__init__.py']) await access(join(resources, file));
   const executables: { name: string; path: string | null; available: boolean; version?: string; stdlibProbe?: boolean; error?: string }[] = [];
   for (const name of process.platform === 'win32' ? ['uv', 'python', 'python3'] : ['uv', 'python3']) {
     const path = await resolveInstalledExecutable(name, [...installDirectories(), '/usr/bin', '/bin']);

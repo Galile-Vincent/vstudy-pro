@@ -1,8 +1,7 @@
 /** Portable developer-tool commands and evidence paths. No shell command interpolation. */
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { systemExecutable } from '../src/main/platform/process.ts';
+import { join, win32 } from 'node:path';
 
 export const temporaryPath = name => join(tmpdir(), name);
 export const pythonExecutable = process.platform === 'win32' ? 'python' : 'python3';
@@ -20,7 +19,8 @@ export function pnpmInvocation(args) {
 /** Return native process metadata for lifecycle tests without parsing Windows tasklist columns. */
 export function listProcesses() {
   if (process.platform === 'win32') {
-    const output = execFileSync(systemExecutable('WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-Command',
+    const powershell = win32.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+    const output = execFileSync(powershell, ['-NoProfile', '-NonInteractive', '-Command',
       'Get-CimInstance Win32_Process | Select-Object ProcessId,ParentProcessId,WorkingSetSize,CommandLine | ConvertTo-Json -Compress'], {encoding: 'utf8', windowsHide: true, maxBuffer: 8 * 1024 * 1024});
     const rows = JSON.parse(output);
     return rows.map(row => ({pid: row.ProcessId, ppid: row.ParentProcessId, rssKiB: Number(row.WorkingSetSize) / 1024, command: row.CommandLine ?? ''}));

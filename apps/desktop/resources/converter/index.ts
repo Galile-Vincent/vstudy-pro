@@ -23,6 +23,7 @@ export async function runProcess(
   onProgress?: Progress,
   cacheDirectory?: string,
   scope?: ProcessScope,
+  diagnostic?: Progress,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const child = (scope ? scope.spawn.bind(scope) : spawn)(executable, args, {
@@ -61,6 +62,7 @@ export async function runProcess(
       clearTimeout(timer);
       if (failure) reject(failure);
       else if (code !== 0) {
+        diagnostic?.(stderr);
         const errorCode = [...stderr.matchAll(/"code":\s*"([A-Z_]+)"/g)].at(-1)?.[1];
         if (errorCode === "PDF_RESOURCE_LIMIT" || errorCode === "PDF_TIME_LIMIT") {
           reject(new Error("This PDF is too large or complex to convert"));
@@ -83,11 +85,12 @@ export function createConverter(options: {
   onProgress?: Progress;
   idleMinutes?: () => number;
   authorizeDownload?: () => Promise<boolean>;
+  diagnostic?: Progress;
 }): { convert: ConverterRunner; ensureReady: () => Promise<string>; dispose: () => Promise<void> } {
   const scope = new ProcessScope();
   let disposed = false;
   const checkOpen = () => { if (disposed) throw new Error('Converter closed'); };
-  const run: typeof runProcess = (executable, args, cwd, timeout, max, progress, cache) => runProcess(executable, args, cwd, timeout, max, progress, cache, scope);
+  const run: typeof runProcess = (executable, args, cwd, timeout, max, progress, cache) => runProcess(executable, args, cwd, timeout, max, progress, cache, scope, options.diagnostic);
   const venv = join(options.userData, "converter-venv");
   const python = join(venv, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   let worker: WarmWorker | undefined;
@@ -135,7 +138,7 @@ export function createConverter(options: {
       if (!uv && !systemPython) throw new Error("Install uv or Python 3.10+ to enable document conversion; then retry");
       await rm(venv, { recursive: true, force: true });
       if (uv) {
-        await run(uv, ["venv", "--python", systemPython ?? "3.12", venv], cwd, 300_000);
+        await run(uv, ["venv", "--python", "3.12", venv], cwd, 300_000);
         report("Installing markitdown…");
         await run(uv, ["pip", "install", "--require-hashes", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       } else if (systemPython) {

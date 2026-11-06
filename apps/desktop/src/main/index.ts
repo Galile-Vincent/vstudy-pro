@@ -32,7 +32,9 @@ import { createIpcRegistrar } from "./ipc/register";
 import { assetHandler } from "./assets";
 import { isPathWithin } from './platform/paths';
 import { relative } from 'node:path';
+import { prepareDistributionSmoke, runDistributionSmoke } from './distribution-smoke';
 
+const distributionSmokeRoot = prepareDistributionSmoke();
 initializeMoodleProtocol();
 
 protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({ scheme, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } })));
@@ -217,6 +219,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
     if (BrowserWindow.getAllWindows().length === 0) void createWindow();
   });
   await createWindow();
+  if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
 }).catch(async error => {
   log({phase:"startup-failed",code:(error as NodeJS.ErrnoException).code ?? error.name});

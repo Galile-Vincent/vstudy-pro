@@ -30,6 +30,26 @@ jobs:
         with:
           node-version-file: .node-version
           cache: pnpm
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        id: uv
+        with:
+          version: '0.12.21'
+          enable-cache: false
+      - name: Place the pinned converter bootstrap tool in its supported user location
+        env:
+          UV_EXECUTABLE: ${{ steps.uv.outputs.uv-path }}
+        run: |
+          node --input-type=module <<'JS'
+          import { copyFileSync, mkdirSync, chmodSync } from 'node:fs';
+          import { homedir } from 'node:os';
+          import { join } from 'node:path';
+          const directory = join(homedir(), '.local', 'bin');
+          mkdirSync(directory, { recursive: true, mode: 0o700 });
+          chmodSync(directory, 0o700);
+          const executable = join(directory, process.platform === 'win32' ? 'uv.exe' : 'uv');
+          copyFileSync(process.env.UV_EXECUTABLE, executable);
+          chmodSync(executable, 0o700);
+          JS
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @vstudy/desktop typecheck
       - run: pnpm --filter @vstudy/desktop lint

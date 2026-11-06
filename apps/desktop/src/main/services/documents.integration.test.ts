@@ -21,14 +21,15 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     const resources = join(directory, "resources");
     await mkdir(resources);
     const progress: string[] = [];
-    const options = { authorizeDownload: async () => true, userData: directory, resources, onProgress: (message: string) => { progress.push(message); } };
+    const diagnostics: string[] = [];
+    const options = { authorizeDownload: async () => true, userData: directory, resources, onProgress: (message: string) => { progress.push(message); }, diagnostic: (message: string) => {diagnostics.push(message);} };
     converter = createConverter(options);
     await expect(converter.ensureReady()).rejects.toThrow();
     await copyFile(resolve("resources/converter/requirements.lock.txt"), join(resources, "requirements.lock.txt"));
     await copyFile(resolve("resources/converter/convert.py"), join(resources, "convert.py"));
     await copyFile(resolve("resources/converter/limits.py"), join(resources, "limits.py"));
     await cp(resolve("resources/converter/pdf_md"), join(resources, "pdf_md"), { recursive: true });
-    const python = await converter.ensureReady();
+    const python = await converter.ensureReady().catch(error => {console.error('Converter fixture setup failed', {progress, diagnostics});throw error;});
     executable = python;
     expect(await converter.ensureReady()).toBe(python);
     expect(progress).toContain("Converter ready");
