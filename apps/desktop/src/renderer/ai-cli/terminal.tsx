@@ -34,6 +34,7 @@ export function CliTerminal({ session }: { session: CliActionSession }) {
     });
     terminal.current = term;
     const fit = new FitAddon(); term.loadAddon(fit); term.open(host.current);
+    const reveal = requestAnimationFrame(() => host.current?.closest('.ai-cli-terminal')?.scrollIntoView({ block: 'start' }));
     const colors = () => {
       const css = getComputedStyle(document.documentElement);
       const token = (name: string) => css.getPropertyValue(`--${name}`).trim();
@@ -70,7 +71,7 @@ export function CliTerminal({ session }: { session: CliActionSession }) {
       }));
     } });
     previous.current = ''; term.write(latest.current.output); previous.current = latest.current.output;
-    return () => { input.dispose(); links.dispose(); observer.disconnect(); theme.disconnect(); term.dispose(); terminal.current = undefined; previous.current = ''; };
+    return () => { cancelAnimationFrame(reveal); input.dispose(); links.dispose(); observer.disconnect(); theme.disconnect(); term.dispose(); terminal.current = undefined; previous.current = ''; };
   }, [session.id]);
   useEffect(() => {
     const term = terminal.current;

@@ -45,10 +45,11 @@ beforeEach(async () => {
   fixture = cliFixture(); bridge.invoke.mockReset().mockImplementation(fixture.invoke); close.mockReset();
   terminal.writes = []; terminal.resets = 0;
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
+  Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', { configurable: true, value: vi.fn() });
   Object.defineProperty(document, 'hidden', { configurable: true, value: false });
   host = document.createElement('div'); document.body.append(host); root = createRoot(host);
 });
-afterEach(async () => { await act(async () => root.unmount()); host.remove(); vi.unstubAllGlobals(); vi.useRealTimers(); });
+afterEach(async () => { await act(async () => root.unmount()); host.remove(); Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView'); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through explicit consent, install, login and test', async provider => {
   await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
