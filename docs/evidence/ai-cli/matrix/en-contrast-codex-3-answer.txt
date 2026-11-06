@@ -30,15 +30,23 @@
   - checkbox "Allow VStudy to run Codex Optional. No tool launches until you allow it and run a reviewed action." [checked]
   - text: Allow VStudy to run Codex Optional. No tool launches until you allow it and run a reviewed action.
   - group: Account and cost
-  - button "Review next action"
+  - region "Review before running":
+    - heading "Review before running" [level=3]
+    - paragraph: VStudy sends a tiny question through its restricted connection. No documents are included.
+    - term: Action plan
+    - definition:
+      - code: "VStudy tool-free test through the existing provider transport '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 2/ai-tools/codex/0.166.0/codex' 'exec' '--json' '--sandbox' 'read-only' '--ephemeral' '--skip-git-repo-check' '--ignore-user-config' '--ignore-rules' '-' Test prompt: Reply with the single word OK. Do not use tools. VStudy creates a private workspace and applies provider isolation. This is an action plan, not a command to paste."
+    - term: Working folder
+    - definition:
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 2/ai-tools/actions
+    - button "Test it"
+    - button "Copy plan"
   - status: Test answered successfully. The answer appears below.
   - region "Action output":
     - strong: Action output
     - status: Completed
     - paragraph: Type here only when this action asks you to. Login URLs and device codes appear here. Links always ask for confirmation.
     - list:
-      - listitem: OK from codex 0.166.0
-      - listitem: Tool-free test completed.
       - listitem
       - listitem
       - listitem
@@ -53,7 +61,8 @@
       - listitem
       - listitem
       - listitem
-    - text: OK from codex 0.166.0 Tool-free test completed.
+      - listitem
+      - listitem
     - textbox "Active action terminal input"
     - group: Readable output and sign-in codes
   - region "Keep your tool ready":

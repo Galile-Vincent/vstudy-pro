@@ -35,10 +35,10 @@
     - paragraph: VStudy が公式のダウンロードを検証し、アプリ専用フォルダーに保存します。
     - term: 実行内容
     - definition:
-      - code: https://downloads.claude.ai/claude-code-releases/1.0.0/darwin-arm64/claude をダウンロードして検証 /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 8/ai-tools/claude/1.0.0 にインストール。
+      - code: https://downloads.claude.ai/claude-code-releases/1.0.0/darwin-arm64/claude をダウンロードして検証 /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 8/ai-tools/claude/1.0.0 にインストール。
     - term: 作業フォルダー
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 8/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 8/ai-tools/actions
     - button "この計画を実行"
     - button "計画をコピー"
   - region "ツールを管理":

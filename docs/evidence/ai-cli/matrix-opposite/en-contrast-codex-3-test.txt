@@ -36,10 +36,10 @@
     - paragraph: VStudy sends a tiny question through its restricted connection. No documents are included.
     - term: Action plan
     - definition:
-      - code: "VStudy tool-free test through the existing provider transport '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-6ITJSR/profile 2/ai-tools/codex/0.166.0/codex' 'exec' '--json' '--sandbox' 'read-only' '--ephemeral' '--skip-git-repo-check' '--ignore-user-config' '--ignore-rules' '-' Test prompt: Reply with the single word OK. Do not use tools. VStudy creates a private workspace and applies provider isolation. This is an action plan, not a command to paste."
+      - code: "VStudy tool-free test through the existing provider transport '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-f7CUZY/profile 2/ai-tools/codex/0.166.0/codex' 'exec' '--json' '--sandbox' 'read-only' '--ephemeral' '--skip-git-repo-check' '--ignore-user-config' '--ignore-rules' '-' Test prompt: Reply with the single word OK. Do not use tools. VStudy creates a private workspace and applies provider isolation. This is an action plan, not a command to paste."
     - term: Working folder
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-6ITJSR/profile 2/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-f7CUZY/profile 2/ai-tools/actions
     - button "Test it"
     - button "Copy plan"
   - status: Action completed. Review the next step above.

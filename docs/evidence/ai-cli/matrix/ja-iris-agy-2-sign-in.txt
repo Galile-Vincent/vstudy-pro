@@ -36,10 +36,10 @@
     - paragraph: 以下の指定された操作だけを実行します。案内が表示されたら提供元のサイトでログインしてください。
     - term: 実行するコマンド
     - definition:
-      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 7/ai-tools/agy/1.0.0/agy\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 7/ai-tools/agy/1.0.0/agy' '--sandbox' '--include-default-customizations=false'"
+      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 7/ai-tools/agy/1.0.0/agy\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 7/ai-tools/agy/1.0.0/agy' '--sandbox' '--include-default-customizations=false'"
     - term: 作業フォルダー
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 7/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 7/ai-tools/actions
     - button "この操作を実行"
     - button "コマンドをコピー"
     - button "自分のターミナルで開く"

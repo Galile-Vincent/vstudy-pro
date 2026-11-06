@@ -36,10 +36,10 @@
     - paragraph: 只會執行以下指定操作。如有提示，請到服務商網站登入。
     - term: 完整指令
     - definition:
-      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 4/ai-tools/claude/1.0.0/claude\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 4/ai-tools/claude/1.0.0/claude' 'auth' 'login'"
+      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 4/ai-tools/claude/1.0.0/claude\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 4/ai-tools/claude/1.0.0/claude' 'auth' 'login'"
     - term: 工作資料夾
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 4/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 4/ai-tools/actions
     - button "執行此操作"
     - button "複製指令"
     - button "在自己的終端機開啟"

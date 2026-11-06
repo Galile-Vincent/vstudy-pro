@@ -36,10 +36,10 @@
     - paragraph: 以下の指定された操作だけを実行します。案内が表示されたら提供元のサイトでログインしてください。
     - term: 実行するコマンド
     - definition:
-      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 8/ai-tools/claude/1.0.0/claude\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 8/ai-tools/claude/1.0.0/claude' 'auth' 'login'"
+      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 8/ai-tools/claude/1.0.0/claude\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 8/ai-tools/claude/1.0.0/claude' 'auth' 'login'"
     - term: 作業フォルダー
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 8/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 8/ai-tools/actions
     - button "この操作を実行"
     - button "コマンドをコピー"
     - button "自分のターミナルで開く"
@@ -49,6 +49,7 @@
     - status: 完了
     - paragraph: 操作で入力を求められたときだけ、ここに入力してください。ログイン URL やデバイスコードが表示されます。リンクを開く前に確認が表示されます。
     - list:
+      - listitem: 検証済みのバージョンを新しいチャット用に有効にしました。
       - listitem
       - listitem
       - listitem
@@ -64,7 +65,7 @@
       - listitem
       - listitem
       - listitem
-      - listitem
+    - text: 検証済みのバージョンを新しいチャット用に有効にしました。
     - textbox "実行中の操作への入力"
     - group: テキスト出力とログインコード
   - region "ツールを管理":

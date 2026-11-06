@@ -36,10 +36,10 @@
     - paragraph: Only the named action below will run. Sign in through the provider's website if prompted.
     - term: Exact command
     - definition:
-      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-6ITJSR/profile 0/ai-tools/agy/1.0.0/agy\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-6ITJSR/profile 0/ai-tools/agy/1.0.0/agy' '--sandbox' '--include-default-customizations=false'"
+      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-f7CUZY/profile 0/ai-tools/agy/1.0.0/agy\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-f7CUZY/profile 0/ai-tools/agy/1.0.0/agy' '--sandbox' '--include-default-customizations=false'"
     - term: Working folder
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-6ITJSR/profile 0/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-f7CUZY/profile 0/ai-tools/actions
     - button "Run this action"
     - button "Copy command"
     - button "Open in my own Terminal"

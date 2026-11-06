@@ -36,10 +36,10 @@
     - paragraph: VStudy が制限付き接続で短い質問を送ります。資料は含まれません。
     - term: 実行内容
     - definition:
-      - code: "VStudy の既存の接続でツールを使わずにテスト '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 7/ai-tools/agy/1.0.0/agy' 'acp' '--stdio' '--sandbox' '--include-default-customizations=false' テストの質問: Reply with the single word OK. Do not use tools. 専用の作業フォルダーを作成し、プロバイダーを隔離します。これは実行内容の説明で、そのまま貼り付けるコマンドではありません。"
+      - code: "VStudy の既存の接続でツールを使わずにテスト '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 7/ai-tools/agy/1.0.0/agy' 'acp' '--stdio' '--sandbox' '--include-default-customizations=false' テストの質問: Reply with the single word OK. Do not use tools. 専用の作業フォルダーを作成し、プロバイダーを隔離します。これは実行内容の説明で、そのまま貼り付けるコマンドではありません。"
     - term: 作業フォルダー
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 7/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 7/ai-tools/actions
     - button "テストする"
     - button "計画をコピー"
   - status: 操作が完了しました。上の次のステップを確認してください。

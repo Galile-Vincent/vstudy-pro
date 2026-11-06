@@ -5,13 +5,13 @@
     - button "Close setup and stop its action"
   - group "Choose your tool":
     - text: Choose your tool
-    - radio "Claude Code Your Anthropic account" [checked] [disabled]
+    - radio "Claude Code Your Anthropic account" [checked]
     - strong: Claude Code
     - text: Your Anthropic account
-    - radio "Codex Your OpenAI account" [disabled]
+    - radio "Codex Your OpenAI account"
     - strong: Codex
     - text: Your OpenAI account
-    - radio "Antigravity Your Google account" [disabled]
+    - radio "Antigravity Your Google account"
     - strong: Antigravity
     - text: Your Google account
   - strong: Claude Code
@@ -28,14 +28,25 @@
   - paragraph: What happens next
   - heading "Try your first answer." [level=2]
   - paragraph: Ask Claude a tiny test question with tools disabled. The answer below confirms that your account can respond. Your documents are not included.
-  - checkbox "Allow VStudy to run Claude Code Optional. No tool launches until you allow it and run a reviewed action." [checked] [disabled]
+  - checkbox "Allow VStudy to run Claude Code Optional. No tool launches until you allow it and run a reviewed action." [checked]
   - text: Allow VStudy to run Claude Code Optional. No tool launches until you allow it and run a reviewed action.
   - group: Account and cost
-  - button "Stop this action"
+  - region "Review before running":
+    - heading "Review before running" [level=3]
+    - paragraph: VStudy sends a tiny question through its restricted connection. No documents are included.
+    - term: Action plan
+    - definition:
+      - code: "VStudy tool-free test through the existing provider transport '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 0/ai-tools/claude/1.1.0/claude' '-p' '--safe-mode' '--output-format' 'stream-json' '--include-partial-messages' '--verbose' '--tools' '' '--strict-mcp-config' '--mcp-config' '{\"mcpServers\":{}}' '--setting-sources' '' '--no-session-persistence' Test prompt: Reply with the single word OK. Do not use tools. VStudy creates a private workspace and applies provider isolation. This is an action plan, not a command to paste."
+    - term: Working folder
+    - definition:
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 0/ai-tools/actions
+    - button "Test it"
+    - button "Copy plan"
+  - status: Action completed. Review the next step above.
   - status: Updates and rollback apply to new chats. Ongoing sessions continue with their current version.
   - region "Action output":
     - strong: Action output
-    - status: Running
+    - status: Completed
     - paragraph: Type here only when this action asks you to. Login URLs and device codes appear here. Links always ask for confirmation.
     - list:
       - listitem
@@ -59,10 +70,10 @@
   - region "Keep your tool ready":
     - heading "Keep your tool ready" [level=3]
     - paragraph: Updates and rollback apply to new chats. Ongoing sessions continue with their current version.
-    - button "Review account status check" [disabled]
-    - button "Sign in again" [disabled]
-    - button "Review rollback to 1.0.0" [disabled]
-    - button "Release notes" [disabled]
+    - button "Review account status check"
+    - button "Sign in again"
+    - button "Review rollback to 1.0.0"
+    - button "Release notes"
   - group: Which tool should I choose?
   - group: Install another way
   - group: Advanced general shell

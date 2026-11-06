@@ -35,10 +35,10 @@
     - paragraph: VStudy 會驗證官方下載，並安裝在應用程式的專用資料夾。
     - term: 操作計畫
     - definition:
-      - code: 下載並驗證 https://downloads.claude.ai/claude-code-releases/1.0.0/darwin-arm64/claude 安裝至 /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 3/ai-tools/claude/1.0.0。
+      - code: 下載並驗證 https://downloads.claude.ai/claude-code-releases/1.0.0/darwin-arm64/claude 安裝至 /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 3/ai-tools/claude/1.0.0。
     - term: 工作資料夾
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 3/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 3/ai-tools/actions
     - button "執行此計畫"
     - button "複製計畫"
   - region "維護你的工具":

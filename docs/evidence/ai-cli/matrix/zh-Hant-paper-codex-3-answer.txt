@@ -37,8 +37,6 @@
     - status: 已完成
     - paragraph: 只有當此操作要求輸入時才需要在這裡輸入。登入網址與裝置代碼會顯示於此。開啟連結前一定會請你確認。
     - list:
-      - listitem: OK from codex 0.166.0
-      - listitem: 無工具測試已完成。
       - listitem
       - listitem
       - listitem
@@ -53,7 +51,8 @@
       - listitem
       - listitem
       - listitem
-    - text: OK from codex 0.166.0 無工具測試已完成。
+      - listitem
+      - listitem
     - textbox "目前操作的終端機輸入"
     - group: 文字輸出與登入代碼
   - region "維護你的工具":

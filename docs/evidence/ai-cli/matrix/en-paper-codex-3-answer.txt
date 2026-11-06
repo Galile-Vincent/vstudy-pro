@@ -37,8 +37,6 @@
     - status: Completed
     - paragraph: Type here only when this action asks you to. Login URLs and device codes appear here. Links always ask for confirmation.
     - list:
-      - listitem: OK from codex 0.166.0
-      - listitem: Tool-free test completed.
       - listitem
       - listitem
       - listitem
@@ -53,7 +51,8 @@
       - listitem
       - listitem
       - listitem
-    - text: OK from codex 0.166.0 Tool-free test completed.
+      - listitem
+      - listitem
     - textbox "Active action terminal input"
     - group: Readable output and sign-in codes
   - region "Keep your tool ready":

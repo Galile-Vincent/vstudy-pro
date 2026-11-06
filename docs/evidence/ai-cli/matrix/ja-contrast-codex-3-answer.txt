@@ -37,8 +37,6 @@
     - status: 完了
     - paragraph: 操作で入力を求められたときだけ、ここに入力してください。ログイン URL やデバイスコードが表示されます。リンクを開く前に確認が表示されます。
     - list:
-      - listitem: OK from codex 0.166.0
-      - listitem: ツールを使わないテストが完了しました。
       - listitem
       - listitem
       - listitem
@@ -53,7 +51,8 @@
       - listitem
       - listitem
       - listitem
-    - text: OK from codex 0.166.0 ツールを使わないテストが完了しました。
+      - listitem
+      - listitem
     - textbox "実行中の操作への入力"
     - group: テキスト出力とログインコード
   - region "ツールを管理":

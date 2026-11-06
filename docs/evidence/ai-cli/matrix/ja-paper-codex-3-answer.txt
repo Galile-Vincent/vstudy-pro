@@ -30,23 +30,15 @@
   - checkbox "VStudy に Codex の実行を許可 任意です。許可して確認済みの操作を実行するまで、ツールは起動しません。" [checked]
   - text: VStudy に Codex の実行を許可 任意です。許可して確認済みの操作を実行するまで、ツールは起動しません。
   - group: アカウントと料金
-  - region "実行前に確認":
-    - heading "実行前に確認" [level=3]
-    - paragraph: VStudy が制限付き接続で短い質問を送ります。資料は含まれません。
-    - term: 実行内容
-    - definition:
-      - code: "VStudy の既存の接続でツールを使わずにテスト '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 6/ai-tools/codex/0.166.0/codex' 'exec' '--json' '--sandbox' 'read-only' '--ephemeral' '--skip-git-repo-check' '--ignore-user-config' '--ignore-rules' '-' テストの質問: Reply with the single word OK. Do not use tools. 専用の作業フォルダーを作成し、プロバイダーを隔離します。これは実行内容の説明で、そのまま貼り付けるコマンドではありません。"
-    - term: 作業フォルダー
-    - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 6/ai-tools/actions
-    - button "テストする"
-    - button "計画をコピー"
+  - button "次の操作を確認"
   - status: テストに回答しました。回答は下に表示されます。
   - region "操作の出力":
     - strong: 操作の出力
     - status: 完了
     - paragraph: 操作で入力を求められたときだけ、ここに入力してください。ログイン URL やデバイスコードが表示されます。リンクを開く前に確認が表示されます。
     - list:
+      - listitem: OK from codex 0.166.0
+      - listitem: ツールを使わないテストが完了しました。
       - listitem
       - listitem
       - listitem
@@ -61,8 +53,7 @@
       - listitem
       - listitem
       - listitem
-      - listitem
-      - listitem
+    - text: OK from codex 0.166.0 ツールを使わないテストが完了しました。
     - textbox "実行中の操作への入力"
     - group: テキスト出力とログインコード
   - region "ツールを管理":

@@ -36,10 +36,10 @@
     - paragraph: VStudy 會透過受限制的連線傳送一個簡短問題，不包含文件。
     - term: 操作計畫
     - definition:
-      - code: "透過 VStudy 現有的供應商連線進行無工具測試 '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-6ITJSR/profile 4/ai-tools/claude/1.0.0/claude' '-p' '--safe-mode' '--output-format' 'stream-json' '--include-partial-messages' '--verbose' '--tools' '' '--strict-mcp-config' '--mcp-config' '{\"mcpServers\":{}}' '--setting-sources' '' '--no-session-persistence' 測試問題: Reply with the single word OK. Do not use tools. VStudy 會建立私有工作資料夾並套用供應商隔離。這是操作計畫，不是可直接貼上的指令。"
+      - code: "透過 VStudy 現有的供應商連線進行無工具測試 '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-f7CUZY/profile 4/ai-tools/claude/1.0.0/claude' '-p' '--safe-mode' '--output-format' 'stream-json' '--include-partial-messages' '--verbose' '--tools' '' '--strict-mcp-config' '--mcp-config' '{\"mcpServers\":{}}' '--setting-sources' '' '--no-session-persistence' 測試問題: Reply with the single word OK. Do not use tools. VStudy 會建立私有工作資料夾並套用供應商隔離。這是操作計畫，不是可直接貼上的指令。"
     - term: 工作資料夾
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-6ITJSR/profile 4/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-f7CUZY/profile 4/ai-tools/actions
     - button "測試看看"
     - button "複製計畫"
   - status: 操作已完成。請查看上方的下一步。

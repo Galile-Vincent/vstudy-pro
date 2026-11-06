@@ -1,0 +1,31 @@
+{
+  "recordedAt": "2026-11-06T04:51:44.813818+00:00",
+  "sourceCommit": "10b6fc7",
+  "mergedMain": "0d990b2",
+  "platform": "darwin-arm64",
+  "electron": "42.11.16",
+  "vitestWorkers": 2,
+  "vitestPool": "forks",
+  "testsPassed": 1128,
+  "testsSkipped": 14,
+  "realProcessVariants": 18,
+  "realProviderFlows": 54,
+  "schemes": [
+    "light",
+    "dark"
+  ],
+  "languages": [
+    "en",
+    "zh-Hant",
+    "ja"
+  ],
+  "themes": [
+    "paper",
+    "iris",
+    "contrast"
+  ],
+  "packagedPty": true,
+  "nativeWindowsVerified": false,
+  "liveNewAccountOAuthVerified": false,
+  "developerIdNotarizationVerified": false
+}

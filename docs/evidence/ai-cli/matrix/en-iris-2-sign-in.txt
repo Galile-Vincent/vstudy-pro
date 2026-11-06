@@ -36,10 +36,10 @@
     - paragraph: Only the named action below will run. Sign in through the provider's website if prompted.
     - term: Exact command
     - definition:
-      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 1/ai-tools/claude/1.0.0/claude\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 1/ai-tools/claude/1.0.0/claude' 'auth' 'login'"
+      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 1/ai-tools/claude/1.0.0/claude\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-9mYr5g/profile 1/ai-tools/claude/1.0.0/claude' 'auth' 'login'"
     - term: Working folder
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 1/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 1/ai-tools/actions
     - button "Run this action"
     - button "Copy command"
     - button "Open in my own Terminal"
@@ -49,6 +49,7 @@
     - status: Completed
     - paragraph: Type here only when this action asks you to. Login URLs and device codes appear here. Links always ask for confirmation.
     - list:
+      - listitem: Verified installation activated for new chats.
       - listitem
       - listitem
       - listitem
@@ -64,7 +65,7 @@
       - listitem
       - listitem
       - listitem
-      - listitem
+    - text: Verified installation activated for new chats.
     - textbox "Active action terminal input"
     - group: Readable output and sign-in codes
   - region "Keep your tool ready":

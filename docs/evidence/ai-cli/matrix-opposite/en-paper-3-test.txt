@@ -36,10 +36,10 @@
     - paragraph: VStudy sends a tiny question through its restricted connection. No documents are included.
     - term: Action plan
     - definition:
-      - code: "VStudy tool-free test through the existing provider transport '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-6ITJSR/profile 0/ai-tools/claude/1.0.0/claude' '-p' '--safe-mode' '--output-format' 'stream-json' '--include-partial-messages' '--verbose' '--tools' '' '--strict-mcp-config' '--mcp-config' '{\"mcpServers\":{}}' '--setting-sources' '' '--no-session-persistence' Test prompt: Reply with the single word OK. Do not use tools. VStudy creates a private workspace and applies provider isolation. This is an action plan, not a command to paste."
+      - code: "VStudy tool-free test through the existing provider transport '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-f7CUZY/profile 0/ai-tools/claude/1.0.0/claude' '-p' '--safe-mode' '--output-format' 'stream-json' '--include-partial-messages' '--verbose' '--tools' '' '--strict-mcp-config' '--mcp-config' '{\"mcpServers\":{}}' '--setting-sources' '' '--no-session-persistence' Test prompt: Reply with the single word OK. Do not use tools. VStudy creates a private workspace and applies provider isolation. This is an action plan, not a command to paste."
     - term: Working folder
     - definition:
-      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-6ITJSR/profile 0/ai-tools/actions
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-f7CUZY/profile 0/ai-tools/actions
     - button "Test it"
     - button "Copy plan"
   - status: Action completed. Review the next step above.
@@ -48,13 +48,6 @@
     - status: Completed
     - paragraph: Type here only when this action asks you to. Login URLs and device codes appear here. Links always ask for confirmation.
     - list:
-      - listitem: Local sign-in fixture. No real account or network is used.
-      - listitem: https://example.com/ai-cli-device
-      - listitem: "Device code: LOCAL-1234"
-      - listitem: Type approve and press Enter.
-      - listitem: approve
-      - listitem: Sign-in complete.
-      - listitem: Sign-in verified.
       - listitem
       - listitem
       - listitem
@@ -64,7 +57,13 @@
       - listitem
       - listitem
       - listitem
-    - text: "Local sign-in fixture. No real account or network is used. https://example.com/ai-cli-device Device code: LOCAL-1234 Type approve and press Enter. Sign-in complete. Sign-in verified."
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
     - textbox "Active action terminal input"
     - button "https://example.com/ai-cli-device"
     - group: Readable output and sign-in codes
