@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { useEffect } from 'react';
+import { act, useEffect } from 'react';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { Workspace } from './index';
@@ -78,4 +78,19 @@ it('retries only the document source and preserves the mounted chat',async()=>{
   await screen.findByText('Readable document');
   expect(state.mounts).toBe(1);
   expect(state.invoke.mock.calls.map(([channel])=>channel)).toEqual(['documents:read']);
+});
+
+it('only exposes tabpanels and their Tab stops while the compact tablist is shown',async()=>{
+  setup();let compact=false;let changed=()=>{};
+  vi.stubGlobal('matchMedia',()=>({get matches(){return compact;},addEventListener:(_event:string,listener:()=>void)=>{changed=listener;},removeEventListener:()=>{}}));
+  try {
+    const {container}=render(<Workspace/>);await screen.findByText('Readable document');
+    const panes=()=>Array.from(container.querySelectorAll<HTMLElement>('[data-panel]'));
+    expect(panes()).toHaveLength(2);
+    for(const pane of panes()){expect(pane.getAttribute('role')).not.toBe('tabpanel');expect(pane.hasAttribute('tabindex')).toBe(false);expect(pane.hasAttribute('aria-labelledby')).toBe(false);}
+    compact=true;await act(()=>changed());
+    for(const pane of panes()){expect(pane.getAttribute('role')).toBe('tabpanel');expect(pane.tabIndex).toBe(0);expect(document.getElementById(pane.getAttribute('aria-labelledby')!)).toBeTruthy();}
+    compact=false;await act(()=>changed());
+    expect(container.querySelector('[role=tabpanel]')).toBeNull();
+  }finally{vi.unstubAllGlobals();}
 });

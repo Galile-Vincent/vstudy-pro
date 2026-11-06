@@ -60,6 +60,14 @@ export function Workspace() {
   const [startupRevision, setStartupRevision] = useState(0);
   const [conversationRevision, setConversationRevision] = useState(0);
   const [historyRevision, setHistoryRevision] = useState(0);
+  const [compact, setCompact] = useState(() => window.matchMedia?.('(max-width:819px)').matches ?? false);
+  useEffect(() => {
+    const media = window.matchMedia?.('(max-width:819px)');
+    if (!media) return;
+    const update = () => setCompact(media.matches);
+    update(); media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
   const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
   useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   useEffect(() => {
@@ -567,9 +575,9 @@ export function Workspace() {
               <Panel
                 key={pane}
                 id={pane}
-                role="tabpanel"
-                aria-labelledby={`workspace-tab-${pane}`}
-                tabIndex={0}
+                role={compact ? "tabpanel" : undefined}
+                aria-labelledby={compact ? `workspace-tab-${pane}` : undefined}
+                tabIndex={compact ? 0 : undefined}
                 order={index}
                 minSize={25}
                 defaultSize={pane === "chat" ? 42 : 58}
