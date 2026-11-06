@@ -97,11 +97,12 @@ export class GrantStore {
     this.save({...this.current, grants: this.current.grants.map(item => item.id === grantId ? {...item, scopes: [...new Set(scopes)], accountIds: [...new Set(accountIds)], expiresAt} : item)});
   }
 
-  touch(grantId: string): void {
-    this.save({...this.current, grants: this.current.grants.map(item => item.id === grantId ? {...item, lastUsedAt: new Date(this.now()).toISOString()} : item)});
+  record(grantId: string, activity: AgentActivity): void {
+    const now = this.now();
+    const grants = this.current.grants.map(item => item.id === grantId && (item.lastUsedAt === null || now - Date.parse(item.lastUsedAt) >= 60_000)
+      ? {...item, lastUsedAt: new Date(now).toISOString()} : item);
+    this.save({...this.current, grants, activity: this.retained([...this.current.activity, activity])});
   }
-
-  record(activity: AgentActivity): void { this.save({...this.current, activity: this.retained([...this.current.activity, activity])}); }
 }
 
 export const unixStatePersistence:McpStatePersistence = {

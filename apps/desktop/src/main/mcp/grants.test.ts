@@ -77,10 +77,11 @@ it('retains at most 1000 sanitized activity records for 30 days', () => {
   mkdirSync(join(root, 'mcp'), {mode: 0o700});
   writeFileSync(join(root, 'mcp/state.json'), JSON.stringify({version: 1, enabled: false, grants: [], activity: Array.from({length: 1000}, () => ({...entry, id: randomUUID()}))}), {mode: 0o600});
   const store = new GrantStore(root, () => now,testStatePersistence(root));
-  store.record({...entry, status: 'DENIED'});
+  const {grantInfo} = store.issue(randomUUID(), 'Codex', [], []);
+  store.record(grantInfo.id, entry);
   expect(store.activity).toHaveLength(1000);
-  expect(store.activity.at(-1)?.status).toBe('DENIED');
-  store.record({...entry, args: {text: '字'.repeat(4000)}});
+  expect(store.activity.at(-1)?.status).toBe('OK');
+  store.record(grantInfo.id, {...entry, args: {text: '字'.repeat(4000)}});
   expect(Buffer.byteLength(JSON.stringify(store.activity.at(-1)))).toBeLessThanOrEqual(4096);
   expect(store.activity.at(-1)?.args).toEqual({omitted: 'Arguments exceed the retained activity limit.'});
   now += 31 * 86400_000;

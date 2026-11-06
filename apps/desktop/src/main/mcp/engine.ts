@@ -170,41 +170,34 @@ export class McpEngine {
   }
 
   private async call(params: Extract<BridgeRequest, {method: 'tools.call'}>['params'], connectionId: string): Promise<ToolResult> {
-    let grant: Grant | undefined;
-    let args: ToolArguments | undefined;
-    let status = 'INTERNAL';
     let accountId: string | null = null;
     try {
-      grant = this.store.authorize(params.grant);
+      let grant = this.store.authorize(params.grant);
       const parsed = mcpTools[params.name].schema.safeParse(params.args);
       if (!parsed.success) throw new McpFailure('INVALID_ARGUMENT');
-      args = parsed.data;
+      let args = parsed.data;
       grant = this.authorize(params.grant, params.name, args);
       if (!args.account && !accountOptional.has(params.name)) {
-        const available = this.accounts().filter(account => grant!.accountIds.includes(account.id));
+        const available = this.accounts().filter(account => grant.accountIds.includes(account.id));
         if (available.length !== 1) throw new McpFailure('ACCOUNT_REQUIRED');
         args = {...args, account: available[0]!.id};
       }
       if (mcpTools[params.name].risk !== 'read') this.exactPayload(args, params.grant);
       const max = this.options.limits?.maxActive ?? 16;
-      if (this.operations.size >= max || [...this.operations].filter(item => item.grantId === grant!.id).length >= (this.options.limits?.maxPerGrant ?? 4)) throw new McpFailure('RATE_LIMITED');
+      if (this.operations.size >= max || [...this.operations].filter(item => item.grantId === grant.id).length >= (this.options.limits?.maxPerGrant ?? 4)) throw new McpFailure('RATE_LIMITED');
       const delay = this.limiter.admit(grant.id);
       const operation: Operation = {id: randomUUID(), connectionId, grantId: grant.id, controller: new AbortController()};
       this.operations.add(operation);
       this.changed();
       const result = await this.runOperation(operation, params.name, args, params.grant, delay, prepared => { accountId = prepared.accountId; });
-      this.store.touch(grant.id);
-      status = 'OK';
-      return result;
-    } catch (error) {
-      status = failureCode(error);
-      return publicFailure(status as McpErrorCode);
-    } finally {
-      if (grant) {
+      if (result.ok) {
         const redactor = this.redactor([params.grant]);
-        this.store.record({id: randomUUID(), at: new Date(this.now()).toISOString(), clientName: redactor.text(grant.clientName, 100), tool: params.name, accountId, status, args: redactor.record(args ?? params.args)});
+        this.store.record(grant.id, {id: randomUUID(), at: new Date(this.now()).toISOString(), clientName: redactor.text(grant.clientName, 100), tool: params.name, accountId, status: 'OK', args: redactor.record(args)});
         this.changed();
       }
+      return result;
+    } catch (error) {
+      return publicFailure(failureCode(error));
     }
   }
 
