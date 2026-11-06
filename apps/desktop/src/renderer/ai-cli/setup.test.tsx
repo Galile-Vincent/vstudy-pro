@@ -4,6 +4,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { i18n } from '../../shared/i18n';
+import { desktopPlatform } from '../../shared/platform';
 import { cliFixture } from './test-fixture';
 
 const bridge = vi.hoisted(() => ({ invoke: vi.fn() }));
@@ -134,14 +135,17 @@ it.each(['en', 'zh-Hant', 'ja'])('offers a copy-only manual installer in %s with
   await i18n.changeLanguage(language);
   Object.assign(fixture.tools[2]!, { consented: true, manualInstallRequired: true, manualUpdateRequired: true });
   const writeText = vi.fn(async () => {});
+  const manualCommand = desktopPlatform() === 'win32'
+    ? 'irm https://antigravity.google/cli/install.ps1 | iex'
+    : 'curl -fsSL https://antigravity.google/cli/install.sh | bash';
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
   try {
     await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
     expect(document.querySelector<HTMLDetailsElement>('.ai-cli-action-area details')?.open).toBe(true);
-    expect(document.querySelector('.ai-cli-action-area code')?.textContent).toBe('curl -fsSL https://antigravity.google/cli/install.sh | bash');
+    expect(document.querySelector('.ai-cli-action-area code')?.textContent).toBe(manualCommand);
     expect(document.body.textContent).toContain(i18n.t('ai-cli:manual_install_reason'));
     await click(i18n.t('ai-cli:copy_command'));
-    expect(writeText).toHaveBeenCalledWith('curl -fsSL https://antigravity.google/cli/install.sh | bash');
+    expect(writeText).toHaveBeenCalledWith(manualCommand);
     expect(fixture.calls.some(call => call.channel === 'ai-cli:preview')).toBe(false);
     expect(runs()).toHaveLength(0);
   } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
