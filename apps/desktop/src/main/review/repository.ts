@@ -6,6 +6,7 @@ import { conceptKey } from './concept-match';
 import { eligibleSourceSql } from './eligibility';
 import { computeMastery, type MasteryObservation } from './mastery';
 import { buildEpisodes } from './episodes';
+import { syncMoodleStudyUnits } from './moodle-units';
 import { MoodleRepository } from '../moodle/repository';
 const jobSourceJoins = `JOIN conversations c ON c.id=j.conversationId JOIN messages u ON u.id=j.userMessageId JOIN messages a ON a.id=j.assistantMessageId LEFT JOIN study_chat_links l ON l.conversationId=c.id LEFT JOIN documents d ON d.id=c.documentId`;
 const sourceJoins = `JOIN study_jobs j ON j.id=o.jobId ${jobSourceJoins}`;
@@ -43,21 +44,16 @@ export class ReviewRepository {
     linkMoodle(id: string, moodleCourseId: string | null) { this.requireCourse(id); if (moodleCourseId)
         studyIdSchema.parse(moodleCourseId); this.db.prepare('UPDATE study_courses SET moodleCourseId=? WHERE id=?').run(moodleCourseId, id); if (moodleCourseId)
         this.seedMoodleUnits(id); return this.requireCourse(id); }
-    materializeMoodleCourse(moodleCourseId: string) { studyIdSchema.parse(moodleCourseId); return this.atomic(() => { const existing = this.db.prepare('SELECT id FROM study_courses WHERE moodleCourseId=?').get(moodleCourseId); if (existing)
-        return this.requireCourse(String(existing.id)); const detail = new MoodleRepository(this.db).course(moodleCourseId); const created = this.createCourse({ title: detail.course.fullName }); return this.linkMoodle(created.id, moodleCourseId); }); }
+    materializeMoodleCourse(moodleCourseId: string) { studyIdSchema.parse(moodleCourseId); return this.atomic(() => { const existing = this.db.prepare('SELECT id FROM study_courses WHERE moodleCourseId=?').get(moodleCourseId); if (existing) { this.seedMoodleUnits(String(existing.id));
+        return this.requireCourse(String(existing.id)); } const detail = new MoodleRepository(this.db).course(moodleCourseId); const created = this.createCourse({ title: detail.course.fullName }); return this.linkMoodle(created.id, moodleCourseId); }); }
     listCourses(input: StudyPageInput & {
         includeArchived?: boolean;
     }) { return this.page('SELECT * FROM study_courses WHERE (? OR archivedAt IS NULL) AND (? IS NULL OR createdAt<? OR (createdAt=? AND id<?)) ORDER BY createdAt DESC,id DESC', [input.includeArchived ? 1 : 0], input, row => studyCourseSchema.parse({ ...row, aliases: JSON.parse(String(row.aliases)) })); }
     listUnits(input: StudyPageInput & {
         courseId: string;
     }) { const { limit, cursor } = studyPageInputSchema.parse({ limit: input.limit, cursor: input.cursor }); const rows = this.db.prepare('SELECT * FROM study_units WHERE courseId=? AND (? IS NULL OR id<?) ORDER BY id DESC LIMIT ?').all(input.courseId, cursor?.id ?? null, cursor?.id ?? null, limit + 1); const selected = rows.slice(0, limit); return { items: selected.map(row => studyUnitSchema.parse(row)), nextCursor: rows.length > limit ? { at: this.now(), id: String(selected.at(-1)!.id) } : null }; }
-    seedMoodleUnits(courseId: string) { const course = this.requireCourse(courseId); if (!course.moodleCourseId)
-        return; const detail = new MoodleRepository(this.db).course(course.moodleCourseId); this.atomic(() => { for (const section of detail.sections.slice(0, 500)) {
-        const next = detail.sections.find(s => s.number > section.number && s.weekStart);
-        this.db.prepare(`INSERT INTO study_units(id,courseId,kind,ordinal,title,sourceKey,sourceSectionId,startsAt,endsAt) VALUES(?,?,'moodle',?,?,?,?,?,?) ON CONFLICT(courseId,kind,sourceKey) DO UPDATE SET ordinal=excluded.ordinal,title=excluded.title,startsAt=excluded.startsAt,endsAt=excluded.endsAt`).run(randomUUID(), courseId, section.number, section.name.slice(0, 240) || 'Section', section.id, section.id, section.weekStart, next?.weekStart ?? null);
-        const unit = this.db.prepare("SELECT id FROM study_units WHERE courseId=? AND kind='moodle' AND sourceKey=?").get(courseId, section.id)!;
-        this.seedHeadings(courseId, String(unit.id), [section.name]);
-    } }); }
+    seedMoodleUnits(courseId: string) { const course = this.requireCourse(courseId); if (course.moodleCourseId)
+        syncMoodleStudyUnits(this.db, course.moodleCourseId, this.now()); }
     seedHeadings(courseId: string, unitId: string | null, headings: readonly string[]) { this.requireCourse(courseId); this.atomic(() => { for (const raw of headings.slice(0, 80)) {
         const label = raw.trim().slice(0, 240), key = conceptKey(label);
         if (!key)
@@ -65,7 +61,7 @@ export class ReviewRepository {
         this.db.prepare("INSERT INTO study_concepts(id,courseId,key,label,source,unitId,userState,note,createdAt) VALUES(?,?,?,?,'heading',?,'none',NULL,?) ON CONFLICT(courseId,key) DO NOTHING").run(randomUUID(), courseId, key, label, unitId, this.now());
     } }); }
     linkDocument(courseId: string, documentId: string, headings: readonly string[] = []) { this.requireCourse(courseId); studyIdSchema.parse(documentId); this.atomic(() => { const document = this.db.prepare('SELECT title FROM documents WHERE id=? AND deletedAt IS NULL').get(documentId); if (!document)
-        throw new Error('Document unavailable'); this.db.prepare('INSERT INTO study_course_documents(courseId,documentId,attachedAt) VALUES(?,?,?) ON CONFLICT DO NOTHING').run(courseId, documentId, this.now()); this.db.prepare("INSERT INTO study_units(id,courseId,kind,ordinal,title,sourceKey,sourceSectionId,startsAt,endsAt) VALUES(?,?,'document',0,?,?,NULL,NULL,NULL) ON CONFLICT DO NOTHING").run(randomUUID(), courseId, String(document.title).slice(0, 240), documentId); const unit = this.db.prepare("SELECT id FROM study_units WHERE courseId=? AND kind='document' AND sourceKey=?").get(courseId, documentId)!; this.db.prepare('INSERT INTO study_document_units(courseId,documentId,unitId) VALUES(?,?,?) ON CONFLICT DO NOTHING').run(courseId, documentId, String(unit.id)); this.seedHeadings(courseId, String(unit.id), headings); }); }
+        throw new Error('Document unavailable'); this.db.prepare('INSERT INTO study_course_documents(courseId,documentId,attachedAt) VALUES(?,?,?) ON CONFLICT DO NOTHING').run(courseId, documentId, this.now()); this.db.prepare("INSERT INTO study_units(id,courseId,kind,ordinal,title,sourceKey,sourceSectionId,startsAt,endsAt) VALUES(?,?,'document',0,?,?,NULL,NULL,NULL) ON CONFLICT DO NOTHING").run(randomUUID(), courseId, String(document.title).slice(0, 240), documentId); const unit = this.db.prepare("SELECT id FROM study_units WHERE courseId=? AND kind='document' AND sourceKey=?").get(courseId, documentId)!; this.db.prepare('INSERT INTO study_document_units(courseId,documentId,unitId) VALUES(?,?,?) ON CONFLICT DO NOTHING').run(courseId, documentId, String(unit.id)); this.seedHeadings(courseId, String(unit.id), headings); this.seedMoodleUnits(courseId); }); }
     unlinkDocument(courseId: string, documentId: string) { this.atomic(() => { const units = this.db.prepare("SELECT id FROM study_units WHERE courseId=? AND kind='document' AND sourceKey=?").all(courseId, documentId); for (const unit of units) {
         this.db.prepare('UPDATE study_observations SET unitId=NULL WHERE unitId=? AND courseId=?').run(String(unit.id), courseId);
         this.db.prepare('UPDATE study_concepts SET unitId=NULL WHERE unitId=? AND courseId=?').run(String(unit.id), courseId);

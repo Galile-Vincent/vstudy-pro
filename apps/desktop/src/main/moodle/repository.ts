@@ -4,6 +4,7 @@
  * Credentials and authenticated transports stay in main; renderer results use shared schemas.
  * @packageDocumentation
  */
+import { syncMoodleStudyUnits } from "../review/moodle-units";
 import { responseCache } from "../cache";
 import { moodleSectionSchema, moodleAnnouncementSchema, type MoodleSection, type MoodleAnnouncement } from '../../shared/moodle-course';
 import { parseCourseIdentity, courseLifecycle } from './identity';
@@ -131,6 +132,7 @@ export class MoodleRepository {
         const keep = new Set(files.map(file => file.value.id));
         if (complete) for (const file of this.files(id)) if (!keep.has(file.id)) this.db.prepare('DELETE FROM moodle_files WHERE id=?').run(file.id);
       }
+      syncMoodleStudyUnits(this.db,id);
       this.db.exec('RELEASE moodle_detail');
     } catch (error) { this.db.exec('ROLLBACK TO moodle_detail; RELEASE moodle_detail'); throw error; }
   }
@@ -154,7 +156,7 @@ export class MoodleRepository {
       value:moodleFileSchema.parse({...JSON.parse(payload.parse(row).data),documentId:row.documentId}),url:z.string().parse(row.url),
     }));
   }
-  linkFile(id: string, documentId: string, revision: Pick<MoodleFile,'modifiedAt'|'size'>) { this.db.prepare("UPDATE moodle_files SET documentId=? WHERE id=? AND json_extract(data,'$.modifiedAt') IS ? AND json_extract(data,'$.size')=?").run(documentId,id,revision.modifiedAt,revision.size); }
+  linkFile(id: string, documentId: string, revision: Pick<MoodleFile,'modifiedAt'|'size'>) { this.db.prepare("UPDATE moodle_files SET documentId=? WHERE id=? AND json_extract(data,'$.modifiedAt') IS ? AND json_extract(data,'$.size')=?").run(documentId,id,revision.modifiedAt,revision.size); const file=this.db.prepare('SELECT courseId FROM moodle_files WHERE id=?').get(id); if(file)syncMoodleStudyUnits(this.db,String(file.courseId)); }
   apply(accountId: string, snapshot: MoodleSnapshot, scope?: string) {
     this.db.exec('SAVEPOINT moodle_sync');
     try {
@@ -216,6 +218,7 @@ export class MoodleRepository {
       prune('files',new Set(snapshot.files.map(item => item.value.id)));
       prune('courses',courseIds);
       this.saveAccount({...account,status:'connected',syncedAt:new Date().toISOString()});
+      for(const courseId of courseIds)syncMoodleStudyUnits(this.db,courseId);
       this.db.exec('RELEASE moodle_sync');
     } catch (error) { this.db.exec('ROLLBACK TO moodle_sync; RELEASE moodle_sync'); throw error; }
   }
