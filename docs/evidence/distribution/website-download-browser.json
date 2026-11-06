@@ -1,0 +1,92 @@
+{
+  "verifiedAt": "2026-11-06T03:23:07.458Z",
+  "browser": "installed Google Chrome, headless",
+  "surface": "built website with intercepted static files and synthetic installer responses",
+  "publicDownloadAvailabilityVerified": false,
+  "results": [
+    {
+      "language": "en",
+      "scenario": "mac-default",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg",
+      "suggestedFilename": "VStudy-Pro-mac-arm64.dmg",
+      "clickDownloaded": true
+    },
+    {
+      "language": "en",
+      "scenario": "mac-intel-hints",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-x64.dmg",
+      "suggestedFilename": "VStudy-Pro-mac-x64.dmg",
+      "clickDownloaded": true
+    },
+    {
+      "language": "en",
+      "scenario": "windows-default",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe",
+      "suggestedFilename": "VStudy-Pro-win-x64.exe",
+      "clickDownloaded": true
+    },
+    {
+      "language": "en",
+      "scenario": "windows-arm-hints",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-arm64.exe",
+      "suggestedFilename": "VStudy-Pro-win-arm64.exe",
+      "clickDownloaded": true
+    },
+    {
+      "language": "zh-Hant",
+      "scenario": "mac-default",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg",
+      "suggestedFilename": "VStudy-Pro-mac-arm64.dmg",
+      "clickDownloaded": true
+    },
+    {
+      "language": "zh-Hant",
+      "scenario": "mac-intel-hints",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-x64.dmg",
+      "suggestedFilename": "VStudy-Pro-mac-x64.dmg",
+      "clickDownloaded": true
+    },
+    {
+      "language": "zh-Hant",
+      "scenario": "windows-default",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe",
+      "suggestedFilename": "VStudy-Pro-win-x64.exe",
+      "clickDownloaded": true
+    },
+    {
+      "language": "zh-Hant",
+      "scenario": "windows-arm-hints",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-arm64.exe",
+      "suggestedFilename": "VStudy-Pro-win-arm64.exe",
+      "clickDownloaded": true
+    },
+    {
+      "language": "ja",
+      "scenario": "mac-default",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg",
+      "suggestedFilename": "VStudy-Pro-mac-arm64.dmg",
+      "clickDownloaded": true
+    },
+    {
+      "language": "ja",
+      "scenario": "mac-intel-hints",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-x64.dmg",
+      "suggestedFilename": "VStudy-Pro-mac-x64.dmg",
+      "clickDownloaded": true
+    },
+    {
+      "language": "ja",
+      "scenario": "windows-default",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe",
+      "suggestedFilename": "VStudy-Pro-win-x64.exe",
+      "clickDownloaded": true
+    },
+    {
+      "language": "ja",
+      "scenario": "windows-arm-hints",
+      "href": "https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-arm64.exe",
+      "suggestedFilename": "VStudy-Pro-win-arm64.exe",
+      "clickDownloaded": true
+    }
+  ]
+}
