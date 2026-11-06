@@ -1,3 +1,4 @@
+import { analyticsMigration } from './analytics-migration';
 /**
  * Keep the immutable, ordered SQL registry used to upgrade existing databases.
  * Owned by main/db.
@@ -97,4 +98,5 @@ export const migrations = [
   { version:19, sql:storageMigration },
   { version:20, sql:"CREATE INDEX IF NOT EXISTS conversations_course_page ON conversations(courseId,createdAt DESC,id DESC);" },
   { version:21, sql:plannerMigration },
+  { version:22, sql:analyticsMigration },
 ];

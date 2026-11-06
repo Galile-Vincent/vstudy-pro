@@ -1,3 +1,7 @@
+import { initializeAnalytics } from './analytics/runtime';
+import { analytics } from './analytics/service';
+const analyticsStartup = performance.now();
+let telemetry: ReturnType<typeof initializeAnalytics>;
 /**
  * Own Electron startup, application protocols, main-window creation, and ordered shutdown.
  * Owned by main.
@@ -50,9 +54,9 @@ if (smokeRoot) {
   app.setPath('userData', isolated);
 }
 process.on('exit', code => log({phase:'main-exit',code}));
-app.on('child-process-gone', (_event,details) => log({phase:'main-child-process-gone',code:details.exitCode,reason:details.reason,type:details.type}));
-app.on('render-process-gone', (_event,_contents,details) => log({phase:'main-render-process-gone',code:details.exitCode,reason:details.reason}));
-process.on('uncaughtExceptionMonitor', error => log({phase:'main-uncaught-exception',code:(error as NodeJS.ErrnoException).code ?? error.name}));
+app.on('child-process-gone', (_event,details) => {if (details.reason !== 'clean-exit') analytics()?.track('app_crashed',{crash_category:'child_process'});log({phase:'main-child-process-gone',code:details.exitCode,reason:details.reason,type:details.type});});
+app.on('render-process-gone', (_event,_contents,details) => {if (details.reason !== 'clean-exit') analytics()?.track('app_crashed',{crash_category:'renderer'});log({phase:'main-render-process-gone',code:details.exitCode,reason:details.reason});});
+process.on('uncaughtExceptionMonitor', error => {analytics()?.track('app_error',{error_category:'other',feature:'app'});log({phase:'main-uncaught-exception',code:(error as NodeJS.ErrnoException).code ?? error.name});});
 process.on('unhandledRejection', () => { log({phase:'main-unhandled-rejection',code:'UNHANDLED_REJECTION'}); app.exit(1); });
 process.umask(0o077);
 app.enableSandbox();
@@ -106,6 +110,9 @@ async function createWindow(show = true): Promise<void> {
     },
   });
   window = current;
+  current.on('focus',()=>telemetry?.activity.focus(true));
+  current.on('blur',()=>telemetry?.activity.focus(false));
+  current.on('minimize',()=>{telemetry?.activity.focus(false);analytics()?.track('app_minimized');});
   applyNativeTheme(appearance);
   current.webContents.on('will-frame-navigate', event => { if (!event.isMainFrame) event.preventDefault(); });
   current.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
@@ -155,6 +162,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
   await recoverRestore(userData);
   await reconcileDownloads(join(userData,"moodle-downloads"));
   store = openStore(join(userData, "vstudy.sqlite"));
+  telemetry = initializeAnalytics(store.db,store.settings.get().language);
   protocol.handle("vstudy-asset", assetHandler(store, userData));
   protocol.handle('vstudy', async request => {
     const url = new URL(request.url);
@@ -216,6 +224,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       await session.defaultSession.closeAllConnections();
       session.defaultSession.flushStorageData();
       await disposeIpc?.();
+      await telemetry?.stop();
       store?.close();
       store = undefined;
     });
@@ -227,6 +236,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
     void restoreMainWindow();
   });
   await createWindow(!process.argv.includes('--mcp-background'));
+  analytics()?.track('app_performance_sample',{startup_ms:Math.round(performance.now()-analyticsStartup)});
   if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
 }).catch(async error => {
@@ -247,7 +257,7 @@ app.on("window-all-closed", () => {
 });
 let quitting = false;
 const shutdown = coordinateShutdown({
-  stopWork: async () => { await disposeIpc?.(); },
+  stopWork: async () => { await disposeIpc?.(); await telemetry?.stop(); },
   flush: () => { if (app.isReady()) session.defaultSession.flushStorageData(); },
   close: () => { store?.close(); store = undefined; },
   quit: () => { quitting = true; app.quit(); },

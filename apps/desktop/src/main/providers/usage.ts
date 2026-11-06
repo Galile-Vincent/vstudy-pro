@@ -34,6 +34,7 @@ export function extractUsage(data: string, kind: string, previous?: Usage): Usag
     const write = c.cache_creation_input_tokens ?? c.cache_write_input_tokens;
     const input = c.input_tokens ?? c.prompt_tokens;
     usage = usageSchema.parse({ ...previous,
+      reportedTokens:{input:input === undefined ? previous?.reportedTokens?.input ?? null : input + (kind === 'anthropic' || kind === 'claude' ? (read ?? 0)+(write ?? 0) : 0),output:c.output_tokens ?? c.completion_tokens ?? previous?.reportedTokens?.output ?? null},
       inputTokens: input === undefined ? previous?.inputTokens ?? 0 : input + (kind === 'anthropic' || kind === 'claude' ? (read ?? 0) + (write ?? 0) : 0),
       outputTokens: c.output_tokens ?? c.completion_tokens ?? previous?.outputTokens ?? 0,
       cacheReadTokens: read ?? previous?.cacheReadTokens, cacheWriteTokens: write ?? previous?.cacheWriteTokens,
@@ -43,12 +44,12 @@ export function extractUsage(data: string, kind: string, previous?: Usage): Usag
   }
   if (wire.type === 'rate_limit_event' && wire.rate_limit_info) {
     const info = wire.rate_limit_info;
-    usage = usageSchema.parse({inputTokens:0,outputTokens:0,costSource:'unknown',...usage,rateLimit:{label:info.rateLimitType ?? 'Claude rate limit', ...(info.utilization === undefined ? {} : {usedPercent:Math.min(100,info.utilization*100)}), ...(info.resetsAt ? {resetsAt:new Date(info.resetsAt*1000).toISOString()} : {})}});
+    usage = usageSchema.parse({inputTokens:0,outputTokens:0,costSource:'unknown',reportedTokens:{input:null,output:null},...usage,rateLimit:{label:info.rateLimitType ?? 'Claude rate limit', ...(info.utilization === undefined ? {} : {usedPercent:Math.min(100,info.utilization*100)}), ...(info.resetsAt ? {resetsAt:new Date(info.resetsAt*1000).toISOString()} : {})}});
   }
   const windows = [wire.rate_limits?.primary, wire.rate_limits?.secondary].filter(w => w != null);
   if (windows.length) {
     const w = windows.reduce((a,b) => a.used_percent >= b.used_percent ? a : b);
-    usage = usageSchema.parse({ inputTokens: 0, outputTokens: 0, costSource: 'unknown', ...usage, rateLimit: { label: `${w.window_minutes ?? 'unknown'} minute window`, usedPercent: w.used_percent, ...(w.resets_at ? { resetsAt: new Date(w.resets_at * 1000).toISOString() } : {}) } });
+    usage = usageSchema.parse({ inputTokens: 0, outputTokens: 0, costSource: 'unknown', reportedTokens:{input:null,output:null}, ...usage, rateLimit: { label: `${w.window_minutes ?? 'unknown'} minute window`, usedPercent: w.used_percent, ...(w.resets_at ? { resetsAt: new Date(w.resets_at * 1000).toISOString() } : {}) } });
   }
   return usage;
 }

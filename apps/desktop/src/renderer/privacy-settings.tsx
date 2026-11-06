@@ -1,3 +1,4 @@
+import { AnalyticsSettings } from './analytics-ui';
 import { CliPrivacyPreferences } from './ai-cli/preferences';
 import { SettingsGroup, SettingsRow } from './settings/layout';
 import { Button } from './components/ui/button';
@@ -38,6 +39,7 @@ export function PrivacySettings() {
 
   return (
     <div data-testid="privacy-settings">
+      <AnalyticsSettings/>
       <SettingsGroup title={tr('settings:network')}>
         <SettingsRow label={tr('settings:network_copy')}>
           <Button size="sm" variant="secondary" onClick={() => void refresh()}>

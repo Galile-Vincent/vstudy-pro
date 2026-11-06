@@ -1,0 +1,18 @@
+---
+import { owner, parseInline, resolveTarget, type LegalChrome } from '../data/legal';
+import type { Language } from '../data/ui';
+interface Props { text: string; language: Language; chrome: LegalChrome; }
+const { text, language, chrome } = Astro.props;
+const external = (href: string) => /^https?:/.test(href);
+---
+{parseInline(text).map(part => {
+  if (part.kind === 'text') return part.text;
+  if (part.kind === 'strong') return <strong>{part.text}</strong>;
+  if (part.kind === 'code') return <code>{part.text}</code>;
+  if (part.kind === 'todo') return <mark class="owner-todo">{part.text}</mark>;
+  if (part.kind === 'email') return owner.email ? <a href={`mailto:${owner.email}`}>{owner.email}</a> : <mark class="owner-todo">{chrome.emailTodo}</mark>;
+  if (part.kind === 'law') return owner.law ?? <mark class="owner-todo">{chrome.lawTodo}</mark>;
+  if (part.kind !== 'link') return null;
+  const href = resolveTarget(part.target, language);
+  return <a href={href} rel={external(href) ? 'noopener' : undefined}>{part.text}{external(href) && <span aria-hidden="true"> ↗</span>}</a>;
+})}

@@ -1,3 +1,4 @@
+import { track } from './analytics';
 import { formatters } from "../shared/format";
 import { useTranslation } from 'react-i18next';
 import { i18n, systemLanguage } from '../shared/i18n';
@@ -16,6 +17,6 @@ export function useFormat() {
 export async function saveLanguage(field: 'language' | 'replyLanguage', value: Settings['language']) {
   const latest = await desktop.invoke('settings:get',{});
   const saved = await desktop.invoke('settings:set',{...latest,[field]:value});
-  if(field === 'language') await applyLanguage(saved.language);
+  if(field === 'language') { await applyLanguage(saved.language); if (latest.language !== saved.language) track('language_changed', {app_language:document.documentElement.lang}); }
   return saved;
 }

@@ -101,7 +101,7 @@ export async function* parseStream(
     toolFrames(payload);
     usage = extractUsage(payload, kind, usage);
     const models = kind === 'claude' ? cliModelUsage(payload) : undefined;
-    if (models?.length && usage) usage = { ...usage, inputTokens: models.reduce((n,m) => n + m.usage.inputTokens,0), outputTokens: models.reduce((n,m) => n + m.usage.outputTokens,0), cacheReadTokens: models.reduce((n,m) => n + (m.usage.cacheReadTokens ?? 0),0), cacheWriteTokens: models.reduce((n,m) => n + (m.usage.cacheWriteTokens ?? 0),0), reasoningTokens: models.reduce((n,m) => n + (m.usage.reasoningTokens ?? 0),0) };
+    if (models?.length && usage) usage = { ...usage, reportedTokens:{input:models.reduce((n,m)=>n+m.usage.inputTokens,0),output:models.reduce((n,m)=>n+m.usage.outputTokens,0)}, inputTokens: models.reduce((n,m) => n + m.usage.inputTokens,0), outputTokens: models.reduce((n,m) => n + m.usage.outputTokens,0), cacheReadTokens: models.reduce((n,m) => n + (m.usage.cacheReadTokens ?? 0),0), cacheWriteTokens: models.reduce((n,m) => n + (m.usage.cacheWriteTokens ?? 0),0), reasoningTokens: models.every(m=>m.usage.reasoningTokens !== undefined) ? models.reduce((n,m) => n + (m.usage.reasoningTokens ?? 0),0) : undefined };
     if (usage) snapshot(usage,models);
     return parseProviderEvent(kind, payload).flatMap(event => {
       const toolEvents: ChatEvent[] = event.type === 'done' ? [...calls.values()].map(call => ({type:'tool-call',call:{toolCallId:call.id,toolName:call.name,args:JSON.parse(call.text || '{}')}})) : [];

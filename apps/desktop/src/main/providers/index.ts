@@ -1,3 +1,4 @@
+import { instrumentProvider } from '../analytics/provider';
 /**
  * Register provider adapters and resolve only explicitly enabled integrations.
  * Owned by main/providers.
@@ -121,7 +122,7 @@ export class ProviderRegistry {
   }
   register(id: ProviderConfig["id"], adapter: ProviderAdapter): void {
     if (this.adapters.has(id)) throw new Error("Provider already registered");
-    this.adapters.set(id, adapter);
+    this.adapters.set(id, instrumentProvider(adapter));
   }
   get(id: ProviderConfig["id"]): ProviderAdapter {
     const adapter = this.adapters.get(id);
