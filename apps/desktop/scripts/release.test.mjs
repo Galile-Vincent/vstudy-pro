@@ -249,7 +249,7 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
     if (target.platform === 'win') {
       await mkdir(join(smoke, 'mcp-enabled'));
       await writeFile(join(smoke, 'mcp-enabled', 'smoke-result.json'), JSON.stringify({...smokeReport(target),
-        mcp: {enabled: true, expectedEnabled: true, windowCreated: true, realPersistence: true}}));
+        mcp: {enabled: true, expectedEnabled: true, windowCreated: true, realPersistence: true, startupRestored: true, bridgeVerified: true, hiddenBackground: true}}));
     }
     const output = join(root, 'artifacts', `distribution-${target.key}-unsigned`);
     await stageAssets({ target, version, input, smoke, output, env: {} });

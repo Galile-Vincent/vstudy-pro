@@ -12,12 +12,17 @@ import { isAbsolute, join, relative, sep } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { setTimeout as delay } from 'node:timers/promises';
+import { Wire } from '../../../mcp/src/transport';
+import { pingWire } from '../../../mcp/src/bridge';
+import { MCP_PROTOCOL_VERSION } from '../shared/mcp';
 import type { Store } from './db';
 import { installDirectories, resolveInstalledExecutable } from './providers/trusted-executable';
 import { scrubbedEnvironment } from '../../resources/converter/contracts';
 import { managedConverterPython, systemExecutable } from './platform/process';
 import { ActionPty } from './providers/setup/pty';
 import { createWindowsStatePersistence } from './mcp/windows-state';
+import { resolveMcpEndpoint } from './mcp/endpoint';
 
 const execute = promisify(execFile);
 
@@ -76,6 +81,34 @@ async function converterProbe(userData: string) {
   return { resourcesPresent: true, executables, managedPythonRequest: managedConverterPython(), nativeWheel, bootstrapAttempted: false, conversionTested: false };
 }
 
+async function mcpProbe(window: BrowserWindow, enabled: boolean) {
+  const deadline = Date.now() + (process.arch === 'arm64' ? 95_000 : 35_000);
+  while (true) {
+    const state: unknown = await window.webContents.executeJavaScript('window.desktop.invoke("mcp:state", {})');
+    if (!state || typeof state !== 'object' || !('enabled' in state) || !('unavailable' in state) || state.unavailable) {
+      throw new Error('Packaged MCP startup is unavailable');
+    }
+    if (!enabled) {
+      if (state.enabled !== false) throw new Error('Fresh packaged MCP state was not disabled');
+      return {enabled: false, expectedEnabled: false, windowCreated: true, realPersistence: process.platform === 'win32',
+        startupRestored: false, bridgeVerified: false};
+    }
+    let wire: Wire | undefined;
+    try {
+      wire = await Wire.connect(resolveMcpEndpoint(app.getPath('userData')).path,
+        {signal: AbortSignal.timeout(Math.max(1, deadline - Date.now()))});
+      const pong = await pingWire(wire);
+      if (state.enabled === true && pong.enabled && pong.version === MCP_PROTOCOL_VERSION) return {
+        enabled: true, expectedEnabled: true, windowCreated: true, realPersistence: process.platform === 'win32',
+        startupRestored: true, bridgeVerified: true, hiddenBackground: !window.isVisible(),
+      };
+    } catch { /* Window creation can precede the guarded native host startup. */ }
+    finally {wire?.close();}
+    if (Date.now() >= deadline) throw new Error('Saved MCP opt-in did not restore an authenticated bridge');
+    await delay(100);
+  }
+}
+
 /** Report native window, renderer, SQLite durability, and converter probe results, then exit with an explicit status. */
 export async function runDistributionSmoke(window: BrowserWindow, store: Store, root: string): Promise<void> {
   const report: Record<string, unknown> = {
@@ -96,11 +129,8 @@ export async function runDistributionSmoke(window: BrowserWindow, store: Store, 
     if (rendererLoaded !== true || !window.webContents.getURL().startsWith('vstudy://app/')) throw new Error('Packaged renderer did not mount with its preload bridge');
     report.rendererLoaded = true;
     const mcpEnabled = process.env.VSTUDY_DISTRIBUTION_SMOKE_MCP_ENABLED === '1';
-    if (mcpEnabled) await window.webContents.executeJavaScript('window.desktop.invoke("mcp:enable", {enabled:true})');
-    const agents: unknown = await window.webContents.executeJavaScript('window.desktop.invoke("mcp:state", {})');
-    if (!agents || typeof agents !== 'object' || !('enabled' in agents) || agents.enabled !== mcpEnabled) throw new Error('Packaged MCP startup state did not match its isolated fixture');
-    report.mcp = {enabled: agents.enabled, expectedEnabled: mcpEnabled, windowCreated: true, realPersistence: process.platform === 'win32'};
-    const capture = await window.webContents.capturePage();
+    report.mcp = await mcpProbe(window, mcpEnabled);
+    const capture = await window.webContents.capturePage(undefined, {stayHidden: true});
     if (capture.isEmpty()) throw new Error('Native window capture was empty');
     await writeFile(join(root, 'window.png'), capture.toPNG());
     report.windowCapture = 'window.png';

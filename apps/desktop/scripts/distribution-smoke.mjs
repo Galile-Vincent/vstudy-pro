@@ -24,7 +24,8 @@ export function validateSmokeReport(report, target, mcpEnabled = false) {
     throw new Error('Windows packaged smoke did not verify the native DPAPI round-trip');
   }
   if (report.mcp?.enabled !== mcpEnabled || report.mcp?.expectedEnabled !== mcpEnabled || report.mcp?.windowCreated !== true ||
-      (target.platform === 'win' && report.mcp?.realPersistence !== true)) {
+      (target.platform === 'win' && report.mcp?.realPersistence !== true) ||
+      (mcpEnabled && (report.mcp?.startupRestored !== true || report.mcp?.bridgeVerified !== true || report.mcp?.hiddenBackground !== true))) {
     throw new Error('Packaged smoke did not verify its expected MCP startup state and real Windows persistence');
   }
   if (report.nativeTerminal?.engine !== 'node-pty' || report.nativeTerminal?.architecture !== target.arch ||
@@ -112,5 +113,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   for (const fuse of [F.OnlyLoadAppFromAsar, F.EnableEmbeddedAsarIntegrityValidation]) {
     if (fuses[fuse] !== FuseState.ENABLE) throw new Error(`Packaged fuse ${F[fuse]} must be enabled`);
   }
-  await runSmoke({ executable, target, output, timeoutMs: Number(values.timeout), mcpEnabled: values['mcp-enabled'] });
+  await runSmoke({ executable, target, output, args: values['mcp-enabled'] ? ['--mcp-background'] : [],
+    timeoutMs: Number(values.timeout), mcpEnabled: values['mcp-enabled'] });
 }
