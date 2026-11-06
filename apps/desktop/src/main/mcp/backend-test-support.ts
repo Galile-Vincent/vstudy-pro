@@ -77,5 +77,5 @@ export async function backendHarness() {
     repository.linkFile(fileId, item.id, record);
     return item;
   }
-  return {options, store, repository, moodle, planner, replies, request, read, openModule, exportCalendar, waits, document, setTime:(value:number) => { time = value; }, close:async () => { await moodle.dispose(); store.close(); rmSync(directory, {recursive:true, force:true}); }};
+  return {options, store, repository, moodle, planner, secrets, replies, request, read, openModule, exportCalendar, waits, document, setTime:(value:number) => { time = value; }, close:async () => { await moodle.dispose(); store.close(); rmSync(directory, {recursive:true, force:true}); }};
 }

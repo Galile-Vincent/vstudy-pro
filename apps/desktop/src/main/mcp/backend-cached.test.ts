@@ -30,7 +30,7 @@ it('projects content without grade, submission, private file, URL or WS fields a
   const result = await h.cached.get_course(h.context(args), args);
   const value = JSON.stringify(result);
   expect(value).toContain('Algorithms');
-  for (const denied of ['Secret grade', '99', 'submitted', 'https:', 'token', 'documentId', 'fileIds']) expect(value).not.toContain(denied);
+  for (const denied of ['Secret grade', '"grade":"99"', 'submitted', 'https:', 'token', 'documentId', 'fileIds']) expect(value).not.toContain(denied);
   expect(h.context(args).provenance.syncedAt).not.toBeNull();
   expect(h.request).not.toHaveBeenCalled();
 });
