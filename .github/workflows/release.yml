@@ -2,7 +2,7 @@ name: Desktop distribution
 on:
   push:
     tags: ['v*.*.*']
-    branches: ['ci/**']
+    branches: ['ci/**', '!ci/windows-native-pipe']
   workflow_dispatch:
     inputs:
       dry_run:
