@@ -94,3 +94,30 @@ it('replaces the reservation with reported usage on success, and when a stream f
     await failing.service.waitForIdle();
     expect(failing.ledger()).toMatchObject({ n: 1, input: 120, output: 37 });
 });
+const sha = () => createHash('sha256').update(TEXT).digest('hex');
+it.each([
+    ['note', 'review.invalid_sources'],
+    ['test', 'review.invalid_output'],
+] as const)('refuses a Moodle assignment document as a source for a %s through the production excerpt reader', async (kind, errorCode) => {
+    let calls = 0;
+    const { service, request, documentId } = setup(async function* (prompt) {
+        calls++;
+        const data = JSON.parse(prompt.split('<UNTRUSTED_REVIEW_DATA>\n')[1]!.split('\n</UNTRUSTED_REVIEW_DATA>')[0]!);
+        const source = { documentId, version: 'original', excerptHash: sha(), quote: 'Force causes acceleration.' };
+        yield { type: 'text-delta', text: kind === 'note' ? note(documentId) : JSON.stringify({ version: 1, items: data.blueprint.map((slot: { id: string; type: string }) => ({ ...slot, stem: 'Question ' + slot.id, answer: slot.type === 'mcq' ? 0 : slot.type === 'cloze' ? 'force' : true, explanation: 'source', source, ...(slot.type === 'mcq' ? { options: ['force', 'speed', 'power', 'other'], optionRationales: ['why', 'why', 'why', 'why'] } : slot.type === 'cloze' ? { alternatives: [] } : {}) })) }) };
+        yield { type: 'done' };
+    }, { kind: 'moodle-assignment' });
+    const artifact = service.generate({ ...request, kind });
+    await service.waitForIdle();
+    expect(service.repo.find(artifact.id)).toMatchObject({ status: 'failed', errorCode, test: null, bodyMarkdown: null });
+    expect(calls).toBeGreaterThan(0);
+});
+it('accepts the same document as a source when no Moodle assignment owns it', async () => {
+    const { service, request, documentId } = setup(async function* () {
+        yield { type: 'text-delta', text: note(documentId) };
+        yield { type: 'done' };
+    });
+    const artifact = service.generate(request);
+    await service.waitForIdle();
+    expect(service.repo.find(artifact.id)?.status).toBe('ready');
+});
