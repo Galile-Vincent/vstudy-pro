@@ -1,7 +1,8 @@
 /** Bound activity writes without delaying durable grant decisions. @packageDocumentation */
 import { randomUUID } from 'node:crypto';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { defaultScopes } from '../../shared/mcp';
+import { McpFailure } from './errors';
 import { GrantStore } from './grants';
 import { countingStatePersistence } from './state-test-fixture';
 import { call, fixture, pair, proposal, taskArgs } from './test-fixture';
@@ -106,4 +107,40 @@ it('does not publish security-state changes when synchronous persistence fails',
     expect(store.grants).toEqual([client.grantInfo]);
     expect(store.authorize(client.grant)).toEqual(client.grantInfo);
   }
+});
+
+it.each(['OK','DENIED','failed','revoke','EXPIRED','TIMEOUT'] as const)('audits an executed write with outcome %s in one combined save', async outcome => {
+  let now=Date.parse('2026-11-06T00:00:00Z');
+  const persistence=countingStatePersistence();
+  const {engine,account,execute,root}=fixture({persistence,now:()=>now});
+  engine.setEnabled(true);
+  const client=await pair(engine,[account.id]);
+  let finish!:()=>void;
+  const dispatched=new Promise<void>(resolve=>{finish=resolve;});
+  execute.mockImplementationOnce(async()=>{
+    await dispatched;
+    if (outcome==='DENIED') throw new McpFailure('DENIED');
+    if (outcome==='failed') throw Error('Backend failed after dispatch');
+    return {content:{saved:true}};
+  });
+  if (outcome==='TIMEOUT') vi.useFakeTimers();
+  const writing=call(engine,client.grant,'create_task',taskArgs());
+  const pending=await proposal(engine);
+  engine.decideProposal({proposalId:pending.id,approve:true});
+  await vi.waitFor(()=>expect(execute).toHaveBeenCalledOnce());
+  const before=persistence.write.mock.calls.length;
+  if (outcome==='revoke') engine.revoke(client.grantInfo.id);
+  if (outcome==='EXPIRED') now=Date.parse(client.grantInfo.expiresAt);
+  if (outcome==='TIMEOUT') await vi.advanceTimersByTimeAsync(120_000);
+  else finish();
+  const status=outcome==='revoke' ? 'DENIED' : outcome==='failed' ? 'INTERNAL' : outcome;
+  expect(await writing).toMatchObject(status==='OK' ? {ok:true} : {ok:false,error:{code:status}});
+  expect(persistence.write).toHaveBeenCalledTimes(before+(outcome==='revoke' ? 2 : 1));
+  const stored=new GrantStore(root,()=>now,persistence);
+  expect(stored.activity).toMatchObject([{tool:'create_task',status}]);
+  expect(stored.grants[0]?.lastUsedAt).toBe(new Date(now).toISOString());
+  // A timeout/revocation response may precede completion of the dispatched backend work.
+  finish();
+  await vi.waitFor(()=>expect(engine.state().activeCalls).toBe(0));
+  expect(persistence.write).toHaveBeenCalledTimes(before+(outcome==='revoke' ? 2 : 1));
 });
