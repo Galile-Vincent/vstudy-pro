@@ -37,7 +37,7 @@ export class GenerationService implements ReviewWorker {
         }
         this.admit();
         const token = randomUUID();
-        const data = this.repo.scopeInputs(request.courseId);
+        const data = this.repo.scopeInputs(request.courseId, request.scope);
         const snapshot = resolveScope(request.scope, data).snapshot;
         if (request.retakeAttemptId)
             snapshot.assumptions.push('retakeAttempt:' + request.retakeAttemptId);
@@ -62,11 +62,11 @@ export class GenerationService implements ReviewWorker {
         try {
             emit('resolving');
             signal.throwIfAborted();
-            const input = this.repo.scopeInputs(request.courseId);
-            const mastery = new ReviewRepository(this.repo.db).computeCourseMastery(request.courseId, this.repo.clock());
+            const foundation = new ReviewRepository(this.repo.db), now = this.repo.clock();
+            const everyConcept = request.scope.kind === 'weak' ? foundation.computeCourseMastery(request.courseId, now) : undefined;
+            const input = this.repo.scopeInputs(request.courseId, request.scope, everyConcept && new Set(everyConcept.filter(c => c.userState !== 'dismissed' && c.mastery.state === 'needs_review').map(c => c.key)));
+            const mastery = everyConcept ?? foundation.computeCourseMastery(request.courseId, now, input.concepts.map(c => c.key));
             const byKey = new Map(mastery.map(c => [c.key, c]));
-            for (const c of input.concepts)
-                c.weak = byKey.get(c.key)?.mastery.state === 'needs_review';
             const resolved = resolveScope(request.scope, input);
             if (resolved.status !== 'resolved')
                 throw new Error('review.needs_source_selection');
@@ -105,7 +105,7 @@ export class GenerationService implements ReviewWorker {
                 concepts = concepts.filter(k => retake.conceptKeys.includes(k));
                 excludedStems = retake.excludedStems;
             }
-            const weakPoints = new ReviewRepository(this.repo.db).observationsPage({ courseId: request.courseId, limit: 100 }).items.filter(o => o.conceptKey && concepts.includes(o.conceptKey) && o.errorType === 'misconception').map(o => ({ id: o.id, conceptKey: o.conceptKey, text: o.weaknessNote, evidenceQuote: o.evidenceQuote }));
+            const weakPoints = foundation.observationsPage({ courseId: request.courseId, limit: 100 }).items.filter(o => o.conceptKey && concepts.includes(o.conceptKey) && o.errorType === 'misconception').map(o => ({ id: o.id, conceptKey: o.conceptKey, text: o.weaknessNote, evidenceQuote: o.evidenceQuote }));
             const blueprint = buildBlueprint(concepts, resolved.snapshot.unitIds.length, request.size);
             const slots = blueprint.slots.map(slot => ({ ...slot, unitId: byKey.get(slot.conceptKey)?.unitId ?? null }));
             if (excludedStems.length > 1000)
@@ -203,7 +203,7 @@ export class GenerationService implements ReviewWorker {
             emit(signal.aborted ? 'interrupted' : 'failed', 0, 1, code);
         }
     }
-    private live(request: GenerationRequest, documents: string[]) { const live = this.repo.scopeInputs(request.courseId); if (!documents.every(id => live.documents.includes(id)))
+    private live(request: GenerationRequest, documents: string[]) { const live = this.repo.liveDocuments(request.courseId, documents); if (!documents.every(id => live.includes(id)))
         throw new Error('review.source_changed'); }
     cancel(id: string) { this.repo.cancel(id); this.active.get(id)?.controller.abort(); }
     suspend() { this.stopped = true; for (const id of this.active.keys())
