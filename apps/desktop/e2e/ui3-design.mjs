@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { Buffer } from 'node:buffer';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
@@ -5,7 +6,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp,mkdir,writeFile,rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join,resolve } from 'node:path';
-const out=process.env.UI3_EVIDENCE??'/tmp/vstudy-ui3/after/review-final';await mkdir(out,{recursive:true});
+const out=process.env.UI3_EVIDENCE??temporaryPath('vstudy-ui3/after/review-final');await mkdir(out,{recursive:true});
 const dir=await mkdtemp(join(tmpdir(),'ui3-e2e-'));let app;const checks=[];
 try {
  app=await electron.launch({args:[process.env.UI3_BUILD??resolve('.'),`--user-data-dir=${dir}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1',VSTUDY_LOCALE:'en'}});

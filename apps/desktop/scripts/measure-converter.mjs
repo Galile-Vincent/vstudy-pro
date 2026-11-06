@@ -1,3 +1,4 @@
+import { temporaryPath } from './platform.mjs';
 import { Buffer } from 'node:buffer';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
@@ -38,7 +39,7 @@ try {
   results.push({state,converter:doc.converter,pageCount,markdownSha256:createHash('sha256').update(markdown).digest('hex'),...timing});
  }
  assert.equal(results[0].markdownSha256,results[1].markdownSha256,'cold/warm extraction preserves the same Markdown');
- await mkdir('/tmp/vstudy-final',{recursive:true});await writeFile('/tmp/vstudy-final/ch2-performance.json',JSON.stringify({sourceSha256:createHash('sha256').update(bytes).digest('hex'),sourceBytes:bytes.length,results},null,2));console.log(results.map(({progress,...result})=>({...result,progressEvents:progress.length})));
+ await mkdir(temporaryPath('vstudy-final'),{recursive:true});await writeFile(temporaryPath('vstudy-final/ch2-performance.json'),JSON.stringify({sourceSha256:createHash('sha256').update(bytes).digest('hex'),sourceBytes:bytes.length,results},null,2));console.log(results.map(({progress,...result})=>({...result,progressEvents:progress.length})));
  assert.ok(results[1].firstPageMs<1500,'warm CH2 first page target <1.5 seconds');
  assert.ok(results[1].readyMs<4000,'warm CH2 total target <4 seconds');
 } finally {await app?.close();await rm(directory,{recursive:true,force:true});}

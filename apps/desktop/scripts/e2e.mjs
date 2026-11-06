@@ -5,16 +5,19 @@ import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { readdir, mkdir, writeFile, open, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { pnpmInvocation, temporaryPath, venvPython } from './platform.mjs';
+import { terminateProcess } from '../src/main/platform/process.ts';
 const root=resolve(import.meta.dirname,'..');
-const evidence=process.env.VSTUDY_E2E_EVIDENCE ?? '/tmp/vstudy-final/e2e';
+const evidence=process.env.VSTUDY_E2E_EVIDENCE ?? temporaryPath('vstudy-final/e2e');
 await mkdir(evidence,{recursive:true});
 const results=[];
 async function run(command,args,name,timeout) {
  const file=await open(`${evidence}/${name}.log`,'w');
  const start=Date.now();
- const child=spawn(command,args,{cwd:root,env:{...process.env,VSTUDY_FAKE_PROVIDER:'1',CSC_IDENTITY_AUTO_DISCOVERY:'false'},stdio:['ignore',file.fd,file.fd],detached:true});
+ const invocation=command==='pnpm'?pnpmInvocation(args):{command,args};
+ const child=spawn(invocation.command,invocation.args,{cwd:root,env:{...process.env,VSTUDY_FAKE_PROVIDER:'1',CSC_IDENTITY_AUTO_DISCOVERY:'false'},stdio:['ignore',file.fd,file.fd],detached:process.platform!=='win32',windowsHide:true});
  let timedOut=false;
- const timer=setTimeout(()=>{timedOut=true;process.kill(-child.pid,'SIGKILL');},timeout);
+ const timer=setTimeout(()=>{timedOut=true;void terminateProcess(child,'SIGKILL');},timeout);
  const code=await new Promise((resolve,reject)=>{child.on('error',reject);child.on('close',resolve);});
  clearTimeout(timer);await file.close();
  const skipped=code===0 && /^SKIP:/m.test(await readFile(`${evidence}/${name}.log`,'utf8'));
@@ -29,7 +32,7 @@ if(!process.env.VSTUDY_CONVERTER_VENV) {
  if(!installed) {
   const created=await run('uv',['venv','--python','3.12',venv],'converter-environment',300000);
   if(created.status!=='PASS')throw new Error(`Install uv or set VSTUDY_CONVERTER_VENV; see ${evidence}/converter-environment.log`);
-  const installed=await run('uv',['pip','install','--require-hashes','--python',join(venv,'bin/python'),'-r',lock],'converter-dependencies',600000);
+  const installed=await run('uv',['pip','install','--require-hashes','--python',venvPython(venv),'-r',lock],'converter-dependencies',600000);
   if(installed.status!=='PASS')throw new Error(`Locked converter installation failed; see ${evidence}/converter-dependencies.log`);
   await writeFile(marker,fingerprint);
  }

@@ -6,12 +6,13 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { listProcesses, pythonExecutable, venvPython } from '../scripts/platform.mjs';
 import { execFileSync } from 'node:child_process';
 const evidence=resolve(process.env.VSTUDY_STORAGE_EVIDENCE ?? '../../docs/evidence/storage');await mkdir(evidence,{recursive:true});
 const root=await mkdtemp(join(tmpdir(),'vstudy-storage-e2e-')),userData=join(root,'user-data'),zip=join(root,'backup.zip');
 let app;let logs='';const results=[];
 async function launch(){
-  const otherElectron=execFileSync('ps',['-axo','comm'],{encoding:'utf8'}).split('\n').some(line=>line.includes('/electron/dist/') && line.endsWith('/MacOS/Electron'));
+  const otherElectron=listProcesses().some(row=>/[\\/]electron[\\/]dist[\\/]/.test(row.command) && /(?:MacOS[\\/]Electron|electron\.exe)/i.test(row.command));
   assert.equal(otherElectron,false,'Another Electron test is running. Retry after it exits.');
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${userData}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
   app.process().stdout?.on('data',chunk=>{logs+=chunk;});app.process().stderr?.on('data',chunk=>{logs+=chunk;});
@@ -46,7 +47,7 @@ try {
   await panel.getByRole('button',{name:strings.integrity,exact:true}).click();await panel.getByRole('status').filter({hasText:strings.integrity_ok}).waitFor();
   await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,chatSide:'right'});});
   await panel.getByRole('button',{name:strings.export,exact:true}).click();await panel.getByRole('status').filter({hasText:strings.done}).waitFor();
-  const archiveCheck=execFileSync('/usr/bin/unzip',['-t',zip],{encoding:'utf8'});assert.ok(archiveCheck.includes('No errors detected'));
+  execFileSync(process.env.VSTUDY_CONVERTER_VENV ? venvPython(process.env.VSTUDY_CONVERTER_VENV) : pythonExecutable,['-c','import sys,zipfile; assert zipfile.ZipFile(sys.argv[1]).testzip() is None',zip]);
   await panel.getByRole('button',{name:strings.clear_converted,exact:true}).click();
   await waitForDocumentStatus(page, imported.id, 'failed');
   await panel.getByRole('button',{name:strings.clear_cache,exact:true}).click();await panel.getByRole('status').filter({hasText:strings.done}).waitFor();

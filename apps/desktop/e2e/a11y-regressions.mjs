@@ -1,10 +1,11 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
-const output=process.env.VSTUDY_A11Y_EVIDENCE??'/tmp/vstudy-a11y-regressions';await mkdir(output,{recursive:true});
+const output=process.env.VSTUDY_A11Y_EVIDENCE??temporaryPath('vstudy-a11y-regressions');await mkdir(output,{recursive:true});
 const results=[];const directory=await mkdtemp(join(tmpdir(),'vstudy-a11y-'));let app;
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1',VSTUDY_LOCALE:'en'}});

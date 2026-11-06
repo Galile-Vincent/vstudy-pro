@@ -21,5 +21,6 @@ for (const size of [16, 32, 128, 256, 512]) {
     await sharp(svg, { density: 384 }).resize(px, px).png().toFile(join(set, name));
   }
 }
-execFileSync('iconutil', ['-c', 'icns', set, '-o', join(build, 'icon.icns')]);
+if (process.platform === 'darwin') execFileSync('iconutil', ['-c', 'icns', set, '-o', join(build, 'icon.icns')]);
+else console.log('macOS iconutil is required to regenerate icon.icns. Use the committed icon for packaging.');
 rmSync(set, { recursive: true, force: true });

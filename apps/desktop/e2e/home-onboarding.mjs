@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
@@ -6,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
-const evidence='/tmp/vstudy-home'; await mkdir(evidence,{recursive:true});
+const evidence=temporaryPath('vstudy-home'); await mkdir(evidence,{recursive:true});
 const screenshots=[],checks=[];
 const full=process.env.VSTUDY_FULL_MATRIX==='1';
 for(const language of full?['en','zh-Hant','ja']:['en']) {

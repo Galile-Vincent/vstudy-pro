@@ -1,7 +1,8 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import assert from 'node:assert/strict';
 import { _electron as electron } from 'playwright';
 import { mkdtemp,rm,writeFile,mkdir } from 'node:fs/promises';import {tmpdir}from'node:os';import{join,resolve}from'node:path';
-await mkdir('/tmp/vstudy-welcome2',{recursive:true});
+await mkdir(temporaryPath('vstudy-welcome2'),{recursive:true});
 const directory=await mkdtemp(join(tmpdir(),'vstudy-welcome-perf-'));let app;const results=[];
 try{
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});const page=await app.firstWindow();await page.locator('.onboarding[data-state=open]').waitFor();await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true,language:'en'});});await page.reload();await page.locator('#welcome-entry').waitFor();
@@ -24,7 +25,7 @@ try{
   await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('#welcome-entry').waitFor();
  }
  console.log(JSON.stringify(results,null,2));
-}finally{await writeFile('/tmp/vstudy-welcome2/performance-both-themes.json',JSON.stringify(results,null,2));await app?.close();await rm(directory,{recursive:true,force:true});}
+}finally{await writeFile(temporaryPath('vstudy-welcome2/performance-both-themes.json'),JSON.stringify(results,null,2));await app?.close();await rm(directory,{recursive:true,force:true});}
 
 await writeFile('../../docs/evidence/welcome2-performance.json',JSON.stringify(results,null,2));
 assert.equal(results.filter(r=>r.name==='entrance').length,12,'Measure every entrance');

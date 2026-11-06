@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdtemp,rm,writeFile } from 'node:fs/promises';
@@ -37,7 +38,7 @@ try {
  await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,chatSide:'right'});});await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('#welcome-entry').click();await page.locator('.demo-stage[data-side=right]').waitFor();results.chatSideMirrorsSettings=true;
  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2));
  for(const id of ['hero','values','demo','who','models','data','start']){await page.locator(`#welcome-${id}`).evaluate(e=>e.scrollIntoView({block:'start',behavior:'instant'}));assert.ok(await page.locator('.welcome').evaluate(e=>e.scrollWidth<=e.clientWidth),id+' at 200%');}
- await page.screenshot({path:'/tmp/vstudy-welcome2/en-200-percent.png'});results.zoom200=true;await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1));
+ await page.screenshot({path:temporaryPath('vstudy-welcome2/en-200-percent.png')});results.zoom200=true;await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1));
  await page.evaluate(()=>{const original=window.document.startViewTransition.bind(window.document);window.transitions=[];window.document.startViewTransition=update=>{const item={source:!!window.document.querySelector('[style*="vt-document"]'),started:window.performance.now()};window.transitions.push(item);const transition=original(()=>{const result=update();item.target=!!window.document.querySelector('.reading-pane[style*="vt-document"]');return result;});transition.finished.then(()=>item.duration=window.performance.now()-item.started);return transition;};});
  await page.getByRole('button',{name:'Try a sample document',exact:true}).click();await page.locator('.workspace [data-testid=document-markdown]').waitFor();
  assert.equal(await page.evaluate(()=>window.transitions.length),0);results.reducedTransitionsSkipped=true;
@@ -48,4 +49,4 @@ try {
  await goHome();await page.locator('.home-page').waitFor();results.throwingTransitionStillNavigates=true;
  await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:false,welcomeSeen:false});});await page.reload();await page.locator('.onboarding[data-state=open]').waitFor();for(let n=0;n<3;n++)await page.locator('.onboarding footer .primary').click();await page.getByRole('button',{name:'Take a 30-second tour',exact:true}).click();await page.locator('.welcome').waitFor();results.optionalTour=true;
  console.log(JSON.stringify(results,null,2));
-} finally {await writeFile('/tmp/vstudy-welcome2/details.json',JSON.stringify(results,null,2));await app?.close();await rm(directory,{recursive:true,force:true});}
+} finally {await writeFile(temporaryPath('vstudy-welcome2/details.json'),JSON.stringify(results,null,2));await app?.close();await rm(directory,{recursive:true,force:true});}

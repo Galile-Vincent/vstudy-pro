@@ -1,0 +1,44 @@
+[
+  {
+    "language": "en",
+    "platform": "darwin",
+    "credentialsUnlocked": false,
+    "chrome": {
+      "minimumSize": [
+        720,
+        480
+      ],
+      "contextIsolation": true,
+      "sandbox": true,
+      "nodeIntegration": false
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "platform": "darwin",
+    "credentialsUnlocked": false,
+    "chrome": {
+      "minimumSize": [
+        720,
+        480
+      ],
+      "contextIsolation": true,
+      "sandbox": true,
+      "nodeIntegration": false
+    }
+  },
+  {
+    "language": "ja",
+    "platform": "darwin",
+    "credentialsUnlocked": false,
+    "chrome": {
+      "minimumSize": [
+        720,
+        480
+      ],
+      "contextIsolation": true,
+      "sandbox": true,
+      "nodeIntegration": false
+    }
+  }
+]

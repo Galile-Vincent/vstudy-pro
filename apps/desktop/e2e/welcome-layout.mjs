@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
@@ -20,7 +21,7 @@ for(const language of ['en','zh-Hant','ja']){
       assert.ok(Math.abs(alignment.delta)<=5,JSON.stringify({language,width,theme,alignment}));assert.ok(alignment.toolbarBottom<=alignment.clipTop+1);
       const citationVisible=await page.locator('.w-demo-answer').evaluate(e=>{const chip=e.querySelector('.document-citation').getBoundingClientRect(),box=e.getBoundingClientRect();return chip.bottom<=box.bottom+1&&chip.top>=box.top;});assert.ok(citationVisible,`${language}-${width}-${theme} citation clipped`);
      }
-     const path=`/tmp/vstudy-welcome2/${language}-${width}-${theme}-${section}.png`;await page.screenshot({path});captures.push({language,width,theme,section,path});
+     const path=temporaryPath(`vstudy-welcome2/${language}-${width}-${theme}-${section}.png`);await page.screenshot({path});captures.push({language,width,theme,section,path});
     }
     const copy=JSON.parse(await readFile(`src/shared/locales/${language}/welcome.json`,'utf8'));
     await page.emulateMedia({reducedMotion:'no-preference'});
@@ -28,7 +29,7 @@ for(const language of ['en','zh-Hant','ja']){
      await page.getByRole('button',{name:copy.close,exact:true}).click();await page.locator('#welcome-entry').click();
      const started=Date.now();
      for(let frame=0;frame<12;frame++){
-      const path=`/tmp/vstudy-welcome2/${language}-${width}-${theme}-final-${signature}-${String(frame).padStart(2,'0')}.png`;
+      const path=temporaryPath(`vstudy-welcome2/${language}-${width}-${theme}-final-${signature}-${String(frame).padStart(2,'0')}.png`);
       await page.screenshot({path});frames.push({language,width,theme,signature,frame,elapsedMs:Date.now()-started,path});await page.waitForTimeout(signature==='hero'?100:25);
      }
     }

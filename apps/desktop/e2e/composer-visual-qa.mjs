@@ -1,10 +1,11 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 const directory=await mkdtemp(join(tmpdir(),'vstudy-composer-qa-'));
-const evidence='/tmp/vstudy-composer-redesign'; await mkdir(evidence,{recursive:true});
+const evidence=temporaryPath('vstudy-composer-redesign'); await mkdir(evidence,{recursive:true});
 let app; const shots=[];
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});

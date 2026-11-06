@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
@@ -5,7 +6,7 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const directory=await mkdtemp(join(tmpdir(),'vstudy-ai-parse-'));
-const evidence=process.env.VSTUDY_AI_EVIDENCE??'/tmp/vstudy-ai-parse';
+const evidence=process.env.VSTUDY_AI_EVIDENCE??temporaryPath('vstudy-ai-parse');
 await mkdir(evidence,{recursive:true});
 let app;
 let checks=0, axeScans=0;

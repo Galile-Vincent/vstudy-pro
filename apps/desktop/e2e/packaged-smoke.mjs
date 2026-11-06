@@ -1,3 +1,4 @@
+if (process.platform !== 'darwin') { console.log('SKIP: legacy macOS codesign smoke; use scripts/smoke-distribution.mjs for cross-platform artifacts.'); process.exit(0); }
 import { setTimeout } from 'node:timers';
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, rm, writeFile, realpath, stat } from 'node:fs/promises';

@@ -1,10 +1,11 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-const evidence='/tmp/vstudy-welcome2'; await mkdir(evidence,{recursive:true});
+const evidence=temporaryPath('vstudy-welcome2'); await mkdir(evidence,{recursive:true});
 const screenshots=[],audits=[],errors=[],checks=[];
 const full=process.env.VSTUDY_FULL_MATRIX!=='0';
 for(const language of full?['en','zh-Hant','ja']:['en']) {

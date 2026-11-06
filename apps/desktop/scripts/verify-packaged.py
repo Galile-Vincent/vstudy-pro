@@ -1,3 +1,7 @@
+import sys
+if sys.platform != "darwin":
+ print("SKIP: macOS bundle fuse probes; use the cross-platform distribution smoke on Windows")
+ sys.exit(0)
 import subprocess,tempfile,os,time,socket,json,pathlib,signal
 binary=str(pathlib.Path(__file__).resolve().parents[1]/'release/mac-arm64/VStudy Pro.app/Contents/MacOS/VStudy Pro')
 results=[]
