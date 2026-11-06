@@ -8,6 +8,16 @@ import { EventEmitter } from 'node:events';
 import { afterEach } from 'vitest';
 import type { Release } from './types';
 import { VendorNetwork } from './network';
+import { SetupStore } from './store';
+import { executableIdentity } from '../trusted-executable';
+import { SetupError } from './types';
+import type { VerifyArtifact } from './authenticity';
+/** Inject a fake authority only in Node tests; production stores always use publisher verification. */
+export const fixtureArtifactVerifier: VerifyArtifact = async (release, binary, signal) => {
+  signal.throwIfAborted();
+  if (release.archive !== 'binary' || release.algorithm !== 'sha256' || (await executableIdentity(binary)).hash !== release.digest) throw new SetupError('signature');
+};
+export const fixtureStore = (root: string, verify: VerifyArtifact = fixtureArtifactVerifier) => new SetupStore(root, verify);
 export function temporaryDirectories() {
   const directories: string[] = [];
   afterEach(async () => { for (const directory of directories) await rm(directory, { recursive: true, force: true }); directories.length = 0; });

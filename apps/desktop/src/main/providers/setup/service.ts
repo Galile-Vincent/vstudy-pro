@@ -17,6 +17,7 @@ import { actionArgs, actionParts, buildPlan, displayCommand, PreviewTokens, type
 import { ActionSessions, type RunningAction, type SetupOwner } from './sessions';
 import { authStatus, probeVersion, tinyTest } from './probes';
 import { ActionPty } from './pty';
+import { manualInstallation } from './authenticity';
 import { failure, initialState, newer, providerId, providers, SetupError, transition, type Release } from './types';
 export interface SetupDependencies {
   store: SetupStore; source: ReleaseSource; pins: ExecutablePins;
@@ -42,9 +43,10 @@ export class AiCliSetup {
   private timer: ReturnType<typeof setInterval> | undefined;
   private stopped = false;
   private readonly shutdown = new AbortController();
+  private automaticRevision = 0;
   constructor(private readonly deps: SetupDependencies) {
     this.sessions = new ActionSessions(deps.createPty, deps.changed);
-    deps.pins.setManagedResolver(binary => deps.store.identity(binary));
+    deps.pins.setManagedResolver(binary => deps.store.identity(binary), binary => deps.store.describe(binary));
     privateDirectory(join(deps.store.root, 'actions'));
   }
   private now() { return (this.deps.now ?? Date.now)(); }
@@ -61,10 +63,11 @@ export class AiCliSetup {
     return Promise.all(providers.map(async provider => {
       let state = this.state(provider);
       const consented = this.enabled(provider), cached = this.deps.store.cached(provider);
-      state = { ...state, consented, latestVersion: cached?.version ?? null, releaseNotesUrl: cached?.notes ?? null, checkedAt: this.deps.store.checkedAt(provider) };
+      const policy = { manualInstallRequired: manualInstallation(provider, null, this.deps.source.platform, this.deps.source.arch), manualUpdateRequired: manualInstallation(provider, cached, this.deps.source.platform, this.deps.source.arch) };
+      state = { ...state, ...policy, consented, latestVersion: cached?.version ?? null, releaseNotesUrl: cached?.notes ?? null, checkedAt: this.deps.store.checkedAt(provider) };
       try {
         const path = await (this.deps.describe ?? configuredCliPath)(provider);
-        state = { ...this.state(provider), consented, latestVersion: cached?.version ?? null, releaseNotesUrl: cached?.notes ?? null, checkedAt: this.deps.store.checkedAt(provider) };
+        state = { ...this.state(provider), ...policy, consented, latestVersion: cached?.version ?? null, releaseNotesUrl: cached?.notes ?? null, checkedAt: this.deps.store.checkedAt(provider) };
         if (this.sessions.providerBusy(provider)) { this.states.set(provider, state); return { ...state }; }
         const managed = this.deps.store.active(provider);
         const changed = state.path !== path;
@@ -86,7 +89,10 @@ export class AiCliSetup {
   preferences() { return this.deps.store.preferences; }
   setPreferences(preferences: CliPreferences) {
     if (preferences.autoUpdateWhenIdle && !preferences.updateChecks) throw new SetupError('not-consented');
+    const previous = this.preferences();
     const result = this.deps.store.setPreferences(preferences);
+    if (previous.updateChecks !== result.updateChecks || previous.autoUpdateWhenIdle !== result.autoUpdateWhenIdle) this.automaticRevision++;
+    if (!preferences.updateChecks || !preferences.autoUpdateWhenIdle) void this.sessions.resetOwner(this.background);
     if (!preferences.advancedShell) void this.sessions.cancelProvider('advanced-shell');
     this.deps.changed?.(); return result;
   }
@@ -147,9 +153,13 @@ export class AiCliSetup {
     await this.sessions.resetOwner(owner);
   }
   private start(owner: SetupOwner, plan: ActionPlan, automatic = false) {
+    const approvedConfig = plan.provider ? this.deps.registry.config(providerId(plan.provider)) : null;
+    const revision = this.automaticRevision;
+    const consented = () => !this.stopped && (plan.provider ? this.enabled(plan.provider) && this.deps.registry.config(providerId(plan.provider)) === approvedConfig : this.preferences().advancedShell) && (!automatic || revision === this.automaticRevision && this.preferences().updateChecks && this.preferences().autoUpdateWhenIdle);
     return this.sessions.start(owner, plan, async action => {
-      const consentWatcher = setInterval(() => { if (plan.provider && !this.enabled(plan.provider)) action.controller.abort(); }, 100);
-      try { await this.execute(action, automatic); } finally { clearInterval(consentWatcher); }
+      const assertConsent = () => { if (!consented()) action.controller.abort(); action.controller.signal.throwIfAborted(); };
+      const consentWatcher = setInterval(() => { if (!consented()) action.controller.abort(); }, 100);
+      try { await this.execute(action, automatic, assertConsent); } finally { clearInterval(consentWatcher); }
     }, code => { if (plan.provider) this.apply(plan.provider, { type: 'failed', code }); });
   }
   private async trustedPlan(plan: ActionPlan) {
@@ -159,10 +169,10 @@ export class AiCliSetup {
     const resolved = await this.deps.pins.resolve(plan.provider);
     if (!resolved || resolved !== plan.binary) throw new SetupError('blocked');
   }
-  private async execute(action: RunningAction, automatic: boolean) {
+  private async execute(action: RunningAction, automatic: boolean, assertConsent: () => void) {
     const { plan, controller, pty } = action, { provider, verb } = plan;
     const signal = controller.signal;
-    await this.trustedPlan(plan); signal.throwIfAborted();
+    assertConsent(); await this.trustedPlan(plan); assertConsent();
     if (provider && !this.enabled(provider)) throw new SetupError('not-consented');
     if (!provider) {
       const result = await pty.run(plan, signal, data => this.sessions.append(action, data), 30 * 60_000);
@@ -171,18 +181,19 @@ export class AiCliSetup {
       return;
     }
     if (['install', 'update', 'rollback'].includes(verb)) {
+      if (verb !== 'rollback' && plan.release?.provider !== provider) throw new SetupError('signature');
       const hadAccount = ['ready', 'update-available'].includes(this.state(provider).status);
       const revision = this.deps.chatRevision();
-      const canActivate = () => this.enabled(provider) && (!automatic || !this.deps.chatBusy() && this.deps.chatRevision() === revision && !hasExecutableLeases() && !this.sessions.otherBusy(action));
+      const canActivate = () => { assertConsent(); return !automatic || !this.deps.chatBusy() && this.deps.chatRevision() === revision && !hasExecutableLeases() && !this.sessions.otherBusy(action); };
       if (!canActivate()) throw new SetupError('busy');
       this.apply(provider, { type: verb === 'install' ? 'install' : 'update' });
-      const watcher = automatic ? setInterval(() => { if (!canActivate()) controller.abort(); }, 100) : undefined;
+      const watcher = automatic ? setInterval(() => { try { if (!canActivate()) controller.abort(); } catch { controller.abort(); } }, 100) : undefined;
       let lastBytes = 0;
       try {
-        const installed = verb === 'rollback' ? await this.deps.store.rollback(provider) : await this.deps.store.install(plan.release!, this.deps.source.network, signal, bytes => {
+        const installed = verb === 'rollback' ? await this.deps.store.rollback(provider, signal, canActivate) : await this.deps.store.install(plan.release!, this.deps.source.network, signal, bytes => {
           if (bytes - lastBytes > 4_000_000) { this.sessions.append(action, tr('ai-cli:download_progress', { bytes }) + '\r\n'); lastBytes = bytes; }
         }, canActivate, (binary, version) => (this.deps.version ?? probeVersion)(binary, provider, version, plan.cwd, signal).then(() => {}));
-        this.deps.pins.activateManaged(provider);
+        assertConsent(); this.deps.pins.activateManaged(provider, installed.identity);
         this.states.set(provider, { ...this.state(provider), path: installed.identity.path, version: installed.release.version, previousVersion: installed.previous, managed: true, tested: false, appliesToNewChats: verb !== 'install' });
         this.apply(provider, { type: 'installed' });
         if (verb !== 'install' && hadAccount) this.apply(provider, { type: 'ready' });
@@ -193,7 +204,9 @@ export class AiCliSetup {
     const providerPlan = { ...plan, executable: plan.binary! };
     const releaseLease = leaseExecutable(plan.binary!);
     try {
+      assertConsent();
       const version = await (this.deps.version ?? probeVersion)(plan.binary!, provider, this.state(provider).version, plan.cwd, signal);
+      assertConsent();
       this.states.set(provider, { ...this.state(provider), version });
       if (!this.enabled(provider)) throw new SetupError('not-consented');
       if (verb === 'login') {
@@ -208,11 +221,13 @@ export class AiCliSetup {
       }
       if (!this.enabled(provider)) throw new SetupError('not-consented');
       const signedIn = await authStatus(provider, providerPlan, pty, signal, verb === 'login');
+      assertConsent();
       this.apply(provider, { type: signedIn ? 'ready' : 'unsigned' });
       if (!signedIn) throw new SetupError(verb === 'test' ? 'login-expired' : 'not-signed-in');
       if (verb === 'test') {
         const timed = AbortSignal.any([signal, AbortSignal.timeout(90_000)]);
         const answer = await tinyTest(this.deps.registry, provider, timed);
+        assertConsent();
         this.sessions.append(action, answer + '\r\n');
         this.states.set(provider, { ...this.state(provider), tested: true });
       }
@@ -260,10 +275,10 @@ export class AiCliSetup {
   async tick() {
     if (this.stopped) return;
     await this.checkUpdates(false);
-    if (!this.preferences().autoUpdateWhenIdle || this.deps.chatBusy() || this.sessions.isBusy || hasExecutableLeases()) return;
+    if (!this.preferences().updateChecks || !this.preferences().autoUpdateWhenIdle || this.deps.chatBusy() || this.sessions.isBusy || hasExecutableLeases()) return;
     for (const provider of providers) {
       const state = this.state(provider), release = this.deps.store.cached(provider);
-      if (!this.enabled(provider) || !state.managed || !release || !newer(release.version, state.version) || provider === 'codex' && release.version !== auditedCodex) continue;
+      if (!this.enabled(provider) || !state.managed || !release || manualInstallation(provider, release, this.deps.source.platform, this.deps.source.arch) || !newer(release.version, state.version) || provider === 'codex' && release.version !== auditedCodex) continue;
       const plan = buildPlan(`update-${provider}`, join(this.deps.store.root, 'actions'), state.path, release, null, this.now());
       this.start(this.background, plan, true); break;
     }

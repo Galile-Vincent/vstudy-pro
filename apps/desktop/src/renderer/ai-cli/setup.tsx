@@ -42,18 +42,19 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
   const runner = useCliAction(refresh);
   const tool = tools.find(item => item.provider === provider);
   const step = tool ? currentStep(tool) : 'install';
+  const manualStep = !!tool?.manualInstallRequired && step === 'install';
   const running = runner.session?.phase === 'running';
   const busy = running || runner.busy || savingConsent;
   const failed = runner.error ?? (runner.plan && !runner.plan.available ? runner.plan.reason : undefined) ?? runner.session?.error ?? (tool?.status === 'error' ? tool.error.hint : undefined);
   useEffect(() => {
-    if (tool?.consented && !tool.tested && !running) void runner.preview(setupAction(provider, step));
-  }, [provider, step, tool?.consented, tool?.tested, running, runner.preview]);
+    if (tool?.consented && !tool.tested && !running && !manualStep) void runner.preview(setupAction(provider, step));
+  }, [provider, step, tool?.consented, tool?.tested, running, manualStep, runner.preview]);
   useEffect(() => {
     let disposed = false;
     setUpdatePlan(undefined);
-    if (tool?.consented && tool.status === 'update-available') void desktop.invoke('ai-cli:preview', { actionId: `update-${provider}` }).then(plan => { if (!disposed) setUpdatePlan(plan); }).catch(() => { if (!disposed) setLocalError(true); });
+    if (tool?.consented && tool.status === 'update-available' && !tool.manualUpdateRequired) void desktop.invoke('ai-cli:preview', { actionId: `update-${provider}` }).then(plan => { if (!disposed) setUpdatePlan(plan); }).catch(() => { if (!disposed) setLocalError(true); });
     return () => { disposed = true; };
-  }, [provider, tool?.consented, tool?.status, tool?.latestVersion]);
+  }, [provider, tool?.consented, tool?.status, tool?.latestVersion, tool?.manualUpdateRequired]);
   const review = async (actionId: CliActionId) => {
     await runner.preview(actionId);
     requestAnimationFrame(() => document.getElementById('ai-cli-preview')?.focus());
@@ -81,15 +82,16 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
           <ol className="ai-cli-steps" aria-label={tr('ai-cli:steps')}>{setupSteps.map((item, index) => <li key={item} aria-current={step === item ? 'step' : undefined} data-done={setupSteps.indexOf(step) > index || tool.tested}><span className="ai-cli-step-number" aria-hidden="true">{setupSteps.indexOf(step) > index || tool.tested ? <Check size={16} /> : index + 1}</span><span><strong>{tr(`ai-cli:step_${item}`)}</strong>{step === item && !tool.tested && <small>{tr('ai-cli:you_are_here')}</small>}</span></li>)}</ol>
           <div className="ai-cli-workarea"><div className="ai-cli-instructions">
             <p className="ai-cli-eyebrow">{tr('ai-cli:next_result')}</p><h2>{tr(tool.tested ? 'ai-cli:ready_title' : `ai-cli:heading_${step}`)}</h2>
-            <p>{tr(tool.tested ? 'ai-cli:ready_body' : `ai-cli:instruction_${provider}_${step}`)}</p>
+            <p>{tr(tool.tested ? 'ai-cli:ready_body' : manualStep ? 'ai-cli:manual_install_reason' : `ai-cli:instruction_${provider}_${step}`)}</p>
             <label className="ai-cli-consent"><input type="checkbox" checked={tool.consented} disabled={busy} onChange={event => void consent(event.target.checked)} /><span>{tr('ai-cli:consent', { provider: cliNames[provider] })}<small>{tr('ai-cli:consent_help')}</small></span></label>
             <details className="ai-cli-account"><summary>{tr('ai-cli:account_title')}</summary><p>{tr(`ai-cli:cost_${provider}`)}</p><p>{tr('ai-cli:privacy_copy')}</p></details>
           </div><div className="ai-cli-action-area" aria-busy={busy}>
             {!tool.consented && <p className="ai-cli-preview">{tr('ai-cli:consent_first')}</p>}
             {runner.busy && <p role="status">{tr('ai-cli:preparing')}</p>}
             {runner.externalOpened && <p role="status">{tr('ai-cli:own_terminal_opened')}</p>}
-            {runner.plan && (tool.consented || runner.plan.actionId === 'advanced-shell') && <ActionPreview key={runner.plan.token} plan={runner.plan} busy={busy} run={runner.run} />}
-            {!runner.plan && !busy && tool.consented && <Button variant="secondary" onClick={() => void runner.preview(setupAction(provider, step))}>{tr('ai-cli:review_next')}</Button>}
+            {manualStep && <ManualInstall key={provider} provider={provider} required />}
+            {runner.plan && (!manualStep || runner.plan.actionId === 'advanced-shell') && (tool.consented || runner.plan.actionId === 'advanced-shell') && <ActionPreview key={runner.plan.token} plan={runner.plan} busy={busy} run={runner.run} />}
+            {!runner.plan && !busy && tool.consented && !manualStep && <Button variant="secondary" onClick={() => void runner.preview(setupAction(provider, step))}>{tr('ai-cli:review_next')}</Button>}
             {running && <Button variant="secondary" onClick={() => void runner.close(false).catch(() => setLocalError(true))}>{tr('ai-cli:cancel')}</Button>}
             {failed && <div className="ai-cli-recovery" role="alert"><strong>{tr('ai-cli:needs_attention')}</strong><p>{tr(`ai-cli:failure_${failed}`)}</p><p>{tr(`ai-cli:recovery_${provider}`)}</p>{!busy && <Button variant="secondary" onClick={() => void runner.preview(runner.session?.actionId ?? setupAction(provider, step))}>{tr('ai-cli:retry')}</Button>}</div>}
             {runner.session?.phase === 'succeeded' && <p role="status" className="ai-cli-success">{tr(runner.session.actionId.startsWith('test-') ? 'ai-cli:test_success' : 'ai-cli:action_success')}</p>}
@@ -104,9 +106,10 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
             {tool.managed && tool.previousVersion && <Button variant="secondary" disabled={busy || !tool.consented} onClick={() => void review(`rollback-${provider}`)}>{tr('ai-cli:rollback', { version: tool.previousVersion })}</Button>}
             {tool.releaseNotesUrl && <Button variant="link" disabled={busy} onClick={() => void desktop.invoke('shell:openExternal', { url: tool.releaseNotesUrl! }).catch(() => setLocalError(true))}>{tr('ai-cli:release_notes')}</Button>}
           </div>{updatePlan && !updatePlan.available && <p>{tr(`ai-cli:failure_${updatePlan.reason ?? 'unsupported'}`)}</p>}</section>
+          {tool.status === 'update-available' && tool.manualUpdateRequired && <p role="status">{tr('ai-cli:manual_update')}{' '}{tr('ai-cli:manual_install_reason')}</p>}
         </>}
         <ProviderChoice />
-        <ManualInstall key={provider} provider={provider} />
+        {!manualStep && <ManualInstall key={provider} provider={provider} />}
         <AdvancedShell busy={busy} onPreview={() => void review('advanced-shell')} />
         <details className="ai-cli-help"><summary>{tr('ai-cli:ask_title')}</summary><p>{tr('ai-cli:ask_body')}</p><blockquote>{tr('ai-cli:school_request', { provider: cliNames[provider] })}</blockquote><Button variant="secondary" onClick={() => void navigator.clipboard.writeText(tr('ai-cli:school_request', { provider: cliNames[provider] })).then(() => setCopied(true)).catch(() => setLocalError(true))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_request')}</Button></details>
         {localError && <p role="alert">{tr('ai-cli:load_error')}</p>}

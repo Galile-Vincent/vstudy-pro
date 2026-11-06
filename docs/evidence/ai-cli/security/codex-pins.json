@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-06T05:31:33.028194+00:00",
+  "verifiedAt": "2026-11-06T05:30:11.020553+00:00",
+  "provider": "codex",
+  "version": "0.166.0",
+  "baseCommit": "9fa6d44bac4ad9413ab479f0fbbb6695dabe06a6",
+  "pinsFile": "apps/desktop/src/main/providers/setup/codex-pins.ts",
+  "purpose": "Reviewed in-repo archive and executable hashes for artifact authentication before probes and when loading installation records.",
+  "trustBasis": {
+    "archiveInputs": "The aarch64 archive digest and size pre-exist in the audited fixture. This audit newly establishes the x86_64 archive digest and size from the exact official OpenAI GitHub release asset.",
+    "signerIdentity": "The parent independently observed OpenAI Team ID 2DC432GLL2 on an existing vendor-signed Codex on this Mac and supplied it as a required audit input. The release feed does not supply the trusted signer identity.",
+    "requiredTeamId": "2DC432GLL2",
+    "requiredSigner": "Developer ID Application: OpenAI OpCo, LLC (2DC432GLL2)",
+    "codesignRequirement": "anchor apple generic and certificate leaf[subject.OU] = \"2DC432GLL2\"",
+    "runtimePolicy": "Policy path (a) uses these reviewed in-repo hashes. Future release-feed digests must not authorize downloaded bytes or installed executable bytes."
+  },
+  "primarySources": {
+    "release": {
+      "url": "https://github.com/openai/codex/releases/tag/rust-v0.166.0",
+      "apiUrl": "https://api.github.com/repos/openai/codex/releases/tags/rust-v0.166.0",
+      "apiRetrievedAt": "2026-11-06T05:26:44Z",
+      "apiResponseSha256": "c63770652597361aad442ea8a35b47d73c8885e03e24cd5e79bcaf9fb2a61cbd",
+      "id": 428320524,
+      "tag": "rust-v0.166.0",
+      "publishedAt": "2026-10-29T19:47:53Z",
+      "immutable": false
+    },
+    "recordedFixture": {
+      "path": "apps/desktop/src/main/providers/setup/fixtures/codex-release.json",
+      "sha256": "7fb2cb37ddf6c559585d19fc68a85066b9e80e174058063ba08568b7c1463a38",
+      "recordedTargets": [
+        "aarch64-apple-darwin"
+      ],
+      "x86_64RecordPresent": false,
+      "x86_64PinStatus": "Newly established in this audit, not a pre-existing in-repo audit record."
+    },
+    "sourceTag": {
+      "refApiUrl": "https://api.github.com/repos/openai/codex/git/ref/tags/rust-v0.166.0",
+      "tagApiUrl": "https://api.github.com/repos/openai/codex/git/tags/593389380740f7b4762771573c447ccfdc59742f",
+      "tagObject": "593389380740f7b4762771573c447ccfdc59742f",
+      "commit": "6ff1e1ca3b30fc8b914720681fcf5fe62e95f856",
+      "githubTagVerification": "unsigned"
+    },
+    "releaseWorkflow": {
+      "url": "https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/.github/workflows/rust-release.yml",
+      "rawUrl": "https://raw.githubusercontent.com/openai/codex/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/.github/workflows/rust-release.yml",
+      "size": 89554,
+      "sha256": "a7e3fbbd6f787b4b91fdf819c97549eb74daf9ccdf961a80fc2ec42b3dce2477",
+      "inspection": "Read as text only. The release workflow signs macOS binaries and verifies the architecture and strict codesign validity of executables in direct archives."
+    },
+    "installer": {
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.166.0/install.sh",
+      "size": 43667,
+      "sha256": "44ac252c1b9a68c02bdf0de8e1c6cbfde36fc1afa8684624962eae7d4c461e70",
+      "executed": false,
+      "inspection": "Read as text only. Its codex-package_SHA256SUMS input covers codex-package assets, not the two exact native codex archives audited here."
+    },
+    "installerChecksumManifest": {
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.166.0/codex-package_SHA256SUMS",
+      "size": 3095,
+      "sha256": "e5d5125d31db6459a0ebebefd8e7b6020a648032cb8682595ac39d5c62cd147d",
+      "usedAsNativeArchiveDigestSource": false
+    }
+  },
+  "method": [
+    "Downloaded each exact native .tar.gz outside the repo. Required the recorded Content-Length when present, enforced the exact size as a streaming byte limit, and rejected a short or oversized response.",
+    "Required the archive SHA-256 to equal the fixed expected digest during download. Re-read each archive with Python hashlib and /usr/bin/shasum before opening it with tarfile.",
+    "Parsed each authenticated archive as a stream. Rejected absolute paths, parent traversal, links, special files, duplicate executables, and unexpected regular files. Bounded member count and total uncompressed size.",
+    "Copied only the exact regular-file executable into a new mode-0600 file outside the repo. Did not apply archive permissions or extract links.",
+    "Computed SHA-256 over the exact executable bytes during the copy, re-read the file with hashlib, and cross-checked with /usr/bin/shasum. Rechecked the digest after codesign inspection and verification.",
+    "Read the Mach-O header as data to require a 64-bit MH_EXECUTE file with the exact target CPU type.",
+    "Inspected codesign -dv output and required strict codesign verification with an Apple-anchored requirement and independently pinned OpenAI Team ID 2DC432GLL2.",
+    "Assessed Gatekeeper with /usr/sbin/spctl as a read-only OS inspection. Recorded both standalone-CLI rejections without claiming Gatekeeper acceptance."
+  ],
+  "targets": {
+    "aarch64-apple-darwin": {
+      "pinStatus": "Existing audited archive digest; executable digest established in this audit.",
+      "assetId": 689702766,
+      "assetUrl": "https://github.com/openai/codex/releases/download/rust-v0.166.0/codex-aarch64-apple-darwin.tar.gz",
+      "assetApiUrl": "https://api.github.com/repos/openai/codex/releases/assets/689702766",
+      "archiveSize": 107610108,
+      "archiveSha256": "c48824462fc57681eafb0925d97b11b589010475613904f570b42fea53e240d5",
+      "archiveVerifiedBeforeExtraction": true,
+      "archiveHashVerification": {
+        "command": "/usr/bin/shasum -a 256 /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin.tar.gz",
+        "exitCode": 0,
+        "stdout": "c48824462fc57681eafb0925d97b11b589010475613904f570b42fea53e240d5  /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin.tar.gz\n",
+        "stderr": ""
+      },
+      "archiveMembers": [
+        {
+          "name": "codex-aarch64-apple-darwin",
+          "size": 268972064,
+          "type": "regular"
+        }
+      ],
+      "binarySize": 268972064,
+      "binarySha256": "39acf979729dd290f9a24ee38b2914e036c91b65952872e28ae2a6b88a7db7c1",
+      "binaryHashVerification": {
+        "command": "/usr/bin/shasum -a 256 /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin",
+        "exitCode": 0,
+        "stdout": "39acf979729dd290f9a24ee38b2914e036c91b65952872e28ae2a6b88a7db7c1  /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin\n",
+        "stderr": ""
+      },
+      "extractedMode": "0600",
+      "machOCpuType": "0x100000c",
+      "machOFileType": "MH_EXECUTE",
+      "codesignInspection": {
+        "command": "/usr/bin/codesign -dv --verbose=4 /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "Executable=/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin\nIdentifier=codex\nFormat=Mach-O thin (arm64)\nCodeDirectory v=20500 size=2085297 flags=0x10000(runtime) hashes=65155+7 location=embedded\nVersionPlatform=1\nVersionMin=720896\nVersionSDK=984320\nHash type=sha256 size=32\nCandidateCDHash sha256=0b4f0c8e07400d2beb156987f9af592071ee78f4\nCandidateCDHashFull sha256=0b4f0c8e07400d2beb156987f9af592071ee78f45e65691342399c904fccd2a8\nHash choices=sha256\nCMSDigest=0b4f0c8e07400d2beb156987f9af592071ee78f45e65691342399c904fccd2a8\nCMSDigestType=2\nExecutable Segment base=0\nExecutable Segment limit=255557632\nExecutable Segment flags=0x1\nPage size=4096\nCDHash=0b4f0c8e07400d2beb156987f9af592071ee78f4\nSignature size=9048\nAuthority=Developer ID Application: OpenAI OpCo, LLC (2DC432GLL2)\nAuthority=Developer ID Certification Authority\nAuthority=Apple Root CA\nTimestamp=Oct 30, 2026 at 2:58:24\u202fAM\nInfo.plist=not bound\nTeamIdentifier=2DC432GLL2\nRuntime Version=15.5.0\nSealed Resources=none\nInternal requirements count=1 size=168\nTotal signatures=1\nChosen signature=1\n"
+      },
+      "codesignVerification": {
+        "command": "/usr/bin/codesign --verify --strict --verbose=4 '-R=anchor apple generic and certificate leaf[subject.OU] = \"2DC432GLL2\"' /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin: valid on disk\n/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin: satisfies its Designated Requirement\n/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin: explicit requirement satisfied\n"
+      },
+      "gatekeeperAssessment": {
+        "command": "/usr/sbin/spctl --assess --type execute --verbose=4 /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin",
+        "exitCode": 3,
+        "stdout": "",
+        "stderr": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-aarch64-apple-darwin: rejected (the code is valid but does not seem to be an app)\n"
+      },
+      "executed": false
+    },
+    "x86_64-apple-darwin": {
+      "pinStatus": "Newly established archive and executable pins in this audit. No prior in-repo x86_64 audit record exists.",
+      "assetId": 689708877,
+      "assetUrl": "https://github.com/openai/codex/releases/download/rust-v0.166.0/codex-x86_64-apple-darwin.tar.gz",
+      "assetApiUrl": "https://api.github.com/repos/openai/codex/releases/assets/689708877",
+      "archiveSize": 117027024,
+      "archiveSha256": "db0c38713c36199b12e7c8d1629386c35a4ce8f99e1c9ce72f1725a74df67b57",
+      "archiveVerifiedBeforeExtraction": true,
+      "archiveHashVerification": {
+        "command": "/usr/bin/shasum -a 256 /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin.tar.gz",
+        "exitCode": 0,
+        "stdout": "db0c38713c36199b12e7c8d1629386c35a4ce8f99e1c9ce72f1725a74df67b57  /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin.tar.gz\n",
+        "stderr": ""
+      },
+      "archiveMembers": [
+        {
+          "name": "codex-x86_64-apple-darwin",
+          "size": 289445104,
+          "type": "regular"
+        }
+      ],
+      "binarySize": 289445104,
+      "binarySha256": "1361e18268866b7f9f5e8703fabcea0a2a990a439eedcce03940abb4ba9eaaeb",
+      "binaryHashVerification": {
+        "command": "/usr/bin/shasum -a 256 /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin",
+        "exitCode": 0,
+        "stdout": "1361e18268866b7f9f5e8703fabcea0a2a990a439eedcce03940abb4ba9eaaeb  /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin\n",
+        "stderr": ""
+      },
+      "extractedMode": "0600",
+      "machOCpuType": "0x1000007",
+      "machOFileType": "MH_EXECUTE",
+      "codesignInspection": {
+        "command": "/usr/bin/codesign -dv --verbose=4 /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "Executable=/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin\nIdentifier=codex\nFormat=Mach-O thin (x86_64)\nCodeDirectory v=20500 size=2243985 flags=0x10000(runtime) hashes=70114+7 location=embedded\nVersionPlatform=1\nVersionMin=658432\nVersionSDK=984320\nHash type=sha256 size=32\nCandidateCDHash sha256=0a371811ec3e27e4b49eebf9cf1d32b95653f041\nCandidateCDHashFull sha256=0a371811ec3e27e4b49eebf9cf1d32b95653f041595467dae54400c552b64641\nHash choices=sha256\nCMSDigest=0a371811ec3e27e4b49eebf9cf1d32b95653f041595467dae54400c552b64641\nCMSDigestType=2\nExecutable Segment base=0\nExecutable Segment limit=276135936\nExecutable Segment flags=0x1\nPage size=4096\nCDHash=0a371811ec3e27e4b49eebf9cf1d32b95653f041\nSignature size=9048\nAuthority=Developer ID Application: OpenAI OpCo, LLC (2DC432GLL2)\nAuthority=Developer ID Certification Authority\nAuthority=Apple Root CA\nTimestamp=Oct 30, 2026 at 2:58:21\u202fAM\nInfo.plist=not bound\nTeamIdentifier=2DC432GLL2\nRuntime Version=15.5.0\nSealed Resources=none\nInternal requirements count=1 size=168\nTotal signatures=1\nChosen signature=1\n"
+      },
+      "codesignVerification": {
+        "command": "/usr/bin/codesign --verify --strict --verbose=4 '-R=anchor apple generic and certificate leaf[subject.OU] = \"2DC432GLL2\"' /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin: valid on disk\n/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin: satisfies its Designated Requirement\n/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin: explicit requirement satisfied\n"
+      },
+      "gatekeeperAssessment": {
+        "command": "/usr/sbin/spctl --assess --type execute --verbose=4 /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin",
+        "exitCode": 3,
+        "stdout": "",
+        "stderr": "/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-codex-01660-pins-66c2iahb/codex-x86_64-apple-darwin: rejected (the code is valid but does not seem to be an app)\n"
+      },
+      "executed": false
+    }
+  },
+  "executionStatus": {
+    "downloadedExecutablesExecuted": false,
+    "downloadedInstallerExecuted": false,
+    "downloadedVersionOrHelpProbesRun": false,
+    "guiLaunched": false,
+    "guiHold": "Maintained. Explicit release remains with the parent.",
+    "fullChecksRun": false,
+    "fullChecksOwner": "Parent"
+  },
+  "gatekeeperLimitation": "On this Mac spctl exits 3 for both exact standalone executables and reports that the code is valid but does not seem to be an app. This audit claims no Gatekeeper acceptance, app assessment success, or executable runtime compatibility."
+}

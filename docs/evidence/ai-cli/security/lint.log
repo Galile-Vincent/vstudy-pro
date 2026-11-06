@@ -1,0 +1,19 @@
+
+> vstudy-pro@ lint /Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33
+> pnpm --filter @vstudy/desktop lint && pnpm --filter @vstudy/website lint
+
+
+> @vstudy/desktop@0.2.2 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33/apps/desktop
+> eslint .
+
+
+> @vstudy/website@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33/apps/website
+> astro check
+
+13:56:23 [types] Generated 14ms
+13:56:23 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33/apps/website...
+Result (32 files): 
+- 0 errors
+- 0 warnings
+- 0 hints
+

@@ -129,6 +129,8 @@ export function registerIpc(
     persistence:()=>typeof options.mcpPersistence==='function' ? options.mcpPersistence() : options.mcpPersistence,
     restoreWindow:restoreMainWindow,onFailure:()=>log({phase:'mcp-bridge-unavailable',code:'UNAVAILABLE'}),
   });
+  const restoreMcp=()=>{void mcp.restore();};
+  app.once('browser-window-created',restoreMcp);
   registerMcpIpc(registrar,implemented,mcp,navigation,createAgentClientSetup(mcpPaths.serverBin,userData));
   const disposeLibrary = registerLibraryIpc(registrar, store, implemented, async (id, remove) => {await disposeDocuments.stopAi(id);return chat.deleteDocument(id, remove);}, disposeDocuments.resume);
   registerStorageIpc(registrar,store,implemented,async()=>{await disposeMoodle.waitForIdle();await chat.waitForIdle();await disposeDocuments.waitForIdle();await disposeLibrary.waitForIdle();});
@@ -138,5 +140,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }

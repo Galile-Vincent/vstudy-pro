@@ -4,9 +4,8 @@ import { ExecutablePins } from '../executable-pins';
 import { ProviderRegistry } from '../index';
 import { createCliAdapter } from '../cli';
 import { AiCliSetup, type SetupDependencies } from './service';
-import { SetupStore } from './store';
 import { ReleaseSource } from './releases';
-import { payloadNetwork, payloadRelease } from './test-fixtures';
+import { payloadNetwork, payloadRelease, fixtureStore } from './test-fixtures';
 export function claudeFixture(root: string, version = '1.0.0') {
   return Buffer.from(`#!${process.execPath}
 const fs=require('fs');
@@ -27,7 +26,7 @@ export function setupFixture(root: string, overrides: Partial<SetupDependencies>
     if (provider !== 'claude') throw new Error('unsupported fixture');
     return payloadRelease(payload);
   };
-  const store = new SetupStore(join(root, 'tools'));
+  const store = fixtureStore(join(root, 'tools'));
   const pins = new ExecutablePins(join(root, 'pins.json'), async () => false);
   const registry = new ProviderRegistry(); registry.register('claude-cli', createCliAdapter('claude'));
   const service = new AiCliSetup({ store, pins, registry, source, chatBusy: () => false, chatRevision: () => 0, loginInterpreters: [process.execPath], describe: provider => pins.describe(provider), ...overrides });

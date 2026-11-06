@@ -1,0 +1,173 @@
+{
+  "recordedAt": "2026-11-06T05:59:21.756617+00:00",
+  "base": "9fa6d44bac4ad9413ab479f0fbbb6695dabe06a6",
+  "branch": "t3/ai-cli-fixes",
+  "checks": [
+    {
+      "command": [
+        "pnpm",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "typecheck.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "lint"
+      ],
+      "exitCode": 0,
+      "log": "lint.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "knip"
+      ],
+      "exitCode": 0,
+      "log": "knip.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "vendor:check"
+      ],
+      "exitCode": 0,
+      "log": "vendor-check.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "security:static"
+      ],
+      "exitCode": 0,
+      "log": "security-static.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "test",
+        "--pool=forks",
+        "--maxWorkers=2"
+      ],
+      "exitCode": 0,
+      "log": "tests.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@vstudy/desktop",
+        "build"
+      ],
+      "exitCode": 0,
+      "log": "build-0.log",
+      "stage": "build"
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@vstudy/website",
+        "build"
+      ],
+      "exitCode": 0,
+      "log": "build-1.log",
+      "stage": "build"
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@vstudy/website",
+        "verify:static"
+      ],
+      "exitCode": 0,
+      "log": "build-2.log",
+      "stage": "build"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-readme-links.mjs"
+      ],
+      "exitCode": 0,
+      "log": "build-3.log",
+      "stage": "build"
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@vstudy/desktop",
+        "exec",
+        "electron-builder",
+        "--mac",
+        "dir",
+        "--publish",
+        "never",
+        "-c.mac.notarize=false",
+        "-c.mac.identity=null"
+      ],
+      "exitCode": 0,
+      "log": "package-build.log"
+    },
+    {
+      "command": [
+        "node",
+        "e2e/ai-cli-packaged.mjs"
+      ],
+      "cwd": "apps/desktop",
+      "exitCode": 0,
+      "result": "../packaged/result.json",
+      "log": "../packaged/launch.log"
+    }
+  ],
+  "fullTestRuns": 1,
+  "fullTests": {
+    "passed": 1183,
+    "skipped": 14,
+    "filesPassed": 151,
+    "filesSkipped": 5
+  },
+  "baseline": {
+    "newBoundaryTestsFailed": 9,
+    "existingProviderOffControlPassed": 1,
+    "xtermDoubleEscapeTitleRegression": "failed with INJECTED TITLE before the patch"
+  },
+  "focused": {
+    "boundaryAuthenticityAndTerminalTestsPassed": 33,
+    "rendererTestsPassed": 28,
+    "note": "The final full run also includes the added forged-Codex-executable case."
+  },
+  "gui": {
+    "launched": true,
+    "launchCount": 1,
+    "recordedAt": "2026-11-06T06:09:57.072746+00:00",
+    "packagedPty": "Passed. The resolved Release helper repaired 0644 to 0755 before a real native PTY answer. The action closed, preferences reset, and the app exited with code 0.",
+    "result": "../packaged/result.json",
+    "screenshot": "../packaged/ai-cli-packaged.png",
+    "preLaunchGuard": "pgrep -fl \"VStudy Pro|Electron\" returned no matches.",
+    "postLaunchGuard": "pgrep -fl \"VStudy Pro|Electron\" returned no matches.",
+    "slotReleased": true,
+    "updatedFakeCliMatrix": "Prepared for explicit native fake selection; not rerun after the security changes.",
+    "newManualUiScreenshots": "Not captured. The packaged screenshot covers the setup host; manual UI has three-language component coverage."
+  },
+  "notes": [
+    "Static security has three existing external-link warnings and no unreviewed dependency advisories.",
+    "Knip passes with one existing excluded-CSS configuration hint.",
+    "Developer ID notarization and native Windows acceptance are not established by these checks."
+  ],
+  "implementationCommits": [
+    "26dc649e96a6ace823ff0f37f8e642db617b5c3e",
+    "f3427b8ebb660c600fca22635e0ec38ef34088d0",
+    "20b036715cf72b9571480daa1210c9261e6525f5"
+  ],
+  "packageStatic": {
+    "result": "package-static.json",
+    "signature": "ad-hoc deep strict verification passes",
+    "fuses": "RunAsNode and inspector off; ASAR-only loading and integrity on",
+    "allCodexPinsPresent": true,
+    "electronLaunched": false
+  }
+}

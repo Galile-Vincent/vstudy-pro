@@ -23,7 +23,7 @@ Final checks pass.
 | `pnpm --filter @vstudy/website build` | 52 pages built | [website](website-build.log) |
 | `node scripts/check-readme-links.mjs` | 152 local links checked | [links](readme-links.log) |
 
-Every Vitest run uses `--pool=forks --maxWorkers=2`. Native Windows acceptance remains untested on this Mac. Existing skipped tests remain skipped. There are no new screenshots because Electron was not launched. Access must be explicitly enabled again after app restart.
+Every Vitest run uses `--pool=forks --maxWorkers=2`. Native Windows acceptance remains untested on this Mac. Existing skipped tests remain skipped. There are no new screenshots because Electron was not launched. The original implementation required enabling again after restart. This was a regression corrected by [post-window restoration](../mcp-background-restore/README.md).
 
 Stream P should preserve the lazy factory in `apps/desktop/src/main/ipc/index.ts` at lines 115–122 and 127. Windows transport and persistence injection remain at lines 128–129. In `main/mcp/runtime.ts`, line 14 accepts a backend factory, lines 37–43 expose safe idle state, lines 44–72 contain lazy construction, and lines 78–93 contain the failure boundary. `main/ipc/mcp.ts` line 16 uses runtime state without initializing the engine. `shared/mcp.ts` line 76 adds the optional unavailable flag. `renderer/settings/agents.tsx` line 26 shows the translated unavailable message. No changes were made to the platform transport or persistence interfaces.
 

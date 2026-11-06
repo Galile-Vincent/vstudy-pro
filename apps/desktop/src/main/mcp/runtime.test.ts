@@ -1,6 +1,6 @@
 /** Runtime tests observe window restoration, transport startup, and storage-safe shutdown. @packageDocumentation */
 import { randomUUID } from 'node:crypto';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -116,6 +116,28 @@ it.each(['backend', 'persistence factory', 'persistence', 'transport'])('contain
   await result.setEnabled(true);
   expect(result.state()).toMatchObject({enabled:true, unavailable:false});
   await result.dispose();
+});
+
+
+it.skipIf(process.platform==='win32').each(['enabled', 'disabled', 'absent', 'corrupt', 'unprotected'] as const)('restores %s protected state without promoting or rewriting opt-in', async persisted => {
+  const root=mkdtempSync(join(tmpdir(),'vm-restore-'));roots.push(root);
+  const path=join(root,'mcp/state.json');
+  const saved=JSON.stringify({version:1, enabled:persisted!=='disabled', grants:[], activity:[]});
+  mkdirSync(join(root,'mcp'),{mode:0o700});
+  if (persisted!=='absent') writeFileSync(path,persisted==='corrupt' ? '{broken' : saved,{mode:0o600});
+  if (persisted==='unprotected') chmodSync(path,0o644);
+  transport.start.mockResolvedValue({socketPath:join(root,'mcp/bridge.sock'),dispose:transport.dispose});
+  const onFailure=vi.fn();
+  const result=createMcpRuntime({userData:root,backend:{accounts:()=>[],prepare:async()=>{throw Error('unused');}},secretValues:()=>[],transport:testTransport,restoreWindow:()=>{},onFailure});
+  try {
+    expect(transport.start).not.toHaveBeenCalled();
+    await result.restore();await result.ready;
+    expect(result.state()).toMatchObject({enabled:persisted==='enabled',unavailable:['corrupt','unprotected'].includes(persisted)});
+    expect(transport.start).toHaveBeenCalledTimes(persisted==='enabled' ? 1 : 0);
+    expect(onFailure).toHaveBeenCalledTimes(['corrupt','unprotected'].includes(persisted) ? 1 : 0);
+    if (['enabled','disabled'].includes(persisted)) expect(readFileSync(path,'utf8')).toBe(saved);
+    if (persisted==='absent') expect(existsSync(path)).toBe(false);
+  } finally {await result.dispose();}
 });
 
 it('disables access after native host loss and restarts only on an explicit enable',async()=>{

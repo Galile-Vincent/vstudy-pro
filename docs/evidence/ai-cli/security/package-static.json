@@ -1,0 +1,14 @@
+{
+  "signatureVerified": true,
+  "releaseFusesVerified": true,
+  "codexPinsPresent": true,
+  "helperMode": "755",
+  "nativeBytes": 85496,
+  "electronLaunched": false,
+  "signatureValidWithHelpers0644": true,
+  "helperCandidates": [
+    "build/Release/spawn-helper",
+    "prebuilds/darwin-arm64/spawn-helper"
+  ],
+  "asarSha256": "9767110eaf3661d3fe2abfcf6e560f46ec1aa4497ebc52b55185e6c940f3551b"
+}

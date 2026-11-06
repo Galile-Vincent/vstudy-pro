@@ -1,0 +1,38 @@
+
+ RUN  v4.1.12 /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli-security-before-8b7ilb7y/apps/desktop
+
+ ❯ src/main/providers/setup/terminal-text.xterm.test.ts (7 tests | 1 failed | 6 skipped) 5ms
+   × blocks the reviewer double-ESC title and hidden-link exploit after filtering 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/providers/setup/terminal-text.xterm.test.ts > blocks the reviewer double-ESC title and hidden-link exploit after filtering
+AssertionError: expected [ 'INJECTED TITLE' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "INJECTED TITLE",
++ ]
+
+ ❯ src/main/providers/setup/terminal-text.xterm.test.ts:59:29
+     57|   try {
+     58|     observed.parse(new TerminalText().filter(doubleEscapeAttack));
+     59|     expect(observed.titles).toEqual([]);
+       |                             ^
+     60|     expect(observed.registrations).not.toHaveBeenCalled();
+     61|     expect(observed.links()).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 skipped (7)
+   Start at  13:50:49
+   Duration  138ms (transform 23ms, setup 0ms, import 40ms, tests 5ms, environment 0ms)
+
+undefined
+/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli-security-before-8b7ilb7y/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/providers/setup/terminal-text.xterm.test.ts -t blocks the reviewer double-ESC --pool=forks --maxWorkers=2
