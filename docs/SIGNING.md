@@ -129,10 +129,11 @@ base64 -i '/private/path/windows-signing.pfx' | tr -d '\r\n' | gh secret set WIN
 gh secret set WIN_CSC_KEY_PASSWORD --repo ava-apple/vstudy-pro
 ```
 
-For a token, cloud HSM, or CA service, have the engineer implement and review a compatible electron-builder signing hook. Set `WIN_SIGNTOOL_HOOK` to its repository-relative script path. The path is configuration, not certificate material. This variable selects a hook; it does not supply a signing service by itself. The hook must sign every requested executable, including installer and uninstaller, timestamp with SHA-256, propagate failure, and keep credentials out of argv and logs. The provider may require additional dedicated secrets or a connected signing runner. A USB token on a laptop cannot be used by a GitHub-hosted runner without such an integration.
+For a token, cloud HSM, or CA service, have the engineer implement and review a compatible electron-builder signing hook. Set `WIN_SIGNTOOL_HOOK` to its repository-relative script path. The path is configuration, not certificate material. This variable selects a hook; it does not supply a signing service by itself. If the provider needs credentials, put its named fields in the optional `WIN_SIGNTOOL_CREDENTIALS` JSON-object secret. The workflow passes that object through the environment only to trusted Windows release packaging, so adding provider credentials needs no workflow rewrite. The reviewed hook must validate its provider's required fields, sign every requested executable including installer and uninstaller, timestamp with SHA-256, propagate failure, and keep all credential fields out of argv and logs. A USB token on a laptop needs a connected signing runner; GitHub-hosted runners cannot access it directly.
 
 ```sh
 gh secret set WIN_SIGNTOOL_HOOK --repo ava-apple/vstudy-pro
+gh secret set WIN_SIGNTOOL_CREDENTIALS --repo ava-apple/vstudy-pro
 ```
 
 Configure only one Windows route. Remove the unused Azure, PFX, or hook selectors before switching. Conflicting or partial routes must fail rather than silently select unsigned output.

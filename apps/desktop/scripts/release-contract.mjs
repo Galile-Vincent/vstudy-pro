@@ -33,7 +33,7 @@ const credentialGroups = {
   certificate: ['CSC_LINK', 'CSC_KEY_PASSWORD'],
   appleApi: ['APPLE_API_KEY', 'APPLE_API_KEY_ID', 'APPLE_API_ISSUER'],
   appleAccount: ['APPLE_ID', 'APPLE_APP_SPECIFIC_PASSWORD', 'APPLE_TEAM_ID'],
-  azure: ['AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'AZURE_CLIENT_SECRET', 'AZURE_ENDPOINT', 'AZURE_CODE_SIGNING_ACCOUNT', 'AZURE_CERTIFICATE_PROFILE', 'WIN_PUBLISHER_NAME'],
+  azure: ['AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'AZURE_CLIENT_SECRET', 'AZURE_ENDPOINT', 'AZURE_CODE_SIGNING_ACCOUNT', 'AZURE_CERTIFICATE_PROFILE'],
   pfx: ['WIN_CSC_LINK', 'WIN_CSC_KEY_PASSWORD'],
   hook: ['WIN_SIGNTOOL_HOOK'],
 };
@@ -59,6 +59,14 @@ export function signingMode(platform, env) {
   if (platform !== 'win') throw new Error(`Unsupported signing platform ${platform}`);
   const modes = ['azure', 'pfx', 'hook'].filter(name => credentialGroup(env, name));
   if (modes.length > 1) throw new Error('Configure exactly one Windows signing backend');
+  if (modes[0] === 'azure' && !env.WIN_PUBLISHER_NAME) throw new Error('Incomplete azure credentials; missing WIN_PUBLISHER_NAME');
+  if (env.WIN_SIGNTOOL_CREDENTIALS) {
+    if (modes[0] !== 'hook') throw new Error('WIN_SIGNTOOL_CREDENTIALS requires WIN_SIGNTOOL_HOOK');
+    try {
+      const credentials = JSON.parse(env.WIN_SIGNTOOL_CREDENTIALS);
+      if (!credentials || typeof credentials !== 'object' || Array.isArray(credentials)) throw new Error();
+    } catch { throw new Error('WIN_SIGNTOOL_CREDENTIALS must contain a JSON object'); }
+  }
   return modes[0] ?? 'unsigned';
 }
 
@@ -78,7 +86,7 @@ export function signingConfiguration(platform, mode, env) {
 
 export function unsignedEnvironment(env) {
   const clean = Object.fromEntries(Object.entries(env).filter(([key]) =>
-    !/^(?:CSC_|WIN_CSC_|APPLE_|AZURE_)/.test(key) && !['WIN_SIGNTOOL_HOOK', 'WIN_PUBLISHER_NAME'].includes(key)));
+    !/^(?:CSC_|WIN_CSC_|WIN_SIGNTOOL_|APPLE_|AZURE_)/.test(key) && key !== 'WIN_PUBLISHER_NAME'));
   return { ...clean, CSC_IDENTITY_AUTO_DISCOVERY: 'false' };
 }
 

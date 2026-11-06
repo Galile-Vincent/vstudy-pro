@@ -72,3 +72,12 @@ jobs:
       - run: pnpm --filter @vstudy/website build
       - run: pnpm --filter @vstudy/website verify:static
       - run: pnpm knip
+  check:
+    needs: [desktop, website]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every native and website check
+        if: needs.desktop.result != 'success' || needs.website.result != 'success'
+        run: exit 1

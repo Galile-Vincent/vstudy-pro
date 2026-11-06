@@ -81,7 +81,12 @@ test('Windows signing has one backend and rejects every partial credential set',
   assert.equal(signingMode('win', {}), 'unsigned');
   assert.equal(signingMode('win', azure), 'azure');
   assert.equal(signingMode('win', pfx), 'pfx');
+  assert.equal(signingMode('win', { ...pfx, WIN_PUBLISHER_NAME: 'Configured publisher' }), 'pfx');
+  assert.equal(signingMode('win', { WIN_PUBLISHER_NAME: 'Configured publisher' }), 'unsigned');
   assert.equal(signingMode('win', { WIN_SIGNTOOL_HOOK: './sign.cjs' }), 'hook');
+  assert.equal(signingMode('win', { WIN_SIGNTOOL_HOOK: './sign.cjs', WIN_SIGNTOOL_CREDENTIALS: '{"token":"test-only"}' }), 'hook');
+  assert.throws(() => signingMode('win', { WIN_SIGNTOOL_CREDENTIALS: '{}' }), /requires WIN_SIGNTOOL_HOOK/);
+  assert.throws(() => signingMode('win', { WIN_SIGNTOOL_HOOK: './sign.cjs', WIN_SIGNTOOL_CREDENTIALS: 'invalid' }), /JSON object/);
   for (const group of [azure, pfx]) for (const key of Object.keys(group)) {
     const env = { ...group };
     delete env[key];
@@ -95,7 +100,7 @@ test('Windows signing has one backend and rejects every partial credential set',
 });
 
 test('unsigned packaging strips all signing and notarization credentials', () => {
-  const env = unsignedEnvironment({ ...appleCertificate, ...appleApi, ...appleAccount, ...azure, ...pfx, WIN_SIGNTOOL_HOOK: 'secret', CSC_NAME: 'identity', PATH: 'keep' });
+  const env = unsignedEnvironment({ ...appleCertificate, ...appleApi, ...appleAccount, ...azure, ...pfx, WIN_SIGNTOOL_HOOK: 'secret', WIN_SIGNTOOL_CREDENTIALS: 'secret', CSC_NAME: 'identity', PATH: 'keep' });
   assert.deepEqual(env, { PATH: 'keep', CSC_IDENTITY_AUTO_DISCOVERY: 'false' });
 });
 

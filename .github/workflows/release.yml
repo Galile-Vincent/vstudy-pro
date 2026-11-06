@@ -75,6 +75,10 @@ jobs:
       - run: pnpm security:static
       - run: pnpm vendor:check
       - run: pnpm build
+      - name: Verify native Windows settings, Ctrl labels, and lazy secure storage in three languages
+        if: matrix.platform == 'win'
+        working-directory: apps/desktop
+        run: node e2e/cross-platform.mjs
       - name: Package unsigned branch or dry-run artifacts
         if: needs.plan.outputs.publish != 'true'
         working-directory: apps/desktop
@@ -82,7 +86,7 @@ jobs:
         env:
           TARGET: ${{ matrix.key }}
       - name: Package release with automatic signing when credentials are complete
-        if: needs.plan.outputs.publish == 'true'
+        if: needs.plan.outputs.publish == 'true' && startsWith(github.ref, 'refs/tags/v') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
         working-directory: apps/desktop
         run: node scripts/package-release.mjs --target "$TARGET"
         env:
@@ -98,6 +102,7 @@ jobs:
           WIN_CSC_LINK: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.WIN_CSC_LINK || '' }}
           WIN_CSC_KEY_PASSWORD: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.WIN_CSC_KEY_PASSWORD || '' }}
           WIN_SIGNTOOL_HOOK: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.WIN_SIGNTOOL_HOOK || '' }}
+          WIN_SIGNTOOL_CREDENTIALS: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.WIN_SIGNTOOL_CREDENTIALS || '' }}
           AZURE_TENANT_ID: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_TENANT_ID || '' }}
           AZURE_CLIENT_ID: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_CLIENT_ID || '' }}
           AZURE_CLIENT_SECRET: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_CLIENT_SECRET || '' }}
@@ -128,6 +133,16 @@ jobs:
         with:
           name: smoke-${{ matrix.key }}
           path: apps/desktop/release/smoke/${{ matrix.key }}/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Retain Windows platform UI evidence
+        if: always() && matrix.platform == 'win'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: platform-ui-${{ matrix.key }}
+          path: |
+            docs/evidence/distribution/win32-ui.json
+            docs/evidence/distribution/win32-*.png
           if-no-files-found: warn
           retention-days: 14
       - name: Retain distribution artifacts
@@ -168,7 +183,7 @@ jobs:
           if-no-files-found: error
   publish:
     needs: [plan, assemble]
-    if: needs.plan.outputs.publish == 'true' && startsWith(github.ref, 'refs/tags/v')
+    if: needs.plan.outputs.publish == 'true' && startsWith(github.ref, 'refs/tags/v') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:
