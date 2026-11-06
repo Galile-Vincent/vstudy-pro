@@ -66,8 +66,9 @@ export function clientConfig(options: ClientOptions): ClientConfig {
     throw new LocalFileError('Client interpolation or control characters in launcher paths are unsupported.');
   }
   const entry: StdioEntry = { command, args: [binPath, '--client', client] };
-  if (client === 'claude') { entry.type = 'stdio'; entry.timeout = 300_000; }
-  if (client === 'codex') entry.tool_timeout_sec = 300;
-  if (client === 'agy') entry.timeoutSeconds = 300;
+  const timeout = platform === 'win32' ? 600 : 300;
+  if (client === 'claude') { entry.type = 'stdio'; entry.timeout = timeout * 1000; }
+  if (client === 'codex') entry.tool_timeout_sec = timeout;
+  if (client === 'agy') entry.timeoutSeconds = timeout;
   return { client, path, entry, format: client === 'codex' ? 'toml' : client === 'cursor' ? 'jsonc' : 'json' };
 }

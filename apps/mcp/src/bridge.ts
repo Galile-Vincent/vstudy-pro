@@ -114,12 +114,16 @@ export class BridgeClient {
   }
 
   private async connect(): Promise<Wire> {
-    for (const [index, backoff] of (this.options.backoffMs ?? [0, 100, 250, 500, 1000, 2000, 3000]).entries()) {
+    const windows = (this.options.connection?.platform ?? process.platform) === 'win32';
+    const backoffs = this.options.backoffMs ?? (windows ? [0, ...Array<number>(48).fill(2000)] : [0, 100, 250, 500, 1000, 2000, 3000]);
+    let deadline = Date.now() + 95_000;
+    for (const [index, backoff] of backoffs.entries()) {
+      if (windows && !this.options.backoffMs && Date.now() >= deadline) break;
       if (backoff) await this.wait(backoff);
       try {
         if (this.state.kind === 'closed') throw new BridgeError('DISCONNECTED', 'The VStudy client has closed.');
         const state = this.state;
-        const wire = await Wire.connect(this.options.socketPath, this.options.connection);
+        const wire = await Wire.connect(this.options.socketPath, { ...this.options.connection, signal: state.controller.signal });
         if (this.state !== state) { wire.close(); throw new BridgeError('DISCONNECTED', 'The VStudy client has closed.'); }
         state.wire = wire;
         return wire;
@@ -131,6 +135,7 @@ export class BridgeClient {
         if (index === 0 && Date.now() - this.lastLaunch >= 30_000) {
           this.lastLaunch = Date.now();
           await (this.options.launch ?? launchApp)();
+          deadline = Date.now() + 95_000;
         }
       }
     }

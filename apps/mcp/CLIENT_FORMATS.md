@@ -14,7 +14,7 @@ Checked on 2026-11-06. This is a record of observed formats, not a claim that an
 
 The current Antigravity path replaces the older `.gemini/antigravity` location. The installed CLI independently confirmed the current path. The installer does not guess a legacy path. Existing empty or invalid configs fail without modification.
 
-Claude Code honors `CLAUDE_CONFIG_DIR` and Codex honors `CODEX_HOME`. The installer supports both. Normal installation uses literal absolute paths and argv arrays, never shell quoting or a bearer token. The timeout budget is 300 seconds for clients whose documented entry schema supports it.
+Claude Code honors `CLAUDE_CONFIG_DIR` and Codex honors `CODEX_HOME`. The installer supports both. Normal installation uses literal absolute paths and argv arrays, never shell quoting or a bearer token. Supported timeout fields use 300 seconds on Unix and 600 seconds on Windows. Windows allows 95 seconds for cold startup, two minutes for pairing, and a subsequent approved call. Claude Desktop and Cursor receive no undocumented timeout field.
 
 ## Observed local configuration
 
@@ -62,4 +62,4 @@ Main's Windows pipe host, its resource wiring, peer impersonation, and app persi
 
 The packaging profile is assisted NSIS with `oneClick=false`, `allowElevation=false`, and `perMachine=false`. These settings and the discovery order have fixture coverage. Actual Windows installation, custom-path registration, and native launch remain unverified on this Mac.
 
-The Windows client connection is deliberately disabled unless a same-handle authenticated connector is injected. Bare Node `createConnection` is not used for Windows pipes. Pipe names alone are not server identity. The connector must verify the server's SID on the actual forwarding handle, request Identification-level impersonation, and retain that handle without reopening it. Its attested SID is checked before any bridge frame or bearer can be sent. The default missing connector and a foreign SID both fail closed in fixtures. A real Windows client forwarder and its framework capability checks remain parent-owned and unverified.
+The Windows client defaults to the production PowerShell/.NET Framework connector in `src/windows-pipe.ts`. It checks the owner and exact protected DACL on the actual forwarding handle at Identification impersonation, then retains that handle without reopening it. Its attested SID is checked before any frame or bearer read. Missing APIs, unsafe ACLs, and mismatched SIDs fail closed. Portable tests passed. The native kernel tests require Windows CI and skip on this Mac. Stream P retains server and private app-state wiring. See the [connector contract](README.md#windows-authenticated-connector).

@@ -51,7 +51,7 @@ it('never reads a bearer or sends a frame when Windows server authentication is 
   const credentials = new Credentials(join(path, 'unread.json'));
   const identity = vi.spyOn(credentials, 'identity');
   const client = new BridgeClient({ socketPath: '\\\\.\\pipe\\vstudy-ebead97e1d40fa148f22dcd495581555',
-    credentials, clientName: 'Test', stderr: () => {}, connection: { platform: 'win32' } });
+    credentials, clientName: 'Test', stderr: () => {}, connection: { platform: 'win32', authenticatedPipe: null } });
   cleanups.push(() => client.close());
   expect(await client.call('list_accounts', {})).toMatchObject({ ok: false, error: { code: 'UNSUPPORTED' } });
   expect(identity).not.toHaveBeenCalled();

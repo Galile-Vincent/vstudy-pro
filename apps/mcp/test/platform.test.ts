@@ -32,6 +32,9 @@ describe('Windows client configuration fixtures', () => {
       expect(config.path).toBe(expected);
       expect(config.entry.command).toBe(command);
       expect(config.entry.args).toEqual([binPath, '--client', client]);
+      if (client === 'claude') expect(config.entry.timeout).toBe(600_000);
+      if (client === 'codex') expect(config.entry.tool_timeout_sec).toBe(600);
+      if (client === 'agy') expect(config.entry.timeoutSeconds).toBe(600);
       const edited = editConfig(undefined, config, false);
       const parsed = parseConfig(edited.text, config.format);
       const servers = parsed[client === 'codex' ? 'mcp_servers' : 'mcpServers'] as Record<string, { args: string[] }>;
@@ -59,7 +62,7 @@ describe('Windows client configuration fixtures', () => {
 describe('platform connection and launch fixtures', () => {
   it('rejects a predictable pipe name when no same-handle authenticated connector exists', async () => {
     const connect = vi.fn(() => new Socket());
-    await expect(connectLocalSocket(windowsPipeName(sid), { platform: 'win32', connect }))
+    await expect(connectLocalSocket(windowsPipeName(sid), { platform: 'win32', connect, authenticatedPipe: null }))
       .rejects.toMatchObject({ code: 'UNSUPPORTED' });
     expect(connect).not.toHaveBeenCalled();
   });
