@@ -5,6 +5,7 @@ import type { IpcResponse } from '../../shared/ipc';
 import type { Document } from '../../shared/domain';
 import type { studyScopeSchema } from '../../shared/review-artifacts';
 import { tr } from '../../shared/i18n';
+import { describeAssumption } from '../../shared/review-assumptions';
 import { desktop } from '../bridge';
 import { DocumentMarkdown } from '../markdown';
 import { Button } from '../components/ui/button';
@@ -24,7 +25,8 @@ export function ArtifactPanel({courseId,kind,selection}:{courseId:string;kind:'n
  const active=useRef<{artifactId:string|null;requestId:string|null}>({artifactId:null,requestId:null});
  const epoch=useRef(0),mounted=useRef(true),operation=useRef(false),recovery=useRef(0);
  const [replyLanguage,setReplyLanguage]=useState<string>('auto');
- const locale=replyLanguage==='zh-Hant'||(replyLanguage==='auto'&&i18n.language.startsWith('zh'))?'zh-Hant':'en';
+ const uiLanguage=i18n.language.startsWith('zh')?'zh-Hant':i18n.language.startsWith('ja')?'ja':'en';
+ const locale=replyLanguage==='zh-Hant'||replyLanguage==='ja'||replyLanguage==='en'?replyLanguage:uiLanguage;
  useEffect(()=>{let current=true;void desktop.invoke('settings:get',{}).then(settings=>{if(current)setReplyLanguage(settings.replyLanguage??'auto');}).catch(()=>{});return()=>{current=false;};},[]);
  const recover=useCallback(async(id:string)=>{
   const version=epoch.current,sequence=++recovery.current;
@@ -86,7 +88,10 @@ function ResolvedScope({artifact}:{artifact:Artifact}) {
  return <details className="review-resolved" open><summary>{tr('review:resolved_scope')}</summary>
  <p>{tr('review:resolved_units')}: {scope.unitIds.map(id=>units.items.find(u=>u.id===id)?.title??id).join(', ')||tr('review:none')}<br/>{tr('review:resolved_documents')}: {scope.documentIds.map(documentTitle).join(', ')||tr('review:none')}</p>
  {scope.from&&<p><time>{scope.from}</time> → <time>{scope.to}</time> ({scope.timeZone})</p>}
- <ul>{scope.assumptions.map((assumption,i)=><li key={i}>{/asked|observation|turn|undated/i.test(assumption)?assumption.toLowerCase()==='based on when you asked'?'':tr('review:asked_fallback')+': ':''}{assumption.toLowerCase()==='based on when you asked'?tr('review:asked_fallback'):assumption}</li>)}</ul>
+ <ul>{scope.assumptions.flatMap((raw,i)=>{const view=describeAssumption(raw);if(!view)return [];
+  if(view.key==='assumption_excerpt_limited')return [<li key={i}>{tr('review:assumption_excerpt_limited',{document:documentTitle(view.documentId!)})}</li>];
+  if(view.key==='assumption_undated_units'){const titles=view.unitIds!.flatMap(id=>units.items.find(u=>u.id===id)?.title??[]);return [<li key={i}>{titles.length?tr('review:assumption_undated_units',{units:titles.join(', ')}):tr('review:asked_fallback')}</li>];}
+  return [<li key={i}>{tr(`review:${view.key}`)}</li>];})}</ul>
  <div aria-label={tr('review:sources')}>{scope.sources.map(source=><span className="review-chip" key={source.documentId+source.version+source.excerptHash}>{documentTitle(source.documentId)} · {source.version}</span>)}</div>
  </details>;
 }

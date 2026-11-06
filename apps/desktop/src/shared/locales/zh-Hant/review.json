@@ -147,5 +147,8 @@
   "consent_done": "已開啟學習記憶。你可以隨時在「設定 > 隱私」變更。",
   "item_feedback": "本題回饋",
   "concept_missed_one": "{{label}}：{{count}} 題值得再看看",
-  "concept_missed_other": "{{label}}：{{count}} 題值得再看看"
+  "concept_missed_other": "{{label}}：{{count}} 題值得再看看",
+  "assumption_sources_omitted": "為了讓這份複習內容不超過長度上限，部分資料沒有納入。",
+  "assumption_excerpt_limited": "只使用了「{{document}}」的開頭部分。",
+  "assumption_undated_units": "沒有日期的單元，依你提問的時間歸類：{{units}}"
 }

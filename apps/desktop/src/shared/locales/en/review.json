@@ -147,5 +147,8 @@
   "consent_done": "Study memory is on. You can change this any time in Settings > Privacy.",
   "item_feedback": "Feedback for this question",
   "concept_missed_one": "{{label}}: {{count}} question worth another look",
-  "concept_missed_other": "{{label}}: {{count}} questions worth another look"
+  "concept_missed_other": "{{label}}: {{count}} questions worth another look",
+  "assumption_sources_omitted": "Some sources were left out to keep this review within its size limit.",
+  "assumption_excerpt_limited": "Only the first part of {{document}} was used.",
+  "assumption_undated_units": "Units without dates were placed by when you asked: {{units}}"
 }

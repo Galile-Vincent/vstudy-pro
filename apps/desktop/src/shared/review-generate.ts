@@ -17,12 +17,12 @@ export const rendererArtifactSchema = artifactSchema.extend({test:z.object({vers
 export function rendererArtifact(artifact: z.infer<typeof artifactSchema>) {
  return rendererArtifactSchema.parse({...artifact,test:artifact.test ? {version:artifact.test.version,items:artifact.test.items.map(item=>publicTestItemSchema.parse(Object.fromEntries(Object.entries(item).filter(([key])=>['id','conceptKey','stem','type','options','unitId','bloom','difficulty'].includes(key))))),warnings:artifact.test.warnings,validationNotice:artifact.test.validationNotice} : null});
 }
-export const generationRequestSchema = z.object({ requestId: id, courseId: id, kind: z.enum(['note', 'test']), title: text, scope: studyScopeSchema, idempotencyKey: text, providerId: providerIdSchema, modelId: text, locale: z.enum(['en', 'zh-Hant']).default('en'), size: z.enum(['short','standard','long']).optional(), retakeAttemptId: id.optional() }).strict();
+export const generationRequestSchema = z.object({ requestId: id, courseId: id, kind: z.enum(['note', 'test']), title: text, scope: studyScopeSchema, idempotencyKey: text, providerId: providerIdSchema, modelId: text, locale: z.enum(['en', 'zh-Hant', 'ja']).default('en'), size: z.enum(['short','standard','long']).optional(), retakeAttemptId: id.optional() }).strict();
 export type GenerationRequest = z.infer<typeof generationRequestSchema>;
 export const attemptSchema = z.object({ id, artifactId: id, phase: z.enum(['answering', 'committed', 'graded', 'confirmed']), answers: studyAnswersSchema, startedAt: z.string().datetime(), committedAt: z.string().datetime().nullable(), confirmedAt: z.string().datetime().nullable(), results: z.array(z.object({ itemId: text, conceptKey: text, correct: z.boolean().nullable(), reportedBad: z.boolean(), feedback: studyTestItemSchema.optional() }).strict()).max(100) }).strict();
 export const reviewGenerateIpc = {
     'review:artifact:generate': { request: generationRequestSchema, response: rendererArtifactSchema },
-    'review:artifact:retry': { request: z.object({ artifactId: id, requestId: id, locale: z.enum(['en', 'zh-Hant']).default('en') }).strict(), response: rendererArtifactSchema },
+    'review:artifact:retry': { request: z.object({ artifactId: id, requestId: id, locale: z.enum(['en', 'zh-Hant', 'ja']).default('en') }).strict(), response: rendererArtifactSchema },
     'review:artifact:cancel': { request: z.object({ artifactId: id }).strict(), response: ack },
     'review:artifact:list': { request: studyPageInputSchema.extend({ courseId: id }), response: z.object({ items: z.array(artifactSchema.omit({ bodyMarkdown: true, test: true })).max(100), nextCursor: studyCursorSchema.nullable() }).strict() },
     'review:artifact:get': { request: z.object({ artifactId: id }).strict(), response: rendererArtifactSchema.nullable() },

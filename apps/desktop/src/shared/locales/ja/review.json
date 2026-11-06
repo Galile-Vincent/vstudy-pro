@@ -147,5 +147,8 @@
   "consent_done": "学習メモリーをオンにしました。設定 > プライバシーでいつでも変更できます。",
   "item_feedback": "この問題のフィードバック",
   "concept_missed_one": "{{label}}：{{count}} 問をもう一度確認",
-  "concept_missed_other": "{{label}}：{{count}} 問をもう一度確認"
+  "concept_missed_other": "{{label}}：{{count}} 問をもう一度確認",
+  "assumption_sources_omitted": "サイズの上限に収めるため、一部の資料は含まれていません。",
+  "assumption_excerpt_limited": "{{document}} は先頭部分のみ使用しました。",
+  "assumption_undated_units": "日付のない単元は、質問した日時で位置づけました：{{units}}"
 }

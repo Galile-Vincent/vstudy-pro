@@ -50,7 +50,7 @@ Type aliases used below are documentation shorthand for `z.output<typeof study*S
 ```ts
 new ReviewRepository(db: DatabaseSync, clock?: () => number);
 getPrefs(): Prefs;
-setPrefs(input: {memoryEnabled?:boolean|undefined; noticeAcknowledged?:boolean|undefined;
+setPrefs(input: {memoryEnabled?:boolean|undefined; noticeAcknowledged?:boolean|undefined; consentAcknowledged?:boolean|undefined;
   timeZone?:string|undefined}): Prefs;
 erase(): void;
 createCourse(input: {title:string; aliases?:string[]}): Course;
@@ -126,7 +126,7 @@ and types `StudyPrefs`, `StudyPageInput`.
 | review:jobs:page | PageInput + {courseId} | Page&lt;JobSummary&gt; |
 | review:jobs:edit | {jobId,changes:{questionSummary}} | ack |
 | review:prefs:get | {} | Prefs |
-| review:prefs:set | {memoryEnabled?,noticeAcknowledged?,timeZone?} | Prefs |
+| review:prefs:set | {memoryEnabled?,noticeAcknowledged?,consentAcknowledged?,timeZone?} | Prefs |
 | review:prefs:erase | {} | ack |
 
 Document linking reads at most 64 KiB of the active Markdown in main and seeds at most 80 headings. It never creates Moodle file rows. Observation pages contain quotes and source IDs; job pages contain question summaries and source IDs. Lists use keyset pagination. Memory defaults enabled; preferences have their own strict `studyPrefs` settings key.
@@ -251,7 +251,10 @@ class MemoryWorker implements ReviewWorker {
 W5a uses the validated generic IPC channels above and W1 preferences; no preload,
 renderer, or locale changes are included. Extraction sends only the bounded thread,
 candidate course IDs/titles, catalog IDs/labels and unit labels to the conversation's
-configured provider. It does not inject memory into tutor prompts. Prompts contain
+configured provider, after every eligible answer, and only while `memoryEnabled` and
+`consentAcknowledged` are both true (`consentAcknowledged` defaults to false, so
+preferences written by earlier builds stay inactive until the student agrees in the
+chat consent card or Settings). It does not inject memory into tutor prompts. Prompts contain
 fixed English or Traditional Chinese instructions outside a single escaped data
 section; Japanese uses the English instructions with Japanese reply language.
 Oversized serialized inputs fail closed rather than truncate a delimiter or quote.
