@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { McpRuntime } from './mcp/runtime';
 
 const mocks = vi.hoisted(() => ({
-  confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
+  initialize:vi.fn(), confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
   showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), log: vi.fn(), registerIpc: vi.fn(), restore: undefined as undefined | (() => void),
 }));
 const electron = await vi.hoisted(async () => {
@@ -43,7 +43,7 @@ vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
 vi.mock('./services/delete-data', () => ({ deleteAllData: vi.fn() }));
 vi.mock('./assets', () => ({ assetHandler: vi.fn() }));
 vi.mock('./theme', () => ({ applyNativeTheme: vi.fn(), nativeBackground: () => '#ffffff' }));
-vi.mock('./moodle/sso-protocol', () => ({ initializeMoodleProtocol: vi.fn() }));
+vi.mock('./moodle/sso-protocol', () => ({ initializeMoodleProtocol: mocks.initialize }));
 vi.mock('./storage/reconcile', () => ({ reconcileDownloads: vi.fn() }));
 vi.mock('./storage/restore-startup', () => ({ confirmRestoreStartup: mocks.confirm, rollbackRestoreStartup: mocks.rollback }));
 vi.mock('./storage/backup', () => ({ recoverRestore: vi.fn() }));
@@ -286,4 +286,28 @@ it('settles deferred second launches after startup fails', async () => {
   await vi.waitFor(() => expect(electron.app.exit).toHaveBeenCalledWith(1));
   expect(electron.BrowserWindow.instances).toHaveLength(0);
   expect(mocks.fatal).toHaveBeenCalledWith(expect.any(Error), 'recovery');
+});
+
+it('reports synchronous bootstrap failure before any window or store exists', async () => {
+  const error=Error('protocol registration failed');
+  mocks.initialize.mockImplementationOnce(()=>{throw error;});
+  await expect(import('./index')).resolves.toBeDefined();
+  expect(mocks.fatal).toHaveBeenCalledWith(error,'services');
+  expect(electron.app.exit).toHaveBeenCalledWith(1);
+  expect(electron.BrowserWindow.instances).toHaveLength(0);
+});
+it('reports uncaught startup exceptions with a safe fatal message', async () => {
+  await start();
+  const error=Error('uncaught during startup');
+  const listener=eventProcess.rawListeners('uncaughtExceptionMonitor').find(listener=>!processListeners.get('uncaughtExceptionMonitor')!.includes(listener))!;
+  listener(error);
+  expect(mocks.fatal).toHaveBeenCalledWith(error,'window');
+  expect(electron.app.exit).toHaveBeenCalledWith(1);
+});
+
+it('does not recover renderer failures belonging to another window', async () => {
+  const main=await start();
+  electron.app.emit('render-process-gone', {}, {reload:vi.fn()}, {reason:'crashed',exitCode:1});
+  expect(main.webContents.reload).not.toHaveBeenCalled();
+  expect(electron.dialog.showMessageBox).not.toHaveBeenCalled();
 });

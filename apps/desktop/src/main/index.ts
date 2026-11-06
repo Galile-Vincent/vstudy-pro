@@ -36,24 +36,45 @@ import { isPathWithin } from './platform/paths';
 import { relative } from 'node:path';
 import { prepareDistributionSmoke, runDistributionSmoke } from './distribution-smoke';
 
-const distributionSmokeRoot = prepareDistributionSmoke();
-initializeMoodleProtocol();
-
-protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({ scheme, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } })));
-
-const smokeRoot = process.env.VSTUDY_PACKAGED_SMOKE_DIR;
-if (smokeRoot) {
-  const canonical = realpathSync(smokeRoot), temporary = realpathSync(tmpdir());
-  if (!isPathWithin(temporary, canonical) || !/^vstudy-packaged-smoke-[^/\\]+$/.test(relative(temporary, canonical)) || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
-  const isolated = join(canonical, 'user-data');
-  mkdirSync(isolated, {recursive:true,mode:0o700});
-  if (lstatSync(isolated).isSymbolicLink() || realpathSync(isolated) !== isolated) throw new Error('Smoke user data must be an isolated directory');
-  app.setPath('userData', isolated);
+let startupStage: StartupStage = 'services';
+let startupComplete = false;
+let startupFailed = false;
+let resolveAppReady!: (ready: boolean) => void;
+const appReady = new Promise<boolean>(resolve => { resolveAppReady = resolve; });
+function failStartup(error: unknown): void {
+  if (startupFailed) return;
+  startupFailed = true;
+  resolveAppReady(false);
+  log({phase:'startup-failed', stage:startupStage, error: error instanceof Error ? error.stack ?? error.message : error});
+  showStartupError(error, startupStage);
 }
+function requestMainWindow(): void {
+  void restoreMainWindow().catch(error => log({phase:'window-restore-failed', error}));
+}
+let distributionSmokeRoot: ReturnType<typeof prepareDistributionSmoke>;
+const smokeRoot = process.env.VSTUDY_PACKAGED_SMOKE_DIR;
+try {
+  distributionSmokeRoot = prepareDistributionSmoke();
+  initializeMoodleProtocol();
+
+  protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({ scheme, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } })));
+
+  if (smokeRoot) {
+    const canonical = realpathSync(smokeRoot), temporary = realpathSync(tmpdir());
+    if (!isPathWithin(temporary, canonical) || !/^vstudy-packaged-smoke-[^/\\]+$/.test(relative(temporary, canonical)) || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
+    const isolated = join(canonical, 'user-data');
+    mkdirSync(isolated, {recursive:true,mode:0o700});
+    if (lstatSync(isolated).isSymbolicLink() || realpathSync(isolated) !== isolated) throw new Error('Smoke user data must be an isolated directory');
+    app.setPath('userData', isolated);
+  }
+} catch (error) { failStartup(error); app.exit(1); }
 process.on('exit', code => log({phase:'main-exit',code}));
 app.on('child-process-gone', (_event,details) => log({phase:'main-child-process-gone',code:details.exitCode,reason:details.reason,type:details.type}));
 app.on('render-process-gone', (_event,_contents,details) => log({phase:'main-render-process-gone',code:details.exitCode,reason:details.reason}));
-process.on('uncaughtExceptionMonitor', error => log({phase:'main-uncaught-exception',code:(error as NodeJS.ErrnoException).code ?? error.name}));
+process.on('uncaughtExceptionMonitor', error => {
+  log({phase:'main-uncaught-exception',code:(error as NodeJS.ErrnoException).code ?? error.name});
+  if (!startupComplete) { failStartup(error); app.exit(1); }
+});
 process.on('unhandledRejection', error => {
   log({phase:'main-unhandled-rejection', error: error instanceof Error ? error.stack ?? error.message : error});
   if (!startupComplete) { failStartup(error); app.exit(1); }
@@ -188,24 +209,10 @@ async function createWindow(show = true): Promise<void> {
   });
 }
 
-let startupStage: StartupStage = 'recovery';
-let startupComplete = false;
-let startupFailed = false;
-let resolveAppReady!: (ready: boolean) => void;
-const appReady = new Promise<boolean>(resolve => { resolveAppReady = resolve; });
-function failStartup(error: unknown): void {
-  if (startupFailed) return;
-  startupFailed = true;
-  resolveAppReady(false);
-  log({phase:'startup-failed', stage:startupStage, error: error instanceof Error ? error.stack ?? error.message : error});
-  showStartupError(error, startupStage);
-}
-function requestMainWindow(): void {
-  void restoreMainWindow().catch(error => log({phase:'window-restore-failed', error}));
-}
-const ownsApplication = acquireOwnership(app, () => window, requestMainWindow);
+const ownsApplication = !startupFailed && acquireOwnership(app, () => window, requestMainWindow);
 if (ownsApplication) void app.whenReady().then(async () => {
   if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
+  startupStage = 'recovery';
   const userData = app.getPath("userData");
   mkdirSync(userData, { recursive: true });
   await rollbackRestoreStartup(userData);
