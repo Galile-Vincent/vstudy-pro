@@ -4,8 +4,9 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { i18n } from '../../shared/i18n';
-import { desktopPlatform } from '../../shared/platform';
 import { cliFixture } from './test-fixture';
+import { desktopPlatform } from '../../shared/platform';
+import { manualInstallCommand } from '../../shared/ai-cli-manual';
 
 const bridge = vi.hoisted(() => ({ invoke: vi.fn() }));
 const terminalStrings = vi.hoisted(() => ({ promptLabel: '', tooMuchOutput: '' }));
@@ -141,11 +142,8 @@ it.each(['en', 'zh-Hant', 'ja'].flatMap(language => (['claude', 'codex', 'agy'] 
   try {
     await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
     expect(document.querySelector<HTMLDetailsElement>('.ai-cli-action-area details')?.open).toBe(true);
-    const windows = desktopPlatform() === 'win32';
-    const command = windows
-      ? { claude: 'irm https://claude.ai/install.ps1 | iex', codex: null, agy: 'irm https://antigravity.google/cli/install.ps1 | iex' }[provider]
-      : { claude: 'curl -fsSL https://claude.ai/install.sh | bash', codex: 'curl -fsSL https://chatgpt.com/codex/install.sh | sh -s -- --release 0.166.0', agy: 'curl -fsSL https://antigravity.google/cli/install.sh | bash' }[provider];
-    if (command === null) { expect(document.querySelector('.ai-cli-action-area code')).toBeNull(); return; }
+    const command = manualInstallCommand(provider, desktopPlatform());
+    expect(command).not.toBeNull();
     expect(document.querySelector('.ai-cli-action-area code')?.textContent).toBe(command);
     expect(document.body.textContent!.split(i18n.t('ai-cli:manual_install_reason'))).toHaveLength(2);
     expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toBe(['manual_step_copy', 'manual_step_terminal', 'manual_step_return'].map(key => i18n.t(`ai-cli:${key}`)).join(''));
@@ -182,13 +180,20 @@ it.each(['en', 'zh-Hant', 'ja'].flatMap(language => (['claude', 'agy'] as const)
   await i18n.changeLanguage(language);
   vi.mocked(desktopPlatform).mockReturnValue('win32');
   Object.assign(fixture.tools.find(tool => tool.provider === provider)!, { manualInstallRequired: true });
-  await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
-  expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toContain('Windows Terminal');
-  expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toContain('Enter');
-  expect(document.querySelector('.ai-cli-action-area code')?.textContent).toBe(provider === 'claude' ? 'irm https://claude.ai/install.ps1 | iex' : 'irm https://antigravity.google/cli/install.ps1 | iex');
-  await click(i18n.t('ai-cli:open_terminal_windows'));
-  expect(fixture.calls.at(-1)).toEqual({ channel: 'ai-cli:openTerminal', payload: { actionId: `terminal-${provider}`, token: '11111111-1111-4111-8111-111111111111' } });
-  expect(runs()).toHaveLength(0);
+  const writeText = vi.fn(async () => {});
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+  try {
+    await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
+    expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toContain('Windows Terminal');
+    expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toContain('Enter');
+    const command = provider === 'claude' ? 'irm https://claude.ai/install.ps1 | iex' : 'irm https://antigravity.google/cli/install.ps1 | iex';
+    expect(document.querySelector('.ai-cli-action-area code')?.textContent).toBe(command);
+    await click(i18n.t('ai-cli:copy_command'));
+    expect(writeText).toHaveBeenCalledWith(command);
+    await click(i18n.t('ai-cli:open_terminal_windows'));
+    expect(fixture.calls.at(-1)).toEqual({ channel: 'ai-cli:openTerminal', payload: { actionId: `terminal-${provider}`, token: '11111111-1111-4111-8111-111111111111' } });
+    expect(runs()).toHaveLength(0);
+  } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
 });
 
 it('checks installed files again and moves to sign-in without running the newly found tool', async () => {
