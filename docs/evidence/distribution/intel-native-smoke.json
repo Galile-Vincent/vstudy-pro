@@ -1,0 +1,54 @@
+{
+  "verifiedAt": "2026-11-06T05:27:14.779Z",
+  "sourceCommit": "2a5bd6dde2a086045caec76b85c956b908c3ef41",
+  "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42163956595",
+  "job": "https://github.com/ava-apple/vstudy-pro/actions/runs/42163956595/job/127716031927",
+  "platform": "darwin",
+  "arch": "x64",
+  "appVersion": "0.2.2",
+  "ok": true,
+  "exitCode": 0,
+  "windowCreated": true,
+  "rendererLoaded": true,
+  "database": {
+    "engine": "node:sqlite",
+    "version": "3.53.3",
+    "integrity": "ok",
+    "writeRead": true,
+    "persisted": true
+  },
+  "safeStorage": {
+    "probed": false,
+    "reason": "Mac Keychain remains lazy during distribution smoke"
+  },
+  "converter": {
+    "resourcesPresent": true,
+    "executables": [
+      {
+        "name": "uv",
+        "path": "/Users/runner/.local/bin/uv",
+        "available": true,
+        "version": "uv 0.12.21 (7af826859 2026-09-29 x86_64-apple-darwin)",
+        "stdlibProbe": false
+      },
+      {
+        "name": "python3",
+        "path": "/usr/local/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+        "available": true,
+        "version": "{\"version\": \"3.14.7 (main, Aug  5 2026, 10:29:49) [Clang 17.0.0 (clang-1700.6.4.2)]\", \"stdlibProbe\": true}",
+        "stdlibProbe": true
+      }
+    ],
+    "managedPythonRequest": "3.12",
+    "nativeWheel": {
+      "verified": true,
+      "version": "50.0.2",
+      "sha256": "300ffa97163fa3d691e9476049436997b80edcd74a90e8d3da701eab1134f3cc",
+      "minimumMacOS": "13.0"
+    },
+    "bootstrapAttempted": false,
+    "conversionTested": false
+  },
+  "qualificationOnly": true,
+  "signingVerified": false
+}

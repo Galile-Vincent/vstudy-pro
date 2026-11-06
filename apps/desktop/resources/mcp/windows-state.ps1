@@ -110,7 +110,7 @@ try {
         $file.Flush($true)
         Trace-Stage 'file-flushed'
     } finally { $file.Dispose() }
-    if ([System.IO.File]::Exists($path)) { [System.IO.File]::Replace($temporary, $path, $null) }
+    if ([System.IO.File]::Exists($path)) { [System.IO.File]::Replace($temporary, $path, [NullString]::Value) }
     else { [System.IO.File]::Move($temporary, $path) }
     Trace-Stage 'file-published'
     $published = Open-VerifiedState $path
