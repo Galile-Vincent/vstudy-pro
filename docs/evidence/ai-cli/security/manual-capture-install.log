@@ -1,0 +1,12 @@
+Scope: all 4 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +60
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 60, reused 60, downloaded 0, added 60, done
+
+. prepare$ node scripts/ensure-pty-helper.mjs && node apps/desktop/scripts/generate-locales.mjs && node scripts/install-hooks.mjs
+. prepare: Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33/apps/desktop/src/shared/locales.generated.ts (22 namespaces).
+. prepare: sync hooks: ✔️(pre-commit, pre-push, commit-msg)
+. prepare: Done
+Done in 1.2s using pnpm v10.28.2

@@ -1,0 +1,17 @@
+
+> vstudy-pro@ security:static /Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33
+> node apps/desktop/scripts/security-audit.mjs && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs
+
+{"vulnerabilities":{"info":0,"low":1,"moderate":4,"high":12,"critical":1},"unreviewed":[]}
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33/apps/desktop/src/main/ipc/index.ts
+  76:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33/apps/desktop/src/main/moodle/sso-protocol.ts
+  14:59  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33/apps/desktop/src/main/moodle/webview.ts
+  224:89  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+✖ 3 problems (0 errors, 3 warnings)
+

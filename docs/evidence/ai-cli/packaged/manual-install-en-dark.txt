@@ -1,0 +1,51 @@
+Set up an AI tool
+
+Install, sign in, and test here. You can keep reading at any time.
+
+Choose your tool
+Claude Code
+Your Anthropic account
+Codex
+Your OpenAI account
+Antigravity
+Your Google account
+Antigravity
+Not installed
+1
+Install
+You are here
+2
+Sign in
+3
+Test
+
+What happens next
+
+Install your AI tool.
+
+VStudy cannot independently confirm this download comes from the provider. Install it with the official command in your own terminal, then choose the program in Settings > Providers.
+
+Allow VStudy to run Antigravity
+Optional. No tool launches until you allow it and run a reviewed action.
+Account and cost
+Install another way
+
+VStudy cannot independently confirm this download comes from the provider. Install it with the official command in your own terminal, then choose the program in Settings > Providers.
+
+If installing here fails, you or your IT team can use the official installer in your own terminal. It uses the vendor's folders and defaults, outside VStudy's managed copy. VStudy does not run this command. After installation, use Settings > Providers > Change to choose that executable, then check its status here.
+
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+Copy command
+Keep your tool ready
+
+Updates and rollback apply to new chats. Ongoing sessions continue with their current version.
+
+Review account status check
+Sign in again
+Which tool should I choose?
+Advanced general shell
+Need help from your teacher or IT team?
+
+AI is optional. Your reading stays available.
+
+Continue reading

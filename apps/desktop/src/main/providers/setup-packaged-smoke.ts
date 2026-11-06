@@ -3,6 +3,7 @@ import { dialog, type BrowserWindow } from 'electron';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cliActionPlanSchema, cliActionSessionSchema } from '../../shared/ai-cli';
+import { captureManualSetup } from './setup-manual-smoke';
 
 export async function runSetupPackagedSmoke(window: BrowserWindow, root: string) {
   const invoke = (channel: string, request: unknown) => window.webContents.executeJavaScript(`window.desktop.invoke(${JSON.stringify(channel)},${JSON.stringify(request)})`);
@@ -32,7 +33,8 @@ export async function runSetupPackagedSmoke(window: BrowserWindow, root: string)
     await window.webContents.executeJavaScript("window.dispatchEvent(new CustomEvent('vstudy:ai-cli-setup'))");
     await new Promise(resolve => setTimeout(resolve, 350));
     await writeFile(join(root, 'ai-cli-packaged.png'), (await window.webContents.capturePage()).toPNG());
-    await writeFile(join(root, 'smoke-result.json'), JSON.stringify({ ok: true, packagedPty: true, nativeCommandAnswered: true, closed: true, preferences }));
+    const manualCaptures = process.env.VSTUDY_CLI_MANUAL_SMOKE === '1' ? await captureManualSetup(window, root) : [];
+    await writeFile(join(root, 'smoke-result.json'), JSON.stringify({ ok: true, packagedPty: true, nativeCommandAnswered: true, closed: true, preferences, manualCaptures }));
   } catch {
     await writeFile(join(root, 'smoke-result.json'), JSON.stringify({ ok: false, packagedPty: true, reason: 'Packaged PTY action failed' }));
   } finally {

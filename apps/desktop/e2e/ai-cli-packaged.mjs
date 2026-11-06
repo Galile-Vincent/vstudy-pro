@@ -10,6 +10,8 @@ import { getCurrentFuseWire, FuseV1Options as F } from '@electron/fuses';
 const evidence = resolve('../../docs/evidence/ai-cli/packaged');
 await mkdir(evidence, { recursive: true });
 const root = await mkdtemp(join(tmpdir(), 'vstudy-packaged-smoke-'));
+const fixtureHome = join(root, 'home');
+await mkdir(fixtureHome, { mode: 0o700 });
 const bundle = resolve('release/mac-arm64/VStudy Pro.app');
 const native = join(bundle, 'Contents/Resources/app.asar.unpacked/node_modules/node-pty');
 const helperModes = new Map();
@@ -28,7 +30,7 @@ try {
   const nativeFiles = {};
   for (const file of ['prebuilds/darwin-arm64/pty.node', 'prebuilds/darwin-arm64/spawn-helper']) nativeFiles[file] = (await stat(join(native, file))).size;
   let log = '';
-  child = spawn(join(bundle, 'Contents/MacOS/VStudy Pro'), [], { env: { ...process.env, ELECTRON_RUN_AS_NODE: '', VSTUDY_PACKAGED_SMOKE_DIR: root, VSTUDY_FAKE_PROVIDER: '1', VSTUDY_CLI_PTY_SMOKE: '1', VSTUDY_LOCALE: 'en' }, stdio: ['ignore', 'pipe', 'pipe'] });
+  child = spawn(join(bundle, 'Contents/MacOS/VStudy Pro'), [], { env: { ...process.env, HOME: fixtureHome, ELECTRON_RUN_AS_NODE: '', VSTUDY_PACKAGED_SMOKE_DIR: root, VSTUDY_FAKE_PROVIDER: '1', VSTUDY_CLI_PTY_SMOKE: '1', VSTUDY_CLI_MANUAL_SMOKE: '1', VSTUDY_LOCALE: 'en' }, stdio: ['ignore', 'pipe', 'pipe'] });
   child.stdout.on('data', data => { log = (log + data).slice(-32768); });
   child.stderr.on('data', data => { log = (log + data).slice(-32768); });
   const timer = setTimeout(() => child.kill('SIGKILL'), 40000);
@@ -38,8 +40,14 @@ try {
   await writeFile(join(evidence, 'result.json'), JSON.stringify({ code, signatureVerified: true, signature, fuses, nativeFiles, helpers, result }, null, 2));
   await writeFile(join(evidence, 'launch.log'), log);
   await copyFile(join(root, 'ai-cli-packaged.png'), join(evidence, 'ai-cli-packaged.png')).catch(() => {});
+  for (const language of ['en', 'zh-Hant', 'ja']) for (const scheme of ['light', 'dark']) for (const extension of ['png', 'txt']) {
+    const file = `manual-install-${language}-${scheme}.${extension}`;
+    await copyFile(join(root, file), join(evidence, file)).catch(() => {});
+  }
   assert.equal(code, 0); assert.equal(result.ok, true); assert.equal(result.nativeCommandAnswered, true); assert.equal(result.closed, true);
   assert.ok(helpers.some(helper => (parseInt(helper.after, 8) & 0o111) === 0o111), 'the real ASAR runtime repaired its resolved helper before the PTY spawn');
+  assert.equal(result.manualCaptures.length, 6, 'all manual-install language and scheme captures passed');
+  for (const capture of result.manualCaptures) assert.ok((await stat(join(evidence, capture.file))).size > 0, 'the captured screenshot was retained');
   console.log(JSON.stringify({ ...result, signatureVerified: true, releaseFusesEnabled: true, nativeFiles }));
 } finally {
   child?.kill('SIGKILL');
