@@ -39,7 +39,7 @@ function Assert-Private($Acl, [bool]$Directory) {
 function Open-VerifiedState([string]$Path) {
     Assert-Path $Path $false
     $file = [System.IO.FileStream]::new($Path, [System.IO.FileMode]::Open,
-        [System.Security.AccessControl.FileSystemRights]'Read, ReadPermissions',
+        [System.IO.FileAccess]::Read,
         [System.IO.FileShare]::Read, 4096, [System.IO.FileOptions]::SequentialScan)
     try {
         Assert-Private ($file.GetAccessControl()) $false

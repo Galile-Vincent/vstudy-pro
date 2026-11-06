@@ -52,7 +52,14 @@ it('does not launch a helper for absent state and rejects unsupported paths or u
 
 it.skipIf(process.platform !== 'win32')('persists and replaces state with a protected current-SID ACL and rejects broadened ACLs and hardlinks', async () => {
   const root = await mkdtemp(join(tmpdir(), 'vstudy-state-native-'));
-  const store = createWindowsStatePersistence({script: resolve('resources/mcp/windows-state.ps1')});
+  const diagnostics: string[] = [];
+  const store = createWindowsStatePersistence({script: resolve('resources/mcp/windows-state.ps1'), execute: (executable, args, options) => {
+    try { return execFileSync(executable, args, options); }
+    catch (error) {
+      if (error instanceof Error && 'stderr' in error) diagnostics.push(String(error.stderr).slice(-2400));
+      throw error;
+    }
+  }});
   const file = win32.join(root, 'mcp', 'state.json');
   const powershell = systemExecutable('WindowsPowerShell/v1.0/powershell.exe');
   const command = (script: string) => execFileSync(powershell, ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', script], {
@@ -79,5 +86,8 @@ it.skipIf(process.platform !== 'win32')('persists and replaces state with a prot
     command(`$a=Get-Acl -LiteralPath $env:VSTUDY_STATE_PATH; $a.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new('S-1-1-0'),[Security.AccessControl.FileSystemRights]::Read,[Security.AccessControl.AccessControlType]::Allow)); Set-Acl -LiteralPath $env:VSTUDY_STATE_PATH -AclObject $a`);
     expect(() => store.read(root)).toThrow('could not be verified');
     expect(() => store.write(root, '{}')).toThrow('could not be verified');
+  } catch (error) {
+    console.error('Native Windows state fixture failed', diagnostics);
+    throw error;
   } finally {await rm(root, {recursive: true, force: true, maxRetries: 3});}
 }, 180000);
