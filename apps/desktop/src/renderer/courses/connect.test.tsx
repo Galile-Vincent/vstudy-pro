@@ -101,7 +101,7 @@ it('waits for permission before sign-in without timing out',async () => {
   api.preflight = () => new Promise(resolve => {release=resolve;});
   await click('Chung Yuan');await click('Continue to sign in');
   expect(document.body.textContent).toContain(tr('moodle:keychain_waiting'));
-  expect(document.body.textContent).toContain('Choose Always Allow');
+  expect(document.body.textContent).toContain(tr('moodle:keychain_hint'));
   expect(connect).not.toHaveBeenCalled();
   expect([...document.querySelectorAll('button')].some(button => button.textContent === 'Sign in')).toBe(false);
   await act(async () => release({ready:true}));

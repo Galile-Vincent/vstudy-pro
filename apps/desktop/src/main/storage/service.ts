@@ -16,6 +16,7 @@ import { MoodleLogoCache } from '../moodle/logos';
 import { clearMoodleImages } from '../moodle/files';
 import { libraryFiles } from './backup';
 import { retryBusy } from './atomic';
+import { isPathWithin } from '../platform/paths';
 
 /** Count physical files once. Cache bytes are also reported as logical SQLite payload size. */
 export async function storageUsage(root:string,store:Store){
@@ -30,7 +31,7 @@ export async function storageUsage(root:string,store:Store){
         : /^vstudy\.sqlite(?:-wal|-shm)?$/.test(entry.name) ? 'database'
         : ['secrets.json','providers.json','executable-pins.json'].includes(entry.name) ? 'configuration'
         : /cache|converter-venv/i.test(entry.name) ? 'cache' : 'other';
-      if(file.startsWith(join(root,'library')+'/'))id=entry.name.startsWith('source.') ? 'originals' : 'converted';
+      if(isPathWithin(join(root,'library'),file))id=entry.name.startsWith('source.') ? 'originals' : 'converted';
       if(entry.isDirectory())await walk(file,id);
       else if(entry.isFile()){
         const info=await lstat(file).catch(error=>{if(error.code==='ENOENT')return undefined;throw error;});if(!info)continue;

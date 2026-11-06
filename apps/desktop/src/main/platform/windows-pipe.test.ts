@@ -33,7 +33,9 @@ it.skipIf(process.platform !== 'win32')('round-trips bytes only through the curr
     expect(sid).toMatch(/^S-1-\d+(?:-\d+)+$/);
     const acl = Buffer.from(encoded!, 'base64').toString('utf8');
     expect(acl).toContain('D:P');
-    expect(acl).toContain(sid);
+    const trustee = sid!.endsWith('-500') ? 'LA' : sid;
+    expect(acl).toContain(`;;;${trustee})`);
+    expect(acl).toMatch(/\(D;[^)]*;;;NU\)/);
     expect(acl).not.toMatch(/\(A;[^)]*;;;(?:WD|AU|BU)\)/);
     // Connect after readiness. There is no permissive Node server in this test.
     const peer = createConnection(`\\\\.\\pipe\\${name}`);

@@ -9,16 +9,18 @@ import { resolve, relative, sep, join } from 'node:path';
 import { isPathWithin } from '../platform/paths';
 /** Reject escaping, symbolic, or hard-linked paths before returning a real library path. */
 export function containedPath(root: string, path: string) {
-    const lexical = relative(resolve(root), resolve(path));
-    if (!isPathWithin(root, path))
+    const realRoot = realpathSync.native(root);
+    const lexicalRoot = isPathWithin(root, path) ? resolve(root) : realRoot;
+    const lexical = relative(lexicalRoot, resolve(path));
+    if (!isPathWithin(lexicalRoot, path))
         throw new Error('Path outside library');
-    let current = resolve(root);
+    let current = lexicalRoot;
     for (const part of lexical.split(sep)) {
         current = join(current, part);
         if (lstatSync(current).isSymbolicLink() || (lstatSync(current).isFile() && lstatSync(current).nlink !== 1))
             throw new Error('Symlink in library path');
     }
-    const realRoot = realpathSync(root), real = realpathSync(path);
+    const real = realpathSync.native(path);
     if (!isPathWithin(realRoot, real))
         throw new Error('Path outside library');
     return real;
