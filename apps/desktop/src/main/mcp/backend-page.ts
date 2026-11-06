@@ -5,7 +5,7 @@ import { decodeHtmlEntities } from '../../shared/html';
 import { fail } from './backend-errors';
 
 export const MAX_PAGE_BYTES = 48_000;
-export const MAX_TEXT_CHARS = 12_000;
+export const MAX_TEXT_CHARS = 6_000;
 
 /** Convert external HTML or Markdown to inert text and remove network and local path references. */
 export function contentText(value: string, cap = 2_000): string {
@@ -48,6 +48,7 @@ export class BackendPages {
     } catch { fail('INVALID_ARGUMENT'); }
   }
   page<T>(rows: readonly T[], binding: string, args: {cursor?:string | undefined; limit:number}) {
+    binding = createHash('sha256').update(binding).update(JSON.stringify(rows)).digest('hex');
     const start = this.offset(binding, args.cursor);
     const items: T[] = [];
     let bytes = 0;
@@ -61,6 +62,7 @@ export class BackendPages {
     return {content:{items}, nextCursor:next < rows.length ? this.encode(binding, next) : null};
   }
   text(text: string, binding: string, args: {cursor?:string | undefined; limit:number}) {
+    binding = createHash('sha256').update(binding).update(text).digest('hex');
     const offset = this.offset(binding, args.cursor);
     const value = text.slice(offset, offset + Math.min(MAX_TEXT_CHARS, args.limit * 1000));
     return {content:{text:value, offset}, nextCursor:offset + value.length < text.length ? this.encode(binding, offset + value.length) : null};

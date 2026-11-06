@@ -286,11 +286,13 @@ export class MoodleService {
   }
   async token(id: string): Promise<string> { return (await this.tokens(id)).token; }
   /** Main-only MCP transport shares the service scheduler and injected request, never a token result. */
-  async mcpClient(id: string): Promise<Pick<MoodleClient, 'call'>> {
+  async mcpClient(id: string, onSecrets?: (values:readonly string[]) => void): Promise<Pick<MoodleClient, 'call'>> {
     if (this.stopped) throw new MoodleError('auth');
     const account = this.repository.account(id);
     if (account.status !== 'connected') throw new MoodleError('auth');
-    const client = new MoodleClient(account.siteUrl, await this.token(id), this.request, {queue:this.queue, priority:5});
+    const tokens = await this.tokens(id);
+    onSecrets?.([tokens.token, tokens.privateToken, tokens.userPrivateAccessKey].filter((value): value is string => Boolean(value)));
+    const client = new MoodleClient(account.siteUrl, tokens.token, this.request, {queue:this.queue, priority:5});
     if (this.stopped || !this.repository.accounts().some(row => row.id === id && row.status === 'connected')) throw new MoodleError('auth');
     client.setFunctions(this.repository.capabilities(id)?.functions ?? []);
     client.setLanguage(this.language());

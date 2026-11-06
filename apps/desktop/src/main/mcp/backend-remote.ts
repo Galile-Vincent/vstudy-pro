@@ -8,7 +8,7 @@ export class BackendRemote {
   private tail: Promise<unknown> = Promise.resolve();
   private pending = 0;
   private lastFinished: number | null = null;
-  constructor(private readonly options:McpBackendOptions) {}
+  constructor(private readonly options:McpBackendOptions, private readonly onSecrets?: (values:readonly string[]) => void) {}
   supports(context:BackendContext, name:string): boolean {
     return context.repository.capabilities(context.account().id)?.functions?.includes(name) === true;
   }
@@ -28,7 +28,7 @@ export class BackendRemote {
       this.require(context, [name]);
       if (context.account().status !== 'connected') fail('SESSION_REQUIRED');
       try {
-        const client = await this.options.moodle.mcpClient(context.account().id);
+        const client = await this.options.moodle.mcpClient(context.account().id, this.onSecrets);
         context.recheck();
         return await client.call(name, params, schema, false);
       } finally { this.lastFinished = clock(); }

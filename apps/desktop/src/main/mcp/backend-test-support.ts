@@ -1,5 +1,5 @@
 /** Isolated SQLite, school responses and main-only secrets for backend behavior tests. @packageDocumentation */
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -71,7 +71,7 @@ export async function backendHarness() {
   const options:McpBackendOptions = {store, moodle, planner, documents:{read}, openModule, exportCalendar, clock:() => time, random:() => 0, wait:async ms => { waits.push(ms); time += ms; }};
   function document(fileId = fileA, content = 'Converted algorithms text') {
     const record = repository.file(fileId).file;
-    const item = documentSchema.parse({id:randomUUID(), title:'Lecture', sourceName:'lecture.md', sourceHash:randomUUID(), sourcePath:'/main-only/lecture.md', mime:'text/markdown', markdownPath:'/main-only/content.md', status:'ready', createdAt:stamp, converter:'markitdown'});
+    const item = documentSchema.parse({id:randomUUID(), title:'Lecture', sourceName:'lecture.md', sourceHash:createHash('sha256').update(fileId).digest('hex'), sourcePath:'/main-only/lecture.md', mime:'text/markdown', markdownPath:'/main-only/content.md', status:'ready', createdAt:stamp, converter:'markitdown'});
     store.documents.insert(item);
     new SearchService(store.db).update(item.id, content);
     repository.linkFile(fileId, item.id, record);
