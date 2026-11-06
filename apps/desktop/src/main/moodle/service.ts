@@ -227,23 +227,23 @@ export class MoodleService {
       const contents=await optional('core_course_get_contents',() => client.courseContents(detail.course));
       if (contents && active()) {
         if (contents.partial) this.partialContents.add(id); else this.partialContents.delete(id);
-        this.repository.saveDetail(id,{sections:contents.sections},contents.files,client.offline ? client.lastSyncedAt : undefined);
+        this.repository.saveDetail(id,{sections:contents.sections},contents.files,client.offline ? client.lastSyncedAt : undefined,!contents.partial);
       }
       ready();
       this.progress({accountId:account.id,courseId:id,state:'loading',completed:1,total:1});
       await Promise.all([(async () => {
-      if (contents && active()) {
+      if (active()) {
         const [statuses,assignments,quizzes] = await Promise.all([
           detail.course.identity.enableCompletion ? optional('core_completion_get_activities_completion_status',() => client.completion(detail.course,account.remoteUserId)) : undefined,
           optional('mod_assign_get_assignments',() => client.assignments(account.id,[detail.course])),
           optional('mod_quiz_get_quizzes_by_courses',() => client.quizDeadlines(detail.course)),
         ]);
-        const deadlines = [...new Map([...detail.deadlines,...(assignments ?? []),...(quizzes ?? [])].map(item => [item.id,item])).values()];
         if (active()) {
           const latest=this.repository.course(id);
-          this.repository.apply(account.id,{courses:[latest.course],deadlines,notifications:[],grades:this.repository.gradeRecords(id),files:this.repository.fileRecords(id)},id);
+          this.repository.apply(account.id,{courses:[latest.course],deadlines:[],deadlineFamilies:{...(assignments ? {assignment:assignments} : {}),...(quizzes ? {quiz:quizzes} : {})},notifications:[],grades:this.repository.gradeRecords(id),files:this.repository.fileRecords(id)},id);
         }
-        for (const section of contents.sections) for (const module of section.modules) {
+        const deadlines = active() ? this.repository.course(id).deadlines : [];
+        for (const section of contents?.sections ?? []) for (const module of section.modules) {
           const status = statuses?.find(status => status.cmid === module.cmid);
           if (status) module.completion = completionState(status.state,status.tracking);
           const deadline = deadlines.find(deadline => deadline.url && deadline.url === module.url);
@@ -256,7 +256,7 @@ export class MoodleService {
             this.repository.saveCourse({...latest,progress:100 * tracked.filter(status => status.state > 0).length / tracked.length,identity:{...latest.identity,hasProgress:true}});
           }
         }
-        if (active()) this.repository.saveDetail(id,{sections:contents.sections},contents.files,client.offline ? client.lastSyncedAt : undefined);
+        if (contents && active()) this.repository.saveDetail(id,{sections:contents.sections},contents.files,client.offline ? client.lastSyncedAt : undefined,!contents.partial);
       }
       })(),(async () => {
       if (detail.course.identity.teacherSource !== 'contacts' && Date.now() - (this.teacherCache.get(id) ?? 0) > 3600_000) {
@@ -273,7 +273,7 @@ export class MoodleService {
         const grades=await optional('gradereport_user_get_grade_items',() => client.grades(detail.course,account.remoteUserId));
         if (grades && active()) {
           const latest=this.repository.course(id);
-          this.repository.apply(account.id,{courses:[latest.course],deadlines:latest.deadlines,notifications:[],grades,files:this.repository.fileRecords(id)},id);
+          this.repository.apply(account.id,{courses:[latest.course],deadlines:[],deadlineFamilies:{},notifications:[],grades,files:this.repository.fileRecords(id)},id);
         }
       })(),(async () => {
       const announcements = await optional('mod_forum_get_forums_by_courses',() => client.announcements(this.repository.course(id).course));
@@ -388,24 +388,23 @@ export class MoodleService {
     const optional = async <T>(request: () => Promise<T>, cached: T): Promise<T> => {
       try { return await request(); } catch (error) { if (error instanceof MoodleError && error.kind === 'auth') throw error; if (!(error instanceof MoodleError) || error.kind !== 'unsupported') errors.push(error instanceof MoodleError ? error.kind : 'service'); return cached; }
     };
-    const cached = courses.flatMap(course => { try { return [this.repository.course(course.id)]; } catch { return []; } });
-    const events = await optional(() => client.events(id,courses),cached.flatMap(item => item.deadlines.filter(item => item.kind !== 'assignment')));
+    const events = await optional(() => client.events(id,courses),undefined);
     const notifications = await optional(() => client.notifications(account,courses),this.repository.notificationRecords(id).map(row => ({...row,value:{...row.value,courseId:courses.some(course => course.id === row.value.courseId) ? row.value.courseId : null}})));
     const active = () => !this.stopped && this.repository.accounts().some(account => account.id === id);
     let completed=0;
     const current=courses.filter(course => course.identity.lifecycle === 'current');
     const outcomes=await Promise.allSettled(current.map(async course => {
       const [assignments,grades,contents] = await Promise.all([
-        optional(() => client.assignments(id,[course],false),cached.find(item => item.course.id === course.id)?.deadlines.filter(item => item.kind === 'assignment') ?? []),
+        optional(() => client.assignments(id,[course],false),undefined),
         Promise.resolve(this.repository.gradeRecords(course.id)),
         optional(() => client.courseContents(course),undefined),
       ]);
       if (active()) {
-        const deadlines=[...assignments,...events.filter(event => event.courseId === course.id && !assignments.some(item => item.url === event.url))];
-        this.repository.apply(id,{courses:[course],deadlines,notifications:[],grades,files:contents?.files ?? this.repository.fileRecords(course.id)},course.id);
+        const calendar=events?.filter(event => event.courseId === course.id && !assignments?.some(item => item.url && item.url === event.url));
+        this.repository.apply(id,{courses:[course],deadlines:[],deadlineFamilies:{...(assignments ? {assignment:assignments} : {}),...(calendar ? {calendar} : {})},notifications:[],grades,files:this.repository.fileRecords(course.id)},course.id);
         if (contents) {
           if (contents.partial) this.partialContents.add(course.id); else this.partialContents.delete(course.id);
-          this.repository.saveDetail(course.id,{sections:contents.sections},contents.files,client.offline ? client.lastSyncedAt : undefined);
+          this.repository.saveDetail(course.id,{sections:contents.sections},contents.files,client.offline ? client.lastSyncedAt : undefined,!contents.partial);
         }
         this.progress({accountId:id,state:'loading',completed:++completed,total:current.length});
       }
