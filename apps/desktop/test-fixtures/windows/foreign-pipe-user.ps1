@@ -33,9 +33,14 @@ public static class VStudyForeignPipeProbe {
             WindowsIdentity current = WindowsIdentity.GetCurrent();
             if (current.User.Value == original || current.User.Value != expectedSid ||
                 new WindowsPrincipal(current).IsInRole(WindowsBuiltInRole.Administrator)) throw new InvalidOperationException("Foreign ordinary-user identity was not established");
-            using (SafeFileHandle handle = CreateFile("\\\\.\\pipe\\" + pipe, 0xc0020000u, 3u, IntPtr.Zero, 3u, 0x00110000u, IntPtr.Zero)) {
-                return handle.IsInvalid ? Marshal.GetLastWin32Error() : 0;
+            foreach (uint access in new uint[] {1u, 2u, 3u}) {
+                using (SafeFileHandle handle = CreateFile("\\\\.\\pipe\\" + pipe, access, 3u, IntPtr.Zero, 3u, 0x40110000u, IntPtr.Zero)) {
+                    if (!handle.IsInvalid) return 0;
+                    int error = Marshal.GetLastWin32Error();
+                    if (error != 5) return error;
+                }
             }
+            return 5;
         } finally {
             if (impersonated && !RevertToSelf()) Environment.FailFast("Could not restore the test identity");
             CloseHandle(token);
