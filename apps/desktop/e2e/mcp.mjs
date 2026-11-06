@@ -97,11 +97,11 @@ try {
   await page.getByTestId('agent-consent').getByRole('button',{name:'Deny',exact:true}).click();assert.equal((await deny).error.code,'DENIED');
   assert.equal((await invoke('mark_module_complete',{courseId,moduleId:quizId})).error.code,'ACADEMIC_INTEGRITY');
   assert.equal((await invoke('get_quiz_info',{courseId,quizId:41})).ok,true);
-  const submit=invoke('submit_assignment',{courseId,moduleId:assignId,assignmentId:51,text:'This is my own reflection.',studentOwned:true});
+  const submit=invoke('save_assignment_draft',{courseId,moduleId:assignId,assignmentId:51,text:'This is my own reflection.',studentOwned:true});
   await page.getByTestId('agent-consent').waitFor();
   assert.equal(fixture.submissions.length,0);
   await page.screenshot({path:join(evidence,'03b-submission.png')});
-  await page.getByTestId('agent-consent').getByRole('checkbox',{name:'I confirm this is my own work and I want to submit this exact text.',exact:true}).click();
+  await page.getByTestId('agent-consent').getByRole('checkbox',{name:'I confirm this is my own work and I want to save this exact text as a draft.',exact:true}).click();
   await page.getByTestId('agent-consent').getByRole('button',{name:'Approve once',exact:true}).click();
   assert.equal((await submit).ok,true);assert.deepEqual(fixture.submissions,['This is my own reflection.']);
   report.push('PASS. Planner writes deferred until approval and denial saved nothing. Quiz completion was blocked. Assignment text was sent exactly once only after high-risk consent.');

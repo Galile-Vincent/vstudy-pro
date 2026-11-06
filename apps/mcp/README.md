@@ -34,7 +34,7 @@ A disconnected read may reconnect once. Writes never replay after a disconnect o
 
 ## Contracts and modules
 
-The app-owned [shared contract](../desktop/src/shared/mcp.ts) defines all 27 input schemas, risks, scopes, and the result union. It is unchanged by this package. `server.ts` publishes those schemas with the official MCP SDK. A successful result contains a fixed human summary plus `data.trust`, `data.notice`, provenance, content, and a pagination cursor. An error contains a fixed code, message, and hint. Raw bridge errors never enter stdio.
+The app-owned [shared contract](../desktop/src/shared/mcp.ts) defines all 27 input schemas, risks, scopes, and the result union. It is unchanged by this package. `server.ts` publishes those schemas with the official MCP SDK. A successful result contains a fixed human summary plus `data.trust`, `data.notice`, provenance, content, an optional `data.redacted` flag, and a pagination cursor. `save_assignment_draft` replaces `submit_assignment` and saves only approved student text as a draft. Its result supplies an `open_in_app` target. Final assignment submission is always manual in Moodle. An error contains a fixed code, message, and hint. Raw bridge errors never enter stdio.
 
 Resources use the same bridge tool calls and account checks:
 

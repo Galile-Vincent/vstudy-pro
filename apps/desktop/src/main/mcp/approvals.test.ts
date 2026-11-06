@@ -15,7 +15,7 @@ const writes: [ToolName, Record<string, unknown>][] = [
   ['open_in_app', {courseId: course, moduleId: module}],
   ['mark_module_complete', {courseId: course, moduleId: module}],
   ['post_forum_reply', {courseId: course, discussionId: 1, postId: 2, subject: 'Reply', message: 'My own reply'}],
-  ['submit_assignment', {courseId: course, moduleId: module, assignmentId: 1, text: 'My own work', studentOwned: true}],
+  ['save_assignment_draft', {courseId: course, moduleId: module, assignmentId: 1, text: 'My own work', studentOwned: true}],
 ];
 
 it.each(writes)('%s requires a new one-shot approval for the exact payload', async (name, args) => {
@@ -97,11 +97,11 @@ it('does not truncate a 20,000-character submission and rejects payloads that ca
   engine.setEnabled(true);
   const client = await pair(engine, [account.id]);
   const args = {courseId: course, moduleId: module, assignmentId: 1, text: 'word '.repeat(4000), studentOwned: true};
-  const response = call(engine, client.grant, 'submit_assignment', args);
+  const response = call(engine, client.grant, 'save_assignment_draft', args);
   expect((await proposal(engine)).payload.text).toBe(args.text);
   engine.decideProposal({proposalId: engine.state().proposals[0]!.id, approve: true});
   expect(await response).toMatchObject({ok: true});
-  expect(await call(engine, client.grant, 'submit_assignment', {...args, text: 'SCHOOL-CANARY'})).toMatchObject({ok: false, error: {code: 'INVALID_ARGUMENT'}});
+  expect(await call(engine, client.grant, 'save_assignment_draft', {...args, text: 'SCHOOL-CANARY'})).toMatchObject({ok: false, error: {code: 'INVALID_ARGUMENT'}});
   expect(execute).toHaveBeenCalledTimes(1);
 });
 

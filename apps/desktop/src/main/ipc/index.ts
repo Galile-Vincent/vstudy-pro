@@ -42,7 +42,7 @@ export interface AppIpcOptions {
   moodleRequest?:typeof fetch;
   mcpPaths?:{peerHelper?:string;serverBin:string};
   mcpTransport?:McpTransportFactory;
-  mcpPersistence?:McpStatePersistence;
+  mcpPersistence?:McpStatePersistence|(()=>McpStatePersistence|undefined);
 }
 
 /** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
@@ -112,7 +112,8 @@ export function registerIpc(
   const disposeMoodle = registerMoodleIpc(registrar, store, secrets, implemented, disposeDocuments, restoreMainWindow, options.moodleRequest);
   const userData=app.getPath('userData');
   const navigation=createAgentNavigation(disposeMoodle.service.repository,restoreMainWindow);
-  const mcpBackend=createMcpBackend({store,moodle:disposeMoodle.service,documents:disposeDocuments,openModule:navigation.openModule,exportCalendar:async selection=>{
+  let backend:ReturnType<typeof createMcpBackend>|undefined;
+  const mcpBackend=()=>backend ??= createMcpBackend({store,moodle:disposeMoodle.service,documents:disposeDocuments,openModule:navigation.openModule,exportCalendar:async selection=>{
     const context=new PlannerRepository(store.db).context();
     const text=plannerCalendar(context.snapshot,context.deadlines,selection);
     const result=await dialog.showSaveDialog({defaultPath:'vstudy-study-plan.ics',filters:[{name:tr('planner:calendar_file'),extensions:['ics']}]});
@@ -123,9 +124,9 @@ export function registerIpc(
     peerHelper:app.isPackaged ? join(process.resourcesPath,'mcp-peer') : join(app.getAppPath(),'resources/mcp-peer'),
     serverBin:app.isPackaged ? join(process.resourcesPath,'mcp/dist/vstudy-mcp.cjs') : join(app.getAppPath(),'../mcp/dist/vstudy-mcp.cjs'),
   };
-  const mcp=createMcpRuntime({userData,backend:mcpBackend,secretValues:mcpBackend.secretValues,
+  const mcp=createMcpRuntime({userData,backend:mcpBackend,secretValues:()=>mcpBackend().secretValues(),
     ...(mcpPaths.peerHelper ? {peerHelper:mcpPaths.peerHelper} : {}),...(options.mcpTransport?{transport:options.mcpTransport}:{}),
-    ...(options.mcpPersistence?{persistence:options.mcpPersistence}:{}),
+    persistence:()=>typeof options.mcpPersistence==='function' ? options.mcpPersistence() : options.mcpPersistence,
     restoreWindow:restoreMainWindow,onFailure:()=>log({phase:'mcp-bridge-unavailable',code:'UNAVAILABLE'}),
   });
   registerMcpIpc(registrar,implemented,mcp,navigation,createAgentClientSetup(mcpPaths.serverBin,userData));

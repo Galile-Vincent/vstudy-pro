@@ -13,7 +13,7 @@ export interface AgentClientSetup {
 export function registerMcpIpc(registrar:ReturnType<typeof createIpcRegistrar>,implemented:Set<IpcChannel>,runtime:McpRuntime,navigation:ReturnType<typeof createAgentNavigation>,clients:AgentClientSetup) {
   for (const channel of Object.keys(mcpIpc) as (keyof typeof mcpIpc)[]) implemented.add(channel);
   implemented.add('mcp:take-navigation');
-  registrar.handle('mcp:state',()=>runtime.engine.state());
+  registrar.handle('mcp:state',()=>runtime.state());
   registrar.handle('mcp:enable',async({enabled})=>{await runtime.setEnabled(enabled);if(!enabled)navigation.clear();return {ok:true};});
   registrar.handle('mcp:revoke',({grantId})=>{runtime.engine.revoke(grantId);navigation.clear();return {ok:true};});
   registrar.handle('mcp:edit-grant',request=>{runtime.engine.editGrant(request);navigation.clear();return {ok:true};});

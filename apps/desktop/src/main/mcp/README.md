@@ -40,31 +40,28 @@ Required bridge options are `userData`, absolute `peerHelper`, `handleRequest`, 
 
 ## Main integration
 
-```ts
-import { createMcpEngine } from './mcp/engine';
-import { createUnixBridge } from './mcp/bridge';
+`createMcpRuntime` defers backend, engine, private-state and transport construction until `setEnabled(true)`. Supply a backend factory to keep desktop startup independent of MCP availability. Its `state()` returns safe idle state without constructing the engine. Initialization failures log only a fixed diagnostic and set `unavailable`; Settings displays the translated platform message. Access must be enabled again after restarting the app.
 
-const engine = createMcpEngine({
+```ts
+import { createMcpRuntime } from './mcp/runtime';
+
+const runtime = createMcpRuntime({
 	userData,
-	backend,
+	backend: () => getOrCreateMainBackend(),
 	secretValues: () => knownSchoolSecretsInMain(),
-	onChange: () => notifyAgentsStateChanged(),
-});
-const bridge = await createUnixBridge({
-	userData,
 	peerHelper: absolutePackagedHelperPath,
-	handleRequest: (request, connectionId) => engine.handleRequest(request, connectionId),
-	onDisconnect: connectionId => engine.disconnect(connectionId),
+	restoreWindow: () => restoreMainWindow(),
+	onFailure: () => log({phase:'mcp-bridge-unavailable', code:'UNAVAILABLE'}),
 });
 ```
 
-Register renderer methods only through the app's existing sender-validated, schema-validated IPC. Adapt successful `void` mutations to `{ok: true}` for the shared IPC acknowledgements. Consent must come from the trusted app main frame. No bridge approval method exists. During shutdown, call `engine.dispose()` and then await `bridge.dispose()` before closing backend storage.
+Register renderer methods only through the existing sender-validated, schema-validated IPC. Use `runtime.state()` for state reads and `runtime.setEnabled(enabled)` for the master switch. Access `runtime.engine` for decisions only after enabling. Consent must come from the trusted app main frame. No bridge approval method exists. Await `runtime.dispose()` before closing backend storage.
 
 Build the helper from the repository root with `node scripts/build-mcp-peer.mjs`. Its default output is `apps/desktop/resources/mcp-peer`. `--output /absolute/path` selects another output for tests or packaging. The parent must bundle this binary as an executable outside ASAR and pass its absolute path. The helper uses `getpeereid` on macOS and `SO_PEERCRED` on Linux. Node inherits the accepted, paused `Socket` as stdio FD 3. The helper does not read protocol bytes. Missing helpers or failed verification reject connections before parsing requests.
 
 ## Pairing and tool calls
 
-`ping` is available while access is off. It returns `{version: MCP_PROTOCOL_VERSION, enabled}`. The master switch defaults off for a new state file.
+`ping` returns `{version: MCP_PROTOCOL_VERSION, enabled}` when a bridge exists. No bridge is constructed until the student enables access. The master switch starts off after every app restart.
 
 `pair.begin` returns the shared `{pairingId, code, expiresAt}` shape immediately. The app shows the same random code and the self-reported client name. Pairing expires after two minutes. `pair.finish` returns a fixed `DENIED` error while consent is pending. The client can retry on the same connection after the student decides. Only that connection can finish. Successful finish consumes consent and returns `{grant, grantInfo}` once. Cross-connection finish and replay fail. Disconnect and switching off discard consent. Only requested scopes and explicitly selected existing accounts can be granted. The renderer should select shared `defaultScopes` initially and exclude grades and writes unless requested by the student.
 
@@ -76,11 +73,11 @@ The engine validates registry arguments and scopes before preparation. Remote to
 
 `search_content` requires both `read:content` and `read:files` because its results include converted file text. This extra policy supplements the fixed registry scope and runs at every authorization check, including before preparation and execution. Other content tools must omit file text, grades, submissions, and quiz grades unless their registry scope authorizes that data.
 
-Every registry write waits for a fresh one-shot 60-second approval. The backend receives a deeply frozen copy of the exact arguments. Consent shows its complete payload, including submissions up to 20,000 characters. Writes whose payload would change under redaction fail with `INVALID_ARGUMENT`. This rejects embedded credentials, links, active markup, and oversized previews instead of approving hidden or truncated text. Targets use plain redacted labels and stable IDs remain in the payload.
+Every registry write waits for a fresh one-shot 60-second approval. The backend receives a deeply frozen copy of the exact arguments. Consent shows its complete payload, including assignment draft text up to 20,000 characters and the current remote draft state. Writes whose payload would change under redaction fail with `INVALID_ARGUMENT`. This rejects embedded credentials, links, active markup, and oversized previews instead of approving hidden or truncated text. Targets use plain redacted labels and stable IDs remain in the payload.
 
 Authorization runs again after preparation, after approval, before execution, and before returning data. The engine passes an AbortSignal and live authorization callback to `execute(signal, authorize)`. The backend checks both between steps and at actual HTTP dispatch after the shared scheduler wait. Account generations fence captured clients when their school disconnects. Revoke, expiry, edits, disconnect, master-off, timeout, and disposal prevent later dispatch. A request already sent to Moodle cannot be recalled or automatically retried. A backend that never settles continues occupying a bounded execution slot.
 
-The backend must enforce course and record ownership inside its allowlist, academic-integrity restrictions, supported functions, current target eligibility, and assignment submission rules. It must also rate-limit individual Moodle requests inside multi-request operations and retain the existing webview autologin policy. The engine cannot infer those rules from an opaque execution callback.
+The backend must enforce course and record ownership inside its allowlist, academic-integrity restrictions, supported functions, current target eligibility, and assignment draft rules. `save_assignment_draft` reads status for approval and around saving, rejects files, other plugin content or changed text, and returns an `open_in_app` target. Final assignment submission is always manual in Moodle. It must also rate-limit individual Moodle requests inside multi-request operations and retain the existing webview autologin policy. The engine cannot infer those rules from an opaque execution callback.
 
 ## Bounds and private state
 
@@ -92,7 +89,7 @@ The bridge allows 32 connections, four in-flight requests per connection, and 32
 
 A private PID lock prevents competing listener startup. A live listener or live lock owner is never replaced. A dead lock and refused stale socket can be reclaimed. Disposal checks path identity before explicit removal. Same-UID malicious software remains outside this isolation boundary, as documented in `docs/MCP_DESIGN.md`.
 
-Results have fixed human summaries and the shared untrusted-data envelope. The sanitizer removes school URLs, credential-like fields, known secrets and their URL/base64 encodings, WS function values, long opaque secrets, active HTML, and images. Content becomes bounded plain text. Stable backend IDs remain usable. Result collections are capped at 50 items and individual strings at 8000 characters, within a 48,000-character text budget. The backend must paginate content before these safety caps to avoid losing readable data.
+Results have fixed human summaries and the shared untrusted-data envelope. The sanitizer removes school URLs, credential-like fields, known secrets and their URL/base64 encodings, WS function values, long opaque secrets, active HTML, and images. Content becomes bounded plain text. A result-level scan also detects adjacent string fragments and whitespace-wrapped base64, base64url and hex forms. A match replaces whole affected leaves and adds `data.redacted: true`. Excessive scan input drops the entire field set. Stable backend IDs remain usable when they contain no known secret. Result collections are capped at 50 items and individual strings at 8000 characters, within a 48,000-character text budget. The backend must paginate content before these safety caps to avoid losing readable data.
 
 The integrated backend calls `MoodleService.mcpSecretValues()` before returning a prepared call. This loads stored token, private-token, and user-private-access-key values into its main-only redaction set even for cached reads and expired sessions. It makes no school request. Keep `backend.secretValues` bound to the engine so the final output scrubber sees that snapshot.
 

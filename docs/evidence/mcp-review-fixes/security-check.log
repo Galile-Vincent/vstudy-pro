@@ -1,0 +1,104 @@
+
+> vstudy-pro@ security:check /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc
+> node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test --pool=forks --maxWorkers=2
+
+{"vulnerabilities":{"info":0,"low":1,"moderate":4,"high":12,"critical":1},"unreviewed":[]}
+
+> vstudy-pro@ lint /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc
+> pnpm --filter @vstudy/mcp lint && pnpm --filter @vstudy/desktop lint && pnpm --filter @vstudy/website lint
+
+
+> @vstudy/mcp@0.2.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/mcp
+> eslint .
+
+
+> @vstudy/desktop@0.2.2 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop
+> eslint .
+
+
+> @vstudy/website@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/website
+> astro check
+
+13:49:59 [types] Generated 25ms
+13:49:59 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/website...
+Result (33 files):
+- 0 errors
+- 0 warnings
+- 0 hints
+
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop/src/main/ipc/index.ts
+  76:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop/src/main/moodle/sso-protocol.ts
+  14:59  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop/src/main/moodle/webview.ts
+  224:89  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+✖ 3 problems (0 errors, 3 warnings)
+
+
+> vstudy-pro@ test /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc
+> pnpm --filter @vstudy/mcp test && pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2
+
+
+> @vstudy/mcp@0.2.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/mcp
+> pnpm build && vitest run --pool=forks --maxWorkers=2
+
+
+> @vstudy/mcp@0.2.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/mcp
+> node scripts/build.mjs
+
+
+  dist/vstudy-mcp.cjs   942.6kb
+  dist/installer.cjs    371.7kb
+  dist/windows-acl.cjs  141.1kb
+
+⚡ Done in 25ms
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/mcp
+
+
+ Test Files  12 passed | 1 skipped (13)
+      Tests  130 passed | 2 skipped (132)
+   Start at  13:50:03
+   Duration  3.24s (transform 106ms, setup 0ms, import 327ms, tests 5.48s, environment 0ms)
+
+
+> @vstudy/desktop@0.2.2 test /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop
+> node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run --pool=forks --maxWorkers=2
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop/src/shared/locales.generated.ts (22 namespaces).
+(node:14996) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+VStudy light: WCAG AA passed at every contrast setting
+VStudy dark: WCAG AA passed at every contrast setting
+Ocean light: WCAG AA passed at every contrast setting
+Ocean dark: WCAG AA passed at every contrast setting
+Grove light: WCAG AA passed at every contrast setting
+Grove dark: WCAG AA passed at every contrast setting
+Ember light: WCAG AA passed at every contrast setting
+Ember dark: WCAG AA passed at every contrast setting
+Iris light: WCAG AA passed at every contrast setting
+Iris dark: WCAG AA passed at every contrast setting
+Rose light: WCAG AA passed at every contrast setting
+Rose dark: WCAG AA passed at every contrast setting
+Slate light: WCAG AA passed at every contrast setting
+Slate dark: WCAG AA passed at every contrast setting
+Paper light: WCAG AA passed at every contrast setting
+Paper dark: WCAG AA passed at every contrast setting
+High contrast light: WCAG AA passed at every contrast setting
+High contrast dark: WCAG AA passed at every contrast setting
+32 renderer CSS files use semantic theme tokens
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  175 passed | 5 skipped (180)
+      Tests  1391 passed | 14 skipped (1405)
+   Start at  13:50:06
+   Duration  37.06s (transform 1.82s, setup 0ms, import 13.61s, tests 42.70s, environment 8.58s)

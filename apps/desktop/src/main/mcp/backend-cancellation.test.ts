@@ -61,10 +61,11 @@ it('stops after assignment save when approval is revoked before final submission
     if (name === 'mod_assign_save_submission') controller.abort();
     return Response.json(h.replies[name]);
   });
-  const args = mcpTools.submit_assignment.schema.parse({courseId:courseA, moduleId:assignA, assignmentId:52, text:'My approved essay.', studentOwned:true});
-  await expect((await h.backend.prepare('submit_assignment', args, [accountA])).execute(controller.signal)).rejects.toMatchObject({code:'DENIED'});
+  const args = mcpTools.save_assignment_draft.schema.parse({courseId:courseA, moduleId:assignA, assignmentId:52, text:'My approved essay.', studentOwned:true});
+  await expect((await h.backend.prepare('save_assignment_draft', args, [accountA])).execute(controller.signal)).rejects.toMatchObject({code:'DENIED'});
   const functions = h.request.mock.calls.map(row => new URLSearchParams(String(row[1]?.body)).get('wsfunction'));
-  expect(functions).toEqual(['core_course_get_course_module', 'mod_assign_get_assignments', 'mod_assign_get_submission_status', 'mod_assign_save_submission']);
+  expect(functions.at(-1)).toBe('mod_assign_save_submission');
+  expect(functions).not.toContain('mod_assign_submit_for_grading');
 });
 
 it('does not run local mutations or app callbacks with a cancelled approval', async () => {

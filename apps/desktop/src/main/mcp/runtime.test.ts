@@ -25,9 +25,9 @@ function runtime(backend?:McpBackend) {
   const result=createMcpRuntime({userData:root,peerHelper:'/fixture/peer',backend:backend??base,secretValues:()=>[],transport:testTransport,...(testStatePersistence(root)?{persistence:testStatePersistence(root)!}:{}),restoreWindow,onFailure});
   return {result,account,restoreWindow,onFailure,root};
 }
-it('starts the bridge while off and restores the app only for new consent',async()=>{
+it('defers the bridge while off and restores the app only for new consent',async()=>{
   const f=runtime();await f.result.ready;
-  expect(f.result.engine.state().enabled).toBe(false);expect(f.restoreWindow).not.toHaveBeenCalled();
+  expect(f.result.state().enabled).toBe(false);expect(transport.start).not.toHaveBeenCalled();expect(f.restoreWindow).not.toHaveBeenCalled();
   await f.result.setEnabled(true);
   const pending=await rpc(f.result.engine,'client','pair.begin',{clientId:randomUUID(),clientName:'Agent',scopes:['read:courses']});
   expect(pending.result).toHaveProperty('code');expect(f.restoreWindow).toHaveBeenCalledTimes(1);
@@ -57,7 +57,7 @@ it('leaves access disabled after a failed bridge start and allows a later explic
   const store=new GrantStore(root,Date.now,testStatePersistence(root));store.setEnabled(true);
   const onFailure=vi.fn();
   const result=createMcpRuntime({userData:root,peerHelper:'/missing',backend:{accounts:()=>[],prepare:async()=>{throw Error('unused');}},secretValues:()=>[],transport:testTransport,...(testStatePersistence(root)?{persistence:testStatePersistence(root)!}:{}),restoreWindow:()=>{},onFailure});
-  await result.ready;expect(result.engine.state().enabled).toBe(false);expect(onFailure).toHaveBeenCalledOnce();
+  await result.setEnabled(true);expect(result.state().enabled).toBe(false);expect(onFailure).toHaveBeenCalledOnce();
   transport.start.mockResolvedValueOnce({socketPath:'/fixture',dispose:transport.dispose});
   await result.setEnabled(true);expect(result.engine.state().enabled).toBe(true);await result.dispose();
 });
@@ -70,4 +70,49 @@ it('rejects bridge execution while exclusive storage maintenance owns the app',a
   });
   expect(await call(f.result.engine,paired.grant,'list_courses',{account:f.account.id})).toMatchObject({ok:true});
   await f.result.dispose();
+});
+
+it('Windows-shaped process without getuid throws synchronously before runtime readiness and cannot fail only MCP closed', async () => {
+  const descriptor = Object.getOwnPropertyDescriptor(process, 'getuid')!;
+  const onFailure = vi.fn();
+  let result:ReturnType<typeof createMcpRuntime> | undefined;
+  try {
+    Object.defineProperty(process, 'getuid', {...descriptor, value:undefined});
+    expect(() => { result = createMcpRuntime({userData:'/unused-review-path', backend:{accounts:()=>[], prepare:async()=>{throw Error('unused');}}, secretValues:()=>[], restoreWindow:()=>{}, onFailure}); }).not.toThrow();
+    await result!.ready;
+    expect(onFailure).not.toHaveBeenCalled();
+    expect(transport.start).not.toHaveBeenCalled();
+    await expect(result!.setEnabled(true)).resolves.toBeUndefined();
+    expect(result!.state()).toMatchObject({enabled:false, unavailable:true, proposals:[], pairings:[]});
+    expect(onFailure).toHaveBeenCalledOnce();
+  } finally {
+    Object.defineProperty(process, 'getuid', descriptor);
+    await result?.dispose();
+  }
+});
+
+it.each(['backend', 'persistence factory', 'persistence', 'transport'])('contains a synchronous %s construction failure until explicit retry', async stage => {
+  const onFailure = vi.fn();
+  const backend:McpBackend = {accounts:()=>[], prepare:async()=>{throw Error('unused');}};
+  let broken = true;
+  const construct = vi.fn(() => { if (stage === 'backend' && broken) throw Error('private path token=secret'); return backend; });
+  const persistence = vi.fn(() => {
+    if (stage === 'persistence factory' && broken) throw Error('private');
+    return {read:()=>{if (stage === 'persistence' && broken) throw Error('private'); return undefined;}, write:()=>{}};
+  });
+  const result = createMcpRuntime({userData:'.', backend:construct, secretValues:()=>[], restoreWindow:()=>{}, onFailure,
+    persistence,
+    transport:()=>{if (stage === 'transport' && broken) throw Error('private'); return Promise.resolve({endpoint:{kind:'unix',path:'/fixture'},dispose:async()=>{}});},
+  });
+  expect(construct).not.toHaveBeenCalled();
+  expect(persistence).not.toHaveBeenCalled();
+  const enabling = result.setEnabled(true);
+  await expect(result.ready).resolves.toBeUndefined();
+  await enabling;
+  expect(result.state()).toMatchObject({enabled:false, unavailable:true});
+  expect(onFailure.mock.calls).toEqual([[]]);
+  broken = false;
+  await result.setEnabled(true);
+  expect(result.state()).toMatchObject({enabled:true, unavailable:false});
+  await result.dispose();
 });

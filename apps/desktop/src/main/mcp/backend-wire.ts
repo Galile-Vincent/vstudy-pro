@@ -57,6 +57,10 @@ export const assignmentsWire = z.object({courses:z.array(z.object({id:integer, a
 })).max(10_000)})).max(1000), warnings:warnings.optional()});
 export const submissionWire = z.object({lastattempt:z.object({
   submissionsenabled:flag, locked:flag, canedit:flag, caneditowner:flag.optional(), cansubmit:flag,
-  submission:z.object({userid:integer.optional(), status:z.string()}).optional(),
+  submission:z.object({userid:integer.optional(), status:z.string(), plugins:z.array(z.object({
+    type:z.string(), name:z.string().optional(),
+    editorfields:z.array(z.object({name:z.string(), description:z.string().optional(), text:z.string().max(1_000_000), format:integer}).strict()).max(20).optional(),
+    fileareas:z.array(z.object({area:z.string(), files:z.array(z.object({filename:z.string(), filesize:integer.optional()}).passthrough()).max(100)}).strict()).max(20).optional(),
+  }).strict()).max(20)}).optional(),
   teamsubmission:z.unknown().optional(),
 }).optional(), warnings:warnings.optional()});
