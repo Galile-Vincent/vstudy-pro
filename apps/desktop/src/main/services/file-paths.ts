@@ -6,7 +6,7 @@
  */
 import { realpathSync, lstatSync } from 'node:fs';
 import { resolve, relative, sep, join } from 'node:path';
-import { isPathWithin } from '../platform/paths';
+import { isPathWithin, isRealPathWithin } from '../platform/paths';
 /** Reject escaping, symbolic, or hard-linked paths before returning a real library path. */
 export function containedPath(root: string, path: string) {
     const realRoot = realpathSync.native(root);
@@ -21,7 +21,7 @@ export function containedPath(root: string, path: string) {
             throw new Error('Symlink in library path');
     }
     const real = realpathSync.native(path);
-    if (!isPathWithin(realRoot, real))
+    if (!isRealPathWithin(realRoot, real))
         throw new Error('Path outside library');
     return real;
 }

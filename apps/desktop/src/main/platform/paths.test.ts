@@ -1,6 +1,6 @@
 /** Exercise Windows path semantics on every host and portable archive names. */
 import { expect, it } from 'vitest';
-import { isPathWithin, isPortableRelativePath, portableBasename } from './paths';
+import { isPathWithin, isRealPathWithin, isPortableRelativePath, portableBasename } from './paths';
 import { mkdtemp, mkdir, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -16,6 +16,15 @@ it.each([
   ['\\\\server\\share\\library', '\\\\server\\other\\library\\notes.md', false],
 ])('contains Windows path %s -> %s = %s', (root, file, expected) => {
   expect(isPathWithin(root, file, 'win32')).toBe(expected);
+});
+
+it.each([
+  [String.raw`C:\Library`, String.raw`c:\Library\notes.md`, true],
+  [String.raw`C:\Library`, String.raw`C:\library\notes.md`, false],
+  [String.raw`\\server\share\Library`, String.raw`\\SERVER\SHARE\Library\notes.md`, true],
+  [String.raw`\\server\share\Library`, String.raw`\\server\share\library\notes.md`, false],
+])('keeps canonical Windows directory case at the filesystem boundary', (root, file, expected) => {
+  expect(isRealPathWithin(root, file, 'win32')).toBe(expected);
 });
 
 it.each(['../secret', '/root', 'C:/secret', 'C:secret', '//server/share', '\\\\server\\share',

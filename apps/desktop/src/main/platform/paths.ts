@@ -8,6 +8,16 @@ export function isPathWithin(root: string, candidate: string, platform = process
   return relative !== '' && relative !== '..' && !relative.startsWith(`..${paths.sep}`) && !paths.isAbsolute(relative);
 }
 
+/** Canonical realpath results retain directory case, including case-sensitive Windows directories. */
+export function isRealPathWithin(root: string, candidate: string, platform = process.platform): boolean {
+  if (platform !== 'win32') return isPathWithin(root, candidate, platform);
+  if (!path.win32.isAbsolute(root) || !path.win32.isAbsolute(candidate)) return false;
+  const rootVolume = path.win32.parse(root).root, candidateVolume = path.win32.parse(candidate).root;
+  if (rootVolume.toLowerCase() !== candidateVolume.toLowerCase()) return false;
+  return isPathWithin('/' + root.slice(rootVolume.length).replaceAll('\\', '/'),
+    '/' + candidate.slice(candidateVolume.length).replaceAll('\\', '/'), 'linux');
+}
+
 /** Backup databases can contain paths from a different operating system. */
 export function portableBasename(value: string): string {
   return path.posix.basename(value.replaceAll('\\', '/'));
