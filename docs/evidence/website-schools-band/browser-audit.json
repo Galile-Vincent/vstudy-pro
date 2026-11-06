@@ -1,0 +1,1294 @@
+{
+  "responsive": [
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 390,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "302px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 20,
+        "width": 350
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 390,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "302px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 20,
+        "width": 350
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 768,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "304px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 32,
+        "width": 704
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 768,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "304px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 32,
+        "width": 704
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 1024,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "147.633px 147.641px 147.633px",
+      "connector": {
+        "width": "123.633px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 32,
+        "width": 960
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 1024,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "147.633px 147.641px 147.633px",
+      "connector": {
+        "width": "123.633px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 32,
+        "width": 960
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 1440,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 120,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 1440,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 120,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 1920,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 360,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "language": "en",
+      "width": 1920,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 360,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "Check whether your school uses Moodle (opens in a new tab)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/en/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 390,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "302px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 20,
+        "width": 350
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 390,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "302px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 20,
+        "width": 350
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 768,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "304px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 32,
+        "width": 704
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 768,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "304px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 32,
+        "width": 704
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 1024,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "147.633px 147.641px 147.633px",
+      "connector": {
+        "width": "123.633px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 32,
+        "width": 960
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 1024,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "147.633px 147.641px 147.633px",
+      "connector": {
+        "width": "123.633px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 32,
+        "width": 960
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 1440,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 120,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 1440,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 120,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 1920,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 360,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "language": "zh-Hant",
+      "width": 1920,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 360,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "查詢學校是否使用 Moodle (在新分頁開啟)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 390,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "302px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 20,
+        "width": 350
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 390,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "302px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 20,
+        "width": 350
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 768,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "304px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 32,
+        "width": 704
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 768,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "304px",
+      "connector": {
+        "width": "1px",
+        "height": "24.3984px"
+      },
+      "band": {
+        "x": 32,
+        "width": 704
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 1024,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "147.633px 147.641px 147.633px",
+      "connector": {
+        "width": "123.633px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 32,
+        "width": 960
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 1024,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "147.633px 147.641px 147.633px",
+      "connector": {
+        "width": "123.633px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 32,
+        "width": 960
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 1440,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 120,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 1440,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 120,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 1920,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 360,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    },
+    {
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "language": "ja",
+      "width": 1920,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "steps": 3,
+      "flow": "196.727px 196.727px 196.734px",
+      "connector": {
+        "width": "172.727px",
+        "height": "1px"
+      },
+      "band": {
+        "x": 360,
+        "width": 1200
+      },
+      "lookup": {
+        "url": "https://stats.moodle.org/sites/",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "label": "学校が Moodle を使っているか調べる (新しいタブで開きます)"
+      },
+      "docs": "http://127.0.0.1:4338/vstudy-pro/ja/docs/connect-your-school/#availability",
+      "oldControls": 0
+    }
+  ],
+  "palettes": [
+    {
+      "language": "en",
+      "scheme": "light",
+      "palette": "vstudy",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "light",
+      "palette": "ocean",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "light",
+      "palette": "grove",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "light",
+      "palette": "ember",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "light",
+      "palette": "iris",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "light",
+      "palette": "rose",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "light",
+      "palette": "slate",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "light",
+      "palette": "paper",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "light",
+      "palette": "contrast",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "dark",
+      "palette": "vstudy",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "dark",
+      "palette": "ocean",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "dark",
+      "palette": "grove",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "dark",
+      "palette": "ember",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "dark",
+      "palette": "iris",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "dark",
+      "palette": "rose",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "dark",
+      "palette": "slate",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "dark",
+      "palette": "paper",
+      "violations": []
+    },
+    {
+      "language": "en",
+      "scheme": "dark",
+      "palette": "contrast",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "light",
+      "palette": "vstudy",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "light",
+      "palette": "ocean",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "light",
+      "palette": "grove",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "light",
+      "palette": "ember",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "light",
+      "palette": "iris",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "light",
+      "palette": "rose",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "light",
+      "palette": "slate",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "light",
+      "palette": "paper",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "light",
+      "palette": "contrast",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "palette": "vstudy",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "palette": "ocean",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "palette": "grove",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "palette": "ember",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "palette": "iris",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "palette": "rose",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "palette": "slate",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "palette": "paper",
+      "violations": []
+    },
+    {
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "palette": "contrast",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "light",
+      "palette": "vstudy",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "light",
+      "palette": "ocean",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "light",
+      "palette": "grove",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "light",
+      "palette": "ember",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "light",
+      "palette": "iris",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "light",
+      "palette": "rose",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "light",
+      "palette": "slate",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "light",
+      "palette": "paper",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "light",
+      "palette": "contrast",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "dark",
+      "palette": "vstudy",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "dark",
+      "palette": "ocean",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "dark",
+      "palette": "grove",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "dark",
+      "palette": "ember",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "dark",
+      "palette": "iris",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "dark",
+      "palette": "rose",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "dark",
+      "palette": "slate",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "dark",
+      "palette": "paper",
+      "violations": []
+    },
+    {
+      "language": "ja",
+      "scheme": "dark",
+      "palette": "contrast",
+      "violations": []
+    }
+  ],
+  "guides": [
+    {
+      "language": "en",
+      "width": 390,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "lookup": "Check whether your school uses Moodle ↗",
+      "cycu": true
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "lookup": "Check whether your school uses Moodle ↗",
+      "cycu": true
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "lookup": "Check whether your school uses Moodle ↗",
+      "cycu": true
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "lookup": "Check whether your school uses Moodle ↗",
+      "cycu": true
+    },
+    {
+      "language": "zh-Hant",
+      "width": 390,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "lookup": "查詢學校是否使用 Moodle ↗",
+      "cycu": true
+    },
+    {
+      "language": "zh-Hant",
+      "width": 390,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "lookup": "查詢學校是否使用 Moodle ↗",
+      "cycu": true
+    },
+    {
+      "language": "zh-Hant",
+      "width": 1440,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "lookup": "查詢學校是否使用 Moodle ↗",
+      "cycu": true
+    },
+    {
+      "language": "zh-Hant",
+      "width": 1440,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "lookup": "查詢學校是否使用 Moodle ↗",
+      "cycu": true
+    },
+    {
+      "language": "ja",
+      "width": 390,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "lookup": "学校が Moodle を使っているか調べる ↗",
+      "cycu": true
+    },
+    {
+      "language": "ja",
+      "width": 390,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "lookup": "学校が Moodle を使っているか調べる ↗",
+      "cycu": true
+    },
+    {
+      "language": "ja",
+      "width": 1440,
+      "scheme": "light",
+      "overflow": false,
+      "violations": [],
+      "lookup": "学校が Moodle を使っているか調べる ↗",
+      "cycu": true
+    },
+    {
+      "language": "ja",
+      "width": 1440,
+      "scheme": "dark",
+      "overflow": false,
+      "violations": [],
+      "lookup": "学校が Moodle を使っているか調べる ↗",
+      "cycu": true
+    }
+  ],
+  "screenshots": [
+    {
+      "language": "en",
+      "width": 390,
+      "scheme": "light",
+      "path": "docs/evidence/website-schools-band/final/en-390-light.png"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "scheme": "dark",
+      "path": "docs/evidence/website-schools-band/final/en-390-dark.png"
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "scheme": "light",
+      "path": "docs/evidence/website-schools-band/final/en-1440-light.png"
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "scheme": "dark",
+      "path": "docs/evidence/website-schools-band/final/en-1440-dark.png"
+    },
+    {
+      "language": "zh-Hant",
+      "width": 390,
+      "scheme": "light",
+      "path": "docs/evidence/website-schools-band/final/zh-Hant-390-light.png"
+    },
+    {
+      "language": "zh-Hant",
+      "width": 390,
+      "scheme": "dark",
+      "path": "docs/evidence/website-schools-band/final/zh-Hant-390-dark.png"
+    },
+    {
+      "language": "zh-Hant",
+      "width": 1440,
+      "scheme": "light",
+      "path": "docs/evidence/website-schools-band/final/zh-Hant-1440-light.png"
+    },
+    {
+      "language": "zh-Hant",
+      "width": 1440,
+      "scheme": "dark",
+      "path": "docs/evidence/website-schools-band/final/zh-Hant-1440-dark.png"
+    },
+    {
+      "language": "ja",
+      "width": 390,
+      "scheme": "light",
+      "path": "docs/evidence/website-schools-band/final/ja-390-light.png"
+    },
+    {
+      "language": "ja",
+      "width": 390,
+      "scheme": "dark",
+      "path": "docs/evidence/website-schools-band/final/ja-390-dark.png"
+    },
+    {
+      "language": "ja",
+      "width": 1440,
+      "scheme": "light",
+      "path": "docs/evidence/website-schools-band/final/ja-1440-light.png"
+    },
+    {
+      "language": "ja",
+      "width": 1440,
+      "scheme": "dark",
+      "path": "docs/evidence/website-schools-band/final/ja-1440-dark.png"
+    }
+  ]
+}
