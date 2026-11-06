@@ -1,13 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { z } from 'zod';
-import { studyCourseSchema, studyCourseInputSchema, studyConceptSchema, studyConceptInputSchema, studyUnitSchema, studyChatLinkSchema, studyObservationSchema, studyPageInputSchema, studyPrefsSchema, studyIdSchema, type StudyPageInput, type StudyPrefs } from '../../shared/review';
+import { studyJobSummarySchema, studyJobEditSchema, studyCourseSchema, studyCourseInputSchema, studyConceptSchema, studyConceptInputSchema, studyUnitSchema, studyChatLinkSchema, studyObservationSchema, studyPageInputSchema, studyPrefsSchema, studyIdSchema, type StudyPageInput, type StudyPrefs } from '../../shared/review';
 import { conceptKey } from './concept-match';
 import { eligibleSourceSql } from './eligibility';
 import { computeMastery, type MasteryObservation } from './mastery';
 import { buildEpisodes } from './episodes';
 import { MoodleRepository } from '../moodle/repository';
-const sourceJoins = `JOIN study_jobs j ON j.id=o.jobId JOIN conversations c ON c.id=j.conversationId JOIN messages u ON u.id=j.userMessageId JOIN messages a ON a.id=j.assistantMessageId LEFT JOIN study_chat_links l ON l.conversationId=c.id LEFT JOIN documents d ON d.id=c.documentId`;
+const jobSourceJoins = `JOIN conversations c ON c.id=j.conversationId JOIN messages u ON u.id=j.userMessageId JOIN messages a ON a.id=j.assistantMessageId LEFT JOIN study_chat_links l ON l.conversationId=c.id LEFT JOIN documents d ON d.id=c.documentId`;
+const sourceJoins = `JOIN study_jobs j ON j.id=o.jobId ${jobSourceJoins}`;
 /** SQL ownership for local study memory. Construction performs no work or network access. */
 export class ReviewRepository {
     constructor(private readonly db: DatabaseSync, private readonly clock: () => number = Date.now) { }
@@ -31,7 +32,7 @@ export class ReviewRepository {
         const last = selected.at(-1);
         return { items: selected.map(parse), nextCursor: more && last ? { at: String(last[timeColumn]), id: String(last.id ?? last.conversationId) } : null };
     }
-    getPrefs(): StudyPrefs { const row = this.db.prepare("SELECT value FROM settings WHERE key='studyPrefs'").get(); return studyPrefsSchema.parse(row ? JSON.parse(String(row.value)) : {}); }
+    getPrefs(): StudyPrefs { const row = this.db.prepare("SELECT value FROM settings WHERE key='studyPrefs'").get(); return studyPrefsSchema.parse(row ? JSON.parse(String(row.value)) : {timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone}); }
     setPrefs(input: z.input<ReturnType<typeof studyPrefsSchema.partial>>): StudyPrefs { const patch = studyPrefsSchema.partial().parse(input); const result = studyPrefsSchema.parse({ ...this.getPrefs(), ...patch }); this.atomic(() => { this.db.prepare("INSERT INTO settings(key,value) VALUES('studyPrefs',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").run(JSON.stringify(result)); if (!result.memoryEnabled)
         this.db.prepare("UPDATE study_jobs SET status='cancelled',attemptToken=NULL,updatedAt=? WHERE status IN ('pending','running')").run(this.now()); }); return result; }
     erase(): void { this.atomic(() => { this.setPrefs({ memoryEnabled: false }); this.db.exec('DELETE FROM study_courses; DELETE FROM study_chat_links; DELETE FROM study_jobs;'); }); }
@@ -106,6 +107,14 @@ export class ReviewRepository {
     private event(id: string, kind: 'restored' | 'understood') { this.db.prepare('INSERT INTO study_concept_events(id,conceptId,kind,at) VALUES(?,?,?,?)').run(randomUUID(), id, kind, this.now()); }
     restoreConcept(id: string) { this.atomic(() => { this.db.prepare("UPDATE study_concepts SET userState='none' WHERE id=?").run(id); this.event(id, 'restored'); }); }
     understoodConcept(id: string) { this.event(id, 'understood'); }
+    jobsPage(input:StudyPageInput&{courseId:string}) {
+      return this.page(`SELECT j.id,j.conversationId,j.userMessageId,j.assistantMessageId,j.courseId,j.status,j.questionSummary,j.occurredAt,j.createdAt FROM study_jobs j ${jobSourceJoins} WHERE j.courseId=? AND (${eligibleSourceSql}) AND (? IS NULL OR j.occurredAt<? OR (j.occurredAt=? AND j.id<?)) ORDER BY j.occurredAt DESC,j.id DESC`,[input.courseId],input,row=>studyJobSummarySchema.parse(row),'occurredAt');
+    }
+    editJob(id:string,changes:z.input<typeof studyJobEditSchema>):void {
+      studyIdSchema.parse(id);const patch=studyJobEditSchema.parse(changes);
+      const result=this.db.prepare('UPDATE study_jobs SET questionSummary=?,updatedAt=? WHERE id=?').run(patch.questionSummary,this.now(),id);
+      if(!result.changes)throw new Error('Study exchange unavailable');
+    }
     observationsPage(input: StudyPageInput & {
         courseId: string;
     }) { return this.page(`SELECT o.*,j.occurredAt,j.conversationId,j.userMessageId,j.assistantMessageId,j.questionSummary FROM study_observations o ${sourceJoins} WHERE o.courseId=? AND (${eligibleSourceSql}) AND (? IS NULL OR o.createdAt<? OR (o.createdAt=? AND o.id<?)) ORDER BY o.createdAt DESC,o.id DESC`, [input.courseId], input, row => studyObservationSchema.parse({ ...row, dismissed: row.dismissed === 1, resolved: row.resolved === 1, wrongAttempt: row.wrongAttempt === 1 })); }

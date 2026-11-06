@@ -61,6 +61,8 @@ export function registerReviewIpc(registrar: ReturnType<typeof createIpcRegistra
     registrar.handle('review:observations:page', input => repo.observationsPage(input));
     registrar.handle('review:observations:edit', ({ observationId, changes }) => { repo.editObservation(observationId, changes); return { ok: true }; });
     registrar.handle('review:observations:delete', ({ observationId }) => { repo.deleteObservation(observationId); return { ok: true }; });
+    registrar.handle('review:jobs:page',input=>repo.jobsPage(input));
+    registrar.handle('review:jobs:edit',({jobId,changes})=>{repo.editJob(jobId,changes);return {ok:true};});
     registrar.handle('review:prefs:get', () => repo.getPrefs());
     registrar.handle('review:prefs:set', async (input) => { if (input.memoryEnabled === false) {
         reviewWorkers.suspend('privacy');

@@ -62,3 +62,17 @@ it('shows unassigned live chats and fences reassigned evidence without losing it
     expect(repo.observationsPage({ courseId: second.id }).items[0]).toMatchObject({ id: observation, conceptKey: null, proposedLabel: 'force' });
     expect(store.db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
 });
+
+it('lists and edits eligible exchange summaries even when extraction found zero concepts',()=>{
+ const {repo,store}=setup();const course=repo.createCourse({title:'Math'});
+ const chat='11111111-1111-4111-8111-111111111111',user='22222222-2222-4222-8222-222222222222',assistant='33333333-3333-4333-8333-333333333333',job='44444444-4444-4444-8444-444444444444',at='2030-01-01T00:00:00.000Z';
+ store.db.prepare("INSERT INTO conversations(id,scope,providerId,modelId,createdAt) VALUES(?,'general','p','m',?)").run(chat,at);
+ for(const [id,role] of [[user,'user'],[assistant,'assistant']])store.db.prepare('INSERT INTO messages(id,conversationId,role,parts,createdAt) VALUES(?,?,?,?,?)').run(id!,chat,role!,JSON.stringify([{type:'text',text:'Answer',status:'complete'}]),at);
+ repo.assignChat(chat,course.id);
+ store.db.prepare("INSERT INTO study_jobs(id,conversationId,userMessageId,assistantMessageId,extractorVersion,courseId,assignmentRevision,status,questionSummary,occurredAt,createdAt,updatedAt) VALUES(?,?,?,?,?,?,1,'succeeded','A plain question',?,?,?)").run(job,chat,user,assistant,'v1',course.id,at,at,at);
+ expect(repo.jobsPage({courseId:course.id}).items[0]).toMatchObject({id:job,questionSummary:'A plain question'});
+ expect(repo.observationsPage({courseId:course.id}).items).toHaveLength(0);
+ expect(()=>repo.editJob(job,{questionSummary:'x'.repeat(241)})).toThrow();
+ repo.editJob(job,{questionSummary:'Edited summary'});expect(repo.jobsPage({courseId:course.id}).items[0]?.questionSummary).toBe('Edited summary');
+ repo.excludeChat(chat,true);expect(repo.jobsPage({courseId:course.id}).items).toHaveLength(0);
+});

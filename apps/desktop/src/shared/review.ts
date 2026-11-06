@@ -14,6 +14,8 @@ export const studyCourseSchema = z.object({ id: studyIdSchema, title, aliases: z
 export const studyUnitSchema = z.object({ id: studyIdSchema, courseId: studyIdSchema, kind: z.enum(['moodle', 'document', 'manual']), ordinal: z.number().int(), title, sourceKey: z.string().min(1).max(240), sourceSectionId: z.string().nullable(), startsAt: at.nullable(), endsAt: at.nullable() }).strict();
 export const studyConceptSchema = z.object({ id: studyIdSchema, courseId: studyIdSchema, key: title, label: title, source: z.enum(['heading', 'user', 'promoted']), unitId: studyIdSchema.nullable(), userState: z.enum(['none', 'dismissed']), note: z.string().max(240).nullable(), createdAt: at }).strict();
 export const studyObservationSchema = z.object({ id: studyIdSchema, jobId: studyIdSchema, courseId: studyIdSchema, unitId: studyIdSchema.nullable(), conceptKey: title.nullable(), proposedLabel: title.nullable(), errorType: z.enum(['none', 'slip', 'mistake', 'misconception', 'gap']), signal: z.enum(['asked', 'confused', 'wrong', 'gave_up', 'resolved']), evidenceQuote: z.string().max(240), evidenceKind: z.enum(['quote', 'paraphrase']), weaknessNote: z.string().max(240).nullable(), confidence: z.number().min(0).max(1), dismissed: z.boolean(), resolved: z.boolean(), wrongAttempt: z.boolean(), createdAt: at, occurredAt: at, conversationId: studyIdSchema, userMessageId: studyIdSchema, assistantMessageId: studyIdSchema, questionSummary: z.string().max(240).nullable() }).strict();
+export const studyJobSummarySchema=z.object({id:studyIdSchema,conversationId:studyIdSchema,userMessageId:studyIdSchema,assistantMessageId:studyIdSchema,courseId:studyIdSchema.nullable(),status:z.enum(['pending','running','succeeded','failed','cancelled','skipped']),questionSummary:z.string().max(240).nullable(),occurredAt:at,createdAt:at}).strict();
+export const studyJobEditSchema=z.object({questionSummary:z.string().trim().min(1).max(240)}).strict();
 export const studyChatLinkSchema = z.object({ conversationId: studyIdSchema, courseId: studyIdSchema.nullable(), method: z.enum(['scope', 'document', 'alias', 'model', 'manual']), confidence: z.number().min(0).max(1), confirmed: z.boolean(), excludeFromMemory: z.boolean(), revision: z.number().int().nonnegative(), updatedAt: at }).strict();
 export const studyCursorSchema = z.object({ at, id: studyIdSchema }).strict();
 export const studyPageInputSchema = z.object({ limit: z.number().int().min(1).max(100).default(50), cursor: studyCursorSchema.optional() }).strict();
@@ -47,6 +49,8 @@ export const reviewIpc = {
     'review:observations:page': { request: studyPageInputSchema.extend({ courseId: studyIdSchema }), response: page(studyObservationSchema) },
     'review:observations:edit': { request: z.object({ observationId: studyIdSchema, changes: z.object({ weaknessNote: z.string().max(240).nullable().optional(), dismissed: z.boolean().optional(), resolved: z.boolean().optional() }).strict() }).strict(), response: ack },
     'review:observations:delete': { request: z.object({ observationId: studyIdSchema }).strict(), response: ack },
+    'review:jobs:page':{request:studyPageInputSchema.extend({courseId:studyIdSchema}),response:page(studyJobSummarySchema)},
+    'review:jobs:edit':{request:z.object({jobId:studyIdSchema,changes:studyJobEditSchema}).strict(),response:ack},
     'review:prefs:get': { request: empty, response: studyPrefsSchema },
     'review:prefs:set': { request: studyPrefsSchema.partial(), response: studyPrefsSchema },
     'review:prefs:erase': { request: empty, response: ack },
