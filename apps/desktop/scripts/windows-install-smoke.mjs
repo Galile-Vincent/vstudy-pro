@@ -53,16 +53,16 @@ try {
   await access(executable);
   await access(uninstaller);
   await access(shortcut);
-  const protocol = query("$key=[Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Software\\Classes\\vstudymoodle\\shell\\open\\command'); if($null -eq $key){throw 'Protocol missing'}; try{[Console]::Out.Write($key.GetValue(''))}finally{$key.Dispose()}");
-  const registered = /^"([^"]+)"\s+(.+)$/.exec(protocol);
-  if (!registered || registered[1].toLowerCase() !== executable.toLowerCase() || !registered[2].includes('%1')) throw new Error('Per-user sign-in protocol does not point to the installed executable');
-  report.protocolRegistered = true;
   report.installed = true;
   report.startMenu = true;
   await run(process.execPath, [fileURLToPath(new URL('distribution-smoke.mjs', import.meta.url)), '--target', target.key,
     '--executable', executable, '--output', output], 'installed-app', 120000);
   report.launched = true;
   report.mcpStartup.disabled = true;
+  const protocol = query("$key=[Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Software\\Classes\\vstudymoodle\\shell\\open\\command'); if($null -eq $key){throw 'Protocol missing'}; try{[Console]::Out.Write($key.GetValue(''))}finally{$key.Dispose()}");
+  const registered = /^"([^"]+)"\s+(.+)$/.exec(protocol);
+  if (!registered || registered[1].toLowerCase() !== executable.toLowerCase() || !registered[2].includes('%1')) throw new Error('Per-user sign-in protocol does not point to the installed executable');
+  report.protocolRegistered = true;
   await run(process.execPath, [fileURLToPath(new URL('distribution-smoke.mjs', import.meta.url)), '--target', target.key,
     '--executable', executable, '--output', join(output, 'mcp-enabled'), '--mcp-enabled'], 'installed-app-mcp-enabled', 120000);
   report.mcpStartup.enabled = true;
