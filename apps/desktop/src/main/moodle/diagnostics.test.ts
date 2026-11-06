@@ -8,7 +8,6 @@ import { expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { MoodleClient, MoodleError } from './client';
 import { account, fixtureFetch } from './fixtures/support';
-import { redact } from '../logging';
 
 it('logs only diagnostic metadata and structure, never response string values',async () => {
  const logger=vi.spyOn(console,'log').mockImplementation(() => {});
@@ -18,7 +17,7 @@ it('logs only diagnostic metadata and structure, never response string values',a
  const client=new MoodleClient(account.siteUrl,canary,fixtureFetch({bad:{rows:[{id:canary,description:canary}],message:canary,debuginfo:canary},exception:{exception:'moodle_exception',errorcode:'invalidparameter',message:canary,debuginfo:canary,backtrace:canary}}));
  await expect(client.call('bad',{},z.object({rows:z.array(z.object({id:z.number()}))})) ).rejects.toMatchObject({kind:'service'});
  await expect(client.call('exception',{},z.object({}))).rejects.toMatchObject({kind:'service'});
- const logs=logger.mock.calls.map(call => redact(call[0])).join('\n');
+ const logs=logger.mock.calls.map(call => String(call[0])).join('\n');
  expect(logs).not.toContain(canary);
  expect(logs).toContain('rows.0.id');
  expect(logs).toContain('invalid_type');
@@ -70,7 +69,7 @@ it('bounds issue lists and debug shapes and excludes shape by default',async () 
  const request=fixtureFetch({bad:{rows:Array.from({length:30},() => ({id:'private'}))}});
  const client=new MoodleClient(account.siteUrl,'token',request);
  await expect(client.call('bad',{},z.object({rows:z.array(z.object({id:z.number()}))}))).rejects.toThrow();
- const entry=JSON.parse(String(logger.mock.calls[0]![0]));
+ const entry=JSON.parse(String(logger.mock.calls[0]![0]).replace(/^\S+ /, ''));
  expect(entry.diagnostic.issues).toHaveLength(10);
  expect(entry.diagnostic.shape).toBeUndefined();
  } finally {logger.mockRestore();}

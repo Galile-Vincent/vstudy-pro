@@ -6,7 +6,7 @@
  */
 import { app, clipboard } from 'electron';
 import { release } from 'node:os';
-import { appendFileSync, mkdirSync, readFileSync, renameSync, rmSync, statSync } from 'node:fs';
+import { appendFileSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 /** Remove credential-shaped values before diagnostics reach logs. */
 export function redact(value: unknown): string {
@@ -15,13 +15,14 @@ export function redact(value: unknown): string {
     text = value instanceof Error ? value.stack ?? value.message : typeof value === 'string' ? value : JSON.stringify(value, (_key, item: unknown) => item instanceof Error ? item.stack ?? item.message : item) ?? '';
   } catch { return '[unserializable diagnostic]'; }
   return text
-    .replace(/sk-[a-z0-9_-]+/gi, '[redacted]')
-    .replace(/(Bearer\s+)[^\s"',}]+/gi, '$1[redacted]')
-    .replace(/((?:x-api-key|api[_-]?key|token|password)["'\s]*[:=]["'\s]*)[^\s"',}]+/gi, '$1[redacted]')
+    .replace(/\bsk-[a-z0-9_-]+/gi, '[redacted]')
+    .replace(/((?:cookie|set-cookie)["'\s]*:\s*["']?)[^"'\r\n}]+/gi, '$1[redacted]')
+    .replace(/((?:Basic|Bearer)\s+)[^\s"',}]+/gi, '$1[redacted]')
+    .replace(/((?:x-api-key|api[_-]?key|token|password|(?:client[_-])?secret)["'\s]*[:=]["'\s]*)[^\s"',}]+/gi, '$1[redacted]')
     .replace(/(["'])(?:[a-z]:[\\/]+|\\\\|~?\/)[^"'\r\n]*\1/gi, '$1[path]$1')
-    .replace(/(["'])[^"'\r\n]*\.[a-z0-9]{1,10}\1/gi, '$1[file]$1')
+    .replace(/(?:[a-z]:[\\/]+Users[\\/]+|\/(?:Users|home)\/|~\/)[^"'\r\n<>|)]+/gi, '[path]')
     .replace(/[a-z]:[\\/]+[^\s"'<>|)]+|(?:~|file:\/\/)?\/[^\s"'<>|)]+/gi, '[path]')
-    .replace(/(?<![\p{L}\p{N}_-])[\p{L}\p{N}_-]+(?:\.[\p{L}\p{N}_-]+)+/gu, '[file]');
+    .replace(/(?<![\p{L}\p{N}_-])[\p{L}\p{N}_-]+(?:\.[\p{L}\p{N}_-]+)*\.(?:pdf|docx?|xlsx?|pptx?|txt|md|csv|json|db|sqlite|log|[cm]?js|tsx?|png|jpe?g|zip)\b/giu, '[file]');
 }
 const maxBytes = 1024 * 1024;
 const recent: string[] = [];
@@ -38,8 +39,13 @@ export function log(value: unknown): void {
     let size = 0;
     try { size = statSync(path).size; } catch { /* The first record creates the log. */ }
     if (size + Buffer.byteLength(line + '\n') > maxBytes) {
-      rmSync(path + '.1', {force:true});
-      renameSync(path, path + '.1');
+      try {
+        rmSync(path + '.1', {force:true});
+        renameSync(path, path + '.1');
+      } catch {
+        // A locked rotation target must not prevent subsequent records.
+        writeFileSync(path, '', {mode:0o600});
+      }
     }
     appendFileSync(path, line + '\n', {mode:0o600});
   } catch { /* Retain recent records in memory when the disk is unavailable. */ }
@@ -58,5 +64,5 @@ export function copyDiagnostics(): void {
     }
   } catch { /* The file sink may be unavailable before startup. */ }
   if (!lines.length) lines = recent;
-  clipboard.writeText(`VStudy Pro ${app.getVersion()}\nOS ${process.platform} ${release()}\nArch ${process.arch}\n${lines.slice(-100).map(redact).join('\n')}`);
+  clipboard.writeText(`VStudy Pro ${app.getVersion()}\nOS ${process.platform} ${release()}\nArch ${process.arch}\n${lines.slice(-100).join('\n')}`);
 }

@@ -2,8 +2,13 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { mkdtempSync, readFileSync, statSync, rmSync, writeFileSync, readdirSync } from 'node:fs';
 import { tmpdir, homedir } from 'node:os';
+import * as fs from 'node:fs';
 import { join } from 'node:path';
 const mocks = vi.hoisted(() => ({root:'',copy:vi.fn()}));
+vi.mock('node:fs', async importOriginal => {
+  const actual=await importOriginal<typeof import('node:fs')>();
+  return {...actual,renameSync:vi.fn(actual.renameSync),rmSync:vi.fn(actual.rmSync)};
+});
 vi.mock('electron', () => ({app:{getPath:()=>mocks.root,getVersion:()=> '0.3.0'},clipboard:{writeText:mocks.copy}}));
 import { log, redact, copyDiagnostics } from './logging';
 const roots:string[]=[];
@@ -26,7 +31,7 @@ it('writes redacted logs with restrictive permissions and bounded rotation', () 
 it('copies only metadata and the last 100 redacted records, including previous runs', () => {
   const directory=fixture(); vi.spyOn(console,'log').mockImplementation(()=>{});
   log({phase:'initialize'});
-  writeFileSync(join(directory,'main.log'), Array.from({length:120},(_,i)=>`record-${i} /private/private-paper.pdf`).join('\n')+'\n');
+  writeFileSync(join(directory,'main.log'), Array.from({length:120},(_,i)=>`2026-11-06T12:34:56.789Z ${redact({phase:`record-${i}`,path:'/private/private-paper.pdf'})}`).join('\n')+'\n');
   copyDiagnostics();
   const text=mocks.copy.mock.calls.at(-1)![0] as string;
   expect(text).toContain('VStudy Pro 0.3.0'); expect(text).toContain('OS '+process.platform); expect(text).toContain('Arch '+process.arch);
@@ -38,4 +43,50 @@ it('keeps logging and copy usable when the file sink fails', () => {
   vi.spyOn(console,'log').mockImplementation(()=>{});
   expect(()=>log({phase:'sink-unavailable'})).not.toThrow();
   copyDiagnostics(); expect(mocks.copy.mock.calls.at(-1)![0]).toContain('sink-unavailable');
+});
+
+it.each([
+  '2026-11-06T12:34:56.789Z', 'rows.0.id', 'sections.0.modules.1.id', 'Object.handler', '12.345', 'disk-full',
+])('preserves diagnostic labels and timestamps: %s', value => {
+  expect(redact(value)).toBe(value);
+});
+it.each([
+  '/Users/John Smith/Library/private-paper.pdf',
+  '/home/John Smith/Documents/Private Coursework/private-paper.pdf',
+  String.raw`C:\Users\Ann Lee\AppData\private-paper.db`,
+  `${homedir()}/Private Coursework/private-paper.pdf`,
+])('redacts unquoted home paths with spaces: %s', path => {
+  expect(redact(`open ${path} failed`)).not.toMatch(/John|Smith|Ann|Lee|Coursework|private-paper/);
+  expect(redact({path})).not.toMatch(/John|Smith|Ann|Lee|Coursework|private-paper/);
+});
+it.each([
+  'secret=PRIVATE_CANARY', 'client_secret: PRIVATE_CANARY',
+  'Cookie: MoodleSession=PRIVATE_CANARY; other=PRIVATE_OTHER',
+  'Authorization: Basic PRIVATE_CANARY', 'Authorization: Bearer PRIVATE_CANARY',
+  {Cookie:'MoodleSession=PRIVATE_CANARY; other=PRIVATE_OTHER'},
+  {Authorization:'Basic PRIVATE_CANARY'}, {client_secret:'PRIVATE_CANARY'},
+])('redacts credentials: %j', value => {
+  expect(redact(value)).not.toContain('PRIVATE_');
+});
+it('copies persisted diagnostic lines verbatim with intact timestamps and labels', () => {
+  fixture(); vi.spyOn(console,'log').mockImplementation(()=>{});
+  vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-06T12:34:56.789Z'));
+  try {
+    log({phase:'validation',path:'rows.0.id'});
+    const stored=readFileSync(join(mocks.root,'logs','main.log'),'utf8').trim();
+    copyDiagnostics();
+    expect(mocks.copy.mock.calls.at(-1)![0]).toContain(stored);
+    expect(stored).toContain('2026-11-06T12:34:56.789Z');
+    expect(stored).toContain('rows.0.id');
+  } finally { vi.useRealTimers(); }
+});
+it.each(['renameSync','rmSync'] as const)('continues file logging when rotation %s fails', operation => {
+  const directory=fixture(); vi.spyOn(console,'log').mockImplementation(()=>{});
+  log({phase:'initialize'});
+  writeFileSync(join(directory,'main.log'),'x'.repeat(1024*1024));
+  vi.mocked(fs[operation]).mockImplementationOnce(()=>{throw Error('EBUSY');});
+  log({phase:'rotation-failed'});
+  expect(readFileSync(join(directory,'main.log'),'utf8')).toContain('rotation-failed');
+  log({phase:'rotation-recovered'});
+  expect(readFileSync(join(directory,'main.log'),'utf8')).toContain('rotation-recovered');
 });
