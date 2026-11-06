@@ -35,7 +35,7 @@ function ConsentFrame({ id, expiresAt, pairing, canApprove, approve, deny, dismi
       <DialogDescription>{tr(pairing ? 'agents:pair_help' : 'agents:proposal_help')}</DialogDescription>
       <div className="agents-consent-body">{children}</div>
       <p className="agents-countdown" role="timer" aria-live="off">{remaining ? tr('agents:countdown', { seconds: remaining }) : tr('agents:request_expired')}</p>
-      <p className="agents-muted">{tr('agents:expiry')} <AgentDate value={expiresAt} /></p>
+      <p className="agents-muted">{tr('agents:request_expires')} <AgentDate value={expiresAt} /></p>
       {unavailable && <p role="alert">{tr('agents:offline')}</p>}
       {attempted && !agents.pending && <p role="status">{tr('agents:decision_uncertain')}</p>}
       {agents.failed && <p role="alert">{tr('agents:action_error')}</p>}
