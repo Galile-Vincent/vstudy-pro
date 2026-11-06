@@ -10,10 +10,11 @@ it.skipIf(process.platform !== 'win32')('protects and verifies files without inh
   const directory = mkdtempSync(join(tmpdir(), 'vstudy-sdk-acl-'));
   const file = join(directory, 'private.json');
   const environment = {SystemRoot: process.env.SystemRoot ?? 'C:\\Windows'};
+  const diagnostics: string[] = [];
   const execute: NonNullable<WindowsAclOptions['execute']> = (executable, args, options) => {
     try {return execFileSync(executable, args, options);}
     catch (error) {
-      if (error instanceof Error && 'stderr' in error) console.error('Synthetic native ACL fixture helper failed', String(error.stderr).slice(-2400));
+      if (error instanceof Error && 'stderr' in error) diagnostics.push(String(error.stderr).slice(-2400));
       throw error;
     }
   };
@@ -27,5 +28,8 @@ it.skipIf(process.platform !== 'win32')('protects and verifies files without inh
       "$a=[IO.File]::GetAccessControl($env:VSTUDY_ACL_FIXTURE); $a.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new('S-1-1-0'),[Security.AccessControl.FileSystemRights]::Read,[Security.AccessControl.AccessControlType]::Allow)); [IO.File]::SetAccessControl($env:VSTUDY_ACL_FIXTURE,$a)"],
       {env: {...environment, VSTUDY_ACL_FIXTURE: file}, windowsHide: true, timeout: 30_000});
     expect(() => verifyWindowsPath(file, false, {environment, execute})).toThrow('unavailable or unsafe');
+  } catch (error) {
+    console.error('Synthetic native ACL fixture failed', diagnostics);
+    throw error;
   } finally {rmSync(directory, {recursive: true, force: true, maxRetries: 10});}
 }, 120_000);

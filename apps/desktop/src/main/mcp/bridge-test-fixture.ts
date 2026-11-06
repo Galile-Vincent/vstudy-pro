@@ -19,9 +19,9 @@ beforeAll(() => {
   if (process.platform==='win32') return;
   helperDirectory = mkdtempSync(join(tmpdir(), 'vmp-helper-'));
   helper = join(helperDirectory, 'mcp-peer');
-  const built = spawnSync(process.execPath, [resolve('../../scripts/build-mcp-peer.mjs'), '--output', helper], {encoding: 'utf8'});
+  const built = spawnSync(process.execPath, [resolve('../../scripts/build-mcp-peer.mjs'), '--output', helper], {encoding: 'utf8', timeout: 50_000});
   expect({status: built.status, stderr: built.stderr}).toEqual({status: 0, stderr: ''});
-});
+}, 60_000);
 afterAll(() => {if (helperDirectory)rmSync(helperDirectory,{recursive:true,force:true});});
 afterEach(async () => {
   for (const client of clients.splice(0)) client.socket.destroy();
