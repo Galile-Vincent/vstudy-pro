@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "platform": "win32",
+  "arch": "x64",
+  "sameHandleClientVerified": true,
+  "pairedRead": true,
+  "privateStatePersisted": true,
+  "bearerAbsentFromState": true,
+  "fragmentedUnicodeFrame": true,
+  "oversizedRejectedBeforeDispatch": true,
+  "hostSurvived": true,
+  "shutdown": true,
+  "run": "42175707962",
+  "commit": "86d34d3f3ed7295508ab2c25d9888ab330cbb06c",
+  "runUrl": "https://github.com/ava-apple/vstudy-pro/actions/runs/42175707962",
+  "manualDispatchRun": "https://github.com/ava-apple/vstudy-pro/actions/runs/42175912047"
+}
