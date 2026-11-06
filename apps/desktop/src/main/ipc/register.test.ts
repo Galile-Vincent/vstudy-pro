@@ -106,17 +106,19 @@ it('validates all AI parse channels through the same sender and response boundar
  registrar.dispose();
 });
 
-it('routes IPC stacks through redaction without exposing private filenames', async () => {
+it('logs only IPC failure metadata without provider text or private filenames', async () => {
   const {vi} = await import('vitest');
   const output=vi.spyOn(console,'log').mockImplementation(()=>{});
   const raw=vi.spyOn(console,'error').mockImplementation(()=>{});
   let invoke!: (event:IpcMainInvokeEvent,payload:unknown)=>unknown;
   const registrar=createIpcRegistrar({handle:(_channel,handler)=>{invoke=handler;},removeHandler:()=>{}},()=>true);
-  registrar.handle('settings:get',()=>{throw Error("ENOENT open '/Volumes/School/private-paper.pdf'; private-paper.pdf");});
+  registrar.handle('settings:get',()=>{throw Error("ENOENT open '/Volumes/School/private-paper.pdf'; private-paper.pdf PRIVATE_PROMPT_CANARY");});
   try {
     await expect(invoke({} as IpcMainInvokeEvent,{})).rejects.toThrow('VSTUDY_STATUS');
     expect(output).toHaveBeenCalled(); expect(raw).not.toHaveBeenCalled();
     expect(JSON.stringify(output.mock.calls)).not.toContain('private-paper');
+    expect(JSON.stringify(output.mock.calls)).not.toContain('PRIVATE_PROMPT_CANARY');
+    expect(JSON.stringify(output.mock.calls)).toContain('ipc-failed');
   } finally {registrar.dispose();output.mockRestore();raw.mockRestore();}
 });
 it('returns a localized size error before accepting an oversize user chat message',async()=>{

@@ -100,10 +100,11 @@ const entryUrl =
 
 let reloads: number[] = [];
 let openingWindow: Promise<void> | undefined;
-async function restoreMainWindow(): Promise<void> {
+async function restoreMainWindow(): Promise<BrowserWindow | undefined> {
   if (!await appReady) return;
-  if (window && !window.isDestroyed()) {window.show();window.focus();return;}
+  if (window && !window.isDestroyed()) {window.show();window.focus();return window;}
   await (openingWindow ??= createWindow().finally(() => {openingWindow=undefined;}));
+  return window ?? undefined;
 }
 
 async function createWindow(show = true): Promise<void> {
@@ -175,12 +176,25 @@ async function createWindow(show = true): Promise<void> {
       .catch(error => log({phase:'window-recovery-dialog-failed', error}))
       .finally(() => { recoveryDialogOpen = false; });
   };
+  let unresponsiveTimeout: ReturnType<typeof setTimeout> | undefined;
+  const cancelUnresponsive = () => { clearTimeout(unresponsiveTimeout); unresponsiveTimeout = undefined; };
   current.webContents.on('render-process-gone', (_event, details) => {
+    cancelUnresponsive();
     log({phase:'main-window-render-process-gone', reason:details.reason, code:details.exitCode});
-    recoverRenderer();
+    if (!quitting && details.reason !== 'clean-exit') recoverRenderer();
   });
-  current.on('unresponsive', () => { log({phase:'main-window-unresponsive'}); recoverRenderer(); });
+  current.on('unresponsive', () => {
+    log({phase:'main-window-unresponsive'});
+    if (unresponsiveTimeout) return;
+    unresponsiveTimeout = setTimeout(() => {
+      unresponsiveTimeout = undefined;
+      if (!quitting) recoverRenderer();
+    }, 10_000);
+    unresponsiveTimeout.unref();
+  });
+  current.on('responsive', cancelUnresponsive);
   current.on("closed", () => {
+    cancelUnresponsive();
     clearTimeout(showTimeout);
     if (window === current) window = null;
   });
@@ -194,7 +208,7 @@ async function createWindow(show = true): Promise<void> {
       if (error) reject(error);
       else resolve();
     };
-    settleNavigation = () => settle();
+    settleNavigation = () => settle(new Error('Renderer recovery exhausted'));
     const loaded = () => settle();
     const closed = () => settle();
     const failed = (_event: Electron.Event, code: number, description: string, _url: string, mainFrame: boolean) => {

@@ -22,7 +22,7 @@ export interface McpEngineOptions {
   now?: () => number;
   limits?: {maxActive?: number; maxPerGrant?: number; spacingMs?: number; jitterMs?: number; callTimeoutMs?: number};
 }
-interface Operation {id: string; connectionId: string; grantId: string; controller: AbortController}
+interface Operation {id: string; connectionId: string; grantId: string; controller: AbortController; executed: boolean}
 interface Cursor {grantId: string; key: string; value: string; expires: number}
 type EditGrant = z.input<(typeof mcpIpc)['mcp:edit-grant']['request']>;
 type PairDecision = z.input<(typeof mcpIpc)['mcp:pair-decision']['request']>;
@@ -171,34 +171,43 @@ export class McpEngine {
 
   private async call(params: Extract<BridgeRequest, {method: 'tools.call'}>['params'], connectionId: string): Promise<ToolResult> {
     let accountId: string | null = null;
+    let grant: Grant | undefined;
+    let args: ToolArguments | undefined;
+    let operation: Operation | undefined;
+    let result: ToolResult = publicFailure('INTERNAL');
     try {
-      let grant = this.store.authorize(params.grant);
+      grant = this.store.authorize(params.grant);
       const parsed = mcpTools[params.name].schema.safeParse(params.args);
       if (!parsed.success) throw new McpFailure('INVALID_ARGUMENT');
-      let args = parsed.data;
+      args = parsed.data;
       grant = this.authorize(params.grant, params.name, args);
       if (!args.account && !accountOptional.has(params.name)) {
-        const available = this.accounts().filter(account => grant.accountIds.includes(account.id));
+        const accountIds = grant.accountIds;
+        const available = this.accounts().filter(account => accountIds.includes(account.id));
         if (available.length !== 1) throw new McpFailure('ACCOUNT_REQUIRED');
         args = {...args, account: available[0]!.id};
       }
       if (mcpTools[params.name].risk !== 'read') this.exactPayload(args, params.grant);
       const max = this.options.limits?.maxActive ?? 16;
-      if (this.operations.size >= max || [...this.operations].filter(item => item.grantId === grant.id).length >= (this.options.limits?.maxPerGrant ?? 4)) throw new McpFailure('RATE_LIMITED');
+      const grantId = grant.id;
+      if (this.operations.size >= max || [...this.operations].filter(item => item.grantId === grantId).length >= (this.options.limits?.maxPerGrant ?? 4)) throw new McpFailure('RATE_LIMITED');
       const delay = this.limiter.admit(grant.id);
-      const operation: Operation = {id: randomUUID(), connectionId, grantId: grant.id, controller: new AbortController()};
+      operation = {id: randomUUID(), connectionId, grantId, controller: new AbortController(), executed: false};
       this.operations.add(operation);
       this.changed();
-      const result = await this.runOperation(operation, params.name, args, params.grant, delay, prepared => { accountId = prepared.accountId; });
-      if (result.ok) {
-        const redactor = this.redactor([params.grant]);
-        this.store.record(grant.id, {id: randomUUID(), at: new Date(this.now()).toISOString(), clientName: redactor.text(grant.clientName, 100), tool: params.name, accountId, status: 'OK', args: redactor.record(args)});
-        this.changed();
-      }
-      return result;
+      result = await this.runOperation(operation, params.name, args, params.grant, delay, prepared => { accountId = prepared.accountId; });
     } catch (error) {
-      return publicFailure(failureCode(error));
+      result = publicFailure(failureCode(error));
+    } finally {
+      if (operation?.executed && grant && args) {
+        const redactor = this.redactor([params.grant]);
+        try {
+          this.store.record(grant.id, {id: randomUUID(), at: new Date(this.now()).toISOString(), clientName: redactor.text(grant.clientName, 100), tool: params.name, accountId, status: result.ok ? 'OK' : result.error.code, args: redactor.record(args)});
+          this.changed();
+        } catch (error) { result = publicFailure(failureCode(error)); }
+      }
     }
+    return result;
   }
 
   private async runOperation(operation: Operation, name: ToolName, args: ToolArguments, token: string, delay: number, prepared: (call: PreparedMcpCall) => void): Promise<ToolResult> {
@@ -232,6 +241,7 @@ export class McpEngine {
       }
       signal.throwIfAborted();
       this.authorize(token, name, args, call);
+      operation.executed = true;
       const output = await call.execute(signal, () => {
         try { signal.throwIfAborted(); this.authorize(token, name, args, call); if (risk !== 'read') this.exactPayload(args, token); return null; }
         catch (error) { return failureCode(error); }
