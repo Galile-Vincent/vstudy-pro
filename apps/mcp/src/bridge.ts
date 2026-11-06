@@ -115,20 +115,27 @@ export class BridgeClient {
 
   private async connect(): Promise<Wire> {
     const windows = (this.options.connection?.platform ?? process.platform) === 'win32';
+    const bounded = windows && !this.options.backoffMs;
     const backoffs = this.options.backoffMs ?? (windows ? [0, ...Array<number>(48).fill(2000)] : [0, 100, 250, 500, 1000, 2000, 3000]);
     let deadline = Date.now() + 95_000;
     for (const [index, backoff] of backoffs.entries()) {
-      if (windows && !this.options.backoffMs && Date.now() >= deadline) break;
-      if (backoff) await this.wait(backoff);
+      if (bounded && Date.now() >= deadline) break;
+      if (backoff) await this.wait(bounded ? Math.min(backoff, deadline - Date.now()) : backoff);
+      if (bounded && Date.now() >= deadline) break;
+      const attempt = new AbortController();
+      const timer = bounded ? setTimeout(() => attempt.abort(), deadline - Date.now()) : undefined;
       try {
         if (this.state.kind === 'closed') throw new BridgeError('DISCONNECTED', 'The VStudy client has closed.');
         const state = this.state;
-        const wire = await Wire.connect(this.options.socketPath, { ...this.options.connection, signal: state.controller.signal });
+        const signal = AbortSignal.any([state.controller.signal, attempt.signal]);
+        const wire = await Wire.connect(this.options.socketPath, { ...this.options.connection, signal });
+        if (bounded && Date.now() >= deadline) { wire.close(); break; }
         if (this.state !== state) { wire.close(); throw new BridgeError('DISCONNECTED', 'The VStudy client has closed.'); }
         state.wire = wire;
         return wire;
       }
       catch (error) {
+        if (bounded && Date.now() >= deadline) break;
         const unavailable = error instanceof Error && 'code' in error
           && (error.code === 'ENOENT' || error.code === 'ECONNREFUSED');
         if (!unavailable) throw error;
@@ -137,7 +144,7 @@ export class BridgeClient {
           await (this.options.launch ?? launchApp)();
           deadline = Date.now() + 95_000;
         }
-      }
+      } finally { clearTimeout(timer); }
     }
     throw new BridgeError('DISCONNECTED', 'Open VStudy Pro, enable Settings > Agents, and retry.');
   }

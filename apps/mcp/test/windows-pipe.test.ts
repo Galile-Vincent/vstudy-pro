@@ -7,6 +7,17 @@ import { windowsPipeName } from '../../desktop/src/main/mcp/endpoint';
 import { connectLocalSocket } from '../src/connection';
 import { BridgeClient } from '../src/bridge';
 import { Credentials } from '../src/credentials';
+import { BridgeError } from '../src/errors';
+
+vi.mock('node:timers/promises', () => ({
+  setTimeout: (ms: number, value: unknown, options: {signal?: AbortSignal} = {}) => new Promise((resolve, reject) => {
+    const {signal} = options;
+    if (signal?.aborted) { reject(signal.reason); return; }
+    const timer = setTimeout(() => {signal?.removeEventListener('abort', abort); resolve(value);}, ms);
+    const abort = () => {clearTimeout(timer); reject(signal?.reason);};
+    signal?.addEventListener('abort', abort, {once: true});
+  }),
+}));
 
 const sid = 'S-1-5-21-100-200-300-1001';
 const request = { path: windowsPipeName(sid), expectedServerSid: sid, impersonationLevel: 'identification' as const };
@@ -116,21 +127,59 @@ it('aborts both pending authentication and an authenticated forwarding process',
   }
 });
 
-it('allows a cold Windows app more than 90 seconds after launch without reading credentials or replaying a write', async () => {
+it('allows cold Windows startup beyond 90 seconds but starts no attempt at or after the deadline', async () => {
   vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-06T01:00:00Z'));
   const credentials = new Credentials('/unused-credentials');
   const identity = vi.spyOn(credentials, 'identity');
   const launch = vi.fn(async () => {});
-  const connector = vi.fn(async () => { throw Object.assign(new Error('Not listening'), {code: 'ENOENT'}); });
+  const starts: number[] = []; const beginning = Date.now();
+  const connector = vi.fn(async () => {starts.push(Date.now() - beginning); throw Object.assign(new Error('Not listening'), {code: 'ENOENT'});});
   const client = new BridgeClient({ socketPath: request.path, credentials, clientName: 'Test', stderr: () => {}, launch,
     connection: {platform: 'win32', currentSid: () => sid, authenticatedPipe: connector} });
   let settled = false;
   const running = client.call('create_task', {task: {title: 'Study', courseId: null, dueAt: null, estimateMinutes: 30}}).then(result => {settled = true; return result;});
   await vi.advanceTimersByTimeAsync(91_000);
   expect(settled).toBe(false); expect(launch).toHaveBeenCalledOnce(); expect(identity).not.toHaveBeenCalled();
-  await vi.advanceTimersByTimeAsync(7000);
+  await vi.advanceTimersByTimeAsync(4000);
   expect(await running).toMatchObject({ok: false, error: {code: 'DISCONNECTED'}});
+  expect(Date.now() - beginning).toBe(95_000);
+  expect(starts.at(-1)).toBe(94_000);
+  expect(starts.every(start => start < 95_000)).toBe(true);
   expect(launch).toHaveBeenCalledOnce(); expect(identity).not.toHaveBeenCalled();
+  await client.close();
+});
+
+it('accepts a Windows app that becomes ready at 92 seconds', async () => {
+  vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-06T01:00:00Z'));
+  const beginning = Date.now(); const credentials = new Credentials('/unused-credentials');
+  const identity = vi.spyOn(credentials, 'identity').mockImplementation(() => {throw new BridgeError('EXPIRED', 'Synthetic identity.');});
+  const client = new BridgeClient({socketPath: request.path, credentials, clientName: 'Test', stderr: () => {}, launch: async () => {},
+    connection: {platform: 'win32', currentSid: () => sid, authenticatedPipe: async () => {
+      if (Date.now() - beginning < 92_000) throw Object.assign(new Error('Not listening'), {code: 'ENOENT'});
+      return {stream: new PassThrough(), serverSid: sid};
+    }}});
+  const running = client.call('create_task', {task: {title: 'Study', courseId: null, dueAt: null, estimateMinutes: 30}});
+  await vi.advanceTimersByTimeAsync(92_000);
+  expect(await running).toMatchObject({ok: false, error: {code: 'EXPIRED'}});
+  expect(identity).toHaveBeenCalledOnce();
+  await client.close();
+});
+
+it('cancels a last native attempt at the remaining startup deadline without reading a grant', async () => {
+  vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-06T01:00:00Z'));
+  const h = fixture(); const beginning = Date.now(); const credentials = new Credentials('/unused-credentials');
+  const identity = vi.spyOn(credentials, 'identity');
+  const client = new BridgeClient({socketPath: request.path, credentials, clientName: 'Test', stderr: () => {}, launch: async () => {},
+    connection: {platform: 'win32', currentSid: () => sid, authenticatedPipe: async value => {
+      if (Date.now() - beginning < 94_000) throw Object.assign(new Error('Not listening'), {code: 'ENOENT'});
+      return h.connector(value);
+    }}});
+  const running = client.call('create_task', {task: {title: 'Study', courseId: null, dueAt: null, estimateMinutes: 30}});
+  await vi.advanceTimersByTimeAsync(94_000);
+  expect(h.start).toHaveBeenCalledOnce(); expect(h.child.kill).not.toHaveBeenCalled();
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(await running).toMatchObject({ok: false, error: {code: 'DISCONNECTED'}});
+  expect(h.child.kill).toHaveBeenCalledOnce(); expect(h.write).not.toHaveBeenCalled(); expect(identity).not.toHaveBeenCalled();
   await client.close();
 });
 

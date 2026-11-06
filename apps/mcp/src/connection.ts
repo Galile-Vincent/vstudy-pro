@@ -12,6 +12,7 @@ import { createWindowsPipeConnector } from './windows-pipe';
  * Resolve only after checking the actual server SID on the same handle that carries the returned stream.
  * Never probe then reconnect. Use Identification-level impersonation and send no client bytes before verification.
  * Destroying the returned stream must close that authenticated handle and any forwarding process.
+ * Reject promptly when the supplied signal aborts, including during native startup.
  */
 export type AuthenticatedPipeConnector = (request: {
   path: string; expectedServerSid: string; impersonationLevel: 'identification'; signal?: AbortSignal;
