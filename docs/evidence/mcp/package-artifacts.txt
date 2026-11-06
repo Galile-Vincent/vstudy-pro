@@ -2,16 +2,20 @@
 > @vstudy/mcp@0.2.0 verify /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
 > node scripts/verify-artifact.mjs
 
-dist/vstudy-mcp.cjs sha256 b092bfd1a34431fe6822506197de4ee1c9c71828763d62b8e35828e3fd6cabcf
-dist/installer.cjs sha256 8d511b061ca20327559807428eebfa6820cbd5c1bcb1fbdf9c6cbffdd94be1d3
+dist/vstudy-mcp.cjs sha256 b0da74f4bc2642490ca08d9f1e503c5171437405e0788dfc827c9265981a2802
+dist/installer.cjs sha256 9555dc4afb6bc3b6ecc0b5602b91357a4a9aa5900214e257b394cf3d93219b30
 dist/windows-acl.cjs sha256 b1e0ab7ccdb2e6d68d997a9f9350aefd6c816857c3a7c7abecccf7ce0c2e169f
 Bundled CLI executes and all five client asset packages exist.
 Native plugin CLI copies match the standalone artifact.
-
 
 > @vstudy/mcp@0.2.0 verify:package /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
 > node scripts/verify-package.mjs
 
 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources: CLI and client resources present. Unix helper executable outside ASAR.
-/Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp/dist/vstudy-mcp.cjs sha256 b092bfd1a34431fe6822506197de4ee1c9c71828763d62b8e35828e3fd6cabcf
-/Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp-peer sha256 a283070704bb5d2996384d51dd916dc6c579ae8789cdcf9a88601f32ccb72476
+/Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp/dist/vstudy-mcp.cjs sha256 b0da74f4bc2642490ca08d9f1e503c5171437405e0788dfc827c9265981a2802
+/Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp-peer sha256 947d9293aa62c6ca03979e9dbb44fd2b4e732c98d415d12599a013f697118ae5
+
+> @vstudy/mcp@0.2.0 verify:core /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> node scripts/check-core-bridge.mjs
+
+PASS real core engine, native peer helper, official SDK, 27 schemas, pending DENIED pairing, one-shot finish, opaque cursor roundtrip, eight queued reads, approved write, restart, disabled JSON-RPC error, authenticated nonpairing doctor revocation/expiry/scope/disabled probes, explicit reset and fresh consent.

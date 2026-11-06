@@ -115,7 +115,7 @@ VStudy removes active HTML and remote links from results. Results contain stable
 
 ## Diagnose a connection
 
-Run `vstudy-mcp doctor --client <client>` with the same identity and data location used by its server. Doctor reports app discovery, connection, protocol version, and grant status. It verifies an existing grant through the app and discards returned account content. It does not pair or launch the app. The in-app wizard also has **Test connection**. A missing grant before first pairing is expected.
+Run `vstudy-mcp doctor --client <client>` with the same identity and data location used by its server. If the command is not on PATH, use the full Node and server paths shown by the setup wizard instead. Doctor reports app discovery, connection, protocol version, and grant status. It verifies an existing grant through the app and discards returned account content. It does not pair or launch the app. The in-app wizard also has **Test connection**. A missing grant before first pairing is expected.
 
 To pair again after expiry or revocation, stop the client's VStudy MCP server and run `vstudy-mcp reset --client <client>`. Restart it and call a tool to request fresh consent. Reset clears only that local bearer and expiry. It preserves the client UUID and does not revoke an app grant. It supports `--dry-run`.
 

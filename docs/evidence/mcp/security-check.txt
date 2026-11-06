@@ -19,16 +19,16 @@
 > @vstudy/website@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website
 > astro check
 
-12:05:35 [types] Generated 26ms
-12:05:35 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website...
-Result (29 files):
+13:22:54 [types] Generated 14ms
+13:22:54 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website...
+Result (33 files):
 - 0 errors
 - 0 warnings
 - 0 hints
 
 
 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/main/ipc/index.ts
-  75:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+  76:166  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
 
 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/main/moodle/sso-protocol.ts
   14:59  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
@@ -51,26 +51,26 @@ Result (29 files):
 > node scripts/build.mjs
 
 
-  dist/vstudy-mcp.cjs   941.6kb
-  dist/installer.cjs    371.1kb
+  dist/vstudy-mcp.cjs   942.5kb
+  dist/installer.cjs    371.5kb
   dist/windows-acl.cjs  140.9kb
 
-⚡ Done in 39ms
+⚡ Done in 37ms
 
  RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
 
 
  Test Files  12 passed | 1 skipped (13)
-      Tests  121 passed | 2 skipped (123)
-   Start at  12:05:39
-   Duration  5.09s (transform 163ms, setup 0ms, import 505ms, tests 8.81s, environment 1ms)
+      Tests  130 passed | 2 skipped (132)
+   Start at  13:22:58
+   Duration  3.23s (transform 92ms, setup 0ms, import 309ms, tests 5.48s, environment 0ms)
 
 
 > @vstudy/desktop@0.2.2 test /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop
 > node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run --pool=forks --maxWorkers=2
 
-Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/locales.generated.ts (21 namespaces).
-(node:59305) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/locales.generated.ts (22 namespaces).
+(node:72897) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -92,15 +92,16 @@ Paper light: WCAG AA passed at every contrast setting
 Paper dark: WCAG AA passed at every contrast setting
 High contrast light: WCAG AA passed at every contrast setting
 High contrast dark: WCAG AA passed at every contrast setting
-30 renderer CSS files use semantic theme tokens
+32 renderer CSS files use semantic theme tokens
 
  RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop
 
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
 
- Test Files  162 passed | 5 skipped (167)
-      Tests  1258 passed | 14 skipped (1272)
-   Start at  12:05:44
-   Duration  37.50s (transform 2.10s, setup 0ms, import 15.03s, tests 39.88s, environment 9.88s)
+ Test Files  175 passed | 5 skipped (180)
+      Tests  1377 passed | 14 skipped (1391)
+   Start at  13:23:02
+   Duration  35.78s (transform 1.88s, setup 0ms, import 12.72s, tests 42.20s, environment 7.95s)
 
 
 > vstudy-pro@ typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4
@@ -114,14 +115,14 @@ High contrast dark: WCAG AA passed at every contrast setting
 > @vstudy/desktop@0.2.2 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop
 > node scripts/generate-locales.mjs && tsc --noEmit
 
-Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/locales.generated.ts (21 namespaces).
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/locales.generated.ts (22 namespaces).
 
 > @vstudy/website@0.1.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website
 > astro check
 
-12:06:29 [types] Generated 24ms
-12:06:29 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website...
-Result (29 files):
+13:23:45 [types] Generated 22ms
+13:23:45 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website...
+Result (33 files):
 - 0 errors
 - 0 warnings
 - 0 hints

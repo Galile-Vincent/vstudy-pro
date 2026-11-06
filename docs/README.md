@@ -49,6 +49,7 @@ Other project documentation:
 - [Engineering procedures](ENGINEERING.md) describe setup, checks, IPC, migrations, locale generation, and releases.
 - [Cleanup verification](ENGINEERING_CLEANUP.md) records current commands and scoped exceptions.
 - [Storage and recovery](STORAGE.md) describes persistence ownership, cache limits, and portable backups.
+- [Global agents and MCP](MCP.md) describes pairing, scopes, tools, approvals, recovery, and the academic-integrity policy. [MCP design](MCP_DESIGN.md) records the openape investigation and transport decisions. [Integration evidence](evidence/mcp/VERIFICATION.md) separates fixture acceptance, installed clients, and remaining gaps.
 - [Vendor patches](VENDOR_PATCHES.md) records source hashes and exact reviewed diffs.
 - [Proposed 0.2.0 notes](releases/0.2.0.md) describe the release candidate without creating a tag.
 - [Moodle](../apps/desktop/src/main/moodle/README.md), [database](../apps/desktop/src/main/db/README.md), [cache](../apps/desktop/src/main/cache/README.md), [storage](../apps/desktop/src/main/storage/README.md), [services](../apps/desktop/src/main/services/README.md), [providers](../apps/desktop/src/main/providers/README.md), [planner](../apps/desktop/src/main/planner/README.md), [IPC](../apps/desktop/src/main/ipc/README.md), and [themes](../apps/desktop/src/shared/themes/README.md) document subsystem data flow and invariants.

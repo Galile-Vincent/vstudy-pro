@@ -1,5 +1,6 @@
 /** Documentation records drive static routes, navigation, headings, and the search index. */
 import type { Language } from './ui';
+import { mcpGuide } from './mcp-docs';
 
 export interface Section {
   id: string;
@@ -59,6 +60,7 @@ export const guides: Guide[] = [
       {id:'approval',title:'Review before you approve',paragraphs:['The agent returns proposals, not automatic planner writes. Review each approval card, including the target course, task, date, and duration. Approve only the action you want. Rejecting a proposal does not apply it.','Main validates the approved action against current targets before writing. Repeated approval does not duplicate the same action. This approval model does not make AI answers authoritative or guarantee a correct plan.']},
     ],
   },
+  mcpGuide,
   {
     slug:'reading-documents',title:'Reading documents with AI',group:'Study with VStudy',source:'README.md',
     description:'Import a reading, select a passage, and trace answers back to the source.',
