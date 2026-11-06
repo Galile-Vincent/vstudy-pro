@@ -128,8 +128,9 @@ public static class VStudyPipeHost {
         security.AddAccessRule(new PipeAccessRule(User, PipeAccessRights.FullControl, AccessControlType.Allow));
         Descriptor = security.GetSecurityDescriptorBinaryForm();
         NamedPipeServerStream initial = Create(true);
-        Thread listener = new Thread(Listen); listener.IsBackground = true; listener.Start(initial);
+        Thread listener = new Thread(Listen); listener.IsBackground = true;
         Emit("ready:" + User.Value + ":" + Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(security.GetSecurityDescriptorSddlForm(AccessControlSections.All))));
+        listener.Start(initial);
         try {
             string line;
             while ((line = Console.In.ReadLine()) != null) {
