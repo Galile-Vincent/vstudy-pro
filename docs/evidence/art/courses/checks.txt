@@ -1,0 +1,18 @@
+Courses art redesign verification.
+
+pnpm --filter @vstudy/desktop build. Passed.
+pnpm --filter @vstudy/desktop typecheck. Passed.
+pnpm --filter @vstudy/desktop lint. Passed with no errors or warnings.
+pnpm knip. Passed. Existing configuration hint about CSS import tracking.
+pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2. Passed. 992 tests passed, 14 skipped. 131 test files passed, 5 skipped.
+pnpm --filter @vstudy/desktop exec vitest run src/renderer/courses --pool=forks --maxWorkers=2. Passed. 75 tests.
+pnpm --filter @vstudy/desktop contrast:check. Passed. All 9 packs, both schemes, every contrast setting from 100 through 150. Includes cover labels and the hero scrim over a white source image.
+pnpm security:static. Passed. Three existing dynamic shell.openExternal warnings outside the changed files.
+git diff --check. Passed.
+
+ART_PHASE=before node e2e/art-courses.mjs. Built Electron. VStudy and Ocean, both schemes, 1200×768 and 1440×900. Home and course captures. First-use coach visible.
+ART_PHASE=final node e2e/art-courses.mjs. Built Electron. All 9 packs, both schemes. Home and course axe checks. Home/course screenshots plus tabs, sheets, planner, connect, webview toolbar, and loading/empty/offline states. Keyboard opening, tab movement, assistant Escape/focus, and composer bounds checked. Real provider runtime with a local fake provider. No school connection.
+ART_PHASE=pseudo node e2e/art-courses.mjs. Real Electron with Vite renderer. zh-Hant, ja, expanded en-XA. Minimum 720×768 at 125% scale. Home and course screenshots in both schemes. Header marker assertion proves the expanded locale reached the UI. No page overflow. Account remains compact.
+
+PNG evidence stays local under docs/evidence/art/courses because the repository ignores generated screenshots. The text reports and reusable harness are versioned.
+No independent review ran inside the implementation sub-agent. Parent review is required before release.
