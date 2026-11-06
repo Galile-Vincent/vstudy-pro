@@ -24,3 +24,5 @@ flowchart LR
 - Raw provider errors must not expose tokens or document content in public diagnostics.
 
 [Fixture provenance](fixtures/README.md) identifies recorded catalogs and streams. [Codex transport](../../../../../docs/codex-tool-free.md) documents the exact version, process restrictions, and limits. Live-provider tests need explicit opt-in and authentication.
+
+[Guided setup](setup/README.md) owns verified app-managed CLI installation, reviewed sign-in actions, tests, side-by-side updates, and rollback. It shares this registry's opt-ins and executable trust. New transports resolve an immutable selected path; existing processes retain theirs through updates. A user-selected custom executable remains selected until another explicit managed installation.

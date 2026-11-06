@@ -166,7 +166,15 @@ Choose a school and confirm its Moodle site. Main discovers the official mobile 
 
 Imports copy your original into a content-addressed library. Markdown and text open directly; other formats use an on-demand Python converter to produce Markdown. The converter denies network access on macOS and stops after idle time. Conversion can lose formatting; it is not an exact PDF viewer.
 
-AI is optional. **Settings > Providers** can use an existing Claude Code (`claude`), Codex (`codex`), or Antigravity (`agy`) CLI login after individual opt-in. Sign in with those tools outside VStudy first. Alternatively, save an Anthropic, OpenAI, or OpenAI-compatible API key, or keep it only for the session. CLI subscription access and API billing follow their providers' terms. Codex currently requires authenticated CLI **0.166.0**, macOS, and `/usr/bin/sandbox-exec`; unsupported transport verification fails closed. See [Codex transport limits](docs/codex-tool-free.md).
+AI is optional. Open **AI tools** in the sidebar, or **Set up AI** from onboarding, the Reader, or **Settings > Providers**. Choose Claude Code (`claude`), Codex (`codex`), or Antigravity (`agy`), then allow that tool individually. Discovery checks files without launching a disabled tool.
+
+1. **Install.** Review the official download and private destination, then run the action. VStudy verifies the download and keeps each version in its own app-managed folder. It needs no administrator password and changes no shell profile or PATH.
+2. **Sign in.** Run the reviewed action in the embedded terminal on macOS. Follow its link or device code, then return to VStudy. Links ask for confirmation. You can also copy the command or open your own Terminal. Windows and Linux use that external-terminal fallback for sign-in.
+3. **Test.** Choose **Test it** to send a tiny prompt through the real provider. It contains no document text and may count toward your provider usage. Specific recovery hints and a request to copy to your teacher or IT team are available in the same sheet.
+
+The sidebar shows versions and update state. **Check for updates now** requests a one-time version check. Background checks and automatic updates while idle start off in **Settings > Privacy**. A requested update installs beside the current version. Running chats keep their executable, new chats use the update, and rollback keeps the previous version available. VStudy does not update a separately installed CLI. The copy-only vendor installer fallback explains how to select an existing executable in Providers settings.
+
+VStudy includes no AI subscription. Account access and free or paid usage follow the provider's terms. API keys remain available for Anthropic, OpenAI, and OpenAI-compatible endpoints, saved or just for the session. Codex requires the audited CLI **0.166.0**, macOS, and `/usr/bin/sandbox-exec`. Its managed installer uses that version; a newer release cannot bypass transport verification. See [Codex transport limits](docs/codex-tool-free.md), [setup design and acceptance limits](docs/AI_CLI_SETUP_DESIGN.md), and [implementation evidence](docs/AI_CLI_SETUP_REPORT.md).
 
 An AI question combines your message with bounded context. Document chat includes metadata, conversation history, and selected text; without a selection it includes an outline and opening excerpt. Course chat adds available coursework, planner state, and selected ready documents. Answers stream back and are saved locally. Agent proposals require explicit approval before main changes planner data. Confirm dates and answers against the source.
 
@@ -178,7 +186,7 @@ VStudy sends no app analytics. School sign-in, sync, and content views contact t
 
 Documents, Markdown, and chats are **not encrypted at rest** by the app. Saved secrets use macOS Keychain-backed encryption; session-only secrets remain in main-process memory. FileVault and your macOS account protect local files. Portable backups exclude credentials but contain private study content.
 
-**Settings > Privacy** lists bounded, session-only app-initiated requests and CLI launches. It is not a packet capture and cannot enumerate every request inside a CLI or Chromium; byte counts are unknown. External browser and mail links require confirmation. Read the [security model](docs/SECURITY.md) before using sensitive material.
+**Settings > Privacy** lists bounded, session-only app-initiated requests and CLI launches, including AI tool metadata checks and downloads. Background AI tool checks are a separate opt-in. The inventory is not a packet capture and cannot enumerate every request inside a CLI or Chromium; byte counts are unknown. External browser and mail links require confirmation. Read the [security model](docs/SECURITY.md) before using sensitive material.
 
 ## Project structure
 

@@ -1,16 +1,18 @@
 /** Human-readable localized guides. Other guides retain an explicit English fallback notice. */
 import type { Guide } from './docs';
 import type { Language } from './ui';
+import { aiCliGuides } from './ai-cli-guides';
 
 export const translations: Partial<Record<Language, Record<string, Pick<Guide, 'title' | 'description' | 'sections'>>>> = {
   'zh-Hant': {
+    'ai-providers': aiCliGuides['zh-Hant'],
     'getting-started': {
       title:'開始使用', description:'安裝 VStudy Pro，不連接帳號也能試讀第一份資料。',
       sections:[
         {id:'install',title:'在 Mac 上安裝',paragraphs:['VStudy Pro 是 macOS 應用程式。請在 GitHub 最新版本選擇 Apple 晶片組建。目前儲存庫為私人，需要存取權限才能查看版本。若沒有可下載檔案，可依 Development 指南從原始碼建置。','此儲存庫未宣告最低 macOS 版本。安裝前請確認實際版本需求。AI 回答、學校登入與新的課程內容都需要網路。'],steps:['從網站導覽列的下載按鈕開啟最新版本。','打開磁碟映像檔，將 VStudy Pro 拖入「應用程式」。','從「應用程式」打開 VStudy Pro。']},
         {id:'first-launch',title:'開啟可信任的組建',paragraphs:['目前本機組建採臨時簽署，沒有 Developer ID 簽署或 Apple 公證。Gatekeeper 可能會阻擋首次啟動。請先確認來源與版本可信任，不要全域停用 Gatekeeper。'],steps:['嘗試打開應用程式，然後關閉 macOS 的提示。','打開「系統設定」的「隱私權與安全性」。','找到遭阻擋的 VStudy Pro 啟動項目。若有「強制打開」，確認信任後再選擇。','確認提示並依需要驗證身分。若沒有此選項，請確認版本或聯繫維護者。']},
         {id:'onboarding',title:'試讀範例文件',paragraphs:['首次設定可選擇英文、繁體中文或日文，以及明亮或深色主題。先從內附範例開始，之後再連接學校或設定 AI 供應商。','在閱讀器打開範例，選取一句話即可體驗閱讀流程。AI 回答需要你自行啟用的供應商，單純閱讀範例則不需要 AI。'],image:{name:'onboarding',width:1440,height:900,alt:'歡迎導覽與閱讀工作區預覽'}},
-        {id:'optional-setup',title:'只加入你需要的功能',paragraphs:['在「課程」連接學校以加入 Moodle 課業。在「資料庫」匯入自己的文件。想使用 AI 時，再到「設定 > 供應商」。','PDF 等格式需要 Python 轉換環境。首次轉換會先詢問是否允許下載套件。Markdown 與純文字不需要此設定。「設定 > 隱私權」提供轉換器離線模式。']},
+        {id:'optional-setup',title:'只加入你需要的功能',paragraphs:['在「課程」連接學校以加入 Moodle 課業。在「資料庫」匯入自己的文件。想使用 AI 時，可從側邊欄的「AI 工具」、首次導覽、閱讀器或「設定 > 供應商」開啟「設定 AI 工具」。','選擇工具並個別允許執行，再依序完成安裝、登入與測試。執行前會顯示操作內容。macOS 的內嵌終端機會顯示登入連結與代碼，也可使用自己的終端機。VStudy 不附帶 AI 訂閱，測試可能計入供應商用量。','PDF 等格式需要 Python 轉換環境。首次轉換會先詢問是否允許下載套件。Markdown 與純文字不需要此設定。「設定 > 隱私權」提供轉換器離線模式。']},
       ],
     },
     'connect-your-school': {
@@ -24,13 +26,14 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
     },
   },
   ja: {
+    'ai-providers': aiCliGuides.ja,
     'getting-started': {
       title:'はじめに', description:'VStudy Pro をインストールして、アカウント接続なしで資料を読んでみましょう。',
       sections:[
         {id:'install',title:'Mac にインストールする',paragraphs:['VStudy Pro は macOS アプリです。GitHub の最新リリースで Apple シリコン向けビルドを選んでください。現在リポジトリは非公開で、リリースの表示にはアクセス権が必要です。配布ファイルがない場合は Development ガイドに沿ってソースからビルドできます。','このリポジトリには macOS の最低バージョンが明記されていません。実際のリリース要件を確認してください。AI の回答、学校へのログイン、新しい授業内容にはネット接続が必要です。'],steps:['ナビゲーションのダウンロードボタンから最新リリースを開きます。','ディスクイメージを開き、VStudy Pro を「アプリケーション」にドラッグします。','「アプリケーション」から VStudy Pro を開きます。']},
         {id:'first-launch',title:'信頼できるビルドを開く',paragraphs:['現在のローカルビルドはアドホック署名で、Developer ID 署名と Apple の公証がありません。Gatekeeper が初回起動を止める場合があります。入手元とリリースを確認し、信頼できる場合のみ続けてください。Gatekeeper 全体を無効にしないでください。'],steps:['アプリを一度開こうとしてから、macOS の警告を閉じます。','「システム設定」の「プライバシーとセキュリティ」を開きます。','ブロックされた VStudy Pro の項目で、表示されていれば「このまま開く」を選びます。','確認画面に従い、必要なら認証します。項目がなければリリースを確認するか、メンテナーに連絡してください。']},
         {id:'onboarding',title:'サンプル資料を読む',paragraphs:['初回設定では英語、繁体字中国語、日本語と、ライトまたはダークのテーマを選べます。まず付属のサンプルから始めて、学校や AI プロバイダーは後で接続できます。','サンプルをリーダーで開き、一文を選んで読み方を試します。AI の回答には自分で有効にしたプロバイダーが必要です。サンプルを読むだけなら AI は不要です。'],image:{name:'onboarding',width:1440,height:900,alt:'VStudy の初回設定とサンプル資料'}},
-        {id:'optional-setup',title:'必要な機能だけを追加する',paragraphs:['「授業」で学校を接続すると Moodle の授業を取得できます。「ライブラリ」では自分の資料を取り込めます。AI を使いたくなったら「設定 > プロバイダー」を開きます。','PDF などの変換には Python の変換環境が必要です。初回変換ではパッケージのダウンロード前に許可を求めます。Markdown とテキストはこの準備なしで使えます。「設定 > プライバシー」に変換器のオフラインモードがあります。']},
+        {id:'optional-setup',title:'必要な機能だけを追加する',paragraphs:['「授業」で学校を接続すると Moodle の授業を取得できます。「ライブラリ」では自分の資料を取り込めます。AI を使いたくなったら、サイドバーの「AI ツール」、初回案内、リーダー、または「設定 > プロバイダー」から「AI ツールを設定」を開きます。','ツールを選んで個別に実行を許可し、インストール、ログイン、テストと進みます。各操作は実行前に確認できます。macOS の内蔵ターミナルにリンクとコードを表示し、自分のターミナルも使えます。VStudy に AI の契約は含まれず、テストは利用枠を消費する場合があります。','PDF などの変換には Python の変換環境が必要です。初回変換ではパッケージのダウンロード前に許可を求めます。Markdown とテキストはこの準備なしで使えます。「設定 > プライバシー」に変換器のオフラインモードがあります。']},
       ],
     },
     'connect-your-school': {
