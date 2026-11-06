@@ -14,7 +14,7 @@ Read course documents, keep Moodle deadlines together, and turn coursework into 
 
 Open [GitHub Releases](https://github.com/ava-apple/vstudy-pro/releases/latest) and download the DMG and `SHA256SUMS.txt` from the same release. This repository is currently private, so you need repository access. If no published release is available, ask the maintainer for access or build from source below.
 
-The current local build produces **`VStudy Pro-0.2.0-arm64.dmg`**. Version numbers change with releases. The [release workflow](.github/workflows/release.yml) runs on `v*.*.*` tag pushes, checks the tag against the desktop version, and attaches unsigned artifacts and checksums to a **draft** release. A draft is not a published download.
+The current local build produces **`VStudy-Pro-0.2.0-arm64.dmg`**. Version numbers change with releases. The [release workflow](.github/workflows/release.yml) runs on `v*.*.*` tag pushes, checks the tag against the desktop version, and attaches unsigned artifacts and checksums to a **draft** release. A draft is not a published download.
 
 Use an Apple silicon Mac, arm64. The generated app declares macOS 12.0 or later. The builder config has no explicit architecture list and defaults to its build host; the current arm64 build is verified. Intel and universal builds are not verified. The Release workflow also leaves architecture to its runner; check the actual release asset before downloading for an Intel Mac. Windows and Linux packages are not provided. AI and school sync need internet access. Reading local Markdown and text does not require an AI account.
 
@@ -63,7 +63,7 @@ pnpm build
 pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish never -c.mac.notarize=false -c.mac.identity=null
 ```
 
-On an arm64 host, output is `apps/desktop/release/VStudy Pro-0.2.0-arm64.dmg` and `apps/desktop/release/mac-arm64/VStudy Pro.app`. This command disables Developer ID signing and notarization. `pnpm package` uses the configured signing/notarization defaults instead. For distribution signing, follow [the release guide](docs/ENGINEERING.md#prepare-a-release) and [signed-build credentials](CONTRIBUTING.md#sign-a-distribution-build).
+On an arm64 host, output is `apps/desktop/release/VStudy-Pro-0.2.0-arm64.dmg` and `apps/desktop/release/mac-arm64/VStudy Pro.app`. This command disables Developer ID signing and notarization. `pnpm package` uses the configured signing/notarization defaults instead. For distribution signing, follow [the release guide](docs/ENGINEERING.md#prepare-a-release) and [signed-build credentials](CONTRIBUTING.md#sign-a-distribution-build).
 
 For non-text document conversion, install **uv** or **Python 3.10+** separately. First conversion asks before downloading hash-locked dependencies from PyPI; uv may download Python from GitHub. **Settings > Privacy** provides Retry and persistent Offline mode. Markdown and text work without that installation.
 
