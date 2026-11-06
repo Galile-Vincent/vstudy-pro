@@ -6,7 +6,9 @@ import { i18n } from '../../shared/i18n';
 import { cliToolStateSchema } from '../../shared/ai-cli';
 interface ManualCapture {
   language: string; scheme: string; theme: string; step: string; command: string;
-  copyEnabled: boolean; copyVisible: boolean; horizontalOverflow: boolean; actionButtons: number; hasRunPreview: boolean; file: string;
+  copyEnabled: boolean; copyVisible: boolean; terminalEnabled: boolean; terminalVisible: boolean; checkEnabled: boolean; checkVisible: boolean;
+  numberedSteps: number; reasonCount: number; sourceVisible: boolean; primaryActions: string[]; detectionChecked: boolean;
+  horizontalOverflow: boolean; actionButtons: number; hasRunPreview: boolean; file: string;
 }
 
 export async function captureManualSetup(window: BrowserWindow, root: string) {
@@ -35,22 +37,29 @@ export async function captureManualSetup(window: BrowserWindow, root: string) {
     const copy = String(i18n.getFixedT(language, 'ai-cli')('copy_command'));
     const reason = String(i18n.getFixedT(language, 'ai-cli')('manual_install_reason'));
     const step = String(i18n.getFixedT(language, 'ai-cli')('step_install'));
+    const check = String(i18n.getFixedT(language, 'ai-cli')('check_again'));
+    const missing = String(i18n.getFixedT(language, 'ai-cli')('manual_not_found'));
     await waitFor(`(() => {
       const manual=document.querySelector('.ai-cli-action-area details[open]');
-      return document.documentElement.lang===${JSON.stringify(language)} && document.documentElement.dataset.scheme===${JSON.stringify(scheme)} && manual?.textContent.includes(${JSON.stringify(reason)}) && [...manual.querySelectorAll('button')].some(button=>button.textContent===${JSON.stringify(copy)});
+      return document.documentElement.lang===${JSON.stringify(language)} && document.documentElement.dataset.scheme===${JSON.stringify(scheme)} && document.querySelector('.ai-cli-manual-reason')?.textContent.includes(${JSON.stringify(reason)}) && manual?.querySelector('[data-manual-copy]')?.textContent===${JSON.stringify(copy)} && manual?.querySelector('[data-manual-check]')?.textContent===${JSON.stringify(check)};
     })()`);
     await window.webContents.executeJavaScript('document.fonts.ready.then(()=>true)');
     await new Promise(resolve => setTimeout(resolve, 350));
-    const { bodyText, ...inspection }: Omit<ManualCapture, 'file'> & { bodyText: string } = await window.webContents.executeJavaScript(`(() => {
-      const pane=document.querySelector('.ai-cli-action-area'), manual=pane.querySelector('details[open]'), button=manual.querySelector('button'), scroll=document.querySelector('.ai-cli-scroll');
-      const box=button.getBoundingClientRect(), viewport=scroll.getBoundingClientRect();
-      return {language:document.documentElement.lang,scheme:document.documentElement.dataset.scheme,theme:document.documentElement.dataset.theme,step:document.querySelector('.ai-cli-steps [aria-current=step] strong')?.textContent,command:manual.querySelector('code')?.textContent,copyEnabled:!button.disabled,copyVisible:box.top>=viewport.top && box.bottom<=viewport.bottom,horizontalOverflow:manual.scrollWidth>manual.clientWidth+1,actionButtons:pane.querySelectorAll('button').length,hasRunPreview:Boolean(pane.querySelector('#ai-cli-preview')),bodyText:document.querySelector('.ai-cli-sheet').innerText};
+    const { bodyText, ...inspection }: Omit<ManualCapture, 'file' | 'detectionChecked'> & { bodyText: string } = await window.webContents.executeJavaScript(`(() => {
+      const pane=document.querySelector('.ai-cli-action-area'), manual=pane.querySelector('details[open]'), scroll=document.querySelector('.ai-cli-scroll'), sheet=document.querySelector('.ai-cli-sheet');
+      const copy=manual.querySelector('[data-manual-copy]'), terminal=manual.querySelector('[data-manual-terminal]'), check=manual.querySelector('[data-manual-check]');
+      const viewport=scroll.getBoundingClientRect(), visible=element=>{const box=element.getBoundingClientRect();return box.top>=viewport.top && box.bottom<=viewport.bottom;};
+      return {language:document.documentElement.lang,scheme:document.documentElement.dataset.scheme,theme:document.documentElement.dataset.theme,step:document.querySelector('.ai-cli-steps [aria-current=step] strong')?.textContent,command:manual.querySelector('code')?.textContent,copyEnabled:!copy.disabled,copyVisible:visible(copy),terminalEnabled:!terminal.disabled,terminalVisible:visible(terminal),checkEnabled:!check.disabled,checkVisible:visible(check),numberedSteps:manual.querySelectorAll('ol li').length,reasonCount:sheet.innerText.split(${JSON.stringify(reason)}).length-1,sourceVisible:visible(sheet.querySelector('.ai-cli-manual-reason button')),primaryActions:[...pane.querySelectorAll('button[data-variant=default]')].map(button=>button.textContent),horizontalOverflow:manual.scrollWidth>manual.clientWidth+1,actionButtons:pane.querySelectorAll('button').length,hasRunPreview:Boolean(pane.querySelector('#ai-cli-preview')),bodyText:sheet.innerText};
     })()`);
     const file = `manual-install-${language}-${scheme}.png`;
     await writeFile(join(root, file), (await window.webContents.capturePage()).toPNG());
     await writeFile(join(root, file.replace('.png', '.txt')), bodyText);
-    if (inspection.step !== step || inspection.command !== 'curl -fsSL https://antigravity.google/cli/install.sh | bash' || !inspection.copyEnabled || !inspection.copyVisible || inspection.horizontalOverflow || inspection.actionButtons !== 1 || inspection.hasRunPreview) throw new Error('Manual setup layout or action policy failed');
-    captures.push({ ...inspection, file });
+    if (inspection.step !== step || inspection.command !== 'curl -fsSL https://antigravity.google/cli/install.sh | bash' || !inspection.copyEnabled || !inspection.copyVisible || !inspection.terminalEnabled || !inspection.terminalVisible || !inspection.checkEnabled || !inspection.checkVisible || !inspection.sourceVisible || inspection.reasonCount !== 1 || inspection.numberedSteps !== 3 || inspection.primaryActions.length !== 1 || inspection.primaryActions[0] !== check || inspection.horizontalOverflow || inspection.actionButtons !== 3 || inspection.hasRunPreview) throw new Error('Manual setup layout or action policy failed');
+    await window.webContents.executeJavaScript("document.querySelector('[data-manual-check]').click()");
+    await waitFor(`document.querySelector('.ai-cli-manual [role=status]')?.textContent===${JSON.stringify(missing)}`);
+    const checked = cliToolStateSchema.parse((await invoke('ai-cli:list', {})).find((tool: { provider: string }) => tool.provider === 'agy'));
+    if (checked.path !== null || checked.status !== 'not-installed' || checked.version !== null || checked.tested) throw new Error('Check again must remain a file-only check');
+    captures.push({ ...inspection, detectionChecked: true, file });
   }
   await invoke('ai-cli:consent', { provider: 'agy', enabled: false });
   return captures;

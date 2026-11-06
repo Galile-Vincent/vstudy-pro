@@ -1,23 +1,60 @@
-/** Copy-only official installer fallback. Renderer never submits these strings to main for execution. */
-import { useState } from 'react';
+/** Plain copy-and-paste steps; only main can open an external terminal, never run this installer. */
+import { useEffect, useRef, useState } from 'react';
 import type { CliProvider } from '../../shared/ai-cli';
+import { cliInstallSources, manualInstallCommand } from '../../shared/ai-cli-manual';
 import { desktopPlatform } from '../../shared/platform';
 import { tr } from '../../shared/i18n';
+import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
 
-export function ManualInstall({ provider, required = false }: { provider: CliProvider; required?: boolean | undefined }) {
-  const [copied, setCopied] = useState(false), [error, setError] = useState(false);
-  const windows = desktopPlatform() === 'win32';
-  const commands = {
-    claude: windows ? 'irm https://claude.ai/install.ps1 | iex' : 'curl -fsSL https://claude.ai/install.sh | bash',
-    codex: windows ? null : 'curl -fsSL https://chatgpt.com/codex/install.sh | sh -s -- --release 0.166.0',
-    agy: windows ? 'irm https://antigravity.google/cli/install.ps1 | iex' : 'curl -fsSL https://antigravity.google/cli/install.sh | bash',
+export function ManualInstallReason({ provider }: { provider: CliProvider }) {
+  const [error, setError] = useState(false);
+  return <div className="ai-cli-manual-reason"><p>{tr('ai-cli:manual_install_reason')}</p>
+    <Button variant="link" onClick={() => { setError(false); void desktop.invoke('shell:openExternal', { url: cliInstallSources[provider] }).catch(() => setError(true)); }}>{tr('ai-cli:official_source')}</Button>
+    {error && <p role="alert">{tr('ai-cli:manual_link_error')}</p>}
+  </div>;
+}
+
+export function ManualInstall({ provider, required = false, busy = false, onCheck }: { provider: CliProvider; required?: boolean | undefined; busy?: boolean; onCheck: () => Promise<void> }) {
+  const [copied, setCopied] = useState(false), [error, setError] = useState<'copy' | 'terminal'>();
+  const [pending, setPending] = useState(false), [notice, setNotice] = useState<'opened' | 'checked'>();
+  const mounted = useRef(true), locked = useRef(false);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const platform = desktopPlatform(), windows = platform === 'win32';
+  const command = manualInstallCommand(provider, platform);
+  const act = async (terminal: boolean) => {
+    if (locked.current || busy) return;
+    locked.current = true; setPending(true); setError(undefined); setNotice(undefined);
+    try {
+      if (terminal) {
+        const plan = await desktop.invoke('ai-cli:preview', { actionId: `terminal-${provider}` });
+        if (!mounted.current) return;
+        if (!plan.available) throw new Error('Terminal unavailable');
+        const result = await desktop.invoke('ai-cli:openTerminal', { actionId: plan.actionId, token: plan.token });
+        if (mounted.current && result.ok) setNotice('opened');
+      } else {
+        await onCheck();
+        if (mounted.current) setNotice('checked');
+      }
+    } catch { if (mounted.current) setError('terminal'); }
+    finally { locked.current = false; if (mounted.current) setPending(false); }
   };
-  const command = commands[provider];
-  return <details className="ai-cli-help" open={required || undefined}><summary>{tr('ai-cli:manual_install')}</summary>
-    {required && <p>{tr('ai-cli:manual_install_reason')}</p>}
-    <p>{tr('ai-cli:manual_install_help')}</p>
-    {command ? <><pre className="ai-cli-output"><code>{command}</code></pre><Button variant={required ? 'default' : 'secondary'} onClick={() => void navigator.clipboard.writeText(command).then(() => { setCopied(true); setError(false); }).catch(() => setError(true))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_command')}</Button></> : <p>{tr('ai-cli:failure_unsupported')}</p>}
-    {error && <p role="alert">{tr('ai-cli:copy_error')}</p>}
+  return <details className="ai-cli-help ai-cli-manual" open={required || undefined}><summary>{tr('ai-cli:manual_install')}</summary>
+    {command ? <>
+      <ol className="ai-cli-manual-steps">
+        <li>{tr('ai-cli:manual_step_copy')}</li>
+        <li>{tr(windows ? 'ai-cli:manual_step_terminal_windows' : platform === 'darwin' ? 'ai-cli:manual_step_terminal' : 'ai-cli:manual_step_terminal_other')}</li>
+        <li>{tr('ai-cli:manual_step_return')}</li>
+      </ol>
+      <pre className="ai-cli-output"><code>{command}</code></pre>
+      <div className="ai-cli-actions">
+        <Button variant="secondary" data-manual-copy disabled={busy || pending} onClick={() => void navigator.clipboard.writeText(command).then(() => { setCopied(true); setError(undefined); }).catch(() => setError('copy'))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_command')}</Button>
+        <Button variant="secondary" data-manual-terminal disabled={busy || pending} onClick={() => void act(true)}>{tr(windows ? 'ai-cli:open_terminal_windows' : 'ai-cli:open_terminal')}</Button>
+      </div>
+      <Button className="ai-cli-manual-check" data-manual-check disabled={busy || pending} onClick={() => void act(false)}>{tr(pending ? 'ai-cli:manual_working' : 'ai-cli:check_again')}</Button>
+    </> : <p>{tr('ai-cli:failure_unsupported')}</p>}
+    {notice && <p role="status">{tr(notice === 'opened' ? 'ai-cli:manual_terminal_opened' : 'ai-cli:manual_not_found')}</p>}
+    {error && <p role="alert">{tr(error === 'copy' ? 'ai-cli:copy_error' : 'ai-cli:manual_terminal_error')}</p>}
+    {!required && <ManualInstallReason provider={provider} />}
   </details>;
 }

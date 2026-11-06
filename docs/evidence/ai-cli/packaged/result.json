@@ -49,9 +49,20 @@
         "command": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
         "copyEnabled": true,
         "copyVisible": true,
+        "terminalEnabled": true,
+        "terminalVisible": true,
+        "checkEnabled": true,
+        "checkVisible": true,
+        "numberedSteps": 3,
+        "reasonCount": 1,
+        "sourceVisible": true,
+        "primaryActions": [
+          "Check again"
+        ],
         "horizontalOverflow": false,
-        "actionButtons": 1,
+        "actionButtons": 3,
         "hasRunPreview": false,
+        "detectionChecked": true,
         "file": "manual-install-en-light.png"
       },
       {
@@ -62,9 +73,20 @@
         "command": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
         "copyEnabled": true,
         "copyVisible": true,
+        "terminalEnabled": true,
+        "terminalVisible": true,
+        "checkEnabled": true,
+        "checkVisible": true,
+        "numberedSteps": 3,
+        "reasonCount": 1,
+        "sourceVisible": true,
+        "primaryActions": [
+          "Check again"
+        ],
         "horizontalOverflow": false,
-        "actionButtons": 1,
+        "actionButtons": 3,
         "hasRunPreview": false,
+        "detectionChecked": true,
         "file": "manual-install-en-dark.png"
       },
       {
@@ -75,9 +97,20 @@
         "command": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
         "copyEnabled": true,
         "copyVisible": true,
+        "terminalEnabled": true,
+        "terminalVisible": true,
+        "checkEnabled": true,
+        "checkVisible": true,
+        "numberedSteps": 3,
+        "reasonCount": 1,
+        "sourceVisible": true,
+        "primaryActions": [
+          "再檢查一次"
+        ],
         "horizontalOverflow": false,
-        "actionButtons": 1,
+        "actionButtons": 3,
         "hasRunPreview": false,
+        "detectionChecked": true,
         "file": "manual-install-zh-Hant-light.png"
       },
       {
@@ -88,9 +121,20 @@
         "command": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
         "copyEnabled": true,
         "copyVisible": true,
+        "terminalEnabled": true,
+        "terminalVisible": true,
+        "checkEnabled": true,
+        "checkVisible": true,
+        "numberedSteps": 3,
+        "reasonCount": 1,
+        "sourceVisible": true,
+        "primaryActions": [
+          "再檢查一次"
+        ],
         "horizontalOverflow": false,
-        "actionButtons": 1,
+        "actionButtons": 3,
         "hasRunPreview": false,
+        "detectionChecked": true,
         "file": "manual-install-zh-Hant-dark.png"
       },
       {
@@ -101,9 +145,20 @@
         "command": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
         "copyEnabled": true,
         "copyVisible": true,
+        "terminalEnabled": true,
+        "terminalVisible": true,
+        "checkEnabled": true,
+        "checkVisible": true,
+        "numberedSteps": 3,
+        "reasonCount": 1,
+        "sourceVisible": true,
+        "primaryActions": [
+          "もう一度確認"
+        ],
         "horizontalOverflow": false,
-        "actionButtons": 1,
+        "actionButtons": 3,
         "hasRunPreview": false,
+        "detectionChecked": true,
         "file": "manual-install-ja-light.png"
       },
       {
@@ -114,9 +169,20 @@
         "command": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
         "copyEnabled": true,
         "copyVisible": true,
+        "terminalEnabled": true,
+        "terminalVisible": true,
+        "checkEnabled": true,
+        "checkVisible": true,
+        "numberedSteps": 3,
+        "reasonCount": 1,
+        "sourceVisible": true,
+        "primaryActions": [
+          "もう一度確認"
+        ],
         "horizontalOverflow": false,
-        "actionButtons": 1,
+        "actionButtons": 3,
         "hasRunPreview": false,
+        "detectionChecked": true,
         "file": "manual-install-ja-dark.png"
       }
     ]

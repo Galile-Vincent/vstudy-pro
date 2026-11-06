@@ -61,3 +61,13 @@ it.each([
   const preview = tokens.issue(owner, buildPlan(actionId, '/private/empty', binary, null, reason, Date.now()));
   expect(() => tokens.consume(owner, actionId, preview.token, Date.now(), 'own-terminal')).toThrow(reason);
 });
+
+it.each(['claude', 'codex', 'agy'] as const)('never allows the manual %s installer capability to become an embedded action', provider => {
+  const owner = new Owner(), tokens = new PreviewTokens<Owner>(), actionId = `terminal-${provider}` as const;
+  const issue = () => tokens.issue(owner, buildPlan(actionId, '/private/empty', null, null, null, Date.now()));
+  const embedded = issue();
+  expect(() => tokens.consume(owner, actionId, embedded.token, Date.now())).toThrow('blocked');
+  const external = issue();
+  expect(tokens.consume(owner, actionId, external.token, Date.now(), 'own-terminal').verb).toBe('terminal');
+  expect(() => tokens.consume(owner, actionId, external.token, Date.now(), 'own-terminal')).toThrow('blocked');
+});
