@@ -2,9 +2,9 @@
 
 # VStudy Pro
 
-在 Mac 上閱讀課程教材、整合 Moodle 作業期限，並把待辦事項排成讀書計畫。
+在 macOS 與 Windows 上閱讀課程教材、整合 Moodle 作業期限，並把待辦事項排成讀書計畫。
 
-![版本 0.2.1](https://img.shields.io/badge/version-0.2.1-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
+![版本 0.2.1](https://img.shields.io/badge/version-0.2.1-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
 
 ![圖論筆記、已選段落、示範回答與來源引用](docs/assets/readme/reader.webp)
 
@@ -12,60 +12,51 @@
 
 ### 取得軟體
 
-前往 [GitHub Releases](https://github.com/ava-apple/vstudy-pro/releases/latest)，下載同一版本的 DMG 與 `SHA256SUMS.txt`。此儲存庫目前為私人儲存庫，需要存取權限。若尚無已發布版本，請向維護者取得權限，或依下方說明自行建置。
+| 平台 | 直接下載安裝檔 |
+| --- | --- |
+| Apple 晶片 Mac | [下載 DMG](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg) |
+| Intel Mac | [下載 DMG](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-x64.dmg) |
+| Windows x64 | [下載 EXE](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe) |
+| Windows ARM64 | [下載 EXE](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-arm64.exe) |
 
-目前本機建置產生的檔案是 **`VStudy-Pro-0.2.1-arm64.dmg`**，檔名中的版本會隨發布更新。[Release workflow](.github/workflows/release.yml) 在推送 `v*.*.*` 標籤後執行，確認標籤與桌面版版本相符，再將未經 Developer ID 簽署的安裝檔與校驗碼附加到**草稿版本**。草稿不等於已開放下載的正式版本。
+請下載同一版本的 [SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt)。固定連結指向最新已發布的檔案，儲存庫已公開。若出現 404，請查看[版本說明](https://github.com/ava-apple/vstudy-pro/releases/latest)中的發布平台與驗證結果。CI 成果物與試跑不等於公開版本；連結本身不代表版本、大小或該平台已通過測試。
 
-需要 Apple silicon Mac（arm64）。產生的 app 宣告最低系統版本為 macOS 12.0。Builder 設定未固定架構，預設使用建置主機的架構；目前已驗證 arm64 建置。Intel 與 universal 建置尚未驗證。Release workflow 同樣依 runner 決定架構；Intel Mac 使用者須先確認實際發布檔案。未提供 Windows 或 Linux 版本。AI 與學校同步需要網路；閱讀本機 Markdown 與文字檔不需要 AI 帳號。
+需要 macOS 12 以上，或 64 位元 Windows 10 以上。Mac 預設選 Apple 晶片，除非「關於這台 Mac」顯示 Intel 處理器。Windows 請在「設定 > 系統 > 關於 > 系統類型」確認；ARM 處理器選 ARM64，其他選 x64。未提供 Linux 安裝檔。AI 與學校同步需要網路；閱讀本機 Markdown 與文字檔不需要 AI 帳號。
 
 ### 驗證並開啟
 
-1. 將 DMG 與 `SHA256SUMS.txt` 放在同一個資料夾，在「終端機」切換至該資料夾後檢查校驗碼。
-
-   ```sh
-   cd ~/Downloads
-   shasum -a 256 -c SHA256SUMS.txt
-   ```
-
-   確認 DMG 顯示 `OK` 再繼續。校驗碼可偵測下載損毀或檔案變動，無法證明發布者身分。
-2. 開啟 DMG，將 **VStudy Pro.app** 拖入「**應用程式**」，再退出磁碟映像檔。
-3. 開啟「應用程式」中的 app。若你信任這份未簽署或臨時簽署的建置，可先按住 Control 點按，或按右鍵選「**打開**」。若仍被阻擋，先嘗試開啟一次，再到「**系統設定 > 隱私權與安全性 > 強制打開**」確認。名稱可能因 macOS 版本而不同。
-4. 若已驗證且信任的 app 仍因隔離屬性而無法開啟，可只對這份 app 執行下列指令，再重新開啟。
-
-   ```sh
-   xattr -dr com.apple.quarantine '/Applications/VStudy Pro.app'
-   ```
-
-   這會移除此 app 的下載隔離警告，不會替 app 簽署或公證。請勿全面停用 Gatekeeper。
+1. 比對安裝檔與 `SHA256SUMS.txt` 中對應檔名的完整雜湊。Mac 可在下載資料夾執行 `shasum -a 256 VStudy-Pro-mac-arm64.dmg`，並替換成實際檔名。Windows 可在 PowerShell 執行 `Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe`。清單包含其他平台，請比對自己下載的那一項。校驗碼可偵測檔案變動，無法證明發布者身分。
+2. Mac：開啟 DMG，將 **VStudy Pro.app** 拖入「**應用程式**」，退出映像檔後開啟安裝的 app。若未簽署或臨時簽署版本遭阻擋，先嘗試開啟一次。確認來源可信任後，在「**系統設定 > 隱私權與安全性**」於提供選項時選擇「**強制打開**」。請勿全面停用 Gatekeeper。詳見 [Apple 首次開啟說明](https://support.apple.com/en-us/102445)。
+3. Windows：執行 EXE，安裝到目前使用者帳號。若 SmartScreen 警告未簽署安裝檔，僅在驗證後且有此選項時，選擇「**其他資訊 > 仍要執行**」。組織政策可能禁止此操作。請勿停用 SmartScreen。若此個人安裝程式意外要求管理員權限，請停止操作。
+4. 已簽署且公證的 Mac 版本使用一般首次開啟確認。已簽署 Windows 版本可在檔案數位簽章詳細資料確認發布者，但簽署不保證已有 SmartScreen 信譽。實際簽署狀態以版本說明為準，詳見[簽章驗證](docs/SIGNING.md#verify-the-delivered-artifacts)。
 5. 依首次使用導覽操作，或先開啟範例文件。需要時再到「**課程**」連接學校，到「**設定 > AI 服務供應商**」設定 AI。
 
-儲存或解鎖 API 金鑰時，macOS 可能顯示「鑰匙圈」提示。VStudy 透過 Electron `safeStorage`，使用登入鑰匙圈中的加密金鑰保護已儲存的憑證。系統可能要求鑰匙圈密碼；重新建置臨時簽署的 app 後也可能再次詢問。拒絕後仍可選擇「重試」或「不儲存金鑰」。重新啟動後，需要明確解鎖已儲存的金鑰；開啟主視窗不會自動解密。
+VStudy 以 Electron `safeStorage` 加密已儲存憑證。macOS 使用登入鑰匙圈中的金鑰，臨時簽署重新建置後可能再次詢問存取權限。Windows 使用綁定目前 Windows 使用者的 DPAPI，不會顯示 Mac 式鑰匙圈提示。兩個系統都在重新啟動後，等待你明確解鎖才解密已儲存金鑰；開啟主視窗不會自動解鎖。你可重試，或只在本次執行使用金鑰而不儲存。
 
 ### 更新或解除安裝
 
-目前採手動更新。先到「**設定 > 儲存空間**」匯出備份，結束 VStudy Pro，下載並驗證新版 DMG，再取代「應用程式」中的舊版。保留資料夾即可保留文件庫與計畫。資料庫升級會先建立遷移備份，不支援降版。
+目前採手動更新。先到「**設定 > 儲存空間**」匯出備份，結束 VStudy Pro，並驗證新版安裝檔。Mac 取代「應用程式」中的 app；Windows 使用相同帳號執行新版安裝程式。保留資料目錄即可保留文件庫與計畫。資料庫升級會先建立遷移備份，不支援降版。自動更新需等簽署與公證驗證完成後另行實作。
 
-若要一併刪除資料，請在 app 內開啟「**設定 > 隱私權 > 刪除所有資料**」，輸入 `DELETE` 並確認系統對話框。App 會刪除專用資料目錄後結束，再將「應用程式」中的 app 移到垃圾桶。只刪除 app 不會移除本機資料。
+若要刪除資料，在 app 內開啟「**設定 > 隱私權 > 刪除所有資料**」，輸入 `DELETE` 並確認系統對話框。App 刪除專用資料目錄後結束，再將 Mac app 移到垃圾桶，或到 Windows「**設定 > 應用程式 > 已安裝的應用程式**」解除安裝。只刪除 app 會保留本機資料。
 
-Main 使用 Electron `app.getPath('userData')`。目前套件名稱為 `@vstudy/desktop`，macOS 預設資料夾是 `~/Library/Application Support/@vstudy/desktop`，包含 `vstudy.sqlite`、`library/`、`secrets.json` 與轉換器檔案。封裝版與開發版使用相同套件名稱，測試程式可另設路徑。詳見[儲存空間說明](docs/STORAGE.md)與 [Electron 套件名稱初始化](https://github.com/electron/electron/blob/v42.0.0/lib/browser/init.ts)。
+Main 使用 Electron `app.getPath('userData')`。目前套件命名空間是 `@vstudy/desktop`，Mac 預設為 `~/Library/Application Support/@vstudy/desktop`，Windows 為 `%APPDATA%\@vstudy\desktop`，包含 `vstudy.sqlite`、`library/`、`secrets.json` 與轉換器檔案。測試可另設路徑，詳見[儲存空間說明](docs/STORAGE.md)。
 
-「刪除所有資料」不會移除文件庫外的原始檔、已匯出的備份、CLI 登入資料、共用 Python 下載快取，或獨立的鑰匙圈加密項目，也不代表安全抹除備份或 SSD 區塊。
+刪除所有資料不會移除文件庫外的原始檔、匯出備份、CLI 登入資料、共用 Python 下載快取，或獨立的系統憑證儲存項目，也不代表安全抹除備份或 SSD 區塊。
 
 ### 從原始碼建置
 
-使用 macOS、`.node-version` 指定的 **Node 24.19.0**，以及 `package.json` 指定的 **pnpm 10.28.2**。套件引擎允許 Node >=24.11.1。複製私人儲存庫需要權限；以下指令從儲存庫根目錄執行。
+使用 macOS 或 Windows、`.node-version` 指定的 **Node 24.19.0**，以及 `package.json` 指定的 **pnpm 10.28.2**。套件引擎允許 Node >=24.11.1。以下指令從公開儲存庫的根目錄執行。
 
 ```sh
 git clone https://github.com/ava-apple/vstudy-pro.git
 cd vstudy-pro
 pnpm install --frozen-lockfile
 pnpm build
-pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish never -c.mac.notarize=false -c.mac.identity=null
 ```
 
-在 arm64 主機上會產生 `apps/desktop/release/VStudy-Pro-0.2.1-arm64.dmg` 與 `apps/desktop/release/mac-arm64/VStudy Pro.app`。上述指令停用 Developer ID 簽署與公證；`pnpm package` 則使用設定中的預設簽署與公證流程。對外發布請參閱[發布指南](docs/ENGINEERING.md#prepare-a-release)與[簽署憑證設定](CONTRIBUTING.md#sign-a-distribution-build)。
+`pnpm build` 編譯 app。各架構安裝檔請依[不發布的試跑流程](docs/ENGINEERING.md#prepare-a-release)產生並驗證，憑證設定見[簽署指南](docs/SIGNING.md)。Mac 本機建置不能證明 Windows 可用。
 
-轉換非純文字文件前，需另外安裝 **uv** 或 **Python 3.10+**。首次轉換會先徵求同意，才從 PyPI 下載以雜湊鎖定的相依套件；uv 也可能從 GitHub 下載 Python。「**設定 > 隱私權**」提供重試與持續生效的離線模式。Markdown 與文字檔不需要安裝這些套件。
+文件轉換需要時，請另行安裝 **uv** 或 **Python 3.10+**。首次轉換會先徵求同意，才從 PyPI 下載以雜湊鎖定的套件；uv 也可能從 GitHub 下載 Python。「**設定 > 隱私權**」提供重試與持續生效的離線模式。Markdown 與文字檔不需要 Python。macOS 額外以系統沙箱禁止轉換器連網；Windows 目前沒有對等的核心層網路封鎖，離線模式與 Python socket 攔截不構成作業系統安全邊界。
 
 ## 功能介紹
 
@@ -144,15 +135,17 @@ pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish neve
 
 ### 鍵盤快捷鍵
 
+Mac 使用 Cmd，Windows 使用 Ctrl。
+
 | 快捷鍵 | 操作 |
 | --- | --- |
-| `Cmd+K` | 開啟全域對話搜尋。 |
-| `Cmd+B` | 展開或收合側邊欄。 |
-| `Cmd+Shift+K` | 針對目前選取的段落提問。 |
+| `Cmd/Ctrl+K` | 開啟全域對話搜尋。 |
+| `Cmd/Ctrl+B` | 展開或收合側邊欄。 |
+| `Cmd/Ctrl+Shift+K` | 針對目前選取的段落提問。 |
 | 方向鍵 / `Shift+方向鍵` | 閱讀器本身取得焦點時，移動或延伸文字選取範圍。 |
 | `Enter` / `Shift+Enter` | 傳送聊天 / 換行，輸入法組字期間除外。 |
 | `Esc` | 關閉對話框或 Moodle 頁面面板。 |
-| `Cmd+R` | 重新載入目前聚焦的 Moodle 頁面面板。 |
+| `Cmd/Ctrl+R` | 重新載入目前聚焦的 Moodle 頁面面板。 |
 | `Tab` / `Shift+Tab` | 在控制項之間移動焦點。 |
 
 ## 運作方式
@@ -161,7 +154,7 @@ pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish neve
 
 匯入時會複製原始檔到以內容雜湊管理的文件庫。Markdown 與文字檔可直接開啟，其他格式交由按需啟動的 Python 轉換器產生 Markdown。轉換器在 macOS 上禁止網路存取，閒置後停止。轉換可能遺失排版，不是精確還原 PDF 的檢視器。
 
-AI 為選用功能。「**設定 > AI 服務供應商**」可個別啟用 Claude Code（`claude`）、Codex（`codex`）與 Antigravity（`agy`）既有的 CLI 登入。請先在 VStudy 外登入這些工具。也可使用 Anthropic、OpenAI 或 OpenAI-compatible API 金鑰，並選擇儲存或僅於本次執行保留。CLI 訂閱與 API 費用依供應商規則計算。目前 Codex 需要已登入的 CLI **0.166.0**、macOS 與 `/usr/bin/sandbox-exec`；傳輸驗證不支援或失敗時會拒絕執行。詳見 [Codex 傳輸限制](docs/codex-tool-free.md)。
+AI 為選用功能。「**設定 > AI 服務供應商**」可個別啟用 Claude Code（`claude`）、Codex（`codex`）與 Antigravity（`agy`）既有的 CLI 登入。請先在 VStudy 外登入這些工具。也可使用 Anthropic、OpenAI 或 OpenAI-compatible API 金鑰，並選擇儲存或僅於本次執行保留。CLI 訂閱與 API 費用依供應商規則計算。目前 Codex 需要已登入的 CLI **0.166.0**、macOS 與 `/usr/bin/sandbox-exec`；傳輸驗證不支援或失敗時會拒絕執行。Windows 未實作對等且已驗證的核心沙箱，因此停用 Codex；可改用 API 供應商。詳見 [Codex 傳輸限制](docs/codex-tool-free.md)。
 
 提問時會將你的訊息與有大小限制的背景資料組成提示。文件聊天包含中繼資料、對話記錄與選取文字；未選取時會加入大綱與開頭節錄。課程聊天會加入可取得的課程資料、讀書計畫狀態與選定且已轉換完成的文件。回答以串流顯示並存入本機。助理提出的計畫修改須經明確核准，Main 才會套用。請回到原始來源確認日期與答案。
 
@@ -171,7 +164,7 @@ AI 為選用功能。「**設定 > AI 服務供應商**」可個別啟用 Claude
 
 VStudy 不傳送 app 分析資料。學校登入、同步與內容檢視會連線至你選擇的學校。啟用的 API 服務會收到上述問題與背景資料；先前選取的內容可能仍在對話記錄中。CLI 工具可能連線至自己的聊天、模型探索、驗證、額度或遙測服務。App 會為 Claude 設定停用非必要流量與遙測。Python 安裝經同意後可能連線至 PyPI 與 GitHub。
 
-App **不會加密磁碟上的文件、Markdown 與聊天記錄**。儲存的機密資料透過 macOS 鑰匙圈加密，僅供本次執行使用的資料則保留在 Main 記憶體。請使用 FileVault 與 macOS 帳號保護檔案。可攜式備份不含憑證，但仍包含私人學習資料。
+App **不會加密磁碟上的文件、Markdown 與聊天記錄**。儲存的機密資料透過 Mac 鑰匙圈或 Windows DPAPI 加密，本次執行的資料保留在 Main 記憶體。請用系統帳號權限與 FileVault 或 BitLocker 等磁碟加密保護檔案。可攜式備份不含憑證，但仍包含私人學習資料。
 
 「**設定 > 隱私權**」列出本次執行中有數量上限的 app 主動請求與 CLI 啟動記錄。這不是封包擷取，無法列出 CLI 或 Chromium 內部的每一個請求，目前也無法得知傳輸位元組數。開啟外部瀏覽器或郵件連結前會要求確認。處理敏感資料前請閱讀[安全模型](docs/SECURITY.md)。
 
@@ -266,7 +259,7 @@ E2E 需要 **uv**，或透過 `VSTUDY_CONVERTER_VENV` 指定既有、以雜湊�
 
 ### 已知限制
 
-- 僅支援 macOS；已驗證的安裝檔為 arm64，未經 Developer ID 簽署。測試版可能出現 Gatekeeper 與鑰匙圈提示。
+- macOS 與 Windows 各架構需要分別驗證封裝版。測試結果與簽署狀態以版本說明為準；未簽署版本可能觸發 Gatekeeper 或 SmartScreen。
 - 沒有 OCR，不支援掃描或純影像 PDF。複雜表格、分欄、公式與圖片可能失真。單檔 HTML 與 Markdown 匯入不會複製旁邊的圖片檔。
 - 真實學校功能取決於該校 Moodle 行動服務與權限。需使用公開 HTTPS；不支援僅限區網、自簽 TLS 憑證與 QR 憑證交換。
 - 本機資料沒有跨裝置同步。API 與 CLI 模型需要各自的存取權限，也可能產生費用。

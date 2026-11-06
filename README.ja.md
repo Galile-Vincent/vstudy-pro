@@ -2,9 +2,9 @@
 
 # VStudy Pro
 
-Mac で教材を読み、Moodle の締め切りをまとめ、課題を学習計画に変えるアプリです。
+macOS と Windows で教材を読み、Moodle の締め切りをまとめ、課題を学習計画に変えるアプリです。
 
-![バージョン 0.2.1](https://img.shields.io/badge/version-0.2.1-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
+![バージョン 0.2.1](https://img.shields.io/badge/version-0.2.1-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
 
 ![グラフのノート、選択した文章、デモ回答と出典の引用](docs/assets/readme/reader.webp)
 
@@ -12,60 +12,51 @@ Mac で教材を読み、Moodle の締め切りをまとめ、課題を学習計
 
 ### アプリを入手する
 
-[GitHub Releases](https://github.com/ava-apple/vstudy-pro/releases/latest) から、同じリリースの DMG と `SHA256SUMS.txt` をダウンロードしてください。現在、このリポジトリは非公開のため、アクセス権が必要です。公開済みのリリースがない場合は、管理者にアクセスを依頼するか、下の手順でソースからビルドしてください。
+| プラットフォーム | インストーラー |
+| --- | --- |
+| Apple シリコン Mac | [DMG をダウンロード](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg) |
+| Intel Mac | [DMG をダウンロード](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-x64.dmg) |
+| Windows x64 | [EXE をダウンロード](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe) |
+| Windows ARM64 | [EXE をダウンロード](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-arm64.exe) |
 
-現在のローカルビルドで生成されるファイルは **`VStudy-Pro-0.2.1-arm64.dmg`** です。バージョン番号はリリースごとに変わります。[Release workflow](.github/workflows/release.yml) は `v*.*.*` タグの push で実行され、タグとアプリのバージョンを照合します。その後、Developer ID 未署名の成果物とチェックサムを**ドラフトリリース**に添付します。ドラフトは公開済みのダウンロードではありません。
+同じリリースの [SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt) もダウンロードしてください。固定リンクは最新の公開ファイルを指します。リポジトリは公開されています。404 の場合は[リリースノート](https://github.com/ava-apple/vstudy-pro/releases/latest)で配布対象と検証結果を確認してください。CI の成果物や試行ビルドは公開リリースではありません。リンクだけではバージョン、サイズ、動作確認を保証しません。
 
-Apple silicon Mac（arm64）が必要です。生成されたアプリの最低 OS バージョンは macOS 12.0 です。Builder 設定はアーキテクチャを固定せず、ビルドホストの構成を使います。現在確認できているのは arm64 ビルドです。Intel 版と universal 版は未検証です。Release workflow も runner のアーキテクチャに依存するため、Intel Mac では実際の配布ファイルを確認してください。Windows 版と Linux 版も提供していません。AI と学校の同期にはインターネット接続が必要です。ローカルの Markdown やテキストを読むだけなら、AI アカウントは不要です。
+macOS 12 以降、または 64 ビット Windows 10 以降が必要です。Mac は「この Mac について」に Intel と表示される場合を除き、Apple シリコンを選びます。Windows は「設定 > システム > バージョン情報 > システムの種類」を確認し、ARM プロセッサーなら ARM64、その他は x64 を選びます。Linux 版はありません。AI と学校の同期にはネット接続が必要です。ローカルの Markdown とテキストの閲覧には AI アカウントは不要です。
 
 ### 検証して開く
 
-1. DMG と `SHA256SUMS.txt` を同じフォルダに置きます。ターミナルでそのフォルダに移動し、チェックサムを確認します。
+1. インストーラーのハッシュ全体を `SHA256SUMS.txt` の同じファイル名の値と比較します。Mac はダウンロード先で `shasum -a 256 VStudy-Pro-mac-arm64.dmg` を実行し、実際のファイル名に置き換えます。Windows は PowerShell で `Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe` を使います。一覧にはほかの成果物も含まれます。自分が取得したファイルを照合してください。チェックサムは改変を検出しますが、発行元の身元は証明しません。
+2. Mac：DMG を開き、**VStudy Pro.app** を「**アプリケーション**」にドラッグします。イメージを取り出し、インストールしたアプリを開きます。未署名やアドホック署名でブロックされたら、一度起動を試します。入手元を信頼できる場合のみ「**システム設定 > プライバシーとセキュリティ**」で、表示される場合に「**このまま開く**」を選びます。Gatekeeper 全体を無効にしないでください。[Apple の初回起動手順](https://support.apple.com/en-us/102445)を参照してください。
+3. Windows：EXE を実行し、現在のユーザー用にインストールします。未署名のファイルで SmartScreen が警告したら、検証後に、表示される場合のみ「**詳細情報 > 実行**」を選びます。組織の方針で禁止される場合もあります。SmartScreen を無効にしないでください。このユーザー用インストーラーが管理者権限を要求したら操作を止めてください。
+4. 署名と公証済みの Mac 版は通常の初回確認で開きます。署名済み Windows 版はファイルの署名詳細で発行元を確認します。ただし署名は SmartScreen の評価を保証しません。実際の署名状態はリリースノートを確認し、[署名の検証](docs/SIGNING.md#verify-the-delivered-artifacts)も参照してください。
+5. 初回ガイドに従うか、サンプル資料を開きます。学校は「**コース**」、任意の AI は「**設定 > プロバイダー**」で追加できます。
 
-   ```sh
-   cd ~/Downloads
-   shasum -a 256 -c SHA256SUMS.txt
-   ```
-
-   DMG に `OK` と表示されてから進んでください。チェックサムは破損や改変の検出に使えますが、配布元の身元を証明するものではありません。
-2. DMG を開き、**VStudy Pro.app** を「**アプリケーション**」にドラッグしてから、ディスクイメージを取り出します。
-3. 「アプリケーション」のコピーを起動します。信頼できる未署名またはアドホック署名のビルドでは、Control キーを押しながらクリックするか、右クリックして「**開く**」を試してください。ブロックされる場合は一度起動を試みた後、「**システム設定 > プライバシーとセキュリティ > このまま開く**」で確認します。表示名は macOS によって異なります。
-4. 検証済みで信頼できるコピーが quarantine 属性で開けない場合に限り、そのアプリに次のコマンドを実行し、もう一度開いてください。
-
-   ```sh
-   xattr -dr com.apple.quarantine '/Applications/VStudy Pro.app'
-   ```
-
-   このコピーのダウンロード隔離属性を削除する操作です。署名や公証は行いません。Gatekeeper 全体を無効にしないでください。
-5. 初回ガイドに沿って進むか、サンプル文書を開きます。必要になったら「**コース**」で学校を接続し、「**設定 > プロバイダー**」で AI を設定してください。
-
-API キーを保存またはロック解除すると、macOS のキーチェーン確認が表示されることがあります。VStudy は Electron `safeStorage` を使い、ログインキーチェーンの暗号化キーで保存済みの認証情報を保護します。キーチェーンのパスワードを求められる場合や、アドホック署名の再ビルド後に再確認される場合があります。拒否しても、再試行するか、キーを保存せずに使えます。再起動後は保存済みキーの明示的なロック解除が必要です。メインウィンドウを開くだけでは復号しません。
+VStudy は Electron `safeStorage` で保存済み認証情報を暗号化します。macOS はログインキーチェーンのキーを使い、アドホック署名の再ビルド後にはアクセス確認が再表示される場合があります。Windows は現在の Windows ユーザーに結び付いた DPAPI を使い、Mac のキーチェーン確認は表示しません。どちらも再起動後は明示的なロック解除まで復号を待ちます。メイン画面を開くだけでは解除しません。再試行するか、保存せずにセッション中だけキーを使えます。
 
 ### 更新とアンインストール
 
-更新は手動です。「**設定 > ストレージ**」でバックアップをエクスポートし、VStudy Pro を終了します。新しい DMG をダウンロードして検証し、「アプリケーション」のコピーを置き換えてください。データフォルダを残せばライブラリと計画を引き継げます。データベースの更新時には移行前のバックアップを作成します。ダウングレードには対応していません。
+更新は手動です。「**設定 > ストレージ**」でバックアップをエクスポートし、VStudy Pro を終了して、新しいインストーラーを検証します。Mac は「アプリケーション」のコピーを置き換え、Windows は同じユーザーで新版の EXE を実行します。データフォルダーを残せばライブラリと計画は保持されます。データベース更新前には移行用バックアップを作成します。ダウングレードは非対応です。自動更新は署名と公証を検証した後の別の変更です。
 
-データも削除する場合は、アプリ内の「**設定 > プライバシー > すべてのデータを削除**」で `DELETE` と入力し、システムの確認ダイアログを承認してください。専用データ領域を削除してアプリが終了したら、アプリ本体をゴミ箱に移動します。アプリ本体だけを削除してもローカルデータは残ります。
+データを削除するには「**設定 > プライバシー > すべてのデータを削除**」で `DELETE` と入力し、システムの確認に同意します。アプリが専用データ領域を削除して終了したら、Mac アプリをゴミ箱に移すか、Windows の「**設定 > アプリ > インストールされているアプリ**」で削除します。アプリだけを削除してもローカルデータは残ります。
 
-Main は Electron の `app.getPath('userData')` を使います。現在のパッケージ名は `@vstudy/desktop` で、macOS の既定フォルダは `~/Library/Application Support/@vstudy/desktop` です。`vstudy.sqlite`、`library/`、`secrets.json`、変換ツールのファイルを含みます。パッケージ版と開発版は同じ名前を使い、テストでは別の場所を指定できます。[ストレージの説明](docs/STORAGE.md)と [Electron のパッケージ名初期化](https://github.com/electron/electron/blob/v42.0.0/lib/browser/init.ts)を参照してください。
+Main は Electron `app.getPath('userData')` を使います。現在の名前空間は `@vstudy/desktop` です。既定の場所は Mac が `~/Library/Application Support/@vstudy/desktop`、Windows が `%APPDATA%\@vstudy\desktop` で、`vstudy.sqlite`、`library/`、`secrets.json`、変換器のファイルを含みます。テストでは場所を変更できます。[ストレージの説明](docs/STORAGE.md)を参照してください。
 
-全データの削除でも、ライブラリ外の原本、エクスポート済みバックアップ、CLI のログイン情報、共有 Python ダウンロードキャッシュ、独立したキーチェーンの暗号化項目は削除しません。バックアップや SSD ブロックの安全な消去を保証する操作でもありません。
+全データ削除でも、ライブラリ外の原本、書き出したバックアップ、CLI の認証情報、共有 Python ダウンロードキャッシュ、独立した OS の認証保管項目は削除しません。バックアップや SSD の安全な消去を保証する操作ではありません。
 
 ### ソースからビルドする
 
-macOS、`.node-version` の **Node 24.19.0**、`package.json` の **pnpm 10.28.2** を使います。パッケージの engine 指定は Node >=24.11.1 です。非公開リポジトリの clone にはアクセス権が必要です。以下はリポジトリのルートで実行します。
+macOS または Windows、`.node-version` の **Node 24.19.0**、`package.json` の **pnpm 10.28.2** を使います。engine 指定は Node >=24.11.1 です。公開リポジトリのルートで実行します。
 
 ```sh
 git clone https://github.com/ava-apple/vstudy-pro.git
 cd vstudy-pro
 pnpm install --frozen-lockfile
 pnpm build
-pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish never -c.mac.notarize=false -c.mac.identity=null
 ```
 
-arm64 ホストでは `apps/desktop/release/VStudy-Pro-0.2.1-arm64.dmg` と `apps/desktop/release/mac-arm64/VStudy Pro.app` を生成します。このコマンドは Developer ID 署名と公証を無効にします。`pnpm package` は設定済みの署名・公証の既定値を使います。配布用の署名については[リリース手順](docs/ENGINEERING.md#prepare-a-release)と[署名用の認証情報](CONTRIBUTING.md#sign-a-distribution-build)を参照してください。
+`pnpm build` はアプリをコンパイルします。各アーキテクチャのインストーラーは[公開しない試行ビルドの手順](docs/ENGINEERING.md#prepare-a-release)で生成し、検証してください。認証情報は[署名ガイド](docs/SIGNING.md)を参照します。Mac のローカルビルドだけでは Windows の動作を確認できません。
 
-テキスト以外の文書を変換するには、**uv** または **Python 3.10+** を別途インストールします。初回変換では同意を得てから、ハッシュを固定した依存パッケージを PyPI から取得します。uv が GitHub から Python を取得することもあります。「**設定 > プライバシー**」には再試行と、設定を保持するオフラインモードがあります。Markdown とテキストにはこのインストールは不要です。
+文書変換で必要になったら **uv** または **Python 3.10+** を別途インストールします。初回変換では同意後にハッシュを固定したパッケージを PyPI から取得します。uv は GitHub から Python を取得する場合もあります。「**設定 > プライバシー**」に再試行と永続的なオフラインモードがあります。Markdown とテキストは Python が不要です。macOS は OS のサンドボックスで変換器の通信を拒否します。Windows には同等のカーネルによる通信拒否がありません。オフラインモードや Python の socket 制限は OS のセキュリティ境界ではありません。
 
 ## 主な機能
 
@@ -144,15 +135,17 @@ arm64 ホストでは `apps/desktop/release/VStudy-Pro-0.2.1-arm64.dmg` と `app
 
 ### キーボードショートカット
 
+Mac では Cmd、Windows では Ctrl を使います。
+
 | ショートカット | 操作 |
 | --- | --- |
-| `Cmd+K` | 全体の会話検索を開く。 |
-| `Cmd+B` | サイドバーの表示を切り替える。 |
-| `Cmd+Shift+K` | リーダーで選択中の文章について質問する。 |
+| `Cmd/Ctrl+K` | 全体の会話検索を開く。 |
+| `Cmd/Ctrl+B` | サイドバーの表示を切り替える。 |
+| `Cmd/Ctrl+Shift+K` | リーダーで選択中の文章について質問する。 |
 | 矢印キー / `Shift+矢印キー` | リーダー自体にフォーカスがあるとき、選択位置を移動・拡張する。 |
 | `Enter` / `Shift+Enter` | チャット送信 / 改行。IME の変換中を除く。 |
 | `Esc` | ダイアログや Moodle ページのパネルを閉じる。 |
-| `Cmd+R` | フォーカス中の Moodle ページを再読み込みする。 |
+| `Cmd/Ctrl+R` | フォーカス中の Moodle ページを再読み込みする。 |
 | `Tab` / `Shift+Tab` | 操作項目間でフォーカスを移動する。 |
 
 ## 仕組み
@@ -161,7 +154,7 @@ arm64 ホストでは `apps/desktop/release/VStudy-Pro-0.2.1-arm64.dmg` と `app
 
 文書を取り込むと、原本のコピーを内容のハッシュで管理するライブラリに保存します。Markdown とテキストは直接開き、その他の形式は必要なときだけ Python 変換ツールを起動して Markdown にします。変換中は macOS でネットワークを禁止し、アイドル後に停止します。書式が失われる場合があり、PDF を忠実に表示するビューアーではありません。
 
-AI は任意です。「**設定 > プロバイダー**」で、Claude Code（`claude`）、Codex（`codex`）、Antigravity（`agy`）の既存 CLI ログインを個別に有効化できます。先に VStudy の外で各ツールにログインしてください。Anthropic、OpenAI、OpenAI-compatible API キーも使え、保存するか、そのセッションだけ使うかを選べます。CLI サブスクリプションと API の課金条件は各社の規約に従います。現在 Codex には認証済み CLI **0.166.0**、macOS、`/usr/bin/sandbox-exec` が必要です。未対応の転送方式や検証失敗時は実行を拒否します。[Codex の制約](docs/codex-tool-free.md)を参照してください。
+AI は任意です。「**設定 > プロバイダー**」で、Claude Code（`claude`）、Codex（`codex`）、Antigravity（`agy`）の既存 CLI ログインを個別に有効化できます。先に VStudy の外で各ツールにログインしてください。Anthropic、OpenAI、OpenAI-compatible API キーも使え、保存するか、そのセッションだけ使うかを選べます。CLI サブスクリプションと API の課金条件は各社の規約に従います。現在 Codex には認証済み CLI **0.166.0**、macOS、`/usr/bin/sandbox-exec` が必要です。未対応の転送方式や検証失敗時は実行を拒否します。Windows には検証済みの同等のカーネルサンドボックスが実装されていないため、Codex は無効です。Windows では API プロバイダーを利用できます。[Codex の制約](docs/codex-tool-free.md)を参照してください。
 
 質問はサイズを制限した文脈と組み合わせて送ります。文書チャットではメタデータ、会話履歴、選択した文章を含み、選択がなければアウトラインと冒頭の抜粋を含みます。コースチャットでは取得できる課程情報、プランナーの状態、選んだ変換済み文書を追加します。回答はストリーム表示してローカルに保存します。計画の変更提案は明示的な承認を受けてから Main が適用します。日付や回答は原典で確認してください。
 
@@ -171,7 +164,7 @@ AI は任意です。「**設定 > プロバイダー**」で、Claude Code（`c
 
 VStudy はアプリの利用分析を送信しません。学校へのログイン、同期、ページ表示は選んだ学校と通信します。有効にした API プロバイダーには上記の質問と文脈を送信し、以前選択した文章が履歴に残ることもあります。CLI ツールは独自のチャット、モデル検出、検証、利用枠、テレメトリーのサービスと通信する場合があります。Claude には非必須通信とテレメトリーの停止設定を渡します。Python のセットアップは同意後に PyPI や GitHub と通信する場合があります。
 
-文書、Markdown、会話記録は、アプリによって**保存時に暗号化されません**。保存する秘密情報は macOS キーチェーンを使って暗号化し、セッションのみの情報は Main のメモリに保持します。ローカルファイルの保護には FileVault と macOS アカウントを使ってください。ポータブルバックアップには認証情報は含まれませんが、個人の学習内容は含まれます。
+文書、Markdown、会話記録は、アプリによって**保存時に暗号化されません**。保存する秘密情報は Mac キーチェーンまたは Windows DPAPI で暗号化し、セッションのみの情報は Main のメモリに保持します。ファイルは OS のアカウント権限と FileVault や BitLocker などのディスク暗号化で保護してください。ポータブルバックアップには認証情報は含まれませんが、個人の学習内容は含まれます。
 
 「**設定 > プライバシー**」は、そのセッションでアプリが開始したリクエストと CLI 起動を件数上限付きで表示します。パケットキャプチャではなく、CLI や Chromium 内部のすべての通信は把握できません。通信バイト数も不明です。外部ブラウザーやメールのリンクを開く前には確認を求めます。機密資料を扱う前に[セキュリティモデル](docs/SECURITY.md)を確認してください。
 
@@ -266,7 +259,7 @@ E2E には **uv**、または `VSTUDY_CONVERTER_VENV` で指定する既存の�
 
 ### 既知の制約
 
-- macOS 専用です。検証済みのパッケージは arm64 で、Developer ID 未署名です。テストビルドでは Gatekeeper やキーチェーンの確認が表示される場合があります。
+- macOS と Windows の各アーキテクチャは個別のパッケージ検証が必要です。検証結果と署名状態はリリースノートを確認してください。未署名では Gatekeeper や SmartScreen が警告する場合があります。
 - OCR はありません。スキャン画像のみの PDF は非対応です。複雑な表、段組み、数式、画像は正しく変換できない場合があります。単一の HTML や Markdown を取り込んでも隣接画像はコピーしません。
 - 学校との連携は Moodle モバイルサービスと権限に依存します。公開 HTTPS が必須で、LAN 限定サイト、自己署名 TLS、QR 認証情報の交換は非対応です。
 - デバイス間同期はありません。API や CLI のモデルには各サービスのアクセス権が必要で、料金が発生する場合があります。
