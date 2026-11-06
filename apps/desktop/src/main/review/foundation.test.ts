@@ -12,7 +12,7 @@ describe('mastery decision 5', () => {
   it.each([
     ['plain question', [obs('2026-11-05T01:00:00Z',{signal:'asked',errorType:'none'})], 'candidate'],
     ['same episode', [obs('2026-11-05T01:00:00Z'),obs('2026-11-05T02:00:00Z')], 'candidate'],
-    ['same day separated', [obs('2026-11-05T01:00:00Z'),obs('2026-11-05T08:00:00Z')], 'watching'],
+    ['same study day separated', [obs('2026-11-05T05:00:00Z'),obs('2026-11-05T12:00:00Z')], 'watching'],
     ['different days', [obs('2026-11-05T01:00:00Z'),obs('2026-11-06T01:00:00Z')], 'needs_review'],
     ['misconception', [obs('2026-11-05T01:00:00Z',{errorType:'misconception'})], 'needs_review'],
     ['direct preference', [obs('2026-11-05T01:00:00Z',{signal:'gave_up',errorType:'none'})], 'candidate'],
@@ -31,9 +31,9 @@ describe('mastery decision 5', () => {
     expect(computeMastery([{...a,evidenceKind:'paraphrase'}],{now}).negative).toBe(computeMastery([a],{now}).negative / 2);
   });
 });
-it('groups by adjacent interaction with exact six-hour boundary and local day changes', () => {
+it('groups by adjacent interaction with exact six-hour boundary without midnight splits', () => {
   const rows = ['2026-11-05T15:59:00Z','2026-11-05T16:01:00Z','2026-11-05T22:01:00Z'].map(at=>obs(at));
-  expect(buildEpisodes(rows,'Asia/Taipei')).toHaveLength(3);
+  expect(buildEpisodes(rows,'Asia/Taipei')).toHaveLength(2);
   expect(buildEpisodes([...rows].reverse(),'Asia/Taipei')).toEqual(buildEpisodes(rows,'Asia/Taipei'));
 });
 it.each([['ＡＢＣ  計算','abc 計算'],['微積分','微積分'],['日本語の導関数','日本語の導関数']])('normalizes %s without losing CJK', (input,want) => {
