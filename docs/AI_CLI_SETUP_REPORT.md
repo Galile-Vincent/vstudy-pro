@@ -118,6 +118,14 @@ Windows run `42170686410`, job `127737543788`, exposed 21 owned fixture failures
 
 The full macOS suite passes 1,184 tests with 15 skips. Final affected-fixture checks pass 24 tests with one platform skip. Typecheck, lint, Knip, vendor checks, and static security checks pass. No Electron process launched for this follow-up. [The complete ten-file fixture list, gate reasons, evidence, and Windows rerun command](AI_CLI_WINDOWS_FIXTURES.md) is the handoff to P. Native Windows acceptance of these changes remains pending P's CI rerun.
 
+## Final manual-install screenshots after the main merge
+
+Main `9434d667` contains Windows fixture fix `e707d93` and handoff `38e254b`. Branch `t3/ai-cli-windows-tests` starts from that main and adds the packaged capture support and evidence. The requested fixture work was already complete and was not duplicated.
+
+After explicit slot release, one rebuilt packaged process passed native PTY acceptance and captured the real Antigravity manual-install sheet in three languages and both Paper schemes. All six PNGs were opened and visually inspected. The highlighted Install step, localized explanation, full official command, and enabled Copy button are visible without horizontal clipping or overlapping controls. This closes the earlier manual-UI screenshot gap. [The six-image review and evidence](evidence/ai-cli/packaged/manual-install-review.md) record the actual screenshots and assertions.
+
+The resolved helper repaired from `0644` to `0755`, the native command answered, and the action closed. Ad-hoc signature verification and release fuses passed. The app exited, both process guards were clear, and slot release was announced immediately. Typecheck, scoped lint, build, packaging, Knip, static security, and 44 focused tests passed. Native Windows acceptance, live OAuth, and release notarization remain separate checks.
+
 ## Integration seams and remaining work
 
 Stream M can import `openAiCliSetup(provider?: 'claude' | 'codex' | 'agy')` from `renderer/ai-cli/entry.ts` and call `desktop.invoke('ai-cli:list', {})` for file-only state. It should link a missing client to this sheet. No MCP files were edited. The coordinator received this seam during implementation.
