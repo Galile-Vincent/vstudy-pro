@@ -51,6 +51,7 @@ export function createIpcRegistrar(
           release = channel.startsWith('storage:') ? () => {} : enterStorageRequest();
           const request = ipcContract[channel].request.parse(payload) as IpcRequest<C>;
           const response = await handler(request, event);
+          if (channel.startsWith('review:') && Buffer.byteLength(JSON.stringify(response) ?? '') > 512 * 1024) throw new Error('review.response_limit');
           return ipcContract[channel].response.parse(response);
         } catch (error) {
           if (error instanceof MessageTextLimitError || channel === 'chat:start' && error instanceof z.ZodError && error.issues.some(issue=>issue.code==='too_big' && issue.path[0]==='userMessage')) {
@@ -73,6 +74,7 @@ export function createIpcRegistrar(
           if (error instanceof Error && error.message.startsWith('ai_parse.')) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'errors.'+error.message,params:{}}));
           if (error instanceof Error && error.message === 'errors.keychain_unavailable') throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message,params:{}}));
           if (channel === 'converter:mode') throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed',params:{}}));
+          if (channel.startsWith('review:') && error instanceof Error && /^review\.[a-z_]+$/.test(error.message)) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message,params:{}}));
           const code=error instanceof Error && error.message.includes('Only empty conversations') ? 'errors.conversation_not_empty' : 'errors.generic';
           // Electron strips custom Error fields, so keep the stable payload in its message.
           throw new Error('VSTUDY_STATUS:' + JSON.stringify({code,params:{}}));

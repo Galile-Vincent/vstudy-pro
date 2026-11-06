@@ -1,3 +1,4 @@
+import { reviewGenerateIpc, type ReviewProgress } from './review-generate';
 /**
  * Define the validated request, response, and event contracts exposed by preload.
  * Owned by shared.
@@ -44,6 +45,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 export const ipcContract = {
   'app:reportError': { request: z.object({phase:z.enum(['render','bootstrap']),code:z.string().max(100),componentStack:z.string().max(4000).optional()}).strict(), response:ack },
   ...reviewIpc,
+  ...reviewGenerateIpc,
   ...mcpIpc,
   ...mcpNavigationIpc,
   ...aiCliContract,
@@ -193,6 +195,7 @@ export const chatEnvelopeSchema = z
 export type ChatEnvelope = z.infer<typeof chatEnvelopeSchema>;
 /** Renderer capability boundary. Invoke only declared channels and unsubscribe event listeners on teardown. */
 export interface DesktopApi {
+  onReviewProgress(listener:(event:ReviewProgress)=>void):()=>void;
   onMoodleProgress?(listener:(event:MoodleProgress)=>void):()=>void;
   onDocumentProgress?(listener: (event: z.infer<typeof documentProgressSchema>) => void): () => void;
   getPathForFile?(file: File): string;

@@ -1,3 +1,4 @@
+import { reviewProgressChannel, reviewProgressSchema } from '../shared/review-generate';
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 import {
   moodleProgressChannel, moodleProgressSchema,
@@ -31,6 +32,11 @@ if (process.isMainFrame) window.addEventListener('drop', event => {
   paths.forEach((path, index) => { if (tokens[index]) dropTokens.set(path, tokens[index]!); });
 }, true);
 const api: DesktopApi = {
+  onReviewProgress(listener) {
+    const receive = (_event:Electron.IpcRendererEvent,payload:unknown) => {const parsed=reviewProgressSchema.safeParse(payload);if(parsed.success)listener(parsed.data);};
+    ipcRenderer.on(reviewProgressChannel,receive);
+    return () => ipcRenderer.removeListener(reviewProgressChannel,receive);
+  },
   onMoodleProgress(listener) {
     const receive = (_event:Electron.IpcRendererEvent,payload:unknown) => {const parsed=moodleProgressSchema.safeParse(payload);if(parsed.success)listener(parsed.data);};
     ipcRenderer.on(moodleProgressChannel,receive);
