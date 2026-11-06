@@ -1,0 +1,46 @@
+/** Registered fallback colors also blend derived gradients. Only user changes enable transitions. */
+@property --background { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --surface { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --sidebar-surface { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --subtle { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --active { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --ink { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --muted { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --line { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --accent-color { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --accent-foreground { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --selection-color { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --focus { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --danger { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --success { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --warning { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --info { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --chart-1 { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --chart-2 { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --chart-3 { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --chart-4 { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --chart-5 { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --glass-tint { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --shadow-color { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --reader-background { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --reader-ink { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --code-background { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --syntax-keyword { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --syntax-string { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --syntax-number { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --course-start { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --course-end { syntax:"<color>"; inherits:true; initial-value:transparent; }
+@property --glass-opacity { syntax:"<percentage>"; inherits:true; initial-value:80%; }
+html[data-theme-transition=tokens] {
+  transition-property:--background,--surface,--sidebar-surface,--subtle,--active,--ink,--muted,--line,--accent-color,--accent-foreground,--selection-color,--focus,--danger,--success,--warning,--info,--chart-1,--chart-2,--chart-3,--chart-4,--chart-5,--glass-tint,--shadow-color,--reader-background,--reader-ink,--code-background,--syntax-keyword,--syntax-string,--syntax-number,--course-start,--course-end,--glass-opacity,background-color,color,border-color,fill,stroke,box-shadow;
+  transition-duration:280ms; transition-timing-function:cubic-bezier(.2,.8,.2,1);
+}
+html[data-theme-transition=view] :is(.shell-sidebar,.shell-topbar,.reading-pane) { view-transition-name:none!important; }
+html[data-theme-transition=view]::view-transition-group(root) { animation:none; }
+html[data-theme-transition=view]::view-transition-old(root) { animation:none; mix-blend-mode:normal; }
+html[data-theme-transition=view]::view-transition-new(root) { animation:theme-crossfade 280ms cubic-bezier(.2,.8,.2,1) both; mix-blend-mode:normal; }
+@keyframes theme-crossfade { from { opacity:0; } to { opacity:1; } }
+@media(prefers-reduced-motion:reduce) {
+  html[data-theme-transition] { transition:none; }
+  html[data-theme-transition]::view-transition-old(root),html[data-theme-transition]::view-transition-new(root) { animation:none; }
+}

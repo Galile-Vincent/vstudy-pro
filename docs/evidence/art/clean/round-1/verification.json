@@ -1,0 +1,12 @@
+{
+  "phase": "round-1",
+  "artifact": "Real built Electron with fixture Moodle read handlers. No school connection.",
+  "results": [
+    "vstudy/light/1440x900 home and course captured.",
+    "vstudy/dark/1440x900 home and course captured.",
+    "ocean/light/1440x900 home and course captured.",
+    "ocean/dark/1440x900 home and course captured.",
+    "All tab surfaces, module sheet, assistant Escape/focus return, keyboard course opening, zh-Hant/ja and 125% scale checked. Pseudo-localization runs separately with ART_PHASE=pseudo."
+  ],
+  "errors": []
+}

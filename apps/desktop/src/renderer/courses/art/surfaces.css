@@ -1,5 +1,5 @@
 /** Course art is the primary visual gesture. Text and controls sit on quiet theme surfaces. */
-.moodle-page { --course-mesh-one:light-dark(oklch(from var(--accent-color) .8 .15 h),oklch(from var(--accent-color) .4 .16 h)); --course-mesh-two:light-dark(oklch(from var(--accent-color) .82 .14 calc(h + 65)),oklch(from var(--accent-color) .4 .16 calc(h + 65))); position:relative; isolation:isolate; background:var(--art-reader-mesh,linear-gradient(transparent,transparent)),radial-gradient(ellipse at 95% 0%,color-mix(in oklab,var(--course-mesh-one) 48%,transparent),transparent 70%),radial-gradient(ellipse at 10% 90%,color-mix(in oklab,var(--course-mesh-two) 40%,transparent),transparent 75%),var(--background); }
+.moodle-page { --course-mesh-one:light-dark(oklch(from var(--accent-color) .8 .15 h),oklch(from var(--accent-color) .4 .16 h)); --course-mesh-two:light-dark(oklch(from var(--accent-color) .82 .14 calc(h + 65)),oklch(from var(--accent-color) .4 .16 calc(h + 65))); position:relative; isolation:isolate; background:var(--art-reader-mesh,linear-gradient(transparent,transparent)),radial-gradient(ellipse at 95% 0%,color-mix(in oklab,var(--course-mesh-one) 18%,transparent),transparent 70%),radial-gradient(ellipse at 10% 90%,color-mix(in oklab,var(--course-mesh-two) 14%,transparent),transparent 75%),var(--background); }
 .moodle-content { position:relative; z-index:1; }
 .moodle-header { margin-bottom:24px; }
 .moodle-header h1,.moodle-hero h1 { font-size:28px; line-height:32px; font-weight:600; letter-spacing:-.02em; }
@@ -57,10 +57,10 @@
 .moodle-row-icon { color:var(--accent-color); }
 .moodle-row { gap:12px; }
 .moodle-row + .moodle-row,.moodle-announcement + .moodle-announcement { border-top:1px solid color-mix(in oklab,var(--ink) 6%,transparent); }
-.moodle-empty { position:relative; min-height:220px; overflow:hidden; background:radial-gradient(ellipse at 50% -40%,var(--active),transparent 75%),var(--surface); box-shadow:var(--course-shadow); border-radius:var(--course-radius); }
+.moodle-empty { position:relative; min-height:220px; overflow:hidden; background:radial-gradient(ellipse at 15% 0%,color-mix(in oklch,var(--accent-color) 10%,transparent),transparent 72%),radial-gradient(ellipse at 90% 100%,color-mix(in oklch,var(--chart-4) 8%,transparent),transparent 75%),var(--surface); box-shadow:var(--course-shadow); border-radius:var(--course-radius); }
 .moodle-empty > svg { width:64px; height:64px; padding:16px; border-radius:50%; color:var(--accent-color); background:var(--active); }
 .moodle-empty-inline { display:flex; align-items:center; gap:12px; }
-.moodle-empty-inline::before { content:""; width:32px; height:32px; flex:none; border-radius:50%; background:radial-gradient(circle at 40% 35%,var(--surface) 24%,var(--active) 26%,var(--subtle) 65%); }
+.moodle-empty-inline::before { content:""; width:32px; height:32px; flex:none; border-radius:50%; background:radial-gradient(ellipse at 30% 20%,var(--active),var(--subtle)); }
 .moodle-skeleton { height:320px; background:linear-gradient(145deg,var(--active),var(--surface)); border-radius:var(--course-radius); }
 .moodle-detail-sheet[data-slot="sheet-content"] { background:var(--surface); }
 .moodle-detail-sheet [data-slot="sheet-header"] { background:radial-gradient(ellipse at 100% 0%,var(--active),transparent 80%),var(--subtle); padding-bottom:32px; }
@@ -124,10 +124,7 @@
 .moodle-course-chat [data-slot="aui_composer-shell"] > p:first-child { display:none; }
 .moodle-course-chat .aui-thread-viewport { min-height:0; }
 .moodle-agent-body > .conversation-trigger { flex:none; min-height:32px; padding:4px 8px; display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--muted); }
-.moodle-content::before { content:""; position:absolute; inset:-16px; z-index:-1; opacity:.04; pointer-events:none; background-image:var(--course-grain); }
 .moodle-course-card:hover { box-shadow:0 0 0 1px color-mix(in oklab,var(--ink) 6%,transparent),0 12px 24px color-mix(in oklab,var(--shadow-color) 10%,transparent); }
-:root[data-theme="contrast"] .moodle-content::before { display:none; }
-@media(prefers-contrast:more), (forced-colors:active) { .moodle-content::before { display:none; } }
 @media(prefers-reduced-transparency:reduce) { .moodle-page { --course-glass:var(--surface); } }
 :root[data-material="solid"] { --course-glass:var(--surface); }
 .moodle-banner[role="alert"] { background:radial-gradient(ellipse at 100% 0%,var(--active),transparent 75%),var(--surface); box-shadow:var(--course-shadow); border-radius:var(--course-radius); }
@@ -159,7 +156,6 @@
 .moodle-card-class { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%; }
 .moodle-page[data-course="true"] { padding-top:0; }
 .moodle-hero { position:relative; isolation:isolate; display:block; min-height:380px; margin:0 -32px 24px; padding:0; border-radius:0 0 var(--course-radius) var(--course-radius); overflow:hidden; color:var(--course-art-ink); background:var(--course-art-base); }
-.moodle-hero .moodle-art-pattern { width:100%; height:100%; inset:0; transform:rotate(-20deg) scale(1.3); }
 .moodle-hero .moodle-art-scrim { background:linear-gradient(90deg,color-mix(in oklab,var(--course-art-base) 76%,transparent),color-mix(in oklab,var(--course-art-base) 76%,transparent) 60%,transparent); }
 .moodle-hero-navigation { position:relative; z-index:1; padding:16px 32px; }
 .moodle-hero-navigation .moodle-header { margin:0; }
@@ -175,7 +171,7 @@
 .moodle-hero [data-slot="button"] { background:color-mix(in oklab,var(--course-art-base) 85%,transparent); color:var(--course-art-ink); backdrop-filter:blur(16px); box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--course-art-ink) 22%,transparent); }
 .moodle-hero [data-slot="button"]:hover { background:var(--course-art-base); }
 .moodle-hero .moodle-raw-name { margin-top:12px; }
-.moodle-hero .moodle-hero-next { display:inline-flex; padding:10px 14px; border-radius:var(--r-pill); background:var(--course-art-base); box-shadow:0 0 0 1px color-mix(in oklab,var(--course-art-ink) 35%,transparent),0 0 24px color-mix(in oklab,var(--accent-color) 45%,transparent); margin:20px 0 0; }
+.moodle-hero .moodle-hero-next { display:inline-flex; padding:10px 14px; border-radius:var(--r-pill); background:var(--course-art-base); box-shadow:0 0 0 1px color-mix(in oklab,var(--course-art-ink) 35%,transparent); margin:20px 0 0; }
 :root[data-theme="contrast"] :is(.moodle-hero,.moodle-cover-due,.moodle-progress,.moodle-hero [data-slot="button"],.moodle-hero .moodle-eyebrow) { background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line); }
 @media(max-width:1000px) {
   .moodle-hero > div.moodle-hero-body { width:100%; max-width:none; }
@@ -192,3 +188,6 @@
 }
 :root[data-theme="contrast"] .moodle-hero .moodle-hero-next { box-shadow:inset 0 0 0 1px var(--line); }
 @media(prefers-contrast:more), (forced-colors:active) { .moodle-hero .moodle-hero-next { box-shadow:inset 0 0 0 1px var(--line); } }
+
+:root[data-theme=contrast] .moodle-empty,:root[data-theme=contrast] .moodle-empty-inline::before { background:var(--surface); }
+@media(prefers-contrast:more), (forced-colors:active) { .moodle-empty,.moodle-empty-inline::before { background:var(--surface); } }

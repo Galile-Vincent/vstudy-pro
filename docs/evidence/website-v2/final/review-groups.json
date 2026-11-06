@@ -1,0 +1,194 @@
+[
+  {
+    "group": "vstudy-light",
+    "keys": [
+      "courses-home-vstudy-light",
+      "course-page-vstudy-light",
+      "planner-today-vstudy-light",
+      "reader-chat-with-answer-vstudy-light",
+      "history-search-vstudy-light",
+      "library-vstudy-light",
+      "home-vstudy-light",
+      "themes-settings-vstudy-light",
+      "moodle-webview-vstudy-light",
+      "storage-settings-vstudy-light",
+      "onboarding-welcome-vstudy-light"
+    ]
+  },
+  {
+    "group": "vstudy-dark",
+    "keys": [
+      "courses-home-vstudy-dark",
+      "course-page-vstudy-dark",
+      "planner-today-vstudy-dark",
+      "reader-chat-with-answer-vstudy-dark",
+      "history-search-vstudy-dark",
+      "library-vstudy-dark",
+      "home-vstudy-dark",
+      "themes-settings-vstudy-dark",
+      "moodle-webview-vstudy-dark",
+      "storage-settings-vstudy-dark",
+      "onboarding-welcome-vstudy-dark"
+    ]
+  },
+  {
+    "group": "ocean-light",
+    "keys": [
+      "courses-home-ocean-light",
+      "course-page-ocean-light",
+      "planner-today-ocean-light",
+      "reader-chat-with-answer-ocean-light",
+      "history-search-ocean-light",
+      "library-ocean-light",
+      "home-ocean-light",
+      "themes-settings-ocean-light",
+      "moodle-webview-ocean-light",
+      "storage-settings-ocean-light",
+      "onboarding-welcome-ocean-light"
+    ]
+  },
+  {
+    "group": "ocean-dark",
+    "keys": [
+      "courses-home-ocean-dark",
+      "course-page-ocean-dark",
+      "planner-today-ocean-dark",
+      "reader-chat-with-answer-ocean-dark",
+      "history-search-ocean-dark",
+      "library-ocean-dark",
+      "home-ocean-dark",
+      "themes-settings-ocean-dark",
+      "moodle-webview-ocean-dark",
+      "storage-settings-ocean-dark",
+      "onboarding-welcome-ocean-dark"
+    ]
+  },
+  {
+    "group": "grove-light",
+    "keys": [
+      "courses-home-grove-light",
+      "course-page-grove-light",
+      "planner-today-grove-light",
+      "reader-chat-with-answer-grove-light",
+      "history-search-grove-light",
+      "library-grove-light",
+      "home-grove-light",
+      "themes-settings-grove-light",
+      "moodle-webview-grove-light",
+      "storage-settings-grove-light",
+      "onboarding-welcome-grove-light"
+    ]
+  },
+  {
+    "group": "grove-dark",
+    "keys": [
+      "courses-home-grove-dark",
+      "course-page-grove-dark",
+      "planner-today-grove-dark",
+      "reader-chat-with-answer-grove-dark",
+      "history-search-grove-dark",
+      "library-grove-dark",
+      "home-grove-dark",
+      "themes-settings-grove-dark",
+      "moodle-webview-grove-dark",
+      "storage-settings-grove-dark",
+      "onboarding-welcome-grove-dark"
+    ]
+  },
+  {
+    "group": "ember-light",
+    "keys": [
+      "courses-home-ember-light",
+      "course-page-ember-light",
+      "planner-today-ember-light",
+      "reader-chat-with-answer-ember-light",
+      "history-search-ember-light",
+      "library-ember-light",
+      "home-ember-light",
+      "themes-settings-ember-light",
+      "moodle-webview-ember-light",
+      "storage-settings-ember-light",
+      "onboarding-welcome-ember-light"
+    ]
+  },
+  {
+    "group": "ember-dark",
+    "keys": [
+      "courses-home-ember-dark",
+      "course-page-ember-dark",
+      "planner-today-ember-dark",
+      "reader-chat-with-answer-ember-dark",
+      "history-search-ember-dark",
+      "library-ember-dark",
+      "home-ember-dark",
+      "themes-settings-ember-dark",
+      "moodle-webview-ember-dark",
+      "storage-settings-ember-dark",
+      "onboarding-welcome-ember-dark"
+    ]
+  },
+  {
+    "group": "iris-light",
+    "keys": [
+      "courses-home-iris-light",
+      "course-page-iris-light",
+      "planner-today-iris-light",
+      "reader-chat-with-answer-iris-light",
+      "history-search-iris-light",
+      "library-iris-light",
+      "home-iris-light",
+      "themes-settings-iris-light",
+      "moodle-webview-iris-light",
+      "storage-settings-iris-light",
+      "onboarding-welcome-iris-light"
+    ]
+  },
+  {
+    "group": "iris-dark",
+    "keys": [
+      "courses-home-iris-dark",
+      "course-page-iris-dark",
+      "planner-today-iris-dark",
+      "reader-chat-with-answer-iris-dark",
+      "history-search-iris-dark",
+      "library-iris-dark",
+      "home-iris-dark",
+      "themes-settings-iris-dark",
+      "moodle-webview-iris-dark",
+      "storage-settings-iris-dark",
+      "onboarding-welcome-iris-dark"
+    ]
+  },
+  {
+    "group": "rose-light",
+    "keys": [
+      "courses-home-rose-light",
+      "course-page-rose-light",
+      "planner-today-rose-light",
+      "reader-chat-with-answer-rose-light",
+      "history-search-rose-light",
+      "library-rose-light",
+      "home-rose-light",
+      "themes-settings-rose-light",
+      "moodle-webview-rose-light",
+      "storage-settings-rose-light",
+      "onboarding-welcome-rose-light"
+    ]
+  },
+  {
+    "group": "rose-dark",
+    "keys": [
+      "courses-home-rose-dark",
+      "course-page-rose-dark",
+      "planner-today-rose-dark",
+      "reader-chat-with-answer-rose-dark",
+      "history-search-rose-dark",
+      "library-rose-dark",
+      "home-rose-dark",
+      "themes-settings-rose-dark",
+      "moodle-webview-rose-dark",
+      "storage-settings-rose-dark",
+      "onboarding-welcome-rose-dark"
+    ]
+  }
+]

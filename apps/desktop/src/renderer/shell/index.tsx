@@ -1,4 +1,6 @@
 /** Navigation frame and profile-local routes shared by the study views. */
+import { useScrollChrome } from './use-scroll-chrome';
+import './scroll-chrome.css';
 import { HelpMenu } from "../onboarding/help";
 import { useSidebarOverlay } from './use-sidebar-overlay';
 import { applyAppearance } from '../settings/apply-appearance';
@@ -54,6 +56,7 @@ export function AppShell({
   status?: ReactNode;
 }) {
   useTranslation();
+  useScrollChrome();
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [displayName, setDisplayName] = useState('');
   useEffect(() => {

@@ -1,0 +1,39 @@
+{
+  "checks": {
+    "typecheck": {
+      "result": "PASS",
+      "log": "typecheck.txt"
+    },
+    "lint": {
+      "result": "PASS",
+      "log": "lint.txt"
+    },
+    "knip": {
+      "result": "PASS",
+      "log": "knip.txt"
+    },
+    "vendor": {
+      "result": "PASS",
+      "log": "vendor.txt"
+    },
+    "contrast": {
+      "result": "PASS",
+      "log": "contrast.txt"
+    },
+    "tests": {
+      "result": "PASS",
+      "log": "tests.txt"
+    }
+  },
+  "tests": {
+    "passed": 1007,
+    "skipped": 14,
+    "filesPassed": 134,
+    "filesSkipped": 5
+  },
+  "notes": [
+    "Knip retains its existing CSS configuration hint.",
+    "Native and renderer transition tests are included.",
+    "One Electron instance at a time. Vitest used --pool=forks --maxWorkers=2."
+  ]
+}

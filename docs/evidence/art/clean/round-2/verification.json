@@ -1,0 +1,27 @@
+{
+  "phase": "round-2",
+  "artifact": "Real built Electron with fixture Moodle read handlers. No school connection.",
+  "results": [
+    "vstudy/light/1440x900 home and course captured.",
+    "vstudy/dark/1440x900 home and course captured.",
+    "ocean/light/1440x900 home and course captured.",
+    "ocean/dark/1440x900 home and course captured.",
+    "grove/light/1440x900 home and course captured.",
+    "grove/dark/1440x900 home and course captured.",
+    "ember/light/1440x900 home and course captured.",
+    "ember/dark/1440x900 home and course captured.",
+    "iris/light/1440x900 home and course captured.",
+    "iris/dark/1440x900 home and course captured.",
+    "rose/light/1440x900 home and course captured.",
+    "rose/dark/1440x900 home and course captured.",
+    "slate/light/1440x900 home and course captured.",
+    "slate/dark/1440x900 home and course captured.",
+    "paper/light/1440x900 home and course captured.",
+    "paper/dark/1440x900 home and course captured.",
+    "contrast/light/1440x900 home and course captured.",
+    "contrast/dark/1440x900 home and course captured.",
+    "Course grid, planner, connection dialog, announcement sheet, webview toolbar, loading, empty and offline error states captured. Webview content needs a live authenticated school.",
+    "All tab surfaces, module sheet, assistant Escape/focus return, keyboard course opening, zh-Hant/ja and 125% scale checked. Pseudo-localization runs separately with ART_PHASE=pseudo."
+  ],
+  "errors": []
+}

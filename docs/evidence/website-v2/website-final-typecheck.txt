@@ -1,0 +1,10 @@
+
+> @vstudy/website@0.1.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-6068bbec/apps/website
+> astro check
+
+10:31:39 [types] Generated 26ms
+10:31:39 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-6068bbec/apps/website...
+Result (24 files):
+- 0 errors
+- 0 warnings
+- 0 hints

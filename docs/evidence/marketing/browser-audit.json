@@ -1,0 +1,4834 @@
+{
+  "artifact": "Production Astro build, T3 preview browser, axe WCAG 2 A/AA and 2.1 AA",
+  "desktopPages": [
+    {
+      "requested": "/vstudy-pro/",
+      "url": "/vstudy-pro/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/",
+      "url": "/vstudy-pro/zh-Hant/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/themes/",
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "The app Appearance page with paired theme preview orbs",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Study planner with tasks, time estimates, and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Graph traversal notes beside a saved demo answer, source citation, and selected passage",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Styled demo teacher page for Algorithms & Data Structures inside the isolated Moodle pane",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "歡迎導覽與閱讀工作區預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/development/",
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Courses and due-soon work in VStudy",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Real Algorithms & Data Structures course page with week 8 materials and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "搜尋學校或輸入 Moodle 網址",
+          "width": "1000",
+          "height": "724",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Search and filter conversations in the History view",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/ja/",
+      "url": "/vstudy-pro/ja/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/troubleshooting/",
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/themes/",
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "The app Appearance page with paired theme preview orbs",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/study-planner/",
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Study planner with tasks, time estimates, and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/reading-documents/",
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Graph traversal notes beside a saved demo answer, source citation, and selected passage",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/moodle-pages/",
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Styled demo teacher page for Algorithms & Data Structures inside the isolated Moodle pane",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/getting-started/",
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "VStudy の初回設定とサンプル資料",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/development/",
+      "url": "/vstudy-pro/ja/docs/development/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/data-and-storage/",
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Courses and due-soon work in VStudy",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Real Algorithms & Data Structures course page with week 8 materials and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/connect-your-school/",
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "学校を検索するか Moodle URL を入力する画面",
+          "width": "1000",
+          "height": "724",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/chat-history/",
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Search and filter conversations in the History view",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/architecture/",
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/ja/docs/ai-providers/",
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/en/",
+      "url": "/vstudy-pro/en/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/troubleshooting/",
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/themes/",
+      "url": "/vstudy-pro/en/docs/themes/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "The app Appearance page with paired theme preview orbs",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/study-planner/",
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Study planner with tasks, time estimates, and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/reading-documents/",
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Graph traversal notes beside a saved demo answer, source citation, and selected passage",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/privacy-and-network/",
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/moodle-pages/",
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Styled demo teacher page for Algorithms & Data Structures inside the isolated Moodle pane",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/getting-started/",
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Welcome onboarding with a preview of the reading workspace",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/development/",
+      "url": "/vstudy-pro/en/docs/development/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/data-and-storage/",
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Courses and due-soon work in VStudy",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Real Algorithms & Data Structures course page with week 8 materials and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/connect-your-school/",
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Search schools or enter a Moodle site URL",
+          "width": "1000",
+          "height": "724",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/chat-history/",
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Search and filter conversations in the History view",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/architecture/",
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "requested": "/vstudy-pro/en/docs/ai-providers/",
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    }
+  ],
+  "mobilePages": [
+    {
+      "url": "/vstudy-pro/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "The app Appearance page with paired theme preview orbs",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Study planner with tasks, time estimates, and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Graph traversal notes beside a saved demo answer, source citation, and selected passage",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Styled demo teacher page for Algorithms & Data Structures inside the isolated Moodle pane",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "歡迎導覽與閱讀工作區預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Courses and due-soon work in VStudy",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Real Algorithms & Data Structures course page with week 8 materials and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "搜尋學校或輸入 Moodle 網址",
+          "width": "1000",
+          "height": "724",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Search and filter conversations in the History view",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "lang": "zh-Hant",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "The app Appearance page with paired theme preview orbs",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Study planner with tasks, time estimates, and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Graph traversal notes beside a saved demo answer, source citation, and selected passage",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Styled demo teacher page for Algorithms & Data Structures inside the isolated Moodle pane",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "VStudy の初回設定とサンプル資料",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Courses and due-soon work in VStudy",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Real Algorithms & Data Structures course page with week 8 materials and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "学校を検索するか Moodle URL を入力する画面",
+          "width": "1000",
+          "height": "724",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Search and filter conversations in the History view",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "lang": "ja",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "The app Appearance page with paired theme preview orbs",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Study planner with tasks, time estimates, and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Graph traversal notes beside a saved demo answer, source citation, and selected passage",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Styled demo teacher page for Algorithms & Data Structures inside the isolated Moodle pane",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Welcome onboarding with a preview of the reading workspace",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Courses and due-soon work in VStudy",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Real Algorithms & Data Structures course page with week 8 materials and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Search schools or enter a Moodle site URL",
+          "width": "1000",
+          "height": "724",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Search and filter conversations in the History view",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "lang": "en",
+      "violations": [],
+      "overflow": false,
+      "images": []
+    }
+  ],
+  "homeThemeMatrix": [
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "en",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "en",
+      "theme": "ocean",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "en",
+      "theme": "grove",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "en",
+      "theme": "ember",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "en",
+      "theme": "iris",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "en",
+      "theme": "rose",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "ocean",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "海洋 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "海洋 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "grove",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "森林 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "森林 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "ember",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "餘燼 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "餘燼 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "iris",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "鳶尾 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "鳶尾 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "rose",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "玫瑰 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "玫瑰 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "ocean",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "grove",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "ember",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "iris",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "rose",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "ocean",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "grove",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "ember",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "iris",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "rose",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "ocean",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "海洋 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "海洋 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "grove",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "森林 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "森林 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "ember",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "餘燼 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "餘燼 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "iris",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "鳶尾 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "鳶尾 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "rose",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "玫瑰 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "玫瑰 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "ocean",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "grove",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "ember",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "iris",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "rose",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "en",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "en",
+      "theme": "ocean",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "en",
+      "theme": "grove",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "en",
+      "theme": "ember",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "en",
+      "theme": "iris",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "en",
+      "theme": "rose",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "ocean",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "海洋 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "海洋 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "grove",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "森林 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "森林 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "ember",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "餘燼 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "餘燼 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "iris",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "鳶尾 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "鳶尾 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "zh-Hant",
+      "theme": "rose",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "玫瑰 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "玫瑰 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "ocean",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "grove",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "ember",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "iris",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "light",
+      "lang": "ja",
+      "theme": "rose",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "ocean",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "grove",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "ember",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "iris",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "en",
+      "theme": "rose",
+      "url": "/vstudy-pro/en/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "Art-led course cards with teachers, progress, and deadlines",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "Algorithms & Data Structures with current-week materials and upcoming work",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Populated study planner with tasks and a statistics exam",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Graph traversal notes with a selected passage, demo AI answer, and source citation",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · Light app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · Dark app preview",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "ocean",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "海洋 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "海洋 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "grove",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "森林 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "森林 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "ember",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "餘燼 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "餘燼 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "iris",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "鳶尾 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "鳶尾 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "zh-Hant",
+      "theme": "rose",
+      "url": "/vstudy-pro/zh-Hant/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "以藝術封面呈現教師、進度與截止日期的課程卡片",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "演算法與資料結構的本週教材與即將到期作業",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "學習規劃中的待辦事項與統計期中考",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "圖論筆記、已選段落、示範 AI 回答與來源引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "玫瑰 · 淺色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "玫瑰 · 深色 app 預覽",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "vstudy",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "VStudy · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "ocean",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ocean · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "grove",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Grove · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "ember",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Ember · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "iris",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Iris · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "lang": "ja",
+      "theme": "rose",
+      "url": "/vstudy-pro/ja/",
+      "violations": [],
+      "overflow": false,
+      "images": [
+        {
+          "alt": "アートの表紙と教員、進捗、締切が並ぶ授業カード",
+          "width": "1440",
+          "height": "900",
+          "loading": "eager"
+        },
+        {
+          "alt": "アルゴリズムとデータ構造の今週の教材と課題",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "タスクと統計の中間試験が入った学習プランナー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "グラフのノート、選択した文章、デモ AI 回答と出典の引用",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · ライトのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        },
+        {
+          "alt": "Rose · ダークのアプリプレビュー",
+          "width": "1440",
+          "height": "900",
+          "loading": "lazy"
+        }
+      ]
+    }
+  ],
+  "themeSwap": [
+    {
+      "theme": "vstudy",
+      "light": true,
+      "dark": true,
+      "decoded": true
+    },
+    {
+      "theme": "ocean",
+      "light": true,
+      "dark": true,
+      "decoded": true
+    },
+    {
+      "theme": "grove",
+      "light": true,
+      "dark": true,
+      "decoded": true
+    },
+    {
+      "theme": "ember",
+      "light": true,
+      "dark": true,
+      "decoded": true
+    },
+    {
+      "theme": "iris",
+      "light": true,
+      "dark": true,
+      "decoded": true
+    },
+    {
+      "theme": "rose",
+      "light": true,
+      "dark": true,
+      "decoded": true
+    }
+  ]
+}

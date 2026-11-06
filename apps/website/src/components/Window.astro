@@ -1,16 +1,18 @@
 ---
-import { path } from '../config';
-interface Props { name: string; width: number; height: number; alt: string; eager?: boolean; }
-const { name, width, height, alt, eager = false } = Astro.props;
+import { getImage } from 'astro:assets';
+import { shot } from '../data/shots';
+interface Props { name: string; alt: string; eager?: boolean; size?: number; }
+const { name, alt, eager = false, size = eager ? 1440 : 960 } = Astro.props;
+const image = await getImage({src:shot(name),width:size,format:'webp',quality:82});
 ---
 <div class="app-window">
   <div class="window-bar" aria-hidden="true"><span></span><span></span><span></span><b>VStudy Pro</b></div>
-  <img src={path(`assets/${name}.webp`)} {width} {height} {alt} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} decoding="async" />
+  <img src={image.src} width={1440} height={900} {alt} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} decoding="async" />
 </div>
 <style>
   .app-window { padding:var(--space-2); background:var(--surface); border-radius:var(--r-xl); box-shadow:var(--elevation); overflow:hidden; }
   .window-bar { height:var(--space-8); display:flex; gap:var(--space-2); align-items:center; padding:0 var(--space-3) var(--space-2); color:var(--muted); }
   .window-bar span { width:8px; height:8px; background:var(--line); border-radius:var(--r-pill); }
   .window-bar b { margin-inline:auto; padding-right:var(--space-12); font-size:10px; font-weight:500; }
-  img { width:100%; border-radius:var(--r-lg); }
+  img { width:100%; height:auto; border-radius:var(--r-lg); }
 </style>

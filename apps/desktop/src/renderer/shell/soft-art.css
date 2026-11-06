@@ -1,0 +1,25 @@
+/** Two broad color fields and one translucent curve. No image, noise, or stroked motif. */
+.soft-art {
+  --art-hue-offset:0;
+  --art-hue-gap:40;
+  --art-x:20%;
+  --art-y:10%;
+  --art-primary:light-dark(oklch(from var(--accent-color) .80 .085 calc(h + var(--art-hue-offset))),oklch(from var(--accent-color) .46 .07 calc(h + var(--art-hue-offset))));
+  --art-secondary:light-dark(oklch(from var(--accent-color) .72 .08 calc(h + var(--art-hue-offset) + var(--art-hue-gap))),oklch(from var(--accent-color) .36 .065 calc(h + var(--art-hue-offset) + var(--art-hue-gap))));
+  --art-base:light-dark(oklch(from var(--accent-color) .62 .055 h),oklch(from var(--accent-color) .27 .045 h));
+  isolation:isolate;
+  background:radial-gradient(ellipse at var(--art-x) var(--art-y),var(--art-primary),transparent 72%),radial-gradient(ellipse at 90% 80%,var(--art-secondary),transparent 75%),var(--art-base);
+}
+.soft-art::before {
+  content:""; position:absolute; pointer-events:none;
+  width:110%; height:160%; left:38%; top:28%; border-radius:50%;
+  background:linear-gradient(155deg,color-mix(in oklab,var(--surface) 6%,transparent),transparent 65%);
+  transform:rotate(-24deg);
+}
+.moodle-cover .soft-art::before,.art-reader-cover.soft-art::before { display:none; }
+:root[data-theme=contrast] .soft-art { background:var(--surface); }
+:root[data-theme=contrast] .soft-art::before { display:none; }
+@media(prefers-contrast:more), (forced-colors:active) {
+  .soft-art { background:var(--surface); }
+  .soft-art::before { display:none; }
+}
