@@ -123,6 +123,10 @@
       {
         "from": "resources/mcp/windows-pipe.ps1",
         "to": "mcp/windows-pipe.ps1"
+      },
+      {
+        "from": "resources/mcp/windows-state.ps1",
+        "to": "mcp/windows-state.ps1"
       }
     ],
     "mac": {
