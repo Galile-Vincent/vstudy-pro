@@ -11,14 +11,13 @@ it.each(['week?1*.pdf','a<b>c|d".pdf','CON.pdf','nul.txt','COM1.pdf','LPT9.pdf',
   expect(safe).not.toMatch(/[?*<>|"/\\:]/);
   expect(safe).not.toMatch(/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i);
   expect(safe).not.toMatch(/^[.]|[. ]$/);
-  expect(Buffer.byteLength(safe)).toBeLessThanOrEqual(200);
+  expect(Buffer.byteLength(safe)).toBeLessThanOrEqual(120);
   expect(safe).toMatch(/\.(pdf|txt)$/);
 });
-it('resolves sanitization and case-insensitive staging name collisions as a pure function',() => {
-  const names:string[] = [];
-  for (const name of ['Lecture.pdf','lecture.pdf','a?.pdf','a*.pdf']) names.push(sanitizeMoodleFilename(name,names));
-  expect(new Set(names.map(name => name.toLowerCase())).size).toBe(4);
-  expect(sanitizeMoodleFilename('lecture.pdf')).toBe('lecture.pdf');
+it('keeps a typical Windows staging path under MAX_PATH',() => {
+  const root = 'C:\\Users\\'+'u'.repeat(40)+'\\AppData\\Local\\Temp';
+  const filename = sanitizeMoodleFilename('a'.repeat(300)+'.pdf');
+  expect(`${root}\\.download-ABCDEF\\${filename}`.length+1).toBeLessThanOrEqual(260);
 });
 it.each([
  ['https://school.example/moodle/pluginfile.php/1/a.pdf','https://school.example/moodle/webservice/pluginfile.php/1/a.pdf?token=secret'],

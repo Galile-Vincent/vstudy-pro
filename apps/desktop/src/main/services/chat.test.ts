@@ -631,3 +631,11 @@ it('reports a typed save failure while leaving the streamed answer available to 
   expect(owner.events.at(-1)).toMatchObject({type:'error',code:'errors.chat_save_failed',params:{}});
   expect(store.messages.list(request.conversationId).some(m=>m.role==='assistant')).toBe(false);
 });
+it('rejects oversized user text before service persistence or provider work',async()=>{
+  let calls=0;
+  const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[],async *stream(){calls++;yield {type:'done'};}};
+  const {chat,store,request}=await setup(adapter);
+  const owner=new Owner();
+  expect(()=>chat.start({...request,userMessage:'x'.repeat(2_000_001)},owner)).toThrow(expect.objectContaining({name:'MessageTextLimitError',code:'errors.message_too_large'}));
+  expect(store.messages.list(request.conversationId)).toEqual([]);expect(calls).toBe(0);
+});

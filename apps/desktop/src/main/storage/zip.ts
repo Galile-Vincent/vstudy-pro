@@ -8,7 +8,7 @@
 import { createReadStream } from 'node:fs';
 import { open, rename, rm, mkdir } from 'node:fs/promises';
 import type { FileHandle } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { crc32 } from 'node:zlib';
 import { retryBusy, syncDirectory, validateDestination } from './atomic';
@@ -71,6 +71,7 @@ export async function extractZip(source:string, destination:string):Promise<Map<
 }
 
 async function readZip(source:string, destination?:string):Promise<Map<string,{bytes:number;sha256:string}>> {
+  if(destination)destination=resolve(destination);
   const file=await open(source,'r');
   try {
     const size=(await file.stat()).size;

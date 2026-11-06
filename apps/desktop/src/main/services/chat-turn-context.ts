@@ -34,8 +34,8 @@ export function chatTurnContext(messages: Message[], request: ChatRequest): Chat
     const turn = m.parts[0]?.turnId;
     return !turn || !all.slice(i + 1).some(next => next.role === m.role && next.parts[0]?.turnId === turn);
   });
-  const history = latestTurns.filter((message, index) => message.role === "assistant"
+  const history = latestTurns.filter((message, index) => message.parts.every(p=>!p.contextExcluded) && (message.role === "assistant"
     ? message.parts.every(p => !p.contextExcluded && (!p.status || p.status === "complete"))
-    : latestTurns[index + 1]?.role === "assistant" && latestTurns[index + 1]!.parts.every(p => !p.contextExcluded && (!p.status || p.status === "complete")));
+    : latestTurns[index + 1]?.role === "assistant" && latestTurns[index + 1]!.parts.every(p => !p.contextExcluded && (!p.status || p.status === "complete"))));
   return { regenerating, userMessageId, assistantMessageId, superseded, history };
 }

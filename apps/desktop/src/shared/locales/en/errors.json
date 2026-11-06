@@ -44,5 +44,7 @@
   "startup_services": "VStudy could not initialize application services. Try restarting.",
   "startup_window": "VStudy could not open the study window. Try restarting.",
   "window_unavailable": "The study window stopped responding. Automatic recovery has stopped. Quit and reopen VStudy, or copy diagnostics for support.",
-  "chat_save_failed": "This answer could not be saved. Copy it before leaving. Check free disk space and file permissions, then try again."
+  "chat_save_failed": "This answer could not be saved. Copy it before leaving. Check free disk space and file permissions, then try again.",
+  "message_too_large": "This message exceeds 2,000,000 characters. Shorten it and try again.",
+  "message_unreadable": "This stored message could not be read. Its content was skipped."
 }

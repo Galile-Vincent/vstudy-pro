@@ -46,12 +46,14 @@ export class AiParseService {
   return pages.map((markdown,i)=>({page:i+1,markdown})).filter(p=>p.page>=start && p.page<=end);
  }
  async estimate(r:AiParseRequest,signal=new AbortController().signal):Promise<AiParseEstimate> {
-  const d=this.document(r.documentId), pages=this.selected(r,await this.pages(d));
+  signal.throwIfAborted();
+  const d=this.document(r.documentId), all=await this.pages(d), pages=this.selected(r,all);
   const models=await this.providers.get(r.providerId).listModels();const model=models.find(m=>m.id===r.modelId);
+  signal.throwIfAborted();
   const supportsImages=model?.supportsImages===true;
   const billable:typeof pages=[];
   if(d.mime==='application/pdf' && !supportsImages || r.providerId==='agy-cli')billable.push(...pages);
-  else for(const page of pages){const {key}=await this.input(r,d,page,signal);if(!this.cached(key)?.markdown)billable.push(page);}
+  else for(const page of pages)if(!this.reusable(d.id,page.page,this.identity(r,d,page,all.length)))billable.push(page);
   return {...estimateParse(billable.map(p=>p.markdown),r.modelId,d.mime==='application/pdf',this.store.settings.get().priceOverrides),pages:pages.length,supportsImages,billing:r.providerId.endsWith('-cli')?'api-equivalent':'api',...((!supportsImages && d.mime==='application/pdf') || r.providerId==='agy-cli'?{reason:model?.imageUnsupportedReason??'ai_parse.images_unsupported'}:{})};
  }
  status(id:Document['id']):AiParseState {
@@ -78,6 +80,7 @@ export class AiParseService {
    if(settings.monthlyBudgetUsd!==undefined && (spent.unknownPrices || estimate.costUsd===undefined || (spent.costUsd??0)+estimate.costUsd>settings.monthlyBudgetUsd) && !r.options.confirmBudgetOverride)throw new Error('ai_parse.budget');
    if(settings.monthlyTokenBudget!==undefined && spent.inputTokens+spent.outputTokens+estimate.inputTokens+estimate.outputTokens>settings.monthlyTokenBudget && !r.options.confirmBudgetOverride)throw new Error('ai_parse.budget');
    controller.signal.throwIfAborted();
+   this.store.db.prepare("UPDATE ai_parse_pages SET code=NULL WHERE documentId=? AND code='ai_parse.publish_failed'").run(d.id);
    this.store.db.prepare("INSERT INTO ai_parse_jobs VALUES(?,?,'running',?,?) ON CONFLICT(documentId) DO UPDATE SET request=excluded.request,status='running',updatedAt=excluded.updatedAt,promptVersion=excluded.promptVersion").run(r.documentId,JSON.stringify(r),new Date().toISOString(),AI_PARSE_PROMPT_VERSION);
    for(const p of this.selected(r,pages))this.store.db.prepare("INSERT OR IGNORE INTO ai_parse_pages(documentId,page,cacheKey,status) VALUES(?,?,?,'pending')").run(d.id,p.page,'');
    const promise=this.run(r,d,pages,controller).catch(()=>{
@@ -89,6 +92,16 @@ export class AiParseService {
    this.active.set(r.documentId,{controller,promise});
    return this.status(r.documentId);
   } catch(error) {this.active.delete(r.documentId);release();throw error;}
+ }
+ // Source files are content-addressed; missing legacy identities conservatively count as billable.
+ private identity(r:AiParseRequest,d:Document,p:{page:number;markdown:string},pageCount:number) {
+  return createHash('sha256').update(JSON.stringify([d.sourceHash,d.mime,p.page,pageCount,p.markdown,AI_PARSE_PROMPT_VERSION,r.providerId,r.modelId,r.options.modelOptions])).digest('hex');
+ }
+ private reusable(documentId:string,page:number,inputKey:string) {
+  const row=this.store.db.prepare("SELECT cacheKey,markdown,provenance FROM ai_parse_pages WHERE documentId=? AND page=? AND status='done'").get(documentId,page);
+  if(!row?.markdown)return;
+  try {if((JSON.parse(String(row.provenance)) as {inputKey?:string}).inputKey===inputKey)return {key:String(row.cacheKey),markdown:String(row.markdown)};}
+  catch { /* Unknown cache identities must be estimated as billable. */ }
  }
  private async input(r:AiParseRequest,d:Document,p:{page:number;markdown:string},signal:AbortSignal) {
   signal.throwIfAborted();
@@ -113,12 +126,14 @@ export class AiParseService {
   const signal=controller.signal;
   const notify=()=>{if(this.store.documents.get(d.id))this.progress(this.status(d.id));};
   const page=async(p:{page:number;markdown:string})=>{
+   const inputKey=this.identity(r,d,p,pages.length);
    let key='';let usage:Usage|undefined;let output='';let called=false;
    let admission:ReturnType<typeof estimateParse>|undefined;
    try {
     signal.throwIfAborted();
-    const input=await this.input(r,d,p,signal),rendered=input.rendered;key=input.key;
-    const cached=this.cached(key);
+    const reusable=this.reusable(d.id,p.page,inputKey);
+    const input=reusable?undefined:await this.input(r,d,p,signal),rendered=input?.rendered;key=reusable?.key??input!.key;
+    const cached=reusable??this.cached(key);
     this.store.db.prepare("INSERT INTO ai_parse_pages(documentId,page,cacheKey,status,markdown,code) VALUES(?,?,?,'running',NULL,NULL) ON CONFLICT(documentId,page) DO UPDATE SET cacheKey=excluded.cacheKey,status='running',markdown=NULL,code=NULL").run(d.id,p.page,key);notify();
     if(cached?.markdown)output=String(cached.markdown);
     else {
@@ -141,7 +156,7 @@ export class AiParseService {
      if(!done)throw new Error('ai_parse.provider');
     }
     signal.throwIfAborted();
-    const gate=validateAiPage(rendered?.text??p.markdown,output);
+    const gate=reusable?{accepted:true}:validateAiPage(rendered?.text??p.markdown,output);
     this.store.db.prepare('UPDATE ai_parse_pages SET status=?,markdown=?,code=? WHERE documentId=? AND page=?').run(gate.accepted?'done':'kept-original',gate.accepted?output:null,gate.accepted?null:'ai_parse.changed_too_much',d.id,p.page);
    } catch {
     this.store.db.prepare("INSERT INTO ai_parse_pages(documentId,page,cacheKey,status,markdown,code) VALUES(?,?,?, ?,NULL,?) ON CONFLICT(documentId,page) DO UPDATE SET status=excluded.status,code=excluded.code,markdown=NULL").run(d.id,p.page,key,signal.aborted?'pending':'failed',signal.aborted?'ai_parse.cancelled':'ai_parse.failed');
@@ -152,7 +167,7 @@ export class AiParseService {
      this.store.usage.record({...measured,id:randomUUID(),createdAt:new Date().toISOString(),providerId:r.providerId,modelId:r.modelId,kind:'parse',documentId:d.id,aborted:signal.aborted});
     }
     if(admission){inFlight.inputTokens-=admission.inputTokens;inFlight.outputTokens-=admission.outputTokens;inFlight.costUsd-=admission.costUsd??0;}
-    this.store.db.prepare('UPDATE ai_parse_pages SET provenance=? WHERE documentId=? AND page=?').run(JSON.stringify({providerId:r.providerId,modelId:r.modelId,promptVersion:AI_PARSE_PROMPT_VERSION,date:new Date().toISOString()}),d.id,p.page);
+    this.store.db.prepare('UPDATE ai_parse_pages SET provenance=? WHERE documentId=? AND page=?').run(JSON.stringify({inputKey,providerId:r.providerId,modelId:r.modelId,promptVersion:AI_PARSE_PROMPT_VERSION,date:new Date().toISOString()}),d.id,p.page);
     notify();
    }
   };

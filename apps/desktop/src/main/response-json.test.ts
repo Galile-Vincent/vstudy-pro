@@ -18,6 +18,11 @@ const endpoints = [
   {name:'provider models',payload:{data:[{id:'model'}]},run:(request:typeof fetch) => createApiAdapter(() => ({id:'openai-api',kind:'api',enabled:true}),{getInMainOnly:() => 'key'},request).listModels(),failure:null},
 ];
 for (const endpoint of endpoints) {
+  it(`accepts a UTF-8 BOM at the ${endpoint.name} entry point`,async () => {
+    const plain = await endpoint.run(async () => Response.json(endpoint.payload));
+    const request:typeof fetch = async () => new Response('\uFEFF'+JSON.stringify(endpoint.payload));
+    expect(await endpoint.run(request)).toEqual(plain);
+  });
   it(`caps decompressed streamed JSON bytes and cancels oversized ${endpoint.name} responses`,async () => {
     const cancellations:ReturnType<typeof vi.fn>[] = [];
     const request:typeof fetch = async () => {

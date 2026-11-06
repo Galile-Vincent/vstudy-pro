@@ -137,26 +137,87 @@ it.each(['markdown','metadata','database'])('reports failed %s publication as re
   expect(await readFile(path,'utf8')).toContain('# alpha beta gamma');
  } finally {await x.cleanup();}
 });
-it.each(['markdown','image'])('charges changed %s content in estimates and monthly admission',async kind=>{
+it.each(['markdown','source hash'])('charges changed %s content in estimates and monthly admission',async kind=>{
  let calls=0,image='first';
  const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test',supportsImages:true}],async *stream(){calls++;yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'done'};}};
  const x=await setup(adapter,async()=>({image:Buffer.from(image),text:'alpha beta gamma'}));try {
-  if(kind==='image')x.store.db.prepare("UPDATE documents SET mime='application/pdf' WHERE id=?").run(x.imported.id);
+  if(kind==='source hash')x.store.db.prepare("UPDATE documents SET mime='application/pdf' WHERE id=?").run(x.imported.id);
   await x.service.start(x.request);await x.service.waitForIdle();
   expect((await x.service.estimate(x.request)).inputTokens).toBe(0);
-  if(kind==='markdown')await writeFile(x.imported.markdownPath,'alpha beta gamma changed');else image='second';
+  if(kind==='markdown')await writeFile(x.imported.markdownPath,'alpha beta gamma changed');else {image='second';x.store.db.prepare('UPDATE documents SET sourceHash=? WHERE id=?').run('b'.repeat(64),x.imported.id);}
   const estimate=await x.service.estimate(x.request);expect(estimate.inputTokens).toBeGreaterThan(0);
   x.store.settings.set({monthlyTokenBudget:1});await expect(x.service.start(x.request)).rejects.toThrow('ai_parse.budget');expect(calls).toBe(1);
  } finally {await x.cleanup();}
 });
-it('rechecks monthly admission when rendered content changes after the estimate',async()=>{
- let calls=0,renders=0;
+it('rechecks monthly admission after rendering before sending a page',async()=>{
+ let calls=0;
  const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test',supportsImages:true}],async *stream(){calls++;yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'done'};}};
- const x=await setup(adapter,async()=>({image:Buffer.from(++renders<=3?'old':'new'),text:'alpha beta gamma'}));try {
+ const x=await setup(adapter,async()=>{x.store.settings.set({monthlyTokenBudget:1});return {image:Buffer.from('image'),text:'alpha beta gamma'};});try {
+  x.store.db.prepare("UPDATE documents SET mime='application/pdf' WHERE id=?").run(x.imported.id);
+  await x.service.start(x.request);await x.service.waitForIdle();expect(calls).toBe(0);
+  expect(x.service.status(x.imported.id).pages[0]?.status).toBe('failed');
+ } finally {await x.cleanup();}
+});
+it('estimates a multi-page PDF without rendering and renders only uncached pages once',async()=>{
+ const render=vi.fn(async()=>({image:Buffer.from('image'),text:'alpha beta gamma'}));
+ let calls=0;
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test',supportsImages:true}],async *stream(){calls++;yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'done'};}};
+ const x=await setup(adapter,render);try {
+  x.store.db.prepare("UPDATE documents SET mime='application/pdf' WHERE id=?").run(x.imported.id);
+  await writeFile(x.imported.markdownPath,'<!-- page 1 -->alpha beta gamma<!-- page 2 -->alpha beta gamma');
+  expect((await x.service.estimate(x.request)).pages).toBe(2);expect(render).not.toHaveBeenCalled();
+  await x.service.start({...x.request,scope:'preview'});await x.service.waitForIdle();
+  expect(render).toHaveBeenCalledTimes(1);
+  const partial=await x.service.estimate(x.request);expect(partial.inputTokens).toBeGreaterThan(0);expect(render).toHaveBeenCalledTimes(1);
+  await x.service.start(x.request);await x.service.waitForIdle();expect(render).toHaveBeenCalledTimes(2);
+  expect((await x.service.estimate(x.request)).inputTokens).toBe(0);
+  await x.service.start(x.request);await x.service.waitForIdle();expect(render).toHaveBeenCalledTimes(2);expect(calls).toBe(1);
+ } finally {await x.cleanup();}
+});
+it('returns a conservative estimate when rendering is unavailable',async()=>{
+ const render=vi.fn(async()=>{throw new Error('render failed');});
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test',supportsImages:true}],async *stream(){yield {type:'done'};}};
+ const x=await setup(adapter,render);try {
+  x.store.db.prepare("UPDATE documents SET mime='application/pdf' WHERE id=?").run(x.imported.id);
+  const estimate=await x.service.estimate(x.request);
+  expect(estimate.inputTokens).toBeGreaterThan(4096);expect(render).not.toHaveBeenCalled();
+ } finally {await x.cleanup();}
+});
+it.each(['page count','options','legacy identity'])('conservatively charges cached pages after a change to %s',async kind=>{
+ const render=vi.fn(async()=>({image:Buffer.from('image'),text:'alpha beta gamma'}));
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test',supportsImages:true}],async *stream(){yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'done'};}};
+ const x=await setup(adapter,render);try {
   x.store.db.prepare("UPDATE documents SET mime='application/pdf' WHERE id=?").run(x.imported.id);
   await x.service.start(x.request);await x.service.waitForIdle();
-  const spent=x.store.usage.summary('month');x.store.settings.set({monthlyTokenBudget:spent.inputTokens+spent.outputTokens+1});
-  await x.service.start(x.request);await x.service.waitForIdle();expect(calls).toBe(1);
-  expect(x.service.status(x.imported.id).pages[0]?.status).toBe('failed');
+  expect((await x.service.estimate(x.request)).inputTokens).toBe(0);
+  const request={...x.request,scope:'preview' as const};
+  if(kind==='page count')await writeFile(x.imported.markdownPath,'<!-- page 1 -->alpha beta gamma<!-- page 2 -->alpha beta gamma');
+  if(kind==='options')request.options={...request.options,modelOptions:{effort:'high'}};
+  if(kind==='legacy identity')x.store.db.prepare('UPDATE ai_parse_pages SET provenance=NULL WHERE documentId=?').run(x.imported.id);
+  expect((await x.service.estimate(request)).inputTokens).toBeGreaterThan(4096);
+  expect(render).toHaveBeenCalledTimes(1);
+ } finally {await x.cleanup();}
+});
+it.each(['cancelled','complete'])('clears stale publication failures after a later narrow run is %s',async outcome=>{
+ let later=false,entered!:()=>void;
+ const started=new Promise<void>(resolve=>{entered=resolve;});
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test'}],async *stream(r,signal){
+  if(later && outcome==='cancelled') {entered();await new Promise<void>(resolve=>signal.addEventListener('abort',()=>resolve(),{once:true}));signal.throwIfAborted();}
+  yield {type:'text-delta',text:!later && r.userMessage.includes('delta')?'invented unrelated content':r.userMessage};yield {type:'done'};
+ }};
+ const x=await setup(adapter);try {
+  await writeFile(x.imported.markdownPath,'<!-- page 1 -->alpha beta gamma<!-- page 2 -->delta epsilon zeta');
+  const path=join(x.imported.markdownPath,'..','content.ai.md');await mkdir(path);
+  await x.service.start(x.request);await x.service.waitForIdle();
+  expect(x.service.status(x.imported.id).code).toBe('ai_parse.publish_failed');
+  await rm(path,{recursive:true});later=true;
+  await x.service.start({...x.request,scope:'currentPage',startPage:2});
+  if(outcome==='cancelled'){await started;x.service.cancel(x.imported.id);}
+  await x.service.waitForIdle();
+  const state=x.service.status(x.imported.id);
+  expect(state.status).toBe(outcome);expect(state.code).toBeUndefined();
+  expect(state.pages.some(page=>page.code==='ai_parse.publish_failed')).toBe(false);
+  await x.service.use(x.imported.id,'ai');await x.service.discard(x.imported.id);
+  expect(x.service.status(x.imported.id).status).toBe('idle');
  } finally {await x.cleanup();}
 });
