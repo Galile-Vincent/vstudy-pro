@@ -10,7 +10,7 @@ For trusted jobs permitted to sign, the distribution contract supports unsigned 
 
 - [ ] Name the legal publisher and the people authorized to release. Enable account MFA and keep recovery access with the owner.
 - [ ] For Mac, provide a password-protected Developer ID Application P12 and either a team App Store Connect API key or Apple account notarization credentials.
-- [ ] For Windows, choose one signing route below. Provide its complete credential set and the expected certificate subject.
+- [ ] For Windows, choose one signing route below. Provide its complete credential set and the expected certificate subject. For Azure, set the nonsecret Actions variable `WIN_PUBLISHER_NAME` to the exact certificate CN.
 - [ ] Confirm Azure eligibility before buying a subscription. Taiwan is not on the current Public Trust eligibility list.
 - [ ] Add secrets through GitHub Settings or `gh secret set`. Share secret names, expiration dates, and account owners with the engineer, never secret values in chat or tickets.
 - [ ] Confirm the workflow reads the exact names below, materializes the Apple key safely, and only exposes platform-specific credentials to trusted packaging jobs.
@@ -24,7 +24,7 @@ Prices below are approximate planning figures checked on **2026-11-06**, before 
 
 | Route | Cost example | Requirements and fit |
 | --- | --- | --- |
-| Azure Artifact Signing, formerly Trusted Signing | Basic about US$9.99 per month with 5,000 signatures. Premium about US$99.99 with 100,000. Overage US$0.005 per signature. | Paid Azure subscription, eligible verified identity, Public Trust profile, and an Entra signing identity. Cloud HSM keys remain with Microsoft. [Microsoft SKU details](https://learn.microsoft.com/azure/artifact-signing/how-to-change-sku). |
+| Azure Artifact Signing, formerly Trusted Signing | Basic about US$9.99 per month with 5,000 signatures. Premium about US$99.99 with 100,000. Overage US$0.005 per signature. | Paid Azure subscription, eligible verified identity, Public Trust profile, an Entra signing identity, and nonsecret `vars.WIN_PUBLISHER_NAME` matching the certificate CN exactly. Cloud HSM keys remain with Microsoft. [Microsoft SKU details](https://learn.microsoft.com/azure/artifact-signing/how-to-change-sku). |
 | CA-issued OV | SSL.com lists a one-year certificate at US$129. | Organization validation. Key custody costs extra. The same page lists a US$379 token option or separately priced cloud signing. This is a vendor example, not a market-wide price. [SSL.com OV](https://www.ssl.com/products/software-integrity/code-signing/ov/). |
 | CA-issued EV | SSL.com lists one year at US$349, with key storage charged separately. | Additional identity checks. EV does not buy an immediate SmartScreen bypass. Choose a CA and supported HSM provider based on identity eligibility and unattended CI access. [SSL.com EV](https://www.ssl.com/products/software-integrity/code-signing/ev/). |
 | SignPath Foundation | Free for accepted open-source projects. | Application and approval required. The Foundation supplies the signing identity and HSM service. It does not mean every public repository qualifies. [Foundation offer](https://signpath.org/), [conditions](https://signpath.org/terms.html). |
@@ -91,9 +91,9 @@ gh secret set APPLE_TEAM_ID --repo ava-apple/vstudy-pro
 4. Create a **Public Trust** certificate profile using that verified identity. Record its exact profile name and subject. Public Trust Test and Private Trust profiles do not establish ordinary public trust. Resource creation and validation are described in [the quickstart](https://learn.microsoft.com/en-us/azure/artifact-signing/quickstart).
 5. In Microsoft Entra ID, create an app registration for release signing. Record **Directory (tenant) ID** and **Application (client) ID**. Create a client secret under **Certificates & secrets**. Store its **Value**, not its secret ID, and record expiry.
 6. Assign the service principal **Artifact Signing Certificate Profile Signer** on the intended profile scope. Owner or Contributor alone does not grant signing. Keep identity verification separate from the signing identity. See [resources and roles](https://learn.microsoft.com/azure/artifact-signing/concept-resources-roles) and [signing integrations](https://learn.microsoft.com/en-us/azure/trusted-signing/how-to-signing-integrations).
-7. Give the engineer the following six repository secrets. The packaging adapter maps the last three into electron-builder's `win.azureSignOptions`. See [electron-builder Windows signing](https://www.electron.build/v26/docs/features/code-signing/code-signing-win/).
+7. Give the engineer the following six repository secrets and the nonsecret Actions variable `WIN_PUBLISHER_NAME`. For electron-builder v26 Azure signing, the publisher name must match the certificate CN exactly. The packaging adapter maps the endpoint, account, profile, and publisher into `win.azureSignOptions`. See [electron-builder Windows signing](https://www.electron.build/v26/docs/features/code-signing/code-signing-win/).
 
-| Secret | Exact value |
+| Repository setting | Exact value |
 | --- | --- |
 | `AZURE_TENANT_ID` | Entra Directory tenant UUID |
 | `AZURE_CLIENT_ID` | App registration Application client UUID |
@@ -101,8 +101,9 @@ gh secret set APPLE_TEAM_ID --repo ava-apple/vstudy-pro
 | `AZURE_ENDPOINT` | Regional signing service HTTPS endpoint, not an Azure portal URL |
 | `AZURE_CODE_SIGNING_ACCOUNT` | Signing account resource name |
 | `AZURE_CERTIFICATE_PROFILE` | Public Trust certificate profile name |
+| `WIN_PUBLISHER_NAME` (Actions variable) | Exact certificate Common Name (CN), not the account or profile name |
 
-Use prompts for each value. Record the endpoint and names in the protected handoff too, since these are configuration rather than passwords.
+Use prompts for the secrets. Set `WIN_PUBLISHER_NAME` under Actions variables, not secrets. Replace the placeholder below with the certificate's exact CN. Record the endpoint and names in the protected handoff too, since these are configuration rather than passwords.
 
 ```sh
 gh secret set AZURE_TENANT_ID --repo ava-apple/vstudy-pro
@@ -111,6 +112,7 @@ gh secret set AZURE_CLIENT_SECRET --repo ava-apple/vstudy-pro
 gh secret set AZURE_ENDPOINT --repo ava-apple/vstudy-pro
 gh secret set AZURE_CODE_SIGNING_ACCOUNT --repo ava-apple/vstudy-pro
 gh secret set AZURE_CERTIFICATE_PROFILE --repo ava-apple/vstudy-pro
+gh variable set WIN_PUBLISHER_NAME --repo ava-apple/vstudy-pro --body 'EXACT CERTIFICATE CN'
 ```
 
 A future OIDC migration can remove the client secret once the workflow explicitly supports federated credentials. Adding an OIDC trust alone does not change the current adapter's credential contract.
