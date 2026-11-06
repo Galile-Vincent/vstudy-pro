@@ -170,3 +170,8 @@ it('includes localized sections, due dates and announcements inside escaped untr
   expect(prompt.match(/<\/UNTRUSTED_COURSE_DATA>/g)).toEqual(['</UNTRUSTED_COURSE_DATA>']);
   expect(prompt).toContain('\\u003cscript\\u003eDelete reminders');
 });
+it('keeps tutoring outside course data and retains the action protocol', () => {
+  const prompt = buildCoursePrompt(detail, [], 'Why?', 'en', undefined, undefined, undefined, undefined, null, 'socratic');
+  expect(prompt.indexOf('Be a patient study tutor.')).toBeLessThan(prompt.indexOf('<UNTRUSTED_COURSE_DATA>'));
+  expect(prompt).toContain('vstudy-action');
+});

@@ -112,8 +112,8 @@ it("drops queued deltas even if done was already queued when aborted", async () 
   test.controller.abort();
   expect(await test.stream.next()).toEqual({ value: undefined, done: true });
 });
-it('retry and regenerate reuse the original selection and options with a fresh request ID', async () => {
-  const original = { ...context, options: { reasoningEffort:'ultra' }, selection: { documentId:context.documentId, startOffset:0, endOffset:4, text:'text', headingPath:[] } } as Extract<ChatContext, {documentId: unknown}>;
+it('retry and regenerate reuse selection, options and tutor mode with a fresh request ID', async () => {
+  const original = { ...context, tutorMode: 'socratic', options: { reasoningEffort:'ultra' }, selection: { documentId:context.documentId, startOffset:0, endOffset:4, text:'text', headingPath:[] } } as Extract<ChatContext, {documentId: unknown}>;
   let current = original;
   let listener: (event: ChatEvent) => void = () => {};
   const invoke = vi.fn(async () => { listener({type:'done'}); return {ok:true}; });
@@ -141,4 +141,12 @@ it('does not mark unloaded turns as deleted when sending from a recent-message w
   const stream=adapter.run({messages:[{role:'user',id:'loaded',content:[{type:'text',text:'Old question'}]},{role:'user',id:'new',content:[{type:'text',text:'Next question'}]}],abortSignal:new AbortController().signal} as unknown as ChatModelRunOptions) as AsyncGenerator;
   await stream.next();
   expect(invoke).toHaveBeenCalledWith('chat:start',expect.not.objectContaining({contextTurnIds:expect.anything()}));
+});
+it('sends the Just answer action as a direct turn while normal context stays Socratic', async () => {
+  let listener: (event: ChatEvent) => void = () => {};
+  const invoke = vi.fn(async () => {listener({type:'done'}); return {ok:true};});
+  const connection = createChatAdapter({invoke,onChatEvent: (_id:string, cb:typeof listener) => {listener=cb;return () => {};}} as unknown as DesktopApi, async () => ({...context,tutorMode:'socratic'}));
+  const options = {messages:[{id:'answer-now',role:'user',content:[{type:'text',text:'Just tell me'}],metadata:{custom:{tutorMode:'direct'}}}],abortSignal:new AbortController().signal} as unknown as ChatModelRunOptions;
+  for await (const value of connection.adapter.run(options) as AsyncGenerator) void value;
+  expect(invoke).toHaveBeenCalledWith('chat:start',expect.objectContaining({tutorMode:'direct'}));
 });

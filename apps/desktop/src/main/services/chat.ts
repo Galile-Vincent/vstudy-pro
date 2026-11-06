@@ -31,6 +31,7 @@ import { chatEnvelopeSchema, chatEventChannel } from "../../shared/ipc";
 import type { Store } from "../db";
 import type { ProviderRegistry } from "../providers";
 import { ProviderError } from "../providers/api";
+import { planTutorTurn, tutorReplyMetadata, tutorInstruction } from "../prompt/tutor-mode";
 import { buildPrompt } from "../prompt";
 import { citationCatalog, citedReferences } from "../prompt/citations";
 import { presentationSchema } from "../../shared/presentation";
@@ -43,6 +44,7 @@ export interface ChatOwner {
   removeListener(event: "destroyed", listener: () => void): unknown;
 }
 interface ActiveRequest {
+  tutorPlan: ReturnType<typeof planTutorTurn>;
   owner: ChatOwner;
   userMessageId: string;
   assistantMessageId: string;
@@ -150,10 +152,17 @@ export class ChatService {
     const adapter = this.providers.get(request.providerId);
     const messages = this.store.messages.list(request.conversationId);
     const { regenerating, userMessageId, assistantMessageId, superseded, history } = chatTurnContext(messages, request);
+    if (regenerating) {
+      const saved = messages.find(m => m.id === userMessageId)?.parts[0]?.tutorMode;
+      request = { ...request, tutorMode: saved ?? 'direct' };
+    }
+    const planned = planTutorTurn({history, userMessage: request.userMessage, mode: request.tutorMode ?? 'direct', replyLanguage: this.store.settings.get().replyLanguage});
+    const savedDecision = regenerating ? messages.find(m => m.id === userMessageId)?.parts[0]?.tutorDecision : undefined;
+    const tutorPlan = savedDecision && planned.reason !== 'requested' ? {...savedDecision, instruction: request.tutorMode === 'socratic' ? tutorInstruction(savedDecision, this.store.settings.get().replyLanguage, request.userMessage) : ''} : planned;
     this.store.db.exec("SAVEPOINT accept_chat");
     try {
       if (!regenerating) {
-        this.persist(request, "user", request.userMessage, "complete", undefined, userMessageId);
+        this.persist(request, "user", request.userMessage, "complete", undefined, userMessageId, undefined, {tutorDecision: tutorReplyMetadata(tutorPlan, '')});
         this.store.messages.supersede(superseded, userMessageId);
       }
       if (request.scope !== "course" && request.scope !== "general") new ActivityService(this.store).record("chat", request.documentId, 0, request.requestId);
@@ -164,6 +173,7 @@ export class ChatService {
     }
     const entry: ActiveRequest = {
       owner,
+      tutorPlan,
       ...(regenerating ? {supersedeOnSave: superseded} : {}),
       restoreOnFailure: !regenerating && superseded.length > 0,
       userMessageId,
@@ -209,7 +219,7 @@ export class ChatService {
     usage?: Usage,
     id: string = randomUUID(),
     error?: string,
-    extras: { proposals?: MoodleAgentAction[]; reasoning?: string; citations?: DocumentCitation[]; toolCalls?: ToolCall[] } = {},
+    extras: { tutorDecision?: import("../../shared/domain").TutorDecision; proposals?: MoodleAgentAction[]; reasoning?: string; citations?: DocumentCitation[]; toolCalls?: ToolCall[] } = {},
   ) {
     const previous = this.store.messages.list(request.conversationId).at(-1);
     const createdAt = new Date(
@@ -220,7 +230,7 @@ export class ChatService {
         id,
         conversationId: request.conversationId,
         role,
-        parts: [{ type: "text", text, status, ...extras, modelId: request.modelId, options: request.options, turnId: request.turnId, ...(error ? { error } : {}), ...(usage ? { usage } : {}), ...(role === "user" && request.scope !== "course" && request.scope !== "general" && request.selection ? { selection: request.selection } : {}) }],
+        parts: [{ type: "text", text, status, tutorMode: request.tutorMode ?? "direct", ...extras, modelId: request.modelId, options: request.options, turnId: request.turnId, ...(error ? { error } : {}), ...(usage ? { usage } : {}), ...(role === "user" && request.scope !== "course" && request.scope !== "general" && request.selection ? { selection: request.selection } : {}) }],
         createdAt,
       }),
     );
@@ -275,7 +285,7 @@ export class ChatService {
         for (const model of reported && entry.usageModels?.length ? entry.usageModels : [{ modelId, usage: entry.usage }]) this.store.usage.record({ ...priceUsage(model.modelId, model.usage, this.store.settings.get().priceOverrides), aborted: entry.controller.signal.aborted, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: canonicalModelId(model.modelId), kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.scope === "course" || entry.request.scope === "general" ? undefined : entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
-      if (!restoreBranch && (entry.text || entry.proposals?.length || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error")) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? 'VSTUDY_STATUS:' + JSON.stringify({code:event.code,params:event.params ?? {}}) : undefined, { ...(entry.proposals?.length ? {proposals: entry.proposals} : {}), ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
+      if (!restoreBranch && (entry.text || entry.proposals?.length || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error")) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? 'VSTUDY_STATUS:' + JSON.stringify({code:event.code,params:event.params ?? {}}) : undefined, { tutorDecision: tutorReplyMetadata(entry.tutorPlan, entry.text), ...(entry.proposals?.length ? {proposals: entry.proposals} : {}), ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
       this.store.messages.link(messageId, entry.userMessageId);
       if (entry.supersedeOnSave && entry.text) this.store.messages.supersede(entry.supersedeOnSave, messageId);
       this.store.db.exec("RELEASE finish_chat");
@@ -302,11 +312,11 @@ export class ChatService {
         const { detail, planner, syncedAt } = this.courseContext.get(entry.request.courseId);
         prompt = buildCoursePrompt(detail, history, entry.request.userMessage, this.store.settings.get().replyLanguage,
           id => this.store.documents.get(id as import("../../shared/domain").Document["id"])?.status ?? "not-opened",
-          new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone, planner, syncedAt);
+          new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone, planner, syncedAt, entry.request.tutorMode, tutorReplyMetadata(entry.tutorPlan, ''));
         if (entry.request.materials) prompt += "\n\n" + await buildMaterialContext(this.store, entry.request.courseId, entry.request.materials, this.libraryRoot);
         entry.rawCourseText = "";
       } else if (entry.request.scope === 'general') {
-        prompt = buildPrompt({document:{title:'General conversation',markdown:''},history,userMessage:entry.request.userMessage,replyLanguage:this.store.settings.get().replyLanguage});
+        prompt = buildPrompt({tutorDecision: tutorReplyMetadata(entry.tutorPlan, ''),tutorMode: entry.request.tutorMode ?? 'direct',document:{title:'General conversation',markdown:''},history,userMessage:entry.request.userMessage,replyLanguage:this.store.settings.get().replyLanguage});
       } else {
         if (!document) throw new Error("Document unavailable");
         const file = await open(containedPath(this.libraryRoot, document.activeVersion==='ai' ? join(dirname(document.markdownPath),'content.ai.md') : document.markdownPath), "r");
@@ -322,6 +332,8 @@ export class ChatService {
         entry.citationCatalog = citationCatalog(entry.request.documentId, markdown).map(c=>({...c,version:document.activeVersion}));
         allowPresentation = this.store.settings.get().enableGenerativeUI && ['anthropic-api','openai-api'].includes(entry.request.providerId);
         prompt = buildPrompt({
+          tutorDecision: tutorReplyMetadata(entry.tutorPlan, ""),
+          tutorMode: entry.request.tutorMode ?? "direct",
           replyLanguage: this.store.settings.get().replyLanguage,
           citations: entry.citationCatalog,
           document: { title: document.title, markdown },

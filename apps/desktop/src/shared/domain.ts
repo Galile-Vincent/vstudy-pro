@@ -171,8 +171,21 @@ export const toolCallSchema = z.object({
 }).strict();
 export type ToolCall = z.infer<typeof toolCallSchema>;
 /** Persisted content and turn metadata, including abort state and context exclusion. */
+export const tutorModeSchema = z.enum(["direct", "socratic"]);
+export type TutorMode = z.infer<typeof tutorModeSchema>;
+// Legacy parts may omit the decision; partial stored decisions receive safe defaults.
+export const tutorDecisionSchema = z.object({
+  level: z.enum(['guide', 'hint', 'direct']).default('direct'),
+  reason: z.enum(['legacy', 'disabled', 'requested', 'stuck', 'repeated', 'question-budget', 'multi-question', 'give-first', 'fatigue', 'exit-offer', 'attempt', 'guide']).default('legacy'),
+  move: z.enum(['probe', 'scaffold', 'worked-step', 'answer']).default('answer'),
+  threadId: z.string().min(1).max(200).default('legacy'),
+  step: z.number().int().min(0).max(100000).default(0),
+  questionCount: z.number().int().min(0).max(MAX_MESSAGE_TEXT_LENGTH).default(0),
+  questionOnly: z.boolean().default(false),
+}).strict();
+export type TutorDecision = z.infer<typeof tutorDecisionSchema>;
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string().max(MAX_MESSAGE_TEXT_LENGTH), proposals: z.array(moodleAgentActionSchema).max(5).optional(), reasoning: z.string().max(MAX_MESSAGE_TEXT_LENGTH).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .object({ type: z.literal("text"), text: z.string().max(MAX_MESSAGE_TEXT_LENGTH), tutorMode: tutorModeSchema.optional(), tutorDecision: tutorDecisionSchema.optional(), proposals: z.array(moodleAgentActionSchema).max(5).optional(), reasoning: z.string().max(MAX_MESSAGE_TEXT_LENGTH).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .extend({ contextExcluded: z.boolean().optional() })
   .strict();
 /** Validated stored message parts; model and selection metadata stay associated with their original turn. */
@@ -217,6 +230,7 @@ export const providerConfigSchema = z.discriminatedUnion("kind", [
 ]);
 export type ProviderConfig = z.infer<typeof providerConfigSchema>;
 const chatFields = {
+    tutorMode: tutorModeSchema.default("direct"),
     requestId: requestIdSchema,
     conversationId: conversationIdSchema,
     providerId: providerIdSchema,
@@ -232,7 +246,9 @@ export const chatRequestSchema = z.discriminatedUnion("scope", [
  conversationScopeSchema.options[1].extend({...chatFields, materials: materialRequestSchema.optional()}),
  conversationScopeSchema.options[2].extend(chatFields),
 ]).refine(r => r.scope === "course" || r.scope === "general" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
-export type ChatRequest = z.infer<typeof chatRequestSchema>;
+// Callers may omit the mode; the validated IPC boundary supplies the default.
+type LegacyChatInput<T> = T extends unknown ? Omit<T, "tutorMode"> & { tutorMode?: TutorMode } : never;
+export type ChatRequest = LegacyChatInput<z.infer<typeof chatRequestSchema>>;
 /** Validated stream events; terminal state and request ownership are enforced by the chat service. */
 export const chatEventSchema = z.discriminatedUnion("type", [
  z.object({type: z.literal("proposals"), actions: z.array(moodleAgentActionSchema).max(5)}).strict(),

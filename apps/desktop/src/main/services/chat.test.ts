@@ -532,7 +532,7 @@ it('restores the old active branch when an accepted edit fails before output',as
  store.messages.insert({id:randomUUID() as never,conversationId:request.conversationId,role:'assistant',parts:[{type:'text',text:'valuable answer'}],createdAt:new Date(Date.now()+1).toISOString()});
  const before=store.messages.list(request.conversationId);chat.start({...request,userMessage:'edited',turnId:user.id},owner);await chat.waitForIdle();expect(store.messages.list(request.conversationId)).toEqual(before);
 });
-it('persists action-only course replies and never executes a proposal', async () => {
+it.each(['direct','socratic'] as const)('persists action-only course replies in %s mode and never executes a proposal', async tutorMode => {
   const fixture = await setup({...available, async *stream(req) {
     expect(req.allowPresentation).toBe(false);
     expect(req.prompt).toContain('<UNTRUSTED_COURSE_DATA>');
@@ -547,7 +547,7 @@ it('persists action-only course replies and never executes a proposal', async ()
   fixture.store.db.prepare('INSERT INTO moodle_courses VALUES (?,?,?)').run(courseId,accountId,JSON.stringify(course));
   fixture.store.db.prepare('INSERT INTO moodle_deadlines VALUES (?,?,?)').run(deadlineId,courseId,JSON.stringify({id:deadlineId,courseId,title:'Lab report',kind:'assignment',dueAt:'2099-01-01T00:00:00Z',url:null,submitted:false}));
   const conversation = fixture.chat.createConversation({scope:'course',courseId,providerId:'anthropic-api',modelId:'fake'});
-  const request = chatRequestSchema.parse({scope:'course',courseId,conversationId:conversation.id,requestId:randomUUID(),providerId:'anthropic-api',modelId:'fake',userMessage:'Plan'});
+  const request = chatRequestSchema.parse({scope:'course',courseId,conversationId:conversation.id,requestId:randomUUID(),providerId:'anthropic-api',modelId:'fake',userMessage:'Plan',tutorMode});
   if (request.scope !== 'course') throw new Error('Expected course fixture');
   expect(() => fixture.chat.start({...request,courseId:'00000000-0000-4000-8000-000000000099'},fixture.owner)).toThrow('Chat context mismatch');
   fixture.chat.start(request,fixture.owner);
@@ -638,4 +638,40 @@ it('rejects oversized user text before service persistence or provider work',asy
   const owner=new Owner();
   expect(()=>chat.start({...request,userMessage:'x'.repeat(2_000_001)},owner)).toThrow(expect.objectContaining({name:'MessageTextLimitError',code:'errors.message_too_large'}));
   expect(store.messages.list(request.conversationId)).toEqual([]);expect(calls).toBe(0);
+});
+it('streams Socratic output unchanged and replays the persisted decision', async () => {
+  const prompts: string[] = [];
+  const adapter: ProviderAdapter = {...available, async *stream(req) {
+    prompts.push(req.prompt);
+    yield {type:'text-delta',text:'Useful fact. First'};
+    yield {type:'text-delta',text:'? Second？'};
+    yield {type:'done'};
+  }};
+  const { chat, store, request, owner, cwd } = await setup(adapter);
+  const turnId = randomUUID();
+  chat.start({...request, turnId, tutorMode:'socratic'}, owner);
+  await until(() => owner.events.some(e => e.type === 'done'));
+  expect(prompts[0]).toContain('Be a patient study tutor.');
+  expect(owner.events.filter(e => e.type === 'text-delta')).toEqual([{type:'text-delta',text:'Useful fact. First'}, {type:'text-delta',text:'? Second？'}]);
+  const decision = store.messages.list(request.conversationId)[0]?.parts[0]?.tutorDecision;
+  expect(store.messages.list(request.conversationId).at(-1)?.parts[0]?.tutorDecision?.questionCount).toBe(2);
+  expect(store.messages.list(request.conversationId).map(m => m.parts[0]?.tutorMode)).toEqual(['socratic','socratic']);
+  await chat.dispose();
+  const registry = new ProviderRegistry();
+  registry.register('anthropic-api', adapter);
+  const replayChat = new ChatService(store, registry, cwd);
+  cleanups.unshift(() => replayChat.dispose());
+  const replayOwner = new Owner();
+  replayChat.start({...request, requestId: randomUUID() as typeof request.requestId, turnId, tutorMode:'direct'}, replayOwner);
+  await until(() => replayOwner.events.some(e => e.type === 'done'));
+  expect(prompts[1]).toContain('Be a patient study tutor.');
+  expect(store.messages.list(request.conversationId).at(-1)?.parts[0]?.tutorDecision).toMatchObject({...decision,questionCount:2});
+  const nextOwner = new Owner();
+  replayChat.start({...request,requestId:randomUUID() as typeof request.requestId,turnId:randomUUID(),userMessage:'Please continue',tutorMode:'socratic'},nextOwner);
+  await until(() => nextOwner.events.some(e => e.type === 'done'));
+  expect(store.messages.list(request.conversationId).at(-1)?.parts[0]?.tutorDecision).toMatchObject({level:'direct',reason:'multi-question'});
+  const branchOwner = new Owner();
+  replayChat.start({...request,requestId:randomUUID() as typeof request.requestId,turnId,userMessage:'Just tell me',tutorMode:'socratic'},branchOwner);
+  await until(() => branchOwner.events.some(e => e.type === 'done'));
+  expect(store.messages.list(request.conversationId).at(-1)?.parts[0]?.tutorDecision).toMatchObject({level:'direct',reason:'requested',step:1});
 });
