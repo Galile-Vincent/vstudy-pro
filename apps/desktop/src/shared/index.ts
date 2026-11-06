@@ -6,3 +6,4 @@
  */
 export * from "./domain";
 export * from "./ipc";
+export type { AnalyticsState, AcquisitionSource, Onboarding } from "./analytics";

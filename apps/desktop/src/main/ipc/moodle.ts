@@ -1,3 +1,4 @@
+import { analytics } from '../analytics/service';
 /**
  * Register validated moodle IPC operations and delegate privileged work to main services.
  * Owned by main/ipc.
@@ -62,7 +63,11 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     catch { return {ready:false}; }
   });
   registrar.handle(moodleChannels.retrySave,async ({accountId}) => { await service.retrySave(accountId); return {ok:true}; });
-  registrar.handle(moodleChannels.connect,input => service.connect(input));
+  registrar.handle(moodleChannels.connect,async input => {
+    analytics()?.track('moodle_connection_started',{connection_method:input.username ? 'password' : 'browser'});
+    try {return await service.connect(input);}
+    catch (error) {analytics()?.track('moodle_connection_failed',{error_category:'other'});throw error;}
+  });
   registrar.handle(moodleChannels.ssoState,({siteUrl}) => sso.state(siteUrl));
   registrar.handle(moodleChannels.ssoCancel,({siteUrl}) => {sso.cancel(siteUrl);return {ok:true};});
   registrar.handle(moodleChannels.disconnect,async ({accountId}) => { await webviews.disconnect(accountId); await service.disconnect(accountId); return {ok:true}; });

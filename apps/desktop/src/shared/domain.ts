@@ -129,6 +129,7 @@ export const rateLimitSchema = z.object({
 }).strict();
 /** Normalized tokens and USD cost with an explicit reported, estimated, or unknown provenance. */
 export const usageSchema = z.object({
+  reportedTokens:z.object({input:z.number().int().nonnegative().nullable(),output:z.number().int().nonnegative().nullable()}).optional(),
   inputTokens: z.number().int().nonnegative(), outputTokens: z.number().int().nonnegative(),
   cacheReadTokens: z.number().int().nonnegative().optional(), cacheWriteTokens: z.number().int().nonnegative().optional(),
   reasoningTokens: z.number().int().nonnegative().optional(), costUsd: z.number().finite().nonnegative().optional(),

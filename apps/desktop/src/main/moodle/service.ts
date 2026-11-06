@@ -1,3 +1,5 @@
+import { analytics } from '../analytics/service';
+import { resolveSchool } from '../analytics/school';
 /**
  * Coordinate account verification, synchronization, file imports, and Moodle repository reads.
  * Owned by main/moodle.
@@ -103,6 +105,9 @@ export class MoodleService {
       throw new MoodleAuthError('cancelled');
     }
     this.repository.saveAccount(account);
+    const school=resolveSchool(site.siteUrl);
+    analytics()?.school(school ?? null);
+    analytics()?.track('moodle_connection_succeeded',{school_id:school?.id ?? null});
     this.failures.delete(account.id);
     await this.saveCapabilities(account,info);
     if (storage === 'secure') {
@@ -144,6 +149,7 @@ export class MoodleService {
       const token = await this.token(id).catch(() => undefined);
       clearMoodleImages(account.siteUrl,token);
       this.repository.disconnect(id);
+      analytics()?.disconnected(this.repository.accounts().some(account=>account.status === 'connected'));
       this.failures.delete(id);
       this.signInStorage.delete(id);
       this.secrets.delete(moodleSecretId(id));
@@ -158,6 +164,8 @@ export class MoodleService {
   }
   overview(accountId?: string) {
     const snapshot = this.repository.overview(accountId);
+    const active=accountId ? snapshot.accounts.find(account=>account.id === accountId && account.status === 'connected') : undefined;
+    if (active) analytics()?.school(resolveSchool(active.siteUrl));
     for (const account of snapshot.accounts) if (account.status === 'connected' && Date.now() - (this.lastAttempt.get(account.id) ?? 0) >= 60_000 && (!account.syncedAt || Date.now() - Date.parse(account.syncedAt) > 5 * 60_000)) void this.sync(account.id);
     snapshot.accounts = snapshot.accounts.map(account => ({...account,...(this.signInStorage.has(account.id) ? {signInStorage:this.signInStorage.get(account.id)!} : {})}));
     return snapshot;
