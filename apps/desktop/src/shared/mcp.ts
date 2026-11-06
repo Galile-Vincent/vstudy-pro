@@ -101,11 +101,12 @@ export type BridgeResponse = z.infer<typeof bridgeResponseSchema>;
 export const pairBeginResultSchema = z.object({pairingId:id,code:z.string(),expiresAt:instant}).strict();
 export const pairFinishResultSchema = z.object({grant:z.string().min(32).max(256),grantInfo:grantSchema}).strict();
 /** Main-only call preparation. The security engine approves before invoking execute exactly once. */
+export type McpAuthorization = () => McpErrorCode | null;
 export interface PreparedMcpCall {
   accountId:string|null;
   target:string;
   provenance:Provenance;
-  execute:(signal?:AbortSignal)=>Promise<{content:unknown;nextCursor?:string|null}>;
+  execute:(signal?:AbortSignal,authorize?:McpAuthorization)=>Promise<{content:unknown;nextCursor?:string|null}>;
 }
 export interface McpBackend {
   accounts:()=>z.infer<typeof agentAccountSchema>[];

@@ -38,7 +38,7 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
     accounts:options.backend.accounts,
     prepare:async (...args) => {
       const prepared = await withStorage(() => options.backend.prepare(...args));
-      const call:PreparedMcpCall = {...prepared,execute:signal => withStorage(() => prepared.execute(signal))};
+      const call:PreparedMcpCall = {...prepared,execute:(signal,authorize) => withStorage(() => prepared.execute(signal,authorize))};
       return call;
     },
   };

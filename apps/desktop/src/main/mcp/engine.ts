@@ -56,6 +56,11 @@ export class McpEngine {
 
   private changed(): void { this.options.onChange?.(); }
   private redactor(localSecrets: readonly string[] = []): McpRedactor { return new McpRedactor([...(this.options.secretValues?.() ?? []), ...localSecrets]); }
+  private exactPayload(args:ToolArguments, token:string):Record<string,unknown> {
+    const payload = this.redactor([token]).record(args, 64_000, 20_000, 100);
+    if (JSON.stringify(payload) !== JSON.stringify(args)) throw new McpFailure('INVALID_ARGUMENT');
+    return payload;
+  }
   private requireEnabled(): void {
     if (this.disposed) throw new McpFailure('DISCONNECTED');
     if (!this.store.enabled) throw new McpFailure('DISABLED');
@@ -180,7 +185,7 @@ export class McpEngine {
         if (available.length !== 1) throw new McpFailure('ACCOUNT_REQUIRED');
         args = {...args, account: available[0]!.id};
       }
-      if (mcpTools[params.name].risk !== 'read' && JSON.stringify(this.redactor([params.grant]).record(args, 64_000, 20_000, 100)) !== JSON.stringify(args)) throw new McpFailure('INVALID_ARGUMENT');
+      if (mcpTools[params.name].risk !== 'read') this.exactPayload(args, params.grant);
       const max = this.options.limits?.maxActive ?? 16;
       if (this.operations.size >= max || [...this.operations].filter(item => item.grantId === grant!.id).length >= (this.options.limits?.maxPerGrant ?? 4)) throw new McpFailure('RATE_LIMITED');
       const delay = this.limiter.admit(grant.id);
@@ -225,13 +230,16 @@ export class McpEngine {
       const risk = mcpTools[name].risk;
       if (risk !== 'read') {
         const redactor = this.redactor([token]);
-        const code = await this.approvals.request(operation.connectionId, operation.id, {grantId: grant.id, clientName: redactor.text(grant.clientName, 100), tool: name, risk, accountId: call.accountId, target: redactor.text(call.target, 1000), payload: redactor.record(args, 64_000, 20_000, 100)});
+        const code = await this.approvals.request(operation.connectionId, operation.id, {grantId: grant.id, clientName: redactor.text(grant.clientName, 100), tool: name, risk, accountId: call.accountId, target: redactor.text(call.target, 1000), payload: this.exactPayload(args, token)});
         if (code) throw new McpFailure(code);
         await waitForStart(this.limiter.startDelay(), signal);
       }
       signal.throwIfAborted();
       this.authorize(token, name, args, call);
-      const output = await call.execute(signal);
+      const output = await call.execute(signal, () => {
+        try { signal.throwIfAborted(); this.authorize(token, name, args, call); if (risk !== 'read') this.exactPayload(args, token); return null; }
+        catch (error) { return failureCode(error); }
+      });
       signal.throwIfAborted();
       this.authorize(token, name, args, call);
       let cursor: string | null = null;

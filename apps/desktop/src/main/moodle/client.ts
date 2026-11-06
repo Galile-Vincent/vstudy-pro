@@ -90,7 +90,7 @@ export class MoodleClient {
   setLanguage(language: string) { this.language = language.replace(/_/g,'-').toLowerCase(); }
   setFunctions(functions: string[] | undefined) { this.functions = functions ? new Set(functions) : undefined; }
   wsAvailable(name: string) { return !this.functions || this.functions.has(name); }
-  constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = moodleFetch, private readonly scheduling?: {queue:MoodleScheduler;priority:number;timing?:(call:MoodleCallTiming)=>void}, private readonly negative = new Map<string,MoodleError>()) {}
+  constructor(readonly host: string, private readonly token: string, private readonly request: Fetch = moodleFetch, private readonly scheduling?: {queue:MoodleScheduler;priority:number;timing?:(call:MoodleCallTiming)=>void;beforeDispatch?:()=>void}, private readonly negative = new Map<string,MoodleError>()) {}
   private async uncachedCall<S extends z.ZodTypeAny>(name: string, params: Record<string,string>, schema: S, retryLanguage = true, signal?: AbortSignal): Promise<z.output<S>> {
     if (name !== 'core_webservice_get_site_info' && !this.wsAvailable(name)) throw new MoodleError('unsupported');
     const run = async (queueMs:number) => {
@@ -109,6 +109,8 @@ export class MoodleClient {
     return this.scheduling ? this.scheduling.queue.run(this.scheduling.priority,run) : run(0);
   }
   private async performCall<S extends z.ZodTypeAny>(name:string, params:Record<string,string>, schema:S, retryLanguage:boolean, signal:AbortSignal | undefined, timing:MoodleCallTiming):Promise<z.output<S>> {
+    this.scheduling?.beforeDispatch?.();
+    if (signal?.aborted) throw new MoodleError('auth');
     let response: Response;
     timing.requests++;
     try { response = await siteFetch(this.host,this.request)(`${this.host}/webservice/rest/server.php?moodlewsrestformat=json`, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({...params,moodlewssettingfilter:'1',...(this.langSupported ? {moodlewssettinglang:this.language} : {}),wstoken:this.token,wsfunction:name}), redirect:'error', signal:signal ? AbortSignal.any([signal,AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000)}); }

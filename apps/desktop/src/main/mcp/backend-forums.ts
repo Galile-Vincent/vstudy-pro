@@ -2,7 +2,6 @@
 import type { BackendContext } from './backend-context';
 import type { BackendServices, BackendHandlers } from './backend-types';
 import { discussionsWire, forumsWire, postsWire, timestamp, noWarnings } from './backend-wire';
-import { contentText } from './backend-page';
 import { fail } from './backend-errors';
 
 export async function courseForums(context:BackendContext, services:BackendServices, courseId:string) {
@@ -53,15 +52,15 @@ export function forumHandlers(services:BackendServices): Pick<BackendHandlers, '
       const items:{kind:string; id:number; forumId?:number; name:string; author?:string; createdAt?:string | null}[] = [];
       if (forums.length > 100) fail('UNSUPPORTED');
       for (const forum of forums) {
-        items.push({kind:'forum', id:forum.id, name:contentText(forum.name, 300)});
-        for (const [id, row] of await forumDiscussions(context, services, forum.id)) items.push({kind:'discussion', id, forumId:forum.id, name:contentText(row.name ?? row.subject ?? '', 300), author:contentText(row.userfullname ?? '', 200), createdAt:timestamp(row.created ?? row.timecreated ?? row.timemodified)});
+        items.push({kind:'forum', id:forum.id, name:context.text(forum.name, 300)});
+        for (const [id, row] of await forumDiscussions(context, services, forum.id)) items.push({kind:'discussion', id, forumId:forum.id, name:context.text(row.name ?? row.subject ?? '', 300), author:context.text(row.userfullname ?? '', 200), createdAt:timestamp(row.created ?? row.timecreated ?? row.timemodified)});
         if (items.length > 10_000) fail('UNSUPPORTED');
       }
       return services.pages.page(items, services.pages.binding('list_forums', context.accountId, args), args);
     },
     get_discussion:async (context, args) => {
       const posts = await discussionPosts(context, services, args.courseId, args.discussionId);
-      return services.pages.page(posts.map(row => ({id:row.id, discussionId:args.discussionId, parentId:row.parentid ?? row.parent ?? null, subject:contentText(row.subject ?? '', 300), author:contentText(row.author?.fullname ?? row.userfullname ?? '', 200), createdAt:timestamp(row.timecreated ?? row.created), text:contentText(row.message, 6000)})), services.pages.binding('get_discussion', context.accountId, args), args);
+      return services.pages.page(posts.map(row => ({id:row.id, discussionId:args.discussionId, parentId:row.parentid ?? row.parent ?? null, subject:context.text(row.subject ?? '', 300), author:context.text(row.author?.fullname ?? row.userfullname ?? '', 200), createdAt:timestamp(row.timecreated ?? row.created), text:context.text(row.message, 6000)})), services.pages.binding('get_discussion', context.accountId, args), args);
     },
   };
 }

@@ -1,7 +1,6 @@
 /** Build a transient FTS index only from selected-account course content and ready course-linked documents. @packageDocumentation */
 import { DatabaseSync } from 'node:sqlite';
 import type { BackendHandlers, BackendServices } from './backend-types';
-import { contentText } from './backend-page';
 import { fail } from './backend-errors';
 
 export function searchHandler(services:BackendServices): BackendHandlers['search_content'] {
@@ -17,7 +16,7 @@ export function searchHandler(services:BackendServices): BackendHandlers['search
       const add = (kind:string, id:string, courseId:string, moduleId:string | null, title:string, content:string) => {
         bytes += Buffer.byteLength(content);
         if (bytes > 64 * 1024 * 1024) fail('UNSUPPORTED');
-        insert.run(kind, id, courseId, moduleId, contentText(title, 300), contentText(content, 1_000_000));
+        insert.run(kind, id, courseId, moduleId, context.text(title, 300), context.text(content, 1_000_000));
       };
       for (const course of courses) {
         const detail = context.course(course.id);
@@ -42,7 +41,7 @@ export function searchHandler(services:BackendServices): BackendHandlers['search
         : "SELECT kind,id,courseId,moduleId,title,snippet(search,5,'','',' ',48) excerpt FROM search WHERE search MATCH ? ORDER BY bm25(search,0,0,0,0,8,1),kind,id LIMIT 10001")
         .all(...(short ? [query, literal, literal] : [match]));
       if (rows.length > 10_000) fail('UNSUPPORTED');
-      return services.pages.page(rows.map(row => ({kind:String(row.kind), id:String(row.id), courseId:String(row.courseId), moduleId:row.moduleId ? String(row.moduleId) : null, title:String(row.title), excerpt:contentText(String(row.excerpt), 600)})), services.pages.binding('search_content', context.accountId, args), args);
+      return services.pages.page(rows.map(row => ({kind:String(row.kind), id:String(row.id), courseId:String(row.courseId), moduleId:row.moduleId ? String(row.moduleId) : null, title:String(row.title), excerpt:context.text(String(row.excerpt), 600)})), services.pages.binding('search_content', context.accountId, args), args);
     } finally { index.close(); }
   };
 }

@@ -4,7 +4,6 @@ import type { BackendContext } from './backend-context';
 import type { BackendServices } from './backend-types';
 import { integer, noWarnings, warnings } from './backend-wire';
 import { fail, McpBackendError } from './backend-errors';
-import { contentText } from './backend-page';
 import { rewriteReferences } from './backend-references';
 import { sanitizeCourseHtml } from '../moodle/contents';
 
@@ -21,7 +20,7 @@ export async function cacheCoursePages(context:BackendContext, services:BackendS
     if (!section.accessible || !module.accessible || module.kind !== 'page') return module;
     const page = response.pages.find(row => row.course === course.remoteId && row.coursemodule === module.cmid);
     if (!page) return module;
-    const text = contentText(rewriteReferences(context, courseId, page.content), 1_000_000);
+    const text = context.text(rewriteReferences(context, courseId, page.content), 1_000_000);
     contents.set(module.id, text);
     return {...module, descriptionHtml:sanitizeCourseHtml(text)};
   })}));

@@ -29,7 +29,7 @@ export class BackendRemote {
       this.require(context, [name]);
       if (context.account().status !== 'connected') fail('SESSION_REQUIRED');
       try {
-        const client = await this.options.moodle.mcpClient(context.account().id, this.onSecrets);
+        const client = await this.options.moodle.mcpClient(context.account().id, this.onSecrets, () => context.recheck());
         context.recheck();
         const result = await client.call(name, params, schema, false, context.signal);
         context.provenance.syncedAt = new Date(clock()).toISOString();

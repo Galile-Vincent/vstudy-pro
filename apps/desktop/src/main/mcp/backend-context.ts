@@ -1,16 +1,16 @@
 /** Resolve all IDs through the selected granted account, including after an approval or queue wait. @packageDocumentation */
-import type { ToolArguments, Provenance } from '../../shared/mcp';
+import type { ToolArguments, Provenance, McpAuthorization } from '../../shared/mcp';
 import type { MoodleRepository } from '../moodle/repository';
 import { available, fail } from './backend-errors';
 import { contentText } from './backend-page';
 
 export class BackendContext {
   readonly provenance: Provenance;
-  constructor(readonly repository:MoodleRepository, readonly accountId:string | null, readonly accountIds:readonly string[], readonly args:ToolArguments, readonly signal?:AbortSignal) {
+  constructor(readonly repository:MoodleRepository, readonly accountId:string | null, readonly accountIds:readonly string[], readonly args:ToolArguments, readonly signal?:AbortSignal, readonly text:typeof contentText = contentText, private readonly authorize?:McpAuthorization) {
     this.provenance = {account:accountId, school:null, courseId:null, moduleId:null, author:null, syncedAt:null};
     if (accountId) {
       const account = this.account();
-      this.provenance.school = contentText(account.siteName, 200);
+      this.provenance.school = text(account.siteName, 200);
       this.provenance.syncedAt = account.syncedAt;
     }
     this.recheck();
@@ -58,6 +58,8 @@ export class BackendContext {
   ownsCourse(id:string | null): void { if (id) this.course(id); }
   courses() { return this.accountId ? this.repository.overview(this.account().id).courses : []; }
   recheck(): void {
+    const code = this.authorize?.();
+    if (code) fail(code);
     if (this.signal?.aborted) fail('DENIED');
     if (this.accountId) this.account();
     if ('courseId' in this.args && this.args.courseId) this.course(this.args.courseId);

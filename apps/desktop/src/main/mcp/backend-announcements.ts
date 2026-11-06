@@ -3,7 +3,6 @@ import type { MoodleAnnouncement } from '../../shared/moodle-course';
 import type { BackendContext } from './backend-context';
 import type { BackendServices } from './backend-types';
 import { courseForums, forumDiscussions } from './backend-forums';
-import { contentText } from './backend-page';
 import { fail, McpBackendError } from './backend-errors';
 import { noWarnings, postsWire, timestamp } from './backend-wire';
 import { rewriteReferences } from './backend-references';
@@ -14,7 +13,7 @@ export async function courseAnnouncements(context: BackendContext, services: Bac
   const cached = context.course(courseId).announcements;
   const hasCache = context.repository.hasCoursePanelCache(courseId, 'announcements');
   try {
-    const forums = (await courseForums(context, services, courseId)).filter(forum => forum.type === 'news' || /公告|最新消息|announcement|news/i.test(contentText(forum.name)));
+    const forums = (await courseForums(context, services, courseId)).filter(forum => forum.type === 'news' || /公告|最新消息|announcement|news/i.test(context.text(forum.name)));
     if (forums.length > 10) fail('UNSUPPORTED');
     const rows = new Map<string, {id: string; subject: string; author: string; createdAt: string | null; text: string}>();
     for (const forum of forums) {
@@ -33,7 +32,7 @@ export async function courseAnnouncements(context: BackendContext, services: Bac
           created ??= root.timecreated ?? root.created ?? undefined;
         }
         const key = remoteId(context.account().id, 'announcement', id);
-        rows.set(key, {id: key, subject: contentText(discussion.subject ?? discussion.name ?? '', 300), author: contentText(author ?? '', 200), createdAt: timestamp(created), text: contentText(rewriteReferences(context, courseId, message), 6000)});
+        rows.set(key, {id: key, subject: context.text(discussion.subject ?? discussion.name ?? '', 300), author: context.text(author ?? '', 200), createdAt: timestamp(created), text: context.text(rewriteReferences(context, courseId, message), 6000)});
         if (rows.size > 10_000) fail('UNSUPPORTED');
       }
     }
@@ -46,7 +45,7 @@ export async function courseAnnouncements(context: BackendContext, services: Bac
     if (error instanceof McpBackendError && ['DISCONNECTED', 'SESSION_REQUIRED', 'UNSUPPORTED'].includes(error.code) && hasCache) {
       context.recheck();
       context.provenance.syncedAt = context.repository.detailCache(courseId)?.refreshedAt ?? null;
-      return cached.map(row => ({id: row.id, subject: contentText(row.subject, 300), author: contentText(row.author, 200), createdAt: row.createdAt, text: contentText(row.bodyHtml, 6000)}));
+      return cached.map(row => ({id: row.id, subject: context.text(row.subject, 300), author: context.text(row.author, 200), createdAt: row.createdAt, text: context.text(row.bodyHtml, 6000)}));
     }
     throw error;
   }

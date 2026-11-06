@@ -7,7 +7,6 @@ import { plannerCalendar } from '../planner/calendar';
 import type { BackendContext } from './backend-context';
 import type { BackendHandlers, BackendServices } from './backend-types';
 import { available, fail } from './backend-errors';
-import { contentText } from './backend-page';
 
 export function plannerContext(context:BackendContext, services:BackendServices): PlanningContext {
   const all = services.planner.snapshot();
@@ -84,13 +83,13 @@ export function plannerHandlers(services:BackendServices): Pick<BackendHandlers,
     get_planner:async (context, args) => {
       const {snapshot, deadlines} = plannerContext(context, services);
       const items = [
-        ...snapshot.tasks.map(({id, title, courseId, dueAt, estimateMinutes, status, source, goalId, deadlineId}) => ({kind:'task', id, title:contentText(title, 200), courseId, dueAt, estimateMinutes, status, source, goalId, deadlineId})),
-        ...snapshot.exams.map(({id, title, courseId, date, scopeTopics}) => ({kind:'exam', id, title:contentText(title, 200), courseId, date, scopeTopics:scopeTopics.map(value => contentText(value, 200))})),
-        ...snapshot.goals.map(row => ({kind:'goal', ...row, title:contentText(row.title, 200)})),
-        ...snapshot.plans.map(row => ({kind:'plan', ...row, title:contentText(row.title, 200), assumptions:row.assumptions.map(value => contentText(value, 300))})),
-        ...snapshot.blocks.map(row => ({kind:'block', ...row, title:contentText(row.title, 200)})),
-        ...snapshot.reminders.map(row => ({kind:'reminder', ...row, note:contentText(row.note, 280)})),
-        ...context.repository.reminders().filter(row => !row.orphaned && deadlines.some(deadline => deadline.id === row.deadlineId)).map(row => ({kind:'moodle-reminder', id:row.id, deadlineId:row.deadlineId, remindAt:row.remindAt, note:contentText(row.note, 280), fired:row.fired})),
+        ...snapshot.tasks.map(({id, title, courseId, dueAt, estimateMinutes, status, source, goalId, deadlineId}) => ({kind:'task', id, title:context.text(title, 200), courseId, dueAt, estimateMinutes, status, source, goalId, deadlineId})),
+        ...snapshot.exams.map(({id, title, courseId, date, scopeTopics}) => ({kind:'exam', id, title:context.text(title, 200), courseId, date, scopeTopics:scopeTopics.map(value => context.text(value, 200))})),
+        ...snapshot.goals.map(row => ({kind:'goal', ...row, title:context.text(row.title, 200)})),
+        ...snapshot.plans.map(row => ({kind:'plan', ...row, title:context.text(row.title, 200), assumptions:row.assumptions.map(value => context.text(value, 300))})),
+        ...snapshot.blocks.map(row => ({kind:'block', ...row, title:context.text(row.title, 200)})),
+        ...snapshot.reminders.map(row => ({kind:'reminder', ...row, note:context.text(row.note, 280)})),
+        ...context.repository.reminders().filter(row => !row.orphaned && deadlines.some(deadline => deadline.id === row.deadlineId)).map(row => ({kind:'moodle-reminder', id:row.id, deadlineId:row.deadlineId, remindAt:row.remindAt, note:context.text(row.note, 280), fired:row.fired})),
       ].sort((a, b) => a.kind.localeCompare(b.kind) || a.id.localeCompare(b.id));
       return services.pages.page(items, services.pages.binding('get_planner', context.accountId, args), args);
     },
