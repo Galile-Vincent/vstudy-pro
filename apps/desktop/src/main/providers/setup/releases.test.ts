@@ -66,3 +66,9 @@ describe('vendor network', () => {
     await expect(network.text('claude', 'https://downloads.claude.ai/a', signal(), 3)).rejects.toMatchObject({ code: 'blocked' });
   });
 });
+it('verifies the published SHA512 algorithm for an agy payload without a declared size', async () => {
+  const payload = Buffer.from('abc'), path = join(await temporary(), 'agy');
+  const release = { ...payloadRelease(payload, '1.0.0', 'agy'), algorithm: 'sha512' as const, size: null, digest: 'ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f' };
+  await new VendorNetwork(async () => new Response(new Uint8Array(payload))).download(release, path, signal(), () => {});
+  expect(await readFile(path)).toEqual(payload);
+});

@@ -52,6 +52,7 @@ it('never publishes failed verification, version validation, or a new busy activ
   await expect(store.install({ ...release, digest: '0'.repeat(64) }, payloadNetwork(bytes), signal(), () => {})).rejects.toMatchObject({ code: 'checksum' });
   expect(store.active('claude')).toBeNull();
   await expect(store.install(release, payloadNetwork(bytes), signal(), () => {}, () => true, async () => { throw new Error('wrong version'); })).rejects.toThrow('wrong version');
+  await expect(store.install(release, payloadNetwork(bytes), signal(), () => {}, () => true, async binary => { await writeFile(binary, '#!/bin/sh\nexit 2\n'); })).rejects.toMatchObject({ code: 'checksum' });
   await expect(store.install(release, payloadNetwork(bytes), signal(), () => {}, () => false)).rejects.toMatchObject({ code: 'busy' });
   expect(store.active('claude')).toBeNull(); expect(await readdir(join(directory, 'tools/claude'))).toEqual([]);
 });

@@ -3,7 +3,7 @@
  * @packageDocumentation
  */
 import { randomUUID } from 'node:crypto';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { cliEnvironment } from '../cli-transport';
 import { systemExecutable } from '../../platform/process';
 import type { CliActionId, CliActionPlan, CliFailure, CliProvider } from '../../../shared/ai-cli';
@@ -39,7 +39,7 @@ export function buildPlan(actionId: CliActionId, cwd: string, binary: string | n
     args = ['-p', profile, binary, ...args]; executable = '/usr/bin/sandbox-exec';
   }
   const command = verb === 'install' || verb === 'update'
-    ? `VStudy download + verify ${release?.url ?? provider} -> ${join(cwd, provider ?? '', release?.version ?? '')}`
+    ? `VStudy download + verify ${release?.url ?? provider} -> ${join(dirname(cwd), provider ?? '', release?.version ?? '')}`
     : verb === 'rollback' ? `VStudy activate previous verified ${provider} version`
       : verb === 'test' ? `${displayCommand(executable, provider === 'agy' ? ['acp', '--stdio', '--sandbox'] : provider === 'claude' ? ['-p', '--safe-mode', '--tools', '', '--output-format', 'stream-json'] : ['exec', '--json', '--sandbox', 'read-only'])} [VStudy tool-free test]`
         : displayCommand(executable, args);

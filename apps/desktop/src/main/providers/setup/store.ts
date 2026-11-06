@@ -84,8 +84,10 @@ export class SetupStore {
       await chmod(binary, 0o700);
       signal.throwIfAborted();
       if (!canActivate()) throw new SetupError('busy');
+      const verified = await executableIdentity(binary);
       await validateVersion(binary, release.version);
       const identity = await executableIdentity(binary);
+      if (identity.hash !== verified.hash) throw new SetupError('checksum');
       signal.throwIfAborted();
       writeJson(join(stage, 'installed.json'), { release, identity: { ...identity, path: join(directory, basename(binary)) }, completedAt: Date.now() });
       await rm(payload);
