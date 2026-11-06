@@ -1,0 +1,26 @@
+All final requested checks passed. These intermediate failures were corrected.
+
+The original picker test assumed one Taiwan result. It was updated for all Taiwan entries.
+AssertionError: expected <button …(8)>…(3)</button>
+…(23) to have a length of 1 but got 24
+
+A new sorting test passed nullable textContent values to Intl.Collator.compare. The test now supplies an empty string for null.
+src/renderer/courses/school-picker.test.tsx(58,41): error TS2345: Argument of type '(x: string, y: string) => number' is not assignable to parameter of type '(a: string | null, b: string | null) => number'.
+  Types of parameters 'x' and 'a' are incompatible.
+    Type 'string | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+The capture script initially changed settings without reloading the renderer. It now reloads before checking the selected theme.
+page.waitForFunction: Timeout 30000ms exceeded.
+
+The capture script initially counted connected and recent options when checking directory ordering. It now clears fixture accounts and recent sites, and checks the directory group.
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert(directoryHosts.slice(0,taiwan.length).every(text => text.includes('.edu.tw')))
+
+The compact capture script initially used the wrong Traditional Chinese button label. It now uses the locale's exact label.
+locator.scrollIntoViewIfNeeded: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('dialog').getByRole('button', { name: '透過網址新增', exact: true })
+
+Several edit commands initially used repository-relative paths from apps/desktop and raised FileNotFoundError. They wrote no files. The edits were reapplied using absolute paths.

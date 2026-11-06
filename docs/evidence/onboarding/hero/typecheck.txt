@@ -1,0 +1,5 @@
+
+> @vstudy/desktop@0.3.0 typecheck /Users/vincent/vstudy-pro/apps/desktop
+> node scripts/generate-locales.mjs && tsc --noEmit
+
+Locale registry ready at /Users/vincent/vstudy-pro/apps/desktop/src/shared/locales.generated.ts (24 namespaces).
