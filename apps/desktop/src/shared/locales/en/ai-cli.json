@@ -128,5 +128,7 @@
   "failure_unknown": "This action could not finish. Stop it if needed, review the plan, and retry. Ask IT if it keeps failing.",
   "rollback_plan": "VStudy switches its active pointer to the previous verified version. No global tool is changed and no shell command runs.",
   "terminal_input": "Active action terminal input",
-  "too_much_output": "More output is available in Readable output and sign-in codes."
+  "too_much_output": "More output is available in Readable output and sign-in codes.",
+  "row_help": "Use guided setup to install, sign in, and test here. The enable switch remains available for an existing installation.",
+  "onboarding_login_body": "Use guided AI tool setup to install and sign in here. Each tool needs your permission before it runs. Provider plan limits and fees still apply."
 }

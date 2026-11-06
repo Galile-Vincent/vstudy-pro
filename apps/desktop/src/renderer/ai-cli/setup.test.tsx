@@ -139,6 +139,8 @@ it('opens the same global host through the exported entry seam', async () => {
   await mount(<AiCliSetupHost />); expect(document.querySelector('[role=dialog]')).toBeNull();
   await act(async () => openAiCliSetup('codex'));
   expect(document.querySelector<HTMLInputElement>('input[name=ai-cli-provider]:checked')?.parentElement?.textContent).toContain('Codex');
+  await act(async () => openAiCliSetup('agy'));
+  expect(document.querySelector<HTMLInputElement>('input[name=ai-cli-provider]:checked')?.parentElement?.textContent).toContain('Antigravity');
 });
 
 it.each(['en', 'zh-Hant', 'ja', 'en-XA'])('loads all setup copy in %s without namespace fallbacks', async language => {

@@ -1,4 +1,5 @@
 /** Resumable first-run sequence. School and appearance setup stay with their owning features. */
+import { openAiCliSetup } from '../ai-cli/entry';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Document, Settings } from '../../shared';
@@ -37,14 +38,15 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
     try { saveProgress({ step: next, status: 'active' }); setStep(next); setError(''); }
     catch { setError(tr('onboarding:save_error')); }
   };
-  const exit = async (complete: boolean, action?: 'goal' | 'providers') => {
+  const exit = async (complete: boolean, action?: 'goal' | 'providers' | 'ai-cli') => {
     setBusy(true); setError('');
     try {
       const settings = await desktop.invoke('settings:get', {});
       await desktop.invoke('settings:set', { ...settings, onboardingCompleted: true });
       saveProgress({ step, status: complete ? 'completed' : 'paused', done: complete ? [...new Set([...progress.done, 'setup' as const])] : progress.done });
       onComplete();
-      if (action === 'providers') window.dispatchEvent(new CustomEvent('vstudy:open-settings', { detail: { tab: 'providers' } }));
+      if (action === 'ai-cli') openAiCliSetup();
+      else if (action === 'providers') window.dispatchEvent(new CustomEvent('vstudy:open-settings', { detail: { tab: 'providers' } }));
       else if (action === 'goal') {
         if (progress.goal === 'school') navigation?.navigate({ view: 'courses', connectSchool: true });
         else if (imported) navigation?.navigate({ view: 'workspace', documentId: imported.id });
@@ -81,7 +83,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
         {step === 'language' && <label>{tr('onboarding:language')}<Select value={language} disabled={busy} onChange={e => void chooseLanguage(e.target.value as Settings['language'])}><option value="auto">{tr('common:auto')}</option><option value="en" lang="en">English</option><option value="zh-Hant" lang="zh-Hant">繁體中文</option><option value="ja" lang="ja">日本語</option></Select></label>}
         {step === 'appearance' && <AppearanceSection/>}
         {step === 'goal' && <fieldset className="onboarding-goals"><legend className="motion-sr">{tr('onboarding:step_goal')}</legend>{goals.map(goal => <label key={goal} data-selected={progress.goal === goal}><input type="radio" name="onboarding-goal" value={goal} checked={progress.goal === goal} onChange={() => { try { saveProgress({ goal, documentId: undefined }); setImported(undefined); } catch { setError(tr('onboarding:save_error')); } }}/><span><strong>{tr(`onboarding:goal_${goal}`)}</strong><small>{tr(`onboarding:goal_${goal}_body`)}</small></span></label>)}</fieldset>}
-        {step === 'ai' && <><dl className="onboarding-ai">{['free', 'paid', 'login', 'privacy', 'keychain'].map(item => <div key={item}><dt>{tr(`onboarding:ai_${item}`)}</dt><dd>{tr(`onboarding:ai_${item}_body`)}</dd></div>)}</dl></>}
+        {step === 'ai' && <><Button variant="secondary" disabled={busy} onClick={() => void exit(false, 'ai-cli')}>{tr('ai-cli:wizard')}</Button><dl className="onboarding-ai">{['free', 'paid', 'login', 'privacy', 'keychain'].map(item => <div key={item}><dt>{tr(`onboarding:ai_${item}`)}</dt><dd>{tr(item === 'login' ? 'ai-cli:onboarding_login_body' : `onboarding:ai_${item}_body`)}</dd></div>)}</dl></>}
         {step === 'start' && <>
           <p>{tr(`onboarding:before_${progress.goal}`)}</p>
           {progress.goal === 'documents' && <UploadCard showOpen={false} showSample={false} onImported={doc => { setImported(doc); try { saveProgress({ documentId: doc.id, done: [...new Set([...progress.done, 'document' as const])] }); } catch { setError(tr('onboarding:save_error')); } }}/>}

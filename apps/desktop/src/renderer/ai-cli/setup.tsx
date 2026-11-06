@@ -26,7 +26,7 @@ export function AiCliSetupHost() {
     window.addEventListener(aiCliSetupEvent, show);
     return () => window.removeEventListener(aiCliSetupEvent, show);
   }, []);
-  return request ? <AiCliSetup initialProvider={request.provider} onClose={() => setRequest(undefined)} /> : null;
+  return request ? <AiCliSetup key={request.provider ?? 'choose'} initialProvider={request.provider} onClose={() => setRequest(undefined)} /> : null;
 }
 
 export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: CliProvider | undefined; onClose: () => void }) {
