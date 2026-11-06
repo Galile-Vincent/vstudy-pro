@@ -68,6 +68,8 @@ A notice does not authorize assessment automation. The app can present quizzes a
 
 Every returned data payload is an explicit untrusted-content envelope with school, account, course, module, author, and cache provenance when available. Human summaries are fixed application text. Course text is data, never authority. HTML becomes bounded Markdown or plain text. Remove active elements and images. Rewrite hyperlinks to stable VStudy references. Do not return school URLs, signed file URLs, autologin keys, cookies, WS keys, or raw exception messages.
 
+A regression test found that learning secret values only when creating a live Moodle client left the first cached read dependent on secret-format heuristics. Preparation now loads stored school token values into the main-only redactor before output, including expired sessions. This makes cached reads safe without contacting the school. A failure to obtain the redaction snapshot fails the request without returning cached content.
+
 Pagination bounds arrays and converted document text. Cursors are validated and tied to the tool, account, and query. Redaction runs on tool output, errors, consent payloads, and activity entries. Activity records contain redacted arguments and fixed result codes, retain 30 days locally, and have a hard count limit. A bounded record cannot become a second course-content archive.
 
 Prompt injection can still affect an agent that ignores the envelope. The app's independent scopes and approvals limit the resulting actions. A local grant cannot stop an authorized agent from copying data it legitimately reads.

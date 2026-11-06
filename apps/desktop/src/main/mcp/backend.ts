@@ -59,6 +59,8 @@ export function createMcpBackend(options:McpBackendOptions): MainMcpBackend {
       const granted = [...accountIds];
       const accountId = name === 'list_accounts' ? null : selectAccount(options.moodle.repository, granted, args.account, local.has(name));
       const context = new BackendContext(options.moodle.repository, accountId, granted, args);
+      for (const value of await options.moodle.mcpSecretValues()) secrets.add(value);
+      context.recheck();
       if (local.has(name)) validateLocal(context, services, name, args);
       if (name === 'mark_module_complete' && 'moduleId' in args) completionCandidate(context, args.courseId, args.moduleId);
       if (mcpTools[name].risk !== 'read' && name !== 'open_in_app' && !local.has(name)) services.remote.require(context, mcpTools[name].functions);

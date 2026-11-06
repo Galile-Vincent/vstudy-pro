@@ -104,11 +104,11 @@ it('denies selected-account cross references for every course tool before IO', a
   expect(h.request).not.toHaveBeenCalled();
 });
 
-it('exposes only newly loaded main-side secrets to synchronous redaction and never tool data', async () => {
+it('loads stored school secrets before output and retains them only for main-side redaction', async () => {
   const h = await setup();
   h.secrets.useInSession(moodleSecretId(accountA), JSON.stringify({token:'school-token-' + accountA, privateToken:'private-token', userPrivateAccessKey:'access-key'}));
   expect(h.backend.secretValues()).toEqual([]);
   const result = await (await h.backend.prepare('list_quizzes', mcpTools.list_quizzes.schema.parse({courseId:courseA}), [accountA])).execute();
-  expect(h.backend.secretValues()).toEqual(['school-token-' + accountA, 'private-token', 'access-key']);
+  expect(h.backend.secretValues()).toEqual(['school-token-' + accountA, 'private-token', 'access-key', 'school-token-' + accountB]);
   expect(JSON.stringify(result)).not.toContain('school-token');
 });

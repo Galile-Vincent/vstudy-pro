@@ -285,6 +285,20 @@ export class MoodleService {
     catch { throw new MoodleError('auth'); }
   }
   async token(id: string): Promise<string> { return (await this.tokens(id)).token; }
+  /** Redaction also needs stored secrets before cached reads, including expired sessions. Main only. */
+  async mcpSecretValues(): Promise<readonly string[]> {
+    if (this.stopped) throw new MoodleError('auth');
+    const values: string[] = [];
+    for (const account of this.repository.accounts()) {
+      try {
+        const tokens = await this.tokens(account.id);
+        values.push(...[tokens.token, tokens.privateToken, tokens.userPrivateAccessKey].filter((value): value is string => Boolean(value)));
+      } catch (error) {
+        if (!(error instanceof MoodleError && error.kind === 'auth')) throw error;
+      }
+    }
+    return values;
+  }
   /** Main-only MCP transport shares the service scheduler and injected request, never a token result. */
   async mcpClient(id: string, onSecrets?: (values:readonly string[]) => void): Promise<Pick<MoodleClient, 'call'>> {
     if (this.stopped) throw new MoodleError('auth');

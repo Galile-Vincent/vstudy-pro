@@ -10,10 +10,10 @@ import type { BackendContext } from './backend-context';
 import type { BackendRemote } from './backend-remote';
 import type { BackendPages } from './backend-page';
 
-/** Only main supplies these services. No dependency or callback returns school credentials. */
+/** Only main supplies these services. Secret snapshots are used only by the main-owned redactor. */
 export interface McpBackendOptions {
   store: Pick<Store, 'db' | 'documents'>;
-  moodle: Pick<MoodleService, 'repository' | 'mcpClient'>;
+  moodle: Pick<MoodleService, 'repository' | 'mcpClient' | 'mcpSecretValues'>;
   documents: Pick<DocumentService, 'read'>;
   openModule: (accountId:string, courseId:string, moduleId:string) => void | Promise<void>;
   exportCalendar: (selection:z.infer<typeof plannerCalendarSchema>) => Promise<{saved:boolean}>;

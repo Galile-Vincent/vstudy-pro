@@ -94,6 +94,8 @@ A private PID lock prevents competing listener startup. A live listener or live 
 
 Results have fixed human summaries and the shared untrusted-data envelope. The sanitizer removes school URLs, credential-like fields, known secrets and their URL/base64 encodings, WS function values, long opaque secrets, active HTML, and images. Content becomes bounded plain text. Stable backend IDs remain usable. Result collections are capped at 50 items and individual strings at 8000 characters, within a 48,000-character text budget. The backend must paginate content before these safety caps to avoid losing readable data.
 
+The integrated backend calls `MoodleService.mcpSecretValues()` before returning a prepared call. This loads stored token, private-token, and user-private-access-key values into its main-only redaction set even for cached reads and expired sessions. It makes no school request. Keep `backend.secretValues` bound to the engine so the final output scrubber sees that snapshot.
+
 Backend pagination cursors never leave main. The engine returns `mcp:<UUID>` handles bound to grant, tool, account, and query. It retains at most 256 handles for 15 minutes. Handles do not survive restart. Resubmission translates a valid handle back to the backend cursor. Invalid or mismatched cursors fail with `INVALID_ARGUMENT`.
 
 ## Verification
