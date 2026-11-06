@@ -111,6 +111,16 @@
       ],
       "exitCode": 0,
       "log": "package-build.log"
+    },
+    {
+      "command": [
+        "node",
+        "e2e/ai-cli-packaged.mjs"
+      ],
+      "cwd": "apps/desktop",
+      "exitCode": 0,
+      "result": "../packaged/result.json",
+      "log": "../packaged/launch.log"
     }
   ],
   "fullTestRuns": 1,
@@ -131,10 +141,17 @@
     "note": "The final full run also includes the added forged-Codex-executable case."
   },
   "gui": {
-    "launched": false,
-    "packagedPty": "Pending explicit coordinator slot release. Script prepares 0644 helper and asserts runtime repair.",
-    "updatedFakeCliMatrix": "Prepared for explicit native fake selection. Not run under GUI hold.",
-    "newManualUiScreenshots": "Not captured under GUI hold."
+    "launched": true,
+    "launchCount": 1,
+    "recordedAt": "2026-11-06T06:09:57.072746+00:00",
+    "packagedPty": "Passed. The resolved Release helper repaired 0644 to 0755 before a real native PTY answer. The action closed, preferences reset, and the app exited with code 0.",
+    "result": "../packaged/result.json",
+    "screenshot": "../packaged/ai-cli-packaged.png",
+    "preLaunchGuard": "pgrep -fl \"VStudy Pro|Electron\" returned no matches.",
+    "postLaunchGuard": "pgrep -fl \"VStudy Pro|Electron\" returned no matches.",
+    "slotReleased": true,
+    "updatedFakeCliMatrix": "Prepared for explicit native fake selection; not rerun after the security changes.",
+    "newManualUiScreenshots": "Not captured. The packaged screenshot covers the setup host; manual UI has three-language component coverage."
   },
   "notes": [
     "Static security has three existing external-link warnings and no unreviewed dependency advisories.",
