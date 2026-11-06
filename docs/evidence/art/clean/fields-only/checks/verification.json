@@ -1,0 +1,18 @@
+{
+  "result": "PASS",
+  "commands": [
+    "pnpm typecheck",
+    "pnpm lint",
+    "pnpm knip",
+    "pnpm test --pool=forks --maxWorkers=2"
+  ],
+  "tests": {
+    "passed": 1026,
+    "skipped": 14
+  },
+  "mainBase": "e41052e",
+  "notes": [
+    "The full test command includes the all-theme contrast audit.",
+    "Only E2E capture verification was refined after the full suite. Its ESLint check also passes."
+  ]
+}

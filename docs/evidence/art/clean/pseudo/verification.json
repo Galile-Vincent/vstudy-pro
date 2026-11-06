@@ -1,0 +1,8 @@
+{
+  "phase": "pseudo",
+  "artifact": "Real Electron with a Vite renderer and fixture Moodle read handlers. No school connection.",
+  "results": [
+    "en-XA at 720×768 and 125% scale, light/dark, home/course, no horizontal page overflow."
+  ],
+  "errors": []
+}

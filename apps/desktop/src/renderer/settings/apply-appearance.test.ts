@@ -47,3 +47,25 @@ it('applies every token and works when localStorage is unavailable', () => {
   expect(document.documentElement.style.getPropertyValue('--glass-opacity')).toBe('95%');
   storage.mockRestore();
 });
+
+
+it('does not cut the slider preview when its identical value is persisted', async () => {
+  await initializeAppearance();
+  Object.defineProperty(document, 'visibilityState', {value:'visible', configurable:true});
+  let update: (() => void) | undefined;
+  let finish!: () => void;
+  const skip = vi.fn();
+  document.startViewTransition = vi.fn((callback: () => void) => {
+    update = callback;
+    return {ready:Promise.resolve(), finished:new Promise<void>(resolve=>{finish=resolve;}), skipTransition:skip} as unknown as ViewTransition;
+  }) as typeof document.startViewTransition;
+  const next = {...defaultSettings,contrast:110};
+  applyAppearance(next, true);
+  applyAppearance(next, true);
+  expect(skip).not.toHaveBeenCalled();
+  expect(document.documentElement.dataset.themeTransition).toBe('view');
+  update!();
+  finish();
+  await Promise.resolve();
+  document.startViewTransition = undefined as unknown as typeof document.startViewTransition;
+});
