@@ -28,7 +28,7 @@ import type { Document } from "../../shared";
 import type { LibraryQuery } from "../../shared/library";
 import "./shell.css";
 import "./art-reader.css";
-export type View = "home" | "library" | "workspace" | "welcome" | "courses" | "history";
+export type View = "home" | "library" | "workspace" | "welcome" | "courses" | "history" | "review";
 export type Route = {
   view: View;
   conversationId?: import("../../shared/domain").Conversation["id"] | undefined;
@@ -89,7 +89,7 @@ export function AppShell({
       const saved = JSON.parse(
         localStorage.getItem("vstudy-route") ?? "null",
       ) as Route | null;
-      if (saved && ["home", "library", "workspace", "courses", "history"].includes(saved.view))
+      if (saved && ["home", "library", "workspace", "courses", "history", "review"].includes(saved.view))
         return saved;
     } catch {
       /* Storage can be unavailable. */
@@ -177,6 +177,7 @@ export function AppShell({
               {tr("common:library")}
             </SidebarMenuButton></SidebarMenuItem>
             <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "courses" ? "page" : undefined} onClick={() => navigate("courses")}><GraduationCap />{tr("moodle:courses")}</SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "review" ? "page" : undefined} onClick={() => navigate("review")}><BookOpen/>{tr("review:title")}</SidebarMenuButton></SidebarMenuItem>
             <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "history" ? "page" : undefined} onClick={() => navigate("history")}><HistoryIcon/>{tr("history:title")}</SidebarMenuButton></SidebarMenuItem>
           </SidebarMenu></SidebarGroup>
           {sidebar}</SidebarContent><SidebarFooter><AiCliInventory compact /><div className="art-reader-profile"><span className="art-reader-avatar" aria-hidden="true">{displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <Brand/>}</span><span><strong>{displayName || tr("library:brand")}</strong><small>{tr("art-reader:local")}</small></span></div><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
@@ -208,7 +209,7 @@ export function AppShell({
               <span>
                 {route.view === "home"
                   ? tr("library:home")
-                  : route.view === "history" ? tr("history:title") : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
+                  : route.view === "review" ? tr("review:title") : route.view === "history" ? tr("history:title") : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
               </span>
             )}
             {route.view !== 'workspace' && status}
