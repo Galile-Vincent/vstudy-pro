@@ -1,0 +1,14 @@
+
+> @vstudy/mcp@0.2.0 verify:clients /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> node scripts/check-client-formats.mjs
+
+claude: 2.1.318, isolated config reader accepted vstudy; no conversation launched
+codex: 0.167.0, isolated config reader accepted vstudy; no conversation launched
+agy: 1.4.12, isolated config reader accepted vstudy; no conversation launched
+claude-desktop: no CLI config reader detected; app detection absent
+cursor: no CLI config reader detected; app detection absent
+claude: actual config parsed; 0 server entries; contents withheld
+codex: actual config parsed; 2 server entries; contents withheld
+agy: actual config does not parse; contents withheld
+claude-desktop: actual config absent
+cursor: actual config absent

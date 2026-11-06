@@ -1,0 +1,16 @@
+
+> @vstudy/mcp@0.2.0 verify /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> node scripts/verify-artifact.mjs
+
+dist/vstudy-mcp.cjs sha256 1e248f4fbafc4013fe7534e20546e46ec76a3b61bddaedc4757567e18aecf902
+dist/installer.cjs sha256 36b4ec776c7bda2d501d408dc5e7cbc0b5bd1a9b66b4c3dc35cddfe1cf60430b
+dist/windows-acl.cjs sha256 b1e0ab7ccdb2e6d68d997a9f9350aefd6c816857c3a7c7abecccf7ce0c2e169f
+Bundled CLI executes and all five client asset packages exist.
+Native plugin CLI copies match the standalone artifact.
+
+> @vstudy/mcp@0.2.0 verify:package /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> node scripts/verify-package.mjs
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources: CLI and client resources present. Unix helper executable outside ASAR.
+/Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp/dist/vstudy-mcp.cjs sha256 1e248f4fbafc4013fe7534e20546e46ec76a3b61bddaedc4757567e18aecf902
+/Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp-peer sha256 cf4ae28c7d38b75ea6742163a6869f03cbab874eb34679600224ae5f7deca282
