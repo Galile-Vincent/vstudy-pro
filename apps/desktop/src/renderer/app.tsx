@@ -10,6 +10,7 @@ import { LearningHelp, ContextCoach } from "./onboarding/help";
 import { HomeView } from "./home";
 import { Workspace } from "./workspace";
 import { desktop } from './bridge';
+import { AiCliSetupHost } from './ai-cli/setup';
 import { ProviderSettings, type Providers } from './providers';
 function GlobalSettings() {
   const [open, setOpen] = useState(false);
@@ -49,7 +50,7 @@ function Views() {
 export function App() {
   return (
     <AppShell sidebar={<LibrarySidebar />}>
-      <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/>
+      <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/>
     </AppShell>
   );
 }

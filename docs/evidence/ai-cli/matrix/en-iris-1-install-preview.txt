@@ -1,0 +1,55 @@
+- dialog "Set up an AI tool":
+  - banner:
+    - heading "Set up an AI tool" [level=2]
+    - paragraph: Install, sign in, and test here. You can keep reading at any time.
+    - button "Close setup and stop its action"
+  - group "Choose your tool":
+    - text: Choose your tool
+    - radio "Claude Code Your Anthropic account" [checked]
+    - strong: Claude Code
+    - text: Your Anthropic account
+    - radio "Codex Your OpenAI account"
+    - strong: Codex
+    - text: Your OpenAI account
+    - radio "Antigravity Your Google account"
+    - strong: Antigravity
+    - text: Your Google account
+  - strong: Claude Code
+  - status: Not installed
+  - list "Setup progress":
+    - listitem:
+      - strong: Install
+      - text: You are here
+    - listitem:
+      - strong: Sign in
+    - listitem:
+      - strong: Test
+  - paragraph: What happens next
+  - heading "Install your AI tool." [level=2]
+  - paragraph: Review the official Claude Code download below. VStudy verifies it and keeps a separate managed copy. Wait for installation to finish before signing in.
+  - checkbox "Allow VStudy to run Claude Code Optional. No tool launches until you allow it and run a reviewed action." [checked]
+  - text: Allow VStudy to run Claude Code Optional. No tool launches until you allow it and run a reviewed action.
+  - group: Account and cost
+  - region "Review before running":
+    - heading "Review before running" [level=3]
+    - paragraph: VStudy checks the official download and keeps it in its own app folder.
+    - term: Action plan
+    - definition:
+      - code: Download and verify https://downloads.claude.ai/claude-code-releases/1.0.0/darwin-arm64/claude Install in /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 1/ai-tools/claude/1.0.0.
+    - term: Working folder
+    - definition:
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-9mYr5g/profile 1/ai-tools/actions
+    - button "Run this plan"
+    - button "Copy plan"
+  - region "Keep your tool ready":
+    - heading "Keep your tool ready" [level=3]
+    - paragraph: Updates and rollback apply to new chats. Ongoing sessions continue with their current version.
+    - button "Review account status check" [disabled]
+    - button "Sign in again" [disabled]
+  - group: Which tool should I choose?
+  - group: Install another way
+  - group: Advanced general shell
+  - group: Need help from your teacher or IT team?
+  - contentinfo:
+    - paragraph: AI is optional. Your reading stays available.
+    - button "Continue reading"

@@ -4,6 +4,7 @@
  * This module is importable by both processes and must not depend on Electron or privileged IO.
  * @packageDocumentation
  */
+import { aiCliContract } from "./ai-cli";
 import { storageContract } from "./storage";
 import { chatHistoryContract } from './chat-history';
 import { moodlePanelSchema, moodleSiteCheckSchema, moodleSiteUrlSchema, moodleChannels, moodleSchoolSchema, moodleAccountSchema, moodleOverviewSchema, moodleCourseDetailSchema, moodleReminderSchema } from './moodle';
@@ -38,6 +39,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 }, "Only http, https and mailto URLs are allowed");
 /** Source of request and response types for the narrow preload bridge. Every main handler validates both directions. */
 export const ipcContract = {
+  ...aiCliContract,
   ...plannerIpc,
   ...aiParseContract,
   ...moodleWebviewContract,

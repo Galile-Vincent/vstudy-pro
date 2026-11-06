@@ -4,19 +4,27 @@
  * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
  * @packageDocumentation
  */
-import { access, realpath, stat } from 'node:fs/promises';
+import { access, realpath, stat, open } from 'node:fs/promises';
 import { constants, createReadStream } from 'node:fs';
 import { dirname, isAbsolute, join } from 'node:path';
-import { homedir } from 'node:os';
+import { executableDirectories } from '../platform/process';
 import { createHash } from 'node:crypto';
-export const installDirectories = () => [join(homedir(), '.local/bin'), '/opt/homebrew/bin', '/usr/local/bin', join(homedir(), '.claude/local'), join(homedir(), '.codex/bin')];
+export const installDirectories = executableDirectories;
 /** Read executable file metadata without launching or hashing the binary. */
 export async function executableMetadata(path: string) {
   if (!isAbsolute(path)) throw new Error('Executable path must be absolute');
   const resolved = await realpath(path);
   const file = await stat(resolved), directory = await stat(dirname(resolved));
   const owners = [0, process.getuid?.()];
-  if (!file.isFile() || !owners.includes(file.uid) || (file.mode & 0o022) || !owners.includes(directory.uid) || (directory.mode & 0o022)) throw new Error('Unsafe executable ownership or permissions');
+  if (!file.isFile()) throw new Error('Executable must be a regular file');
+  if (process.platform === 'win32') {
+    if (!/\.exe$/i.test(resolved)) throw new Error('Choose a native Windows executable (.exe)');
+    const handle = await open(resolved, 'r');
+    try {
+      const header = Buffer.alloc(2);
+      if ((await handle.read(header, 0, 2, 0)).bytesRead !== 2 || header.toString() !== 'MZ') throw new Error('Invalid Windows executable');
+    } finally { await handle.close(); }
+  } else if (!owners.includes(file.uid) || (file.mode & 0o022) || !owners.includes(directory.uid) || (directory.mode & 0o022)) throw new Error('Unsafe executable ownership or permissions');
   await access(resolved, constants.X_OK);
   return { path: resolved, mtime: file.mtimeMs };
 }
@@ -31,7 +39,7 @@ export async function executableIdentity(path: string) {
 export async function resolveInstalledExecutable(binary: string, directories = installDirectories()): Promise<string | null> {
   if (!/^[a-z0-9.]+$/i.test(binary)) return null;
   for (const directory of directories) {
-    try { return (await executableMetadata(join(directory, binary))).path; } catch { /* Only safe installed executables are eligible. */ }
+    try { return (await executableMetadata(join(directory, process.platform === 'win32' && !binary.endsWith('.exe') ? `${binary}.exe` : binary))).path; } catch { /* Only safe installed executables are eligible. */ }
   }
   return null;
 }

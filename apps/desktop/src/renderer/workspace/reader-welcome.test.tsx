@@ -31,9 +31,9 @@ it('allows reading without AI and keeps the setup action explicit', async () => 
   window.addEventListener('vstudy:read-without-ai', read);
   try {
     await act(async () => root.render(<ReaderOfflineNotice onSettings={setup}/>));
-    await act(async () => host.querySelectorAll<HTMLButtonElement>('button')[0]!.click());
+    await act(async () => Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent === i18n.t('art-reader:setup'))!.click());
     expect(setup).toHaveBeenCalledOnce();
-    await act(async () => host.querySelectorAll<HTMLButtonElement>('button')[1]!.click());
+    await act(async () => Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent === i18n.t('art-reader:without_ai'))!.click());
     expect(read).toHaveBeenCalledOnce();
     expect(host.querySelector('aside')).toBeNull();
   } finally { window.removeEventListener('vstudy:read-without-ai', read); await act(async () => root.unmount()); host.remove(); }

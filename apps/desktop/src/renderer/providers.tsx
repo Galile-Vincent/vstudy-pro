@@ -1,3 +1,5 @@
+import { aiCliSetupEvent } from './ai-cli/entry';
+import { AiCliInventory } from './ai-cli/inventory';
 import { StorageSettings } from "./settings/storage";
 import { AiSetupGuide } from './ai-setup';
 import { Switch } from './components/ui/switch';
@@ -53,6 +55,12 @@ export function ProviderSettings({
       else document.getElementById('shell-content')?.focus();
     };
   }, []);
+
+  useEffect(() => {
+    const handoff = () => onClose();
+    window.addEventListener(aiCliSetupEvent, handoff);
+    return () => window.removeEventListener(aiCliSetupEvent, handoff);
+  }, [onClose]);
 
   return (
     <Dialog
@@ -135,6 +143,7 @@ export function ProviderSettings({
                     <UsageSettings />
                   ) : (
                     <>
+                      <AiCliInventory />
                       <AiSetupGuide onClose={onClose} />
                       <SettingsGroup title={tr('novice:ai_services')}>
                         {providers.filter(provider => provider.config.kind === 'api').map(provider => (

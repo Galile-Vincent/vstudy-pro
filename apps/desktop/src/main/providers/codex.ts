@@ -4,6 +4,7 @@
  * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
  * @packageDocumentation
  */
+import { leaseExecutable } from './setup/leases';
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { access, chmod, copyFile, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
@@ -131,12 +132,13 @@ export function createCodexAdapter(cacheFile?: string): ProviderAdapter {
       const binary = await findCli('codex');
       if (!binary) throw new Error('CLI unavailable');
       const context = await createCodexChatContext(request.modelId === 'default' ? template.slug : request.modelId);
+      const releaseLease = leaseExecutable(binary);
       try {
         const imageArgs:string[]=[];
         for(const [index,image] of (request.images??[]).entries()){const path=join(context.cwd,`page-${index}.png`);await writeFile(path,Buffer.from(image.data,'base64'),{mode:0o600});imageArgs.push('-i',path);}
         const systemArgs=request.systemPrompt?['-c',`developer_instructions=${JSON.stringify(request.systemPrompt)}`]:[];
         yield* runCli('/usr/bin/sandbox-exec', invocation(binary, request.modelId === 'default' ? template.slug : request.modelId, [...context.args,...imageArgs,...systemArgs], request.options), request.prompt, context.cwd, 'codex', signal, 120_000, request.onUsageSnapshot, context.env, assertCodexChatEvent);
-      } finally { await context.cleanup(); }
+      } finally { try { await context.cleanup(); } finally { releaseLease(); } }
     },
   };
 }

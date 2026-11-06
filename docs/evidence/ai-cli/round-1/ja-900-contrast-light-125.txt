@@ -1,0 +1,56 @@
+- dialog "AI ツールを設定":
+  - banner:
+    - paragraph: 学習のパートナー
+    - heading "AI ツールを設定" [level=2]
+    - paragraph: ここでインストールし、アカウントにログインして、小さなテストを実行します。いつでも読書に戻れます。
+    - button "設定を閉じて操作を停止"
+  - group "ツールを選ぶ":
+    - text: ツールを選ぶ
+    - radio "Claude Code Anthropic アカウント" [checked]
+    - strong: Claude Code
+    - text: Anthropic アカウント
+    - radio "Codex OpenAI アカウント"
+    - strong: Codex
+    - text: OpenAI アカウント
+    - radio "Antigravity Google アカウント"
+    - strong: Antigravity
+    - text: Google アカウント
+  - strong: Claude Code
+  - status: 未インストール
+  - list "設定の進行状況":
+    - listitem:
+      - strong: インストール
+      - text: 現在のステップ
+    - listitem:
+      - strong: ログイン
+    - listitem:
+      - strong: テスト
+  - paragraph: 次に行うこと
+  - heading "AI ツールをインストール。" [level=2]
+  - paragraph: 以下の Claude Code 公式ダウンロードを確認してください。VStudy が検証し、専用コピーを管理します。完了後にログインします。
+  - strong: アカウントと料金
+  - paragraph: Claude Code の対象プランが必要です。ご利用プランの上限が適用されます。インストールで有料契約は発生しません。
+  - paragraph: ログインはツールが管理します。質問と共有した内容は提供元に送信されます。テストでは文書を含まない短い質問を送り、利用枠を消費する場合があります。
+  - checkbox "VStudy に Claude Code の実行を許可 任意です。許可して確認済みの操作を実行するまで、ツールは起動しません。" [checked]
+  - text: VStudy に Claude Code の実行を許可 任意です。許可して確認済みの操作を実行するまで、ツールは起動しません。
+  - region "実行前に確認":
+    - heading "実行前に確認" [level=3]
+    - paragraph: VStudy が公式ツールをダウンロードして検証し、アプリ専用フォルダーに保存します。これはシェルコマンドではなく、アプリのインストール計画です。既存のツールとは別に管理します。
+    - term: インストール計画
+    - definition:
+      - code: Download official Claude Code 2.1.318 Verify publisher signature and SHA-256 Install in /private/app data/ai-tools/claude/2.1.318/
+    - term: 作業フォルダー
+    - definition:
+      - code: /private/app data/ai-tools/workspace
+    - button "この計画を実行"
+    - button "計画をコピー"
+  - region "ツールを管理":
+    - heading "ツールを管理" [level=3]
+    - paragraph: 更新と復元は新しいチャットに適用されます。進行中のセッションは現在のバージョンを使い続けます。
+    - button "アカウント状態の確認内容を見る" [disabled]
+    - button "再ログイン" [disabled]
+  - group: 上級者向けシェル
+  - group: 先生や IT 担当者に相談しますか？
+  - contentinfo:
+    - paragraph: AI は任意です。読書はそのまま続けられます。
+    - button "読書を続ける"

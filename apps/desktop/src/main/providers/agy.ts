@@ -4,6 +4,7 @@
  * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
  * @packageDocumentation
  */
+import { leaseExecutable } from './setup/leases';
 import { recordEgress } from '../services/egress';
 import { rmSync } from "node:fs";
 import { spawn } from "node:child_process";
@@ -57,6 +58,7 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
   if (signal.aborted) { yield { type: "done" }; return; }
   recordEgress(request ? 'agy_chat' : 'agy_discovery', 'Google / Antigravity CLI managed endpoints');
   const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, detached: process.platform !== "win32", stdio: ["pipe", "pipe", "pipe"] });
+  const releaseLease = leaseExecutable(binary);
   let failure: AgyError | undefined;
   let sessionId: string | undefined;
   let stopped = false;
@@ -139,6 +141,7 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
     if (killTimer) clearTimeout(killTimer);
     // The leader may exit before a stubborn descendant; still terminate its process group.
     terminate("SIGKILL");
+    releaseLease();
   }
 }
 
