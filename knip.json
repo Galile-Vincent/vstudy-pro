@@ -7,6 +7,9 @@
       ],
       "project": [
         "scripts/**/*.{mjs,cjs,ts}"
+      ],
+      "ignoreBinaries": [
+        "iconutil"
       ]
     },
     "apps/desktop": {
@@ -31,7 +34,6 @@
         "tw-shimmer"
       ],
       "ignoreBinaries": [
-        "iconutil",
         "openssl",
         "rustc"
       ]

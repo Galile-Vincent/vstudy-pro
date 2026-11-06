@@ -1,0 +1,30 @@
+{
+  "mobile": {
+    "url": "http://127.0.0.1:4382/vstudy-pro/en/",
+    "date": "2026-11-06T04:19:33.007Z",
+    "categories": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "lcp": 1652.6856000000002,
+    "cls": 0,
+    "tbt": 0,
+    "errors": null
+  },
+  "desktop": {
+    "url": "http://127.0.0.1:4382/vstudy-pro/en/",
+    "date": "2026-11-06T04:19:42.903Z",
+    "categories": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "lcp": 423.03380000000004,
+    "cls": 0,
+    "tbt": 0,
+    "errors": null
+  }
+}

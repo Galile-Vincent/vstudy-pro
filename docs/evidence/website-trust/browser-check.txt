@@ -1,0 +1,12 @@
+Responsive matrix passed.
+{
+  "responsive": 30,
+  "palettes": 54,
+  "behavior": [
+    "Autoplay advances, maintains stage height, and exposes one slide. Hover, focus, Pause, and keyboard navigation pass. Connect makes no request or navigation.",
+    "Touch persistently pauses playback.",
+    "Native prefers-reduced-motion emulation shows all five static cards, hides controls, and remains unchanged after 5.1 seconds. Axe reports zero violations.",
+    "Without JavaScript all five school examples remain visible."
+  ],
+  "errors": []
+}

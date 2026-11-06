@@ -28,13 +28,10 @@
 .welcome [data-slot=button].primary { background:var(--ink); color:var(--surface); padding-inline:var(--space-5); }
 .welcome [data-slot=button].primary:hover { background:var(--ink); opacity:.88; }
 
-/* Header: the only hairline, and only once content scrolls beneath it. */
+/* The welcome bar stays borderless while scrolling. */
 .w-header { position:sticky; top:0; z-index:5; min-height:var(--welcome-header-height); display:flex; align-items:center; justify-content:flex-end; gap:var(--space-3); padding:0 var(--space-6); background:var(--material-sheet); backdrop-filter:var(--material-filter); font-size:var(--type-sm); }
 .w-header>div { display:flex; flex-wrap:wrap; gap:var(--space-1); }
 .w-header [data-slot=button] { min-height:var(--space-8); padding-inline:var(--space-3); }
-.w-header::after { content:''; position:absolute; inset:auto 0 0; height:1px; background:var(--hairline); opacity:0; transition:opacity var(--motion-base); }
-.welcome[data-scrolled=true] .w-header::after { opacity:1; }
-@supports(animation-timeline:--welcome) { .w-header::after { animation:w-hairline linear both; animation-timeline:--welcome; animation-range:0px 8px; } }
 
 /* Layout rhythm. */
 .w-content { max-inline-size:1040px; margin-inline:auto; padding-inline:var(--space-8); }
@@ -243,7 +240,6 @@
 @keyframes w-dot { from { transform:scale(.6); } }
 @keyframes w-bar { from { transform:scaleX(0); } }
 @keyframes w-progress { to { transform:scaleY(1); } }
-@keyframes w-hairline { to { opacity:1; } }
 
 /* Pausing: hidden window, explicit pause, offscreen loops, and an idle demo. */
 .welcome[data-hidden] *,.welcome[data-motion=paused] *,.welcome section[data-inview=false] .w-marquee>div,.welcome section[data-inview=false] .hero-stack .w-front,.demo-stage[data-playing=false] * { animation-play-state:paused!important; }

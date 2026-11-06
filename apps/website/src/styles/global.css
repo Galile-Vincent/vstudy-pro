@@ -75,7 +75,7 @@ dialog::backdrop { background:rgb(0 0 0 / .45); }
   *,*::before,*::after { animation:none !important; transition:none !important; }
 }
 
-.site-header::before { content:""; position:absolute; inset:0; z-index:-1; background:color-mix(in srgb,var(--background) 85%,transparent); backdrop-filter:blur(16px); box-shadow:0 8px 24px -16px rgb(0 0 0 / .28); opacity:0; transition:opacity 240ms ease-out; }
+.site-header::before { content:""; position:absolute; inset:0; z-index:-1; background:color-mix(in srgb,var(--background) 85%,transparent); backdrop-filter:blur(16px); opacity:0; transition:opacity 240ms ease-out; }
 .site-header.is-scrolled::before { opacity:1; }
 .site-header .button { background:var(--ink); color:var(--background); }
 .scheme-button,.language-select { min-height:44px; }

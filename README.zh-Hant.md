@@ -2,6 +2,11 @@
 
 # VStudy Pro
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/generated/lockup-dark.svg">
+  <img src="assets/brand/generated/lockup-light.svg" width="320" alt="VStudy Pro">
+</picture>
+
 在 macOS 與 Windows 上閱讀課程教材、整合 Moodle 作業期限，並把待辦事項排成讀書計畫。
 
 ![版本 0.2.2](https://img.shields.io/badge/version-0.2.2-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)

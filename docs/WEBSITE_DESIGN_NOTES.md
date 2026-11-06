@@ -161,3 +161,64 @@ Merged main `6d26b91` as `67755ea` and regenerated all 132 app captures. Every c
 A real-wheel header regression covers home/docs, desktop/mobile, and light/dark. Every settled state shows backdrop opacity 1, 16px blur, an 85% neutral fill, and no bottom rule. Navigation stays legible over screenshots and prose. The earlier dark overlap was not reproduced after real scrolling and the fade settled, so no CSS change was needed.
 
 The final run passes 490 responsive states and 232 axe page/palette states. Home and Getting started each score 100 in all four local mobile Lighthouse categories, with zero CLS. Home images total 144,274 bytes. Typecheck, lint, knip, and 1,026 tests pass; 14 existing tests remain skipped. The static audit checks 49 pages and 2,007 links/fragments; README links also pass. Full evidence and command outputs are in [the final report](evidence/website-v2/final/VERIFICATION.md). `docs/MCP.md` is absent from this merged main, so MCP remains accurately marked coming soon.
+
+
+## Website trust sections, W3
+
+The home school walkthrough now contains five fictional examples. Monograms use the site's own system type and neutral CSS gradients. They are original demo tiles, not university marks. The service-detection chip is explicitly inside a fictional demo. Connect only animates the button. It makes no request and opens no sign-in flow.
+
+CYCU is described as an early test site with full course-content compatibility unconfirmed. Checked `docs/moodle-cycu-confirmation.md`, `docs/evidence/ux/after-connect-min.txt`, `docs/evidence/ux/after-moodle-01-authenticated-pane.png`, and the onboarding school captures. The pane capture shows a local 127.0.0.1 fixture, not live CYCU authentication. Directory discovery and fixture captures do not establish live sign-in or complete content, assignment, quiz, or grade support. The confirmation document records failed calls and an outstanding confirmation run. No UCL compatibility claim remains on Home. The school docs explain that the built-in directory is for discovery, not certification or endorsement.
+
+### Data and ownership
+
+`Schools.astro` owns the walkthrough and `Providers.astro` owns the provider grid. `data/trust.ts` contains fictional school records, the provider connection registry, and complete English, Traditional Chinese, and Japanese copy. The provider registry satisfies the desktop `ProviderConfig` ID union, so missing or invented providers fail type checking. Source grounding includes `main/providers/index.ts`, `api.ts`, `cli.ts`, `codex.ts`, `agy.ts`, `models.ts`, renderer `provider-metadata.ts`, and README's Providers and keys section. Models depend on account and endpoint discovery. The page promises no fixed model catalog. Codex retains the macOS and verified-version limitation.
+
+Compared a shared Home script with separate component-owned behavior, and a single swapped card with pre-rendered stacked slides. Chose component ownership and stacked slides. The former avoids Download-stream overlap. The latter reserves layout space and supports a static list without JavaScript or with reduced motion. Only transform and opacity animate slide changes. Visibility gates focus and pointer interaction. Autoplay advances every 4.8 seconds, pauses on hover and focus, and stays paused after touch or manual navigation until Play. The page-wide motion control also pauses the carousel. Live announcements are off during autoplay and polite while paused.
+
+The throughput checkpoint has four items. Blocking first steps were source and brand verification. Independent workstreams are the two components, implemented by this delegate without nested agents. Shared state is limited to the existing page motion preference and additive localized guide paragraphs. The smallest safe decomposition is one owner for this diff, followed by coordinator review. Download code and desktop implementation are untouched.
+
+### Brand usage
+
+Official pages fetched on 2026-11-06. These entries report the pages' wording and our implementation decision. They are not legal conclusions. No third-party logo asset, brand font, traced mark, imitation mark, or unofficial kit ships in this change. Neutral labels use the same system typography as every other card.
+
+| Brand | Official source | What the guidelines say | What we used |
+| --- | --- | --- | --- |
+| Anthropic and Claude Code | [Anthropic Trademark Guidelines](https://www.anthropic.com/legal/trademark-guidelines) | Use requires specific permission and materials approved beforehand. Supplied marks cannot be altered. Spacing must preserve readability. Affiliation cannot be implied without authorization. | Plain names in neutral typographic chips. No approval or official supplied asset was verified, so no logos. |
+| OpenAI and Codex | [OpenAI Design Guidelines](https://openai.com/brand/) | Logo use must relate directly to OpenAI services, follow its terms, preserve the supplied artwork, acknowledge ownership, and avoid implied endorsement. Co-branded partnership materials require approval. | Plain names in neutral typographic chips. No explicit third-party works-with badge permission for this presentation was verified. No logo or partnership lockup. |
+| Google Antigravity | [Google guidance](https://about.google/brand-resource-center/guidance/) and [products and services](https://about.google/brand-resource-center/products-and-services/), [icon guidance](https://partnermarketinghub.withgoogle.com/brands/google/branding-guidelines/how-to-show-googles-brand/), and [product compatibility](https://partnermarketinghub.withgoogle.com/brands/google/use-cases/product-co-branding/) | Informational plain-text product references are described as allowed under the trademark rules. Compatibility guidance prefers accurate plain text and product icons only when necessary. The icon page directs users to request permission. Do not imitate visual identity or imply endorsement. Products without specific guidance refer to general icon and integration rules. | Plain Antigravity name in a neutral typographic chip. No specific Antigravity works-with logo authorization was verified. No Google or Antigravity icon. |
+| OpenAI-compatible endpoints | Desktop `api.ts` and shared provider IDs, rather than a separate brand kit | A protocol connection category, not a separate endorsed vendor. Endpoint privacy depends on the configured service. | Plain descriptive chip. No model vendor logos or claims about every model. |
+
+All three locales include the trademark and non-affiliation disclaimer. New sections add no images, fonts, libraries, or external requests. Verification results are recorded in `docs/evidence/website-trust/VERIFICATION.md`.
+
+
+## Butterfly arrival, 2026-11-06
+
+The owner's 2026-11-06 butterfly supplies the silhouette and blue-to-violet gradients. The arrival leaves the headline, description, and download controls clear, then returns to a still page.
+
+### Direction study
+
+`scripts/brand-motion-study.mjs` renders twelve frames across 7.6 seconds for each of three cubic paths in light and dark. The six contact sheets and 72 frames are in `docs/evidence/brand/motion/`. These are deterministic layout studies. Live browser screenshots verify the implemented home page separately.
+
+- **Arc, selected.** Wide early separation leaves open space over the headline. The butterflies descend along opposite product-window edges. One returns toward the nav logo and rests for 1.1 seconds before fading.
+- **Ribbon.** Control-point spread is 55 percent of the arc. The butterflies cluster near the center, and keep-out clipping makes their passage less continuous.
+- **Orbit.** Spread is 125 percent of the arc, and the lower control points reach 115 percent of the viewport flight depth. The steeper sweep draws attention away from the product.
+
+The second visual pass corrected two issues. Text keep-out rectangles now use text ranges and individual CTA links, rather than full-width block boxes. The macOS icon comparison exposed a hard contact shadow; the generator now uses only the diffuse shadow.
+
+### Motion parameters
+
+`butterfly-model.ts` owns `Point`, `Rect`, and `Flight`. A flight has four cubic control points, a size, opacity, delay, and a settlement flag. There are four butterflies on desktop, or three below 768px, with Save Data, at most four reported CPU cores, or at most 4GB reported device memory. The browser does not expose a portable low-power-mode signal.
+
+Sizes are 18 to 27px. Peak opacities are .42 to .64. Start times differ by 290ms. Wings fold independently around the center, with a 1.04-second sine cycle, .40 to .96 horizontal scale, and a slight opposing skew. The outer symbol moves only with transform and opacity. A radius of .8 times the butterfly size expands each protected text rectangle, including the rotated wing corners.
+
+The origin is the hero logo. The lower flight depth stops 40px above the viewport edge or at the product-window bottom. One endpoint sits beside the nav mark. All butterflies disappear by 7.6 seconds. No animation frame is scheduled after completion.
+
+The script runs only on home pages. It starts after load and idle, stores `vstudy-butterflies-v1` in session storage, and replays from the hero or nav logo. Storage denial does not prevent the page from working. Reduced motion displays no flight. The page's existing pause control and hidden tabs pause the loop. Resize or scroll ends a running arrival so stale geometry cannot cross the copy. CSS containment, fixed positioning, decorative semantics, and pointer-events none prevent layout changes or input interception.
+
+The onboarding uses a static lockup. Another idle animation competes with its existing preview and adds little value.
+
+### Header and brand treatment
+
+Both app and website headers remain borderless at rest and on scroll. The website retains a translucent blur without elevation. Desktop symbols retain brand colors across packs; outlined lockup lettering switches with the resolved scheme, through the existing whole-page theme transition. README picture sources follow GitHub's color scheme.
+
+`pnpm brand` validates the originals, optimizes SVG geometry conservatively, compares rasterized results, and generates icons and metadata. macOS uses an 824px rounded body at 100px from each edge of a 1024px transparent canvas, with a 12px diffuse shadow at 22 percent opacity and a 12px vertical offset. The supplied 226px corner radius becomes about 182px at that size, close to the stock macOS body. Windows and Linux use the supplied full-canvas artwork. `scripts/check-brand.mjs` checks body size, transparency, shadow alpha, cubic endpoints, lifecycle, and protected text.

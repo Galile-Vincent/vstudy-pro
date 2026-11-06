@@ -1,7 +1,7 @@
 /** Localized demonstration copy. Examples never claim live coursework or an available MCP release. */
 import type { Language } from './ui';
 interface RedesignCopy {
-  hero: [string, string]; schools: string; schoolNote: string; custom: string;
+  hero: [string, string];
   demo: string; deadline: string; course: string; review: string;
   tasks: string[]; approve: string; approved: string; reset: string;
   search: string; query: string; result: string; noResults: string;
@@ -11,8 +11,6 @@ interface RedesignCopy {
 export const redesign: Record<Language, RedesignCopy> = {
   en: {
     hero: ['Your semester,', 'with room to think.'],
-    schools: 'Your school. Your Moodle. One workspace.',
-    schoolNote: 'Works with compatible Moodle schools. Mobile web services must be enabled.', custom: 'Your Moodle URL',
     demo: 'Interactive example', deadline: 'Until your next deadline', course: 'Algorithms assignment',
     review: 'Review the proposed plan',
     tasks: ['Review graph traversal · 25 min', 'Practice with three problems · 40 min'],
@@ -26,8 +24,6 @@ export const redesign: Record<Language, RedesignCopy> = {
   },
   'zh-Hant': {
     hero: ['整理好學期，', '留點空間思考。'],
-    schools: '你的學校、你的 Moodle，同一個空間。',
-    schoolNote: '支援相容的 Moodle 學校，學校須啟用行動網路服務。', custom: '你的 Moodle 網址',
     demo: '互動範例', deadline: '距離下一個截止時間', course: '演算法作業',
     review: '檢視建議的讀書計畫',
     tasks: ['複習圖遍歷 · 25 分鐘', '練習三道題目 · 40 分鐘'],
@@ -40,8 +36,6 @@ export const redesign: Record<Language, RedesignCopy> = {
   },
   ja: {
     hero: ['学期を整えて、', '考える余白を。'],
-    schools: 'あなたの学校の Moodle を、ひとつの場所に。',
-    schoolNote: '互換性のある Moodle に対応。学校側でモバイル Web サービスの有効化が必要です。', custom: '自分の Moodle URL',
     demo: '操作できるサンプル', deadline: '次の締切まで', course: 'アルゴリズムの課題',
     review: '提案された計画を確認',
     tasks: ['グラフ探索を復習 · 25 分', '問題を 3 問解く · 40 分'],

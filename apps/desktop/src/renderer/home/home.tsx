@@ -1,4 +1,5 @@
 /** Student dashboard with a reading-first hierarchy and optional setup guidance. */
+import { Brand } from '../components/brand';
 import { contentLanguage } from "../../shared/content-language";
 import { DocumentArt } from '../shell/document-art';
 import { ArrowUpRight, BookOpen, Info } from 'lucide-react';
@@ -69,7 +70,7 @@ export function Home({ navigate, onUsage, onFolder, name, initialData, guidance 
   const percent = Math.max(settings?.monthlyBudgetUsd ? (data?.month.costUsd ?? 0) / settings.monthlyBudgetUsd * 100 : 0, settings?.monthlyTokenBudget ? tokens / settings.monthlyTokenBudget * 100 : 0);
   const displayName = name ?? settings?.displayName;
   return <main className="home-page"><div className="home-content">
-    <header className="home-greeting"><div><h1>{tr(`home:${hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'}`)}{displayName ? tr('home:greeting_name', { name: displayName }) : ''}</h1><p><AnimatedText texts={[tr('home:prompt_1'), tr('home:prompt_2'), tr('home:prompt_3')]} /></p></div><Button variant="ghost" id="welcome-entry" className="ghost" onClick={() => navigate("welcome")}><Info size={14}/>{tr("home:how_to_use")} · {tr('welcome:try_title')}</Button></header>
+    <header className="home-greeting"><div><Brand/><h1>{tr(`home:${hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'}`)}{displayName ? tr('home:greeting_name', { name: displayName }) : ''}</h1><p><AnimatedText texts={[tr('home:prompt_1'), tr('home:prompt_2'), tr('home:prompt_3')]} /></p></div><Button variant="ghost" id="welcome-entry" className="ghost" onClick={() => navigate("welcome")}><Info size={14}/>{tr("home:how_to_use")} · {tr('welcome:try_title')}</Button></header>
     {error && <div role="alert">{error}<Button variant="ghost" onClick={refresh}>{tr('common:retry')}</Button></div>}
     {!data ? !error && <div className="home-grid" role="status" aria-busy="true" aria-label={tr('home:loading')}>{Array.from({ length: 6 }, (_, i) => <Skeleton className="home-card home-skeleton" key={i}/>)}</div> : <div className="home-grid">
       {!!data.recentDocuments.length && <Card title={tr('home:continue')} className="home-recent-section">

@@ -16,7 +16,7 @@
     "smoke": "pnpm build && node scripts/smoke.mjs",
     "package:verify": "node scripts/distribution-smoke.mjs",
     "locales:generate": "node scripts/generate-locales.mjs",
-    "icon": "node scripts/make-icon.mjs",
+    "icon": "node ../../scripts/make-brand.mjs",
     "package:mac:arm64": "pnpm build && node scripts/package-release.mjs --target mac-arm64",
     "package:mac:x64": "pnpm build && node scripts/package-release.mjs --target mac-x64",
     "package:win:x64": "pnpm build && node scripts/package-release.mjs --target win-x64",
@@ -127,6 +127,10 @@
       {
         "from": "resources/mcp/windows-state.ps1",
         "to": "mcp/windows-state.ps1"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "brand/icon.png"
       }
     ],
     "mac": {
@@ -187,7 +191,8 @@
           ]
         }
       ],
-      "requestedExecutionLevel": "asInvoker"
+      "requestedExecutionLevel": "asInvoker",
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -199,7 +204,18 @@
       "runAfterFinish": false,
       "packElevateHelper": false,
       "shortcutName": "VStudy Pro",
-      "selectPerMachineByDefault": false
+      "selectPerMachineByDefault": false,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
+    },
+    "linux": {
+      "icon": "build/icons",
+      "category": "Education"
+    },
+    "dmg": {
+      "icon": "build/icon.icns",
+      "background": "build/dmg-background.png"
     }
   }
 }

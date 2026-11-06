@@ -28,6 +28,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href={path('favicon.svg')} />
+    <link rel="icon" href={path('favicon.ico')} sizes="any" />
+    <link rel="apple-touch-icon" href={path('apple-touch-icon.png')} />
+    <link rel="manifest" href={path('manifest.webmanifest')} />
     <script is:inline>
       try {
         const saved = localStorage.getItem('vstudy-scheme');
@@ -39,7 +42,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <a class="skip" href="#main">{t.skip}</a>
     <header class="site-header">
       <nav class="nav container" aria-label="VStudy Pro">
-        <a class="brand" href={path(`${language}/`)}><Logo />VStudy Pro</a>
+        <a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup /></a>
         <div class="nav-links">
           <a class="desktop-link" href={path(`${language}/#features`)}>{t.features}</a>
           <a href={path(`${language}/docs/getting-started/`)} aria-current={docs ? 'page' : undefined}>{t.docs}</a>
@@ -60,7 +63,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <slot />
     <footer class="site-footer">
       <div class="container footer-inner">
-        <div><a class="brand" href={path(`${language}/`)}><Logo />VStudy Pro</a><p>{t.footer}</p><p><small>{t.version} {VERSION}</small></p></div>
+        <div><a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup /></a><p>{t.footer}</p><p><small>{t.version} {VERSION}</small></p></div>
         <div class="footer-links"><a href={path(`${language}/docs/getting-started/`)}>{t.docs}</a><a href={path(`${language}/docs/privacy-and-network/`)}>{t.privacy}</a><a href={REPO_URL}>{t.source}</a></div>
       </div>
     </footer>

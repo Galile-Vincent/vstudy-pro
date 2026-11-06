@@ -75,6 +75,7 @@ const entryUrl =
 async function createWindow(): Promise<void> {
   const appearance = store!.settings.get();
   applyNativeTheme(appearance);
+  if (!app.isPackaged && process.platform === "darwin") app.dock?.setIcon(join(__dirname, "../../build/icon-mac.png"));
   const current = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -86,6 +87,7 @@ async function createWindow(): Promise<void> {
     titleBarStyle: 'default',
     titleBarOverlay: false,
     autoHideMenuBar: process.platform === 'win32',
+    icon: app.isPackaged ? join(process.resourcesPath, "brand/icon.png") : join(__dirname, "../../build/icon.png"),
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
       contextIsolation: true,
