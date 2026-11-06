@@ -57,15 +57,28 @@ describe('Windows client configuration fixtures', () => {
 });
 
 describe('platform connection and launch fixtures', () => {
-  it('opens the current-user pipe without Unix filesystem validation', async () => {
+  it('rejects a predictable pipe name when no same-handle authenticated connector exists', async () => {
+    const connect = vi.fn(() => new Socket());
+    await expect(connectLocalSocket(windowsPipeName(sid), { platform: 'win32', connect }))
+      .rejects.toMatchObject({ code: 'UNSUPPORTED' });
+    expect(connect).not.toHaveBeenCalled();
+  });
+  it('exposes only a same-handle authenticated stream with Identification-level impersonation', async () => {
     const socket = new Socket();
     const checkUnix = vi.fn(() => { throw new Error('Unix stat must not run.'); });
-    const connect = vi.fn((path: string) => {
-      expect(path).toBe(windowsPipeName(sid));
-      queueMicrotask(() => socket.emit('connect')); return socket;
-    });
-    expect(await connectLocalSocket(windowsPipeName(sid), { platform: 'win32', checkUnix, connect })).toBe(socket);
-    expect(checkUnix).not.toHaveBeenCalled(); socket.destroy();
+    const connect = vi.fn(() => { throw new Error('Bare Node pipe connection must not run.'); });
+    const authenticatedPipe = vi.fn(async () => ({ stream: socket, serverSid: sid }));
+    expect(await connectLocalSocket(windowsPipeName(sid), { platform: 'win32', checkUnix, connect, authenticatedPipe, currentSid: () => sid })).toBe(socket);
+    expect(authenticatedPipe).toHaveBeenCalledWith({ path: windowsPipeName(sid), expectedServerSid: sid, impersonationLevel: 'identification' });
+    expect(checkUnix).not.toHaveBeenCalled(); expect(connect).not.toHaveBeenCalled(); socket.destroy();
+  });
+  it('destroys a foreign-owned connected handle before exposing it to framed RPC', async () => {
+    const socket = new Socket();
+    const write = vi.spyOn(socket, 'write');
+    await expect(connectLocalSocket(windowsPipeName(sid), { platform: 'win32', currentSid: () => sid,
+      authenticatedPipe: async () => ({ stream: socket, serverSid: 'S-1-5-21-999-999-999-1001' }) }))
+      .rejects.toMatchObject({ code: 'DENIED' });
+    expect(socket.destroyed).toBe(true); expect(write).not.toHaveBeenCalled();
   });
   it('rejects remote pipe hosts and arbitrary local names before connecting', async () => {
     const connect = vi.fn(() => new Socket());

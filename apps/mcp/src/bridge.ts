@@ -9,7 +9,7 @@ import { Credentials } from './credentials';
 import { BridgeError, failed, failure } from './errors';
 import { Wire } from './transport';
 import { launchApplication } from './launch';
-import type { WireConnector } from './connection';
+import type { ConnectionOptions } from './connection';
 
 const pingSchema = z.object({ version: z.literal(MCP_PROTOCOL_VERSION), enabled: z.boolean() }).passthrough();
 export interface BridgeOptions {
@@ -19,7 +19,7 @@ export interface BridgeOptions {
   stderr: (text: string) => void;
   launch?: () => Promise<void>;
   backoffMs?: readonly number[];
-  connector?: WireConnector;
+  connection?: ConnectionOptions;
 }
 
 export function launchApp(): Promise<void> { return launchApplication(); }
@@ -119,7 +119,7 @@ export class BridgeClient {
       try {
         if (this.state.kind === 'closed') throw new BridgeError('DISCONNECTED', 'The VStudy client has closed.');
         const state = this.state;
-        const wire = await Wire.connect(this.options.socketPath, this.options.connector);
+        const wire = await Wire.connect(this.options.socketPath, this.options.connection);
         if (this.state !== state) { wire.close(); throw new BridgeError('DISCONNECTED', 'The VStudy client has closed.'); }
         state.wire = wire;
         return wire;

@@ -1,8 +1,8 @@
 /** Authenticate local socket permissions and correlate bounded framed RPC calls. @packageDocumentation */
-import type { Socket } from 'node:net';
+import type { Duplex } from 'node:stream';
 import { randomUUID } from 'node:crypto';
 import { bridgeRequestSchema, bridgeResponseSchema, type BridgeRequest, type BridgeResponse } from './contract';
-import { connectLocalSocket, type WireConnector } from './connection';
+import { connectLocalSocket, type ConnectionOptions } from './connection';
 import { encodeFrame, Frames } from './framing';
 import { BridgeError } from './errors';
 
@@ -15,7 +15,7 @@ export class Wire {
   private readonly queue: Pending[] = [];
   closed = false;
 
-  private constructor(private readonly socket: Socket) {
+  private constructor(private readonly socket: Duplex) {
     socket.on('data', chunk => {
       try {
         for (const value of this.frames.push(chunk)) this.receive(bridgeResponseSchema.parse(value));
@@ -26,8 +26,8 @@ export class Wire {
     socket.on('end', () => this.close());
   }
 
-  static async connect(path: string, connector: WireConnector = connectLocalSocket): Promise<Wire> {
-    return new Wire(await connector(path));
+  static async connect(path: string, options: ConnectionOptions = {}): Promise<Wire> {
+    return new Wire(await connectLocalSocket(path, options));
   }
 
   rpc(call: RpcCall, timeoutMs = 65_000): Promise<unknown> {

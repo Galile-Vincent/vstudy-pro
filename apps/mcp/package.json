@@ -21,7 +21,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "verify": "node scripts/verify-artifact.mjs",
-    "verify:package": "node scripts/verify-package.mjs"
+    "verify:package": "node scripts/verify-package.mjs",
+    "verify:clients": "node scripts/check-client-formats.mjs",
+    "verify:core": "node scripts/check-core-bridge.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",

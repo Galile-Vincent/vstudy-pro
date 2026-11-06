@@ -74,7 +74,7 @@ Tests spawn the real bundled CLI through the official SDK Client and StdioClient
 After the core stream is integrated, run the real-engine check without Electron:
 
 ```sh
-pnpm --filter @vstudy/mcp exec node scripts/check-core-bridge.mjs
+pnpm --filter @vstudy/mcp verify:core
 ```
 
 `--core-root /absolute/path` selects an isolated extraction of a core commit. `--bin /absolute/path` and `--peer-helper /absolute/path` select packaged artifacts. This check uses the actual security engine and native same-UID verifier with a controlled backend. It verifies pending consent, one-shot finish, opaque cursors, approved writes, concurrent reads, restart, and disabled errors. It never connects to a school.
@@ -90,3 +90,11 @@ The local bearer lives under `%APPDATA%\@vstudy\mcp-clients`. On Windows, POSIX 
 Windows launch reads uninstall registry metadata or the known per-user Programs path and spawns the resolved executable with `--mcp-background`. It does not interpret uninstall commands or use a shell. `reset --client` clears a bearer under the same private-file rules and preserves the client UUID. Windows behavior has fixture coverage on macOS only. Native Windows ACL and transport acceptance has not run.
 
 The desktop build dispatch wrapper is `apps/desktop/scripts/build-mcp-platform.mjs`. It skips the core-owned Unix C helper on Windows. The package wrapper is `apps/desktop/scripts/package-platform.mjs`, which invokes electron-builder through Node with host-specific targets. The Unix helper resource filter tolerates its absence on Windows. Packaged Windows verification reads `win*-unpacked/resources` and does not require the Unix helper. Stream P owns the Windows host, resource wiring, and persistence. These changes alone do not enable Windows MCP.
+
+`pnpm --filter @vstudy/mcp verify:clients` probes installed client config readers in temporary homes. It does not start conversations or modify actual client configs. These explicit npm script entries also make both manual verification tools discoverable to knip.
+
+### Windows authenticated connector requirement
+
+A predictable SID-derived pipe name does not authenticate the server. The default Windows connection now fails with `UNSUPPORTED` before opening a bare Node connection or reading a bearer. Stream P must provide `ConnectionOptions.authenticatedPipe` from `src/connection.ts` through `BridgeOptions.connection`. The callback receives `{path, expectedServerSid, impersonationLevel: 'identification'}` and returns `{stream, serverSid}` only after checking the actual owner on that same connected handle. That stream must keep the verified handle for its lifetime. A probe followed by reconnection is invalid. A SID mismatch destroys the stream before Wire or credentials can use it.
+
+No Windows client forwarder is bundled or enabled by this change. Microsoft documents client-side server-user validation in [PipeOptions.CurrentUserOnly](https://learn.microsoft.com/dotnet/api/system.io.pipes.pipeoptions) and explains [pipe impersonation levels](https://learn.microsoft.com/en-us/windows/win32/ipc/impersonating-a-named-pipe-client). Availability on Windows PowerShell 5.1 and its .NET Framework is not assumed. An unavailable secure implementation must keep failing closed. Server-side ACLs and first-instance checks do not replace client-side server authentication.

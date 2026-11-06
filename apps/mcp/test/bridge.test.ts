@@ -118,6 +118,17 @@ describe('bridge boundary', () => {
     expect(app.peakActive).toBe(4);
   });
 
+  it('never reads a bearer or sends a frame when Windows server authentication is unavailable', async () => {
+    const path = root();
+    const credentials = new Credentials(join(path, 'unread.json'));
+    const identity = vi.spyOn(credentials, 'identity');
+    const client = new BridgeClient({ socketPath: '\\\\.\\pipe\\vstudy-ebead97e1d40fa148f22dcd495581555',
+      credentials, clientName: 'Test', stderr: () => {}, connection: { platform: 'win32' } });
+    cleanups.push(() => client.close());
+    expect(await client.call('list_accounts', {})).toMatchObject({ ok: false, error: { code: 'UNSUPPORTED' } });
+    expect(identity).not.toHaveBeenCalled();
+  });
+
   it('starts a missing app once and backs off without replaying a write', async () => {
     const directory = root();
     const launch = vi.fn(async () => {});

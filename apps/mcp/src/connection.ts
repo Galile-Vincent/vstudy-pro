@@ -2,14 +2,25 @@
 import { lstatSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { createConnection, type Socket } from 'node:net';
+import type { Duplex } from 'node:stream';
+import { currentWindowsSid, windowsPipeName } from '../../desktop/src/main/mcp/endpoint';
 import { assertNoSymlinks } from './files';
 import { BridgeError } from './errors';
 
-export type WireConnector = (path: string) => Promise<Socket>;
+/**
+ * Resolve only after checking the actual server SID on the same handle that carries the returned stream.
+ * Never probe then reconnect. Use Identification-level impersonation and send no client bytes before verification.
+ * Destroying the returned stream must close that authenticated handle and any forwarding process.
+ */
+export type AuthenticatedPipeConnector = (request: {
+  path: string; expectedServerSid: string; impersonationLevel: 'identification';
+}) => Promise<{ stream: Duplex; serverSid: string }>;
 export interface ConnectionOptions {
   platform?: NodeJS.Platform;
   connect?: (path: string) => Socket;
   checkUnix?: (path: string) => void;
+  authenticatedPipe?: AuthenticatedPipeConnector;
+  currentSid?: () => string;
 }
 
 function checkUnix(path: string): void {
@@ -22,10 +33,19 @@ function checkUnix(path: string): void {
   }
 }
 
-export async function connectLocalSocket(path: string, options: ConnectionOptions = {}): Promise<Socket> {
+export async function connectLocalSocket(path: string, options: ConnectionOptions = {}): Promise<Duplex> {
   if ((options.platform ?? process.platform) === 'win32') {
     const prefix = "\\\\.\\pipe\\vstudy-";
     if (!path.startsWith(prefix) || !/^[a-f0-9]{32}$/.test(path.slice(prefix.length))) throw new BridgeError('DENIED', 'Use the current-user local VStudy named pipe.');
+    if (!options.authenticatedPipe) throw new BridgeError('UNSUPPORTED', 'A same-handle authenticated Windows pipe connector is required. No credentials were sent.');
+    const expectedServerSid = (options.currentSid ?? currentWindowsSid)();
+    if (path !== windowsPipeName(expectedServerSid)) throw new BridgeError('DENIED', 'The pipe does not belong to the current SID namespace.');
+    const connected = await options.authenticatedPipe({ path, expectedServerSid, impersonationLevel: 'identification' });
+    if (connected.serverSid !== expectedServerSid) {
+      connected.stream.destroy();
+      throw new BridgeError('DENIED', 'The connected pipe server owner does not match the current SID.');
+    }
+    return connected.stream;
   } else (options.checkUnix ?? checkUnix)(path);
   return new Promise((resolve, reject) => {
     const socket = (options.connect ?? createConnection)(path);
