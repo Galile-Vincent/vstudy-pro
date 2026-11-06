@@ -6,8 +6,8 @@ export interface BlueprintSlot {
     difficulty: 'easy' | 'medium';
     bloom: 'remember_understand' | 'apply' | 'analyze_evaluate';
 }
-export function buildBlueprint(concepts: readonly string[], unitCount: number) {
-    const keys = [...new Set(concepts)], count = unitCount <= 1 ? 8 : unitCount <= 4 ? 12 : 20;
+export function buildBlueprint(concepts: readonly string[], unitCount: number, size?: 'short' | 'standard' | 'long') {
+    const keys = [...new Set(concepts)], count = size ? BLUEPRINT_COUNTS[({short:'small',standard:'medium',long:'large'} as const)[size]] : unitCount <= 1 ? BLUEPRINT_COUNTS.small : unitCount <= 4 ? BLUEPRINT_COUNTS.medium : BLUEPRINT_COUNTS.large;
     const slots: BlueprintSlot[] = [];
     if (keys.length < 2 || keys.length > count)
         return { status: 'infeasible' as const, reason: 'Insufficient slots or concepts for coverage and interleaving', slots };

@@ -80,15 +80,14 @@
   "scope_documents_help": "このコースに関連付けた資料を選んでください。",
   "scope_empty": "選べる項目がありません。教材を追加するか、別の範囲を選んでください。",
   "scope_size": "分量",
-  "scope_standard": "標準",
-  "scope_size_unavailable": "現在、分量は選んだ教材に応じて決まります。",
+  "scope_standard": "標準（12問）",
   "item_progress": "{{total}} 問中 {{current}} 問目",
   "your_answer": "あなたの解答",
   "answer_true": "正しい",
   "answer_false": "誤り",
-  "commit_notice": "解答は問題ごとに保存されます。テストを提出するとすべての解答が確定し、フィードバックが表示されます。",
-  "finish_test": "テストを提出",
-  "answer_next": "保存して続ける",
+  "commit_notice": "送信すると回答が確定し、フィードバックが表示されます。",
+  "finish_test": "最後の回答を送信",
+  "answer_next": "回答を送信",
   "question_reported": "この問題を報告しました。復習リストの更新には使われません。",
   "answer_matches": "参考解答と一致しています",
   "worth_another_look": "もう一度見てみましょう",
@@ -142,5 +141,7 @@
   "resolved_documents": "資料",
   "none": "なし",
   "asked_fallback": "質問した日時に基づく",
-  "sources": "出典"
+  "sources": "出典",
+  "scope_short": "短め（8問）",
+  "scope_long": "長め（20問）"
 }

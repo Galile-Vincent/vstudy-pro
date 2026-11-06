@@ -41,13 +41,14 @@ export class GenerationService implements ReviewWorker {
         const snapshot = resolveScope(request.scope, data).snapshot;
         if (request.retakeAttemptId)
             snapshot.assumptions.push('retakeAttempt:' + request.retakeAttemptId);
+        snapshot.size = request.size;
         const artifact = this.repo.create(request, snapshot, token);
         this.launch(artifact.id, token, request, progress);
         return artifact;
     }
     retry(id: string, requestId: string, locale: 'en' | 'zh-Hant', progress: (event: ReviewProgress) => void = () => { }) { this.admit(); const artifact = this.repo.find(id); if (!artifact)
-        throw new Error('review.artifact_unavailable'); const retakeId = artifact.resolvedScope.assumptions.find(a => a.startsWith('retakeAttempt:'))?.slice(14); const token = randomUUID(); if (!this.repo.retry(id, token))
-        return artifact; this.launch(id, token, { requestId, courseId: artifact.courseId, kind: artifact.kind, title: artifact.title, scope: artifact.scope, idempotencyKey: id, providerId: artifact.providerId, modelId: artifact.modelId, locale, ...(retakeId ? { retakeAttemptId: retakeId } : {}) }, progress); return this.repo.find(id)!; }
+        throw new Error('review.artifact_unavailable'); const retakeId = artifact.resolvedScope.assumptions.find(a => a.startsWith('retakeAttempt:'))?.slice(14); const size=artifact.resolvedScope.size; const token = randomUUID(); if (!this.repo.retry(id, token))
+        return artifact; this.launch(id, token, { requestId, courseId: artifact.courseId, kind: artifact.kind, title: artifact.title, scope: artifact.scope, idempotencyKey: id, providerId: artifact.providerId, modelId: artifact.modelId, locale, size, ...(retakeId ? { retakeAttemptId: retakeId } : {}) }, progress); return this.repo.find(id)!; }
     private admit() { if (this.stopped || this.disposed)
         throw new Error('review.suspended'); if (this.active.size >= 2)
         throw new Error('review.busy'); }
@@ -91,6 +92,7 @@ export class GenerationService implements ReviewWorker {
                     resolved.snapshot.assumptions.push('Source excerpt limited to first 6000 bytes: ' + excerpt.documentId);
             if (request.retakeAttemptId)
                 resolved.snapshot.assumptions.push('retakeAttempt:' + request.retakeAttemptId);
+            resolved.snapshot.size = request.size;
             resolved.snapshot.sources = excerpts.map(e => ({ documentId: e.documentId, version: e.version, excerptHash: e.excerptHash }));
             this.repo.snapshot(id, token, studyResolvedScopeSchema.parse(resolved.snapshot));
             let concepts = resolved.snapshot.conceptKeys;
@@ -104,7 +106,7 @@ export class GenerationService implements ReviewWorker {
                 excludedStems = retake.excludedStems;
             }
             const weakPoints = new ReviewRepository(this.repo.db).observationsPage({ courseId: request.courseId, limit: 100 }).items.filter(o => o.conceptKey && concepts.includes(o.conceptKey) && o.errorType === 'misconception').map(o => ({ id: o.id, conceptKey: o.conceptKey, text: o.weaknessNote, evidenceQuote: o.evidenceQuote }));
-            const blueprint = buildBlueprint(concepts, resolved.snapshot.unitIds.length);
+            const blueprint = buildBlueprint(concepts, resolved.snapshot.unitIds.length, request.size);
             const slots = blueprint.slots.map(slot => ({ ...slot, unitId: byKey.get(slot.conceptKey)?.unitId ?? null }));
             if (excludedStems.length > 1000)
                 throw new Error('review.retake_limit');

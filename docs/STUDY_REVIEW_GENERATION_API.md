@@ -1,6 +1,6 @@
 # W3 generation and attempts API
 
-Paths are relative to `apps/desktop/src`. Shared schemas are authoritative. No renderer UI or locale changes accompany this work; only the progress subscription bridge and dev mock change.
+Paths are relative to `apps/desktop/src`. Shared schemas are authoritative. The renderer uses prompt-only artifacts and per-item feedback. The dev mock provides empty artifact lists and explicit provider/attempt-unavailable errors; it does not simulate grading.
 
 ## W2 integration
 
@@ -27,24 +27,27 @@ Every request is a strict object. UUID means standard UUID string. Invoke throug
 
 | Channel | Request | Response |
 |---|---|---|
-| `review:artifact:generate` | `{requestId,courseId,kind:'note'|'test',title,scope,idempotencyKey,providerId,modelId,locale?:'en'|'zh-Hant',retakeAttemptId?:UUID}` | Artifact immediately, background work continues |
+| `review:artifact:generate` | `{requestId,courseId,kind:'note'|'test',title,scope,idempotencyKey,providerId,modelId,locale?:'en'|'zh-Hant',size?:'short'|'standard'|'long',retakeAttemptId?:UUID}` | Artifact immediately, background work continues |
 | `review:artifact:retry` | `{artifactId,requestId,locale?:'en'|'zh-Hant'}` | Artifact; only failed/interrupted starts a new attempt |
 | `review:artifact:cancel` | `{artifactId}` | `{ok:true}` |
 | `review:artifact:list` | `{courseId,limit?,cursor?}` | `{items:ArtifactSummary[],nextCursor}` |
 | `review:artifact:get` | `{artifactId}` | Artifact or null |
 | `review:artifact:delete` | `{artifactId}` | `{ok:true}`; cascades attempts and mastery effects |
 | `review:artifact:export` | `{artifactId}` | `{saved:boolean}`; main opens native Markdown save dialog |
-| `review:attempt:start` | `{artifactId}` | Attempt |
+| `review:attempt:start` | `{artifactId}` | Attempt; returns the latest existing attempt on this artifact, including graded/confirmed, or creates one |
+| `review:attempt:get` | `{attemptId}` | Attempt with saved answers and committed-item feedback, for reload/resume |
 | `review:attempt:answer` | `{attemptId,itemId,answer:string|number|boolean|null}` | Attempt; answering only |
-| `review:attempt:commit` | `{attemptId}` | Graded Attempt; idempotent, locks answers |
+| `review:attempt:commit` | `{attemptId,itemId?}` | Attempt; commits one item and returns its feedback immediately. Omit itemId to finish all remaining items through the same grading path. Idempotent |
 | `review:attempt:confirm` | `{attemptId}` | Confirmed Attempt; idempotent |
 | `review:attempt:report-bad` | `{attemptId,itemId}` | Attempt; also removes previously applied effect |
 
 Artifact: `{id,courseId,kind,title,scope,resolvedScope,status,bodyMarkdown,test,providerId,modelId,errorCode,createdAt}`. Status is `generating|ready|failed|interrupted`. Summary omits `bodyMarkdown` and `test`. Ready note has bodyMarkdown; ready test has test. Nonready artifacts have neither. `scope` is W1's units/documents/concepts/dates/weak union. Dates are exclusive local date endpoints in an IANA zone, maximum 366 calendar days. Resolved scope includes source document/version/excerpt SHA-256 snapshots, UTC endpoints and assumptions. Undated fallback says “based on when you asked”. `review.needs_source_selection` means ask the student to select documents. Single-concept tests can be `review.infeasible_blueprint` because mandatory interleaving cannot be satisfied.
 
-Test: `{version:1,items,warnings?,validationNotice?,excludedStemHashes?}`. Items use W1 MCQ (`options:string[],answer:number`), cloze (`answer:string,alternatives:string[]`), or true_false (`answer:boolean`). Each has `id,conceptKey,stem,explanation,source:{documentId,version,excerptHash,quote}`. Generated items additionally carry `unitId,bloom,difficulty,nextStep`, and MCQs carry `optionRationales` and optional `misconceptions:[{option,id,inferred}]`. Bloom is `remember_understand|apply|analyze_evaluate`. Do not show answers, source quotes, rationales or explanation until commit. Display exactly: **checked for structure and sources, not guaranteed correct**. These checks do not establish semantic truth or solve model math.
+Stored test: `{version:1,items,warnings?,validationNotice?,excludedStemHashes?}`. Items use W1 MCQ (`options:string[],answer:number`), cloze (`answer:string,alternatives:string[]`), or true_false (`answer:boolean`). Each has `id,conceptKey,stem,explanation,source:{documentId,version,excerptHash,quote}`. Generated items additionally carry `unitId,bloom,difficulty,nextStep`, and MCQs carry `optionRationales` and optional `misconceptions:[{option,id,inferred}]`. Bloom is `remember_understand|apply|analyze_evaluate`. All artifact responses (get, generate, retry, including idempotent ready responses) strip answer, alternatives, explanation, source, nextStep, optionRationales, misconceptions and excludedStemHashes. Renderer items contain only id, conceptKey, stem, type, options (MCQ), unitId, bloom and difficulty. Answer keys, rationales and citations are delivered only as a full item in a committed result's feedback; never for an unanswered item. Display exactly: **checked for structure and sources, not guaranteed correct**. These checks do not establish semantic truth or solve model math.
 
-Attempt: `{id,artifactId,phase,answers,startedAt,committedAt,confirmedAt,results:[{itemId,conceptKey,correct:boolean|null,reportedBad:boolean}]}`. Answers are immutable after commit. Main computes correctness; IPC accepts no renderer correctness/score. Confirm applies eligible results atomically once per item. Only W1 `computeCourseMastery` computes mastery; no counters are written. Retake: generate a new test with the old confirmed `retakeAttemptId` and a new idempotency key; only missed, unreported concepts are used. Ancestor stem hashes prevent repeats. Retake identity survives retry in the resolved snapshot.
+Attempt: `{id,artifactId,phase,answers,startedAt,committedAt,confirmedAt,results:[{itemId,conceptKey,correct:boolean|null,reportedBad:boolean,feedback?:StoredTestItem}]}`. Each result has correct:null and no feedback until that item is committed. Its answer then becomes immutable while other answers remain editable. Phase stays answering until all items are graded; committedAt is the whole-attempt finish time. Phase then becomes graded, and confirmed only after explicit confirmation. start resumes the latest attempt; get refreshes it by ID, so a reload needs no renderer-local attempt ID. Repeated start also recovers a lost start response. Main computes correctness; IPC accepts no renderer correctness/score. Confirm applies eligible results atomically once per item. Only W1 `computeCourseMastery` computes mastery; no counters are written. Retake: generate a new test with the old confirmed `retakeAttemptId` and a new idempotency key; only missed, unreported concepts are used. Ancestor stem hashes prevent repeats. Retake identity survives retry in the resolved snapshot.
+
+Size uses W3's fixed blueprint counts: short = 8 (small), standard = 12 (medium), long = 20 (large), regardless of unit count. The UI defaults to standard. For older callers omitting size, scope-based sizing stays compatible: <=1 unit = 8, 2-4 units = 12, >=5 units = 20. The selected size is persisted in resolvedScope.size and retained on retry. Counts are requested slots; unsupported items may still be dropped with coverage warnings. At least two concepts and no more concepts than slots remain required; infeasible scopes report review.infeasible_blueprint.
 
 ## Progress subscription
 
@@ -66,13 +69,13 @@ Subscribe before invoking generate/retry, filter by requestId then artifactId, a
 ## Exported main APIs
 
 - `scope.ts`: `ScopeInputs`, `dateRange(fromDate,toDate,timeZone) -> {from,to}`, `resolveScope(scope,inputs) -> {status:'resolved'|'needs_source_selection',snapshot}`.
-- `blueprint.ts`: `BLUEPRINT_COUNTS`, `BlueprintSlot`, `buildBlueprint(conceptKeys,unitCount) -> {status:'ready'|'infeasible',reason,slots}`.
+- `blueprint.ts`: `BLUEPRINT_COUNTS`, `BlueprintSlot`, `buildBlueprint(conceptKeys,unitCount,size?) -> {status:'ready'|'infeasible',reason,slots}`.
 - `note-plan.ts`: `notePlan(unitCount,concepts:{key,mastery}[],weak=false)` returns word/character/prompt budgets, depth, omissions and review offsets.
 - `test-validate.ts`: `Excerpt`, `REVIEW_VALIDATION_NOTICE`, `normalizeStem`, `stemHash`, `validateTest(raw,excerpts,excludedStems=[]) -> {version:1,items,warnings}`.
 - `prompts/index.ts`: `PROMPT_VERSION`, `notePrompt(data,locale)`, `testPrompt(data,locale)`.
 - `artifact-repository.ts`: `ArtifactRepository(db,clock=Date.now)`; `atomic`, `find`, `byKey`, `create`, `retry`, `snapshot`, `finish`, `fail`, `cancel`, `recover`, `delete`, `list`, `scopeInputs`.
 - `generate.ts`: `GenerationDependencies`, `GenerationService(repo,deps)`; `generate(request,progress?)`, `retry(id,requestId,locale,progress?)`, `cancel(id)`, `suspend`, `resume`, `waitForIdle`, `dispose`. Registers with W1 `reviewWorkers`; recovery runs in normal IPC registration, outside the constructor.
-- `attempts.ts`: `Attempts(repo)`; `get(id)`, `start(artifactId)`, `answer(id,itemId,answer)`, `commit(id)`, `confirm(id)`, `reportBad(id,itemId)`, `retake(id)`.
+- `attempts.ts`: `Attempts(repo)`; `get(id)`, `start(artifactId)`, `answer(id,itemId,answer)`, `commit(id,itemId?)`, `confirm(id)`, `reportBad(id,itemId)`, `retake(id)`.
 - `main/ipc/review-generate.ts`: `progressFor(event)`, `registerReviewGenerateIpc(registrar,store,implemented,providers,admission=reviewAdmission) -> GenerationService`.
 
 Shared exports: `reviewProgressChannel`, `reviewProgressSchema`, `ReviewProgress`, `artifactSchema`, `generationRequestSchema`, `GenerationRequest`, `attemptSchema`, `reviewGenerateIpc`. Persisted test schemas remain in `shared/review-artifacts.ts` and are reused by restore validation.

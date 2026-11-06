@@ -19,6 +19,7 @@ export function ArtifactPanel({courseId,kind,selection}:{courseId:string;kind:'n
  const {i18n}=useTranslation();
  const page=useReviewPage(useCallback((cursor?:Cursor)=>desktop.invoke('review:artifact:list',{courseId,limit:20,...(cursor?{cursor}:{})}),[courseId]));
  const [scope,setScope]=useState<Scope|null>(null),[artifact,setArtifact]=useState<Artifact|null>(null),[busy,setBusy]=useState(false),[failed,setFailed]=useState(false),[stage,setStage]=useState('generating'),[deleting,setDeleting]=useState(false),[notice,setNotice]=useState('');
+ const [size,setSize]=useState<'short'|'standard'|'long'>('standard');
  const [providers,setProviders]=useState<IpcResponse<'providers:list'>>([]),[model,setModel]=useState('');
  const active=useRef<{artifactId:string|null;requestId:string|null}>({artifactId:null,requestId:null});
  const epoch=useRef(0),mounted=useRef(true),operation=useRef(false),recovery=useRef(0);
@@ -52,7 +53,7 @@ export function ArtifactPanel({courseId,kind,selection}:{courseId:string;kind:'n
   const choices=providers.flatMap(p=>p.config.enabled&&p.availability.available?p.models.map(m=>({providerId:p.config.id,modelId:m.id})):[]);
   const choice=choices[Number(model||0)];if(!choice){setFailed(true);return;}
   epoch.current++;const requestId=crypto.randomUUID();active.current={requestId,artifactId:null};setStage('queued');setDeleting(false);
-  const value=await desktop.invoke('review:artifact:generate',{requestId,courseId,kind,title:tr(kind==='note'?'review:notes':'review:tests'),scope:scope??{kind:'weak'},idempotencyKey:crypto.randomUUID(),...choice,locale,...(retakeAttemptId?{retakeAttemptId}:{})});
+  const value=await desktop.invoke('review:artifact:generate',{requestId,courseId,kind,title:tr(kind==='note'?'review:notes':'review:tests'),scope:scope??{kind:'weak'},idempotencyKey:crypto.randomUUID(),...choice,locale,size,...(retakeAttemptId?{retakeAttemptId}:{})});
   if(!mounted.current||active.current.requestId!==requestId)return;
   active.current.artifactId=value.id;setArtifact(value);await recover(value.id);page.retry();
  };
@@ -60,7 +61,7 @@ export function ArtifactPanel({courseId,kind,selection}:{courseId:string;kind:'n
  const choices=providers.flatMap(p=>p.config.enabled&&p.availability.available?p.models.map(m=>({key:p.config.id+':'+m.id,label:m.name||m.id})):[]);
  const errorKey=artifact?.errorCode?.includes('needs_source_selection')?'needs_sources':artifact?.errorCode?.match(/budget|admission|price/)?'generation_budget':artifact?.errorCode?.match(/offline|network|provider/)?'generation_offline':artifact?.errorCode?.includes('infeasible')?'generation_infeasible':'generation_failed';
  return <section className="review-artifacts"><h2>{tr(kind==='note'?'review:notes':'review:tests')}</h2>
- <ScopePicker courseId={courseId} selection={selection} onChange={setScope} needsSourceSelection={artifact?.errorCode==='review.needs_source_selection'}/>
+ <ScopePicker courseId={courseId} selection={selection} onChange={setScope} size={size} onSizeChange={setSize} needsSourceSelection={artifact?.errorCode==='review.needs_source_selection'}/>
  <div className="review-actions"><label>{tr('review:generation_model')}<select value={model} onChange={e=>setModel(e.target.value)}>{choices.map((m,index)=><option key={m.key} value={index}>{m.label}</option>)}</select></label><Button disabled={busy||artifact?.status==='generating'||!scope||!choices.length} onClick={()=>void run(()=>generate())}>{tr(kind==='note'?'review:generate_note':'review:generate_test')}</Button></div>
  {!choices.length&&<p>{tr('review:choose_provider')} <Button onClick={()=>void loadProviders()}>{tr('review:retry')}</Button></p>}
  {failed&&<p role="alert">{tr('review:error')} <Button onClick={()=>void run(async()=>{if(active.current.artifactId)await recover(active.current.artifactId);else{await loadProviders();page.retry();}})}>{tr('review:retry')}</Button></p>}

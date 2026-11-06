@@ -80,15 +80,14 @@
   "scope_documents_help": "Choose documents already attached to this course.",
   "scope_empty": "No choices yet. Add course materials or try another scope.",
   "scope_size": "Length",
-  "scope_standard": "Standard",
-  "scope_size_unavailable": "Length is currently determined by the selected materials.",
+  "scope_standard": "Standard (12 items)",
   "item_progress": "Question {{current}} of {{total}}",
   "your_answer": "Your answer",
   "answer_true": "True",
   "answer_false": "False",
-  "commit_notice": "Answers are saved as you go. Submit the test to lock all answers and see feedback.",
-  "finish_test": "Submit test",
-  "answer_next": "Save and continue",
+  "commit_notice": "Submitting locks this answer and shows feedback.",
+  "finish_test": "Submit final answer",
+  "answer_next": "Submit answer",
   "question_reported": "Question reported and excluded from review updates.",
   "answer_matches": "Your answer matches",
   "worth_another_look": "Worth another look",
@@ -142,5 +141,7 @@
   "resolved_documents": "Documents",
   "none": "None",
   "asked_fallback": "Based on when you asked",
-  "sources": "Sources"
+  "sources": "Sources",
+  "scope_short": "Short (8 items)",
+  "scope_long": "Long (20 items)"
 }

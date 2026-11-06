@@ -51,3 +51,9 @@ it('provides exact source messages for opening review evidence in History', () =
   expect(chat.conversations[0]!.scope).toBe('general');
   expect(chat.messages.some(message=>message.id==='00000000-0000-4000-8000-000000000024')).toBe(true);
 });
+it('validates generation contracts and reports unavailable attempts explicitly',()=>{
+ const mock=createReviewMock();
+ expect(mock('review:artifact:list',{courseId:'00000000-0000-4000-8000-000000000001'})).toEqual({items:[],nextCursor:null});
+ expect(()=>mock('review:attempt:get',{attemptId:'00000000-0000-4000-8000-000000000001'})).toThrow('review.attempt_unavailable');
+ expect(()=>mock('review:attempt:get',{attemptId:'invalid'})).toThrow();
+});

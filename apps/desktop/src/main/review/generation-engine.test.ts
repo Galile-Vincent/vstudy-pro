@@ -80,3 +80,52 @@ it('keeps abandoned generation untouched when constructing a service outside nor
  cleanup.push(()=>service.dispose());
  expect(repo.find(artifact.id)?.status).toBe('generating');
 });
+it('commits one item immutably, resumes, withholds other keys and applies only on confirmation', () => {
+ const {repo,request,snapshot}=setup();
+ const artifact=repo.create(request,snapshot,'token');
+ const source={documentId:randomUUID(),version:'original' as const,excerptHash:'a'.repeat(64),quote:'Secret source'};
+ repo.finish(artifact.id,'token',{test:{version:1,items:['a','b'].map(id=>({id,conceptKey:id,type:'true_false' as const,stem:id,answer:true,explanation:'Secret rationale',source}))}});
+ const engine=new Attempts(repo), attempt=engine.start(artifact.id);
+ engine.answer(attempt.id,'a',false);
+ const committed=engine.commit(attempt.id,'a');
+ expect(committed.phase).toBe('answering');
+ expect(committed.results.find(r=>r.itemId==='a')).toMatchObject({correct:false,feedback:{answer:true,explanation:'Secret rationale',source}});
+ expect(committed.results.find(r=>r.itemId==='b')?.feedback).toBeUndefined();
+ expect(()=>engine.answer(attempt.id,'a',true)).toThrow('locked');
+ expect(engine.commit(attempt.id,'a')).toEqual(committed);
+ expect(engine.start(artifact.id)).toEqual(committed);
+ expect(engine.get(attempt.id)).toEqual(committed);
+ expect(()=>engine.confirm(attempt.id)).toThrow('not_graded');
+ expect(repo.db.prepare('SELECT count(*) n FROM study_attempt_items WHERE appliedAt IS NOT NULL').get()?.n).toBe(0);
+ engine.answer(attempt.id,'b',true);
+ expect(engine.commit(attempt.id,'b').phase).toBe('graded');
+ expect(engine.commit(attempt.id).phase).toBe('graded');
+ repo.db.exec("CREATE TRIGGER fail_confirmation BEFORE UPDATE OF phase ON study_attempts WHEN NEW.phase='confirmed' BEGIN SELECT RAISE(ABORT,'confirmation failure'); END");
+ expect(()=>engine.confirm(attempt.id)).toThrow('confirmation failure');
+ expect(engine.get(attempt.id).phase).toBe('graded');
+ expect(repo.db.prepare('SELECT count(*) n FROM study_attempt_items WHERE appliedAt IS NOT NULL').get()?.n).toBe(0);
+ repo.db.exec('DROP TRIGGER fail_confirmation');
+ engine.confirm(attempt.id); engine.confirm(attempt.id);
+ expect(repo.db.prepare('SELECT count(*) n FROM study_attempt_items WHERE appliedAt IS NOT NULL').get()?.n).toBe(2);
+});
+it('sends only prompts to the renderer, including idempotent generation responses',async()=>{
+ const {rendererArtifact,rendererArtifactSchema}=await import('../../shared/review-generate');
+ const {repo,request,snapshot}=setup(), artifact=repo.create(request,snapshot,'token');
+ const source={documentId:randomUUID(),version:'original' as const,excerptHash:'a'.repeat(64),quote:'secret quote'};
+ repo.finish(artifact.id,'token',{test:{version:1,items:[{id:'q',conceptKey:'force',type:'cloze',stem:'Question',answer:'secret key',alternatives:['secret alias'],explanation:'secret explanation',nextStep:'secret hint',source}]}});
+ const payload=rendererArtifact(repo.find(artifact.id)!);
+ expect(JSON.stringify(payload)).not.toContain('secret');
+ expect(payload.test?.items[0]).toEqual({id:'q',conceptKey:'force',type:'cloze',stem:'Question'});
+ expect(rendererArtifactSchema.safeParse({...payload,test:repo.find(artifact.id)!.test}).success).toBe(false);
+});
+it('preserves requested size through a failed generation retry',async()=>{
+ const {repo,request,excerpt}=materials();request.size='long';
+ const sizes:(string|undefined)[]=[];
+ const service=new GenerationService(repo,{admission:new FakeAdmission(),readExcerpt:async()=>excerpt,estimate:(_prompt,r)=>{sizes.push(r.size);return {inputTokens:10,outputTokens:10,costUsd:1};},call:async()=>{
+  throw Error('offline');
+ }});
+ cleanup.push(()=>service.dispose());
+ const artifact=service.generate(request);await service.waitForIdle();
+ service.retry(artifact.id,randomUUID(),'en');await service.waitForIdle();
+ expect(sizes).toEqual(['long','long']);
+});

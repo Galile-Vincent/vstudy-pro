@@ -12,6 +12,7 @@ export const studyScopeSchema=z.discriminatedUnion('kind',[
 ]);
 export const studySourceSnapshotSchema=z.object({documentId:id,version:z.enum(['original','ai']),excerptHash:hash}).strict();
 export const studyResolvedScopeSchema=z.object({
+ size:z.enum(['short','standard','long']).optional(),
  unitIds:z.array(id).max(100),documentIds:z.array(id).max(100),conceptKeys:z.array(text).max(100),
  from:at.nullable(),to:at.nullable(),timeZone:zone,sources:z.array(studySourceSnapshotSchema).max(100),
  assumptions:z.array(z.string().min(1).max(500)).max(50),

@@ -9,7 +9,7 @@ import { useReviewPage, type Cursor } from './paging';
 
 export type ReviewScope = z.infer<typeof studyScopeSchema>;
 type Selection = { courseId: string; conceptKeys: string[]; labels: string[] };
-export function ScopePicker({ courseId, selection, onChange, needsSourceSelection }: { courseId: string; selection: Selection | null; onChange: (scope: ReviewScope | null) => void; needsSourceSelection?: boolean }) {
+export function ScopePicker({ courseId, selection, onChange, needsSourceSelection, size = 'standard', onSizeChange }: { courseId: string; selection: Selection | null; onChange: (scope: ReviewScope | null) => void; needsSourceSelection?: boolean; size?: 'short'|'standard'|'long'; onSizeChange?: (size:'short'|'standard'|'long')=>void }) {
   const preselected = selection?.courseId === courseId ? selection : null;
   const [kind, setKind] = useState<ReviewScope['kind']>(preselected ? 'concepts' : 'units');
   const [unitIds, setUnitIds] = useState<string[]>([]);
@@ -69,6 +69,6 @@ export function ScopePicker({ courseId, selection, onChange, needsSourceSelectio
       {!loading && !error && !choices.length && <p>{tr('review:scope_empty')}</p>}
       {page?.cursor && <Button type="button" disabled={page.loading} onClick={page.more}>{tr('review:load_more')}</Button>}
     </>}
-    <label>{tr('review:scope_size')}<select value="standard" disabled><option value="standard">{tr('review:scope_standard')}</option></select></label><p>{tr('review:scope_size_unavailable')}</p>
+    <label>{tr('review:scope_size')}<select value={size} onChange={event=>onSizeChange?.(event.target.value as 'short'|'standard'|'long')}>{(['short','standard','long'] as const).map(value=><option key={value} value={value}>{tr(`review:scope_${value}`)}</option>)}</select></label>
   </fieldset>;
 }
