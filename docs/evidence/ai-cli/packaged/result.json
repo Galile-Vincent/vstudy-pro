@@ -18,6 +18,18 @@
     "prebuilds/darwin-arm64/pty.node": 85496,
     "prebuilds/darwin-arm64/spawn-helper": 50480
   },
+  "helpers": [
+    {
+      "path": "build/Release/spawn-helper",
+      "before": "644",
+      "after": "755"
+    },
+    {
+      "path": "prebuilds/darwin-arm64/spawn-helper",
+      "before": "644",
+      "after": "644"
+    }
+  ],
   "result": {
     "ok": true,
     "packagedPty": true,
