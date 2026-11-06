@@ -4,7 +4,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { ConnectDialog, fuzzySiteMatch } from './connect';
 import { createMockMoodleApi } from '../dev-mock';
-import { i18n } from '../../shared/i18n';
+import { i18n, tr } from '../../shared/i18n';
 import type { AuthPlan } from '../../shared/moodle';
 vi.stubGlobal('ResizeObserver',class {observe() {} unobserve() {} disconnect() {}});
 (globalThis as {IS_REACT_ACT_ENVIRONMENT?:boolean}).IS_REACT_ACT_ENVIRONMENT = true;
@@ -100,7 +100,7 @@ it('waits for permission before sign-in without timing out',async () => {
   let release!: (value:{ready:boolean}) => void;
   api.preflight = () => new Promise(resolve => {release=resolve;});
   await click('Chung Yuan');await click('Continue to sign in');
-  expect(document.body.textContent).toContain('Waiting for macOS permission');
+  expect(document.body.textContent).toContain(tr('moodle:keychain_waiting'));
   expect(document.body.textContent).toContain('Choose Always Allow');
   expect(connect).not.toHaveBeenCalled();
   expect([...document.querySelectorAll('button')].some(button => button.textContent === 'Sign in')).toBe(false);

@@ -4,7 +4,7 @@
   "connect_ai": "Set up AI help",
   "setup_title": "How to get AI answers",
   "step_access": "Choose an AI service approved by your school. Ask your teacher or IT team if you are unsure. A ChatGPT or Claude chat subscription does not include API credit. The service may charge separately.",
-  "step_key": "Use Get a key below for that service. Paste its secret code into the matching field. Choose Use without saving keys for this session, or Save key. If Mac permission is denied, you can retry or use the session option.",
+  "step_key": "Use Get a key below for that service. Paste its secret code into the matching field. Choose Use without saving keys for this session, or Save key. If secure storage permission is denied, you can retry or use the session option.",
   "step_answer": "Select Test connection and wait for confirmation. Close Settings, choose a model in Chat, select a passage, and ask a question. If the check fails, follow its message or ask your school for help.",
   "no_account": "No AI account or secret code?",
   "ask_school": "You do not need Terminal or a paid account to keep reading. Ask your teacher or IT team which AI access your school permits. You can copy this request:",
