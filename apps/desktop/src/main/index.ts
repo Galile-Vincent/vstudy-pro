@@ -10,7 +10,7 @@ import { recoverRestore } from "./storage/backup";
 import { applyNativeTheme, nativeBackground } from './theme';
 import { initializeMoodleProtocol } from './moodle/sso-protocol';
 import { log } from './logging';
-import { showAttachedMessage } from './dialogs';
+import { showAttachedMessage, showStartupError, type StartupStage } from './dialogs';
 import { coordinateShutdown } from './shutdown';
 import { acquireOwnership } from './ownership';
 import { tr } from './i18n';
@@ -146,6 +146,7 @@ async function createWindow(show = true): Promise<void> {
   });
 }
 
+let startupStage: StartupStage = 'recovery';
 const ownsApplication = acquireOwnership(app, () => window, () => {void restoreMainWindow();});
 if (ownsApplication) void app.whenReady().then(async () => {
   if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
@@ -154,7 +155,9 @@ if (ownsApplication) void app.whenReady().then(async () => {
   await rollbackRestoreStartup(userData);
   await recoverRestore(userData);
   await reconcileDownloads(join(userData,"moodle-downloads"));
+  startupStage = 'database';
   store = openStore(join(userData, "vstudy.sqlite"));
+  startupStage = 'services';
   protocol.handle("vstudy-asset", assetHandler(store, userData));
   protocol.handle('vstudy', async request => {
     const url = new URL(request.url);
@@ -226,20 +229,18 @@ if (ownsApplication) void app.whenReady().then(async () => {
   app.on("activate", () => {
     void restoreMainWindow();
   });
+  startupStage = 'window';
   await createWindow(!process.argv.includes('--mcp-background'));
   if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
 }).catch(async error => {
+  showStartupError(error, startupStage);
   log({phase:"startup-failed",code:(error as NodeJS.ErrnoException).code ?? error.name});
   await disposeIpc?.();
   store?.close();store=undefined;
   if(await rollbackRestoreStartup(app.getPath("userData"))) {
     app.relaunch();app.exit(1);return;
   }
-  const code=(error as NodeJS.ErrnoException).code;
-  log({phase:'startup-storage-failed',code:code ?? 'STORAGE'});
-  const key=code==='ENOSPC' ? 'disk_full' : code==='EACCES' || code==='EPERM' ? 'permission' : 'integrity_failed';
-  await showAttachedMessage({type:'error',message:tr('storage:'+key),buttons:[tr('common:close')]});
   app.exit(1);
 });
 app.on("window-all-closed", () => {

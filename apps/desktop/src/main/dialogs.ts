@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import { app, BrowserWindow, dialog, type MessageBoxOptions } from 'electron';
+import { tr } from './i18n';
 import { coalescePrompt } from './services/prompt';
 export const showAttachedMessage = coalescePrompt(async (options: MessageBoxOptions) => {
   const parent = await new Promise<BrowserWindow>(resolve => {
@@ -16,3 +17,11 @@ export const showAttachedMessage = coalescePrompt(async (options: MessageBoxOpti
   });
   return dialog.showMessageBox(parent, options);
 });
+
+export type StartupStage = 'recovery' | 'database' | 'services' | 'window';
+/** Fatal startup errors must be visible even before Electron or a window is ready. */
+export function showStartupError(error: unknown, stage: StartupStage): void {
+  const code = (error as NodeJS.ErrnoException | null)?.code;
+  const key = code === 'ENOSPC' ? 'storage:disk_full' : code === 'EACCES' || code === 'EPERM' ? 'storage:permission' : 'errors:startup_' + stage;
+  dialog.showErrorBox('VStudy Pro', tr(key));
+}

@@ -5,7 +5,7 @@ import type { McpRuntime } from './mcp/runtime';
 
 const mocks = vi.hoisted(() => ({
   confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
-  showMessage: vi.fn(), log: vi.fn(), registerIpc: vi.fn(),
+  showMessage: vi.fn(), fatal: vi.fn(), log: vi.fn(), registerIpc: vi.fn(),
 }));
 const electron = await vi.hoisted(async () => {
   const { EventEmitter } = await import('node:events');
@@ -48,7 +48,7 @@ vi.mock('./storage/reconcile', () => ({ reconcileDownloads: vi.fn() }));
 vi.mock('./storage/restore-startup', () => ({ confirmRestoreStartup: mocks.confirm, rollbackRestoreStartup: mocks.rollback }));
 vi.mock('./storage/backup', () => ({ recoverRestore: vi.fn() }));
 vi.mock('./logging', () => ({ log: mocks.log }));
-vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage }));
+vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage, showStartupError: mocks.fatal }));
 vi.mock('./shutdown', () => ({ coordinateShutdown: () => vi.fn() }));
 vi.mock('./ownership', () => ({ acquireOwnership: () => true }));
 vi.mock('./i18n', () => ({ tr: (key: string) => key }));
@@ -107,6 +107,7 @@ it('rejects a real main-frame load failure and removes the pending navigation li
   window.webContents.emit('did-fail-load', {}, -105, 'ERR_NAME_NOT_RESOLVED', 'file://app', true);
   await vi.waitFor(() => expect(electron.app.exit).toHaveBeenCalledWith(1));
   expect(mocks.confirm).not.toHaveBeenCalled();
+  expect(mocks.fatal).toHaveBeenCalledWith(expect.any(Error), 'window');
   expect(mocks.closeStore).toHaveBeenCalledOnce();
   expect(window.webContents.listenerCount('did-finish-load')).toBe(0);
   expect(window.webContents.listenerCount('did-fail-load')).toBe(0);
