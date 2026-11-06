@@ -1,19 +1,5 @@
-/** Headers rest without a rule. Only an overlapping scroll surface adds an opacity fade. */
+/** App headers remain borderless at rest and while content scrolls beneath them. */
 .app-shell .shell-topbar,.app-shell .app-header,.workspace .pane-toolbar,.settings-header,.settings-section-header,.library-toolbar,.moodle-header,.moodle-agent-heading,.workspace-tabs {
   border-bottom:0; box-shadow:none;
 }
 .app-shell .shell-topbar,.app-shell .app-header,.settings-header,.library-toolbar { position:relative; z-index:6; }
-.shell-topbar::after,.app-header::after,.reading-pane > .pane-toolbar::after,.settings-header::after,.library-toolbar::after {
-  content:""; position:absolute; inset:100% 0 auto; height:14px; pointer-events:none;
-  background:linear-gradient(color-mix(in oklab,var(--shadow-color) 9%,transparent),transparent);
-  opacity:0; transition:opacity 180ms cubic-bezier(.2,.8,.2,1);
-}
-.shell-main:has(:is(.moodle-page,.home-page,.history-page)[data-scrolled=true]) > .shell-topbar::after,
-.workspace:has(:is(.reading-pane,.reading-scroll,.aui-thread-viewport)[data-scrolled=true]) > .app-header::after,
-.reading-pane[data-scrolled=true] > .pane-toolbar::after,
-.reading-pane:has(.reading-scroll[data-scrolled=true]) > .pane-toolbar::after,
-.settings-dialog:has(.settings-pane[data-scrolled=true]) > .settings-header::after,
-.library-view:has(.library-results[data-scrolled=true]) .library-toolbar::after { opacity:1; }
-@media(prefers-reduced-motion:reduce) {
-  .shell-topbar::after,.app-header::after,.reading-pane > .pane-toolbar::after,.settings-header::after,.library-toolbar::after { transition:none; }
-}
