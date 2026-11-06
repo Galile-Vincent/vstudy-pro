@@ -23,8 +23,12 @@ export function registryAppPaths(text: string, environment: NodeJS.ProcessEnv): 
     }
     if (!/^VStudy Pro(?: \d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)?$/.test(values.DisplayName ?? '')) continue;
     if (values.InstallLocation) paths.push(win32.join(values.InstallLocation.replace(/^"|"$/g, ''), 'VStudy Pro.exe'));
-    const icon = values.DisplayIcon?.match(/^"([^"]+\.exe)"(?:,-?\d+)?$|^(.+\.exe)(?:,-?\d+)?$/i);
-    if (icon) paths.push(icon[1] ?? icon[2]!);
+    const icon = values.DisplayIcon?.match(/^"([^"]+\.(?:exe|ico))"(?:,-?\d+)?$|^(.+\.(?:exe|ico))(?:,-?\d+)?$/i);
+    if (icon) {
+      const file = icon[1] ?? icon[2]!;
+      if (win32.extname(file).toLowerCase() === '.exe') paths.push(file);
+      else if (win32.basename(file).toLowerCase() === 'uninstallericon.ico') paths.push(win32.join(win32.dirname(file), 'VStudy Pro.exe'));
+    }
   }
   return paths.map(path => path.replace(/%([^%]+)%/g, (_, name: string) => environment[name] ?? `%${name}%`));
 }

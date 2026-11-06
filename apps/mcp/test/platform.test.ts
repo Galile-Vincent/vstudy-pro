@@ -123,6 +123,31 @@ describe('platform connection and launch fixtures', () => {
       expect(registryAppPaths('HKEY_CURRENT_USER\\x\n    DisplayName    REG_SZ    ' + name + '\n    DisplayIcon    REG_SZ    C:\\Other\\VStudy Pro.exe\n', environment)).toEqual([]);
     }
   });
+  it.each([false, true])('finds a custom NSIS install from its uninstaller icon, quoted=%s', async quoted => {
+    const directory = String.raw`E:\Student's files & notes\$(literal); [course]`;
+    const exe = directory + String.raw`\VStudy Pro.exe`;
+    const icon = directory + String.raw`\uninstallerIcon.ico`;
+    const record = 'HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\fixture\r\n    DisplayName    REG_SZ    VStudy Pro 0.2.2\r\n    DisplayIcon    REG_SZ    ' + (quoted ? '"' + icon + '",0' : icon) + '\r\n';
+    const query = vi.fn(() => record);
+    const run = vi.fn(async () => {});
+    await launchApplication({platform: 'win32', environment, query, isFile: path => path === exe, run});
+    expect(run).toHaveBeenCalledWith(exe, ['--mcp-background'], true);
+    expect(query).toHaveBeenCalledOnce();
+  });
+  it('uses a legacy NSIS icon record only after current-user and standard-path discovery fail', () => {
+    const directory = String.raw`D:\Custom VStudy`;
+    const record = 'HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\fixture\n    DisplayName    REG_SZ    VStudy Pro 0.2.2\n    DisplayIcon    REG_SZ    ' + directory + '\\uninstallerIcon.ico\n';
+    const query = vi.fn((_exe: string, args: string[]) => args[1]!.startsWith('HKLM\\') ? record : '');
+    expect(resolveWindowsApp({environment, query, isFile: path => path === directory + '\\VStudy Pro.exe'})).toBe(directory + '\\VStudy Pro.exe');
+    expect(query.mock.calls.map(([, args]) => args[1])).toEqual([
+      String.raw`HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall`, String.raw`HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall`,
+    ]);
+  });
+  it('does not treat unrelated icon names or icon commands as an install directory', () => {
+    for (const icon of [String.raw`E:\Other\icon.ico`, String.raw`E:\Other\uninstallerIcon.ico --run`, String.raw`E:\Other\uninstallerIcon.ico,0 & run`]) {
+      expect(registryAppPaths('HKEY_CURRENT_USER\\x\n    DisplayName    REG_SZ    VStudy Pro 0.2.2\n    DisplayIcon    REG_SZ    ' + icon + '\n', environment)).toEqual([]);
+    }
+  });
   it('prefers a custom HKCU InstallLocation over the standard per-user directory', () => {
     const directory = 'E:\\Custom VStudy';
     const custom = directory + '\\VStudy Pro.exe';
