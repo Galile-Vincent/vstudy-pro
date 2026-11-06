@@ -148,7 +148,7 @@ Both theme controls use a shared 280ms View Transitions crossfade. If unavailabl
 
 The first pass found mobile overflow caused by the drifting glow. The glow's own bounds now stay inside the viewport. No global overflow hiding was added. The second pass found the reading-format note overlapping its screenshot. Clipping now belongs to the screenshot container and the note has its own space. Captures from both passes and the corrected result are under [website-v2](evidence/website-v2/).
 
-The v2 HTML sketches stay outside the repository. PNG evidence follows the existing local-evidence ignore rule. JSON audits, screenshot manifests, design decisions, and verification instructions are committed. T3 captures can rasterize at a different size than their CSS viewport. The manifest records the CSS width used for each capture.
+The v2 HTML sketches stay outside the repository. The coordinator requested that remaining evidence be committed. This task therefore commits its PNG captures alongside JSON audits, screenshot manifests, design decisions, and verification instructions. T3 captures can rasterize at a different size than their CSS viewport. The manifest records the CSS width used for each capture.
 
 ### Integration gate
 

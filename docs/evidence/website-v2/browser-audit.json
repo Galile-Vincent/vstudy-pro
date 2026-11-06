@@ -1,0 +1,3998 @@
+{
+  "date": "2026-11-06",
+  "surface": "production build at http://localhost:4323/vstudy-pro/",
+  "home": [
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/en/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    },
+    {
+      "url": "/vstudy-pro/ja/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 29
+    }
+  ],
+  "docs": [
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "language": "en",
+      "scheme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "scheme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "scheme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "scheme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "scheme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "language": "zh-Hant",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "language": "ja",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "language": "en",
+      "scheme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "language": "zh-Hant",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "language": "ja",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 27
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "language": "en",
+      "scheme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "headerBorder": "0px",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "scheme": "light",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/reading-documents/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/chat-history/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/data-and-storage/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/development/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/study-planner/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/connect-your-school/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/troubleshooting/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/architecture/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/courses-and-deadlines/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/getting-started/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/moodle-pages/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/privacy-and-network/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/themes/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/ai-providers/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/zh-Hant/docs/keyboard-shortcuts/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/reading-documents/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/chat-history/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/data-and-storage/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/development/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/study-planner/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/connect-your-school/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/troubleshooting/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/architecture/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/courses-and-deadlines/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/getting-started/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/moodle-pages/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/privacy-and-network/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/themes/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/ai-providers/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/ja/docs/keyboard-shortcuts/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/reading-documents/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/chat-history/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/data-and-storage/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/development/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/study-planner/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/connect-your-school/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/troubleshooting/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/architecture/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/courses-and-deadlines/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/getting-started/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/moodle-pages/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/privacy-and-network/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/themes/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/ai-providers/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    },
+    {
+      "url": "/vstudy-pro/en/docs/keyboard-shortcuts/",
+      "scheme": "dark",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "headerBorder": "0px"
+    }
+  ]
+}
