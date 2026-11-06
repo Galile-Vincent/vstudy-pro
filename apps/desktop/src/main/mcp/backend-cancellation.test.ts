@@ -1,9 +1,13 @@
 /** Ensure grant cancellation stops queued requests, in-flight reads and follow-up submission effects. @packageDocumentation */
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import fixture from '../moodle/fixtures/mcp-4x.json';
 import { backendHarness, accountA, courseA, moduleA, assignA } from './backend-test-support';
 import { createMcpBackend } from './backend';
 import { mcpTools } from '../../shared/mcp';
+import { McpEngine } from './engine';
+import { GrantStore } from './grants';
+import { countingStatePersistence } from './state-test-fixture';
+import { call, pair } from './test-fixture';
 
 const harnesses:Awaited<ReturnType<typeof backendHarness>>[] = [];
 afterEach(async () => { for (const h of harnesses.splice(0)) await h.close(); });
@@ -12,6 +16,72 @@ async function setup() {
   Object.assign(h.replies, {core_calendar_get_calendar_upcoming_view:{events:[]}, core_course_get_course_module:fixture.assignmentCm, mod_assign_get_assignments:fixture.assignments, mod_assign_get_submission_status:fixture.status, mod_assign_save_submission:[], mod_assign_submit_for_grading:[]});
   return {...h, backend:createMcpBackend(h.options)};
 }
+
+const preparationReads = ['core_course_get_course_module', 'mod_assign_get_assignments', 'mod_assign_get_submission_status'];
+it.each(preparationReads)('revocation during preparation at %s aborts transport and prevents later authenticated reads', async blocked => {
+  const h = await setup();
+  const persistence = countingStatePersistence();
+  const engine = new McpEngine({userData:'profile', backend:h.backend, persistence, limits:{spacingMs:0, jitterMs:0}});
+  let entered!:() => void, release!:() => void;
+  const ready = new Promise<void>(resolve => { entered = resolve; });
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let signal:AbortSignal | null | undefined;
+  h.request.mockImplementation(async (_url, init) => {
+    const name = new URLSearchParams(String(init?.body)).get('wsfunction')!;
+    if (name === blocked) { signal = init?.signal; entered(); await gate; }
+    // An already-dispatched response can still arrive after revocation.
+    return Response.json(h.replies[name]);
+  });
+  try {
+    engine.setEnabled(true);
+    const client = await pair(engine, [accountA]);
+    const pending = call(engine, client.grant, 'save_assignment_draft', {courseId:courseA, moduleId:assignA, assignmentId:52, text:'My essay.', studentOwned:true});
+    await ready;
+    const writes = persistence.write.mock.calls.length;
+    engine.revoke(client.grantInfo.id);
+    expect(signal?.aborted).toBe(true);
+    expect(await pending).toMatchObject({ok:false, error:{code:'DENIED'}});
+    release();
+    await vi.waitFor(() => expect(engine.state().activeCalls).toBe(0));
+    const functions = h.request.mock.calls.map(row => new URLSearchParams(String(row[1]?.body)).get('wsfunction'));
+    expect(functions).toEqual(preparationReads.slice(0, preparationReads.indexOf(blocked) + 1));
+    expect(engine.state().proposals).toEqual([]);
+    expect(engine.state().activity).toEqual([]);
+    expect(persistence.write).toHaveBeenCalledTimes(writes + 1);
+    expect(() => new GrantStore('profile', Date.now, persistence).authorize(client.grant)).toThrow('DENIED');
+  } finally { release(); engine.dispose(); }
+});
+
+it('expiry during preparation stops new reads through live authorization without a cancelled signal', async () => {
+  const h = await setup();
+  const persistence = countingStatePersistence();
+  let now = Date.now();
+  const engine = new McpEngine({userData:'profile', backend:h.backend, persistence, now:() => now, limits:{spacingMs:0, jitterMs:0}});
+  let entered!:() => void, release!:() => void;
+  const ready = new Promise<void>(resolve => { entered = resolve; });
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let signal:AbortSignal | null | undefined;
+  h.request.mockImplementation(async (_url, init) => {
+    signal = init?.signal;
+    entered(); await gate;
+    const name = new URLSearchParams(String(init?.body)).get('wsfunction')!;
+    return Response.json(h.replies[name]);
+  });
+  try {
+    engine.setEnabled(true);
+    const client = await pair(engine, [accountA]);
+    const writes = persistence.write.mock.calls.length;
+    const pending = call(engine, client.grant, 'save_assignment_draft', {courseId:courseA, moduleId:assignA, assignmentId:52, text:'My essay.', studentOwned:true});
+    await ready;
+    now = Date.parse(client.grantInfo.expiresAt);
+    release();
+    expect(await pending).toMatchObject({ok:false, error:{code:'EXPIRED'}});
+    expect(h.request).toHaveBeenCalledTimes(1);
+    expect(signal?.aborted).toBe(false);
+    expect(persistence.write).toHaveBeenCalledTimes(writes);
+    expect(engine.state().proposals).toEqual([]);
+  } finally { release(); engine.dispose(); }
+});
 
 it('aborts a prepared write while queued without dispatching validation reads or mutations', async () => {
   const h = await setup();

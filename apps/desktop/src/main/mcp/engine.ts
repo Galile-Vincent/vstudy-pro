@@ -216,7 +216,10 @@ export class McpEngine {
         if (!cursor || cursor.grantId !== grant.id || cursor.key !== this.cursorKey(name, args) || cursor.expires <= this.now()) throw new McpFailure('INVALID_ARGUMENT');
         backendArgs.cursor = cursor.value;
       }
-      const call = await this.options.backend.prepare(name, freezePayload(structuredClone(backendArgs)), Object.freeze([...grant.accountIds]));
+      const call = await this.options.backend.prepare(name, freezePayload(structuredClone(backendArgs)), Object.freeze([...grant.accountIds]), signal, () => {
+        try { signal.throwIfAborted(); this.authorize(token, name, args); return null; }
+        catch (error) { return failureCode(error); }
+      });
       signal.throwIfAborted();
       this.authorize(token, name, args, call);
       prepared(call);
