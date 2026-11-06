@@ -661,3 +661,22 @@ it('shows a partial contents notice alongside the surviving items',async () => {
   expect(host.textContent).toContain("Some items couldn't be displayed");
   expect(host.querySelectorAll('.moodle-module').length).toBeGreaterThan(0);
 });
+
+it('keeps retained course content in place during a background panel refresh',async()=>{
+  const api=createMockMoodleApi();
+  const detail=await api.course((await api.overview()).courses[0]!.id);
+  detail.panels={contents:'loading',completion:'loading'};
+  api.course=async()=>detail;
+  await mount(api,detail.course.id);
+  expect(host.querySelectorAll('.moodle-module').length).toBeGreaterThan(0);
+  expect(host.querySelector('.moodle-skeleton')).toBeNull();
+  expect(host.querySelector('[role=status][aria-busy=true]')).not.toBeNull();
+});
+it('still shows an initial panel skeleton when course content is absent',async()=>{
+  const api=createMockMoodleApi();
+  const detail=await api.course((await api.overview()).courses[0]!.id);
+  detail.panels={contents:'loading'};detail.sections=[];detail.course.identity.teachers=[];
+  api.course=async()=>detail;
+  await mount(api,detail.course.id);
+  expect(host.querySelector('.moodle-skeleton')).not.toBeNull();
+});

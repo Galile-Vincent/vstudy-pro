@@ -1,4 +1,5 @@
 import { chatHistoryMessages, EarlierMessages, type MessageCursor } from './chat-history';
+import { useChatMotion } from './motion/chat-motion';
 import { FileText } from 'lucide-react';
 import { ChatAnnouncement, CopyAnswerButton } from './chat-accessibility';
 import { ReaderOfflineNotice } from './workspace/offline-notice';
@@ -73,6 +74,8 @@ export function Chat({
 }) {
   useTranslation();
   const [earlierHistory, setEarlierHistory] = useState<Message[]>([]);
+  const restoredHistory = useMemo(() => [...earlierHistory, ...history], [earlierHistory, history]);
+  const motion = useChatMotion(restoredHistory);
   const [options, setOptions] = useState<Record<string,string|boolean>>(conversation.options ?? {});
   useEffect(() => setOptions(conversation.options ?? {}), [conversation.providerId,conversation.modelId]);
   const declared = providers.find(p => p.config.id === conversation.providerId)?.models.find(m => m.id === conversation.modelId || m.resolvedId === conversation.modelId)?.options ?? [];
@@ -138,7 +141,7 @@ export function Chat({
       setEarlierHistory(current => [...messages, ...current]);
       for (const message of messages) for (const part of message.parts) if (part.selection) selections.current.set(message.id, part.selection);
     }}/>
-    <Thread components={documentComponents} autoFocus={autoFocus} />
+    <div className="chat-motion" ref={motion}><Thread components={documentComponents} autoFocus={autoFocus} /></div>
     <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }

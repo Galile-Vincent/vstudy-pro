@@ -202,8 +202,9 @@ function CoursesBody({
 
   const panelStatus = (...names:import('../../shared/moodle').MoodlePanel[]) => {
     const states=names.map(name => detail?.panels?.[name]);
+    const retained = names.some(name => name === 'contents' || name === 'completion' ? !!detail?.sections.length : name === 'teachers' ? !!detail?.course.identity.teachers.length : name === 'assignments' || name === 'quizzes' ? !!detail?.deadlines.length : !!detail?.[name].length);
     return <>
-      {states.includes('loading') && <div role="status" aria-label={tr('moodle:loading')}><Skeleton className="moodle-skeleton" /></div>}
+      {states.includes('loading') && <div role="status" aria-busy="true" aria-label={tr('moodle:loading')}>{retained ? <span className="muted">{tr('moodle:loading')}</span> : <Skeleton className="moodle-skeleton" />}</div>}
       {states.includes('error') && <p role="alert">{tr(`moodle:panel_error_${names.map(name => detail?.panelErrors?.[name]).find(Boolean) ?? 'service'}`)} <button onClick={() => void sync()}>{tr('moodle:retry')}</button></p>}
     </>;
   };

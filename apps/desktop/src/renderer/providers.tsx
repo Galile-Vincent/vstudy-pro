@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSettings } from './language-settings';
 import { tr } from '../shared/i18n';
 import { UsageSettings } from './usage/settings';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { desktop } from './bridge';
 import { type Providers } from './provider-metadata';
 import { ProviderRow } from './provider-row';
@@ -39,6 +39,19 @@ export function ProviderSettings({
 }) {
   useTranslation();
   const navigation = useOptionalNavigation();
+  const [open, setOpen] = useState(true);
+  const completed = useRef(false);
+  const requestClose = useCallback(() => setOpen(false), []);
+  const finishClose = useCallback(() => {
+    if (completed.current) return;
+    completed.current = true;
+    onClose();
+  }, [onClose]);
+  useEffect(() => {
+    if (open) return;
+    const timer = setTimeout(finishClose, 250);
+    return () => clearTimeout(timer);
+  }, [open, finishClose]);
   const [guide, setGuide] = useState(false);
   const [structuredTables, setStructuredTables] = useState(false);
   const [featureError, setFeatureError] = useState('');
@@ -58,22 +71,25 @@ export function ProviderSettings({
   }, []);
 
   useEffect(() => {
-    const handoff = () => onClose();
+    const handoff = requestClose;
     window.addEventListener(aiCliSetupEvent, handoff);
     return () => window.removeEventListener(aiCliSetupEvent, handoff);
-  }, [onClose]);
+  }, [requestClose]);
 
   return (
     <Dialog
-      open
+      open={open}
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) requestClose();
       }}
     >
-      <DialogContent aria-describedby={undefined} showCloseButton={false} className="settings-dialog">
+      <DialogContent aria-describedby={undefined} showCloseButton={false} className="settings-dialog"
+        onAnimationEnd={event => {
+          if (!open && event.target === event.currentTarget) finishClose();
+        }}>
         <div className="settings-header">
           <DialogTitle>{tr('common:settings')}</DialogTitle>
-          <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={tr('common:close_settings')}>
+          <Button variant="ghost" size="icon-sm" onClick={requestClose} aria-label={tr('common:close_settings')}>
             <X size={16} />
           </Button>
         </div>
@@ -127,7 +143,7 @@ export function ProviderSettings({
                             id="welcome-settings-entry"
                             onClick={() => {
                               navigation?.navigate('welcome');
-                              onClose();
+                              requestClose();
                             }}
                           >
                             {tr('welcome:entry')} · {tr('welcome:try_title')}
@@ -148,7 +164,7 @@ export function ProviderSettings({
                   ) : (
                     <>
                       <AiCliInventory />
-                      <AiSetupGuide onClose={onClose} />
+                      <AiSetupGuide onClose={requestClose} />
                       <SettingsGroup title={tr('novice:ai_services')}>
                         {providers.filter(provider => provider.config.kind === 'api').map(provider => (
                           <ProviderRow settingsView key={provider.config.id} provider={provider} onRefresh={onRefresh} />

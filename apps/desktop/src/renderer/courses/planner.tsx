@@ -98,7 +98,7 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
       {unallocated.length > 0 && <section className="planner-panel" aria-label={tr("planner:unallocated")}><h2>{tr("planner:unallocated")}</h2><ul>{unallocated.map((item, index) => <li key={index}>{tr(`planner:unallocated_${item.reason}`, { title: item.title, minutes: item.minutes })}</li>)}</ul></section>}
       {pending && <PlannerProposal action={pending.action} courses={courses} deadlines={deadlines} snapshot={snapshot} busy={busy} onApprove={() => void approve()} onDismiss={() => setPending(undefined)} />}
       <Tabs value={view} onValueChange={setView} className="planner-view-tabs"><TabsList aria-label={tr("planner:title")}><TabsTrigger value="today">{tr("planner:today")}</TabsTrigger><TabsTrigger value="week">{tr("planner:week")}</TabsTrigger></TabsList>
-      <TabsContent value={view}><div className="planner-columns"><div>
+      {['today','week'].map(panel => <TabsContent key={panel} value={panel} forceMount hidden={view !== panel}>{view === panel && <div className="planner-columns"><div>
         <section className="planner-panel"><h2>{tr(view === "today" ? "planner:today" : "planner:week")}</h2>
           {!tasks.length && <p className="planner-muted">{tr("planner:empty_today")}</p>}
           <ul className="planner-task-list">{tasks.map(task => <li key={task.id}>
@@ -129,7 +129,7 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
             <ol>{blocks.map(b => <li key={b.id}><strong>{b.title}</strong><span>{courseTitle(b.courseId)}</span><time dateTime={b.startsAt}>{tr("planner:duration_window", { start: new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { hour: "numeric", minute: "2-digit", timeZone: zone }).format(new Date(b.startsAt)), minutes: b.durationMinutes })}</time></li>)}</ol>
           </section>;
         })}
-      </section></div></TabsContent></Tabs>
+      </section></div>}</TabsContent>)}</Tabs>
     </>}
   </section>;
 }

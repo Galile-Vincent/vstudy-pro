@@ -102,8 +102,10 @@ export function AppShell({
     update(); media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, [route.view]);
+  const focusTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(focusTimer.current), []);
   useEffect(() => {
-    if (route.view === 'welcome' || route.aiParse) return;
+    if (route.view === 'welcome' || route.aiParse || focusTimer.current !== undefined) return;
     const frame = requestAnimationFrame(() => { document.getElementById("shell-content")?.focus(); });
     return () => cancelAnimationFrame(frame);
   }, [route.view, route.documentId, route.courseId]);
@@ -111,6 +113,8 @@ export function AppShell({
   const returnSettings = useRef(false);
   const returnFocus = useRef<HTMLElement | null>(null);
   const navigate: Navigation["navigate"] = (value) => {
+    clearTimeout(focusTimer.current);
+    focusTimer.current = undefined;
     if (sidebarOverlay) closeSidebar();
     const next = typeof value === "string" ? { view: value } : value;
     if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = route; returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
@@ -119,8 +123,26 @@ export function AppShell({
     else transitionTo(() => setRoute(next));
     try { localStorage.setItem("vstudy-route", JSON.stringify({ ...next, connectSchool: undefined })); } catch { /* Route persistence is optional. */ }
   };
+  const closeWelcome = () => {
+    navigate(previous.current);
+    const origin = document.activeElement;
+    focusTimer.current = setTimeout(() => {
+      focusTimer.current = undefined;
+      const active = document.activeElement;
+      if (active !== origin && active !== document.body && active?.id !== 'shell-content') return;
+      if (returnSettings.current) {
+        window.dispatchEvent(new Event("vstudy:open-settings"));
+        focusTimer.current = setTimeout(() => {
+          focusTimer.current = undefined;
+          const active = document.activeElement;
+          if (active === origin || active === document.body || active?.id === 'shell-content' || active?.closest('.settings-dialog')) document.getElementById("welcome-settings-entry")?.focus();
+        }, 0);
+      } else if (returnFocus.current?.isConnected) returnFocus.current.focus();
+      else document.getElementById("welcome-entry")?.focus();
+    }, 0);
+  };
   return (
-    <NavigationContext.Provider value={{ route, navigate, closeWelcome: () => { navigate(previous.current); setTimeout(() => { const target = returnFocus.current; if (returnSettings.current) { window.dispatchEvent(new Event("vstudy:open-settings")); setTimeout(() => document.getElementById("welcome-settings-entry")?.focus(), 100); } else if (target?.isConnected) target.focus(); else document.getElementById("welcome-entry")?.focus(); }, 350); } }}>
+    <NavigationContext.Provider value={{ route, navigate, closeWelcome }}>
       <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view} data-sidebar-overlay={sidebarOverlay}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
