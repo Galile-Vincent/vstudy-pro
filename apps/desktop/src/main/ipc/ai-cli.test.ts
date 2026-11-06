@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { IpcMainInvokeEvent } from 'electron';
 import { temporaryDirectories } from '../providers/setup/test-fixtures';
+import { windowsFixtureImage } from '../providers/setup/native-fixtures';
 import { ExecutablePins, setExecutablePins } from '../providers/executable-pins';
 import { ProviderRegistry } from '../providers';
 import type { ChatService } from '../services/chat';
@@ -14,14 +15,31 @@ import type { IpcChannel } from '../../shared/ipc';
 import { createIpcRegistrar } from './register';
 import { registerAiCliIpc } from './ai-cli';
 const approval = vi.hoisted(() => ({ show: vi.fn(async () => ({ response: 1, checkboxChecked: false })) }));
+const host = vi.hoisted(() => ({ windows: process.platform === 'win32', rejectLaunch: false }));
+vi.mock('node:fs', async importOriginal => {
+  const fs = await importOriginal<typeof import('node:fs')>();
+  return { ...fs, lstatSync: (path: Parameters<typeof fs.lstatSync>[0]) => {
+    const info = fs.lstatSync(path);
+    if (host.windows && process.platform !== 'win32') info.mode &= ~0o077;
+    return info;
+  } };
+});
+vi.mock('node:fs/promises', async importOriginal => {
+  const fs = await importOriginal<typeof import('node:fs/promises')>();
+  return { ...fs, stat: async (path: Parameters<typeof fs.stat>[0]) => {
+    const info = await fs.stat(path);
+    if (host.windows && process.platform !== 'win32') info.mode &= ~0o077;
+    return info;
+  } };
+});
 vi.mock('../dialogs', () => ({ showAttachedMessage: approval.show }));
-beforeEach(() => { approval.show.mockClear().mockResolvedValue({ response: 1, checkboxChecked: false }); });
+beforeEach(() => { host.rejectLaunch = false; approval.show.mockClear().mockResolvedValue({ response: 1, checkboxChecked: false }); });
 const electron = vi.hoisted(() => ({ app: { getPath: vi.fn(), isPackaged: true }, clipboard: { writeText: vi.fn() } }));
 vi.mock('electron', () => electron);
 vi.mock('node:child_process', async importOriginal => ({
   ...await importOriginal<typeof import('node:child_process')>(),
   execFile: vi.fn((...args: unknown[]) => { const callback = args.at(-1); if (typeof callback === 'function') callback(new Error('PRIVATE https://auth.example.test/?code=SECRET')); }),
-  spawn: vi.fn(() => { const child = Object.assign(new EventEmitter(), { unref: vi.fn() }); queueMicrotask(() => child.emit('spawn')); return child; }),
+  spawn: vi.fn(() => { const child = Object.assign(new EventEmitter(), { unref: vi.fn() }); queueMicrotask(() => host.rejectLaunch ? child.emit('error', new Error('PRIVATE https://auth.example.test/?code=SECRET')) : child.emit('spawn')); return child; }),
 }));
 const temporary = temporaryDirectories();
 const disposers: (() => Promise<void>)[] = [];
@@ -54,6 +72,7 @@ it('registers the entire contract with strict sender, subframe, and request vali
   expect(await invoke('ai-cli:preferences', {})).toEqual({ updateChecks: false, autoUpdateWhenIdle: false, advancedShell: false });
 });
 it('notifies the existing preload bridge and sanitizes native errors before the registrar logs them', async () => {
+  host.rejectLaunch = true; vi.stubEnv('LOCALAPPDATA', undefined);
   const { invoke, owner } = await backend(), logging = vi.spyOn(console, 'error').mockImplementation(() => {});
   await invoke('ai-cli:setPreferences', { updateChecks: false, autoUpdateWhenIdle: false, advancedShell: true });
   expect(owner.send).toHaveBeenCalledWith('vstudy:providers-changed');
@@ -74,7 +93,7 @@ it.each([
   const logging = vi.spyOn(console, 'error').mockImplementation(() => {});
   try {
     const { invoke, pins, root } = await backend(), binary = join(root, `${provider}.exe`), actionId = `login-${provider}`;
-    await writeFile(binary, 'MZ fixture', { mode: 0o700 }); await pins.choose(provider, binary);
+    await writeFile(binary, windowsFixtureImage('IPC metadata fixture'), { mode: 0o700 }); await pins.choose(provider, binary);
     await invoke('ai-cli:consent', { provider, enabled: true });
     const blocked = aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview', { actionId }));
     await expect(invoke('ai-cli:run', { actionId, token: blocked.token })).rejects.toThrow('VSTUDY_STATUS');
@@ -125,6 +144,7 @@ it('requires native user approval before the renderer can enable the general she
   expect(approval.show).toHaveBeenCalledTimes(2);
 });
 it('revokes previews on a main document reload and preserves same-document navigation', async () => {
+  host.rejectLaunch = true; vi.stubEnv('LOCALAPPDATA', undefined);
   const { invoke, owner } = await backend();
   await invoke('ai-cli:setPreferences', { updateChecks: false, autoUpdateWhenIdle: false, advancedShell: true });
   const plan = aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview', { actionId: 'advanced-shell' }));

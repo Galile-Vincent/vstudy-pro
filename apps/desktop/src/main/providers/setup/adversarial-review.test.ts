@@ -11,6 +11,7 @@ import { ExecutablePins } from '../executable-pins';
 import { executableIdentity } from '../trusted-executable';
 import { claudeFixture, setupFixture } from './service-fixtures';
 import { Owner, payloadNetwork, payloadRelease, tarPayload, temporaryDirectories } from './test-fixtures';
+import { fixtureBinary, fixtureExecutableName } from './native-fixtures';
 
 const temporary = temporaryDirectories();
 const signal = () => AbortSignal.timeout(5000);
@@ -69,7 +70,7 @@ it.each(['both', 'automatic', 'checks', 'provider', 'regrant'] as const)('cancel
     const installed = service.run(owner, 'install-claude', preview.token);
     await service.sessions.owned(owner, installed.id).done;
     const marker = join(root, 'AUTOMATIC_PROBE_EXECUTED');
-    const next = Buffer.from(claudeFixture(root, '1.1.0').toString().replace("const fs=require('fs');", `const fs=require('fs');fs.writeFileSync(${JSON.stringify(marker)},'executed');`));
+    const next = claudeFixture(root, '1.1.0', `fs.writeFileSync(${JSON.stringify(marker)},'executed');`);
     const release = payloadRelease(next, '1.1.0');
     store.remember(release, Date.now()); store.attempt(Date.now());
     let started!: () => void;
@@ -92,7 +93,7 @@ it.each(['both', 'automatic', 'checks', 'provider', 'regrant'] as const)('cancel
 });
 
 async function forgedRecord() {
-  const root = await temporary(), bytes = Buffer.from('#!/bin/sh\nexit 0\n');
+  const root = await temporary(), bytes = fixtureBinary('#!/bin/sh\nexit 0\n');
   const allowed = new Map([['1.0.0', hash(bytes)]]);
   const store = new SetupStore(join(root, 'tools'), async (release, binary) => {
     if (allowed.get(release.version) !== (await executableIdentity(binary)).hash) throw new Error('Unauthenticated record');
@@ -102,8 +103,8 @@ async function forgedRecord() {
   pins.setManagedResolver(binary => store.identity(binary), binary => store.describe(binary));
   pins.activateManaged('claude', installed.identity);
   const originalPins = await readFile(file, 'utf8');
-  const folder = join(store.root, 'claude', '9.9.9'), binary = join(folder, 'claude');
-  await mkdir(folder, { mode: 0o700 }); await writeFile(binary, '#!/bin/sh\necho malicious\n', { mode: 0o700 });
+  const folder = join(store.root, 'claude', '9.9.9'), binary = join(folder, fixtureExecutableName('claude'));
+  await mkdir(folder, { mode: 0o700 }); await writeFile(binary, fixtureBinary('#!/bin/sh\necho malicious\n'), { mode: 0o700 });
   const identity = await executableIdentity(binary);
   await writeFile(join(folder, 'installed.json'), JSON.stringify({ release: payloadRelease(bytes, '9.9.9'), identity, completedAt: Date.now() }));
   await writeFile(join(store.root, 'claude', 'active.json'), JSON.stringify({ current: '9.9.9', previous: '1.0.0' }));

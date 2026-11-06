@@ -7,6 +7,7 @@ import { claudeFixture, setupFixture } from './service-fixtures';
 import { Owner, payloadNetwork, payloadRelease, temporaryDirectories } from './test-fixtures';
 import type { CliActionId } from '../../../shared/ai-cli';
 import type { AiCliSetup } from './service';
+import { fixtureExecutableName } from './native-fixtures';
 const temporary = temporaryDirectories();
 const active: AiCliSetup[] = [];
 afterEach(async () => { for (const service of active) await service.dispose(); active.length = 0; });
@@ -19,7 +20,7 @@ async function run(service: AiCliSetup, owner: Owner, actionId: CliActionId) {
 }
 it('performs file-only discovery without consent and never launches on preview or disabled actions', async () => {
   const root = await temporary(), fixture = setupFixture(root); active.push(fixture.service);
-  const binary = join(root, 'existing cli'); await writeFile(binary, fixture.payload, { mode: 0o700 }); await fixture.pins.choose('claude', binary);
+  const binary = join(root, fixtureExecutableName('existing cli')); await writeFile(binary, fixture.payload, { mode: 0o700 }); await fixture.pins.choose('claude', binary);
   const owner = new Owner(), spawn = vi.spyOn(fixture.source, 'installable');
   expect((await fixture.service.list())[0]).toMatchObject({ consented: false, path: await realpath(binary), status: 'installed-not-signed-in', tested: false });
   for (const actionId of ['install-claude', 'status-claude', 'login-claude', 'test-claude'] as const) {
@@ -31,7 +32,7 @@ it('performs file-only discovery without consent and never launches on preview o
   await expect(readFile(join(root, 'argv.jsonl'))).rejects.toMatchObject({ code: 'ENOENT' });
   expect((await fixture.service.preview(owner, 'advanced-shell')).reason).toBe('not-consented');
 });
-it('installs, verifies real auth, signs in with one PTY, and tests through the real Claude adapter', async () => {
+it.skipIf(process.platform !== 'darwin')('installs, verifies real auth, signs in with one PTY, and tests through the real Claude adapter', async () => {
   const root = await temporary(), changed = vi.fn(), fixture = setupFixture(root, { changed }), { service, pins } = fixture;
   active.push(service); setExecutablePins(pins); const owner = new Owner();
   await service.consent('claude', true);
@@ -98,7 +99,7 @@ it('rejects automatic install if a chat starts and finishes during a download', 
   expect(store.active('claude')?.release.version).toBe('1.0.0');
   expect((await service.list())[0]).toMatchObject({ status: 'error', error: { code: expect.stringMatching(/busy|cancelled/) } });
 });
-it('cancels a live login when the existing provider configuration revokes consent', async () => {
+it.skipIf(process.platform !== 'darwin')('cancels a live login when the existing provider configuration revokes consent', async () => {
   const fixture = setupFixture(await temporary()), { service, registry } = fixture; active.push(service); const owner = new Owner();
   await service.consent('claude', true); await run(service, owner, 'install-claude');
   const preview = await service.preview(owner, 'login-claude'), session = service.run(owner, 'login-claude', preview.token);

@@ -1,0 +1,108 @@
+{
+  "recordedAt": "2026-11-06T06:34:04.323720+00:00",
+  "branch": "t3/ai-cli-fixes",
+  "base": "bf517ac2",
+  "sourceWindowsRun": {
+    "run": "42170686410",
+    "job": "127737543788",
+    "providedLog": "/tmp/vstudy-sdk-fixed-windows-ci.log",
+    "providedLogSha256": "d71c8cd119fc4cf643082e2e6d0050784db90616eac6ca91d0d9d1c95bea4f7c",
+    "ownedFailureCount": 21,
+    "ownedFailures": "windows-fixtures-ci-failures.txt"
+  },
+  "checks": [
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@vstudy/desktop",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "windows-fixtures-typecheck.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@vstudy/desktop",
+        "lint"
+      ],
+      "exitCode": 0,
+      "log": "windows-fixtures-lint.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "knip"
+      ],
+      "exitCode": 0,
+      "log": "windows-fixtures-knip.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "vendor:check"
+      ],
+      "exitCode": 0,
+      "log": "windows-fixtures-vendor-check.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "security:static"
+      ],
+      "exitCode": 0,
+      "log": "windows-fixtures-security-static.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "test",
+        "--pool=forks",
+        "--maxWorkers=2"
+      ],
+      "exitCode": 0,
+      "log": "windows-fixtures-test.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@vstudy/desktop",
+        "exec",
+        "vitest",
+        "run",
+        "src/main/providers/setup/pty.test.ts",
+        "src/main/providers/setup/store.test.ts",
+        "src/main/providers/setup/native-fixtures.test.ts",
+        "--pool=forks",
+        "--maxWorkers=2"
+      ],
+      "exitCode": 0,
+      "log": "windows-fixtures-final.log",
+      "passed": 24,
+      "skipped": 1
+    }
+  ],
+  "fullMacTestRuns": 1,
+  "fullMacTests": {
+    "passed": 1184,
+    "skipped": 15,
+    "filesPassed": 152,
+    "filesSkipped": 5
+  },
+  "finalRefinements": "After the full run, PTY argv output gained base64 framing and Windows transport fixtures retained unchanged Node executable bytes. The three affected files were rerun directly and scoped lint passed.",
+  "windowsResult": "Pending P native CI rerun. No Windows host was used locally.",
+  "conpty": "All eight existing lifecycle tests remain active on Windows. The added Windows-only native test asserts the pinned agent uses ConPTY.",
+  "macOnlyServiceTests": [
+    "installs, verifies real auth, signs in with one PTY, and tests through the real Claude adapter",
+    "cancels a live login when the existing provider configuration revokes consent"
+  ],
+  "gateReason": "These exercise embedded login, which product policy supports only on macOS through sandbox-exec.",
+  "formatInspection": "windows-fixtures-pe-format.log",
+  "fixtureMappingProof": "native-fixtures.test.ts exercises Windows PE-to-Node argv on macOS without claiming Windows acceptance.",
+  "electronLaunched": false,
+  "handoff": "../../../AI_CLI_WINDOWS_FIXTURES.md",
+  "fixtureCommit": "e707d93af375e6494922d0ac4e067c288352fd37"
+}

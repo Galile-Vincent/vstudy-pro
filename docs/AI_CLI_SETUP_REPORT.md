@@ -4,7 +4,7 @@ Students can set up an AI tool, sign in, test a real answer, and manage updates 
 
 The original feature work was on `t3/ai-cli-setup`. Main at `0d990b2` was merged as `10b6fc7` before the isolated README and website documentation change. The merge preserves butterfly branding, platform icons, onboarding, the AI tools sidebar, and native terminal unpacking. No MCP stream files were changed. No PR was opened.
 
-The security follow-up is on `t3/ai-cli-fixes`, based on main `9fa6d44`. It includes the node-pty helper repair already merged as `bc183bb` and `9fa6d44`. The trust policy and verification below supersede the original managed-install acceptance claims for Antigravity and synthetic Codex downloads. No Electron process launched during the coordinator's hold. After explicit slot release, one short packaged PTY run passed and the app exited.
+The security follow-up is on `t3/ai-cli-fixes`, based on main `9fa6d44`. It includes the node-pty helper repair already merged as `bc183bb` and `9fa6d44`. The trust policy and verification below supersede the original managed-install acceptance claims for Antigravity and synthetic Codex downloads. No Electron process launched during the coordinator's hold. The first authorized packaged PTY run completed before the coordinator corrected slot availability. After M's repeat acceptance and the final explicit release, one additional short packaged run passed with the same result. Both apps exited before announcing slot release.
 
 ## Study and decisions
 
@@ -109,6 +109,14 @@ The following results are retained in [the security check record](evidence/ai-cl
 | `node e2e/ai-cli-packaged.mjs` | Passes after explicit slot release. Both compiled and prebuilt helper candidates start at `0644`. The runtime repairs the selected `build/Release/spawn-helper` to `0755`, answers a native PTY command, closes the action, and resets all preferences. The app exits with code 0. Deep strict ad-hoc signature verification and release fuses remain enabled. [Result](evidence/ai-cli/packaged/result.json). |
 
 [Baseline boundary failures](evidence/ai-cli/security/baseline-regressions.log), [baseline xterm failure](evidence/ai-cli/security/baseline-xterm.log), [targeted regressions](evidence/ai-cli/security/focused-regressions.log), [manual UI component tests](evidence/ai-cli/security/focused-renderer.log), and [the full suite](evidence/ai-cli/security/tests.log) preserve the measured results. No Electron process or new screenshot was created during the hold. The final packaged run captured [the setup sheet](evidence/ai-cli/packaged/ai-cli-packaged.png) after testing and closing its native PTY. `pgrep -fl "VStudy Pro|Electron"` returned no processes both before and after that single run, and the slot release was announced. The screenshot covers the packaged setup host, not the new manual-install UI. The updated fake-CLI matrix is prepared but unrun. Native Windows, live OAuth, release notarization, and an independent review of this follow-up remain unverified.
+
+The repeat after the final slot release also passed both process guards, repaired only the loader-selected Release helper, and produced identical packaged results. No source code changed or full test suite reran for this repeat.
+
+## Native Windows fixture follow-up
+
+Windows run `42170686410`, job `127737543788`, exposed 21 owned fixture failures. The follow-up keeps product validation and PTY code unchanged. It replaces shebang-only assumptions with explicit Node execution, adds platform-correct PE metadata fixtures and executable names, models IPC filesystem permissions consistently, and handles ConPTY control output. Native leased transports use real Node executable copies on Windows. Two embedded-login cases now match the existing macOS-only policy, while all Windows PTY lifecycle cases remain active and a new test asserts ConPTY selection. Two publisher-verification cases gain Windows coverage.
+
+The full macOS suite passes 1,184 tests with 15 skips. Final affected-fixture checks pass 24 tests with one platform skip. Typecheck, lint, Knip, vendor checks, and static security checks pass. No Electron process launched for this follow-up. [The complete ten-file fixture list, gate reasons, evidence, and Windows rerun command](AI_CLI_WINDOWS_FIXTURES.md) is the handoff to P. Native Windows acceptance of these changes remains pending P's CI rerun.
 
 ## Integration seams and remaining work
 
