@@ -23,6 +23,12 @@ export function validateSmokeReport(report, target) {
   if (target.platform === 'win' && (report.safeStorage?.backend !== 'dpapi' || report.safeStorage?.roundTrip !== true || report.safeStorage?.ciphertextCleared !== true)) {
     throw new Error('Windows packaged smoke did not verify the native DPAPI round-trip');
   }
+  if (target.key === 'mac-x64' && (report.converter.nativeWheel?.verified !== true || !/^[a-f0-9]{64}$/.test(report.converter.nativeWheel?.sha256 ?? ''))) {
+    throw new Error('Intel Mac packaged smoke did not verify its supplemental native converter wheel');
+  }
+  if (target.key === 'win-arm64' && report.converter.managedPythonRequest !== 'cpython-3.12-windows-x86_64') {
+    throw new Error('Windows ARM64 converter must request its supported x64 Python runtime');
+  }
 }
 
 export async function runSmoke({ executable, args = [], target, output, timeoutMs = 90000 }) {

@@ -37,7 +37,10 @@ function smokeReport(target) {
     schemaVersion: 1, ok: true, exitCode: 0, appVersion: version, arch: target.arch,
     platform: target.platform === 'mac' ? 'darwin' : 'win32', windowCreated: true, rendererLoaded: true,
     database: { engine: 'node:sqlite', integrity: 'ok', writeRead: true, persisted: true },
-    converter: { resourcesPresent: true, executables: [], bootstrapAttempted: false, conversionTested: false },
+    converter: { resourcesPresent: true, executables: [], bootstrapAttempted: false, conversionTested: false,
+      managedPythonRequest: target.key === 'win-arm64' ? 'cpython-3.12-windows-x86_64' : '3.12',
+      ...(target.key === 'mac-x64' ? { nativeWheel: { verified: true, sha256: 'a'.repeat(64) } } : {}),
+    },
     safeStorage: target.platform === 'win' ? { backend: 'dpapi', roundTrip: true, ciphertextCleared: true } : { probed: false },
   };
 }
@@ -174,6 +177,10 @@ test('packaged smoke rejects wrong architecture, failed DB writes, and invented 
   }
   const win = targetFor('win-x64');
   assert.throws(() => validateSmokeReport({ ...smokeReport(win), safeStorage: { probed: false } }, win), /DPAPI/);
+  const intel = targetFor('mac-x64');
+  assert.throws(() => validateSmokeReport({ ...smokeReport(intel), converter: { ...smokeReport(intel).converter, nativeWheel: undefined } }, intel), /native converter wheel/);
+  const arm = targetFor('win-arm64');
+  assert.throws(() => validateSmokeReport({ ...smokeReport(arm), converter: { ...smokeReport(arm).converter, managedPythonRequest: '3.12' } }, arm), /x64 Python/);
 });
 
 test('native process runner retains JSON, PNG, stdout, stderr, and nonzero exit diagnostics', async t => {

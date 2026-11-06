@@ -5,7 +5,8 @@
  */
 import { app, safeStorage, type BrowserWindow } from 'electron';
 import { lstatSync, mkdirSync, realpathSync } from 'node:fs';
-import { access, writeFile } from 'node:fs/promises';
+import { access, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { isAbsolute, join, relative, sep } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -14,6 +15,7 @@ import { promisify } from 'node:util';
 import type { Store } from './db';
 import { installDirectories, resolveInstalledExecutable } from './providers/trusted-executable';
 import { scrubbedEnvironment } from '../../resources/converter/contracts';
+import { managedConverterPython } from './platform/process';
 
 const execute = promisify(execFile);
 
@@ -36,6 +38,20 @@ export function prepareDistributionSmoke(): string | undefined {
 async function converterProbe(userData: string) {
   const resources = join(process.resourcesPath, 'converter');
   for (const file of ['convert.py', 'limits.py', 'requirements.lock.txt', 'pdf_md/__init__.py']) await access(join(resources, file));
+  let nativeWheel: { verified: boolean; version: string; sha256: string; minimumMacOS: string } | undefined;
+  if (process.platform === 'darwin' && process.arch === 'x64') {
+    const manifest: unknown = JSON.parse(await readFile(join(resources, 'wheels', 'native.json'), 'utf8'));
+    const metadata = manifest as Record<string, unknown>;
+    if (!metadata || metadata.schemaVersion !== 1 || typeof metadata.file !== 'string' ||
+        !/^cryptography-[\d.]+-[\w.]+-[\w.]+-macosx_[\d_]+_x86_64\.whl$/.test(metadata.file) ||
+        typeof metadata.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(metadata.sha256) || typeof metadata.version !== 'string' || typeof metadata.minimumMacOS !== 'string') {
+      throw new Error('Packaged native converter metadata is invalid');
+    }
+    const hash = createHash('sha256').update(await readFile(join(resources, 'wheels', metadata.file))).digest('hex');
+    const nativeLock = await readFile(join(resources, 'requirements.native.lock.txt'), 'utf8');
+    if (hash !== metadata.sha256 || !nativeLock.includes(`--hash=sha256:${hash}`)) throw new Error('Packaged native converter checksum mismatch');
+    nativeWheel = { verified: true, version: metadata.version, sha256: hash, minimumMacOS: metadata.minimumMacOS };
+  }
   const executables: { name: string; path: string | null; available: boolean; version?: string; stdlibProbe?: boolean; error?: string }[] = [];
   for (const name of process.platform === 'win32' ? ['uv', 'python', 'python3'] : ['uv', 'python3']) {
     const path = await resolveInstalledExecutable(name, [...installDirectories(), '/usr/bin', '/bin']);
@@ -52,7 +68,7 @@ async function converterProbe(userData: string) {
       executables.push({ name, path, available: false, error: String(error) });
     }
   }
-  return { resourcesPresent: true, executables, bootstrapAttempted: false, conversionTested: false };
+  return { resourcesPresent: true, executables, managedPythonRequest: managedConverterPython(), nativeWheel, bootstrapAttempted: false, conversionTested: false };
 }
 
 /** Report native window, renderer, SQLite durability, and converter probe results, then exit with an explicit status. */
