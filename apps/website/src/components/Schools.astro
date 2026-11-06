@@ -1,46 +1,49 @@
 ---
-/** A local fictional school walkthrough. Reduced motion and no JavaScript show the complete static list. */
-import { exampleSchools, trustCopy } from '../data/trust';
+/** A static connection guide. First-view motion never changes content, focus, or layout. */
+import { trustCopy } from '../data/trust';
 import type { Language } from '../data/ui';
 import { path } from '../config';
 import '../styles/schools.css';
 interface Props { language: Language; }
 const { language } = Astro.props;
 const t = trustCopy[language];
+const icons = [
+  'M3 10 12 4l9 6M5 10v10h14V10M9 20v-6h6v6M9 10h.01M15 10h.01',
+  'M13 5H5v14h14v-8M10 14 21 3M14 3h7v7',
+  'M3 5h6c2 0 3 1 3 2 0-1 1-2 3-2h6v14h-6c-2 0-3 1-3 2 0-1-1-2-3-2H3ZM12 7v14',
+];
 ---
 <section class="schools-section container" aria-labelledby="schools-title">
-  <div class="school-intro">
-    <h2 id="schools-title">{t.schoolTitle}</h2>
-    <p class="school-promise">{t.schoolBody}</p>
-    <p>{t.availability}</p>
-    <a class="text-link" href={path(`${language}/docs/connect-your-school/#availability`)}>{t.schoolDocs}<span aria-hidden="true">↗</span></a>
-    <p class="school-origin">{t.cycu}</p>
-  </div>
-  <div class="school-demo" data-school-demo data-enhanced role="region" aria-roledescription={t.carousel} aria-label={t.schoolTitle} aria-describedby="school-demo-note">
-    <p id="school-demo-note" class="school-demo-note">{t.demo}</p>
-    <div class="school-stage" data-school-stage aria-live="off" aria-atomic="true">
-      {exampleSchools.map((school, index) => <div class="school-slide" data-school-slide data-query={school.name} data-active={index === 0 ? '' : undefined}>
-        <div class="school-search"><span aria-hidden="true">⌕</span><span class="sr-only">{t.search}: {school.name}</span><span data-school-query aria-hidden="true">{school.name}</span></div>
-        <div class="school-result">
-          <span class="school-monogram" aria-hidden="true" style={`--tile-angle:${120 + index * 24}deg`}>{school.monogram}</span>
-          <div class="school-identity"><h3>{school.name}</h3><p>{t.countries[school.country]}</p></div>
-          <p class="school-detected"><span aria-hidden="true">✓</span>{t.detected}</p>
-          <button type="button" class="school-connect" data-school-connect aria-label={`${t.connect} · ${school.name} · ${t.demo}`}>{t.connect}<span aria-hidden="true">↗</span></button>
-        </div>
-        <p class="school-signin"><span aria-hidden="true">02</span>{t.signIn}</p>
-      </div>)}
+  <div class="school-band" data-school-band>
+    <div class="school-intro">
+      <p class="school-eyebrow">{t.schoolEyebrow}</p>
+      <h2 id="schools-title">{t.schoolTitle}</h2>
+      <p class="school-promise">{t.schoolBody}</p>
     </div>
-    <div class="school-controls" data-school-controls>
-      <button type="button" data-school-play data-pause={t.pause} data-play={t.play}>{t.pause}</button>
-      <div class="school-paging">
-        <button type="button" data-school-prev aria-label={t.previous}>←</button>
-        {exampleSchools.map((school, index) => <button type="button" class="school-dot" data-school-dot={index} aria-label={`${t.show} ${school.name}`} aria-current={index === 0 ? 'true' : 'false'}><span></span></button>)}
-        <button type="button" data-school-next aria-label={t.next}>→</button>
+    <div class="school-connection">
+      <ol class="school-flow">
+        {t.schoolSteps.map((step, index) => <li class="school-step" style={`--step:${index}`}>
+          <span class="school-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d={icons[index]} /></svg></span>
+          <p><span class="school-number" aria-hidden="true">0{index + 1}</span>{step}</p>
+        </li>)}
+      </ol>
+      <div class="school-links">
+        <a href="https://stats.moodle.org/sites/" target="_blank" rel="noopener noreferrer">{t.schoolLookup}<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10" /></svg><span class="sr-only"> ({t.newTab})</span></a>
+        <a href={path(`${language}/docs/connect-your-school/#availability`)}>{t.schoolDocs}<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16m-6-6 6 6-6 6" /></svg></a>
       </div>
     </div>
+    <p class="school-note">{t.schoolNote}</p>
   </div>
 </section>
-<noscript><style>.school-controls { display:none; }.school-demo[data-enhanced] .school-stage { display:block; min-height:0; }.school-demo[data-enhanced] .school-slide { opacity:1; transform:none; visibility:visible; pointer-events:auto; margin-top:24px; }</style></noscript>
 <script>
-  import '../scripts/schools';
+  const band = document.querySelector('[data-school-band]');
+  if (band) {
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        band.setAttribute('data-seen', '');
+        observer.disconnect();
+      }
+    }, { threshold: 0.2 });
+    observer.observe(band);
+  }
 </script>

@@ -1,0 +1,38 @@
+
+> @vstudy/desktop@0.2.2 test /Users/vc/.t3/worktrees/vstudy-pro/t3-3c8c1de3/apps/desktop
+> node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run --pool=forks --maxWorkers=2
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-3c8c1de3/apps/desktop/src/shared/locales.generated.ts (22 namespaces).
+(node:45220) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-3c8c1de3/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-3c8c1de3/apps/desktop/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+VStudy light: WCAG AA passed at every contrast setting
+VStudy dark: WCAG AA passed at every contrast setting
+Ocean light: WCAG AA passed at every contrast setting
+Ocean dark: WCAG AA passed at every contrast setting
+Grove light: WCAG AA passed at every contrast setting
+Grove dark: WCAG AA passed at every contrast setting
+Ember light: WCAG AA passed at every contrast setting
+Ember dark: WCAG AA passed at every contrast setting
+Iris light: WCAG AA passed at every contrast setting
+Iris dark: WCAG AA passed at every contrast setting
+Rose light: WCAG AA passed at every contrast setting
+Rose dark: WCAG AA passed at every contrast setting
+Slate light: WCAG AA passed at every contrast setting
+Slate dark: WCAG AA passed at every contrast setting
+Paper light: WCAG AA passed at every contrast setting
+Paper dark: WCAG AA passed at every contrast setting
+High contrast light: WCAG AA passed at every contrast setting
+High contrast dark: WCAG AA passed at every contrast setting
+32 renderer CSS files use semantic theme tokens
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3c8c1de3/apps/desktop
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  175 passed | 5 skipped (180)
+      Tests  1396 passed | 14 skipped (1410)
+   Start at  14:09:23
+   Duration  45.33s (transform 3.14s, setup 0ms, import 21.25s, tests 47.40s, environment 10.52s)
+

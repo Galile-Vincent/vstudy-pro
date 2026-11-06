@@ -1,0 +1,23 @@
+
+> @vstudy/mcp@0.2.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-3c8c1de3/apps/mcp
+> pnpm build && vitest run --pool=forks --maxWorkers=2
+
+
+> @vstudy/mcp@0.2.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-3c8c1de3/apps/mcp
+> node scripts/build.mjs
+
+
+  dist/vstudy-mcp.cjs   942.6kb
+  dist/installer.cjs    371.7kb
+  dist/windows-acl.cjs  141.1kb
+
+⚡ Done in 28ms
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3c8c1de3/apps/mcp
+
+
+ Test Files  12 passed | 1 skipped (13)
+      Tests  130 passed | 2 skipped (132)
+   Start at  14:09:18
+   Duration  4.35s (transform 143ms, setup 0ms, import 503ms, tests 7.11s, environment 1ms)
+

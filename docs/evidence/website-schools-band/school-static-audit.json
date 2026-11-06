@@ -1,0 +1,106 @@
+{
+  "languages": 3,
+  "staticStepsPerLanguage": 3,
+  "linksPerBand": 2,
+  "oldDemoControls": 0,
+  "staticContentWithoutJavaScript": true,
+  "reducedMotion": "CSS audited; native browser preference emulation unavailable in T3 preview",
+  "screenshots": [
+    {
+      "path": "before/en-1200-dark.png",
+      "bytes": 164097
+    },
+    {
+      "path": "before/en-1200-light.png",
+      "bytes": 163146
+    },
+    {
+      "path": "before/en-1440-dark.png",
+      "bytes": 156315
+    },
+    {
+      "path": "before/en-1440-light.png",
+      "bytes": 158659
+    },
+    {
+      "path": "round-1/en-1440-light.png",
+      "bytes": 200460
+    },
+    {
+      "path": "round-1/en-390-light.png",
+      "bytes": 154083
+    },
+    {
+      "path": "round-2/en-1440-light.png",
+      "bytes": 193288
+    },
+    {
+      "path": "round-2/ja-390-dark.png",
+      "bytes": 187983
+    },
+    {
+      "path": "round-2/zh-Hant-768-light.png",
+      "bytes": 373094
+    },
+    {
+      "path": "final/en-1440-dark.png",
+      "bytes": 187320
+    },
+    {
+      "path": "final/en-1440-light.png",
+      "bytes": 190675
+    },
+    {
+      "path": "final/en-390-dark.png",
+      "bytes": 157422
+    },
+    {
+      "path": "final/en-390-light.png",
+      "bytes": 156354
+    },
+    {
+      "path": "final/ja-1440-dark.png",
+      "bytes": 204922
+    },
+    {
+      "path": "final/ja-1440-light.png",
+      "bytes": 209416
+    },
+    {
+      "path": "final/ja-390-dark.png",
+      "bytes": 186044
+    },
+    {
+      "path": "final/ja-390-light.png",
+      "bytes": 184973
+    },
+    {
+      "path": "final/zh-Hant-1440-dark.png",
+      "bytes": 203535
+    },
+    {
+      "path": "final/zh-Hant-1440-light.png",
+      "bytes": 206483
+    },
+    {
+      "path": "final/zh-Hant-390-dark.png",
+      "bytes": 198705
+    },
+    {
+      "path": "final/zh-Hant-390-light.png",
+      "bytes": 199781
+    },
+    {
+      "path": "prototypes/divided.png",
+      "bytes": 208786
+    },
+    {
+      "path": "prototypes/framed.png",
+      "bytes": 201504
+    },
+    {
+      "path": "prototypes/neutral.png",
+      "bytes": 208356
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "before": {
+    "x": 120,
+    "y": 330.96875,
+    "width": 1200,
+    "height": 402.3046875,
+    "top": 330.96875,
+    "right": 1320,
+    "bottom": 733.2734375,
+    "left": 120
+  },
+  "after": {
+    "x": 120,
+    "y": 330.96875,
+    "width": 1200,
+    "height": 402.3046875,
+    "top": 330.96875,
+    "right": 1320,
+    "bottom": 733.2734375,
+    "left": 120
+  },
+  "shifts": [],
+  "paused": "paused",
+  "activeAnimations": 0,
+  "steps": 3
+}
