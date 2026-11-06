@@ -1,10 +1,11 @@
 /** Exercise actual startup and createWindow with controlled Electron navigation and close events. */
 import { EventEmitter } from 'node:events';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import type { McpRuntime } from './mcp/runtime';
 
 const mocks = vi.hoisted(() => ({
   confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
-  showMessage: vi.fn(), log: vi.fn(),
+  showMessage: vi.fn(), log: vi.fn(), registerIpc: vi.fn(),
 }));
 const electron = await vi.hoisted(async () => {
   const { EventEmitter } = await import('node:events');
@@ -34,9 +35,9 @@ const electron = await vi.hoisted(async () => {
   };
 });
 vi.mock('electron', () => electron);
-vi.mock('node:fs', () => ({ mkdirSync: vi.fn() }));
+vi.mock('node:fs', async importOriginal => ({...await importOriginal<typeof import('node:fs')>(), mkdirSync:vi.fn()}));
 vi.mock('./db', () => ({ openStore: () => ({ settings: { get: () => ({}) }, close: mocks.closeStore }) }));
-vi.mock('./ipc', () => ({ registerIpc: () => mocks.dispose }));
+vi.mock('./ipc', () => ({ registerIpc: () => mocks.registerIpc() }));
 vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn() }) }));
 vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
 vi.mock('./services/delete-data', () => ({ deleteAllData: vi.fn() }));
@@ -59,6 +60,7 @@ beforeEach(() => {
   processListeners = new Map(['exit', 'uncaughtExceptionMonitor', 'unhandledRejection'].map(event => [event, eventProcess.rawListeners(event)]));
   vi.resetModules();
   vi.clearAllMocks();
+  mocks.registerIpc.mockReturnValue(mocks.dispose);
   electron.app.removeAllListeners();
   electron.nativeTheme.removeAllListeners();
   electron.BrowserWindow.instances = [];
@@ -108,4 +110,46 @@ it('rejects a real main-frame load failure and removes the pending navigation li
   expect(mocks.closeStore).toHaveBeenCalledOnce();
   expect(window.webContents.listenerCount('did-finish-load')).toBe(0);
   expect(window.webContents.listenerCount('did-fail-load')).toBe(0);
+});
+
+it.each([
+  ['persistence factory', false], ['persistence factory', true],
+  ['Windows-shaped process', false], ['Windows-shaped process', true],
+] as const)('creates the main window with %s failure and MCP enabled=%s', async (failure, enabled) => {
+  const {createMcpRuntime} = await vi.importActual<typeof import('./mcp/runtime')>('./mcp/runtime');
+  const descriptor = Object.getOwnPropertyDescriptor(process, 'getuid')!;
+  const persistence = vi.fn(() => {throw Error('private startup path token=school-secret');});
+  const onFailure = vi.fn(() => mocks.log({phase:'mcp-bridge-unavailable', code:'UNAVAILABLE'}));
+  let runtime:McpRuntime | undefined;
+  try {
+    if (failure === 'Windows-shaped process') Object.defineProperty(process, 'getuid', {...descriptor, value:undefined});
+    mocks.registerIpc.mockImplementation(() => {
+      runtime = createMcpRuntime({userData:'/unused-startup-path', backend:{accounts:()=>[], prepare:async()=>{throw Error('unused');}},
+        ...(failure === 'persistence factory' ? {persistence} : {}), secretValues:()=>[], restoreWindow:()=>{}, onFailure,
+      });
+      if (enabled) void runtime.setEnabled(true);
+      return () => runtime!.dispose();
+    });
+    const window = await start();
+    window.emit('ready-to-show');
+    expect(window.show).toHaveBeenCalledOnce();
+    window.webContents.emit('did-finish-load');
+    await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
+    expect(electron.app.exit).not.toHaveBeenCalled();
+    expect(mocks.closeStore).not.toHaveBeenCalled();
+    if (enabled) {
+      await vi.waitFor(() => expect(runtime!.state()).toMatchObject({enabled:false, unavailable:true}));
+      expect(onFailure).toHaveBeenCalledOnce();
+      expect(mocks.log).toHaveBeenCalledWith({phase:'mcp-bridge-unavailable', code:'UNAVAILABLE'});
+      if (failure === 'persistence factory') expect(persistence).toHaveBeenCalledOnce();
+    } else {
+      expect(runtime!.state()).toMatchObject({enabled:false, unavailable:false});
+      expect(onFailure).not.toHaveBeenCalled();
+      expect(persistence).not.toHaveBeenCalled();
+    }
+    expect(JSON.stringify(mocks.log.mock.calls)).not.toContain('school-secret');
+  } finally {
+    Object.defineProperty(process, 'getuid', descriptor);
+    await runtime?.dispose();
+  }
 });

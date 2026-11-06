@@ -44,9 +44,9 @@ Grants expire after 30 days. **Settings > Agents** shows scopes, accounts, expir
 
 Every write needs approval in VStudy, including local planner changes. The card identifies the client, school account, tool, exact target, and complete payload. Approval applies once. After 60 seconds without approval, VStudy denies the request.
 
-Forum replies and assignment submissions always require a fresh high-risk approval. A grant alone cannot publish or submit. Review the text and target before approving. Check Moodle before repeating a write after a disconnect or uncertain response. The server never automatically retries a mutation.
+Forum replies and assignment draft saves always require a fresh high-risk approval. A grant alone cannot publish or save a draft. Review the text and target before approving. Check Moodle before repeating a write after a disconnect or uncertain response. The server never automatically retries a mutation.
 
-Assignment submission accepts your own text with `studentOwned: true`. The app also requires you to confirm that it is your own work before enabling approval. The tool supports plain-text online submissions. File-only assignments, unsupported team workflows, and school-specific statements need the normal Moodle page. The agent cannot upload arbitrary local paths or reuse Moodle draft file IDs.
+`save_assignment_draft` accepts your own plain text with `studentOwned: true` and a separate ownership confirmation. Approval shows the exact text and current remote draft state, including attachment names and sizes and the current text hash. VStudy checks status before and immediately after saving. Files, other plugin content, or changed text cause a structured failure directing you to Moodle. A successful result says 'Draft saved. Review and submit it yourself in Moodle' and supplies an `open_in_app` target. Final submission is always a manual action in Moodle. File-only assignments, unsupported workflows, and school-specific statements need Moodle. Agents cannot supply local paths or draft file IDs.
 
 If redaction would change an action payload, VStudy rejects it instead of showing different text for approval. Use Moodle directly for text that contains removed links, markup, credential-like values, or unsupported formatting.
 
@@ -100,7 +100,7 @@ Courses that have never been opened in the app load sections and files from the 
 | `export_calendar` | `selection` | Export selected eligible calendar items |
 | `mark_module_complete` | `courseId`, `moduleId` | Manually complete an affirmatively ungraded resource |
 | `post_forum_reply` | `courseId`, `discussionId`, `postId`, `subject`, `message` | Publish the approved reply |
-| `submit_assignment` | `courseId`, `moduleId`, `assignmentId`, `text`, `studentOwned` | Save and submit the student's approved text |
+| `save_assignment_draft` | `courseId`, `moduleId`, `assignmentId`, `text`, `studentOwned` | Save the student's approved text as a draft only. Submit manually in Moodle |
 | `open_in_app` | `courseId`, `moduleId` | Open the selected activity for the student |
 
 The shared [tool registry](../apps/desktop/src/shared/mcp.ts) defines complete nested schemas. Unknown fields fail validation. Course and target ownership is checked again when the approved action executes.
@@ -154,3 +154,7 @@ Scopes, account allowlists, expiring grants, exact one-shot approvals, capabilit
 A malicious process running as your OS user can inspect memory and change files. These controls do not isolate it from your account. School content and local logs are not encrypted by MCP. FileVault and your OS account protect files. Once an agent legitimately reads information, revocation cannot recall its copies.
 
 See [the security model](SECURITY.md), [MCP design decisions](MCP_DESIGN.md), and the [main subsystem contract](../apps/desktop/src/main/mcp/README.md).
+
+MCP backend, grant persistence, and transport construction are lazy until the student enables access. Construction and readiness failures disable only MCP and log a fixed diagnostic. Settings > Agents shows "Agent access is unavailable on this platform/build". The desktop startup and window creation do not depend on MCP availability. Access must be enabled again after restarting the app.
+
+The result redactor checks adjacent string leaves in document order, both joined and separated, against known secrets and their URL, base64, base64url, and hex forms. It also checks whitespace-folded text before pagination. A match replaces affected leaves entirely with `[redacted]` and sets `redacted: true` in the untrusted envelope. Scanning allows 512 leaves, 128,000 characters, 1,200 nodes, depth 8, and a 16-leaf adjacency window. Exceeding these bounds drops the entire field set. Known-secret input is capped at 100 values of 4,096 characters each. Individual source strings over 1,000,000 characters are dropped before scanning.

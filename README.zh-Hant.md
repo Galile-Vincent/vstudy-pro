@@ -164,7 +164,7 @@ Mac 使用 Cmd，Windows 使用 Ctrl。
 node apps/mcp/dist/vstudy-mcp.cjs install --client codex --dry-run
 ```
 
-其他用戶端可改用 `claude`、`agy`、`claude-desktop` 或 `cursor`，需要 Node.js 24.11.1 以上。測驗與影片仍由學生親自完成；MCP 不回答或提交測驗，也不偽造活動進度。作業繳交僅接受學生自己的文字，並需逐次明確同意。
+其他用戶端可改用 `claude`、`agy`、`claude-desktop` 或 `cursor`，需要 Node.js 24.11.1 以上。測驗與影片仍由學生親自完成；MCP 不回答或提交測驗，也不偽造活動進度。`save_assignment_draft` 僅將學生自己核准的文字儲存為草稿。最終繳交一律由學生在 Moodle 手動完成。
 
 詳見 [MCP 設定、工具與安全指南](docs/MCP.md)、[用戶端格式與實際驗證範圍](apps/mcp/CLIENT_FORMATS.md)，以及[設計決策](docs/MCP_DESIGN.md)。封裝產物已搭配官方 SDK 與本機 Moodle 測試資料驗證；原生 Windows 整合與真實學校驗收仍需另外完成。
 

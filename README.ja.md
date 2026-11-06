@@ -164,7 +164,7 @@ Mac では Cmd、Windows では Ctrl を使います。
 node apps/mcp/dist/vstudy-mcp.cjs install --client codex --dry-run
 ```
 
-ほかのクライアントは `claude`、`agy`、`claude-desktop`、`cursor` を指定します。Node.js 24.11.1 以降が必要です。小テストや動画は学生自身が取り組みます。MCP は小テストの解答・提出や活動進捗の偽造を行いません。課題提出は学生自身のテキストだけを対象とし、操作ごとに明示的な同意が必要です。
+ほかのクライアントは `claude`、`agy`、`claude-desktop`、`cursor` を指定します。Node.js 24.11.1 以降が必要です。小テストや動画は学生自身が取り組みます。MCP は小テストの解答・提出や活動進捗の偽造を行いません。`save_assignment_draft` は学生自身が承認したテキストだけを下書きとして保存します。最終提出は必ず学生が Moodle で手動で行います。
 
 [MCP の設定・ツール・安全性](docs/MCP.md)、[クライアント形式と実際の検証範囲](apps/mcp/CLIENT_FORMATS.md)、[設計判断](docs/MCP_DESIGN.md)を参照してください。公式 SDK とローカル Moodle フィクスチャでパッケージ成果物を確認しました。ネイティブ Windows の統合と実際の学校での確認は別途必要です。
 

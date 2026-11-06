@@ -24,7 +24,7 @@ export const pairingFixture = (): Pairing => ({
   requestedScopes: ['read:courses', 'read:content', 'read:grades', 'write:local'], expiresAt: future(),
 });
 export const proposalFixture = (): Proposal => ({
-  id: ids.proposal, grantId: ids.grant, clientName: 'My agent', tool: 'submit_assignment', risk: 'high',
+  id: ids.proposal, grantId: ids.grant, clientName: 'My agent', tool: 'save_assignment_draft', risk: 'high',
   accountId: ids.account, target: 'Example University / Biology / My assignment', payload: { text: 'My own essay', studentOwned: true },
   createdAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 60000).toISOString(),
 });

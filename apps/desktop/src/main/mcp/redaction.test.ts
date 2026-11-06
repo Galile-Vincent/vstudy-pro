@@ -29,7 +29,7 @@ it('bounds cycles, enormous collections, hostile property names, and total outpu
   const json = JSON.stringify(value);
   expect(json.length).toBeLessThan(60_000);
   expect(json).not.toContain('school.example');
-  expect(json).toContain('[truncated]');
+  expect(value).toBe('[redacted]');
 });
 
 it('maps backend auth failures to fixed public codes and never echoes diagnostics', () => {
@@ -66,4 +66,50 @@ it('preserves only strict credential-free VStudy resource references',()=>{
   for(const uri of [`${valid[0]}?token=secret`,`${valid[0]}#cookie=secret`,'vstudy://accounts/https://school.example','vstudy://accounts/invalid/files/invalid','vstudy://school.example/cookie'])expect(redact.text(uri)).not.toContain('//');
   expect(redact.text('\u00010\u0002')).toBe('0');
   expect(redact.text(`//school.example ${valid[2]}`)).toBe(`[link removed] ${valid[2]}`);
+});
+
+it('redacts randomized splits of raw, URL, base64, base64url and hex secrets across nested leaves', () => {
+  const secret = 'School +/? private value 01928!';
+  const forms = [secret, encodeURIComponent(secret), ...(['base64','base64url','hex'] as const).map(encoding => Buffer.from(secret).toString(encoding))];
+  let seed = 1729;
+  const random = (max:number) => {seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed % max;};
+  for (const form of forms) for (let trial = 0; trial < 80; trial++) {
+    const cuts = [...new Set([0, form.length, ...Array.from({length:2+random(10)}, () => 1+random(form.length-1))])].sort((a,b) => a-b);
+    const parts = cuts.slice(1).map((end,index) => form.slice(cuts[index],end));
+    const input = {prefix:'Keep this label.', fields:parts.map((text,index) => index % 2 ? {text} : [text]), suffix:'Keep this too.'};
+    const result = new McpRedactor([secret]).result(input, {account:null,school:null,courseId:null,moduleId:null,author:null,syncedAt:null});
+    expect(toolResultSchema.parse(result)).toEqual(result);
+    expect(result).toMatchObject({ok:true, data:{redacted:true, content:{...input, fields:parts.map((_,index) => index % 2 ? {text:'[redacted]'} : ['[redacted]'])}}});
+  }
+});
+
+it('redacts secrets joined with separators and whitespace-wrapped encodings without retaining surrounding text', () => {
+  const secret = 'School private token value!';
+  const redactor = new McpRedactor([secret]);
+  expect(redactor.value({a:'School', b:'private', c:'token', d:'value!'})).toEqual({a:'[redacted]',b:'[redacted]',c:'[redacted]',d:'[redacted]'});
+  for (const encoding of ['base64','base64url','hex'] as const) {
+    const form = Buffer.from(secret).toString(encoding);
+    for (let width = 1; width < form.length; width++) {
+      const wrapped = form.match(new RegExp(`.{1,${width}}`, 'g'))!.join(' \r\n\t');
+      expect(redactor.text('before '+wrapped+' after')).toBe('[redacted]');
+      expect(redactor.value({text:'before '+wrapped+' after'})).toEqual({text:'[redacted]'});
+    }
+  }
+});
+
+it('drops the whole field set when leaf, character, adjacency, or secret limits are exceeded', () => {
+  const secret = 'private-school-token-value';
+  const redactor = new McpRedactor([secret]);
+  for (const value of [Array.from({length:513}, () => 'x'), {text:'x'.repeat(128001)}, [...secret]]) {
+    expect(redactor.value(value)).toBe('[redacted]');
+  }
+  expect(redactor.record({text:'x'.repeat(128001)})).toEqual({redacted:'[redacted]'});
+  expect(new McpRedactor(['x'.repeat(4097)]).value({text:'unchecked'})).toBe('[redacted]');
+  expect(new McpRedactor(Array.from({length:101}, (_,index) => String(index))).text('unchecked')).toBe('[redacted]');
+});
+
+it('checks adjacent leaves again after HTML decoding and markup removal', () => {
+  const secret = 'school-private-credential';
+  const redactor = new McpRedactor([secret]);
+  expect(redactor.value({name:'<b>school-private</b>', shortName:'-credential'})).toEqual({name:'[redacted]', shortName:'[redacted]'});
 });

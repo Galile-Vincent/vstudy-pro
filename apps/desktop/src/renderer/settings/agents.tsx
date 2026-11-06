@@ -23,6 +23,7 @@ export function AgentsSettings() {
     <p className="agents-intro agents-muted">{tr('agents:description')}</p>
     {agents.connection === 'loading' && <p role="status">{tr('agents:loading')}</p>}
     {agents.connection === 'offline' && <div role="alert"><p>{tr('agents:offline')}</p><Button variant="secondary" disabled={agents.pending} onClick={() => void agents.refresh()}>{tr('agents:retry')}</Button></div>}
+    {agents.state?.unavailable && <p role="alert">{tr('agents:unavailable')}</p>}
     {agents.failed && <p role="alert">{tr('agents:action_error')}</p>}
     <SettingsGroup>
       <SettingsRow label={tr('agents:master')} description={tr('agents:master_help')}>

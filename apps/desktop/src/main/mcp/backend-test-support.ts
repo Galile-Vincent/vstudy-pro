@@ -59,6 +59,11 @@ export async function backendHarness() {
   const request = vi.fn<typeof fetch>(async (_url, init) => {
     const params = new URLSearchParams(String(init?.body));
     const name = params.get('wsfunction')!;
+    if (name === 'mod_assign_save_submission' && Array.isArray(replies[name]) && !replies[name].length) {
+      const status = structuredClone(replies.mod_assign_get_submission_status) as {lastattempt?:{submission?:{plugins:unknown[]}}};
+      if (status?.lastattempt?.submission) status.lastattempt.submission.plugins = [{type:'onlinetext', editorfields:[{name:'onlinetext', text:params.get('plugindata[onlinetext_editor][text]'), format:2}]}];
+      replies.mod_assign_get_submission_status = status;
+    }
     return Response.json(replies[name] ?? {exception:'missing fixture', errorcode:'functionnotavailable'});
   });
   const moodle = new MoodleService(repository, secrets, {login:async () => { throw new Error('No login'); }}, request);

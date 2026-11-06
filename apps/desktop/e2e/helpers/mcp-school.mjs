@@ -48,7 +48,7 @@ export async function startMcpSchool() {
         core_completion_update_activity_completion_status_manually:{status:true},
         mod_forum_add_discussion_post:{postid:901},
         mod_assign_get_assignments:{courses:[{id:4,assignments:[assignment]}]},
-        mod_assign_get_submission_status:{lastattempt:{submissionsenabled:true,locked:false,canedit:true,cansubmit:true,submission:{userid:42,status:'draft'}}},
+        mod_assign_get_submission_status:{lastattempt:{submissionsenabled:true,locked:false,canedit:true,cansubmit:true,submission:{userid:42,status:'draft',plugins:[{type:'onlinetext',editorfields:[{name:'onlinetext',text:submissions.at(-1) ?? '',format:2}]}]}}},
         mod_assign_save_submission:[],mod_assign_submit_for_grading:[],
       }[name];
       if(name==='mod_assign_save_submission')submissions.push(params.get('plugindata[onlinetext_editor][text]'));

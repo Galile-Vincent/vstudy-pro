@@ -13,5 +13,5 @@
   "posts": {"posts":[{"id":"61","discussionid":"41","parentid":null,"subject":"Topic","message":"Read <a href='https://school.test/?token=secret'>the chapter</a>.","author":{"id":"9","fullname":"Teacher","email":"teacher@school.test"},"timecreated":"1793923200","isdeleted":false,"isprivatereply":false}],"warnings":[]},
   "assignmentCm": {"cm":{"id":"102","course":"10","modname":"assign","instance":"52","completion":"2","visible":"1"},"warnings":[]},
   "assignments": {"courses":[{"id":"10","assignments":[{"id":"52","cmid":"102","course":"10","name":"Essay","duedate":"1794096000","nosubmissions":"0","submissiondrafts":"1","teamsubmission":"0","requireallteammemberssubmit":"0","preventsubmissionnotingroup":"0","requiresubmissionstatement":"0","configs":[{"plugin":"onlinetext","subtype":"assignsubmission","name":"enabled","value":"1"}]}]}],"warnings":[]},
-  "status": {"lastattempt":{"submissionsenabled":true,"locked":false,"canedit":true,"cansubmit":true,"submission":{"userid":"7","status":"draft"}},"warnings":[]}
+  "status": {"lastattempt":{"submissionsenabled":true,"locked":false,"canedit":true,"cansubmit":true,"submission":{"userid":"7","status":"draft","plugins":[{"type":"onlinetext","editorfields":[{"name":"onlinetext","text":"Old draft","format":2}]}]}},"warnings":[]}
 }

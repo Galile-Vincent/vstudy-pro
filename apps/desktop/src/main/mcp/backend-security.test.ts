@@ -91,7 +91,7 @@ it('does not dispatch final assignment submission when the grant expires during 
     if (name === 'mod_assign_save_submission') await new Promise(resolve => setTimeout(resolve, Math.max(0, expiry - Date.now() + 25)));
     return Response.json(h.replies[name]);
   });
-  const running = h.call('submit_assignment', {courseId: courseA, moduleId: assignA, assignmentId: 52, text: 'My approved work.', studentOwned: true});
+  const running = h.call('save_assignment_draft', {courseId: courseA, moduleId: assignA, assignmentId: 52, text: 'My approved work.', studentOwned: true});
   h.engine.decideProposal({proposalId: (await proposal(h.engine)).id, approve: true});
   expect(await running).toMatchObject({ok: false, error: {code: 'EXPIRED'}});
   const calls = h.request.mock.calls.map(([, init]) => new URLSearchParams(String(init?.body)).get('wsfunction'));
@@ -122,4 +122,76 @@ it('fences an approved mutation queued in the shared scheduler when its school d
   expect((await running).ok).toBe(false);
   await Promise.all(blockers);
   expect(h.request.mock.calls.map(([, init]) => new URLSearchParams(String(init?.body)).get('wsfunction'))).toEqual(['core_course_get_course_module']);
+});
+
+async function assignmentDraftAttack(withFile:boolean, replaceText:boolean) {
+  const h = await setup('fixture-private-token');
+  const assignment = structuredClone(fixture.assignments);
+  if (withFile) assignment.courses[0]!.assignments[0]!.configs.push({plugin:'file', subtype:'assignsubmission', name:'enabled', value:'1'});
+  let draftText = 'Old draft';
+  let saved = false;
+  h.request.mockImplementation(async (_url, init) => {
+    const params = new URLSearchParams(String(init?.body));
+    const name = params.get('wsfunction');
+    if (name === 'core_course_get_course_module') return Response.json(fixture.assignmentCm);
+    if (name === 'mod_assign_get_assignments') return Response.json(assignment);
+    if (name === 'mod_assign_get_submission_status') {
+      if (saved && replaceText) draftText = 'Unapproved concurrent browser edit';
+      return Response.json({lastattempt:{...fixture.status.lastattempt, submission:{...fixture.status.lastattempt.submission, plugins:[
+        {type:'onlinetext', editorfields:[{name:'onlinetext', text:draftText, format:2}]},
+        {type:'file', fileareas:[{area:'submission_files', files:withFile ? [{filename:'unreviewed-private-attachment.pdf', filesize:42}] : []}]},
+      ]}}, warnings:[]});
+    }
+    if (name === 'mod_assign_save_submission') { saved = true; draftText = params.get('plugindata[onlinetext_editor][text]')!; }
+    return Response.json([]);
+  });
+  const running = h.call('save_assignment_draft', {courseId:courseA, moduleId:assignA, assignmentId:52, text:'My approved text only.', studentOwned:true});
+  const pending = await proposal(h.engine);
+  expect(pending.payload.text).toBe('My approved text only.');
+  if (withFile) expect(JSON.stringify(pending.payload)).toContain('unreviewed-private-attachment.pdf');
+  expect(JSON.stringify(pending.payload)).toContain('textHash');
+  h.engine.decideProposal({proposalId:pending.id, approve:true});
+  const result = await running;
+  expect(result).toMatchObject({ok:false, error:{code:'UNSUPPORTED', hint:expect.stringContaining('Moodle')}});
+  const calls = h.request.mock.calls.map(([, init]) => new URLSearchParams(String(init?.body)).get('wsfunction'));
+  expect(calls).not.toContain('mod_assign_submit_for_grading');
+  return {h, calls};
+}
+it('final submission includes pre-existing attachments absent from the approved payload', async () => {
+  const {calls} = await assignmentDraftAttack(true, false);
+  expect(calls).not.toContain('mod_assign_save_submission');
+});
+it('final submission accepts a changed remote draft after saving the approved text', async () => {
+  const {calls} = await assignmentDraftAttack(false, true);
+  expect(calls.filter(name => name === 'mod_assign_save_submission')).toHaveLength(1);
+});
+
+it('removes the final assignment tool and final-submission capability', () => {
+  expect(mcpTools).not.toHaveProperty('submit_assignment');
+  expect(mcpTools.save_assignment_draft.functions).not.toContain('mod_assign_submit_for_grading');
+});
+
+it('reconstructs a known school token split across returned course fields', async () => {
+  const secret = '0123456789abcdeffedcba9876543210';
+  const h = await setup(secret);
+  h.repository.saveCourse({...h.repository.course(courseA).course, fullName:secret.slice(0,16), shortName:secret.slice(16)});
+  const result = await h.call('list_courses', {});
+  if (!result.ok) throw Error(result.error.code);
+  const item = z.object({items:z.array(z.object({name:z.string(),shortName:z.string()}))}).parse(result.data.content).items[0]!;
+  expect(item.name).toBe('[redacted]');
+  expect(item.shortName).toBe('[redacted]');
+  expect(result.data).toMatchObject({redacted:true});
+  expect(h.request).not.toHaveBeenCalled();
+});
+it('reconstructs a base64 school token split by whitespace inside module content', async () => {
+  const secret = '0123456789abcdeffedcba9876543210';
+  const h = await setup(secret);
+  const encoded = Buffer.from(secret).toString('base64');
+  const detail = h.repository.course(courseA);
+  h.repository.saveDetail(courseA, {sections:detail.sections.map(section => ({...section, modules:section.modules.map(module => module.id === moduleA ? {...module, descriptionHtml:encoded.slice(0,22)+'\n'+encoded.slice(22)} : module)}))});
+  const result = await h.call('get_module', {courseId:courseA, moduleId:moduleA});
+  if (!result.ok) throw Error(result.error.code);
+  const {text} = z.object({text:z.string()}).parse(result.data.content);
+  expect(text).toBe('[redacted]');
+  expect(result.data).toMatchObject({redacted:true});
 });
