@@ -77,3 +77,19 @@ it('shows a submitted-linked task as done and keeps it out of the proposal',asyn
   expect(host.querySelector('[data-completed-tasks]')?.textContent).toContain('Done');
   await click('Plan my week');expect(host.querySelector('.planner-proposal')).toBeNull();
 });
+
+it('keeps both tab panels addressable and supports Arrow, Home and End navigation',async()=>{
+  await mount();
+  const tabs=[...host.querySelectorAll<HTMLButtonElement>('.planner-view-tabs [role=tab]')];
+  const panels=tabs.map(tab=>document.getElementById(tab.getAttribute('aria-controls')!));
+  expect(panels.every(panel=>panel?.getAttribute('role')==='tabpanel')).toBe(true);
+  expect(panels[0]?.hidden).toBe(false);expect(panels[1]?.hidden).toBe(true);
+  await act(async()=>tabs[0]!.focus());
+  for(const [key,index] of [['ArrowRight',1],['Home',0],['End',1],['ArrowRight',0]] as const){
+    await act(async()=>document.activeElement!.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true})));
+    await act(async()=>new Promise(resolve=>setTimeout(resolve,0)));
+    expect(document.activeElement).toBe(tabs[index]);
+    expect(tabs[index]!.getAttribute('aria-selected')).toBe('true');
+    expect(document.getElementById(tabs[index]!.getAttribute('aria-controls')!)?.hidden).toBe(false);
+  }
+});
