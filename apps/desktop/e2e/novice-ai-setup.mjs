@@ -1,4 +1,5 @@
 /** Recheck novice recovery in real Electron. This is source-informed regression coverage, not a naive user study. */
+import { waitForDocumentStatus } from './helpers/document-status.mjs';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -44,12 +45,16 @@ for (const [persona, language] of [['p1', 'zh-Hant'], ['p2', 'en'], ['p3', 'en']
     await launch(false);
     await task('reading-without-ai', async () => {
       await page.getByRole('button', { name: onboarding.sample, exact: true }).click();
+      await page.getByRole('button', { name: home.open_imported.replace('{{title}}', common.sample_title), exact: true }).waitFor();
+      const documents=await page.evaluate(()=>window.desktop.invoke('documents:list',{}));
+      assert.equal(documents.length,1,'Sample import creates one document');
+      await waitForDocumentStatus(page,documents[0].id);
       await page.getByRole('button', { name: home.open_imported.replace('{{title}}', common.sample_title), exact: true }).click();
       await page.getByTestId('document-markdown').waitFor();
       await page.getByRole('complementary', { name: copy.ai_off, exact: true }).waitFor();
       assert.equal(await page.getByRole('textbox', { name: common.ask_about_your_document, exact: true }).isDisabled(), true);
       assert.equal(await page.locator('.document-conversion-hint').count(), 0, 'native text has no alarming conversion warning');
-      assert.ok((await page.locator('.pane-toolbar').innerText()).includes(copy.ready_to_read));
+      assert.ok((await page.getByTestId('document-markdown').innerText()).length>0,'Ready sample has readable content');
     });
     await task('no-key-fallback', async () => {
       await page.getByRole('button', { name: copy.connect_ai, exact: true }).first().click();
