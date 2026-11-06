@@ -130,3 +130,13 @@ module.main()
   expect(result.status).toBe(0);
   expect(JSON.parse(result.stdout)).toEqual([128, 64 * 1024 * 1024, 0]);
 });
+
+it('measures converter peak memory through the native host API', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const { resolve } = await import('node:path');
+  const result = spawnSync(process.platform === 'win32' ? 'python' : 'python3', ['-c',
+    'import sys; sys.path.insert(0,sys.argv[1]); from limits import install_limits,peak_memory_bytes; install_limits(); print(peak_memory_bytes())',
+    resolve('resources/converter')], {encoding: 'utf8'});
+  expect(result.status, result.stderr).toBe(0);
+  expect(Number(result.stdout.trim())).toBeGreaterThan(0);
+});
