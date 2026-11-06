@@ -12,8 +12,9 @@ function Trace-Stage([string]$Stage) {
 Trace-Stage 'start'
 
 function Assert-Path([string]$Path, [bool]$Directory) {
-    $item = Get-Item -LiteralPath $Path -Force
-    if (($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0 -or $item.PSIsContainer -ne $Directory) { throw 'Unsafe path' }
+    $attributes = [System.IO.File]::GetAttributes($Path)
+    $isDirectory = ($attributes -band [System.IO.FileAttributes]::Directory) -ne 0
+    if (($attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0 -or $isDirectory -ne $Directory) { throw 'Unsafe path' }
 }
 function New-PrivateSecurity([bool]$Directory) {
     if ($Directory) { $acl = [System.Security.AccessControl.DirectorySecurity]::new() }
@@ -54,11 +55,14 @@ function Open-VerifiedState([string]$Path) {
 
 if (-not [System.IO.Path]::IsPathRooted($UserData) -or $UserData -notmatch '^[A-Za-z]:\\' -or $UserData.Substring(2).Contains(':')) { throw 'Local drive path required' }
 $parent = [System.IO.Path]::GetFullPath($UserData)
+$root = [System.IO.Path]::GetPathRoot($parent)
 $cursor = $parent
 while ($cursor) {
     Assert-Path $cursor $true
+    if ([string]::Equals($cursor, $root, [StringComparison]::OrdinalIgnoreCase)) { break }
     $ancestor = [System.IO.Directory]::GetParent($cursor)
     if ($null -eq $ancestor) { break }
+    if ([string]::Equals($ancestor.FullName, $cursor, [StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid ancestor chain' }
     $cursor = $ancestor.FullName
 }
 $directory = [System.IO.Path]::Combine($parent, 'mcp')
@@ -68,7 +72,7 @@ if (-not [System.IO.Directory]::Exists($directory)) {
     [void][System.IO.Directory]::CreateDirectory($directory, (New-PrivateSecurity $true))
 }
 Assert-Path $directory $true
-Assert-Private (Get-Acl -LiteralPath $directory) $true
+Assert-Private ([System.IO.Directory]::GetAccessControl($directory)) $true
 Trace-Stage 'directory-verified'
 $path = [System.IO.Path]::Combine($directory, 'state.json')
 if ($Operation -eq 'read') {
