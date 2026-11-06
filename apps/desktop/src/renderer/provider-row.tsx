@@ -1,3 +1,4 @@
+import { openAiCliSetup } from './ai-cli/entry';
 import { Check } from 'lucide-react';
 import { Checkbox } from './components/checkbox';
 import { Switch } from './components/ui/switch';
@@ -88,7 +89,8 @@ export function ProviderRow({
       {isCli && (
         <>
           {unsupportedCli && <p role="note">{tr('distribution:codex_unavailable')}</p>}
-          <p className="muted">{tr('settings:cli_help', { command: provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex login' : 'agy' })}</p>
+          <Button variant="secondary" disabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
+          <p className="muted">{tr('ai-cli:row_help')}</p>
           <Button disabled={busy || unsupportedCli} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
           <label className="provider-cli-label">
             {settingsView ? (

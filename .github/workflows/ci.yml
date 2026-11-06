@@ -42,6 +42,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Prepare verified native converter dependencies when upstream wheels are missing
         run: node apps/desktop/scripts/converter-native.mjs
+      - run: pnpm --filter @vstudy/mcp typecheck
+      - run: pnpm --filter @vstudy/mcp lint
+      - run: pnpm --filter @vstudy/mcp test
       - run: pnpm --filter @vstudy/desktop typecheck
       - run: pnpm --filter @vstudy/desktop lint
       - run: pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2
@@ -51,6 +54,9 @@ jobs:
       - run: pnpm security:static
       - run: pnpm vendor:check
       - run: pnpm build
+      - run: pnpm --filter @vstudy/mcp verify
+      - run: pnpm --filter @vstudy/mcp verify:clients
+      - run: pnpm --filter @vstudy/mcp verify:core
       - name: Retain the real cross-user pipe isolation report
         if: always() && runner.os == 'Windows'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

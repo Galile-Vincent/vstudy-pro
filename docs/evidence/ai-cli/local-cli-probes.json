@@ -1,0 +1,53 @@
+{
+  "checkedAt": "2026-11-06T03:44:40.993453+00:00",
+  "scope": "Read-only local status. No new login or vendor installer ran. Personal fields omitted.",
+  "claude": {
+    "version": "2.1.318",
+    "commands": [
+      "claude --version",
+      "claude auth --help",
+      "claude auth status",
+      "claude auth status --help",
+      "claude auth login --help"
+    ],
+    "authenticated": true,
+    "statusFormat": "JSON loggedIn boolean; --json supported"
+  },
+  "codex": {
+    "version": "0.167.0",
+    "commands": [
+      "codex --version",
+      "codex login --help",
+      "codex login status"
+    ],
+    "authenticated": true,
+    "compatibleWithCurrentTransport": false,
+    "requiredVersion": "0.166.0"
+  },
+  "agy": {
+    "version": "1.4.12",
+    "commands": [
+      "agy --version",
+      "agy --help",
+      "agy help auth",
+      "agy help login",
+      "agy acp --stdio --sandbox --include-default-customizations=false"
+    ],
+    "authSubcommand": false,
+    "loginSubcommand": false,
+    "statusProtocol": [
+      "initialize",
+      "session/new"
+    ],
+    "authenticated": true,
+    "availableModels": 6,
+    "authenticateCalled": false
+  },
+  "sources": [
+    "https://code.claude.com/docs/en/setup",
+    "https://github.com/openai/codex",
+    "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+    "https://antigravity.google/docs/getting-started?tab=cli",
+    "https://antigravity.google/docs/plans"
+  ]
+}

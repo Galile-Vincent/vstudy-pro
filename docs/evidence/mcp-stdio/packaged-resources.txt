@@ -1,0 +1,6 @@
+> @vstudy/mcp@0.2.0 verify:package /Users/vc/.t3/worktrees/vstudy-pro/t3-531641e7/apps/mcp
+> node scripts/verify-package.mjs
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-531641e7/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources: CLI and client resources present. Unix helper executable outside ASAR.
+/Users/vc/.t3/worktrees/vstudy-pro/t3-531641e7/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp/dist/vstudy-mcp.cjs sha256 ea5cf6e4c281c40ed75d980b426ebbd651d7a83815249a489af8c3c51c9e57ae
+/Users/vc/.t3/worktrees/vstudy-pro/t3-531641e7/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp-peer sha256 4698fd1e0e78a194ae56d43bc10343253da1dc2900d5f31f46618185bf36b8aa

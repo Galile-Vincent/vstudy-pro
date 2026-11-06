@@ -8,10 +8,10 @@
   "scripts": {
     "dev": "pnpm --filter @vstudy/desktop dev",
     "build": "pnpm --filter @vstudy/desktop build",
-    "test": "pnpm --filter @vstudy/desktop test",
-    "typecheck": "pnpm --filter @vstudy/desktop typecheck && pnpm --filter @vstudy/website typecheck",
+    "test": "pnpm --filter @vstudy/mcp test && pnpm --filter @vstudy/desktop test",
+    "typecheck": "pnpm --filter @vstudy/mcp typecheck && pnpm --filter @vstudy/desktop typecheck && pnpm --filter @vstudy/website typecheck",
     "package": "pnpm --filter @vstudy/desktop package",
-    "lint": "pnpm --filter @vstudy/desktop lint && pnpm --filter @vstudy/website lint",
+    "lint": "pnpm --filter @vstudy/mcp lint && pnpm --filter @vstudy/desktop lint && pnpm --filter @vstudy/website lint",
     "smoke": "pnpm --filter @vstudy/desktop smoke",
     "security:check": "node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test --pool=forks --maxWorkers=2",
     "e2e": "node apps/desktop/scripts/e2e.mjs",
@@ -19,7 +19,7 @@
     "package:signed": "node apps/desktop/scripts/package-signed.mjs",
     "vendor:check": "node apps/desktop/scripts/vendor-check.mjs",
     "typecheck-fast": "node apps/desktop/scripts/generate-locales.mjs && pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo",
-    "prepare": "node apps/desktop/scripts/generate-locales.mjs && node scripts/install-hooks.mjs",
+    "prepare": "node scripts/ensure-pty-helper.mjs && node apps/desktop/scripts/generate-locales.mjs && node scripts/install-hooks.mjs",
     "release": "git-cliff --output CHANGELOG.md",
     "security:static": "node apps/desktop/scripts/security-audit.mjs && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs",
     "brand": "node scripts/make-brand.mjs"

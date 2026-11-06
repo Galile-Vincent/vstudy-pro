@@ -1,7 +1,10 @@
+import { aiCliSetupEvent } from './ai-cli/entry';
+import { AiCliInventory } from './ai-cli/inventory';
 import { StorageSettings } from "./settings/storage";
 import { AiSetupGuide } from './ai-setup';
 import { Switch } from './components/ui/switch';
-import { SlidersHorizontal, Palette, KeyRound, BarChart3, Shield, HardDrive, X } from 'lucide-react';
+import { SlidersHorizontal, Palette, KeyRound, BarChart3, Shield, HardDrive, Bot, X } from 'lucide-react';
+import { AgentsSettings } from './settings/agents';
 import { SettingsGroup, SettingsRow } from './settings/layout';
 import { AppearanceSection } from './settings/appearance';
 import './settings/settings.css';
@@ -54,6 +57,12 @@ export function ProviderSettings({
     };
   }, []);
 
+  useEffect(() => {
+    const handoff = () => onClose();
+    window.addEventListener(aiCliSetupEvent, handoff);
+    return () => window.removeEventListener(aiCliSetupEvent, handoff);
+  }, [onClose]);
+
   return (
     <Dialog
       open
@@ -76,6 +85,7 @@ export function ProviderSettings({
                 ['general', SlidersHorizontal],
                 ['appearance', Palette],
                 ['providers', KeyRound],
+                ['agents', Bot],
                 ['usage', BarChart3],
                 ['storage', HardDrive],
                 ['privacy', Shield],
@@ -83,15 +93,15 @@ export function ProviderSettings({
             ).map(([id, Icon]) => (
               <TabsTrigger key={id} value={id}>
                 <Icon size={16} />
-                {tr(id === 'storage' ? 'storage:title' : `settings:${id}`)}
+                {tr(id === 'agents' ? 'agents:title' : id === 'storage' ? 'storage:title' : `settings:${id}`)}
               </TabsTrigger>
             ))}
           </TabsList>
-          {['general', 'appearance', 'providers', 'usage', 'storage', 'privacy'].map((id) => (
+          {['general', 'appearance', 'providers', 'agents', 'usage', 'storage', 'privacy'].map((id) => (
             <TabsContent forceMount hidden={tab !== id} value={id} key={id} className="settings-pane">
               <div className="settings-pane-inner">
                 <header className="settings-section-header">
-                  <h2>{tr(id === 'storage' ? 'storage:title' : `settings:${id}`)}</h2>
+                  <h2>{tr(id === 'agents' ? 'agents:title' : id === 'storage' ? 'storage:title' : `settings:${id}`)}</h2>
                   {id === 'providers' && (
                     <p className="muted">
                       {tr('common:keys_are_saved_securely_in_the_desktop_app_and_never_read_back')}
@@ -127,6 +137,8 @@ export function ProviderSettings({
                     </>
                   ) : id === 'appearance' ? (
                     <AppearanceSection />
+                  ) : id === 'agents' ? (
+                    <AgentsSettings />
                   ) : id === 'storage' ? (
                     <StorageSettings />
                   ) : id === 'privacy' ? (
@@ -135,6 +147,7 @@ export function ProviderSettings({
                     <UsageSettings />
                   ) : (
                     <>
+                      <AiCliInventory />
                       <AiSetupGuide onClose={onClose} />
                       <SettingsGroup title={tr('novice:ai_services')}>
                         {providers.filter(provider => provider.config.kind === 'api').map(provider => (

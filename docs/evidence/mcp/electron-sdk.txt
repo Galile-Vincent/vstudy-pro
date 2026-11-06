@@ -1,0 +1,5 @@
+PASS. A real app-owned bridge is off by default. The official SDK client paired through the real consent dialog with a matching code and one explicitly selected account.
+PASS. Real MoodleClient POSTs reached only the loopback school. Page content, forum text, file pagination, resources, prompts, scope denial, account denial, redaction, and SDK output schemas passed.
+PASS. Planner writes deferred until approval and denial saved nothing. Quiz completion was blocked. Assignment text was sent exactly once only after high-risk consent.
+PASS. English, Traditional Chinese, and Japanese agent settings rendered in Electron. Checkboxes retained square geometry and the English Agents page had no WCAG A/AA axe violations.
+PASS. App restart reconnected the existing stdio client without re-pairing. Revocation denied the next read. Bearers remained out of app state, tool results, and stderr. Socket and credential permissions were private.

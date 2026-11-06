@@ -72,6 +72,21 @@ export function createMockBridge(): DesktopApi {
     const input = request as Record<string, unknown>;
     let result: unknown = { ok: true };
     switch (channel) {
+      case "mcp:state":
+        result = {enabled:false,grants:[],pairings:[],proposals:[],activity:[],activeCalls:0,accounts:[]};
+        break;
+      case "mcp:take-navigation":
+        result = null;
+        break;
+      case "mcp:clients":
+        result = [];
+        break;
+      case "mcp:doctor":
+        result = {ok:false,checks:[]};
+        break;
+      case "mcp:install":
+        result = {diff:"",changed:false};
+        break;
       case "dashboard:get":
         result = { pinnedFolders: [], pinnedDocuments: [], recentDocuments: [], month: { inputTokens: 0, outputTokens: 0, costUsd: 0, calls: 0 }, series: [], streak: { current: 0, best: 0, today: false, days: [] }, recentActivity: [] };
         break;

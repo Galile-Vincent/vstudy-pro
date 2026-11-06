@@ -1,9 +1,13 @@
 /** Human-readable localized guides. Other guides retain an explicit English fallback notice. */
 import type { Guide } from './docs';
 import type { Language } from './ui';
+import { aiCliGuides } from './ai-cli-guides';
+import { mcpTranslations } from './mcp-docs';
 
 export const translations: Partial<Record<Language, Record<string, Pick<Guide, 'title' | 'description' | 'sections'>>>> = {
   'zh-Hant': {
+    'ai-providers': aiCliGuides['zh-Hant'],
+    'agents-mcp': mcpTranslations['zh-Hant'],
     'getting-started': {
       title:'開始使用', description:'安裝 VStudy Pro，不連接帳號也能試讀第一份資料。',
       sections:[
@@ -50,7 +54,7 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
           ],
         },
         {id:'onboarding',title:'試讀範例文件',paragraphs:['首次設定可選擇英文、繁體中文或日文，以及明亮或深色主題。先從內附範例開始，之後再連接學校或設定 AI 供應商。','在閱讀器打開範例，選取一句話即可體驗閱讀流程。AI 回答需要你自行啟用的供應商，單純閱讀範例則不需要 AI。'],image:{name:'onboarding',width:1440,height:900,alt:'歡迎導覽與閱讀工作區預覽'}},
-        {id:'optional-setup',title:'只加入你需要的功能',paragraphs:['在「課程」連接學校以加入 Moodle 課業。在「資料庫」匯入自己的文件。想使用 AI 時，再到「設定 > 供應商」。','PDF 等格式需要 Python 轉換環境。首次轉換會先詢問是否允許下載套件。Markdown 與純文字不需要此設定。Windows 沒有已驗證且等同 macOS 核心沙箱的機制，因此停用 Codex；Windows 可使用 API 供應商。「設定 > 隱私權」提供轉換器離線模式。Mac 額外以系統沙箱禁止轉換器連網。Windows 沒有對等的核心層網路封鎖；離線模式與 Python socket 攔截不構成作業系統安全邊界。']},
+        {id:'optional-setup',title:'只加入你需要的功能',paragraphs:['在「課程」連接學校以加入 Moodle 課業。在「資料庫」匯入自己的文件。想使用 AI 時，可從側邊欄的「AI 工具」、首次導覽、閱讀器或「設定 > 供應商」開啟「設定 AI 工具」。','選擇工具並個別允許執行，再依序完成安裝、登入與測試。執行前會顯示操作內容。macOS 的內嵌終端機會顯示登入連結與代碼，也可使用自己的終端機。VStudy 不附帶 AI 訂閱，測試可能計入供應商用量。','PDF 等格式需要 Python 轉換環境。首次轉換會先詢問是否允許下載套件。Markdown 與純文字不需要此設定。「設定 > 隱私權」提供轉換器離線模式。', "Windows 沒有已驗證且等同 macOS 核心沙箱的機制，因此停用 Codex CLI 供應商，API 供應商仍可使用。Mac 額外以系統沙箱禁止轉換器連網。Windows 沒有對等的核心層網路封鎖，離線模式與 Python socket 攔截不構成作業系統安全邊界。"]},
       ],
     },
     'connect-your-school': {
@@ -64,6 +68,8 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
     },
   },
   ja: {
+    'ai-providers': aiCliGuides.ja,
+    'agents-mcp': mcpTranslations.ja,
     'getting-started': {
       title:'はじめに', description:'VStudy Pro をインストールして、アカウント接続なしで資料を読んでみましょう。',
       sections:[
@@ -110,7 +116,7 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
           ],
         },
         {id:'onboarding',title:'サンプル資料を読む',paragraphs:['初回設定では英語、繁体字中国語、日本語と、ライトまたはダークのテーマを選べます。まず付属のサンプルから始めて、学校や AI プロバイダーは後で接続できます。','サンプルをリーダーで開き、一文を選んで読み方を試します。AI の回答には自分で有効にしたプロバイダーが必要です。サンプルを読むだけなら AI は不要です。'],image:{name:'onboarding',width:1440,height:900,alt:'VStudy の初回設定とサンプル資料'}},
-        {id:'optional-setup',title:'必要な機能だけを追加する',paragraphs:['「授業」で学校を接続すると Moodle の授業を取得できます。「ライブラリ」では自分の資料を取り込めます。AI を使いたくなったら「設定 > プロバイダー」を開きます。','PDF などの変換には Python の変換環境が必要です。初回変換ではパッケージのダウンロード前に許可を求めます。Markdown とテキストはこの準備なしで使えます。Windows には検証済みの同等のカーネルサンドボックスがないため、Codex は無効です。Windows では API プロバイダーを使えます。「設定 > プライバシー」に変換器のオフラインモードがあります。Mac は OS のサンドボックスで変換器の通信を拒否します。Windows に同等のカーネルによる拒否はなく、オフラインモードや Python の socket 制限は OS のセキュリティ境界ではありません。']},
+        {id:'optional-setup',title:'必要な機能だけを追加する',paragraphs:['「授業」で学校を接続すると Moodle の授業を取得できます。「ライブラリ」では自分の資料を取り込めます。AI を使いたくなったら、サイドバーの「AI ツール」、初回案内、リーダー、または「設定 > プロバイダー」から「AI ツールを設定」を開きます。','ツールを選んで個別に実行を許可し、インストール、ログイン、テストと進みます。各操作は実行前に確認できます。macOS の内蔵ターミナルにリンクとコードを表示し、自分のターミナルも使えます。VStudy に AI の契約は含まれず、テストは利用枠を消費する場合があります。','PDF などの変換には Python の変換環境が必要です。初回変換ではパッケージのダウンロード前に許可を求めます。Markdown とテキストはこの準備なしで使えます。「設定 > プライバシー」に変換器のオフラインモードがあります。', "Windows には検証済みの同等なカーネルサンドボックスがないため、Codex CLI プロバイダーは無効です。API プロバイダーは利用できます。Mac は OS のサンドボックスで変換器の通信を遮断します。Windows には同等のカーネルによる通信遮断がなく、オフライン設定と Python の socket 制限は OS のセキュリティ境界ではありません。"]},
       ],
     },
     'connect-your-school': {

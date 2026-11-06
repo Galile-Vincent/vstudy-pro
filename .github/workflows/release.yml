@@ -69,6 +69,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Prepare verified native converter dependencies when upstream wheels are missing
         run: node apps/desktop/scripts/converter-native.mjs
+      - run: pnpm --filter @vstudy/mcp typecheck
+      - run: pnpm --filter @vstudy/mcp lint
+      - run: pnpm --filter @vstudy/mcp test
       - run: pnpm --filter @vstudy/desktop typecheck
       - run: pnpm --filter @vstudy/desktop lint
       - run: pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2
@@ -78,6 +81,9 @@ jobs:
       - run: pnpm security:static
       - run: pnpm vendor:check
       - run: pnpm build
+      - run: pnpm --filter @vstudy/mcp verify
+      - run: pnpm --filter @vstudy/mcp verify:clients
+      - run: pnpm --filter @vstudy/mcp verify:core
       - name: Package unsigned branch or dry-run artifacts
         if: needs.plan.outputs.publish != 'true'
         working-directory: apps/desktop
@@ -109,6 +115,10 @@ jobs:
           AZURE_CODE_SIGNING_ACCOUNT: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_CODE_SIGNING_ACCOUNT || '' }}
           AZURE_CERTIFICATE_PROFILE: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_CERTIFICATE_PROFILE || '' }}
           WIN_PUBLISHER_NAME: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && vars.WIN_PUBLISHER_NAME || '' }}
+      - name: Verify packaged MCP code and plugin resources
+        env:
+          TARGET: ${{ matrix.key }}
+        run: pnpm --filter @vstudy/mcp verify:package --release-dir "../desktop/release/$TARGET"
       - name: Launch the packaged Mac app with native smoke reporting
         if: matrix.platform == 'mac'
         working-directory: apps/desktop

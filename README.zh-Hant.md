@@ -75,6 +75,7 @@ pnpm build
 - **儲存與備份。** 查看空間用量、清除快取或轉換檔、檢查資料庫完整性，以及匯出或還原可攜式備份。備份不含憑證；還原後須重新登入學校。
 - **隱私。** 文件庫與 SQLite 儲存在本機，AI 服務可自由選用，已儲存的憑證會加密，並提供本次執行的網路活動清單。App 不傳送分析資料，也沒有跨裝置同步。
 - **首次使用與語言。** 提供範例文件、可重播的設定導覽、操作示範與情境提示。介面支援 English（`en`）、繁體中文（`zh-Hant`）與日本語（`ja`）。
+- **透過 MCP 連接全域代理程式。** 以限定帳號、權限與有效期限的授權分享課業。代理程式使用 app 的登入狀態讀取內容，每次寫入都在「設定 > 代理程式」核准。
 
 ## 頁面導覽
 
@@ -153,13 +154,37 @@ Mac 使用 Cmd，Windows 使用 Ctrl。
 | `Cmd/Ctrl+R` | 重新載入目前聚焦的 Moodle 頁面面板。 |
 | `Tab` / `Shift+Tab` | 在控制項之間移動焦點。 |
 
+## 連接全域代理程式
+
+原始碼建置包含供 Claude Code、Codex、Antigravity、Claude Desktop 與 Cursor 使用的 MCP 伺服器。代理程式透過 VStudy 既有的登入狀態讀取你選定的 Moodle 帳號。學校憑證留在 app，代理程式取得獨立且會到期的本機授權；所有寫入都必須在 VStudy 逐次核准。
+
+開啟「設定 > 代理程式」，啟用連線，再用連接精靈預覽與安裝用戶端設定。比對配對碼，並選擇帳號與權限。完成原始碼建置後，可先預覽 Codex 設定：
+
+```sh
+node apps/mcp/dist/vstudy-mcp.cjs install --client codex --dry-run
+```
+
+其他用戶端可改用 `claude`、`agy`、`claude-desktop` 或 `cursor`，需要 Node.js 24.11.1 以上。測驗與影片仍由學生親自完成；MCP 不回答或提交測驗，也不偽造活動進度。作業繳交僅接受學生自己的文字，並需逐次明確同意。
+
+詳見 [MCP 設定、工具與安全指南](docs/MCP.md)、[用戶端格式與實際驗證範圍](apps/mcp/CLIENT_FORMATS.md)，以及[設計決策](docs/MCP_DESIGN.md)。封裝產物已搭配官方 SDK 與本機 Moodle 測試資料驗證；原生 Windows 整合與真實學校驗收仍需另外完成。
+
 ## 運作方式
 
 選擇學校並確認 Moodle 網站後，Main 探索官方行動服務，以學校支援的密碼或 SSO 流程登入，再將各帳號的課程快照存入本機 SQLite。App 會檢查伺服器能力，不假設每所學校都開放相同功能。
 
 匯入時會複製原始檔到以內容雜湊管理的文件庫。Markdown 與文字檔可直接開啟，其他格式交由按需啟動的 Python 轉換器產生 Markdown。轉換器在 macOS 上禁止網路存取，閒置後停止。轉換可能遺失排版，不是精確還原 PDF 的檢視器。
 
-AI 為選用功能。「**設定 > AI 服務供應商**」可個別啟用 Claude Code（`claude`）、Codex（`codex`）與 Antigravity（`agy`）既有的 CLI 登入。請先在 VStudy 外登入這些工具。也可使用 Anthropic、OpenAI 或 OpenAI-compatible API 金鑰，並選擇儲存或僅於本次執行保留。CLI 訂閱與 API 費用依供應商規則計算。目前 Codex 需要已登入的 CLI **0.166.0**、macOS 與 `/usr/bin/sandbox-exec`；傳輸驗證不支援或失敗時會拒絕執行。Windows 未實作對等且已驗證的核心沙箱，因此停用 Codex；可改用 API 供應商。詳見 [Codex 傳輸限制](docs/codex-tool-free.md)。
+AI 為選用功能。可從側邊欄的「**AI 工具**」、首次導覽、閱讀器，或「**設定 > AI 服務供應商**」開啟「**設定 AI 工具**」。選擇 Claude Code（`claude`）、Codex（`codex`）或 Antigravity（`agy`），再個別允許執行。未啟用的工具只會檢查檔案，不會啟動。
+
+1. **安裝。** 確認官方下載與專用目的地，再執行操作。VStudy 會驗證下載，並將各版本存放在應用程式管理的獨立資料夾。不需要管理員密碼，也不會修改 shell 設定或 PATH。
+2. **登入。** 在 macOS 的內嵌終端機執行已確認的操作，依照連結或裝置代碼登入，再回到 VStudy。開啟連結前會要求確認。也可複製指令或開啟自己的「終端機」。Windows 與 Linux 的登入採用外部終端機方式。
+3. **測試。** 選擇「**測試看看**」，透過真實供應商傳送一小段提示，不包含文件文字，但可能計入服務用量。同一畫面提供具體排除方法，以及可複製給老師或資訊人員的求助文字。
+
+側邊欄會顯示版本與更新狀態。「立即檢查」只進行一次版本檢查。「**設定 > 隱私權**」中的背景檢查與閒置時自動更新預設關閉。手動更新會安裝在目前版本旁。進行中的聊天繼續使用原版本，新聊天使用更新版，並保留前一版供還原。VStudy 不會更新另外安裝的 CLI。若改用只供複製的官方安裝指令，畫面會說明如何在供應商設定選擇現有執行檔。
+
+VStudy 不附帶 AI 訂閱。帳號資格與免費、付費用量依供應商條款計算。也可使用 Anthropic、OpenAI 或 OpenAI-compatible API 金鑰，儲存或僅供本次執行使用。Codex 需要已驗證的 CLI **0.166.0**、macOS 與 `/usr/bin/sandbox-exec`。內建安裝使用此版本，新版也不能繞過傳輸驗證。詳見 [Codex 傳輸限制](docs/codex-tool-free.md)、[設定設計與驗收限制](docs/AI_CLI_SETUP_DESIGN.md)及[實作證據](docs/AI_CLI_SETUP_REPORT.md)。
+
+Windows 尚無已驗證且等同 macOS 核心沙箱的機制，因此停用 Codex CLI 供應商；Windows 可使用 API 供應商。
 
 提問時會將你的訊息與有大小限制的背景資料組成提示。文件聊天包含中繼資料、對話記錄與選取文字；未選取時會加入大綱與開頭節錄。課程聊天會加入可取得的課程資料、讀書計畫狀態與選定且已轉換完成的文件。回答以串流顯示並存入本機。助理提出的計畫修改須經明確核准，Main 才會套用。請回到原始來源確認日期與答案。
 
@@ -171,7 +196,7 @@ VStudy 不傳送 app 分析資料。學校登入、同步與內容檢視會連�
 
 App **不會加密磁碟上的文件、Markdown 與聊天記錄**。儲存的機密資料透過 Mac 鑰匙圈或 Windows DPAPI 加密，本次執行的資料保留在 Main 記憶體。請用系統帳號權限與 FileVault 或 BitLocker 等磁碟加密保護檔案。可攜式備份不含憑證，但仍包含私人學習資料。
 
-「**設定 > 隱私權**」列出本次執行中有數量上限的 app 主動請求與 CLI 啟動記錄。這不是封包擷取，無法列出 CLI 或 Chromium 內部的每一個請求，目前也無法得知傳輸位元組數。開啟外部瀏覽器或郵件連結前會要求確認。處理敏感資料前請閱讀[安全模型](docs/SECURITY.md)。
+「**設定 > 隱私權**」列出本次執行中有數量上限的 app 主動請求與 CLI 啟動記錄，包含 AI 工具版本資料檢查與下載。背景版本檢查須另外同意。這不是封包擷取，無法列出 CLI 或 Chromium 內部的每一個請求，目前也無法得知傳輸位元組數。開啟外部瀏覽器或郵件連結前會要求確認。處理敏感資料前請閱讀[安全模型](docs/SECURITY.md)。
 
 ## 專案結構
 
@@ -185,6 +210,7 @@ apps/desktop/
   resources/    Python 轉換器與內建範例文件
   e2e/          真實 Electron 整合測試與測試資料
   scripts/      建置、封裝、安全與測試工具
+apps/mcp/       Stdio MCP 伺服器、用戶端安裝器、外掛與 SDK 驗證
 docs/           架構、資料、安全、設計與驗證記錄
 scripts/        儲存庫工具、Git hooks 與 README 連結驗證
 .github/        CI 與未經 Developer ID 簽署的標籤發布流程
@@ -247,9 +273,9 @@ sequenceDiagram
 | --- | --- |
 | `pnpm dev` | 啟動 Electron 與 Vite，以 Ctrl+C 停止。 |
 | `pnpm typecheck` | 檢查 TypeScript 並產生語言型別。 |
-| `pnpm lint` | 執行桌面版 ESLint。 |
-| `pnpm test --pool=forks --maxWorkers=2` | 以兩個 worker 執行對比檢查與單元測試。 |
-| `pnpm build` | 建置 Main、Preload 與 Renderer。 |
+| `pnpm lint` | 檢查 MCP、桌面版與網站。 |
+| `pnpm test --pool=forks --maxWorkers=2` | 以兩個 worker 執行 MCP、對比與桌面版單元測試。 |
+| `pnpm build` | 建置 MCP、本機身分驗證輔助程式、Main、Preload 與 Renderer。 |
 | `pnpm security:static` | 檢查相依套件政策與安全規則。 |
 | `pnpm security:check` | 執行靜態檢查、lint 與單元測試。 |
 | `pnpm e2e` | 建置並依序執行真實 Electron E2E 測試。 |

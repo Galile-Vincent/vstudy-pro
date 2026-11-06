@@ -1,0 +1,4 @@
+> @vstudy/mcp@0.2.0 verify:core /Users/vc/.t3/worktrees/vstudy-pro/t3-531641e7/apps/mcp
+> node scripts/check-core-bridge.mjs --core-root /Users/vc/.t3/worktrees/vstudy-pro/t3-531641e7/apps/mcp/node_modules/.cache/core-fixture --bin '/Users/vc/.t3/worktrees/vstudy-pro/t3-531641e7/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp/dist/vstudy-mcp.cjs' --peer-helper '/Users/vc/.t3/worktrees/vstudy-pro/t3-531641e7/apps/desktop/release/mac-arm64/VStudy Pro.app/Contents/Resources/mcp-peer'
+
+PASS real core engine, native peer helper, official SDK, 27 schemas, pending DENIED pairing, one-shot finish, opaque cursor roundtrip, eight queued reads, approved write, restart, disabled JSON-RPC error, authenticated nonpairing doctor revocation/expiry/scope/disabled probes, explicit reset and fresh consent.

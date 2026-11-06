@@ -1,0 +1,141 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+
+ ❯ test/platform.test.ts (22 tests | 2 failed | 20 skipped) 3ms
+     × discovers a custom path from versioned NSIS metadata 0.2.2 2ms
+     × discovers a custom path from versioned NSIS metadata 0.3.0-rc.1+build.2 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/platform.test.ts > platform connection and launch fixtures > discovers a custom path from versioned NSIS metadata 0.2.2
+ FAIL  test/platform.test.ts > platform connection and launch fixtures > discovers a custom path from versioned NSIS metadata 0.3.0-rc.1+build.2
+Error: DISCONNECTED
+ ❯ unavailable src/launch.ts:14:27
+     12|   run?: (executable: string, args: string[], detached: boolean) => Pro…
+     13| }
+     14| const unavailable = () => new BridgeError('DISCONNECTED', 'Install or …
+       |                           ^
+     15|
+     16| export function registryAppPaths(text: string, environment: NodeJS.Pro…
+ ❯ launchApplication src/launch.ts:75:26
+ ❯ test/platform.test.ts:117:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 20 skipped (22)
+   Start at  12:34:30
+   Duration  151ms (transform 65ms, setup 0ms, import 94ms, tests 3ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/platform.test.ts --pool=forks --maxWorkers=2 -t versioned NSIS
+
+
+> @vstudy/mcp@0.2.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> pnpm build && vitest run --pool=forks --maxWorkers=2
+
+
+> @vstudy/mcp@0.2.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> node scripts/build.mjs
+
+
+  dist/vstudy-mcp.cjs   942.2kb
+  dist/installer.cjs    371.2kb
+  dist/windows-acl.cjs  140.9kb
+
+⚡ Done in 38ms
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+
+
+ Test Files  12 passed | 1 skipped (13)
+      Tests  126 passed | 2 skipped (128)
+   Start at  12:34:56
+   Duration  3.43s (transform 116ms, setup 0ms, import 378ms, tests 5.80s, environment 0ms)
+
+
+> @vstudy/mcp@0.2.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> tsc --noEmit
+
+
+> @vstudy/mcp@0.2.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> eslint .
+
+
+> @vstudy/mcp@0.2.0 verify:core /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> node scripts/check-core-bridge.mjs
+
+PASS real core engine, native peer helper, official SDK, 27 schemas, pending DENIED pairing, one-shot finish, opaque cursor roundtrip, eight queued reads, approved write, restart, disabled JSON-RPC error, authenticated nonpairing doctor revocation/expiry/scope/disabled probes, explicit reset and fresh consent.
+
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+
+ ❯ test/platform.test.ts (24 tests | 2 failed | 22 skipped) 3ms
+     × finds a custom NSIS install from its uninstaller icon, quoted=false 2ms
+     × finds a custom NSIS install from its uninstaller icon, quoted=true 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/platform.test.ts > platform connection and launch fixtures > finds a custom NSIS install from its uninstaller icon, quoted=false
+ FAIL  test/platform.test.ts > platform connection and launch fixtures > finds a custom NSIS install from its uninstaller icon, quoted=true
+Error: DISCONNECTED
+ ❯ unavailable src/launch.ts:14:27
+     12|   run?: (executable: string, args: string[], detached: boolean) => Pro…
+     13| }
+     14| const unavailable = () => new BridgeError('DISCONNECTED', 'Install or …
+       |                           ^
+     15|
+     16| export function registryAppPaths(text: string, environment: NodeJS.Pro…
+ ❯ launchApplication src/launch.ts:75:26
+ ❯ test/platform.test.ts:133:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 22 skipped (24)
+   Start at  12:46:05
+   Duration  123ms (transform 48ms, setup 0ms, import 70ms, tests 3ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/platform.test.ts --pool=forks --maxWorkers=2 -t custom NSIS install from its uninstaller icon
+
+
+> @vstudy/mcp@0.2.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> pnpm build && vitest run --pool=forks --maxWorkers=2
+
+
+> @vstudy/mcp@0.2.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> node scripts/build.mjs
+
+
+  dist/vstudy-mcp.cjs   942.5kb
+  dist/installer.cjs    371.5kb
+  dist/windows-acl.cjs  140.9kb
+
+⚡ Done in 35ms
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+
+
+ Test Files  12 passed | 1 skipped (13)
+      Tests  130 passed | 2 skipped (132)
+   Start at  12:47:11
+   Duration  3.17s (transform 112ms, setup 0ms, import 334ms, tests 5.38s, environment 0ms)
+
+
+> @vstudy/mcp@0.2.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> tsc --noEmit
+
+
+> @vstudy/mcp@0.2.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> eslint .
+
+
+> @vstudy/mcp@0.2.0 verify:core /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> node scripts/check-core-bridge.mjs
+
+PASS real core engine, native peer helper, official SDK, 27 schemas, pending DENIED pairing, one-shot finish, opaque cursor roundtrip, eight queued reads, approved write, restart, disabled JSON-RPC error, authenticated nonpairing doctor revocation/expiry/scope/disabled probes, explicit reset and fresh consent.

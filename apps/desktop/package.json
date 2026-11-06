@@ -7,7 +7,7 @@
   "main": "out/main/index.js",
   "scripts": {
     "dev": "node scripts/generate-locales.mjs && electron-vite dev",
-    "build": "node scripts/generate-locales.mjs && electron-vite build",
+    "build": "pnpm --filter @vstudy/mcp build && node scripts/build-mcp-platform.mjs && node scripts/generate-locales.mjs && electron-vite build",
     "test": "node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run",
     "contrast:check": "node scripts/check-contrast.mjs",
     "typecheck": "node scripts/generate-locales.mjs && tsc --noEmit",
@@ -28,6 +28,8 @@
     "@assistant-ui/react": "0.15.32",
     "@assistant-ui/react-markdown": "0.14.24",
     "@base-ui/react": "1.9.0",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
@@ -37,6 +39,8 @@
     "katex": "0.16.47",
     "lowlight": "3.3.0",
     "lucide-react": "1.67.0",
+    "node-pty": "1.1.0",
+    "openpgp": "6.3.2",
     "radix-ui": "1.8.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -96,10 +100,11 @@
       "!**/*.test.*",
       "!**/*.map",
       "!**/*.md",
-      "!**/*.test.*",
       "!**/test/**",
       "!**/__fixtures__/**",
-      "!node_modules/**"
+      "!node_modules/**",
+      "node_modules/node-pty/**/*",
+      "node_modules/node-addon-api/**/*"
     ],
     "extraResources": [
       {
@@ -131,6 +136,25 @@
       {
         "from": "build/icon.png",
         "to": "brand/icon.png"
+      },
+      {
+        "from": "../mcp/dist",
+        "to": "mcp/dist"
+      },
+      {
+        "from": "../mcp/plugins",
+        "to": "mcp/plugins"
+      },
+      {
+        "from": "../mcp/CLIENT_FORMATS.md",
+        "to": "mcp/CLIENT_FORMATS.md"
+      },
+      {
+        "from": "resources",
+        "to": ".",
+        "filter": [
+          "mcp-peer"
+        ]
       }
     ],
     "mac": {
@@ -173,6 +197,24 @@
         ]
       }
     ],
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "createStartMenuShortcut": true,
+      "createDesktopShortcut": false,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": false,
+      "packElevateHelper": false,
+      "shortcutName": "VStudy Pro",
+      "selectPerMachineByDefault": false,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
+    },
+    "asarUnpack": [
+      "node_modules/node-pty/**/*"
+    ],
     "win": {
       "artifactName": "VStudy-Pro-${version}-win-${arch}.${ext}",
       "target": [
@@ -193,21 +235,6 @@
       ],
       "requestedExecutionLevel": "asInvoker",
       "icon": "build/icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowElevation": false,
-      "createStartMenuShortcut": true,
-      "createDesktopShortcut": false,
-      "deleteAppDataOnUninstall": false,
-      "runAfterFinish": false,
-      "packElevateHelper": false,
-      "shortcutName": "VStudy Pro",
-      "selectPerMachineByDefault": false,
-      "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico",
-      "installerHeaderIcon": "build/icon.ico"
     },
     "linux": {
       "icon": "build/icons",

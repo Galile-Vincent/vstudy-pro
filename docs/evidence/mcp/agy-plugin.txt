@@ -1,0 +1,7 @@
+Validating vstudy (apps/mcp/plugins/agy/plugin.json)
+
+  · plugin.json: no logo: the plugin shows a generic icon. Add "logo": "assets/logo.svg" (a .png, .svg, .jpg, .jpeg or .webp file inside the plugin)
+
+  skills 5 · agents 0 · rules 0 · hooks 0 · mcpServers 1 · sidecars 0
+
+✔ Validation passed

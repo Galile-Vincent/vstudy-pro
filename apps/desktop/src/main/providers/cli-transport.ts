@@ -4,6 +4,7 @@
  * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
  * @packageDocumentation
  */
+import { leaseExecutable } from './setup/leases';
 import { recordEgress } from '../services/egress';
 import { pinnedCli } from './executable-pins';
 import { installDirectories } from './trusted-executable';
@@ -39,6 +40,9 @@ export function cliEnvironment(
     if (source[key]) env[key] = source[key];
   env.PATH = [...installDirectories(), ...(process.platform === 'win32' ? [dirname(systemExecutable('cmd.exe'))] : ['/usr/bin', '/bin'])].join(delimiter);
   env.DISABLE_TELEMETRY = '1';
+  env.DISABLE_UPDATES = '1';
+  env.DISABLE_AUTOUPDATER = '1';
+  env.AGY_CLI_DISABLE_AUTO_UPDATE = 'true';
   env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';
   return env;
 }
@@ -108,6 +112,7 @@ export async function* runCli(
     detached: process.platform !== "win32",
     stdio: ["pipe", "pipe", "pipe"],
   });
+  const releaseLease = leaseExecutable(binary);
   let spawnFailed = false;
   const closed = new Promise<number | null>((resolve) => {
     child.once("error", () => {
@@ -192,6 +197,6 @@ export async function* runCli(
     // Parent exit does not imply that TERM-resistant descendants left its process group.
     terminate("SIGKILL");
     if (killTimer) clearTimeout(killTimer);
-    await Promise.all(terminations);
+    try { await Promise.all(terminations); } finally { releaseLease(); }
   }
 }

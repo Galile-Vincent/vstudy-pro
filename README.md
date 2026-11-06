@@ -75,6 +75,7 @@ Install **uv** or **Python 3.10+** separately when document conversion requires 
 - **Storage and backup.** Inspect usage, clear caches or converted files, check database integrity, and export or restore a portable backup. Backups exclude credentials; restored school accounts need sign-in again.
 - **Privacy.** Local library and SQLite, optional providers, encrypted saved credentials, and a session network-activity inventory. No app analytics or device sync.
 - **Onboarding and languages.** A sample document, replayable setup, walkthroughs, and contextual tips. The interface supports English (`en`), Traditional Chinese (`zh-Hant`), and Japanese (`ja`).
+- **Global agents over MCP.** Share selected school accounts with scoped, expiring grants. Read course content through the app session and approve every proposed write in Settings > Agents.
 
 ## The pages
 
@@ -153,13 +154,37 @@ Use Cmd on Mac and Ctrl on Windows.
 | `Cmd/Ctrl+R` | Reload the focused Moodle page pane. |
 | `Tab` / `Shift+Tab` | Move between controls. |
 
+## Connect global agents
+
+The source build includes an MCP server for Claude Code, Codex, Antigravity, Claude Desktop, and Cursor. It reads the Moodle accounts you select through VStudy's existing session. School credentials stay in the app. Agents receive separate expiring local grants, and every write requires approval in VStudy.
+
+Open **Settings > Agents**, enable connections, and use **Connect an agent** to preview and install its configuration. Compare the pairing codes and select accounts and scopes. From a built checkout, preview the Codex entry with:
+
+```sh
+node apps/mcp/dist/vstudy-mcp.cjs install --client codex --dry-run
+```
+
+Use `claude`, `agy`, `claude-desktop`, or `cursor` for the other clients. Node.js 24.11.1 or later is required. Quiz attempts and videos remain the student's work; MCP cannot answer or submit quizzes or fabricate activity progress. Assignment submission accepts only the student's own text with explicit per-call consent.
+
+See the [MCP setup, tools, and security guide](docs/MCP.md), [client formats and actual verification](apps/mcp/CLIENT_FORMATS.md), and [design decisions](docs/MCP_DESIGN.md). Packaged-source acceptance used the official SDK with loopback Moodle fixtures. Native Windows integration and live-school acceptance remain separate checks.
+
 ## How it works
 
 Choose a school and confirm its Moodle site. Main discovers the official mobile service, signs in with the school's supported password or SSO flow, and stores account-scoped course snapshots in local SQLite. It checks server capabilities instead of assuming every school exposes the same functions.
 
 Imports copy your original into a content-addressed library. Markdown and text open directly; other formats use an on-demand Python converter to produce Markdown. The converter denies network access on macOS and stops after idle time. Conversion can lose formatting; it is not an exact PDF viewer.
 
-AI is optional. **Settings > Providers** can use an existing Claude Code (`claude`), Codex (`codex`), or Antigravity (`agy`) CLI login after individual opt-in. Sign in with those tools outside VStudy first. Alternatively, save an Anthropic, OpenAI, or OpenAI-compatible API key, or keep it only for the session. CLI subscription access and API billing follow their providers' terms. Codex currently requires authenticated CLI **0.166.0**, macOS, and `/usr/bin/sandbox-exec`; unsupported transport verification fails closed. Codex is disabled on Windows because no equivalent verified kernel sandbox is implemented. Use an API provider on Windows. See [Codex transport limits](docs/codex-tool-free.md).
+AI is optional. Open **AI tools** in the sidebar, or **Set up AI** from onboarding, the Reader, or **Settings > Providers**. Choose Claude Code (`claude`), Codex (`codex`), or Antigravity (`agy`), then allow that tool individually. Discovery checks files without launching a disabled tool.
+
+1. **Install.** Review the official download and private destination, then run the action. VStudy verifies the download and keeps each version in its own app-managed folder. It needs no administrator password and changes no shell profile or PATH.
+2. **Sign in.** Run the reviewed action in the embedded terminal on macOS. Follow its link or device code, then return to VStudy. Links ask for confirmation. You can also copy the command or open your own Terminal. Windows and Linux use that external-terminal fallback for sign-in.
+3. **Test.** Choose **Test it** to send a tiny prompt through the real provider. It contains no document text and may count toward your provider usage. Specific recovery hints and a request to copy to your teacher or IT team are available in the same sheet.
+
+The sidebar shows versions and update state. **Check for updates now** requests a one-time version check. Background checks and automatic updates while idle start off in **Settings > Privacy**. A requested update installs beside the current version. Running chats keep their executable, new chats use the update, and rollback keeps the previous version available. VStudy does not update a separately installed CLI. The copy-only vendor installer fallback explains how to select an existing executable in Providers settings.
+
+VStudy includes no AI subscription. Account access and free or paid usage follow the provider's terms. API keys remain available for Anthropic, OpenAI, and OpenAI-compatible endpoints, saved or just for the session. Codex requires the audited CLI **0.166.0**, macOS, and `/usr/bin/sandbox-exec`. Its managed installer uses that version; a newer release cannot bypass transport verification. See [Codex transport limits](docs/codex-tool-free.md), [setup design and acceptance limits](docs/AI_CLI_SETUP_DESIGN.md), and [implementation evidence](docs/AI_CLI_SETUP_REPORT.md).
+
+Codex is disabled on Windows because no equivalent verified kernel sandbox is implemented. Use an API provider on Windows.
 
 An AI question combines your message with bounded context. Document chat includes metadata, conversation history, and selected text; without a selection it includes an outline and opening excerpt. Course chat adds available coursework, planner state, and selected ready documents. Answers stream back and are saved locally. Agent proposals require explicit approval before main changes planner data. Confirm dates and answers against the source.
 
@@ -171,7 +196,7 @@ VStudy sends no app analytics. School sign-in, sync, and content views contact t
 
 Documents, Markdown, and chats are **not encrypted at rest** by the app. Saved secrets use Mac Keychain-backed encryption or Windows DPAPI. Session-only secrets remain in main-process memory. Protect local files with OS account access and disk encryption such as FileVault or BitLocker. Portable backups exclude credentials but contain private study content.
 
-**Settings > Privacy** lists bounded, session-only app-initiated requests and CLI launches. It is not a packet capture and cannot enumerate every request inside a CLI or Chromium; byte counts are unknown. External browser and mail links require confirmation. Read the [security model](docs/SECURITY.md) before using sensitive material.
+**Settings > Privacy** lists bounded, session-only app-initiated requests and CLI launches, including AI tool metadata checks and downloads. Background AI tool checks are a separate opt-in. The inventory is not a packet capture and cannot enumerate every request inside a CLI or Chromium; byte counts are unknown. External browser and mail links require confirmation. Read the [security model](docs/SECURITY.md) before using sensitive material.
 
 ## Project structure
 
@@ -185,6 +210,7 @@ apps/desktop/
   resources/    Python converter and bundled sample documents
   e2e/          Real Electron integration tests and fixtures
   scripts/      Build, packaging, security, and test helpers
+apps/mcp/       Stdio MCP server, client installers, plugins, and SDK checks
 docs/           Architecture, data, security, design, and evidence
 scripts/        Repository tools, hooks, and README link validation
 .github/        CI and unsigned tag-release workflows
@@ -247,9 +273,9 @@ Run from the repository root after installing dependencies. Run checks sequentia
 | --- | --- |
 | `pnpm dev` | Start Electron and Vite. Stop with Ctrl+C. |
 | `pnpm typecheck` | Check TypeScript and generate locale types. |
-| `pnpm lint` | Run desktop ESLint. |
-| `pnpm test --pool=forks --maxWorkers=2` | Run contrast checks and unit tests with two workers. |
-| `pnpm build` | Build main, preload, and renderer. |
+| `pnpm lint` | Check MCP, desktop, and website. |
+| `pnpm test --pool=forks --maxWorkers=2` | Run MCP, contrast, and desktop unit checks with two workers. |
+| `pnpm build` | Build MCP, its native peer helper, main, preload, and renderer. |
 | `pnpm security:static` | Run dependency policy and security lint. |
 | `pnpm security:check` | Run static checks, lint, and unit tests. |
 | `pnpm e2e` | Build and run serial real-Electron E2E tests. |

@@ -1,0 +1,81 @@
+- dialog "設定 AI 工具":
+  - banner:
+    - heading "設定 AI 工具" [level=2]
+    - paragraph: 在這裡安裝、登入並測試。你隨時可以繼續閱讀。
+    - button "關閉設定並停止操作"
+  - group "選擇工具":
+    - text: 選擇工具
+    - radio "Claude Code 你的 Anthropic 帳號"
+    - strong: Claude Code
+    - text: 你的 Anthropic 帳號
+    - radio "Codex 你的 OpenAI 帳號" [checked]
+    - strong: Codex
+    - text: 你的 OpenAI 帳號
+    - radio "Antigravity 你的 Google 帳號"
+    - strong: Antigravity
+    - text: 你的 Google 帳號
+  - strong: Codex
+  - status: 已就緒
+  - code: 0.166.0
+  - list "設定進度":
+    - listitem:
+      - strong: 安裝
+    - listitem:
+      - strong: 登入
+    - listitem:
+      - strong: 測試
+      - text: 目前在這一步
+  - paragraph: 接下來會發生什麼
+  - heading "試試第一個回答。" [level=2]
+  - paragraph: 透過 VStudy 已稽核、停用工具的 Codex 連線傳送小測試問題。成功回答後，即可在新聊天選擇 Codex。
+  - checkbox "允許 VStudy 執行 Codex 此為選用功能。只有在允許並確認執行操作後，才會啟動工具。" [checked]
+  - text: 允許 VStudy 執行 Codex 此為選用功能。只有在允許並確認執行操作後，才會啟動工具。
+  - group: 帳號與費用
+  - region "執行前確認":
+    - heading "執行前確認" [level=3]
+    - paragraph: VStudy 會透過受限制的連線傳送一個簡短問題，不包含文件。
+    - term: 操作計畫
+    - definition:
+      - code: "透過 VStudy 現有的供應商連線進行無工具測試 '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-f7CUZY/profile 4/ai-tools/codex/0.166.0/codex' 'exec' '--json' '--sandbox' 'read-only' '--ephemeral' '--skip-git-repo-check' '--ignore-user-config' '--ignore-rules' '-' 測試問題: Reply with the single word OK. Do not use tools. VStudy 會建立私有工作資料夾並套用供應商隔離。這是操作計畫，不是可直接貼上的指令。"
+    - term: 工作資料夾
+    - definition:
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-f7CUZY/profile 4/ai-tools/actions
+    - button "測試看看"
+    - button "複製計畫"
+  - status: 操作已完成。請查看上方的下一步。
+  - region "操作輸出":
+    - strong: 操作輸出
+    - status: 已完成
+    - paragraph: 只有當此操作要求輸入時才需要在這裡輸入。登入網址與裝置代碼會顯示於此。開啟連結前一定會請你確認。
+    - list:
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+    - textbox "目前操作的終端機輸入"
+    - button "https://example.com/ai-cli-device"
+    - group: 文字輸出與登入代碼
+  - region "維護你的工具":
+    - heading "維護你的工具" [level=3]
+    - paragraph: 更新與還原適用於新聊天。進行中的工作階段會繼續使用原版本。
+    - button "查看帳號狀態檢查"
+    - button "重新登入"
+  - group: 我該選哪一個工具？
+  - group: 改用其他安裝方式
+  - group: 進階一般終端機
+  - group: 需要老師或資訊人員協助嗎？
+  - contentinfo:
+    - paragraph: AI 是選用功能，你仍可繼續閱讀。
+    - button "繼續閱讀"

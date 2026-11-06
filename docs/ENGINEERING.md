@@ -30,6 +30,18 @@ Read [architecture](ARCHITECTURE.md), [the data model](DATA_MODEL.md), and [secu
 
 Run only one Electron instance at a time. Stop every process started for verification.
 
+### Native PTY helper permissions
+
+The pinned node-pty 1.1.0 package can contain `prebuilds/darwin-arm64/spawn-helper` and `prebuilds/darwin-x64/spawn-helper` with mode `0644`. A skipped dependency lifecycle script or a fresh install can expose this as `posix_spawnp failed`. A Vite build alone is not sufficient protection because contributors and CI can run tests before building.
+
+Root `prepare` runs `scripts/ensure-pty-helper.mjs`. This offline, idempotent guard adds execute bits only to node-pty's own existing Unix helpers. It covers Release, Debug, both Mac architectures, and Linux prebuilds. Ready helpers remain untouched. It skips Windows and ordinary CI installs where dependency scripts ran. If CI explicitly disables dependency scripts through `npm_config_ignore_scripts` or `npm_config_ignore_dep_scripts`, the guard still runs when invoked. Fully disabling lifecycle scripts also disables root `prepare`, so runtime protection is required regardless of the install hook.
+
+Before every real PTY spawn, main uses node-pty's pinned native loader to identify the actual Release, Debug, or host prebuild directory. It verifies and repairs that helper before invoking `spawn`. Packaged paths resolve to `app.asar.unpacked` or `node_modules.asar.unpacked`. The shared guard rejects symlinked helpers and intermediate directories, checks canonical containment inside the resolved package, opens with `O_NOFOLLOW`, and verifies descriptor identity before changing permissions. It never changes helper contents or walks outside the dependency package. The Vite build uses the same guard before packaging.
+
+If the helper is missing, blocked by permissions, or cannot be repaired on a read-only installation, setup returns the localized `terminal-unavailable` recovery hint in English, Traditional Chinese, and Japanese. Users can repair/reinstall VStudy or use their own terminal. For a source checkout, run `node scripts/ensure-pty-helper.mjs`; rebuild node-pty if its native files are missing. Do not use sudo or change permissions recursively. Guard execution needs Node 24 or later for the shared TypeScript module, as required by this repository's engine.
+
+`src/main/providers/setup/pty-helper.test.ts` copies a real helper into temporary packages, sets `0644`, and checks repair, repeated calls, denied chmod, symlink escape refusal, and ASAR-unpacked resolution. These tests run under Node and do not launch Electron. Recheck node-pty's `lib/utils.js` loader contract when changing its pinned version.
+
 ## Check a change
 
 Run these commands sequentially on a memory-constrained machine.

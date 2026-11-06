@@ -1,0 +1,8 @@
+> @vstudy/mcp@0.2.0 verify /Users/vc/.t3/worktrees/vstudy-pro/t3-531641e7/apps/mcp
+> node scripts/verify-artifact.mjs
+
+dist/vstudy-mcp.cjs sha256 ea5cf6e4c281c40ed75d980b426ebbd651d7a83815249a489af8c3c51c9e57ae
+dist/installer.cjs sha256 0b955066ca417349bb93c784f5fb1a4ad6d7317e83d3e4d466af6f0d4257382d
+dist/windows-acl.cjs sha256 b1e0ab7ccdb2e6d68d997a9f9350aefd6c816857c3a7c7abecccf7ce0c2e169f
+Bundled CLI executes and all five client asset packages exist.
+Native plugin CLI copies match the standalone artifact.

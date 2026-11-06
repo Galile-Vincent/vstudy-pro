@@ -29,6 +29,8 @@ export class MoodleService {
   private readonly detailPending = new Map<string,Promise<void>>();
   private readonly detailAttempts = new Map<string,number>();
   private readonly queue = new MoodleScheduler(6);
+  private readonly mcpGenerations = new Map<string, number>();
+  private readonly disconnecting = new Set<string>();
   private readonly contentReady = new Map<string,Promise<void>>();
   private readonly failures = new Map<string,Map<string,MoodleError>>();
   private sessionFailures(id:string) { let failures=this.failures.get(id); if (!failures) { failures=new Map(); this.failures.set(id,failures); } return failures; }
@@ -134,21 +136,25 @@ export class MoodleService {
   }
   async disconnect(id: string) {
     this.repository.account(id);
-    const account = this.repository.account(id);
-    const courseIds=this.repository.overview(id).courses.map(course=>course.id);
-    const token = await this.token(id).catch(() => undefined);
-    clearMoodleImages(account.siteUrl,token);
-    this.repository.disconnect(id);
-    this.failures.delete(id);
-    this.signInStorage.delete(id);
-    this.secrets.delete(moodleSecretId(id));
-    await Promise.allSettled([this.pending.get(id),...courseIds.map(courseId=>this.detailPending.get(courseId))]);
-    clearMoodleImages(account.siteUrl,token);
-    this.lastAttempt.delete(id);
-    for(const courseId of courseIds){
-      this.detailAttempts.delete(courseId);this.detailErrors.delete(courseId);this.panelErrors.delete(courseId);
-      this.panelFresh.delete(courseId);this.panels.delete(courseId);this.partialContents.delete(courseId);this.teacherCache.delete(courseId);
-    }
+    this.disconnecting.add(id);
+    this.mcpGenerations.set(id, (this.mcpGenerations.get(id) ?? 0) + 1);
+    try {
+      const account = this.repository.account(id);
+      const courseIds=this.repository.overview(id).courses.map(course=>course.id);
+      const token = await this.token(id).catch(() => undefined);
+      clearMoodleImages(account.siteUrl,token);
+      this.repository.disconnect(id);
+      this.failures.delete(id);
+      this.signInStorage.delete(id);
+      this.secrets.delete(moodleSecretId(id));
+      await Promise.allSettled([this.pending.get(id),...courseIds.map(courseId=>this.detailPending.get(courseId))]);
+      clearMoodleImages(account.siteUrl,token);
+      this.lastAttempt.delete(id);
+      for(const courseId of courseIds){
+        this.detailAttempts.delete(courseId);this.detailErrors.delete(courseId);this.panelErrors.delete(courseId);
+        this.panelFresh.delete(courseId);this.panels.delete(courseId);this.partialContents.delete(courseId);this.teacherCache.delete(courseId);
+      }
+    } finally { this.disconnecting.delete(id); }
   }
   overview(accountId?: string) {
     const snapshot = this.repository.overview(accountId);
@@ -285,6 +291,38 @@ export class MoodleService {
     catch { throw new MoodleError('auth'); }
   }
   async token(id: string): Promise<string> { return (await this.tokens(id)).token; }
+  /** Redaction also needs stored secrets before cached reads, including expired sessions. Main only. */
+  async mcpSecretValues(): Promise<readonly string[]> {
+    if (this.stopped) throw new MoodleError('auth');
+    const values: string[] = [];
+    for (const account of this.repository.accounts()) {
+      try {
+        const tokens = await this.tokens(account.id);
+        values.push(...[tokens.token, tokens.privateToken, tokens.userPrivateAccessKey].filter((value): value is string => Boolean(value)));
+      } catch (error) {
+        if (!(error instanceof MoodleError && error.kind === 'auth')) throw error;
+      }
+    }
+    return values;
+  }
+  /** Main-only MCP transport shares the service scheduler and injected request, never a token result. */
+  async mcpClient(id: string, onSecrets?: (values:readonly string[]) => void, beforeDispatch?:()=>void): Promise<Pick<MoodleClient, 'call'>> {
+    const generation = this.mcpGenerations.get(id) ?? 0;
+    const live = () => {
+      if (this.stopped || this.disconnecting.has(id) || generation !== (this.mcpGenerations.get(id) ?? 0) || !this.repository.accounts().some(row => row.id === id && row.status === 'connected')) throw new MoodleError('auth');
+    };
+    live();
+    const account = this.repository.account(id);
+    if (account.status !== 'connected') throw new MoodleError('auth');
+    const tokens = await this.tokens(id);
+    onSecrets?.([tokens.token, tokens.privateToken, tokens.userPrivateAccessKey].filter((value): value is string => Boolean(value)));
+    const client = new MoodleClient(account.siteUrl, tokens.token, this.request, {queue:this.queue, priority:5, beforeDispatch:()=>{live();beforeDispatch?.();}});
+    live();
+    client.setFunctions(this.repository.capabilities(id)?.functions ?? []);
+    client.setLanguage(this.language());
+    client.setUserId(account.remoteUserId);
+    return {call:client.call.bind(client)};
+  }
   private async saveCapabilities(account: MoodleAccount, info: Awaited<ReturnType<MoodleClient['siteInfo']>>) {
     if (info.userprivateaccesskey) {
       const tokens = await this.tokens(account.id);

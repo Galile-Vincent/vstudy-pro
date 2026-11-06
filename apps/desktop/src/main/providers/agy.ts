@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import { terminateProcess } from '../platform/process';
+import { leaseExecutable } from './setup/leases';
 import { recordEgress } from '../services/egress';
 import { spawn } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
@@ -57,6 +58,7 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
   if (signal.aborted) { yield { type: "done" }; return; }
   recordEgress(request ? 'agy_chat' : 'agy_discovery', 'Google / Antigravity CLI managed endpoints');
   const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, windowsHide: true, detached: process.platform !== "win32", stdio: ["pipe", "pipe", "pipe"] });
+  const releaseLease = leaseExecutable(binary);
   let failure: AgyError | undefined;
   let sessionId: string | undefined;
   let stopped = false;
@@ -138,7 +140,7 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
     stop(); await closed;
     if (killTimer) clearTimeout(killTimer);
     // The leader may exit before a stubborn descendant; still terminate its process group.
-    await terminateProcess(child, "SIGKILL");
+    try { await terminateProcess(child, "SIGKILL"); } finally { releaseLease(); }
   }
 }
 

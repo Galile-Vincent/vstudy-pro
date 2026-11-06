@@ -37,3 +37,6 @@ apps/desktop/src/shared/locales.generated.ts
 
 # Astro-generated build metadata.
 apps/website/.astro/
+
+# Native peer helper built for the package target.
+apps/desktop/resources/mcp-peer

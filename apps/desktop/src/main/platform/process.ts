@@ -11,7 +11,7 @@ export function executableDirectories(platform = process.platform, env = process
   const local = env.LOCALAPPDATA ?? win32.join(home, 'AppData', 'Local');
   const programFiles = env.ProgramFiles ?? 'C:\\Program Files';
   return [win32.join(home, '.local', 'bin'), win32.join(home, '.cargo', 'bin'), win32.join(home, '.claude', 'local'),
-    win32.join(home, '.codex', 'bin'), win32.join(local, 'Microsoft', 'WinGet', 'Links'),
+    win32.join(home, '.codex', 'bin'), win32.join(local, 'agy', 'bin'), win32.join(local, 'Microsoft', 'WinGet', 'Links'),
     ...['314', '313', '312', '311', '310'].flatMap(version => [win32.join(local, 'Programs', 'Python', `Python${version}`), win32.join(programFiles, `Python${version}`)]),
   ];
 }

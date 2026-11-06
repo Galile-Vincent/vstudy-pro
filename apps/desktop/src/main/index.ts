@@ -72,7 +72,13 @@ const entryUrl =
   developmentUrl ??
   (app.isPackaged ? "vstudy://app/index.html" : pathToFileURL(join(__dirname, "../renderer/index.html")).href);
 
-async function createWindow(): Promise<void> {
+let openingWindow: Promise<void> | undefined;
+async function restoreMainWindow(): Promise<void> {
+  if (window && !window.isDestroyed()) {window.show();window.focus();return;}
+  await (openingWindow ??= createWindow().finally(() => {openingWindow=undefined;}));
+}
+
+async function createWindow(show = true): Promise<void> {
   const appearance = store!.settings.get();
   applyNativeTheme(appearance);
   if (!app.isPackaged && process.platform === "darwin") app.dock?.setIcon(join(__dirname, "../../build/icon-mac.png"));
@@ -111,7 +117,7 @@ async function createWindow(): Promise<void> {
   current.webContents.on("will-attach-webview", (event) =>
     event.preventDefault(),
   );
-  current.once("ready-to-show", () => current.show());
+  current.once("ready-to-show", () => {if (show) current.show();});
   current.on("closed", () => {
     if (window === current) window = null;
   });
@@ -139,7 +145,7 @@ async function createWindow(): Promise<void> {
   });
 }
 
-const ownsApplication = acquireOwnership(app, () => window);
+const ownsApplication = acquireOwnership(app, () => window, () => {void restoreMainWindow();});
 if (ownsApplication) void app.whenReady().then(async () => {
   if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
   const userData = app.getPath("userData");
@@ -194,9 +200,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.sender === window.webContents &&
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
-    () => {
-      if (window && !window.isDestroyed()) { window.show(); window.focus(); }
-    },
+    () => {void restoreMainWindow();},
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deleteAllData');
@@ -218,9 +222,9 @@ if (ownsApplication) void app.whenReady().then(async () => {
   });
   nativeTheme.on("updated", () => { if (store) applyNativeTheme(store.settings.get()); });
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) void createWindow();
+    void restoreMainWindow();
   });
-  await createWindow();
+  await createWindow(!process.argv.includes('--mcp-background'));
   if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
 }).catch(async error => {
