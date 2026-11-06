@@ -1,7 +1,8 @@
 /** Model Windows private-file ordering with mocked ACL calls; no Windows ACL acceptance is claimed. @packageDocumentation */
 import { afterEach, expect, it, vi } from 'vitest';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { protectWindowsPath, verifyWindowsPath } from '../src/windows-acl';
 import { ensureDirectory, readLocal, writeExclusive } from '../src/files';
 
@@ -13,7 +14,7 @@ function onWindows(run: () => void) {
   try { Object.defineProperty(process, 'platform', { value: 'win32' }); run(); }
   finally { Object.defineProperty(process, 'platform', descriptor); }
 }
-function root() { const path = mkdtempSync('/private/tmp/vwfile-'); roots.push(path); return path; }
+function root() { const path = mkdtempSync(join(realpathSync(tmpdir()), 'vwfile-')); roots.push(path); return path; }
 
 it('secures newly app-owned directories and empty files before writing bearer bytes', () => {
   const directory = join(root(), 'private');

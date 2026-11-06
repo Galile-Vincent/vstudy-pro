@@ -1,8 +1,9 @@
 /** Inspect build dispatch argv and actual Windows resource-layout fixtures without a Windows process. @packageDocumentation */
 import { afterEach, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, rmSync, realpathSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const roots: string[] = [];
 afterEach(() => { for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true }); });
@@ -24,7 +25,7 @@ it('selects native host packaging arguments without invoking a package-manager c
 });
 
 it('checks a win-unpacked resources layout without requiring an absent Unix helper', () => {
-  const release = mkdtempSync('/private/tmp/vwin-layout-'); roots.push(release);
+  const release = mkdtempSync(join(realpathSync(tmpdir()), 'vwin-layout-')); roots.push(release);
   const target = join(release, 'win-unpacked/resources/mcp'); mkdirSync(target, { recursive: true });
   cpSync('dist', join(target, 'dist'), { recursive: true });
   cpSync('plugins', join(target, 'plugins'), { recursive: true });

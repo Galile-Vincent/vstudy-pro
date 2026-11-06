@@ -20,7 +20,7 @@ async function setup(options: FixtureOptions = {}) {
   return { app, credentials, before, run: () => doctor({ home: app.home, userData: app.userData, client: 'codex', command: process.execPath, environment: {} }) };
 }
 
-describe('doctor grant probe', () => {
+describe.skipIf(process.platform === 'win32')('Unix doctor grant probe', () => {
   it('checks live authorization on the ping connection and discards account content', async () => {
     const { app, credentials, before, run } = await setup({ echoGrant: true });
     const result = await run();

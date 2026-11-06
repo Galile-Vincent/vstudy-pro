@@ -1,16 +1,18 @@
 /** Verify config adapters only in isolated homes, including preservation and hostile paths. @packageDocumentation */
 import { afterEach, describe, expect, it } from 'vitest';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync, realpathSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { isDeepStrictEqual } from 'node:util';
 import { clientConfig, installableClients, type ClientOptions } from '../src/client-config';
 import { editConfig, parseConfig } from '../src/config-edit';
 import { installClient, restoreConfigBackup, uninstallClient } from '../src/installer';
+import { verifyWindowsPath } from '../src/windows-acl';
 
 const homes: string[] = [];
 afterEach(() => { for (const path of homes.splice(0)) rmSync(path, { recursive: true, force: true }); });
 function options(client: ClientOptions['client']): ClientOptions {
-  const home = mkdtempSync('/private/tmp/vmi-'); homes.push(home);
+  const home = mkdtempSync(join(realpathSync(tmpdir()), 'vmi-')); homes.push(home);
   return { client, home, environment: {}, command: process.execPath, binPath: join(home, 'app with spaces', 'vstudy-mcp.cjs') };
 }
 function seed(options: ClientOptions, text: string): string {
@@ -44,8 +46,13 @@ describe('safe client installers', () => {
       expect(result.changed).toBe(true);
       expect(result.backupPath).toBeDefined();
       expect(readFileSync(result.backupPath!, 'utf8')).toBe(original);
-      expect(statSync(result.backupPath!).mode & 0o777).toBe(0o600);
-      expect(statSync(path).mode & 0o777).toBe(0o600);
+      if (process.platform === 'win32') {
+        verifyWindowsPath(result.backupPath!, false);
+        verifyWindowsPath(path, false);
+      } else {
+        expect(statSync(result.backupPath!).mode & 0o777).toBe(0o600);
+        expect(statSync(path).mode & 0o777).toBe(0o600);
+      }
       expect(result.diff).not.toContain('secret-not-for-diff');
       const after = readFileSync(path, 'utf8');
       if (config.format !== 'json') expect(after).toContain(config.format === 'toml' ? '# retained comment' : '// retained comment');
@@ -75,7 +82,7 @@ describe('safe client installers', () => {
       const restored = restoreConfigBackup({ ...args, backupPath: installed.backupPath! });
       expect(readFileSync(path, 'utf8')).toBe(original);
       expect(readFileSync(restored.backupPath!, 'utf8')).toBe(current);
-      expect(() => restoreConfigBackup({ ...args, backupPath: '/private/tmp/arbitrary' })).toThrow();
+      expect(() => restoreConfigBackup({ ...args, backupPath: join(args.home!, 'arbitrary') })).toThrow();
     });
 
     it(`${client} refuses conflicts and edited entries without printing or overwriting them`, () => {
@@ -88,7 +95,7 @@ describe('safe client installers', () => {
         try { change(args); } catch (error) { expect(String(error)).not.toContain('private-secret'); }
         expect(readFileSync(path, 'utf8')).toBe(source);
       }
-      expect(readdirSync(dirname(path))).toEqual([client === 'codex' ? 'config.toml' : path.split('/').at(-1)]);
+      expect(readdirSync(dirname(path))).toEqual([basename(path)]);
     });
 
     it(`${client} preserves spaces, quotes, dollar signs, and shell metacharacters as argv`, () => {
@@ -103,7 +110,7 @@ describe('safe client installers', () => {
     });
   }
 
-  it('rejects symlinked files, parents, backups, and lock files', () => {
+  it.skipIf(process.platform === 'win32')('rejects Unix symlinked files, parents, backups, and lock files', () => {
     const args = options('cursor');
     const target = join(args.home!, 'target'); writeFileSync(target, '{"private":"value"}');
     const path = clientConfig(args).path; mkdirSync(dirname(path)); symlinkSync(target, path);

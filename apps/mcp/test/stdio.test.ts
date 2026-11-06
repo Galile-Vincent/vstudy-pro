@@ -30,7 +30,7 @@ async function connect(options: FixtureOptions = {}, clientKind = 'codex') {
   return { app, transport, client, stderr: () => stderr };
 }
 
-describe('real stdio artifact', () => {
+describe.skipIf(process.platform === 'win32')('real stdio artifact over a Unix bridge', () => {
   it('discovers every shared schema without pairing or touching credentials', async () => {
     const { app, client } = await connect();
     const { tools } = await client.listTools();

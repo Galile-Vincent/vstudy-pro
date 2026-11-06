@@ -1,7 +1,8 @@
 /** Verify framed transport failure modes, private grants, and missing-app recovery. @packageDocumentation */
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { BridgeClient, pingBridge } from '../src/bridge';
 import { Credentials } from '../src/credentials';
 import { credentialPath } from '../src/paths';
@@ -14,7 +15,7 @@ const cleanups: (() => void | Promise<void>)[] = [];
 afterEach(async () => { vi.useRealTimers(); for (const cleanup of cleanups.splice(0).reverse()) await cleanup(); });
 
 function root() {
-  const path = mkdtempSync('/private/tmp/vmc-');
+  const path = mkdtempSync(join(realpathSync(tmpdir()), 'vmc-'));
   cleanups.push(() => rmSync(path, { recursive: true, force: true }));
   return path;
 }
@@ -28,7 +29,7 @@ async function setup(options: Parameters<typeof fixture>[0] = {}) {
   return { app, credentials, client };
 }
 
-describe('bridge boundary', () => {
+describe('portable framing', () => {
   it('decodes fragmented and concatenated frames and rejects invalid lengths and UTF-8', () => {
     const first = encodeFrame({ a: 'Taipei 台北' });
     const second = encodeFrame({ b: 2 });
@@ -43,7 +44,20 @@ describe('bridge boundary', () => {
     expect(() => new Frames().push(Buffer.from([0, 0, 0, 1, 255]))).toThrow();
     expect(() => encodeFrame('x'.repeat(MCP_MAX_FRAME))).toThrow();
   });
+});
 
+it('never reads a bearer or sends a frame when Windows server authentication is unavailable', async () => {
+  const path = root();
+  const credentials = new Credentials(join(path, 'unread.json'));
+  const identity = vi.spyOn(credentials, 'identity');
+  const client = new BridgeClient({ socketPath: '\\\\.\\pipe\\vstudy-ebead97e1d40fa148f22dcd495581555',
+    credentials, clientName: 'Test', stderr: () => {}, connection: { platform: 'win32' } });
+  cleanups.push(() => client.close());
+  expect(await client.call('list_accounts', {})).toMatchObject({ ok: false, error: { code: 'UNSUPPORTED' } });
+  expect(identity).not.toHaveBeenCalled();
+});
+
+describe.skipIf(process.platform === 'win32')('Unix bridge boundary', () => {
   it('diagnostic ping never pairs', async () => {
     const { app } = await setup();
     expect(await pingBridge(app.socketPath)).toBe(1);
@@ -116,17 +130,6 @@ describe('bridge boundary', () => {
     expect(app.calls.filter(call => call.method === 'pair.begin')).toHaveLength(1);
     expect(app.connections).toBe(1);
     expect(app.peakActive).toBe(4);
-  });
-
-  it('never reads a bearer or sends a frame when Windows server authentication is unavailable', async () => {
-    const path = root();
-    const credentials = new Credentials(join(path, 'unread.json'));
-    const identity = vi.spyOn(credentials, 'identity');
-    const client = new BridgeClient({ socketPath: '\\\\.\\pipe\\vstudy-ebead97e1d40fa148f22dcd495581555',
-      credentials, clientName: 'Test', stderr: () => {}, connection: { platform: 'win32' } });
-    cleanups.push(() => client.close());
-    expect(await client.call('list_accounts', {})).toMatchObject({ ok: false, error: { code: 'UNSUPPORTED' } });
-    expect(identity).not.toHaveBeenCalled();
   });
 
   it('starts a missing app once and backs off without replaying a write', async () => {

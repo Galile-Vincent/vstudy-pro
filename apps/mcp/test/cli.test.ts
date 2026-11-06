@@ -2,8 +2,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFile, execFileSync, spawnSync } from 'node:child_process';
 import { promisify } from 'node:util';
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, realpathSync } from 'node:fs';
+import { resolve, join, sep } from 'node:path';
+import { tmpdir } from 'node:os';
 import { createRequire } from 'node:module';
 import { doctor } from '../src/doctor';
 import { installableClients } from '../src/client-config';
@@ -13,15 +14,16 @@ const bin = resolve('dist/vstudy-mcp.cjs');
 const cleanups: (() => void | Promise<void>)[] = [];
 afterEach(async () => { for (const cleanup of cleanups.splice(0).reverse()) await cleanup(); });
 function home() {
-  const path = mkdtempSync('/private/tmp/vcli-');
+  const path = mkdtempSync(join(realpathSync(tmpdir()), 'vcli-'));
   cleanups.push(() => rmSync(path, { recursive: true, force: true })); return path;
 }
-function env(home: string) { return { HOME: home, PATH: process.env.PATH ?? '', VSTUDY_USER_DATA: join(home, 'app') }; }
+function env(home: string) { return { HOME: home, USERPROFILE: home, APPDATA: join(home, 'AppData', 'Roaming'), LOCALAPPDATA: join(home, 'AppData', 'Local'), SystemRoot: process.env.SystemRoot ?? 'C:\\Windows', PATH: process.env.PATH ?? '', VSTUDY_USER_DATA: join(home, 'app') }; }
 
 describe('CLI administration', () => {
   it('supports help and version without contacting the app or creating grants', () => {
     const directory = home();
-    expect(execFileSync(bin, ['--version'], { env: env(directory), encoding: 'utf8' })).toBe('0.2.0\n');
+    expect(execFileSync(process.execPath, [bin, '--version'], { env: env(directory), encoding: 'utf8' })).toBe('0.2.0\n');
+    if (process.platform !== 'win32') expect(execFileSync(bin, ['--version'], { env: env(directory), encoding: 'utf8' })).toBe('0.2.0\n');
     expect(execFileSync(process.execPath, [bin, '--help'], { env: env(directory), encoding: 'utf8' })).toContain('--dry-run');
     expect(readdirSync(directory)).toEqual([]);
   });
@@ -34,7 +36,7 @@ describe('CLI administration', () => {
       expect(run('install', '--dry-run').changed).toBe(true);
       expect(readdirSync(directory)).toEqual([]);
       const installed = run('install');
-      expect(installed.configPath.startsWith(directory + '/')).toBe(true);
+      expect(installed.configPath.startsWith(directory + sep)).toBe(true);
       expect(existsSync(installed.configPath)).toBe(true);
       expect(JSON.stringify(installed)).not.toContain(grant);
       expect(readFileSync(installed.configPath, 'utf8')).not.toContain('grant');
@@ -67,7 +69,7 @@ describe('CLI administration', () => {
     expect(readdirSync(directory)).toEqual([]);
   });
 
-  it('doctor pings the actual fixture without pairing or printing private contents', async () => {
+  it.skipIf(process.platform === 'win32')('doctor pings the Unix fixture without pairing or printing private contents', async () => {
     const app = await fixture(); cleanups.push(app.close);
     let stdout = '';
     try {

@@ -14,7 +14,7 @@ afterEach(async () => { for (const cleanup of cleanups.splice(0).reverse()) awai
 const bin = resolve('dist/vstudy-mcp.cjs');
 
 for (const state of ['expired', 'revoked'] as const) {
-  it(`resets a ${state} local credential and pairs the next fresh server with the same clientId`, async () => {
+  it.skipIf(process.platform === 'win32')(`resets a ${state} local credential over the Unix bridge and pairs with the same clientId`, async () => {
     const failure = state === 'revoked' ? { toolFailure: 'DENIED' as const, toolFailureRpc: true } : {};
     const app = await fixture(failure); cleanups.push(app.close);
     const credentials = new Credentials(credentialPath('codex', app.home));
