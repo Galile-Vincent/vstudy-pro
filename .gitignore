@@ -26,6 +26,8 @@ docs/screenshots/**/*.webm
 docs/security-evidence/**/*.png
 *.dmg
 *.blockmap
+apps/desktop/resources/converter/wheels/
+apps/desktop/resources/converter/requirements.native.lock.txt
 .env
 .env.*
 !.env.example

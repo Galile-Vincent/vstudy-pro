@@ -108,6 +108,9 @@
         "filter": [
           "**/*.py",
           "requirements*.txt",
+          "wheels/*.whl",
+          "wheels/native.json",
+          "!requirements-build*",
           "!**/test_*",
           "!**/__pycache__/**",
           "!**/profile*"

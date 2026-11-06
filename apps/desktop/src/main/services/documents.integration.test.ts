@@ -6,7 +6,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { cp, copyFile, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, copyFile, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { createConverter, runProcess, scrubbedEnvironment } from "../../../resources/converter";
@@ -26,11 +26,21 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     converter = createConverter(options);
     await expect(converter.ensureReady()).rejects.toThrow();
     await copyFile(resolve("resources/converter/requirements.lock.txt"), join(resources, "requirements.lock.txt"));
+    if (await stat(resolve('resources/converter/requirements.native.lock.txt')).then(file => file.isFile(), () => false)) {
+      await copyFile(resolve('resources/converter/requirements.native.lock.txt'), join(resources, 'requirements.native.lock.txt'));
+      await cp(resolve('resources/converter/wheels'), join(resources, 'wheels'), {recursive: true});
+    }
     await copyFile(resolve("resources/converter/convert.py"), join(resources, "convert.py"));
     await copyFile(resolve("resources/converter/limits.py"), join(resources, "limits.py"));
     await cp(resolve("resources/converter/pdf_md"), join(resources, "pdf_md"), { recursive: true });
     const python = await converter.ensureReady().catch(error => {console.error('Converter fixture setup failed', {progress, diagnostics});throw error;});
     executable = python;
+    const runtime = spawnSync(python, ['-I', '-S', '-c', 'import json,platform,sys;print(json.dumps({"version":sys.version,"machine":platform.machine()}))'], {
+      cwd: directory, env: scrubbedEnvironment(directory), encoding: 'utf8', windowsHide: true, timeout: 10000,
+    });
+    expect(runtime.status, runtime.stderr).toBe(0);
+    console.info('Converter fixture runtime', runtime.stdout.trim());
+    if (process.platform === 'win32' && process.arch === 'arm64') expect(JSON.parse(runtime.stdout).machine.toLowerCase()).toMatch(/^(amd64|x86_64)$/);
     expect(await converter.ensureReady()).toBe(python);
     expect(progress).toContain("Converter ready");
     progress.length = 0;

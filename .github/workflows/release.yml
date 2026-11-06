@@ -66,6 +66,8 @@ jobs:
           UV_EXECUTABLE: ${{ steps.uv.outputs.uv-path }}
         run: node apps/desktop/scripts/provision-ci-uv.mjs
       - run: pnpm install --frozen-lockfile
+      - name: Prepare verified native converter dependencies when upstream wheels are missing
+        run: node apps/desktop/scripts/converter-native.mjs
       - run: pnpm --filter @vstudy/desktop typecheck
       - run: pnpm --filter @vstudy/desktop lint
       - run: pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2

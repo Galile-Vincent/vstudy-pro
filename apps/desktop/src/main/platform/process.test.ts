@@ -1,6 +1,6 @@
 /** Check executable locations and the converter's documented isolation boundary. */
 import { expect, it } from 'vitest';
-import { executableDirectories, pythonInvocation, macSandboxExecutable } from './process';
+import { executableDirectories, pythonInvocation, macSandboxExecutable, managedConverterPython } from './process';
 import { executableMetadata, resolveInstalledExecutable } from '../providers/trusted-executable';
 import { copyFile, mkdtemp, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -16,6 +16,13 @@ it('uses native Windows locations without adding inherited PATH entries', () => 
 it('wraps Python in a native deny-network sandbox only on Mac', () => {
   expect(pythonInvocation('/python', ['-B', 'worker.py'], 'darwin')).toEqual({executable: macSandboxExecutable, args: ['-p', '(version 1)(allow default)(deny network*)', '/python', '-B', 'worker.py']});
   expect(pythonInvocation('C:\\Python\\python.exe', ['-B', 'worker.py'], 'win32')).toEqual({executable: 'C:\\Python\\python.exe', args: ['-B', 'worker.py']});
+});
+
+it('requests a supported x64 Python only for Windows ARM64', () => {
+  expect(managedConverterPython('win32', 'arm64')).toBe('cpython-3.12-windows-x86_64');
+  expect(managedConverterPython('win32', 'x64')).toBe('3.12');
+  expect(managedConverterPython('darwin', 'arm64')).toBe('3.12');
+  expect(managedConverterPython('darwin', 'x64')).toBe('3.12');
 });
 
 it.skipIf(process.platform !== 'win32')('resolves a native exe and rejects Windows shell wrappers', async () => {

@@ -6,6 +6,7 @@ import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { targetFor, signingMode, signingConfiguration, unsignedEnvironment, packagedExecutable } from './release-contract.mjs';
 import { withAppleApiKey } from './signing-key.mjs';
+import { verifyNativeConverter } from './converter-native.mjs';
 
 const { values } = parseArgs({ options: {
   target: { type: 'string', default: `${process.platform === 'darwin' ? 'mac' : 'win'}-${process.arch}` },
@@ -23,6 +24,7 @@ if (values.unsigned) {
 }
 const mode = signingMode(target.platform, process.env);
 if (values['require-signing'] && mode === 'unsigned') throw new Error('Signing credentials are required by package:signed');
+if (target.key === 'mac-x64') await verifyNativeConverter();
 process.env.CSC_IDENTITY_AUTO_DISCOVERY = mode === 'unsigned' ? 'false' : 'true';
 process.env.CSC_FOR_PULL_REQUEST = 'false';
 if (mode === 'apple-api') {

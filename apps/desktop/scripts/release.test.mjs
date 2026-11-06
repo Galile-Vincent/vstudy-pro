@@ -14,6 +14,7 @@ import { targets, targetFor, assetNames, packagedExecutable, releaseIntent, sign
 import { runSmoke, validateSmokeReport } from './distribution-smoke.mjs';
 import { stageAssets, assembleAssets } from './release-assets.mjs';
 import { withAppleApiKey } from './signing-key.mjs';
+import { nativeRequirements, verifyNativeConverter } from './converter-native.mjs';
 
 const version = '1.2.3';
 const desktop = fileURLToPath(new URL('..', import.meta.url));
@@ -109,6 +110,37 @@ test('Apple API key material is private, restored, and deleted even when signing
     await assert.rejects(readFile(materialized), /ENOENT/);
   }
   await assert.rejects(withAppleApiKey({ APPLE_API_KEY: 'invalid-secret' }, () => assert.fail()), /must be a PEM/);
+});
+
+test('native converter artifacts retain upstream hashes and reject changed wheels or source locks', async t => {
+  const root = await temporary(t);
+  const oldHash = 'a'.repeat(64);
+  const lock = `cryptography==50.0.2 \\\n    --hash=sha256:${oldHash}\n`;
+  const file = 'cryptography-50.0.2-cp311-abi3-macosx_13_0_x86_64.whl';
+  const wheel = Buffer.from('native-wheel-fixture');
+  const sha256 = createHash('sha256').update(wheel).digest('hex');
+  const overlay = nativeRequirements(lock, '50.0.2', sha256);
+  assert.ok(overlay.includes(`--hash=sha256:${oldHash}`));
+  assert.ok(overlay.includes(`--hash=sha256:${sha256}`));
+  assert.throws(() => nativeRequirements(lock, '49.0.0', sha256), /match/);
+  assert.throws(() => nativeRequirements(lock + lock, '50.0.2', sha256), /unique/);
+  assert.throws(() => nativeRequirements(lock, '50.0.2', '../invalid'), /identity/);
+  await mkdir(join(root, 'wheels'));
+  await writeFile(join(root, 'requirements.lock.txt'), lock);
+  await writeFile(join(root, 'requirements-build.lock.txt'), 'build-tools-fixture');
+  await writeFile(join(root, 'requirements.native.lock.txt'), overlay);
+  await writeFile(join(root, 'wheels', file), wheel);
+  await writeFile(join(root, 'wheels/native.json'), JSON.stringify({ schemaVersion: 1, version: '50.0.2', file, sha256,
+    sourceLockSha256: createHash('sha256').update(lock).digest('hex'),
+    buildLockSha256: createHash('sha256').update('build-tools-fixture').digest('hex'),
+    openssl: { sha256: '603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a' },
+  }));
+  assert.equal((await verifyNativeConverter(root)).file, file);
+  await writeFile(join(root, 'wheels', file), 'corrupted');
+  await assert.rejects(verifyNativeConverter(root), /checksum mismatch/);
+  await writeFile(join(root, 'wheels', file), wheel);
+  await writeFile(join(root, 'requirements.lock.txt'), lock + '# changed\n');
+  await assert.rejects(verifyNativeConverter(root), /stale or invalid/);
 });
 
 test('all native targets retain stable aliases and architecture-specific outputs', () => {
