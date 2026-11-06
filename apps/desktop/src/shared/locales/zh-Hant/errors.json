@@ -37,5 +37,6 @@
   "ai_parse.changed_too_much": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
   "connection_bad_key": "金鑰無法使用。請儲存新金鑰後再試一次。",
   "connection_offline": "無法連線。請檢查網路和已儲存的網址後再試一次。",
-  "connection_no_access": "服務未允許這次測試。請檢查帳號權限和付款設定後再試一次。"
+  "connection_no_access": "服務未允許這次測試。請檢查帳號權限和付款設定後再試一次。",
+  "chat_save_failed": "無法儲存這則回答，請在離開前複製內容。檢查剩餘磁碟空間與檔案權限後再試一次。"
 }

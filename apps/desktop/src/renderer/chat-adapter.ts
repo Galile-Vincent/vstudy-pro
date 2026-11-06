@@ -94,7 +94,7 @@ export function createChatAdapter(
           if (abortSignal.aborted || runGeneration !== generation) return;
           const event = queue.shift();
           if (!event) continue;
-          if (event.type === "error") { yield {...snapshot(),status:{type:'incomplete',reason:'error',error:event.code ? statusText({code:event.code,params:event.params ?? {}}) : errorText(event.message)}}; return; }
+          if (event.type === "error") { yield {...snapshot(),status:{type:'incomplete',reason:'error',error:event.code ? statusText({code:event.code,params:event.params ?? {}}) : event.message}}; return; }
           if (event.type === "done") return;
           if (event.type === "proposals") { proposed(event.actions); continue; }
           if (event.type === "usage") { usage = event.usage; window.dispatchEvent(new Event("usage-updated")); }

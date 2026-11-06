@@ -37,5 +37,6 @@
   "ai_parse.changed_too_much": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
   "connection_bad_key": "Your key did not work. Save a new key and try again.",
   "connection_offline": "Could not reach the provider. Check your internet and saved URL, then try again.",
-  "connection_no_access": "The provider did not allow this test. Check your account access and billing, then try again."
+  "connection_no_access": "The provider did not allow this test. Check your account access and billing, then try again.",
+  "chat_save_failed": "This answer could not be saved. Copy it before leaving. Check free disk space and file permissions, then try again."
 }

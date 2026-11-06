@@ -98,7 +98,7 @@ describe("IPC chat adapter", () => {
     const failed = setup(async (emit) =>
       emit({ type: "error", message: "provider failed" }),
     );
-    expect((await failed.stream.next()).value).toEqual({content:[{type:'text',text:''}],metadata:{custom:{modelId:'m',options:undefined,citations:[]}},status:{type:'incomplete',reason:'error',error:'Something went wrong. Please try again.'}});
+    expect((await failed.stream.next()).value).toEqual({content:[{type:'text',text:''}],metadata:{custom:{modelId:'m',options:undefined,citations:[]}},status:{type:'incomplete',reason:'error',error:'provider failed'}});
     expect(failed.unsubscribe).toHaveBeenCalled();
   });
 });
@@ -127,4 +127,9 @@ it('retry and regenerate reuse the original selection and options with a fresh r
   expect(first).toEqual(['chat:start',{...original,userMessage:'Explain',turnId:'turn',contextTurnIds:[],requestId:expect.any(String)}]);
   expect(second).toEqual(['chat:start',{...original,userMessage:'Explain',turnId:'turn',contextTurnIds:[],requestId:expect.any(String)}]);
   expect(first[1].requestId).not.toBe(second[1].requestId);
+});
+it('preserves the localized IPC rejection instead of translating it twice',async()=>{
+  const test=setup(async()=>{throw new Error('VSTUDY_STATUS:'+JSON.stringify({code:'errors.auth_failed',params:{}}));});
+  const {tr}=await import('../shared/i18n');
+  expect((await test.stream.next()).value.status.error).toBe(tr('errors:auth_failed'));
 });
