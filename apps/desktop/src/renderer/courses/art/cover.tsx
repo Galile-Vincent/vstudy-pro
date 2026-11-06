@@ -14,6 +14,9 @@ export function courseArt(id: string, term: string | null) {
     pattern: patterns[hash % patterns.length]!,
     style: {
       '--course-color': `var(${colors[hash % colors.length]})`,
+      '--art-hue-offset': `${(hash >>> 12) % 161 - 80}`,
+      '--art-hue-gap': `${40 + (hash >>> 20) % 51}`,
+      '--art-lightness': `${.64 + (hash >>> 16) % 12 / 100}`,
       '--art-angle': `${hash % 180 + 80}deg`,
       '--art-x': `${20 + hash % 65}%`,
       '--art-y': `${10 + (hash >>> 8) % 60}%`,
@@ -27,14 +30,16 @@ export function CourseArtwork({course}: {course: MoodleCourse}) {
   const [failedImage, setFailedImage] = useState<string>();
   return <div className="moodle-artwork" data-pattern={art.pattern} style={art.style} aria-hidden="true">
     {course.imageUrl && failedImage !== course.imageUrl && <img src={course.imageUrl} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailedImage(course.imageUrl!)} />}
-    <span className="moodle-art-pattern" /><span className="moodle-art-grain" /><span className="moodle-art-scrim" />
+    <svg className="moodle-art-pattern" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">{[0,1,2,3,4].map(index => <ellipse key={index} cx="360" cy="120" rx={85 + index * 44} ry={150 + index * 50} />)}</svg><span className="moodle-art-grain" /><span className="moodle-art-scrim" />
   </div>;
 }
 
 /** Course cover shares the card's semantic code and completion labels with assistive technology. */
-export function CourseCover({course}: {course: MoodleCourse}) {
+export function CourseCover({course, deadline}: {course: MoodleCourse; deadline?: {label:string; urgent:boolean}}) {
   return <div className="moodle-cover" style={courseArt(course.id, course.identity.term).style}>
     <CourseArtwork course={course} />
+    {deadline && <span className="moodle-cover-due" data-urgent={deadline.urgent} title={deadline.label}>{deadline.label}</span>}
+    <CourseProgress course={course} />
     <span className="moodle-course-code">{[course.identity.term, course.identity.code].filter(Boolean).join(' · ') || course.shortName}</span>
   </div>;
 }
@@ -43,8 +48,9 @@ export function CourseCover({course}: {course: MoodleCourse}) {
 export function CourseProgress({course}: {course: MoodleCourse}) {
   if (!course.identity.hasProgress || course.progress === null) return null;
   const count = Math.round(course.progress);
-  return <div className="moodle-progress" style={courseArt(course.id, course.identity.term).style}>
-    <progress max={100} value={count} aria-label={tr('moodle:course_progress',{count})} />
-    <span>{tr('moodle:course_progress',{count})}</span>
+  return <div className="moodle-progress">
+    <svg viewBox="0 0 44 44" aria-hidden="true"><circle className="moodle-progress-track" cx="22" cy="22" r="18" /><circle className="moodle-progress-value" cx="22" cy="22" r="18" pathLength="100" strokeDasharray={`${count} 100`} /></svg>
+    <span aria-hidden="true">{count}%</span>
+    <progress className="sr-only" max={100} value={count} aria-label={tr('moodle:course_progress',{count})} />
   </div>;
 }

@@ -52,7 +52,7 @@ import {
 import type { MoodleTermFilter } from "../../shared/moodle-course";
 import "./art/tokens.css";
 import "./courses.css";
-import { CourseArtwork, CourseCover as Cover, CourseProgress, courseArt } from "./art/cover";
+import { CourseArtwork, CourseCover as Cover, courseArt } from "./art/cover";
 import "./art/surfaces.css";
 import { ConnectDialog } from "./connect";
 import { Planner } from "./planner";
@@ -451,9 +451,7 @@ function CoursesBody({
     <Button variant="ghost" className="moodle-back" onClick={() => setShowPlanner(false)}><ArrowLeft />{tr("planner:back")}</Button>
     <Planner courses={overview?.courses ?? []} deadlines={overview?.upcoming ?? []} />
   </div></main>;
-  return (
-    <main className="moodle-page">
-      <div className="moodle-content">
+  const header = (
         <header className="moodle-header">
           <div>
             {courseId && (
@@ -478,6 +476,11 @@ function CoursesBody({
           </Button>
           </div>
         </header>
+  );
+  return (
+    <main className="moodle-page" data-course={Boolean(detail)}>
+      <div className="moodle-content">
+        {!detail && header}
         <div role="status" aria-live="polite">
           {notice && (
             <div className="moodle-banner">
@@ -572,6 +575,7 @@ function CoursesBody({
             <>
               <div className="moodle-hero" style={courseArt(detail.course.id, detail.course.identity.term).style}>
                 <CourseArtwork course={detail.course} />
+                <div className="moodle-hero-navigation">{header}</div>
                 <div className="moodle-hero-body">
                   <span className="moodle-eyebrow">
                     {[detail.course.identity.term, detail.course.identity.code]
@@ -906,15 +910,12 @@ function CoursesBody({
                             style={{...courseArt(course.id, course.identity.term).style, animationDelay: `${index * 30}ms`, ...(index >= 6 ? {animation: "none"} : {})}}
                             title={[course.fullName, course.identity.lifecycle === "unknown" ? tr("moodle:dates_unavailable") : null].filter(Boolean).join(" · ")}
                           >
-                            <Cover course={course} />
+                            <Cover course={course} deadline={{label: next ? tr("courses-art:due_relative", {time: relative(next.dueAt)}) : tr("courses-art:no_due"), urgent: !!next && Date.parse(next.dueAt) - Date.now() < 86400000}} />
                             <div className="moodle-card-body">
                               <h3><button type="button" onClick={() => onCourse(course.id)}>{displayTitle(course.identity, lang, course.fullName)}</button></h3>
                               <IdentityLine value={displayTeachers(course.identity, lang)} label={tr("moodle:teacher_unknown")} />
-                              <CourseProgress course={course} />
                               <footer>
-                                <span className="moodle-urgency" data-urgent={!!next && Date.parse(next.dueAt) - Date.now() < 86400000}>
-                                  <CalendarDays />{next ? tr("courses-art:due_relative", {time: relative(next.dueAt)}) : tr("courses-art:no_due")}
-                                </span>
+                                <span className="moodle-card-class">{displayClass(course.identity)}</span>
                                 <span className="moodle-card-unread">{unread > 0 && <span className="moodle-unread" aria-hidden="true" />}{tr("moodle:course_unread", {count: unread})}<ArrowUpRight /></span>
                               </footer>
                             </div>

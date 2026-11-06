@@ -25,7 +25,8 @@ async function audit(url) {
     if (entry.isDirectory()) await audit(path);
     else if (entry.name.endsWith('.css')) {
       const css=await readFile(path,'utf8');
-      assert.equal(/#[a-f\d]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|oklch|lab|lch)\(|prefers-color-scheme|--palette-\d+|:\s*(?:white|black)\b|,\s*(?:white|black)\s+\d/.test(css),false,`Fixed CSS color or scheme override in ${path.pathname}`);
+      assert.equal(/\boklch\((?!from var\(--(?:accent-color|course-color)\))/.test(css),false,`OKLCH must derive from a semantic theme token in ${path.pathname}`);
+      assert.equal(/#[a-f\d]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|lab|lch)\(|prefers-color-scheme|--palette-\d+|:\s*(?:white|black)\b|,\s*(?:white|black)\s+\d/.test(css),false,`Fixed CSS color or scheme override in ${path.pathname}`);
       count++;
     }
   }

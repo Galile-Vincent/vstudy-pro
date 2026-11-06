@@ -1,26 +1,35 @@
 /** Scoped art roles derive from the active theme. The scrim and label share a tested pair. */
 :root {
   --course-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='currentColor' filter='url(%23n)' opacity='.7' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
-  --course-radius: 20px;
+  --course-radius: var(--art-reader-radius, 20px);
   --course-media-radius: 12px;
-  --course-control-radius: 10px;
+  --course-control-radius: var(--art-reader-control, 10px);
   --course-art-ink: light-dark(var(--surface), var(--ink));
   --course-art-base: light-dark(var(--ink), var(--background));
-  --course-glass: color-mix(in oklab, var(--glass-tint) var(--glass-opacity), transparent);
-  --course-shadow: 0 0 0 1px color-mix(in oklab, var(--ink) 6%, transparent), 0 8px 24px color-mix(in oklab, var(--shadow-color) 6%, transparent);
+  --course-glass: var(--art-reader-glass, color-mix(in oklab, var(--glass-tint) var(--glass-opacity), transparent));
+  --course-shadow: var(--art-reader-shadow, 0 0 0 1px color-mix(in oklab, var(--ink) 8%, transparent), 0 12px 24px color-mix(in oklab, var(--shadow-color) 6%, transparent));
   --course-ease: cubic-bezier(.2,.8,.2,1);
 }
-.moodle-artwork { position:absolute; inset:0; overflow:hidden; background:radial-gradient(ellipse at var(--art-x) var(--art-y),color-mix(in oklch,var(--course-color) 55%,var(--course-art-ink)),transparent 65%),conic-gradient(from var(--art-angle) at 65% 80%,var(--course-art-base),color-mix(in oklch,var(--accent-color) 65%,var(--course-art-base)),color-mix(in oklch,var(--course-color) 75%,var(--course-art-base)),var(--course-art-base)); }
-.moodle-artwork > img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-.moodle-art-pattern { position:absolute; width:125%; height:250%; top:-105%; left:28%; border:1px solid color-mix(in oklab,var(--course-art-ink) 25%,transparent); border-radius:50%; transform:rotate(-30deg); box-shadow:0 0 0 20px color-mix(in oklab,var(--course-art-ink) 8%,transparent),0 0 0 40px color-mix(in oklab,var(--course-art-ink) 10%,transparent),0 0 0 65px color-mix(in oklab,var(--course-art-ink) 6%,transparent),0 0 0 90px color-mix(in oklab,var(--course-art-ink) 8%,transparent); }
-[data-pattern="contours"] .moodle-art-pattern { width:90%; left:45%; top:-30%; transform:rotate(35deg); border-radius:35% 65% 40% 60%; }
-[data-pattern="waves"] .moodle-art-pattern { width:180%; left:-20%; top:-200%; transform:rotate(-15deg); }
-[data-pattern="grid"] .moodle-art-pattern { inset:0; width:100%; height:100%; border:0; border-radius:0; box-shadow:none; transform:none; background:repeating-linear-gradient(0deg,transparent 0 23px,color-mix(in oklab,var(--course-art-ink) 12%,transparent) 23px 24px),repeating-linear-gradient(90deg,transparent 0 23px,color-mix(in oklab,var(--course-art-ink) 12%,transparent) 23px 24px); mask-image:linear-gradient(120deg,transparent,var(--ink)); }
+.moodle-artwork {
+  --art-primary: oklch(from var(--accent-color) var(--art-lightness) .23 calc(h + var(--art-hue-offset)));
+  --art-secondary: oklch(from var(--accent-color) .76 .19 calc(h + var(--art-hue-offset) + var(--art-hue-gap)));
+  --art-light: oklch(from var(--accent-color) .94 .09 calc(h + var(--art-hue-offset) + var(--art-hue-gap)));
+  --art-deep: oklch(from var(--accent-color) .36 .17 calc(h + var(--art-hue-offset)));
+  position:absolute; inset:0; overflow:hidden;
+  background:radial-gradient(ellipse at var(--art-x) var(--art-y),var(--art-light),transparent 45%),radial-gradient(ellipse at 90% 10%,var(--art-secondary),transparent 65%),conic-gradient(from var(--art-angle) at 35% 65%,var(--art-primary),var(--art-deep),var(--art-secondary),var(--art-primary));
+}
+.moodle-artwork > img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.5; mix-blend-mode:luminosity; }
+.moodle-artwork > .moodle-art-pattern { position:absolute; inset:0; width:100%; height:100%; fill:none; stroke:color-mix(in oklab,var(--course-art-ink) 65%,transparent); stroke-width:1.2; transform:rotate(-20deg) scale(1.15); }
+[data-pattern="contours"] > .moodle-art-pattern { transform:rotate(30deg) scale(1.4); }
+[data-pattern="waves"] > .moodle-art-pattern { transform:rotate(80deg) scale(1.8); }
+[data-pattern="grid"] > .moodle-art-pattern { transform:rotate(15deg) scale(1.6); }
 .moodle-art-grain { position:absolute; inset:0; opacity:.04; background-image:var(--course-grain); }
-.moodle-art-scrim { position:absolute; inset:0; background:linear-gradient(180deg,transparent 10%,color-mix(in oklab,var(--course-art-base) 30%,transparent) 45%,color-mix(in oklab,var(--course-art-base) 96%,transparent)); }
+.moodle-art-scrim { position:absolute; inset:0; background:linear-gradient(180deg,transparent 45%,color-mix(in oklab,var(--course-art-base) 40%,transparent)); }
 :root[data-theme="contrast"] .moodle-artwork { background:var(--surface); }
 :root[data-theme="contrast"] :is(.moodle-art-pattern,.moodle-art-grain,.moodle-art-scrim,.moodle-artwork img) { display:none; }
 @media (prefers-contrast: more), (forced-colors: active) {
   .moodle-artwork { background:var(--surface); }
   :is(.moodle-art-pattern,.moodle-art-grain,.moodle-art-scrim,.moodle-artwork img) { display:none; }
 }
+:root[data-theme="contrast"] { --course-art-ink:var(--ink); --course-art-base:var(--surface); }
+@media(prefers-contrast:more), (forced-colors:active) { :root { --course-art-ink:var(--ink); --course-art-base:var(--surface); } }
