@@ -30,11 +30,13 @@ assert.deepEqual(releaseMetadata, {}, 'Unverified release metadata must remain h
 for (const route of ['', 'en/', 'zh-Hant/', 'ja/', 'en/docs/getting-started/', 'zh-Hant/docs/getting-started/', 'ja/docs/getting-started/']) {
   const html = await readFile(new URL(`../dist/${route}index.html`, import.meta.url), 'utf8');
   for (const installer of installers) {
-    assert.ok(html.includes(`href="${downloadBase}/${installer.file}"`), `${route} no-JS ${installer.id}`);
+    const linked = html.includes(`href="${downloadBase}/${installer.file}"`);
+    assert.equal(linked, installer.releaseEnabled, `${route} no-JS publication scope ${installer.id}`);
+    assert.ok(html.includes(`data-installer="${installer.id}"`), `${route} includes planned platforms`);
   }
   assert.ok(html.includes(`href="${downloadBase}/SHA256SUMS.txt"`), `${route} checksums`);
   assert.match(html, /<details[^>]*class="download-platforms/);
   if (!route.includes('/docs/')) assert.match(html, /class="intel-alternative"/);
   assert.doesNotMatch(html, /\d+(?:\.\d+)?\s*(?:MB|MiB)\b/, 'No invented installer size');
 }
-console.log(`PASS: ${cases.length} platform cases; all four static homepages and three install guides expose every installer and checksums; homepages expose the Intel alternative.`);
+console.log(`PASS: ${cases.length} platform cases; four homepages and three guides link enabled installers and checksums, and mark other targets as planned.`);

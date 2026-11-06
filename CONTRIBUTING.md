@@ -41,7 +41,7 @@ Git-cliff fits this single-app repository without a changeset file per change or
 - [ ] Review [the security model](docs/SECURITY.md), privacy disclosures, dependency exceptions, migration backups, and recovery behavior on Mac and Windows.
 - [ ] Commit `docs/releases/<version>.md`. State actual signing and notarization status. Include the lack of a Windows kernel network deny for Python conversion and that Codex is disabled on Windows.
 - [ ] Trigger the release workflow on a `ci/**` branch push or by manual **workflow_dispatch** for a dry run. CI branch pushes must never use signing secrets, publish a release, or upload to Releases. Inspect the workflow's dispatch inputs before running it. Dry-run output belongs in Actions artifacts.
-- [ ] Inspect GitHub-hosted packaging and smoke evidence for Mac arm64, Mac x64, Windows x64, and Windows ARM64. Each packaged smoke must launch a window, exercise SQLite, check converter availability without an implicit download, and exit. A missing target or skipped launch is an open gap.
+- [ ] Inspect GitHub-hosted packaging and smoke evidence for every enabled target in `apps/desktop/distribution-targets.json`. First publication enables Mac arm64 and Windows x64. Intel Mac and Windows ARM64 remain planned qualification candidates. Each packaged smoke must launch a window, exercise SQLite, check converter availability without an implicit download, and exit. A missing enabled target or skipped launch is an open gap.
 - [ ] Test direct download, per-user install, first launch, manual upgrade, and uninstall on clean Mac and Windows machines. Review Cmd on Mac, Ctrl on Windows, native controls, accessibility, locales, and first-run behavior.
 - [ ] For a separately authorized signing run, verify the delivered signatures and Mac notarization using [SIGNING.md](docs/SIGNING.md#verify-the-delivered-artifacts). Invalid or partial credentials must fail. The branch-only CI dry run remains unsigned regardless of configured secrets.
 - [ ] Compare the installer aliases below with the versioned files. Generate `SHA256SUMS.txt` only after all signing, notarization, and stapling finish. Validate update metadata without enabling an updater.
@@ -61,10 +61,10 @@ Only an owner-approved `v*.*.*` tag may publish a non-draft release. The tag ver
 The latest published release must contain these stable assets, versioned archives, and checksums. Signing must not change their names.
 
 - `VStudy-Pro-mac-arm64.dmg`
-- `VStudy-Pro-mac-x64.dmg`
 - `VStudy-Pro-win-x64.exe`
-- `VStudy-Pro-win-arm64.exe`
 - `SHA256SUMS.txt`
+
+Dry runs qualify all four targets. Tag publication builds and assembles only targets with `releaseEnabled: true`. Intel Mac reserves `VStudy-Pro-mac-x64.dmg`, and Windows ARM64 reserves `VStudy-Pro-win-arm64.exe`. Enable either only after full conversion and native package/install/launch checks pass. Change its one registry flag and update all three READMEs and installation guides. The website's links, release matrix, assembly, and public URL checks follow that flag automatically. A qualification manifest is never publishable.
 
 After an owner-approved publication, test each `https://github.com/ava-apple/vstudy-pro/releases/latest/download/<filename>` link as an unauthenticated user. Check the release body and its actual signing status. Do not advertise an architecture whose packaged checks failed. Website version and file size must come from verified published assets, not the source package version or an estimate.
 

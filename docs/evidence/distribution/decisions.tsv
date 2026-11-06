@@ -1,2 +1,6 @@
 ts	phase	decision	why	evidence	result
 2026-11-06T00:00:00Z	plan	Keep stable installer aliases across signing modes	One-click links must survive addition of secrets	docs/DISTRIBUTION_PLAN.md	planned
+2026-11-06T04:31:26Z	plan-correction	Initial timestamp was a scaffold placeholder	Plan commit 8ce538f records 2026-11-06T02:29:24Z	git show -s --format=%cI 8ce538f	corrected by appended record
+2026-11-06T04:31:26Z	publication-scope	Enable Mac arm64 and Windows x64 first	Coordinator approved complete converter support over a Markdown/TXT-only preview	apps/desktop/distribution-targets.json; docs/DISTRIBUTION_PLAN.md	Intel Mac and Windows ARM64 planned
+2026-11-06T04:31:26Z	cancelled-runs	Replace unsupported macos-14 runner configuration	Both original jobs were rejected before a runner or steps were assigned	cancelled-main-annotation.json; cancelled-tag-annotation.json	New labels have executed real public-repo jobs
+2026-11-06T04:31:26Z	native-python	Keep downloaded Python outside temporary bootstrap HOME	Deleting bootstrap removed uv-managed Python and broke the surviving venv	825f82d; services/documents.integration.test.ts	Real uv regression passed locally

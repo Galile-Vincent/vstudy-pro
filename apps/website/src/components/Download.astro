@@ -7,21 +7,24 @@ interface Props { language: Language; compact?: boolean; }
 const { language, compact = false } = Astro.props;
 const t = downloadCopy[language];
 const initial = installers[0];
+const planned = installers.filter(installer => !installer.releaseEnabled);
 ---
-<div class:list={['download-picker', { compact }]} data-download-picker data-download-label={t.download} data-download-compact={compact || undefined}>
+<div class:list={['download-picker', { compact }]} data-download-picker data-download-label={t.download} data-download-planned={t.planned} data-download-compact-label={ui[language].download} data-download-compact={compact || undefined}>
   <div class="download-actions">
     <a class:list={['button', { compact }]} data-download-primary aria-label={`${t.download} ${initial.label}`} href={`${downloadBase}/${initial.file}`}>
-      <span data-download-text>{compact ? ui[language].download : `${t.download} ${initial.label}`}</span><span aria-hidden="true">↓</span>
+      <span data-download-text>{compact ? ui[language].download : `${t.download} ${initial.label}`}</span><span aria-hidden="true" data-download-arrow>↓</span>
     </a>
-    {!compact && <a class="intel-alternative" href={`${downloadBase}/${installers[1].file}`}>{t.intel}</a>}
+    {!compact && (installers[1].releaseEnabled
+      ? <a class="intel-alternative" href={`${downloadBase}/${installers[1].file}`}>{t.intel}</a>
+      : <span class="intel-alternative">{t.intel} {t.planned}</span>)}
     <details class="download-platforms">
       <summary>{t.other}</summary>
       <ul>
         {installers.map(installer => <li>
-          <a href={`${downloadBase}/${installer.file}`} data-installer={installer.id}>
+          {installer.releaseEnabled ? <a href={`${downloadBase}/${installer.file}`} data-installer={installer.id}>
             {installer.label}
             {releaseMetadata[installer.id] && <small>v{releaseMetadata[installer.id]!.version} · {new Intl.NumberFormat(language, { style: 'unit', unit: 'megabyte', maximumFractionDigits: 1 }).format(releaseMetadata[installer.id]!.bytes / 1_000_000)}</small>}
-          </a>
+          </a> : <span data-installer={installer.id} aria-disabled="true">{installer.label}<small>{t.planned}</small></span>}
         </li>)}
         <li><a href={`${downloadBase}/SHA256SUMS.txt`}>{t.checksums}</a></li>
         <li><a href={RELEASES_URL}>{t.releases}</a></li>
@@ -30,6 +33,7 @@ const initial = installers[0];
   </div>
   {!compact && <div class="download-notes">
     <p>{t.requirements}</p>
+    {planned.length > 0 && <p>{planned.map(installer => installer.label).join(' / ')} · {t.planned}</p>}
     <p>{t.status}</p>
     <a href={path(`${language}/docs/getting-started/`)}>{t.help}</a>
     <details><summary>{t.safety}</summary><p>{t.unsigned}</p><p>{t.mac}</p><p>{t.win}</p><p>{t.signed}</p></details>
@@ -47,10 +51,15 @@ const initial = installers[0];
     document.querySelectorAll<HTMLElement>('[data-download-picker]').forEach(picker => {
       const link = picker.querySelector<HTMLAnchorElement>('[data-download-primary]');
       const label = picker.querySelector('[data-download-text]');
+      const arrow = picker.querySelector<HTMLElement>('[data-download-arrow]');
       if (link && label) {
-        link.href = `${downloadBase}/${installer.file}`;
-        link.setAttribute('aria-label', `${picker.dataset.downloadLabel} ${installer.label}`);
-        if (!picker.dataset.downloadCompact) label.textContent = `${picker.dataset.downloadLabel} ${installer.label}`;
+        const description = installer.releaseEnabled ? `${picker.dataset.downloadLabel} ${installer.label}` : `${installer.label} · ${picker.dataset.downloadPlanned}`;
+        if (installer.releaseEnabled) { link.href = `${downloadBase}/${installer.file}`; link.removeAttribute('aria-disabled'); }
+        else { link.removeAttribute('href'); link.setAttribute('aria-disabled', 'true'); }
+        link.setAttribute('aria-label', description);
+        label.textContent = picker.dataset.downloadCompact
+          ? (installer.releaseEnabled ? picker.dataset.downloadCompactLabel! : picker.dataset.downloadPlanned!) : description;
+        if (arrow) arrow.hidden = !installer.releaseEnabled;
       }
     });
   }
@@ -68,7 +77,8 @@ const initial = installers[0];
   summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
   .download-platforms { position: relative; text-align: start; }
   .download-platforms ul { list-style: none; padding: .5rem; margin: .5rem 0 0; border: 1px solid var(--line); border-radius: .5rem; background: var(--surface); }
-  .download-platforms a { display: block; padding: .5rem; }
+  .download-platforms a, .download-platforms [aria-disabled] { display: block; padding: .5rem; }
+  [aria-disabled] { cursor: default; opacity: .7; }
   .download-platforms small { display: block; color: var(--muted); }
   .download-notes { max-width: 42rem; margin: 1rem auto; font-size: .875rem; color: var(--muted); line-height: 1.6; }
   .download-notes p { margin: .5rem 0; }

@@ -28,7 +28,7 @@ export const guides: Guide[] = [
         id: 'install',
         title: 'Install on macOS or Windows',
         paragraphs: [
-          'Full document conversion needs macOS 14+ on Apple silicon or macOS 13+ on Intel. Use Windows 10+ for x64 or Windows 11+ for ARM64; the ARM64 app runs x64 Python through Windows emulation. The app can launch on macOS 12 for Markdown and text. On Mac, choose Apple silicon unless About This Mac lists Intel. On Windows, check Settings > System > About > System type. Choose ARM64 for ARM processors and x64 otherwise. There is no Linux installer.',
+          'Apple silicon Mac and Windows x64 are the first release targets. Intel Mac and Windows ARM64 are planned until full conversion and native packaging checks pass. Full document conversion needs macOS 14+ on Apple silicon or macOS 13+ on Intel. Use Windows 10+ for x64 or Windows 11+ for ARM64; the ARM64 app runs x64 Python through Windows emulation. The app can launch on macOS 12 for Markdown and text. On Mac, choose Apple silicon unless About This Mac lists Intel. On Windows, check Settings > System > About > System type. ARM-based Windows and Intel Mac users should wait for their planned installer. There is no Linux installer.',
           'The links below point to the latest published release. The repository is public. If an asset is absent, check Release notes and availability for published targets and verification results. A dry run is not a published release. AI, school sign-in, and fresh course content need internet access.',
         ],
         steps: [

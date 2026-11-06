@@ -1,5 +1,7 @@
 # Distribution CI handoff
 
+Integration scope update. The first cross-platform publication enables Mac arm64 and Windows x64. Intel Mac and Windows ARM64 remain planned qualification candidates in `apps/desktop/distribution-targets.json`. Branch dry runs build all four. Tag matrix, assembly, website links, and publication use only `releaseEnabled` targets. The four-target worker inventory below describes available packaging machinery rather than a claim that every architecture is published or verified.
+
 ## Integration contract
 
 The parent owns `src/main/index.ts` and all local Electron launches. This worker did not launch Electron, push, open a PR, dispatch CI, or publish a release.
