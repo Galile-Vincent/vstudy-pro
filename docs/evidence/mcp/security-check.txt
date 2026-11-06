@@ -19,9 +19,9 @@
 > @vstudy/website@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website
 > astro check
 
-11:31:50 [types] Generated 24ms
-11:31:50 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website...
-Result (24 files): 
+12:05:35 [types] Generated 26ms
+12:05:35 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website...
+Result (29 files):
 - 0 errors
 - 0 warnings
 - 0 hints
@@ -51,26 +51,26 @@ Result (24 files):
 > node scripts/build.mjs
 
 
-  dist/vstudy-mcp.cjs   934.2kb
-  dist/installer.cjs    364.1kb
+  dist/vstudy-mcp.cjs   941.6kb
+  dist/installer.cjs    371.1kb
   dist/windows-acl.cjs  140.9kb
 
-⚡ Done in 28ms
+⚡ Done in 39ms
 
  RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
 
 
- Test Files  11 passed (11)
-      Tests  108 passed (108)
-   Start at  11:31:53
-   Duration  3.33s (transform 98ms, setup 0ms, import 314ms, tests 5.72s, environment 0ms)
+ Test Files  12 passed | 1 skipped (13)
+      Tests  121 passed | 2 skipped (123)
+   Start at  12:05:39
+   Duration  5.09s (transform 163ms, setup 0ms, import 505ms, tests 8.81s, environment 1ms)
 
 
 > @vstudy/desktop@0.2.2 test /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop
 > node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run --pool=forks --maxWorkers=2
 
 Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/locales.generated.ts (21 namespaces).
-(node:6851) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+(node:59305) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -97,10 +97,34 @@ High contrast dark: WCAG AA passed at every contrast setting
  RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop
 
 
- Test Files  161 passed | 5 skipped (166)
-      Tests  1252 passed | 14 skipped (1266)
-   Start at  11:31:57
-   Duration  30.58s (transform 1.78s, setup 0ms, import 11.75s, tests 33.54s, environment 7.77s)
+ Test Files  162 passed | 5 skipped (167)
+      Tests  1258 passed | 14 skipped (1272)
+   Start at  12:05:44
+   Duration  37.50s (transform 2.10s, setup 0ms, import 15.03s, tests 39.88s, environment 9.88s)
+
+
+> vstudy-pro@ typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4
+> pnpm --filter @vstudy/mcp typecheck && pnpm --filter @vstudy/desktop typecheck && pnpm --filter @vstudy/website typecheck
+
+
+> @vstudy/mcp@0.2.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/mcp
+> tsc --noEmit
+
+
+> @vstudy/desktop@0.2.2 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop
+> node scripts/generate-locales.mjs && tsc --noEmit
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/desktop/src/shared/locales.generated.ts (21 namespaces).
+
+> @vstudy/website@0.1.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website
+> astro check
+
+12:06:29 [types] Generated 24ms
+12:06:29 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4/apps/website...
+Result (29 files):
+- 0 errors
+- 0 warnings
+- 0 hints
 
 
 > vstudy-pro@ knip /Users/vc/.t3/worktrees/vstudy-pro/t3-41e4a9a4
