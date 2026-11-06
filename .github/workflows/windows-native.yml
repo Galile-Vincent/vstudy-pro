@@ -3,10 +3,10 @@ on:
   workflow_dispatch:
     inputs:
       suite:
-        description: Focused native pipe or CLI setup tests
+        description: Focused pipe, CLI setup, or Electron native-addon verification
         type: choice
         default: pipe
-        options: [pipe, cli]
+        options: [pipe, cli, native-addon]
   push:
     branches: ['ci/windows-native-pipe']
 permissions:
@@ -67,3 +67,42 @@ jobs:
           src/main/providers/setup/store.test.ts src/main/providers/setup/service.test.ts
           src/main/providers/setup/authenticity.test.ts src/main/providers/setup/adversarial-review.test.ts
           src/renderer/ai-cli/setup.test.tsx --pool=forks --maxWorkers=2 --reporter=verbose
+  native-addon:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'native-addon'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            arch: x64
+          - os: windows-11-arm
+            arch: arm64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Rebuild native modules through the same builder used for installers
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: pnpm --filter @vstudy/desktop exec electron-builder install-app-deps --platform win32 --arch "$TARGET_ARCH"
+      - name: Exercise the rebuilt terminal in stock Electron
+        env:
+          ELECTRON_RUN_AS_NODE: '1'
+          VSTUDY_NATIVE_ARCH: ${{ matrix.arch }}
+        run: pnpm --filter @vstudy/desktop exec electron scripts/native-addon-smoke.mjs
+      - name: Retain native-addon acceptance
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: native-addon-${{ matrix.arch }}
+          path: apps/desktop/release/native-addon-${{ matrix.arch }}.json
+          if-no-files-found: warn
+          retention-days: 14

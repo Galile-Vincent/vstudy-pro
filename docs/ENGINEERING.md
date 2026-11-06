@@ -1,6 +1,8 @@
 # Work on VStudy Pro
 
-Run commands from the repository root unless a path is specified. Use Node 24.19.0 and pnpm 10.28.2. The Node version files select the tested runtime. The package engine permits Node >=24.11.1.
+Run commands from the repository root unless a path is specified. Use Node 24.19.0 and pnpm 10.28.2. The Node version files select the tested runtime. The package engine permits Node >=24.15.0.
+
+Native packaging pins `@electron/rebuild@4.0.3>node-gyp` to 13.1.0. It recognizes the Visual Studio 2026 installations on current Windows runners; see the [node-gyp changelog](https://github.com/nodejs/node-gyp/blob/main/CHANGELOG.md). The Node minimum applies to source builds. The standalone MCP script keeps its separate runtime requirement.
 
 ## Find the owner of a change
 

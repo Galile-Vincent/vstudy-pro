@@ -1,6 +1,6 @@
 # Phase 1 foundation
 
-Requires Node >=24.11.1. The workspace selects pnpm 10.28.2. All direct dependencies are exact versions; the lockfile pins transitives. Electron 40.0.0 embeds Node 24.11.1 and runs `node:sqlite` without flags or native ABI rebuilds. Both Vitest and the real Electron smoke test exercise that SQLite implementation.
+Source builds require Node >=24.15.0. The workspace selects pnpm 10.28.2. All direct dependencies are exact versions; the lockfile pins transitives. Electron 42.11.16 embeds Node 24.19.0 and runs `node:sqlite` without flags or native ABI rebuilds. Both Vitest and the real Electron smoke test exercise that SQLite implementation.
 
 Run from the repository root:
 

@@ -50,7 +50,7 @@ Delete-all does not remove originals outside the library, exported backups, CLI 
 
 ### Build from source
 
-Use macOS or Windows, Node **24.19.0** from `.node-version`, and **pnpm 10.28.2** from `package.json`. The package engine permits Node >=24.11.1. Run from the public repository's root.
+Use macOS or Windows, Node **24.19.0** from `.node-version`, and **pnpm 10.28.2** from `package.json`. The package engine permits Node >=24.15.0. Run from the public repository's root.
 
 ```sh
 git clone https://github.com/ava-apple/vstudy-pro.git

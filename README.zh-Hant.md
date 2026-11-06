@@ -50,7 +50,7 @@ Main 使用 Electron `app.getPath('userData')`。目前套件命名空間是 `@v
 
 ### 從原始碼建置
 
-使用 macOS 或 Windows、`.node-version` 指定的 **Node 24.19.0**，以及 `package.json` 指定的 **pnpm 10.28.2**。套件引擎允許 Node >=24.11.1。以下指令從公開儲存庫的根目錄執行。
+使用 macOS 或 Windows、`.node-version` 指定的 **Node 24.19.0**，以及 `package.json` 指定的 **pnpm 10.28.2**。套件引擎允許 Node >=24.15.0。以下指令從公開儲存庫的根目錄執行。
 
 ```sh
 git clone https://github.com/ava-apple/vstudy-pro.git

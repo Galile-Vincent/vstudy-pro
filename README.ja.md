@@ -50,7 +50,7 @@ Main は Electron `app.getPath('userData')` を使います。現在の名前空
 
 ### ソースからビルドする
 
-macOS または Windows、`.node-version` の **Node 24.19.0**、`package.json` の **pnpm 10.28.2** を使います。engine 指定は Node >=24.11.1 です。公開リポジトリのルートで実行します。
+macOS または Windows、`.node-version` の **Node 24.19.0**、`package.json` の **pnpm 10.28.2** を使います。engine 指定は Node >=24.15.0 です。公開リポジトリのルートで実行します。
 
 ```sh
 git clone https://github.com/ava-apple/vstudy-pro.git
