@@ -83,7 +83,7 @@ it('recovers interrupted memory and abandoned generation only at normal IPC star
  const {MemoryRepository}=await import('../review/memory-repository');
  const {randomUUID}=await import('node:crypto');
  const store=openStore(':memory:');stores.push(store);
- const review=new ReviewRepository(store.db),course=review.createCourse({title:'Physics'});
+ const review=new ReviewRepository(store.db),course=review.createCourse({title:'Physics'});review.setPrefs({consentAcknowledged:true});
  const chat=randomUUID(),user=randomUUID(),assistant=randomUUID(),at=new Date().toISOString();
  store.db.prepare("INSERT INTO conversations(id,scope,providerId,modelId,createdAt) VALUES(?,'general','openai-api','gpt-5.4',?)").run(chat,at);
  for(const [messageId,role] of [[user,'user'],[assistant,'assistant']])store.db.prepare('INSERT INTO messages(id,conversationId,role,parts,createdAt,parentMessageId) VALUES(?,?,?,?,?,?)').run(messageId!,chat,role!,JSON.stringify([{type:'text',text:'Force?',status:'complete'}]),at,role==='assistant'?user:null);
