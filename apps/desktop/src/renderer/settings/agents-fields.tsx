@@ -21,7 +21,7 @@ export function AgentSelection({ availableScopes, scopes, accountIds, accounts, 
       <legend>{tr('agents:scopes')}</legend>
       {scopeSchema.options.filter(scope => availableScopes.includes(scope)).map(scope => <label className="agents-choice" key={scope}>
         <Checkbox checked={scopes.includes(scope)} disabled={disabled} onCheckedChange={checked => onScopes(checked ? [...scopes, scope] : scopes.filter(value => value !== scope))} />
-        <span>{tr(`agents:scope_${scope}`)}<small><code>{scope}</code></small></span>
+        <span>{tr(`agents:scope_${scope.replace(':', '_')}`)}<small><code>{scope}</code></small></span>
       </label>)}
       {!availableScopes.length && <p>{tr('agents:no_scopes')}</p>}
     </fieldset>

@@ -1,0 +1,106 @@
+/* Agent surfaces use Quiet folio's flat tonal groups and shared theme roles. */
+.agents-settings, .agents-dialog {
+  color: var(--ink);
+  font-size: var(--type-base);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.agents-intro { margin-bottom: var(--space-6); }
+.agents-muted, .agents-details dt, .agents-choice small { color: var(--muted); }
+.agents-section, .agents-connect-entry { margin-top: var(--space-6); }
+.agents-section > h3, .agents-selection legend {
+  font-size: var(--type-base);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+.agents-card {
+  padding: var(--space-4);
+  margin-top: var(--space-3);
+  background: color-mix(in oklab, var(--ink) 4%, var(--surface));
+  border: 0;
+  border-radius: var(--r-md);
+  min-width: 0;
+}
+.agents-card-header, .agents-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+.agents-card-header h3, .agents-card-header h4 { font-weight: 600; margin: 0; }
+.agents-actions { justify-content: flex-end; margin-top: var(--space-3); }
+.agents-badge {
+  font-size: var(--type-xs);
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface);
+  border-radius: var(--r-pill);
+}
+.agents-details { display: grid; gap: var(--space-3); margin-block: var(--space-4); }
+.agents-details > div { display: grid; grid-template-columns: minmax(5rem, 1fr) minmax(0, 3fr); gap: var(--space-3); }
+.agents-details dt { font-size: var(--type-sm); }
+.agents-details dd { margin: 0; min-width: 0; }
+.agents-details dd > span, .agents-scope { display: block; }
+.agents-details dd > span + span { margin-top: var(--space-2); }
+.agents-details small, .agents-choice small, .agents-choice code { display: block; }
+.agents-settings code, .agents-dialog code, .agents-raw { font-family: var(--font-mono); font-size: var(--type-sm); }
+.agents-settings .agents-danger { color: var(--danger); }
+.agents-activity { list-style: none; padding: 0; }
+.agents-activity summary { cursor: pointer; color: var(--muted); }
+.agents-raw {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+  max-height: 18rem;
+  overflow: auto;
+  margin-block: var(--space-2);
+  padding: var(--space-3);
+  border: 0;
+  border-radius: var(--r-sm);
+  background: var(--code-background);
+  color: var(--ink);
+  user-select: text;
+}
+[data-slot=dialog-content].agents-dialog {
+  width: min(38rem, calc(100vw - var(--space-8)));
+  max-width: calc(100vw - var(--space-8));
+  max-height: calc(100dvh - var(--space-8));
+  overflow: auto;
+  padding: var(--space-6);
+  gap: var(--space-4);
+  border: 0;
+  border-radius: var(--r-lg);
+  background: var(--material-sheet);
+  box-shadow: var(--elevation-floating);
+}
+.agents-dialog [data-slot=dialog-title] { font-size: var(--type-lg); line-height: 1.35; }
+.agents-dialog [data-slot=dialog-description] { color: var(--muted); font-size: var(--type-base); }
+.agents-dialog button, .agents-settings button { white-space: normal; height: auto; min-height: var(--control-height); border-radius: var(--r-sm); }
+.agents-selection { display: grid; gap: var(--space-4); }
+.agents-selection fieldset { display: grid; gap: var(--space-2); min-width: 0; padding: 0; border: 0; }
+.agents-choice { display: flex; align-items: flex-start; gap: var(--space-3); cursor: pointer; }
+.agents-choice > [data-slot=checkbox] { margin-top: var(--space-1); }
+.agents-choice > span { flex: 1; min-width: 0; }
+.agents-selection fieldset:disabled .agents-choice { cursor: default; }
+.agents-expiry { display: grid; gap: var(--space-2); }
+.agents-dialog input[data-slot=input] { border: 0; border-radius: var(--r-sm); background: var(--subtle); color: var(--ink); box-shadow: none; padding: var(--space-2) var(--space-3); }
+.agents-client-name { font-size: var(--type-md); font-weight: 600; }
+.agents-code { display: block; text-align: center; background: var(--subtle); border-radius: var(--r-md); padding: var(--space-5); font-family: var(--font-mono); font-size: var(--type-xl); font-weight: 600; letter-spacing: .12em; user-select: all; }
+.agents-risk { color: var(--warning); }
+.agents-risk[data-risk=high] { color: var(--danger); }
+.agents-countdown { font-variant-numeric: tabular-nums; color: var(--muted); }
+.agents-doctor ul { display: grid; gap: var(--space-3); padding: 0; list-style: none; }
+.agents-doctor li { display: grid; gap: var(--space-1); }
+.agents-live { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--accent-color); font-size: var(--type-sm); }
+.agents-live [data-slot=button] { color: inherit; white-space: normal; }
+.agents-live-dot { width: var(--space-2); height: var(--space-2); flex: none; background: currentColor; border-radius: var(--r-pill); }
+@media (max-width: 719px) {
+  .agents-details > div { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+  [data-slot=dialog-content].agents-dialog { padding: var(--space-4); }
+  .agents-live { max-width: 10rem; }
+}
+@media (prefers-contrast: more), (forced-colors: active) {
+  .agents-card, [data-slot=dialog-content].agents-dialog { border: 1px solid var(--ink); }
+}
