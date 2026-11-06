@@ -137,6 +137,16 @@ jobs:
           path: apps/desktop/release/smoke/${{ matrix.key }}/
           if-no-files-found: warn
           retention-days: 14
+      - name: Retain the Intel converter wheel and exact resolver inputs
+        if: always() && matrix.key == 'mac-x64'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: converter-native-${{ matrix.key }}
+          path: |
+            apps/desktop/resources/converter/wheels/
+            apps/desktop/resources/converter/requirements.native.lock.txt
+          if-no-files-found: warn
+          retention-days: 14
       - name: Retain Windows platform UI evidence
         if: always() && matrix.platform == 'win'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

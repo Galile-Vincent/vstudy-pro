@@ -5,7 +5,7 @@ import { ProcessScope } from "./process-scope";
 import { profileStage } from "./profile";
 import { WarmWorker } from "./warm-worker";
 import { spawn } from "node:child_process";
-import { access, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
 import { constants } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
@@ -114,6 +114,8 @@ export function createConverter(options: {
     const requirements = process.platform === 'darwin' && process.arch === 'x64' && await stat(nativeRequirements).then(file => file.isFile(), () => false)
       ? nativeRequirements : join(options.resources, "requirements.lock.txt");
     const wheels = requirements === nativeRequirements ? ['--find-links', join(options.resources, 'wheels')] : [];
+    options.diagnostic?.(JSON.stringify({ converterInstall: { platform: process.platform, arch: process.arch,
+      requirements, wheels: wheels.length ? await readdir(join(options.resources, 'wheels')) : [] } }));
     const fingerprint = createHash("sha256").update(await readFile(requirements)).digest("hex");
     const marker = join(venv, ".requirements-sha256");
     const cwd = await mkdtemp(join(tmpdir(), "vstudy-bootstrap-"));
@@ -147,11 +149,11 @@ export function createConverter(options: {
       if (uv) {
         await run(uv, ["venv", "--python", managedConverterPython(), venv], cwd, 300_000);
         report("Installing markitdown…");
-        await run(uv, ["pip", "install", "--require-hashes", ...wheels, "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(uv, ["pip", "install", "--require-hashes", "--only-binary", ":all:", ...wheels, "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       } else if (systemPython) {
         await run(systemPython, ["-m", "venv", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await run(python, ["-m", "pip", "install", "--require-hashes", ...wheels, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(python, ["-m", "pip", "install", "--require-hashes", "--only-binary", ":all:", ...wheels, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       }
       await run(python, ["-c", "import markitdown, pdfplumber"], cwd);
       checkOpen();
