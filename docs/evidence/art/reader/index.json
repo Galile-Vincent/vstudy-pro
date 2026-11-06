@@ -1,0 +1,35 @@
+{
+  "runs": {
+    "before": {
+      "screenshots": 40,
+      "verification": "before/verification.json"
+    },
+    "round-1": {
+      "screenshots": 10,
+      "verification": "round-1/verification.json"
+    },
+    "round-2": {
+      "screenshots": 10,
+      "verification": "round-2/verification.json"
+    },
+    "final": {
+      "screenshots": 117,
+      "verification": "final/verification.json"
+    },
+    "pseudo": {
+      "screenshots": 9,
+      "verification": "pseudo/verification.json"
+    },
+    "interaction": {
+      "screenshots": 3,
+      "verification": "interaction/verification.json"
+    }
+  },
+  "prototypes": [
+    "prototype-01.png",
+    "prototype-02.png",
+    "prototype-03.png",
+    "prototypes-comparison.png"
+  ],
+  "notes": "Production Electron for main evidence. Pseudo-locale uses Electron with the Vite renderer. Fixture provider only. One Electron instance at a time."
+}
