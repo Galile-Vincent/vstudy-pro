@@ -24,3 +24,35 @@ it.each([false,true])('announces copy only on success and clears it (failure %s)
     if(!fail){await act(()=>document.querySelector<HTMLButtonElement>('button[aria-label="Copy link"]')!.click());expect(footer.querySelector('[role=status]')?.textContent).toContain('copied');}
   }finally{await act(()=>root.unmount());host.remove();vi.useRealTimers();}
 });
+
+it('offers Retry after opening fails and clears the failure on recovery and navigation',async()=>{
+  const {render,screen,fireEvent,waitFor,cleanup}=await import('@testing-library/react');
+  const {tr}=await import('../../shared/i18n');
+  let fail=true;
+  const state={id:'retry-pane',status:'ready',url:'https://school.example/course/view.php?id=1',title:'Course',secure:true,zoom:1,error:null,documentId:null,retryAt:null,canGoBack:false,canGoForward:false};
+  invoke.mockImplementation(async(channel)=>{if(channel==='moodle:webview-open'&&fail)throw new Error('offline');return state;});
+  const props={accountId:'school',target:{kind:'page' as const,url:state.url},onClose:()=>{},onDocument:()=>{},onReconnect:()=>{}};
+  try{
+    const view=render(<MoodleWebviewPane {...props}/>);
+    await screen.findByRole('alert');
+    fail=false;fireEvent.click(screen.getByRole('button',{name:tr('common:retry')}));
+    await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
+    fail=true;view.rerender(<MoodleWebviewPane {...props} target={{kind:'page',url:'https://school.example/course/view.php?id=2'}}/>);
+    await screen.findByRole('alert');
+    fail=false;view.rerender(<MoodleWebviewPane {...props} target={{kind:'page',url:'https://school.example/course/view.php?id=3'}}/>);
+    await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
+  }finally{cleanup();}
+});
+it('clears an action failure when Reload succeeds',async()=>{
+  const {render,screen,fireEvent,waitFor,cleanup}=await import('@testing-library/react');
+  const state={id:'action-pane',status:'ready',url:'https://school.example/course/view.php?id=1',title:'Course',secure:true,zoom:1,error:null,documentId:null,retryAt:null,canGoBack:false,canGoForward:false};
+  invoke.mockImplementation(async(channel,payload)=>{if(channel==='moodle:webview-action'&&payload.action==='copy')throw new Error('clipboard');return state;});
+  try{
+    render(<MoodleWebviewPane accountId="school" target={{kind:'page',url:state.url}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>);
+    await waitFor(()=>expect(screen.getAllByRole('button',{name:'Copy link'})[0]!.hasAttribute('disabled')).toBe(false));
+    fireEvent.click(screen.getAllByRole('button',{name:'Copy link'})[0]!);
+    await screen.findByRole('alert');
+    fireEvent.click(screen.getByRole('button',{name:'Reload'}));
+    await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
+  }finally{cleanup();}
+});
