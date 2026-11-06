@@ -4,6 +4,7 @@ export const NEGATIVE_HALF_LIFE_DAYS = 21;
 export const POSITIVE_HALF_LIFE_DAYS = 30;
 export const SELF_REPORT_WEIGHT = 0.1;
 export const UNDERSTOOD_HIDE_DAYS = 14;
+export const REVIEW_INTERVAL_DAYS = [1, 3, 7, 14] as const;
 const DAY_MS = 86_400_000;
 export interface MasteryObservation {
   id:string;jobId:string;occurredAt:string;errorType:'none'|'slip'|'mistake'|'misconception'|'gap';
@@ -12,7 +13,7 @@ export interface MasteryObservation {
 }
 export interface MasteryAttempt {at:string;correct:boolean;confirmed:boolean;reportedBad?:boolean}
 export interface MasteryOptions {now:number;timeZone?:string;userState?:'none'|'dismissed';understoodAt?:string|null;attempts?:readonly MasteryAttempt[]}
-export interface MasteryResult {state:'candidate'|'watching'|'needs_review'|'dismissed';risk:number;negative:number;positive:number;episodeCount:number}
+export interface MasteryResult {state:'candidate'|'watching'|'needs_review'|'dismissed';risk:number;negative:number;positive:number;episodeCount:number;nextReviewAt:string|null}
 function negativeWeight(o:MasteryObservation):number {
   if (o.signal==='asked' || o.signal==='resolved' || o.resolved) return 0;
   if (o.errorType==='misconception') return 0.8;
@@ -45,5 +46,18 @@ export function computeMastery(observations:readonly MasteryObservation[], optio
   if (options.understoodAt && options.now-Date.parse(options.understoodAt)<UNDERSTOOD_HIDE_DAYS*DAY_MS &&
     !rows.some(o=>negativeWeight(o)>0 && Date.parse(o.occurredAt)>Date.parse(options.understoodAt!))) state='watching';
   if (options.userState==='dismissed') state='dismissed';
-  return {state,risk:(negative+0.3)/(negative+positive+1),negative,positive,episodeCount:episodes.length};
+  const events = [
+    ...rows.filter(o=>negativeWeight(o)>0).map(o=>({at:o.occurredAt,correct:false})),
+    ...rows.filter(o=>o.resolved && o.signal==='resolved').map(o=>({at:o.occurredAt,correct:true})),
+    ...(options.attempts ?? []).filter(a=>a.confirmed && !a.reportedBad && Date.parse(a.at)<=options.now),
+  ].sort((a,b)=>Date.parse(a.at)-Date.parse(b.at) || Number(a.correct)-Number(b.correct));
+  let anchor:number|null=null, successes=0;
+  for (const event of events) {
+    const at=Date.parse(event.at);
+    if (!event.correct) { anchor=at; successes=0; }
+    else if (anchor!==null && at-anchor>=DAY_MS) { anchor=at; successes++; }
+  }
+  const nextReviewAt=state==='dismissed' || anchor===null ? null :
+    new Date(anchor + REVIEW_INTERVAL_DAYS[Math.min(successes,REVIEW_INTERVAL_DAYS.length-1)]!*DAY_MS).toISOString();
+  return {state,nextReviewAt,risk:(negative+0.3)/(negative+positive+1),negative,positive,episodeCount:episodes.length};
 }

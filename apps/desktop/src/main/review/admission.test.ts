@@ -85,3 +85,21 @@ it.each(['openai-api','anthropic-api','openai-compatible'] as const)('enforces o
   expect(body?.[providerId === 'openai-api' ? 'max_completion_tokens' : 'max_tokens']).toBe(123);
   expect(body?.tools).toBeUndefined();
 });
+
+it('installs the real generation port and rejects reservations while suspended', async () => {
+ const {admission}=setup();
+ const {installReviewAdmission,reviewAdmission}=await import('./admission-port');
+ installReviewAdmission(admission);
+ const estimate={inputTokens:10,outputTokens:20,costUsd:.01};
+ const handle=reviewAdmission.reserve(estimate);
+ expect(admission.inFlight.calls).toBe(1);
+ let idle=false;const waiting=admission.waitForIdle().then(()=>{idle=true;});
+ await Promise.resolve();expect(idle).toBe(false);
+ admission.suspend();
+ expect(()=>reviewAdmission.reserve(estimate)).toThrow('review.suspended');
+ reviewAdmission.settle(handle,estimate);
+ await waiting;expect(idle).toBe(true);
+ expect(admission.inFlight.calls).toBe(0);
+ admission.resume();
+ reviewAdmission.settle(reviewAdmission.reserve(estimate),estimate);
+});

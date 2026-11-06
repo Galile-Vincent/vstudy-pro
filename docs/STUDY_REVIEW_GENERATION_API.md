@@ -17,7 +17,7 @@ reviewAdmission:Admission;
 FakeAdmission; // tests only; constructor(), reserve(), settle(), pending, settled
 ```
 
-W2 must install its single shared admission instance in normal startup before generation dispatch. Unknown prices fail closed. Until installed, generation persists `failed` with `review.admission_unavailable`; no unmetered fallback exists. W2 should reuse `serializeUntrusted(value,maxBytes=98304)` from `main/review/untrusted.ts`, or reconcile its serializer with this escaped, final-byte-bounded interface. Never install the test fake in production. The gate must settle once, including cancellation, and use conservative estimates when no usage is reported.
+Normal app startup installs W2's single shared admission instance before generation dispatch. Unknown prices fail closed. Until installed, generation persists `failed` with `review.admission_unavailable`; no unmetered fallback exists. W2 should reuse `serializeUntrusted(value,maxBytes=98304)` from `main/review/untrusted.ts`, or reconcile its serializer with this escaped, final-byte-bounded interface. Never install the test fake in production. The gate must settle once, including cancellation, and use conservative estimates when no usage is reported.
 
 Production usage is recorded as kind `chat`. The existing usage row schema has no purpose metadata; W3 does not migrate it. Review reservations cover review calls only, not foreground chat or parse jobs. CLI transports lack an adapter output-token bound; they reserve a conservative 240000 output tokens and have a 240000-byte output gate. Supported API transports receive an 8192-token output bound. Quotes and excerpts still go to the selected provider.
 
@@ -71,8 +71,33 @@ Subscribe before invoking generate/retry, filter by requestId then artifactId, a
 - `test-validate.ts`: `Excerpt`, `REVIEW_VALIDATION_NOTICE`, `normalizeStem`, `stemHash`, `validateTest(raw,excerpts,excludedStems=[]) -> {version:1,items,warnings}`.
 - `prompts/index.ts`: `PROMPT_VERSION`, `notePrompt(data,locale)`, `testPrompt(data,locale)`.
 - `artifact-repository.ts`: `ArtifactRepository(db,clock=Date.now)`; `atomic`, `find`, `byKey`, `create`, `retry`, `snapshot`, `finish`, `fail`, `cancel`, `recover`, `delete`, `list`, `scopeInputs`.
-- `generate.ts`: `GenerationDependencies`, `GenerationService(repo,deps)`; `generate(request,progress?)`, `retry(id,requestId,locale,progress?)`, `cancel(id)`, `suspend`, `resume`, `waitForIdle`, `dispose`. Registers with W1 `reviewWorkers`; constructor recovery runs only at normal IPC startup.
+- `generate.ts`: `GenerationDependencies`, `GenerationService(repo,deps)`; `generate(request,progress?)`, `retry(id,requestId,locale,progress?)`, `cancel(id)`, `suspend`, `resume`, `waitForIdle`, `dispose`. Registers with W1 `reviewWorkers`; recovery runs in normal IPC registration, outside the constructor.
 - `attempts.ts`: `Attempts(repo)`; `get(id)`, `start(artifactId)`, `answer(id,itemId,answer)`, `commit(id)`, `confirm(id)`, `reportBad(id,itemId)`, `retake(id)`.
 - `main/ipc/review-generate.ts`: `progressFor(event)`, `registerReviewGenerateIpc(registrar,store,implemented,providers,admission=reviewAdmission) -> GenerationService`.
 
 Shared exports: `reviewProgressChannel`, `reviewProgressSchema`, `ReviewProgress`, `artifactSchema`, `generationRequestSchema`, `GenerationRequest`, `attemptSchema`, `reviewGenerateIpc`. Persisted test schemas remain in `shared/review-artifacts.ts` and are reused by restore validation.
+
+## W2 admission and lifecycle integration
+
+Normal IPC startup installs the real `getReviewAdmission(store)` service into
+W3's `Admission` port before registering generation. Generation `reserve/settle`
+and extraction `execute` share one in-flight budget. Unknown prices, exhausted
+budgets and suspended services fail closed before provider dispatch. Provider
+usage is recorded once by the corresponding call path; settling releases the
+reservation even on invalid output, provider failure or cancellation.
+
+Both memory and generation register with W1's real worker registry. Storage
+maintenance suspends and drains them before snapshot/settle work; shutdown and
+delete-all dispose and await them before closing the database or removing files.
+Restore holds keep them suspended until restart. Constructing a generation
+service or opening a store does not recover abandoned artifacts; normal generation
+IPC startup performs recovery. Memory interrupted-job recovery is likewise limited
+to normal `startMemory` startup.
+
+The foundation API additionally exposes `review:jobs:delete({jobId})` for atomic
+summary/evidence removal and `review:chat:link-get({conversationId})` for direct
+assignment/exclusion lookup. Concept mastery responses include nullable UTC
+`mastery.nextReviewAt`, computed with expanding 1/3/7/14-day intervals from eligible
+negative evidence and confirmed results. See `STUDY_REVIEW_API.md` for the reset,
+same-session and deletion rules. These fields use the shared IPC schemas and
+require no separate preload allowlist or database migration.

@@ -28,9 +28,9 @@ computeMastery(observations: readonly MasteryObservation[], options: MasteryOpti
 // MasteryOptions = {now:number; timeZone?:string; userState?:'none'|'dismissed';
 //   understoodAt?:string|null; attempts?:readonly MasteryAttempt[]}
 // Result = {state:'candidate'|'watching'|'needs_review'|'dismissed';
-//   risk:number; negative:number; positive:number; episodeCount:number}
+//   risk:number; negative:number; positive:number; episodeCount:number; nextReviewAt:string|null}
 // NEGATIVE_HALF_LIFE_DAYS=21, POSITIVE_HALF_LIFE_DAYS=30,
-// SELF_REPORT_WEIGHT=.1, UNDERSTOOD_HIDE_DAYS=14
+// SELF_REPORT_WEIGHT=.1, UNDERSTOOD_HIDE_DAYS=14, REVIEW_INTERVAL_DAYS=[1,3,7,14]
 
 // main/review/eligibility.ts
 isEligibleSource(source: EligibleSource): boolean;
@@ -259,3 +259,43 @@ Evidence validation proves provenance and membership, not pedagogical correctnes
 A bare affirmation never demonstrates resolution. The R-S concept record accepts
 an optional `wrong_attempt:boolean` to retain a wrong attempt alongside `gave_up`;
 main requires substantive student quote evidence and never infers it from tutor text.
+
+## Integrated startup and additional memory controls
+
+Normal `registerIpc` startup installs `getReviewAdmission(store)` through
+`installReviewAdmission`, registers that gate, starts the memory worker and
+registers generation. Extraction and generation share in-flight token and dollar
+reservations. Suspension rejects new reservations with `review.suspended`;
+unknown or exhausted budgets still fail closed. Each provider path records its
+usage once before releasing the reservation. Storage settle drains both worker
+families, shutdown disposes them, and delete-all waits for disposal before closing
+the store and removing files. Store opening and staged restore do not start or
+recover workers. Interrupted extraction recovery runs in `startMemory`;
+abandoned generation recovery runs in normal generation IPC registration.
+
+Additional bounded, preload-validated channels:
+
+- `review:jobs:delete({jobId}) -> {ok:true}` clears one exchange's question summary
+  and all its observations atomically. Its chat, messages, assignment and other
+  exchanges survive. The job remains as a skipped `summary_deleted` tombstone,
+  invisible in jobs pages and ineligible for retry or startup re-enqueue. Clearing
+  the attempt token fences an extraction already in flight. Mastery and source
+  eligibility reflect removal immediately.
+- `review:chat:link-get({conversationId}) -> ChatLink|null` reads an existing
+  assignment and exclusion flag directly, including assigned chats without any
+  summaries. Missing links and soft-deleted conversations return null. This read
+  creates no assignment.
+
+`review:courses:mastery` now returns `mastery.nextReviewAt: string|null` for each
+concept. `computeMastery` computes this UTC timestamp without persistence using
+`REVIEW_INTERVAL_DAYS = [1,3,7,14]` (R-N sections 2.6 and 3.10). Negative eligible
+observations and confirmed incorrect attempts reset the interval to one day.
+Confirmed correct attempts and demonstrated resolutions at least one day after
+the previous anchor advance the interval, capped at fourteen days. Same-session,
+unconfirmed, future and reported-bad results do not advance it. Dismissed concepts
+and concepts without a negative anchor return null. Self-reported understanding
+retains its visibility suppression but does not advance the spacing schedule.
+Clients can select non-dismissed concepts whose non-null due timestamp is no later
+than now for Review today; paging still applies. Deleting evidence or an artifact
+recomputes the schedule immediately. These intervals are product parameters, not
+claims about an optimal learning schedule.
