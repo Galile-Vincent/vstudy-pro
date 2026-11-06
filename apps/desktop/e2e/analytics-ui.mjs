@@ -37,7 +37,7 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
     assert.equal(state.enabled,false);assert.equal(state.onboarding_completed,true);assert.equal(state.acquisition_source,'github');
     await page.evaluate(()=>window.dispatchEvent(new window.CustomEvent('vstudy:open-settings',{detail:{tab:'privacy'}})));
     const privacy=page.getByTestId('privacy-settings');await privacy.waitFor();
-    await privacy.locator('details summary').click();
+    await privacy.locator('summary').filter({hasText:copy.exact}).click();
     const toggle=privacy.getByRole('switch',{name:copy.enabled,exact:true});
     assert.equal(await toggle.getAttribute('aria-checked'),'false');
     await toggle.click();await page.waitForFunction(()=>window.document.querySelector('[data-testid=privacy-settings] [role=switch]')?.getAttribute('aria-checked')==='true');
