@@ -1,3 +1,4 @@
+import type { IpcResponse } from '../../shared/ipc';
 import { LoadError } from '../components/load-error';
 import { ContextCoach, HelpMenu } from "../onboarding/help";
 import { ReaderOfflineNotice } from './offline-notice';
@@ -18,7 +19,6 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type {
   Conversation,
   Document,
-  Message,
   Selection,
   Settings,
   ProviderConfig,
@@ -47,7 +47,7 @@ export function Workspace() {
     [model, setModel] = useState("");
   const [settingsTab, setSettingsTab] = useState("providers");
   const [conversation, setConversation] = useState<Conversation | null>(null),
-    [history, setHistory] = useState<Message[] | null>(null);
+    [history, setHistory] = useState<IpcResponse<'messages:page'> | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null),
     [showSettings, setShowSettings] = useState(false),
     [notice, setNotice] = useState(""),
@@ -227,7 +227,7 @@ export function Workspace() {
     setHistory(null);
     if (!conversation) return;
     void desktop
-      .invoke("messages:list", { conversationId: conversation.id })
+      .invoke("messages:page", { conversationId: conversation.id, limit:50, direction:'backward' })
       .then((value) => {
         if (active) setHistory(value);
       })
@@ -259,8 +259,8 @@ export function Workspace() {
       lastModelId: modelId,
     });
     if (conversation && `${conversation.providerId}/${conversation.modelId}` !== value) {
-      void desktop.invoke('messages:list',{conversationId:conversation.id}).then(async messages => {
-        if (messages.length) { await newConversation(value); return; }
+      void desktop.invoke('messages:page',{conversationId:conversation.id,limit:1}).then(async messages => {
+        if (messages.items.length) { await newConversation(value); return; }
         try {
           const next = await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId});
           setConversation(next);
@@ -310,7 +310,7 @@ export function Workspace() {
       if(activate)setCompactPane("chat");
       setFocusChat(activate);
       setConversation(created);
-      setHistory([]);
+      setHistory({items:[],nextCursor:null});
     } catch (error) {
       report(error);
     } finally {
@@ -369,7 +369,8 @@ export function Workspace() {
           draft={draft}
           onDraft={setDraft}
           conversation={conversation}
-          history={history}
+          history={history.items}
+          historyCursor={history.nextCursor}
           selection={selection}
           onClearSelection={() => setSelection(null)}
           providers={providers}

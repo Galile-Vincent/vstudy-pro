@@ -1,3 +1,4 @@
+import type { IpcResponse } from '../../shared/ipc';
 /** Course chat keeps model output as proposals. Only confirmation cards invoke planner writes or approve material access. */
 import { emptyPlanner, type MaterialRequest } from "../../shared/planner";
 import { AiSetupNotice } from '../ai-setup';
@@ -8,7 +9,7 @@ import { ConversationList } from "../conversation-list";
 import { useEffect, useRef, useState } from "react";
 import { desktop } from "../bridge";
 import { Chat } from "../chat";
-import type { Conversation, Message } from "../../shared/domain";
+import type { Conversation } from "../../shared/domain";
 import type { Providers } from "../providers";
 import { Check, Sparkles } from "lucide-react";
 import type {
@@ -56,7 +57,7 @@ export function CourseAgentPanel({
   const handledRequest = useRef(0);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [conversation, setConversation] = useState<Conversation>();
-  const [history, setHistory] = useState<Message[]>([]);
+  const [history, setHistory] = useState<IpcResponse<'messages:page'>>({items:[],nextCursor:null});
   const [providers, setProviders] = useState<Providers>([]);
   const [historyJump,setHistoryJump]=useState<string>();
   const [draft, setDraft] = useState("");
@@ -69,8 +70,8 @@ export function CourseAgentPanel({
     setProviders(await desktop.invoke("providers:list", { discover: true }));
   };
   const load = async (c: Conversation) => {
-    const messages = await desktop.invoke("messages:list", {
-      conversationId: c.id,
+    const messages = await desktop.invoke("messages:page", {
+      conversationId: c.id, limit:50, direction:'backward',
     });
     setPromptRequest(undefined);
     setDraft("");
@@ -276,7 +277,8 @@ export function CourseAgentPanel({
                   jumpMessageId={historyJump}
                   draft={draft}
                   onDraft={setDraft}
-                  history={history}
+                  history={history.items}
+                  historyCursor={history.nextCursor}
                   selection={null}
                   onClearSelection={() => {}}
                   providers={providers}

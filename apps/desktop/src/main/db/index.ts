@@ -182,12 +182,13 @@ export function openStore(path: string) {
       },
     },
     messages: {
-      page(conversationId: Conversation["id"], limit: number, cursor?: { createdAt: string; id: string }) {
+      page(conversationId: Conversation["id"], limit: number, cursor?: { createdAt: string; id: string }, direction: 'forward' | 'backward' = 'forward') {
         const size = Math.min(100, Math.max(1, Math.floor(limit)));
-        const rows = db.prepare(`SELECT * FROM messages WHERE conversationId=? AND supersededBy IS NULL ${cursor ? 'AND (createdAt,id)>(?,?)' : ''} ORDER BY createdAt,id LIMIT ?`).all(conversationId,...(cursor ? [cursor.createdAt,cursor.id] : []),size+1);
+        const backward = direction === 'backward';
+        const rows = db.prepare(`SELECT * FROM messages WHERE conversationId=? AND supersededBy IS NULL ${cursor ? `AND (createdAt,id)${backward ? '<' : '>'}(?,?)` : ''} ORDER BY createdAt ${backward ? 'DESC' : 'ASC'},id ${backward ? 'DESC' : 'ASC'} LIMIT ?`).all(conversationId,...(cursor ? [cursor.createdAt,cursor.id] : []),size+1);
         const items=rows.slice(0,size).map(r=>messageRow.parse(r));
         const last=items.at(-1);
-        return {items,nextCursor:rows.length>size&&last?{createdAt:last.createdAt,id:last.id}:null};
+        return {items:backward ? items.reverse() : items,nextCursor:rows.length>size&&last?{createdAt:last.createdAt,id:last.id}:null};
       },
       supersede(ids: Message['id'][], replacementId: string) {
         const update = db.prepare('UPDATE messages SET supersededBy=? WHERE id=? AND supersededBy IS NULL');

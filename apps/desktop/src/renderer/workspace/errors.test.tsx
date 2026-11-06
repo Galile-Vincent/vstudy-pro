@@ -43,13 +43,13 @@ it('keeps document load errors visible with Retry until the document loads',asyn
   expect(screen.queryByRole('alert')).toBeNull();
 });
 
-it.each(['documents:get','conversations:list','messages:list'])('retries persistent %s failures',async failingChannel=>{
+it.each(['documents:get','conversations:list','messages:page'])('retries persistent %s failures',async failingChannel=>{
   setup();let fail=true;
   const original=state.invoke.getMockImplementation()!;
   state.invoke.mockImplementation(async(channel,...args)=>{
     if(channel===failingChannel&&fail)throw new Error('VSTUDY_STATUS:'+JSON.stringify({code:'errors.network',params:{}}));
     if(channel==='conversations:list')return [{id:'chat',providerId:'anthropic-api',modelId:'fake'}];
-    if(channel==='messages:list')return [];
+    if(channel==='messages:page')return {items:[],nextCursor:null};
     return original(channel,...args);
   });
   render(<Workspace/>);

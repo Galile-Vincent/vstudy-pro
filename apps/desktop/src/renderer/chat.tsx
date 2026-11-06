@@ -1,4 +1,4 @@
-import { errorText } from './status';
+import { chatHistoryMessages, EarlierMessages, type MessageCursor } from './chat-history';
 import { FileText } from 'lucide-react';
 import { ChatAnnouncement, CopyAnswerButton } from './chat-accessibility';
 import { ReaderOfflineNotice } from './workspace/offline-notice';
@@ -28,7 +28,6 @@ import { desktop } from "./bridge";
 import { documentCitationSchema } from "../shared";
 import { DocumentReference } from "./components/assistant-ui/elements/document-reference";
 import { DocumentSource, DocumentTool, jumpToCitation } from './document-elements';
-import { assistantContent } from './chat-content';
 import { createChatAdapter } from "./chat-adapter";
 import { type Providers } from "./providers";
 
@@ -41,6 +40,7 @@ export function Chat({
   draft,
   onDraft,
   history,
+  historyCursor,
   selection,
   onClearSelection,
   providers,
@@ -60,6 +60,7 @@ export function Chat({
   draft: string;
   onDraft: (value: string) => void;
   history: Message[];
+  historyCursor?: MessageCursor | null | undefined;
   selection: Selection | null;
   onClearSelection: () => void;
   providers: Providers;
@@ -71,6 +72,7 @@ export function Chat({
   documentPageCount?: number; documentTitle?: string;
 }) {
   useTranslation();
+  const [earlierHistory, setEarlierHistory] = useState<Message[]>([]);
   const [options, setOptions] = useState<Record<string,string|boolean>>(conversation.options ?? {});
   useEffect(() => setOptions(conversation.options ?? {}), [conversation.providerId,conversation.modelId]);
   const declared = providers.find(p => p.config.id === conversation.providerId)?.models.find(m => m.id === conversation.modelId || m.resolvedId === conversation.modelId)?.options ?? [];
@@ -101,6 +103,7 @@ export function Chat({
           current.current.onClearSelection();
         },
         actions => current.current.onProposals(actions),
+        () => !!historyCursor,
       ),
     [],
   );
@@ -109,15 +112,7 @@ export function Chat({
   const suggestion = useMemo(() => ({generate: async () => [{prompt:tr('common:which_passages_support_this_answer')},{prompt:tr('common:explain_this_more_simply')}]}), []);
   const runtime = useLocalRuntime(connection.adapter, {
     adapters: { suggestion, ...(speech ? {speech} : {}) },
-    initialMessages: history.map((m) => ({
-      id: m.id,
-      role: m.role,
-      content: m.role === 'assistant' ? m.parts.flatMap(p => assistantContent(p.text,p.reasoning,p.citations,p.toolCalls)) : m.parts.map(p => ({type:'text' as const,text:p.text})),
-      createdAt: new Date(m.createdAt),
-      ...(m.role === 'assistant' && m.parts.some(p => p.status === 'error') ? { status: { type: 'incomplete' as const, reason: 'error' as const, error: errorText(new Error(m.parts.find(p => p.status === 'error')?.error ?? '')) } } : {}),
-      ...(m.role === 'assistant' && m.parts.some(p => p.status === 'aborted') ? {status:{type:'incomplete' as const,reason:'cancelled' as const}} : {}),
-      metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage, modelId: m.parts[0]?.modelId, options: m.parts[0]?.options, selection: m.parts[0]?.selection, turnId: m.parts[0]?.turnId, citations: m.parts[0]?.citations } },
-    })),
+    initialMessages: chatHistoryMessages(history),
   });
   useEffect(() => { if (promptRequest) { runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}],metadata:{custom:{materials:promptRequest.materials}}}); } }, [promptRequest?.id]);
   useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
@@ -130,8 +125,8 @@ export function Chat({
     };
     frame=requestAnimationFrame(jump);
     return()=>{cancelAnimationFrame(frame);document.querySelectorAll('.history-jump').forEach(el=>el.classList.remove('history-jump'));};
-  },[jumpMessageId]);
-  const statuses = new Map(history.flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
+  },[jumpMessageId, earlierHistory.length]);
+  const statuses = new Map([...earlierHistory, ...history].flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
     selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
@@ -139,6 +134,10 @@ export function Chat({
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
+    <EarlierMessages runtime={runtime} conversationId={conversation.id} cursor={historyCursor} onLoaded={messages => {
+      setEarlierHistory(current => [...messages, ...current]);
+      for (const message of messages) for (const part of message.parts) if (part.selection) selections.current.set(message.id, part.selection);
+    }}/>
     <Thread components={documentComponents} autoFocus={autoFocus} />
     <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;

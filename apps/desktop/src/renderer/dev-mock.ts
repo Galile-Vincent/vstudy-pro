@@ -188,6 +188,16 @@ export function createMockBridge(): DesktopApi {
           1,
         );
         break;
+      case "messages:page": {
+        const page = request as IpcRequest<'messages:page'>;
+        const rows = messages.filter(m => m.conversationId === page.conversationId).sort((a,b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
+        const backward = page.direction === 'backward';
+        const filtered = rows.filter(m => !page.cursor || (backward ? m.createdAt < page.cursor.createdAt || m.createdAt === page.cursor.createdAt && m.id < page.cursor.id : m.createdAt > page.cursor.createdAt || m.createdAt === page.cursor.createdAt && m.id > page.cursor.id));
+        if (backward) filtered.reverse();
+        const items = filtered.slice(0, page.limit ?? 50), last = items.at(-1);
+        result = {items:backward ? items.reverse() : items,nextCursor:filtered.length > items.length && last ? {createdAt:last.createdAt,id:last.id} : null};
+        break;
+      }
       case "messages:list":
         result = messages.filter(
           (m) => m.conversationId === input.conversationId,

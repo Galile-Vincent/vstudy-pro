@@ -23,7 +23,7 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     const startup=library.search.rebuild().catch(()=>{console.error("Search rebuild deferred until next startup");});
     let purging: Promise<void> = Promise.resolve();
     const handle: typeof registrar.handle = (channel, handler) => { implemented.add(channel); registrar.handle(channel, handler); };
-    handle('messages:page',r=>store.messages.page(r.conversationId,r.limit,r.cursor));
+    handle('messages:page',r=>store.messages.page(r.conversationId,r.limit,r.cursor,r.direction));
     handle('usage:page',r=>store.usage.page(r.limit,r.cursor));
     handle('library:folders:list', () => library.folders());
     handle('library:counts', () => { const r=store.db.prepare("SELECT count(*) AS 'all',sum(lastOpenedAt IS NOT NULL) AS recent,sum(pinned=1) AS pinned,sum(folderId IS NULL) AS unfiled,sum(status IN('converting','failed')) AS 'converting-failed' FROM documents WHERE deletedAt IS NULL").get(); return Object.fromEntries(Object.entries(r??{}).map(([k,v])=>[k,Number(v??0)])); });

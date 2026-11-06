@@ -133,3 +133,12 @@ it('preserves the localized IPC rejection instead of translating it twice',async
   const {tr}=await import('../shared/i18n');
   expect((await test.stream.next()).value.status.error).toBe(tr('errors:auth_failed'));
 });
+it('does not mark unloaded turns as deleted when sending from a recent-message window',async()=>{
+  let emit!:(event:ChatEvent)=>void;
+  const invoke=vi.fn(async()=>{emit({type:'done'});return {ok:true};});
+  const bridge={invoke,onChatEvent:(_id:string,listener:typeof emit)=>{emit=listener;return ()=>{};}} as unknown as DesktopApi;
+  const {adapter}=createChatAdapter(bridge,async()=>context,undefined,undefined,()=>true);
+  const stream=adapter.run({messages:[{role:'user',id:'loaded',content:[{type:'text',text:'Old question'}]},{role:'user',id:'new',content:[{type:'text',text:'Next question'}]}],abortSignal:new AbortController().signal} as unknown as ChatModelRunOptions) as AsyncGenerator;
+  await stream.next();
+  expect(invoke).toHaveBeenCalledWith('chat:start',expect.not.objectContaining({contextTurnIds:expect.anything()}));
+});
