@@ -69,7 +69,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
   };
   return <Dialog open onOpenChange={open => { if (!open) close(); }}>
     <DialogContent showCloseButton={false} className="ai-cli-sheet" aria-describedby="ai-cli-intro" onPointerDownOutside={event => event.preventDefault()}>
-      <header className="ai-cli-header"><div><p className="ai-cli-eyebrow">{tr('ai-cli:eyebrow')}</p><DialogTitle className="ai-cli-title">{tr('ai-cli:title')}</DialogTitle><DialogDescription id="ai-cli-intro">{tr('ai-cli:intro')}</DialogDescription></div><Button variant="ghost" aria-label={tr('ai-cli:close')} onClick={close}><X size={20} aria-hidden="true" /></Button></header>
+      <header className="ai-cli-header"><div><DialogTitle className="ai-cli-title">{tr('ai-cli:title')}</DialogTitle><DialogDescription id="ai-cli-intro">{tr('ai-cli:intro')}</DialogDescription></div><Button variant="ghost" aria-label={tr('ai-cli:close')} onClick={close}><X size={20} aria-hidden="true" /></Button></header>
       <div className="ai-cli-scroll">
         <fieldset className="ai-cli-chooser" disabled={busy}><legend>{tr('ai-cli:choose')}</legend>{cliProviders.map(id => <label key={id} data-selected={provider === id}><input type="radio" name="ai-cli-provider" checked={provider === id} onChange={() => void choose(id)} /><strong>{cliNames[id]}</strong><span>{tr(`ai-cli:account_${id}`)}</span></label>)}</fieldset>
         {loadError && <div role="alert"><p>{tr('ai-cli:load_error')}</p><Button variant="secondary" onClick={() => void refresh()}>{tr('ai-cli:retry')}</Button></div>}
@@ -80,8 +80,8 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
           <div className="ai-cli-workarea"><div className="ai-cli-instructions">
             <p className="ai-cli-eyebrow">{tr('ai-cli:next_result')}</p><h2>{tr(tool.tested ? 'ai-cli:ready_title' : `ai-cli:heading_${step}`)}</h2>
             <p>{tr(tool.tested ? 'ai-cli:ready_body' : `ai-cli:instruction_${provider}_${step}`)}</p>
-            <div className="ai-cli-account"><strong>{tr('ai-cli:account_title')}</strong><p>{tr(`ai-cli:cost_${provider}`)}</p><p>{tr('ai-cli:privacy_copy')}</p></div>
             <label className="ai-cli-consent"><input type="checkbox" checked={tool.consented} disabled={busy} onChange={event => void consent(event.target.checked)} /><span>{tr('ai-cli:consent', { provider: cliNames[provider] })}<small>{tr('ai-cli:consent_help')}</small></span></label>
+            <details className="ai-cli-account"><summary>{tr('ai-cli:account_title')}</summary><p>{tr(`ai-cli:cost_${provider}`)}</p><p>{tr('ai-cli:privacy_copy')}</p></details>
           </div><div className="ai-cli-action-area" aria-busy={busy}>
             {!tool.consented && <p className="ai-cli-preview">{tr('ai-cli:consent_first')}</p>}
             {runner.busy && <p role="status">{tr('ai-cli:preparing')}</p>}

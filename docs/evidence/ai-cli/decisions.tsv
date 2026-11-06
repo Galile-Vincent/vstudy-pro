@@ -1,2 +1,3 @@
 ts	phase	decision	why	evidence	result
 2026-11-06T03:20:54.443783+00:00	design	Choose action-scoped PTYs and versioned managed binaries	Interactive auth needs terminal semantics and running chats must retain their binary	docs/AI_CLI_SETUP_DESIGN.md	contract ready
+2026-11-06T03:41:52.243256+00:00	renderer	Move the primary action into the first viewport	Electron screenshots showed the Run button below the fold at the default size	docs/evidence/ai-cli/round-1/en-1200-paper-light-100.png	round 2 fixes the default viewport

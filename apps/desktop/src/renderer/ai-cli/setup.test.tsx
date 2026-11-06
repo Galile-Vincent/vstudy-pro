@@ -55,7 +55,8 @@ it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through exp
   await allow();
   expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('Download, verify SHA-256');
   expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('/main/owned/folder');
-  expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('not a shell command');
+  expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('Installation plan');
+  expect([...document.querySelectorAll('button')].some(item => item.textContent === 'Open in my own Terminal')).toBe(false);
   expect(runs()).toHaveLength(0);
   await click('Run this plan');
   expect(document.body.textContent).toContain('Connect your account.');
