@@ -34,7 +34,7 @@ html[data-theme-transition=view]::view-transition-new(root) {
 .moodle-assistant-panel[hidden] {
   opacity:0;
   transform:translateY(var(--space-2));
-  pointer-events:none;
+  pointer-events:none; interactivity:inert;
   transition-timing-function:var(--ease-exit);
 }
 /* Keep absolute positioning during exit so the reader never resizes mid-fade. */
@@ -46,18 +46,28 @@ html[data-theme-transition=view]::view-transition-new(root) {
 }
 .app-shell[data-sidebar-overlay=true] .shell-sidebar[hidden] {
   opacity:0; transform:translateX(calc(-1 * var(--space-2)));
-  pointer-events:none;
+  pointer-events:none; interactivity:inert;
   transition-timing-function:var(--ease-exit);
 }
 @media(max-width:999px) {
-  .app-shell[data-sidebar-overlay=true][data-view=workspace] .shell-sidebar { inset:0 auto 0 0; width:var(--sidebar-width); }
+  .app-shell[data-view=workspace] .shell-sidebar {
+    position:absolute; z-index:40; inset:0 auto 0 0; width:var(--sidebar-width);
+    background:var(--surface); box-shadow:var(--elevation-floating);
+    opacity:1; transform:none;
+    transition:opacity var(--motion-base) var(--ease-out-soft), transform var(--motion-base) var(--ease-out-soft), display var(--motion-base) allow-discrete;
+  }
+  .app-shell[data-view=workspace] .shell-sidebar[hidden] {
+    opacity:0; transform:translateX(calc(-1 * var(--space-2)));
+    pointer-events:none; interactivity:inert;
+  }
+  @starting-style { .app-shell[data-view=workspace] .shell-sidebar:not([hidden]) { opacity:0; transform:translateX(calc(-1 * var(--space-2))); } }
 }
 @starting-style {
   .moodle-assistant-panel:not([hidden]) { opacity:0; transform:translateY(var(--space-2)); }
   .app-shell[data-sidebar-overlay=true] .shell-sidebar:not([hidden]) { opacity:0; transform:translateX(calc(-1 * var(--space-2))); }
 }
 @media(prefers-reduced-motion:reduce) {
-  .moodle-assistant-panel, .app-shell[data-sidebar-overlay=true] .shell-sidebar { transition:none; }
+  .moodle-assistant-panel, .app-shell[data-sidebar-overlay=true] .shell-sidebar, .app-shell[data-view=workspace] .shell-sidebar { transition:none; }
 }
 
 .chat-motion { display:contents; }
