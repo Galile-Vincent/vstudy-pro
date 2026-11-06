@@ -77,6 +77,8 @@ export function createMockBridge(): DesktopApi {
     const input = request as Record<string, unknown>;
     let result: unknown = { ok: true };
     switch (channel) {
+      case 'ai-cli:list':
+      case 'ai-cli:checkUpdates': result=[]; break;
       case 'chats:get': result=conversations.find(row=>row.id===input.conversationId)??null; break;
       case 'chats:facets': result={courses:[],documents:[],models:[]}; break;
       case 'chats:search': result={items:[],nextCursor:null}; break;
