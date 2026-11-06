@@ -137,6 +137,7 @@ async function createWindow(): Promise<void> {
 
 const ownsApplication = acquireOwnership(app, () => window);
 if (ownsApplication) void app.whenReady().then(async () => {
+  if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
   const userData = app.getPath("userData");
   mkdirSync(userData, { recursive: true });
   await rollbackRestoreStartup(userData);

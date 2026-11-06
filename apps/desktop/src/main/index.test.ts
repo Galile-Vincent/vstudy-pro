@@ -22,7 +22,7 @@ const electron = await vi.hoisted(async () => {
   }
   const app = Object.assign(new EventEmitter(), {
     isPackaged: false, whenReady: () => Promise.resolve(), getPath: () => '/tmp/vstudy-startup-unit-test',
-    enableSandbox: vi.fn(), exit: vi.fn(), quit: vi.fn(), relaunch: vi.fn(),
+    enableSandbox: vi.fn(), exit: vi.fn(), quit: vi.fn(), relaunch: vi.fn(), setAppUserModelId: vi.fn(),
   });
   return {
     app, BrowserWindow: Window, nativeTheme: new EventEmitter(), safeStorage: {}, ipcMain: { removeHandler: vi.fn() },
