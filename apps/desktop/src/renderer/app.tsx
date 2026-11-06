@@ -1,4 +1,5 @@
 import { SurfaceErrorBoundary } from './components/surface-error-boundary';
+import { ReviewView } from "./review";
 import { HistoryView, HistoryFinder } from "./history";
 import { lazy, Suspense, useEffect, useMemo, useState, type ComponentType } from "react";
 let loadedWelcome: ComponentType | undefined;
@@ -43,7 +44,7 @@ function Views() {
   }, []);
   return <SurfaceErrorBoundary resetKeys={[JSON.stringify(route)]}>{route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "workspace" ? (
     <Workspace key={route.documentId} />
-  ) : route.view === "history" ? (<HistoryView/>) : route.view === "courses" ? (
+  ) : route.view === "review" ? (<ReviewView/>) : route.view === "history" ? (<HistoryView/>) : route.view === "courses" ? (
     <CoursesView />
   ) : route.view === "library" ? (
     <LibraryView key={JSON.stringify(route.query)} />
