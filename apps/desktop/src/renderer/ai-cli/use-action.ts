@@ -58,8 +58,8 @@ export function useCliAction(onFinished: () => Promise<void>) {
         active.current = undefined; setSession(undefined);
       }
       if (ownTerminal) {
-        await desktop.invoke('ai-cli:openTerminal', { actionId: plan.actionId, token: plan.token });
-        if (mounted.current) { setPlan(undefined); setExternalOpened(true); }
+        const result = await desktop.invoke('ai-cli:openTerminal', { actionId: plan.actionId, token: plan.token });
+        if (mounted.current) { setPlan(undefined); setExternalOpened(result.ok); }
         return;
       }
       const next = await desktop.invoke('ai-cli:run', { actionId: plan.actionId, token: plan.token });

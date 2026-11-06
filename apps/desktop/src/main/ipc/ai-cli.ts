@@ -9,6 +9,8 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { IpcChannel } from '../../shared/ipc';
 import { aiCliContract } from '../../shared/ai-cli';
+import { manualInstallCommand } from '../../shared/ai-cli-manual';
+import { actionParts } from '../providers/setup/plans';
 import type { ExecutablePins } from '../providers/executable-pins';
 import type { ProviderRegistry } from '../providers';
 import type { ChatService } from '../services/chat';
@@ -66,7 +68,15 @@ export function registerAiCliIpc(registrar: ReturnType<typeof createIpcRegistrar
   });
   safe.handle('ai-cli:checkUpdates', async () => (await ready).checkUpdates());
   safe.handle('ai-cli:openTerminal', async ({ actionId, token }, event) => {
-    const setup = await ready, plan = await setup.terminalPlan(event.sender, actionId, token);
+    const setup = await ready;
+    if (actionId.startsWith('terminal-')) {
+      const { provider } = actionParts(actionId), command = provider && manualInstallCommand(provider, process.platform);
+      if (!command) throw new Error('Unsupported manual installation');
+      const terminal = tr(process.platform === 'win32' ? 'ai-cli:open_terminal_windows' : 'ai-cli:open_terminal');
+      const result = await showAttachedMessage({ type: 'question', message: terminal, detail: tr('ai-cli:manual_terminal_confirm', { command }), buttons: [tr('common:cancel'), terminal], defaultId: 0, cancelId: 0 });
+      if (result.response !== 1) return { ok: false };
+    }
+    const plan = await setup.terminalPlan(event.sender, actionId, token);
     clipboard.writeText(plan.command);
     if (process.platform === 'darwin') {
       await new Promise<void>((resolve, reject) => execFile('/usr/bin/open', ['-a', 'Terminal', plan.cwd], { timeout: 10_000, cwd: plan.cwd, env: { ...plan.env } }, error => error ? reject(error) : resolve()));

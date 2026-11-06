@@ -5,11 +5,13 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { i18n } from '../../shared/i18n';
 import { cliFixture } from './test-fixture';
+import { desktopPlatform } from '../../shared/platform';
 
 const bridge = vi.hoisted(() => ({ invoke: vi.fn() }));
 const terminalStrings = vi.hoisted(() => ({ promptLabel: '', tooMuchOutput: '' }));
 const terminal = vi.hoisted(() => ({ writes: [] as string[], resets: 0, data: undefined as ((value: string) => void) | undefined }));
 vi.mock('../bridge', () => ({ desktop: bridge }));
+vi.mock('../../shared/platform', async importOriginal => ({ ...await importOriginal<typeof import('../../shared/platform')>(), desktopPlatform: vi.fn(() => 'darwin') }));
 vi.mock('@xterm/xterm', () => ({ Terminal: class {
   static get strings() { return terminalStrings; }
   options = {}; cols = 80; rows = 24; buffer = { active: { getLine: () => undefined } };
@@ -43,6 +45,7 @@ async function allow() { await act(async () => document.querySelector<HTMLInputE
 const runs = () => fixture.calls.filter(call => call.channel === 'ai-cli:run');
 beforeEach(async () => {
   await i18n.changeLanguage('en');
+  vi.mocked(desktopPlatform).mockReturnValue('darwin');
   fixture = cliFixture(); bridge.invoke.mockReset().mockImplementation(fixture.invoke); close.mockReset();
   terminal.writes = []; terminal.resets = 0;
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
@@ -130,19 +133,31 @@ it('does not offer an incompatible update', async () => {
   expect(runs()).toHaveLength(0);
 });
 
-it.each(['en', 'zh-Hant', 'ja'])('offers a copy-only manual installer in %s without previewing or executing the download', async language => {
+it.each(['en', 'zh-Hant', 'ja'].flatMap(language => (['claude', 'codex', 'agy'] as const).map(provider => ({ language, provider }))))('guides manual installation for $provider in $language without executing the download', async ({ language, provider }) => {
   await i18n.changeLanguage(language);
-  Object.assign(fixture.tools[2]!, { consented: true, manualInstallRequired: true, manualUpdateRequired: true });
+  Object.assign(fixture.tools.find(tool => tool.provider === provider)!, { manualInstallRequired: true, manualUpdateRequired: true });
   const writeText = vi.fn(async () => {});
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
   try {
-    await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
+    await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
     expect(document.querySelector<HTMLDetailsElement>('.ai-cli-action-area details')?.open).toBe(true);
-    expect(document.querySelector('.ai-cli-action-area code')?.textContent).toBe('curl -fsSL https://antigravity.google/cli/install.sh | bash');
-    expect(document.body.textContent).toContain(i18n.t('ai-cli:manual_install_reason'));
+    const command = { claude: 'curl -fsSL https://claude.ai/install.sh | bash', codex: 'curl -fsSL https://chatgpt.com/codex/install.sh | sh -s -- --release 0.166.0', agy: 'curl -fsSL https://antigravity.google/cli/install.sh | bash' }[provider];
+    expect(document.querySelector('.ai-cli-action-area code')?.textContent).toBe(command);
+    expect(document.body.textContent!.split(i18n.t('ai-cli:manual_install_reason'))).toHaveLength(2);
+    expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toBe(['manual_step_copy', 'manual_step_terminal', 'manual_step_return'].map(key => i18n.t(`ai-cli:${key}`)).join(''));
+    expect(document.querySelectorAll('.ai-cli-manual-steps li')).toHaveLength(3);
+    expect(document.querySelector('.ai-cli-consent')?.textContent).toContain(i18n.t('ai-cli:consent_manual', { provider: provider === 'claude' ? 'Claude Code' : provider === 'codex' ? 'Codex' : 'Antigravity' }));
+    expect(button(i18n.t('ai-cli:check_again')).dataset.variant).toBe('default');
+    expect(button(i18n.t('ai-cli:open_terminal')).disabled).toBe(false);
+    expect(document.querySelector('.ai-cli-workarea')?.textContent).not.toMatch(/managed copy|executable|reviewed action/i);
     await click(i18n.t('ai-cli:copy_command'));
-    expect(writeText).toHaveBeenCalledWith('curl -fsSL https://antigravity.google/cli/install.sh | bash');
+    expect(writeText).toHaveBeenCalledWith(command);
+    await click(i18n.t('ai-cli:official_source'));
+    expect(fixture.calls.at(-1)).toEqual({ channel: 'shell:openExternal', payload: { url: { claude: 'https://code.claude.com/docs/en/setup', codex: 'https://developers.openai.com/codex/cli', agy: 'https://antigravity.google/docs/getting-started?tab=cli' }[provider] } });
     expect(fixture.calls.some(call => call.channel === 'ai-cli:preview')).toBe(false);
+    await click(i18n.t('ai-cli:open_terminal'));
+    expect(fixture.calls.at(-1)).toEqual({ channel: 'ai-cli:openTerminal', payload: { actionId: `terminal-${provider}`, token: '11111111-1111-4111-8111-111111111111' } });
+    expect(document.body.textContent).toContain(i18n.t('ai-cli:manual_terminal_opened'));
     expect(runs()).toHaveLength(0);
   } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
 });
@@ -156,6 +171,75 @@ it('keeps unpinned updates manual and routes the vendor link through external co
   expect(document.querySelector('.ai-cli-version small')?.textContent).toBe('New version available: install it yourself');
   await click(i18n.t('ai-cli:vendor_install_link'));
   expect(fixture.calls.at(-1)).toEqual({ channel: 'shell:openExternal', payload: { url: 'https://example.com/release' } });
+  expect(runs()).toHaveLength(0);
+});
+
+it.each(['en', 'zh-Hant', 'ja'].flatMap(language => (['claude', 'agy'] as const).map(provider => ({ language, provider }))))('shows Windows installation steps for $provider in $language', async ({ language, provider }) => {
+  await i18n.changeLanguage(language);
+  vi.mocked(desktopPlatform).mockReturnValue('win32');
+  Object.assign(fixture.tools.find(tool => tool.provider === provider)!, { manualInstallRequired: true });
+  await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
+  expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toContain('Windows Terminal');
+  expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toContain('Enter');
+  expect(document.querySelector('.ai-cli-action-area code')?.textContent).toBe(provider === 'claude' ? 'irm https://claude.ai/install.ps1 | iex' : 'irm https://antigravity.google/cli/install.ps1 | iex');
+  await click(i18n.t('ai-cli:open_terminal_windows'));
+  expect(fixture.calls.at(-1)).toEqual({ channel: 'ai-cli:openTerminal', payload: { actionId: `terminal-${provider}`, token: '11111111-1111-4111-8111-111111111111' } });
+  expect(runs()).toHaveLength(0);
+});
+
+it('checks installed files again and moves to sign-in without running the newly found tool', async () => {
+  Object.assign(fixture.tools[2]!, { consented: true, manualInstallRequired: true });
+  await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
+  await click('Check again');
+  expect(document.body.textContent).toContain("We haven't found it yet.");
+  Object.assign(fixture.tools[2]!, { path: '/newly/installed/agy', status: 'installed-not-signed-in' });
+  const checks = fixture.calls.filter(call => call.channel === 'ai-cli:list').length;
+  await click('Check again');
+  expect(fixture.calls.filter(call => call.channel === 'ai-cli:list')).toHaveLength(checks + 1);
+  expect(document.querySelector('.ai-cli-steps [aria-current=step]')?.textContent).toContain('Sign in');
+  expect(fixture.calls.at(-1)?.payload.actionId).toBe('login-agy');
+  expect(runs()).toHaveLength(0);
+});
+
+it('keeps other Unix terminal instructions platform-neutral and Codex unavailable outside macOS', async () => {
+  vi.mocked(desktopPlatform).mockReturnValue('linux');
+  Object.assign(fixture.tools[2]!, { manualInstallRequired: true });
+  Object.assign(fixture.tools[1]!, { manualInstallRequired: true });
+  await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
+  expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toContain('Open your terminal, paste it and press Enter.');
+  expect(document.querySelector('.ai-cli-manual-steps')?.textContent).not.toContain('Mac');
+  await act(async () => document.querySelectorAll<HTMLInputElement>('input[name=ai-cli-provider]')[1]!.click());
+  expect(document.querySelector('.ai-cli-action-area')?.textContent).toContain('not supported on this device');
+  expect(document.querySelector('.ai-cli-action-area [data-manual-terminal]')).toBeNull();
+});
+
+it('opens a manual terminal only with the preview capability, and treats cancellation as normal', async () => {
+  Object.assign(fixture.tools[2]!, { manualInstallRequired: true });
+  bridge.invoke.mockImplementation(async (channel, payload) => {
+    const response = await fixture.invoke(channel, payload);
+    return channel === 'ai-cli:openTerminal' ? { ok: false } : response;
+  });
+  await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
+  await click('Open Terminal');
+  expect(fixture.calls.slice(-2)).toEqual([
+    { channel: 'ai-cli:preview', payload: { actionId: 'terminal-agy' } },
+    { channel: 'ai-cli:openTerminal', payload: { actionId: 'terminal-agy', token: '11111111-1111-4111-8111-111111111111' } },
+  ]);
+  expect(document.body.textContent).not.toContain('Your terminal is open');
+  expect(document.querySelector('[role=alert]')).toBeNull();
+  expect(fixture.tools[2]!.consented).toBe(false);
+  expect(runs()).toHaveLength(0);
+});
+
+it('does not open a late manual terminal preview after setup closes', async () => {
+  Object.assign(fixture.tools[2]!, { manualInstallRequired: true });
+  let finish!: (value: unknown) => void;
+  bridge.invoke.mockImplementation((channel, payload) => channel === 'ai-cli:preview' ? new Promise(resolve => { finish = resolve; }) : fixture.invoke(channel, payload));
+  await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
+  await click('Open Terminal');
+  await act(async () => root.render(null));
+  await act(async () => finish({ actionId: 'terminal-agy', available: true, token: '11111111-1111-4111-8111-111111111111' }));
+  expect(fixture.calls.some(call => call.channel === 'ai-cli:openTerminal')).toBe(false);
   expect(runs()).toHaveLength(0);
 });
 

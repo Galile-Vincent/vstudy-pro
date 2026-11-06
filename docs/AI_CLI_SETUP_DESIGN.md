@@ -42,6 +42,10 @@ Use the existing Quiet folio surfaces and semantic theme tokens. A calm setup sh
 
 Entry points are onboarding, the Reader no-AI card, Settings > Providers, and the sidebar AI tools entry. The sidebar keeps a status dot and version chips. Update progress does not interrupt active chats. A successful switch says that the update applies to new chats. All new copy belongs to `shared/locales/{en,zh-Hant,ja}/ai-cli.json`.
 
+Manual installation shows one short explanation and a confirmed official-source link in the left column. The right column leads with three numbered steps, Copy command, Open Terminal and paste, and return to Check again. Check again is the only primary button and repeats file-only discovery. The permission label says that VStudy can use the tool once it is installed. These steps and labels are shared by every provider and translated into English, Traditional Chinese, and Japanese.
+
+The `terminal-<provider>` action is an external-terminal capability. Main maps its ID to the same fixed official command displayed by the renderer. After native confirmation, the existing external-terminal action copies that command and opens a blank terminal with fixed argv. It never pastes or executes the installer. Its token cannot start an embedded action. Opening the terminal does not enable the provider or the advanced shell. Provider consent and executable approval still gate sign-in, status, and test execution. Codex remains macOS-only.
+
 ## Integration and verification
 
 Stream M can call `desktop.invoke('ai-cli:list', {})` for file-only state and `openAiCliSetup(provider)` from `renderer/ai-cli/entry.ts` to open this same setup flow. It must not configure or install a second executable. Stream P's `main/platform/process.ts` and `shared/platform.ts` were initially copied from `t3/cross-platform`. This stream adds the Windows Antigravity install location to the process helper. The unused paths helper was removed. Merge these additive seams with P. No MCP files were edited.

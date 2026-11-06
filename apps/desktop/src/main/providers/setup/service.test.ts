@@ -62,6 +62,24 @@ it('requires a fresh single-use plan and existing consent when an action actuall
   expect(() => fixture.service.run(owner, 'install-claude', preview.token)).toThrow('not-consented');
   expect(() => fixture.service.run(owner, 'install-claude', preview.token)).toThrow('blocked');
 });
+
+it('offers manual terminal setup before provider consent without downloading or executing a CLI', async () => {
+  const root = await temporary(), fixture = setupFixture(root), { service, source, pins } = fixture;
+  active.push(service); const owner = new Owner();
+  const download = vi.spyOn(source, 'installable'), resolve = vi.spyOn(pins, 'resolve');
+  for (const provider of ['claude', 'agy'] as const) {
+    const actionId = `terminal-${provider}` as const;
+    const embedded = await service.preview(owner, actionId);
+    expect(embedded.available).toBe(true);
+    expect(() => service.run(owner, actionId, embedded.token)).toThrow('blocked');
+    const preview = await service.preview(owner, actionId);
+    expect(await service.terminalPlan(owner, actionId, preview.token)).toMatchObject({ command: preview.command, cwd: join(await realpath(root), 'tools', 'actions') });
+  }
+  expect(download).not.toHaveBeenCalled(); expect(resolve).not.toHaveBeenCalled();
+  expect(service.sessions.isBusy).toBe(false);
+  expect((await service.list()).every(tool => !tool.consented)).toBe(true);
+  await expect(readFile(join(root, 'argv.jsonl'))).rejects.toMatchObject({ code: 'ENOENT' });
+});
 it('checks updates only with separate consent, throttles checks, preserves cache offline, and rolls back', async () => {
   const root = await temporary(), fixture = setupFixture(root), { service, source } = fixture; active.push(service); const owner = new Owner();
   const latest = vi.spyOn(source, 'latest');

@@ -143,6 +143,44 @@ it('requires native user approval before the renderer can enable the general she
   await invoke('ai-cli:setPreferences', { updateChecks: false, autoUpdateWhenIdle: false, advancedShell: true });
   expect(approval.show).toHaveBeenCalledTimes(2);
 });
+
+it.each(['darwin', 'win32'] as const)('confirms the official manual command before opening a blank %s terminal', async platform => {
+  const original = Object.getOwnPropertyDescriptor(process, 'platform')!;
+  Object.defineProperty(process, 'platform', { value: platform });
+  vi.stubEnv('LOCALAPPDATA', undefined);
+  const logging = vi.spyOn(console, 'error').mockImplementation(() => {});
+  try {
+    const { invoke } = await backend();
+    electron.clipboard.writeText.mockClear(); vi.mocked(execFile).mockClear(); vi.mocked(spawn).mockClear();
+    const preview = aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview', { actionId: 'terminal-agy' }));
+    expect(preview.available).toBe(true);
+    expect(preview.command).toBe(platform === 'win32' ? 'irm https://antigravity.google/cli/install.ps1 | iex' : 'curl -fsSL https://antigravity.google/cli/install.sh | bash');
+    approval.show.mockResolvedValueOnce({ response: 0, checkboxChecked: false });
+    expect(await invoke('ai-cli:openTerminal', { actionId: 'terminal-agy', token: preview.token })).toEqual({ ok: false });
+    expect(electron.clipboard.writeText).not.toHaveBeenCalled(); expect(execFile).not.toHaveBeenCalled(); expect(spawn).not.toHaveBeenCalled();
+    expect(approval.show).toHaveBeenLastCalledWith(expect.objectContaining({ detail: expect.stringContaining(preview.command), defaultId: 0, cancelId: 0 }));
+    const opening = invoke('ai-cli:openTerminal', { actionId: 'terminal-agy', token: preview.token });
+    if (platform === 'darwin') {
+      await expect(opening).rejects.toThrow('VSTUDY_STATUS');
+      expect(execFile).toHaveBeenLastCalledWith('/usr/bin/open', ['-a', 'Terminal', preview.cwd], expect.objectContaining({ cwd: preview.cwd }), expect.any(Function));
+    } else {
+      expect(await opening).toEqual({ ok: true });
+      expect(spawn).toHaveBeenLastCalledWith(expect.stringMatching(/powershell\.exe$/), ['-NoLogo', '-NoProfile', '-NoExit'], expect.objectContaining({ shell: false, cwd: preview.cwd }));
+    }
+    expect(electron.clipboard.writeText).toHaveBeenCalledWith(preview.command);
+    expect(aiCliContract['ai-cli:list'].response.parse(await invoke('ai-cli:list', {})).every(tool => !tool.consented)).toBe(true);
+  } finally { Object.defineProperty(process, 'platform', original); logging.mockRestore(); }
+});
+
+it('rechecks the document after manual terminal approval before copying or launching', async () => {
+  const { invoke, owner } = await backend(), logging = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const preview = aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview', { actionId: 'terminal-agy' }));
+  approval.show.mockImplementationOnce(async () => { owner.emit('did-start-navigation', { isMainFrame: true, isSameDocument: false }); return { response: 1, checkboxChecked: false }; });
+  electron.clipboard.writeText.mockClear(); vi.mocked(execFile).mockClear(); vi.mocked(spawn).mockClear();
+  await expect(invoke('ai-cli:openTerminal', { actionId: 'terminal-agy', token: preview.token })).rejects.toThrow('VSTUDY_STATUS');
+  expect(electron.clipboard.writeText).not.toHaveBeenCalled(); expect(execFile).not.toHaveBeenCalled(); expect(spawn).not.toHaveBeenCalled();
+  logging.mockRestore();
+});
 it('revokes previews on a main document reload and preserves same-document navigation', async () => {
   host.rejectLaunch = true; vi.stubEnv('LOCALAPPDATA', undefined);
   const { invoke, owner } = await backend();

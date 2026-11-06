@@ -11,7 +11,8 @@ import type { CliActionId, CliActionPlan, CliFailure, CliProvider } from '../../
 import { SetupError, type Release } from './types';
 import type { TerminalPlan } from './pty';
 import { tr } from '../../../shared/i18n';
-export type Verb = 'install' | 'update' | 'rollback' | 'login' | 'status' | 'test' | 'advanced-shell';
+import { manualInstallCommand } from '../../../shared/ai-cli-manual';
+export type Verb = 'install' | 'update' | 'rollback' | 'login' | 'status' | 'test' | 'terminal' | 'advanced-shell';
 export type PlanTarget = 'embedded' | 'own-terminal';
 export interface ActionPlan extends TerminalPlan { public: CliActionPlan; provider: CliProvider | null; verb: Verb; binary: string | null; release: Release | null }
 export function actionParts(action: CliActionId): { provider: CliProvider | null; verb: Verb } {
@@ -41,7 +42,7 @@ export function buildPlan(actionId: CliActionId, cwd: string, binary: string | n
     const profile = `(version 1)(allow default)(deny process-exec)(allow process-exec ${allowed.map(path => `(literal ${JSON.stringify(path)})`).join(' ')})`;
     args = ['-p', profile, binary, ...args]; executable = '/usr/bin/sandbox-exec';
   }
-  const command = verb === 'install' || verb === 'update'
+  const command = verb === 'terminal' && provider ? manualInstallCommand(provider, process.platform) ?? '' : verb === 'install' || verb === 'update'
     ? tr('ai-cli:download_plan', { url: release?.url ?? provider, path: join(dirname(cwd), provider ?? '', release?.version ?? '') })
     : verb === 'rollback' ? tr('ai-cli:rollback_description', { provider })
       : verb === 'test' ? `${tr('ai-cli:transport_plan')}\n${displayCommand(executable, provider === 'agy' ? agyArgs : cliArgs(provider!, 'default'))}\n${tr('ai-cli:test_prompt_label')}: Reply with the single word OK. Do not use tools.\n${tr('ai-cli:transport_plan_footer')}`
@@ -61,6 +62,7 @@ export class PreviewTokens<Owner extends object> {
     const entry = this.tokens.get(token);
     if (!entry || entry.owner !== owner || entry.plan.public.actionId !== actionId) throw new SetupError('blocked');
     this.tokens.delete(token);
+    if (entry.plan.verb === 'terminal' && target !== 'own-terminal') throw new SetupError('blocked');
     const manualLogin = target === 'own-terminal' && entry.plan.verb === 'login' && entry.plan.binary !== null && entry.plan.public.reason === 'unsupported';
     if (entry.plan.public.expiresAt <= now || !entry.plan.public.available && !manualLogin) throw new SetupError(entry.plan.public.reason ?? 'blocked');
     return entry.plan;
