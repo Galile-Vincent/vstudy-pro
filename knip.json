@@ -22,7 +22,7 @@
         "src/**/*.test.{ts,tsx}"
       ],
       "project": [
-        "src/**/*.{ts,tsx}",
+        "src/**/*.{ts,tsx,mts}",
         "resources/**/*.ts",
         "scripts/**/*.{mjs,cjs,ts}",
         "e2e/**/*.mjs"

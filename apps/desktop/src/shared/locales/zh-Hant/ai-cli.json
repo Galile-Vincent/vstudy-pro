@@ -114,6 +114,7 @@
   "recovery_agy": "使用 Antigravity 時，請在首次使用畫面以鍵盤登入符合資格的 Google 帳號。若學校封鎖登入，請洽資訊人員。",
   "failure_offline": "請檢查網路後重試。快取的更新資訊會保留。",
   "failure_permission-denied": "VStudy 無法寫入或啟動工具。請洽資訊人員取得應用程式資料夾的使用權限，不要停用裝置保護。",
+  "failure_terminal-unavailable": "VStudy 無法準備內嵌終端機的輔助程式。請重新安裝或修復 VStudy，或洽資訊人員還原輔助程式的執行權限。仍可複製登入指令，在自己的終端機執行。",
   "failure_blocked": "裝置或學校政策封鎖此操作。請複製下方求助內容給資訊人員。",
   "failure_wrong-version": "此版本不支援 VStudy 已驗證的連線。請使用相容的受管理版本或洽資訊人員，新版本不一定相容。",
   "failure_browser-not-opened": "請開啟下方登入網址並依服務商指示操作。如已過期，請停止並重新登入。",
