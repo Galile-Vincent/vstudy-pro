@@ -11,8 +11,9 @@ export function registerAnalyticsIpc(registrar:ReturnType<typeof createIpcRegist
   registrar.handle('analytics:getState',()=>service.getState());
   registrar.handle('analytics:setConsent',({enabled})=>service.setConsent(enabled));
   registrar.handle('analytics:completeOnboarding',input=>{
+    const completed=service.getState().onboarding_completed;
     const state=service.completeOnboarding(input);
-    if (newsletter) void Promise.resolve().then(()=>newsletter({email_provided:input.email_provided,updates_opted_in:input.updates_opted_in})).catch(()=>undefined);
+    if (newsletter && !completed) void Promise.resolve().then(()=>newsletter({email_provided:input.email_provided,updates_opted_in:input.updates_opted_in})).catch(()=>undefined);
     return state;
   });
   registrar.handle('analytics:track',({event,properties,event_id})=>{service.rendererTrack(event,properties,event_id);return {ok:true};});

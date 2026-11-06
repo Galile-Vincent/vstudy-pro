@@ -1,8 +1,7 @@
 # Optional installation analytics
 
-Analytics defaults off. Studying works without it. The renderer UI for disclosure,
-consent, onboarding, and deletion is a separate task. This module owns the validated
-IPC contract that UI will use through the existing `window.desktop.invoke` preload
+Analytics defaults off. Studying works without it. The renderer provides disclosure, consent, onboarding, and deletion controls. This module owns the validated
+IPC contract used through the existing `window.desktop.invoke` preload
 bridge. No renderer network permission is needed.
 
 ## Privacy boundary
@@ -22,7 +21,7 @@ character count, reported AI counters, latency, and coarse failure categories.
 Device properties accompany app_opened. A local hash prevents repeated unchanged
 person-property updates. School matching uses exact bundled registry site URLs,
 after Moodle verifies its authenticated site-info URL. Display names never identify
-schools. Unknown sites remain unknown. Only the changed profile is queued.
+schools. Unknown sites remain unknown. Pending profile updates collapse to the latest local profile, including a switch back to the last acknowledged school. The acknowledged hash changes only after a successful batch response. Restored connected Moodle accounts hydrate the verified school profile at startup and sync.
 
 Never collected: names, Moodle/student IDs, email addresses, prompts, answers,
 reasoning text, document contents/titles/paths, search terms, credentials, hostnames,
@@ -42,7 +41,7 @@ survive restarts without changing IDs; an interrupted partial window is not reco
 
 Disabled consent sends nothing and queues nothing. Opt-out immediately aborts the
 in-flight fetch and clears the queue. An already transmitted request cannot be
-recalled. Re-enabling starts fresh, without replaying withheld activity or requests.
+recalled. Re-enabling starts fresh, without replaying withheld activity or requests. A persisted `first_open_sent` flag records the first queued launch event; first consent emits `app_first_opened` once and `app_opened` once for this process. Later consent toggles do not duplicate launches. Main retains only an in-memory onboarding-start timestamp before consent, never a send-queue item. Completion emits the start/completion pair only with consent; declining sends neither.
 A provider request spanning a consent change does not emit a terminal event later.
 Newsletter consent is independent.
 
@@ -60,7 +59,7 @@ SQLite errors never escape the gateway into studying code.
 Activity samples every 5 seconds. `IDLE_THRESHOLD_SECONDS` is 300 seconds.
 `SUMMARY_INTERVAL_MS` is 90 seconds. Summaries contain separate foreground-active,
 foreground-idle, and background milliseconds. Consent transitions reset all counters.
-These are estimates, not exact study-time measurements.
+Gaps over 10 seconds (twice the sample interval) count entirely as background, never foreground active or idle time. These are estimates, not exact study-time measurements.
 
 `config.ts` contains the sole default host and public project token. Override with
 `VSTUDY_POSTHOG_KEY` and `VSTUDY_POSTHOG_HOST` (HTTPS origin only).
@@ -83,22 +82,21 @@ Main owns these events exclusively. Renderer attempts to send them are dropped.
   request UUID. Provider snapshots are captured before local cost/token estimates.
   Missing counters are null, including when legacy local usage fields contain zero.
   A reported zero remains zero. Total tokens are derived only from two known counts.
-  Selected model IDs are used unless the provider supplies actual model usage.
-  Failures use a coarse provider_error category. No error bodies are classified.
+  Selected model IDs are used unless the provider supplies actual model usage. Model IDs must match the bundled Claude/Codex catalogs or conservative first-party family patterns; all other IDs, fine-tunes, and every openai-compatible endpoint model become `custom`. Catalog punctuation is preserved without generic-label rejection. Effort reads raw `reasoning_effort`, `reasoningEffort`, then `effort`; unknown is null. Failures map stable categories to timeout/auth/rate_limit/network/provider_error/other; raw errors are never sent.
 - Questions: question_asked, question_regenerated, conversation_started,
   conversation_continued, conversation_cleared. Categories come from existing
   selection, course summary/quiz, and scope signals. Subjects remain unknown.
 - Moodle: moodle_connection_started, moodle_connection_succeeded,
-  moodle_connection_failed, moodle_disconnected. School profiles follow the active overview or latest successful connection.
+  moodle_connection_failed, moodle_connection_cancelled, moodle_disconnected. One main service owner reports exactly one terminal event after the entire connection attempt; cancellation is not failure. School profiles follow the active overview or latest successful connection.
   Disconnect retains the last school; connected clears when no connections remain.
 - Reliability: app_error on uncaught exception monitoring, app_crashed on renderer
   loss, app_performance_sample after the first main window loads.
-- Onboarding completion is owned by analytics:completeOnboarding.
+- Onboarding completion is owned by analytics:completeOnboarding and guarded once per installation in main. Existing-user consent and Settings use setConsent only, without synthetic acquisition or onboarding events.
 - Profile updates use $identify with $set with only the device/acquisition/school allowlist.
 
-Renderer-origin events available to the later UI task are onboarding_started,
+Renderer-origin events are onboarding_started,
 onboarding_skipped, settings_opened, screen_viewed, theme_changed, language_changed.
-No UI calls are added here. The enum values are in schema.ts.
+The renderer emits explicit UI events. The enum values are in schema.ts.
 
 Deferred events include document reading/annotation/export, study/quiz interaction,
 notes, generic feature adoption, response ratings, provider/settings selections,
@@ -107,14 +105,14 @@ owners and UI/source signals; this core task adds no renderer feature hooks.
 Flashcard and explicit question-sharing events are also deferred; no corresponding
 complete feature was established in this build. There are no subscription events.
 
-## IPC for the later UI
+## IPC for the UI
 
 All channels use the existing trusted-sender registrar and preload validation.
 Types are inferred from shared/analytics.ts through IpcRequest/IpcResponse.
 
 | Channel | Request | Response |
 | --- | --- | --- |
-| analytics:getState | `{}` | `{enabled, onboarding_completed, onboarding, installation_id_present, acquisition_source, deletion_pending}` |
+| analytics:getState | `{}` | `{enabled, consent_decided, onboarding_completed, onboarding, installation_id_present, acquisition_source, deletion_pending}` |
 | analytics:setConsent | `{enabled: boolean}` | Same state |
 | analytics:completeOnboarding | `{acquisition_source, email_provided: boolean, updates_opted_in: boolean, duration_ms: integer}` | Same state |
 | analytics:track | `{event: string, properties: object, event_id?: UUID}` | `{ok: true}`; invalid/disallowed events are silently dropped |
@@ -127,7 +125,7 @@ separate callback receiving only the two consent booleans. The newsletter task m
 own address validation, explicit opt-in, receipts, secure backend delivery, and
 unsubscribe. A newsletter failure does not fail onboarding.
 
-Deletion records a local pending flag, turns analytics off, and clears unsent data.
+Deletion records a local pending flag, turns analytics off, and clears unsent data. Pending deletion suppresses all events under that ID, including after restart. Explicit re-enabling generates a fresh installation UUID and clears pending locally before permitting sends; it does not cancel the historical deletion request or claim cloud deletion.
 It does not claim cloud deletion is complete. The public capture token cannot
 query/delete people. No private credential ships in Electron. The UI should show a
 copyable ID and private publisher contact flow using the returned instructions.
@@ -146,8 +144,7 @@ The project owner must set cloud retention and restrict analytics access to appr
 product/reliability maintainers. Suggested policy is 90 days of raw events and no
 small-school cohort exports below 10 installations. This is a proposed policy, not
 an applied PostHog configuration. Newsletter storage/access/retention needs separate
-approval. The renderer task must disclose pseudonymous tracking and leave analytics
-and newsletter consent unchecked initially.
+approval. The renderer discloses pseudonymous tracking. Analytics starts disabled; newsletter subscription requires an explicit Subscribe action and has no preselected consent. `updates_opted_in` becomes true only after the endpoint accepts the subscription. Merely entering an email or a failed request remains false.
 
 Tests cover PII-shaped properties, consent, no withheld-event replay, opt-out abort,
 durable retry/deduplication/bounds, school changes, device buckets, token provenance,
@@ -155,3 +152,18 @@ and stream ownership. live.test.ts is skipped unless both VSTUDY_ANALYTICS_LIVE=
 and VSTUDY_ANALYTICS_ENABLE=1 are set. It sends exactly one synthetic app_opened with
 fabricated device buckets and writes node_modules/.cache/analytics/live-payload.json in the worktree.
 Never enable it for routine CI.
+
+## Release configuration and legal pages
+
+Build with `VSTUDY_NEWSLETTER_URL=https://newsletter.example/subscribe` and
+`VSTUDY_NEWSLETTER_ORIGINS=https://newsletter.example` (comma-separated exact origins)
+when running the desktop build. electron-vite embeds these public values in main;
+no runtime shell environment or code edit is required in the packaged app. Runtime
+environment overrides remain available. Both URL and origin allowlist default empty,
+so newsletter UI stays hidden. Main rejects non-HTTPS URLs, credentials, fragments,
+and origins outside the configured allowlist. No Resend secret belongs in this build.
+The UI keeps a single explicit Subscribe action; its copy describes update consent.
+It never subscribes merely from entering an email or finishing onboarding.
+
+Privacy and Terms links use `shared/website.ts` (`WEBSITE_URL`) and localized paths.
+This desktop branch must ship together with the website pages on `analytics-legal`.

@@ -33,7 +33,7 @@ export function ExistingAnalyticsPrompt() {
   const [error, setError] = useState(false);
   useEffect(() => {
     let active = true;
-    const refresh = () => { void Promise.all([desktop.invoke('settings:get', {}), desktop.invoke('analytics:getState', {})]).then(([settings,state]) => { if (active) setVisible(!!settings.onboardingCompleted && !state.onboarding_completed); }).catch(() => {}); };
+    const refresh = () => { void Promise.all([desktop.invoke('settings:get', {}), desktop.invoke('analytics:getState', {})]).then(([settings,state]) => { if (active) setVisible(!!settings.onboardingCompleted && !state.consent_decided); }).catch(() => {}); };
     refresh();
     window.addEventListener('analytics-consent-changed', refresh);
     return () => { active = false; window.removeEventListener('analytics-consent-changed', refresh); };
@@ -41,7 +41,7 @@ export function ExistingAnalyticsPrompt() {
   if (!visible) return null;
   return <aside className="analytics-banner" aria-labelledby="analytics-invitation"><h2 id="analytics-invitation">{tr('analytics:invitation')}</h2><AnalyticsDisclosure/><ConsentChoice busy={busy} onChoose={enabled => {
     setBusy(true); setError(false);
-    void completeAnalyticsOnboarding(enabled, { acquisition_source:'prefer_not_to_say', email_provided:false, updates_opted_in:false, duration_ms:0 }).then(() => setVisible(false)).catch(() => setError(true)).finally(() => setBusy(false));
+    void desktop.invoke('analytics:setConsent', {enabled}).then(() => setVisible(false)).catch(() => setError(true)).finally(() => setBusy(false));
   }}/>{error && <p role="alert">{tr('errors:generic')}</p>}</aside>;
 }
 export function AnalyticsSettings() {
@@ -60,11 +60,10 @@ export function AnalyticsSettings() {
       setBusy(true); setError(false);
       void desktop.invoke('analytics:setConsent', {enabled}).then(async next => {
         setState(next);
-        if (!next.onboarding_completed) {
-          const completed = await desktop.invoke('analytics:completeOnboarding', {acquisition_source:next.acquisition_source ?? 'prefer_not_to_say',email_provided:false,updates_opted_in:false,duration_ms:0});
-          setState(completed);
-          window.dispatchEvent(new Event('analytics-consent-changed'));
-        }
+        const identity=await desktop.invoke('analytics:getInstallationId', {});
+        setId(identity.installation_id);
+        if (!next.deletion_pending) setDeletion(undefined);
+        window.dispatchEvent(new Event('analytics-consent-changed'));
       }).catch(() => setError(true)).finally(() => setBusy(false));
     }}/></SettingsRow>
     <div className="analytics-details"><AnalyticsDisclosure/><details><summary>{tr('analytics:exact')}</summary><ul>{['device','activity','ai','school'].map(key => <li key={key}>{tr(`analytics:collect_${key}`)}</li>)}</ul></details>

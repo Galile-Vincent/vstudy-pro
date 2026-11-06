@@ -186,6 +186,7 @@ export async function* runCli(
     yield { type: "done" } as const;
   } catch {
     signal.throwIfAborted();
+    if (timedOut) throw new ProviderError('timeout');
     diagnostic += '\n' + stdoutDiagnostic;
     if (/auth|login|logged.?in|unauthorized|401|403/i.test(diagnostic)) throw new ProviderError('auth failed', kind === 'claude' ? 'Authentication failed. Run `claude` and /login.' : 'Authentication failed. Run `codex login`.');
     throw new ProviderError(/auth|login|unauthorized|401|403/i.test(diagnostic) ? 'auth failed' : /rate.limit|429/i.test(diagnostic) ? 'rate limited' : /budget|quota|credit/i.test(diagnostic) ? 'budget' : /network|ECONN|ENOTFOUND|fetch failed/i.test(diagnostic) ? 'network' : 'provider unavailable');

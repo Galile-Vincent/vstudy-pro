@@ -44,7 +44,10 @@ export class MoodleService {
   private readonly teacherCache = new Map<string,number>();
   private readonly signInStorage = new Map<string, 'session' | 'unsaved'>();
   private readonly lastAttempt = new Map<string,number>();
-  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch, private readonly language: () => string = () => 'zh-tw', private readonly progress: (event:MoodleProgress)=>void = () => {}, private readonly logos?: MoodleLogoCache) {}
+  constructor(readonly repository: MoodleRepository, private readonly secrets: SecretStore, private readonly sso: {login(site: CheckedSite, provider: number | undefined, accept: (tokens: MoodleTokens) => Promise<MoodleAccount>):Promise<MoodleAccount>}, private readonly request: Fetch = moodleFetch, private readonly language: () => string = () => 'zh-tw', private readonly progress: (event:MoodleProgress)=>void = () => {}, private readonly logos?: MoodleLogoCache) {
+    const account=repository.accounts().find(account=>account.status === 'connected');
+    if (account) analytics()?.school(resolveSchool(account.siteUrl));
+  }
   private readonly connecting = new Set<string>();
   private readonly browserSites = new Set<string>();
   private async checkedSite(url: string) {
@@ -67,6 +70,18 @@ export class MoodleService {
     };
   }
   async connect(input: {siteUrl:string;storage?:'secure'|'session' | undefined;provider?:number | undefined;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
+    analytics()?.track('moodle_connection_started',{connection_method:input.username ? 'password' : 'browser'});
+    try {
+      const account=await this.connectAttempt(input);
+      analytics()?.track('moodle_connection_succeeded',{school_id:resolveSchool(account.siteUrl)?.id ?? null});
+      return account;
+    } catch (error) {
+      if (error instanceof MoodleAuthError && error.code === 'cancelled') analytics()?.track('moodle_connection_cancelled');
+      else analytics()?.track('moodle_connection_failed',{error_category:'other'});
+      throw error;
+    }
+  }
+  private async connectAttempt(input: {siteUrl:string;storage?:'secure'|'session' | undefined;provider?:number | undefined;username?:string | undefined;password?:string | undefined}): Promise<MoodleAccount> {
     if (input.storage !== 'session') await this.secrets.preflight();
     const checked = await this.checkedSite(input.siteUrl);
     if (checked.authPlan.kind === 'unavailable') throw new Error(checked.authPlan.reason);
@@ -107,7 +122,6 @@ export class MoodleService {
     this.repository.saveAccount(account);
     const school=resolveSchool(site.siteUrl);
     analytics()?.school(school ?? null);
-    analytics()?.track('moodle_connection_succeeded',{school_id:school?.id ?? null});
     this.failures.delete(account.id);
     await this.saveCapabilities(account,info);
     if (storage === 'secure') {
@@ -358,6 +372,8 @@ export class MoodleService {
     if (this.stopped) return Promise.resolve({errors:[]});
     const current = this.pending.get(id);
     if (current) return current;
+    const account=this.repository.account(id);
+    if (account.status === 'connected') analytics()?.school(resolveSchool(account.siteUrl));
     this.lastAttempt.set(id,Date.now());
     const work = this.refresh(id).catch(error => {
       if (error instanceof MoodleError && error.kind === 'auth' && this.repository.accounts().some(account => account.id === id)) this.repository.expired(id);

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { analyticsModel } from './model';
 import { onboarding } from '../../shared/analytics';
 
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
@@ -9,7 +10,7 @@ export const errorCategory = z.enum(['timeout','auth','rate_limit','network','pr
 const schoolId = z.enum(['cycu','ucl','warwick','unsw']).nullable();
 export const deviceSchema = z.object({platform:z.enum(['macos','windows','linux']),os_version:z.string().regex(/^\d{1,3}(?:\.\d{1,5})?$/),cpu_arch:z.enum(['arm64','x64']),app_version:version,app_language:z.string().max(35).regex(/^[a-z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$/),memory_bucket:z.enum(['<=4','8','16','32','>32']),cpu_cores_bucket:z.enum(['<=2','4','8','16','>16']),display_size_bucket:z.enum(['small','medium','large']),display_scale_bucket:z.enum(['1','1.5','2','>2']),electron_major:count,chrome_major:count});
 export const profileSchema = deviceSchema.partial().extend({acquisition_source:onboarding.shape.acquisition_source.optional(),school_id:schoolId.optional(),school_name:z.enum(['Chung Yuan Christian University','University College London','University of Warwick','UNSW Sydney']).nullable().optional(),school_source:z.enum(['moodle','unknown']).optional(),moodle_connected:z.boolean().optional()});
-const ai = z.object({request_id:id,conversation_id:id.nullable(),provider:z.enum(['anthropic-api','openai-api','openai-compatible','claude-cli','codex-cli','agy-cli']),model:safeLabel.nullable(),reasoning_effort:safeLabel.nullable(),integration_type:z.enum(['api','cli','other']),ai_feature:z.enum(['chat','explain_selection','ask_document','summarize','generate_quiz','other']),context_source:z.enum(['direct_chat','document','selected_text','quiz','other'])});
+const ai = z.object({request_id:id,conversation_id:id.nullable(),provider:z.enum(['anthropic-api','openai-api','openai-compatible','claude-cli','codex-cli','agy-cli']),model:z.string().max(300).nullable(),reasoning_effort:safeLabel.nullable(),integration_type:z.enum(['api','cli','other']),ai_feature:z.enum(['chat','explain_selection','ask_document','summarize','generate_quiz','other']),context_source:z.enum(['direct_chat','document','selected_text','quiz','other'])});
 const timing = {active_ms:count,idle_ms:count,background_ms:count};
 const empty = z.object({});
 export const eventSchemas = {
@@ -22,7 +23,7 @@ export const eventSchemas = {
   ai_request_failed:ai.extend({error_category:errorCategory,latency_ms:count,request_status:z.literal('failed')}),ai_request_cancelled:ai.extend({latency_ms:count,request_status:z.literal('cancelled')}),
   question_asked:z.object({question_category:z.enum(['concept_explanation','summarization','exam_practice','unknown']),subject_category:z.literal('unknown'),question_source:z.enum(['typed','selected_document_text','document_chat','generated_quiz','follow_up','other']),question_length:count,conversation_turn:count.min(1),is_follow_up:z.boolean(),has_document_context:z.boolean()}),
   conversation_started:z.object({conversation_id:id,ai_feature:z.literal('chat')}),conversation_cleared:empty,conversation_continued:z.object({conversation_turn:count.min(1),is_follow_up:z.literal(true)}),question_regenerated:empty,
-  moodle_connection_started:z.object({connection_method:z.enum(['password','browser','discover'])}),moodle_connection_succeeded:z.object({school_id:schoolId}),moodle_connection_failed:z.object({error_category:errorCategory}),moodle_disconnected:empty,
+  moodle_connection_started:z.object({connection_method:z.enum(['password','browser','discover'])}),moodle_connection_succeeded:z.object({school_id:schoolId}),moodle_connection_cancelled:empty,moodle_connection_failed:z.object({error_category:errorCategory}),moodle_disconnected:empty,
   onboarding_started:z.object({onboarding_version:count}),onboarding_skipped:z.object({onboarding_version:count}),onboarding_completed:onboarding,
   settings_opened:z.object({settings_section:z.enum(['general','privacy','ai','moodle','storage','appearance','usage'])}),screen_viewed:z.object({screen_name:z.enum(['library','document','chat','planner','moodle','settings'])}),theme_changed:z.object({theme:z.enum(['light','dark','system'])}),language_changed:z.object({app_language:deviceSchema.shape.app_language}),
   $identify:profileSchema,
@@ -30,6 +31,10 @@ export const eventSchemas = {
 export type AnalyticsEvent = keyof typeof eventSchemas;
 export function sanitizeEvent(event: string, properties: unknown): Record<string,unknown> | null {
   if (!Object.hasOwn(eventSchemas,event)) return null;
+  if (event.startsWith('ai_request_') && properties && typeof properties === 'object') {
+    const value = properties as Record<string,unknown>;
+    if (typeof value.provider === 'string' && (typeof value.model === 'string' || value.model === null)) properties = {...value,model:analyticsModel(value.provider,value.model)};
+  }
   const parsed = eventSchemas[event as AnalyticsEvent].safeParse(properties);
   return parsed.success ? parsed.data : null;
 }

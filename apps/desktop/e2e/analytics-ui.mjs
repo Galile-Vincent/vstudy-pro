@@ -27,6 +27,10 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
     await page.getByRole('button',{name:copy.decline,exact:true}).waitFor();
     await page.screenshot({path:join(evidence,`${language}-${colorScheme}-consent.png`)});
     await page.getByRole('button',{name:copy.decline,exact:true}).click();
+    await page.locator('.onboarding footer').getByRole('button',{name:onboarding.back,exact:true}).click();
+    assert.equal(await page.getByRole('button',{name:copy.share,exact:true}).isDisabled(),true);
+    assert.equal(await page.getByRole('button',{name:copy.decline,exact:true}).isDisabled(),true);
+    await page.locator('.onboarding footer .primary').click();
     await page.getByRole('button',{name:onboarding.later,exact:true}).click();
     await page.locator('.onboarding').waitFor({state:'detached'});
     const state=await page.evaluate(()=>window.desktop.invoke('analytics:getState',{}));
@@ -55,15 +59,16 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
 {
  const directory=await mkdtemp(join(evidence,'upgrade-'));let app;
  try {
-  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_ANALYTICS_ENABLE:'',VSTUDY_NEWSLETTER_URL:'https://example.org/subscribe'}});
+  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_ANALYTICS_ENABLE:'',VSTUDY_NEWSLETTER_URL:'https://example.org/subscribe',VSTUDY_NEWSLETTER_ORIGINS:'https://example.org'}});
   const page=await app.firstWindow();await page.locator('.onboarding').waitFor();
   // Configured newsletter: no request is made during this validation.
   for(let i=0;i<3;i++)await page.locator('.onboarding footer .primary').click();
   const email=page.locator('input[type=email]');await email.waitFor();
-  const checkbox=page.locator('.analytics-check input');
-  assert.equal(await checkbox.isChecked(),false);assert.equal(await checkbox.isDisabled(),true);
-  await email.fill('invalid');assert.equal(await checkbox.isDisabled(),true);
-  await email.fill('student@example.org');assert.equal(await checkbox.isEnabled(),true);assert.equal(await checkbox.isChecked(),false);
+  assert.equal(await page.locator('input[type=checkbox]').count(),0);
+  const subscribe=page.getByRole('button',{name:'Subscribe',exact:true});
+  assert.equal(await subscribe.isDisabled(),true);
+  await email.fill('invalid');assert.equal(await subscribe.isDisabled(),true);
+  await email.fill('student@example.org');assert.equal(await subscribe.isEnabled(),true);
   await page.screenshot({path:join(evidence,'newsletter-configured.png')});
   await page.evaluate(async()=>{const settings=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...settings,onboardingCompleted:true,language:'en'});});
   await page.reload();await page.locator('.analytics-banner').waitFor();
@@ -72,7 +77,7 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
   await page.locator('.analytics-banner').getByRole('button',{name:'No thanks',exact:true}).click();
   await page.locator('.analytics-banner').waitFor({state:'detached'});await page.reload();
   await page.locator('.app-shell').waitFor();assert.equal(await page.locator('.analytics-banner').count(),0);
-  results.push({upgradePromptOnce:true,configuredNewsletterUnchecked:true});
+  results.push({upgradePromptOnce:true,configuredNewsletterExplicitAction:true});
  } finally {if(app)await app.close();await rm(directory,{recursive:true,force:true});}
 }
 await writeFile(join(evidence,'results.json'),JSON.stringify(results,null,2));

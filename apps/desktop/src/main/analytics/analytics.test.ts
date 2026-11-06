@@ -4,7 +4,7 @@ import { openStore, type Store } from '../db';
 import { AnalyticsService, setAnalytics } from './service';
 import { sanitizeEvent } from './schema';
 import { deviceProperties } from './device';
-import { tokenProperties, instrumentProvider } from './provider';
+import { tokenProperties, instrumentProvider, requestMetadata, classifyError } from './provider';
 import { extractUsage } from '../providers/usage';
 import { AnalyticsActivity } from './activity';
 import { analyticsConfig } from './config';
@@ -25,7 +25,7 @@ describe('privacy boundary',()=>{
     expect(sanitizeEvent('app_error',{error_category:'network',feature:'chat',message:'/Users/private',email:'me@example.com'})).toEqual({error_category:'network',feature:'chat'});
   });
   it.each(['me@example.com','https://example.com','/Users/private','C:\\Users\\private','sk-123456789','phc_abcdefgh','api_key','foo.example.com','secret-token','Bearer abc'])('rejects sensitive model shape %s',value=>{
-    expect(sanitizeEvent('ai_request_started',{request_id:randomUUID(),conversation_id:null,provider:'openai-api',model:value,reasoning_effort:null,integration_type:'api',ai_feature:'chat',context_source:'direct_chat'})).toBeNull();
+    expect(sanitizeEvent('ai_request_started',{request_id:randomUUID(),conversation_id:null,provider:'openai-api',model:value,reasoning_effort:null,integration_type:'api',ai_feature:'chat',context_source:'direct_chat'})).toMatchObject({model:'custom'});
   });
   it('keeps only coarse device data',()=>{
     expect(device).toMatchObject({os_version:'15.1',memory_bucket:'16',cpu_cores_bucket:'16',display_size_bucket:'medium',electron_major:42,chrome_major:140});
@@ -44,7 +44,7 @@ describe('consent and durable queue',()=>{
     service.track('app_opened',device);await service.flush();
     expect(queued()).toEqual([]);expect(request).not.toHaveBeenCalled();
     service.setConsent(true);await service.flush();
-    expect(JSON.stringify(request.mock.calls)).not.toContain('app_opened');
+    expect(JSON.parse(String(request.mock.calls[0]![1]!.body)).batch.filter((e:{event:string})=>e.event==='app_opened')).toHaveLength(1);
     service.track('app_opened',device);service.setConsent(false);await service.flush();expect(queued()).toEqual([]);
     service.setConsent(true);expect(queued().some(event=>event.event==='app_opened')).toBe(false);
   });
@@ -79,7 +79,7 @@ describe('consent and durable queue',()=>{
     service.school({id:'cycu',name:'Chung Yuan Christian University'});
     const length=queued().length;
     service.school({id:'cycu',name:'Chung Yuan Christian University'});expect(queued()).toHaveLength(length);
-    service.school({id:'ucl',name:'University College London'});expect(queued()).toHaveLength(length+1);
+    service.school({id:'ucl',name:'University College London'});expect(queued()).toHaveLength(length);
     service.school(null);expect(queued().at(-1).properties.$set.school_id).toBeNull();
   });
   it('rejects renderer duplicates of main-owned events',()=>{
@@ -102,7 +102,7 @@ it('preserves unknown tokens as null before local estimates',()=>{
 it('measures foreground idle and background separately and resets withheld activity',()=>{
   let now=0,idle=0;
   const {service,queued}=setup();service.setConsent(true);
-  const activity=new AnalyticsActivity(service,()=>idle,()=>now);activity.focus(true);now=30_000;activity.sample();idle=301;now=60_000;activity.sample();activity.focus(false);now=90_000;activity.sample();
+  const activity=new AnalyticsActivity(service,()=>idle,()=>now);activity.focus(true);for(now=5000;now<=30_000;now+=5000)activity.sample();idle=301;for(now=35_000;now<=60_000;now+=5000)activity.sample();now=60_000;activity.focus(false);for(now=65_000;now<=90_000;now+=5000)activity.sample();now=90_000;
   expect(queued().find(event=>event.event==='app_activity_summary').properties).toMatchObject({active_ms:30_000,idle_ms:30_000,background_ms:30_000});
   activity.reset();now+=10;activity.end();expect(queued().at(-2).properties.elapsed_ms).toBe(10);
 });
@@ -151,4 +151,82 @@ it('does not invent reasoning tokens in CLI model aggregates',async()=>{
   const events=[];for await(const event of parseStream(chunks(),'claude'))events.push(event);
   const usage=events.find(event=>event.type==='usage');
   expect(usage?.type === 'usage' && tokenProperties(usage.usage).reasoning_tokens).toBeNull();
+});
+
+it('keeps only the newest school profile even when switching back to the acknowledged school',async()=>{
+  const {service,queued,request}=setup();service.setConsent(true);
+  const a={id:'cycu',name:'Chung Yuan Christian University'};
+  service.school(a);await service.flush();
+  service.school({id:'ucl',name:'University College London'});service.school(a);
+  expect(queued().filter(e=>e.event==='$identify')).toHaveLength(1);
+  await service.flush();expect(JSON.stringify(request.mock.calls.at(-1))).not.toContain('University College London');
+});
+it('emits launch and buffered onboarding only after consent and completes once',async()=>{
+  const {service,queued,store,request}=setup();service.start();
+  service.rendererTrack('onboarding_started',{onboarding_version:1});expect(queued()).toEqual([]);
+  service.setConsent(true);
+  const input={acquisition_source:'github' as const,email_provided:false,updates_opted_in:false,duration_ms:100};
+  service.completeOnboarding(input);service.completeOnboarding(input);service.setConsent(false);service.setConsent(true);
+  expect(queued().some(e=>e.event==='app_opened')).toBe(false);
+  expect(service.getState().onboarding).toEqual(input);
+  const restored=new AnalyticsService(store.db,{enabled:true,host:'https://us.i.posthog.com',key:'test'},device,request);
+  restored.start();expect(queued().filter(e=>e.event==='app_first_opened')).toHaveLength(0);
+  await service.stop();await restored.stop();
+});
+it('queues exactly one launch pair and onboarding pair for a newly consenting installation',async()=>{
+  const {service,queued}=setup();service.start();service.rendererTrack('onboarding_started',{onboarding_version:1});service.setConsent(true);
+  const input={acquisition_source:'github' as const,email_provided:false,updates_opted_in:false,duration_ms:1};
+  service.completeOnboarding(input);service.completeOnboarding(input);
+  for(const name of ['app_first_opened','app_opened','onboarding_started','onboarding_completed'])expect(queued().filter(e=>e.event===name)).toHaveLength(1);
+  await service.stop();
+});
+it('declining onboarding sends nothing including the local start marker',()=>{
+  const {service,queued,request}=setup();service.rendererTrack('onboarding_started',{onboarding_version:1});service.setConsent(false);
+  service.completeOnboarding({acquisition_source:'other',email_provided:false,updates_opted_in:false,duration_ms:1});
+  expect(queued()).toEqual([]);expect(request).not.toHaveBeenCalled();
+});
+it('rotates the installation after deletion before permitting new events',()=>{
+  const {service,queued,store,request}=setup();service.setConsent(true);const deleted=service.requestDeletion().installation_id;
+  const restored=new AnalyticsService(store.db,{enabled:true,host:'https://us.i.posthog.com',key:'test'},device,request);
+  expect(restored.track('app_focused')).toBe(false);expect(queued()).toEqual([]);
+  restored.setConsent(true);restored.track('app_focused');
+  expect(restored.getState().deletion_pending).toBe(false);expect(queued().every(e=>e.distinct_id!==deleted)).toBe(true);
+});
+it('counts an eight-hour suspended foreground gap as background',()=>{
+  let now=0;const {service,queued}=setup();service.setConsent(true);
+  const activity=new AnalyticsActivity(service,()=>0,()=>now);activity.focus(true);now=8*60*60*1000;activity.sample();
+  expect(queued().find(e=>e.event==='app_activity_summary').properties).toMatchObject({active_ms:0,idle_ms:0,background_ms:now});
+});
+it.each(['reasoning_effort','reasoningEffort','effort'])('reads raw effort from %s',key=>{
+  expect(requestMetadata({providerId:'openai-api',modelId:'gpt-4.1',options:{[key]:'ultra'}} as unknown as ProviderRequest).reasoning_effort).toBe('ultra');
+});
+it.each([['auth failed','auth'],['rate limited','rate_limit'],['network','network'],['TimeoutError','timeout'],['server error','provider_error'],['unrecognized','other']])('classifies %s without emitting the error text', (category,expected)=>{
+  expect(classifyError({category})).toBe(expected);
+});
+it.each(['gpt-4.1','gpt-6.1-sol','claude-sonnet-4-6'])('accepts known model %s without dropping the event',model=>{
+  const {service,queued}=setup();service.setConsent(true);
+  expect(service.track('ai_request_started',{request_id:randomUUID(),conversation_id:null,provider:model.startsWith('claude')?'claude-cli':'openai-api',model,reasoning_effort:null,integration_type:'api',ai_feature:'chat',context_source:'direct_chat'})).toBe(true);
+  expect(queued().at(-1).properties.model).toBe(model);
+});
+it.each(['ft:gpt-4o:alice-smith:private-thesis:AbC123','my/private.model','private-model'])('replaces private model %s at the gateway',model=>{
+  const {service,queued}=setup();service.setConsent(true);
+  service.track('ai_request_started',{request_id:randomUUID(),conversation_id:null,provider:'openai-api',model,reasoning_effort:null,integration_type:'api',ai_feature:'chat',context_source:'direct_chat'});
+  expect(queued().at(-1).properties.model).toBe('custom');
+});
+it('never discloses compatible endpoint models even when named like a public model',()=>{
+  expect(requestMetadata({providerId:'openai-compatible',modelId:'gpt-4.1'} as ProviderRequest).model).toBe('custom');
+});
+
+it('keeps unknown effort null',()=>{
+  expect(requestMetadata({providerId:'openai-api',modelId:'gpt-5'} as ProviderRequest).reasoning_effort).toBeNull();
+});
+it('sanitizes the actual usage model snapshot and classifies a streamed failure',async()=>{
+  const {service,queued}=setup();service.setConsent(true);setAnalytics(service);
+  const provider=instrumentProvider({detect:async()=>({available:true}),listModels:async()=>[],async *stream(request){
+    request.onUsageSnapshot?.({inputTokens:1,outputTokens:2,costSource:'reported'},[{modelId:'ft:gpt-4o:alice:thesis:123',usage:{inputTokens:1,outputTokens:2,costSource:'reported'}}]);
+    yield {type:'error' as const,message:'private diagnostics',code:'rate limited'};
+  }});
+  for await(const event of provider.stream({requestId:randomUUID(),providerId:'openai-api',modelId:'gpt-4.1',scope:'general'} as ProviderRequest,new AbortController().signal))expect(event.type).toBe('error');
+  expect(queued().at(-1).properties).toMatchObject({model:'custom',error_category:'rate_limit'});
+  expect(JSON.stringify(queued())).not.toMatch(/alice|thesis|private diagnostics/);
 });

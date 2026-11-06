@@ -8,6 +8,8 @@ import type { analyticsConfig } from './config';
 
 export class AnalyticsService {
   private enabled = false;
+  private opened = false;
+  private onboardingStart: number | undefined;
   private installationId = '';
   private sessionId = '';
   private pending: Promise<void> | undefined;
@@ -22,7 +24,7 @@ export class AnalyticsService {
       this.installationId = storedId.success ? storedId.data : randomUUID();
       this.write('installation_id',this.installationId);
       if (!this.read('school_profile',null)) this.write('school_profile',{school_id:null,school_name:null,school_source:'unknown',moodle_connected:false});
-      this.enabled = this.read<boolean>('analytics_enabled',false) === true;
+      this.enabled = this.read<boolean>('analytics_enabled',false) === true && !this.read('deletion_pending',false);
       if (!this.enabled || !config?.enabled) this.db.exec('DELETE FROM analytics_queue');
       this.sessionId = randomUUID();
       this.write('session_id',this.sessionId);
@@ -37,11 +39,12 @@ export class AnalyticsService {
   onConsentChanged?:()=>void;
   get consentRevision() {return this.epoch;}
   getInstallationId() { return { installation_id: this.installationId || null }; }
-  get permitted() { return this.enabled && !!this.config?.enabled && !!this.installationId; }
+  get permitted() { return this.enabled && !this.read('deletion_pending',false) && !!this.config?.enabled && !!this.installationId; }
   getState() {
-    return this.safe(() => analyticsState.parse({enabled:this.enabled,onboarding_completed:this.read('onboarding_completed',false),onboarding:this.read('onboarding',null),installation_id_present:!!this.installationId,acquisition_source:this.read('acquisition_source',null),deletion_pending:this.read('deletion_pending',false)})) ?? {enabled:false,onboarding_completed:false,onboarding:null,installation_id_present:false,acquisition_source:null,deletion_pending:false};
+    return this.safe(() => analyticsState.parse({enabled:this.enabled,onboarding_completed:this.read('onboarding_completed',false),onboarding:this.read('onboarding',null),installation_id_present:!!this.installationId,acquisition_source:this.read('acquisition_source',null),consent_decided:this.read('consent_decided',false),deletion_pending:this.read('deletion_pending',false)})) ?? {enabled:false,onboarding_completed:false,onboarding:null,installation_id_present:false,acquisition_source:null,consent_decided:false,deletion_pending:false};
   }
   setConsent(enabled:boolean) {
+    this.safe(() => this.write('consent_decided',true));
     if (this.enabled === enabled) return this.getState();
     this.safe(() => {
       this.enabled = false;
@@ -49,18 +52,26 @@ export class AnalyticsService {
       this.controller?.abort();
       this.db.exec('DELETE FROM analytics_queue');
       this.write('profile_hash','');
+      if (enabled && this.read('deletion_pending',false)) {
+        this.installationId=randomUUID();
+        this.write('installation_id',this.installationId);
+        this.write('deletion_pending',false);
+      }
       this.write('analytics_enabled',enabled);
       this.enabled = enabled;
       this.onConsentChanged?.();
       if (enabled) {this.sessionId=randomUUID();this.write('session_id',this.sessionId);this.track('app_session_started');}
       this.retryAt = 0;
-      if (enabled) this.profile();
+      if (enabled) {this.launchEvents();this.profile();}
     });
     return this.getState();
   }
   completeOnboarding(input:Onboarding) {
     this.safe(() => {
+      if (this.read('onboarding_completed',false)) return;
       const value = onboarding.parse(input);
+      if (this.onboardingStart !== undefined) this.track('onboarding_started',{onboarding_version:1});
+      this.onboardingStart=undefined;
       this.write('onboarding',value);
       this.write('onboarding_completed',true);
       this.write('acquisition_source',value.acquisition_source);
@@ -75,6 +86,10 @@ export class AnalyticsService {
     return {pending:true as const,installation_id:this.installationId,method:'contact' as const,contact_url:'https://github.com/ava-apple/vstudy-pro',instructions:'Copy this installation ID and contact the app publisher through the support contact in the app distribution. Request deletion of the PostHog person and all associated events. Do not post the ID publicly.'};
   }
   rendererTrack(event:string,properties:unknown,eventId?:string) {
+    if (event === 'onboarding_started') {
+      if (!this.read('onboarding_completed',false)) this.onboardingStart ??= this.now();
+      return;
+    }
     if ((rendererEvents as readonly string[]).includes(event)) this.track(event as AnalyticsEvent,properties,eventId);
   }
   track(event:AnalyticsEvent,properties:unknown = {},eventId: string = randomUUID()) {
@@ -100,9 +115,10 @@ export class AnalyticsService {
       const clean = sanitizeEvent('$identify',{...this.device,acquisition_source:this.read('acquisition_source',undefined),...this.read('school_profile',{})});
       if (!clean) return;
       const hash = createHash('sha256').update(JSON.stringify(clean)).digest('hex');
-      const pending=this.db.prepare("SELECT payload FROM analytics_queue WHERE json_extract(payload,'$.event')='$identify' ORDER BY sequence DESC LIMIT 1").get();
-      const pendingHash=pending ? createHash('sha256').update(JSON.stringify(JSON.parse(String(pending.payload)).properties.$set)).digest('hex') : '';
-      if (hash !== this.read('profile_hash','') && hash !== pendingHash) this.track('$identify',clean);
+      const pending=this.db.prepare("SELECT event_id,payload FROM analytics_queue WHERE json_extract(payload,'$.event')='$identify'").all();
+      if (pending.length === 1 && JSON.stringify(JSON.parse(String(pending[0]!.payload)).properties.$set) === JSON.stringify(clean)) return;
+      this.db.exec("DELETE FROM analytics_queue WHERE json_extract(payload,'$.event')='$identify'");
+      if (hash !== this.read('profile_hash','') || pending.length) this.track('$identify',clean);
     });
   }
   school(school:{id:string;name:string}|null,connected=true) {
@@ -119,13 +135,17 @@ export class AnalyticsService {
     this.safe(() => {this.write('school_profile',{...this.read('school_profile',{}),moodle_connected:connected});this.profile();});
     this.track('moodle_disconnected');
   }
+  private launchEvents() {
+    if (!this.permitted || this.opened) return;
+    if (!this.read('first_open_sent',false) && this.track('app_first_opened',{app_version:this.device.app_version})) this.write('first_open_sent',true);
+    if (this.track('app_opened',this.device)) this.opened=true;
+  }
   start() {
     this.safe(() => {
       const previous = this.read<string>('app_version','');
-      if (!previous) this.track('app_first_opened',{app_version:this.device.app_version});
-      else if (previous !== this.device.app_version) this.track('app_updated',{from_version:previous,to_version:this.device.app_version});
+      if (previous && previous !== this.device.app_version) this.track('app_updated',{from_version:previous,to_version:this.device.app_version});
       this.write('app_version',this.device.app_version);
-      this.track('app_opened',this.device);
+      this.launchEvents();
       this.track('app_session_started');
       this.profile();
       this.timer = setInterval(() => {void this.flush();},15_000);

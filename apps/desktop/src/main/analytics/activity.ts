@@ -14,7 +14,7 @@ export class AnalyticsActivity {
     this.last = now;
     let idle=IDLE_THRESHOLD_SECONDS;
     try {idle=this.idleSeconds();} catch {idle=IDLE_THRESHOLD_SECONDS;}
-    const key = !this.focused ? 'background_ms' : idle >= IDLE_THRESHOLD_SECONDS ? 'idle_ms' : 'active_ms';
+    const key = delta > 10_000 || !this.focused ? 'background_ms' : idle >= IDLE_THRESHOLD_SECONDS ? 'idle_ms' : 'active_ms';
     this.totals[key]+=delta;
     this.window[key]+=delta;
     if (now-this.windowStart>=SUMMARY_INTERVAL_MS) this.summary(now);

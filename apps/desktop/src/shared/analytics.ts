@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const acquisitionSource = z.enum(['friend_classmate','instagram','threads','x','youtube','github','search_engine','teacher_school','other','prefer_not_to_say']);
 export const onboarding = z.object({acquisition_source:acquisitionSource,email_provided:z.boolean(),updates_opted_in:z.boolean(),duration_ms:z.number().int().min(0).max(86_400_000)}).strict();
-export const analyticsState = z.object({enabled:z.boolean(),onboarding_completed:z.boolean(),onboarding:onboarding.nullable(),installation_id_present:z.boolean(),acquisition_source:acquisitionSource.nullable(),deletion_pending:z.boolean()});
+export const analyticsState = z.object({enabled:z.boolean(),consent_decided:z.boolean(),onboarding_completed:z.boolean(),onboarding:onboarding.nullable(),installation_id_present:z.boolean(),acquisition_source:acquisitionSource.nullable(),deletion_pending:z.boolean()});
 export const rendererEvents = ['onboarding_started','onboarding_skipped','settings_opened','screen_viewed','theme_changed','language_changed'] as const;
 export const analyticsContract = {
   'analytics:getInstallationId':{request:z.object({}).strict(),response:z.object({installation_id:z.string().uuid().nullable()})},

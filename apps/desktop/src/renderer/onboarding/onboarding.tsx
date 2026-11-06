@@ -31,8 +31,12 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
   const newsletterConsent = useRef({email_provided:false, updates_opted_in:false});
   const [consentDone, setConsentDone] = useState(false);
   const onNewsletter = useCallback((email_provided:boolean, updates_opted_in:boolean) => { newsletterConsent.current = {email_provided, updates_opted_in}; }, []);
+  const consentLock = useRef(false);
   const completeConsent = async (enabled:boolean) => {
-    await completeAnalyticsOnboarding(enabled, {acquisition_source:source,...newsletterConsent.current,duration_ms:Math.min(86400000,Date.now()-started.current)});
+    if (consentLock.current) return;
+    consentLock.current=true;
+    try { await completeAnalyticsOnboarding(enabled, {acquisition_source:source,...newsletterConsent.current,duration_ms:Math.min(86400000,Date.now()-started.current)}); }
+    catch (error) {consentLock.current=false;throw error;}
     setConsentDone(true);
   };
   useEffect(() => { track('onboarding_started', {onboarding_version:1}); }, []);
@@ -102,7 +106,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
         {step === 'language' && <label>{tr('onboarding:language')}<Select value={language} disabled={busy} onChange={e => void chooseLanguage(e.target.value as Settings['language'])}><option value="auto">{tr('common:auto')}</option><option value="en" lang="en">English</option><option value="zh-Hant" lang="zh-Hant">繁體中文</option><option value="ja" lang="ja">日本語</option></Select></label>}
         {step === 'appearance' && <AppearanceSection/>}
         {step === 'acquisition' && <><fieldset className="analytics-sources"><legend className="motion-sr">{tr('analytics:acquisition')}</legend>{acquisitionSource.options.map(value => <label key={value}><input type="radio" name="acquisition" checked={source === value} onChange={() => setSource(value)}/>{tr(`analytics:source_${value}`)}</label>)}</fieldset><Newsletter onConsent={onNewsletter}/></>}
-        {step === 'privacy' && <><AnalyticsDisclosure/><ConsentChoice busy={busy} onChoose={enabled => { setBusy(true); void completeConsent(enabled).then(() => move('goal')).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}/></>}
+        {step === 'privacy' && <><AnalyticsDisclosure/><ConsentChoice busy={busy || consentDone} onChoose={enabled => { setBusy(true); void completeConsent(enabled).then(() => move('goal')).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}/></>}
         {step === 'goal' && <fieldset className="onboarding-goals"><legend className="motion-sr">{tr('onboarding:step_goal')}</legend>{goals.map(goal => <label key={goal} data-selected={progress.goal === goal}><input type="radio" name="onboarding-goal" value={goal} checked={progress.goal === goal} onChange={() => { try { saveProgress({ goal, documentId: undefined }); setImported(undefined); } catch { setError(tr('onboarding:save_error')); } }}/><span><strong>{tr(`onboarding:goal_${goal}`)}</strong><small>{tr(`onboarding:goal_${goal}_body`)}</small></span></label>)}</fieldset>}
         {step === 'ai' && <><Button variant="secondary" disabled={busy} onClick={() => void exit(false, 'ai-cli')}>{tr('ai-cli:wizard')}</Button><dl className="onboarding-ai">{['free', 'paid', 'login', 'privacy', 'keychain'].map(item => <div key={item}><dt>{tr(`onboarding:ai_${item}`)}</dt><dd>{tr(item === 'login' ? 'ai-cli:onboarding_login_body' : `onboarding:ai_${item}_body`)}</dd></div>)}</dl></>}
         {step === 'start' && <>
@@ -114,7 +118,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
       </div>
       {imported && <p role="status">{tr('onboarding:ready_to_open', { title: imported.title })}</p>}
       {error && <p role="alert">{error}</p>}
-      <footer>{step === 'ai' && <Button variant="outline" disabled={busy} onClick={() => void exit(false, 'providers')}>{tr('onboarding:configure_ai')}</Button>}{index > 0 && <Button variant="outline" disabled={busy} onClick={() => move(steps[index - 1]!)}>{tr('onboarding:back')}</Button>}{step !== 'privacy' && <Button className="primary" disabled={busy || (step === 'start' && progress.goal === 'sample' && !imported)} onClick={() => step === 'start' ? void exit(true, 'goal') : move(steps[index + 1]!)}>{tr(step === 'start' ? progress.goal === 'school' ? 'onboarding:open_courses' : imported || progress.goal === 'sample' ? 'onboarding:open_document' : 'onboarding:open_library' : step === 'ai' ? 'onboarding:skip_ai' : 'onboarding:next')}</Button>}</footer>
+      <footer>{step === 'ai' && <Button variant="outline" disabled={busy} onClick={() => void exit(false, 'providers')}>{tr('onboarding:configure_ai')}</Button>}{index > 0 && <Button variant="outline" disabled={busy} onClick={() => move(steps[index - 1]!)}>{tr('onboarding:back')}</Button>}{(step !== 'privacy' || consentDone) && <Button className="primary" disabled={busy || (step === 'start' && progress.goal === 'sample' && !imported)} onClick={() => step === 'start' ? void exit(true, 'goal') : move(steps[index + 1]!)}>{tr(step === 'start' ? progress.goal === 'school' ? 'onboarding:open_courses' : imported || progress.goal === 'sample' ? 'onboarding:open_document' : 'onboarding:open_library' : step === 'ai' ? 'onboarding:skip_ai' : 'onboarding:next')}</Button>}</footer>
     </DialogContent>
   </Dialog>;
 }
