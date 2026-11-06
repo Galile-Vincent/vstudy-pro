@@ -4,7 +4,7 @@
 
 Mac で教材を読み、Moodle の締め切りをまとめ、課題を学習計画に変えるアプリです。
 
-![バージョン 0.2.0](https://img.shields.io/badge/version-0.2.0-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
+![バージョン 0.2.1](https://img.shields.io/badge/version-0.2.1-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
 
 ![グラフのノート、選択した文章、デモ回答と出典の引用](docs/assets/readme/reader.webp)
 
@@ -14,7 +14,7 @@ Mac で教材を読み、Moodle の締め切りをまとめ、課題を学習計
 
 [GitHub Releases](https://github.com/ava-apple/vstudy-pro/releases/latest) から、同じリリースの DMG と `SHA256SUMS.txt` をダウンロードしてください。現在、このリポジトリは非公開のため、アクセス権が必要です。公開済みのリリースがない場合は、管理者にアクセスを依頼するか、下の手順でソースからビルドしてください。
 
-現在のローカルビルドで生成されるファイルは **`VStudy-Pro-0.2.0-arm64.dmg`** です。バージョン番号はリリースごとに変わります。[Release workflow](.github/workflows/release.yml) は `v*.*.*` タグの push で実行され、タグとアプリのバージョンを照合します。その後、Developer ID 未署名の成果物とチェックサムを**ドラフトリリース**に添付します。ドラフトは公開済みのダウンロードではありません。
+現在のローカルビルドで生成されるファイルは **`VStudy-Pro-0.2.1-arm64.dmg`** です。バージョン番号はリリースごとに変わります。[Release workflow](.github/workflows/release.yml) は `v*.*.*` タグの push で実行され、タグとアプリのバージョンを照合します。その後、Developer ID 未署名の成果物とチェックサムを**ドラフトリリース**に添付します。ドラフトは公開済みのダウンロードではありません。
 
 Apple silicon Mac（arm64）が必要です。生成されたアプリの最低 OS バージョンは macOS 12.0 です。Builder 設定はアーキテクチャを固定せず、ビルドホストの構成を使います。現在確認できているのは arm64 ビルドです。Intel 版と universal 版は未検証です。Release workflow も runner のアーキテクチャに依存するため、Intel Mac では実際の配布ファイルを確認してください。Windows 版と Linux 版も提供していません。AI と学校の同期にはインターネット接続が必要です。ローカルの Markdown やテキストを読むだけなら、AI アカウントは不要です。
 
@@ -63,7 +63,7 @@ pnpm build
 pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish never -c.mac.notarize=false -c.mac.identity=null
 ```
 
-arm64 ホストでは `apps/desktop/release/VStudy-Pro-0.2.0-arm64.dmg` と `apps/desktop/release/mac-arm64/VStudy Pro.app` を生成します。このコマンドは Developer ID 署名と公証を無効にします。`pnpm package` は設定済みの署名・公証の既定値を使います。配布用の署名については[リリース手順](docs/ENGINEERING.md#prepare-a-release)と[署名用の認証情報](CONTRIBUTING.md#sign-a-distribution-build)を参照してください。
+arm64 ホストでは `apps/desktop/release/VStudy-Pro-0.2.1-arm64.dmg` と `apps/desktop/release/mac-arm64/VStudy Pro.app` を生成します。このコマンドは Developer ID 署名と公証を無効にします。`pnpm package` は設定済みの署名・公証の既定値を使います。配布用の署名については[リリース手順](docs/ENGINEERING.md#prepare-a-release)と[署名用の認証情報](CONTRIBUTING.md#sign-a-distribution-build)を参照してください。
 
 テキスト以外の文書を変換するには、**uv** または **Python 3.10+** を別途インストールします。初回変換では同意を得てから、ハッシュを固定した依存パッケージを PyPI から取得します。uv が GitHub から Python を取得することもあります。「**設定 > プライバシー**」には再試行と、設定を保持するオフラインモードがあります。Markdown とテキストにはこのインストールは不要です。
 

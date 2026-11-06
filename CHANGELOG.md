@@ -3,6 +3,24 @@
 Generated from Git history with git-cliff. Historical subjects are preserved.
 Pre-baseline changes without a conventional prefix appear under Other changes.
 
+## v0.2.1
+
+### Features
+- feat(release): ship a real app icon and space-free artifact names (3b9d6b6)
+- feat(courses): give courses a theme-aware art direction (cbe2147)
+- feat(courses): merge art-led Courses redesign (3a6ba28)
+- feat: redesign the reader and study workspace (d6a47d2)
+- feat(reader): merge Quiet folio redesign of reader, chat, home and shell (5d12844)
+- feat(courses): refine vivid artwork and full-width heroes (7cdab65)
+- feat(courses): merge refined vivid course art (0d1af00)
+- feat(marketing): add curated app screenshot pipeline (3dff35e)
+- feat(website): show curated product views across marketing docs (dbe6326)
+- feat(marketing): merge curated screenshots, capture pipeline and refreshed site (e61ba2c)
+
+### Tests
+- test(courses): add reusable art fixtures and Electron evidence (87d202b)
+- test: record reader art direction and Electron acceptance (331403c)
+- test(courses): capture vivid art refinement and reference comparisons (a7fcd86)
 ## v0.2.0
 
 ### Documentation
@@ -82,6 +100,7 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 - chore(cleanup): merge green checks, locale generation, module docs (e7f0082)
 - chore(merge): integrate stream J cleanup into UX polish (30995d9)
 - chore(renderer): remove unused vendor files after stream J merge (fcbd530)
+- chore(release): prepare v0.2.0 (06195e5)
 
 ### Refactoring
 - refactor: route renderer colors through semantic theme tokens (9b72fa1)
