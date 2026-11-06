@@ -1,0 +1,54 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop
+
+ ❯ src/main/mcp/backend-security.test.ts (11 tests | 2 failed | 9 skipped) 28ms
+   × reconstructs a known school token split across returned course fields 17ms
+   × reconstructs a base64 school token split by whitespace inside module content 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/mcp/backend-security.test.ts > reconstructs a known school token split across returned course fields
+AssertionError: expected '0123456789abcdef' to be '[redacted]' // Object.is equality
+
+Expected: "[redacted]"
+Received: "0123456789abcdef"
+
+ ❯ src/main/mcp/backend-security.test.ts:181:21
+    179|   if (!result.ok) throw Error(result.error.code);
+    180|   const item = z.object({items:z.array(z.object({name:z.string(),short…
+    181|   expect(item.name).toBe('[redacted]');
+       |                     ^
+    182|   expect(item.shortName).toBe('[redacted]');
+    183|   expect(result.data).toMatchObject({redacted:true});
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/main/mcp/backend-security.test.ts > reconstructs a base64 school token split by whitespace inside module content
+AssertionError: expected 'MDEyMzQ1Njc4OWFiY2RlZm\nZlZGNiYTk4NzY…' to be '[redacted]' // Object.is equality
+
+- Expected
++ Received
+
+- [redacted]
++ MDEyMzQ1Njc4OWFiY2RlZm
++ ZlZGNiYTk4NzY1NDMyMTA=
+
+ ❯ src/main/mcp/backend-security.test.ts:195:16
+    193|   if (!result.ok) throw Error(result.error.code);
+    194|   const {text} = z.object({text:z.string()}).parse(result.data.content…
+    195|   expect(text).toBe('[redacted]');
+       |                ^
+    196|   expect(result.data).toMatchObject({redacted:true});
+    197| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 skipped (11)
+   Start at  13:46:58
+   Duration  344ms (transform 194ms, setup 0ms, import 266ms, tests 28ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/mcp/backend-security.test.ts --pool=forks --maxWorkers=2 -t reconstructs

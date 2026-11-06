@@ -31,7 +31,7 @@ it('redacts all stored school token forms from the first cached read while the s
     const response = await engine.handleRequest({jsonrpc: '2.0', id: 'read', method: 'tools.call', params: {grant, name: 'list_courses', args: {}}}, 'connection');
     const result = toolResultSchema.parse(response.result);
     expect(result).toMatchObject({ok: true});
-    expect(JSON.stringify(result)).toContain('Algorithms');
+    expect(result).toMatchObject({ok:true, data:{redacted:true, content:{items:[{name:'[redacted]', shortName:'Course'}]}}});
     for (const secret of secrets) expect(JSON.stringify(result)).not.toContain(secret);
     expect(h.request).not.toHaveBeenCalled();
     vi.spyOn(h.moodle, 'mcpSecretValues').mockRejectedValueOnce(new Error('Private Keychain WS-Q7a'));

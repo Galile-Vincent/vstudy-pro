@@ -170,3 +170,28 @@ it('removes the final assignment tool and final-submission capability', () => {
   expect(mcpTools).not.toHaveProperty('submit_assignment');
   expect(mcpTools.save_assignment_draft.functions).not.toContain('mod_assign_submit_for_grading');
 });
+
+it('reconstructs a known school token split across returned course fields', async () => {
+  const secret = '0123456789abcdeffedcba9876543210';
+  const h = await setup(secret);
+  h.repository.saveCourse({...h.repository.course(courseA).course, fullName:secret.slice(0,16), shortName:secret.slice(16)});
+  const result = await h.call('list_courses', {});
+  if (!result.ok) throw Error(result.error.code);
+  const item = z.object({items:z.array(z.object({name:z.string(),shortName:z.string()}))}).parse(result.data.content).items[0]!;
+  expect(item.name).toBe('[redacted]');
+  expect(item.shortName).toBe('[redacted]');
+  expect(result.data).toMatchObject({redacted:true});
+  expect(h.request).not.toHaveBeenCalled();
+});
+it('reconstructs a base64 school token split by whitespace inside module content', async () => {
+  const secret = '0123456789abcdeffedcba9876543210';
+  const h = await setup(secret);
+  const encoded = Buffer.from(secret).toString('base64');
+  const detail = h.repository.course(courseA);
+  h.repository.saveDetail(courseA, {sections:detail.sections.map(section => ({...section, modules:section.modules.map(module => module.id === moduleA ? {...module, descriptionHtml:encoded.slice(0,22)+'\n'+encoded.slice(22)} : module)}))});
+  const result = await h.call('get_module', {courseId:courseA, moduleId:moduleA});
+  if (!result.ok) throw Error(result.error.code);
+  const {text} = z.object({text:z.string()}).parse(result.data.content);
+  expect(text).toBe('[redacted]');
+  expect(result.data).toMatchObject({redacted:true});
+});
