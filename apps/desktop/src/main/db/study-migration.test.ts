@@ -65,3 +65,11 @@ it('document deletion cascades linked document chat evidence and attachment link
   expect(db.prepare('SELECT count(*) n FROM study_jobs').get()!.n).toBe(0);expect(db.prepare('SELECT count(*) n FROM study_observations').get()!.n).toBe(0);expect(db.prepare('SELECT count(*) n FROM study_course_documents').get()!.n).toBe(0);expect(db.prepare("SELECT id FROM study_courses WHERE id='course'").get()).toBeDefined();expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
  }finally{db.close();}
 });
+it('bounds JSON by UTF-8 bytes so multibyte rows can always be restored',()=>{
+ const db=fixture();try{
+  const aliases=JSON.stringify(Array.from({length:40},(_,i)=>'概念'.repeat(70)+i));
+  expect(aliases.length).toBeLessThan(8192);
+  expect(Buffer.byteLength(aliases)).toBeGreaterThan(8192);
+  expect(()=>db.prepare("UPDATE study_courses SET aliases=? WHERE id='course'").run(aliases)).toThrow();
+ }finally{db.close();}
+});

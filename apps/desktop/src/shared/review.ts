@@ -1,6 +1,7 @@
 import { z } from 'zod';
 export const studyIdSchema = z.string().uuid();
 const title = z.string().trim().min(1).max(240);
+const courseAliases=z.array(title).max(50).refine(value=>new TextEncoder().encode(JSON.stringify(value)).byteLength<=8192,'Aliases exceed JSON byte limit');
 const at = z.string().datetime();
 export const studyPrefsSchema = z.object({ memoryEnabled: z.boolean().default(true), noticeAcknowledged: z.boolean().default(false), timeZone: z.string().min(1).max(100).refine(zone => { try {
         new Intl.DateTimeFormat('en', { timeZone: zone });
@@ -10,7 +11,7 @@ export const studyPrefsSchema = z.object({ memoryEnabled: z.boolean().default(tr
         return false;
     } }).default('UTC') }).strict();
 export type StudyPrefs = z.infer<typeof studyPrefsSchema>;
-export const studyCourseSchema = z.object({ id: studyIdSchema, title, aliases: z.array(title).max(50), moodleCourseId: studyIdSchema.nullable(), createdAt: at, archivedAt: at.nullable() }).strict();
+export const studyCourseSchema = z.object({ id: studyIdSchema, title, aliases: courseAliases, moodleCourseId: studyIdSchema.nullable(), createdAt: at, archivedAt: at.nullable() }).strict();
 export const studyUnitSchema = z.object({ id: studyIdSchema, courseId: studyIdSchema, kind: z.enum(['moodle', 'document', 'manual']), ordinal: z.number().int(), title, sourceKey: z.string().min(1).max(240), sourceSectionId: z.string().nullable(), startsAt: at.nullable(), endsAt: at.nullable() }).strict();
 export const studyConceptSchema = z.object({ id: studyIdSchema, courseId: studyIdSchema, key: title, label: title, source: z.enum(['heading', 'user', 'promoted']), unitId: studyIdSchema.nullable(), userState: z.enum(['none', 'dismissed']), note: z.string().max(240).nullable(), createdAt: at }).strict();
 export const studyObservationSchema = z.object({ id: studyIdSchema, jobId: studyIdSchema, courseId: studyIdSchema, unitId: studyIdSchema.nullable(), conceptKey: title.nullable(), proposedLabel: title.nullable(), errorType: z.enum(['none', 'slip', 'mistake', 'misconception', 'gap']), signal: z.enum(['asked', 'confused', 'wrong', 'gave_up', 'resolved']), evidenceQuote: z.string().max(240), evidenceKind: z.enum(['quote', 'paraphrase']), weaknessNote: z.string().max(240).nullable(), confidence: z.number().min(0).max(1), dismissed: z.boolean(), resolved: z.boolean(), wrongAttempt: z.boolean(), createdAt: at, occurredAt: at, conversationId: studyIdSchema, userMessageId: studyIdSchema, assistantMessageId: studyIdSchema, questionSummary: z.string().max(240).nullable() }).strict();
@@ -23,7 +24,7 @@ export type StudyPageInput = z.input<typeof studyPageInputSchema>;
 const page = <T extends z.ZodTypeAny>(item: T) => z.object({ items: z.array(item).max(100), nextCursor: studyCursorSchema.nullable() }).strict();
 const empty = z.object({}).strict(), ack = z.object({ ok: z.literal(true) }).strict();
 const courseId = z.object({ courseId: studyIdSchema }).strict(), conceptId = z.object({ conceptId: studyIdSchema }).strict();
-export const studyCourseInputSchema = z.object({ title, aliases: z.array(title).max(50).default([]) }).strict();
+export const studyCourseInputSchema = z.object({ title, aliases: courseAliases.default([]) }).strict();
 export const studyConceptInputSchema = z.object({ courseId: studyIdSchema, label: title, unitId: studyIdSchema.nullable().default(null), note: z.string().max(240).nullable().default(null) }).strict();
 export const reviewIpc = {
     'review:courses:create': { request: studyCourseInputSchema, response: studyCourseSchema },

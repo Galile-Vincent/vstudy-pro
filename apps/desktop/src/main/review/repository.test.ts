@@ -76,3 +76,8 @@ it('lists and edits eligible exchange summaries even when extraction found zero 
  repo.editJob(job,{questionSummary:'Edited summary'});expect(repo.jobsPage({courseId:course.id}).items[0]?.questionSummary).toBe('Edited summary');
  repo.excludeChat(chat,true);expect(repo.jobsPage({courseId:course.id}).items).toHaveLength(0);
 });
+it('rejects multibyte aliases that would exceed restore JSON bounds',()=>{
+ const {repo}=setup();
+ const aliases=Array.from({length:40},(_,i)=>'概念'.repeat(70)+i);
+ expect(()=>repo.createCourse({title:'Physics',aliases})).toThrow();
+});

@@ -2,7 +2,7 @@
 export const studyMigration = `
 CREATE TABLE study_courses (
  id TEXT PRIMARY KEY NOT NULL, title TEXT NOT NULL CHECK(length(title) BETWEEN 1 AND 240),
- aliases TEXT NOT NULL DEFAULT '[]' CHECK(json_valid(aliases) AND json_type(aliases)='array' AND length(aliases)<=8192),
+ aliases TEXT NOT NULL DEFAULT '[]' CHECK(json_valid(aliases) AND json_type(aliases)='array' AND length(CAST(aliases AS BLOB))<=8192),
  moodleCourseId TEXT UNIQUE REFERENCES moodle_courses(id) ON DELETE SET NULL,
  createdAt TEXT NOT NULL, archivedAt TEXT
 );
@@ -105,11 +105,11 @@ CREATE INDEX study_concept_events_concept ON study_concept_events(conceptId);
 CREATE TABLE study_artifacts (
  id TEXT PRIMARY KEY NOT NULL, courseId TEXT NOT NULL REFERENCES study_courses(id) ON DELETE CASCADE,
  kind TEXT NOT NULL CHECK(kind IN ('note','test')), title TEXT NOT NULL CHECK(length(title) BETWEEN 1 AND 240),
- scopeJson TEXT NOT NULL CHECK(json_valid(scopeJson) AND length(scopeJson)<=8192),
- resolvedScopeJson TEXT NOT NULL CHECK(json_valid(resolvedScopeJson) AND length(resolvedScopeJson)<=65536),
+ scopeJson TEXT NOT NULL CHECK(json_valid(scopeJson) AND length(CAST(scopeJson AS BLOB))<=8192),
+ resolvedScopeJson TEXT NOT NULL CHECK(json_valid(resolvedScopeJson) AND length(CAST(resolvedScopeJson AS BLOB))<=65536),
  status TEXT NOT NULL CHECK(status IN ('generating','ready','failed','interrupted')),
  idempotencyKey TEXT NOT NULL UNIQUE CHECK(length(idempotencyKey) BETWEEN 1 AND 240), attemptToken TEXT NOT NULL,
- bodyMarkdown TEXT CHECK(length(bodyMarkdown)<=262144), testJson TEXT CHECK(json_valid(testJson) AND length(testJson)<=262144),
+ bodyMarkdown TEXT CHECK(length(bodyMarkdown)<=262144), testJson TEXT CHECK(json_valid(testJson) AND length(CAST(testJson AS BLOB))<=262144),
  providerId TEXT NOT NULL, modelId TEXT NOT NULL, promptVersion TEXT NOT NULL, errorCode TEXT CHECK(length(errorCode)<=120), createdAt TEXT NOT NULL,
  CHECK((status='ready' AND ((kind='note' AND bodyMarkdown IS NOT NULL AND testJson IS NULL) OR (kind='test' AND testJson IS NOT NULL AND bodyMarkdown IS NULL))) OR
  (status!='ready' AND bodyMarkdown IS NULL AND testJson IS NULL))
@@ -118,7 +118,7 @@ CREATE INDEX study_artifacts_page ON study_artifacts(courseId,createdAt DESC,id)
 CREATE TABLE study_attempts (
  id TEXT PRIMARY KEY NOT NULL, artifactId TEXT NOT NULL REFERENCES study_artifacts(id) ON DELETE CASCADE,
  phase TEXT NOT NULL CHECK(phase IN ('answering','committed','graded','confirmed')),
- answersJson TEXT NOT NULL CHECK(json_valid(answersJson) AND json_type(answersJson)='object' AND length(answersJson)<=65536),
+ answersJson TEXT NOT NULL CHECK(json_valid(answersJson) AND json_type(answersJson)='object' AND length(CAST(answersJson AS BLOB))<=65536),
  startedAt TEXT NOT NULL, committedAt TEXT, confirmedAt TEXT,
  CHECK((phase='answering' AND committedAt IS NULL AND confirmedAt IS NULL) OR
  (phase IN ('committed','graded') AND committedAt IS NOT NULL AND confirmedAt IS NULL) OR
