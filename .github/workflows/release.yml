@@ -37,7 +37,11 @@ jobs:
       - run: pnpm vendor:check
       - run: pnpm knip
       - run: pnpm build
+      - name: Verify bundled MCP CLI and client assets
+        run: pnpm --filter @vstudy/mcp verify
       - run: pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish never -c.mac.notarize=false -c.mac.identity=null
+      - name: Verify packaged MCP resources and executable helper
+        run: pnpm --filter @vstudy/mcp verify:package
       - name: Checksums
         working-directory: apps/desktop/release
         run: shasum -a 256 ./*.dmg > SHA256SUMS.txt

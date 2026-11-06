@@ -1,0 +1,18 @@
+{
+  "release": "4.5",
+  "fixtureKind": "Synthetic values using official return structures, including numeric strings and optional fields.",
+  "sources": [
+    "https://github.com/moodle/moodle/blob/MOODLE_405_STABLE/course/externallib.php",
+    "https://github.com/moodle/moodle/blob/MOODLE_405_STABLE/mod/assign/externallib.php",
+    "https://github.com/moodle/moodle/blob/MOODLE_405_STABLE/mod/quiz/classes/external.php"
+  ],
+  "cm": {"cm":{"id":"101","course":"10","modname":"resource","instance":"201","completion":"1","completiongradeitemnumber":null,"completionpassgrade":"0","completionview":"0","visible":"1"},"warnings":[]},
+  "quizzes": {"quizzes":[{"id":51,"course":10,"coursemodule":151,"name":"Quiz","intro":"Metadata","timeopen":"1793923200","timeclose":"1794009600","timelimit":"1200","attempts":"2","grade":"100","sumgrades":"10","password":"secret","questions":["must never escape"]}],"warnings":[]},
+  "attempts": {"attempts":[{"id":71,"quiz":51,"userid":7,"attempt":1,"state":"finished","timestart":1793923200,"timefinish":1793923500,"sumgrades":"8.5","layout":"1,2,0","questions":["private question"],"reviewurl":"https://school.test/review?token=secret"}],"warnings":[]},
+  "forums": [{"id":31,"course":10,"cmid":131,"name":"Class forum","type":"general","intro":"Announcements","introfiles":[{"fileurl":"https://school.test/private"}]}],
+  "discussions": {"discussions":[{"id":41,"forumid":31,"name":"Topic","userfullname":"Teacher","timecreated":1793923200,"message":"Read the chapter"}],"warnings":[]},
+  "posts": {"posts":[{"id":61,"discussionid":41,"parentid":null,"subject":"Topic","message":"Read <a href='https://school.test/?token=secret'>the chapter</a>.","author":{"id":9,"fullname":"Teacher","email":"teacher@school.test"},"timecreated":1793923200,"isdeleted":false,"isprivatereply":false}],"warnings":[]},
+  "assignmentCm": {"cm":{"id":102,"course":10,"modname":"assign","instance":52,"completion":2,"visible":1},"warnings":[]},
+  "assignments": {"courses":[{"id":10,"assignments":[{"id":52,"cmid":102,"course":10,"name":"Essay","duedate":1794096000,"nosubmissions":0,"submissiondrafts":1,"teamsubmission":0,"requireallteammemberssubmit":0,"preventsubmissionnotingroup":0,"requiresubmissionstatement":0,"configs":[{"plugin":"onlinetext","subtype":"assignsubmission","name":"enabled","value":"1"}]}]}],"warnings":[]},
+  "status": {"lastattempt":{"submissionsenabled":true,"locked":false,"canedit":true,"caneditowner":true,"cansubmit":true,"submission":{"userid":7,"status":"draft"}},"warnings":[]}
+}

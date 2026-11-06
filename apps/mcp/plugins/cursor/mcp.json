@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "vstudy": {
+      "command": "node",
+      "args": [
+        "${CURSOR_PLUGIN_ROOT}/dist/vstudy-mcp.cjs",
+        "--client",
+        "cursor"
+      ]
+    }
+  }
+}

@@ -2,10 +2,12 @@
 import type { Guide } from './docs';
 import type { Language } from './ui';
 import { aiCliGuides } from './ai-cli-guides';
+import { mcpTranslations } from './mcp-docs';
 
 export const translations: Partial<Record<Language, Record<string, Pick<Guide, 'title' | 'description' | 'sections'>>>> = {
   'zh-Hant': {
     'ai-providers': aiCliGuides['zh-Hant'],
+    'agents-mcp': mcpTranslations['zh-Hant'],
     'getting-started': {
       title:'開始使用', description:'安裝 VStudy Pro，不連接帳號也能試讀第一份資料。',
       sections:[
@@ -27,6 +29,7 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
   },
   ja: {
     'ai-providers': aiCliGuides.ja,
+    'agents-mcp': mcpTranslations.ja,
     'getting-started': {
       title:'はじめに', description:'VStudy Pro をインストールして、アカウント接続なしで資料を読んでみましょう。',
       sections:[

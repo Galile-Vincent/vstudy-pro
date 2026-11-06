@@ -84,6 +84,7 @@ arm64 ホストでは `apps/desktop/release/VStudy-Pro-0.2.2-arm64.dmg` と `app
 - **ストレージとバックアップ。** 使用量の確認、キャッシュや変換済みファイルの削除、データベースの整合性検査、ポータブルバックアップの書き出しと復元ができます。認証情報はバックアップに含まれず、復元後は学校への再ログインが必要です。
 - **プライバシー。** ライブラリと SQLite はローカルに保存します。AI は任意で、保存する認証情報を暗号化し、セッション中のネットワーク活動を表示します。アプリの利用分析送信やデバイス間同期はありません。
 - **初回ガイドと言語。** サンプル文書、再表示できる設定ガイド、操作説明、画面に応じたヒントがあります。English（`en`）、繁體中文（`zh-Hant`）、日本語（`ja`）に対応しています。
+- **MCP でグローバルエージェントを接続。** アカウント・権限・期限を限定して授業を共有します。アプリのセッションで読み取り、書き込みは「設定 > エージェント」で毎回承認します。
 
 ## 画面ガイド
 
@@ -160,6 +161,20 @@ arm64 ホストでは `apps/desktop/release/VStudy-Pro-0.2.2-arm64.dmg` と `app
 | `Cmd+R` | フォーカス中の Moodle ページを再読み込みする。 |
 | `Tab` / `Shift+Tab` | 操作項目間でフォーカスを移動する。 |
 
+## グローバルエージェントを接続する
+
+ソースビルドには Claude Code、Codex、Antigravity、Claude Desktop、Cursor 向けの MCP サーバーを含みます。選択した Moodle アカウントを VStudy の既存セッションで読み取ります。学校の認証情報はアプリ内に保持し、エージェントには期限付きの個別ローカル許可を渡します。すべての書き込みは VStudy 内で毎回承認します。
+
+「設定 > エージェント」で接続を有効にし、接続ウィザードで設定変更を確認してインストールします。両方のコードを比較し、アカウントと権限を選択します。ソースをビルドした後、Codex の設定をプレビューできます。
+
+```sh
+node apps/mcp/dist/vstudy-mcp.cjs install --client codex --dry-run
+```
+
+ほかのクライアントは `claude`、`agy`、`claude-desktop`、`cursor` を指定します。Node.js 24.11.1 以降が必要です。小テストや動画は学生自身が取り組みます。MCP は小テストの解答・提出や活動進捗の偽造を行いません。課題提出は学生自身のテキストだけを対象とし、操作ごとに明示的な同意が必要です。
+
+[MCP の設定・ツール・安全性](docs/MCP.md)、[クライアント形式と実際の検証範囲](apps/mcp/CLIENT_FORMATS.md)、[設計判断](docs/MCP_DESIGN.md)を参照してください。公式 SDK とローカル Moodle フィクスチャでパッケージ成果物を確認しました。ネイティブ Windows の統合と実際の学校での確認は別途必要です。
+
 ## 仕組み
 
 学校を選んで Moodle サイトを確認すると、Main が公式モバイルサービスを検出し、対応するパスワード認証または SSO でログインします。アカウントごとのコース情報をローカルの SQLite に保存します。学校ごとの機能を確認し、同じ機能がすべての学校で使えるとは仮定しません。
@@ -200,6 +215,7 @@ apps/desktop/
   resources/    Python 変換ツールと同梱サンプル文書
   e2e/          実際の Electron を使う統合テストとテストデータ
   scripts/      ビルド、パッケージ、安全性、テストの補助ツール
+apps/mcp/       Stdio MCP サーバー、クライアント設定、プラグイン、SDK 検証
 docs/           設計、データ、セキュリティ、検証記録
 scripts/        リポジトリ用ツール、hooks、README リンク検査
 .github/        CI と未署名のタグリリースワークフロー
@@ -262,9 +278,9 @@ sequenceDiagram
 | --- | --- |
 | `pnpm dev` | Electron と Vite を起動する。Ctrl+C で停止する。 |
 | `pnpm typecheck` | TypeScript を検査し、翻訳の型を生成する。 |
-| `pnpm lint` | デスクトップアプリの ESLint を実行する。 |
-| `pnpm test --pool=forks --maxWorkers=2` | コントラスト検査と単体テストを 2 worker で実行する。 |
-| `pnpm build` | Main、Preload、Renderer をビルドする。 |
+| `pnpm lint` | MCP、デスクトップ、ウェブサイトを検査する。 |
+| `pnpm test --pool=forks --maxWorkers=2` | MCP、コントラスト、デスクトップの単体テストを 2 worker で実行する。 |
+| `pnpm build` | MCP、ネイティブの相手確認ヘルパー、Main、Preload、Renderer をビルドする。 |
 | `pnpm security:static` | 依存関係の方針とセキュリティ lint を検査する。 |
 | `pnpm security:check` | 静的検査、lint、単体テストを実行する。 |
 | `pnpm e2e` | ビルド後、実際の Electron の E2E を順番に実行する。 |

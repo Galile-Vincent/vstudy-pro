@@ -12,6 +12,9 @@ import { Workspace } from "./workspace";
 import { desktop } from './bridge';
 import { AiCliSetupHost } from './ai-cli/setup';
 import { ProviderSettings, type Providers } from './providers';
+import { AgentsProvider } from './settings/agents-state';
+import { AgentNavigation } from './settings/agents-navigation';
+import { AgentConsent, AgentStatus } from './settings/agents-consent';
 function GlobalSettings() {
   const [open, setOpen] = useState(false);
   const [initialTab, setInitialTab] = useState('general');
@@ -49,8 +52,10 @@ function Views() {
 }
 export function App() {
   return (
-    <AppShell sidebar={<LibrarySidebar />}>
-      <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/>
-    </AppShell>
+    <AgentsProvider>
+      <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
+        <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/><AgentConsent /><AgentNavigation />
+      </AppShell>
+    </AgentsProvider>
   );
 }

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "vstudy": {
+      "command": "node",
+      "args": [
+        "${PLUGIN_ROOT}/dist/vstudy-mcp.cjs",
+        "--client",
+        "agy"
+      ],
+      "timeoutSeconds": 300
+    }
+  }
+}

@@ -84,6 +84,7 @@ pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish neve
 - **儲存與備份。** 查看空間用量、清除快取或轉換檔、檢查資料庫完整性，以及匯出或還原可攜式備份。備份不含憑證；還原後須重新登入學校。
 - **隱私。** 文件庫與 SQLite 儲存在本機，AI 服務可自由選用，已儲存的憑證會加密，並提供本次執行的網路活動清單。App 不傳送分析資料，也沒有跨裝置同步。
 - **首次使用與語言。** 提供範例文件、可重播的設定導覽、操作示範與情境提示。介面支援 English（`en`）、繁體中文（`zh-Hant`）與日本語（`ja`）。
+- **透過 MCP 連接全域代理程式。** 以限定帳號、權限與有效期限的授權分享課業。代理程式使用 app 的登入狀態讀取內容，每次寫入都在「設定 > 代理程式」核准。
 
 ## 頁面導覽
 
@@ -160,6 +161,20 @@ pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish neve
 | `Cmd+R` | 重新載入目前聚焦的 Moodle 頁面面板。 |
 | `Tab` / `Shift+Tab` | 在控制項之間移動焦點。 |
 
+## 連接全域代理程式
+
+原始碼建置包含供 Claude Code、Codex、Antigravity、Claude Desktop 與 Cursor 使用的 MCP 伺服器。代理程式透過 VStudy 既有的登入狀態讀取你選定的 Moodle 帳號。學校憑證留在 app，代理程式取得獨立且會到期的本機授權；所有寫入都必須在 VStudy 逐次核准。
+
+開啟「設定 > 代理程式」，啟用連線，再用連接精靈預覽與安裝用戶端設定。比對配對碼，並選擇帳號與權限。完成原始碼建置後，可先預覽 Codex 設定：
+
+```sh
+node apps/mcp/dist/vstudy-mcp.cjs install --client codex --dry-run
+```
+
+其他用戶端可改用 `claude`、`agy`、`claude-desktop` 或 `cursor`，需要 Node.js 24.11.1 以上。測驗與影片仍由學生親自完成；MCP 不回答或提交測驗，也不偽造活動進度。作業繳交僅接受學生自己的文字，並需逐次明確同意。
+
+詳見 [MCP 設定、工具與安全指南](docs/MCP.md)、[用戶端格式與實際驗證範圍](apps/mcp/CLIENT_FORMATS.md)，以及[設計決策](docs/MCP_DESIGN.md)。封裝產物已搭配官方 SDK 與本機 Moodle 測試資料驗證；原生 Windows 整合與真實學校驗收仍需另外完成。
+
 ## 運作方式
 
 選擇學校並確認 Moodle 網站後，Main 探索官方行動服務，以學校支援的密碼或 SSO 流程登入，再將各帳號的課程快照存入本機 SQLite。App 會檢查伺服器能力，不假設每所學校都開放相同功能。
@@ -200,6 +215,7 @@ apps/desktop/
   resources/    Python 轉換器與內建範例文件
   e2e/          真實 Electron 整合測試與測試資料
   scripts/      建置、封裝、安全與測試工具
+apps/mcp/       Stdio MCP 伺服器、用戶端安裝器、外掛與 SDK 驗證
 docs/           架構、資料、安全、設計與驗證記錄
 scripts/        儲存庫工具、Git hooks 與 README 連結驗證
 .github/        CI 與未經 Developer ID 簽署的標籤發布流程
@@ -262,9 +278,9 @@ sequenceDiagram
 | --- | --- |
 | `pnpm dev` | 啟動 Electron 與 Vite，以 Ctrl+C 停止。 |
 | `pnpm typecheck` | 檢查 TypeScript 並產生語言型別。 |
-| `pnpm lint` | 執行桌面版 ESLint。 |
-| `pnpm test --pool=forks --maxWorkers=2` | 以兩個 worker 執行對比檢查與單元測試。 |
-| `pnpm build` | 建置 Main、Preload 與 Renderer。 |
+| `pnpm lint` | 檢查 MCP、桌面版與網站。 |
+| `pnpm test --pool=forks --maxWorkers=2` | 以兩個 worker 執行 MCP、對比與桌面版單元測試。 |
+| `pnpm build` | 建置 MCP、本機身分驗證輔助程式、Main、Preload 與 Renderer。 |
 | `pnpm security:static` | 檢查相依套件政策與安全規則。 |
 | `pnpm security:check` | 執行靜態檢查、lint 與單元測試。 |
 | `pnpm e2e` | 建置並依序執行真實 Electron E2E 測試。 |

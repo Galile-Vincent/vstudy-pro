@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "vstudy": {
+      "command": "/absolute/path/to/node",
+      "args": [
+        "/absolute/path/to/vstudy-mcp.cjs",
+        "--client",
+        "claude-desktop"
+      ]
+    }
+  }
+}

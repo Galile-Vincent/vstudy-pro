@@ -7,12 +7,12 @@
   "main": "out/main/index.js",
   "scripts": {
     "dev": "node scripts/generate-locales.mjs && electron-vite dev",
-    "build": "node scripts/generate-locales.mjs && electron-vite build",
+    "build": "pnpm --filter @vstudy/mcp build && node scripts/build-mcp-platform.mjs && node scripts/generate-locales.mjs && electron-vite build",
     "test": "node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run",
     "contrast:check": "node scripts/check-contrast.mjs",
     "typecheck": "node scripts/generate-locales.mjs && tsc --noEmit",
     "lint": "eslint .",
-    "package": "pnpm build && electron-builder --mac dmg dir",
+    "package": "pnpm build && node scripts/package-platform.mjs",
     "smoke": "pnpm build && node scripts/smoke.mjs",
     "package:verify": "npx --no-install @electron/fuses read --app \"release/mac-arm64/VStudy Pro.app\" && python3 scripts/verify-packaged.py",
     "locales:generate": "node scripts/generate-locales.mjs",
@@ -118,6 +118,25 @@
         "to": "samples"
       },
       {
+        "from": "../mcp/dist",
+        "to": "mcp/dist"
+      },
+      {
+        "from": "../mcp/plugins",
+        "to": "mcp/plugins"
+      },
+      {
+        "from": "../mcp/CLIENT_FORMATS.md",
+        "to": "mcp/CLIENT_FORMATS.md"
+      },
+      {
+        "from": "resources",
+        "to": ".",
+        "filter": [
+          "mcp-peer"
+        ]
+      },
+      {
         "from": "build/icon.png",
         "to": "brand/icon.png"
       }
@@ -150,6 +169,14 @@
         ]
       }
     ],
+    "nsis": {
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "oneClick": false,
+      "allowElevation": false,
+      "perMachine": false
+    },
     "asarUnpack": [
       "node_modules/node-pty/**/*"
     ],
@@ -163,11 +190,6 @@
     "dmg": {
       "icon": "build/icon.icns",
       "background": "build/dmg-background.png"
-    },
-    "nsis": {
-      "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico",
-      "installerHeaderIcon": "build/icon.ico"
     }
   }
 }

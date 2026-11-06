@@ -6,6 +6,17 @@
  */
 import { registerAiCliIpc } from "./ai-cli";
 import { registerPlannerIpc } from "./planner";
+import { join } from "node:path";
+import { createMcpBackend } from "../mcp/backend";
+import { createMcpRuntime } from "../mcp/runtime";
+import { createAgentNavigation } from "../mcp/navigation";
+import { createAgentClientSetup } from "../mcp/client-setup";
+import { registerMcpIpc } from "./mcp";
+import { PlannerRepository } from "../planner/repository";
+import { plannerCalendar } from "../planner/calendar";
+import { exportText } from "../services/export-file";
+import { log } from "../logging";
+import type { McpTransportFactory, McpStatePersistence } from "../../shared/mcp-platform";
 import { registerStorageIpc } from "./storage";
 import { applyNativeTheme } from '../theme';
 import { registerMoodleIpc } from './moodle';
@@ -26,12 +37,21 @@ import { createIpcRegistrar } from "./register";
 import { registerDocumentsIpc } from "./documents";
 import { registerChatIpc } from "./chat";
 
+/** App-owned transport and packaged paths are injected only by the composition root. */
+export interface AppIpcOptions {
+  moodleRequest?:typeof fetch;
+  mcpPaths?:{peerHelper?:string;serverBin:string};
+  mcpTransport?:McpTransportFactory;
+  mcpPersistence?:McpStatePersistence;
+}
+
 /** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerIpc(
   store: Store,
   secrets: SecretStore,
   isTrusted: (event: IpcMainInvokeEvent) => boolean,
   restoreMainWindow: () => void = () => {},
+  options:AppIpcOptions = {},
 ): () => Promise<void> {
   const pins = new ExecutablePins(`${app.getPath('userData')}/executable-pins.json`, async (previous, current) => {
     const result = await showAttachedMessage({type:'warning', message:tr('settings:binary_changed'), detail:tr('settings:binary_detail',{previous:previous.path,current:current.path,hash:current.hash,mtime:new Date(current.mtime).toISOString()}), buttons:[tr('common:cancel'),tr('settings:allow')],defaultId:0,cancelId:0});
@@ -89,7 +109,26 @@ export function registerIpc(
   const disposeAiCli = registerAiCliIpc(registrar, implemented, providers, pins, chat);
   const disposeDocuments = registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove), providers);
   const disposePlanner = registerPlannerIpc(registrar, store, implemented);
-  const disposeMoodle = registerMoodleIpc(registrar, store, secrets, implemented, disposeDocuments, restoreMainWindow);
+  const disposeMoodle = registerMoodleIpc(registrar, store, secrets, implemented, disposeDocuments, restoreMainWindow, options.moodleRequest);
+  const userData=app.getPath('userData');
+  const navigation=createAgentNavigation(disposeMoodle.service.repository,restoreMainWindow);
+  const mcpBackend=createMcpBackend({store,moodle:disposeMoodle.service,documents:disposeDocuments,openModule:navigation.openModule,exportCalendar:async selection=>{
+    const context=new PlannerRepository(store.db).context();
+    const text=plannerCalendar(context.snapshot,context.deadlines,selection);
+    const result=await dialog.showSaveDialog({defaultPath:'vstudy-study-plan.ics',filters:[{name:tr('planner:calendar_file'),extensions:['ics']}]});
+    if (result.canceled || !result.filePath) return {saved:false};
+    await exportText(text,result.filePath);return {saved:true};
+  }});
+  const mcpPaths=options.mcpPaths ?? {
+    peerHelper:app.isPackaged ? join(process.resourcesPath,'mcp-peer') : join(app.getAppPath(),'resources/mcp-peer'),
+    serverBin:app.isPackaged ? join(process.resourcesPath,'mcp/dist/vstudy-mcp.cjs') : join(app.getAppPath(),'../mcp/dist/vstudy-mcp.cjs'),
+  };
+  const mcp=createMcpRuntime({userData,backend:mcpBackend,secretValues:mcpBackend.secretValues,
+    ...(mcpPaths.peerHelper ? {peerHelper:mcpPaths.peerHelper} : {}),...(options.mcpTransport?{transport:options.mcpTransport}:{}),
+    ...(options.mcpPersistence?{persistence:options.mcpPersistence}:{}),
+    restoreWindow:restoreMainWindow,onFailure:()=>log({phase:'mcp-bridge-unavailable',code:'UNAVAILABLE'}),
+  });
+  registerMcpIpc(registrar,implemented,mcp,navigation,createAgentClientSetup(mcpPaths.serverBin,userData));
   const disposeLibrary = registerLibraryIpc(registrar, store, implemented, async (id, remove) => {await disposeDocuments.stopAi(id);return chat.deleteDocument(id, remove);}, disposeDocuments.resume);
   registerStorageIpc(registrar,store,implemented,async()=>{await disposeMoodle.waitForIdle();await chat.waitForIdle();await disposeDocuments.waitForIdle();await disposeLibrary.waitForIdle();});
   for (const channel of Object.keys(ipcContract) as IpcChannel[]) {
@@ -98,5 +137,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { registrar.dispose(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }

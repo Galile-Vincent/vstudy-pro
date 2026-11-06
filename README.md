@@ -84,6 +84,7 @@ For non-text document conversion, install **uv** or **Python 3.10+** separately.
 - **Storage and backup.** Inspect usage, clear caches or converted files, check database integrity, and export or restore a portable backup. Backups exclude credentials; restored school accounts need sign-in again.
 - **Privacy.** Local library and SQLite, optional providers, encrypted saved credentials, and a session network-activity inventory. No app analytics or device sync.
 - **Onboarding and languages.** A sample document, replayable setup, walkthroughs, and contextual tips. The interface supports English (`en`), Traditional Chinese (`zh-Hant`), and Japanese (`ja`).
+- **Global agents over MCP.** Share selected school accounts with scoped, expiring grants. Read course content through the app session and approve every proposed write in Settings > Agents.
 
 ## The pages
 
@@ -160,6 +161,20 @@ Help reopens setup, illustrated or recorded walkthroughs, and keyboard shortcuts
 | `Cmd+R` | Reload the focused Moodle page pane. |
 | `Tab` / `Shift+Tab` | Move between controls. |
 
+## Connect global agents
+
+The source build includes an MCP server for Claude Code, Codex, Antigravity, Claude Desktop, and Cursor. It reads the Moodle accounts you select through VStudy's existing session. School credentials stay in the app. Agents receive separate expiring local grants, and every write requires approval in VStudy.
+
+Open **Settings > Agents**, enable connections, and use **Connect an agent** to preview and install its configuration. Compare the pairing codes and select accounts and scopes. From a built checkout, preview the Codex entry with:
+
+```sh
+node apps/mcp/dist/vstudy-mcp.cjs install --client codex --dry-run
+```
+
+Use `claude`, `agy`, `claude-desktop`, or `cursor` for the other clients. Node.js 24.11.1 or later is required. Quiz attempts and videos remain the student's work; MCP cannot answer or submit quizzes or fabricate activity progress. Assignment submission accepts only the student's own text with explicit per-call consent.
+
+See the [MCP setup, tools, and security guide](docs/MCP.md), [client formats and actual verification](apps/mcp/CLIENT_FORMATS.md), and [design decisions](docs/MCP_DESIGN.md). Packaged-source acceptance used the official SDK with loopback Moodle fixtures. Native Windows integration and live-school acceptance remain separate checks.
+
 ## How it works
 
 Choose a school and confirm its Moodle site. Main discovers the official mobile service, signs in with the school's supported password or SSO flow, and stores account-scoped course snapshots in local SQLite. It checks server capabilities instead of assuming every school exposes the same functions.
@@ -200,6 +215,7 @@ apps/desktop/
   resources/    Python converter and bundled sample documents
   e2e/          Real Electron integration tests and fixtures
   scripts/      Build, packaging, security, and test helpers
+apps/mcp/       Stdio MCP server, client installers, plugins, and SDK checks
 docs/           Architecture, data, security, design, and evidence
 scripts/        Repository tools, hooks, and README link validation
 .github/        CI and unsigned tag-release workflows
@@ -262,9 +278,9 @@ Run from the repository root after installing dependencies. Run checks sequentia
 | --- | --- |
 | `pnpm dev` | Start Electron and Vite. Stop with Ctrl+C. |
 | `pnpm typecheck` | Check TypeScript and generate locale types. |
-| `pnpm lint` | Run desktop ESLint. |
-| `pnpm test --pool=forks --maxWorkers=2` | Run contrast checks and unit tests with two workers. |
-| `pnpm build` | Build main, preload, and renderer. |
+| `pnpm lint` | Check MCP, desktop, and website. |
+| `pnpm test --pool=forks --maxWorkers=2` | Run MCP, contrast, and desktop unit checks with two workers. |
+| `pnpm build` | Build MCP, its native peer helper, main, preload, and renderer. |
 | `pnpm security:static` | Run dependency policy and security lint. |
 | `pnpm security:check` | Run static checks, lint, and unit tests. |
 | `pnpm e2e` | Build and run serial real-Electron E2E tests. |
