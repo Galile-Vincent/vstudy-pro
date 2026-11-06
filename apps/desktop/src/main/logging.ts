@@ -14,7 +14,7 @@ export function redact(value: unknown): string {
   try {
     text = value instanceof Error ? value.stack ?? value.message : typeof value === 'string' ? value : JSON.stringify(value, (_key, item: unknown) => item instanceof Error ? item.stack ?? item.message : item) ?? '';
   } catch { return '[unserializable diagnostic]'; }
-  return text
+  return text.slice(0, 20_000)
     .replace(/\bsk-[a-z0-9_-]+/gi, '[redacted]')
     .replace(/((?:cookie|set-cookie)["'\s]*:\s*["']?)[^"'\r\n}]+/gi, '$1[redacted]')
     .replace(/((?:Basic|Bearer)\s+)[^\s"',}]+/gi, '$1[redacted]')
@@ -22,7 +22,7 @@ export function redact(value: unknown): string {
     .replace(/(["'])(?:[a-z]:[\\/]+|\\\\|~?\/)[^"'\r\n]*\1/gi, '$1[path]$1')
     .replace(/(?:[a-z]:[\\/]+Users[\\/]+|\/(?:Users|home)\/|~\/)[^"'\r\n<>|)]+/gi, '[path]')
     .replace(/[a-z]:[\\/]+[^\s"'<>|)]+|(?:~|file:\/\/)?\/[^\s"'<>|)]+/gi, '[path]')
-    .replace(/(?<![\p{L}\p{N}_-])[\p{L}\p{N}_-]+(?:\.[\p{L}\p{N}_-]+)*\.(?:pdf|docx?|xlsx?|pptx?|txt|md|csv|json|db|sqlite|log|[cm]?js|tsx?|png|jpe?g|zip)\b/giu, '[file]');
+    .replace(/[\p{L}\p{N}_.-]+/gu, token => /\.(?:pdf|docx?|xlsx?|pptx?|txt|md|csv|json|db|sqlite|log|[cm]?js|tsx?|png|jpe?g|zip)\b/i.test(token) ? '[file]' : token);
 }
 const maxBytes = 1024 * 1024;
 const recent: string[] = [];

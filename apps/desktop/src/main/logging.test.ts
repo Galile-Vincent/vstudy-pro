@@ -17,6 +17,16 @@ afterEach(() => { for (const root of roots.splice(0)) rmSync(root,{recursive:tru
 it.each([`${homedir()}/Documents/private-paper.pdf`, '/Volumes/School/private-paper.pdf', 'C:\\Users\\Student\\private-paper.pdf', 'private-paper.pdf', '/Volumes/School/Private Coursework/private-paper.pdf', '\\\\School\\Student\\private-paper.pdf'])('removes private paths and filenames: %s', path => {
   expect(redact(`ENOENT open '${path}' sk-secret Bearer secret x-api-key: hidden`)).not.toMatch(/private-paper|Documents|Student|Coursework|School|sk-secret|Bearer secret|hidden/);
 });
+it('bounds redaction work for long dotted diagnostics while removing paths and filenames', () => {
+  const input = "private-paper.pdf '/Volumes/School/private-paper.pdf' " + 'a.'.repeat(200_000);
+  const started = performance.now();
+  const result = redact(input);
+  expect(performance.now() - started).toBeLessThan(200);
+  expect(result.length).toBeLessThanOrEqual(20_000);
+  expect(result).toContain('[file]');
+  expect(result).toContain('[path]');
+  expect(result).not.toContain('private-paper');
+});
 it('writes redacted logs with restrictive permissions and bounded rotation', () => {
   const directory=fixture(); vi.spyOn(console,'log').mockImplementation(()=>{});
   for (let i=0;i<300;i++) log({phase:'failure',stack:'x'.repeat(8000)+' /private/private-paper.pdf sk-secret'});
