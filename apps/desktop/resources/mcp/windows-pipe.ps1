@@ -108,10 +108,10 @@ public static class VStudyPipeHost {
             while (!Stopping) {
                 next.WaitForConnection();
                 NamedPipeServerStream connected = next;
-                next = Create(false);
                 if (Interlocked.Increment(ref Connections) > 31) {
-                    Interlocked.Decrement(ref Connections); connected.Dispose(); continue;
+                    Interlocked.Decrement(ref Connections); connected.Dispose(); next = Create(false); continue;
                 }
+                next = Create(false);
                 ThreadPool.QueueUserWorkItem(Serve, connected);
             }
         } catch { if (!Stopping) Environment.Exit(1); }

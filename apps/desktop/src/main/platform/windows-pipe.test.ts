@@ -37,7 +37,6 @@ it.skipIf(process.platform !== 'win32')('round-trips bytes only through the curr
     expect(acl).toContain(`;;;${trustee})`);
     expect(acl).toMatch(/\(D;[^)]*;;;NU\)/);
     expect(acl).not.toMatch(/\(A;[^)]*;;;(?:WD|AU|BU)\)/);
-    // Connect after readiness. There is no permissive Node server in this test.
     const peer = createConnection(`\\\\.\\pipe\\${name}`);
     try {
       const response = once(peer, 'data');
@@ -47,6 +46,24 @@ it.skipIf(process.platform !== 'win32')('round-trips bytes only through the curr
       const duplicate = spawn(executable, args, {windowsHide: true, stdio: 'ignore'});
       const [code] = await once(duplicate, 'close');
       expect(code).not.toBe(0);
+      const overflow = [];
+      try {
+        for (let index = 0; index < 31; index++) {
+          const connection = createConnection(`\\\\.\\pipe\\${name}`);
+          connection.on('error', () => {});
+          overflow.push(connection);
+          await new Promise<void>((accept, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Pipe connection timed out')), 4000);
+            const settled = () => { clearTimeout(timeout); accept(); };
+            connection.once('connect', settled);
+            connection.once('error', settled);
+          });
+        }
+      } finally { for (const connection of overflow) connection.destroy(); }
+      expect(child.exitCode).toBeNull();
+      const afterOverflow = once(peer, 'data');
+      peer.write(Buffer.from('HOST_SURVIVED_CONNECTION_LIMIT'));
+      expect((await afterOverflow)[0].toString()).toBe('HOST_SURVIVED_CONNECTION_LIMIT');
     } finally { peer.destroy(); }
   } finally {
     child.stdin.end();
