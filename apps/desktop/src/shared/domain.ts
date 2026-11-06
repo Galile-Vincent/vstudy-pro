@@ -171,7 +171,7 @@ export const toolCallSchema = z.object({
 export type ToolCall = z.infer<typeof toolCallSchema>;
 /** Persisted content and turn metadata, including abort state and context exclusion. */
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string(), proposals: z.array(moodleAgentActionSchema).max(5).optional(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .object({ type: z.literal("text"), text: z.string().max(2_000_000), proposals: z.array(moodleAgentActionSchema).max(5).optional(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .extend({ contextExcluded: z.boolean().optional() })
   .strict();
 /** Validated stored message parts; model and selection metadata stay associated with their original turn. */
@@ -275,6 +275,8 @@ export const settingsSchema = z
     lastDocumentId: documentIdSchema.nullable().default(null),
   })
   .strict();
+/** Omitted keys stay unchanged; explicit undefined clears optional preferences. */
+export const settingsPatchSchema = settingsSchema.partial();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
   ...themePreferencesSchema.parse({}),

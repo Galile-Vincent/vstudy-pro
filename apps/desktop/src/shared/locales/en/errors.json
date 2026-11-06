@@ -23,6 +23,7 @@
   "pdf_no_text": "This PDF has no text layer. OCR is not supported; import a PDF with selectable text.",
   "ai_parse.images_unsupported": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
   "ai_parse.failed": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
+  "ai_parse.publish_failed": "The AI version could not be saved. Check free disk space and write permissions, then retry. Completed pages are retained.",
   "ai_parse.budget": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
   "ai_parse.cap": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",
   "ai_parse.range": "AI improvement unavailable. Check model image support, job cap and remaining budget, then retry.",

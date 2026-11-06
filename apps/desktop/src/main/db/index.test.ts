@@ -16,6 +16,8 @@ import {
   messageSchema,
 } from "../../shared";
 import { openStore, type Store } from "./index";
+import { builtinThemes } from "../../shared/themes";
+import { ipcContract } from "../../shared/ipc";
 import { migrations } from "./migrations";
 const stores: Store[] = [];
 const paths: string[] = [];
@@ -154,4 +156,15 @@ it('excludes superseded responses from context without relabelling them as stopp
  const answer={...message,role:'assistant' as const,parts:[{type:'text' as const,text:'Finished answer',status:'complete' as const}]};
  store.messages.insert(answer);store.messages.excludeFromContext([answer.id]);
  expect(store.messages.list(conversation.id)[0]?.parts).toEqual([{type:'text',text:'Finished answer',status:'complete',contextExcluded:true}]);
+});
+
+it('merges a stale workspace patch without erasing themes or budgets', () => {
+  const {store}=fixture();
+  const stale=store.settings.get();
+  const custom={...builtinThemes[0]!,id:'my-theme',name:'My theme'};
+  store.settings.set({...stale,customThemes:[custom],themeId:'my-theme',colorScheme:'dark',contrast:110,monthlyBudgetUsd:12,monthlyTokenBudget:3000});
+  const saved=store.settings.set(ipcContract['settings:set'].request.parse({lastModelId:'new-model'}));
+  expect(saved).toMatchObject({customThemes:[custom],themeId:'my-theme',colorScheme:'dark',contrast:110,monthlyBudgetUsd:12,monthlyTokenBudget:3000,lastModelId:'new-model'});
+  expect(store.settings.get()).toEqual(saved);
+  expect(store.settings.set({monthlyBudgetUsd:undefined}).monthlyBudgetUsd).toBeUndefined();
 });

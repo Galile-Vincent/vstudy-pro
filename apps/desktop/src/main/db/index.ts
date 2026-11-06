@@ -17,6 +17,7 @@ import {
   documentSchema,
   messageSchema,
   settingsSchema,
+  settingsPatchSchema,
   transitionDocument,
   type Conversation,
   type Document,
@@ -141,6 +142,14 @@ export function openStore(path: string) {
   maintenance.unref();
   return {
     db,
+    validateChats(): void {
+      for (const [table, schema] of [["conversations", conversationRow], ["messages", messageRow]] as const) {
+        for (const row of db.prepare(`SELECT * FROM ${table}`).iterate()) {
+          try { schema.parse(row); }
+          catch (cause) { throw new Error(`storage.invalid_backup`, { cause: new Error(`${table} ${row.id}`, { cause }) }); }
+        }
+      }
+    },
     integrityCheck: () => db.prepare("PRAGMA integrity_check").all(),
     close: () => { clearInterval(maintenance); db.exec("PRAGMA optimize"); db.close(); },
     usage: usageRepository(db),
@@ -236,8 +245,8 @@ export function openStore(path: string) {
             )
           : { ...defaultSettings };
       },
-      set(input: import("zod").input<typeof settingsSchema>): Settings {
-        const value = settingsSchema.parse(input);
+      set(input: import("zod").input<typeof settingsPatchSchema>): Settings {
+        const value = settingsSchema.parse({ ...this.get(), ...settingsPatchSchema.parse(input) });
         db.prepare(
           "INSERT INTO settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
         ).run("app", JSON.stringify(value));

@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import {
-  chatRequestSchema, settingsSchema,
+  chatRequestSchema, settingsSchema, messageSchema,
   documentSchema,
   documentTransitions,
   selectionSchema,
@@ -86,4 +86,10 @@ describe("document lifecycle", () => {
 
 it("loads preexisting settings with a default last document", () => {
   expect(settingsSchema.parse({ chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku" })).toEqual({ themeId:"vstudy",colorScheme:"system",contrast:100,glassOpacity:80,customThemes:[], uiScale:100,density:"comfortable",accent:"neutral",readerFont:"system",readerSize:"m",material:"glass",welcomeSeen: false, language:"auto", replyLanguage:"auto", chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku", lastDocumentId: null, warnAtPercent: 80, priceOverrides: {}, converterIdleMinutes:5,converterOffline:false,enableGenerativeUI:false, modelDisplayNames:{} });
+});
+
+it('bounds stored message text at the existing two-million-character reasoning limit', () => {
+ const base={id:randomUUID(),conversationId:randomUUID(),role:'assistant',createdAt:new Date().toISOString()};
+ expect(messageSchema.safeParse({...base,parts:[{type:'text',text:'a'.repeat(2_000_000)}]}).success).toBe(true);
+ expect(messageSchema.safeParse({...base,parts:[{type:'text',text:'a'.repeat(2_000_001)}]}).success).toBe(false);
 });

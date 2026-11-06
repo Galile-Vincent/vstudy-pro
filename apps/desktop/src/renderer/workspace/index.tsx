@@ -227,17 +227,16 @@ export function Workspace() {
       active = false;
     };
   }, [conversation?.id, report]);
-  const saveSettings = async (next: Settings) => {
+  const saveSettings = async (next: Partial<Settings>) => {
     try {
-      const latest = await desktop.invoke("settings:get", {});
-      const saved = await desktop.invoke("settings:set", { ...next, uiScale:latest.uiScale,density:latest.density,accent:latest.accent,readerFont:latest.readerFont,readerSize:latest.readerSize,material:latest.material, language:latest.language, replyLanguage:latest.replyLanguage, favoriteModels: latest.favoriteModels, recentModels: latest.recentModels, enableGenerativeUI: latest.enableGenerativeUI, converterIdleMinutes:latest.converterIdleMinutes,converterOffline:latest.converterOffline,modelDisplayNames: latest.modelDisplayNames });
+      const saved = await desktop.invoke("settings:set", next);
       setSettings(saved);
     } catch (error) {
       report(error);
     }
   };
   useEffect(() => {
-    if (connected && settings.lastDocumentId !== documentId) void saveSettings({ ...settings, lastDocumentId: documentId });
+    if (connected && settings.lastDocumentId !== documentId) void saveSettings({ lastDocumentId: documentId });
   }, [documentId, connected]);
   const chooseModel = (value: string) => {
     setModel(value);
@@ -245,7 +244,6 @@ export function Workspace() {
       providerId = value.slice(0, slash) as ProviderConfig["id"],
       modelId = value.slice(slash + 1);
     void saveSettings({
-      ...settings,
       lastProviderId: providerId,
       lastModelId: modelId,
     });
@@ -515,7 +513,6 @@ export function Workspace() {
             title={tr('common:swap_chat_side')}
             onClick={() =>
               void saveSettings({
-                ...settings,
                 chatSide: settings.chatSide === "left" ? "right" : "left",
               })
             }

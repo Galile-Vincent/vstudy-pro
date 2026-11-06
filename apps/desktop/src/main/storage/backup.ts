@@ -13,6 +13,7 @@ import { z } from 'zod';
 import type { Store } from '../db';
 import { openStore } from '../db';
 import { PlannerRepository } from '../planner/repository';
+import { requireFreeSpace } from './space';
 import { validateRestoreSchema } from './restore-schema';
 import { containedPath } from '../services/file-paths';
 import { atomicWrite, syncDirectory } from './atomic';
@@ -44,13 +45,19 @@ export async function libraryFiles(root:string):Promise<string[]> {
 /** Call with writers settled and the IPC maintenance gate held. SQLite backup includes WAL pages. */
 export async function exportBackup(store:Store,root:string,destination:string):Promise<void> {
   if(resolve(destination) === resolve(root) || isPathWithin(root,destination))throw new Error('storage.unsafe_file');
+  const names=await libraryFiles(join(root,'library'));
+  const databaseBytes=Number(store.db.prepare('PRAGMA page_count').get()!.page_count)*Number(store.db.prepare('PRAGMA page_size').get()!.page_size);
+  let archiveBytes=databaseBytes+4*1024*1024;
+  for(const name of names)archiveBytes+=(await lstat(join(root,name))).size+Buffer.byteLength(name)*2+276;
+  // SQLite needs a snapshot; ZIP is stored, with room for its manifest and headers.
+  await requireFreeSpace([{path:root,bytes:databaseBytes+8*1024*1024},{path:dirname(destination),bytes:archiveBytes}]);
   const stage=await mkdtemp(join(root,'.backup-'));
   try {
     const snapshot=join(stage,'vstudy.sqlite');await backup(store.db,snapshot);
     const db=new DatabaseSync(snapshot,{readOnly:true});
     try {if(db.prepare('PRAGMA integrity_check').get()?.integrity_check!=='ok')throw new Error('storage.integrity_failed');}finally{db.close();}
     const files:ArchiveFile[]=[{name:'vstudy.sqlite',path:snapshot,...await fingerprint(snapshot)}];
-    for(const name of await libraryFiles(join(root,'library')))files.push({name,path:join(root,name),...await fingerprint(join(root,name))});
+    for(const name of names)files.push({name,path:join(root,name),...await fingerprint(join(root,name))});
     const inventory=new Map(files.map(file=>[file.name,file]));
     const snapshotDb=new DatabaseSync(snapshot,{readOnly:true});
     try {
@@ -68,6 +75,8 @@ export async function exportBackup(store:Store,root:string,destination:string):P
 
 /** Validate all hashes, SQLite, schemas, references, and source identities before scheduling a restore. */
 export async function stageRestore(root:string,source:string):Promise<void> {
+  // Extraction plus SQLite validation/migration WAL and index work coexist with live data.
+  await requireFreeSpace([{path:root,bytes:(await lstat(source)).size*3+8*1024*1024}]);
   const stage=await mkdtemp(join(root,'.restore-'));let published=false;
   try {
     const entries=await extractZip(source,stage);
@@ -80,6 +89,7 @@ export async function stageRestore(root:string,source:string):Promise<void> {
     try {
       if(store.db.prepare('PRAGMA integrity_check').get()?.integrity_check!=='ok' || store.db.prepare('PRAGMA foreign_key_check').all().length)throw new Error('storage.integrity_failed');
       store.settings.get();
+      store.validateChats();
       new PlannerRepository(store.db).snapshot(true);
       for(const row of store.db.prepare('SELECT id,sourceHash,sourcePath,markdownPath,status,activeVersion FROM documents').all()){
         const hash=String(row.sourceHash),name=portableBasename(String(row.sourcePath)),original=`library/${hash}/${name}`;
@@ -94,6 +104,7 @@ export async function stageRestore(root:string,source:string):Promise<void> {
       store.db.exec("DELETE FROM moodle_response_cache; UPDATE moodle_accounts SET data=json_set(data,'$.status','expired'); PRAGMA wal_checkpoint(TRUNCATE)");
     } finally {store.close();}
     await mkdir(join(stage,'library'),{recursive:true,mode:0o700});
+    await syncDirectory(stage);
     await atomicWrite(join(root,'restore-pending.json'),JSON.stringify({directory:basename(stage)}));published=true;
   } finally {if(!published)await rm(stage,{recursive:true,force:true,maxRetries:3});}
 }

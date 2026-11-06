@@ -5,18 +5,20 @@
  * @packageDocumentation
  */
 /** Backups restore on another data root and survive interruptions without touching live data early. */
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { mkdtemp, mkdir, readFile, writeFile, rm, rename, readdir } from 'node:fs/promises';
+import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import { createHash } from 'node:crypto';
 import { openStore } from '../db';
-import { documentSchema } from '../../shared/domain';
+import { documentSchema, conversationSchema, messageSchema } from '../../shared/domain';
 import { confirmRestoreStartup, rollbackRestoreStartup } from './restore-startup';
 import { exportBackup, stageRestore, recoverRestore } from './backup';
 import { clearConverted, checkIntegrity, storageUsage } from './service';
 import { exclusiveStorage, enterStorageRequest, storageBusy } from './maintenance';
 import { fingerprint, writeZip } from './zip';
+vi.mock('node:fs/promises',async importOriginal=>{const actual=await importOriginal<typeof import('node:fs/promises')>();return {...actual,statfs:vi.fn(actual.statfs)};});
 const id='11111111-1111-4111-a111-111111111111';
 async function fixture(root:string){
   const store=openStore(join(root,'vstudy.sqlite'));
@@ -53,7 +55,7 @@ it('rejects corrupted bytes, an invalid manifest, duplicate paths and traversal 
       await expect(stageRestore(root,path)).rejects.toThrow();expect(store.documents.list()).toHaveLength(1);
       const manifest=join(root,'invalid.json');await writeFile(manifest,'{}');const entry={name:'manifest.json',path:manifest,...await fingerprint(manifest)};
       await writeZip(path,[entry]);await expect(stageRestore(root,path)).rejects.toThrow('invalid_backup');
-      await writeZip(path,[entry,entry]);await expect(stageRestore(root,path)).rejects.toThrow();
+      await expect(writeZip(path,[entry,entry])).rejects.toThrow('storage.invalid_backup');
       await expect(writeZip(path,[{...entry,name:'../escape'}])).rejects.toThrow('invalid_backup');
       expect((await readdir(root)).some(name=>name.startsWith('.restore-'))).toBe(false);
     } finally {store.close();await rm(path,{force:true});}
@@ -160,4 +162,55 @@ it('restores a database whose document paths were saved on Windows', async () =>
     try {expect(await readFile(restored.documents.get(id as never)!.sourcePath,'utf8')).toBe(bytes);}
     finally {restored.close();}
   } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
+
+it('restores converted image bytes and their Markdown references', async()=>{
+ const root=await mkdtemp(join(tmpdir(),'vstudy-image-source-')),target=await mkdtemp(join(tmpdir(),'vstudy-image-target-'));
+ const {store,directory}=await fixture(root);
+ try {
+  const image=Buffer.from('converted image bytes'),name='image-'+createHash('sha256').update(image).digest('hex')+'.png';
+  await writeFile(join(directory,name),image);await writeFile(join(directory,'content.md'),`![figure](${name})`);
+  const zip=join(target,'backup.zip');await exportBackup(store,root,zip);await stageRestore(target,zip);await recoverRestore(target);
+  const restored=openStore(join(target,'vstudy.sqlite'));
+  try {const d=restored.documents.get(id as never)!;expect(await readFile(join(d.markdownPath,'..',name))).toEqual(image);expect(await readFile(d.markdownPath,'utf8')).toContain(name);}
+  finally {restored.close();}
+ } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
+it.each(['message','superseded message','deleted conversation'])('rejects domain-invalid %s before scheduling restore',async kind=>{
+ const root=await mkdtemp(join(tmpdir(),'vstudy-chat-source-')),target=await mkdtemp(join(tmpdir(),'vstudy-chat-target-'));
+ const {store}=await fixture(root);
+ try {
+  const c=store.conversations.insert(conversationSchema.parse({id:'22222222-2222-4222-a222-222222222222',documentId:id,providerId:'openai-api',modelId:'test',createdAt:new Date().toISOString()}));
+  const m=store.messages.insert(messageSchema.parse({id:'33333333-3333-4333-a333-333333333333',conversationId:c.id,role:'user',parts:[{type:'text',text:'hello'}],createdAt:c.createdAt}));
+  if(kind==='deleted conversation')store.db.prepare("UPDATE conversations SET options='[]',deletedAt=? WHERE id=?").run(c.createdAt,c.id);
+  else store.db.prepare("UPDATE messages SET parts='{}',supersededBy=? WHERE id=?").run(kind==='superseded message'?'replacement':null,m.id);
+  const zip=join(target,'backup.zip');await exportBackup(store,root,zip);
+  await expect(stageRestore(target,zip)).rejects.toThrow('storage.invalid_backup');
+  expect(await readdir(target)).toEqual(['backup.zip']);expect(store.documents.list()).toHaveLength(1);
+ } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
+it('restores a legacy v1 inventory with no converted image entries',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'vstudy-legacy-source-')),target=await mkdtemp(join(tmpdir(),'vstudy-legacy-target-'));
+ const {store,directory,bytes}=await fixture(root);
+ try {
+  store.db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+  const files=await Promise.all([{name:'vstudy.sqlite',path:join(root,'vstudy.sqlite')},...['source.md','content.md'].map(name=>({name:`library/${basename(directory)}/${name}`,path:join(directory,name)}))].map(async f=>({...f,...await fingerprint(f.path)})));
+  const manifest=join(root,'old-manifest.json');await writeFile(manifest,JSON.stringify({format:'vstudy-backup',version:1,createdAt:'2025-01-01T00:00:00Z',files:files.map(f=>({path:f.name,bytes:f.bytes,sha256:f.sha256}))}));
+  const zip=join(target,'legacy.zip');await writeZip(zip,[...files,{name:'manifest.json',path:manifest,...await fingerprint(manifest)}]);
+  await stageRestore(target,zip);await recoverRestore(target);
+  const restored=openStore(join(target,'vstudy.sqlite'));try {const d=restored.documents.get(id as never)!;expect(await readFile(d.markdownPath,'utf8')).toBe(bytes);expect(restored.settings.get().chatSide).toBe('right');}finally{restored.close();}
+ } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
+
+it.each(['export','restore'])('refuses %s before staging when disk space is insufficient', async operation=>{
+ const root=await mkdtemp(join(tmpdir(),'vstudy-full-source-')),target=await mkdtemp(join(tmpdir(),'vstudy-full-target-'));
+ const {store}=await fixture(root);const zip=join(target,'backup.zip');
+ try {
+  await exportBackup(store,root,zip);const previous=await readFile(zip);
+  const stats=await fs.statfs(root);const space=vi.mocked(fs.statfs).mockResolvedValueOnce({...stats,bavail:0});
+  try {
+   await expect(operation==='export'?exportBackup(store,root,zip):stageRestore(root,zip)).rejects.toMatchObject({name:'StorageSpaceError',code:'ENOSPC',message:'storage.disk_full',availableBytes:0,requiredBytes:expect.any(Number)});
+   expect(await readFile(zip)).toEqual(previous);expect((await readdir(root)).filter(name=>name.startsWith('.backup-') || name.startsWith('.restore-') || name==='restore-pending.json')).toEqual([]);
+  } finally {space.mockClear();}
+ } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });

@@ -61,7 +61,7 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
             if (now - (exports.get(event.sender.id) ?? 0) < 1000)
                 throw new Error('Export rate limited');
             exports.set(event.sender.id, now);
-            const d = library.require(r.documentId), path = containedPath(library.root, channel === 'library:exportMarkdown' ? d.markdownPath : d.sourcePath);
+            const d = library.require(r.documentId), path = containedPath(library.root, channel === 'library:exportMarkdown' ? d.activeVersion === 'ai' ? join(d.markdownPath, '..', 'content.ai.md') : d.markdownPath : d.sourcePath);
             const result = await dialog.showSaveDialog({ defaultPath: channel === 'library:exportMarkdown' ? safeFilename(`${basename(d.sourceName, extname(d.sourceName))}.md`) : safeFilename(basename(d.sourceName)) });
             if (result.canceled || !result.filePath)
                 return { saved: false };

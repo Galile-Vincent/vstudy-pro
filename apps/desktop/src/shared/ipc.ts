@@ -28,7 +28,7 @@ import {
   providerConfigSchema,
   providerIdSchema,
   requestIdSchema,
-  settingsSchema, usageDashboardSchema, usagePeriodSchema, usageSchema, usageSummarySchema, usageRecordSchema, rateLimitSchema,
+  settingsSchema, settingsPatchSchema, usageDashboardSchema, usagePeriodSchema, usageSchema, usageSummarySchema, usageRecordSchema, rateLimitSchema,
 } from "./domain";
 
 const empty = z.object({}).strict();
@@ -129,7 +129,7 @@ export const ipcContract = {
     response: z.array(messageSchema),
   },
   "settings:get": { request: empty, response: settingsSchema },
-  "settings:set": { request: settingsSchema, response: settingsSchema },
+  "settings:set": { request: settingsPatchSchema, response: settingsSchema },
   "providers:list": {
     request: z.object({ discover: z.boolean().optional() }).strict(),
     response: z.array(

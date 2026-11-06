@@ -4,8 +4,8 @@
  * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
  * @packageDocumentation
  */
-import { it,expect } from 'vitest';
-import { mkdtemp,writeFile,readFile,rm } from 'node:fs/promises';
+import { it,expect,vi } from 'vitest';
+import { mkdtemp,writeFile,readFile,rm,mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openStore } from '../db';
@@ -35,12 +35,12 @@ it('rejects missing or invented Latin/CJK tokens and active content',()=>{
  }
  expect(splitParsePages('<!-- page 1 -->\na\n<!-- page 2 -->\nb')).toEqual(['\na\n','\nb']);
 });
-async function setup(adapter:ProviderAdapter) {
+async function setup(adapter:ProviderAdapter, render:ConstructorParameters<typeof AiParseService>[2]=async()=>({image:Buffer.from('image'),text:'alpha beta gamma'}), progress:ConstructorParameters<typeof AiParseService>[3]=()=>{}) {
  const root=await mkdtemp(join(tmpdir(),'ai-parse-test-'));const store=openStore(':memory:');
  const documents=new DocumentService({store,userData:root,convert:async()=>{}});
  const path=join(root,'source.md');await writeFile(path,'alpha beta gamma');const imported=await documents.importPath(path);await documents.waitForIdle();
  const providers=new ProviderRegistry();providers.register('anthropic-api',adapter);
- const service=new AiParseService(store,providers,async()=>({image:Buffer.from('image'),text:'alpha beta gamma'}));
+ const service=new AiParseService(store,providers,render,progress);
  const request=aiParseRequestSchema.parse({documentId:imported.id,providerId:'anthropic-api',modelId:'claude-haiku-5-5'});
  return {root,store,documents,service,request,imported,cleanup:async()=>{await service.dispose();documents.dispose();await documents.waitForIdle();store.close();await rm(root,{recursive:true,force:true});}};
 }
@@ -117,5 +117,46 @@ it.each([false,true])('only blocks unknown pricing when a monthly USD budget is 
   expect((await x.service.estimate(request)).costUsd).toBeUndefined();
   if(budget){x.store.settings.set({...x.store.settings.get(),monthlyBudgetUsd:1});await expect(x.service.start(request)).rejects.toThrow('ai_parse.budget');expect(calls).toBe(0);}
   else {await x.service.start(request);await x.service.waitForIdle();expect(x.service.status(x.imported.id).pages[0]?.status).toBe('done');expect(calls).toBe(1);}
+ } finally {await x.cleanup();}
+});
+
+it.each(['markdown','metadata','database'])('reports failed %s publication as recoverable and retries cached pages before completing',async failure=>{
+ let calls=0;const progress=vi.fn();
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test'}],async *stream(){calls++;yield {type:'text-delta',text:'# alpha beta gamma'};yield {type:'done'};}};
+ const x=await setup(adapter,undefined,progress);try {
+  const path=join(x.imported.markdownPath,'..','content.ai.md'),blocked=failure==='metadata'?path+'.json':path;
+  if(failure==='database')x.store.db.exec("CREATE TRIGGER reject_ai_size BEFORE UPDATE OF aiSizeBytes ON documents BEGIN SELECT RAISE(ABORT,'publication failure'); END");
+  else await mkdir(blocked);
+  await x.service.start(x.request);await x.service.waitForIdle();
+  expect(x.service.status(x.imported.id)).toMatchObject({status:'cancelled',code:'ai_parse.publish_failed',pages:[{page:1,status:'done'}]});
+  expect(progress.mock.calls.at(-1)?.[0]).toMatchObject({status:'cancelled',code:'ai_parse.publish_failed'});
+  expect(await x.documents.read(x.imported.id)).toBe('alpha beta gamma');
+  if(failure==='database')x.store.db.exec('DROP TRIGGER reject_ai_size');else await rm(blocked,{recursive:true});
+  await x.service.start(x.request);await x.service.waitForIdle();
+  expect(x.service.status(x.imported.id)).toMatchObject({status:'complete'});expect(calls).toBe(1);
+  expect(await readFile(path,'utf8')).toContain('# alpha beta gamma');
+ } finally {await x.cleanup();}
+});
+it.each(['markdown','image'])('charges changed %s content in estimates and monthly admission',async kind=>{
+ let calls=0,image='first';
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test',supportsImages:true}],async *stream(){calls++;yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'done'};}};
+ const x=await setup(adapter,async()=>({image:Buffer.from(image),text:'alpha beta gamma'}));try {
+  if(kind==='image')x.store.db.prepare("UPDATE documents SET mime='application/pdf' WHERE id=?").run(x.imported.id);
+  await x.service.start(x.request);await x.service.waitForIdle();
+  expect((await x.service.estimate(x.request)).inputTokens).toBe(0);
+  if(kind==='markdown')await writeFile(x.imported.markdownPath,'alpha beta gamma changed');else image='second';
+  const estimate=await x.service.estimate(x.request);expect(estimate.inputTokens).toBeGreaterThan(0);
+  x.store.settings.set({monthlyTokenBudget:1});await expect(x.service.start(x.request)).rejects.toThrow('ai_parse.budget');expect(calls).toBe(1);
+ } finally {await x.cleanup();}
+});
+it('rechecks monthly admission when rendered content changes after the estimate',async()=>{
+ let calls=0,renders=0;
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test',supportsImages:true}],async *stream(){calls++;yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'done'};}};
+ const x=await setup(adapter,async()=>({image:Buffer.from(++renders<=3?'old':'new'),text:'alpha beta gamma'}));try {
+  x.store.db.prepare("UPDATE documents SET mime='application/pdf' WHERE id=?").run(x.imported.id);
+  await x.service.start(x.request);await x.service.waitForIdle();
+  const spent=x.store.usage.summary('month');x.store.settings.set({monthlyTokenBudget:spent.inputTokens+spent.outputTokens+1});
+  await x.service.start(x.request);await x.service.waitForIdle();expect(calls).toBe(1);
+  expect(x.service.status(x.imported.id).pages[0]?.status).toBe('failed');
  } finally {await x.cleanup();}
 });
