@@ -79,4 +79,3 @@ export function validateStudyData(db:DatabaseSync):void {
   if(db.prepare(`SELECT a.id FROM study_attempts a JOIN study_artifacts f ON f.id=a.artifactId WHERE f.kind!='test' OR f.status!='ready' LIMIT 1`).get())throw new Error('invalid attempt artifact');
  } catch {throw new Error('storage.invalid_backup');}
 }
-
