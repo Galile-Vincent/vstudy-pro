@@ -58,7 +58,7 @@ export class GrantStore {
 
   private retained(activity: AgentActivity[]): AgentActivity[] {
     const oldest = this.now() - GRANT_LIFETIME_MS;
-    return activity.filter(item => Date.parse(item.at) >= oldest).slice(-ACTIVITY_LIMIT);
+    return activity.filter(item => Date.parse(item.at) >= oldest).slice(-ACTIVITY_LIMIT).map(item => Buffer.byteLength(JSON.stringify(item)) <= 4096 ? item : {...item, args: {omitted: 'Arguments exceed the retained activity limit.'}});
   }
 
   private save(next: StoredState): void {

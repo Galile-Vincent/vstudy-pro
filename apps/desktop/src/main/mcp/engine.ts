@@ -2,9 +2,9 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import {
-  agentAccountSchema, bridgeRequestSchema, mcpIpc, mcpTools, provenanceSchema,
+  agentAccountSchema, bridgeRequestSchema, MCP_PROTOCOL_VERSION, mcpIpc, mcpTools, provenanceSchema,
   type AgentsState, type BridgeRequest, type BridgeResponse, type Grant, type McpBackend,
-  type McpErrorCode, type PreparedMcpCall, type ToolArguments, type ToolName, type ToolResult,
+  type McpErrorCode, type PreparedMcpCall, type Scope, type ToolArguments, type ToolName, type ToolResult,
 } from '../../shared/mcp';
 import { ApprovalQueue, PairingQueue } from './approvals';
 import { failureCode, McpFailure, publicFailure } from './errors';
@@ -25,7 +25,8 @@ interface Cursor {grantId: string; key: string; value: string; expires: number}
 type EditGrant = z.input<(typeof mcpIpc)['mcp:edit-grant']['request']>;
 type PairDecision = z.input<(typeof mcpIpc)['mcp:pair-decision']['request']>;
 type ProposalDecision = z.input<(typeof mcpIpc)['mcp:proposal-decision']['request']>;
-const accountIndependent = new Set<ToolName>(['list_accounts', 'get_planner']);
+const accountOptional = new Set<ToolName>(['list_accounts', 'get_planner', 'create_task', 'update_task', 'create_study_plan_proposal', 'set_reminder', 'export_calendar']);
+const additionalScopes: Partial<Record<ToolName, readonly Scope[]>> = {search_content: ['read:files']};
 
 function freezePayload<T>(value: T): T {
   if (value && typeof value === 'object') { Object.freeze(value); for (const child of Object.values(value)) freezePayload(child); }
@@ -121,7 +122,7 @@ export class McpEngine {
       if (!parsed.success) throw new McpFailure('INVALID_ARGUMENT');
       this.assertLive();
       const request = parsed.data;
-      if (request.method === 'ping') return {jsonrpc: '2.0', id, result: {version: 1, enabled: this.store.enabled}};
+      if (request.method === 'ping') return {jsonrpc: '2.0', id, result: {version: MCP_PROTOCOL_VERSION, enabled: this.store.enabled}};
       this.requireEnabled();
       if (request.method === 'pair.begin') {
         const params = request.params;
@@ -149,12 +150,12 @@ export class McpEngine {
   private authorize(token: string, name: ToolName, args: ToolArguments, prepared?: PreparedMcpCall): Grant {
     this.requireEnabled();
     const grant = this.store.authorize(token);
-    if (!grant.scopes.includes(mcpTools[name].scope)) throw new McpFailure('SCOPE_REQUIRED');
+    if ([mcpTools[name].scope, ...(additionalScopes[name] ?? [])].some(scope => !grant.scopes.includes(scope))) throw new McpFailure('SCOPE_REQUIRED');
     if (args.account && !grant.accountIds.includes(args.account)) throw new McpFailure('DENIED');
     if (prepared) {
       if (prepared.accountId !== null && !grant.accountIds.includes(prepared.accountId)) throw new McpFailure('DENIED');
       if (args.account && prepared.accountId !== args.account) throw new McpFailure('DENIED');
-      if (prepared.accountId === null && mcpTools[name].risk !== 'local' && !accountIndependent.has(name)) throw new McpFailure('ACCOUNT_REQUIRED');
+      if (prepared.accountId === null && !accountOptional.has(name)) throw new McpFailure('ACCOUNT_REQUIRED');
       if (prepared.accountId !== null) this.checkAccounts([prepared.accountId]);
       if (provenanceSchema.parse(prepared.provenance).account !== prepared.accountId) throw new McpFailure('DENIED');
     }
@@ -172,7 +173,7 @@ export class McpEngine {
       if (!parsed.success) throw new McpFailure('INVALID_ARGUMENT');
       args = parsed.data;
       grant = this.authorize(params.grant, params.name, args);
-      if (!args.account && !accountIndependent.has(params.name) && mcpTools[params.name].risk !== 'local') {
+      if (!args.account && !accountOptional.has(params.name)) {
         const available = this.accounts().filter(account => grant!.accountIds.includes(account.id));
         if (available.length !== 1) throw new McpFailure('ACCOUNT_REQUIRED');
         args = {...args, account: available[0]!.id};
@@ -269,3 +270,6 @@ export class McpEngine {
     this.cancel({}, 'DISCONNECTED');
   }
 }
+
+/** Compose this engine with the parent-owned backend, renderer IPC, and lifecycle. */
+export function createMcpEngine(options: McpEngineOptions): McpEngine { return new McpEngine(options); }

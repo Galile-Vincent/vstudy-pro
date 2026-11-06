@@ -2,7 +2,7 @@
 import { decodeHtmlEntities } from '../../shared/html';
 import { provenanceSchema, type Provenance, type ToolResult } from '../../shared/mcp';
 
-const sensitiveKey = /token|cookie|password|passwd|authorization|secret|sesskey|autologin|wsfunction|private|accesskey|sessionkey|credential|bearer/i;
+const sensitiveKey = /token|cookie|password|passwd|authorization|secret|sesskey|autologin|wsfunction|private|accesskey|session|credential|bearer/i;
 const hidden = '[redacted]';
 
 /** A fresh redactor snapshots known school secrets for each outward boundary. */
@@ -24,10 +24,11 @@ export class McpRedactor {
       .replace(/<[^>]*>/g, '').replace(/[<>]/g, '')
       .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
       .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1 [link removed]')
-      .replace(/(?:https?:\/\/|www\.)[^\s\])}"'<>]+/gi, '[link removed]')
+      .replace(/(?:(?:https?:)?\/\/|www\.)[^\s\])}"'<>]+/gi, '[link removed]')
       .replace(/\b(?:data|javascript|file|vbscript):[^\s]+/gi, '[link removed]')
+      .replace(/\b(?:(?:set-)?cookie|authorization)\s*:[^\r\n]*/gi, hidden)
       .replace(/\b(?:bearer|basic)\s+[a-z0-9+/_=.-]+/gi, hidden)
-      .replace(/\b(?:[\w-]*(?:token|cookie|password|passwd|secret|sesskey|autologin|wsfunction|privatekey|accesskey|authorization)[\w-]*)\s*[=:]\s*(?:"[^"]*"|'[^']*'|[^\s,;]+)/gi, hidden)
+      .replace(/\b(?:[\w-]*(?:token|cookie|password|passwd|secret|sesskey|session|autologin|wsfunction|privatekey|accesskey|authorization)[\w-]*)\s*[=:]\s*(?:"[^"]*"|'[^']*'|[^\s,;]+)/gi, hidden)
       .replace(/\b(?:core|mod|tool|gradereport|message)_\w+/g, hidden)
       .replace(/\b[a-f0-9]{32,}\b/gi, hidden)
       .replace(/\beyJ[a-z0-9_-]+\.[a-z0-9_-]+(?:\.[a-z0-9_-]+)?\b/gi, hidden)
@@ -35,7 +36,8 @@ export class McpRedactor {
       .replace(/[\u007f\u202a-\u202e\u2066-\u2069]/g, '');
     text = [...text].filter(char => char.charCodeAt(0) >= 32 || '\t\n\r'.includes(char)).join('');
     for (const secret of this.secrets) text = text.split(secret).join(hidden);
-    return text.length > limit ? text.slice(0, limit) + '\n[truncated]' : text;
+    const suffix = '\n[truncated]'.slice(0, limit);
+    return text.length > limit ? text.slice(0, limit - suffix.length) + suffix : text;
   }
 
   /** Limit recursion, node count, arrays, and total text as well as individual strings. */

@@ -52,6 +52,29 @@ it('requires an explicit account when several granted accounts are available and
   expect(execute).not.toHaveBeenCalled();
 });
 
+it('requires both content and file scopes for converted-text search before preparing a call', async () => {
+  const {engine, account, prepare} = fixture();
+  engine.setEnabled(true);
+  const contentOnly = await pair(engine, [account.id], ['read:content']);
+  const filesOnly = await pair(engine, [account.id], ['read:files']);
+  expect(await call(engine, contentOnly.grant, 'search_content', {query: 'chapter'})).toMatchObject({ok: false, error: {code: 'SCOPE_REQUIRED'}});
+  expect(await call(engine, filesOnly.grant, 'search_content', {query: 'chapter'})).toMatchObject({ok: false, error: {code: 'SCOPE_REQUIRED'}});
+  expect(prepare).not.toHaveBeenCalled();
+  const both = await pair(engine, [account.id], ['read:content', 'read:files']);
+  expect(await call(engine, both.grant, 'search_content', {query: 'chapter'})).toMatchObject({ok: true});
+  expect(prepare).toHaveBeenCalledTimes(1);
+});
+
+it('requires a granted school account even for a local-risk module opener', async () => {
+  const {engine, account, prepare, execute} = fixture();
+  engine.setEnabled(true);
+  const client = await pair(engine, [account.id]);
+  prepare.mockResolvedValueOnce({accountId: null, target: 'Module', provenance: {account: null, school: null, courseId: null, moduleId: null, author: null, syncedAt: null}, execute});
+  expect(await call(engine, client.grant, 'open_in_app', {courseId: randomUUID(), moduleId: randomUUID()})).toMatchObject({ok: false, error: {code: 'DENIED'}});
+  expect(execute).not.toHaveBeenCalled();
+  expect(engine.state().proposals).toEqual([]);
+});
+
 it('rejects unknown tools, arbitrary arguments, and all caller-supplied approval RPCs', async () => {
   const {engine, account, prepare} = fixture();
   engine.setEnabled(true);

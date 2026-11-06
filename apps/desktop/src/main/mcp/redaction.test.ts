@@ -39,3 +39,22 @@ it('maps backend auth failures to fixed public codes and never echoes diagnostic
   expect(JSON.stringify(publicFailure(failureCode(raw)))).not.toContain('CANARY');
   expect(failureCode(new Error('CANARY'))).toBe('INTERNAL');
 });
+
+it('keeps capped labels inside shared schema limits after secret replacement expands them', () => {
+  const redactor = new McpRedactor(['xx']);
+  expect(redactor.text('xx'.repeat(50), 100).length).toBeLessThanOrEqual(100);
+  expect(redactor.text('enormous', 3).length).toBe(3);
+});
+
+it('removes complete cookie headers, MoodleSession values, protocol-relative school URLs, and encoded secrets', () => {
+  const secret = 'School-token-CANARY!';
+  const result = new McpRedactor([secret]).value({
+    MoodleSession: 'SESSION-CANARY',
+    text: 'Cookie: MoodleSession=SESSION-CANARY; extra=COOKIE-CANARY\nSet-Cookie: Other=COOKIE-CANARY\nMoodleSession=SESSION-CANARY\n//school.example/pluginfile.php',
+    encoded: Buffer.from(secret).toString('base64'),
+  });
+  const json = JSON.stringify(result);
+  expect(json).not.toContain('CANARY');
+  expect(json).not.toContain('school.example');
+  expect(json).not.toContain(Buffer.from(secret).toString('base64'));
+});

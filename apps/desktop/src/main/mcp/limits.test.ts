@@ -130,3 +130,14 @@ it('does not return a raw authentication exception from prepare or execute', asy
   expect(result).toMatchObject({ok: false, error: {code: 'INTERNAL'}});
   expect(JSON.stringify(result)).not.toContain('TOKEN-CANARY');
 });
+
+it('preserves schema-valid backend codes while ignoring backend messages and hints', async () => {
+  const {engine, account, prepare} = fixture();
+  engine.setEnabled(true);
+  const client = await pair(engine, [account.id]);
+  prepare.mockRejectedValueOnce({code: 'ACADEMIC_INTEGRITY', message: 'TOKEN-CANARY', hint: 'https://school.example/?token=CANARY'});
+  const result = await call(engine, client.grant, 'list_courses');
+  expect(result).toEqual({ok: false, error: {code: 'ACADEMIC_INTEGRITY', message: 'VStudy request failed (ACADEMIC_INTEGRITY).', hint: 'Complete graded activities yourself in Moodle.'}});
+  prepare.mockRejectedValueOnce({code: 'NOT-A-CODE', message: 'TOKEN-CANARY'});
+  expect(await call(engine, client.grant, 'list_courses')).toMatchObject({ok: false, error: {code: 'INTERNAL'}});
+});

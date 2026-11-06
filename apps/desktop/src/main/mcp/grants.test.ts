@@ -79,6 +79,9 @@ it('retains at most 1000 sanitized activity records for 30 days', () => {
   store.record({...entry, status: 'DENIED'});
   expect(store.activity).toHaveLength(1000);
   expect(store.activity.at(-1)?.status).toBe('DENIED');
+  store.record({...entry, args: {text: '字'.repeat(4000)}});
+  expect(Buffer.byteLength(JSON.stringify(store.activity.at(-1)))).toBeLessThanOrEqual(4096);
+  expect(store.activity.at(-1)?.args).toEqual({omitted: 'Arguments exceed the retained activity limit.'});
   now += 31 * 86400_000;
   expect(new GrantStore(root, () => now).activity).toEqual([]);
 });
