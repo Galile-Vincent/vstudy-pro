@@ -100,10 +100,11 @@ const entryUrl =
 
 let reloads: number[] = [];
 let openingWindow: Promise<void> | undefined;
-async function restoreMainWindow(): Promise<void> {
+async function restoreMainWindow(): Promise<BrowserWindow | undefined> {
   if (!await appReady) return;
-  if (window && !window.isDestroyed()) {window.show();window.focus();return;}
+  if (window && !window.isDestroyed()) {window.show();window.focus();return window;}
   await (openingWindow ??= createWindow().finally(() => {openingWindow=undefined;}));
+  return window ?? undefined;
 }
 
 async function createWindow(show = true): Promise<void> {

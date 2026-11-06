@@ -37,7 +37,7 @@ const electron = await vi.hoisted(async () => {
 vi.mock('electron', () => electron);
 vi.mock('node:fs', async importOriginal => ({...await importOriginal<typeof import('node:fs')>(), mkdirSync:vi.fn()}));
 vi.mock('./db', () => ({ openStore: () => ({ settings: { get: () => ({}) }, close: mocks.closeStore }) }));
-vi.mock('./ipc', () => ({ registerIpc: () => mocks.registerIpc() }));
+vi.mock('./ipc', () => ({ registerIpc: (...args:unknown[]) => mocks.registerIpc(...args) }));
 vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn() }) }));
 vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
 vi.mock('./services/delete-data', () => ({ deleteAllData: vi.fn() }));
@@ -352,4 +352,13 @@ it('does not reload a clean renderer exit', async () => {
   const window=await start();
   window.webContents.emit('render-process-gone',{}, {reason:'clean-exit',exitCode:0});
   expect(window.webContents.reload).not.toHaveBeenCalled();
+});
+
+it('returns the main window to privileged callers even without OS focus',async()=>{
+  const window=await start();
+  window.webContents.emit('did-finish-load');
+  await vi.waitFor(()=>expect(mocks.confirm).toHaveBeenCalledOnce());
+  const restore=mocks.registerIpc.mock.calls[0]![3] as ()=>Promise<unknown>;
+  expect(await restore()).toBe(window);
+  expect(window.focus).toHaveBeenCalledOnce();
 });

@@ -29,7 +29,7 @@ import { tr, updateApplicationMenu } from "../i18n";
 import { registerLibraryIpc } from "./library";
 import { registerUsageIpc } from "./usage";
 import { createProviderRegistry } from "../providers";
-import { app, BrowserWindow, dialog, nativeTheme, shell, ipcMain, type IpcMainInvokeEvent } from "electron";
+import { app, type BrowserWindow, dialog, nativeTheme, shell, ipcMain, type IpcMainInvokeEvent } from "electron";
 import type { Store } from "../db";
 import type { SecretStore } from "../services/secrets";
 import { ipcContract, type IpcChannel } from "../../shared/ipc";
@@ -50,7 +50,7 @@ export function registerIpc(
   store: Store,
   secrets: SecretStore,
   isTrusted: (event: IpcMainInvokeEvent) => boolean,
-  restoreMainWindow: () => void | Promise<void> = () => {},
+  restoreMainWindow: () => BrowserWindow | undefined | Promise<BrowserWindow | undefined> = () => undefined,
   options:AppIpcOptions = {},
 ): () => Promise<void> {
   const pins = new ExecutablePins(`${app.getPath('userData')}/executable-pins.json`, async (previous, current) => {
@@ -118,9 +118,8 @@ export function registerIpc(
   const mcpBackend=()=>backend ??= createMcpBackend({store,moodle:disposeMoodle.service,documents:disposeDocuments,openModule:navigation.openModule,exportCalendar:async selection=>{
     const context=new PlannerRepository(store.db).context();
     const text=plannerCalendar(context.snapshot,context.deadlines,selection);
-    await restoreMainWindow();
-    const owner = BrowserWindow.getFocusedWindow();
-    if (!owner || owner.isDestroyed()) return {saved:false};
+    const owner = await restoreMainWindow();
+    if (!owner || owner.isDestroyed()) throw new Error('Main window unavailable');
     const result=await dialog.showSaveDialog(owner, {defaultPath:'vstudy-study-plan.ics',filters:[{name:tr('planner:calendar_file'),extensions:['ics']}]});
     if (result.canceled || !result.filePath) return {saved:false};
     await exportText(text,result.filePath);return {saved:true};
