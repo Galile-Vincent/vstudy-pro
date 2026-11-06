@@ -17,6 +17,8 @@ it('keeps state out of arguments and inherited secrets and decodes only verified
     expect(options.shell).toBe(false);
     expect(options.windowsHide).toBe(true);
     expect(options.env).not.toHaveProperty('VSTUDY_STATE_SENTINEL');
+    expect(options.env.PSModulePath).not.toBe('C:\\untrusted-modules');
+    expect(options.env.PSModulePath).toMatch(/WindowsPowerShell.*Modules$/);
     if (args.at(-1) === 'write') {
       expect(options.input.endsWith('\n')).toBe(true);
       expect(Buffer.from(options.input, 'base64').toString('utf8')).toBe(body);
@@ -25,6 +27,7 @@ it('keeps state out of arguments and inherited secrets and decodes only verified
     return 'state:' + Buffer.from(body).toString('base64');
   });
   vi.stubEnv('VSTUDY_STATE_SENTINEL', 'must-not-leak');
+  vi.stubEnv('PSModulePath', 'C:\\untrusted-modules');
   try {
     const store = createWindowsStatePersistence({platform: 'win32', present: () => true, execute});
     expect(store.read(directory)).toBe(body);

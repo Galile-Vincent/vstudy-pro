@@ -45,10 +45,11 @@ export function createWindowsStatePersistence(options: WindowsStateOptions = {})
   const run: NonNullable<WindowsStateOptions['execute']> = options.execute ?? ((executable, args, execution) => execFileSync(executable, args, execution));
   const execute = (userData: string, operation: 'read' | 'write', input?: string) => {
     const script = options.script ?? (app.isPackaged ? join(process.resourcesPath, 'mcp', 'windows-state.ps1') : resolve(__dirname, '../../resources/mcp/windows-state.ps1'));
+    const powershell = systemExecutable('WindowsPowerShell/v1.0/powershell.exe');
     try {
-      return run(systemExecutable('WindowsPowerShell/v1.0/powershell.exe'),
+      return run(powershell,
         ['-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script, '-UserData', userData, '-Operation', operation],
-        { encoding: 'utf8', ...(input === undefined ? {} : {input}), env: cliEnvironment(), timeout: 30000, maxBuffer: 12 * 1024 * 1024,
+        { encoding: 'utf8', ...(input === undefined ? {} : {input}), env: {...cliEnvironment(), PSModulePath: win32.join(win32.dirname(powershell), 'Modules')}, timeout: 30000, maxBuffer: 12 * 1024 * 1024,
           windowsHide: true, shell: false, stdio: ['pipe', 'pipe', 'pipe'] }).trim();
     } catch { throw new WindowsStateError(); }
   };
