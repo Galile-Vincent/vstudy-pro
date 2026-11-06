@@ -56,9 +56,18 @@ try {
     await route('library',themeId,scheme);
     await page.locator('.library-document').first().waitFor();
     const background=await page.evaluate(()=>window.getComputedStyle(window.document.documentElement).backgroundColor);
+    await page.waitForFunction(()=>!window.document.documentElement.dataset.themeTransition);
     const native=await app.evaluate(({BrowserWindow,nativeTheme})=>({background:BrowserWindow.getAllWindows()[0].getBackgroundColor(),source:nativeTheme.themeSource}));
     assert.equal(native.source,scheme);
     const hex='#'+background.match(/\d+/g).slice(0,3).map(n=>Number(n).toString(16).padStart(2,'0')).join('');
+    await app.evaluate(async({BrowserWindow},hex)=>{
+      const window=BrowserWindow.getAllWindows()[0],deadline=Date.now()+5000;
+      while(window.getBackgroundColor().slice(-6).toLowerCase()!==hex.slice(1)){
+        if(Date.now()>deadline)throw new Error(`Native background did not reach ${hex}`);
+        await new Promise(resolve=>setTimeout(resolve,16));
+      }
+    },hex);
+    native.background=await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].getBackgroundColor());
     assert.equal(native.background.slice(-6).toLowerCase(),hex.slice(1));
     const previous=checks.find(c=>c.scheme===scheme);
     if (previous) assert.notEqual(background,previous.background);
@@ -86,6 +95,7 @@ try {
   await page.waitForFunction(()=>window.document.documentElement.dataset.theme==='ocean');
   await page.getByRole('button',{name:'Light',exact:true}).click();
   assert.equal(await page.evaluate(()=>window.desktop.invoke('settings:get',{}).then(s=>s.colorScheme)),'light');
+  await page.waitForFunction(()=>!window.document.documentElement.dataset.themeTransition);
   await page.getByRole('button',{name:'Create theme',exact:true}).click();
   const editor=page.locator('.theme-editor');
   await editor.getByLabel('Theme name',{exact:true}).fill('My Ocean');
@@ -98,6 +108,7 @@ try {
   await shot('editor-contrast-warning');
   await editor.getByRole('button',{name:'Cancel',exact:true}).click();
   await page.waitForFunction(()=>window.document.documentElement.dataset.theme==='ocean');
+  await page.waitForFunction(()=>!window.document.documentElement.dataset.themeTransition);
   await page.getByRole('button',{name:'Create theme',exact:true}).click();
   await editor.getByLabel('Theme name',{exact:true}).fill('My Ocean');
   await editor.getByRole('button',{name:'Save theme',exact:true}).click();
@@ -126,7 +137,7 @@ try {
   await page.emulateMedia({colorScheme:'light'});
   await page.waitForFunction(()=>window.document.documentElement.dataset.scheme==='light');
   await page.reload();
-  assert.equal(await page.evaluate(()=>window.document.documentElement.dataset.theme),exported.id);
+  await page.waitForFunction(id=>window.document.documentElement.dataset.theme===id&&!window.document.documentElement.dataset.themeTransition,exported.id);
   assert.equal(await page.evaluate(()=>window.desktop.invoke('settings:get',{}).then(s=>s.customThemes.length)),2);
   assert.deepEqual(errors,[]);
   await writeFile(join(evidence,'verification.json'),JSON.stringify({result:'PASS',artifact:'Production Electron. Real settings, library, and reader. Fixture Moodle overview. No school network.',screenshots,checks,behaviors:['Theme keyboard selection','Light/dark persistence','Editor live preview and cancel restoration','Create and save','Export JSON','Reject invalid JSON','Import JSON','Contrast keyboard control','System media changes','Custom theme reload'],errors},null,2)+'\n');
