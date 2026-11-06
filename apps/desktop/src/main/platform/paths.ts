@@ -18,5 +18,5 @@ export function isPortableRelativePath(value: string): boolean {
   if (!value || path.posix.isAbsolute(value) || path.win32.isAbsolute(value) || value.includes('\\')) return false;
   return value.split('/').every(part => part !== '' && part !== '.' && part !== '..' && part.length <= 255 &&
     !/[<>:"|?*\p{Cc}]/u.test(part) && !/[. ]$/.test(part) &&
-    !/^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)/i.test(part));
+    !/^(?:con|conin\$|conout\$|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)/i.test(part));
 }

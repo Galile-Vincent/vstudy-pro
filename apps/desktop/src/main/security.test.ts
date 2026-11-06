@@ -33,7 +33,7 @@ it('checks custom app hosts even when URL.origin is opaque', () => {
  expect(isAppUrl('vstudy://evil/index.html', 'vstudy://app/index.html')).toBe(false);
 });
 
-it.each(['NUL.txt', 'con.pdf', 'COM1.md', 'LPT1.csv'])('keeps device names out of suggested filenames %s', async name => {
+it.each(['NUL.txt', 'con.pdf', 'COM1.md', 'LPT1.csv', 'CONIN$.md', 'CONOUT$.txt'])('keeps device names out of suggested filenames %s', async name => {
   const { safeFilename } = await import('./security');
   expect(safeFilename(name)).toBe('_' + name);
 });

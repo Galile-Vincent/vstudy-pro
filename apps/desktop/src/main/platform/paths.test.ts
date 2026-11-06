@@ -20,7 +20,7 @@ it.each([
 
 it.each(['../secret', '/root', 'C:/secret', 'C:secret', '//server/share', '\\\\server\\share',
   'assets/../secret', 'assets\\secret', 'NUL.png', 'con.txt', 'COM1', 'LPT².txt',
-  'assets/name:stream', 'assets/file.', 'assets/file ', 'a//b', 'a/./b', 'a\0b', 'a'.repeat(256),
+  'CONIN$', 'CONOUT$.txt', 'assets/name:stream', 'assets/file.', 'assets/file ', 'a//b', 'a/./b', 'a\0b', 'a'.repeat(256),
 ])('rejects nonportable name %j', name => expect(isPortableRelativePath(name)).toBe(false));
 
 it('keeps ordinary Unicode filenames and extracts names from either OS', () => {
