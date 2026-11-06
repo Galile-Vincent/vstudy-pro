@@ -80,10 +80,10 @@ it.skipIf(process.platform !== 'win32')('persists and replaces state with a prot
     expect(store.read(root)).toBe('{"replacement":true}');
     expect(await readFile(file, 'utf8')).toBe('{"replacement":true}');
     expect(await lstat(file).then(info => info.nlink)).toBe(1);
-    const acl = JSON.parse(command(`$a=[IO.File]::GetAccessControl($env:VSTUDY_STATE_PATH); [pscustomobject]@{Owner=$a.GetOwner([Security.Principal.SecurityIdentifier]).Value; Current=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; Protected=$a.AreAccessRulesProtected; Entries=@($a.Access).Count} | ConvertTo-Json -Compress`));
-    expect(acl.Owner).toBe(acl.Current);
-    expect(acl.Protected).toBe(true);
-    expect(acl.Entries).toBe(1);
+    const [owner, current, protectedAcl, entries] = command(`$a=[IO.File]::GetAccessControl($env:VSTUDY_STATE_PATH); [Console]::Out.WriteLine($a.GetOwner([Security.Principal.SecurityIdentifier]).Value+'|'+[Security.Principal.WindowsIdentity]::GetCurrent().User.Value+'|'+$a.AreAccessRulesProtected+'|'+$a.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]).Count)`).split('|');
+    expect(owner).toBe(current);
+    expect(protectedAcl).toBe('True');
+    expect(entries?.trim()).toBe('1');
     const other = join(root, 'link.json');
     await link(file, other);
     expect(() => store.read(root)).toThrow('could not be verified');

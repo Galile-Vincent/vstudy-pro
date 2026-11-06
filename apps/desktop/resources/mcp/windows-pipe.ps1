@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][ValidatePattern('^vstudy-[a-f0-9]{32}$')][string]$PipeName)
 $ErrorActionPreference = 'Stop'
 if ($env:VSTUDY_PIPE_FIXTURE_TRACE -eq '1') { [Console]::Error.WriteLine('pipe-phase:before-compile') }
-Add-Type -TypeDefinition @'
+$source = @'
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -151,5 +151,21 @@ public static class VStudyPipeHost {
     }
 }
 '@
-if ($env:VSTUDY_PIPE_FIXTURE_TRACE -eq '1') { [Console]::Error.WriteLine('pipe-phase:compiled') }
-[VStudyPipeHost]::Run($PipeName)
+$provider = [Microsoft.CSharp.CSharpCodeProvider]::new()
+try {
+    $parameters = [System.CodeDom.Compiler.CompilerParameters]::new()
+    $parameters.GenerateInMemory = $true
+    $parameters.GenerateExecutable = $false
+    $parameters.ReferencedAssemblies.AddRange([string[]]@('System.dll', 'System.Core.dll'))
+    if ($env:VSTUDY_PIPE_FIXTURE_TRACE -eq '1') { [Console]::Error.WriteLine('pipe-phase:compiler-ready') }
+    $compiled = $provider.CompileAssemblyFromSource($parameters, [string[]]@($source))
+    if ($compiled.Errors.HasErrors) {
+        if ($env:VSTUDY_PIPE_FIXTURE_TRACE -eq '1') {
+            foreach ($compileIssue in $compiled.Errors) { [Console]::Error.WriteLine($compileIssue.ErrorNumber + ': ' + $compileIssue.ErrorText) }
+        }
+        throw 'Pipe host compilation failed'
+    }
+    if ($env:VSTUDY_PIPE_FIXTURE_TRACE -eq '1') { [Console]::Error.WriteLine('pipe-phase:compiled') }
+    [void]$compiled.CompiledAssembly.GetType('VStudyPipeHost').GetMethod('Run').Invoke($null, [object[]]@($PipeName))
+} finally { $provider.Dispose() }
+
