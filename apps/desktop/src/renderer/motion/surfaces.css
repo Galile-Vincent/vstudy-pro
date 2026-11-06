@@ -1,0 +1,26 @@
+/* Application overrides follow the registry and theme styles. */
+[data-slot=sheet-content], [data-slot=sheet-overlay], [data-slot=dialog-content], [data-slot=dialog-overlay] {
+  animation-duration:var(--motion-base);
+  animation-timing-function:var(--ease-out-soft);
+  transition-duration:var(--motion-base);
+  transition-timing-function:var(--ease-out-soft);
+}
+:is([data-slot=sheet-content],[data-slot=sheet-overlay],[data-slot=dialog-content],[data-slot=dialog-overlay])[data-state=closed] {
+  animation-duration:var(--motion-fast);
+  animation-timing-function:var(--ease-exit);
+}
+html[data-theme-transition=tokens] {
+  transition-duration:var(--motion-base);
+  transition-timing-function:var(--ease-out-soft);
+}
+html[data-theme-transition=view]::view-transition-new(root) {
+  animation-duration:var(--motion-base);
+  animation-timing-function:var(--ease-out-soft);
+}
+@media(prefers-reduced-motion:reduce) {
+  [data-slot=sheet-content], [data-slot=sheet-overlay], [data-slot=dialog-content], [data-slot=dialog-overlay], html[data-theme-transition] {
+    animation:none;
+    transition:none;
+  }
+  html[data-theme-transition=view]::view-transition-new(root) { animation:none; }
+}
