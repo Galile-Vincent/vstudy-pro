@@ -1,3 +1,6 @@
+import { MemoryRepository } from '../review/memory-repository';
+import { wakeMemory } from '../review/memory';
+import { log } from '../logging';
 /**
  * Own request acceptance, stream lifetime, cancellation, and transactional chat persistence.
  * Owned by main/services.
@@ -288,7 +291,12 @@ export class ChatService {
       if (!restoreBranch && (entry.text || entry.proposals?.length || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error")) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? 'VSTUDY_STATUS:' + JSON.stringify({code:event.code,params:event.params ?? {}}) : undefined, { tutorDecision: tutorReplyMetadata(entry.tutorPlan, entry.text), ...(entry.proposals?.length ? {proposals: entry.proposals} : {}), ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
       this.store.messages.link(messageId, entry.userMessageId);
       if (entry.supersedeOnSave && entry.text) this.store.messages.supersede(entry.supersedeOnSave, messageId);
+      if (event.type === 'done' && !entry.controller.signal.aborted && entry.text.trim()) {
+        try { new MemoryRepository(this.store.db).enqueue(messageId); }
+        catch { log({phase:'review-memory-enqueue',code:'FAILED'}); }
+      }
       this.store.db.exec("RELEASE finish_chat");
+      setImmediate(() => wakeMemory(this.store));
     } catch {
       this.store.db.exec("ROLLBACK TO finish_chat; RELEASE finish_chat");
       if (!entry.controller.signal.aborted)

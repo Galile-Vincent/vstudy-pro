@@ -23,7 +23,7 @@ export function isEligibleSource(source:EligibleSource):boolean {
 /** Join aliases: j job, c conversation, d optional document, u user, a assistant, l chat link.
  * Legacy successful messages have no status; explicit error/aborted parts always fail.
  */
-export const eligibleSourceSql = `
+export const eligibleExchangeSql = `
  c.deletedAt IS NULL AND (c.documentId IS NULL OR (d.id=c.documentId AND d.deletedAt IS NULL))
  AND u.conversationId=c.id AND a.conversationId=c.id AND u.role='user' AND a.role='assistant'
  AND u.supersededBy IS NULL AND a.supersededBy IS NULL
@@ -33,6 +33,8 @@ export const eligibleSourceSql = `
  AND NOT EXISTS(SELECT 1 FROM json_each(a.parts) p WHERE
    (json_extract(p.value,'$.status') IS NOT NULL AND json_extract(p.value,'$.status')!='complete')
    OR json_type(p.value,'$.error') IS NOT NULL)
+`;
+export const eligibleSourceSql = `${eligibleExchangeSql}
  AND l.excludeFromMemory=0 AND l.courseId IS NOT NULL AND l.courseId=j.courseId
  AND l.revision=j.assignmentRevision
 `;

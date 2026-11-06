@@ -31,7 +31,7 @@ export type Availability =
   | { available: false; reason: string };
 export type Model = import("../../shared/domain").Model;
 /** Main-assembled prompt and optional page images, with a usage callback for partial abort accounting. */
-export type ProviderRequest = ChatRequest & { prompt: string; systemPrompt?:string; images?:{mediaType:'image/png'; data:string}[]; allowPresentation?: boolean; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
+export type ProviderRequest = ChatRequest & { prompt: string; systemPrompt?:string; maxOutputTokens?:number; images?:{mediaType:'image/png'; data:string}[]; allowPresentation?: boolean; onUsageSnapshot?: (usage: Usage, models?: { modelId: string; usage: Usage }[]) => void };
 /** Adapt one enabled provider to validated events and await resource cleanup when the signal aborts. */
 export interface ProviderAdapter {
   testConnection?(): Promise<"success" | "bad_key" | "offline" | "no_access">;

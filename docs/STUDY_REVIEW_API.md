@@ -164,3 +164,98 @@ Suspension reasons are independent. Storage maintenance drains workers, then res
 `main/db/study-migration.ts` exports `studyMigration:string` as migration 22. Migrations 1-21 are unchanged. `main/db/study-validation.ts` exports `validateStudyData(db:DatabaseSync):void`, a read-only validator invoked after staged restore migration.
 
 `shared/review-artifacts.ts` exports strict bounded schemas `studyScopeSchema`, `studySourceSnapshotSchema`, `studyResolvedScopeSchema`, `studyTestItemSchema`, `studyTestSchema`, `studyAnswersSchema`, and types `StudyResolvedScope`, `StudyTest`. W3 must use these persisted payload contracts. Ready artifacts retain source snapshots after document unlink/deletion; retries and new generation must re-resolve live source ownership.
+
+## W2 memory and admission
+
+No schema migration is required. Normal `registerIpc` composition calls
+`startMemory(store, providers)`; `openStore` and staged restore remain inert.
+The registry suspends dequeue, aborts the active signal and waits for the producer
+before storage maintenance or shutdown. Source changes also fence commits through
+the job token, assignment revision and shared eligibility predicate.
+
+Remote calls are at least once. An interrupted call may already have been billed.
+Local observations and job success (including zero concepts) commit together.
+Startup recovers running attempts up to three dispatches and scans at most 100
+missing exchanges from the preceding seven days. Queue depth is 100, global FIFO,
+with one extraction active. Overflow retains the answer and relies on recovery;
+there is no unlimited historical backfill. Manual retries reset the attempt cap.
+Budget-denied jobs remain pending with `errorCode:'budget'` until explicit retry.
+Other extraction errors are failed and retryable. `review:jobs:page` includes
+`errorCode`; `review:jobs:retry` accepts `{jobId}` and returns `{ok:true}` and uses
+the existing expensive retry channel rate limit. Unassigned exchanges cannot
+contribute mastery; a manual Unsorted assignment remains authoritative.
+
+Exact W3 API (`main/review/admission.ts`):
+
+```ts
+type ReviewPurpose = 'extraction' | 'generation';
+interface ReviewCall {
+  purpose: ReviewPurpose;
+  request: ProviderRequest;
+  adapter: ProviderAdapter;
+  outputTokens?: number;     // default 2048, maximum 32768
+  maxOutputBytes?: number;   // default 64 KiB, maximum 256 KiB
+}
+class ReviewBudgetError extends Error { readonly errorCode = 'budget'; }
+class ReviewAdmission {
+  constructor(store: AdmissionStore);
+  readonly inFlight: {calls:number;inputTokens:number;outputTokens:number;costUsd:number};
+  execute(call: ReviewCall, signal: AbortSignal): Promise<string>;
+}
+getReviewAdmission(store: AdmissionStore): ReviewAdmission;
+```
+
+`AdmissionStore` structurally requires `settings.get()` with `priceOverrides`,
+optional `monthlyBudgetUsd`/`monthlyTokenBudget`, and `usage.summary('month')` plus
+`usage.record(UsageRecord)`. Pass the app's same `Store` to `getReviewAdmission`
+for W3. Every generation/critic/retry dispatch must call `execute` anew.
+Reservations are synchronous immediately before dispatch and settle once even
+for tool output, invalid output, exceptions and aborts. Unknown prices fail closed.
+The admission service gates review calls only; foreground chat and AI-parse have
+separate gates. It cannot promise a global spending limit across those services.
+API adapters receive an explicit output limit; CLI adapters enforce only a local
+response byte bound, so remote billing cannot be strictly bounded for those
+transports. Usage is recorded as `kind:'chat'`; the immutable ledger has no purpose
+metadata column, so purpose remains main-local rather than being persisted.
+
+Other exported W2 APIs:
+
+```ts
+// extract-schema.ts
+extractionSchema; // strict bounded R-S 2.2 snake_case record
+// Exported types: ExtractionResult, ExtractionMessage, ExtractionConcept,
+// ExtractionContext, GuardedObservation, GuardedExtraction
+guardExtraction(value: unknown, context: ExtractionContext): GuardedExtraction;
+// extract-prompt.ts
+buildExtractionPrompt(input: ExtractionPromptInput): string;
+serializeUntrustedData(value: unknown, maxBytes?: number): string;
+EXTRACTION_DATA_MAX_BYTES;   // 48 KiB escaped JSON
+EXTRACTION_PROMPT_MAX_BYTES; // 56 KiB final prompt
+// thread-snapshot.ts
+buildThreadSnapshot(db: DatabaseSync, assistantId: string): {
+  messages: ThreadMessage[]; bytes: number; queries: number;
+}; // <=24 messages, <=32 KiB fetched JSON, <=49 queries
+// memory.ts
+startMemory(store: Store, providers: ProviderRegistry): MemoryWorker;
+wakeMemory(store: Store): void;
+retryMemoryJob(store: Store, id: string): void;
+class MemoryWorker implements ReviewWorker {
+  constructor(jobs: MemoryRepository,
+    extract: (job: MemoryJob, signal: AbortSignal) => Promise<MemoryResult>);
+  wake(): void; retry(id: string): void;
+  suspend(): void; resume(): void;
+  waitForIdle(): Promise<void>; dispose(): Promise<void>;
+}
+```
+
+W5a uses the validated generic IPC channels above and W1 preferences; no preload,
+renderer, or locale changes are included. Extraction sends only the bounded thread,
+candidate course IDs/titles, catalog IDs/labels and unit labels to the conversation's
+configured provider. It does not inject memory into tutor prompts. Prompts contain
+fixed English or Traditional Chinese instructions outside a single escaped data
+section; Japanese uses the English instructions with Japanese reply language.
+Oversized serialized inputs fail closed rather than truncate a delimiter or quote.
+Evidence validation proves provenance and membership, not pedagogical correctness.
+A bare affirmation never demonstrates resolution. The R-S concept record accepts
+an optional `wrong_attempt:boolean` to retain a wrong attempt alongside `gave_up`;
+main requires substantive student quote evidence and never infers it from tutor text.
