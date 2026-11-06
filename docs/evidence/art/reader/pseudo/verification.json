@@ -1,0 +1,17 @@
+{
+  "phase": "pseudo",
+  "screenshots": [
+    "en-XA-1000-125-home.png",
+    "en-XA-1000-125-library.png",
+    "en-XA-1000-125-workspace.png",
+    "en-XA-1200-100-home.png",
+    "en-XA-1200-100-library.png",
+    "en-XA-1200-100-workspace.png",
+    "en-XA-1600-100-home.png",
+    "en-XA-1600-100-library.png",
+    "en-XA-1600-100-workspace.png"
+  ],
+  "checks": [],
+  "errors": [],
+  "artifact": "Built Electron application; local fixture documents and fake provider, no live AI."
+}

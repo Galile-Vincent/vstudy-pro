@@ -1,0 +1,22 @@
+{
+  "phase": "interaction",
+  "screenshots": [
+    "coach-popover-keyboard.png",
+    "read-without-ai-keyboard-125.png",
+    "compact-read-without-ai-keyboard-125.png"
+  ],
+  "checks": [
+    {
+      "keyboard": [
+        "sidebar collapse and expand",
+        "coach open and dismiss persists",
+        "AI setup dialog",
+        "continue without AI focuses reader",
+        "list toggle",
+        "open document"
+      ]
+    }
+  ],
+  "errors": [],
+  "artifact": "Built Electron application; local fixture documents and fake provider, no live AI."
+}

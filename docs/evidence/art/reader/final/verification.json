@@ -1,0 +1,219 @@
+{
+  "phase": "final",
+  "screenshots": [
+    "vstudy-light-1440x900-home.png",
+    "vstudy-light-1440x900-library.png",
+    "vstudy-light-1440x900-reader-empty.png",
+    "vstudy-light-1440x900-reader-conversation.png",
+    "vstudy-light-1440x900-reader-no-ai.png",
+    "vstudy-dark-1440x900-home.png",
+    "vstudy-dark-1440x900-library.png",
+    "vstudy-dark-1440x900-reader-empty.png",
+    "vstudy-dark-1440x900-reader-conversation.png",
+    "vstudy-dark-1440x900-reader-no-ai.png",
+    "ocean-light-1440x900-home.png",
+    "ocean-light-1440x900-library.png",
+    "ocean-light-1440x900-reader-empty.png",
+    "ocean-light-1440x900-reader-conversation.png",
+    "ocean-light-1440x900-reader-no-ai.png",
+    "ocean-dark-1440x900-home.png",
+    "ocean-dark-1440x900-library.png",
+    "ocean-dark-1440x900-reader-empty.png",
+    "ocean-dark-1440x900-reader-conversation.png",
+    "ocean-dark-1440x900-reader-no-ai.png",
+    "grove-light-1440x900-home.png",
+    "grove-light-1440x900-library.png",
+    "grove-light-1440x900-reader-empty.png",
+    "grove-light-1440x900-reader-conversation.png",
+    "grove-light-1440x900-reader-no-ai.png",
+    "grove-dark-1440x900-home.png",
+    "grove-dark-1440x900-library.png",
+    "grove-dark-1440x900-reader-empty.png",
+    "grove-dark-1440x900-reader-conversation.png",
+    "grove-dark-1440x900-reader-no-ai.png",
+    "ember-light-1440x900-home.png",
+    "ember-light-1440x900-library.png",
+    "ember-light-1440x900-reader-empty.png",
+    "ember-light-1440x900-reader-conversation.png",
+    "ember-light-1440x900-reader-no-ai.png",
+    "ember-dark-1440x900-home.png",
+    "ember-dark-1440x900-library.png",
+    "ember-dark-1440x900-reader-empty.png",
+    "ember-dark-1440x900-reader-conversation.png",
+    "ember-dark-1440x900-reader-no-ai.png",
+    "iris-light-1440x900-home.png",
+    "iris-light-1440x900-library.png",
+    "iris-light-1440x900-reader-empty.png",
+    "iris-light-1440x900-reader-conversation.png",
+    "iris-light-1440x900-reader-no-ai.png",
+    "iris-dark-1440x900-home.png",
+    "iris-dark-1440x900-library.png",
+    "iris-dark-1440x900-reader-empty.png",
+    "iris-dark-1440x900-reader-conversation.png",
+    "iris-dark-1440x900-reader-no-ai.png",
+    "rose-light-1440x900-home.png",
+    "rose-light-1440x900-library.png",
+    "rose-light-1440x900-reader-empty.png",
+    "rose-light-1440x900-reader-conversation.png",
+    "rose-light-1440x900-reader-no-ai.png",
+    "rose-dark-1440x900-home.png",
+    "rose-dark-1440x900-library.png",
+    "rose-dark-1440x900-reader-empty.png",
+    "rose-dark-1440x900-reader-conversation.png",
+    "rose-dark-1440x900-reader-no-ai.png",
+    "slate-light-1440x900-home.png",
+    "slate-light-1440x900-library.png",
+    "slate-light-1440x900-reader-empty.png",
+    "slate-light-1440x900-reader-conversation.png",
+    "slate-light-1440x900-reader-no-ai.png",
+    "slate-dark-1440x900-home.png",
+    "slate-dark-1440x900-library.png",
+    "slate-dark-1440x900-reader-empty.png",
+    "slate-dark-1440x900-reader-conversation.png",
+    "slate-dark-1440x900-reader-no-ai.png",
+    "paper-light-1440x900-home.png",
+    "paper-light-1440x900-library.png",
+    "paper-light-1440x900-reader-empty.png",
+    "paper-light-1440x900-reader-conversation.png",
+    "paper-light-1440x900-reader-no-ai.png",
+    "paper-dark-1440x900-home.png",
+    "paper-dark-1440x900-library.png",
+    "paper-dark-1440x900-reader-empty.png",
+    "paper-dark-1440x900-reader-conversation.png",
+    "paper-dark-1440x900-reader-no-ai.png",
+    "contrast-light-1440x900-home.png",
+    "contrast-light-1440x900-library.png",
+    "contrast-light-1440x900-reader-empty.png",
+    "contrast-light-1440x900-reader-conversation.png",
+    "contrast-light-1440x900-reader-no-ai.png",
+    "contrast-dark-1440x900-home.png",
+    "contrast-dark-1440x900-library.png",
+    "contrast-dark-1440x900-reader-empty.png",
+    "contrast-dark-1440x900-reader-conversation.png",
+    "contrast-dark-1440x900-reader-no-ai.png",
+    "en-1000-125-home.png",
+    "en-1000-125-library.png",
+    "en-1000-125-workspace.png",
+    "en-1200-100-home.png",
+    "en-1200-100-library.png",
+    "en-1200-100-workspace.png",
+    "en-1600-100-home.png",
+    "en-1600-100-library.png",
+    "en-1600-100-workspace.png",
+    "zh-Hant-1000-125-home.png",
+    "zh-Hant-1000-125-library.png",
+    "zh-Hant-1000-125-workspace.png",
+    "zh-Hant-1200-100-home.png",
+    "zh-Hant-1200-100-library.png",
+    "zh-Hant-1200-100-workspace.png",
+    "zh-Hant-1600-100-home.png",
+    "zh-Hant-1600-100-library.png",
+    "zh-Hant-1600-100-workspace.png",
+    "ja-1000-125-home.png",
+    "ja-1000-125-library.png",
+    "ja-1000-125-workspace.png",
+    "ja-1200-100-home.png",
+    "ja-1200-100-library.png",
+    "ja-1200-100-workspace.png",
+    "ja-1600-100-home.png",
+    "ja-1600-100-library.png",
+    "ja-1600-100-workspace.png"
+  ],
+  "checks": [
+    {
+      "key": "vstudy-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "vstudy-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "ocean-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "ocean-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "grove-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "grove-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "ember-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "ember-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "iris-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "iris-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "rose-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "rose-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "slate-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "slate-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "paper-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "paper-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "contrast-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "contrast-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "axe": []
+    }
+  ],
+  "errors": [],
+  "artifact": "Built Electron application; local fixture documents and fake provider, no live AI."
+}

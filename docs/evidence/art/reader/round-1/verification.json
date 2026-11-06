@@ -1,0 +1,29 @@
+{
+  "phase": "round-1",
+  "screenshots": [
+    "vstudy-light-1440x900-home.png",
+    "vstudy-light-1440x900-library.png",
+    "vstudy-light-1440x900-reader-empty.png",
+    "vstudy-light-1440x900-reader-conversation.png",
+    "vstudy-light-1440x900-reader-no-ai.png",
+    "vstudy-dark-1440x900-home.png",
+    "vstudy-dark-1440x900-library.png",
+    "vstudy-dark-1440x900-reader-empty.png",
+    "vstudy-dark-1440x900-reader-conversation.png",
+    "vstudy-dark-1440x900-reader-no-ai.png"
+  ],
+  "checks": [
+    {
+      "key": "vstudy-light-1440x900",
+      "overlap": false,
+      "inside": true
+    },
+    {
+      "key": "vstudy-dark-1440x900",
+      "overlap": false,
+      "inside": true
+    }
+  ],
+  "errors": [],
+  "artifact": "Built Electron application; local fixture documents and fake provider, no live AI."
+}

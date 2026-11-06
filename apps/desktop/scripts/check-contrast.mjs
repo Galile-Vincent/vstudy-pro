@@ -3,7 +3,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { URL } from 'node:url';
 import { courseArtContrast } from './course-art-contrast.mjs';
-import { builtinThemes, adjustedTokens, contrastFailures } from '../src/shared/themes/index.ts';
+import { builtinThemes, adjustedTokens, contrastFailures, contrastRatio } from '../src/shared/themes/index.ts';
 
 for (const theme of builtinThemes) {
   for (const scheme of ['light','dark']) {
@@ -14,6 +14,7 @@ for (const theme of builtinThemes) {
       assert.ok(art.label >= 4.5 && art.hero >= 4.5, `${theme.id} ${scheme} ${contrast}% course scrim AA ${JSON.stringify(art)}`);
       assert.deepEqual(failures,[],`${theme.id} ${scheme} ${contrast}%`);
     }
+    assert.ok(contrastRatio(theme[scheme].ink,theme[scheme].surface)>=4.5,`${theme.id} ${scheme} document-cover label over opaque surface scrim`);
     console.log(`${theme.name} ${scheme}: WCAG AA passed at every contrast setting`);
   }
 }

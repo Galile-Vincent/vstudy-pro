@@ -1,0 +1,22 @@
+{
+  "workspace": "Workspace",
+  "collection": "Your collection",
+  "companion": "Study companion",
+  "welcome_title": "A little curiosity. A new understanding.",
+  "selection_title": "Let’s look a little closer.",
+  "welcome_body": "Explore the ideas in “{{title}}”.",
+  "summarize": "Summarize this section",
+  "explain": "Explain a term",
+  "quiz": "Quiz me",
+  "prompt_summarize": "Summarize the key ideas in {{context}} of “{{title}}”.",
+  "prompt_explain": "Explain the important terms in {{context}} of “{{title}}”, with everyday examples.",
+  "prompt_quiz": "Quiz me on {{context}} of “{{title}}”. Ask one question at a time.",
+  "selected_passage": "the selected passage",
+  "open_document": "the open document",
+  "offline_title": "A space to read. AI when you’re ready.",
+  "offline_body": "Keep reading and organizing your documents. Connect an AI service whenever you want to explore them together.",
+  "setup": "Set up AI",
+  "without_ai": "Use without AI",
+  "local": "Your personal study space",
+  "tip": "Reading tip"
+}

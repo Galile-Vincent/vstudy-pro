@@ -1,12 +1,12 @@
-import { HelpMenu } from "../onboarding/help";
-import { AiSetupNotice } from '../ai-setup';
+import { ContextCoach, HelpMenu } from "../onboarding/help";
+import { ReaderOfflineNotice } from './offline-notice';
+import { ReaderWelcome } from './reader-welcome';
 import { Textarea } from '../components/ui/textarea';
 import { AiParseControls } from '../ai-parse/ai-parse-controls';
 import { Button } from '../components/ui/button';
 import { useReadingActivity } from '../home/use-reading-activity';
-import { BlankChat } from '../motion/blank-chat';
 import { useNavigate } from '../shell';
-import { Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, FileText } from "lucide-react";
+import { Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, FileText, PanelLeft, Sparkles, ChevronRight } from "lucide-react";
 import { errorText, statusText } from "../status";
 import { conversionStatus } from "../../shared/status";
 import { useTranslation } from "react-i18next";
@@ -55,6 +55,14 @@ export function Workspace() {
 
   const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
   useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
+  useEffect(() => {
+    const read = () => {
+      setCompactPane('reading');
+      requestAnimationFrame(() => document.getElementById('reading-content')?.focus());
+    };
+    window.addEventListener('vstudy:read-without-ai', read);
+    return () => window.removeEventListener('vstudy:read-without-ai', read);
+  }, []);
   const [draft, setDraft] = useState("");
   const [loadedConversationDocument,setLoadedConversationDocument] = useState<Document['id'] | null>(null);
   const [historyJump,setHistoryJump] = useState<string>();
@@ -340,10 +348,11 @@ export function Workspace() {
   );
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
+      <header className="art-reader-chat-header"><span><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</span>{chatControls}</header>
       {conversation && history ? (
         <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}>{chatDocument === documentId ? <Chat
           documentPageCount={documentPageCount}
-          documentTitle={doc?.sourceName ?? tr('common:document')}
+          documentTitle={doc?.title ?? tr('common:document')}
             onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
           key={conversation.id}
           jumpMessageId={historyJump}
@@ -362,8 +371,9 @@ export function Workspace() {
         /> : <p role="status">{tr("common:loading_conversation")}</p>}</Suspense>
       ) : (
         <div className="chat-start">
-          <BlankChat documentOpen={!!doc} hasSelection={!!selection} replyLanguage={settings.replyLanguage} disabled={!canChat || busy} onQuestion={text => { setDraft(text); void newConversation(); }} />
-          {connected && !providers.some(p => p.config.enabled && p.availability.available && p.models.length > 0) && <AiSetupNotice onSettings={() => { setSettingsTab('providers'); setShowSettings(true); }} />}
+          <div className="art-reader-start-content"><ReaderWelcome title={doc?.title ?? tr('common:document')} hasSelection={!!selection} onQuestion={canChat && !busy ? text => { setDraft(text); void newConversation(); } : undefined} />
+          {connected && !providers.some(p => p.config.enabled && p.availability.available && p.models.length > 0) && <ReaderOfflineNotice onSettings={() => { setSettingsTab('providers'); setShowSettings(true); }} />}
+          </div>
           {selection && (
             <div className="selection-chip">
               <SelectionPreview selection={selection} />
@@ -393,6 +403,7 @@ export function Workspace() {
     <section id="reading-content" tabIndex={-1} className="pane reading-pane" aria-label={tr('common:document')}>
       {practice === doc?.id && <aside><strong>{tr('welcome:try_title')}</strong><p>{tr('welcome:try_steps')}</p><Button variant="ghost" onClick={() => { setPractice(null); try { sessionStorage.removeItem('vstudy:practice'); } catch { return; } }}>{tr('welcome:try_hide')}</Button></aside>}
       <div className="pane-toolbar">
+        <ContextCoach inline/>
         <span className="eyebrow">{doc?.sourceName ?? tr('common:reading_space')}</span>
         {doc && <button className="icon-button" title={tr('common:delete_document')} aria-label={tr('common:delete_document')} onClick={() => {
           if (!window.confirm(tr('library:delete_document',{title:doc.title}))) return;
@@ -482,13 +493,14 @@ export function Workspace() {
     >
       <h1 className="sr-only">{tr("common:document_library")}</h1><header className="app-header">
         <div className="row">
+          <Button variant="ghost" size="icon" aria-label={tr('common:toggle_document_library')} onClick={() => window.dispatchEvent(new Event('vstudy:toggle-sidebar'))}><PanelLeft size={18}/></Button>
           <button className="ghost" onClick={() => navigate("library")}>{tr("common:library")}</button>
           <button data-testid="import-document" aria-label={tr('common:import_document')} disabled={busy||!connected} onClick={()=>void importDocument()}><Plus size={16}/></button>
+          <ChevronRight size={14} className="art-reader-breadcrumb-separator" aria-hidden="true"/>
           <span className="muted workspace-title">
             {doc?.title ?? tr('common:your_workspace')}
           </span>
         </div>
-        {chatControls}
         <div className="row">
           <HelpMenu />
           <span className={`connection-status ${connected && !isMock ? "motion-sr" : ""}`} data-testid="bridge-status">

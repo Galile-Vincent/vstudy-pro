@@ -1,7 +1,8 @@
+import { FileText } from 'lucide-react';
 import { ChatAnnouncement, CopyAnswerButton } from './chat-accessibility';
-import { AiSetupNotice } from './ai-setup';
+import { ReaderOfflineNotice } from './workspace/offline-notice';
+import { ReaderWelcome } from './workspace/reader-welcome';
 import { MarkdownText } from './document-markdown';
-import { BlankChat } from './motion/blank-chat';
 import { useTranslation } from "react-i18next";
 import { tr } from '../shared/i18n';
 import { ModelControls } from "./model-controls";
@@ -24,7 +25,6 @@ import { SelectionPreview } from "./selection-preview-view";
 export { SelectionPreview } from "./selection-preview-view";
 import { desktop } from "./bridge";
 import { documentCitationSchema } from "../shared";
-import { Suggestions } from "./components/assistant-ui/elements/suggestions";
 import { DocumentReference } from "./components/assistant-ui/elements/document-reference";
 import { DocumentSource, DocumentTool, jumpToCitation } from './document-elements';
 import { assistantContent } from './chat-content';
@@ -133,12 +133,11 @@ export function Chat({
   const statuses = new Map(history.flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
-    selection, onClearSelection, usage, budget, unavailable, onUsage, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
+    selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
     picker: <ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
-    {unavailable && <AiSetupNotice onSettings={onSettings} />}
     <Thread components={documentComponents} autoFocus={autoFocus} />
     <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
@@ -148,15 +147,15 @@ type DocumentChat = {
   isCourse: boolean; isGeneral: boolean;
   selection: Selection | null; onClearSelection: () => void;
   usage: ReturnType<typeof useUsage>; budget: ReturnType<typeof useBudgetGuard>;
-  unavailable: boolean; onUsage: () => void; picker: React.ReactNode;
+  unavailable: boolean; onUsage: () => void; onSettings: () => void; picker: React.ReactNode;
   documentPageCount: number; documentTitle: string; models: Providers[number]["models"]; selections: Map<string, Selection>; statuses: Map<string, string>; subscription: boolean;
 };
 const DocumentChatContext = createContext<DocumentChat | null>(null);
 const useDocumentChat = () => useContext(DocumentChatContext)!;
 function ComposerSelection() {
   useTranslation();
-  const {selection,onClearSelection,isGeneral} = useDocumentChat();
-  return <><p>{tr(isGeneral ? 'history:general_context' : selection ? 'library:context_selection' : 'library:context_document')}</p>{selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label={tr('common:remove_selection')} onClick={onClearSelection}>×</button></div>}</>;
+  const {selection,onClearSelection,isGeneral,documentTitle} = useDocumentChat();
+  return <><div className="art-reader-context"><FileText size={14} aria-hidden="true"/><span>{isGeneral ? tr('history:general_context') : selection ? tr('library:context_selection') : documentTitle}</span></div>{selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label={tr('common:remove_selection')} onClick={onClearSelection}>×</button></div>}</>;
 }
 function ComposerBanner() {
   useTranslation();
@@ -172,11 +171,6 @@ function MessageSelection() {
   const id = useAuiState(s => s.message.id), {selections} = useDocumentChat();
   const selected = selections.get(id);
   return selected && <SelectionPreview selection={selected} />;
-}
-function DocumentSuggestions() {
-  useTranslation();
-  const aui = useAui();
-  return <Suggestions suggestions={[tr('common:summarize_this_document'),tr('common:explain_the_key_ideas'),tr('common:compare_the_main_arguments')]} selectedSuggestion={null} cycle={0} onSuggestion={prompt => aui.composer().setText(prompt)} variant="pills" />;
 }
 function DocumentMessageFooter() {
   useTranslation();
@@ -194,8 +188,16 @@ function DocumentMessageFooter() {
 }
 function useComposerBindings() {
   useTranslation(); const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
-function DocumentWelcome() { const { selection, usage } = useDocumentChat(); return <div className="document-welcome"><BlankChat documentOpen hasSelection={!!selection} replyLanguage={usage.data?.settings.replyLanguage ?? 'auto'}/><DocumentSuggestions/></div>; }
-const documentComponents = { Announcement: ChatAnnouncement, CopyAction: CopyAnswerButton, Text: MarkdownText, Welcome:DocumentWelcome, WelcomeExtra:DocumentSuggestions, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
+function DocumentWelcome() {
+  const aui = useAui();
+  const { selection, documentTitle } = useDocumentChat();
+  return <ReaderWelcome title={documentTitle} hasSelection={!!selection} onQuestion={prompt => aui.composer().setText(prompt)}/>;
+}
+function DocumentNotice() {
+  const { unavailable, onSettings } = useDocumentChat();
+  return unavailable ? <ReaderOfflineNotice onSettings={onSettings}/> : null;
+}
+const documentComponents = { Announcement: ChatAnnouncement, CopyAction: CopyAnswerButton, Text: MarkdownText, Welcome:DocumentWelcome, ThreadNotice:DocumentNotice, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 
 export function ChatComposerInput() {
   useTranslation();
