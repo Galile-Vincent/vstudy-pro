@@ -1,3 +1,4 @@
+import { createReviewMock, reviewDemoChat } from './review/dev-mock';
 import realCourseRows from '../main/moodle/fixtures/real-cycu-courses.tsv?raw';
 import { parseCourseIdentity, courseLifecycle } from '../main/moodle/identity';
 import {
@@ -46,9 +47,12 @@ The relationship is $E = mc^2$.
 > Understanding grows when you put an idea into your own words.
 `;
 export function createMockBridge(): DesktopApi {
+  const reviewDemo = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('reviewDemo') === '1';
+  const reviewMock = createReviewMock(reviewDemo);
   const documents: Document[] = [],
     conversations: Conversation[] = [],
     messages: Message[] = [];
+  if (reviewDemo) { const fixture=reviewDemoChat(); conversations.push(...fixture.conversations); messages.push(...fixture.messages); }
   let settings: Settings = { ...defaultSettings };
   const keys = new Set<string>();
   const listeners = new Map<string, (event: ChatEvent) => void>();
@@ -69,9 +73,13 @@ export function createMockBridge(): DesktopApi {
     channel: C,
     request: IpcRequest<C>,
   ): Promise<IpcResponse<C>> => {
+    if (channel.startsWith('review:')) return reviewMock(channel, request) as IpcResponse<C>;
     const input = request as Record<string, unknown>;
     let result: unknown = { ok: true };
     switch (channel) {
+      case 'chats:get': result=conversations.find(row=>row.id===input.conversationId)??null; break;
+      case 'chats:facets': result={courses:[],documents:[],models:[]}; break;
+      case 'chats:search': result={items:[],nextCursor:null}; break;
       case "mcp:state":
         result = {enabled:false,grants:[],pairings:[],proposals:[],activity:[],activeCalls:0,accounts:[]};
         break;
