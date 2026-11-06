@@ -171,7 +171,7 @@ Open **Settings > Agents**, enable connections, and use **Connect an agent** to 
 node apps/mcp/dist/vstudy-mcp.cjs install --client codex --dry-run
 ```
 
-Use `claude`, `agy`, `claude-desktop`, or `cursor` for the other clients. Node.js 24.11.1 or later is required. Quiz attempts and videos remain the student's work; MCP cannot answer or submit quizzes or fabricate activity progress. Assignment submission accepts only the student's own text with explicit per-call consent.
+Use `claude`, `agy`, `claude-desktop`, or `cursor` for the other clients. Node.js 24.11.1 or later is required. Quiz attempts and videos remain the student's work; MCP cannot answer or submit quizzes or fabricate activity progress. `save_assignment_draft` saves only the student's own approved text as a draft. Final submission is always a manual action in Moodle.
 
 See the [MCP setup, tools, and security guide](docs/MCP.md), [client formats and actual verification](apps/mcp/CLIENT_FORMATS.md), and [design decisions](docs/MCP_DESIGN.md). Packaged-source acceptance used the official SDK with loopback Moodle fixtures. Native Windows integration and live-school acceptance remain separate checks.
 

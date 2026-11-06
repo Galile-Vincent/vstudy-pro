@@ -1,4 +1,5 @@
 /** Guard the exact approved Moodle effects and fail closed on graded completion or unsupported submissions. @packageDocumentation */
+import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import type { BackendContext } from './backend-context';
 import type { BackendHandlers, BackendServices } from './backend-types';
@@ -24,7 +25,7 @@ async function currentModule(context:BackendContext, services:BackendServices, c
   return cm;
 }
 
-async function checkAssignment(context:BackendContext, services:BackendServices, args:ToolArguments<'submit_assignment'>) {
+export async function assignmentDraft(context:BackendContext, services:BackendServices, args:ToolArguments<'save_assignment_draft'>) {
   const course = context.course(args.courseId).course;
   const module = context.module(args.courseId, args.moduleId);
   if (module.kind !== 'assign' || module.modname !== 'assign') fail('DENIED');
@@ -48,14 +49,28 @@ async function checkAssignment(context:BackendContext, services:BackendServices,
     const limit = Number(value('onlinetext', 'wordlimit'));
     if (!Number.isSafeInteger(limit) || limit <= 0 || args.text.trim().split(/\s+/u).length > limit) fail('UNSUPPORTED');
   }
+  return readAssignmentDraft(context, services, args);
+}
+
+async function readAssignmentDraft(context:BackendContext, services:BackendServices, args:ToolArguments<'save_assignment_draft'>) {
   const status = await services.remote.call(context, 'mod_assign_get_submission_status', {assignid:String(args.assignmentId), userid:String(context.account().remoteUserId), groupid:'0'}, submissionWire);
   noWarnings(status);
   const last = status.lastattempt;
   if (!last || !last.submissionsenabled || last.locked || !last.canedit || last.caneditowner === false || !last.cansubmit || last.teamsubmission !== undefined || last.submission?.status === 'submitted') fail('UNSUPPORTED');
   if (last.submission?.userid !== undefined && last.submission.userid !== context.account().remoteUserId) fail('DENIED');
+  const plugins = last.submission?.plugins ?? [];
+  const editors = plugins.flatMap(plugin => plugin.editorfields ?? []);
+  const attachments = plugins.flatMap(plugin => (plugin.fileareas ?? []).flatMap(area => area.files.map(file => ({name:file.filename, size:file.filesize ?? null}))));
+  const otherContent = plugins.some(plugin => !['onlinetext', 'file'].includes(plugin.type)
+    || plugin.type !== 'onlinetext' && (plugin.editorfields?.length ?? 0) > 0
+    || (plugin.fileareas ?? []).some(area => area.area !== 'submission_files' || plugin.type !== 'file'))
+    || editors.length > 1 || editors.some(field => field.name !== 'onlinetext' || field.format !== 2);
+  const text = editors[0]?.text ?? '';
+  const textHash = 'sha256:' + createHash('sha256').update(text).digest('hex').match(/.{8}/g)!.join(':');
+  return {text, state:{textHash, attachments, otherContent}};
 }
 
-export function writeHandlers(services:BackendServices): Pick<BackendHandlers, 'mark_module_complete' | 'post_forum_reply' | 'submit_assignment'> {
+export function writeHandlers(services:BackendServices): Pick<BackendHandlers, 'mark_module_complete' | 'post_forum_reply' | 'save_assignment_draft'> {
   return {
     mark_module_complete:async (context, args) => {
       completionCandidate(context, args.courseId, args.moduleId);
@@ -81,18 +96,18 @@ export function writeHandlers(services:BackendServices): Pick<BackendHandlers, '
       noWarnings(response);
       return {content:{posted:true, discussionId:args.discussionId, postId:response.postid}};
     },
-    submit_assignment:async (context, args) => {
+    save_assignment_draft:async (context, args) => {
       if (args.studentOwned !== true) fail('ACADEMIC_INTEGRITY');
-      services.remote.require(context, ['core_course_get_course_module', 'mod_assign_get_assignments', 'mod_assign_get_submission_status', 'mod_assign_save_submission', 'mod_assign_submit_for_grading']);
-      await checkAssignment(context, services, args);
+      services.remote.require(context, ['core_course_get_course_module', 'mod_assign_get_assignments', 'mod_assign_get_submission_status', 'mod_assign_save_submission']);
+      const before = await assignmentDraft(context, services, args);
+      if (before.state.attachments.length || before.state.otherContent) fail('UNSUPPORTED');
       const saved = await services.remote.call(context, 'mod_assign_save_submission', {assignmentid:String(args.assignmentId), 'plugindata[onlinetext_editor][text]':args.text, 'plugindata[onlinetext_editor][format]':'2', 'plugindata[onlinetext_editor][itemid]':'0'}, warnings);
       context.recheck();
       noWarnings(saved);
-      await checkAssignment(context, services, args);
-      context.recheck();
-      const submitted = await services.remote.call(context, 'mod_assign_submit_for_grading', {assignmentid:String(args.assignmentId), acceptsubmissionstatement:'0'}, warnings);
-      noWarnings(submitted);
-      return {content:{submitted:true, assignmentId:args.assignmentId, moduleId:args.moduleId}};
+      const after = await readAssignmentDraft(context, services, args);
+      if (after.state.attachments.length || after.state.otherContent || after.text !== args.text) fail('UNSUPPORTED');
+      return {content:{message:'Draft saved. Review and submit it yourself in Moodle', assignmentId:args.assignmentId,
+        open_in_app:{account:context.account().id, courseId:args.courseId, moduleId:args.moduleId}}};
     },
   };
 }

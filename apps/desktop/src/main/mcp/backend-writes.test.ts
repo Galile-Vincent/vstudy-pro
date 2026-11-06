@@ -23,9 +23,9 @@ async function setup() {
   const writes = () => h.request.mock.calls.map(row => new URLSearchParams(String(row[1]?.body))).filter(params => /^(mod_assign_(?:save_submission|submit_for_grading)|mod_forum_add_discussion_post|core_completion_update_activity_completion_status_manually)$/.test(params.get('wsfunction') ?? ''));
   return {...h, backend, writes};
 }
-const submission = () => mcpTools.submit_assignment.schema.parse({courseId:courseA, moduleId:assignA, assignmentId:52, text:'My own essay.', studentOwned:true});
+const submission = () => mcpTools.save_assignment_draft.schema.parse({courseId:courseA, moduleId:assignA, assignmentId:52, text:'My own essay.', studentOwned:true});
 
-it('prepares every registry write without a database mutation, school request or app callback', async () => {
+it('prepares every registry write without mutations and reads assignment state for approval', async () => {
   const h = await setup();
   const task = h.planner.quickAdd({title:'Study', courseId:courseA, dueAt:new Date(now + 86400000).toISOString(), estimateMinutes:30});
   const cases:Partial<Record<ToolName, object>> = {
@@ -35,8 +35,9 @@ it('prepares every registry write without a database mutation, school request or
     set_reminder:{target:{kind:'task', id:task.id}, remindAt:new Date(now + 3600000).toISOString(), note:'Study'},
     export_calendar:{selection:{taskIds:[task.id]}}, mark_module_complete:{courseId:courseA, moduleId:moduleA},
     post_forum_reply:{courseId:courseA, discussionId:41, postId:61, subject:'Reply', message:'My response.'},
-    submit_assignment:submission(), open_in_app:{courseId:courseA, moduleId:moduleA},
+    save_assignment_draft:submission(), open_in_app:{courseId:courseA, moduleId:moduleA},
   };
+  h.replies.core_course_get_course_module = fixture4.assignmentCm;
   const baseline = h.planner.snapshot();
   for (const name of Object.keys(mcpTools) as ToolName[]) {
     if (mcpTools[name].risk === 'read') continue;
@@ -44,7 +45,7 @@ it('prepares every registry write without a database mutation, school request or
     await h.backend.prepare(name, mcpTools[name].schema.parse(cases[name]), [accountA]);
   }
   expect(h.planner.snapshot()).toEqual(baseline);
-  expect(h.request).not.toHaveBeenCalled();
+  expect(h.writes()).toHaveLength(0);
   expect(h.openModule).not.toHaveBeenCalled();
   expect(h.exportCalendar).not.toHaveBeenCalled();
 });
@@ -86,24 +87,24 @@ it('denies 3.x completion with absent grade evidence and every assessed or unkno
   expect(h.writes()).toHaveLength(0);
 });
 
-it.each([fixture3, fixture4, fixture5])('saves and submits exact student-owned plain text on $release without accepting a statement', async fixture => {
+it.each([fixture3, fixture4, fixture5])('saves exact student-owned plain text as a draft on $release without final submission', async fixture => {
   const h = await setup();
   Object.assign(h.replies, {core_course_get_course_module:fixture.assignmentCm, mod_assign_get_assignments:fixture.assignments, mod_assign_get_submission_status:fixture.status});
-  const prepared = await h.backend.prepare('submit_assignment', submission(), [accountA]);
-  expect(h.request).not.toHaveBeenCalled();
-  await prepared.execute();
-  expect(h.writes()).toHaveLength(2);
+  const prepared = await h.backend.prepare('save_assignment_draft', submission(), [accountA]);
+  expect(h.writes()).toHaveLength(0);
+  const result = await prepared.execute();
+  expect(result.content).toMatchObject({message:'Draft saved. Review and submit it yourself in Moodle', open_in_app:{courseId:courseA, moduleId:assignA}});
+  expect(h.writes()).toHaveLength(1);
   expect(Object.fromEntries(h.writes()[0]!)).toMatchObject({wsfunction:'mod_assign_save_submission', assignmentid:'52', 'plugindata[onlinetext_editor][text]':'My own essay.', 'plugindata[onlinetext_editor][format]':'2', 'plugindata[onlinetext_editor][itemid]':'0'});
-  expect(Object.fromEntries(h.writes()[1]!)).toMatchObject({wsfunction:'mod_assign_submit_for_grading', assignmentid:'52', acceptsubmissionstatement:'0'});
+  expect(h.writes().some(call => call.get('wsfunction') === 'mod_assign_submit_for_grading')).toBe(false);
 });
 
 it('rejects assignment IDs that differ from the module instance or current assignment cmid', async () => {
   const h = await setup();
-  const prepared = await h.backend.prepare('submit_assignment', submission(), [accountA]);
-  await expect(prepared.execute()).rejects.toMatchObject({code:'DENIED'});
+  await expect(h.backend.prepare('save_assignment_draft', submission(), [accountA])).rejects.toMatchObject({code:'DENIED'});
   h.replies.core_course_get_course_module = fixture4.assignmentCm;
   h.replies.mod_assign_get_assignments = {courses:[{id:10, assignments:[{...fixture4.assignments.courses[0]!.assignments[0], cmid:999}]}]};
-  await expect((await h.backend.prepare('submit_assignment', submission(), [accountA])).execute()).rejects.toMatchObject({code:'DENIED'});
+  await expect(h.backend.prepare('save_assignment_draft', submission(), [accountA])).rejects.toMatchObject({code:'DENIED'});
   expect(h.writes()).toHaveLength(0);
 });
 
@@ -115,14 +116,14 @@ it.each([
   const h = await setup();
   h.replies.core_course_get_course_module = fixture4.assignmentCm;
   h.replies.mod_assign_get_assignments = {courses:[{id:10, assignments:[{...fixture4.assignments.courses[0]!.assignments[0], ...patch}]}]};
-  await expect((await h.backend.prepare('submit_assignment', submission(), [accountA])).execute()).rejects.toMatchObject({code:'UNSUPPORTED'});
+  await expect(h.backend.prepare('save_assignment_draft', submission(), [accountA])).rejects.toMatchObject({code:'UNSUPPORTED'});
   expect(h.writes()).toHaveLength(0);
 });
 
 it('never retries an uncertain submission save and never submits after save warnings', async () => {
   const h = await setup(); h.replies.core_course_get_course_module = fixture4.assignmentCm;
   h.replies.mod_assign_save_submission = [{warningcode:'error', message:'token=secret'}];
-  await expect((await h.backend.prepare('submit_assignment', submission(), [accountA])).execute()).rejects.toMatchObject({code:'UNSUPPORTED'});
+  await expect((await h.backend.prepare('save_assignment_draft', submission(), [accountA])).execute()).rejects.toMatchObject({code:'UNSUPPORTED'});
   expect(h.writes()).toHaveLength(1);
   h.request.mockImplementation(async (_url, init) => {
     const name = new URLSearchParams(String(init?.body)).get('wsfunction')!;
@@ -130,7 +131,7 @@ it('never retries an uncertain submission save and never submits after save warn
     return Response.json(h.replies[name]);
   });
   h.request.mockClear();
-  await expect((await h.backend.prepare('submit_assignment', submission(), [accountA])).execute()).rejects.toMatchObject({code:'DISCONNECTED'});
+  await expect((await h.backend.prepare('save_assignment_draft', submission(), [accountA])).execute()).rejects.toMatchObject({code:'DISCONNECTED'});
   expect(h.writes()).toHaveLength(1);
 });
 

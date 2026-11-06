@@ -72,7 +72,7 @@ function PairingConsent({ request, dismiss }: { request: Pairing; dismiss: () =>
 function ProposalConsent({ request, dismiss }: { request: Proposal; dismiss: () => void }) {
   const agents = useAgents();
   const [studentOwned,setStudentOwned]=useState(false);
-  const needsOwnership=request.tool==='submit_assignment';
+  const needsOwnership=request.tool==='save_assignment_draft';
   const decide = (approve: boolean) => void agents.act('mcp:proposal-decision', { proposalId: request.id, approve });
   return <ConsentFrame id={request.id} expiresAt={request.expiresAt} canApprove={!needsOwnership || studentOwned} approve={() => decide(true)} deny={() => decide(false)} dismiss={dismiss}>
     <div><p className="agents-muted">{tr('agents:claimed_name')}</p><p className="agents-client-name">{request.clientName}</p><p className="agents-muted">{tr('agents:self_reported')}</p></div>

@@ -74,7 +74,7 @@ it('shows the exact proposal target, payload, account and risk as text', async (
   expect(document.querySelector('pre')?.textContent).toBe(JSON.stringify({ text: injection }, null, 2));
   expect(document.body.textContent).toContain('Example University · student');
   expect(document.body.textContent).toContain(ids.account);
-  expect(document.body.textContent).toContain('Publishes or submits to your school');
+  expect(document.body.textContent).toContain('School draft or public post');
   expect(document.body.textContent).toContain('60 seconds remaining');
   expect(document.querySelector('img,a,script')).toBeNull();
   expect(document.activeElement).toBe(button('Deny'));
@@ -215,7 +215,7 @@ it.each(['en', 'zh-Hant', 'ja'])('translates pairing scopes and risk labels in %
   expect(document.body.textContent).not.toContain('agents:');
 });
 it('requires the student to confirm ownership before approving an assignment submission',async()=>{
-  state.proposals=[{...proposalFixture(),tool:'submit_assignment',risk:'high',payload:{text:'My own reflection.',studentOwned:true}}];
+  state.proposals=[{...proposalFixture(),tool:'save_assignment_draft',risk:'high',payload:{text:'My own reflection.',studentOwned:true}}];
   await mount();
   expect(button('Approve once').disabled).toBe(true);
   await toggle('I confirm this is my own work');

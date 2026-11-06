@@ -9,7 +9,7 @@ const hints: Record<McpErrorCode, string> = {
   SCOPE_REQUIRED: 'Ask the student to review the grant scopes in VStudy.',
   ACCOUNT_REQUIRED: 'Choose an account returned by list_accounts.',
   NOT_FOUND: 'Refresh the available items in VStudy and try again.',
-  UNSUPPORTED: 'Use Moodle directly or ask the school to enable the required mobile service.',
+  UNSUPPORTED: 'Finish this operation yourself in Moodle. If a mobile service is missing, ask the school to enable it.',
   INVALID_ARGUMENT: 'Use the documented tool schema and stable VStudy IDs.',
   RATE_LIMITED: 'Wait before making another request.',
   TIMEOUT: 'Review the current state in VStudy before proposing the action again.',

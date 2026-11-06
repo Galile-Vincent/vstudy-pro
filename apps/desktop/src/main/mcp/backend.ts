@@ -17,7 +17,7 @@ import { searchHandler } from './backend-search';
 import { forumHandlers } from './backend-forums';
 import { remoteReadHandlers } from './backend-reads';
 import { syncHandler } from './backend-sync';
-import { completionCandidate, writeHandlers } from './backend-writes';
+import { assignmentDraft, completionCandidate, writeHandlers } from './backend-writes';
 import type { BackendHandlers, BackendServices, McpBackendOptions } from './backend-types';
 import { McpRedactor } from './redaction';
 export type { McpBackendOptions } from './backend-types';
@@ -69,11 +69,16 @@ export function createMcpBackend(options:McpBackendOptions): MainMcpBackend {
       const course = 'courseId' in args && args.courseId ? context.course(args.courseId).course : null;
       const module = 'moduleId' in args ? context.module(args.courseId, args.moduleId) : null;
       const target = [context.provenance.school ?? 'Local planner', course?.fullName, module?.name, course?.id, module?.id].filter(Boolean).map(value => text(value!, 300)).join(' / ').slice(0, 1000);
+      const draft = name === 'save_assignment_draft' ? await assignmentDraft(context, services, mcpTools.save_assignment_draft.schema.parse(args)) : undefined;
       let used = false;
-      const prepared:CancellablePreparedMcpCall = {accountId, target, provenance:context.provenance, execute:(signal?:AbortSignal,authorize?:McpAuthorization) => backendBoundary(async () => {
+      const prepared:CancellablePreparedMcpCall = {accountId, target, provenance:context.provenance, ...(draft ? {approvalContext:{remoteDraft:draft.state}} : {}), execute:(signal?:AbortSignal,authorize?:McpAuthorization) => backendBoundary(async () => {
         if (mcpTools[name].risk !== 'read') { if (used) fail('EXPIRED'); used = true; }
         const execution = new BackendContext(options.moodle.repository, accountId, granted, args, signal, text, authorize);
         execution.recheck();
+        if (draft) {
+          const current = await assignmentDraft(execution, services, mcpTools.save_assignment_draft.schema.parse(args));
+          if (JSON.stringify(current.state) !== JSON.stringify(draft.state)) fail('UNSUPPORTED');
+        }
         // The registry maps each key to its schema; union indexing loses that correlation in TypeScript.
         const handler = handlers[name] as (context:BackendContext, args:ToolArguments) => ReturnType<BackendHandlers[ToolName]>;
         const result = await handler(execution, args);

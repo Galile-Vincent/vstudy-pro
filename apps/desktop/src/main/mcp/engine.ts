@@ -230,7 +230,7 @@ export class McpEngine {
       const risk = mcpTools[name].risk;
       if (risk !== 'read') {
         const redactor = this.redactor([token]);
-        const code = await this.approvals.request(operation.connectionId, operation.id, {grantId: grant.id, clientName: redactor.text(grant.clientName, 100), tool: name, risk, accountId: call.accountId, target: redactor.text(call.target, 1000), payload: this.exactPayload(args, token)});
+        const code = await this.approvals.request(operation.connectionId, operation.id, {grantId: grant.id, clientName: redactor.text(grant.clientName, 100), tool: name, risk, accountId: call.accountId, target: redactor.text(call.target, 1000), payload: {...this.exactPayload(args, token), ...redactor.record(call.approvalContext ?? {}, 32_000)}});
         if (code) throw new McpFailure(code);
         await waitForStart(this.limiter.startDelay(), signal);
       }
