@@ -160,7 +160,10 @@ export function openStore(path: string) {
       for (const [table, schema, query] of [["conversations", conversationRow, "SELECT * FROM conversations WHERE deletedAt IS NULL"], ["messages", messageRow, "SELECT messages.* FROM messages JOIN conversations ON conversations.id=messages.conversationId WHERE messages.supersededBy IS NULL AND conversations.deletedAt IS NULL"]] as const) {
         for (const row of db.prepare(query).iterate()) {
           try { schema.parse(row); }
-          catch (cause) { throw new Error(`storage.invalid_backup`, { cause: new Error(`${table} ${row.id}`, { cause }) }); }
+          catch (cause) {
+            if (table === 'messages' && readMessages([row]).length) continue;
+            throw new Error(`storage.invalid_backup`, { cause: new Error(`${table} ${row.id}`, { cause }) });
+          }
         }
       }
     },
