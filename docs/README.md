@@ -1,3 +1,5 @@
+<img src="../assets/brand/generated/symbol.svg" width="40" alt="VStudy Pro">
+
 # Documentation index
 
 [The project README](../README.md) is the current user guide. Audit reports and design reviews record dated snapshots; their historical pass counts are not current acceptance.

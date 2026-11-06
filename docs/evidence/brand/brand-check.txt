@@ -1,0 +1,1 @@
+PASS. Nine SVG render comparisons, 824px macOS icon body and transparent margin, five flight widths, three variants, protected text, and finite lifecycle.

@@ -2,6 +2,11 @@ English · [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md)
 
 # VStudy Pro
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/generated/lockup-dark.svg">
+  <img src="assets/brand/generated/lockup-light.svg" width="320" alt="VStudy Pro">
+</picture>
+
 Read course documents, keep Moodle deadlines together, and turn coursework into a study plan on your Mac.
 
 ![Version 0.2.2](https://img.shields.io/badge/version-0.2.2-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)

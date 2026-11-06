@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+body{margin:0;font-family:var(--font-sans,system-ui);color:var(--foreground)}nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}button{font:inherit;padding:8px 14px;border:1px solid var(--border,#888);border-radius:8px;color:inherit;background:transparent;cursor:pointer}button[aria-pressed=true]{background:var(--secondary,#ddd)}img{display:block;width:100%;height:auto;border-radius:12px}img[hidden]{display:none}p{font-size:14px;line-height:1.5;color:var(--muted-foreground);margin:12px 0 0}
+</style></head><body><nav aria-label="Motion direction"><button data-direction="arc" aria-pressed="true">Arc, selected</button><button data-direction="ribbon" aria-pressed="false">Ribbon</button><button data-direction="orbit" aria-pressed="false">Orbit</button><button id="scheme" aria-pressed="false">Dark study</button></nav><main>
+<img data-study="arc-light" src="arc-light-sequence.png" alt="Twelve frames of the selected wide arc in light mode">
+<img hidden data-study="arc-dark" src="arc-dark-sequence.png" alt="Twelve frames of the selected wide arc in dark mode">
+<img hidden data-study="ribbon-light" src="ribbon-light-sequence.png" alt="Twelve frames of the narrower ribbon in light mode">
+<img hidden data-study="ribbon-dark" src="ribbon-dark-sequence.png" alt="Twelve frames of the narrower ribbon in dark mode">
+<img hidden data-study="orbit-light" src="orbit-light-sequence.png" alt="Twelve frames of the steeper orbit in light mode">
+<img hidden data-study="orbit-dark" src="orbit-dark-sequence.png" alt="Twelve frames of the steeper orbit in dark mode">
+</main><p>The wide arc separates the butterflies above the headline, then carries them around the product edges. Twelve deterministic prototype frames span 7.6 seconds. The shipped page has separate live browser captures.</p><script>
+let direction='arc',dark=false;function update(){document.querySelectorAll('[data-study]').forEach(el=>el.hidden=el.dataset.study!==direction+'-'+(dark?'dark':'light'));document.querySelectorAll('[data-direction]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.direction===direction)));document.querySelector('#scheme').setAttribute('aria-pressed',String(dark));}document.querySelectorAll('[data-direction]').forEach(el=>el.onclick=()=>{direction=el.dataset.direction;update();});document.querySelector('#scheme').onclick=()=>{dark=!dark;update();};
+</script></body></html>

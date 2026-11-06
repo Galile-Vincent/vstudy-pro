@@ -30,7 +30,6 @@
 .shell-topbar .shell-toggle { min-width:44px; min-height:44px; }
 .shell-topbar .learning-help-trigger { margin-inline-start:auto; }
 .shell-topbar .shell-history-trigger { color:var(--muted); font-size:var(--type-xs); }
-.shell-topbar .shell-history-trigger kbd { opacity:.75; }
 .app-shell .shell-content { position:relative; }
 .app-shell[data-view=workspace] .shell-content > .context-coach { display:none; }
 .app-shell .workspace { background:var(--art-reader-mesh),var(--background); }

@@ -1,3 +1,4 @@
+import { Brand } from '../components/brand';
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
   useCallback,
@@ -10,7 +11,6 @@ import {
   ArrowLeft,
   ArrowUpRight,
   CalendarDays,
-  BookOpen,
   Check,
   ChevronRight,
   Clock3,
@@ -813,7 +813,7 @@ function CoursesBody({
             </>
           ) : (
             <div className="moodle-empty">
-              <BookOpen />
+              <Brand/>
               <h2>{tr("moodle:course_unavailable")}</h2>
               <Button variant="outline" onClick={() => onCourse()}>
                 {tr("moodle:all_courses")}
