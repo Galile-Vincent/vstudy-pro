@@ -27,7 +27,7 @@ export interface CancellablePreparedMcpCall extends PreparedMcpCall {
   execute:(signal?:AbortSignal,authorize?:McpAuthorization) => ReturnType<PreparedMcpCall['execute']>;
 }
 export interface MainMcpBackend extends McpBackend {
-  prepare:(name:ToolName, args:ToolArguments, accountIds:readonly string[]) => Promise<CancellablePreparedMcpCall>;
+  prepare:(name:ToolName, args:ToolArguments, accountIds:readonly string[], signal?:AbortSignal, authorize?:McpAuthorization) => Promise<CancellablePreparedMcpCall>;
   secretValues:() => readonly string[];
 }
 
@@ -35,7 +35,7 @@ export interface MainMcpBackend extends McpBackend {
  * Supply store, MoodleService, DocumentService and typed main callbacks for opening and export.
  * Optional planner and timing dependencies support isolated tests. This factory performs no IO.
  * Pass secretValues directly to createMcpEngine. Its loaded-token snapshot stays in main only.
- * Pass the engine's grant-cancellation signal to execute so queued and follow-up requests stop.
+ * Pass the engine's signal and live authorization to prepare and execute so follow-up requests stop.
  */
 export function createMcpBackend(options:McpBackendOptions): MainMcpBackend {
   const secrets = new Set<string>();
@@ -54,14 +54,14 @@ export function createMcpBackend(options:McpBackendOptions): MainMcpBackend {
   return {
     accounts:() => options.moodle.repository.accounts().map(row => ({id:row.id, school:text(row.siteName, 200), user:text(row.displayName, 200)})),
     secretValues:() => [...secrets],
-    prepare:(name, input, accountIds) => backendBoundary(async () => {
+    prepare:(name, input, accountIds, signal, authorize) => backendBoundary(async () => {
       const parsed = mcpTools[name]?.schema.safeParse(input);
       if (!parsed?.success) fail('INVALID_ARGUMENT');
       const args = parsed.data as ToolArguments;
       const granted = [...accountIds];
       const accountId = name === 'list_accounts' ? null : selectAccount(options.moodle.repository, granted, args.account, local.has(name));
       for (const value of await options.moodle.mcpSecretValues()) secrets.add(value);
-      const context = new BackendContext(options.moodle.repository, accountId, granted, args, undefined, text);
+      const context = new BackendContext(options.moodle.repository, accountId, granted, args, signal, text, authorize);
       context.recheck();
       if (local.has(name)) validateLocal(context, services, name, args);
       if (name === 'mark_module_complete' && 'moduleId' in args) completionCandidate(context, args.courseId, args.moduleId);

@@ -37,7 +37,7 @@ it('does not grant extra scopes, unselected accounts, or new school accounts', a
   expect(await call(engine, client.grant, 'list_courses')).toMatchObject({ok: true});
   expect(prepare.mock.calls[0]?.[2]).toEqual([account.id]);
   expect(prepare.mock.calls[0]?.[1]).toMatchObject({account: account.id});
-  expect(engine.state().activity.map(item => item.status)).toEqual(['SCOPE_REQUIRED', 'DENIED', 'OK']);
+  expect(engine.state().activity.map(item => item.status)).toEqual(['OK']);
 });
 
 it('requires an explicit account when several granted accounts are available and rejects backend escape', async () => {

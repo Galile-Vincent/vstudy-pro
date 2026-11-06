@@ -111,5 +111,5 @@ export interface PreparedMcpCall {
 }
 export interface McpBackend {
   accounts:()=>z.infer<typeof agentAccountSchema>[];
-  prepare:(name:ToolName,args:ToolArguments,accountIds:readonly string[])=>Promise<PreparedMcpCall>;
+  prepare:(name:ToolName,args:ToolArguments,accountIds:readonly string[],signal?:AbortSignal,authorize?:McpAuthorization)=>Promise<PreparedMcpCall>;
 }
