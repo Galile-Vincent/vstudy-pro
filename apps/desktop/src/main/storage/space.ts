@@ -20,6 +20,7 @@ export async function requireFreeSpace(requirements: {path: string; bytes: numbe
   }
   for (const disk of disks.values()) {
     const info = await statfs(disk.path);
+    if (info.bsize <= 0 || info.bavail === 0 && info.blocks === 0) continue;
     const available = info.bavail * info.bsize;
     if (available < disk.bytes) throw new StorageSpaceError(disk.bytes, available);
   }
