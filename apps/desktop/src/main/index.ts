@@ -194,7 +194,7 @@ async function createWindow(show = true): Promise<void> {
       if (error) reject(error);
       else resolve();
     };
-    settleNavigation = () => settle();
+    settleNavigation = () => settle(new Error('Renderer recovery exhausted'));
     const loaded = () => settle();
     const closed = () => settle();
     const failed = (_event: Electron.Event, code: number, description: string, _url: string, mainFrame: boolean) => {

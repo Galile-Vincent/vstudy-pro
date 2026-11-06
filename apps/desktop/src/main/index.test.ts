@@ -240,10 +240,16 @@ it('quits through ordered shutdown when recovery is exhausted and Quit is select
   window.emit('unresponsive'); window.emit('unresponsive'); window.emit('unresponsive');
   await vi.waitFor(() => expect(electron.app.quit).toHaveBeenCalledOnce());
 });
-it('settles initial navigation when renderer recovery is exhausted', async () => {
+it('rolls back restored startup when renderer recovery is exhausted', async () => {
+  mocks.rollback.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
   const window = await start();
   for (let i=0;i<3;i++) window.webContents.emit('render-process-gone', {}, {reason:'crashed',exitCode:1});
-  await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
+  await vi.waitFor(() => expect(electron.app.exit).toHaveBeenCalledWith(1));
+  expect(mocks.confirm).not.toHaveBeenCalled();
+  expect(mocks.rollback).toHaveBeenCalledTimes(2);
+  expect(electron.app.relaunch).toHaveBeenCalledOnce();
+  window.webContents.emit('did-finish-load');
+  expect(mocks.confirm).not.toHaveBeenCalled();
 });
 
 it('queues second launches until startup and the store are ready', async () => {
