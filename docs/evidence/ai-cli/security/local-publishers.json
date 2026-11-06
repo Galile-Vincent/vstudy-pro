@@ -1,0 +1,132 @@
+{
+  "observedAt": "2026-11-06T05:50:52.994957+00:00",
+  "method": "Read installed CLI code signatures and Gatekeeper assessments without executing CLIs. Observed Team IDs are research evidence, not runtime install authorization.",
+  "records": [
+    {
+      "provider": "claude",
+      "binary": "/Users/vc/.local/share/claude/versions/2.1.318",
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/codesign",
+            "-dv",
+            "--verbose=4",
+            "/Users/vc/.local/share/claude/versions/2.1.318"
+          ],
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": "Executable=/Users/vc/.local/share/claude/versions/2.1.318\nIdentifier=com.anthropic.claude-code\nFormat=Mach-O thin (arm64)\nCodeDirectory v=20500 size=623333 flags=0x10000(runtime) hashes=19468+7 location=embedded\nVersionPlatform=1\nVersionMin=851968\nVersionSDK=1705216\nHash type=sha256 size=32\nCandidateCDHash sha256=f9106e5a4887c4904a64d3b9dd15e7154f6120d7\nCandidateCDHashFull sha256=f9106e5a4887c4904a64d3b9dd15e7154f6120d7ea481b7578c46470a5981e58\nHash choices=sha256\nCMSDigest=f9106e5a4887c4904a64d3b9dd15e7154f6120d7ea481b7578c46470a5981e58\nCMSDigestType=2\nExecutable Segment base=0\nExecutable Segment limit=123584512\nExecutable Segment flags=0x1\nPage size=16384\nCDHash=f9106e5a4887c4904a64d3b9dd15e7154f6120d7\nSignature size=9047\nAuthority=Developer ID Application: Anthropic PBC (Q6L2SF6YDW)\nAuthority=Developer ID Certification Authority\nAuthority=Apple Root CA\nTimestamp=Nov 4, 2026 at 3:09:48\u202fAM\nInfo.plist entries=9\nTeamIdentifier=Q6L2SF6YDW\nRuntime Version=26.5.0\nSealed Resources=none\nInternal requirements count=1 size=188\nTotal signatures=1\nChosen signature=1\n"
+        },
+        {
+          "argv": [
+            "/usr/bin/codesign",
+            "--verify",
+            "--strict",
+            "--verbose=4",
+            "/Users/vc/.local/share/claude/versions/2.1.318"
+          ],
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": "/Users/vc/.local/share/claude/versions/2.1.318: valid on disk\n/Users/vc/.local/share/claude/versions/2.1.318: satisfies its Designated Requirement\n"
+        },
+        {
+          "argv": [
+            "/usr/sbin/spctl",
+            "--assess",
+            "--type",
+            "execute",
+            "--verbose=4",
+            "/Users/vc/.local/share/claude/versions/2.1.318"
+          ],
+          "exitCode": 3,
+          "stdout": "",
+          "stderr": "/Users/vc/.local/share/claude/versions/2.1.318: rejected (the code is valid but does not seem to be an app)\n"
+        }
+      ]
+    },
+    {
+      "provider": "codex",
+      "binary": "/Users/vc/.codex/packages/standalone/releases/0.167.0-aarch64-apple-darwin/bin/codex",
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/codesign",
+            "-dv",
+            "--verbose=4",
+            "/Users/vc/.codex/packages/standalone/releases/0.167.0-aarch64-apple-darwin/bin/codex"
+          ],
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": "Executable=/Users/vc/.codex/packages/standalone/releases/0.167.0-aarch64-apple-darwin/bin/codex\nIdentifier=codex\nFormat=Mach-O thin (arm64)\nCodeDirectory v=20500 size=2099569 flags=0x10000(runtime) hashes=65601+7 location=embedded\nVersionPlatform=1\nVersionMin=720896\nVersionSDK=984320\nHash type=sha256 size=32\nCandidateCDHash sha256=42914b6b6913492df6d38960843bd116265dab7c\nCandidateCDHashFull sha256=42914b6b6913492df6d38960843bd116265dab7ca49c40dd92d1da9a5faaca3a\nHash choices=sha256\nCMSDigest=42914b6b6913492df6d38960843bd116265dab7ca49c40dd92d1da9a5faaca3a\nCMSDigestType=2\nExecutable Segment base=0\nExecutable Segment limit=257327104\nExecutable Segment flags=0x1\nPage size=4096\nCDHash=42914b6b6913492df6d38960843bd116265dab7c\nSignature size=9047\nAuthority=Developer ID Application: OpenAI OpCo, LLC (2DC432GLL2)\nAuthority=Developer ID Certification Authority\nAuthority=Apple Root CA\nTimestamp=Nov 6, 2026 at 8:29:57\u202fAM\nInfo.plist=not bound\nTeamIdentifier=2DC432GLL2\nRuntime Version=15.5.0\nSealed Resources=none\nInternal requirements count=1 size=168\nTotal signatures=1\nChosen signature=1\n"
+        },
+        {
+          "argv": [
+            "/usr/bin/codesign",
+            "--verify",
+            "--strict",
+            "--verbose=4",
+            "/Users/vc/.codex/packages/standalone/releases/0.167.0-aarch64-apple-darwin/bin/codex"
+          ],
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": "/Users/vc/.codex/packages/standalone/releases/0.167.0-aarch64-apple-darwin/bin/codex: valid on disk\n/Users/vc/.codex/packages/standalone/releases/0.167.0-aarch64-apple-darwin/bin/codex: satisfies its Designated Requirement\n"
+        },
+        {
+          "argv": [
+            "/usr/sbin/spctl",
+            "--assess",
+            "--type",
+            "execute",
+            "--verbose=4",
+            "/Users/vc/.codex/packages/standalone/releases/0.167.0-aarch64-apple-darwin/bin/codex"
+          ],
+          "exitCode": 3,
+          "stdout": "",
+          "stderr": "/Users/vc/.codex/packages/standalone/releases/0.167.0-aarch64-apple-darwin/bin/codex: rejected (the code is valid but does not seem to be an app)\n"
+        }
+      ]
+    },
+    {
+      "provider": "agy",
+      "binary": "/Users/vc/.local/bin/agy",
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/codesign",
+            "-dv",
+            "--verbose=4",
+            "/Users/vc/.local/bin/agy"
+          ],
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": "Executable=/Users/vc/.local/bin/agy\nIdentifier=cli\nFormat=Mach-O thin (arm64)\nCodeDirectory v=20500 size=385327 flags=0x10000(runtime) hashes=12036+2 location=embedded\nVersionPlatform=1\nVersionMin=786432\nVersionSDK=1704960\nHash type=sha256 size=32\nCandidateCDHash sha256=bd7b4ccbbf306ea6ec2305d96644959c472726c2\nCandidateCDHashFull sha256=bd7b4ccbbf306ea6ec2305d96644959c472726c24dd8956756fe94c0b2f496ab\nHash choices=sha256\nCMSDigest=bd7b4ccbbf306ea6ec2305d96644959c472726c24dd8956756fe94c0b2f496ab\nCMSDigestType=2\nExecutable Segment base=0\nExecutable Segment limit=140197888\nExecutable Segment flags=0x1\nPage size=16384\nCDHash=bd7b4ccbbf306ea6ec2305d96644959c472726c2\nSignature size=8990\nAuthority=Developer ID Application: Google LLC (EQHXZ8M8AV)\nAuthority=Developer ID Certification Authority\nAuthority=Apple Root CA\nTimestamp=Oct 31, 2026 at 4:05:33\u202fAM\nInfo.plist=not bound\nTeamIdentifier=EQHXZ8M8AV\nRuntime Version=26.4.0\nSealed Resources=none\nInternal requirements count=1 size=164\nTotal signatures=1\nChosen signature=1\n"
+        },
+        {
+          "argv": [
+            "/usr/bin/codesign",
+            "--verify",
+            "--strict",
+            "--verbose=4",
+            "/Users/vc/.local/bin/agy"
+          ],
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": "/Users/vc/.local/bin/agy: valid on disk\n/Users/vc/.local/bin/agy: satisfies its Designated Requirement\n"
+        },
+        {
+          "argv": [
+            "/usr/sbin/spctl",
+            "--assess",
+            "--type",
+            "execute",
+            "--verbose=4",
+            "/Users/vc/.local/bin/agy"
+          ],
+          "exitCode": 3,
+          "stdout": "",
+          "stderr": "/Users/vc/.local/bin/agy: rejected (the code is valid but does not seem to be an app)\n"
+        }
+      ]
+    }
+  ]
+}

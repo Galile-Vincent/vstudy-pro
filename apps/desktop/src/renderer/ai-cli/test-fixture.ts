@@ -4,6 +4,7 @@ import type { CliActionId, CliActionSession, CliFailure, CliPreferences, CliTool
 export function cliFixture() {
   const tools: CliToolState[] = ['claude', 'codex', 'agy'].map(provider => ({
     provider: provider as CliToolState['provider'], consented: false, version: null, path: null, managed: false,
+    manualInstallRequired: false, manualUpdateRequired: false,
     latestVersion: null, releaseNotesUrl: null, checkedAt: null, previousVersion: null, appliesToNewChats: false,
     tested: false, status: 'not-installed', error: null,
   }));

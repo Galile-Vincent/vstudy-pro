@@ -150,5 +150,9 @@
   "test_complete": "無工具測試已完成。",
   "signin_verified": "已確認登入。",
   "manual_install": "改用其他安裝方式",
-  "manual_install_help": "若在這裡安裝失敗，可由你或資訊人員在自己的終端機使用官方安裝程式。它會依供應商預設方式安裝，不屬於 VStudy 管理的版本。VStudy 不會執行這個指令。安裝後，請到「設定 > 供應商 > 變更」選取執行檔，再回來檢查狀態。"
+  "manual_install_help": "若在這裡安裝失敗，可由你或資訊人員在自己的終端機使用官方安裝程式。它會依供應商預設方式安裝，不屬於 VStudy 管理的版本。VStudy 不會執行這個指令。安裝後，請到「設定 > 供應商 > 變更」選取執行檔，再回來檢查狀態。",
+  "failure_manual-install-required": "VStudy 無法獨立驗證此下載。請展開其他安裝方式，複製官方指令並在自己的終端機執行。未啟動任何下載的程式。",
+  "manual_install_reason": "VStudy 無法獨立確認此下載來自供應商。請在自己的終端機執行官方安裝指令，再到「設定 > 供應商」選擇程式。",
+  "manual_update": "有新版本，請自行安裝",
+  "vendor_install_link": "開啟供應商安裝說明"
 }

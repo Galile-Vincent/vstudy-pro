@@ -55,6 +55,8 @@
 .ai-cli-dot { width:8px; height:8px; background:var(--muted); border-radius:var(--r-pill); margin-left:auto; flex-shrink:0; }
 .ai-cli-dot[data-ready=true] { background:var(--success); }
 .ai-cli-versions { display:flex; flex-wrap:wrap; gap:var(--space-2); }
+.ai-cli-version-entry { display:flex; flex-direction:column; min-width:0; }
+.ai-cli-inventory[data-compact=true] .ai-cli-version-entry { width:100%; }
 .ai-cli-version { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2); padding:var(--space-2) var(--space-3); background:var(--subtle); border:0; border-radius:var(--r-sm); font-size:12px; color:var(--ink); text-align:start; }
 .ai-cli-version small { color:var(--muted); }
 .ai-cli-inventory[data-compact=true] .ai-cli-versions { gap:var(--space-1); padding-inline:var(--space-2); }

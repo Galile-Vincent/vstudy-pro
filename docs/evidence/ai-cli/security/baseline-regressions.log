@@ -1,0 +1,223 @@
+
+ RUN  v4.1.12 /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli-security-before-8b7ilb7y/apps/desktop
+
+ ❯ src/main/providers/setup/adversarial-review.test.ts (10 tests | 9 failed) 4292ms
+   × never probes bytes authenticated only by a compromised Antigravity feed 326ms
+   × refuses feed-substituted Codex bytes under the audited version before probing 338ms
+   × the store independently rejects a forged feed release even if callers skip ReleaseSource 332ms
+   × cancels a paused automatic update after revoking both consent 696ms
+   × cancels a paused automatic update after revoking automatic consent 707ms
+   × cancels a paused automatic update after revoking checks consent 776ms
+   × cancels a paused automatic update after revoking regrant consent 636ms
+   × keeps the approved pin as the expected identity when installation records and pointers are forged 30ms
+   × re-authenticates a managed installation record when it is loaded, independently of its JSON hash 18ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/providers/setup/adversarial-review.test.ts > never probes bytes authenticated only by a compromised Antigravity feed
+AssertionError: promise resolved "{ release: { …(10) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "completedAt": 1793944149747,
++   "identity": {
++     "hash": "adbe3e86b5470ba02b802da0267f2cbcb85fea4ff291a21b88e0c136b23478d7",
++     "mtime": 1793944149459.084,
++     "path": "/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-setup-Rc5t5Y/tools/agy/9.9.9/agy",
++   },
++   "previous": null,
++   "release": {
++     "algorithm": "sha512",
++     "archive": "tar.gz",
++     "digest": "85cdd553268e731b7f387d77c7ffd57bbcd212813094579cc9b7e6ab06a4d4c8847f5275fa490798922ebffe2147e169b51678f2df48239e77ae614c76c6ee79",
++     "evidence": "{\"version\":\"9.9.9\",\"url\":\"https://antigravity-cli-auto-updater-974169037036.us-central1.run.app/evil.tar.gz\",\"sha512\":\"85cdd553268e731b7f387d77c7ffd57bbcd212813094579cc9b7e6ab06a4d4c8847f5275fa490798922ebffe2147e169b51678f2df48239e77ae614c76c6ee79\"}",
++     "executable": "antigravity",
++     "notes": "https://antigravity.google/docs/changelog",
++     "provider": "agy",
++     "size": null,
++     "url": "https://antigravity-cli-auto-updater-974169037036.us-central1.run.app/evil.tar.gz",
++     "version": "9.9.9",
++   },
+  }
+
+ ❯ src/main/providers/setup/adversarial-review.test.ts:30:7
+     28|     const release = await source.installable('agy', signal());
+     29|     return store.install(release, network, signal(), () => {}, () => t…
+     30|   })()).rejects.toMatchObject({ code: 'manual-install-required' });
+       |       ^
+     31|   expect(probe).not.toHaveBeenCalled();
+     32|   await expect(readFile(marker)).rejects.toMatchObject({ code: 'ENOENT…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  src/main/providers/setup/adversarial-review.test.ts > refuses feed-substituted Codex bytes under the audited version before probing
+AssertionError: promise resolved "{ release: { …(10) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "completedAt": 1793944150090,
++   "identity": {
++     "hash": "c34185235af141abf31851419a2ddf57d71a740ac4508dd7ef7ed71b332bf5d9",
++     "mtime": 1793944149783.6326,
++     "path": "/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-setup-nHseZm/tools/codex/0.166.0/codex",
++   },
++   "previous": null,
++   "release": {
++     "algorithm": "sha256",
++     "archive": "tar.gz",
++     "digest": "36bf9cc37e5aaa08a1e440c7298b3d4626d398077712977459b10180ebeae22a",
++     "evidence": "{\"tag_name\":\"rust-v0.166.0\",\"html_url\":\"https://github.com/openai/codex/releases/tag/rust-v0.166.0\",\"assets\":[{\"name\":\"codex-aarch64-apple-darwin.tar.gz\",\"browser_download_url\":\"https://api.github.com/repos/openai/codex/payload.tar.gz\",\"digest\":\"sha256:36bf9cc37e5aaa08a1e440c7298b3d4626d398077712977459b10180ebeae22a\",\"size\":278}]}",
++     "executable": "codex-aarch64-apple-darwin",
++     "notes": "https://github.com/openai/codex/releases/tag/rust-v0.166.0",
++     "provider": "codex",
++     "size": 278,
++     "url": "https://api.github.com/repos/openai/codex/payload.tar.gz",
++     "version": "0.166.0",
++   },
+  }
+
+ ❯ src/main/providers/setup/adversarial-review.test.ts:47:7
+     45|     const release = await source.installable('codex', signal());
+     46|     return store.install(release, network, signal(), () => {}, () => t…
+     47|   })()).rejects.toMatchObject({ code: 'signature' });
+       |       ^
+     48|   expect(probe).not.toHaveBeenCalled();
+     49|   await expect(readFile(marker)).rejects.toMatchObject({ code: 'ENOENT…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  src/main/providers/setup/adversarial-review.test.ts > the store independently rejects a forged feed release even if callers skip ReleaseSource
+AssertionError: promise resolved "{ release: { …(10) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "completedAt": 1793944150428,
++   "identity": {
++     "hash": "9e2ff655f180cd3d30e341cfecb127675311a8f747f70507f33c0dd3abea4c86",
++     "mtime": 1793944150113.3916,
++     "path": "/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-setup-ObbAzo/tools/codex/0.166.0/codex",
++   },
++   "previous": null,
++   "release": {
++     "algorithm": "sha256",
++     "archive": "binary",
++     "digest": "9e2ff655f180cd3d30e341cfecb127675311a8f747f70507f33c0dd3abea4c86",
++     "evidence": "test fixture",
++     "executable": "codex",
++     "notes": "https://example.com/notes",
++     "provider": "codex",
++     "size": 204,
++     "url": "https://api.github.com/repos/openai/codex/payload",
++     "version": "0.166.0",
++   },
+  }
+
+ ❯ src/main/providers/setup/adversarial-review.test.ts:57:100
+     55|   const store = new SetupStore(join(root, 'tools')), probe = vi.fn(asy…
+     56|   const release = { ...payloadRelease(bytes, '0.166.0', 'codex'), url:…
+     57|   await expect(store.install(release, payloadNetwork(bytes), signal(),…
+       |                                                                                                    ^
+     58|   expect(probe).not.toHaveBeenCalled();
+     59|   await expect(readFile(marker)).rejects.toMatchObject({ code: 'ENOENT…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  src/main/providers/setup/adversarial-review.test.ts > cancels a paused automatic update after revoking both consent
+ FAIL  src/main/providers/setup/adversarial-review.test.ts > cancels a paused automatic update after revoking automatic consent
+ FAIL  src/main/providers/setup/adversarial-review.test.ts > cancels a paused automatic update after revoking checks consent
+ FAIL  src/main/providers/setup/adversarial-review.test.ts > cancels a paused automatic update after revoking regrant consent
+AssertionError: promise resolved "Buffer[ 101, 120, 101, 99, 117, …(-107) ]" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "data": [
++     101,
++     120,
++     101,
++     99,
++     117,
++     116,
++     101,
++     100,
++   ],
++   "type": "Buffer",
+  }
+
+ ❯ src/main/providers/setup/adversarial-review.test.ts:88:34
+     86|     finish();
+     87|     await expect.poll(() => service.sessions.isBusy).toBe(false);
+     88|     await expect(readFile(marker)).rejects.toMatchObject({ code: 'ENOE…
+       |                                  ^
+     89|     expect(store.active('claude')?.release.version).toBe('1.0.0');
+     90|     expect(await readdir(join(store.root, 'claude'))).toEqual(['1.0.0'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  src/main/providers/setup/adversarial-review.test.ts > keeps the approved pin as the expected identity when installation records and pointers are forged
+AssertionError: expected '/private/var/folders/m_/hlq7_f2j6wn88…' to be null
+
+- Expected:
+null
+
++ Received:
+"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-setup-gJdPFT/tools/claude/9.9.9/claude"
+
+ ❯ src/main/providers/setup/adversarial-review.test.ts:116:40
+    114|   const { pins, confirm, binary, file, originalPins, installed } = awa…
+    115|   expect(await readFile(file, 'utf8')).toBe(originalPins);
+    116|   expect(await pins.resolve('claude')).toBeNull();
+       |                                        ^
+    117|   expect(confirm).toHaveBeenCalledWith(installed.identity, expect.obje…
+    118|   expect(await readFile(file, 'utf8')).toBe(originalPins);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  src/main/providers/setup/adversarial-review.test.ts > re-authenticates a managed installation record when it is loaded, independently of its JSON hash
+AssertionError: promise resolved "{ …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "hash": "41db545458d26a780d124c41c2bae2cc92acaebc9f0d9ecf529083199893ed9e",
++   "mtime": 1793944153733.7812,
++   "path": "/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-setup-6dvwwG/tools/claude/9.9.9/claude",
+  }
+
+ ❯ src/main/providers/setup/adversarial-review.test.ts:123:70
+    121| it('re-authenticates a managed installation record when it is loaded, …
+    122|   const { store, pins, confirm, file, originalPins } = await forgedRec…
+    123|   await expect(Promise.resolve().then(() => store.identity('claude')))…
+       |                                                                      ^
+    124|   confirm.mockResolvedValue(true);
+    125|   await expect(pins.resolve('claude')).rejects.toThrow();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 1 passed (10)
+   Start at  13:49:08
+   Duration  4.78s (transform 287ms, setup 0ms, import 379ms, tests 4.29s, environment 0ms)
+
+undefined
+/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli-security-before-8b7ilb7y/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/providers/setup/adversarial-review.test.ts --pool=forks --maxWorkers=2

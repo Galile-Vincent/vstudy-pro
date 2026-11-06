@@ -8,6 +8,7 @@ import type { IPty, IPtyForkOptions } from 'node-pty';
 import { systemExecutable } from '../../platform/process';
 import { SetupError } from './types';
 import { preparePtyHelper } from './pty-helper.mjs';
+export { TerminalText } from './terminal-text';
 export interface TerminalPlan { executable: string; args: readonly string[]; cwd: string; env: Readonly<Record<string, string>> }
 export type PtySpawn = (file: string, args: string[], options: IPtyForkOptions) => IPty;
 export interface PtyResult { exitCode: number; output: string }
@@ -76,28 +77,5 @@ export class ActionPty {
       clearTimeout(timer); if (escalation) clearTimeout(escalation);
       signal.removeEventListener('abort', abort); dataSubscription.dispose(); exitSubscription.dispose(); this.terminal = undefined;
     }
-  }
-}
-/** Drop OSC and DCS strings across chunk boundaries before xterm receives them. */
-export class TerminalText {
-  private mode: 'text' | 'escape' | 'string' | 'end' = 'text';
-  filter(value: string) {
-    let output = '';
-    for (const char of value) {
-      if (this.mode === 'text') {
-        if (char.charCodeAt(0) === 27) this.mode = 'escape';
-        else if (![0x90, 0x98, 0x9d, 0x9e, 0x9f].includes(char.charCodeAt(0))) output += char;
-        else this.mode = 'string';
-      } else if (this.mode === 'escape') {
-        if (']P_^X'.includes(char)) this.mode = 'string';
-        else { output += String.fromCharCode(27) + char; this.mode = 'text'; }
-      } else if (this.mode === 'string') {
-        if (char.charCodeAt(0) === 7 || char.charCodeAt(0) === 0x9c) this.mode = 'text';
-        else if (char.charCodeAt(0) === 27) this.mode = 'end';
-      } else {
-        this.mode = char === '\\' ? 'text' : 'string';
-      }
-    }
-    return output;
   }
 }

@@ -25,6 +25,7 @@ import { openAiCliSetup } from './entry';
 import { CliTerminal } from './terminal';
 import { ProviderChoice } from './choice';
 import { terminalDelta } from './model';
+import { AiCliInventory } from './inventory';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 let fixture: ReturnType<typeof cliFixture>;
@@ -126,6 +127,35 @@ it('does not offer an incompatible update', async () => {
   fixture.compatible(false); await mount();
   expect(document.body.textContent).toContain('not supported by VStudy');
   expect(document.body.textContent).not.toContain('Review update to 2.0.0');
+  expect(runs()).toHaveLength(0);
+});
+
+it.each(['en', 'zh-Hant', 'ja'])('offers a copy-only manual installer in %s without previewing or executing the download', async language => {
+  await i18n.changeLanguage(language);
+  Object.assign(fixture.tools[2]!, { consented: true, manualInstallRequired: true, manualUpdateRequired: true });
+  const writeText = vi.fn(async () => {});
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+  try {
+    await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
+    expect(document.querySelector<HTMLDetailsElement>('.ai-cli-action-area details')?.open).toBe(true);
+    expect(document.querySelector('.ai-cli-action-area code')?.textContent).toBe('curl -fsSL https://antigravity.google/cli/install.sh | bash');
+    expect(document.body.textContent).toContain(i18n.t('ai-cli:manual_install_reason'));
+    await click(i18n.t('ai-cli:copy_command'));
+    expect(writeText).toHaveBeenCalledWith('curl -fsSL https://antigravity.google/cli/install.sh | bash');
+    expect(fixture.calls.some(call => call.channel === 'ai-cli:preview')).toBe(false);
+    expect(runs()).toHaveLength(0);
+  } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
+});
+
+it('keeps unpinned updates manual and routes the vendor link through external confirmation', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.0.0', latestVersion: '2.0.0', status: 'update-available', manualUpdateRequired: true, releaseNotesUrl: 'https://example.com/release' });
+  await mount();
+  expect(document.body.textContent).toContain('New version available: install it yourself');
+  expect(fixture.calls.some(call => call.channel === 'ai-cli:preview')).toBe(false);
+  await act(async () => root.render(<AiCliInventory />));
+  expect(document.querySelector('.ai-cli-version small')?.textContent).toBe('New version available: install it yourself');
+  await click(i18n.t('ai-cli:vendor_install_link'));
+  expect(fixture.calls.at(-1)).toEqual({ channel: 'shell:openExternal', payload: { url: 'https://example.com/release' } });
   expect(runs()).toHaveLength(0);
 });
 

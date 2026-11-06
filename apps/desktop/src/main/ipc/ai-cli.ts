@@ -18,15 +18,15 @@ import { tr } from '../i18n';
 import { SetupStore } from '../providers/setup/store';
 import { ReleaseSource } from '../providers/setup/releases';
 import { setupNetwork } from '../providers/setup/fixtures';
+import { artifactVerifier } from '../providers/setup/authenticity';
 import { AiCliSetup } from '../providers/setup/service';
 import type { createIpcRegistrar } from './register';
 export function registerAiCliIpc(registrar: ReturnType<typeof createIpcRegistrar>, implemented: Set<IpcChannel>, providers: ProviderRegistry, pins: ExecutablePins, chat: ChatService) {
   const subscribers = new Map<WebContents, () => void>();
   const changed = () => { for (const sender of subscribers.keys()) if (!sender.isDestroyed()) sender.send('vstudy:providers-changed'); };
-  const store = new SetupStore(join(app.getPath('userData'), 'ai-tools'));
-  pins.setManagedResolver(binary => store.identity(binary));
   let service: AiCliSetup | undefined;
   const ready = setupNetwork(app.isPackaged).then(({ network, fingerprint, loginInterpreters }) => {
+    const store = new SetupStore(join(app.getPath('userData'), 'ai-tools'), artifactVerifier(fingerprint));
     service = new AiCliSetup({ store, source: new ReleaseSource(network, process.platform, process.arch, fingerprint), registry: providers, pins, chatBusy: () => chat.isBusy, chatRevision: () => chat.activityRevision, changed, loginInterpreters });
     service.startUpdates(); return service;
   });

@@ -13,6 +13,7 @@ import { executableIdentity, type ExecutableIdentity } from '../trusted-executab
 import { extractExecutable } from './archive';
 import { releaseSchema, SetupError, versionSchema, type Release } from './types';
 import type { VendorNetwork } from './network';
+import { artifactVerifier, type VerifyArtifact } from './authenticity';
 const identitySchema = z.object({ path: z.string(), mtime: z.number(), hash: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
 const pointerSchema = z.object({ current: versionSchema, previous: versionSchema.nullable() }).strict();
 const recordSchema = z.object({ release: releaseSchema, identity: identitySchema, completedAt: z.number() }).strict();
@@ -34,7 +35,7 @@ function writeJson(path: string, value: unknown) {
 export class SetupStore {
   private cache: z.infer<typeof cacheSchema> = { preferences: { ...defaultPreferences }, lastAttempt: 0, releases: {}, checkedAt: {} };
   readonly root: string;
-  constructor(root: string) {
+  constructor(root: string, private readonly verifyArtifact: VerifyArtifact = artifactVerifier()) {
     privateDirectory(root); this.root = realpathSync(root);
     const cache = join(this.root, 'settings.json');
     if (existsSync(cache)) try { this.cache = cacheSchema.parse(JSON.parse(readFileSync(cache, 'utf8'))); } catch { /* Invalid cache never enables a preference. */ }
@@ -65,14 +66,30 @@ export class SetupStore {
     const pointer = this.pointer(provider);
     return pointer ? { ...this.installation(provider, pointer.current), previous: pointer.previous } : null;
   }
-  identity(binary: string): ExecutableIdentity | null {
+  describe(binary: string): string | null {
     if (!['claude', 'codex', 'agy'].includes(binary)) return null;
-    return this.active(binary as CliProvider)?.identity ?? null;
+    return this.active(binary as CliProvider)?.identity.path ?? null;
+  }
+  async identity(binary: string): Promise<ExecutableIdentity | null> {
+    if (!['claude', 'codex', 'agy'].includes(binary)) return null;
+    const active = this.active(binary as CliProvider);
+    return active ? (await this.verifiedInstallation(binary as CliProvider, active.release.version, AbortSignal.timeout(30_000))).identity : null;
+  }
+  private async verifiedInstallation(provider: CliProvider, version: string, signal: AbortSignal) {
+    const record = this.installation(provider, version);
+    const before = await executableIdentity(record.identity.path);
+    if (before.path !== record.identity.path || before.hash !== record.identity.hash) throw new SetupError('signature');
+    await this.verifyArtifact(record.release, before.path, signal);
+    const identity = await executableIdentity(before.path);
+    if (identity.hash !== before.hash || identity.mtime !== before.mtime || identity.path !== before.path) throw new SetupError('signature');
+    signal.throwIfAborted();
+    return { ...record, identity };
   }
   async install(release: Release, network: VendorNetwork, signal: AbortSignal, progress: (bytes: number) => void, canActivate = () => true, validateVersion: (binary: string, version: string) => Promise<void> = async () => {}) {
     const parent = this.providerRoot(release.provider);
     const directory = join(parent, release.version);
     const stage = await mkdtemp(join(parent, '.staging-'));
+    let promoted = false, activated = false;
     try {
       const payload = join(stage, 'payload');
       await network.download(release, payload, signal, progress);
@@ -85,27 +102,40 @@ export class SetupStore {
       signal.throwIfAborted();
       if (!canActivate()) throw new SetupError('busy');
       const verified = await executableIdentity(binary);
+      await this.verifyArtifact(release, binary, signal);
+      signal.throwIfAborted();
+      if (!canActivate()) throw new SetupError('busy');
       await validateVersion(binary, release.version);
       const identity = await executableIdentity(binary);
       if (identity.hash !== verified.hash) throw new SetupError('checksum');
       signal.throwIfAborted();
+      if (!canActivate()) throw new SetupError('busy');
       writeJson(join(stage, 'installed.json'), { release, identity: { ...identity, path: join(directory, basename(binary)) }, completedAt: Date.now() });
       await rm(payload);
       if (!canActivate()) throw new SetupError('busy');
       if (existsSync(directory)) {
-        const record = this.installation(release.provider, release.version);
+        const record = await this.verifiedInstallation(release.provider, release.version, signal);
         const actual = await executableIdentity(record.identity.path);
         if (record.identity.hash !== identity.hash || actual.hash !== identity.hash) throw new SetupError('checksum');
-      } else await this.promote(stage, directory);
+      } else { await this.promote(stage, directory, signal, canActivate); promoted = true; }
       signal.throwIfAborted();
       if (!canActivate()) throw new SetupError('busy');
       const previous = this.pointer(release.provider)?.current ?? null;
       writeJson(join(parent, 'active.json'), { current: release.version, previous: previous === release.version ? this.pointer(release.provider)?.previous ?? null : previous });
-      return this.active(release.provider)!;
+      activated = true;
+      return { release, identity: { ...identity, path: join(directory, basename(binary)) }, completedAt: Date.now(), previous: previous === release.version ? this.pointer(release.provider)?.previous ?? null : previous };
+    } catch (error) {
+      if (promoted && !activated) {
+        const pointer = this.pointer(release.provider);
+        if (pointer?.current !== release.version && pointer?.previous !== release.version) await rm(directory, { recursive: true, force: true });
+      }
+      throw error;
     } finally { await rm(stage, { recursive: true, force: true }); }
   }
-  private async promote(stage: string, directory: string) {
+  private async promote(stage: string, directory: string, signal: AbortSignal, canActivate: () => boolean) {
     for (let attempt = 0; ; attempt++) {
+      signal.throwIfAborted();
+      if (!canActivate()) throw new SetupError('busy');
       try { await rename(stage, directory); return; }
       catch (error) {
         if (process.platform !== 'win32' || !['EBUSY', 'EPERM', 'EACCES'].includes((error as NodeJS.ErrnoException).code ?? '') || attempt >= 4) throw error;
@@ -113,13 +143,15 @@ export class SetupStore {
       }
     }
   }
-  async rollback(provider: CliProvider) {
+  async rollback(provider: CliProvider, signal = AbortSignal.timeout(30_000), canActivate = () => true) {
+    signal.throwIfAborted();
+    if (!canActivate()) throw new SetupError('busy');
     const pointer = this.pointer(provider);
     if (!pointer?.previous) throw new SetupError('wrong-version');
-    const previous = this.installation(provider, pointer.previous);
-    const currentIdentity = await executableIdentity(previous.identity.path);
-    if (currentIdentity.hash !== previous.identity.hash) throw new SetupError('checksum');
+    const previous = await this.verifiedInstallation(provider, pointer.previous, signal);
+    signal.throwIfAborted();
+    if (!canActivate()) throw new SetupError('busy');
     writeJson(join(this.providerRoot(provider), 'active.json'), { current: pointer.previous, previous: pointer.current });
-    return this.active(provider)!;
+    return { ...previous, previous: pointer.current };
   }
 }

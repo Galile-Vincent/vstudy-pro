@@ -1,4 +1,4 @@
-/** Real Electron setup acceptance with signed fake CLIs and a live old-version chat during update. */
+/** Claude managed acceptance and explicit external fake CLI selection without relaxing publisher trust. */
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
@@ -132,8 +132,25 @@ try {
       await page.waitForFunction(id => window.document.querySelector('.ai-cli-chooser input:checked')?.closest('label')?.textContent.includes(id), provider === 'codex' ? 'Codex' : 'Antigravity');
       await capture(`${provider}-1-install`, `${language}-${theme}`);
       await page.locator('.ai-cli-consent input').first().click();
-      await page.getByRole('button', { name: copy.run_native, exact: true }).click();
-      await waitTool(provider, { version, managed: true, status: 'installed-not-signed-in' });
+      if (provider === 'agy') {
+        assert.equal((await invoke('ai-cli:list')).find(tool => tool.provider === provider).manualInstallRequired, true);
+        await page.getByRole('button', { name: copy.copy_command, exact: true }).waitFor();
+      } else {
+        await page.getByText(copy.failure_signature, { exact: true }).first().waitFor();
+        const rejected = await invoke('ai-cli:preview', { actionId: 'install-codex' });
+        assert.equal(rejected.available, false); assert.equal(rejected.reason, 'signature');
+      }
+      await capture(`${provider}-1-manual-policy`, `${language}-${theme}`);
+      await app.evaluate(({ dialog }, file) => {
+        const original = dialog.showOpenDialog;
+        dialog.showOpenDialog = async () => { dialog.showOpenDialog = original; return { canceled: false, filePaths: [file] }; };
+      }, fixtures.executables[provider]);
+      const selected = await invoke('providers:chooseExecutable', { binary: provider });
+      assert.ok(selected.path, 'the existing native file selection boundary approves the owned fake');
+      await page.reload();
+      await page.locator('.ai-cli-inventory-entry').first().click();
+      await page.locator('.ai-cli-chooser input').nth(radio).click();
+      await waitTool(provider, { path: selected.path, managed: false, status: 'installed-not-signed-in' });
       await page.getByRole('button', { name: copy.run, exact: true }).waitFor();
       await capture(`${provider}-2-sign-in`, `${language}-${theme}`);
       await page.getByRole('button', { name: copy.run, exact: true }).click();
@@ -148,7 +165,7 @@ try {
       assert.ok((await page.locator('.ai-cli-terminal .ai-cli-output').textContent()).includes('OK from'), 'the real provider transport returned its fixture answer');
       await page.locator('.ai-cli-terminal').scrollIntoViewIfNeeded();
       await capture(`${provider}-3-answer`, `${language}-${theme}`);
-      results.at(-1)[provider] = { install: true, signIn: true, tinyTransportAnswer: true, version };
+      results.at(-1)[provider] = { install: 'manual selection of an owned fake', managedPayloadRejected: true, signIn: true, tinyTransportAnswer: true, version };
     }
     await page.getByRole('button', { name: copy.close, exact: true }).click();
     await invoke('settings:set', { ...await invoke('settings:get'), uiScale: 125 });

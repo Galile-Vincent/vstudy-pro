@@ -1,4 +1,4 @@
-/** Signed local release fixtures still pass the production parsers, checksums, PTYs, and provider transports. */
+/** Claude uses a signed fixture publisher. Other fake CLIs require explicit executable selection. */
 import { createHash } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -58,7 +58,7 @@ else {
 }
 export async function createCliFixtures(root) {
   await mkdir(root, { recursive: true, mode: 0o700 });
-  const files = {}, fixtureFile = join(root, 'network.json');
+  const files = {}, executables = {}, fixtureFile = join(root, 'network.json');
   const key = await generateKey({ type: 'ecc', curve: 'ed25519Legacy', userIDs: [{ name: 'VStudy isolated test fixture' }], format: 'armored' });
   const privateKey = await readPrivateKey({ armoredKey: key.privateKey });
   const fingerprint = (await readKey({ armoredKey: key.publicKey })).getFingerprint().toUpperCase();
@@ -68,6 +68,10 @@ export async function createCliFixtures(root) {
   const codexTarget = process.arch === 'arm64' ? 'aarch64-apple-darwin' : 'x86_64-apple-darwin';
   const makeRelease = async (provider, version) => {
     const payload = worker(provider, version, root);
+    if (provider !== 'claude') {
+      const file = join(root, `${provider}-${version}`);
+      await writeFile(file, payload, { mode: 0o700 }); executables[provider] = file;
+    }
     if (provider === 'claude') {
       const manifest = JSON.stringify({ version, platforms: { [`darwin-${process.arch}`]: { binary: 'claude', checksum: createHash('sha256').update(payload).digest('hex'), size: payload.length } } });
       const signature = await sign({ message: await createMessage({ binary: Buffer.from(manifest) }), signingKeys: privateKey, detached: true });
@@ -89,5 +93,5 @@ export async function createCliFixtures(root) {
   await makeRelease('claude', '1.0.0'); await makeRelease('claude', '1.1.0');
   await makeRelease('agy', '1.0.0'); await makeRelease('codex', '0.166.0');
   await writeFile(fixtureFile, JSON.stringify({ files, claudeFingerprint: fingerprint, loginInterpreters: [process.execPath] }), { mode: 0o600 });
-  return { fixtureFile, update: () => writeFile(claudeLatest, '1.1.0'), root };
+  return { fixtureFile, executables, update: () => writeFile(claudeLatest, '1.1.0'), root };
 }

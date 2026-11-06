@@ -51,6 +51,7 @@ export function transition(state: CliToolState, event: SetupEvent): CliToolState
 }
 export function initialState(provider: CliProvider): CliToolState {
   return { provider, status: 'not-installed', consented: false, version: null, path: null, managed: false,
+    manualInstallRequired: provider === 'agy', manualUpdateRequired: provider === 'agy',
     latestVersion: null, releaseNotesUrl: null, checkedAt: null, previousVersion: null, appliesToNewChats: false, tested: false, error: null };
 }
 export const providerId = (provider: CliProvider) => `${provider}-cli` as const;
