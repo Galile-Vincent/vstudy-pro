@@ -12,6 +12,7 @@ import { sanitizeCourseHtml } from '../moodle/contents';
 
 export async function courseAnnouncements(context: BackendContext, services: BackendServices, courseId: string) {
   const cached = context.course(courseId).announcements;
+  const hasCache = context.repository.hasCoursePanelCache(courseId, 'announcements');
   try {
     const forums = (await courseForums(context, services, courseId)).filter(forum => forum.type === 'news' || /公告|最新消息|announcement|news/i.test(contentText(forum.name)));
     if (forums.length > 10) fail('UNSUPPORTED');
@@ -39,10 +40,10 @@ export async function courseAnnouncements(context: BackendContext, services: Bac
     context.recheck();
     const result = [...rows.values()].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? '') || a.id.localeCompare(b.id));
     const announcements: MoodleAnnouncement[] = result.flatMap(row => row.createdAt ? [{id: row.id, subject: row.subject, author: row.author, createdAt: row.createdAt, bodyHtml: sanitizeCourseHtml(row.text) ?? '', url: null}] : []);
-    if (context.repository.detailCache(courseId)) context.repository.saveDetail(courseId, {announcements}, undefined, new Date(services.clock()).toISOString());
+    if (announcements.length === result.length) context.repository.saveDetail(courseId, {announcements}, undefined, new Date(services.clock()).toISOString());
     return result;
   } catch (error) {
-    if (error instanceof McpBackendError && ['DISCONNECTED', 'SESSION_REQUIRED', 'UNSUPPORTED'].includes(error.code) && cached.length) {
+    if (error instanceof McpBackendError && ['DISCONNECTED', 'SESSION_REQUIRED', 'UNSUPPORTED'].includes(error.code) && hasCache) {
       context.recheck();
       context.provenance.syncedAt = context.repository.detailCache(courseId)?.refreshedAt ?? null;
       return cached.map(row => ({id: row.id, subject: contentText(row.subject, 300), author: contentText(row.author, 200), createdAt: row.createdAt, text: contentText(row.bodyHtml, 6000)}));

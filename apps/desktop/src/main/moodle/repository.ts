@@ -34,6 +34,12 @@ const storedCourseSchema = z.preprocess(value => {
   return {...(value as Record<string,unknown>),identity};
 },moodleCourseSchema);
 const payload = z.object({data:z.string()});
+const panelCacheSchema = z.object({
+  sections: z.array(moodleSectionSchema).optional(),
+  announcements: z.array(moodleAnnouncementSchema).optional(),
+  refreshedAt: z.string(),
+  loaded: z.object({sections: z.boolean(), announcements: z.boolean()}).optional(),
+});
 /** Persist account-scoped snapshots without deleting linked library documents. */
 export class MoodleRepository {
   constructor(private readonly db: DatabaseSync) {
@@ -83,12 +89,18 @@ export class MoodleRepository {
     return {course,deadlines,notifications:this.rows("SELECT data FROM moodle_notifications WHERE accountId=? AND json_extract(data,'$.courseId')=?",moodleNotificationSchema,course.accountId,id),grades:this.rows('SELECT data FROM moodle_grades WHERE courseId=?',moodleGradeItemSchema,id),files:this.files(id),reminders:this.rows('SELECT r.data FROM moodle_reminders r JOIN moodle_deadlines d ON d.id=r.deadlineId WHERE d.courseId=?',moodleReminderSchema,id),sections:cache?.sections ?? [],announcements:cache?.announcements ?? []};
   }
   detailCache(id: string) {
-    return this.rows('SELECT data FROM moodle_course_details WHERE courseId=?',z.object({sections:z.array(moodleSectionSchema).default([]),announcements:z.array(moodleAnnouncementSchema).default([]),refreshedAt:z.string()}),id)[0];
+    const cache = this.rows('SELECT data FROM moodle_course_details WHERE courseId=?', panelCacheSchema, id)[0];
+    if (!cache) return undefined;
+    return {...cache, sections: cache.sections ?? [], announcements: cache.announcements ?? [], loaded: cache.loaded ?? {sections: Boolean(cache.sections?.length), announcements: Boolean(cache.announcements?.length)}};
+  }
+  hasCoursePanelCache(id: string, panel: 'sections' | 'announcements'): boolean {
+    return this.detailCache(id)?.loaded[panel] === true;
   }
   saveDetail(id: string, panels: {sections?:MoodleSection[];announcements?:MoodleAnnouncement[]}, files?:MoodleSnapshot['files'], syncedAt?: string) {
     if (!this.db.prepare('SELECT 1 FROM moodle_courses WHERE id=?').get(id)) throw new Error('Moodle course not found');
     const previous = this.detailCache(id);
-    const data = {...previous,...panels,refreshedAt:syncedAt ?? new Date().toISOString()};
+    const loaded = {sections: panels.sections !== undefined || previous?.loaded.sections === true, announcements: panels.announcements !== undefined || previous?.loaded.announcements === true};
+    const data = {...previous,...panels,loaded,refreshedAt:syncedAt ?? new Date().toISOString()};
     const serialized=JSON.stringify(data);
     if(Buffer.byteLength(serialized)>8*1024*1024)throw new Error('Moodle course detail exceeds cache limit');
     this.db.exec('SAVEPOINT moodle_detail');

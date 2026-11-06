@@ -81,3 +81,44 @@ it('does not substitute a private reply for the announcement body', async () => 
   await expect(h.call('list_announcements', {courseId: courseA})).rejects.toMatchObject({code: 'UNSUPPORTED'});
   expect(h.repository.course(courseA).announcements).toEqual([]);
 });
+
+it('does not mistake an announcements-only cache for loaded course sections', async () => {
+  const h = await setup();
+  h.store.db.prepare('DELETE FROM moodle_course_details WHERE courseId=?').run(courseA);
+  news(h);
+  h.replies.core_course_get_contents = contents;
+  await h.call('list_announcements', {courseId: courseA});
+  expect(h.repository.hasCoursePanelCache(courseA, 'sections')).toBe(false);
+  expect(h.repository.hasCoursePanelCache(courseA, 'announcements')).toBe(true);
+  expect(JSON.stringify(await h.call('get_course', {courseId: courseA}))).toContain('First lecture');
+  expect(h.repository.hasCoursePanelCache(courseA, 'sections')).toBe(true);
+  expect(h.repository.course(courseA).announcements).toHaveLength(1);
+});
+
+it('preserves a successfully empty panel offline and loads ambiguous empty legacy sections once', async () => {
+  const h = await setup();
+  h.replies.mod_forum_get_forums_by_courses = [];
+  expect((await h.call('list_announcements', {courseId: courseA})).content).toEqual({items: []});
+  h.repository.expired(accountA);
+  expect((await h.call('list_announcements', {courseId: courseA})).content).toEqual({items: []});
+  const account = h.repository.account(accountA);
+  h.repository.saveAccount({...account, status: 'connected'});
+  h.store.db.prepare('UPDATE moodle_course_details SET data=? WHERE courseId=?').run(JSON.stringify({sections: [], announcements: [], refreshedAt: new Date(now).toISOString()}), courseA);
+  h.replies.core_course_get_contents = contents;
+  expect(h.repository.hasCoursePanelCache(courseA, 'sections')).toBe(false);
+  await h.call('get_course', {courseId: courseA});
+  expect(h.repository.hasCoursePanelCache(courseA, 'sections')).toBe(true);
+  const calls = h.request.mock.calls.length;
+  await h.call('get_course', {courseId: courseA});
+  expect(h.request).toHaveBeenCalledTimes(calls);
+});
+
+it('does not certify an empty offline announcement cache after reading undated posts', async () => {
+  const h = await setup();
+  news(h);
+  h.replies.mod_forum_get_forum_discussions = {discussions: [{id: 31, discussion: 30, forum: 11, subject: 'Undated notice'}]};
+  expect(JSON.stringify(await h.call('list_announcements', {courseId: courseA}))).toContain('Read chapter two.');
+  expect(h.repository.hasCoursePanelCache(courseA, 'announcements')).toBe(false);
+  h.repository.expired(accountA);
+  await expect(h.call('list_announcements', {courseId: courseA})).rejects.toMatchObject({code: 'SESSION_REQUIRED'});
+});
