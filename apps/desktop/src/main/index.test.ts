@@ -117,12 +117,12 @@ it.each([
   ['Windows-shaped process', false], ['Windows-shaped process', true],
 ] as const)('creates the main window with %s failure and MCP enabled=%s', async (failure, enabled) => {
   const {createMcpRuntime} = await vi.importActual<typeof import('./mcp/runtime')>('./mcp/runtime');
-  const descriptor = Object.getOwnPropertyDescriptor(process, 'getuid')!;
+  const descriptor = Object.getOwnPropertyDescriptor(process, 'getuid');
   const persistence = vi.fn(() => {throw Error('private startup path token=school-secret');});
   const onFailure = vi.fn(() => mocks.log({phase:'mcp-bridge-unavailable', code:'UNAVAILABLE'}));
   let runtime:McpRuntime | undefined;
   try {
-    if (failure === 'Windows-shaped process') Object.defineProperty(process, 'getuid', {...descriptor, value:undefined});
+    if (failure === 'Windows-shaped process') Object.defineProperty(process, 'getuid', {...descriptor, configurable:true, value:undefined});
     mocks.registerIpc.mockImplementation(() => {
       runtime = createMcpRuntime({userData:'/unused-startup-path', backend:{accounts:()=>[], prepare:async()=>{throw Error('unused');}},
         ...(failure === 'persistence factory' ? {persistence} : {}), secretValues:()=>[], restoreWindow:()=>{}, onFailure,
@@ -149,7 +149,8 @@ it.each([
     }
     expect(JSON.stringify(mocks.log.mock.calls)).not.toContain('school-secret');
   } finally {
-    Object.defineProperty(process, 'getuid', descriptor);
+    if (descriptor) Object.defineProperty(process, 'getuid', descriptor);
+    else Reflect.deleteProperty(process, 'getuid');
     await runtime?.dispose();
   }
 });

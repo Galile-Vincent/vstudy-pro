@@ -1,12 +1,18 @@
-name: Windows native MCP
+name: Windows focused verification
 on:
   workflow_dispatch:
+    inputs:
+      suite:
+        description: Focused native pipe or CLI setup tests
+        type: choice
+        default: pipe
+        options: [pipe, cli]
   push:
     branches: ['ci/windows-native-pipe']
 permissions:
   contents: read
 concurrency:
-  group: windows-native-${{ github.ref }}
+  group: windows-native-${{ github.ref }}-${{ inputs.suite || 'pipe' }}
   cancel-in-progress: true
 defaults:
   run:
@@ -15,6 +21,7 @@ env:
   CI: 'true'
 jobs:
   native-pipe:
+    if: github.event_name != 'workflow_dispatch' || inputs.suite == 'pipe'
     runs-on: windows-latest
     timeout-minutes: 12
     steps:
@@ -39,3 +46,24 @@ jobs:
           path: docs/evidence/distribution/win32-mcp-roundtrip.json
           if-no-files-found: warn
           retention-days: 14
+  cli-setup:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'cli'
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Verify native CLI installation identities, approval, and setup UI
+        run: >-
+          pnpm --filter @vstudy/desktop exec vitest run
+          src/main/index.test.ts src/main/ipc/ai-cli.test.ts
+          src/main/providers/setup/store.test.ts src/main/providers/setup/service.test.ts
+          src/main/providers/setup/authenticity.test.ts src/main/providers/setup/adversarial-review.test.ts
+          src/renderer/ai-cli/setup.test.tsx --pool=forks --maxWorkers=2
