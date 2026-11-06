@@ -33,8 +33,8 @@ export function developmentCsp(entryUrl: string): string {
 export function safeFilename(name: string): string {
   return Array.from(name).filter(char => {
     const code = char.codePointAt(0)!;
-    return code > 31 && code !== 127 && !(code >= 0x202a && code <= 0x202e) && !(code >= 0x2066 && code <= 0x2069) && !'/\\:'.includes(char);
-  }).join('').slice(0, 180).replace(/^\.+/, '') || 'export';
+    return code > 31 && code !== 127 && !(code >= 0x202a && code <= 0x202e) && !(code >= 0x2066 && code <= 0x2069) && !'/\\:<>"|?*'.includes(char);
+  }).join('').slice(0, 180).replace(/^\.+/, '').replace(/[. ]+$/, '').replace(/^(con|conin\$|conout\$|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?=\.|$)/i, '_$1') || 'export';
 }
 
 /** Bound an untrusted document label before displaying it in native UI. */

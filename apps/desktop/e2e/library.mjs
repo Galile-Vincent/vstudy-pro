@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 import assert from "node:assert/strict";
@@ -5,7 +6,7 @@ import { mkdtemp, rm, mkdir, writeFile, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 const directory = await mkdtemp(join(tmpdir(), "vstudy-library-e2e-"));
-const evidence = "/tmp/vstudy-library";
+const evidence = temporaryPath('vstudy-library');
 await mkdir(evidence, { recursive: true });
 const screenshots = [];
 let app;
@@ -239,7 +240,7 @@ try {
   await page.getByRole("button", { name: "Lesson 0", exact: true }).waitFor();
   const row = page.locator(".library-document[role=listitem]").first();
   await row.click({ button: "right" });
-  await page.getByRole("menu").waitFor().catch(async e => { await page.screenshot({path:"/tmp/vstudy-design1/menu-failure.png"}); console.log(await page.locator("body").innerText()); throw e; });
+  await page.getByRole("menu").waitFor().catch(async e => { await page.screenshot({path:temporaryPath('vstudy-design1/menu-failure.png')}); console.log(await page.locator("body").innerText()); throw e; });
   await shot("context-menu");
   await page
     .getByRole("menu")

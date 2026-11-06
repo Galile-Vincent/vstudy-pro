@@ -66,10 +66,23 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
       });
       engine = created;
       if (restore && !(requestedEnabled ?? created.state().enabled)) return;
-      bridge = await (options.transport ?? createPlatformBridge)({userData:options.userData,
+      const transport = await (options.transport ?? createPlatformBridge)({userData:options.userData,
         ...(options.peerHelper ? {peerHelper:options.peerHelper} : {}),
         handleRequest:(request, id) => created.handleRequest(request, id), onDisconnect:id => created.disconnect(id),
       });
+      bridge = transport;
+      const closed = () => {
+        if (stopped || bridge !== transport) return;
+        bridge = undefined;
+        requestedEnabled = false;
+        unavailable = true;
+        try {created.setEnabled(false);} catch { /* No bridge survives a failed state write. */ }
+        created.dispose();
+        if (engine === created) engine = undefined;
+        shown.clear();
+        options.onFailure();
+      };
+      void transport.closed?.then(closed, closed);
     }).finally(() => {starting = undefined;});
   };
   return {
@@ -80,7 +93,10 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
     async setEnabled(enabled:boolean|undefined) {
       if (enabled!==undefined) requestedEnabled = enabled;
       try {
-        if (enabled!==false) await start(enabled===undefined);
+        if (enabled!==false) {
+          await start(enabled===undefined);
+          if (enabled===true && (!bridge || !engine)) throw new McpFailure('DISCONNECTED');
+        }
         if (!stopped && requestedEnabled!==undefined) engine?.setEnabled(requestedEnabled);
         unavailable = false;
       } catch {
@@ -89,8 +105,9 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
         try { engine?.setEnabled(false); } catch { /* Persistence failure must not escape into desktop startup. */ }
         engine?.dispose();
         engine = undefined;
-        await bridge?.dispose().catch(() => {});
+        const failed = bridge;
         bridge = undefined;
+        await failed?.dispose().catch(() => {});
         if (!stopped) options.onFailure();
       }
     },

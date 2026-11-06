@@ -6,6 +6,7 @@
  */
 import { lstat, readFile } from "node:fs/promises";
 import { readFileSync, lstatSync } from 'node:fs';
+import { isPortableRelativePath } from '../platform/paths';
 /** Validate file signatures and archive declarations before staging conversion. */
 export function validateImport(path: string, extension: string) {
     if (!lstatSync(path).isFile() || lstatSync(path).isSymbolicLink() || lstatSync(path).nlink !== 1)
@@ -45,15 +46,17 @@ function validateImportBytes(data: Buffer, extension: string): void {
             throw new Error('ZIP entry limit');
         let cursor = offset, total = 0;
         const names: string[] = [];
+        const seenNames = new Set<string>();
         for (let n = 0; n < entries; n++) {
             if (cursor + 46 > data.length || data.readUInt32LE(cursor) !== 0x02014b50)
                 throw new Error('Invalid ZIP entry');
             const compressed = data.readUInt32LE(cursor + 20), size = data.readUInt32LE(cursor + 24), length = data.readUInt16LE(cursor + 28), extra = data.readUInt16LE(cursor + 30), comment = data.readUInt16LE(cursor + 32), flags = data.readUInt16LE(cursor + 8), mode = data.readUInt32LE(cursor + 38) >>> 16;
             total += size;
             const name = data.subarray(cursor + 46, cursor + 46 + length).toString();
-            names.push(name);
-            if (total > 256 * 1024 * 1024 || size / Math.max(1, compressed) > 200 || (flags & 1) || (mode & 0xf000) === 0xa000 || name.includes('..') || name.startsWith('/') || name.includes('\\'))
+            if (seenNames.has(name.toLowerCase()) ||
+                total > 256 * 1024 * 1024 || size / Math.max(1, compressed) > 200 || (flags & 1) || (mode & 0xf000) === 0xa000 || !isPortableRelativePath(name.replace(/\/$/, '')))
                 throw new Error('Unsafe ZIP archive');
+            names.push(name);seenNames.add(name.toLowerCase());
             cursor += 46 + length + extra + comment;
         }
         const prefix = { docx: 'word/', xlsx: 'xl/', pptx: 'ppt/' }[extension]!;

@@ -24,7 +24,7 @@ function updateBackground(window: BrowserWindow, color: string, vibrancy: Window
   clearTimeout(previous?.timer);
   const state: WindowAppearance = {color:previous?.color ?? color, target:color, vibrancy};
   appearances.set(window, state);
-  if (!previous || previous.vibrancy !== vibrancy) window.setVibrancy(vibrancy);
+  if (process.platform === 'darwin' && (!previous || previous.vibrancy !== vibrancy)) window.setVibrancy(vibrancy);
   if (!previous || !window.isVisible() || systemPreferences.getAnimationSettings().prefersReducedMotion) {
     state.color = color;
     window.setBackgroundColor(color);
@@ -48,6 +48,6 @@ function updateBackground(window: BrowserWindow, color: string, vibrancy: Window
 export function applyNativeTheme(settings: Settings): void {
   if (nativeTheme.themeSource !== settings.colorScheme) nativeTheme.themeSource = settings.colorScheme;
   for (const window of BrowserWindow.getAllWindows()) {
-    updateBackground(window, nativeBackground(settings), settings.material === 'glass' && settings.glassOpacity < 100 && !nativeTheme.prefersReducedTransparency ? 'under-window' : null);
+    updateBackground(window, nativeBackground(settings), process.platform === 'darwin' && settings.material === 'glass' && settings.glassOpacity < 100 && !nativeTheme.prefersReducedTransparency ? 'under-window' : null);
   }
 }

@@ -18,7 +18,17 @@ const approval = vi.hoisted(() => ({ show: vi.fn(async () => ({ response: 1, che
 const host = vi.hoisted(() => ({ windows: process.platform === 'win32', rejectLaunch: false }));
 vi.mock('node:fs', async importOriginal => {
   const fs = await importOriginal<typeof import('node:fs')>();
-  return { ...fs, lstatSync: (path: Parameters<typeof fs.lstatSync>[0]) => {
+  const directories = new Set<number>();
+  let nextDirectory = -1;
+  return { ...fs, openSync: (path: Parameters<typeof fs.openSync>[0], flags: Parameters<typeof fs.openSync>[1], mode?: Parameters<typeof fs.openSync>[2]) => {
+    // A simulated Unix terminal still needs a Windows-compatible filesystem boundary.
+    if (host.windows && process.platform !== 'win32' && flags === 'r' && fs.statSync(path).isDirectory()) {
+      const handle = nextDirectory--; directories.add(handle); return handle;
+    }
+    return fs.openSync(path, flags, mode);
+  }, fsyncSync: (handle: number) => { if (!directories.has(handle)) fs.fsyncSync(handle); },
+  closeSync: (handle: number) => { if (!directories.delete(handle)) fs.closeSync(handle); },
+  lstatSync: (path: Parameters<typeof fs.lstatSync>[0]) => {
     const info = fs.lstatSync(path);
     if (host.windows && process.platform !== 'win32') info.mode &= ~0o077;
     return info;

@@ -49,8 +49,8 @@ const en = {
     ['Do I need AI to use VStudy?', 'No. Read documents, browse saved coursework, and manage your planner without an AI provider. AI features need an enabled provider and a network connection.'],
     ['Will it work with my school?', 'VStudy accepts public HTTPS Moodle sites. Your school must enable compatible mobile web services. Search the bundled directory or enter your Moodle URL. Some schools restrict third-party access.'],
     ['Can I study offline?', 'Local readings, conversations, plans, and previously saved course content remain on your Mac. New Moodle content and AI responses require a connection. Markdown and text import work without the Python converter.'],
-    ['Where is the download?', 'The Download button opens the latest GitHub release. This repository is currently private, so GitHub access is required. A public download is not promised.'],
-    ['What should I expect on first launch?', 'Current local builds are ad-hoc signed and not notarized. macOS may block the first launch. Review the source and release before using Privacy & Security → Open Anyway. Read the installation guide for the full steps.'],
+    ['Where is the download?', 'Download selects a macOS or Windows installer. Other platforms lists every installer and the checksums. If a file is missing, check the latest published release.'],
+    ['What should I expect on first launch?', 'Unsigned builds may trigger Gatekeeper on Mac or SmartScreen on Windows. Verify the file and source before continuing. The installation guide explains both systems and signed releases.'],
   ],
   finalTitle: 'Make space for the work that matters.',
   finalBody: 'Start with a reading. Bring the rest of your semester when you are ready.',
@@ -72,7 +72,7 @@ const zh: Copy = {
   extras:[['找回那段對話','搜尋所有聊天，依課程、文件、角色或日期篩選。','chat-history'],['在課程中開啟 Moodle','使用依帳號隔離的內嵌視窗，開啟支援的學校頁面。','moodle-pages']],
   privacyTitle:'你的資料庫，留在你的 Mac。',privacyBody:'文件、對話與讀書計畫儲存在本機。不需要 VStudy 帳號，沒有分析追蹤，也不會自動同步裝置。',privacyDetail:'AI 由你選擇。啟用後，供應商會收到問題與相關閱讀內容。連接 Moodle 時則會聯繫你的學校。',privacyLink:'了解哪些資料會傳出 Mac',
   themesTitle:'讓工作空間更像你。',themesBody:'九組全應用程式佈景主題，每組都有明暗版本。在此試試配色，再到應用程式裡調整。',themeHint:'選擇主題即可預覽此頁配色。兩顆色球分別顯示明亮與深色版本。',
-  faqTitle:'開始之前，你可能想知道。',faqs:[['一定要使用 AI 嗎？','不用。沒有 AI 供應商也能閱讀文件、瀏覽已儲存的課程與管理計畫。AI 功能需要啟用供應商並連上網路。'],['支援我的學校嗎？','VStudy 支援公開 HTTPS Moodle 網站。學校必須開放相容的行動網路服務。可搜尋內建名錄或輸入 Moodle 網址，部分學校會限制第三方存取。'],['可以離線讀書嗎？','本機文件、對話、計畫與已儲存的課程仍可使用。新的 Moodle 內容與 AI 回答需要網路。Markdown 與純文字匯入不需要 Python 轉換器。'],['在哪裡下載？','下載按鈕會開啟 GitHub 最新版本。目前儲存庫為私人，需要 GitHub 存取權限，尚未承諾公開下載。'],['第一次開啟要注意什麼？','目前本機組建採臨時簽署，尚未公證，macOS 可能會阻擋。確認來源與版本後，再到「隱私權與安全性」選擇「強制打開」。完整步驟請見安裝指南。']],
+  faqTitle:'開始之前，你可能想知道。',faqs:[['一定要使用 AI 嗎？','不用。沒有 AI 供應商也能閱讀文件、瀏覽已儲存的課程與管理計畫。AI 功能需要啟用供應商並連上網路。'],['支援我的學校嗎？','VStudy 支援公開 HTTPS Moodle 網站。學校必須開放相容的行動網路服務。可搜尋內建名錄或輸入 Moodle 網址，部分學校會限制第三方存取。'],['可以離線讀書嗎？','本機文件、對話、計畫與已儲存的課程仍可使用。新的 Moodle 內容與 AI 回答需要網路。Markdown 與純文字匯入不需要 Python 轉換器。'],['在哪裡下載？','下載按鈕會選擇 macOS 或 Windows 安裝檔。「其他平台」列出所有安裝檔與校驗碼。若缺少檔案，請確認最新已發布版本。'],['第一次開啟要注意什麼？','未簽署的組建可能觸發 Mac 的 Gatekeeper 或 Windows 的 SmartScreen。請先驗證檔案並確認來源。安裝指南包含兩個系統的操作與已簽署版本說明。']],
   finalTitle:'為重要的課業，留出空間。',finalBody:'從一份閱讀資料開始，準備好後再帶入整個學期。',requirements:'適用於 Apple 晶片 Mac。目前組建尚未公證，開啟前請閱讀首次啟動指南。',firstLaunch:'安裝與首次啟動',footer:'讓課業更有條理的空間。',privacy:'隱私權',source:'GitHub 原始碼',version:'版本',themeNames:['VStudy','海洋','森林','餘燼','鳶尾','玫瑰','石板','紙張','高對比'],
 };
 const ja: Copy = {
@@ -88,7 +88,7 @@ const ja: Copy = {
   extras:[['あの会話をもう一度','すべてのチャットを検索。授業、資料、役割、日付で絞り込めます。','chat-history'],['Moodle を授業のそばに','アカウントごとに分離した表示で、対応する学校のページを開けます。','moodle-pages']],
   privacyTitle:'ライブラリは、あなたの Mac に。',privacyBody:'資料、会話、学習計画はローカルに保存。VStudy アカウントも解析トラッキングもなく、端末間の自動同期もありません。',privacyDetail:'AI を使うかはあなた次第。有効にすると、質問と関連する資料の文脈をプロバイダーに送ります。Moodle 接続は学校と通信します。',privacyLink:'Mac の外に送る情報を確認',
   themesTitle:'自分らしいワークスペースに。',themesBody:'アプリ全体に適用する 9 組のテーマ。それぞれにライトとダークがあります。このページで配色を試せます。',themeHint:'テーマを選ぶとこのページでプレビューできます。2 つの球はライトとダークの配色です。',
-  faqTitle:'始める前に。',faqs:[['AI は必須ですか？','いいえ。AI プロバイダーなしでも資料を読み、保存済みの授業を確認し、予定を管理できます。AI 機能には有効なプロバイダーとネット接続が必要です。'],['自分の学校でも使えますか？','公開 HTTPS の Moodle サイトに対応します。学校側で互換性のあるモバイル Web サービスを有効にする必要があります。内蔵の一覧で検索するか Moodle URL を入力します。第三者のアクセスを制限する学校もあります。'],['オフラインで学習できますか？','ローカルの資料、会話、計画、保存済みの授業は利用できます。新しい Moodle コンテンツと AI の回答にはネット接続が必要です。Markdown とテキストの取り込みには Python 変換器が不要です。'],['どこでダウンロードできますか？','ボタンは GitHub の最新リリースを開きます。現在リポジトリは非公開で、GitHub のアクセス権が必要です。公開ダウンロードは約束されていません。'],['初回起動では何が起きますか？','現在のローカルビルドはアドホック署名で、公証されていません。macOS が起動を止める場合があります。入手元とリリースを確認してから「プライバシーとセキュリティ」で「このまま開く」を選びます。詳細はインストールガイドを確認してください。']],
+  faqTitle:'始める前に。',faqs:[['AI は必須ですか？','いいえ。AI プロバイダーなしでも資料を読み、保存済みの授業を確認し、予定を管理できます。AI 機能には有効なプロバイダーとネット接続が必要です。'],['自分の学校でも使えますか？','公開 HTTPS の Moodle サイトに対応します。学校側で互換性のあるモバイル Web サービスを有効にする必要があります。内蔵の一覧で検索するか Moodle URL を入力します。第三者のアクセスを制限する学校もあります。'],['オフラインで学習できますか？','ローカルの資料、会話、計画、保存済みの授業は利用できます。新しい Moodle コンテンツと AI の回答にはネット接続が必要です。Markdown とテキストの取り込みには Python 変換器が不要です。'],['どこでダウンロードできますか？','ボタンは macOS または Windows のインストーラーを選びます。「ほかのプラットフォーム」に全インストーラーとチェックサムがあります。ファイルがない場合は最新の公開リリースを確認してください。'],['初回起動では何が起きますか？','未署名のビルドでは Mac の Gatekeeper や Windows の SmartScreen が警告する場合があります。ファイルと入手元を検証してください。インストールガイドに両システムの手順と署名済みリリースの説明があります。']],
   finalTitle:'大切な学びに、余白を。',finalBody:'まずはひとつの資料から。準備ができたら、学期の残りもここへ。',requirements:'Apple シリコン搭載 Mac 向け。現在のビルドは未公証です。初回起動ガイドを確認してください。',firstLaunch:'インストールと初回起動',footer:'授業と向き合う、落ち着いた場所。',privacy:'プライバシー',source:'GitHub のソース',version:'バージョン',themeNames:['VStudy','Ocean','Grove','Ember','Iris','Rose','Slate','Paper','ハイコントラスト'],
 };
 export const ui = { en, 'zh-Hant': zh, ja };

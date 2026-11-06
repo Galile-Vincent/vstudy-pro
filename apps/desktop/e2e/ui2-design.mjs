@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
@@ -7,7 +8,7 @@ import {tmpdir} from 'node:os';
 import {DatabaseSync} from 'node:sqlite';
 import {join,resolve} from 'node:path';
 const round=process.env.VSTUDY_UI2_ROUND??'final',full=round==='final';
-const output=`/tmp/vstudy-ui2/${round}`;await mkdir(output,{recursive:true});
+const output=temporaryPath(`vstudy-ui2/${round}`);await mkdir(output,{recursive:true});
 const dir=await mkdtemp(join(tmpdir(),'ui2-')),screenshots=[],checks=[],errors=[];let app;
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${dir}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});

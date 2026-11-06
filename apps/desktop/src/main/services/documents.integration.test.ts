@@ -6,12 +6,15 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { cp, copyFile, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { cp, copyFile, mkdir, mkdtemp, readFile, realpath, rm, stat } from "node:fs/promises";
+import { homedir, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { createConverter, runProcess, scrubbedEnvironment } from "../../../resources/converter";
+import { installDirectories, resolveInstalledExecutable } from '../providers/trusted-executable';
+import { isPathWithin } from '../platform/paths';
+import { managedConverterPython } from '../platform/process';
 
-const available = ["uv", "python3"].some((command) => spawnSync(command, ["--version"]).status === 0);
+const available = ["uv", "python3", "python"].some((command) => spawnSync(command, ["--version"]).status === 0);
 describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3.10+; skipped when neither is installed)", () => {
   let directory: string;
   let executable: string;
@@ -21,23 +24,42 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     const resources = join(directory, "resources");
     await mkdir(resources);
     const progress: string[] = [];
-    const options = { authorizeDownload: async () => true, userData: directory, resources, onProgress: (message: string) => { progress.push(message); } };
+    const diagnostics: string[] = [];
+    const options = { authorizeDownload: async () => true, userData: directory, resources, onProgress: (message: string) => { progress.push(message); }, diagnostic: (message: string) => {diagnostics.push(message);} };
     converter = createConverter(options);
     await expect(converter.ensureReady()).rejects.toThrow();
     await copyFile(resolve("resources/converter/requirements.lock.txt"), join(resources, "requirements.lock.txt"));
+    if (await stat(resolve('resources/converter/requirements.native.lock.txt')).then(file => file.isFile(), () => false)) {
+      await copyFile(resolve('resources/converter/requirements.native.lock.txt'), join(resources, 'requirements.native.lock.txt'));
+      await cp(resolve('resources/converter/wheels'), join(resources, 'wheels'), {recursive: true});
+    }
     await copyFile(resolve("resources/converter/convert.py"), join(resources, "convert.py"));
+    await copyFile(resolve("resources/converter/limits.py"), join(resources, "limits.py"));
     await cp(resolve("resources/converter/pdf_md"), join(resources, "pdf_md"), { recursive: true });
-    const python = await converter.ensureReady();
+    const python = await converter.ensureReady().catch(error => {console.error('Converter fixture setup failed', {progress, diagnostics});throw error;});
     executable = python;
+    const runtime = spawnSync(python, ['-I', '-S', '-c', 'import json,platform,sys,sysconfig;print(json.dumps({"version":sys.version,"machine":platform.machine(),"buildPlatform":sysconfig.get_platform()}))'], {
+      cwd: directory, env: scrubbedEnvironment(directory), encoding: 'utf8', windowsHide: true, timeout: 10000,
+    });
+    expect(runtime.status, runtime.stderr).toBe(0);
+    console.info('Converter fixture runtime', runtime.stdout.trim());
+    if (process.platform === 'win32' && process.arch === 'arm64') {
+      expect(JSON.parse(runtime.stdout).buildPlatform).toBe('win-amd64');
+      const binary = await readFile(python);
+      expect(binary.toString('ascii', 0, 2)).toBe('MZ');
+      const pe = binary.readUInt32LE(0x3c);
+      expect(binary.toString('ascii', pe, pe + 4)).toBe('PE\0\0');
+      expect(binary.readUInt16LE(pe + 4)).toBe(0x8664);
+    }
     expect(await converter.ensureReady()).toBe(python);
     expect(progress).toContain("Converter ready");
     progress.length = 0;
     const cached = createConverter(options);
     expect(await cached.ensureReady()).toBe(python);
-    cached.dispose();
+    await cached.dispose();
     expect(progress).toEqual([]);
   }, 900_000);
-  afterAll(async () => { converter?.dispose(); if (directory) await rm(directory, { recursive: true, force: true }); });
+  afterAll(async () => { await converter?.dispose(); if (directory) await rm(directory, { recursive: true, force: true, maxRetries: 10 }); });
   it.each(["docx", "pptx", "xlsx", "html", "pdf", "csv"])("converts a real %s fixture", async (extension) => {
     const output = join(directory, `result-${extension}.md`);
     const parser = await converter.convert(resolve(`test-fixtures/converter/sample.${extension}`), output);
@@ -75,6 +97,31 @@ with zipfile.ZipFile(sys.argv[1]) as original, zipfile.ZipFile(sys.argv[2], 'w',
     expect(await readFile(join(directory, "retried.md"), "utf8")).toContain("VStudy fixture");
   });
 });
+
+it('keeps downloaded Python alive after removing the isolated bootstrap HOME', async context => {
+  const uv = await resolveInstalledExecutable('uv', installDirectories());
+  if (!uv) { context.skip(); return; }
+  const root = await mkdtemp(join(tmpdir(), 'vstudy-managed-python-'));
+  const bootstrap = join(root, 'bootstrap');
+  const owned = join(root, 'user-data');
+  const managed = join(owned, 'converter-python');
+  const venv = join(owned, 'converter-venv');
+  try {
+    await mkdir(bootstrap);
+    await mkdir(owned);
+    await runProcess(uv, ['venv', '--managed-python', '--python', managedConverterPython(), venv], bootstrap,
+      300000, 1024 * 1024, undefined, join(homedir(), '.cache', 'uv'), undefined, undefined, managed);
+    await rm(bootstrap, {recursive: true, force: true});
+    const executable = join(venv, process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python');
+    const result = spawnSync(executable, ['-I', '-S', '-c', 'import json,sys;print(json.dumps({"base":sys.base_prefix,"version":list(sys.version_info[:2])}))'], {
+      cwd: owned, env: scrubbedEnvironment(owned), encoding: 'utf8', windowsHide: true, timeout: 10000,
+    });
+    expect(result.status, result.stderr).toBe(0);
+    const runtime = JSON.parse(result.stdout);
+    expect(runtime.version).toEqual([3, 12]);
+    expect(isPathWithin(await realpath(managed), await realpath(runtime.base))).toBe(true);
+  } finally { await rm(root, {recursive: true, force: true, maxRetries: 3}); }
+}, 330000);
 
 it("caps subprocess output, times out, and scrubs inherited secrets", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "vstudy-process-test-"));

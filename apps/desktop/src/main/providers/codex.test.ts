@@ -13,6 +13,13 @@ import { findCli } from './cli-transport';
 import * as cli from './cli-transport';
 import { createCodexAdapter } from './codex';
 afterEach(() => vi.restoreAllMocks());
+it('never resolves or launches Codex on Windows, even when a CLI exists', async () => {
+  const find = vi.spyOn(cli, 'findCli').mockRejectedValue(new Error('Must not probe'));
+  const adapter = createCodexAdapter(undefined, 'win32');
+  expect(await adapter.detect()).toMatchObject({available: false, reason: expect.stringContaining('macOS')});
+  expect(await adapter.listModels()).toEqual([]);
+  expect(find).not.toHaveBeenCalled();
+});
 it('keeps detection and model listing unavailable without a CLI', async () => {
   vi.spyOn(cli, 'findCli').mockResolvedValue(null);
   const adapter = createCodexAdapter();

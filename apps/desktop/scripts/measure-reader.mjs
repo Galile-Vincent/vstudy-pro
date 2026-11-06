@@ -1,3 +1,4 @@
+import { temporaryPath } from './platform.mjs';
 import { poll } from './poll.mjs';
 import { Buffer } from 'node:buffer';
 import { _electron as electron } from 'playwright';
@@ -20,5 +21,5 @@ try {
  await page.locator('.library-document').first().press('Enter');await page.getByTestId('document-markdown').waitFor();
  const end=await page.evaluate(()=>new Promise(resolve=>window.requestAnimationFrame(()=>resolve(window.performance.now()))));
  const result={fixtureBytes:Buffer.byteLength(source),coldFirstDocumentOpenMs:end-start,definition:'fresh Electron process, Library Enter to nonempty reader and next rAF; driver latency included; warm filesystem cache; not the original audit corpus'};
- await mkdir('/tmp/vstudy-final',{recursive:true});await writeFile('/tmp/vstudy-final/reader-performance.json',JSON.stringify(result,null,2));console.log(result);
+ await mkdir(temporaryPath('vstudy-final'),{recursive:true});await writeFile(temporaryPath('vstudy-final/reader-performance.json'),JSON.stringify(result,null,2));console.log(result);
 } finally {await app?.close();await rm(directory,{recursive:true,force:true});}

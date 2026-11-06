@@ -10,6 +10,7 @@ import { tr } from '../shared/i18n';
 import { desktop } from './bridge';
 import { errorText } from './status';
 import { providerName, type Providers } from './provider-metadata';
+import { desktopPlatform, supportsIsolatedCodex } from '../shared/platform';
 
 export function ProviderRow({
   provider,
@@ -56,6 +57,7 @@ export function ProviderRow({
   };
 
   const isCli = provider.config.kind === 'cli';
+  const unsupportedCli = provider.config.id === 'codex-cli' && !supportsIsolatedCodex(desktopPlatform());
   const isEnabled = provider.config.enabled;
   const isAvailable = provider.availability.available;
   const isReady = isCli ? (isEnabled && isAvailable) : hasKey || (isEnabled && isAvailable);
@@ -86,15 +88,16 @@ export function ProviderRow({
       </div>
       {isCli && (
         <>
-          <Button variant="secondary" disabled={busy} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
+          {unsupportedCli && <p role="note">{tr('distribution:codex_unavailable')}</p>}
+          <Button variant="secondary" disabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
           <p className="muted">{tr('ai-cli:row_help')}</p>
-          <Button disabled={busy} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
+          <Button disabled={busy || unsupportedCli} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
           <label className="provider-cli-label">
             {settingsView ? (
               <Switch
                 aria-label={tr('settings:enable_cli', { provider: providerName[provider.config.id] })}
                 checked={provider.config.enabled}
-                disabled={busy}
+                disabled={busy || unsupportedCli}
                 onCheckedChange={(enabled) => {
                   void perform(() => desktop.invoke('providers:configure', { ...provider.config, enabled }));
                 }}
@@ -102,7 +105,7 @@ export function ProviderRow({
             ) : (
               <Checkbox
                 checked={provider.config.enabled}
-                disabled={busy}
+                disabled={busy || unsupportedCli}
                 onChange={(e) => {
                   const enabled = e.target.checked;
                   void perform(() => desktop.invoke('providers:configure', { ...provider.config, enabled }));
@@ -121,7 +124,7 @@ export function ProviderRow({
           <Button
             variant={settingsView ? 'secondary' : 'outline'}
             size={settingsView ? 'sm' : 'default'}
-            disabled={busy}
+            disabled={busy || unsupportedCli}
             onClick={() =>
               void perform(() =>
                 desktop.invoke('providers:chooseExecutable', {

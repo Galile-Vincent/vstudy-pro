@@ -1,6 +1,8 @@
 # Work on VStudy Pro
 
-Run commands from the repository root unless a path is specified. Use Node 24.19.0 and pnpm 10.28.2. The Node version files select the tested runtime. The package engine permits Node >=24.11.1.
+Run commands from the repository root unless a path is specified. Use Node 24.19.0 and pnpm 10.28.2. The Node version files select the tested runtime. The package engine permits Node >=24.15.0.
+
+Native packaging pins `@electron/rebuild@4.0.3>node-gyp` to 13.1.0. It recognizes the Visual Studio 2026 installations on current Windows runners; see the [node-gyp changelog](https://github.com/nodejs/node-gyp/blob/main/CHANGELOG.md). The Node minimum applies to source builds. The standalone MCP script keeps its separate runtime requirement.
 
 ## Find the owner of a change
 
@@ -114,9 +116,29 @@ Use read-only Moodle functions unless the user explicitly approves a write actio
 
 ## Prepare a release
 
-Follow [CONTRIBUTING](../CONTRIBUTING.md). `pnpm release` regenerates the changelog only. Signed packaging uses `pnpm package:signed` and requires external credentials. Unsigned tag builds are test artifacts.
+Follow [the release checklist](../CONTRIBUTING.md#release-checklist). The desktop package version is authoritative. `pnpm release --tag vX.Y.Z` regenerates the changelog only. Write the owner-reviewed release body in `docs/releases/X.Y.Z.md`. Do not create or push a tag during implementation or a dry run.
 
-See [cleanup verification](ENGINEERING_CLEANUP.md) for current command results and explicit Knip exceptions. [The stream H report](REPO_HYGIENE.md) is historical.
+The release workflow supports dry runs on `ci/**` branch pushes and `workflow_dispatch` with `dry_run: true`. Push only a branch the owner has authorized. A `ci/**` push and a manual dry run receive no signing secrets, create no release, and upload no files to Releases. They retain unsigned installers and reports as Actions artifacts. A non-dry dispatch is allowed only against the exact version tag and publishes that release. It requires the same owner approval as pushing the tag.
+
+Publication scope comes from `apps/desktop/distribution-targets.json`. Apple silicon Mac and Windows x64 are enabled first. Intel Mac and Windows ARM64 remain planned, while dry runs continue their qualification. After full converter and native package/install/launch verification, change the target's `releaseEnabled` flag and update the three READMEs and installation guides. The website, tag matrix, assembly, and public URL smoke follow the same registry. Publishing rejects qualification manifests and disabled-target files.
+
+Inspect real GitHub-hosted Mac and Windows packaging and launch results. A source build, a local Mac smoke, or an uploaded artifact alone does not prove a Windows installer works. See [the distribution plan](DISTRIBUTION_PLAN.md) for targets and the packaged smoke contract. Codex is disabled on Windows because this implementation has no equivalent verified kernel sandbox. API providers remain the cross-platform alternative.
+
+For trusted jobs authorized to sign, no credentials produces unsigned Windows builds and Mac builds without Developer ID or notarization. Complete credentials enable signing automatically. Partial or invalid credentials fail. Use [SIGNING.md](SIGNING.md) for setup and verification. Branch-only CI always stays unsigned. Test the exact downloaded files, not a different build. Keep checksums synchronized with the final signed and stapled bytes.
+
+Only an owner-approved `v*.*.*` version tag may publish a non-draft release with `docs/releases/<version>.md` as its body. Stable aliases support one-click downloads on the website. Keep their names unchanged when signing is enabled. Record signing status, architecture tests, workflow URLs, and unresolved limits in the release review. Publish and verify the first stable asset aliases before deploying the website that links to them; hold the main/Pages push until the approved tag release succeeds. Automatic updates remain disabled until a separate signed-update rollout is reviewed.
+
+For website changes, run the checks below. The download inventory and architecture recommendation live in `apps/website/src/data/downloads.ts`. Installer version and size stay hidden unless verified against published assets. Shared site redesigns can move `Download.astro` without copying detection rules.
+
+```sh
+pnpm --filter @vstudy/website typecheck
+pnpm --filter @vstudy/website build
+pnpm --filter @vstudy/website verify:static
+node apps/website/scripts/verify-downloads.mjs
+node scripts/check-readme-links.mjs
+```
+
+See [cleanup verification](ENGINEERING_CLEANUP.md) for command results and explicit Knip exceptions. [The stream H report](REPO_HYGIENE.md) is historical.
 
 ## Test Node and locale changes
 

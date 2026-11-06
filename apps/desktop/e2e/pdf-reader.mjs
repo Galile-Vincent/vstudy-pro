@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { Buffer } from "node:buffer";
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
@@ -6,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 let source = process.argv[2];
-const evidence = resolve(process.argv[3] ?? '/tmp/vstudy-pdf-evidence');
+const evidence = resolve(process.argv[3] ?? temporaryPath('vstudy-pdf-evidence'));
 await mkdir(evidence, { recursive: true });
 const directory = await mkdtemp(join(tmpdir(), 'vstudy-pdf-reader-'));
 if (!source) {

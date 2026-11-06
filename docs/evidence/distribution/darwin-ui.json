@@ -1,0 +1,53 @@
+[
+  {
+    "language": "en",
+    "platform": "darwin",
+    "keyboardModifier": "Cmd",
+    "credentialsUnlocked": false,
+    "chrome": {
+      "minimumSize": [
+        720,
+        480
+      ],
+      "nativeHandle": true,
+      "menuBarVisible": true,
+      "contextIsolation": true,
+      "sandbox": true,
+      "nodeIntegration": false
+    }
+  },
+  {
+    "language": "zh-Hant",
+    "platform": "darwin",
+    "keyboardModifier": "Cmd",
+    "credentialsUnlocked": false,
+    "chrome": {
+      "minimumSize": [
+        720,
+        480
+      ],
+      "nativeHandle": true,
+      "menuBarVisible": true,
+      "contextIsolation": true,
+      "sandbox": true,
+      "nodeIntegration": false
+    }
+  },
+  {
+    "language": "ja",
+    "platform": "darwin",
+    "keyboardModifier": "Cmd",
+    "credentialsUnlocked": false,
+    "chrome": {
+      "minimumSize": [
+        720,
+        480
+      ],
+      "nativeHandle": true,
+      "menuBarVisible": true,
+      "contextIsolation": true,
+      "sandbox": true,
+      "nodeIntegration": false
+    }
+  }
+]

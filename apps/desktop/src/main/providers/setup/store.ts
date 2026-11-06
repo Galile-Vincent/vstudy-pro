@@ -36,7 +36,7 @@ export class SetupStore {
   private cache: z.infer<typeof cacheSchema> = { preferences: { ...defaultPreferences }, lastAttempt: 0, releases: {}, checkedAt: {} };
   readonly root: string;
   constructor(root: string, private readonly verifyArtifact: VerifyArtifact = artifactVerifier()) {
-    privateDirectory(root); this.root = realpathSync(root);
+    privateDirectory(root); this.root = process.platform === 'win32' ? realpathSync.native(root) : realpathSync(root);
     const cache = join(this.root, 'settings.json');
     if (existsSync(cache)) try { this.cache = cacheSchema.parse(JSON.parse(readFileSync(cache, 'utf8'))); } catch { /* Invalid cache never enables a preference. */ }
   }

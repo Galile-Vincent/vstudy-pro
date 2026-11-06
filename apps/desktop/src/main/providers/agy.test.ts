@@ -90,7 +90,7 @@ it('removes a pending probe directory when disposed before the handshake complet
   await new Promise(resolve=>setTimeout(resolve,5));
  }
  expect(created).toHaveLength(1);
- adapter.dispose();
+ await adapter.dispose();
  expect((await readdir(tmpdir())).filter(name=>created.includes(name))).toEqual([]);
  await pending;
 });

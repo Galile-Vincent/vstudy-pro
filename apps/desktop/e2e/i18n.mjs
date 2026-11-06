@@ -1,9 +1,10 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdtemp,rm,mkdir,readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join,resolve } from 'node:path';
-const evidence='/tmp/vstudy-i18n';await mkdir(evidence,{recursive:true});
+const evidence=temporaryPath('vstudy-i18n');await mkdir(evidence,{recursive:true});
 for(const language of ['en','zh-Hant','ja']) {
  const catalog=JSON.parse(await readFile(`src/shared/locales/${language}/common.json`,'utf8'));
  const directory=await mkdtemp(join(tmpdir(),'vstudy-i18n-'));

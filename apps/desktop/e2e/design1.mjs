@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { poll } from '../scripts/poll.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
@@ -7,7 +8,7 @@ import { mkdtemp, mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import assert from 'node:assert/strict';
-const round=process.env.DESIGN_ROUND??'1',root='/tmp/vstudy-design1';await mkdir(root,{recursive:true});const screenshots=[],audits=[];
+const round=process.env.DESIGN_ROUND??'1',root=temporaryPath('vstudy-design1');await mkdir(root,{recursive:true});const screenshots=[],audits=[];
 for(const language of ['en','ja','zh-Hant']) {
  const dir=await mkdtemp(join(tmpdir(),'design1-'));let app,db;
  try {

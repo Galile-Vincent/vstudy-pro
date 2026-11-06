@@ -19,13 +19,15 @@ export function backupBeforeMigration(db: DatabaseSync, path: string, version: n
   const temporary = `${destination}.${randomUUID()}.tmp`;
   db.exec(`VACUUM INTO '${temporary.replaceAll("'", "''")}'`);
   chmodSync(temporary, 0o600);
-  const fd = openSync(temporary, 'r');
+  const fd = openSync(temporary, 'r+');
   try { fsyncSync(fd); } finally { closeSync(fd); }
   try { linkSync(temporary, destination); }
   catch (error) { if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error; }
   finally { unlinkSync(temporary); }
-  const directory = openSync(dirname(path), 'r');
-  try { fsyncSync(directory); } finally { closeSync(directory); }
+  if (process.platform !== 'win32') {
+    const directory = openSync(dirname(path), 'r');
+    try { fsyncSync(directory); } finally { closeSync(directory); }
+  }
 }
 
 /** Apply each immutable migration in its own transaction, after its recoverable backup. */

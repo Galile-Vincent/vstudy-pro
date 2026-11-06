@@ -1,6 +1,6 @@
 # Application architecture
 
-VStudy Pro is a macOS Electron application for document reading, grounded chat, Moodle coursework, and student-owned study planning. Documents and plans stay in one local application data namespace. There is no device sync.
+VStudy Pro is a macOS and Windows Electron application for document reading, grounded chat, Moodle coursework, and student-owned study planning. Documents and plans stay in one local application data namespace. There is no device sync.
 
 ## Process boundaries
 

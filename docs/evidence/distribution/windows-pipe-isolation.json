@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "differentUser": true,
+  "administrator": false,
+  "accessModes": [
+    "read",
+    "write",
+    "duplex"
+  ],
+  "accessDenied": true,
+  "win32Error": 5,
+  "accountRemoved": true,
+  "platform": "win32",
+  "arch": "x64",
+  "run": "42167005272",
+  "commit": "ada6be282e5dd784232c96159137e6a7d0b8aec9"
+}

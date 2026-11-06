@@ -1,5 +1,6 @@
 /** Immutable installs, live transports, rollback, and hostile archive acceptance tests. @packageDocumentation */
 import { createHash } from 'node:crypto';
+import { realpathSync } from 'node:fs';
 import { readFile, writeFile, chmod, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { expect, it, vi } from 'vitest';
@@ -9,8 +10,16 @@ import { executableLeased } from './leases';
 import { runCli } from '../cli-transport';
 import { payloadNetwork, payloadRelease, tarPayload, temporaryDirectories, fixtureStore } from './test-fixtures';
 import { fixtureBinary, transportFixture } from './native-fixtures';
+import { executableIdentity } from '../trusted-executable';
 const temporary = temporaryDirectories();
 const signal = () => AbortSignal.timeout(5000);
+it('persists the canonical native installation path and verifies it after reopening', async () => {
+  const root = join(await temporary(), 'tools'), store = fixtureStore(root), bytes = fixtureBinary('#!/bin/sh\nexit 0\n');
+  expect(store.root).toBe(process.platform === 'win32' ? realpathSync.native(root) : realpathSync(root));
+  const installed = await store.install(payloadRelease(bytes), payloadNetwork(bytes), signal(), () => {});
+  expect((await executableIdentity(installed.identity.path)).path).toBe(installed.identity.path);
+  expect(await fixtureStore(root).identity('claude')).toEqual(await executableIdentity(installed.identity.path));
+});
 it('switches new sessions while a real old transport remains leased and can roll back', async () => {
   const directory = await temporary(), store = fixtureStore(join(directory, 'tools'));
   const oldTransport = transportFixture('old'), nextTransport = transportFixture('new');

@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
@@ -7,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const directory = await mkdtemp(join(tmpdir(), 'vstudy-fields-'));
-const output = '/tmp/vstudy-ui2/field-borders';
+const output = temporaryPath('vstudy-ui2/field-borders');
 await mkdir(output, { recursive: true });
 const checks = [], errors = [];
 let app;

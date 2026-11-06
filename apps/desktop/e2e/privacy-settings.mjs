@@ -1,10 +1,11 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
-const output='/tmp/vstudy-final/screens';await mkdir(output,{recursive:true});
+const output=temporaryPath('vstudy-final/screens');await mkdir(output,{recursive:true});
 const directory=await mkdtemp(join(tmpdir(),'vstudy-privacy-'));let app;const results=[];
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});

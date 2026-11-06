@@ -18,9 +18,10 @@ $ErrorActionPreference = 'Stop'
 $path = $env:VSTUDY_ACL_PATH
 $sid = [System.Security.Principal.SecurityIdentifier]::new($env:VSTUDY_ACL_SID)
 $isDirectory = $env:VSTUDY_ACL_DIRECTORY -eq '1'
-$item = Get-Item -LiteralPath $path -Force
-if (($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0 -or $item.PSIsContainer -ne $isDirectory) { throw 'Unsafe path' }
-$acl = Get-Acl -LiteralPath $path
+$attributes = [System.IO.File]::GetAttributes($path)
+if (($attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0 -or (($attributes -band [System.IO.FileAttributes]::Directory) -ne 0) -ne $isDirectory) { throw 'Unsafe path' }
+if ($isDirectory) { $acl = [System.IO.Directory]::GetAccessControl($path) }
+else { $acl = [System.IO.File]::GetAccessControl($path) }
 if ($acl.GetOwner([System.Security.Principal.SecurityIdentifier]).Value -ne $sid.Value) { throw 'Unsafe owner' }
 if ($env:VSTUDY_ACL_OPERATION -eq 'protect') {
   if ($isDirectory) { $acl = [System.Security.AccessControl.DirectorySecurity]::new() }
@@ -31,9 +32,11 @@ if ($env:VSTUDY_ACL_OPERATION -eq 'protect') {
   if ($isDirectory) { $inheritance = [System.Security.AccessControl.InheritanceFlags]'ContainerInherit, ObjectInherit' }
   $rule = [System.Security.AccessControl.FileSystemAccessRule]::new($sid, [System.Security.AccessControl.FileSystemRights]::FullControl, $inheritance, [System.Security.AccessControl.PropagationFlags]::None, [System.Security.AccessControl.AccessControlType]::Allow)
   $acl.AddAccessRule($rule)
-  Set-Acl -LiteralPath $path -AclObject $acl
+  if ($isDirectory) { [System.IO.Directory]::SetAccessControl($path, $acl) }
+  else { [System.IO.File]::SetAccessControl($path, $acl) }
 }
-$acl = Get-Acl -LiteralPath $path
+if ($isDirectory) { $acl = [System.IO.Directory]::GetAccessControl($path) }
+else { $acl = [System.IO.File]::GetAccessControl($path) }
 if ($acl.GetOwner([System.Security.Principal.SecurityIdentifier]).Value -ne $sid.Value -or -not $acl.AreAccessRulesProtected) { throw 'Unsafe ACL' }
 $raw = [System.Security.AccessControl.RawSecurityDescriptor]::new($acl.GetSecurityDescriptorBinaryForm(), 0)
 if ($raw.DiscretionaryAcl.Count -ne 1) { throw 'Foreign or missing ACE' }
@@ -63,7 +66,7 @@ function windowsAcl(path: string, directory: boolean, operation: 'protect' | 've
     const executable = win32.join(system, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
     const output = (options.execute ?? execFileSync)(executable,
       ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')],
-      { encoding: 'utf8', timeout: 5000, maxBuffer: 8192, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: { ...environment,
+      { encoding: 'utf8', timeout: 30000, maxBuffer: 8192, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: {SystemRoot: system, WINDIR: system, PSModulePath: win32.join(win32.dirname(executable), 'Modules'),
         VSTUDY_ACL_PATH: path, VSTUDY_ACL_SID: sid, VSTUDY_ACL_DIRECTORY: directory ? '1' : '0', VSTUDY_ACL_OPERATION: operation } });
     if (typeof output !== 'string' || output.trim() !== 'VSTUDY_ACL_OK') throw new WindowsAclError();
   } catch { throw new WindowsAclError(); }

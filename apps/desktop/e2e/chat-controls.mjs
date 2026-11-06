@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -16,21 +17,21 @@ try {
  await page.locator('.aui-composer-input').waitFor();
  const input=page.locator('.aui-composer-input'); await input.waitFor();
  await page.getByRole('combobox',{name:'Model',exact:true}).click();
- await page.screenshot({path: '/tmp/vstudy-picker-open.png', animations:'disabled'});
+ await page.screenshot({path: temporaryPath('vstudy-picker-open.png'), animations:'disabled'});
  await page.getByRole('combobox',{name:'Search models'}).fill('Fake');
- await page.screenshot({path: '/tmp/vstudy-picker-search.png', animations:'disabled'});
+ await page.screenshot({path: temporaryPath('vstudy-picker-search.png'), animations:'disabled'});
  await page.locator('[data-slot=model-selector-list] [role=option]').filter({hasText:'Fake'}).click();
  await page.getByRole('combobox',{name:'Effort',exact:true}).click();
  await page.getByRole('option',{name:'High',exact:true}).click();
  assert.match(await page.getByRole('combobox',{name:'Effort',exact:true}).innerText(),/High/);
  assert.equal(await page.getByRole('button',{name:'Stop generating',exact:true}).count(),0);
  await input.fill('Explain');
- await page.screenshot({path: '/tmp/vstudy-composer-effort.png', animations:'disabled'});
+ await page.screenshot({path: temporaryPath('vstudy-composer-effort.png'), animations:'disabled'});
  await input.dispatchEvent('compositionstart'); await input.press('Enter');
  assert.equal(await page.locator('[data-role=user]').count(),0,'IME Enter must not send');
  await input.dispatchEvent('compositionend'); await input.press('Enter');
  await page.getByRole('button',{name:'Stop generating',exact:true}).waitFor();
- await page.screenshot({path: '/tmp/vstudy-loading.png', animations:'disabled'});
+ await page.screenshot({path: temporaryPath('vstudy-loading.png'), animations:'disabled'});
  await page.waitForFunction(()=>!window.document.querySelector('.aui-composer-cancel'));
  const conversation = await page.evaluate(async()=>{const d=await window.desktop.invoke('documents:list',{});return (await window.desktop.invoke('conversations:list',{documentId:d[0].id}))[0];});
  assert.deepEqual(conversation.options,{effort:'high'});
@@ -57,7 +58,7 @@ try {
  assert.match(await error.innerText(),/rate limit/i);
  assert.equal(await page.locator('.aui-thread-followup-suggestions').count(),0);
  await page.locator('[data-slot=aui_thread-viewport]').evaluate(el=>el.scrollTo({top:el.scrollHeight,behavior:'instant'}));
- await page.screenshot({path: '/tmp/vstudy-error-retry.png', animations:'disabled'});
+ await page.screenshot({path: temporaryPath('vstudy-error-retry.png'), animations:'disabled'});
  await page.reload();
  await error.getByRole('button',{name:'Retry',exact:true}).last().waitFor();
  assert.match(await error.last().innerText(),/provider is unavailable/i);
@@ -65,10 +66,10 @@ try {
  await page.waitForFunction(()=>!window.document.querySelector('.aui-composer-cancel'));
  await page.emulateMedia({colorScheme:'dark'});
  await page.getByRole('combobox',{name:'Model',exact:true}).click();
- await page.screenshot({path: '/tmp/vstudy-picker-dark.png', animations:'disabled'});
+ await page.screenshot({path: temporaryPath('vstudy-picker-dark.png'), animations:'disabled'});
  await page.keyboard.press('Escape');
  await page.getByRole('button',{name:'Conversation usage',exact:true}).click();
  assert.equal(await page.getByRole('tab',{name:'Usage',exact:true}).getAttribute('aria-selected'),'true');
  await page.getByRole('button',{name:'Close settings'}).click();
  assert.deepEqual(errors,[]); console.log('PASS chat controls: IME, options, copy, regenerate usage, error/retry, dark mode');
-} catch(error) { if(app) { const p=await app.firstWindow(); console.log(await p.locator('body').innerText()); await p.screenshot({path:'/tmp/vstudy-controls-failure.png'}); } throw error; } finally { await app?.close(); await rm(directory,{recursive:true,force:true}); }
+} catch(error) { if(app) { const p=await app.firstWindow(); console.log(await p.locator('body').innerText()); await p.screenshot({path:temporaryPath('vstudy-controls-failure.png')}); } throw error; } finally { await app?.close(); await rm(directory,{recursive:true,force:true}); }

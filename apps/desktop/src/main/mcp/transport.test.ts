@@ -3,7 +3,8 @@ import { expect, it, vi } from 'vitest';
 import { createPlatformBridge } from './transport';
 import { resolveMcpEndpoint, windowsPipeName } from './endpoint';
 import { defaultAppDataPath } from '../platform/app-data';
-const listener=vi.hoisted(()=>({create:vi.fn()}));
+const listener=vi.hoisted(()=>({create:vi.fn(),windows:vi.fn()}));
+vi.mock('./windows-bridge',()=>({createWindowsBridge:listener.windows}));
 vi.mock('./bridge',()=>({createUnixBridge:listener.create}));
 it.each(['darwin','linux'] as const)('adapts %s to the existing authenticated Unix implementation',async platform=>{
   const dispose=vi.fn(async()=>{});listener.create.mockResolvedValueOnce({socketPath:'/private/profile/mcp/bridge.sock',dispose});
@@ -13,8 +14,12 @@ it.each(['darwin','linux'] as const)('adapts %s to the existing authenticated Un
   await transport.dispose();expect(dispose).toHaveBeenCalledOnce();
   expect(listener.create).toHaveBeenLastCalledWith({userData:'/private/profile',peerHelper:'/app/mcp-peer',handleRequest,onDisconnect});
 });
-it('fails closed on Windows until the current-user ACL transport is supplied',async()=>{
-  await expect(createPlatformBridge({userData:'C:\\profile',handleRequest:vi.fn(),onDisconnect:vi.fn()},'win32')).rejects.toMatchObject({code:'UNSUPPORTED'});
+it('selects the current-user ACL Windows transport without a Unix peer helper',async()=>{
+  const value={endpoint:{kind:'named-pipe',path:'fixture'},dispose:vi.fn(async()=>{})};
+  listener.windows.mockResolvedValueOnce(value);
+  const options={userData:'C:\\profile',handleRequest:vi.fn(),onDisconnect:vi.fn()};
+  expect(await createPlatformBridge(options,'win32')).toBe(value);
+  expect(listener.windows).toHaveBeenCalledWith(options);
 });
 it('derives a local pipe name from the current user SID, never an account-controlled host',()=>{
   const first=resolveMcpEndpoint('C:\\profile','win32','S-1-5-21-111-222-333-1001');

@@ -9,6 +9,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { WarmWorker } from "../../../resources/converter/warm-worker";
+import { ProcessScope } from "../../../resources/converter/process-scope";
 
 it("reuses a worker, recovers after job errors, and restarts after a crash", async () => {
   const directory = await mkdtemp(join(tmpdir(), "vstudy-worker-test-"));
@@ -28,7 +29,8 @@ for line in sys.stdin:
   print(json.dumps({'progress': str(os.getpid())}), flush=True)
   print(json.dumps({'done': True}), flush=True)
 `);
-  const worker = new WarmWorker("python3", script, directory);
+  const scope = new ProcessScope();
+  const worker = new WarmWorker(process.platform === 'win32' ? 'python' : 'python3', script, directory, scope);
   try {
     const pids: string[] = [];
     await worker.run("one", "", "", pid => pids.push(pid));
@@ -46,10 +48,10 @@ for line in sys.stdin:
     await rejected;
     vi.useRealTimers();
     await worker.run("after-timeout", "", "");
-  } finally { vi.useRealTimers(); worker.stop(); await rm(directory, { recursive: true, force: true }); }
+  } finally { vi.useRealTimers(); worker.stop(); await scope.dispose(); await rm(directory, { recursive: true, force: true, maxRetries: 10 }); }
 });
 
-it('cancels bootstrap, reaps its process group and allows immediate venv removal', async () => {
+it.skipIf(process.platform === 'win32')('cancels bootstrap, reaps its process group and allows immediate venv removal', async () => {
   const { createConverter } = await import('../../../resources/converter');
   const { mkdir, readFile, chmod } = await import('node:fs/promises');
   const directory = await mkdtemp(join(tmpdir(), 'vstudy-bootstrap-stop-'));
@@ -82,7 +84,7 @@ wait
   } finally { await converter.dispose(); resolveExecutable.mockRestore(); vi.unstubAllEnvs(); await rm(directory,{recursive:true,force:true}); }
 });
 
-it('reaps descendants when an installer exits before its child',async()=>{
+it.skipIf(process.platform === 'win32')('reaps descendants when an installer exits before its child',async()=>{
   const {ProcessScope}=await import('../../../resources/converter/process-scope');
   const scope=new ProcessScope();
   const script=`const child=require('child_process').spawn(process.execPath,['-e','setInterval(()=>{},100)'],{stdio:'ignore'}); console.log(child.pid); child.unref();`;
@@ -115,10 +117,11 @@ for line in sys.stdin:
     expect(progress).toEqual(['NETWORK_DENIED']);
   } finally { worker.stop(); await rm(directory, { recursive: true, force: true }); }
 });
-it('sets kernel file/core limits before accepting converter jobs', async () => {
+it.skipIf(process.platform === 'win32')('sets kernel file/core limits before accepting converter jobs', async () => {
   const { spawnSync } = await import('node:child_process');
   const { resolve } = await import('node:path');
   const result = spawnSync('python3', ['-c', `import importlib.util, json, resource, sys
+sys.path.insert(0, __import__('os').path.dirname(sys.argv[1]))
 spec=importlib.util.spec_from_file_location('converter',sys.argv[1])
 module=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
@@ -128,4 +131,14 @@ module.main()
 `, resolve('resources/converter/convert.py')], { encoding: 'utf8' });
   expect(result.status).toBe(0);
   expect(JSON.parse(result.stdout)).toEqual([128, 64 * 1024 * 1024, 0]);
+});
+
+it('measures converter peak memory through the native host API', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const { resolve } = await import('node:path');
+  const result = spawnSync(process.platform === 'win32' ? 'python' : 'python3', ['-c',
+    'import sys; sys.path.insert(0,sys.argv[1]); from limits import install_limits,peak_memory_bytes; install_limits(); print(peak_memory_bytes())',
+    resolve('resources/converter')], {encoding: 'utf8'});
+  expect(result.status, result.stderr).toBe(0);
+  expect(Number(result.stdout.trim())).toBeGreaterThan(0);
 });

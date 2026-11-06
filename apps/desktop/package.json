@@ -12,11 +12,17 @@
     "contrast:check": "node scripts/check-contrast.mjs",
     "typecheck": "node scripts/generate-locales.mjs && tsc --noEmit",
     "lint": "eslint .",
-    "package": "pnpm build && node scripts/package-platform.mjs",
+    "package": "pnpm build && node scripts/package-release.mjs",
     "smoke": "pnpm build && node scripts/smoke.mjs",
-    "package:verify": "npx --no-install @electron/fuses read --app \"release/mac-arm64/VStudy Pro.app\" && python3 scripts/verify-packaged.py",
+    "package:verify": "node scripts/distribution-smoke.mjs",
     "locales:generate": "node scripts/generate-locales.mjs",
-    "icon": "node ../../scripts/make-brand.mjs"
+    "icon": "node ../../scripts/make-brand.mjs",
+    "package:mac:arm64": "pnpm build && node scripts/package-release.mjs --target mac-arm64",
+    "package:mac:x64": "pnpm build && node scripts/package-release.mjs --target mac-x64",
+    "package:win:x64": "pnpm build && node scripts/package-release.mjs --target win-x64",
+    "package:win:arm64": "pnpm build && node scripts/package-release.mjs --target win-arm64",
+    "package:signed": "node scripts/package-signed.mjs",
+    "test:release": "node --test scripts/release.test.mjs"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.32",
@@ -94,7 +100,6 @@
       "!**/*.test.*",
       "!**/*.map",
       "!**/*.md",
-      "!**/*.test.*",
       "!**/test/**",
       "!**/__fixtures__/**",
       "!node_modules/**",
@@ -108,6 +113,9 @@
         "filter": [
           "**/*.py",
           "requirements*.txt",
+          "wheels/*.whl",
+          "wheels/native.json",
+          "!requirements-build*",
           "!**/test_*",
           "!**/__pycache__/**",
           "!**/profile*"
@@ -116,6 +124,18 @@
       {
         "from": "resources/samples",
         "to": "samples"
+      },
+      {
+        "from": "resources/mcp/windows-pipe.ps1",
+        "to": "mcp/windows-pipe.ps1"
+      },
+      {
+        "from": "resources/mcp/windows-state.ps1",
+        "to": "mcp/windows-state.ps1"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "brand/icon.png"
       },
       {
         "from": "../mcp/dist",
@@ -135,24 +155,32 @@
         "filter": [
           "mcp-peer"
         ]
-      },
-      {
-        "from": "build/icon.png",
-        "to": "brand/icon.png"
       }
     ],
     "mac": {
-      "artifactName": "VStudy-Pro-${version}-${arch}.${ext}",
+      "artifactName": "VStudy-Pro-${version}-mac-${arch}.${ext}",
       "icon": "build/icon.icns",
       "target": [
-        "dmg",
-        "dir"
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
       ],
       "category": "public.app-category.education",
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "notarize": true,
+      "notarize": false,
       "extendInfo": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false
@@ -170,17 +198,42 @@
       }
     ],
     "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "createStartMenuShortcut": true,
+      "createDesktopShortcut": false,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": false,
+      "packElevateHelper": false,
+      "shortcutName": "VStudy Pro",
+      "selectPerMachineByDefault": false,
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
-      "installerHeaderIcon": "build/icon.ico",
-      "oneClick": false,
-      "allowElevation": false,
-      "perMachine": false
+      "installerHeaderIcon": "build/icon.ico"
     },
     "asarUnpack": [
       "node_modules/node-pty/**/*"
     ],
     "win": {
+      "artifactName": "VStudy-Pro-${version}-win-${arch}.${ext}",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker",
       "icon": "build/icon.ico"
     },
     "linux": {

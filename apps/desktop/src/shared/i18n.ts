@@ -7,6 +7,7 @@
 import { initReactI18next } from 'react-i18next';
 import i18next from 'i18next';
 import { catalogs } from './locales.generated';
+import { shortcutModifier, platformTranslationKey } from './platform';
 
 export type Language = 'en' | 'zh-Hant' | 'ja';
 /** Map supported system locale variants and fall back to English. */
@@ -31,4 +32,4 @@ export const resources = {
 export const i18n = i18next.createInstance();
 void i18n.use(initReactI18next).init({ resources, lng:'en', fallbackLng:'en', defaultNS:'common', keySeparator:false, interpolation:{escapeValue:false}, initImmediate:false });
 /** Translate a namespace-qualified key through the initialized shared i18n instance. */
-export function tr(key: string, params?: Record<string, unknown>): string { return String(i18n.t(key, params ?? {})); }
+export function tr(key: string, params?: Record<string, unknown>): string { return String(i18n.t(platformTranslationKey(key), { modifier: shortcutModifier(), ...params })); }

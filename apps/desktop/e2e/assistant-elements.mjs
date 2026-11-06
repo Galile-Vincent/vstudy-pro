@@ -1,9 +1,10 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import {_electron as electron} from 'playwright';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,rm} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
-const directory=await mkdtemp(join(tmpdir(),'vstudy-elements-'));const evidence='/tmp/vstudy-composer-redesign';await mkdir(evidence,{recursive:true});let app;
+const directory=await mkdtemp(join(tmpdir(),'vstudy-elements-'));const evidence=temporaryPath('vstudy-composer-redesign');await mkdir(evidence,{recursive:true});let app;
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1'}});
  const page=await app.firstWindow();
@@ -50,7 +51,7 @@ try {
  await page.getByRole('textbox',{name:'Rename thread',exact:true}).press('Enter');
  await page.getByRole('searchbox',{name:'Search threads'}).fill('Study notes');
  await page.locator('[data-slot=aui_thread-list-item-trigger]').filter({hasText:'Study notes'}).waitFor();
- await page.screenshot({path:'/tmp/vstudy-chatfix/renamed-thread.png',animations:'disabled'});
+ await page.screenshot({path:temporaryPath('vstudy-chatfix/renamed-thread.png'),animations:'disabled'});
  await page.reload();await page.getByRole('button',{name:'Conversations',exact:true}).click();
  await page.locator('[data-slot=aui_thread-list-item-trigger]').filter({hasText:'Study notes'}).waitFor();
  assert.deepEqual(errors,[]);console.log(JSON.stringify({result:'PASS',emptyConversationReuse:true,reasoning:true,citations:true,presentation:true,threadList:true,reload:true,consoleErrors:errors}));

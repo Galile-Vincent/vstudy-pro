@@ -5,11 +5,12 @@ import { ProcessScope } from "./process-scope";
 import { profileStage } from "./profile";
 import { WarmWorker } from "./warm-worker";
 import { spawn } from "node:child_process";
-import { access, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
 import { constants } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
+import { managedConverterPython } from '../../src/main/platform/process';
 
 import { scrubbedEnvironment, type Progress, type ConverterRunner, MAX_MARKDOWN_BYTES } from './contracts';
 export { scrubbedEnvironment, type Progress, type ConverterRunner, MAX_MARKDOWN_BYTES } from './contracts';
@@ -23,10 +24,14 @@ export async function runProcess(
   onProgress?: Progress,
   cacheDirectory?: string,
   scope?: ProcessScope,
+  diagnostic?: Progress,
+  managedPythonDirectory?: string,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const child = (scope ? scope.spawn.bind(scope) : spawn)(executable, args, {
-      cwd, env: { ...scrubbedEnvironment(cwd), ...(cacheDirectory ? { PIP_CACHE_DIR: cacheDirectory, UV_CACHE_DIR: cacheDirectory } : {}) }, shell: false, stdio: ["ignore", "pipe", "pipe"],
+      cwd, env: { ...scrubbedEnvironment(cwd), ...(cacheDirectory ? { PIP_CACHE_DIR: cacheDirectory, UV_CACHE_DIR: cacheDirectory } : {}),
+        ...(managedPythonDirectory ? { UV_PYTHON_INSTALL_DIR: managedPythonDirectory, UV_PYTHON_INSTALL_BIN: '0', UV_PYTHON_INSTALL_REGISTRY: '0' } : {}),
+      }, shell: false, stdio: ["ignore", "pipe", "pipe"],
     });
     let bytes = 0;
     let stderr = "";
@@ -61,6 +66,7 @@ export async function runProcess(
       clearTimeout(timer);
       if (failure) reject(failure);
       else if (code !== 0) {
+        diagnostic?.(stderr);
         const errorCode = [...stderr.matchAll(/"code":\s*"([A-Z_]+)"/g)].at(-1)?.[1];
         if (errorCode === "PDF_RESOURCE_LIMIT" || errorCode === "PDF_TIME_LIMIT") {
           reject(new Error("This PDF is too large or complex to convert"));
@@ -74,7 +80,7 @@ export async function runProcess(
 }
 
 async function findExecutable(name: string): Promise<string | undefined> {
-  return (await resolveInstalledExecutable(name, [...installDirectories(), '/usr/bin', '/bin'])) ?? undefined;
+  return (await resolveInstalledExecutable(name, [...installDirectories(), ...(process.platform === 'win32' ? [] : ['/usr/bin', '/bin'])])) ?? undefined;
 }
 
 export function createConverter(options: {
@@ -83,11 +89,12 @@ export function createConverter(options: {
   onProgress?: Progress;
   idleMinutes?: () => number;
   authorizeDownload?: () => Promise<boolean>;
+  diagnostic?: Progress;
 }): { convert: ConverterRunner; ensureReady: () => Promise<string>; dispose: () => Promise<void> } {
   const scope = new ProcessScope();
   let disposed = false;
   const checkOpen = () => { if (disposed) throw new Error('Converter closed'); };
-  const run: typeof runProcess = (executable, args, cwd, timeout, max, progress, cache) => runProcess(executable, args, cwd, timeout, max, progress, cache, scope);
+  const run: typeof runProcess = (executable, args, cwd, timeout, max, progress, cache) => runProcess(executable, args, cwd, timeout, max, progress, cache, scope, options.diagnostic, join(options.userData, 'converter-python'));
   const venv = join(options.userData, "converter-venv");
   const python = join(venv, process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   let worker: WarmWorker | undefined;
@@ -103,7 +110,12 @@ export function createConverter(options: {
   async function install(): Promise<string> {
     const checked = profileStage("Venv/bootstrap check");
     await mkdir(options.userData, { recursive: true, mode: 0o700 });
-    const requirements = join(options.resources, "requirements.lock.txt");
+    const nativeRequirements = join(options.resources, 'requirements.native.lock.txt');
+    const requirements = process.platform === 'darwin' && process.arch === 'x64' && await stat(nativeRequirements).then(file => file.isFile(), () => false)
+      ? nativeRequirements : join(options.resources, "requirements.lock.txt");
+    const wheels = requirements === nativeRequirements ? ['--find-links', join(options.resources, 'wheels')] : [];
+    options.diagnostic?.(JSON.stringify({ converterInstall: { platform: process.platform, arch: process.arch,
+      requirements, wheels: wheels.length ? await readdir(join(options.resources, 'wheels')) : [] } }));
     const fingerprint = createHash("sha256").update(await readFile(requirements)).digest("hex");
     const marker = join(venv, ".requirements-sha256");
     const cwd = await mkdtemp(join(tmpdir(), "vstudy-bootstrap-"));
@@ -123,7 +135,7 @@ export function createConverter(options: {
       const cache = join(homedir(), ".cache", uv ? "uv" : "pip");
       await mkdir(cache, { recursive: true, mode: 0o700 });
       let systemPython: string | undefined;
-      for (const name of ["python3.12", "python3.11", "python3.10", "python3"]) {
+      for (const name of process.platform === 'win32' ? ['python', 'python3'] : ["python3.12", "python3.11", "python3.10", "python3"]) {
         const candidate = await findExecutable(name);
         if (!candidate) continue;
         try {
@@ -135,13 +147,13 @@ export function createConverter(options: {
       if (!uv && !systemPython) throw new Error("Install uv or Python 3.10+ to enable document conversion; then retry");
       await rm(venv, { recursive: true, force: true });
       if (uv) {
-        await run(uv, ["venv", "--python", systemPython ?? "3.12", venv], cwd, 300_000);
+        await run(uv, ["venv", "--python", managedConverterPython(), venv], cwd, 300_000);
         report("Installing markitdown…");
-        await run(uv, ["pip", "install", "--require-hashes", "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(uv, ["pip", "install", "--require-hashes", "--only-binary", ":all:", ...wheels, "--python", python, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       } else if (systemPython) {
         await run(systemPython, ["-m", "venv", venv], cwd, 300_000);
         report("Installing markitdown…");
-        await run(python, ["-m", "pip", "install", "--require-hashes", "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
+        await run(python, ["-m", "pip", "install", "--require-hashes", "--only-binary", ":all:", ...wheels, "-r", requirements], cwd, 600_000, 8 * 1024 * 1024, report, cache);
       }
       await run(python, ["-c", "import markitdown, pdfplumber"], cwd);
       checkOpen();

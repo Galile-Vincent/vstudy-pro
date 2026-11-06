@@ -24,13 +24,18 @@ import { mkdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { openStore, type Store } from "./db";
 import { registerIpc } from "./ipc";
+import { createWindowsStatePersistence } from "./mcp/windows-state";
 import { createSecretStore } from "./services/secrets";
 import { developmentCsp, isAppUrl, productionCsp } from "./security";
 
 import { deleteAllData } from "./services/delete-data";
 import { createIpcRegistrar } from "./ipc/register";
 import { assetHandler } from "./assets";
+import { isPathWithin } from './platform/paths';
+import { relative } from 'node:path';
+import { prepareDistributionSmoke, runDistributionSmoke } from './distribution-smoke';
 
+const distributionSmokeRoot = prepareDistributionSmoke();
 initializeMoodleProtocol();
 
 protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({ scheme, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } })));
@@ -38,7 +43,7 @@ protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({
 const smokeRoot = process.env.VSTUDY_PACKAGED_SMOKE_DIR;
 if (smokeRoot) {
   const canonical = realpathSync(smokeRoot), temporary = realpathSync(tmpdir());
-  if (!canonical.startsWith(temporary + '/vstudy-packaged-smoke-') || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
+  if (!isPathWithin(temporary, canonical) || !/^vstudy-packaged-smoke-[^/\\]+$/.test(relative(temporary, canonical)) || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
   const isolated = join(canonical, 'user-data');
   mkdirSync(isolated, {recursive:true,mode:0o700});
   if (lstatSync(isolated).isSymbolicLink() || realpathSync(isolated) !== isolated) throw new Error('Smoke user data must be an isolated directory');
@@ -86,6 +91,9 @@ async function createWindow(show = true): Promise<void> {
     show: false,
     backgroundColor: nativeBackground(appearance),
     title: "VStudy Pro",
+    titleBarStyle: 'default',
+    titleBarOverlay: false,
+    autoHideMenuBar: process.platform === 'win32',
     icon: app.isPackaged ? join(process.resourcesPath, "brand/icon.png") : join(__dirname, "../../build/icon.png"),
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
@@ -140,6 +148,7 @@ async function createWindow(show = true): Promise<void> {
 
 const ownsApplication = acquireOwnership(app, () => window, () => {void restoreMainWindow();});
 if (ownsApplication) void app.whenReady().then(async () => {
+  if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
   const userData = app.getPath("userData");
   mkdirSync(userData, { recursive: true });
   await rollbackRestoreStartup(userData);
@@ -193,6 +202,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
     () => {void restoreMainWindow();},
+    process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {},
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deleteAllData');
@@ -217,6 +227,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
     void restoreMainWindow();
   });
   await createWindow(!process.argv.includes('--mcp-background'));
+  if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
 }).catch(async error => {
   log({phase:"startup-failed",code:(error as NodeJS.ErrnoException).code ?? error.name});

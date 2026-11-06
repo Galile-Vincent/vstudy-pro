@@ -10,9 +10,9 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { WarmWorker } from '../../../resources/converter/warm-worker';
-it.skipIf(!process.env.VSTUDY_CONVERTER_PYTHON)('converts all seven formats through the real network-denied worker', async () => {
+it.skipIf(!process.env.VSTUDY_CONVERTER_PYTHON)('converts all seven formats through the real platform converter worker', async () => {
   const root=await mkdtemp(join(tmpdir(),'vstudy-converter-formats-'));
-  execFileSync('/usr/bin/python3',['test-fixtures/converter/generate.py',root]);
+  execFileSync(process.platform === 'win32' ? 'python' : 'python3',['test-fixtures/converter/generate.py',root]);
   const worker=new WarmWorker(process.env.VSTUDY_CONVERTER_PYTHON!,resolve('resources/converter/convert.py'),root);
   try {
     for (const extension of ['docx','xlsx','pptx','html','csv','md','pdf']) {

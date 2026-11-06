@@ -11,7 +11,7 @@ it('announces a pending CLI enable check until discovery finishes', async () => 
  const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
  let finish!:()=>void;const pending=new Promise<void>(resolve=>{finish=resolve;});
  try {
-  await act(async()=>root.render(<ProviderRow provider={{config:{kind:'cli',id:'codex-cli',enabled:false},availability:{available:false,reason:'Provider disabled'},models:[]}} onRefresh={()=>pending}/>));
+  await act(async()=>root.render(<ProviderRow provider={{config:{kind:'cli',id:'claude-cli',enabled:false},availability:{available:false,reason:'Provider disabled'},models:[]}} onRefresh={()=>pending}/>));
   await act(async()=>host.querySelector<HTMLButtonElement>('[role=checkbox]')!.click());
   expect(host.querySelector('section')?.getAttribute('aria-busy')).toBe('true');
   expect(host.querySelector('[role=status]')?.textContent).toBe('Checking provider…');
@@ -28,4 +28,15 @@ it('confirms a working session key without claiming it was saved', async () => {
   expect(host.querySelector('.provider-status')?.textContent).toContain('Key is available for this session only.');
   expect(host.querySelector('.provider-status')?.textContent).not.toContain('No key saved');
  } finally {await act(async()=>root.unmount());host.remove();}
+});
+
+it('explains unavailable Codex isolation on Windows and disables its launch controls', async () => {
+ const platform = await import('../shared/platform');
+ const hostPlatform = vi.spyOn(platform, 'desktopPlatform').mockReturnValue('win32');
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ try {
+  await act(async()=>root.render(<ProviderRow provider={{config:{kind:'cli',id:'codex-cli',enabled:false},availability:{available:false,reason:'Provider disabled'},models:[]}} onRefresh={async()=>{}}/>));
+  expect(host.querySelector('[role=note]')?.textContent).toContain('macOS process sandbox');
+  expect(Array.from(host.querySelectorAll('button')).every(button=>button.disabled)).toBe(true);
+ } finally {await act(async()=>root.unmount());host.remove();hostPlatform.mockRestore();}
 });

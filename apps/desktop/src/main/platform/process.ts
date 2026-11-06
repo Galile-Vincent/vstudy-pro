@@ -28,6 +28,11 @@ export function pythonInvocation(python: string, args: string[], platform = proc
     : { executable: python, args };
 }
 
+/** Windows ARM64 uses Windows 11 x64 emulation for Python dependencies without supported ARM wheels. */
+export function managedConverterPython(platform = process.platform, architecture = process.arch): string {
+  return platform === 'win32' && architecture === 'arm64' ? 'cpython-3.12-windows-x86_64' : '3.12';
+}
+
 /** Stop the process tree on Windows and the isolated process group on Unix. */
 export async function terminateProcess(child: ChildProcess, signal: NodeJS.Signals): Promise<void> {
   if (process.platform === 'win32') {

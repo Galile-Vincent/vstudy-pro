@@ -5,6 +5,7 @@ import Base from '../layouts/Base.astro';
 import Architecture from './Architecture.astro';
 import Search from './Search.astro';
 import DocsNav from './DocsNav.astro';
+import Download from './Download.astro';
 import { path, REPO_URL } from '../config';
 import { guides, getGuide } from '../data/docs';
 import { translations } from '../data/translations';
@@ -38,6 +39,7 @@ const url = (item: string) => path(`${language}/docs/${item}/`);
         {guide.sections.map(section => <section aria-labelledby={section.id}>
           <h2 id={section.id}><a href={`#${section.id}`}>{section.title}<span class="heading-hash" aria-hidden="true">#</span></a></h2>
           {section.paragraphs.map(paragraph => <p>{paragraph}</p>)}
+          {slug === 'getting-started' && section.id === 'install' && <Download {language} />}
           {section.links?.map(link => <p><a href={link.url} rel="noopener">{link.label}<span aria-hidden="true"> ↗</span></a></p>)}
           {section.steps && <ol>{section.steps.map(step => <li>{step}</li>)}</ol>}
           {section.code && <div class="code-block" data-label={language === 'zh-Hant' ? '終端機' : language === 'ja' ? 'ターミナル' : 'Terminal'}><button class="copy-code" data-copy data-label={t.copy} data-copied={t.copied} data-failed={t.copyFailed}>{t.copy}</button><pre tabindex="0" aria-label={section.title}><code>{section.code}</code></pre></div>}

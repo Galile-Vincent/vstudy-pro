@@ -4,9 +4,9 @@
  * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
  * @packageDocumentation
  */
+import { terminateProcess } from '../platform/process';
 import { leaseExecutable } from './setup/leases';
 import { recordEgress } from '../services/egress';
-import { rmSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -57,7 +57,7 @@ interface Options { findBinary?: () => Promise<string | null>; timeoutMs?: numbe
 export async function* runAgy(binary: string, args: string[], cwd: string, request: ProviderRequest | undefined, signal: AbortSignal, timeoutMs: number): AsyncIterable<ChatEvent | Model[]> {
   if (signal.aborted) { yield { type: "done" }; return; }
   recordEgress(request ? 'agy_chat' : 'agy_discovery', 'Google / Antigravity CLI managed endpoints');
-  const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, detached: process.platform !== "win32", stdio: ["pipe", "pipe", "pipe"] });
+  const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, windowsHide: true, detached: process.platform !== "win32", stdio: ["pipe", "pipe", "pipe"] });
   const releaseLease = leaseExecutable(binary);
   let failure: AgyError | undefined;
   let sessionId: string | undefined;
@@ -66,7 +66,7 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
   let killTimer: ReturnType<typeof setTimeout> | undefined;
   let stderr = "";
   const terminate = (signal: NodeJS.Signals) => {
-    try { if (child.pid && process.platform !== "win32") process.kill(-child.pid, signal); else child.kill(signal); } catch { /* Already exited. */ }
+    void terminateProcess(child, signal);
   };
   const stop = () => {
     if (stopped) return;
@@ -140,8 +140,7 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
     stop(); await closed;
     if (killTimer) clearTimeout(killTimer);
     // The leader may exit before a stubborn descendant; still terminate its process group.
-    terminate("SIGKILL");
-    releaseLease();
+    try { await terminateProcess(child, "SIGKILL"); } finally { releaseLease(); }
   }
 }
 
@@ -149,15 +148,13 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
 export class AgyAdapter implements ProviderAdapter {
   private cache?: { expires: number; availability: Availability; models: Model[] };
   private pending: Promise<NonNullable<AgyAdapter["cache"]>> | undefined;
-  private readonly probeDirectories = new Set<string>();
   private readonly probeController = new AbortController();
-  private readonly onExit = () => this.dispose();
+  private readonly onExit = () => { this.probeController.abort(); };
   constructor(private readonly options: Options = {}) { process.once('exit',this.onExit); }
-  dispose() {
+  async dispose(): Promise<void> {
     this.probeController.abort();
-    for (const directory of this.probeDirectories) rmSync(directory,{recursive:true,force:true});
-    this.probeDirectories.clear();
     process.removeListener('exit',this.onExit);
+    await this.pending;
   }
   private binary() { return (this.options.findBinary ?? (() => findCli("agy")))(); }
   private async probe() {
@@ -169,13 +166,12 @@ export class AgyAdapter implements ProviderAdapter {
       let models: Model[] = [];
       if (binary) {
         const cwd = await mkdtemp(join(tmpdir(), "vstudy-agy-probe-"));
-        this.probeDirectories.add(cwd);
         try {
           for await (const event of runAgy(binary, this.options.args ?? agyArgs, cwd, undefined, this.probeController.signal, this.options.timeoutMs ?? 10_000)) {
             if (Array.isArray(event)) { models = event; availability = { available: true }; }
             else if (event.type === "error") availability = { available: false, reason: event.message };
           }
-        } finally { await rm(cwd, { recursive: true, force: true }); this.probeDirectories.delete(cwd); }
+        } finally { await rm(cwd, { recursive: true, force: true, maxRetries: 3 }); }
       }
       return this.cache = { expires: Date.now() + 60_000, availability, models };
     })();

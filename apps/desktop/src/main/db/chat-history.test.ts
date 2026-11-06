@@ -121,7 +121,7 @@ it('backfills v17 messages and retains an owner-only backup, links and foreign k
       expect(s.db.prepare('SELECT parentMessageId FROM messages').get()?.parentMessageId).toBe('parent');
       expect(s.db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
       expect(existsSync(path + '.before-v18.bak')).toBe(true);
-      expect(statSync(path + '.before-v18.bak').mode & 0o777).toBe(0o600);
+      if (process.platform !== 'win32') expect(statSync(path + '.before-v18.bak').mode & 0o777).toBe(0o600);
     }
     finally {
       s.close();
@@ -130,7 +130,7 @@ it('backfills v17 messages and retains an owner-only backup, links and foreign k
   finally {
     rmSync(dir, { recursive: true, force: true });
   }
-});
+}, process.platform === 'win32' ? 120_000 : 5_000);
 
 it('clears a renamed title so future messages can supply its automatic title',()=>{
   const s=setup(),{c}=conversation(s,'Automatic title');

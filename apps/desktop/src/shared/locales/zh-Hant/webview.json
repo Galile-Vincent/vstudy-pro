@@ -21,7 +21,7 @@
   "zoom-reset": "重設縮放",
   "focus": "聚焦網頁",
   "copied": "已複製連結",
-  "footer_hint": "Esc 關閉 · ⌘/Ctrl R 重新載入",
+  "footer_hint": "Esc 關閉 · {{modifier}} R 重新載入",
   "reconnect": "重新連線",
   "sign_in": "重新登入",
   "original": "檢視原始網頁",

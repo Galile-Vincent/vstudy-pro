@@ -34,7 +34,8 @@
         "tw-shimmer"
       ],
       "ignoreBinaries": [
-        "openssl"
+        "openssl",
+        "rustc"
       ]
     },
     "apps/website": {

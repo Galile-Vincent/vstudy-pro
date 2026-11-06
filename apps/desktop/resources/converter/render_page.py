@@ -1,4 +1,4 @@
-"""Bounded single-page image worker; never contacts the network."""
+"""Bounded single-page image worker with Python-level network guards."""
 import json
 import math
 import os
@@ -39,11 +39,19 @@ def _render(source, page_number, output):
 
 
 def render(source, page_number, output):
-    signal.alarm(20)
+    import socket
+    def deny_network(*args, **kwargs):
+        raise PermissionError("Converter network disabled")
+    socket.socket.connect = deny_network
+    socket.socket.connect_ex = deny_network
+    socket.create_connection = deny_network
+    if hasattr(signal, "alarm"):
+        signal.alarm(20)
     try:
         return _render(source, page_number, output)
     finally:
-        signal.alarm(0)
+        if hasattr(signal, "alarm"):
+            signal.alarm(0)
 
 
 if __name__ == '__main__':

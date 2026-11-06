@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-if (process.env.VSTUDY_CODEX_LIVE !== '1') {
+import { temporaryPath } from '../scripts/platform.mjs';
+if (process.platform !== 'darwin') {
+ console.log('SKIP: Codex CLI requires the macOS isolated transport.');
+} else if (process.env.VSTUDY_CODEX_LIVE !== '1') {
  console.log('SKIP: set VSTUDY_CODEX_LIVE=1 with authenticated Codex 0.166.0');
 } else {
  const directory = await mkdtemp(join(tmpdir(), 'vstudy-real-codex-')); let app;
@@ -36,10 +39,10 @@ if (process.env.VSTUDY_CODEX_LIVE !== '1') {
   await page.waitForFunction(() => !window.document.querySelector('.aui-composer-cancel'));
   const result = await page.evaluate(async () => { const documents = await window.desktop.invoke('documents:list', {}); const conversations = await window.desktop.invoke('conversations:list', {documentId: documents[0].id}); const conversation = conversations.find(c => c.providerId === 'codex-cli'); return { conversation, messages: conversation ? await window.desktop.invoke('messages:list', { conversationId: conversation.id }) : [] }; });
   assert.equal(result.conversation?.providerId, 'codex-cli'); assert.ok(result.messages.some(m => m.role === 'assistant' && m.parts.some(p => p.usage?.inputTokens > 0))); 
-  await page.screenshot({ path: '/tmp/vstudy-codex-chat.png', animations: 'disabled' });
+  await page.screenshot({ path: temporaryPath('vstudy-codex-chat.png'), animations: 'disabled' });
   await input.fill('Write a detailed ten thousand word guide to linear algebra.'); await input.press('Enter');
   const stop = page.getByRole('button', { name: 'Stop generating', exact: true }); await stop.waitFor(); await page.waitForTimeout(1000); await stop.click(); await stop.waitFor({state:'hidden'});
-  console.log('PASS: Stop cancels the real provider; real Codex UI chat, conversation persisted; screenshot /tmp/vstudy-codex-chat.png');
- } catch (error) { if (app) { const page = await app.firstWindow(); await page.screenshot({ path: '/tmp/vstudy-codex-chat-failure.png' }); console.log(await page.locator('body').innerText()); } throw error; }
+  console.log('PASS: Stop cancels the real provider; real Codex UI chat, conversation persisted; screenshot', temporaryPath('vstudy-codex-chat.png'));
+ } catch (error) { if (app) { const page = await app.firstWindow(); await page.screenshot({ path: temporaryPath('vstudy-codex-chat-failure.png') }); console.log(await page.locator('body').innerText()); } throw error; }
  finally { await app?.close(); await rm(directory, { recursive: true, force: true }); }
 }

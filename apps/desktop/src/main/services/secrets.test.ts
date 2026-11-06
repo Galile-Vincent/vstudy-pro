@@ -32,7 +32,7 @@ it("encrypts, persists with 0600, replaces, and deletes keys", async () => {
   expect(store.has("openai-api")).toBe(false);
   expect(await store.getInMainOnly("openai-api")).toBeNull();
   await store.set("openai-api", "secret-api-key");
-  expect(statSync(file).mode & 0o777).toBe(0o600);
+  if (process.platform !== 'win32') expect(statSync(file).mode & 0o777).toBe(0o600);
   expect(readFileSync(file, "utf8")).not.toContain("secret-api-key");
   expect(await createSecretStore(file, encryption).getInMainOnly("openai-api")).toBe(
     "secret-api-key",

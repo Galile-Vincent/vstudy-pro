@@ -4,6 +4,8 @@ export type McpEndpoint = {kind:'unix';path:string}|{kind:'named-pipe';path:stri
 export interface McpTransport {
   endpoint:McpEndpoint;
   dispose:()=>Promise<void>;
+  /** Resolves when the native host closes, including during explicit disposal. */
+  closed?:Promise<void>;
 }
 export interface McpTransportOptions {
   userData:string;

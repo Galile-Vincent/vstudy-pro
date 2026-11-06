@@ -1,25 +1,83 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [main, 'ci/**', '!ci/windows-native-pipe']
   pull_request:
 permissions:
   contents: read
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
+env:
+  CI: 'true'
 jobs:
-  check:
-    runs-on: macos-14
-    timeout-minutes: 30
-    env:
-      CI: 'true'
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        id: uv
+        with:
+          version: '0.12.21'
+          enable-cache: false
+      - name: Place the pinned converter bootstrap tool in its supported user location
+        env:
+          UV_EXECUTABLE: ${{ steps.uv.outputs.uv-path }}
+        run: node apps/desktop/scripts/provision-ci-uv.mjs
+      - run: pnpm install --frozen-lockfile
+      - name: Prepare verified native converter dependencies when upstream wheels are missing
+        run: node apps/desktop/scripts/converter-native.mjs
+      - run: pnpm --filter @vstudy/mcp typecheck
+      - run: pnpm --filter @vstudy/mcp lint
+      - run: pnpm --filter @vstudy/mcp test
+      - run: pnpm --filter @vstudy/desktop typecheck
+      - run: pnpm --filter @vstudy/desktop lint
+      - run: pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2
+        env:
+          VSTUDY_WINDOWS_ACCOUNT_TEST: ${{ matrix.os == 'windows-latest' && '1' || '' }}
+      - run: pnpm --filter @vstudy/desktop test:release
+      - run: pnpm security:static
+      - run: pnpm vendor:check
+      - run: pnpm build
+      - run: pnpm --filter @vstudy/mcp verify
+      - run: pnpm --filter @vstudy/mcp verify:clients
+        if: runner.os == 'macOS'
+      - run: pnpm --filter @vstudy/mcp verify:core
+        if: runner.os == 'macOS'
+      - name: Retain native Windows bridge and cross-user reports
+        if: always() && runner.os == 'Windows'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pipe-isolation-${{ matrix.os }}
+          path: |
+            docs/evidence/distribution/win32-pipe-isolation.json
+            docs/evidence/distribution/win32-mcp-roundtrip.json
+          if-no-files-found: warn
+          retention-days: 14
+  website:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version
           cache: pnpm
@@ -28,11 +86,18 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint
-      - run: pnpm typecheck
-      - run: pnpm lint
-      - run: pnpm build
-      - name: Tests and security checks
-        run: pnpm security:check
-      - run: pnpm vendor:check
+        run: node -e 'process.stdout.write(process.env.PR_TITLE + "\n")' | pnpm exec commitlint
+      - run: pnpm --filter @vstudy/website typecheck
+      - run: pnpm --filter @vstudy/website lint
+      - run: pnpm --filter @vstudy/website build
+      - run: pnpm --filter @vstudy/website verify:static
       - run: pnpm knip
+  check:
+    needs: [desktop, website]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every native and website check
+        if: needs.desktop.result != 'success' || needs.website.result != 'success'
+        run: exit 1

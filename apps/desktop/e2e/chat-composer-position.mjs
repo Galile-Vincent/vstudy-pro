@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { Buffer } from 'node:buffer';
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
@@ -6,7 +7,7 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 const directory=await mkdtemp(join(tmpdir(),'vstudy-chat-bottom-'));
-const evidence='/tmp/vstudy-chat-bottom';await mkdir(evidence,{recursive:true});
+const evidence=temporaryPath('vstudy-chat-bottom');await mkdir(evidence,{recursive:true});
 let app;
 let positions=0, axeScans=0;
 try {

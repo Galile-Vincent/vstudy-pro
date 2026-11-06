@@ -102,7 +102,7 @@ export class DocumentService {
         }), createWriteStream(source, { flags: "wx", mode: 0o600 }));
         copied();
         await validateImportAsync(source, extension);
-        const handle = await open(source, "r");
+        const handle = await open(source, "r+");
         try { await handle.sync(); } finally { await handle.close(); }
         const sourceHash = hash.digest("hex");
         const existing = this.options.store.documents.findByHash(sourceHash);

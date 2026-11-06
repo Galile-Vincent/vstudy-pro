@@ -1,3 +1,4 @@
+import { temporaryPath } from '../scripts/platform.mjs';
 import { _electron as electron } from "playwright";
 import assert from "node:assert/strict";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
@@ -33,7 +34,7 @@ try {
   assert.ok(!(await chip.innerText()).includes("image.png"));
   assert.equal(await chip.evaluate(el => el.scrollWidth <= el.clientWidth + 1), true);
   assert.equal((await chip.locator("summary span").innerText()).length, 161);
-  await page.screenshot({path: "/tmp/vstudy-visual-section.png", animations:'disabled'});
+  await page.screenshot({path: temporaryPath('vstudy-visual-section.png'), animations:'disabled'});
   await chip.locator("summary").click();
   assert.ok((await chip.innerText()).includes("Blue fern"));
   await input.fill("Explain");
@@ -43,7 +44,7 @@ try {
   assert.equal(await page.locator("[data-role=assistant] strong").innerText(), "bold");
   assert.deepEqual(await page.locator("[data-role=assistant] li").allTextContents(), ["First", "Second"]);
   await page.locator("[data-role=assistant] strong").scrollIntoViewIfNeeded();
-  await page.screenshot({path: "/tmp/vstudy-visual-markdown.png", animations:'disabled'});
+  await page.screenshot({path: temporaryPath('vstudy-visual-markdown.png'), animations:'disabled'});
   for (const name of ["Delete document"]) {
     const button = page.getByRole("button", { name, exact: true });
     assert.equal(Math.round((await button.boundingBox()).width), 28);
@@ -61,5 +62,5 @@ try {
   await page.getByRole("combobox", { name: "Model", exact: true }).filter({ hasText: "Fixture model (test only)" }).waitFor();
   assert.equal(await page.evaluate(() => window.desktop.invoke("settings:get", {}).then(s => `${s.lastProviderId}/${s.lastModelId}`)), "anthropic-api/fixture-model");
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ result: "PASS", screenshots: ["/tmp/vstudy-visual-section.png", "/tmp/vstudy-visual-markdown.png"], consoleErrors: errors }));
+  console.log(JSON.stringify({ result: "PASS", screenshots: [temporaryPath('vstudy-visual-section.png'), temporaryPath('vstudy-visual-markdown.png')], consoleErrors: errors }));
 } finally { await app?.close(); await rm(directory, { recursive: true, force: true }); }

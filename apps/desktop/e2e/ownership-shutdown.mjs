@@ -1,5 +1,6 @@
 import { _electron as electron } from 'playwright';
-import { spawn, execFileSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
+import { listProcesses } from '../scripts/platform.mjs';
 import { once } from 'node:events';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdtemp,rm,writeFile } from 'node:fs/promises';
@@ -30,7 +31,7 @@ try {
   await window.partialStream;
  },{doc,conversation,requestId});
  const mainPid=app.process().pid;
- const descendants=execFileSync('/bin/ps',['-axo','pid=,ppid='],{encoding:'utf8'}).trim().split('\n').map(line=>line.trim().split(/\s+/).map(Number)).filter(([,parent])=>parent===mainPid).map(([pid])=>pid);
+ const descendants=listProcesses().filter(row=>row.ppid===mainPid).map(row=>row.pid);
  const exited=once(app.process(),'exit');await app.evaluate(({app})=>app.quit());await exited;app=undefined;
  const db=new DatabaseSync(join(root,'vstudy.sqlite'));
  const rows=db.prepare("SELECT parts FROM messages WHERE conversationId=? AND role='assistant'").all(conversation.id);db.close();

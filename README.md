@@ -7,9 +7,9 @@ English · [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md)
   <img src="assets/brand/generated/lockup-light.svg" width="320" alt="VStudy Pro">
 </picture>
 
-Read course documents, keep Moodle deadlines together, and turn coursework into a study plan on your Mac.
+Read course documents, keep Moodle deadlines together, and turn coursework into a study plan on macOS and Windows.
 
-![Version 0.2.2](https://img.shields.io/badge/version-0.2.2-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
+![Version 0.2.2](https://img.shields.io/badge/version-0.2.2-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
 
 ![Graph traversal notes with a selected passage, demo answer, and source citation](docs/assets/readme/reader.webp)
 
@@ -17,60 +17,51 @@ Read course documents, keep Moodle deadlines together, and turn coursework into 
 
 ### Get the app
 
-Open [GitHub Releases](https://github.com/ava-apple/vstudy-pro/releases/latest) and download the DMG and `SHA256SUMS.txt` from the same release. This repository is currently private, so you need repository access. If no published release is available, ask the maintainer for access or build from source below.
+| Platform | Direct installer |
+| --- | --- |
+| Mac with Apple silicon | [Download DMG](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg) |
+| Mac with Intel | Planned. Full converter and native packaging checks are pending. |
+| Windows x64 | [Download EXE](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe) |
+| Windows ARM64 | Planned. Full converter and native installer checks are pending. |
 
-The current local build produces **`VStudy-Pro-0.2.2-arm64.dmg`**. Version numbers change with releases. The [release workflow](.github/workflows/release.yml) runs on `v*.*.*` tag pushes, checks the tag against the desktop version, and attaches unsigned artifacts and checksums to a **draft** release. A draft is not a published download.
+Download [SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt) from the same release. These stable links select the latest published assets. The repository is public. If an asset returns 404, check [the release notes](https://github.com/ava-apple/vstudy-pro/releases/latest) for published targets and verification results. A CI artifact or dry run is not a public release. No version, size, or successful platform test is implied by a link.
 
-Use an Apple silicon Mac, arm64. The generated app declares macOS 12.0 or later. The builder config has no explicit architecture list and defaults to its build host; the current arm64 build is verified. Intel and universal builds are not verified. The Release workflow also leaves architecture to its runner; check the actual release asset before downloading for an Intel Mac. Windows and Linux packages are not provided. AI and school sync need internet access. Reading local Markdown and text does not require an AI account.
+The first release targets Apple silicon Mac and Windows x64. Intel Mac and Windows ARM64 remain planned until full conversion and native packaging checks pass. Full document conversion requires macOS 14+ on Apple silicon or macOS 13+ on Intel. Windows requires Windows 10+ for x64 or Windows 11+ for ARM64; the ARM64 app uses x64 Python through Windows emulation. The app can launch on macOS 12 for Markdown and text, but the converter has newer native dependencies. On Mac, choose Apple silicon unless About This Mac shows an Intel processor. On Windows, check Settings > System > About > System type. ARM-based Windows and Intel Mac users should wait for their planned installer. There is no Linux installer. AI and school sync need internet access. Reading local Markdown and text does not require an AI account.
 
 ### Verify and open
 
-1. Put the downloaded DMG and `SHA256SUMS.txt` in the same folder. In Terminal, change to that folder and check the checksum.
-
-   ```sh
-   cd ~/Downloads
-   shasum -a 256 -c SHA256SUMS.txt
-   ```
-
-   Continue only if your DMG reports `OK`. A checksum detects a damaged or changed download; it does not establish the publisher's identity.
-2. Open the DMG. Drag **VStudy Pro.app** into **Applications**, then eject the disk image.
-3. Launch the copy in Applications. For an unsigned or ad-hoc signed build that you trust, try Control-click or right-click > **Open**. If macOS still blocks it, attempt to open it once, then use **System Settings > Privacy & Security > Open Anyway** and confirm. Exact wording varies with macOS.
-4. If quarantine still prevents opening a verified, trusted copy, use this fallback on that app only, then open it again.
-
-   ```sh
-   xattr -dr com.apple.quarantine '/Applications/VStudy Pro.app'
-   ```
-
-   This removes the download quarantine warning for this copy. It does not sign or notarize the app. Do not disable Gatekeeper globally.
+1. Verify the downloaded installer against its entry in `SHA256SUMS.txt`. On Mac, run `shasum -a 256 VStudy-Pro-mac-arm64.dmg` in the download folder, substituting your filename. On Windows, run `Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe` in PowerShell. Compare the complete hash. The checksum file includes other artifacts, so verify your downloaded file's entry. A matching checksum detects changed bytes; it does not identify the publisher.
+2. On Mac, open the DMG, drag **VStudy Pro.app** into **Applications**, eject the image, and open the installed copy. If an unsigned or ad-hoc build is blocked, attempt to open it once. Then use **System Settings > Privacy & Security > Open Anyway** if offered, after verifying that you trust the source. Do not disable Gatekeeper globally. See [Apple's first-open guidance](https://support.apple.com/en-us/102445).
+3. On Windows, run the EXE. The installer uses the current user's account. If SmartScreen warns about an unsigned installer, choose **More info > Run anyway** only after verification and only if offered. An organization policy may forbid this. Do not disable SmartScreen. Stop if a per-user installer unexpectedly requests administrator access.
+4. For a signed and notarized Mac release, use the ordinary first-open confirmation. For signed Windows releases, check the publisher in the file's signature details. Signing does not guarantee SmartScreen reputation. The release notes must state the actual signing status. See [signature verification](docs/SIGNING.md#verify-the-delivered-artifacts).
 5. Follow onboarding or open the sample document. Connect a school under **Courses** and configure optional AI under **Settings > Providers** when ready.
 
-Saving or unlocking API keys can trigger a macOS Keychain prompt. VStudy uses Electron `safeStorage` to encrypt saved credentials with a login-Keychain encryption key. macOS may request your Keychain password or ask again after an ad-hoc rebuild. Denying access leaves **Retry** and **Use without saving keys** available. Saved keys require explicit unlocking after restart. Opening the main window does not decrypt saved keys.
+VStudy encrypts saved credentials through Electron `safeStorage`. macOS uses a login-Keychain key and may ask for Keychain access, especially after an ad-hoc rebuild. Windows uses DPAPI tied to the Windows user, without a Mac-style Keychain dialog. Both systems defer decryption until you explicitly unlock saved keys after restart. Opening the main window does not unlock them. You can retry or use keys for the session without saving.
 
 ### Update or uninstall
 
-Updates are manual. Export a backup in **Settings > Storage**, quit VStudy Pro, download and verify the new DMG, and replace the app in Applications. Keep your data folder to retain your library and plans. Database upgrades create migration backups; downgrades are not supported.
+Updates are manual. Export a backup in **Settings > Storage**, quit VStudy Pro, and verify the new installer. On Mac, replace the app in Applications. On Windows, run the new installer for the same user. Keep the data folder to retain your library and plans. Database upgrades create migration backups. Downgrades are unsupported. Automatic updates remain a later change after signing and notarization are verified.
 
-To remove your data inside the app, use **Settings > Privacy > Delete all data**, type `DELETE`, and confirm the native dialog. The app removes its data namespace and quits. Then move the app from Applications to Trash. Deleting only the app keeps its local data.
+To remove your data, use **Settings > Privacy > Delete all data**, type `DELETE`, and confirm the native dialog. The app removes its data namespace and quits. Then remove the Mac app from Applications, or uninstall VStudy Pro in Windows **Settings > Apps > Installed apps**. Removing only the app leaves local data.
 
-Main uses Electron `app.getPath('userData')`. With the current package name `@vstudy/desktop`, its default macOS data folder is `~/Library/Application Support/@vstudy/desktop`, including `vstudy.sqlite`, `library/`, `secrets.json`, and converter files. Packaged and development builds use that package name; test harnesses can override the location. See [storage ownership](docs/STORAGE.md) and [Electron's package-name initialization](https://github.com/electron/electron/blob/v42.0.0/lib/browser/init.ts).
+Main uses Electron `app.getPath('userData')`. The current package namespace is `@vstudy/desktop`. The default paths are `~/Library/Application Support/@vstudy/desktop` on Mac and `%APPDATA%\@vstudy\desktop` on Windows. They contain `vstudy.sqlite`, `library/`, `secrets.json`, and converter files. Test harnesses can override the location. See [storage ownership](docs/STORAGE.md).
 
-Delete-all does not remove originals outside the library, exported backups, CLI logins, shared Python download caches, or the separate Keychain encryption item. It is not secure erasure of backups or SSD blocks.
+Delete-all does not remove originals outside the library, exported backups, CLI logins, shared Python download caches, or separate OS credential-store items. It is not secure erasure of backups or SSD blocks.
 
 ### Build from source
 
-Use macOS, Node **24.19.0** from `.node-version`, and **pnpm 10.28.2** from `package.json`. The package engine permits Node >=24.11.1. Clone requires access to the private repository. Run from its root.
+Use macOS or Windows, Node **24.19.0** from `.node-version`, and **pnpm 10.28.2** from `package.json`. The package engine permits Node >=24.15.0. Run from the public repository's root.
 
 ```sh
 git clone https://github.com/ava-apple/vstudy-pro.git
 cd vstudy-pro
 pnpm install --frozen-lockfile
 pnpm build
-pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish never -c.mac.notarize=false -c.mac.identity=null
 ```
 
-On an arm64 host, output is `apps/desktop/release/VStudy-Pro-0.2.2-arm64.dmg` and `apps/desktop/release/mac-arm64/VStudy Pro.app`. This command disables Developer ID signing and notarization. `pnpm package` uses the configured signing/notarization defaults instead. For distribution signing, follow [the release guide](docs/ENGINEERING.md#prepare-a-release) and [signed-build credentials](CONTRIBUTING.md#sign-a-distribution-build).
+`pnpm build` compiles the app. Use [the nonpublishing release procedure](docs/ENGINEERING.md#prepare-a-release) to produce and verify installers for each architecture. See [signing setup](docs/SIGNING.md) for credentials. A local Mac build does not verify Windows.
 
-For non-text document conversion, install **uv** or **Python 3.10+** separately. First conversion asks before downloading hash-locked dependencies from PyPI; uv may download Python from GitHub. **Settings > Privacy** provides Retry and persistent Offline mode. Markdown and text work without that installation.
+Install **uv** or **Python 3.10+** separately when document conversion requires it. First conversion asks permission before downloading hash-locked packages from PyPI. uv may also download Python from GitHub. **Settings > Privacy** offers retry and a persistent offline mode. Markdown and text need no Python setup. macOS additionally denies converter network access with an OS sandbox. Windows currently has no equivalent kernel-enforced network denial; offline mode and Python socket interception are not an OS security boundary.
 
 ## What it does
 
@@ -150,15 +141,17 @@ Help reopens setup, illustrated or recorded walkthroughs, and keyboard shortcuts
 
 ### Keyboard shortcuts
 
+Use Cmd on Mac and Ctrl on Windows.
+
 | Shortcut | Action |
 | --- | --- |
-| `Cmd+K` | Open the global conversation finder. |
-| `Cmd+B` | Toggle the sidebar. |
-| `Cmd+Shift+K` | Ask about the current reader selection. |
+| `Cmd/Ctrl+K` | Open the global conversation finder. |
+| `Cmd/Ctrl+B` | Toggle the sidebar. |
+| `Cmd/Ctrl+Shift+K` | Ask about the current reader selection. |
 | Arrow keys / `Shift+Arrow` | Move or extend text selection when the reader itself has focus. |
 | `Enter` / `Shift+Enter` | Send chat / insert a newline, outside IME composition. |
 | `Esc` | Dismiss a dialog or the Moodle page pane. |
-| `Cmd+R` | Reload the focused Moodle page pane. |
+| `Cmd/Ctrl+R` | Reload the focused Moodle page pane. |
 | `Tab` / `Shift+Tab` | Move between controls. |
 
 ## Connect global agents
@@ -193,6 +186,8 @@ An update without independent publisher proof shows **New version available: ins
 
 VStudy includes no AI subscription. Account access and free or paid usage follow the provider's terms. API keys remain available for Anthropic, OpenAI, and OpenAI-compatible endpoints, saved or just for the session. Codex requires the audited CLI **0.166.0**, macOS, and `/usr/bin/sandbox-exec`. Its managed installer uses that version; a newer release cannot bypass transport verification. See [Codex transport limits](docs/codex-tool-free.md), [setup design and acceptance limits](docs/AI_CLI_SETUP_DESIGN.md), and [implementation evidence](docs/AI_CLI_SETUP_REPORT.md).
 
+Codex is disabled on Windows because no equivalent verified kernel sandbox is implemented. Use an API provider on Windows.
+
 An AI question combines your message with bounded context. Document chat includes metadata, conversation history, and selected text; without a selection it includes an outline and opening excerpt. Course chat adds available coursework, planner state, and selected ready documents. Answers stream back and are saved locally. Agent proposals require explicit approval before main changes planner data. Confirm dates and answers against the source.
 
 Cached course snapshots and converted documents remain readable offline. Cached deadlines can be stale. Fresh sync, school pages, and remote AI require a connection. Offline conversion mode does not make an external AI provider local.
@@ -201,7 +196,7 @@ Cached course snapshots and converted documents remain readable offline. Cached 
 
 VStudy sends no app analytics. School sign-in, sync, and content views contact the chosen school. Enabled API providers receive the question and context above; earlier selections can remain in chat history. CLI tools may contact their own chat, model discovery, verification, quota, or telemetry services. Claude receives nonessential-traffic and telemetry opt-outs. Python setup can contact PyPI and GitHub after consent.
 
-Documents, Markdown, and chats are **not encrypted at rest** by the app. Saved secrets use macOS Keychain-backed encryption; session-only secrets remain in main-process memory. FileVault and your macOS account protect local files. Portable backups exclude credentials but contain private study content.
+Documents, Markdown, and chats are **not encrypted at rest** by the app. Saved secrets use Mac Keychain-backed encryption or Windows DPAPI. Session-only secrets remain in main-process memory. Protect local files with OS account access and disk encryption such as FileVault or BitLocker. Portable backups exclude credentials but contain private study content.
 
 **Settings > Privacy** lists bounded, session-only app-initiated requests and CLI launches, including AI tool metadata checks and downloads. Background AI tool checks are a separate opt-in. The inventory is not a packet capture and cannot enumerate every request inside a CLI or Chromium; byte counts are unknown. External browser and mail links require confirmation. Read the [security model](docs/SECURITY.md) before using sensitive material.
 
@@ -297,7 +292,7 @@ Follow [CONTRIBUTING](CONTRIBUTING.md) for changes, translation synchronization,
 
 ### Known limits
 
-- macOS only; the verified package is arm64 and unsigned by a Developer ID. Gatekeeper and Keychain prompts are expected for test builds.
+- macOS and Windows targets require separate packaged verification. Check release notes for tested architectures and signing status. Unsigned builds can trigger Gatekeeper or SmartScreen.
 - No OCR. Scanned or image-only PDFs are unsupported. Complex tables, columns, equations, and images can lose fidelity. Single-file HTML and Markdown imports do not copy adjacent images.
 - Live-school features depend on the school's Moodle mobile service and permissions. Public HTTPS is required; LAN-only sites, self-signed TLS, and QR credential exchange are unsupported.
 - Local storage has no device sync. API and CLI models need their own access and may incur charges.
