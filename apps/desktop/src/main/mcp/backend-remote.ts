@@ -16,6 +16,7 @@ export class BackendRemote {
     if (names.some(name => !this.supports(context, name))) fail('UNSUPPORTED');
   }
   async call<S extends z.ZodTypeAny>(context:BackendContext, name:string, params:Record<string,string>, schema:S): Promise<z.output<S>> {
+    context.recheck();
     this.require(context, [name]);
     if (this.pending >= 24) fail('RATE_LIMITED');
     this.pending++;
@@ -30,7 +31,9 @@ export class BackendRemote {
       try {
         const client = await this.options.moodle.mcpClient(context.account().id, this.onSecrets);
         context.recheck();
-        return await client.call(name, params, schema, false);
+        const result = await client.call(name, params, schema, false, context.signal);
+        context.provenance.syncedAt = new Date(clock()).toISOString();
+        return result;
       } finally { this.lastFinished = clock(); }
     }));
     this.tail = work;

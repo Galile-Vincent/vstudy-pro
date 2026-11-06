@@ -13,6 +13,9 @@ export function plannerContext(context:BackendContext, services:BackendServices)
   const all = services.planner.snapshot();
   const courses = context.courses();
   const courseIds = courses.map(row => row.id);
+  const documentIds = courses.flatMap(course => context.course(course.id).files.filter(file => file.documentId).flatMap(file => {
+    try { context.file(file.id); return [file.documentId!]; } catch { return []; }
+  }));
   const owns = (id:string | null) => id === null || courseIds.includes(id);
   const deadlines = courses.flatMap(course => context.course(course.id).deadlines).filter(row => !row.orphaned);
   const goals = all.goals.filter(row => owns(row.courseId));
@@ -20,6 +23,7 @@ export function plannerContext(context:BackendContext, services:BackendServices)
     && (!row.goalId || goals.some(goal => goal.id === row.goalId && goal.courseId === row.courseId))
     && (!row.deadlineId || deadlines.some(deadline => deadline.id === row.deadlineId && deadline.courseId === row.courseId)));
   const exams = all.exams.filter(row => owns(row.courseId)
+    && row.materialIds.every(id => documentIds.includes(id))
     && (!row.deadlineId || deadlines.some(deadline => deadline.id === row.deadlineId && deadline.courseId === row.courseId)));
   const targetCourse = (target:PlannerTarget): string | null | undefined => (target.kind === 'task' ? tasks : target.kind === 'exam' ? exams : deadlines).find(row => row.id === target.id)?.courseId;
   const visible = (block:PlannerSnapshot['blocks'][number]) => owns(block.courseId) && (!block.target || targetCourse(block.target) === block.courseId);
@@ -29,7 +33,7 @@ export function plannerContext(context:BackendContext, services:BackendServices)
   });
   const blocks = all.blocks.filter(block => visible(block) && (!block.planId || plans.some(plan => plan.id === block.planId)));
   const reminders = all.reminders.filter(row => targetCourse(row.target) !== undefined);
-  return {snapshot:{tasks, exams, goals, plans, blocks, reminders}, deadlines, courseIds, documentIds:[], now:services.clock()};
+  return {snapshot:{tasks, exams, goals, plans, blocks, reminders}, deadlines, courseIds, documentIds, now:services.clock()};
 }
 
 function actionFor(name:ToolName, args:ToolArguments): PlannerAction {
@@ -96,6 +100,7 @@ export function plannerHandlers(services:BackendServices): Pick<BackendHandlers,
     set_reminder:async (context, args) => { validateLocal(context, services, 'set_reminder', args); return approve(context, actionFor('set_reminder', args)); },
     export_calendar:async (context, args) => {
       validateLocal(context, services, 'export_calendar', args);
+      context.recheck();
       return {content:await services.options.exportCalendar(args.selection)};
     },
   };

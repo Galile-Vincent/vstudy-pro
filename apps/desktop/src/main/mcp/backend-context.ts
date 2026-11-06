@@ -6,7 +6,7 @@ import { contentText } from './backend-page';
 
 export class BackendContext {
   readonly provenance: Provenance;
-  constructor(readonly repository:MoodleRepository, readonly accountId:string | null, readonly accountIds:readonly string[], readonly args:ToolArguments) {
+  constructor(readonly repository:MoodleRepository, readonly accountId:string | null, readonly accountIds:readonly string[], readonly args:ToolArguments, readonly signal?:AbortSignal) {
     this.provenance = {account:accountId, school:null, courseId:null, moduleId:null, author:null, syncedAt:null};
     if (accountId) {
       const account = this.account();
@@ -19,7 +19,12 @@ export class BackendContext {
       this.provenance.syncedAt = repository.detailCache(args.courseId)?.refreshedAt ?? this.provenance.syncedAt;
     }
     if ('moduleId' in args) this.provenance.moduleId = args.moduleId;
-    if ('fileId' in args) this.provenance.courseId = this.file(args.fileId).file.courseId;
+    if ('fileId' in args) {
+      const {file} = this.file(args.fileId);
+      this.provenance.courseId = file.courseId;
+      this.provenance.moduleId = this.course(file.courseId).sections.flatMap(section => section.modules).find(module => module.fileIds.includes(file.id))?.id ?? null;
+      this.provenance.syncedAt = repository.detailCache(file.courseId)?.refreshedAt ?? this.provenance.syncedAt;
+    }
   }
   account() {
     if (!this.accountId) fail('ACCOUNT_REQUIRED');
@@ -53,6 +58,7 @@ export class BackendContext {
   ownsCourse(id:string | null): void { if (id) this.course(id); }
   courses() { return this.accountId ? this.repository.overview(this.account().id).courses : []; }
   recheck(): void {
+    if (this.signal?.aborted) fail('DENIED');
     if (this.accountId) this.account();
     if ('courseId' in this.args && this.args.courseId) this.course(this.args.courseId);
     if ('moduleId' in this.args) this.module(this.args.courseId, this.args.moduleId);

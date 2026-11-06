@@ -22,7 +22,7 @@ export function contentText(value: string, cap = 2_000): string {
 
 const canonical = (value: unknown): unknown => Array.isArray(value) ? value.map(canonical)
   : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => [k, canonical(v)])) : value;
-const cursorSchema = z.object({v:z.literal(1), binding:z.string(), offset:z.number().int().min(0).max(1_000_000)}).strict();
+const cursorSchema = z.object({v:z.literal(1), binding:z.string(), offset:z.number().int().min(0).max(8 * 1024 * 1024)}).strict();
 
 export class BackendPages {
   private readonly key = randomBytes(32);
@@ -34,6 +34,7 @@ export class BackendPages {
     const data = Buffer.from(JSON.stringify({v:1, binding, offset})).toString('base64url');
     return data + '.' + createHmac('sha256', this.key).update(data).digest('base64url');
   }
+  next(binding: string, offset: number): string { return this.encode(binding, offset); }
   offset(binding: string, cursor?: string): number {
     if (!cursor) return 0;
     const [data, mac, extra] = cursor.split('.');
