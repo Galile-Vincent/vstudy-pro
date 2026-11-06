@@ -13,7 +13,7 @@ Use Claude Code, Codex, Antigravity, Claude Desktop, or Cursor to read your sync
 
 Client names are self-reported. A matching name does not prove which program connected. Compare the code while you are connecting that client. Pairing never asks for a school password or school token.
 
-The bundled `vstudy-mcp` script needs Node.js 24.11.1 or later. A source checkout uses the Node version in `.node-version` and pnpm version in `package.json`. Source setup is:
+The bundled `vstudy-mcp` script needs Node.js 24.11.1 or later. A source checkout uses Node 24.19.0 from `.node-version` and the pnpm version in `package.json`. Source builds require Node >=24.15.0. Source setup is:
 
 ```sh
 pnpm install --frozen-lockfile

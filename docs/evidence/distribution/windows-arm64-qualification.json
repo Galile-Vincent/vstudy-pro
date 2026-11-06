@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "target": "win-arm64",
+  "administrator": false,
+  "installDirectory": "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\VStudy Pro",
+  "ok": false,
+  "installed": false,
+  "launched": false,
+  "uninstalled": false,
+  "startMenu": false,
+  "protocolRegistered": false,
+  "mcpStartup": {
+    "disabled": false,
+    "enabled": false
+  },
+  "error": "Error: ENOENT: no such file or directory, access 'C:\\Users\\runneradmin\\AppData\\Local\\Programs\\VStudy Pro\\VStudy Pro.exe'",
+  "sourceCommit": "002070ba14de05f00fccb3d24bee62af55c779f6",
+  "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42184671424",
+  "job": "https://github.com/ava-apple/vstudy-pro/actions/runs/42184671424/job/127782091859",
+  "packageBuilt": true,
+  "nativeAddonProbePassed": true,
+  "installedAppVerified": false,
+  "qualified": false,
+  "releaseEnabled": false,
+  "diagnosis": "Expected installed EXE missing after installer exited. Install location, timing, and installer selection need investigation; the report does not distinguish them."
+}

@@ -44,7 +44,9 @@
     "enabled": false,
     "expectedEnabled": false,
     "windowCreated": true,
-    "realPersistence": false
+    "realPersistence": false,
+    "startupRestored": false,
+    "bridgeVerified": false
   },
   "windowCapture": "window.png",
   "database": {
@@ -76,7 +78,7 @@
       {
         "name": "python3",
         "available": true,
-        "version": "{\"version\": \"3.15.1 (main, Oct 21 2026, 05:55:12) [Clang 21.0.0 (clang-2100.3.34.2)]\", \"stdlibProbe\": true}",
+        "version": "{\"version\": \"3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.3.34.2)]\", \"stdlibProbe\": true}",
         "stdlibProbe": true
       }
     ],
@@ -84,9 +86,9 @@
     "bootstrapAttempted": false,
     "conversionTested": false
   },
-  "sourceCommit": "79b1b3e7797f28b787c57e604daaed59d27f8c3f",
-  "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42172210076",
-  "job": "https://github.com/ava-apple/vstudy-pro/actions/runs/42172210076/job/127743717297",
+  "sourceCommit": "04003c0bbc0e8f5967899278de32b7a3cbca7c66",
+  "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42182355366",
+  "job": "https://github.com/ava-apple/vstudy-pro/actions/runs/42182355366/job/127774787770",
   "signingVerified": false,
   "publicReleaseCreated": false,
   "qualificationOnly": false

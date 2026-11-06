@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "platform": "win32",
+  "arch": "x64",
+  "electron": "42.11.16",
+  "node": "24.19.0",
+  "engine": "node-pty",
+  "rebuilt": true,
+  "stockElectron": true,
+  "packaged": false,
+  "roundTrip": true,
+  "exitCode": 0,
+  "libraries": [
+    {
+      "name": "conpty.node",
+      "sha256": "a7921c3cbba6945fe7d01c33959f43fa164d2a2a1d2f93461a659c4d0a2e72e6"
+    }
+  ],
+  "sourceCommit": "04003c0bbc0e8f5967899278de32b7a3cbca7c66",
+  "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42181535288",
+  "job": "https://github.com/ava-apple/vstudy-pro/actions/runs/42181535288/job/127772049587",
+  "compilerDriver": "node-gyp 13.1.0",
+  "signingVerified": false,
+  "publicReleaseCreated": false
+}

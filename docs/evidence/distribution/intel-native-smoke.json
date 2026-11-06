@@ -44,7 +44,9 @@
     "enabled": false,
     "expectedEnabled": false,
     "windowCreated": true,
-    "realPersistence": false
+    "realPersistence": false,
+    "startupRestored": false,
+    "bridgeVerified": false
   },
   "windowCapture": "window.png",
   "database": {
@@ -84,15 +86,15 @@
     "nativeWheel": {
       "verified": true,
       "version": "50.0.2",
-      "sha256": "4734c5bf45596782b8dbf68be7d79745b744e8f9884d6b15732e5880d4f39278",
+      "sha256": "026eb408f29e39aa4be217278511f2e92849546e3412736be15d379af2b0fd5d",
       "minimumMacOS": "13.0"
     },
     "bootstrapAttempted": false,
     "conversionTested": false
   },
-  "sourceCommit": "79b1b3e7797f28b787c57e604daaed59d27f8c3f",
-  "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42172210076",
-  "job": "https://github.com/ava-apple/vstudy-pro/actions/runs/42172210076/job/127743717148",
+  "sourceCommit": "04003c0bbc0e8f5967899278de32b7a3cbca7c66",
+  "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42182355366",
+  "job": "https://github.com/ava-apple/vstudy-pro/actions/runs/42182355366/job/127774787852",
   "signingVerified": false,
   "publicReleaseCreated": false,
   "qualificationOnly": true

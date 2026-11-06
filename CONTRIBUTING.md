@@ -1,6 +1,6 @@
 # Contribute to VStudy Pro
 
-Use [the engineering guide](docs/ENGINEERING.md) to install dependencies, navigate the code, and run checks.
+Use [the engineering guide](docs/ENGINEERING.md) to install dependencies, navigate the code, and run checks. Use Node 24.19.0 from `.node-version` and pnpm 10.28.2. Source builds require Node >=24.15.0.
 
 ## Make a focused change
 

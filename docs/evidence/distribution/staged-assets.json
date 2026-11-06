@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "version": "0.2.2",
+  "checksumSource": "CI stageAssets inventory. Downloaded metadata files were also rehashed locally; complete binary downloads were not rehashed locally.",
+  "publicReleaseCreated": false,
+  "targets": [
+    {
+      "target": "mac-arm64",
+      "releaseEnabled": true,
+      "qualified": true,
+      "source": {
+        "repository": "ava-apple/vstudy-pro",
+        "commit": "04003c0bbc0e8f5967899278de32b7a3cbca7c66",
+        "ref": "refs/heads/ci/cross-platform-dryrun",
+        "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42182355366"
+      },
+      "signing": {
+        "schemaVersion": 1,
+        "target": "mac-arm64",
+        "mode": "unsigned",
+        "signed": false,
+        "notarized": false
+      },
+      "builtAt": "2026-11-06T07:45:38.449Z",
+      "assets": [
+        {
+          "file": "VStudy-Pro-0.2.2-mac-arm64.dmg",
+          "size": 123600370,
+          "sha256": "2e990bbe0c035f1a839dc32e34ab2db8f48716f6bc66f7463343b5b3d3643717"
+        },
+        {
+          "file": "VStudy-Pro-0.2.2-mac-arm64.dmg.blockmap",
+          "size": 130972,
+          "sha256": "cd88358ddbe2c29154c3805cc04ec47a058620297045b1b88c04cad44d06275a"
+        },
+        {
+          "file": "VStudy-Pro-0.2.2-mac-arm64.zip",
+          "size": 346210257,
+          "sha256": "05ebf390a87450177cded2faf07e9434e63f01167ede8c9c355ab23272ae4aae"
+        },
+        {
+          "file": "VStudy-Pro-0.2.2-mac-arm64.zip.blockmap",
+          "size": 339940,
+          "sha256": "d6c3305d9dbff78f49b1c25b55165e062a99a98a6cc40d03ec8232897eb75928"
+        },
+        {
+          "file": "VStudy-Pro-mac-arm64.dmg",
+          "size": 123600370,
+          "sha256": "2e990bbe0c035f1a839dc32e34ab2db8f48716f6bc66f7463343b5b3d3643717"
+        },
+        {
+          "file": "latest-mac-arm64.yml",
+          "size": 518,
+          "sha256": "12fb322142838dd357c38a1b23f40bfb37a646f513f98f1cf180c56b208ecf15"
+        },
+        {
+          "file": "latest-mac.yml",
+          "size": 518,
+          "sha256": "12fb322142838dd357c38a1b23f40bfb37a646f513f98f1cf180c56b208ecf15"
+        }
+      ]
+    },
+    {
+      "target": "mac-x64",
+      "releaseEnabled": false,
+      "qualified": true,
+      "source": {
+        "repository": "ava-apple/vstudy-pro",
+        "commit": "04003c0bbc0e8f5967899278de32b7a3cbca7c66",
+        "ref": "refs/heads/ci/cross-platform-dryrun",
+        "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42182355366"
+      },
+      "signing": {
+        "schemaVersion": 1,
+        "target": "mac-x64",
+        "mode": "unsigned",
+        "signed": false,
+        "notarized": false
+      },
+      "builtAt": "2026-11-06T07:57:09.069Z",
+      "assets": [
+        {
+          "file": "VStudy-Pro-0.2.2-mac-x64.dmg",
+          "size": 134483909,
+          "sha256": "71c5421bc46c6590e049d9059d06e410ba29d9baa1b852d3e194c9847e1a8d30"
+        },
+        {
+          "file": "VStudy-Pro-0.2.2-mac-x64.dmg.blockmap",
+          "size": 141534,
+          "sha256": "ddbe8a9c92c9c88ddb4c0450408a22d5776bc4878cab735a7e5eb77f116a124f"
+        },
+        {
+          "file": "VStudy-Pro-0.2.2-mac-x64.zip",
+          "size": 370586231,
+          "sha256": "e1b79bb25161104a34c61976691019863abd4a87dd2402e47f1361fa45379aa2"
+        },
+        {
+          "file": "VStudy-Pro-0.2.2-mac-x64.zip.blockmap",
+          "size": 386063,
+          "sha256": "51abf9e1ec118c494409b1267468004716ecaeefe5e4b46dcb2c3f3ff501e163"
+        },
+        {
+          "file": "VStudy-Pro-mac-x64.dmg",
+          "size": 134483909,
+          "sha256": "71c5421bc46c6590e049d9059d06e410ba29d9baa1b852d3e194c9847e1a8d30"
+        },
+        {
+          "file": "latest-mac-x64.yml",
+          "size": 512,
+          "sha256": "9bb79396ff38f9bbc442329c24638a2910101df5a65a25c159dc198b31faaee3"
+        }
+      ]
+    },
+    {
+      "target": "win-x64",
+      "releaseEnabled": true,
+      "qualified": true,
+      "source": {
+        "repository": "ava-apple/vstudy-pro",
+        "commit": "002070ba14de05f00fccb3d24bee62af55c779f6",
+        "ref": "refs/heads/ci/windows-native-pipe",
+        "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42184671424"
+      },
+      "signing": {
+        "schemaVersion": 1,
+        "target": "win-x64",
+        "mode": "unsigned",
+        "signed": false,
+        "notarized": false
+      },
+      "builtAt": "2026-11-06T08:06:32.009Z",
+      "assets": [
+        {
+          "file": "VStudy-Pro-0.2.2-win-x64.exe",
+          "size": 111704208,
+          "sha256": "76974fde78998f5ffc27a33b423544ed6a11c49b1f36f5bd506328fbcfd7bdaa"
+        },
+        {
+          "file": "VStudy-Pro-0.2.2-win-x64.exe.blockmap",
+          "size": 118205,
+          "sha256": "61cea7d2a71d732a456f5566ed752d873763009d9882e98517c0a82348e36092"
+        },
+        {
+          "file": "VStudy-Pro-0.2.2-win-x64.zip",
+          "size": 156149988,
+          "sha256": "a9cdd2af31303b5783aaa0f0aeb7d41fea77445a57c94d0f6382642c4cf1db3d"
+        },
+        {
+          "file": "VStudy-Pro-win-x64.exe",
+          "size": 111704208,
+          "sha256": "76974fde78998f5ffc27a33b423544ed6a11c49b1f36f5bd506328fbcfd7bdaa"
+        },
+        {
+          "file": "latest-win-x64.yml",
+          "size": 353,
+          "sha256": "a5762c5a45bec608d6df6a6047e9a95e1c89dd4bf0fbd8c3a8ac485c3560ba4c"
+        },
+        {
+          "file": "latest.yml",
+          "size": 353,
+          "sha256": "a5762c5a45bec608d6df6a6047e9a95e1c89dd4bf0fbd8c3a8ac485c3560ba4c"
+        }
+      ]
+    },
+    {
+      "target": "win-arm64",
+      "releaseEnabled": false,
+      "qualified": false,
+      "sourceCommit": "002070ba14de05f00fccb3d24bee62af55c779f6",
+      "run": "https://github.com/ava-apple/vstudy-pro/actions/runs/42184671424",
+      "packageBuilt": true,
+      "assets": [],
+      "reason": "Installer returned without the expected EXE. No installed-app or staged-asset claim."
+    }
+  ]
+}
