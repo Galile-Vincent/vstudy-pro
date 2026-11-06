@@ -123,3 +123,10 @@ it.each(['en', 'zh-Hant', 'ja'])('renders translated controls in %s', async loca
   expect(view.host.textContent).toContain(tr('agents:no_grants'));
   expect(view.host.textContent).not.toContain('agents:');
 });
+
+it('shows platform unavailability without losing Settings controls', async () => {
+  state.unavailable = true;
+  await mount();
+  expect(view.host.textContent).toContain('Agent access is unavailable on this platform/build');
+  expect(document.querySelector('[role=switch]')).not.toBeNull();
+});

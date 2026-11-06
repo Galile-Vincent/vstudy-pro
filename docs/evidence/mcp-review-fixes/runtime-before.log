@@ -1,0 +1,31 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop
+
+ ❯ src/main/mcp/runtime.test.ts (5 tests | 1 failed | 4 skipped) 3ms
+   × Windows-shaped process without getuid throws synchronously before runtime readiness and cannot fail only MCP closed 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/mcp/runtime.test.ts > Windows-shaped process without getuid throws synchronously before runtime readiness and cannot fail only MCP closed
+AssertionError: expected [Function] to not throw an error but 'Error: DENIED' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"Error: DENIED"
+
+ ❯ src/main/mcp/runtime.test.ts:81:212
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  13:44:57
+   Duration  115ms (transform 47ms, setup 0ms, import 63ms, tests 3ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/mcp/runtime.test.ts --pool=forks --maxWorkers=2 -t Windows-shaped

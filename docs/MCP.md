@@ -154,3 +154,5 @@ Scopes, account allowlists, expiring grants, exact one-shot approvals, capabilit
 A malicious process running as your OS user can inspect memory and change files. These controls do not isolate it from your account. School content and local logs are not encrypted by MCP. FileVault and your OS account protect files. Once an agent legitimately reads information, revocation cannot recall its copies.
 
 See [the security model](SECURITY.md), [MCP design decisions](MCP_DESIGN.md), and the [main subsystem contract](../apps/desktop/src/main/mcp/README.md).
+
+MCP backend, grant persistence, and transport construction are lazy until the student enables access. Construction and readiness failures disable only MCP and log a fixed diagnostic. Settings > Agents shows "Agent access is unavailable on this platform/build". The desktop startup and window creation do not depend on MCP availability. Access must be enabled again after restarting the app.

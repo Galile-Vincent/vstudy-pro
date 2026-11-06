@@ -15,7 +15,7 @@ it('rejects foreign senders and extra decision fields before calling any privile
   const registrar=createIpcRegistrar(ipc,event=>event===trusted);
   const approve=vi.spyOn(f.engine,'decideProposal');
   const navigation={take:vi.fn(()=>null),clear:vi.fn()} as unknown as ReturnType<typeof createAgentNavigation>;
-  const runtime={engine:f.engine,setEnabled:async(value:boolean)=>f.engine.setEnabled(value)} as McpRuntime;
+  const runtime={engine:f.engine,state:()=>f.engine.state(),setEnabled:async(value:boolean)=>f.engine.setEnabled(value)} as McpRuntime;
   registerMcpIpc(registrar,new Set(),runtime,navigation,{list:async()=>[],install:async()=>({diff:'',changed:false}),doctor:async()=>({ok:true,checks:[]})});
   await expect(handlers.get('mcp:proposal-decision')!({} as IpcMainInvokeEvent,{proposalId:f.account.id,approve:true})).rejects.toThrow('Untrusted');
   await expect(handlers.get('mcp:proposal-decision')!(trusted,{proposalId:f.account.id,approve:true,grant:'stolen'})).rejects.toThrow();

@@ -1,0 +1,29 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop
+
+ ❯ src/main/index.test.ts (8 tests | 1 failed) 527ms
+   × creates the main window with persistence factory failure and MCP enabled=true 55ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/index.test.ts > creates the main window with persistence factory failure and MCP enabled=true
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/main/index.test.ts:143:66
+    141|       expect(onFailure).toHaveBeenCalledOnce();
+    142|       expect(mocks.log).toHaveBeenCalledWith({phase:'mcp-bridge-unavai…
+    143|       if (failure === 'persistence factory') expect(persistence).toHav…
+       |                                                                  ^
+    144|     } else {
+    145|       expect(runtime!.state()).toMatchObject({enabled:false, unavailab…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  13:53:46
+   Duration  606ms (transform 92ms, setup 0ms, import 24ms, tests 527ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/index.test.ts --pool=forks --maxWorkers=2

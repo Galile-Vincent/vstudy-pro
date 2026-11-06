@@ -134,5 +134,6 @@
   "queued_one": "{{count}} request waiting for review",
   "queued_other": "{{count}} requests waiting for review",
   "own_work": "I confirm this is my own work and I want to save this exact text as a draft.",
-  "request_expires": "Request expires"
+  "request_expires": "Request expires",
+  "unavailable": "Agent access is unavailable on this platform/build"
 }

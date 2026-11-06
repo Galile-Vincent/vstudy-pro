@@ -1,0 +1,52 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop
+
+ ❯ src/main/mcp/backend-security.test.ts (8 tests | 2 failed | 6 skipped) 128ms
+   × final submission includes pre-existing attachments absent from the approved payload 66ms
+   × final submission accepts a changed remote draft after saving the approved text 61ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/mcp/backend-security.test.ts > final submission includes pre-existing attachments absent from the approved payload
+AssertionError: expected '{"limit":20,"courseId":"703f2baf-1c89…' to contain 'unreviewed-private-attachment.pdf'
+
+Expected: "unreviewed-private-attachment.pdf"
+Received: "{"limit":20,"courseId":"703f2baf-1c89-5604-a915-f087f9b6e2bf","moduleId":"8dd86dc5-3069-566e-a6fd-4610e9e0777b","assignmentId":52,"text":"My approved text only.","studentOwned":true,"account":"11111111-1111-4111-a111-111111111111"}"
+
+ ❯ assignmentDraftAttack src/main/mcp/backend-security.test.ts:151:57
+    149|   const pending = await proposal(h.engine);
+    150|   expect(pending.payload.text).toBe('My approved text only.');
+    151|   if (withFile) expect(JSON.stringify(pending.payload)).toContain('unr…
+       |                                                         ^
+    152|   expect(JSON.stringify(pending.payload)).toContain('textHash');
+    153|   h.engine.decideProposal({proposalId:pending.id, approve:true});
+ ❯ src/main/mcp/backend-security.test.ts:161:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/main/mcp/backend-security.test.ts > final submission accepts a changed remote draft after saving the approved text
+AssertionError: expected '{"limit":20,"courseId":"703f2baf-1c89…' to contain 'textHash'
+
+Expected: "textHash"
+Received: "{"limit":20,"courseId":"703f2baf-1c89-5604-a915-f087f9b6e2bf","moduleId":"8dd86dc5-3069-566e-a6fd-4610e9e0777b","assignmentId":52,"text":"My approved text only.","studentOwned":true,"account":"11111111-1111-4111-a111-111111111111"}"
+
+ ❯ assignmentDraftAttack src/main/mcp/backend-security.test.ts:152:43
+    150|   expect(pending.payload.text).toBe('My approved text only.');
+    151|   if (withFile) expect(JSON.stringify(pending.payload)).toContain('unr…
+    152|   expect(JSON.stringify(pending.payload)).toContain('textHash');
+       |                                           ^
+    153|   h.engine.decideProposal({proposalId:pending.id, approve:true});
+    154|   const result = await running;
+ ❯ src/main/mcp/backend-security.test.ts:165:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 skipped (8)
+   Start at  13:42:03
+   Duration  455ms (transform 195ms, setup 0ms, import 268ms, tests 128ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/mcp/backend-security.test.ts --pool=forks --maxWorkers=2 -t final submission

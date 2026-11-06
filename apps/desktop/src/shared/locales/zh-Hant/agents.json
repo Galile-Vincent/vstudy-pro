@@ -134,5 +134,6 @@
   "queued_one": "{{count}} 個請求等待確認",
   "queued_other": "{{count}} 個請求等待確認",
   "own_work": "我確認這是自己的作品，並同意將這段完整文字儲存為草稿。",
-  "request_expires": "請求到期時間"
+  "request_expires": "請求到期時間",
+  "unavailable": "此平台或建置版本無法使用代理程式存取功能"
 }
