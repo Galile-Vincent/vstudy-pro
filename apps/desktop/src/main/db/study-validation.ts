@@ -1,7 +1,7 @@
 /** Side-effect-free payload checks for staged backups, including historical study rows. */
 import type { DatabaseSync } from 'node:sqlite';
 import { z } from 'zod';
-import { studyScopeSchema, studyResolvedScopeSchema, studyTestSchema, studyAnswersSchema, type StudyTest } from '../../shared/review-artifacts';
+import { isStudyAnswer, studyScopeSchema, studyResolvedScopeSchema, studyTestSchema, studyAnswersSchema, type StudyTest } from '../../shared/review-artifacts';
 import { studyCourseSchema, studyUnitSchema, studyConceptSchema, studyChatLinkSchema, studyPrefsSchema } from '../../shared/review';
 
 const id=z.string().uuid(), at=z.string().datetime(), text=z.string().min(1).max(240), bit=z.union([z.literal(0),z.literal(1)]);
@@ -64,7 +64,7 @@ export function validateStudyData(db:DatabaseSync):void {
    if(attempt.committedAt!==null&&attempt.committedAt<attempt.startedAt||attempt.confirmedAt!==null&&attempt.confirmedAt<attempt.committedAt!)throw new Error('invalid attempt chronology');
    for(const [itemId,answer]of Object.entries(answers)){
     const item=test.items.find(item=>item.id===itemId);if(!item)throw new Error('invalid answer item');
-    if(answer!==null&&(item.type==='mcq'?(typeof answer!=='number'||answer>=item.options.length):item.type==='true_false'?typeof answer!=='boolean':typeof answer!=='string'))throw new Error('invalid answer type');
+    if(!isStudyAnswer(item,answer))throw new Error('invalid answer type');
    }
    for(const raw of db.prepare('SELECT * FROM study_attempt_items WHERE attemptId=?').all(attempt.id)){
     const item=test.items.find(item=>item.id===raw.itemId);
