@@ -4,6 +4,9 @@ export type Language = typeof languages[number];
 export const languageNames = { en: 'English', 'zh-Hant': '繁體中文', ja: '日本語' };
 
 const en = {
+  coursePageAlt:'Algorithms & Data Structures with current-week materials and upcoming work',
+  readerAlt:'Graph traversal notes with a selected passage, demo AI answer, and source citation',coursesAlt:'Art-led course cards with teachers, progress, and deadlines',
+  plannerAlt: 'Populated study planner with tasks and a statistics exam', lightPreview:'Light app preview', darkPreview:'Dark app preview',
   features: 'Features', docs: 'Docs', download: 'Download', downloadMac: 'Download for macOS',
   readDocs: 'Read the docs', skip: 'Skip to content', appearance: 'Change color scheme',
   language: 'Language', menu: 'Menu', close: 'Close', search: 'Search the docs', searchHint: 'Search topics, questions, and headings',
@@ -13,7 +16,7 @@ const en = {
   copy: 'Copy', copied: 'Copied', copyFailed: 'Could not copy. Select the code to copy it.',
   hero: 'Your semester, with room to think.',
   sub: 'Bring Moodle courses, study plans, and AI-assisted reading together in one calm workspace for your Mac.',
-  availability: 'macOS · Apple silicon', screenshot: 'The real app, with a sample document and a test provider.',
+  availability: 'macOS · Apple silicon', screenshot: 'The real app with curated demo coursework and a simulated AI conversation.',
   stepsTitle: 'A little setup. A clearer next step.',
   steps: [
     ['Make yourself at home', 'Open the sample document. Choose your language and a theme that feels right.'],
@@ -26,9 +29,7 @@ const en = {
   courseLink: 'Explore courses and deadlines',
   agentTitle: 'A study partner. You make the call.',
   agentBody: 'Ask the course agent to break down an assignment or plan exam preparation. It proposes tasks, study blocks, and reminders. You review the details before anything changes.',
-  agentPrompt: 'Help me plan for next week’s exam.',
-  agentProposal: 'Proposed study block', agentTask: 'Review lecture notes', agentTime: '45 minutes · Tomorrow',
-  agentApproval: 'Waiting for your approval', agentLink: 'Understand the approval model',
+  agentLink: 'Understand the approval model',
   readerTitle: 'Read closely. Ask better questions.',
   readerBody: 'Select a passage and ask your chosen AI provider to explain it. Follow citations back to the reading, and keep your questions alongside the document.',
   readerLink: 'Read with AI', readerNote: 'PDF, Word, slides, spreadsheets, Markdown, and more. Scanned PDFs need OCR elsewhere.',
@@ -42,7 +43,7 @@ const en = {
   privacyLink: 'See what leaves your Mac',
   themesTitle: 'A workspace that feels like yours.',
   themesBody: 'Nine whole-app theme packs. Each with a light and a dark side. Try a palette here, then make the app your own.',
-  themeHint: 'Select a pack to preview this page. The two orbs show its light and dark palettes.',
+  themeHint: 'Six real app previews, light and dark. Select a pack to compare it and preview this page.',
   faqTitle: 'Before you settle in.',
   faqs: [
     ['Do I need AI to use VStudy?', 'No. Read documents, browse saved coursework, and manage your planner without an AI provider. AI features need an enabled provider and a network connection.'],
@@ -59,11 +60,14 @@ const en = {
 };
 type Copy = { [K in keyof typeof en]: typeof en[K] };
 const zh: Copy = {
+  coursePageAlt:'演算法與資料結構的本週教材與即將到期作業',
+  readerAlt:'圖論筆記、已選段落、示範 AI 回答與來源引用',coursesAlt:'以藝術封面呈現教師、進度與截止日期的課程卡片',
+  plannerAlt:'學習規劃中的待辦事項與統計期中考',lightPreview:'淺色 app 預覽',darkPreview:'深色 app 預覽',
   features:'功能',docs:'使用指南',download:'下載',downloadMac:'下載 macOS 版',readDocs:'閱讀使用指南',skip:'跳至主要內容',appearance:'切換明暗模式',language:'語言',menu:'選單',close:'關閉',search:'搜尋使用指南',searchHint:'搜尋主題、問題與章節',noResults:'找不到結果。試試「學校」、「備份」或「provider」。',searchStart:'輸入關鍵字即可搜尋。搜尋內容只留在此瀏覽器。',onPage:'本頁內容',contents:'瀏覽使用指南',previous:'上一頁',next:'下一頁',fallback:'此篇指南目前僅提供英文。「開始使用」與「連接學校」已有繁體中文版。',copy:'複製',copied:'已複製',copyFailed:'無法複製，請選取程式碼後複製。',
   hero:'整理好學期，留點空間思考。',sub:'在 Mac 上，用一個清爽的工作空間整合 Moodle 課程、讀書計畫與 AI 輔助閱讀。',availability:'macOS · Apple 晶片',screenshot:'真實應用程式畫面，使用範例文件與測試供應商。',
   stepsTitle:'一點設定，讓下一步更清楚。',steps:[['從熟悉環境開始','打開範例文件，選擇語言與喜歡的佈景主題。'],['帶入你的課業','連接學校的 Moodle，或匯入自己的閱讀資料。兩種方式都能開始。'],['決定接下來的安排','查看期限、提出問題，並在核准前檢視讀書計畫。']],
   featureTitle:'少切換，多專注。',courseTitle:'掌握期限，也看見課程脈絡。',courseBody:'Moodle 課程、截止日期、公告、成績與檔案集中在一起。已儲存的課程內容，在網路中斷時仍可查看。',courseLink:'了解課程與期限',
-  agentTitle:'讀書夥伴，由你做決定。',agentBody:'請課程助理拆解作業，或安排考前準備。助理會提出任務、讀書時段與提醒，只有在你檢視並核准後才會寫入。',agentPrompt:'幫我安排下週考試的準備計畫。',agentProposal:'建議讀書時段',agentTask:'複習上課筆記',agentTime:'45 分鐘 · 明天',agentApproval:'等待你的核准',agentLink:'了解核准機制',
+  agentTitle:'讀書夥伴，由你做決定。',agentBody:'請課程助理拆解作業，或安排考前準備。助理會提出任務、讀書時段與提醒，只有在你檢視並核准後才會寫入。',agentLink:'了解核准機制',
   readerTitle:'仔細讀，也問得更深入。',readerBody:'選取一段文字，請你選擇的 AI 供應商解釋。透過引用回到原文，讓問題與閱讀資料放在一起。',readerLink:'使用 AI 閱讀',readerNote:'支援 PDF、Word、簡報、試算表、Markdown 等格式。掃描 PDF 需要先在其他工具進行 OCR。',
   extras:[['找回那段對話','搜尋所有聊天，依課程、文件、角色或日期篩選。','chat-history'],['在課程中開啟 Moodle','使用依帳號隔離的內嵌視窗，開啟支援的學校頁面。','moodle-pages']],
   privacyTitle:'你的資料庫，留在你的 Mac。',privacyBody:'文件、對話與讀書計畫儲存在本機。不需要 VStudy 帳號，沒有分析追蹤，也不會自動同步裝置。',privacyDetail:'AI 由你選擇。啟用後，供應商會收到問題與相關閱讀內容。連接 Moodle 時則會聯繫你的學校。',privacyLink:'了解哪些資料會傳出 Mac',
@@ -72,11 +76,14 @@ const zh: Copy = {
   finalTitle:'為重要的課業，留出空間。',finalBody:'從一份閱讀資料開始，準備好後再帶入整個學期。',requirements:'適用於 Apple 晶片 Mac。目前組建尚未公證，開啟前請閱讀首次啟動指南。',firstLaunch:'安裝與首次啟動',footer:'讓課業更有條理的空間。',privacy:'隱私權',source:'GitHub 原始碼',version:'版本',themeNames:['VStudy','海洋','森林','餘燼','鳶尾','玫瑰','石板','紙張','高對比'],
 };
 const ja: Copy = {
+  coursePageAlt:'アルゴリズムとデータ構造の今週の教材と課題',
+  readerAlt:'グラフのノート、選択した文章、デモ AI 回答と出典の引用',coursesAlt:'アートの表紙と教員、進捗、締切が並ぶ授業カード',
+  plannerAlt:'タスクと統計の中間試験が入った学習プランナー',lightPreview:'ライトのアプリプレビュー',darkPreview:'ダークのアプリプレビュー',
   features:'機能',docs:'ガイド',download:'ダウンロード',downloadMac:'macOS 版をダウンロード',readDocs:'ガイドを読む',skip:'本文へスキップ',appearance:'明暗を切り替える',language:'言語',menu:'メニュー',close:'閉じる',search:'ガイドを検索',searchHint:'トピック、質問、見出しを検索',noResults:'見つかりません。「school」「backup」「provider」もお試しください。',searchStart:'入力して検索。検索内容はこのブラウザー内に留まります。',onPage:'このページの内容',contents:'ガイド一覧',previous:'前へ',next:'次へ',fallback:'このガイドは現在英語のみです。「はじめに」と「学校に接続する」は日本語で読めます。',copy:'コピー',copied:'コピーしました',copyFailed:'コピーできませんでした。コードを選択してコピーしてください。',
   hero:'学期を整えて、考える余白を。',sub:'Moodle の授業、学習計画、AI と読む資料を、Mac のひとつの落ち着いたワークスペースに。',availability:'macOS · Apple シリコン',screenshot:'サンプル資料とテスト用プロバイダーを使った実際のアプリ画面。',
   stepsTitle:'少しの準備で、次の一歩が見える。',steps:[['自分の場所をつくる','サンプル資料を開いて、言語と好みのテーマを選びます。'],['授業をまとめる','学校の Moodle に接続するか、自分の資料を取り込みます。どちらからでも始められます。'],['次の予定を決める','締切を確認し、質問し、学習計画を確認してから承認します。']],
   featureTitle:'切り替えを減らして、学びに集中。',courseTitle:'締切も、授業の流れも見渡せる。',courseBody:'Moodle の授業、締切、お知らせ、成績、ファイルを一か所に。保存済みの授業内容は、接続が途切れても確認できます。',courseLink:'授業と締切について',
-  agentTitle:'学習のパートナー。決めるのはあなた。',agentBody:'課題の分解や試験対策を授業エージェントに相談。タスク、学習時間、リマインダーの提案を確認し、承認した内容だけが反映されます。',agentPrompt:'来週の試験に向けて計画を立てたい。',agentProposal:'学習時間の提案',agentTask:'講義ノートを復習する',agentTime:'45 分 · 明日',agentApproval:'あなたの承認待ち',agentLink:'承認の仕組みを読む',
+  agentTitle:'学習のパートナー。決めるのはあなた。',agentBody:'課題の分解や試験対策を授業エージェントに相談。タスク、学習時間、リマインダーの提案を確認し、承認した内容だけが反映されます。',agentLink:'承認の仕組みを読む',
   readerTitle:'深く読んで、よりよく問いかける。',readerBody:'文章を選択して、選んだ AI プロバイダーに説明を求めます。引用から原文に戻り、質問を資料と一緒に残せます。',readerLink:'AI と資料を読む',readerNote:'PDF、Word、スライド、表計算、Markdown などに対応。スキャン PDF は別のツールで OCR が必要です。',
   extras:[['あの会話をもう一度','すべてのチャットを検索。授業、資料、役割、日付で絞り込めます。','chat-history'],['Moodle を授業のそばに','アカウントごとに分離した表示で、対応する学校のページを開けます。','moodle-pages']],
   privacyTitle:'ライブラリは、あなたの Mac に。',privacyBody:'資料、会話、学習計画はローカルに保存。VStudy アカウントも解析トラッキングもなく、端末間の自動同期もありません。',privacyDetail:'AI を使うかはあなた次第。有効にすると、質問と関連する資料の文脈をプロバイダーに送ります。Moodle 接続は学校と通信します。',privacyLink:'Mac の外に送る情報を確認',

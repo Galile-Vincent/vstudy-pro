@@ -6,7 +6,7 @@
 
 ![版本 0.2.0](https://img.shields.io/badge/version-0.2.0-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
 
-![繁體中文閱讀範例與可選用的 AI 聊天區](docs/assets/readme/reader.webp)
+![圖論筆記、已選段落、示範回答與來源引用](docs/assets/readme/reader.webp)
 
 ## 下載與安裝
 
@@ -82,61 +82,65 @@ pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish neve
 
 ## 頁面導覽
 
-截圖取自既有的真實 app 測試，學校與 AI 資料皆為測試範例。部分截圖早於目前的導覽或控制項，僅供了解配置，不代表真實學校或 AI 服務已通過驗證。[圖片來源](docs/assets/readme/README.md)記錄原始路徑。
+截圖來自目前建置的 app，使用精心編排的示範課程、本機文件與模擬 AI 對話，不代表真實學校或 AI 服務已通過驗證。[截圖流程與圖片來源](docs/assets/readme/README.md)。
 
 ### 首頁
 
 從設定清單開始，匯入文件或試用範例，也能返回最近閱讀的內容並查看學習活動。
 
-![首頁的設定清單與文件匯入區](docs/assets/readme/home.webp)
+![最近閱讀與已完成設定清單的首頁](docs/assets/readme/home.webp)
 
 ### 文件庫
 
 瀏覽與搜尋文件，透過資料夾、標籤、釘選、最近開啟、已儲存篩選與轉換狀態找到教材。
 
-![Grove 淺色主題的文件庫](docs/assets/readme/library.webp)
+![以兩個資料夾整理的英文與繁體中文學習筆記](docs/assets/readme/library.webp)
 
 ### 閱讀器與聊天
 
 在轉換後的 Markdown 旁開啟文件對話，選取段落提問、回查引用，並重新開啟同一文件的舊對話。不連接 AI 也能閱讀。
 
-![範例文件與 AI 設定提示](docs/assets/readme/reader.webp)
+![圖論筆記、已選段落、示範回答與來源引用](docs/assets/readme/reader.webp)
 
 ### 課程首頁
 
 連接或重新登入學校、同步帳號、查看未來七天尚未繳交的作業，並切換目前、未來、過去或全部課程。
 
-![Iris 淺色主題的範例學校與課程](docs/assets/readme/courses.webp)
+![以課程藝術封面呈現教師、截止日期與進度](docs/assets/readme/courses.webp)
 
 ### 課程頁面
 
 分頁包含**內容、期限、公告、成績、檔案與通知**。可開啟教材、設定期限提醒，或詢問課程助理。學校未開放的功能無法使用。
 
-![在課程上方開啟的獨立 Moodle 教師頁面](docs/assets/readme/webview.webp)
+![演算法與資料結構的本週教材與截止日期](docs/assets/readme/course.webp)
+
+![在獨立 app 面板中開啟的 Moodle 示範教師頁面](docs/assets/readme/webview.webp)
 
 ### 今日與讀書計畫
 
 從課程進入讀書計畫，切換今日與本週、新增任務與考試、設定可用時間，確認排程提案後再儲存，也能匯出行事曆檔案。
 
-![今日與讀書計畫的任務輸入表單](docs/assets/readme/planner.webp)
+![今日學習待辦事項與統計期中考](docs/assets/readme/planner.webp)
 
 ### 聊天記錄
 
 跨對話搜尋並重新開啟符合的訊息，以篩選條件區分課程、文件與一般聊天，也可保留常用的釘選對話。
 
-![跨範例對話搜尋聊天記錄](docs/assets/readme/history.webp)
+![以 Command-K 搜尋已儲存的學習對話](docs/assets/readme/history.webp)
 
 ### 設定
 
 「**一般**」切換語言並重開導覽或歡迎頁；「**外觀**」調整主題與對比；「**AI 服務供應商**」連接 AI；「**用量**」查看 token 與費用；「**儲存空間**」管理備份與清理；「**隱私權**」管理轉換器安裝、離線模式、網路活動與資料刪除。
 
-![外觀設定中的主題淺色與深色預覽](docs/assets/readme/themes.webp)
+![全介面淺色與深色主題設定](docs/assets/readme/themes.webp)
+
+![儲存空間使用量與分類](docs/assets/readme/storage.webp)
 
 ### 說明與歡迎頁
 
 「說明」可重開首次設定、圖解或錄製的操作示範，以及鍵盤快捷鍵。歡迎頁介紹 app 並提供範例，不必先準備學校或 AI 帳號。
 
-![使用範例文件練習選取段落的首次使用導覽](docs/assets/readme/onboarding.webp)
+![閱讀工作區預覽與歡迎導覽](docs/assets/readme/onboarding.webp)
 
 ### 鍵盤快捷鍵
 
@@ -253,6 +257,7 @@ sequenceDiagram
 | `pnpm e2e` | 建置並依序執行真實 Electron E2E 測試。 |
 | `pnpm smoke` | 建置並啟動真實 Electron 冒煙測試。 |
 | `pnpm package` | 依預設簽署設定建置與封裝。 |
+| `node apps/desktop/scripts/marketing-shots.mjs` | 先執行 `pnpm build`，再產生行銷截圖組合。 |
 | `node scripts/check-readme-links.mjs` | 檢查三份 README 與文件索引的本機連結。 |
 
 E2E 需要 **uv**，或透過 `VSTUDY_CONVERTER_VENV` 指定既有、以雜湊鎖定的轉換器環境。它會準備未簽署的封裝，也可能下載 Python 相依套件。驗證資料預設存於 `/tmp/vstudy-final/e2e`，可用 `VSTUDY_E2E_EVIDENCE` 更改。真實 AI 測試需要明確啟用並登入，略過不代表通過驗證。

@@ -3,11 +3,14 @@ import Base from '../layouts/Base.astro';
 import Window from './Window.astro';
 import { path, RELEASES_URL, VERSION } from '../config';
 import { ui, type Language } from '../data/ui';
+import { getImage } from 'astro:assets';
+import { shot } from '../data/shots';
 import palettes from '../../../desktop/src/shared/themes/palettes.json';
 import '../styles/home.css';
 interface Props { language: Language; }
 const { language } = Astro.props;
 const t = ui[language];
+const previews = await Promise.all(palettes.slice(0,6).map(async pack => ({...pack,lightShot:(await getImage({src:shot(`courses-home-${pack.id}-light`),width:720,format:'webp',quality:82})).src,darkShot:(await getImage({src:shot(`courses-home-${pack.id}-dark`),width:720,format:'webp',quality:82})).src})));
 const doc = (slug: string) => path(`${language}/docs/${slug}/`);
 ---
 <Base {language} title={t.hero} description={t.sub}>
@@ -17,7 +20,7 @@ const doc = (slug: string) => path(`${language}/docs/${slug}/`);
       <p class="hero-sub">{t.sub}</p>
       <div class="hero-actions"><a class="button" href={RELEASES_URL}>{t.downloadMac}<span aria-hidden="true">↓</span></a><a class="button secondary" href={doc('getting-started')}>{t.readDocs}<span aria-hidden="true">↗</span></a></div>
       <p class="release-meta">{t.availability} <span aria-hidden="true">·</span> v{VERSION}</p>
-      <figure class="hero-screen"><Window name="reader" width={1200} height={868} alt={t.readerTitle} eager /><figcaption>{t.screenshot}</figcaption></figure>
+      <figure class="hero-screen"><Window name="courses" alt={t.coursesAlt} eager /><figcaption>{t.screenshot}</figcaption></figure>
     </section>
 
     <section class="steps-section container" aria-labelledby="steps-title">
@@ -29,18 +32,15 @@ const doc = (slug: string) => path(`${language}/docs/${slug}/`);
       <h2 id="features-title" class="section-intro">{t.featureTitle}</h2>
       <div class="feature-row">
         <div class="feature-copy"><h3>{t.courseTitle}</h3><p>{t.courseBody}</p><a class="text-link" href={doc('courses-and-deadlines')}>{t.courseLink}<span aria-hidden="true">↗</span></a></div>
-        <div class="feature-image course-image"><Window name="courses" width={1200} height={768} alt={t.courseTitle} /></div>
+        <div class="feature-image course-image"><Window name="course" alt={t.coursePageAlt} /></div>
       </div>
       <div class="feature-row reverse">
         <div class="feature-copy"><h3>{t.agentTitle}</h3><p>{t.agentBody}</p><a class="text-link" href={doc('study-planner')}>{t.agentLink}<span aria-hidden="true">↗</span></a></div>
-        <div class="agent-visual" role="img" aria-label={`${t.agentPrompt} ${t.agentProposal}. ${t.agentApproval}`}>
-          <div class="chat-question">{t.agentPrompt}</div>
-          <div class="agent-proposal"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 2v6m8-6v6M4 11h16m-12 5 2 2 5-5"/></svg><p>{t.agentProposal}</p><h4>{t.agentTask}</h4><p>{t.agentTime}</p><div class="approval-status"><span></span>{t.agentApproval}</div></div>
-        </div>
+        <div class="feature-image"><Window name="planner" alt={t.plannerAlt} /></div>
       </div>
       <div class="feature-row">
         <div class="feature-copy"><h3>{t.readerTitle}</h3><p>{t.readerBody}</p><a class="text-link" href={doc('reading-documents')}>{t.readerLink}<span aria-hidden="true">↗</span></a><p class="feature-note">{t.readerNote}</p></div>
-        <div class="feature-image reading-image"><Window name="reader" width={1200} height={868} alt={t.readerTitle} /></div>
+        <div class="feature-image reading-image"><Window name="reader" alt={t.readerAlt} /></div>
       </div>
       <div class="extra-features">
         {t.extras.map(([title,body,slug],index) => <div class="extra-feature">
@@ -60,13 +60,13 @@ const doc = (slug: string) => path(`${language}/docs/${slug}/`);
     <section class="themes-section container" aria-labelledby="themes-title">
       <div class="themes-heading"><h2 id="themes-title">{t.themesTitle}</h2><p>{t.themesBody}</p></div>
       <div class="theme-picker" aria-label={t.themesTitle}>
-        {palettes.map((pack,index) => <button class="theme-choice" data-theme-id={pack.id} aria-pressed={index === 0}>
+        {previews.map((pack,index) => <button class="theme-choice" data-theme-id={pack.id} data-light-shot={pack.lightShot} data-dark-shot={pack.darkShot} aria-pressed={index === 0}>
           <span class="orbs" aria-hidden="true"><span style={`--orb-bg:${pack.light[0]};--orb-accent:${pack.light[7]}`}></span><span style={`--orb-bg:${pack.dark[0]};--orb-accent:${pack.dark[7]}`}></span></span>
           {t.themeNames[index]}
         </button>)}
       </div>
       <p class="theme-hint">{t.themeHint}</p>
-      <Window name="themes" width={1200} height={774} alt={t.themesTitle} />
+      <div class="theme-pair"><figure id="theme-light"><Window name="courses-home-vstudy-light" alt={`${t.themeNames[0]} · ${t.lightPreview}`} size={720} /><figcaption>{t.lightPreview}</figcaption></figure><figure id="theme-dark"><Window name="courses-home-vstudy-dark" alt={`${t.themeNames[0]} · ${t.darkPreview}`} size={720} /><figcaption>{t.darkPreview}</figcaption></figure></div>
     </section>
 
     <section class="faq-section container" aria-labelledby="faq-title">
@@ -96,6 +96,10 @@ const doc = (slug: string) => path(`${language}/docs/${slug}/`);
   document.querySelectorAll<HTMLButtonElement>('[data-theme-id]').forEach(button => button.addEventListener('click', () => {
     selected = palettes.find(pack => pack.id === button.dataset.themeId);
     document.querySelectorAll('[data-theme-id]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+    const light = document.querySelector<HTMLImageElement>('#theme-light img');
+    const dark = document.querySelector<HTMLImageElement>('#theme-dark img');
+    if (light && button.dataset.lightShot) { light.src = button.dataset.lightShot; light.alt = `${button.textContent?.trim()} · ${light.closest('figure')?.querySelector('figcaption')?.textContent}`; }
+    if (dark && button.dataset.darkShot) { dark.src = button.dataset.darkShot; dark.alt = `${button.textContent?.trim()} · ${dark.closest('figure')?.querySelector('figcaption')?.textContent}`; }
     applyPack();
   }));
   document.addEventListener('scheme-change', applyPack);

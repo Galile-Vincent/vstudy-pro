@@ -6,7 +6,7 @@ Mac で教材を読み、Moodle の締め切りをまとめ、課題を学習計
 
 ![バージョン 0.2.0](https://img.shields.io/badge/version-0.2.0-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
 
-![繁体字中国語のサンプル文書と任意で使える AI チャット](docs/assets/readme/reader.webp)
+![グラフのノート、選択した文章、デモ回答と出典の引用](docs/assets/readme/reader.webp)
 
 ## ダウンロードとインストール
 
@@ -82,61 +82,65 @@ arm64 ホストでは `apps/desktop/release/VStudy-Pro-0.2.0-arm64.dmg` と `app
 
 ## 画面ガイド
 
-画像は既存の実アプリテストで撮影したもので、学校や AI のデータはテスト用です。一部は現在のナビゲーションや操作項目と異なります。画面構成の参考であり、実際の学校や AI サービスでの動作確認を示すものではありません。[画像の出典](docs/assets/readme/README.md)に元のパスを記載しています。
+スクリーンショットは現在のビルドを使い、デモの授業、ローカル資料、模擬 AI 会話を表示しています。実際の学校や AI サービスの動作検証ではありません。[撮影手順と画像の出典](docs/assets/readme/README.md)。
 
 ### ホーム
 
 設定チェックリスト、文書の取り込み、サンプルから始められます。最近読んだ文書や学習活動にも戻れます。
 
-![設定チェックリストと文書取り込みを表示したホーム](docs/assets/readme/home.webp)
+![最近の資料と完了した設定チェックリストのホーム](docs/assets/readme/home.webp)
 
 ### ライブラリ
 
 文書の閲覧と検索ができます。フォルダ、タグ、ピン留め、最近の項目、保存したフィルター、変換状態で教材を探せます。
 
-![Grove ライトテーマのライブラリ](docs/assets/readme/library.webp)
+![2 つのフォルダーに整理した英語と繁体字中国語の学習ノート](docs/assets/readme/library.webp)
 
 ### リーダーとチャット
 
 変換した Markdown の横で文書について対話します。文章を選んで質問し、引用元を確認し、同じ文書の過去の会話を開けます。AI を接続しなくても読めます。
 
-![サンプル文書と AI 設定の案内](docs/assets/readme/reader.webp)
+![グラフのノート、選択した文章、デモ回答と出典の引用](docs/assets/readme/reader.webp)
 
 ### コース一覧
 
 学校の接続・再接続、アカウントの同期、今後 7 日間の未提出課題の確認ができます。現在、今後、過去、すべてのコースを切り替えられます。
 
-![Iris ライトテーマのサンプル学校とコース一覧](docs/assets/readme/courses.webp)
+![アートの表紙と教員、締切、進捗が並ぶ授業カード](docs/assets/readme/courses.webp)
 
 ### コース詳細
 
 **コンテンツ、締め切り、お知らせ、成績、ファイル、通知**のタブがあります。教材を開き、リマインダーを設定し、コースアシスタントに質問できます。学校が提供しない機能は利用できません。
 
-![コースの上に開いた独立した Moodle 教員ページ](docs/assets/readme/webview.webp)
+![アルゴリズムとデータ構造の今週の教材と締切](docs/assets/readme/course.webp)
+
+![独立したアプリ内表示で開いた Moodle のデモ教員ページ](docs/assets/readme/webview.webp)
 
 ### 今日とプランナー
 
 コース画面からプランナーを開きます。今日と今週を切り替え、タスクや試験、使える時間を設定し、予定の提案を確認して保存できます。学習時間枠をカレンダーファイルにも書き出せます。
 
-![今日とプランナーのタスク入力フォーム](docs/assets/readme/planner.webp)
+![今日の学習タスクと統計の中間試験](docs/assets/readme/planner.webp)
 
 ### 履歴
 
 会話を横断して検索し、該当するメッセージを開けます。コース、文書、一般チャットを絞り込み、よく使う会話をピン留めできます。
 
-![サンプル会話を横断した履歴検索](docs/assets/readme/history.webp)
+![Command-K で保存済みの学習会話を検索](docs/assets/readme/history.webp)
 
 ### 設定
 
 「**一般**」は言語と初回ガイド・Welcome、「**外観**」はテーマとコントラスト、「**プロバイダー**」は AI 接続、「**使用量**」は token と費用、「**ストレージ**」はバックアップと削除を扱います。「**プライバシー**」では変換ツールのインストール、オフラインモード、ネットワーク活動、データ削除を管理します。
 
-![テーマのライト・ダークプレビューを表示した外観設定](docs/assets/readme/themes.webp)
+![アプリ全体のライトとダークのテーマ設定](docs/assets/readme/themes.webp)
+
+![ストレージ使用量の内訳](docs/assets/readme/storage.webp)
 
 ### ヘルプと Welcome
 
 ヘルプから初回設定、図解や録画による操作ガイド、キーボードショートカットを開けます。Welcome はアプリを紹介し、学校や AI の認証情報がなくても試せるサンプルを提供します。
 
-![サンプル文書で文章の選択を練習する初回ガイド](docs/assets/readme/onboarding.webp)
+![読書画面のプレビューがある初回ガイド](docs/assets/readme/onboarding.webp)
 
 ### キーボードショートカット
 
@@ -253,6 +257,7 @@ sequenceDiagram
 | `pnpm e2e` | ビルド後、実際の Electron の E2E を順番に実行する。 |
 | `pnpm smoke` | ビルドして実際の Electron のスモークテストを起動する。 |
 | `pnpm package` | 設定済みの署名の既定値でビルド・パッケージする。 |
+| `node apps/desktop/scripts/marketing-shots.mjs` | `pnpm build` の後にマーケティング用スクリーンショットを生成する。 |
 | `node scripts/check-readme-links.mjs` | 3 言語の README と文書一覧のローカルリンクを検査する。 |
 
 E2E には **uv**、または `VSTUDY_CONVERTER_VENV` で指定する既存のハッシュ固定済み変換環境が必要です。未署名パッケージを用意し、Python の依存関係をダウンロードする場合があります。証跡の既定パスは `/tmp/vstudy-final/e2e` で、`VSTUDY_E2E_EVIDENCE` で変更できます。実際のプロバイダーを使うテストには明示的な有効化と認証が必要です。スキップは動作確認済みを意味しません。
