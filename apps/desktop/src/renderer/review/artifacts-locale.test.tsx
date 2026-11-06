@@ -33,11 +33,11 @@ it.each([['zh-Hant', zhHant], ['ja', ja], ['en', en]] as const)('explains assump
   render(<ArtifactPanel courseId="course" kind="note" selection={null} />);
   fireEvent.click(await screen.findByRole('button', { name: 'A note' }));
   const list = (await screen.findByText(catalog.assumption_sources_omitted)).closest('ul')!;
-  expect([...list.querySelectorAll('li')].map(li => li.textContent)).toEqual([
+  await waitFor(() => expect([...list.querySelectorAll('li')].map(li => li.textContent)).toEqual([
     catalog.assumption_sources_omitted,
     catalog.assumption_excerpt_limited.replace('{{document}}', 'Cell biology'),
     catalog.assumption_undated_units.replace('{{units}}', 'Week 3'),
-  ]);
+  ]));
   expect(document.body.textContent).not.toContain('retakeAttempt');
   expect(document.body.textContent).not.toContain('future build');
 });

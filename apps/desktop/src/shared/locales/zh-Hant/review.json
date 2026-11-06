@@ -51,7 +51,6 @@
   "job_failed": "記錄暫時中斷",
   "job_cancelled": "已取消記錄",
   "job_skipped": "未記錄",
-  "retry_unavailable": "記憶記錄服務接上後，就能重試。",
   "memory_title": "學習記憶",
   "memory_enabled": "記住問題以便複習",
   "erase_memory": "清除學習記憶",

@@ -51,7 +51,6 @@
   "job_failed": "Recording interrupted",
   "job_cancelled": "Recording cancelled",
   "job_skipped": "Not recorded",
-  "retry_unavailable": "Retry will be available when the memory worker is connected.",
   "memory_title": "Study memory",
   "memory_enabled": "Remember questions for review",
   "erase_memory": "Erase study memory",

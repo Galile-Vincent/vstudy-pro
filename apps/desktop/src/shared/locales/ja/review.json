@@ -51,7 +51,6 @@
   "job_failed": "記録が中断されました",
   "job_cancelled": "記録をキャンセルしました",
   "job_skipped": "記録なし",
-  "retry_unavailable": "メモリーサービスの接続後に再試行できます。",
   "memory_title": "学習メモリー",
   "memory_enabled": "復習のために質問を記録",
   "erase_memory": "学習メモリーを消去",
