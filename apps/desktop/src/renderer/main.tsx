@@ -9,6 +9,7 @@ import "./style.css";
 import "./tokens.css";
 import "./settings/themes.css";
 import "./settings/theme-transition.css";
+import "./motion/surfaces.css";
 void initializeAppearance().then(() => {
   const root = document.getElementById("root");
   if (!root) throw new Error(tr('common:missing_application_root'));
