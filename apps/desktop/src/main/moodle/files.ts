@@ -13,6 +13,27 @@ import { MAX_SOURCE_BYTES } from '../services/documents';
 import type { MoodleRepository } from './repository';
 import type { Fetch } from './client';
 
+/** Bound a portable path component; callers sharing a directory supply occupied names. */
+export function sanitizeMoodleFilename(name: string, usedNames: readonly string[] = []): string {
+  const cleaned = Array.from(name,char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127 || '/\\:?*<>|"'.includes(char) ? '_' : char).join('').replace(/^\.+/,'_').replace(/[. ]+$/,'');
+  const extension = extname(cleaned);
+  if (!/^\.[a-z0-9]{1,12}$/i.test(extension)) throw new Error('Unsupported Moodle file extension');
+  let stem = cleaned.slice(0,-extension.length).replace(/[. ]+$/,'') || 'source';
+  if (/^(con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:[. ]|$)/i.test(stem)) stem = `_${stem}`;
+  const occupied = new Set(usedNames.map(value => value.toLowerCase()));
+  for (let index = 1; ; index++) {
+    const suffix = `${index === 1 ? '' : `-${index}`}${extension}`;
+    let bounded = '', bytes = Buffer.byteLength(suffix);
+    for (const char of stem) {
+      bytes += Buffer.byteLength(char);
+      if (bytes > 200) break;
+      bounded += char;
+    }
+    const candidate = bounded + suffix;
+    if (!occupied.has(candidate.toLowerCase())) return candidate;
+  }
+}
+
 /** Attach credentials only to a file URL accepted by the account site policy. */
 export function authenticatedFileUrl(source: string, host: string, token: string): string {
   const url = siteTarget(host,source);
@@ -71,8 +92,7 @@ async function performImport(repository: MoodleRepository, id: string, host: str
   if (file.documentId && documents.get(file.documentId as Parameters<DocumentService['get']>[0])) return file.documentId;
   if (file.size > MAX_SOURCE_BYTES) throw new Error('Document exceeds 50 MiB');
   const target = authenticatedFileUrl(url,host,token);
-  const extension = extname(file.name).toLowerCase();
-  if (!/^\.[a-z0-9]{1,12}$/.test(extension)) throw new Error('Unsupported Moodle file extension');
+  const filename = sanitizeMoodleFilename(file.name);
   await mkdir(stagingRoot,{recursive:true,mode:0o700});
   const directory = await mkdtemp(join(stagingRoot,'.download-'));
   try {
@@ -81,7 +101,7 @@ async function performImport(repository: MoodleRepository, id: string, host: str
     catch { throw new Error('Moodle file download failed'); }
     if (!response.ok || !response.body) throw new Error('Moodle file download failed');
     if (Number(response.headers.get('content-length')) > MAX_SOURCE_BYTES) { await response.body.cancel(); throw new Error('Document exceeds 50 MiB'); }
-    const path = join(directory,Array.from(file.name,char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127 || '/\\:'.includes(char) ? '_' : char).join('').replace(/^\.+/, '_'));
+    const path = join(directory,filename);
     const output = await open(path,'wx',0o600);
     const reader = response.body.getReader();
     let size = 0;
