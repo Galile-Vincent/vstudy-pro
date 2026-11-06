@@ -1,0 +1,4 @@
+[mcp_servers.vstudy]
+command = "/absolute/path/to/node"
+args = ["/absolute/path/to/vstudy-mcp.cjs", "--client", "codex"]
+tool_timeout_sec = 300

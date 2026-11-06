@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "vstudy": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/dist/vstudy-mcp.cjs",
+        "--client",
+        "claude"
+      ],
+      "timeout": 300000
+    }
+  }
+}
