@@ -12,6 +12,7 @@ import { Workspace } from "./workspace";
 import { desktop } from './bridge';
 import { ProviderSettings, type Providers } from './providers';
 import { AgentsProvider } from './settings/agents-state';
+import { AgentNavigation } from './settings/agents-navigation';
 import { AgentConsent, AgentStatus } from './settings/agents-consent';
 function GlobalSettings() {
   const [open, setOpen] = useState(false);
@@ -52,7 +53,7 @@ export function App() {
   return (
     <AgentsProvider>
       <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
-        <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AgentConsent />
+        <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AgentConsent /><AgentNavigation />
       </AppShell>
     </AgentsProvider>
   );

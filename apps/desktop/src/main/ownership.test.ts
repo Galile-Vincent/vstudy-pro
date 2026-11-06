@@ -16,3 +16,13 @@ it('quits the losing instance and restores and focuses the owner on second launc
   expect(acquireOwnership(app,()=>window)).toBe(true);
   second!();expect(calls).toEqual(['quit','restore','focus']);
 });
+it('keeps MCP background launches hidden and restores a closed owner for ordinary launches', () => {
+  let second: ((event?:unknown,argv?:string[])=>void)|undefined;
+  let restored=0;
+  const app={requestSingleInstanceLock:()=>true,quit:()=>{},on:(_event:string,handler:typeof second)=>{second=handler;}};
+  expect(acquireOwnership(app,()=>null,()=>{restored++;})).toBe(true);
+  second?.(undefined,['VStudy Pro','--mcp-background']);
+  expect(restored).toBe(0);
+  second?.(undefined,['VStudy Pro']);
+  expect(restored).toBe(1);
+});

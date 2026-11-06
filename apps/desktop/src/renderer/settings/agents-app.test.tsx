@@ -28,6 +28,7 @@ beforeEach(async () => {
   state = { ...stateFixture(), enabled: true, activeCalls: 1 };
   invoke.mockReset().mockImplementation(async channel => {
     if (channel === 'mcp:state') return state;
+    if (channel === 'mcp:take-navigation') return null;
     if (channel === 'settings:get') return defaultSettings;
     if (channel === 'settings:appearance') return { reducedTransparency: false };
     if (channel === 'settings:systemLocale') return 'en';
