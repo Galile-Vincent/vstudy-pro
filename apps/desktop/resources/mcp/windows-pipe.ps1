@@ -1,5 +1,6 @@
 param([Parameter(Mandatory=$true)][ValidatePattern('^vstudy-[a-f0-9]{32}$')][string]$PipeName)
 $ErrorActionPreference = 'Stop'
+if ($env:VSTUDY_PIPE_FIXTURE_TRACE -eq '1') { [Console]::Error.WriteLine('pipe-phase:before-compile') }
 Add-Type -TypeDefinition @'
 using System;
 using System.Collections.Concurrent;
@@ -150,4 +151,5 @@ public static class VStudyPipeHost {
     }
 }
 '@
+if ($env:VSTUDY_PIPE_FIXTURE_TRACE -eq '1') { [Console]::Error.WriteLine('pipe-phase:compiled') }
 [VStudyPipeHost]::Run($PipeName)

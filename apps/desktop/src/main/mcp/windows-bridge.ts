@@ -17,7 +17,7 @@ interface Connection {
   timers: Set<NodeJS.Timeout>;
   idle: NodeJS.Timeout;
 }
-interface WindowsBridgeOptions extends McpTransportOptions { script?: string }
+interface WindowsBridgeOptions extends McpTransportOptions { script?: string; diagnostic?: (output: string) => void }
 
 /** A packaged, argv-only PowerShell host owns the native ACL. Node never opens a permissive pipe. */
 export async function createWindowsBridge(options: WindowsBridgeOptions): Promise<McpTransport> {
@@ -26,10 +26,13 @@ export async function createWindowsBridge(options: WindowsBridgeOptions): Promis
   const endpoint = resolveMcpEndpoint(options.userData, 'win32', sid);
   const script = options.script ?? (app.isPackaged ? join(process.resourcesPath, 'mcp', 'windows-pipe.ps1') : resolve(__dirname, '../../resources/mcp/windows-pipe.ps1'));
   const powershell = systemExecutable('WindowsPowerShell/v1.0/powershell.exe');
+  const environment = cliEnvironment();
   const host = spawn(powershell, [
     '-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script,
     '-PipeName', endpoint.path.slice('\\\\.\\pipe\\'.length),
-  ], {env: {...cliEnvironment(), PSModulePath: win32.join(win32.dirname(powershell), 'Modules')}, windowsHide: true, shell: false, stdio: ['pipe', 'pipe', 'pipe']});
+  ], {env: {...environment, WINDIR: environment.SystemRoot ?? environment.SYSTEMROOT ?? 'C:\\Windows',
+    PSModulePath: win32.join(win32.dirname(powershell), 'Modules'), ...(options.diagnostic ? {VSTUDY_PIPE_FIXTURE_TRACE: '1'} : {})},
+    windowsHide: true, shell: false, stdio: ['pipe', 'pipe', 'pipe']});
   const closed = new Promise<void>(accept => { host.once('close', () => accept()); host.once('error', () => accept()); });
   const lines = createInterface({input: host.stdout});
   const connections = new Map<string, Connection>();
@@ -37,7 +40,7 @@ export async function createWindowsBridge(options: WindowsBridgeOptions): Promis
   let ready = false;
   let disposed = false;
   let disposing: Promise<void> | undefined;
-  host.stderr.resume();
+  host.stderr.on('data', chunk => options.diagnostic?.(String(chunk).slice(-8192)));
   const disconnect = (id: string) => {
     const state = connections.get(id);
     if (!state) return;
@@ -56,6 +59,9 @@ export async function createWindowsBridge(options: WindowsBridgeOptions): Promis
     host.kill();
   };
   host.stdin.on('error', fail);
+  host.stderr.on('error', fail);
+  lines.on('error', fail);
+  lines.on('close', () => {if (!disposed) fail();});
   const send = (id: string, response: BridgeResponse) => {
     if (!ready || !connections.has(id)) return;
     try {

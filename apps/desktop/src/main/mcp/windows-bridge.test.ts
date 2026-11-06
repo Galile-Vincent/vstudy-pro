@@ -42,9 +42,11 @@ it.skipIf(process.platform !== 'win32')('pairs and reads through the authenticat
   let bridge: Awaited<ReturnType<typeof createWindowsBridge>> | undefined;
   let wire: Wire | undefined;
   const streams: Duplex[] = [];
+  const diagnostics: string[] = [];
   try {
     engine.setEnabled(true);
-    bridge = await createWindowsBridge({userData: root, script: resolve('resources/mcp/windows-pipe.ps1'), handleRequest, onDisconnect});
+    bridge = await createWindowsBridge({userData: root, script: resolve('resources/mcp/windows-pipe.ps1'), handleRequest, onDisconnect,
+      diagnostic: text => {diagnostics.push(text); if (diagnostics.length > 10) diagnostics.shift();}});
     wire = await Wire.connect(bridge.endpoint.path);
     expect(await wire.rpc({method: 'ping', params: {}})).toMatchObject({enabled: true});
     const pending = pairBeginResultSchema.parse(await wire.rpc({method: 'pair.begin', params: {
@@ -86,6 +88,9 @@ it.skipIf(process.platform !== 'win32')('pairs and reads through the authenticat
       arch: process.arch, sameHandleClientVerified: true, pairedRead: true, privateStatePersisted: true, bearerAbsentFromState: true,
       fragmentedUnicodeFrame: true, oversizedRejectedBeforeDispatch: true, hostSurvived: true, shutdown: true,
       run: process.env.GITHUB_RUN_ID, commit: process.env.GITHUB_SHA}, null, 2) + '\n');
+  } catch (error) {
+    console.error('Synthetic Windows engine/pipe fixture failed', diagnostics);
+    throw error;
   } finally {
     wire?.close(); for (const stream of streams) stream.destroy();
     await bridge?.dispose(); engine.dispose(); await rm(root, {recursive: true, force: true, maxRetries: 3});
