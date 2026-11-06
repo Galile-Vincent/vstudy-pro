@@ -111,8 +111,8 @@ it('blocks OSC, DCS, APC, PM, and SOS with repeated ESC, C1, and split terminato
   }
 });
 
-it('registers no titles, hidden links, OSC callbacks, or DCS callbacks under hostile fuzzed chunking', () => {
-  for (let seed = 1; seed <= 128; seed++) {
+it.each([1, 17, 33, 49, 65, 81, 97, 113])('registers no terminal effects under hostile fuzzed chunking for seeds starting at %s', start => {
+  for (let seed = start; seed < start + 16; seed++) {
     const input = hostileStream(seed);
     expectInert(chunked(input, seed));
     expectInert(input.split(''));
