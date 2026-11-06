@@ -13,7 +13,7 @@ import { call, pair, rpc } from './test-fixture';
 
 const transport = vi.hoisted(() => ({dispose:vi.fn(async()=>{}),start:vi.fn()}));
 vi.mock('./bridge',() => ({createUnixBridge:transport.start}));
-const testTransport=async()=>{const bridge=await transport.start();return {endpoint:{kind:'unix' as const,path:bridge.socketPath},dispose:bridge.dispose};};
+const testTransport=async()=>{const bridge=await transport.start();return {endpoint:{kind:'unix' as const,path:bridge.socketPath},dispose:bridge.dispose,...(bridge.closed?{closed:bridge.closed}:{})};};
 const roots:string[]=[];
 afterEach(() => {for(const root of roots.splice(0))rmSync(root,{recursive:true,force:true});vi.clearAllMocks();});
 function runtime(backend?:McpBackend) {
@@ -70,4 +70,32 @@ it('rejects bridge execution while exclusive storage maintenance owns the app',a
   });
   expect(await call(f.result.engine,paired.grant,'list_courses',{account:f.account.id})).toMatchObject({ok:true});
   await f.result.dispose();
+});
+
+it('disables access after native host loss and restarts only on an explicit enable',async()=>{
+  const f=runtime();await f.result.ready;await f.result.dispose();
+  let lose!:()=>void;
+  const closed=new Promise<void>(resolve=>{lose=resolve;});
+  transport.start.mockResolvedValueOnce({socketPath:'/fixture',dispose:transport.dispose,closed});
+  const root=mkdtempSync(join(tmpdir(),'vm-runtime-'));roots.push(root);
+  const onFailure=vi.fn();
+  const result=createMcpRuntime({userData:root,backend:{accounts:()=>[],prepare:async()=>{throw Error('unused');}},
+    secretValues:()=>[],transport:testTransport,...(testStatePersistence(root)?{persistence:testStatePersistence(root)!}:{}),restoreWindow:()=>{},onFailure});
+  await result.ready;await result.setEnabled(true);
+  const starts=transport.start.mock.calls.length;
+  lose();await vi.waitFor(()=>expect(onFailure).toHaveBeenCalledOnce());
+  expect(result.engine.state().enabled).toBe(false);expect(transport.start).toHaveBeenCalledTimes(starts);
+  await result.setEnabled(true);expect(transport.start).toHaveBeenCalledTimes(starts+1);
+  expect(result.engine.state().enabled).toBe(true);await result.dispose();
+});
+
+it('does not report explicit native host disposal as a transport failure',async()=>{
+  const root=mkdtempSync(join(tmpdir(),'vm-runtime-'));roots.push(root);
+  let close!:()=>void;
+  const closed=new Promise<void>(resolve=>{close=resolve;});
+  transport.start.mockResolvedValueOnce({socketPath:'/fixture',dispose:async()=>{close();await closed;},closed});
+  const onFailure=vi.fn();
+  const result=createMcpRuntime({userData:root,backend:{accounts:()=>[],prepare:async()=>{throw Error('unused');}},secretValues:()=>[],
+    transport:testTransport,...(testStatePersistence(root)?{persistence:testStatePersistence(root)!}:{}),restoreWindow:()=>{},onFailure});
+  await result.ready;await result.dispose();expect(onFailure).not.toHaveBeenCalled();
 });

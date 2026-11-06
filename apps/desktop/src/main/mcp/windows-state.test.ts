@@ -6,6 +6,7 @@ import { join, resolve, win32 } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createWindowsStatePersistence } from './windows-state';
 import { systemExecutable } from '../platform/process';
+import { cliEnvironment } from '../providers/cli-transport';
 
 vi.mock('electron', () => ({app: {isPackaged: false}}));
 const directory = String.raw`C:\Users\Ada\AppData\Roaming\@vstudy\desktop`;
@@ -67,7 +68,8 @@ it.skipIf(process.platform !== 'win32')('persists and replaces state with a prot
   const file = win32.join(root, 'mcp', 'state.json');
   const powershell = systemExecutable('WindowsPowerShell/v1.0/powershell.exe');
   const command = (script: string) => execFileSync(powershell, ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', script], {
-    encoding: 'utf8', windowsHide: true, timeout: 30000, env: {...process.env, VSTUDY_STATE_PATH: file},
+    encoding: 'utf8', windowsHide: true, timeout: 30000,
+    env: {...cliEnvironment(), PSModulePath: win32.join(win32.dirname(powershell), 'Modules'), VSTUDY_STATE_PATH: file},
   });
   try {
     expect(store.read(root)).toBeUndefined();
@@ -78,7 +80,7 @@ it.skipIf(process.platform !== 'win32')('persists and replaces state with a prot
     expect(store.read(root)).toBe('{"replacement":true}');
     expect(await readFile(file, 'utf8')).toBe('{"replacement":true}');
     expect(await lstat(file).then(info => info.nlink)).toBe(1);
-    const acl = JSON.parse(command(`$a=Get-Acl -LiteralPath $env:VSTUDY_STATE_PATH; [pscustomobject]@{Owner=$a.GetOwner([Security.Principal.SecurityIdentifier]).Value; Current=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; Protected=$a.AreAccessRulesProtected; Entries=@($a.Access).Count} | ConvertTo-Json -Compress`));
+    const acl = JSON.parse(command(`$a=[IO.File]::GetAccessControl($env:VSTUDY_STATE_PATH); [pscustomobject]@{Owner=$a.GetOwner([Security.Principal.SecurityIdentifier]).Value; Current=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; Protected=$a.AreAccessRulesProtected; Entries=@($a.Access).Count} | ConvertTo-Json -Compress`));
     expect(acl.Owner).toBe(acl.Current);
     expect(acl.Protected).toBe(true);
     expect(acl.Entries).toBe(1);
@@ -87,7 +89,7 @@ it.skipIf(process.platform !== 'win32')('persists and replaces state with a prot
     expect(() => store.read(root)).toThrow('could not be verified');
     expect(() => store.write(root, '{}')).toThrow('could not be verified');
     await rm(other);
-    command(`$a=Get-Acl -LiteralPath $env:VSTUDY_STATE_PATH; $a.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new('S-1-1-0'),[Security.AccessControl.FileSystemRights]::Read,[Security.AccessControl.AccessControlType]::Allow)); Set-Acl -LiteralPath $env:VSTUDY_STATE_PATH -AclObject $a`);
+    command(`$a=[IO.File]::GetAccessControl($env:VSTUDY_STATE_PATH); $a.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new('S-1-1-0'),[Security.AccessControl.FileSystemRights]::Read,[Security.AccessControl.AccessControlType]::Allow)); [IO.File]::SetAccessControl($env:VSTUDY_STATE_PATH,$a)`);
     expect(() => store.read(root)).toThrow('could not be verified');
     expect(() => store.write(root, '{}')).toThrow('could not be verified');
   } catch (error) {

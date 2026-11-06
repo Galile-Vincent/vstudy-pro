@@ -22,6 +22,7 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
   const work = new Set<Promise<unknown>>();
   let stopped = false;
   let bridge:McpTransport|undefined;
+  let transportLost=false;
   let starting:Promise<void>|undefined;
   let shown = new Set<string>();
   const track = <T>(operation:Promise<T>):Promise<T> => {
@@ -54,13 +55,31 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
     if (bridge) return Promise.resolve();
     return starting ??= (options.transport ?? createPlatformBridge)({userData:options.userData,...(options.peerHelper?{peerHelper:options.peerHelper}:{}),
       handleRequest:(request,id) => engine.handleRequest(request,id),onDisconnect:id => engine.disconnect(id),
-    }).then(value => {bridge=value;}).finally(() => {starting=undefined;});
+    }).then(value => {
+      bridge=value;
+      const closed=() => {
+        if (stopped || bridge!==value) return;
+        bridge=undefined;
+        transportLost=true;
+        try {engine.setEnabled(false);} catch { /* A failed state write cannot reopen a lost transport. */ }
+        options.onFailure();
+      };
+      void value.closed?.then(closed,closed);
+    }).finally(() => {starting=undefined;});
   };
   const ready = start().catch(() => {if (!stopped) {engine.setEnabled(false);options.onFailure();}});
   return {
     engine,
     ready,
-    async setEnabled(enabled:boolean) {if (enabled) await start();engine.setEnabled(enabled);},
+    async setEnabled(enabled:boolean) {
+      if (enabled) {
+        // Require the disabled state to persist before replacing a lost native host.
+        if (transportLost) engine.setEnabled(false);
+        await start();
+      }
+      engine.setEnabled(enabled);
+      if (enabled) transportLost=false;
+    },
     async dispose() {
       if (stopped) return;
       stopped=true;

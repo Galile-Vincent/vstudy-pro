@@ -1,4 +1,5 @@
 /** Persist MCP state only through a current-SID ACL check and atomic flushed replacement. @packageDocumentation */
+import type { McpStatePersistence } from '../../shared/mcp-platform';
 import { app } from 'electron';
 import { execFileSync } from 'node:child_process';
 import { lstatSync } from 'node:fs';
@@ -36,7 +37,7 @@ function statePresent(path: string): boolean {
 }
 
 /** Matches the synchronous persistence interface; authorization and JSON schema checks stay in the shared engine. */
-export function createWindowsStatePersistence(options: WindowsStateOptions = {}) {
+export function createWindowsStatePersistence(options: WindowsStateOptions = {}): McpStatePersistence {
   const check = (userData: string) => {
     if ((options.platform ?? process.platform) !== 'win32' || !win32.isAbsolute(userData) ||
         !/^[a-z]:\\/i.test(userData) || userData.slice(2).includes(':') || [...userData].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) throw new WindowsStateError();

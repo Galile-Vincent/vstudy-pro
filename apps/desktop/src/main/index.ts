@@ -24,6 +24,7 @@ import { mkdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { openStore, type Store } from "./db";
 import { registerIpc } from "./ipc";
+import { createWindowsStatePersistence } from "./mcp/windows-state";
 import { createSecretStore } from "./services/secrets";
 import { developmentCsp, isAppUrl, productionCsp } from "./security";
 
@@ -201,6 +202,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
     () => {void restoreMainWindow();},
+    process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {},
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deleteAllData');
