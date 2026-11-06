@@ -60,6 +60,15 @@
         "scripts/*.mjs",
         "test/**/*.ts"
       ]
+    },
+    "apps/newsletter": {
+      "entry": [
+        "test/**/*.test.ts"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
     }
   }
 }
