@@ -23,6 +23,7 @@
   "pdf_no_text": "此 PDF 沒有文字層。目前不支援 OCR，請匯入可選取文字的 PDF。",
   "ai_parse.images_unsupported": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
   "ai_parse.failed": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
+  "ai_parse.publish_failed": "無法儲存 AI 版本。請檢查磁碟空間及寫入權限後重試。已完成的頁面會保留。",
   "ai_parse.budget": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
   "ai_parse.cap": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
   "ai_parse.range": "無法使用 AI 改善。請檢查模型圖片支援、費用上限及剩餘預算後重試。",
