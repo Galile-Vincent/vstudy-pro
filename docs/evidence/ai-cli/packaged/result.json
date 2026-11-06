@@ -1,0 +1,32 @@
+{
+  "code": 0,
+  "signatureVerified": true,
+  "signature": "",
+  "fuses": {
+    "0": 48,
+    "1": 48,
+    "2": 48,
+    "3": 48,
+    "4": 49,
+    "5": 49,
+    "6": 48,
+    "7": 48,
+    "8": 49,
+    "version": "1"
+  },
+  "nativeFiles": {
+    "prebuilds/darwin-arm64/pty.node": 85496,
+    "prebuilds/darwin-arm64/spawn-helper": 50480
+  },
+  "result": {
+    "ok": true,
+    "packagedPty": true,
+    "nativeCommandAnswered": true,
+    "closed": true,
+    "preferences": {
+      "updateChecks": false,
+      "autoUpdateWhenIdle": false,
+      "advancedShell": false
+    }
+  }
+}

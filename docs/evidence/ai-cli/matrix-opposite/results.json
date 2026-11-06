@@ -1,0 +1,384 @@
+{
+  "fakeAccounts": true,
+  "realMainAndPreload": true,
+  "signedReleaseFixtures": true,
+  "realPty": true,
+  "results": [
+    {
+      "language": "en",
+      "theme": "paper",
+      "colorScheme": "dark",
+      "reloadStopsSignInProcess": true,
+      "liveOldProcess": true,
+      "oldBinaryVersion": "1.0.0",
+      "activated": "1.1.0",
+      "rollback": "1.0.0",
+      "codex": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "0.166.0"
+      },
+      "agy": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "1.0.0"
+      },
+      "layout125": [
+        900,
+        1440
+      ],
+      "keyboard": true
+    },
+    {
+      "language": "en",
+      "theme": "iris",
+      "colorScheme": "light",
+      "install": true,
+      "signIn": true,
+      "tinyTransportAnswer": true,
+      "codex": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "0.166.0"
+      },
+      "agy": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "1.0.0"
+      },
+      "layout125": [
+        900,
+        1440
+      ],
+      "keyboard": true
+    },
+    {
+      "language": "en",
+      "theme": "contrast",
+      "colorScheme": "dark",
+      "install": true,
+      "signIn": true,
+      "tinyTransportAnswer": true,
+      "codex": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "0.166.0"
+      },
+      "agy": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "1.0.0"
+      },
+      "layout125": [
+        900,
+        1440
+      ],
+      "keyboard": true
+    },
+    {
+      "language": "zh-Hant",
+      "theme": "paper",
+      "colorScheme": "dark",
+      "install": true,
+      "signIn": true,
+      "tinyTransportAnswer": true,
+      "codex": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "0.166.0"
+      },
+      "agy": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "1.0.0"
+      },
+      "layout125": [
+        900,
+        1440
+      ],
+      "keyboard": true
+    },
+    {
+      "language": "zh-Hant",
+      "theme": "iris",
+      "colorScheme": "light",
+      "install": true,
+      "signIn": true,
+      "tinyTransportAnswer": true,
+      "codex": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "0.166.0"
+      },
+      "agy": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "1.0.0"
+      },
+      "layout125": [
+        900,
+        1440
+      ],
+      "keyboard": true
+    },
+    {
+      "language": "zh-Hant",
+      "theme": "contrast",
+      "colorScheme": "dark",
+      "install": true,
+      "signIn": true,
+      "tinyTransportAnswer": true,
+      "codex": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "0.166.0"
+      },
+      "agy": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "1.0.0"
+      },
+      "layout125": [
+        900,
+        1440
+      ],
+      "keyboard": true
+    },
+    {
+      "language": "ja",
+      "theme": "paper",
+      "colorScheme": "dark",
+      "install": true,
+      "signIn": true,
+      "tinyTransportAnswer": true,
+      "codex": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "0.166.0"
+      },
+      "agy": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "1.0.0"
+      },
+      "layout125": [
+        900,
+        1440
+      ],
+      "keyboard": true
+    },
+    {
+      "language": "ja",
+      "theme": "iris",
+      "colorScheme": "light",
+      "install": true,
+      "signIn": true,
+      "tinyTransportAnswer": true,
+      "codex": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "0.166.0"
+      },
+      "agy": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "1.0.0"
+      },
+      "layout125": [
+        900,
+        1440
+      ],
+      "keyboard": true
+    },
+    {
+      "language": "ja",
+      "theme": "contrast",
+      "colorScheme": "dark",
+      "install": true,
+      "signIn": true,
+      "tinyTransportAnswer": true,
+      "codex": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "0.166.0"
+      },
+      "agy": {
+        "install": true,
+        "signIn": true,
+        "tinyTransportAnswer": true,
+        "version": "1.0.0"
+      },
+      "layout125": [
+        900,
+        1440
+      ],
+      "keyboard": true
+    }
+  ],
+  "snapshots": [
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-1-install-consent.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-1-install-preview.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-2-device-code.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-2-reload-recovery.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-4-updated-with-old-chat.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-5-rollback.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-codex-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-codex-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-codex-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-codex-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-agy-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-agy-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-agy-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-agy-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-layout-900-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-paper-layout-1440-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-1-install-consent.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-1-install-preview.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-2-device-code.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-codex-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-codex-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-codex-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-codex-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-agy-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-agy-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-agy-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-agy-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-layout-900-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-iris-layout-1440-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-1-install-consent.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-1-install-preview.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-2-device-code.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-codex-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-codex-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-codex-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-codex-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-agy-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-agy-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-agy-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-agy-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-layout-900-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/en-contrast-layout-1440-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-1-install-consent.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-1-install-preview.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-2-device-code.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-codex-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-codex-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-codex-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-codex-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-agy-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-agy-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-agy-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-agy-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-layout-900-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-paper-layout-1440-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-1-install-consent.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-1-install-preview.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-2-device-code.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-codex-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-codex-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-codex-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-codex-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-agy-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-agy-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-agy-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-agy-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-layout-900-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-iris-layout-1440-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-1-install-consent.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-1-install-preview.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-2-device-code.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-codex-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-codex-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-codex-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-codex-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-agy-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-agy-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-agy-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-agy-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-layout-900-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/zh-Hant-contrast-layout-1440-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-1-install-consent.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-1-install-preview.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-2-device-code.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-codex-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-codex-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-codex-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-codex-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-agy-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-agy-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-agy-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-agy-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-layout-900-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-paper-layout-1440-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-1-install-consent.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-1-install-preview.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-2-device-code.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-codex-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-codex-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-codex-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-codex-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-agy-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-agy-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-agy-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-agy-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-layout-900-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-iris-layout-1440-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-1-install-consent.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-1-install-preview.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-2-device-code.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-codex-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-codex-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-codex-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-codex-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-agy-1-install.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-agy-2-sign-in.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-agy-3-test.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-agy-3-answer.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-layout-900-125.png",
+    "docs/evidence/ai-cli/matrix-opposite/ja-contrast-layout-1440-125.png"
+  ]
+}

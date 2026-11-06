@@ -1,0 +1,82 @@
+- dialog "Set up an AI tool":
+  - banner:
+    - heading "Set up an AI tool" [level=2]
+    - paragraph: Install, sign in, and test here. You can keep reading at any time.
+    - button "Close setup and stop its action"
+  - group "Choose your tool":
+    - text: Choose your tool
+    - radio "Claude Code Your Anthropic account"
+    - strong: Claude Code
+    - text: Your Anthropic account
+    - radio "Codex Your OpenAI account"
+    - strong: Codex
+    - text: Your OpenAI account
+    - radio "Antigravity Your Google account" [checked]
+    - strong: Antigravity
+    - text: Your Google account
+  - strong: Antigravity
+  - status: Sign in needed
+  - code: 1.0.0
+  - list "Setup progress":
+    - listitem:
+      - strong: Install
+    - listitem:
+      - strong: Sign in
+      - text: You are here
+    - listitem:
+      - strong: Test
+  - paragraph: What happens next
+  - heading "Connect your account." [level=2]
+  - paragraph: Antigravity starts an interactive first-run screen. Follow its prompts below with the keyboard, choose Google sign-in, and return after browser approval. It has no separate login command.
+  - checkbox "Allow VStudy to run Antigravity Optional. No tool launches until you allow it and run a reviewed action." [checked]
+  - text: Allow VStudy to run Antigravity Optional. No tool launches until you allow it and run a reviewed action.
+  - group: Account and cost
+  - region "Review before running":
+    - heading "Review before running" [level=3]
+    - paragraph: Only the named action below will run. Sign in through the provider's website if prompted.
+    - term: Exact command
+    - definition:
+      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 0/ai-tools/agy/1.0.0/agy\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-HWAiwl/profile 0/ai-tools/agy/1.0.0/agy' '--sandbox' '--include-default-customizations=false'"
+    - term: Working folder
+    - definition:
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 0/ai-tools/actions
+    - button "Run this action"
+    - button "Copy command"
+    - button "Open in my own Terminal"
+  - status: Action completed. Review the next step above.
+  - region "Action output":
+    - strong: Action output
+    - status: Completed
+    - paragraph: Type here only when this action asks you to. Login URLs and device codes appear here. Links always ask for confirmation.
+    - list:
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+    - textbox "Active action terminal input"
+    - group: Readable output and sign-in codes
+  - region "Keep your tool ready":
+    - heading "Keep your tool ready" [level=3]
+    - paragraph: Updates and rollback apply to new chats. Ongoing sessions continue with their current version.
+    - button "Review account status check"
+    - button "Sign in again"
+    - button "Release notes"
+  - group: Which tool should I choose?
+  - group: Install another way
+  - group: Advanced general shell
+  - group: Need help from your teacher or IT team?
+  - contentinfo:
+    - paragraph: AI is optional. Your reading stays available.
+    - button "Continue reading"

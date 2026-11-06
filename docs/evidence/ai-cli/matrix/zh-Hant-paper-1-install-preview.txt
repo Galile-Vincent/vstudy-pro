@@ -1,0 +1,55 @@
+- dialog "設定 AI 工具":
+  - banner:
+    - heading "設定 AI 工具" [level=2]
+    - paragraph: 在這裡安裝、登入並測試。你隨時可以繼續閱讀。
+    - button "關閉設定並停止操作"
+  - group "選擇工具":
+    - text: 選擇工具
+    - radio "Claude Code 你的 Anthropic 帳號" [checked]
+    - strong: Claude Code
+    - text: 你的 Anthropic 帳號
+    - radio "Codex 你的 OpenAI 帳號"
+    - strong: Codex
+    - text: 你的 OpenAI 帳號
+    - radio "Antigravity 你的 Google 帳號"
+    - strong: Antigravity
+    - text: 你的 Google 帳號
+  - strong: Claude Code
+  - status: 尚未安裝
+  - list "設定進度":
+    - listitem:
+      - strong: 安裝
+      - text: 目前在這一步
+    - listitem:
+      - strong: 登入
+    - listitem:
+      - strong: 測試
+  - paragraph: 接下來會發生什麼
+  - heading "安裝 AI 工具。" [level=2]
+  - paragraph: 確認下方的官方 Claude Code 下載計畫。VStudy 會驗證檔案並保留獨立的受管理副本，安裝完成後再登入。
+  - checkbox "允許 VStudy 執行 Claude Code 此為選用功能。只有在允許並確認執行操作後，才會啟動工具。" [checked]
+  - text: 允許 VStudy 執行 Claude Code 此為選用功能。只有在允許並確認執行操作後，才會啟動工具。
+  - group: 帳號與費用
+  - region "執行前確認":
+    - heading "執行前確認" [level=3]
+    - paragraph: VStudy 會驗證官方下載，並安裝在應用程式的專用資料夾。
+    - term: 操作計畫
+    - definition:
+      - code: 下載並驗證 https://downloads.claude.ai/claude-code-releases/1.0.0/darwin-arm64/claude 安裝至 /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 3/ai-tools/claude/1.0.0。
+    - term: 工作資料夾
+    - definition:
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-HWAiwl/profile 3/ai-tools/actions
+    - button "執行此計畫"
+    - button "複製計畫"
+  - region "維護你的工具":
+    - heading "維護你的工具" [level=3]
+    - paragraph: 更新與還原適用於新聊天。進行中的工作階段會繼續使用原版本。
+    - button "查看帳號狀態檢查" [disabled]
+    - button "重新登入" [disabled]
+  - group: 我該選哪一個工具？
+  - group: 改用其他安裝方式
+  - group: 進階一般終端機
+  - group: 需要老師或資訊人員協助嗎？
+  - contentinfo:
+    - paragraph: AI 是選用功能，你仍可繼續閱讀。
+    - button "繼續閱讀"

@@ -1,0 +1,69 @@
+- dialog "Set up an AI tool":
+  - banner:
+    - heading "Set up an AI tool" [level=2]
+    - paragraph: Install, sign in, and test here. You can keep reading at any time.
+    - button "Close setup and stop its action"
+  - group "Choose your tool":
+    - text: Choose your tool
+    - radio "Claude Code Your Anthropic account"
+    - strong: Claude Code
+    - text: Your Anthropic account
+    - radio "Codex Your OpenAI account" [checked]
+    - strong: Codex
+    - text: Your OpenAI account
+    - radio "Antigravity Your Google account"
+    - strong: Antigravity
+    - text: Your Google account
+  - strong: Codex
+  - status: Ready
+  - code: 0.166.0
+  - list "Setup progress":
+    - listitem:
+      - strong: Install
+    - listitem:
+      - strong: Sign in
+    - listitem:
+      - strong: Test
+  - paragraph: What happens next
+  - heading "Ready to study" [level=2]
+  - paragraph: Your tool answered the test. Choose it in chat to ask about your reading.
+  - checkbox "Allow VStudy to run Codex Optional. No tool launches until you allow it and run a reviewed action." [checked]
+  - text: Allow VStudy to run Codex Optional. No tool launches until you allow it and run a reviewed action.
+  - group: Account and cost
+  - button "Review next action"
+  - status: Test answered successfully. The answer appears below.
+  - region "Action output":
+    - strong: Action output
+    - status: Completed
+    - paragraph: Type here only when this action asks you to. Login URLs and device codes appear here. Links always ask for confirmation.
+    - list:
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+    - textbox "Active action terminal input"
+    - group: Readable output and sign-in codes
+  - region "Keep your tool ready":
+    - heading "Keep your tool ready" [level=3]
+    - paragraph: Updates and rollback apply to new chats. Ongoing sessions continue with their current version.
+    - button "Review account status check"
+    - button "Sign in again"
+  - group: Which tool should I choose?
+  - group: Install another way
+  - group: Advanced general shell
+  - group: Need help from your teacher or IT team?
+  - contentinfo:
+    - paragraph: AI is optional. Your reading stays available.
+    - button "Continue reading"

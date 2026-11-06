@@ -1,0 +1,8 @@
+
+> vstudy-pro@ knip /Users/vc/.t3/worktrees/vstudy-pro/t3-067c5e33
+> knip --include files,dependencies,unlisted,binaries
+
+(node:11040) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Configuration hints (1)
+.css  apps/desktop  knip.json  Compiled extension excluded by project (imports not followed)

@@ -1,0 +1,81 @@
+- dialog "AI ツールを設定":
+  - banner:
+    - heading "AI ツールを設定" [level=2]
+    - paragraph: ここでインストール、ログイン、テストを行えます。いつでも読書に戻れます。
+    - button "設定を閉じて操作を停止"
+  - group "ツールを選ぶ":
+    - text: ツールを選ぶ
+    - radio "Claude Code Anthropic アカウント" [checked]
+    - strong: Claude Code
+    - text: Anthropic アカウント
+    - radio "Codex OpenAI アカウント"
+    - strong: Codex
+    - text: OpenAI アカウント
+    - radio "Antigravity Google アカウント"
+    - strong: Antigravity
+    - text: Google アカウント
+  - strong: Claude Code
+  - status: ログインが必要
+  - code: 1.0.0
+  - list "設定の進行状況":
+    - listitem:
+      - strong: インストール
+    - listitem:
+      - strong: ログイン
+      - text: 現在のステップ
+    - listitem:
+      - strong: テスト
+  - paragraph: 次に行うこと
+  - heading "アカウントを接続。" [level=2]
+  - paragraph: ログイン操作を実行し、下に表示される Claude のサイトの案内に従ってください。許可後にここへ戻ります。この欄にパスワードを貼り付けないでください。
+  - checkbox "VStudy に Claude Code の実行を許可 任意です。許可して確認済みの操作を実行するまで、ツールは起動しません。" [checked]
+  - text: VStudy に Claude Code の実行を許可 任意です。許可して確認済みの操作を実行するまで、ツールは起動しません。
+  - group: アカウントと料金
+  - region "実行前に確認":
+    - heading "実行前に確認" [level=3]
+    - paragraph: 以下の指定された操作だけを実行します。案内が表示されたら提供元のサイトでログインしてください。
+    - term: 実行するコマンド
+    - definition:
+      - code: "'/usr/bin/sandbox-exec' '-p' '(version 1)(allow default)(deny process-exec)(allow process-exec (literal \"/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-6ITJSR/profile 7/ai-tools/claude/1.0.0/claude\") (literal \"/usr/bin/true\") (literal \"/bin/sh\") (literal \"/usr/bin/security\") (literal \"/opt/homebrew/Cellar/node/26.9.0/bin/node\"))' '/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli '\\''fixture-6ITJSR/profile 7/ai-tools/claude/1.0.0/claude' 'auth' 'login'"
+    - term: 作業フォルダー
+    - definition:
+      - code: /private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-ai-cli 'fixture-6ITJSR/profile 7/ai-tools/actions
+    - button "この操作を実行"
+    - button "コマンドをコピー"
+    - button "自分のターミナルで開く"
+  - status: 操作が完了しました。上の次のステップを確認してください。
+  - region "操作の出力":
+    - strong: 操作の出力
+    - status: 完了
+    - paragraph: 操作で入力を求められたときだけ、ここに入力してください。ログイン URL やデバイスコードが表示されます。リンクを開く前に確認が表示されます。
+    - list:
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+      - listitem
+    - textbox "実行中の操作への入力"
+    - group: テキスト出力とログインコード
+  - region "ツールを管理":
+    - heading "ツールを管理" [level=3]
+    - paragraph: 更新と復元は新しいチャットに適用されます。進行中のセッションは現在のバージョンを使い続けます。
+    - button "アカウント状態の確認内容を見る"
+    - button "再ログイン"
+  - group: どのツールを選べばよいですか？
+  - group: 別の方法でインストール
+  - group: 上級者向けシェル
+  - group: 先生や IT 担当者に相談しますか？
+  - contentinfo:
+    - paragraph: AI は任意です。読書はそのまま続けられます。
+    - button "読書を続ける"

@@ -16,9 +16,9 @@ Sources are [T3 Code](https://github.com/pingdotgg/t3code), [Claude advanced set
 
 | Tool | Installed | Sign in | Status | Official installer |
 | --- | --- | --- | --- | --- |
-| Claude | 2.1.318 | `claude auth login` | `claude auth status` returns JSON with `loggedIn` | `curl -fsSL https://claude.ai/install.sh | bash` |
-| Codex | 0.167.0 | `codex login --device-auth` | `codex login status` uses exit status and prints account type | `curl -fsSL https://chatgpt.com/codex/install.sh | sh` |
-| Antigravity | 1.4.12 | `agy` opens its first-run interactive sign-in | No `auth` or `login` subcommand. Use existing ACP `initialize` and `session/new` without `authenticate`. | `curl -fsSL https://antigravity.google/cli/install.sh | bash` |
+| Claude | 2.1.318 | `claude auth login` | `claude auth status --json` returns `loggedIn` | `curl -fsSL https://claude.ai/install.sh \| bash` |
+| Codex | 0.167.0 | `codex login --device-auth` | `codex login status` uses exit status and prints account type | `curl -fsSL https://chatgpt.com/codex/install.sh \| sh -s -- --release 0.166.0` |
+| Antigravity | 1.4.12 | `agy --sandbox --include-default-customizations=false` opens first-run sign-in | No `auth` or `login` subcommand. Use existing ACP `initialize` and `session/new` without `authenticate`. | `curl -fsSL https://antigravity.google/cli/install.sh \| bash` |
 
 Versions, help, and auth status were run locally. Claude returned authenticated JSON and Codex returned authenticated status. Personal account details are excluded from evidence. `agy help auth` and `agy help login` both returned unknown-subcommand errors. A local read-only ACP probe returned an authenticated session and six available models on 1.4.12. Existing `runAgy` implements the noninteractive ACP status probe and explicitly avoids browser-opening `authenticate`. Actual new-account browser sign-in remains a manual acceptance check. The tiny test uses the existing tool-free provider adapter, never a generic interactive agent prompt.
 
@@ -44,8 +44,20 @@ Entry points are onboarding, the Reader no-AI card, Settings > Providers, and th
 
 ## Integration and verification
 
-Stream M can call `desktop.invoke('ai-cli:list', {})` for file-only state and `openAiCliSetup(provider)` in renderer code to open this same setup flow. It must not configure or install a second executable. Stream P's platform helper files are copied without modification from `t3/cross-platform` so the imports converge when merged. Do not edit MCP files.
+Stream M can call `desktop.invoke('ai-cli:list', {})` for file-only state and `openAiCliSetup(provider)` from `renderer/ai-cli/entry.ts` to open this same setup flow. It must not configure or install a second executable. Stream P's `main/platform/process.ts` and `shared/platform.ts` were initially copied from `t3/cross-platform`. This stream adds the Windows Antigravity install location to the process helper. The unused paths helper was removed. Merge these additive seams with P. No MCP files were edited.
 
 Verify state transitions, disabled-provider discovery, argv and environment boundaries, output and input caps, cancellation, checksum failures, signature failures, safe archive handling, side-by-side switching with a live old process, rollback, update fixtures, component states, and real Electron install/sign-in/test/update with local fake executables. Save the language and theme matrix under `docs/evidence/ai-cli/`. Native Windows and notarized release acceptance require the appropriate host and signing credentials. Do not claim those from a macOS development run.
 
 Throughput checkpoint. First commit the design and IPC contract. Build backend and renderer as separate verified units. Integrate and review both diffs. Run targeted checks once per unit, then full checks and packaged Electron evidence. Merge main before a separate final README and website documentation commit. As an implementation delegate, leave the coordinator's independent review and PR gate to the coordinator.
+
+## Decisions confirmed during implementation
+
+Managed installation downloads native vendor payloads directly. The copy-only fallback shows the official installer for the user's own terminal. It explains that vendor installers use vendor folders and that Settings > Providers > Change selects an existing executable. An explicit custom selection wins until the user requests another managed install or update. Pending executable approval cannot overwrite a newer selection.
+
+Antigravity disables its own updater only when `AGY_CLI_DISABLE_AUTO_UPDATE=true`. The value `1` does not satisfy the vendor's documented switch. Claude receives `DISABLE_AUTOUPDATER=1` and `DISABLE_UPDATES=1`. This keeps managed version paths stable. See [Antigravity troubleshooting](https://antigravity.google/docs/cli-troubleshooting?hl=en).
+
+The embedded sign-in PTY is currently enabled on macOS only. Its sandbox prevents the CLI from launching a browser outside the app's link confirmation. Windows and Linux show the exact direct sign-in command and offer the user's terminal. Codex chat remains macOS-only. This is a deliberate limitation until equivalent browser-launch containment is available on those platforms.
+
+The Advanced preference requires main's native confirmation before enabling the general shell. Reloading the main document revokes its preview tokens and stops setup processes. Previews awaiting network metadata also become invalid. Existing chat sessions are not owned by this setup cleanup. The terminal scrolls into view once when an action starts, keeping sign-in codes visible.
+
+Package acceptance uses the actual ASAR app with release fuses enabled and the native node-pty library unpacked. The build restores the executable bit on node-pty's spawn helper because the published prebuild lacks it on this host. Developer ID signing and notarization still require release credentials. Retention intentionally keeps all verified versions rather than risking deletion of a binary used by another process after an app restart.
