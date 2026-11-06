@@ -2,16 +2,16 @@
 import { path, RELEASES_URL } from '../config';
 import { downloadBase, installers, releaseMetadata } from '../data/downloads';
 import { downloadCopy } from '../data/download-copy';
-import type { Language } from '../data/ui';
+import { ui, type Language } from '../data/ui';
 interface Props { language: Language; compact?: boolean; }
 const { language, compact = false } = Astro.props;
 const t = downloadCopy[language];
 const initial = installers[0];
 ---
-<div class:list={['download-picker', { compact }]} data-download-picker data-download-label={t.download}>
+<div class:list={['download-picker', { compact }]} data-download-picker data-download-label={t.download} data-download-compact={compact || undefined}>
   <div class="download-actions">
-    <a class:list={['button', { compact }]} data-download-primary href={`${downloadBase}/${initial.file}`}>
-      <span data-download-text>{t.download} {initial.label}</span><span aria-hidden="true">↓</span>
+    <a class:list={['button', { compact }]} data-download-primary aria-label={`${t.download} ${initial.label}`} href={`${downloadBase}/${initial.file}`}>
+      <span data-download-text>{compact ? ui[language].download : `${t.download} ${initial.label}`}</span><span aria-hidden="true">↓</span>
     </a>
     {!compact && <a class="intel-alternative" href={`${downloadBase}/${installers[1].file}`}>{t.intel}</a>}
     <details class="download-platforms">
@@ -49,7 +49,8 @@ const initial = installers[0];
       const label = picker.querySelector('[data-download-text]');
       if (link && label) {
         link.href = `${downloadBase}/${installer.file}`;
-        label.textContent = `${picker.dataset.downloadLabel} ${installer.label}`;
+        link.setAttribute('aria-label', `${picker.dataset.downloadLabel} ${installer.label}`);
+        if (!picker.dataset.downloadCompact) label.textContent = `${picker.dataset.downloadLabel} ${installer.label}`;
       }
     });
   }

@@ -27,14 +27,14 @@ for (const [name, ua, hints, expected] of cases) {
 }
 assert.equal(new Set(installers.map(item => item.file)).size, 4);
 assert.deepEqual(releaseMetadata, {}, 'Unverified release metadata must remain hidden');
-for (const route of ['', 'en/', 'zh-Hant/', 'ja/']) {
+for (const route of ['', 'en/', 'zh-Hant/', 'ja/', 'en/docs/getting-started/', 'zh-Hant/docs/getting-started/', 'ja/docs/getting-started/']) {
   const html = await readFile(new URL(`../dist/${route}index.html`, import.meta.url), 'utf8');
   for (const installer of installers) {
     assert.ok(html.includes(`href="${downloadBase}/${installer.file}"`), `${route} no-JS ${installer.id}`);
   }
   assert.ok(html.includes(`href="${downloadBase}/SHA256SUMS.txt"`), `${route} checksums`);
   assert.match(html, /<details[^>]*class="download-platforms/);
-  assert.match(html, /class="intel-alternative"/);
+  if (!route.includes('/docs/')) assert.match(html, /class="intel-alternative"/);
   assert.doesNotMatch(html, /\d+(?:\.\d+)?\s*(?:MB|MiB)\b/, 'No invented installer size');
 }
-console.log(`PASS: ${cases.length} platform cases; all four static homepages expose four installers, checksums, and Intel alternative.`);
+console.log(`PASS: ${cases.length} platform cases; all four static homepages and three install guides expose every installer and checksums; homepages expose the Intel alternative.`);
