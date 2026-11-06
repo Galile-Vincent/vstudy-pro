@@ -30,7 +30,7 @@ The repository already has account-scoped repositories, response schemas, a sche
 - Electron main owns bridge authentication, consent, grants, approval state, redaction, account selection, and tool execution.
 - `apps/mcp` owns stdio MCP, the official SDK adapter, resources, prompts, client configuration, and a credential file containing only the local grant.
 - The renderer can approve or deny pending requests through validated IPC. No approval RPC exists on the agent bridge.
-- The backend prepares a typed call and an exact target. Execution is a callback retained only in main. Every mutation waits for a one-shot approval with a 60-second expiry. Authorization is checked again after approval.
+- The backend prepares a typed call and an exact target. Execution is a callback retained only in main. Integration added an optional main-only AbortSignal after code review showed that revocation could otherwise leave queued validation requests free to dispatch a later mutation. The engine always supplies it. The backend checks it between steps and passes it through the existing Moodle scheduler and transport. No wire schema changed. Every mutation waits for a one-shot approval with a 60-second expiry. Authorization is checked again after approval.
 
 Two structures were considered. A generic web-service forwarding tool is compact but cannot enforce tool-specific scope, redaction, or academic policy. A fixed registry with a main-owned backend makes the permitted operations enumerable and testable. The fixed registry is the final decision.
 

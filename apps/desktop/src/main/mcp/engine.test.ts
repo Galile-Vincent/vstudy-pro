@@ -2,7 +2,7 @@
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { agentsStateSchema, bridgeRequestSchema, defaultScopes, pairBeginResultSchema, pairFinishResultSchema, type BridgeRequest } from '../../shared/mcp';
 import { capabilityMatrix } from './capabilities';
 import { McpEngine } from './engine';
@@ -136,4 +136,16 @@ it('binds opaque pagination handles to the grant, account, tool, and query witho
   expect(await call(engine, first.grant, 'search_content', {query: 'different', cursor: result.nextCursor})).toMatchObject({ok: false, error: {code: 'INVALID_ARGUMENT'}});
   expect(await call(engine, first.grant, 'search_content', {query: 'chapter', cursor: result.nextCursor})).toMatchObject({ok: true});
   expect(prepare.mock.calls.at(-1)?.[1].cursor).toBe('SCHOOL-CANARY-OPAQUE-CURSOR');
+});
+it('passes revocation cancellation to prepared backend execution',async()=>{
+  const f=fixture();f.engine.setEnabled(true);
+  let entered:AbortSignal|undefined;
+  let done!:()=>void;
+  const waiting=new Promise<void>(resolve=>{done=resolve;});
+  f.prepare.mockImplementation(async(_name,args)=>({accountId:f.account.id,target:'Course',provenance:{account:f.account.id,school:'School',courseId:null,moduleId:null,author:null,syncedAt:null},execute:async(signal)=>{entered=signal;await waiting;signal?.throwIfAborted();return {content:args};}}));
+  const paired=await pair(f.engine,[f.account.id]);
+  const result=call(f.engine,paired.grant,'list_courses',{});
+  await vi.waitFor(()=>expect(entered).toBeDefined());
+  f.engine.revoke(paired.grantInfo.id);expect(entered?.aborted).toBe(true);
+  done();expect(await result).toMatchObject({ok:false,error:{code:'DENIED'}});
 });

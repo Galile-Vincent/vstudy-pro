@@ -106,7 +106,7 @@ export interface PreparedMcpCall {
   accountId:string|null;
   target:string;
   provenance:Provenance;
-  execute:()=>Promise<{content:unknown;nextCursor?:string|null}>;
+  execute:(signal?:AbortSignal)=>Promise<{content:unknown;nextCursor?:string|null}>;
 }
 export interface McpBackend {
   accounts:()=>z.infer<typeof agentAccountSchema>[];

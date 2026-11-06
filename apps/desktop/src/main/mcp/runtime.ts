@@ -28,7 +28,7 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
     accounts:options.backend.accounts,
     prepare:async (...args) => {
       const prepared = await track(options.backend.prepare(...args));
-      const call:PreparedMcpCall = {...prepared,execute:() => track(prepared.execute())};
+      const call:PreparedMcpCall = {...prepared,execute:signal => track(prepared.execute(signal))};
       return call;
     },
   };

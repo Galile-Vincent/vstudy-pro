@@ -229,7 +229,7 @@ export class McpEngine {
       }
       signal.throwIfAborted();
       this.authorize(token, name, args, call);
-      const output = await call.execute();
+      const output = await call.execute(signal);
       signal.throwIfAborted();
       this.authorize(token, name, args, call);
       let cursor: string | null = null;
