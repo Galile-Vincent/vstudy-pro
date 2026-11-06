@@ -117,3 +117,39 @@ The desktop sidebar disclosure and keyboard access to horizontally scrollable co
 The complete home asset budget is 146,583 bytes at the largest locale, including uncompressed HTML, linked CSS and JS, and all home images even when lazy. It excludes OG metadata imagery because browsers do not fetch that as page content. No font downloads occur. The static audit checks 1,947 internal links and fragments.
 
 Screenshots are viewport captures at 390×1000 and 1440×1000, with additional scrolled captures for the agent, privacy, themes, FAQ, and final action. PNG evidence follows the repository's existing ignore rule and remains local. JSON results, manifests, source assets, and verification notes are committed. Reduced-motion behavior is implemented and CSS-audited; the T3 browser API does not expose reduced-motion emulation. Independent parent review and hosted Pages verification remain outside this implementation pass.
+
+## Website v2, owner feedback
+
+The owner rejected the tinted canvas, quiet presentation, hard theme cuts, and header rule. This revision replaces the alternating feature rows with a mixed bento grid and keeps the existing static routes, guide registry, product truth, and three languages.
+
+### Prototype decision
+
+Compared three static HTML prototypes outside the repository at `/tmp/vstudy-website-v2-prototypes/`. Captured them with the T3 browser. The source sketches use the current real course screenshot and the same copy so composition is the variable. The comparison is in [website-v2/prototypes/comparison.png](evidence/website-v2/prototypes/comparison.png).
+
+| Prototype | Observation | Decision |
+| --- | --- | --- |
+| Centered aurora | Large two-line type and a wide product window preserve the app's legibility. A low-opacity glow adds depth without coloring the whole canvas. | Selected. |
+| Split studio | Product and headline compete horizontally. The app becomes too small to read at the same viewport. | Rejected. |
+| Paper | Clean white space and a shallow perspective feel calm, but the composition is close to the rejected page. | Rejected. |
+
+Exhaust the Design Space changed the hero decision from an untested restyle to three rendered alternatives. Model the Domain kept new copy in a typed locale record and theme updates in one shared function. Prove It Works changed the acceptance check from build success to real browser actions, rendered captures, axe, and local Lighthouse.
+
+### Implemented direction
+
+The canvas is #fafafa in light and #0b0b0d in dark. Panels use neutral white and charcoal. Palette orbs change the accent and matching real app preview, while the canvas stays neutral. The hero reaches 92px and uses localized line breaks. A slowly drifting aurora sits behind the product window. A requestAnimationFrame scroll handler applies at most 20px of translation and 1.8% of scale. No animation library is loaded.
+
+The bento cards combine courses and reading captures with a ticking example deadline, a searchable conversation example, an approval/reset example, working palette orbs, a Moodle capture, and an MCP tile. Demo data is labeled. The school monograms are directory examples, not endorsements or guarantees. The adjacent text keeps Moodle mobile-service compatibility explicit. Setup has numbered steps connected by simple lines. The FAQ keeps the real distribution, privacy, offline, and provider limitations.
+
+Headers have no bottom border on home or docs. Their background, blur, and faint shadow appear through a pseudo-element's opacity after scrolling. The docs keep their existing route, navigation, callout, search, anchored heading, and copy-code structures. Neutral surfaces, calmer sidebar typography, and inset code blocks refine the reading experience.
+
+Both theme controls use a shared 280ms View Transitions crossfade. If unavailable, registered color properties interpolate for 280ms ease-out. The inline scheme initializer still runs before paint. Transition CSS activates after initialization. Reduced motion skips the API and all motion. The page also has an explicit motion pause control.
+
+### Visual review
+
+The first pass found mobile overflow caused by the drifting glow. The glow's own bounds now stay inside the viewport. No global overflow hiding was added. The second pass found the reading-format note overlapping its screenshot. Clipping now belongs to the screenshot container and the note has its own space. Captures from both passes and the corrected result are under [website-v2](evidence/website-v2/).
+
+The v2 HTML sketches stay outside the repository. PNG evidence follows the existing local-evidence ignore rule. JSON audits, screenshot manifests, design decisions, and verification instructions are committed. T3 captures can rasterize at a different size than their CSS viewport. The manifest records the CSS width used for each capture.
+
+### Integration gate
+
+At this pass, main is `ec24a40` and has neither the U4 clean-art merge nor `docs/MCP.md`. The MCP tile and FAQ therefore say coming soon in all three languages. The final step must merge main after U4 lands, update MCP copy if its documentation has arrived, run `pnpm build && node apps/desktop/scripts/marketing-shots.mjs`, inspect the generated contact sheet, rebuild the site and README derivatives, and rerun checks. Current screenshots still use the pre-U4 art.

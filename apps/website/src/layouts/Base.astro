@@ -64,22 +64,32 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       </div>
     </footer>
     <script>
+      import { transitionTheme } from '../scripts/theme';
+      requestAnimationFrame(() => { document.documentElement.dataset.themeReady = ''; });
       const toggle = document.querySelector<HTMLButtonElement>('#scheme-toggle');
       const system = matchMedia('(prefers-color-scheme: dark)');
       let manual = false;
       try { manual = ['light','dark'].includes(localStorage.getItem('vstudy-scheme') ?? ''); } catch {}
       toggle?.addEventListener('click', () => {
         const scheme = document.documentElement.dataset.scheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.dataset.scheme = scheme;
+        transitionTheme(() => {
+          document.documentElement.dataset.scheme = scheme;
+          document.dispatchEvent(new Event('scheme-change'));
+        });
         manual = true;
         try { localStorage.setItem('vstudy-scheme', scheme); } catch {}
-        document.dispatchEvent(new Event('scheme-change'));
       });
       system.addEventListener('change', event => {
         if (manual) return;
-        document.documentElement.dataset.scheme = event.matches ? 'dark' : 'light';
-        document.dispatchEvent(new Event('scheme-change'));
+        transitionTheme(() => {
+          document.documentElement.dataset.scheme = event.matches ? 'dark' : 'light';
+          document.dispatchEvent(new Event('scheme-change'));
+        });
       });
+      const header = document.querySelector('.site-header');
+      const updateHeader = () => header?.classList.toggle('is-scrolled', window.scrollY > 12);
+      updateHeader();
+      window.addEventListener('scroll', updateHeader, { passive: true });
       document.querySelector<HTMLSelectElement>('#site-language')?.addEventListener('change', event => {
         if (event.currentTarget instanceof HTMLSelectElement) location.href = event.currentTarget.value;
       });
