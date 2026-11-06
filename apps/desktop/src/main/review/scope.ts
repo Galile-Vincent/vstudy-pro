@@ -68,7 +68,8 @@ export function resolveScope(raw: z.input<typeof studyScopeSchema>, data: ScopeI
         }
         return false;
     });
-    const documentIds = [...new Set(units.flatMap(u => u.documentIds).concat(scope.kind === 'documents' ? scope.documentIds : []))].filter(id => data.documents.includes(id));
-    const snapshot: StudyResolvedScope = { unitIds: units.map(u => u.id), documentIds, conceptKeys: requestedConcepts.filter(c => c.unitId && units.some(u => u.id === c.unitId)).map(c => c.key), from: range?.from ?? null, to: range?.to ?? null, timeZone: scope.kind === 'dates' ? scope.timeZone : 'UTC', sources: [], assumptions: fallback.length ? ['Undated units based on when you asked: ' + fallback.join(', ')] : [] };
+    const unitless = requestedConcepts.some(c => c.unitId === null);
+    const documentIds = [...new Set(units.flatMap(u => u.documentIds).concat(scope.kind === 'documents' ? scope.documentIds : (scope.kind === 'concepts' || scope.kind === 'weak') && unitless ? data.documents : []))].filter(id => data.documents.includes(id));
+    const snapshot: StudyResolvedScope = { unitIds: units.map(u => u.id), documentIds, conceptKeys: requestedConcepts.filter(c => c.unitId === null || units.some(u => u.id === c.unitId)).map(c => c.key), from: range?.from ?? null, to: range?.to ?? null, timeZone: scope.kind === 'dates' ? scope.timeZone : 'UTC', sources: [], assumptions: fallback.length ? ['Undated units based on when you asked: ' + fallback.join(', ')] : [] };
     return { status: documentIds.length ? 'resolved' as const : 'needs_source_selection' as const, snapshot };
 }
