@@ -76,7 +76,7 @@ it('registers the entire contract with strict sender, subframe, and request vali
   expect([...implemented].filter(channel => channel.startsWith('ai-cli:'))).toEqual(Object.keys(aiCliContract));
   await expect(invoke('ai-cli:list', {}, stranger)).rejects.toThrow('Untrusted IPC sender');
   await expect(invoke('ai-cli:list', {}, undefined, {})).rejects.toThrow('Untrusted IPC sender');
-  const logging = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const logging = vi.spyOn(console, 'log').mockImplementation(() => {});
   await expect(invoke('ai-cli:preview', { actionId: 'advanced-shell', executable: '/bin/sh' })).rejects.toThrow('VSTUDY_STATUS');
   expect(logging).toHaveBeenCalled();
   expect(await invoke('ai-cli:preferences', {})).toEqual({ updateChecks: false, autoUpdateWhenIdle: false, advancedShell: false });
