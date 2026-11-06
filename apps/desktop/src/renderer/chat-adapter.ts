@@ -11,6 +11,7 @@ export function createChatAdapter(
   context: () => Promise<ChatContext>,
   started: (messageId: string) => void = () => {},
   proposed: (actions: import("../shared/moodle").MoodleAgentAction[]) => void = () => {},
+  partialHistory: () => boolean = () => false,
 ) {
   const contexts = new Map<string, ChatContext>();
   const active = new Set<() => void>();
@@ -69,9 +70,10 @@ export function createChatAdapter(
           cancel();
           return;
         }
+        // An unloaded prefix is not a deleted branch; let main retain its full context.
         // Main may emit the entire response before its start acknowledgement resolves.
         void bridge
-          .invoke("chat:start", { ...details, requestId, userMessage, turnId, contextTurnIds: messages.filter(m => m.role === "user").slice(0, -1).map(m => String(m.metadata?.custom?.turnId ?? m.id)) })
+          .invoke("chat:start", { ...details, requestId, userMessage, turnId, ...(!partialHistory() ? {contextTurnIds: messages.filter(m => m.role === "user").slice(0, -1).map(m => String(m.metadata?.custom?.turnId ?? m.id))} : {}) })
           .catch((error) =>
             push({
               type: "error",
@@ -94,7 +96,7 @@ export function createChatAdapter(
           if (abortSignal.aborted || runGeneration !== generation) return;
           const event = queue.shift();
           if (!event) continue;
-          if (event.type === "error") { yield {...snapshot(),status:{type:'incomplete',reason:'error',error:event.code ? statusText({code:event.code,params:event.params ?? {}}) : errorText(event.message)}}; return; }
+          if (event.type === "error") { yield {...snapshot(),status:{type:'incomplete',reason:'error',error:event.code ? statusText({code:event.code,params:event.params ?? {}}) : event.message}}; return; }
           if (event.type === "done") return;
           if (event.type === "proposals") { proposed(event.actions); continue; }
           if (event.type === "usage") { usage = event.usage; window.dispatchEvent(new Event("usage-updated")); }

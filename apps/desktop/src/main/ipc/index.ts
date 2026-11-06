@@ -60,7 +60,9 @@ export function registerIpc(
   setExecutablePins(pins);
   const providers = createProviderRegistry(secrets, `${app.getPath("userData")}/providers.json`);
   const registrar = createIpcRegistrar(ipcMain, isTrusted);
+  registrar.handle('app:reportError', report => { log({phase:`renderer-${report.phase}`,code:report.code,componentStack:report.componentStack}); return {ok:true}; });
   const implemented = new Set<IpcChannel>([
+    'app:reportError',
     "shell:openExternal",
     "settings:appearance",
     "settings:systemLocale",

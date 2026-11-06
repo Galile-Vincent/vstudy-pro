@@ -224,10 +224,6 @@ export class ChatService {
     );
   }
   private send(entry: ActiveRequest, event: ChatEvent) {
-    if(event.type === 'error') {
-      const category = /auth/i.test(event.message) ? 'auth_failed' : /rate.limit/i.test(event.message) ? 'rate_limited' : /network/i.test(event.message) ? 'network' : /budget|quota/i.test(event.message) ? 'budget' : 'provider_unavailable';
-      event = {...event,code:`errors.${category}`,params:{}};
-    }
     try {
       if (!entry.owner.isDestroyed())
         entry.owner.send(
@@ -246,6 +242,10 @@ export class ChatService {
     event: Extract<ChatEvent, { type: "done" | "error" }>,
   ) {
     if (this.active.get(entry.request.requestId) !== entry) return;
+    if (event.type === 'error' && !event.code) {
+      const category = /auth/i.test(event.message) ? 'auth_failed' : /rate.limit/i.test(event.message) ? 'rate_limited' : /network/i.test(event.message) ? 'network' : /budget|quota/i.test(event.message) ? 'budget' : 'provider_unavailable';
+      event = {...event,code:`errors.${category}`,params:{}};
+    }
     this.active.delete(entry.request.requestId);
     entry.owner.removeListener("destroyed", entry.onDestroyed);
     try {
@@ -273,14 +273,14 @@ export class ChatService {
         for (const model of reported && entry.usageModels?.length ? entry.usageModels : [{ modelId, usage: entry.usage }]) this.store.usage.record({ ...priceUsage(model.modelId, model.usage, this.store.settings.get().priceOverrides), aborted: entry.controller.signal.aborted, id: randomUUID(), createdAt: new Date().toISOString(), providerId: entry.request.providerId, modelId: canonicalModelId(model.modelId), kind: 'chat', conversationId: entry.request.conversationId, documentId: entry.request.scope === "course" || entry.request.scope === "general" ? undefined : entry.request.documentId, messageId: messageId as import('../../shared/domain').Message['id'] });
         this.send(entry, { type: 'usage', usage: entry.usage });
       }
-      if (!restoreBranch && (entry.text || entry.proposals?.length || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error")) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? event.message : undefined, { ...(entry.proposals?.length ? {proposals: entry.proposals} : {}), ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
+      if (!restoreBranch && (entry.text || entry.proposals?.length || entry.reasoning || entry.toolCalls?.length || entry.usage || event.type === "error")) this.persist(entry.request, "assistant", entry.text, entry.controller.signal.aborted ? "aborted" : event.type === "error" ? "error" : "complete", entry.usage, messageId, event.type === "error" ? 'VSTUDY_STATUS:' + JSON.stringify({code:event.code,params:event.params ?? {}}) : undefined, { ...(entry.proposals?.length ? {proposals: entry.proposals} : {}), ...(entry.reasoning ? { reasoning: entry.reasoning } : {}), ...(citations.length ? { citations } : {}), ...(entry.toolCalls?.length ? { toolCalls: entry.toolCalls } : {}) });
       this.store.messages.link(messageId, entry.userMessageId);
       if (entry.supersedeOnSave && entry.text) this.store.messages.supersede(entry.supersedeOnSave, messageId);
       this.store.db.exec("RELEASE finish_chat");
     } catch {
       this.store.db.exec("ROLLBACK TO finish_chat; RELEASE finish_chat");
       if (!entry.controller.signal.aborted)
-        event = { type: "error", message: "Chat could not be saved" };
+        event = { type: "error", message: "Chat could not be saved", code: "errors.chat_save_failed", params: {} };
     }
     this.send(entry, event);
   }

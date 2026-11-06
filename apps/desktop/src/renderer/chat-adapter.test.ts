@@ -98,7 +98,7 @@ describe("IPC chat adapter", () => {
     const failed = setup(async (emit) =>
       emit({ type: "error", message: "provider failed" }),
     );
-    expect((await failed.stream.next()).value).toEqual({content:[{type:'text',text:''}],metadata:{custom:{modelId:'m',options:undefined,citations:[]}},status:{type:'incomplete',reason:'error',error:'Something went wrong. Please try again.'}});
+    expect((await failed.stream.next()).value).toEqual({content:[{type:'text',text:''}],metadata:{custom:{modelId:'m',options:undefined,citations:[]}},status:{type:'incomplete',reason:'error',error:'provider failed'}});
     expect(failed.unsubscribe).toHaveBeenCalled();
   });
 });
@@ -127,4 +127,18 @@ it('retry and regenerate reuse the original selection and options with a fresh r
   expect(first).toEqual(['chat:start',{...original,userMessage:'Explain',turnId:'turn',contextTurnIds:[],requestId:expect.any(String)}]);
   expect(second).toEqual(['chat:start',{...original,userMessage:'Explain',turnId:'turn',contextTurnIds:[],requestId:expect.any(String)}]);
   expect(first[1].requestId).not.toBe(second[1].requestId);
+});
+it('preserves the localized IPC rejection instead of translating it twice',async()=>{
+  const test=setup(async()=>{throw new Error('VSTUDY_STATUS:'+JSON.stringify({code:'errors.auth_failed',params:{}}));});
+  const {tr}=await import('../shared/i18n');
+  expect((await test.stream.next()).value.status.error).toBe(tr('errors:auth_failed'));
+});
+it('does not mark unloaded turns as deleted when sending from a recent-message window',async()=>{
+  let emit!:(event:ChatEvent)=>void;
+  const invoke=vi.fn(async()=>{emit({type:'done'});return {ok:true};});
+  const bridge={invoke,onChatEvent:(_id:string,listener:typeof emit)=>{emit=listener;return ()=>{};}} as unknown as DesktopApi;
+  const {adapter}=createChatAdapter(bridge,async()=>context,undefined,undefined,()=>true);
+  const stream=adapter.run({messages:[{role:'user',id:'loaded',content:[{type:'text',text:'Old question'}]},{role:'user',id:'new',content:[{type:'text',text:'Next question'}]}],abortSignal:new AbortController().signal} as unknown as ChatModelRunOptions) as AsyncGenerator;
+  await stream.next();
+  expect(invoke).toHaveBeenCalledWith('chat:start',expect.not.objectContaining({contextTurnIds:expect.anything()}));
 });

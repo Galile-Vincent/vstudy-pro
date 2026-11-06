@@ -41,6 +41,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 }, "Only http, https and mailto URLs are allowed");
 /** Source of request and response types for the narrow preload bridge. Every main handler validates both directions. */
 export const ipcContract = {
+  'app:reportError': { request: z.object({phase:z.enum(['render','bootstrap']),code:z.string().max(100),componentStack:z.string().max(4000).optional()}).strict(), response:ack },
   ...mcpIpc,
   ...mcpNavigationIpc,
   ...aiCliContract,

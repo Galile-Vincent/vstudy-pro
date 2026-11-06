@@ -43,5 +43,6 @@
   "startup_database": "VStudy 無法開啟本機資料庫。請保留檔案並嘗試重新啟動。",
   "startup_services": "VStudy 無法初始化應用程式服務。請嘗試重新啟動。",
   "startup_window": "VStudy 無法開啟學習視窗。請嘗試重新啟動。",
-  "window_unavailable": "學習視窗已停止回應，自動復原已停止。請結束並重新開啟 VStudy，或複製診斷資訊以尋求協助。"
+  "window_unavailable": "學習視窗已停止回應，自動復原已停止。請結束並重新開啟 VStudy，或複製診斷資訊以尋求協助。",
+  "chat_save_failed": "無法儲存這則回答，請在離開前複製內容。檢查剩餘磁碟空間與檔案權限後再試一次。"
 }

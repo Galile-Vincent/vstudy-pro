@@ -27,7 +27,7 @@ import {
   SlidersHorizontal, AlertTriangle, LoaderCircle, X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { LibraryQuery } from "../../shared/library";
+import { libraryQuerySchema, type LibraryQuery } from "../../shared/library";
 import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
@@ -88,11 +88,12 @@ export function LibraryView() {
   const restoreTop = useRef(
     Number(sessionStorage.getItem(`library-scroll:${viewKey}`) ?? 0),
   );
-  const [query, setQuery] = useState<LibraryQuery>(() => ({
-    ...defaults,
-    ...JSON.parse(localStorage.getItem(`library-sort:${viewKey}`) ?? "{}"),
-    ...route.query,
-  }));
+  const [query, setQuery] = useState<LibraryQuery>(() => {
+    let sort = {};
+    try { sort = libraryQuerySchema.pick({sort:true,direction:true}).partial().parse(JSON.parse(localStorage.getItem(`library-sort:${viewKey}`) ?? '{}')); }
+    catch { /* Corrupt optional sort preferences must not prevent opening the library. */ }
+    return {...defaults, ...sort, ...route.query};
+  });
   const [customDates,setCustomDates] = useState(false);
   const [filtersOpen,setFiltersOpen] = useState(false);
   useEffect(() => {
@@ -247,10 +248,9 @@ export function LibraryView() {
     focusAfter.current = focused?.closest<HTMLElement>("[data-index]")?.id ?? menuAnchor.current?.closest<HTMLElement>("[data-index]")?.id ?? "shell-content";
     try {
       await action();
-      changed();
     } catch (e) {
       setNotice(errorText(e));
-    }
+    } finally { changed(); }
   };
   const more = async () => {
     if (!cursor || fetching.current) return;
@@ -272,15 +272,19 @@ export function LibraryView() {
     }
   };
   const selectAll = async () => {
+    const id = generation.current;
     let all = items;
     let next = cursor;
-    while (next) {
-      const page = await desktop.invoke("library:documents:list", {
-        ...query,
-        cursor: next,
-      });
-      all = [...all, ...page.items];
-      next = page.nextCursor ?? undefined;
+    try {
+      while (next) {
+        const page = await desktop.invoke("library:documents:list", { ...query, cursor: next });
+        if (id !== generation.current) return;
+        all = [...all, ...page.items];
+        next = page.nextCursor ?? undefined;
+      }
+    } catch (error) {
+      if (id === generation.current) throw error;
+      return;
     }
     setItems(all);
     setCursor(undefined);
@@ -299,19 +303,19 @@ export function LibraryView() {
       : selected;
   const remove = async (targets: Item["document"]["id"][]) => {
     await run(async () => {
-      for (const documentId of targets)
-        await desktop.invoke("library:documents:softDelete", { documentId });
-      setNotice(
-        tr("library:deleted", {
-          count: targets.length,
-          formatted: format.number(targets.length),
-        }),
-      );
-      setUndo(() => async () => {
-        for (const documentId of targets)
-          await desktop.invoke("library:documents:restore", { documentId });
-        changed();
-      });
+      const deleted: typeof targets = [];
+      try {
+        for (const documentId of targets) {
+          await desktop.invoke("library:documents:softDelete", { documentId });
+          deleted.push(documentId);
+        }
+        setNotice(tr("library:deleted", {count:deleted.length,formatted:format.number(deleted.length)}));
+      } finally {
+        if (deleted.length) setUndo(() => async () => {
+          for (const documentId of deleted) await desktop.invoke("library:documents:restore", { documentId });
+          changed();
+        });
+      }
     });
     setMenu(null);
   };

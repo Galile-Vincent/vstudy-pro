@@ -18,7 +18,7 @@ async function mount(fail=false){
   invoke.mockImplementation(async channel=>{
     if(channel==='providers:list')return [];
     if(channel==='chats:get')return conversation;
-    if(channel==='messages:list'){if(++reads===1)return [];if(fail)throw new Error('unavailable');return [{role:'user'}];}
+    if(channel==='messages:page'){if(++reads===1)return {items:[],nextCursor:null};if(fail)throw new Error('unavailable');return {items:[{role:'user'}],nextCursor:null};}
     if(channel==='conversations:model')throw new Error('not empty');
     if(channel==='conversations:create')return {...conversation,id:'00000000-0000-4000-8000-000000000002',modelId:'next'};
   });

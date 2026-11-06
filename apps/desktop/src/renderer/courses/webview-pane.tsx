@@ -24,6 +24,7 @@ export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconne
   useTranslation('webview');
   const [state,setState] = useState<WebviewState>();
   const [failed,setFailed] = useState(false);
+  const [attempt,setAttempt] = useState(0);
   const [full,setFull] = useState(window.innerWidth < 1000);
   const [width,setWidth] = useState(Math.min(800,window.innerWidth - 80));
   const [copied,setCopied] = useState(false);
@@ -42,6 +43,7 @@ export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconne
   const action = useCallback(async (action:WebviewAction) => {
     if (!id.current) return;
     if (action === 'copy') setCopied(false);
+    else setFailed(false);
     try {
       const next = await desktop.invoke('moodle:webview-action',{id:id.current,action});
       if (action === 'copy') setCopied(true);
@@ -49,6 +51,7 @@ export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconne
     } catch {setFailed(true);}
   },[close]);
   useEffect(() => {
+    setFailed(false); setState(undefined); id.current = undefined; closing.current = false;
     let active = true, timer:ReturnType<typeof setTimeout>|undefined;
     const accept = (next:WebviewState) => {
       if (!active) return;
@@ -67,7 +70,7 @@ export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconne
       id.current = next.id;accept(next);timer = setTimeout(() => void poll(),500);
     }).catch(() => {if (active) setFailed(true);});
     return () => {active=false;clearTimeout(timer);if (id.current) void desktop.invoke('moodle:webview-action',{id:id.current,action:'close'}).catch(() => {});};
-  },[accountId,target,close]);
+  },[accountId,target,close,attempt]);
   useEffect(() => {
     closeButton.current?.focus();
     const root = document.getElementById('root');
@@ -131,7 +134,8 @@ export function MoodleWebviewPane({accountId,target,onClose,onDocument,onReconne
         {busy && <div className="moodle-webview-message" role="status"><RefreshCw className="moodle-spin" /><p>{tr(state?.status === 'loading' ? 'webview:loading' : 'webview:connecting')}</p></div>}
         {error && <div className="moodle-webview-message" role="alert"><ShieldAlert /><h2>{tr(`webview:error_${error}`)}</h2><p>{tr(`webview:hint_${error}`)}</p>
           {state?.retryAt && state.retryAt > Date.now() && <p>{tr('webview:rate_limit',{time:new Date(state.retryAt).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})})}</p>}
-          {state && <Button onClick={() => void action(error === 'session-expired' || error === 'unavailable' ? 'reconnect' : 'reload')} disabled={!!state.retryAt && state.retryAt > Date.now()}>{tr(error === 'session-expired' || error === 'unavailable' ? 'webview:reconnect' : 'webview:reload')}</Button>}
+          {failed && <Button onClick={() => { if (id.current) void action('reload'); else setAttempt(value => value + 1); }}>{tr('common:retry')}</Button>}
+          {!failed && state && <Button onClick={() => void action(error === 'session-expired' || error === 'unavailable' ? 'reconnect' : 'reload')} disabled={!!state.retryAt && state.retryAt > Date.now()}>{tr(error === 'session-expired' || error === 'unavailable' ? 'webview:reconnect' : 'webview:reload')}</Button>}
           {['session-expired','unavailable'].includes(error) && <Button variant="outline" onClick={() => callbacks.current.onReconnect()}>{tr('webview:sign_in')}</Button>}
         </div>}
       </div>

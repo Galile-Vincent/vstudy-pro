@@ -368,5 +368,6 @@
   "attachment_label": "附件 {{name}}（{{type}}）{{status}}",
   "uploading": "上傳中",
   "reload": "重新載入",
-  "copy_diagnostics": "複製診斷資訊"
+  "copy_diagnostics": "複製診斷資訊",
+  "reload_application": "重新載入應用程式"
 }

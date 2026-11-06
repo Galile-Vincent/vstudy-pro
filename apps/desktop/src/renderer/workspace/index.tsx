@@ -1,3 +1,5 @@
+import type { IpcResponse } from '../../shared/ipc';
+import { LoadError } from '../components/load-error';
 import { ContextCoach, HelpMenu } from "../onboarding/help";
 import { ReaderOfflineNotice } from './offline-notice';
 import { ReaderWelcome } from './reader-welcome';
@@ -17,7 +19,6 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type {
   Conversation,
   Document,
-  Message,
   Selection,
   Settings,
   ProviderConfig,
@@ -46,13 +47,17 @@ export function Workspace() {
     [model, setModel] = useState("");
   const [settingsTab, setSettingsTab] = useState("providers");
   const [conversation, setConversation] = useState<Conversation | null>(null),
-    [history, setHistory] = useState<Message[] | null>(null);
+    [history, setHistory] = useState<IpcResponse<'messages:page'> | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null),
     [showSettings, setShowSettings] = useState(false),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [loadingSource, setLoadingSource] = useState(false);
 
+  const [startupError, setStartupError] = useState(''), [sourceError, setSourceError] = useState(''),
+    [conversationError, setConversationError] = useState(''), [historyError, setHistoryError] = useState('');
+  const [loadRevision, setLoadRevision] = useState(0);
+  const retryLoad = () => setLoadRevision(value => value + 1);
   const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
   useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   useEffect(() => {
@@ -131,6 +136,7 @@ export function Workspace() {
   },[report]);
   useEffect(() => {
     let active = true;
+    setStartupError('');
     void Promise.all([
       desktop.invoke("settings:get", {}),
       (route.documentId
@@ -149,11 +155,11 @@ export function Workspace() {
         setDocumentId(route.documentId ?? d.find(item => item.id === s.lastDocumentId)?.id ?? null);
         setModel(resolveModel(s.lastProviderId && s.lastModelId ? `${s.lastProviderId}/${s.lastModelId}` : "", p));
       })
-      .catch(report);
+      .catch(error => { if (active) setStartupError(errorText(error)); });
     return () => {
       active = false;
     };
-  }, [report]);
+  }, [report, loadRevision]);
   useEffect(() => {
     if (!documents.some((d) => d.status === "converting")) return;
     const timer = setInterval(() => {
@@ -166,6 +172,7 @@ export function Workspace() {
   }, [documents, report]);
   useEffect(() => {
     let active = true;
+    setConversationError('');
     setSource("");
     setSelection(null);
     setConversation(null);
@@ -186,17 +193,18 @@ export function Workspace() {
           if (selected) setModel(`${selected.providerId}/${selected.modelId}`);
         }
       })
-      .catch(report);
+      .catch(error => { if (active) setConversationError(errorText(error)); });
     return () => {
       active = false;
     };
-  }, [documentId, report]);
+  }, [documentId, report, loadRevision]);
   useEffect(() => {
     if (!conversation) return;
     try { localStorage.setItem(`vstudy-conversation:${(conversation.scope === "course" ? conversation.courseId : conversation.scope === "general" ? "general" : conversation.documentId)}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
   }, [conversation?.id]);
   useEffect(() => {
     let active = true;
+    setSourceError('');
     setSource("");
     if (doc?.status !== "ready") return;
     setLoadingSource(true);
@@ -205,28 +213,29 @@ export function Workspace() {
       .then((value) => {
         if (active) {setSource(value);setReaderVersion(doc.activeVersion);}
       })
-      .catch(report)
+      .catch(error => { if (active) setSourceError(errorText(error)); })
       .finally(() => {
         if (active) setLoadingSource(false);
       });
     return () => {
       active = false;
     };
-  }, [doc?.id, doc?.status, readerRevision, report]);
+  }, [doc?.id, doc?.status, readerRevision, report, loadRevision]);
   useEffect(() => {
     let active = true;
+    setHistoryError('');
     setHistory(null);
     if (!conversation) return;
     void desktop
-      .invoke("messages:list", { conversationId: conversation.id })
+      .invoke("messages:page", { conversationId: conversation.id, limit:50, direction:'backward' })
       .then((value) => {
         if (active) setHistory(value);
       })
-      .catch(report);
+      .catch(error => { if (active) setHistoryError(errorText(error)); });
     return () => {
       active = false;
     };
-  }, [conversation?.id, report]);
+  }, [conversation?.id, report, loadRevision]);
   const saveSettings = async (next: Partial<Settings>) => {
     try {
       const saved = await desktop.invoke("settings:set", next);
@@ -248,8 +257,8 @@ export function Workspace() {
       lastModelId: modelId,
     });
     if (conversation && `${conversation.providerId}/${conversation.modelId}` !== value) {
-      void desktop.invoke('messages:list',{conversationId:conversation.id}).then(async messages => {
-        if (messages.length) { await newConversation(value); return; }
+      void desktop.invoke('messages:page',{conversationId:conversation.id,limit:1}).then(async messages => {
+        if (messages.items.length) { await newConversation(value); return; }
         try {
           const next = await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId});
           setConversation(next);
@@ -262,7 +271,7 @@ export function Workspace() {
 
   };
   const importing = useRef(false);
-  const importDocument = async (paths?: string[]) => {
+  const importDocument = async (paths?: string[], names?: string[]) => {
     if (!connected) { setNotice(tr('common:workspace_is_still_connecting_try_importing_again_in_a_moment')); return; }
     if (importing.current) return;
     importing.current = true;
@@ -270,7 +279,7 @@ export function Workspace() {
     try {
       const results = paths ? await desktop.invoke("documents:importPaths", { paths }) : null;
       const imported = results ? results.find(r => r.ok)?.document : await desktop.invoke("documents:import", {});
-      if (results) setNotice(results.filter(r => !r.ok).map(r => `${r.path}: ${tr('errors:conversion_failed')}`).join("\n"));
+      if (results) setNotice(results.flatMap((r, index) => r.ok ? [] : [`${names?.[index] ?? tr('common:document')}: ${errorText(new Error(r.error))}`]).join("\n"));
       if (imported) {
         setDocuments(await desktop.invoke("documents:list", {}));
         setDocumentId(imported.id);
@@ -299,7 +308,7 @@ export function Workspace() {
       if(activate)setCompactPane("chat");
       setFocusChat(activate);
       setConversation(created);
-      setHistory([]);
+      setHistory({items:[],nextCursor:null});
     } catch (error) {
       report(error);
     } finally {
@@ -347,7 +356,7 @@ export function Workspace() {
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
       <header className="art-reader-chat-header"><span><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</span>{chatControls}</header>
-      {conversation && history ? (
+      {conversationError || historyError ? <LoadError message={conversationError || historyError} retry={retryLoad}/> : conversation && history ? (
         <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}>{chatDocument === documentId ? <Chat
           documentPageCount={documentPageCount}
           documentTitle={doc?.title ?? tr('common:document')}
@@ -358,7 +367,8 @@ export function Workspace() {
           draft={draft}
           onDraft={setDraft}
           conversation={conversation}
-          history={history}
+          history={history.items}
+          historyCursor={history.nextCursor}
           selection={selection}
           onClearSelection={() => setSelection(null)}
           providers={providers}
@@ -455,7 +465,7 @@ export function Workspace() {
           >
             {tr('common:retry_conversion')}</button><p>{tr('library:retry_hint')}</p>
         </div>
-      ) : loadingSource ? (
+      ) : sourceError ? <LoadError message={sourceError} retry={retryLoad}/> : loadingSource ? (
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
@@ -485,7 +495,7 @@ export function Workspace() {
         try {
           const paths = Array.from(e.dataTransfer.files, (file) => desktop.getPathForFile?.(file) ?? "");
           if (!paths.length || paths.some((path) => !path)) throw new Error(tr('common:dropped_files_have_no_accessible_local_path'));
-          void importDocument(paths);
+          void importDocument(paths, Array.from(e.dataTransfer.files, file => file.name));
         } catch (error) { report(error); }
       }}
     >
@@ -527,6 +537,7 @@ export function Workspace() {
           </button>
         </div>
       </header>
+      {startupError && <LoadError message={startupError} retry={retryLoad}/>}
       {notice && (
         <div className="notice" role="status">
           <span>{notice}</span>

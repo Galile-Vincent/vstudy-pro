@@ -620,3 +620,14 @@ it("never sends Markdown outside the configured library even when both database 
     expect(cwd).not.toBe(outside);
   } finally {await rm(outside,{recursive:true,force:true});}
 });
+it('reports a typed save failure while leaving the streamed answer available to copy', async () => {
+  const {chat,store,request,owner}=await setup({...available,async *stream(){
+    yield {type:'text-delta',text:'Answer worth keeping'};
+    store.messages.insert=()=>{throw Object.assign(new Error('private path'),{code:'ENOSPC'});};
+    yield {type:'done'};
+  }});
+  chat.start(request,owner);await chat.waitForIdle();
+  expect(owner.events).toContainEqual({type:'text-delta',text:'Answer worth keeping'});
+  expect(owner.events.at(-1)).toMatchObject({type:'error',code:'errors.chat_save_failed',params:{}});
+  expect(store.messages.list(request.conversationId).some(m=>m.role==='assistant')).toBe(false);
+});

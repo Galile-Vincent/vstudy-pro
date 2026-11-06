@@ -368,5 +368,6 @@
   "attachment_label": "Attachment {{name}} ({{type}}) {{status}}",
   "uploading": "Uploading",
   "reload": "Reload",
-  "copy_diagnostics": "Copy diagnostics"
+  "copy_diagnostics": "Copy diagnostics",
+  "reload_application": "Reload application"
 }
