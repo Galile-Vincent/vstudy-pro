@@ -80,15 +80,14 @@
   "scope_documents_help": "請選擇已連結到這門課的文件。",
   "scope_empty": "目前沒有可選項目。請加入課程教材，或改選其他範圍。",
   "scope_size": "篇幅",
-  "scope_standard": "標準",
-  "scope_size_unavailable": "目前會依選取的教材決定篇幅。",
+  "scope_standard": "標準（12 題）",
   "item_progress": "第 {{current}} 題，共 {{total}} 題",
   "your_answer": "你的答案",
   "answer_true": "正確",
   "answer_false": "錯誤",
-  "commit_notice": "作答會逐題儲存。送出測驗後，所有答案將鎖定，並顯示回饋。",
-  "finish_test": "送出測驗",
-  "answer_next": "儲存並繼續",
+  "commit_notice": "送出後會鎖定本題答案並顯示回饋。",
+  "finish_test": "送出最後一題",
+  "answer_next": "送出答案",
   "question_reported": "已回報這道題目，不會用來更新複習清單。",
   "answer_matches": "你的答案符合參考答案",
   "worth_another_look": "值得再看看",
@@ -142,5 +141,7 @@
   "resolved_documents": "文件",
   "none": "無",
   "asked_fallback": "依據你提問的時間",
-  "sources": "來源"
+  "sources": "來源",
+  "scope_short": "簡短（8 題）",
+  "scope_long": "完整（20 題）"
 }

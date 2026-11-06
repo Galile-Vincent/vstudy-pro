@@ -1,4 +1,5 @@
 import { conversationSchema, messageSchema } from '../../shared/domain';
+import { reviewGenerateIpc } from '../../shared/review-generate';
 import { reviewIpc, studyConceptSchema, studyPrefsSchema } from '../../shared/review';
 import type { IpcRequest, IpcResponse } from '../../shared/ipc';
 
@@ -71,6 +72,15 @@ export function createReviewMock(demo = false) {
     }
   }
   return (channel:string,input:unknown):unknown => {
+    if(Object.hasOwn(reviewGenerateIpc,channel)) {
+      const key=channel as keyof typeof reviewGenerateIpc;
+      reviewGenerateIpc[key].request.parse(input);
+      if(key==='review:artifact:list') return {items:[],nextCursor:null};
+      if(key==='review:artifact:get') return null;
+      if(key==='review:artifact:delete'||key==='review:artifact:cancel') return {ok:true};
+      if(key==='review:artifact:export') return {saved:false};
+      throw new Error(key.startsWith('review:attempt:')?'review.attempt_unavailable':'review.provider_unavailable');
+    }
     if(!Object.hasOwn(reviewIpc,channel))return undefined;
     const key=channel as ReviewChannel;
     reviewIpc[key].request.parse(input);

@@ -21,7 +21,9 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
  const heading = useRef<HTMLHeadingElement>(null);
  const items = artifact.test?.items ?? [];
  const item = items[index];
- const locked = attempt !== null && attempt.phase !== 'answering';
+ const result = attempt?.results.find(result => result.itemId === item?.id);
+ const feedback = result?.feedback;
+ const locked = result?.correct !== null && result?.correct !== undefined;
  const run = async (action: () => Promise<void>) => {
   if (operation.current) return;
   operation.current = true; retryAction.current = action; setBusy(true); setFailed(false);
@@ -30,7 +32,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
  useEffect(() => {
   let active = true;
   const load = async () => {
-   if (!opening.current || opening.current.id !== artifact.id) opening.current = { id: artifact.id, promise: desktop.invoke('review:attempt:start', { artifactId: artifact.id }) };
+   if (!opening.current || opening.current.id !== artifact.id) opening.current = { id: artifact.id, promise: desktop.invoke('review:attempt:start', { artifactId: artifact.id }).then(value=>desktop.invoke('review:attempt:get',{attemptId:value.id})) };
    let next: Attempt;
    try { next = await opening.current.promise; } catch (error) { opening.current = null; throw error; }
    if (active) { setAttempt(next); setDraft(next.answers[items[0]?.id ?? ''] ?? null); }
@@ -49,18 +51,13 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
   void run(async () => {
    const saved = await desktop.invoke('review:attempt:answer', { attemptId: attempt.id, itemId: item.id, answer: draft });
    setAttempt(saved);
-   if (index === items.length - 1) {
-    const commit = async () => { setAttempt(await desktop.invoke('review:attempt:commit', { attemptId: saved.id })); };
-    retryAction.current = commit;
-    await commit();
-   } else {
-    setIndex(index + 1); setDraft(saved.answers[items[index + 1]!.id] ?? null);
-   }
+   const commit = async () => { setAttempt(await desktop.invoke('review:attempt:commit', { attemptId: saved.id, itemId:item.id })); };
+   retryAction.current = commit;
+   await commit();
   });
  };
  const missed = attempt?.results.filter(result => result.correct === false && !result.reportedBad) ?? [];
  const reviewed = attempt?.results.filter(result => !result.reportedBad && result.correct !== null) ?? [];
- const result = attempt?.results.find(result => result.itemId === item?.id);
  return <section className="review-test-player" aria-busy={busy}>
   {failed && <p role="alert">{tr('review:error')} <Button disabled={busy} onClick={() => { if (retryAction.current) void run(retryAction.current); }}>{tr('review:retry')}</Button></p>}
   {!attempt && busy && <p role="status">{tr('review:loading')}</p>}
@@ -77,17 +74,17 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
     <Button type="submit" disabled={busy || draft === null || draft === ''}>{tr(index === items.length - 1 ? 'review:finish_test' : 'review:answer_next')}</Button>
    </form> : <>
     <p>{tr(result?.reportedBad ? 'review:question_reported' : result?.correct ? 'review:answer_matches' : 'review:worth_another_look')}</p>
-    <p>{tr('review:correct_answer')}: {item.type === 'mcq' ? item.options[item.answer] : item.type === 'true_false' ? tr(item.answer ? 'review:answer_true' : 'review:answer_false') : item.answer}</p>
-    <p>{item.explanation}</p>
-    {item.type === 'mcq' && item.optionRationales?.map((rationale, optionIndex) => <p key={optionIndex}>{item.options[optionIndex]}: {rationale}</p>)}
-    {item.nextStep && <p>{item.nextStep}</p>}
-    <details><summary><span className="review-chip">{tr('review:source_reference', { document: item.source.documentId, version: item.source.version })}</span></summary><blockquote>{item.source.quote}</blockquote></details>
+    <p>{tr('review:correct_answer')}: {feedback?.type === 'mcq' ? feedback.options[feedback.answer] : feedback?.type === 'true_false' ? tr(feedback.answer ? 'review:answer_true' : 'review:answer_false') : feedback?.answer}</p>
+    <p>{feedback?.explanation}</p>
+    {feedback?.type === 'mcq' && feedback.optionRationales?.map((rationale, optionIndex) => <p key={optionIndex}>{feedback.options[optionIndex]}: {rationale}</p>)}
+    {feedback?.nextStep && <p>{feedback?.nextStep}</p>}
+    {feedback && <details><summary><span className="review-chip">{tr('review:source_reference', { document: feedback.source.documentId, version: feedback.source.version })}</span></summary><blockquote>{feedback.source.quote}</blockquote></details>}
     <Button disabled={busy || result?.reportedBad} onClick={() => void run(async () => setAttempt(await desktop.invoke('review:attempt:report-bad', { attemptId: attempt.id, itemId: item.id })))}>{tr('review:report_bad_question')}</Button>
    </>}
    <div className="review-actions">
     <Button disabled={busy || index === 0} onClick={() => move(index - 1)}>{tr('review:previous_item')}</Button>
     {locked && index < items.length - 1 && <Button onClick={() => move(index + 1)}>{tr('review:next_item')}</Button>}
-    {locked && <Button onClick={() => setResults(true)}>{tr('review:view_results')}</Button>}
+    {attempt.phase !== 'answering' && <Button onClick={() => setResults(true)}>{tr('review:view_results')}</Button>}
    </div>
   </>}
   {attempt && results && <>

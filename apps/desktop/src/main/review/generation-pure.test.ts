@@ -28,3 +28,9 @@ it('keeps source and concept injection inside escaped data in both prompt langua
         expect(result.indexOf('Use ONLY')).toBeLessThan(result.indexOf('<UNTRUSTED_REVIEW_DATA>'));
     } });
 it('rejects oversized source quotes and unbalanced options without evaluating model math', () => { const source = { documentId: id, version: 'original' as const, excerptHash: 'a'.repeat(64), text: 'x'.repeat(300) }; const base = { id: 'q', conceptKey: 'a', type: 'mcq', stem: 'Evaluate process.exit()', answer: 0, options: ['x', 'y', 'z', 'w'], explanation: 'No execution', source: { documentId: id, version: source.version, excerptHash: source.excerptHash, quote: 'x'.repeat(241) } }; expect(validateTest({ version: 1, items: [base] }, [source]).items).toHaveLength(0); expect(validateTest({ version: 1, items: [{ ...base, source: { ...base.source, quote: 'x' }, options: ['much longer answer', 'x', 'y', 'z'] }] }, [source]).items).toHaveLength(0); });
+it('uses blueprint constants for explicit test sizes and preserves infeasibility',()=>{
+ for(const [size,count] of [['short',8],['standard',12],['long',20]] as const){
+  expect(buildBlueprint(['a','b'],1,size).slots).toHaveLength(count);
+  expect(buildBlueprint(['a'],1,size).status).toBe('infeasible');
+ }
+});

@@ -8,7 +8,7 @@ import type { ProviderRegistry } from '../providers';
 import type { createIpcRegistrar } from './register';
 import { type IpcChannel } from '../../shared/ipc';
 import { requestIdSchema, conversationIdSchema, documentIdSchema } from '../../shared/domain';
-import { reviewGenerateIpc, reviewProgressChannel, reviewProgressSchema, type ReviewProgress } from '../../shared/review-generate';
+import { rendererArtifact, reviewGenerateIpc, reviewProgressChannel, reviewProgressSchema, type ReviewProgress } from '../../shared/review-generate';
 import { ArtifactRepository } from '../review/artifact-repository';
 import { GenerationService } from '../review/generate';
 import { Attempts } from '../review/attempts';
@@ -91,18 +91,19 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
     });
     for (const channel of Object.keys(reviewGenerateIpc) as (keyof typeof reviewGenerateIpc)[])
         implemented.add(channel);
-    registrar.handle('review:artifact:generate', (r, event) => service.generate(r, progressFor(event)));
-    registrar.handle('review:artifact:retry', (r, event) => service.retry(r.artifactId, r.requestId, r.locale, progressFor(event)));
+    registrar.handle('review:artifact:generate', (r, event) => rendererArtifact(service.generate(r, progressFor(event))));
+    registrar.handle('review:artifact:retry', (r, event) => rendererArtifact(service.retry(r.artifactId, r.requestId, r.locale, progressFor(event))));
     registrar.handle('review:artifact:cancel', ({ artifactId }) => { service.cancel(artifactId); return { ok: true }; });
-    registrar.handle('review:artifact:get', ({ artifactId }) => repo.find(artifactId));
+    registrar.handle('review:artifact:get', ({ artifactId }) => {const artifact=repo.find(artifactId); return artifact ? rendererArtifact(artifact) : null;});
     registrar.handle('review:artifact:list', r => repo.list(r));
     registrar.handle('review:artifact:delete', ({ artifactId }) => { service.cancel(artifactId); repo.delete(artifactId); return { ok: true }; });
     registrar.handle('review:artifact:export', async ({ artifactId }, event) => { const artifact = repo.find(artifactId); if (artifact?.status !== 'ready')
         throw new Error('review.artifact_unavailable'); const markdown = artifact.bodyMarkdown ?? '# Practice test\n\n' + artifact.test!.items.map((i, n) => `${n + 1}. ${i.stem}\n${i.type === 'mcq' ? i.options.map((s, j) => `   ${j + 1}. ${s}`).join('\n') : ''}\n\nAnswer: ${String(i.answer)}\n\n${i.explanation}\n\nSource: ${i.source.documentId}\n> ${i.source.quote}`).join('\n\n'); const options = { defaultPath: 'review.md', filters: [{ name: 'Markdown', extensions: ['md'] }] }; const owner = ownerWindow(event.sender); const selected = owner ? await dialog.showSaveDialog(owner, options) : await dialog.showSaveDialog(options); if (selected.canceled || !selected.filePath)
         return { saved: false }; await exportText(markdown + '\n\nchecked for structure and sources, not guaranteed correct', selected.filePath); return { saved: true }; });
+    registrar.handle('review:attempt:get', ({attemptId}) => attempts.get(attemptId));
     registrar.handle('review:attempt:start', ({ artifactId }) => attempts.start(artifactId));
     registrar.handle('review:attempt:answer', ({ attemptId, itemId, answer }) => attempts.answer(attemptId, itemId, answer));
-    registrar.handle('review:attempt:commit', ({ attemptId }) => attempts.commit(attemptId));
+    registrar.handle('review:attempt:commit', ({ attemptId, itemId }) => attempts.commit(attemptId, itemId));
     registrar.handle('review:attempt:confirm', ({ attemptId }) => attempts.confirm(attemptId));
     registrar.handle('review:attempt:report-bad', ({ attemptId, itemId }) => attempts.reportBad(attemptId, itemId));
     return service;

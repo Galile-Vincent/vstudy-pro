@@ -81,3 +81,11 @@ it('shows loading and then a useful empty state', async () => {
   resolveUnits?.({ items: [], nextCursor: null });
   expect(await screen.findByText('review:scope_empty')).toBeTruthy();
 });
+it('offers all blueprint sizes and reports a changed selection',async()=>{
+ fixture();const change=vi.fn();
+ render(<ScopePicker courseId="course" selection={null} onChange={vi.fn()} onSizeChange={change}/>);
+ fireEvent.change(screen.getByLabelText('review:scope_size'),{target:{value:'long'}});
+ expect(change).toHaveBeenCalledWith('long');
+ expect(screen.getByRole('option',{name:'review:scope_short'})).toBeTruthy();
+ expect(screen.getByRole('option',{name:'review:scope_standard'})).toBeTruthy();
+});
