@@ -1,6 +1,6 @@
 {
   "recordedAt": "2026-11-06T04:51:44.813818+00:00",
-  "sourceCommit": "10b6fc7",
+  "sourceCommit": "aedf0442bb9bbdfc36e2080e74e3b45f7fdb1027",
   "mergedMain": "0d990b2",
   "platform": "darwin-arm64",
   "electron": "42.11.16",
@@ -27,5 +27,7 @@
   "packagedPty": true,
   "nativeWindowsVerified": false,
   "liveNewAccountOAuthVerified": false,
-  "developerIdNotarizationVerified": false
+  "developerIdNotarizationVerified": false,
+  "matrixSourceCommit": "10b6fc7",
+  "externalTerminalEnvironmentRegressionPassed": true
 }
