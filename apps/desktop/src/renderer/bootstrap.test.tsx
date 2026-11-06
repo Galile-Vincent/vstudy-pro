@@ -2,6 +2,8 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { createRoot } from 'react-dom/client';
+import { act } from 'react';
 import { bootstrap } from './bootstrap';
 import { i18n, tr } from '../shared/i18n';
 vi.mock('./bridge',()=>({desktop:{invoke:vi.fn().mockResolvedValue({ok:true})}}));
@@ -22,18 +24,34 @@ it('reveals recovery even if the application root is missing',async()=>{
   expect(screen.getByRole('button',{name:tr('common:reload_application')})).toBeTruthy();
 });
 
-it('keeps static recovery invisible while appearance and React are still booting',async()=>{
+it('arms static recovery to become visible after ten seconds without JavaScript',()=>{
   const html=readFileSync('src/renderer/index.html','utf8');
   const parsed=new DOMParser().parseFromString(html,'text/html');
   const styles=Array.from(parsed.querySelectorAll('style')).map(style=>style.cloneNode(true) as HTMLStyleElement);
   document.head.append(...styles);
   document.body.innerHTML=parsed.body.innerHTML;
-  let ready!:()=>void;
-  const pending=bootstrap(()=>new Promise<void>(resolve=>{ready=resolve;}),()=>{});
-  const fallback=document.querySelector('[role=alert]')!;
   try {
+    const fallback=document.querySelector('[role=alert]')!;
     expect(getComputedStyle(fallback).visibility).toBe('hidden');
-    ready();await pending;
-    expect(getComputedStyle(fallback).visibility).toBe('hidden');
-  }finally{ready();await pending;styles.forEach(style=>style.remove());}
+    expect(getComputedStyle(fallback).animation).toBe('bootstrap-timeout 0s 10s forwards');
+    const keyframes=styles.flatMap(style=>Array.from(style.sheet!.cssRules))
+      .find(rule=>rule instanceof CSSKeyframesRule && rule.name==='bootstrap-timeout') as CSSKeyframesRule;
+    expect(keyframes).toBeDefined();
+    const end=keyframes.cssRules[0] as CSSKeyframeRule;
+    expect(end.keyText).toBe('100%');
+    expect(end.style.visibility).toBe('visible');
+  }finally{styles.forEach(style=>style.remove());}
+});
+
+it('removes static recovery when bootstrap commits the application',async()=>{
+  document.body.innerHTML=new DOMParser().parseFromString(readFileSync('src/renderer/index.html','utf8'),'text/html').body.innerHTML;
+  let ready!:()=>void;
+  const root=createRoot(document.getElementById('root')!);
+  const pending=bootstrap(()=>new Promise<void>(resolve=>{ready=resolve;}),()=>root.render(<p>Application ready</p>));
+  try {
+    expect(document.querySelector('.bootstrap-fallback')).not.toBeNull();
+    await act(async()=>{ready();await pending;});
+    expect(screen.getByText('Application ready')).toBeTruthy();
+    expect(document.querySelector('.bootstrap-fallback')).toBeNull();
+  }finally{await act(()=>root.unmount());}
 });

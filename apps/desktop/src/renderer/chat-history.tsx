@@ -25,7 +25,9 @@ export function chatHistoryMessages(history: Message[]): ThreadMessageLike[] {
 export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jumpMessageId,onLoaded}:{runtime:AssistantRuntime;conversationId:Conversation['id'];cursor?:MessageCursor|null|undefined;jumpMessageId?:string|undefined;onLoaded:(messages:Message[],cursor:MessageCursor|null)=>void}) {
   useTranslation();
   const running = useAuiState(state => state.thread.isRunning);
+  const targetFound = useAuiState(state => state.thread.messages.some(message => message.id === jumpMessageId));
   const [cursor,setCursor] = useState(initialCursor), [loading,setLoading] = useState(false), [error,setError] = useState('');
+  const [jump,setJump] = useState({id:jumpMessageId,pages:0});
   const pending = useRef(false), live = useRef(true);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
   const load = useCallback(async () => {
@@ -44,8 +46,13 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jum
     finally { pending.current = false; if (live.current) setLoading(false); }
   }, [cursor, runtime, conversationId, onLoaded]);
   useEffect(() => {
-    if (jumpMessageId && cursor && !loading && !error && !running && !runtime.thread.getState().messages.some(message => message.id === jumpMessageId)) void load();
-  }, [jumpMessageId, cursor, loading, error, running, runtime, load]);
-  if (!cursor) return null;
-  return <div>{error ? <LoadError message={error} retry={() => void load()}/> : <Button variant="ghost" disabled={loading || running} onClick={() => void load()}>{tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')}</Button>}</div>;
+    if (jump.id !== jumpMessageId) { setJump({id:jumpMessageId,pages:0}); return; }
+    if (jumpMessageId && cursor && !loading && !error && !running && !targetFound && jump.pages < 5) {
+      setJump({...jump,pages:jump.pages+1});
+      void load();
+    }
+  }, [jumpMessageId, jump, cursor, loading, error, running, targetFound, load]);
+  const missingTarget = jumpMessageId && !targetFound && !loading && !error && (!cursor || (jump.id === jumpMessageId && jump.pages >= 5));
+  if (!cursor && !missingTarget) return null;
+  return <div>{missingTarget && <p role="status">{tr('history:message_not_found')}</p>}{cursor && (error ? <LoadError message={error} retry={() => void load()}/> : <Button variant="ghost" disabled={loading || running} onClick={() => void load()}>{tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')}</Button>)}</div>;
 }

@@ -44,6 +44,34 @@ it('stops automatic search paging on failure and resumes only after Retry',async
   expect(bridge.invoke).toHaveBeenCalledTimes(2);
 });
 
+it('caps a missing search target at five older pages and leaves further loading manual',async()=>{
+  await i18n.changeLanguage('en');
+  let pages=0;
+  bridge.invoke.mockImplementation(async()=>{
+    const id='older-'+ ++pages;
+    return {items:[message(id)],nextCursor:pages<20?{id,createdAt:'2026-11-01T00:00:00Z'}:null};
+  });
+  mount([message('recent')],{id:'recent',createdAt:'2026-11-02T00:00:00Z'},'deleted-target');
+  const notice=await screen.findByRole('status');
+  expect(notice.textContent).toBe(tr('history:message_not_found'));
+  expect(pages).toBe(5);
+  expect(screen.getByText('recent')).toBeTruthy();
+  expect(screen.getByRole('textbox')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:tr('common:load_earlier_messages')}));
+  await screen.findByText('older-6');
+  expect(pages).toBe(6);
+});
+
+it.each([false,true])('reports a missing finder target when the cursor is exhausted (has older page: %s)',async hasOlderPage=>{
+  await i18n.changeLanguage('en');
+  bridge.invoke.mockResolvedValue({items:[],nextCursor:null});
+  mount([message('recent')],hasOlderPage?{id:'recent',createdAt:'2026-11-02T00:00:00Z'}:null,'deleted-target');
+  expect((await screen.findByRole('status')).textContent).toBe(tr('history:message_not_found'));
+  expect(bridge.invoke).toHaveBeenCalledTimes(hasOlderPage?1:0);
+  expect(screen.queryByRole('button',{name:tr('common:load_earlier_messages')})).toBeNull();
+  expect(screen.getByText('recent')).toBeTruthy();
+});
+
 it('sends explicit branch context once the final earlier page is loaded',async()=>{
   await i18n.changeLanguage('en');
   bridge.invoke.mockImplementation(async channel=>{

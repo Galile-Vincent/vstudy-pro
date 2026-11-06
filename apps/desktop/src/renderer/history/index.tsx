@@ -2,7 +2,7 @@ import type { IpcResponse } from '../../shared/ipc';
 import { LoadError } from '../components/load-error';
 import { errorText } from '../status';
 /** Shell History and Cmd/Ctrl+K finder. Both navigate to the same persistent conversation. */
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import type { ChatHit } from '../../shared/chat-history';
@@ -68,7 +68,11 @@ function HistoryContent() {
   } | null>(null);
   const [providers, setProviders] = useState<Providers>([]), [draft, setDraft] = useState(''), [failed, setFailed] = useState(''), [modelError, setModelError] = useState(false);
   const [revision, setRevision] = useState(0);
-  const refreshProviders = async () => setProviders(await desktop.invoke('providers:list', {}));
+  const [providersFailed, setProvidersFailed] = useState(false);
+  const refreshProviders = useCallback(async () => {
+    try { setProviders(await desktop.invoke('providers:list', {})); setProvidersFailed(false); }
+    catch { setProvidersFailed(true); }
+  }, []);
   useEffect(() => {
     let live = true;
     setLoaded(null);
@@ -84,7 +88,7 @@ function HistoryContent() {
       } }).catch(error => { if (live) setFailed(errorText(error)); });
     return () => { live = false; };
   }, [route.conversationId, revision]);
-  useEffect(() => { void refreshProviders().catch(() => {}); }, []);
+  useEffect(() => { void refreshProviders(); }, [refreshProviders]);
   const open = (hit: ChatHit, messageId?: string) => navigate({ view: 'history', conversationId: hit.id, messageId });
   const changeModel = async (value: string) => {
     if (!loaded)
@@ -110,6 +114,7 @@ function HistoryContent() {
   return <main className="history-page"><header><h1>{tr('history:title')}</h1><p>{tr('history:subtitle')}</p></header><div className="history-layout">
   <section className="history-browser" aria-label={tr('history:title')}><HistorySearch onOpen={open}/></section>
   {route.conversationId && <section className="history-conversation chat-pane" aria-label={tr('common:chat')}><button className="history-back" onClick={() => navigate('history')}>{tr('history:back')}</button>
+   {providersFailed && <LoadError message={tr('history:providers_error')} retry={() => void refreshProviders()}/>}
    {modelError && <p role="alert">{tr('history:model_change_error')}</p>}
    {failed ? <LoadError message={failed} retry={() => setRevision(value => value + 1)}/> : loaded ? <Suspense fallback={<p role="status">{tr('common:loading_conversation')}</p>}><Chat key={loaded.conversation.id} conversation={loaded.conversation} history={loaded.messages.items} historyCursor={loaded.messages.nextCursor} jumpMessageId={route.messageId} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={() => { }} providers={providers} model={loaded.conversation.providerId + '/' + loaded.conversation.modelId} onModel={value => { void changeModel(value); }} onSettings={settings} onProvidersChanged={refreshProviders} onUsage={settings}/></Suspense> : <p role="status">{tr('common:loading_conversation')}</p>}
   </section>}
