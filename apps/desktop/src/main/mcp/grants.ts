@@ -104,7 +104,6 @@ export class GrantStore {
   record(activity: AgentActivity): void { this.save({...this.current, activity: this.retained([...this.current.activity, activity])}); }
 }
 
-/** Unix implementation. Windows supplies an ACL-backed persistence adapter through the engine options. */
 export const unixStatePersistence:McpStatePersistence = {
   read(userData) {
     const path=join(privateMcpDirectory(userData),'state.json');

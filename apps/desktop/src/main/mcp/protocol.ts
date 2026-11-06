@@ -2,7 +2,6 @@
 import { MCP_MAX_FRAME, bridgeRequestSchema, bridgeResponseSchema, type BridgeRequest, type BridgeResponse } from '../../shared/mcp';
 import { McpFailure } from './errors';
 
-/** Decode incrementally without repeatedly concatenating attacker-controlled fragments. */
 export class RequestFrames {
   private readonly header = Buffer.alloc(4);
   private headerBytes = 0;

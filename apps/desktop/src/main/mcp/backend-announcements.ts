@@ -39,7 +39,6 @@ export async function courseAnnouncements(context: BackendContext, services: Bac
     context.recheck();
     const result = [...rows.values()].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? '') || a.id.localeCompare(b.id));
     const announcements: MoodleAnnouncement[] = result.flatMap(row => row.createdAt ? [{id: row.id, subject: row.subject, author: row.author, createdAt: row.createdAt, bodyHtml: sanitizeCourseHtml(row.text) ?? '', url: null}] : []);
-    // Existing detail rows certify that sections were loaded; keep cold reads distinguishable.
     if (context.repository.detailCache(courseId)) context.repository.saveDetail(courseId, {announcements}, undefined, new Date(services.clock()).toISOString());
     return result;
   } catch (error) {

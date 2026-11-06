@@ -71,7 +71,6 @@ export function editConfig(before: string | undefined, config: ClientConfig, uni
   delete rest.vstudy;
   const remaining = Object.keys(rest).length ? { ...root, [key]: rest } : { ...root };
   if (!Object.keys(rest).length) delete remaining[key];
-  // An existing empty parent table is harmless and remains byte-for-byte intact.
   if (object(after[key]) && !Object.keys(after[key]).length && !Object.keys(rest).length) remaining[key] = {};
   if (!isDeepStrictEqual(after, remaining, { skipPrototype: true })) throw new LocalFileError('The managed block includes unrelated settings. No files were changed.');
   return { text, changed: true };

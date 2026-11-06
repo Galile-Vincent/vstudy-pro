@@ -273,5 +273,4 @@ export class McpEngine {
   }
 }
 
-/** Compose this engine with the parent-owned backend, renderer IPC, and lifecycle. */
 export function createMcpEngine(options: McpEngineOptions): McpEngine { return new McpEngine(options); }
