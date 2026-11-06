@@ -21,7 +21,7 @@ Read course documents, keep Moodle deadlines together, and turn coursework into 
 
 Download [SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt) from the same release. These stable links select the latest published assets. The repository is public. If an asset returns 404, check [the release notes](https://github.com/ava-apple/vstudy-pro/releases/latest) for published targets and verification results. A CI artifact or dry run is not a public release. No version, size, or successful platform test is implied by a link.
 
-Requirements are macOS 12 or later, or 64-bit Windows 10 or later. On Mac, choose Apple silicon unless About This Mac shows an Intel processor. On Windows, check Settings > System > About > System type. Choose ARM64 only for an ARM-based processor; otherwise choose x64. There is no Linux installer. AI and school sync need internet access. Reading local Markdown and text does not require an AI account.
+Full document conversion requires macOS 14+ on Apple silicon or macOS 13+ on Intel. Windows requires Windows 10+ for x64 or Windows 11+ for ARM64; the ARM64 app uses x64 Python through Windows emulation. The app can launch on macOS 12 for Markdown and text, but the converter has newer native dependencies. On Mac, choose Apple silicon unless About This Mac shows an Intel processor. On Windows, check Settings > System > About > System type. Choose ARM64 only for an ARM-based processor; otherwise choose x64. There is no Linux installer. AI and school sync need internet access. Reading local Markdown and text does not require an AI account.
 
 ### Verify and open
 

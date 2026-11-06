@@ -21,7 +21,7 @@ macOS と Windows で教材を読み、Moodle の締め切りをまとめ、課�
 
 同じリリースの [SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt) もダウンロードしてください。固定リンクは最新の公開ファイルを指します。リポジトリは公開されています。404 の場合は[リリースノート](https://github.com/ava-apple/vstudy-pro/releases/latest)で配布対象と検証結果を確認してください。CI の成果物や試行ビルドは公開リリースではありません。リンクだけではバージョン、サイズ、動作確認を保証しません。
 
-macOS 12 以降、または 64 ビット Windows 10 以降が必要です。Mac は「この Mac について」に Intel と表示される場合を除き、Apple シリコンを選びます。Windows は「設定 > システム > バージョン情報 > システムの種類」を確認し、ARM プロセッサーなら ARM64、その他は x64 を選びます。Linux 版はありません。AI と学校の同期にはネット接続が必要です。ローカルの Markdown とテキストの閲覧には AI アカウントは不要です。
+資料変換には、Apple シリコンで macOS 14 以降、Intel で macOS 13 以降が必要です。Windows は x64 で Windows 10 以降、ARM64 で Windows 11 以降が必要です。ARM64 版は Windows のエミュレーションで x64 Python を実行します。アプリ自体は macOS 12 で Markdown とテキストを開けますが、変換ツールのネイティブ依存関係には新しい OS が必要です。Mac は「この Mac について」に Intel と表示される場合を除き、Apple シリコンを選びます。Windows は「設定 > システム > バージョン情報 > システムの種類」を確認し、ARM プロセッサーなら ARM64、その他は x64 を選びます。Linux 版はありません。AI と学校の同期にはネット接続が必要です。ローカルの Markdown とテキストの閲覧には AI アカウントは不要です。
 
 ### 検証して開く
 

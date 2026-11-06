@@ -21,7 +21,7 @@
 
 請下載同一版本的 [SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt)。固定連結指向最新已發布的檔案，儲存庫已公開。若出現 404，請查看[版本說明](https://github.com/ava-apple/vstudy-pro/releases/latest)中的發布平台與驗證結果。CI 成果物與試跑不等於公開版本；連結本身不代表版本、大小或該平台已通過測試。
 
-需要 macOS 12 以上，或 64 位元 Windows 10 以上。Mac 預設選 Apple 晶片，除非「關於這台 Mac」顯示 Intel 處理器。Windows 請在「設定 > 系統 > 關於 > 系統類型」確認；ARM 處理器選 ARM64，其他選 x64。未提供 Linux 安裝檔。AI 與學校同步需要網路；閱讀本機 Markdown 與文字檔不需要 AI 帳號。
+完整文件轉換需要 Apple 晶片 macOS 14 以上，或 Intel macOS 13 以上。Windows x64 需要 Windows 10 以上，ARM64 需要 Windows 11 以上；ARM64 應用程式透過 Windows 模擬功能執行 x64 Python。應用程式本身可在 macOS 12 開啟並閱讀 Markdown 與文字，但轉換工具的原生相依套件需要較新的系統。Mac 預設選 Apple 晶片，除非「關於這台 Mac」顯示 Intel 處理器。Windows 請在「設定 > 系統 > 關於 > 系統類型」確認；ARM 處理器選 ARM64，其他選 x64。未提供 Linux 安裝檔。AI 與學校同步需要網路；閱讀本機 Markdown 與文字檔不需要 AI 帳號。
 
 ### 驗證並開啟
 

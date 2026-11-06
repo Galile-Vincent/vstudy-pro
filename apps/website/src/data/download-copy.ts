@@ -5,7 +5,7 @@ export const downloadCopy = {
   en: {
     download: 'Download for', other: 'Other platforms', intel: 'Intel Mac download',
     checksums: 'SHA-256 checksums', releases: 'Release notes and availability',
-    requirements: 'macOS 12+ · Windows 10+ (64-bit). Choose the installer for your processor. No Linux installer.',
+    requirements: 'Full document conversion: macOS 14+ on Apple silicon, macOS 13+ on Intel; Windows 10+ on x64, Windows 11+ on ARM64. No Linux installer.',
     status: 'Links point to the latest published release. If an asset is missing, check the release notes. Version and file size appear only when verified.',
     help: 'Install and first-open instructions', safety: 'Opening a downloaded app',
     unsigned: 'Unsigned builds can trigger Gatekeeper or SmartScreen. Verify the download and trust its source before continuing.',
@@ -16,7 +16,7 @@ export const downloadCopy = {
   'zh-Hant': {
     download: '下載', other: '其他平台', intel: '下載 Intel Mac 版',
     checksums: 'SHA-256 校驗碼', releases: '版本說明與檔案狀態',
-    requirements: 'macOS 12 以上 · Windows 10 以上（64 位元）。請依處理器選擇安裝檔。未提供 Linux 安裝檔。',
+    requirements: '完整文件轉換需要：Apple 晶片 macOS 14 以上、Intel macOS 13 以上；x64 Windows 10 以上、ARM64 Windows 11 以上。未提供 Linux 安裝檔。',
     status: '連結指向最新已發布版本。若缺少檔案，請查看版本說明；版本與檔案大小僅在確認後顯示。',
     help: '安裝與首次開啟說明', safety: '開啟下載的應用程式',
     unsigned: '未簽署的組建可能觸發 Gatekeeper 或 SmartScreen。請先驗證下載檔案，確認來源可信任後再繼續。',
@@ -27,7 +27,7 @@ export const downloadCopy = {
   ja: {
     download: 'ダウンロード', other: 'ほかのプラットフォーム', intel: 'Intel Mac 版をダウンロード',
     checksums: 'SHA-256 チェックサム', releases: 'リリースノートと配布状況',
-    requirements: 'macOS 12 以降 · Windows 10 以降（64 ビット）。プロセッサーに合うインストーラーを選んでください。Linux 版はありません。',
+    requirements: '資料変換には Apple シリコンで macOS 14 以降、Intel で macOS 13 以降、x64 で Windows 10 以降、ARM64 で Windows 11 以降が必要です。Linux 版はありません。',
     status: 'リンクは最新の公開リリースを指します。ファイルがない場合はリリースノートを確認してください。バージョンとサイズは確認できた場合のみ表示します。',
     help: 'インストールと初回起動の手順', safety: 'ダウンロードしたアプリを開く',
     unsigned: '未署名のビルドでは Gatekeeper や SmartScreen が警告する場合があります。ダウンロードを検証し、入手元を信頼できる場合のみ続けてください。',

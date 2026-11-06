@@ -11,7 +11,7 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
           id: 'install',
           title: '在 macOS 或 Windows 安裝',
           paragraphs: [
-            '需要 macOS 12 以上，或 64 位元 Windows 10 以上。Mac 預設選 Apple 晶片，除非「關於這台 Mac」顯示 Intel。Windows 請在「設定 > 系統 > 關於 > 系統類型」確認；ARM 處理器選 ARM64，其他選 x64。未提供 Linux 安裝檔。',
+            '完整文件轉換需要 Apple 晶片 macOS 14 以上，或 Intel macOS 13 以上。Windows x64 需要 Windows 10 以上，ARM64 需要 Windows 11 以上，並透過 Windows 模擬功能執行 x64 Python。應用程式本身可在 macOS 12 閱讀 Markdown 與文字。Mac 預設選 Apple 晶片，除非「關於這台 Mac」顯示 Intel。Windows 請在「設定 > 系統 > 關於 > 系統類型」確認；ARM 處理器選 ARM64，其他選 x64。未提供 Linux 安裝檔。',
             '以下連結指向最新已發布版本，儲存庫已公開。若缺少檔案，請到「版本說明與檔案狀態」確認發布平台與驗證結果。試跑不等於已發布版本。AI、學校登入與新課程資料需要網路。',
           ],
           steps: [
@@ -71,7 +71,7 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
           id: 'install',
           title: 'macOS または Windows にインストールする',
           paragraphs: [
-            'macOS 12 以降、または 64 ビット Windows 10 以降が必要です。Mac は「この Mac について」に Intel とある場合を除き、Apple シリコンを選びます。Windows は「設定 > システム > バージョン情報 > システムの種類」を確認し、ARM なら ARM64、その他は x64 を選びます。Linux 版はありません。',
+            '資料変換には Apple シリコンで macOS 14 以降、Intel で macOS 13 以降が必要です。Windows は x64 で Windows 10 以降、ARM64 で Windows 11 以降が必要で、ARM64 版はエミュレーションで x64 Python を実行します。アプリ自体は macOS 12 で Markdown とテキストを開けます。Mac は「この Mac について」に Intel とある場合を除き、Apple シリコンを選びます。Windows は「設定 > システム > バージョン情報 > システムの種類」を確認し、ARM なら ARM64、その他は x64 を選びます。Linux 版はありません。',
             'リンクは最新の公開リリースを指します。リポジトリは公開されています。ファイルがない場合は「リリースノートと配布状況」で配布対象と検証結果を確認してください。試行ビルドは公開リリースではありません。AI、学校へのログイン、新しい授業内容にはネット接続が必要です。',
           ],
           steps: [

@@ -2,6 +2,10 @@
 
 VStudy owns one application data namespace under Electron `app.getPath('userData')`. The main process acquires Electron's single-instance lock before opening it. Renderer requests contain IDs or maintenance actions. Native dialogs select backup and export paths.
 
+The default namespace is under `~/Library/Application Support` on Mac and `%APPDATA%` on Windows. Unix file modes apply on Mac; Windows relies on the per-user profile's inherited ACLs. Windows safeStorage uses account-bound DPAPI, while Mac uses Keychain-backed encryption. File data is flushed on both systems with writable handles. Directory fsync is skipped on Windows because Node cannot provide the same directory-flush operation, so the app does not claim identical power-loss durability for directory metadata. SQLite keeps `synchronous=FULL` on both systems.
+
+Portable import and restore names reject Windows device names, alternate streams, trailing dots or spaces, and case-colliding archive entries on every host. Native containment handles drive letters, UNC shares, case folding, and canonical long paths. Realpath checks use the native form so Windows short-name aliases do not invalidate contained files. Long-path support in external Python tools and local Windows policies can still vary.
+
 ## Inventory and ownership
 
 The following table lists the persisted data in this checkout. SQLite objects live in `vstudy.sqlite` with WAL and SHM sidecars. A row has no automatic retention limit unless the table states one. Courses and user records are retained deliberately, rather than evicted as response cache entries.
