@@ -109,5 +109,5 @@ export function registerDocumentsIpc(
     return { ok: true };
   });
   const dispose = registrar.dispose;
-  return Object.assign(async () => { await ai?.dispose(); ipcMain.removeListener('vstudy:preload-drop', captureDrop); documents.dispose(); dispose(); await converter.dispose(); await documents.waitForIdle(); }, {waitForIdle:async()=>{await ai?.waitForIdle();await documents.waitForIdle();},importPath:documents.importPath.bind(documents),get:documents.get.bind(documents),stopAi:async(id:import("../../shared/domain").Document["id"])=>{ai?.cancel(id);await ai?.waitForIdle();},resume: (id: import("../../shared/domain").Document["id"]) => documents.resume(id)});
+  return Object.assign(async () => { await ai?.dispose(); ipcMain.removeListener('vstudy:preload-drop', captureDrop); documents.dispose(); dispose(); await converter.dispose(); await documents.waitForIdle(); }, {waitForIdle:async()=>{await ai?.waitForIdle();await documents.waitForIdle();},importPath:documents.importPath.bind(documents),get:documents.get.bind(documents),read:documents.read.bind(documents),stopAi:async(id:import("../../shared/domain").Document["id"])=>{ai?.cancel(id);await ai?.waitForIdle();},resume: (id: import("../../shared/domain").Document["id"]) => documents.resume(id)});
 }

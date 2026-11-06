@@ -92,5 +92,5 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     await exportText(text,result.filePath);
     return {saved:true};
   });
-  return Object.assign(async () => { stopReminders(); await webviews.dispose(); sso.dispose(); await service.dispose(); }, {waitForIdle:()=>service.waitForIdle()});
+  return Object.assign(async () => { stopReminders(); await webviews.dispose(); sso.dispose(); await service.dispose(); }, {waitForIdle:()=>service.waitForIdle(),service});
 }
