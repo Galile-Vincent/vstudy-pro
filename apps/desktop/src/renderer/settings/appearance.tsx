@@ -28,7 +28,7 @@ export function AppearanceSection() {
       try {
         const latest = await desktop.invoke('settings:get', {});
         const next = await desktop.invoke('settings:set', { ...latest, ...patch });
-        applyAppearance(next);
+        applyAppearance(next, true);
         setSettings(next);
         setError('');
         return next;
@@ -84,7 +84,7 @@ export function AppearanceSection() {
     <SettingsGroup title={tr('themes:interface')}>
       {(['contrast','glassOpacity'] as const).map(field => <SettingsRow key={field} label={tr(`themes:${field}`)} description={tr(`themes:${field}_hint`)}>
         <label className="theme-slider"><output>{settings[field]}%</output><input type="range" min={field === 'contrast' ? 100 : 50} max={field === 'contrast' ? 150 : 100} step="1"
-          aria-label={tr(`themes:${field}`)} value={settings[field]} onChange={e => { const value=Number(e.target.value); const next={...settings,[field]:value}; setSettings(next); applyAppearance(next); }}
+          aria-label={tr(`themes:${field}`)} value={settings[field]} onChange={e => { const value=Number(e.target.value); const next={...settings,[field]:value}; setSettings(next); applyAppearance(next, true); }}
           onPointerUp={e => void update({[field]:Number(e.currentTarget.value)})} onKeyUp={e => void update({[field]:Number(e.currentTarget.value)})} onBlur={e => void update({[field]:Number(e.currentTarget.value)})}/></label>
       </SettingsRow>)}
       {(['uiScale','density','readerFont','readerSize','material'] as const).map(field => <SettingsRow key={field} label={tr(`settings:${field}`)}>
