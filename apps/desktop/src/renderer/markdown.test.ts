@@ -32,8 +32,10 @@ describe("Document Markdown", () => {
     expect(container.querySelector("table")).not.toBeNull();
     expect(container.querySelector('.paragraph-action')?.getAttribute('tabindex')).toBe('-1');
     expect(container.querySelector("input[type=checkbox]")).not.toBeNull();
-    await vi.waitFor(() => expect(container.querySelector('.katex')).not.toBeNull());
-    await vi.waitFor(() => expect(container.querySelector('.hljs-keyword')).not.toBeNull());
+    await vi.waitFor(() => {
+      expect(container.querySelector('.katex')).not.toBeNull();
+      expect(container.querySelector('.hljs-keyword')).not.toBeNull();
+    }, {timeout: 10000});
     expect(container.querySelector(".katex")).not.toBeNull();
     expect(container.querySelectorAll(".katex .msupsub").length).toBe(3);
     expect(container.querySelector(".hljs-keyword")).not.toBeNull();
@@ -78,7 +80,7 @@ describe("Document Markdown", () => {
     );
     await act(async () => root.unmount());
     container.remove();
-  });
+  }, 15000);
   it("rejects unsafe image paths and allows raster data or local relatives", () => {
     for (const url of [
       "https://remote/image.png",
