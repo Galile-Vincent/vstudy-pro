@@ -1,13 +1,14 @@
 /** Compose the bridge with app-owned services and drain prepared work before storage closes. @packageDocumentation */
 import type { McpBackend, PreparedMcpCall } from '../../shared/mcp';
 import { createMcpEngine } from './engine';
-import { createUnixBridge, type UnixBridge } from './bridge';
+import { createPlatformBridge, type McpTransport, type McpTransportFactory } from './transport';
 import { enterStorageRequest } from '../storage/maintenance';
 import { McpFailure } from './errors';
 
 export interface McpRuntimeOptions {
   userData:string;
-  peerHelper:string;
+  peerHelper?:string;
+  transport?:McpTransportFactory;
   backend:McpBackend;
   secretValues:()=>readonly string[];
   restoreWindow:()=>void;
@@ -18,7 +19,7 @@ export interface McpRuntimeOptions {
 export function createMcpRuntime(options:McpRuntimeOptions) {
   const work = new Set<Promise<unknown>>();
   let stopped = false;
-  let bridge:UnixBridge|undefined;
+  let bridge:McpTransport|undefined;
   let starting:Promise<void>|undefined;
   let shown = new Set<string>();
   const track = <T>(operation:Promise<T>):Promise<T> => {
@@ -49,7 +50,7 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
   const start = ():Promise<void> => {
     if (stopped) return Promise.reject(new Error('MCP runtime stopped'));
     if (bridge) return Promise.resolve();
-    return starting ??= createUnixBridge({userData:options.userData,peerHelper:options.peerHelper,
+    return starting ??= (options.transport ?? createPlatformBridge)({userData:options.userData,...(options.peerHelper?{peerHelper:options.peerHelper}:{}),
       handleRequest:(request,id) => engine.handleRequest(request,id),onDisconnect:id => engine.disconnect(id),
     }).then(value => {bridge=value;}).finally(() => {starting=undefined;});
   };
