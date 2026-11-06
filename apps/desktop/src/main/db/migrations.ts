@@ -4,6 +4,7 @@
  * Applied SQL remains immutable; repositories share one connection and use bound query values.
  * @packageDocumentation
  */
+import { studyMigration } from './study-migration';
 import { plannerMigration } from './planner-migration';
 import { storageMigration } from '../cache/migration';
 import { chatHistoryMigration } from './chat-history-migration';
@@ -97,4 +98,5 @@ export const migrations = [
   { version:19, sql:storageMigration },
   { version:20, sql:"CREATE INDEX IF NOT EXISTS conversations_course_page ON conversations(courseId,createdAt DESC,id DESC);" },
   { version:21, sql:plannerMigration },
+  { version:22, sql:studyMigration },
 ];
