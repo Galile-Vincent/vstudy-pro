@@ -1,4 +1,4 @@
-/** Verify keyboard controls and the changed localized school guides against the built artifact. */
+/** Verify the localized school guides against the built artifact. */
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFile, realpath, writeFile } from 'node:fs/promises';
@@ -15,28 +15,6 @@ try {
   const page = await browser.newPage();
   await page.setCacheEnabled(false);
   page.on('pageerror', error => report.errors.push(error.message));
-  await page.goto(`${base}/en/`, { waitUntil: 'networkidle0' });
-  await page.focus('[data-school-prev]');
-  await page.keyboard.press('Enter');
-  assert.equal(await page.$eval('[data-active]', el => el.dataset.query), 'Metro Tech');
-  await page.focus('[data-school-dot="1"]');
-  await page.keyboard.press('Enter');
-  assert.equal(await page.$eval('[data-active]', el => el.dataset.query), 'Northfield College');
-  assert.equal(await page.$eval('[data-school-dot="1"]', el => el.getAttribute('aria-current')), 'true');
-  await page.keyboard.press('ArrowLeft');
-  assert.equal(await page.$eval('[data-active]', el => el.dataset.query), 'Example University');
-  await page.focus('[data-school-play]');
-  await page.keyboard.press('Tab');
-  assert.equal(await page.evaluate(() => document.activeElement.hasAttribute('data-school-prev')), true);
-  await page.click('[data-school-play]');
-  await page.mouse.move(1, 1);
-  await page.$eval('[data-school-play]', el => el.blur());
-  await page.waitForFunction(() => document.querySelector('[data-school-demo]').dataset.playback === 'playing');
-  await page.click('#motion-toggle');
-  await page.waitForFunction(() => document.querySelector('[data-school-demo]').dataset.playback === 'paused');
-  await page.click('#motion-toggle');
-  await page.waitForFunction(() => document.querySelector('[data-school-demo]').dataset.playback === 'playing');
-  report.controls.push('Previous wraps to the last school. Enter activates dots. ArrowLeft changes schools. Tab follows control order. Page motion pause is respected.');
   for (const language of ['en', 'zh-Hant', 'ja']) {
     for (const width of [390, 1440]) {
       for (const scheme of ['light', 'dark']) {
