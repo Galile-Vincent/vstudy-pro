@@ -13,7 +13,8 @@ import { ReaderOfflineNotice } from '../workspace/offline-notice';
 import { AiCliSetupHost } from './setup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-it('reaches guided setup from the Reader with no covering settings dialog', async () => {
+it('mounts Settings without ResizeObserver and reaches guided setup from the Reader', async () => {
+  expect(typeof ResizeObserver).toBe('undefined');
   await i18n.changeLanguage('en');
   bridge.invoke.mockImplementation(cliFixture().invoke);
   function ReaderWithSettings() {
@@ -24,7 +25,14 @@ it('reaches guided setup from the Reader with no covering settings dialog', asyn
   try {
     await act(async () => root.render(<ReaderWithSettings />));
     await act(async () => host.querySelector<HTMLButtonElement>('.art-reader-offline-actions button')!.click());
-    expect(document.querySelector('.settings-dialog')).not.toBeNull();
+    expect(document.querySelector('.settings-tabs[role=tablist]')).not.toBeNull();
+    const intro = document.querySelector('.settings-intro')!;
+    expect([...intro.querySelectorAll('ol > li')].map(item => item.textContent)).toEqual([i18n.t('novice:step_access'), i18n.t('novice:step_key')]);
+    for (const key of ['privacy', 'step_access', 'step_key']) {
+      expect(document.querySelector('.settings-pane:not([hidden])')!.textContent!.split(i18n.t(`novice:${key}`))).toHaveLength(2);
+    }
+    expect(intro.textContent).not.toContain(i18n.t('settings:key_help'));
+    expect(intro.textContent).not.toContain(i18n.t('settings:keychain_help'));
     await act(async () => document.querySelector<HTMLButtonElement>('.settings-dialog .ai-cli-inventory-entry')!.click());
     expect(document.querySelector('.settings-dialog')).toBeNull();
     expect(document.querySelectorAll('[role=dialog]')).toHaveLength(1);

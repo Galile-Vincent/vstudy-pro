@@ -33,17 +33,18 @@ it('offers setup when no models exist instead of stranding the student in an emp
   expect(onSettings).toHaveBeenCalledOnce();
 });
 
-it('takes a student through access, connection testing, a question, and a teacher fallback', async () => {
+it('offers connection testing, a question, and a teacher fallback after the settings intro', async () => {
   await i18n.changeLanguage('en');
   const onClose = vi.fn();
   await act(async () => root.render(<AiSetupGuide onClose={onClose} />));
   const steps = [...host.querySelectorAll('li')].map(item => item.textContent);
-  expect(steps[0]).toContain('does not include API credit');
-  expect(steps[1]).toContain('permission is denied');
-  expect(steps[2]).toContain('Test connection');
-  expect(steps[2]).toContain('ask a question');
+  expect(steps).toHaveLength(1);
+  expect(steps[0]).toContain('Test connection');
+  expect(steps[0]).toContain('ask a question');
   expect(host.querySelector('blockquote')?.textContent).toContain('Does our school provide an approved AI service');
-  expect(host.textContent).toContain('Never paste your school password');
+  for (const key of ['privacy', 'step_access', 'step_key']) {
+    expect(host.textContent).not.toContain(i18n.t(`novice:${key}`));
+  }
   await act(async () => host.querySelector('button')!.click());
   expect(onClose).toHaveBeenCalledOnce();
 });

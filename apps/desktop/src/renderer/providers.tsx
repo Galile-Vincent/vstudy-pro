@@ -51,6 +51,7 @@ export function ProviderSettings({
     if (!list) return;
     const syncOrientation = () => setOrientation(getComputedStyle(list).flexDirection === 'row' ? 'horizontal' : 'vertical');
     syncOrientation();
+    if (typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver(syncOrientation);
     observer.observe(list);
     return () => observer.disconnect();
@@ -166,10 +167,10 @@ export function ProviderSettings({
                     <>
                       <div className="settings-intro">
                         <p>{tr('novice:privacy')}</p>
-                        <p>{tr('novice:step_access')}</p>
-                        <p>{tr('novice:step_key')}</p>
-                        <p>{tr('settings:key_help')}</p>
-                        <p>{tr('settings:keychain_help')}</p>
+                        <ol>
+                          <li>{tr('novice:step_access')}</li>
+                          <li>{tr('novice:step_key')}</li>
+                        </ol>
                       </div>
                       <details className="settings-disclosure">
                         <summary>{tr('novice:setup_title')}</summary>
