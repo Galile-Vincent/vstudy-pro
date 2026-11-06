@@ -18,7 +18,7 @@ it.skipIf(process.platform !== 'win32')('round-trips bytes only through the curr
   let diagnostics = '';
   child.stderr.on('data', chunk => { diagnostics = (diagnostics + String(chunk)).slice(-8192); });
   const ready = new Promise<string>((accept, reject) => {
-    const timer = setTimeout(() => { child.kill(); reject(new Error('Pipe host startup timed out')); }, 25000);
+    const timer = setTimeout(() => { child.kill(); reject(new Error(`Pipe host startup timed out: ${diagnostics}`)); }, process.arch === 'arm64' ? 90000 : 25000);
     child.once('error', error => { clearTimeout(timer); reject(error); });
     child.once('close', code => { clearTimeout(timer); reject(new Error(`Pipe host failed (${code}): ${diagnostics}`)); });
     lines.on('line', line => {
@@ -70,4 +70,4 @@ it.skipIf(process.platform !== 'win32')('round-trips bytes only through the curr
     await closed;
     lines.close();
   }
-}, 60000);
+}, process.arch === 'arm64' ? 180000 : 60000);
