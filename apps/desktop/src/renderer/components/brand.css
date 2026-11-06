@@ -1,0 +1,15 @@
+.vstudy-brand { display:inline-block; position:relative; flex-shrink:0; vertical-align:middle; }
+.vstudy-brand img { display:block; width:100%; height:auto; }
+.vstudy-symbol { width:32px; }
+.vstudy-lockup { width:220px; max-width:100%; }
+.vstudy-brand .vstudy-brand-dark { position:absolute; inset:0; opacity:0; }
+:root[data-scheme=dark] .vstudy-lockup > img:first-child { opacity:0; }
+:root[data-scheme=dark] .vstudy-brand-dark { opacity:1; }
+.shell-brand .art-reader-brand-mark { background:none; }
+.art-reader-avatar .vstudy-symbol { width:22px; }
+.home-greeting .vstudy-symbol { width:42px; margin-bottom:var(--space-3); }
+.onboarding .vstudy-lockup { width:180px; }
+.w-hero .vstudy-lockup { display:block; width:240px; margin-bottom:var(--space-6); }
+.w-header .vstudy-lockup { width:150px; margin-right:auto; }
+.learning-dialog .vstudy-lockup { width:180px; }
+.library-empty .vstudy-symbol,.moodle-empty .vstudy-symbol { width:64px; margin-bottom:var(--space-4); }

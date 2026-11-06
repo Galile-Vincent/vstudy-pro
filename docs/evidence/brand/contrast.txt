@@ -1,0 +1,23 @@
+
+> @vstudy/desktop@0.2.2 contrast:check /Users/vc/.t3/worktrees/vstudy-pro/t3-1d9a4246/apps/desktop
+> node scripts/check-contrast.mjs
+
+VStudy light: WCAG AA passed at every contrast setting
+VStudy dark: WCAG AA passed at every contrast setting
+Ocean light: WCAG AA passed at every contrast setting
+Ocean dark: WCAG AA passed at every contrast setting
+Grove light: WCAG AA passed at every contrast setting
+Grove dark: WCAG AA passed at every contrast setting
+Ember light: WCAG AA passed at every contrast setting
+Ember dark: WCAG AA passed at every contrast setting
+Iris light: WCAG AA passed at every contrast setting
+Iris dark: WCAG AA passed at every contrast setting
+Rose light: WCAG AA passed at every contrast setting
+Rose dark: WCAG AA passed at every contrast setting
+Slate light: WCAG AA passed at every contrast setting
+Slate dark: WCAG AA passed at every contrast setting
+Paper light: WCAG AA passed at every contrast setting
+Paper dark: WCAG AA passed at every contrast setting
+High contrast light: WCAG AA passed at every contrast setting
+High contrast dark: WCAG AA passed at every contrast setting
+30 renderer CSS files use semantic theme tokens

@@ -1,0 +1,10 @@
+{
+  "errors": [],
+  "headers": "No border, shadow, or after pseudo-element before and after scroll.",
+  "checks": [
+    {
+      "view": "onboarding",
+      "axe": []
+    }
+  ]
+}
