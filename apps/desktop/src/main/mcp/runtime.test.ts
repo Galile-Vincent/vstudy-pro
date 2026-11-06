@@ -7,6 +7,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import type { McpBackend } from '../../shared/mcp';
 import { createMcpRuntime } from './runtime';
 import { GrantStore } from './grants';
+import { exclusiveStorage } from '../storage/maintenance';
 import { call, pair, rpc } from './test-fixture';
 
 const transport = vi.hoisted(() => ({dispose:vi.fn(async()=>{}),start:vi.fn()}));
@@ -57,4 +58,14 @@ it('leaves access disabled after a failed bridge start and allows a later explic
   await result.ready;expect(result.engine.state().enabled).toBe(false);expect(onFailure).toHaveBeenCalledOnce();
   transport.start.mockResolvedValueOnce({socketPath:'/fixture',dispose:transport.dispose});
   await result.setEnabled(true);expect(result.engine.state().enabled).toBe(true);await result.dispose();
+});
+
+it('rejects bridge execution while exclusive storage maintenance owns the app',async()=>{
+  const f=runtime();await f.result.ready;await f.result.setEnabled(true);
+  const paired=await pair(f.result.engine,[f.account.id],['read:courses']);
+  await exclusiveStorage(async()=>{},async()=>{
+    expect(await call(f.result.engine,paired.grant,'list_courses',{account:f.account.id})).toMatchObject({ok:false,error:{code:'RATE_LIMITED'}});
+  });
+  expect(await call(f.result.engine,paired.grant,'list_courses',{account:f.account.id})).toMatchObject({ok:true});
+  await f.result.dispose();
 });

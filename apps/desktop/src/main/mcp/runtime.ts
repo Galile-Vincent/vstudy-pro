@@ -2,6 +2,8 @@
 import type { McpBackend, PreparedMcpCall } from '../../shared/mcp';
 import { createMcpEngine } from './engine';
 import { createUnixBridge, type UnixBridge } from './bridge';
+import { enterStorageRequest } from '../storage/maintenance';
+import { McpFailure } from './errors';
 
 export interface McpRuntimeOptions {
   userData:string;
@@ -24,11 +26,16 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
     void operation.finally(() => work.delete(operation)).catch(() => {});
     return operation;
   };
+  const withStorage = <T>(operation:()=>Promise<T>):Promise<T> => {
+    let release:()=>void;
+    try {release=enterStorageRequest();} catch {return Promise.reject(new McpFailure('RATE_LIMITED'));}
+    return track(Promise.resolve().then(operation).finally(release));
+  };
   const backend:McpBackend = {
     accounts:options.backend.accounts,
     prepare:async (...args) => {
-      const prepared = await track(options.backend.prepare(...args));
-      const call:PreparedMcpCall = {...prepared,execute:signal => track(prepared.execute(signal))};
+      const prepared = await withStorage(() => options.backend.prepare(...args));
+      const call:PreparedMcpCall = {...prepared,execute:signal => withStorage(() => prepared.execute(signal))};
       return call;
     },
   };
