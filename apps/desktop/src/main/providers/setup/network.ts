@@ -26,7 +26,8 @@ export class VendorNetwork {
     let url = vendorUrl(provider, value);
     for (let count = 0; count <= 5; count++) {
       signal.throwIfAborted();
-      recordEgress('ai_cli_download', url);
+      const target = new URL(url);
+      recordEgress('ai_cli_download', target.origin + target.pathname);
       let response: Response;
       try { response = await this.request(url, { redirect: 'manual', signal, headers: { Accept: 'application/json, application/octet-stream, */*' } }); }
       catch (error) { signal.throwIfAborted(); throw error instanceof SetupError ? error : new SetupError('offline'); }

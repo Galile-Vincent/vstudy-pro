@@ -30,14 +30,15 @@ export class ExecutablePins {
   }
   describe(binary: string): Promise<string | null> { const path = this.managed(binary)?.path ?? this.pins[binary]?.path; return path ? executableMetadata(path).then(metadata=>metadata.path).catch(()=>null) : resolveInstalledExecutable(binary); }
   resolve(binary: string): Promise<string | null> {
-    const pending = this.pending.get(binary);
+    const managed = this.managed(binary);
+    const key = `${binary}:${managed?.path ?? this.pins[binary]?.path ?? ''}`;
+    const pending = this.pending.get(key);
     if (pending) return pending;
-    const work = this.check(binary).finally(() => this.pending.delete(binary));
-    this.pending.set(binary, work);
+    const work = this.check(binary, managed).finally(() => this.pending.delete(key));
+    this.pending.set(key, work);
     return work;
   }
-  private async check(binary: string) {
-    const managed = this.managed(binary);
+  private async check(binary: string, managed: ExecutableIdentity | null) {
     const pin = this.pins[binary];
     const previous = managed && managed.path !== pin?.path ? managed : pin;
     const path = managed?.path ?? previous?.path ?? await resolveInstalledExecutable(binary);

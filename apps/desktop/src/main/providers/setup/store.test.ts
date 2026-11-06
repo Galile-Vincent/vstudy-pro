@@ -79,3 +79,16 @@ it('extracts only the expected regular executable and preserves its verified byt
   expect(await readFile(result.identity.path)).toEqual(bytes);
   await chmod(result.identity.path, 0o700);
 });
+it('does not reuse an old pending pin check for a newly activated executable', async () => {
+  const directory = await temporary(), store = new SetupStore(join(directory, 'tools')), bytes = Buffer.from('#!/bin/sh\nexit 0\n');
+  const first = await store.install(payloadRelease(bytes), payloadNetwork(bytes), signal(), () => {});
+  let approve!: (allowed: boolean) => void, started!: () => void;
+  const waiting = new Promise<void>(resolve => { started = resolve; });
+  const pins = new ExecutablePins(join(directory, 'pins.json'), () => { started(); return new Promise<boolean>(resolve => { approve = resolve; }); });
+  await pins.choose('claude', first.identity.path); pins.setManagedResolver(binary => store.identity(binary));
+  await writeFile(first.identity.path, '#!/bin/sh\nexit 1\n');
+  const oldResolution = pins.resolve('claude'); await waiting;
+  const second = await store.install(payloadRelease(bytes, '1.1.0'), payloadNetwork(bytes), signal(), () => {});
+  try { expect(await pins.resolve('claude')).toBe(second.identity.path); }
+  finally { approve(false); await oldResolution; }
+});

@@ -76,10 +76,14 @@ export class SetupStore {
     try {
       const payload = join(stage, 'payload');
       await network.download(release, payload, signal, progress);
+      signal.throwIfAborted();
+      if (!canActivate()) throw new SetupError('busy');
       const binary = join(stage, release.provider + (process.platform === 'win32' ? '.exe' : ''));
       if (release.archive === 'binary') await copyFile(payload, binary);
       else await extractExecutable(payload, binary, release.executable, signal);
       await chmod(binary, 0o700);
+      signal.throwIfAborted();
+      if (!canActivate()) throw new SetupError('busy');
       await validateVersion(binary, release.version);
       const identity = await executableIdentity(binary);
       signal.throwIfAborted();
