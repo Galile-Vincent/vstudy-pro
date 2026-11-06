@@ -1,3 +1,4 @@
+import { SurfaceErrorBoundary } from './components/surface-error-boundary';
 import { HistoryView, HistoryFinder } from "./history";
 import { lazy, Suspense, useEffect, useMemo, useState, type ComponentType } from "react";
 let loadedWelcome: ComponentType | undefined;
@@ -30,7 +31,7 @@ function GlobalSettings() {
     window.addEventListener('vstudy:open-settings', show);
     return () => window.removeEventListener('vstudy:open-settings', show);
   }, []);
-  return open ? <ProviderSettings initialTab={initialTab} providers={providers} onClose={() => { setOpen(false); window.dispatchEvent(new Event("vstudy:providers-changed")); }} onRefresh={refresh}/> : null;
+  return open ? <SurfaceErrorBoundary resetKeys={[initialTab]}><ProviderSettings initialTab={initialTab} providers={providers} onClose={() => { setOpen(false); window.dispatchEvent(new Event("vstudy:providers-changed")); }} onRefresh={refresh}/></SurfaceErrorBoundary> : null;
 }
 function Views() {
   const { route } = useNavigate();
@@ -40,15 +41,15 @@ function Views() {
     const idle = window.requestIdleCallback(() => { void loadWelcome(); });
     return () => window.cancelIdleCallback(idle);
   }, []);
-  return route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "workspace" ? (
-    <Workspace />
+  return <SurfaceErrorBoundary resetKeys={[JSON.stringify(route)]}>{route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "workspace" ? (
+    <Workspace key={route.documentId} />
   ) : route.view === "history" ? (<HistoryView/>) : route.view === "courses" ? (
     <CoursesView />
   ) : route.view === "library" ? (
     <LibraryView key={JSON.stringify(route.query)} />
   ) : (
     <HomeView />
-  );
+  )}</SurfaceErrorBoundary>;
 }
 export function App() {
   return (

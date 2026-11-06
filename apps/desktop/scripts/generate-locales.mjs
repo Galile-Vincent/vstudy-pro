@@ -44,3 +44,14 @@ try { previous = await readFile(target, 'utf8'); } catch (error) {
 }
 if (previous !== output) await writeFile(target, output);
 console.log(`Locale registry ready at ${fileURLToPath(target)} (${namespaces.length} namespaces).`);
+
+// Keep recovery text available even when the renderer module cannot start.
+const htmlPath = new URL('../src/renderer/index.html', import.meta.url);
+const html = await readFile(htmlPath, 'utf8');
+const escapeHtml = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+const fallback = await Promise.all(languages.map(async language => {
+  const common = JSON.parse(await readFile(new URL(`locales/${language}/common.json`, shared), 'utf8'));
+  return `<p lang="${language}">${escapeHtml(common.surface_render_error)}</p>`;
+}));
+const nextHtml = html.replace(/<!-- startup-fallback:start -->[\s\S]*?<!-- startup-fallback:end -->/, `<!-- startup-fallback:start --><section role="alert" style="visibility:visible">${fallback.join('')}</section><!-- startup-fallback:end -->`);
+if (nextHtml !== html) await writeFile(htmlPath, nextHtml);

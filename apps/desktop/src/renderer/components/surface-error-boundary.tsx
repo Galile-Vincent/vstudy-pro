@@ -1,7 +1,8 @@
 /** Contain view render failures while keeping shell navigation available. Retry remounts the failed content. */
-import { Component, type ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
+import { reportRendererError } from '../renderer-errors';
 import { Button } from './ui/button';
 
 function Recovery({ retry }: { retry: () => void }) {
@@ -13,9 +14,14 @@ function Recovery({ retry }: { retry: () => void }) {
   </section>;
 }
 
-export class SurfaceErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+export class SurfaceErrorBoundary extends Component<{ children: ReactNode; resetKeys?: readonly unknown[] }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(error: unknown, info: ErrorInfo) { reportRendererError(error, 'render', info.componentStack); }
+  componentDidUpdate(previous: Readonly<typeof this.props>) {
+    const before = previous.resetKeys ?? [], after = this.props.resetKeys ?? [];
+    if (this.state.failed && (before.length !== after.length || before.some((key, index) => !Object.is(key, after[index])))) this.setState({ failed: false });
+  }
   render() {
     return this.state.failed
       ? <Recovery retry={() => this.setState({ failed: false })}/>

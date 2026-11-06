@@ -19,10 +19,12 @@ async function fixture() {
   fixtures.push(root);
   await mkdir(join(root, 'scripts'));
   await copyFile(new URL('../../scripts/generate-locales.mjs', import.meta.url), join(root, 'scripts/generate-locales.mjs'));
+  await mkdir(join(root, 'src/renderer'), {recursive:true});
+  await writeFile(join(root, 'src/renderer/index.html'), '<div id="root"><!-- startup-fallback:start --><!-- startup-fallback:end --></div>');
   for (const language of ['en', 'zh-Hant', 'ja']) {
     const directory = join(root, 'src/shared/locales', language);
     await mkdir(directory, { recursive: true });
-    await writeFile(join(directory, 'common.json'), JSON.stringify({ greeting: 'Hello {{name}}' }));
+    await writeFile(join(directory, 'common.json'), JSON.stringify({ greeting: 'Hello {{name}}', surface_render_error: language + ' <Retry> & recover' }));
   }
   return { root, generate: () => run(process.execPath, [join(root, 'scripts/generate-locales.mjs')]) };
 }
@@ -53,4 +55,11 @@ it('rejects non-string catalog values', async () => {
   const { root, generate } = await fixture();
   await writeFile(join(root, 'src/shared/locales/ja/common.json'), '{"greeting":42}');
   await expect(generate()).rejects.toThrow('Expected a flat string catalog');
+});
+
+it('generates escaped static recovery text from every locale',async()=>{
+  const {root,generate}=await fixture();await generate();
+  const html=await readFile(join(root,'src/renderer/index.html'),'utf8');
+  for(const language of ['en','zh-Hant','ja'])expect(html).toContain(`<p lang="${language}">${language} &lt;Retry&gt; &amp; recover</p>`);
+  expect(html).toContain('visibility:visible');expect(html).toContain('role="alert"');
 });

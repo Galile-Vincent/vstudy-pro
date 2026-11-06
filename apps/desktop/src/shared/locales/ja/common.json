@@ -366,5 +366,6 @@
   "tool_cancelled_label": "ツールをキャンセルしました",
   "tool_failed_label": "ツールが失敗しました",
   "attachment_label": "添付 {{name}}（{{type}}）{{status}}",
-  "uploading": "アップロード中"
+  "uploading": "アップロード中",
+  "reload_application": "アプリを再読み込み"
 }
