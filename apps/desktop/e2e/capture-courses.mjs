@@ -178,6 +178,36 @@ try {
       await page.reload();await page.locator('.moodle-course-card').first().waitFor();
       await shot(`view-list-${language}-${scheme}`);
     }
+    for(const language of ['en','ja']) for(const uiScale of [100,200]) {
+      await route('light',language);
+      await page.evaluate(async uiScale=>{
+        const settings=await window.desktop.invoke('settings:get',{});
+        await window.desktop.invoke('settings:set',{...settings,uiScale});
+        localStorage.setItem('vstudy.courses.view','cards');
+      },uiScale);
+      await page.reload();await page.locator('.moodle-course-card').first().waitFor();
+      const catalogWidth=await page.locator('.courses-catalog').evaluate(node=>node.getBoundingClientRect().width);
+      let width=Math.ceil(1280-catalogWidth+562);
+      for(let attempt=0;attempt<3;attempt++) {
+        await app.evaluate(({BrowserWindow},width)=>BrowserWindow.getAllWindows()[0].setContentSize(width,800),width);
+        await cdp.send('Emulation.setDeviceMetricsOverride',{width,height:800,deviceScaleFactor:2,mobile:false});
+        const measured=await page.locator('.courses-catalog').evaluate(node=>node.getBoundingClientRect().width);
+        if(Math.abs(measured-562)<1) break;
+        width+=Math.round(562-measured);
+      }
+      assert.ok(await page.locator('.courses-catalog').evaluate(node=>Math.abs(node.getBoundingClientRect().width-562)<1),'Cards are captured beside the 560px breakpoint');
+      assert.equal(await page.locator('.moodle-grid').evaluate(node=>getComputedStyle(node).display),'grid');
+      const geometry=await page.locator('.moodle-course-card').evaluateAll(nodes=>nodes.map(node=>{
+        const teacher=node.querySelector('.course-meta > span:first-child'),bounds=node.getBoundingClientRect();
+        return {width:bounds.width,scroll:node.scrollWidth,client:node.clientWidth,teacherWidth:teacher?.getBoundingClientRect().width,teacherMin:teacher ? parseFloat(getComputedStyle(teacher).minWidth.match(/[\d.]+px/)?.[0] ?? '0') : undefined,overflows:[...node.querySelectorAll('.moodle-card-body,.course-counts,.course-pin,.course-meta time')].some(child=>{const rect=child.getBoundingClientRect();return rect.right>bounds.right+1 || rect.left<bounds.left-1;})};
+      }));
+      assert.ok(geometry.every(row=>row.scroll<=row.client+1 && !row.overflows),`${language} cards fit at ${uiScale}% text`);
+      assert.ok(geometry.every(row=>row.teacherWidth===undefined || row.teacherWidth>=row.teacherMin-1),`${language} teachers retain their minimum width at ${uiScale}% text`);
+      results.cardGeometry ??=[];results.cardGeometry.push({language,uiScale,width,geometry});
+      await shot(`cards-breakpoint-${language}-${uiScale}`);
+      await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(1280,800));
+      await cdp.send('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:2,mobile:false});
+    }
     await route('dark');
     await page.evaluate(()=>localStorage.setItem('vstudy.courses.view','cards'));
     await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(520,800));
