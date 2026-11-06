@@ -10,7 +10,8 @@ import { Button } from '../components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import { useReviewPage, type Cursor } from './paging';
-import { ArtifactPlaceholder, type ReviewSelection } from './artifact-placeholder';
+import type { ReviewSelection } from './review-selection';
+import { ArtifactPanel } from './artifacts';
 import './review.css';
 /** W2 supplies this adapter once retry and paused reasons are available. W1 never invokes unknown IPC. */
 export type ReviewJobsAdapter = { status?: 'offline'|'budget'|'error'; retry?: (jobId?: string)=>Promise<void> };
@@ -37,7 +38,7 @@ export function ReviewView({jobsAdapter}:{jobsAdapter?:ReviewJobsAdapter}) {
  {!courseId ? <Inbox key={revision} courses={courses.items} open={open}/> : <Tabs value={tab} onValueChange={setTab}><TabsList aria-label={tr('review:title')}>{['recent','weak','notes','tests'].map(t=><TabsTrigger key={t} value={t}>{tr(`review:${t}`)}</TabsTrigger>)}</TabsList>
  <TabsContent value="recent"><Recent key={courseId+revision} course={course} courseId={courseId} open={open} mutate={mutate} busy={busy} jobsAdapter={jobsAdapter}/></TabsContent>
  <TabsContent value="weak"><Weak key={courseId+revision} courseId={courseId} open={open} mutate={mutate} busy={busy} artifacts={artifacts}/></TabsContent>
- <TabsContent value="notes"><ArtifactPlaceholder kind="note" selection={selection}/></TabsContent><TabsContent value="tests"><ArtifactPlaceholder kind="test" selection={selection}/></TabsContent></Tabs>}
+ <TabsContent value="notes" forceMount hidden={tab!=='notes'}><ArtifactPanel key={courseId+'note'} courseId={courseId} kind="note" selection={selection}/></TabsContent><TabsContent value="tests" forceMount hidden={tab!=='tests'}><ArtifactPanel key={courseId+'test'} courseId={courseId} kind="test" selection={selection}/></TabsContent></Tabs>}
  </div></main>;
 }
 function CourseTools({course,refresh,onCreated}:{course:Course|undefined;refresh:()=>void;onCreated:(id:string)=>void}) {
