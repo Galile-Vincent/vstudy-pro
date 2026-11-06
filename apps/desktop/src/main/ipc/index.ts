@@ -1,3 +1,5 @@
+import { registerReviewIpc } from "./review";
+import { reviewWorkers } from "../review/workers";
 /**
  * Register validated index IPC operations and delegate privileged work to main services.
  * Owned by main/ipc.
@@ -106,6 +108,7 @@ export function registerIpc(
     secrets.delete(providerId);
     return { ok: true };
   });
+  registerReviewIpc(registrar, store, implemented);
   registerUsageIpc(registrar, store, implemented, () => providers.config('codex-cli').enabled);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
   const disposeAiCli = registerAiCliIpc(registrar, implemented, providers, pins, chat);
@@ -144,5 +147,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }

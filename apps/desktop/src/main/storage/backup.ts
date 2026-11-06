@@ -12,6 +12,7 @@ import { isPathWithin, portableBasename } from '../platform/paths';
 import { z } from 'zod';
 import type { Store } from '../db';
 import { openStore } from '../db';
+import { validateStudyData } from '../db/study-validation';
 import { PlannerRepository } from '../planner/repository';
 import { requireFreeSpace } from './space';
 import { validateRestoreSchema } from './restore-schema';
@@ -91,6 +92,7 @@ export async function stageRestore(root:string,source:string):Promise<void> {
       store.settings.get();
       store.validateChats();
       new PlannerRepository(store.db).snapshot(true);
+      validateStudyData(store.db);
       for(const row of store.db.prepare('SELECT id,sourceHash,sourcePath,markdownPath,status,activeVersion FROM documents').all()){
         const hash=String(row.sourceHash),name=portableBasename(String(row.sourcePath)),original=`library/${hash}/${name}`;
         if(!/^[a-f0-9]{64}$/.test(hash) || !/^source\.[a-z0-9]{1,12}$/.test(name) || entries.get(original)?.sha256!==hash)throw new Error('storage.invalid_backup');

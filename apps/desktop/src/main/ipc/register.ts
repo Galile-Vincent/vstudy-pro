@@ -19,7 +19,7 @@ import {
 } from "../../shared/ipc";
 
 export function channelPolicy(channel: string) {
-  const expensive = /import|reconvert|retry|chat:start|aiParse:(?:start|estimate|use|discard)|export/i.test(channel);
+  const expensive = /import|reconvert|retry|chat:start|aiParse:(?:start|estimate|use|discard)|review:(?:artifact:generate|attempt:(?:finish|commit|confirm))|export/i.test(channel);
   return { bytes: channel === 'chat:start' || channel === 'usage:estimate' ? 8 * 1024 * 1024 : 512 * 1024,
     requests: expensive ? 12 : channel === 'activity:heartbeat' ? 120 : 600, windowMs: 60_000 };
 }
