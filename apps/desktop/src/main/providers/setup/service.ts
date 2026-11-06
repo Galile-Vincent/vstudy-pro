@@ -8,6 +8,7 @@ import { tr } from '../../../shared/i18n';
 import { EventEmitter } from 'node:events';
 import { join } from 'node:path';
 import type { CliActionId, CliPreferences, CliProvider, CliToolState } from '../../../shared/ai-cli';
+import { manualInstallCommand } from '../../../shared/ai-cli-manual';
 import type { ProviderRegistry } from '../index';
 import { configuredCliPath, type ExecutablePins } from '../executable-pins';
 import { hasExecutableLeases, leaseExecutable } from './leases';
@@ -106,7 +107,8 @@ export class AiCliSetup {
     if (!provider) reason = this.preferences().advancedShell ? null : 'not-consented';
     else {
       const state = this.state(provider); binary = state.path;
-      if (!this.enabled(provider)) reason = 'not-consented';
+      if (verb === 'terminal') reason = manualInstallCommand(provider, this.deps.source.platform) ? null : 'unsupported';
+      else if (!this.enabled(provider)) reason = 'not-consented';
       else if (this.sessions.providerBusy(provider)) reason = 'busy';
       else if (provider === 'codex' && this.deps.source.platform !== 'darwin') reason = 'unsupported';
       else if (verb === 'login' && this.deps.source.platform !== 'darwin') reason = 'unsupported';
@@ -127,7 +129,7 @@ export class AiCliSetup {
   private takePlan(owner: SetupOwner, actionId: CliActionId, token: string, target: PlanTarget = 'embedded') {
     if (this.stopped) throw new SetupError('cancelled');
     const plan = this.tokens.consume(owner, actionId, token, this.now(), target);
-    if (plan.provider && !this.enabled(plan.provider) || !plan.provider && !this.preferences().advancedShell) throw new SetupError('not-consented');
+    if (plan.verb !== 'terminal' && (plan.provider && !this.enabled(plan.provider) || !plan.provider && !this.preferences().advancedShell)) throw new SetupError('not-consented');
     if (this.sessions.providerBusy(plan.provider)) throw new SetupError('busy');
     return plan;
   }
@@ -136,7 +138,7 @@ export class AiCliSetup {
     const plan = this.takePlan(owner, actionId, token, 'own-terminal');
     await this.trustedPlan(plan);
     if (this.stopped || owner.isDestroyed() || revision !== this.documentRevision.get(owner)) throw new SetupError('cancelled');
-    if (plan.provider && !this.enabled(plan.provider) || !plan.provider && !this.preferences().advancedShell) throw new SetupError('not-consented');
+    if (plan.verb !== 'terminal' && (plan.provider && !this.enabled(plan.provider) || !plan.provider && !this.preferences().advancedShell)) throw new SetupError('not-consented');
     if (this.sessions.providerBusy(plan.provider)) throw new SetupError('busy');
     const command = plan.verb === 'login' && plan.provider && plan.binary ? displayCommand(plan.binary, actionArgs(plan.provider, plan.verb)) : plan.public.command;
     const env = { ...plan.env };
@@ -163,7 +165,7 @@ export class AiCliSetup {
     }, code => { if (plan.provider) this.apply(plan.provider, { type: 'failed', code }); });
   }
   private async trustedPlan(plan: ActionPlan) {
-    if (!plan.provider) return;
+    if (!plan.provider || plan.verb === 'terminal') return;
     if (!this.enabled(plan.provider)) throw new SetupError('not-consented');
     if (['install', 'update', 'rollback'].includes(plan.verb)) return;
     const resolved = await this.deps.pins.resolve(plan.provider);

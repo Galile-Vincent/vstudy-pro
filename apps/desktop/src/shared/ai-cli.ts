@@ -34,6 +34,7 @@ export const cliActionIdSchema = z.enum([
   'install-claude', 'login-claude', 'status-claude', 'test-claude', 'update-claude', 'rollback-claude',
   'install-codex', 'login-codex', 'status-codex', 'test-codex', 'update-codex', 'rollback-codex',
   'install-agy', 'login-agy', 'status-agy', 'test-agy', 'update-agy', 'rollback-agy',
+  'terminal-claude', 'terminal-codex', 'terminal-agy',
   'advanced-shell',
 ]);
 export type CliActionId = z.infer<typeof cliActionIdSchema>;
@@ -74,5 +75,5 @@ export const aiCliContract = {
   'ai-cli:preferences': { request: empty, response: cliPreferencesSchema },
   'ai-cli:setPreferences': { request: cliPreferencesSchema, response: cliPreferencesSchema },
   'ai-cli:checkUpdates': { request: empty, response: z.array(cliToolStateSchema) },
-  'ai-cli:openTerminal': { request: z.object({ actionId: cliActionIdSchema, token: z.string().uuid() }).strict(), response: ack },
+  'ai-cli:openTerminal': { request: z.object({ actionId: cliActionIdSchema, token: z.string().uuid() }).strict(), response: z.object({ ok: z.boolean() }).strict() },
 } satisfies Record<string, { request: z.ZodTypeAny; response: z.ZodTypeAny }>;

@@ -142,6 +142,12 @@ Follow-up implementation commits are `26dc649` for the terminal parser, `f3427b8
 
 Independent cross-family review and any PR gate remain coordinator-owned. Passing tests and implementation self-review are not an independent verdict. This report does not mark the branch as independently reviewed or ready to ship.
 
+## Manual-install copy follow-up
+
+Branch `t3/ai-cli-copy` starts from main `b402c424`. Commit `0f78688` replaces the repeated explanation with one short sentence and an official-source link. All three providers share numbered copy-and-paste instructions, a confirmed Open Terminal action, a primary file-only Check again button, and clearer permission labels. English, Traditional Chinese, and Japanese use the same flow. The manual terminal capability copies a fixed command and opens a blank terminal. It cannot run an installer in the embedded runner or enable a provider.
+
+The full desktop suite passed 1,466 tests, with 15 skipped. The final renderer follow-up passed 44 tests. Typecheck, lint, Knip, vendor checks, and static security checks passed. One packaged macOS app passed the real PTY smoke and exercised Check again in every language and scheme. All six screenshots were opened and visually reviewed. The app closed immediately afterward, the Electron inventory was empty, and the GUI slot was released. [The capture review, screenshots, hashes, and exact acceptance scope](evidence/ai-cli/packaged/manual-install-review.md) record the evidence.
+
 ## Delivery and dispatch record
 
 Blocking work established the official commands, executable trust rules, managed directory policy, and strict IPC shapes before delegation. Backend and renderer then worked in separate worktrees from the committed contract. Shared IPC edits and integration serialized in this checkout. Verification used bounded workers and one Electron app. The folio and capability design survived runtime verification, so no replacement implementation was needed.
