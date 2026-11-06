@@ -58,3 +58,12 @@ it('removes complete cookie headers, MoodleSession values, protocol-relative sch
   expect(json).not.toContain('school.example');
   expect(json).not.toContain(Buffer.from(secret).toString('base64'));
 });
+it('preserves only strict credential-free VStudy resource references',()=>{
+  const account=randomUUID(),course=randomUUID(),module=randomUUID(),file=randomUUID();
+  const valid=[`vstudy://accounts/${account}/courses/${course}`,`vstudy://accounts/${account}/courses/${course}/modules/${module}`,`vstudy://accounts/${account}/files/${file}`];
+  const redact=new McpRedactor();
+  for(const uri of valid)expect(redact.text(uri)).toBe(uri);
+  for(const uri of [`${valid[0]}?token=secret`,`${valid[0]}#cookie=secret`,'vstudy://accounts/https://school.example','vstudy://accounts/invalid/files/invalid','vstudy://school.example/cookie'])expect(redact.text(uri)).not.toContain('//');
+  expect(redact.text('\u00010\u0002')).toBe('0');
+  expect(redact.text(`//school.example ${valid[2]}`)).toBe(`[link removed] ${valid[2]}`);
+});

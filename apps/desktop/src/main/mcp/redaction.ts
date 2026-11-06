@@ -1,5 +1,7 @@
 /** Bound and scrub every untrusted string before it leaves main or enters retained activity. @packageDocumentation */
+import { randomBytes } from 'node:crypto';
 import { decodeHtmlEntities } from '../../shared/html';
+import { isMcpResourceUri } from '../../shared/mcp-resource';
 import { provenanceSchema, type Provenance, type ToolResult } from '../../shared/mcp';
 
 const sensitiveKey = /token|cookie|password|passwd|authorization|secret|sesskey|autologin|wsfunction|private|accesskey|session|credential|bearer/i;
@@ -17,6 +19,13 @@ export class McpRedactor {
     let text = value;
     for (const secret of this.secrets) text = text.split(secret).join(hidden);
     for (let i = 0; i < 3; i++) text = decodeHtmlEntities(text);
+    const resources=new Map<string,string>();
+    text=text.replace(/vstudy:\/\/[^\s\])}"'<>]+/gi, value => {
+      if (!isMcpResourceUri(value)) return '[link removed]';
+      const marker=`__VSR_${randomBytes(6).toString('hex')}_${resources.size}__`;
+      resources.set(marker,value);
+      return marker;
+    });
     text = text
       .replace(/<!--[^]*?(?:-->|$)/g, '')
       .replace(/<(script|style|iframe|object|embed|svg|math|template)\b[^>]*>[^]*?(?:<\/\1\s*>|$)/gi, '')
@@ -34,6 +43,7 @@ export class McpRedactor {
       .replace(/\beyJ[a-z0-9_-]+\.[a-z0-9_-]+(?:\.[a-z0-9_-]+)?\b/gi, hidden)
       .replace(/(?<![a-z0-9_+/=-])[a-z0-9_+/=-]{40,}(?![a-z0-9_+/=-])/gi, hidden)
       .replace(/[\u007f\u202a-\u202e\u2066-\u2069]/g, '');
+    for (const [marker,uri] of resources) text=text.split(marker).join(uri);
     text = [...text].filter(char => char.charCodeAt(0) >= 32 || '\t\n\r'.includes(char)).join('');
     for (const secret of this.secrets) text = text.split(secret).join(hidden);
     const suffix = '\n[truncated]'.slice(0, limit);
