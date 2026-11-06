@@ -97,7 +97,6 @@
   "view_results": "View results",
   "results_title": "Your review",
   "results_counts": "{{matched}} answers matched out of {{reviewed}} reviewed. {{revisit}} worth another look.",
-  "concept_counts": "{{count}} concepts worth another look",
   "confirm_notice": "After finishing the test, confirm separately to update your review list. Reported questions are excluded.",
   "review_list_updated": "Your review list has been updated.",
   "update_review_list": "Update my review list",
@@ -145,5 +144,8 @@
   "consent_title": "Remember your questions for review?",
   "consent_turn_on": "Turn on",
   "consent_not_now": "Not now",
-  "consent_done": "Study memory is on. You can change this any time in Settings > Privacy."
+  "consent_done": "Study memory is on. You can change this any time in Settings > Privacy.",
+  "item_feedback": "Feedback for this question",
+  "concept_missed_one": "{{label}}: {{count}} question worth another look",
+  "concept_missed_other": "{{label}}: {{count}} questions worth another look"
 }

@@ -97,7 +97,6 @@
   "view_results": "結果を見る",
   "results_title": "今回の復習",
   "results_counts": "確認した {{reviewed}} 問のうち {{matched}} 問が参考解答と一致しました。{{revisit}} 問をもう一度見てみましょう。",
-  "concept_counts": "{{count}} 個の概念をもう一度確認",
   "confirm_notice": "テストを終えた後、別途確認して復習リストを更新します。報告済みの問題は除外されます。",
   "review_list_updated": "復習リストを更新しました。",
   "update_review_list": "復習リストを更新する",
@@ -145,5 +144,8 @@
   "consent_title": "復習のために質問を記録しますか？",
   "consent_turn_on": "オンにする",
   "consent_not_now": "今はしない",
-  "consent_done": "学習メモリーをオンにしました。設定 > プライバシーでいつでも変更できます。"
+  "consent_done": "学習メモリーをオンにしました。設定 > プライバシーでいつでも変更できます。",
+  "item_feedback": "この問題のフィードバック",
+  "concept_missed_one": "{{label}}：{{count}} 問をもう一度確認",
+  "concept_missed_other": "{{label}}：{{count}} 問をもう一度確認"
 }

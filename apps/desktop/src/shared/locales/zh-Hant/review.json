@@ -97,7 +97,6 @@
   "view_results": "查看結果",
   "results_title": "這次的複習",
   "results_counts": "共檢視 {{reviewed}} 題，其中 {{matched}} 題符合參考答案，{{revisit}} 題值得再看看。",
-  "concept_counts": "{{count}} 個觀念值得再看看",
   "confirm_notice": "完成整份測驗後，需另行確認才會更新複習清單。已回報的題目不列入計算。",
   "review_list_updated": "已更新你的複習清單。",
   "update_review_list": "更新我的複習清單",
@@ -145,5 +144,8 @@
   "consent_title": "要記住你的問題以便複習嗎？",
   "consent_turn_on": "開啟",
   "consent_not_now": "暫時不要",
-  "consent_done": "已開啟學習記憶。你可以隨時在「設定 > 隱私」變更。"
+  "consent_done": "已開啟學習記憶。你可以隨時在「設定 > 隱私」變更。",
+  "item_feedback": "本題回饋",
+  "concept_missed_one": "{{label}}：{{count}} 題值得再看看",
+  "concept_missed_other": "{{label}}：{{count}} 題值得再看看"
 }
