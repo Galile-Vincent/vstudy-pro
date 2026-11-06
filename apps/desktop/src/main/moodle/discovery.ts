@@ -6,6 +6,7 @@
  */
 /** Probe a user-selected HTTPS Moodle root without credentials. Validate public configuration before use. */
 import { z } from 'zod';
+import { readBoundedJson } from '../response-json';
 import { getDomain } from 'tldts';
 import type { AuthPlan, MoodleSiteCheck } from '../../shared/moodle';
 import { moodleFetch, normalizeSiteUrl, resolvePublicHost, siteTarget } from './site-url';
@@ -60,7 +61,8 @@ export async function checkSite(input: string, request: typeof fetch = moodleFet
         continue;
       }
       if (!response.ok) throw new Error('Moodle discovery failed');
-      const rawResult = z.array(z.object({error:z.boolean(),data:z.unknown().optional(),exception:z.object({errorcode:z.string().optional()}).optional()})).safeParse(await response.json().catch(() => { throw new Error('Moodle discovery failed'); }));
+      const {value:raw} = await readBoundedJson(response).catch(() => { throw new Error('Moodle discovery failed'); });
+      const rawResult = z.array(z.object({error:z.boolean(),data:z.unknown().optional(),exception:z.object({errorcode:z.string().optional()}).optional()})).safeParse(raw);
       if (!rawResult.success) throw new Error('Moodle discovery failed');
       const result = rawResult.data[0];
       if (result?.error && result.exception?.errorcode === 'codingerror' && !get) { get = true; continue; }

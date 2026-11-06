@@ -19,6 +19,7 @@ import { remoteId } from './client';
 export interface MoodleSnapshot {
   courses: MoodleCourse[];
   deadlines: MoodleDeadline[];
+  deadlineFamilies?: Partial<Record<'assignment'|'quiz'|'calendar',MoodleDeadline[]>>;
   notifications: {remoteId:number;value:MoodleNotification}[];
   grades: {remoteKey:string;value:MoodleGradeItem}[];
   files: {url:string;value:MoodleFile}[];
@@ -33,6 +34,8 @@ const storedCourseSchema = z.preprocess(value => {
   Object.assign(identity,courseLifecycle({startAt:row.startAt,endAt:row.endAt,term:identity.term}));
   return {...(value as Record<string,unknown>),identity};
 },moodleCourseSchema);
+const storedDeadlineSchema = moodleDeadlineSchema.extend({source:z.enum(['assignment','quiz','calendar']).optional()});
+const publicDeadlineSchema = storedDeadlineSchema.transform(value => moodleDeadlineSchema.strip().parse(value));
 const payload = z.object({data:z.string()});
 const panelCacheSchema = z.object({
   sections: z.array(moodleSectionSchema).optional(),
@@ -76,7 +79,7 @@ export class MoodleRepository {
     const accounts = this.accounts().filter(account => !accountId || account.id === accountId);
     const courses = this.rows('SELECT data FROM moodle_courses ORDER BY id',storedCourseSchema).filter(course => accounts.some(account => account.id === course.accountId));
     const ids = new Set(courses.map(course => course.id));
-    const upcoming = this.rows('SELECT data FROM moodle_deadlines',moodleDeadlineSchema).filter(item => ids.has(item.courseId) && !item.submitted && !item.orphaned).sort((a,b) => a.dueAt.localeCompare(b.dueAt));
+    const upcoming = this.rows('SELECT data FROM moodle_deadlines',publicDeadlineSchema).filter(item => ids.has(item.courseId) && !item.submitted && !item.orphaned).sort((a,b) => a.dueAt.localeCompare(b.dueAt));
     const notifications = this.rows('SELECT data FROM moodle_notifications',moodleNotificationSchema).filter(item => accounts.some(account => account.id === item.accountId));
     const reminders=this.reminders();
     return {accounts,courses,upcoming,summaries:courses.map(course => ({course,notifications:notifications.filter(item => item.courseId === course.id),reminders:reminders.filter(item => upcoming.some(deadline => deadline.courseId === course.id && deadline.id === item.deadlineId))})),otherNotifications:notifications.filter(item => item.courseId === null),unreadNotifications:notifications.filter(item => !item.read).length};
@@ -85,7 +88,7 @@ export class MoodleRepository {
     const course = this.rows('SELECT data FROM moodle_courses WHERE id=?',storedCourseSchema,id)[0];
     if (!course) throw new Error('Moodle course not found');
     const cache = this.detailCache(id);
-    const deadlines = this.rows('SELECT data FROM moodle_deadlines WHERE courseId=?',moodleDeadlineSchema,id).filter(item => !item.orphaned);
+    const deadlines = this.rows('SELECT data FROM moodle_deadlines WHERE courseId=?',publicDeadlineSchema,id).filter(item => !item.orphaned);
     return {course,deadlines,notifications:this.rows("SELECT data FROM moodle_notifications WHERE accountId=? AND json_extract(data,'$.courseId')=?",moodleNotificationSchema,course.accountId,id),grades:this.rows('SELECT data FROM moodle_grades WHERE courseId=?',moodleGradeItemSchema,id),files:this.files(id),reminders:this.rows('SELECT r.data FROM moodle_reminders r JOIN moodle_deadlines d ON d.id=r.deadlineId WHERE d.courseId=?',moodleReminderSchema,id),sections:cache?.sections ?? [],announcements:cache?.announcements ?? []};
   }
   detailCache(id: string) {
@@ -96,9 +99,18 @@ export class MoodleRepository {
   hasCoursePanelCache(id: string, panel: 'sections' | 'announcements'): boolean {
     return this.detailCache(id)?.loaded[panel] === true;
   }
-  saveDetail(id: string, panels: {sections?:MoodleSection[];announcements?:MoodleAnnouncement[]}, files?:MoodleSnapshot['files'], syncedAt?: string) {
+  saveDetail(id: string, panels: {sections?:MoodleSection[];announcements?:MoodleAnnouncement[]}, files?:MoodleSnapshot['files'], syncedAt?: string, complete = true) {
     if (!this.db.prepare('SELECT 1 FROM moodle_courses WHERE id=?').get(id)) throw new Error('Moodle course not found');
     const previous = this.detailCache(id);
+    if (!complete && panels.sections) {
+      const sections = new Map(previous?.sections.map(section => [section.id,section]));
+      for (const section of panels.sections) {
+        const modules = new Map(sections.get(section.id)?.modules.map(module => [module.id,module]));
+        for (const module of section.modules) modules.set(module.id,{...module,fileIds:[...new Set([...(modules.get(module.id)?.fileIds ?? []),...module.fileIds])]});
+        sections.set(section.id,{...section,modules:[...modules.values()]});
+      }
+      panels = {...panels,sections:[...sections.values()]};
+    }
     const loaded = {sections: panels.sections !== undefined || previous?.loaded.sections === true, announcements: panels.announcements !== undefined || previous?.loaded.announcements === true};
     const data = {...previous,...panels,loaded,refreshedAt:syncedAt ?? new Date().toISOString()};
     const serialized=JSON.stringify(data);
@@ -117,7 +129,7 @@ export class MoodleRepository {
           this.db.prepare(`INSERT INTO moodle_files(id,courseId,url,data) VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET url=excluded.url,data=excluded.data,documentId=CASE WHEN json_extract(moodle_files.data,'$.modifiedAt') IS json_extract(excluded.data,'$.modifiedAt') AND json_extract(moodle_files.data,'$.size')=json_extract(excluded.data,'$.size') THEN moodle_files.documentId ELSE NULL END`).run(item.value.id,id,item.url,JSON.stringify(item.value));
         }
         const keep = new Set(files.map(file => file.value.id));
-        for (const file of this.files(id)) if (!keep.has(file.id)) this.db.prepare('DELETE FROM moodle_files WHERE id=?').run(file.id);
+        if (complete) for (const file of this.files(id)) if (!keep.has(file.id)) this.db.prepare('DELETE FROM moodle_files WHERE id=?').run(file.id);
       }
       this.db.exec('RELEASE moodle_detail');
     } catch (error) { this.db.exec('ROLLBACK TO moodle_detail; RELEASE moodle_detail'); throw error; }
@@ -147,6 +159,9 @@ export class MoodleRepository {
     this.db.exec('SAVEPOINT moodle_sync');
     try {
       const account = this.account(accountId);
+      const incomingDeadlines = snapshot.deadlineFamilies
+        ? Object.entries(snapshot.deadlineFamilies).flatMap(([source,items]) => items.map(item => ({item,source})))
+        : snapshot.deadlines.map(item => ({item,source:undefined}));
       for (const incoming of snapshot.courses) {
         let course = incoming;
         const previous = this.rows('SELECT data FROM moodle_courses WHERE id=?',storedCourseSchema,course.id)[0];
@@ -155,8 +170,12 @@ export class MoodleRepository {
         this.db.prepare('INSERT INTO moodle_courses(id,accountId,data) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(course.id,accountId,JSON.stringify(course));
       }
       const courseIds = new Set(snapshot.courses.map(course => course.id));
-      for (const item of [...snapshot.deadlines,...snapshot.grades.map(item => item.value),...snapshot.files.map(item => item.value)]) if (!courseIds.has(item.courseId)) throw new Error('Moodle course mismatch');
-      for (const item of snapshot.deadlines) this.db.prepare('INSERT INTO moodle_deadlines(id,courseId,data) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(item.id,item.courseId,JSON.stringify(item));
+      for (const item of [...incomingDeadlines.map(row => row.item),...snapshot.grades.map(item => item.value),...snapshot.files.map(item => item.value)]) if (!courseIds.has(item.courseId)) throw new Error('Moodle course mismatch');
+      for (const {item,source} of incomingDeadlines) {
+        const row = this.db.prepare('SELECT data FROM moodle_deadlines WHERE id=?').get(item.id);
+        const previous = row ? storedDeadlineSchema.parse(JSON.parse(payload.parse(row).data)) : undefined;
+        this.db.prepare('INSERT INTO moodle_deadlines(id,courseId,data) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(item.id,item.courseId,JSON.stringify({...item,source:source ?? previous?.source,submitted:item.submitted ?? previous?.submitted ?? null}));
+      }
       for (const {remoteId,value:item} of snapshot.notifications) {
         if (item.accountId !== accountId || item.courseId && !courseIds.has(item.courseId)) throw new Error('Moodle account mismatch');
         const existing = this.notification(item.id);
@@ -169,24 +188,29 @@ export class MoodleRepository {
         const scoped = scope && scope !== '@notifications' ? 'courseId=?' : table === 'courses' || table === 'notifications' ? 'accountId=?' : 'courseId IN (SELECT id FROM moodle_courses WHERE accountId=?)';
         const rows = this.db.prepare(`SELECT id FROM moodle_${table} WHERE ${scoped}`).all(scope && scope !== '@notifications' ? scope : accountId);
         for (const row of rows) if (typeof row.id === 'string' && !ids.has(row.id)) {
+          if (table === 'deadlines' && snapshot.deadlineFamilies) {
+            const stored = this.db.prepare("SELECT json_extract(data,'$.source') source,json_extract(data,'$.kind') kind FROM moodle_deadlines WHERE id=?").get(row.id)!;
+            // A legacy event's kind cannot distinguish calendar quizzes from canonical quizzes.
+            const source = stored.source ?? (stored.kind === 'event' ? 'calendar' : undefined);
+            if (typeof source !== 'string' || !Object.hasOwn(snapshot.deadlineFamilies,source)) continue;
+          }
           if (table === 'notifications' && this.notification(row.id)?.pendingRemoteRead) continue;
           if (table === 'deadlines' && this.reminders().some(item => item.deadlineId === row.id)) {
-            const deadline = this.deadlines([row.id])[0]!;
-            this.db.prepare('UPDATE moodle_deadlines SET data=? WHERE id=?').run(JSON.stringify({...deadline,orphaned:true}),row.id);
+            this.db.prepare("UPDATE moodle_deadlines SET data=json_set(data,'$.orphaned',json('true')) WHERE id=?").run(row.id);
             for (const reminder of this.reminders().filter(item => item.deadlineId === row.id)) this.db.prepare('UPDATE moodle_reminders SET data=? WHERE id=?').run(JSON.stringify({...reminder,orphaned:true}),reminder.id);
             continue;
           }
           if (table === 'courses' && this.db.prepare('SELECT 1 FROM moodle_reminders r JOIN moodle_deadlines d ON d.id=r.deadlineId WHERE d.courseId=?').get(row.id)) {
-            const deadlines = this.rows('SELECT data FROM moodle_deadlines WHERE courseId=?',moodleDeadlineSchema,row.id);
-            for (const deadline of deadlines) this.db.prepare('UPDATE moodle_deadlines SET data=? WHERE id=?').run(JSON.stringify({...deadline,orphaned:true}),deadline.id);
+            const deadlines = this.rows('SELECT data FROM moodle_deadlines WHERE courseId=?',publicDeadlineSchema,row.id);
+            for (const deadline of deadlines) this.db.prepare("UPDATE moodle_deadlines SET data=json_set(data,'$.orphaned',json('true')) WHERE id=?").run(deadline.id);
             for (const reminder of this.reminders().filter(item => deadlines.some(deadline => deadline.id === item.deadlineId))) this.db.prepare('UPDATE moodle_reminders SET data=? WHERE id=?').run(JSON.stringify({...reminder,orphaned:true}),reminder.id);
             continue;
           }
           this.db.prepare(`DELETE FROM moodle_${table} WHERE id=?`).run(row.id);
         }
       };
-      prune('deadlines',new Set(snapshot.deadlines.map(item => item.id)));
-      for (const reminder of this.reminders()) if (reminder.orphaned && snapshot.deadlines.some(item => item.id === reminder.deadlineId)) this.db.prepare('UPDATE moodle_reminders SET data=? WHERE id=?').run(JSON.stringify({...reminder,orphaned:false}),reminder.id);
+      prune('deadlines',new Set(incomingDeadlines.map(({item}) => item.id)));
+      for (const reminder of this.reminders()) if (reminder.orphaned && incomingDeadlines.some(({item}) => item.id === reminder.deadlineId)) this.db.prepare('UPDATE moodle_reminders SET data=? WHERE id=?').run(JSON.stringify({...reminder,orphaned:false}),reminder.id);
       prune('notifications',new Set(snapshot.notifications.map(item => item.value.id)));
       prune('grades',new Set(snapshot.grades.map(item => remoteId(accountId,'grade',`${item.value.courseId}:${item.remoteKey}`))));
       prune('files',new Set(snapshot.files.map(item => item.value.id)));
@@ -210,7 +234,7 @@ export class MoodleRepository {
   }
   deadlines(ids: string[]) {
     return ids.map(id => {
-      const item = this.rows('SELECT data FROM moodle_deadlines WHERE id=?',moodleDeadlineSchema,id)[0];
+      const item = this.rows('SELECT data FROM moodle_deadlines WHERE id=?',publicDeadlineSchema,id)[0];
       if (!item) throw new Error('Moodle deadline not found');
       return item;
     });

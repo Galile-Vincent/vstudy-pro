@@ -19,6 +19,8 @@ import { importMoodleFile, authenticatedFileUrl } from './files';
 import { calendarText, startReminders } from './reminders';
 import { account, fixtureFetch } from './fixtures/support';
 import { ipcContract } from '../../shared/ipc';
+import { PlannerRepository } from '../planner/repository';
+import { plannerTaskDone } from '../../shared/planner-policy';
 
 const stores: Store[] = [];
 const directories: string[] = [];
@@ -33,6 +35,118 @@ async function setup() {
   const service = new MoodleService(repository,secrets,{login:async (_site,_provider,accept) => accept({token:'token'})},request);
   return {directory,store,secrets,repository,request,service};
 }
+it.each(['sync','detail'] as const)('preserves linked files, modules and sections after partial contents during %s',async mode => {
+  const {repository,service,request,store,directory} = await setup();
+  await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  const file = repository.course(course.id).files[0]!;
+  const documents = new DocumentService({store,userData:directory,convert:async (_input,output) => {await writeFile(output,'# Imported');return 'markitdown';}});
+  const documentId = await importMoodleFile(repository,file.id,account.siteUrl,'token',documents,async () => new Response('%PDF-1.4\nfixture\n%%EOF'));
+  const base = request.getMockImplementation()!;
+  let contents:unknown = [{id:701,name:'Updated week',modules:[{id:801,name:'Slides',contents:[{type:'file',filename:'lecture.pdf',filesize:'invalid'}]},{id:802,name:'New module'}]}, {id:'invalid'}];
+  request.mockImplementation(async (url,options) => new URLSearchParams(String(options?.body)).get('wsfunction') === 'core_course_get_contents' ? Response.json(contents) : base(url,options));
+  const refresh = () => mode === 'sync' ? service.sync(account.id) : service.refreshCourse(course.id);
+  await refresh();
+  expect(repository.course(course.id).files).toEqual([{...file,documentId}]);
+  expect(repository.course(course.id).sections[0]?.modules.map(module => module.name)).toEqual(['Slides','New module']);
+  contents = [{id:'invalid'}];
+  await refresh();
+  expect(repository.course(course.id).sections[0]?.name).toBe('Updated week');
+  contents = [];
+  await refresh();
+  expect(repository.course(course.id)).toMatchObject({files:[],sections:[]});
+  expect(documents.get(documentId as Parameters<DocumentService['get']>[0])).toBeTruthy();
+  await documents.waitForIdle();documents.dispose();await service.dispose();
+});
+
+it('keeps detail-only quizzes and their planner task links through background sync',async () => {
+  const {repository,service,request,store} = await setup();
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (url,options) => {
+    const name = new URLSearchParams(String(options?.body)).get('wsfunction');
+    if (name === 'mod_quiz_get_quizzes_by_courses') return Response.json({quizzes:[{id:203,name:'Detail quiz',coursemodule:303,timeclose:1794096000}]});
+    if (name === 'mod_quiz_get_user_attempts') return Response.json({attempts:[]});
+    return base(url,options);
+  });
+  await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  await service.refreshCourse(course.id);
+  const quiz = repository.course(course.id).deadlines.find(item => item.title === 'Detail quiz')!;
+  const planner = new PlannerRepository(store.db);
+  const task = planner.quickAdd({title:'Prepare quiz',courseId:course.id,deadlineId:quiz.id,dueAt:quiz.dueAt,estimateMinutes:30,goalId:null});
+  await service.sync(account.id);
+  expect(repository.course(course.id).deadlines).toContainEqual(quiz);
+  expect(planner.snapshot().tasks).toContainEqual(task);
+  await service.dispose();
+});
+
+it('retains verified submission completion until a later detail check changes it',async () => {
+  const {repository,service,request,store} = await setup();
+  await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  const assignment = repository.course(course.id).deadlines.find(item => item.kind === 'assignment')!;
+  const planner = new PlannerRepository(store.db);
+  const task = planner.quickAdd({title:'Homework',courseId:course.id,deadlineId:assignment.id,dueAt:assignment.dueAt,estimateMinutes:30,goalId:null});
+  const base = request.getMockImplementation()!;
+  let status = 'submitted';
+  request.mockImplementation(async (url,options) => new URLSearchParams(String(options?.body)).get('wsfunction') === 'mod_assign_get_submission_status' ? Response.json({lastattempt:{submission:{status}}}) : base(url,options));
+  await service.refreshCourse(course.id);
+  expect(plannerTaskDone(task,repository.course(course.id).deadlines)).toBe(true);
+  await service.sync(account.id);
+  expect(plannerTaskDone(planner.snapshot().tasks[0]!,repository.course(course.id).deadlines)).toBe(true);
+  status = 'draft';
+  await service.refreshCourse(course.id);
+  expect(plannerTaskDone(task,repository.course(course.id).deadlines)).toBe(false);
+  await service.dispose();
+});
+
+it('removes only successfully fetched deadline families from a historical course',async () => {
+  const {repository,service,request} = await setup();
+  const base = request.getMockImplementation()!;
+  let assignments:unknown = undefined, quizzes:unknown = {quizzes:[{id:203,name:'Detail quiz',coursemodule:303,timeclose:1794096000}]};
+  request.mockImplementation(async (url,options) => {
+    const name = new URLSearchParams(String(options?.body)).get('wsfunction');
+    if (name === 'core_enrol_get_users_courses') return Response.json([{id:101,fullname:'Past',shortname:'P',enddate:1}]);
+    if (name === 'mod_assign_get_assignments' && assignments !== undefined) return Response.json(assignments);
+    if (name === 'mod_quiz_get_quizzes_by_courses') return Response.json(quizzes);
+    return base(url,options);
+  });
+  await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  await service.refreshCourse(course.id);
+  expect(repository.course(course.id).deadlines.map(item => item.kind).sort()).toEqual(['assignment','quiz']);
+  assignments = {courses:[{id:101,assignments:[]}]};quizzes = {errorcode:'failure'};
+  await service.refreshCourse(course.id);
+  expect(repository.course(course.id).deadlines.map(item => item.title)).toEqual(['Detail quiz']);
+  quizzes = {quizzes:[]};assignments = {errorcode:'functionnotavailable'};
+  await service.refreshCourse(course.id);
+  expect(repository.course(course.id).deadlines).toEqual([]);
+  await service.dispose();
+});
+it('preserves calendar deadlines when detail fetches empty assignment and quiz families',async () => {
+  const {repository,service,request} = await setup();
+  await service.sync(account.id);
+  const course = repository.overview().courses[0]!;
+  const calendar = repository.course(course.id).deadlines.filter(item => item.kind !== 'assignment');
+  const base = request.getMockImplementation()!;
+  request.mockImplementation(async (url,options) => {
+    const name = new URLSearchParams(String(options?.body)).get('wsfunction');
+    if (name === 'mod_assign_get_assignments') return Response.json({courses:[]});
+    if (name === 'mod_quiz_get_quizzes_by_courses') return Response.json({quizzes:[]});
+    if (name === 'core_course_get_contents') return Response.json({errorcode:'failure'});
+    return base(url,options);
+  });
+  await service.refreshCourse(course.id);
+  expect(repository.course(course.id).deadlines).toEqual(calendar);
+  request.mockImplementation(async (url,options) => {
+    const name = new URLSearchParams(String(options?.body)).get('wsfunction');
+    if (name?.startsWith('core_calendar_')) return Response.json({errorcode:'failure'});
+    return base(url,options);
+  });
+  await service.sync(account.id);
+  expect(repository.course(course.id).deadlines).toEqual(expect.arrayContaining(calendar));
+  await service.dispose();
+});
 it('syncs twice with stable identities and isolated account records',async () => {
   const {repository,service,store} = await setup();
   await service.sync(account.id);

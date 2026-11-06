@@ -6,6 +6,7 @@
  */
 import type { MoodleResponseCache, ResourceKind } from "../cache";
 import { log } from '../logging';
+import { JsonResponseError, readBoundedJson } from '../response-json';
 import { diagnosticIdentifier, issueDiagnostics, responseShape } from './diagnostics';
 import type { MoodleScheduler } from './scheduler';
 import { connectionTiming } from './site-url';
@@ -117,17 +118,11 @@ export class MoodleClient {
     catch { throw new MoodleError('network'); }
     if (!response.ok) throw new MoodleError('network');
     timing.reused = connectionTiming.get(response)?.reused ?? null;
-    let text:string;
-    try {
-      if(!response.body)throw new MoodleError('service');
-      const reader=response.body.getReader(),chunks:Uint8Array[]=[];let bytes=0;
-      try {while(true){const part=await reader.read();if(part.done)break;bytes+=part.value.byteLength;if(bytes>16*1024*1024)throw new MoodleError('service');chunks.push(part.value);}}
-      finally{await reader.cancel().catch(()=>{});reader.releaseLock();}
-      text=Buffer.concat(chunks).toString('utf8');
-    } catch(error) { if(error instanceof MoodleError)throw error;throw new MoodleError('network'); }
-    timing.bytes += Buffer.byteLength(text);
     let raw:unknown;
-    try { raw = JSON.parse(text); } catch { throw new MoodleError('service'); }
+    try {
+      const result = await readBoundedJson(response);
+      raw = result.value;timing.bytes += result.bytes;
+    } catch (error) { throw new MoodleError(error instanceof JsonResponseError ? 'service' : 'network'); }
     const error = z.object({exception:z.string().nullish(),errorcode:z.string().nullish(),error:z.string().nullish(),message:z.string().nullish()}).safeParse(raw);
     if (error.success && (error.data.exception || error.data.errorcode || error.data.error)) {
       if (retryLanguage && this.langSupported && /invalidparameter|invalid_parameter/.test(error.data.errorcode ?? '') && /moodlewssettinglang|lang/i.test(error.data.message ?? '')) { this.langSupported = false; return this.performCall(name,params,schema,false,signal,timing); }
@@ -387,7 +382,7 @@ export async function passwordToken(host: string, username: string, password: st
     response = await siteFetch(host,request)(`${host}/login/token.php`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({username,password,service:'moodle_mobile_app'}),redirect:'error',signal:AbortSignal.timeout(30_000)});
   } catch { throw new MoodleError('network'); }
   if (!response.ok) throw new MoodleError('network');
-  const raw: unknown = await response.json();
+  const {value:raw} = await readBoundedJson(response).catch(error => { throw new MoodleError(error instanceof JsonResponseError ? 'service' : 'network'); });
   const error = z.object({errorcode:z.string()}).safeParse(raw);
   if (error.success) throw authError(error.data.errorcode);
   const result = z.object({token:z.string().min(1).max(16384),privatetoken:z.string().min(1).max(16384).optional()}).safeParse(raw);

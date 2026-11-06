@@ -5,7 +5,21 @@
  * @packageDocumentation
  */
 import { expect, it, vi } from 'vitest';
-import { authenticatedFileUrl, moodleImage } from './files';
+import { authenticatedFileUrl, moodleImage, sanitizeMoodleFilename } from './files';
+it.each(['week?1*.pdf','a<b>c|d".pdf','CON.pdf','nul.txt','COM1.pdf','LPT9.pdf','..hidden.pdf','name.pdf. ','a'.repeat(300)+'.pdf','課'.repeat(150)+'.pdf'])('makes a portable bounded staging filename for %s',name => {
+  const safe = sanitizeMoodleFilename(name);
+  expect(safe).not.toMatch(/[?*<>|"/\\:]/);
+  expect(safe).not.toMatch(/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i);
+  expect(safe).not.toMatch(/^[.]|[. ]$/);
+  expect(Buffer.byteLength(safe)).toBeLessThanOrEqual(200);
+  expect(safe).toMatch(/\.(pdf|txt)$/);
+});
+it('resolves sanitization and case-insensitive staging name collisions as a pure function',() => {
+  const names:string[] = [];
+  for (const name of ['Lecture.pdf','lecture.pdf','a?.pdf','a*.pdf']) names.push(sanitizeMoodleFilename(name,names));
+  expect(new Set(names.map(name => name.toLowerCase())).size).toBe(4);
+  expect(sanitizeMoodleFilename('lecture.pdf')).toBe('lecture.pdf');
+});
 it.each([
  ['https://school.example/moodle/pluginfile.php/1/a.pdf','https://school.example/moodle/webservice/pluginfile.php/1/a.pdf?token=secret'],
  ['https://school.example/moodle/pluginfile.php?file=%2F1%2Fa.pdf&token=old#top','https://school.example/moodle/webservice/pluginfile.php?file=%2F1%2Fa.pdf&token=secret'],
