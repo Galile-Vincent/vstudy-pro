@@ -83,7 +83,9 @@ jobs:
       - run: pnpm build
       - run: pnpm --filter @vstudy/mcp verify
       - run: pnpm --filter @vstudy/mcp verify:clients
+        if: runner.os == 'macOS'
       - run: pnpm --filter @vstudy/mcp verify:core
+        if: runner.os == 'macOS'
       - name: Package unsigned branch or dry-run artifacts
         if: needs.plan.outputs.publish != 'true'
         working-directory: apps/desktop

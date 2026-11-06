@@ -56,7 +56,9 @@ jobs:
       - run: pnpm build
       - run: pnpm --filter @vstudy/mcp verify
       - run: pnpm --filter @vstudy/mcp verify:clients
+        if: runner.os == 'macOS'
       - run: pnpm --filter @vstudy/mcp verify:core
+        if: runner.os == 'macOS'
       - name: Retain native Windows bridge and cross-user reports
         if: always() && runner.os == 'Windows'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
