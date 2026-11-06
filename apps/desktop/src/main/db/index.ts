@@ -142,6 +142,14 @@ export function openStore(path: string) {
   maintenance.unref();
   return {
     db,
+    validateChats(): void {
+      for (const [table, schema] of [["conversations", conversationRow], ["messages", messageRow]] as const) {
+        for (const row of db.prepare(`SELECT * FROM ${table}`).iterate()) {
+          try { schema.parse(row); }
+          catch (cause) { throw new Error(`storage.invalid_backup`, { cause: new Error(`${table} ${row.id}`, { cause }) }); }
+        }
+      }
+    },
     integrityCheck: () => db.prepare("PRAGMA integrity_check").all(),
     close: () => { clearInterval(maintenance); db.exec("PRAGMA optimize"); db.close(); },
     usage: usageRepository(db),

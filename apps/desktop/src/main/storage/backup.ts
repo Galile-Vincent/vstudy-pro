@@ -80,6 +80,7 @@ export async function stageRestore(root:string,source:string):Promise<void> {
     try {
       if(store.db.prepare('PRAGMA integrity_check').get()?.integrity_check!=='ok' || store.db.prepare('PRAGMA foreign_key_check').all().length)throw new Error('storage.integrity_failed');
       store.settings.get();
+      store.validateChats();
       new PlannerRepository(store.db).snapshot(true);
       for(const row of store.db.prepare('SELECT id,sourceHash,sourcePath,markdownPath,status,activeVersion FROM documents').all()){
         const hash=String(row.sourceHash),name=portableBasename(String(row.sourcePath)),original=`library/${hash}/${name}`;
@@ -94,6 +95,7 @@ export async function stageRestore(root:string,source:string):Promise<void> {
       store.db.exec("DELETE FROM moodle_response_cache; UPDATE moodle_accounts SET data=json_set(data,'$.status','expired'); PRAGMA wal_checkpoint(TRUNCATE)");
     } finally {store.close();}
     await mkdir(join(stage,'library'),{recursive:true,mode:0o700});
+    await syncDirectory(stage);
     await atomicWrite(join(root,'restore-pending.json'),JSON.stringify({directory:basename(stage)}));published=true;
   } finally {if(!published)await rm(stage,{recursive:true,force:true,maxRetries:3});}
 }
