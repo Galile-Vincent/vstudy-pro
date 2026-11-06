@@ -1,4 +1,5 @@
 /** Global Help entry points and contextual, profile-local learning guidance. */
+import { Brand } from '../components/brand';
 import { useEffect, useState } from 'react';
 import { Check, CircleHelp, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +41,7 @@ export function LearningHelp() {
   if (view === 'setup') return <Onboarding onComplete={() => setView(undefined)}/>;
   if (!view) return null;
   return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}><DialogContent className="learning-dialog" aria-describedby={undefined} showCloseButton={false}>
-    <header><DialogTitle>{tr(`onboarding:help_${view}`)}</DialogTitle><Button variant="ghost" size="icon" aria-label={tr('common:close')} onClick={() => setView(undefined)}><X size={18}/></Button></header>
+    <Brand lockup/><header><DialogTitle>{tr(`onboarding:help_${view}`)}</DialogTitle><Button variant="ghost" size="icon" aria-label={tr('common:close')} onClick={() => setView(undefined)}><X size={18}/></Button></header>
     {view === 'walkthroughs' ? <><p>{tr('onboarding:walkthroughs_body')}</p><nav className="learning-lessons" aria-label={tr('onboarding:help_walkthroughs')}>{lessons.map(item => <Button variant={lesson === item ? 'secondary' : 'ghost'} aria-pressed={lesson === item} key={item} onClick={() => setLesson(item)}>{tr(`onboarding:lesson_${item}`)}</Button>)}</nav><Walkthrough key={lesson} lesson={lesson}/></> : <><p>{tr('onboarding:shortcuts_body')}</p><dl className="learning-shortcuts">{['selection', 'sidebar', 'send', 'newline', 'dismiss', 'navigate'].map(key => <div key={key}><dt>{tr(`onboarding:shortcut_${key}`)}</dt><dd><kbd>{tr(`onboarding:keys_${key}`)}</kbd></dd></div>)}</dl></>}
   </DialogContent></Dialog>;
 }

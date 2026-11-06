@@ -1,0 +1,13 @@
+
+> @vstudy/website@0.1.0 verify:static /Users/vc/.t3/worktrees/vstudy-pro/t3-1d9a4246/apps/website
+> node scripts/verify-static.mjs
+
+{
+  "pages": 49,
+  "checkedLinks": 2418,
+  "largestHomeBytes": 248777,
+  "largestHomeImageBytes": 156188,
+  "imageBudgetBytes": 400000,
+  "budgetBytes": 1500000,
+  "failures": 0
+}

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleDisplayName</key>
+    <string>VStudy Pro</string>
+    <key>CFBundleExecutable</key>
+    <string>VStudy Pro</string>
+    <key>CFBundleIconFile</key>
+    <string>icon.icns</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.vstudy.pro</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>VStudy Pro</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.2.2</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>VStudy Moodle sign-in</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>vstudymoodle</string>
+        </array>
+      </dict>
+    </array>
+    <key>CFBundleVersion</key>
+    <string>0.2.2</string>
+    <key>DTCompiler</key>
+    <string>com.apple.compilers.llvm.clang.1_0</string>
+    <key>DTSDKBuild</key>
+    <string>24F74</string>
+    <key>DTSDKName</key>
+    <string>macosx15.5</string>
+    <key>DTXcode</key>
+    <string>1640</string>
+    <key>DTXcodeBuild</key>
+    <string>16F6</string>
+    <key>ElectronAsarIntegrity</key>
+    <dict>
+      <key>Resources/app.asar</key>
+      <dict>
+        <key>algorithm</key>
+        <string>SHA256</string>
+        <key>hash</key>
+        <string>2379cc8de076c963d9ec708a97a6fe33f3b7b37e8d313abcda775dab40f6ae98</string>
+      </dict>
+    </dict>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.education</string>
+    <key>LSEnvironment</key>
+    <dict>
+      <key>MallocNanoZone</key>
+      <string>0</string>
+    </dict>
+    <key>LSMinimumSystemVersion</key>
+    <string>12.0</string>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+      <key>NSAllowsArbitraryLoads</key>
+      <true/>
+      <key>NSAllowsLocalNetworking</key>
+      <true/>
+      <key>NSExceptionDomains</key>
+      <dict>
+        <key>127.0.0.1</key>
+        <dict>
+          <key>NSIncludesSubdomains</key>
+          <false/>
+          <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+          <true/>
+          <key>NSTemporaryExceptionAllowsInsecureHTTPSLoads</key>
+          <false/>
+          <key>NSTemporaryExceptionMinimumTLSVersion</key>
+          <string>1.0</string>
+          <key>NSTemporaryExceptionRequiresForwardSecrecy</key>
+          <false/>
+        </dict>
+        <key>localhost</key>
+        <dict>
+          <key>NSIncludesSubdomains</key>
+          <false/>
+          <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+          <true/>
+          <key>NSTemporaryExceptionAllowsInsecureHTTPSLoads</key>
+          <false/>
+          <key>NSTemporaryExceptionMinimumTLSVersion</key>
+          <string>1.0</string>
+          <key>NSTemporaryExceptionRequiresForwardSecrecy</key>
+          <false/>
+        </dict>
+      </dict>
+    </dict>
+    <key>NSAudioCaptureUsageDescription</key>
+    <string>This app needs access to audio capture</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>This app needs access to Bluetooth</string>
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>This app needs access to Bluetooth</string>
+    <key>NSCameraUsageDescription</key>
+    <string>This app needs access to the camera</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2026 vstudy</string>
+    <key>NSMainNibFile</key>
+    <string>MainMenu</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app needs access to the microphone</string>
+    <key>NSPrefersDisplaySafeAreaCompatibilityMode</key>
+    <false/>
+    <key>NSPrincipalClass</key>
+    <string>AtomApplication</string>
+    <key>NSQuitAlwaysKeepsWindows</key>
+    <false/>
+    <key>NSRequiresAquaSystemAppearance</key>
+    <false/>
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+  </dict>
+</plist>

@@ -1,5 +1,6 @@
 /** Resumable first-run sequence. School and appearance setup stay with their owning features. */
 import { openAiCliSetup } from '../ai-cli/entry';
+import { Brand } from '../components/brand';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Document, Settings } from '../../shared';
@@ -74,7 +75,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
   };
   return <Dialog open onOpenChange={open => { if (!open && !busy) void exit(false); }}>
     <DialogContent showCloseButton={false} className="onboarding" aria-labelledby="onboarding-title" aria-describedby="onboarding-intro" onPointerDownOutside={event => event.preventDefault()} onOpenAutoFocus={event => { event.preventDefault(); heading.current?.focus(); }}>
-      <div className="onboarding-top"><p role="status">{tr('onboarding:progress', { current: index + 1, total: steps.length })}</p><Button variant="ghost" disabled={busy} onClick={() => void exit(false)}>{tr('onboarding:later')}</Button></div>
+      <div className="onboarding-top">{step === 'welcome' && <Brand lockup/>}<p role="status" className={step === 'welcome' ? 'motion-sr' : undefined}>{tr('onboarding:progress', { current: index + 1, total: steps.length })}</p><Button variant="ghost" disabled={busy} onClick={() => void exit(false)}>{tr('onboarding:later')}</Button></div>
       <div className="onboarding-progress" aria-hidden="true">{steps.map(item => <span key={item} data-current={item === step}/>)}</div>
       <DialogTitle asChild><h1 id="onboarding-title" ref={heading} tabIndex={-1}>{tr(`onboarding:step_${step}`)}</h1></DialogTitle>
       <p id="onboarding-intro" className="onboarding-intro">{tr(`onboarding:step_${step}_body`)}</p>

@@ -1,3 +1,4 @@
+import { Brand } from '../components/brand';
 import { DocumentArt } from '../shell/document-art';
 import type { CSSProperties } from 'react';
 import { Badge } from '../components/ui/badge';
@@ -23,7 +24,7 @@ import {
   MoreHorizontal,
   LayoutGrid,
   List,
-  FolderOpen, SlidersHorizontal, AlertTriangle, LoaderCircle, X,
+  SlidersHorizontal, AlertTriangle, LoaderCircle, X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { LibraryQuery } from "../../shared/library";
@@ -625,7 +626,7 @@ export function LibraryView() {
         </div>
       ) : !items.length ? (
         <div className="empty library-empty">
-          <FolderOpen aria-hidden="true" />
+          <Brand/>
           <h2>
             {tr(
               `library:empty_${text ? "search" : filters.length ? "filter" : query.folderId ? "folder" : "library"}`,

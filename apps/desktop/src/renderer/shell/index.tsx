@@ -1,4 +1,5 @@
 /** Navigation frame and profile-local routes shared by the study views. */
+import { Brand } from '../components/brand';
 import { useScrollChrome } from './use-scroll-chrome';
 import { AiCliInventory } from '../ai-cli/inventory';
 import './scroll-chrome.css';
@@ -127,7 +128,7 @@ export function AppShell({
           className="shell-sidebar"
           aria-label={tr("common:document_library")}
         >
-          <SidebarHeader className="shell-brand"><span className="art-reader-brand-mark" aria-hidden="true"><BookOpen size={18}/></span><span>{tr("library:brand")}</span></SidebarHeader><SidebarContent>
+          <SidebarHeader className="shell-brand"><span className="art-reader-brand-mark" aria-hidden="true"><Brand/></span><span>{tr("library:brand")}</span></SidebarHeader><SidebarContent>
           <SidebarGroup><p className="art-reader-sidebar-label">{tr("art-reader:workspace")}</p><SidebarMenu>
             <SidebarMenuItem><SidebarMenuButton
               aria-current={route.view === "home" ? "page" : undefined}
@@ -147,7 +148,7 @@ export function AppShell({
             <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "courses" ? "page" : undefined} onClick={() => navigate("courses")}><GraduationCap />{tr("moodle:courses")}</SidebarMenuButton></SidebarMenuItem>
             <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "history" ? "page" : undefined} onClick={() => navigate("history")}><HistoryIcon/>{tr("history:title")}</SidebarMenuButton></SidebarMenuItem>
           </SidebarMenu></SidebarGroup>
-          {sidebar}</SidebarContent><SidebarFooter><AiCliInventory compact /><div className="art-reader-profile"><span className="art-reader-avatar" aria-hidden="true">{displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <BookOpen size={16}/>}</span><span><strong>{displayName || tr("library:brand")}</strong><small>{tr("art-reader:local")}</small></span></div><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
+          {sidebar}</SidebarContent><SidebarFooter><AiCliInventory compact /><div className="art-reader-profile"><span className="art-reader-avatar" aria-hidden="true">{displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <Brand/>}</span><span><strong>{displayName || tr("library:brand")}</strong><small>{tr("art-reader:local")}</small></span></div><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
         </Sidebar>
         <div className="shell-main">
           <header className="shell-topbar">
