@@ -33,3 +33,17 @@ it('opens a conversation using only the recent message page',async()=>{
   expect(state.invoke).toHaveBeenCalledWith('messages:page',{conversationId:'chat',limit:50,direction:'backward'});
   expect(state.invoke).not.toHaveBeenCalledWith('messages:list',expect.anything());
 });
+
+it.each(['rejects','never settles'])('opens readable history even when provider discovery %s',async failure=>{
+  state.invoke.mockImplementation(async channel=>{
+    if(channel==='providers:list'){
+      if(failure==='rejects')throw new Error('keychain unavailable');
+      return new Promise(()=>{});
+    }
+    if(channel==='chats:get')return {id:'chat',scope:'general',providerId:'anthropic-api',modelId:'fake'};
+    if(channel==='messages:page')return {items:[],nextCursor:null};
+  });
+  render(<HistoryView/>);
+  expect(await screen.findByText('Recovered conversation')).toBeTruthy();
+  expect(screen.queryByRole('alert')).toBeNull();
+});
