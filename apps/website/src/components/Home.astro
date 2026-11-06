@@ -2,6 +2,8 @@
 import Base from '../layouts/Base.astro';
 import Window from './Window.astro';
 import Bento from './Bento.astro';
+import Schools from './Schools.astro';
+import Providers from './Providers.astro';
 import { path, RELEASES_URL, VERSION } from '../config';
 import { ui, type Language } from '../data/ui';
 import { redesign } from '../data/v2';
@@ -26,15 +28,11 @@ const doc = (slug: string) => path(`${language}/docs/${slug}/`);
       </figure>
     </section>
 
-    <section class="schools-section container" aria-labelledby="schools-title">
-      <h2 id="schools-title">{v.schools}</h2>
-      <ul class="school-chips" aria-label={v.schools}>
-        <li><span aria-hidden="true">中</span>CYCU</li><li><span aria-hidden="true">U</span>UCL</li><li><span aria-hidden="true">M</span>{v.custom}</li>
-      </ul>
-      <p>{v.schoolNote}</p>
-    </section>
+    <Schools {language} />
 
     <Bento {language} />
+
+    <Providers {language} />
 
     <section class="steps-section container" aria-labelledby="steps-title">
       <h2 id="steps-title" data-reveal>{t.stepsTitle}</h2>
