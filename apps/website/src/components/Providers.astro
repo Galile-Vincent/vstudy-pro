@@ -12,7 +12,7 @@ const t = trustCopy[language];
   <ul class="provider-grid">
     {Object.entries(providerConnections).map(([id, provider]) => <li class="provider-card" data-provider-id={id}>
       <span class="provider-brand">{provider.brand}</span>
-      <h3>{provider.name}</h3>
+      <h3><a href={path(`${language}/docs/ai-providers/#${id === 'codex-cli' ? 'codex' : 'choose'}`)}>{provider.name}<span aria-hidden="true"> ↗</span></a></h3>
       <p class="provider-connection">{t[provider.connection]}</p>
       {id === 'codex-cli' && <p class="provider-limit">{t.macOnly}</p>}
       <p class="provider-privacy">{t.privacy[provider.privacy]}</p>
@@ -28,6 +28,8 @@ const t = trustCopy[language];
   .provider-card { padding:var(--space-6); border-radius:var(--r-lg); background:var(--subtle); min-width:0; }
   .provider-brand { display:inline-block; padding:var(--space-2) var(--space-3); background:var(--surface); border-radius:var(--r-sm); font-size:var(--text-xs); font-weight:500; }
   .provider-card h3 { margin-top:var(--space-6); font-size:var(--text-lg); }
+  .provider-card h3 a:hover { text-decoration:underline; }
+  .provider-card h3 span { font-size:var(--text-sm); }
   .provider-connection { color:var(--ink); font-size:var(--text-sm); margin-top:var(--space-3); }
   .provider-limit { font-size:var(--text-xs); margin-top:var(--space-2); }
   .provider-privacy { font-size:var(--text-sm); margin-top:var(--space-5); }
