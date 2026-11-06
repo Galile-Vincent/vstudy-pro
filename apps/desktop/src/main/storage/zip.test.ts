@@ -3,8 +3,9 @@ import { expect, it, vi } from 'vitest';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { crc32 } from 'node:zlib';
-import { join } from 'node:path';
-import { fingerprint, writeZip } from './zip';
+import { dirname, join, relative } from 'node:path';
+import { extractZip, fingerprint, writeZip } from './zip';
+vi.mock('node:path',async importOriginal=>{const actual=await importOriginal<typeof import('node:path')>();return {...actual,dirname:vi.fn(actual.dirname)};});
 vi.mock('node:fs/promises',async importOriginal=>{const actual=await importOriginal<typeof import('node:fs/promises')>();return {...actual,open:vi.fn(actual.open)};});
 it.each(['payload','matching CRCs','entry list'])('rejects a written archive with corrupted %s and preserves the previous backup',async corruption=>{
  const root=await fs.mkdtemp(join(tmpdir(),'zip-readback-'));
@@ -28,4 +29,22 @@ it.each(['payload','matching CRCs','entry list'])('rejects a written archive wit
   await expect(writeZip(destination,[entry])).rejects.toThrow('storage.invalid_backup');
   expect(await fs.readFile(destination,'utf8')).toBe('previous backup');
  } finally {await fs.rm(root,{recursive:true,force:true});vi.mocked(fs.open).mockClear();}
+});
+it.each(['relative','trailing separator','dot segments'])('extracts into a destination with %s without walking beyond its root',async kind=>{
+ const root=await fs.mkdtemp(join(tmpdir(),'zip-destination-'));
+ try {
+  const source=join(root,'source'),archive=join(root,'backup.zip'),target=join(root,'extracted');
+  await fs.writeFile(source,'fixture');
+  const name=`library/${'a'.repeat(64)}/content.md`;
+  await writeZip(archive,[{name,path:source,...await fingerprint(source)}]);
+  const destination=kind==='relative'?relative(process.cwd(),target):kind==='trailing separator'?target+'/':target+'/../extracted';
+  const actual=await vi.importActual<typeof import('node:path')>('node:path');
+  let walks=0;
+  vi.mocked(dirname).mockImplementation(path=>{
+   if(++walks>20)throw new Error('Directory walk did not terminate');
+   return actual.dirname(path);
+  });
+  await extractZip(archive,destination);
+  expect(await fs.readFile(join(target,name),'utf8')).toBe('fixture');
+ } finally {vi.mocked(dirname).mockReset();vi.mocked(dirname).mockImplementation((await vi.importActual<typeof import('node:path')>('node:path')).dirname);await fs.rm(root,{recursive:true,force:true});}
 });
