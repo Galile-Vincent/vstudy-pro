@@ -16,6 +16,8 @@ Run the bin without a subcommand for MCP stdio. Pass `--client claude`, `codex`,
 
 Install requires an available Node runtime. The installer pins its absolute path and the bundled CLI path. The packaged Electron executable cannot act as Node because VStudy disables its RunAsNode fuse. Plugin installations instead use `node` from the client's PATH.
 
+Use `reset --client <client>` to clear a local bearer and expiry while preserving its client UUID. This command does not pair, launch, or revoke app state. Restart the agent server before requesting fresh consent. It supports dry-run and JSON output.
+
 Use `install --client <client> [--dry-run]`, `uninstall --client <client> [--dry-run]`, or `doctor [--client <client>]`. Add `--json` for the desktop integration. Install and uninstall print only the VStudy entry. They preserve unrelated text, refuse conflicts and symlinks, save existing contents in a private adjacent backup, and replace configurations atomically. Dry-run creates nothing. Uninstall does not revoke grants or remove optional skills. Revoke access in VStudy.
 
 ## Pairing and recovery
@@ -24,11 +26,11 @@ Turn on **Settings > Agents** in VStudy. The first tool or resource read connect
 
 If the socket is absent or refuses connection, the CLI runs `/usr/bin/open -g -j -a 'VStudy Pro' --args --mcp-background` with bounded backoff and a launch cooldown. Other platforms require the user to open the app. Permission failures do not trigger a launch.
 
-Pairing begins and finishes on one connection. Compare the code on stderr with VStudy before approving. Discovery, help, install, and doctor do not pair. Doctor authenticates stored bearers through `list_accounts` on its existing ping connection, discards account content, and reports revoked, expired, disabled, or insufficient-scope results without launching the app. The per-client file `~/.config/vstudy-mcp/<client>.json` contains a random client UUID, an opaque local grant, and its expiry. The directory is 0700 and the file is 0600. Nothing reads a Moodle password, cookie, WS token, or autologin key.
+Pairing begins and finishes on one connection. Compare the code on stderr with VStudy before approving. Discovery, help, install, and doctor do not pair. Doctor authenticates stored bearers through `list_accounts` on its existing ping connection, discards account content, and reports revoked, expired, disabled, or insufficient-scope results without launching the app. On Unix the per-client file `~/.config/vstudy-mcp/<client>.json` contains a random client UUID, an opaque local grant, and its expiry. The directory is 0700 and the file is 0600. Nothing reads a Moodle password, cookie, WS token, or autologin key.
 
 Pairing polls `pair.finish` on the same connection when the app returns pending `DENIED`, until the advertised expiry. Core currently allows two minutes for pairing. Tool roundtrips allow 130 seconds for the core's 120-second whole-call bound, including its 60-second write approval window. Installed Claude Code, Codex, and agy entries allow 300 seconds per tool call, including initial pairing and a write approval. Desktop and Cursor timeout behavior still needs live-client acceptance.
 
-A disconnected read may reconnect once. Writes never replay after a disconnect or timeout. Inspect pending and completed actions in VStudy before a new write request. Expired or revoked grants fail rather than silently broadening access. To pair again, revoke the old grant in the app, stop the client server, and remove only that client's local grant file. The next tool call requests fresh consent.
+A disconnected read may reconnect once. Writes never replay after a disconnect or timeout. Inspect pending and completed actions in VStudy before a new write request. Expired or revoked grants fail rather than silently broadening access. To pair again, stop the client server and run `vstudy-mcp reset --client <client>`. After restarting the server, the next tool call requests fresh consent. Reset does not revoke app state. The app replaces the previous grant for that persistent client UUID after the new consent succeeds.
 
 ## Contracts and modules
 
@@ -78,3 +80,13 @@ pnpm --filter @vstudy/mcp exec node scripts/check-core-bridge.mjs
 `--core-root /absolute/path` selects an isolated extraction of a core commit. `--bin /absolute/path` and `--peer-helper /absolute/path` select packaged artifacts. This check uses the actual security engine and native same-UID verifier with a controlled backend. It verifies pending consent, one-shot finish, opaque cursors, approved writes, concurrent reads, restart, and disabled errors. It never connects to a school.
 
 After building an app directory, run `pnpm --filter @vstudy/mcp verify:package`. It checks the actual resources, standalone CLI, and executable native helper outside ASAR. The release workflow runs this after packaging.
+
+## Windows client support
+
+Windows uses the parent-owned app-data and endpoint helpers. The bridge is a current-SID local named pipe, not a TCP socket. The SID comes from the native whoami resolver, not a client name. The client rejects remote pipe hosts and skips Unix filesystem checks for a named pipe. The app-data default is the native APPDATA namespace for `@vstudy/desktop`.
+
+The local bearer lives under `%APPDATA%\@vstudy\mcp-clients`. On Windows, POSIX chmod modes do not establish privacy. `src/windows-acl.ts`, also exported as `@vstudy/mcp/windows-acl`, protects newly app-owned paths with a current-SID-only DACL and verifies owner and the complete DACL before private reads. It uses a constant PowerShell script with literal environment inputs. It does not alter existing client config-directory ACLs. Bearer files are staged in an already-private directory, and every newly created private file remains empty until enforcement succeeds. Missing or unsafe native enforcement fails closed.
+
+Windows launch reads uninstall registry metadata or the known per-user Programs path and spawns the resolved executable with `--mcp-background`. It does not interpret uninstall commands or use a shell. `reset --client` clears a bearer under the same private-file rules and preserves the client UUID. Windows behavior has fixture coverage on macOS only. Native Windows ACL and transport acceptance has not run.
+
+The desktop build dispatch wrapper is `apps/desktop/scripts/build-mcp-platform.mjs`. It skips the core-owned Unix C helper on Windows. The package wrapper is `apps/desktop/scripts/package-platform.mjs`, which invokes electron-builder through Node with host-specific targets. The Unix helper resource filter tolerates its absence on Windows. Packaged Windows verification reads `win*-unpacked/resources` and does not require the Unix helper. Stream P owns the Windows host, resource wiring, and persistence. These changes alone do not enable Windows MCP.

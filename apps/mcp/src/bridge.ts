@@ -1,5 +1,4 @@
 /** Pair lazily and retry only contract-declared reads after an uncertain disconnect. @packageDocumentation */
-import { execFile } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import {
   defaultScopes, MCP_PROTOCOL_VERSION, mcpTools, pairBeginResultSchema,
@@ -9,6 +8,8 @@ import { z } from 'zod';
 import { Credentials } from './credentials';
 import { BridgeError, failed, failure } from './errors';
 import { Wire } from './transport';
+import { launchApplication } from './launch';
+import type { WireConnector } from './connection';
 
 const pingSchema = z.object({ version: z.literal(MCP_PROTOCOL_VERSION), enabled: z.boolean() }).passthrough();
 export interface BridgeOptions {
@@ -18,16 +19,10 @@ export interface BridgeOptions {
   stderr: (text: string) => void;
   launch?: () => Promise<void>;
   backoffMs?: readonly number[];
+  connector?: WireConnector;
 }
 
-export function launchApp(): Promise<void> {
-  if (process.platform !== 'darwin') return Promise.reject(new BridgeError('DISCONNECTED', 'Open VStudy Pro and enable Settings > Agents.'));
-  return new Promise((resolve, reject) => {
-    execFile('/usr/bin/open', ['-g', '-j', '-a', 'VStudy Pro', '--args', '--mcp-background'],
-      { timeout: 5000, windowsHide: true }, error => error
-        ? reject(new BridgeError('DISCONNECTED', 'Install or open VStudy Pro and enable Settings > Agents.')) : resolve());
-  });
-}
+export function launchApp(): Promise<void> { return launchApplication(); }
 
 export class BridgeClient {
   private ready: Promise<{ wire: Wire; grant: string }> | undefined;
@@ -124,7 +119,7 @@ export class BridgeClient {
       try {
         if (this.state.kind === 'closed') throw new BridgeError('DISCONNECTED', 'The VStudy client has closed.');
         const state = this.state;
-        const wire = await Wire.connect(this.options.socketPath);
+        const wire = await Wire.connect(this.options.socketPath, this.options.connector);
         if (this.state !== state) { wire.close(); throw new BridgeError('DISCONNECTED', 'The VStudy client has closed.'); }
         state.wire = wire;
         return wire;

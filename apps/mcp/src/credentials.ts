@@ -1,4 +1,5 @@
 /** Persist only a random client identity and opaque local grant in private storage. @packageDocumentation */
+import { existsSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
@@ -15,9 +16,9 @@ export class Credentials {
   constructor(readonly path: string) {}
 
   read(): Identity | undefined {
+    if (existsSync(this.path)) checkDirectory(dirname(this.path));
     const text = readLocal(this.path, true);
     if (text === undefined) return undefined;
-    checkDirectory(dirname(this.path));
     return identitySchema.parse(JSON.parse(text));
   }
 
@@ -31,6 +32,13 @@ export class Credentials {
       if (!(error instanceof Error && 'code' in error && error.code === 'EEXIST')) throw error;
     }
     return this.read()!;
+  }
+
+  reset(dryRun = false): boolean {
+    const identity = this.read();
+    if (!identity || (!identity.grant && !identity.expiresAt)) return false;
+    if (!dryRun) this.save({ clientId: identity.clientId });
+    return true;
   }
 
   save(identity: Identity): void {

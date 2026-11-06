@@ -44,6 +44,19 @@
         "src/**/*.{astro,ts}",
         "scripts/*.mjs"
       ]
+    },
+    "apps/mcp": {
+      "entry": [
+        "src/cli.ts",
+        "src/public.ts",
+        "scripts/*.mjs",
+        "test/**/*.test.ts"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "scripts/*.mjs",
+        "test/**/*.ts"
+      ]
     }
   }
 }

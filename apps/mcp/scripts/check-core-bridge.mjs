@@ -4,7 +4,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import assert from 'node:assert/strict';
@@ -130,9 +130,20 @@ try {
   engine.setEnabled(true); engine.revoke(info.id);
   assert.match((await diagnose()).detail, /DENIED.*revoked/);
   assert.equal(finishes, pairingFinishes);
+  await client.close();
+  const identityFile = join(home, '.config/vstudy-mcp/codex.json');
+  const clientId = JSON.parse(readFileSync(identityFile, 'utf8')).clientId;
+  execFileSync(process.execPath, [bin, 'reset', '--client', 'codex', '--json'], { env: { HOME: home, PATH: process.env.PATH ?? '' } });
+  assert.deepEqual(JSON.parse(readFileSync(identityFile, 'utf8')), { clientId });
+  client = new Client({ name: 'Fresh client after explicit reset', version: '1.0.0' });
+  await client.connect(new StdioClientTransport({ command: process.execPath, args: [bin, '--client', 'codex'], stderr: 'pipe',
+    env: { HOME: home, PATH: process.env.PATH ?? '', VSTUDY_USER_DATA: userData } }));
+  assert.equal((await read({})).structuredContent.ok, true);
+  assert.ok(finishes > pairingFinishes);
+  assert.equal(engine.state().grants.at(-1).clientId, clientId);
   assert.ok(stderr.includes('pairing code'));
   assert.ok(!stderr.includes(schoolSecret));
-  console.log('PASS real core engine, native peer helper, official SDK, 27 schemas, pending DENIED pairing, one-shot finish, opaque cursor roundtrip, eight queued reads, approved write, restart, disabled JSON-RPC error, authenticated nonpairing doctor revocation/expiry/scope/disabled probes.');
+  console.log('PASS real core engine, native peer helper, official SDK, 27 schemas, pending DENIED pairing, one-shot finish, opaque cursor roundtrip, eight queued reads, approved write, restart, disabled JSON-RPC error, authenticated nonpairing doctor revocation/expiry/scope/disabled probes, explicit reset and fresh consent.');
 } finally {
   for (const timer of timers) clearTimeout(timer);
   await client?.close();

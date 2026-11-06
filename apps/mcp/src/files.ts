@@ -5,6 +5,7 @@ import {
 } from 'node:fs';
 import { dirname, isAbsolute, parse, relative, resolve, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { protectWindowsPath, verifyWindowsPath } from './windows-acl';
 
 export class LocalFileError extends Error {}
 
@@ -40,16 +41,19 @@ export function readLocal(path: string, privateFile = false): string | undefined
     const stat = fstatSync(fd);
     if (!stat.isFile() || stat.nlink !== 1 || stat.size > 2 * 1024 * 1024
       || (process.getuid && stat.uid !== process.getuid())
-      || (privateFile && (stat.mode & 0o777) !== 0o600)) {
+      || (privateFile && process.platform !== 'win32' && (stat.mode & 0o777) !== 0o600)) {
       throw new LocalFileError('Local file ownership, size, or permissions are unsafe.');
     }
+    if (privateFile && process.platform === 'win32') verifyWindowsPath(path, false);
     return readFileSync(fd, 'utf8');
   } finally { closeSync(fd); }
 }
 
 export function ensureDirectory(path: string, privateDirectory = false): void {
   assertNoSymlinks(path);
+  const existed = existsSync(path);
   mkdirSync(path, { recursive: true, mode: 0o700 });
+  if (privateDirectory && !existed && process.platform === 'win32') protectWindowsPath(path, true);
   checkDirectory(path, privateDirectory);
 }
 
@@ -57,15 +61,20 @@ export function checkDirectory(path: string, privateDirectory = true): void {
   assertNoSymlinks(path);
   const stat = lstatSync(path);
   if (!stat.isDirectory() || (process.getuid && stat.uid !== process.getuid())
-    || (privateDirectory && (stat.mode & 0o777) !== 0o700)) {
+    || (privateDirectory && process.platform !== 'win32' && (stat.mode & 0o777) !== 0o700)) {
     throw new LocalFileError('Local directory ownership or permissions are unsafe.');
   }
+  if (privateDirectory && process.platform === 'win32') verifyWindowsPath(path, true);
 }
 
 export function writeExclusive(path: string, text: string): void {
   assertNoSymlinks(path);
   const fd = openSync(path, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, 0o600);
-  try { writeFileSync(fd, text); fsyncSync(fd); } finally { closeSync(fd); }
+  let complete = false;
+  try {
+    if (process.platform === 'win32') protectWindowsPath(path, false);
+    writeFileSync(fd, text); fsyncSync(fd); complete = true;
+  } finally { closeSync(fd); if (!complete) unlinkSync(path); }
 }
 
 export function replaceLocal(path: string, text: string, expected: string | undefined): void {
@@ -75,7 +84,9 @@ export function replaceLocal(path: string, text: string, expected: string | unde
     writeExclusive(staging, text);
     if (readLocal(path) !== expected) throw new LocalFileError('Configuration changed during installation. Retry after other clients finish writing.');
     renameSync(staging, path);
-    const fd = openSync(dirname(path), constants.O_RDONLY);
-    try { fsyncSync(fd); } finally { closeSync(fd); }
+    if (process.platform !== 'win32') {
+      const fd = openSync(dirname(path), constants.O_RDONLY);
+      try { fsyncSync(fd); } finally { closeSync(fd); }
+    }
   } finally { if (existsSync(staging)) unlinkSync(staging); }
 }

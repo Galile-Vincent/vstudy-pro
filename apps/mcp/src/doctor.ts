@@ -1,6 +1,6 @@
 /** Diagnose local installation without pairing, launching the app, or exposing grant values. @packageDocumentation */
 import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, win32 } from 'node:path';
 import { homedir } from 'node:os';
 import { execFile } from 'node:child_process';
 import { clientConfig, findExecutable, installableClients, type ClientOptions } from './client-config';
@@ -10,6 +10,7 @@ import { parseConfig } from './config-edit';
 import { readLocal } from './files';
 import { pingWire } from './bridge';
 import { Wire } from './transport';
+import { resolveWindowsApp } from './launch';
 import { BridgeError } from './errors';
 import { MCP_PROTOCOL_VERSION, toolResultSchema, type McpErrorCode } from './contract';
 
@@ -17,14 +18,16 @@ export interface DoctorOptions extends Omit<ClientOptions, 'client'> { client?: 
 export interface DoctorResult { ok: boolean; checks: { name: string; ok: boolean; detail: string }[] }
 
 export function detectClients(options: Omit<ClientOptions, 'client'> = {}) {
-  const home = options.home ?? homedir();
+  const platform = options.platform ?? process.platform;
+  const environment = options.environment ?? process.env;
+  const home = options.home ?? (platform === 'win32' ? environment.USERPROFILE : undefined) ?? homedir();
   return installableClients.map(client => {
     const config = clientConfig({ ...options, client });
-    const binary = client === 'claude-desktop' ? undefined : findExecutable(client, options.environment);
+    const binary = client === 'claude-desktop' ? undefined : findExecutable(client, environment, platform);
     const app = { claude: 'Claude', codex: 'Codex', agy: 'Antigravity', 'claude-desktop': 'Claude', cursor: 'Cursor' }[client];
-    const detected = !!binary || existsSync(`/Applications/${app}.app`) || existsSync(join(home, `Applications/${app}.app`));
-    const quote = (value: string) => "'" + value.replaceAll("'", "'\\''") + "'";
-    const command = [config.entry.command, config.entry.args[0], 'install', '--client', client].map(quote).join(' ');
+    const detected = !!binary || (platform === 'win32' && !!environment.LOCALAPPDATA && existsSync(win32.join(environment.LOCALAPPDATA, 'Programs', app))) || existsSync(`/Applications/${app}.app`) || existsSync(join(home, `Applications/${app}.app`));
+    const quote = (value: string) => "'" + value.replaceAll("'", platform === 'win32' ? "''" : "'\\''") + "'";
+    const command = (platform === 'win32' ? '& ' : '') + [config.entry.command, config.entry.args[0], 'install', '--client', client].map(quote).join(' ');
     return { client, detected, configPath: config.path, command };
   });
 }
@@ -39,18 +42,21 @@ async function binaryVersion(path: string): Promise<string | undefined> {
 
 export async function doctor(options: DoctorOptions = {}): Promise<DoctorResult> {
   const checks: DoctorResult['checks'] = [];
-  const home = options.home ?? homedir();
-  const userData = options.userData ?? process.env.VSTUDY_USER_DATA ?? appDataPath(home);
+  const platform = options.platform ?? process.platform;
+  const environment = options.environment ?? process.env;
+  const home = options.home ?? (platform === 'win32' ? environment.USERPROFILE : undefined) ?? homedir();
+  const userData = options.userData ?? process.env.VSTUDY_USER_DATA ?? appDataPath(home, options);
   const clients = options.client ? [options.client] : installableClients;
-  const node = options.command ?? findExecutable('node', options.environment);
+  const node = options.command ?? findExecutable('node', environment, platform);
   const nodeVersion = node ? await binaryVersion(node) : undefined;
   checks.push({ name: 'node', ok: !!nodeVersion && Number(nodeVersion.split('.')[0]) >= 24,
     detail: nodeVersion ? `Node ${nodeVersion}; version 24 or later required.` : 'Node.js is unavailable. Install Node.js 24 or later.' });
-  const appInstalled = existsSync('/Applications/VStudy Pro.app') || existsSync(join(home, 'Applications/VStudy Pro.app'));
+  let appInstalled = false;
+  try { appInstalled = platform === 'win32' ? !!resolveWindowsApp({ environment }) : existsSync('/Applications/VStudy Pro.app') || existsSync(join(home, 'Applications/VStudy Pro.app')); } catch { appInstalled = false; }
   checks.push({ name: 'app-installed', ok: appInstalled, detail: appInstalled ? 'VStudy Pro app bundle detected.' : 'VStudy Pro was not found in Applications.' });
   let wire: Wire | undefined;
   try {
-    wire = await Wire.connect(bridgePath(userData));
+    wire = await Wire.connect(bridgePath(userData, options));
     const { version, enabled } = await pingWire(wire);
     checks.push({ name: 'bridge', ok: version === MCP_PROTOCOL_VERSION, detail: `Running bridge protocol ${version}.` });
     checks.push({ name: 'bridge-enabled', ok: enabled, detail: enabled ? 'Agent access is enabled.' : 'DISABLED. Agent access is switched off in VStudy.' });
@@ -74,7 +80,7 @@ export async function doctor(options: DoctorOptions = {}): Promise<DoctorResult>
         checks.push({ name: `${client}-config`, ok: false, detail: 'Configuration failed validation. No private contents were printed.' });
       }
       try {
-        const identity = new Credentials(credentialPath(client, home)).read();
+        const identity = new Credentials(credentialPath(client, home, options)).read();
         if (!identity?.grant) {
           checks.push({ name: `${client}-grant`, ok: false, detail: 'No stored local bearer. Doctor does not initiate pairing.' });
           continue;

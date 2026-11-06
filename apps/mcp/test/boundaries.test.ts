@@ -11,7 +11,7 @@ describe('package boundaries', () => {
       expect(source, name).not.toMatch(/from ['"](?:electron|node:https?|node:http2|undici|axios)/);
       expect(source, name).not.toMatch(/\bfetch\s*\(|webContents|safeStorage|wstoken|autologin/);
       const privileged = source.match(/from ['"]([^'"]*desktop[^'"]*)['"]/g) ?? [];
-      expect(privileged.every(value => value.includes('/shared/mcp')), name).toBe(true);
+      expect(privileged.every(value => value.includes('/shared/mcp') || value.includes('/main/platform/app-data') || value.includes('/main/mcp/endpoint')), name).toBe(true);
     }
   });
 

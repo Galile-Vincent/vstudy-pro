@@ -1,10 +1,8 @@
 /** Authenticate local socket permissions and correlate bounded framed RPC calls. @packageDocumentation */
-import { lstatSync } from 'node:fs';
-import { dirname } from 'node:path';
-import { createConnection, type Socket } from 'node:net';
+import type { Socket } from 'node:net';
 import { randomUUID } from 'node:crypto';
 import { bridgeRequestSchema, bridgeResponseSchema, type BridgeRequest, type BridgeResponse } from './contract';
-import { assertNoSymlinks } from './files';
+import { connectLocalSocket, type WireConnector } from './connection';
 import { encodeFrame, Frames } from './framing';
 import { BridgeError } from './errors';
 
@@ -28,26 +26,8 @@ export class Wire {
     socket.on('end', () => this.close());
   }
 
-  static async connect(path: string): Promise<Wire> {
-    assertNoSymlinks(path);
-    const directory = lstatSync(dirname(path));
-    const socketFile = lstatSync(path);
-    if (!directory.isDirectory() || !socketFile.isSocket()
-      || (directory.mode & 0o777) !== 0o700 || (socketFile.mode & 0o777) !== 0o600
-      || (process.getuid && (directory.uid !== process.getuid() || socketFile.uid !== process.getuid()))) {
-      throw new BridgeError('DENIED', 'The bridge directory must be private (0700) and its socket owned by you (0600).');
-    }
-    return new Promise((resolve, reject) => {
-      const socket = createConnection(path);
-      const timer = setTimeout(() => { socket.destroy(); reject(new BridgeError('TIMEOUT', 'VStudy did not accept the local connection.')); }, 2000);
-      const onError = (error: Error) => { clearTimeout(timer); socket.destroy(); reject(error); };
-      socket.once('error', onError);
-      socket.once('connect', () => {
-        clearTimeout(timer);
-        socket.removeListener('error', onError);
-        resolve(new Wire(socket));
-      });
-    });
+  static async connect(path: string, connector: WireConnector = connectLocalSocket): Promise<Wire> {
+    return new Wire(await connector(path));
   }
 
   rpc(call: RpcCall, timeoutMs = 65_000): Promise<unknown> {

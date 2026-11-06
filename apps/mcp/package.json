@@ -8,7 +8,8 @@
     "vstudy-mcp": "dist/vstudy-mcp.cjs"
   },
   "exports": {
-    "./installer": "./dist/installer.cjs"
+    "./installer": "./dist/installer.cjs",
+    "./windows-acl": "./dist/windows-acl.cjs"
   },
   "files": [
     "dist",
@@ -19,7 +20,8 @@
     "test": "pnpm build && vitest run --pool=forks --maxWorkers=2",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "verify": "node scripts/verify-artifact.mjs"
+    "verify": "node scripts/verify-artifact.mjs",
+    "verify:package": "node scripts/verify-package.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",

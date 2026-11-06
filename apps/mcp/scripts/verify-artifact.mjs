@@ -2,7 +2,7 @@
 import { accessSync, constants, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-for (const name of ['vstudy-mcp', 'installer']) {
+for (const name of ['vstudy-mcp', 'installer', 'windows-acl']) {
   const path = `dist/${name}.cjs`;
   accessSync(path, constants.R_OK);
   console.log(`${path} sha256 ${createHash('sha256').update(readFileSync(path)).digest('hex')}`);
