@@ -17,6 +17,7 @@ import {
   documentSchema,
   messageSchema,
   settingsSchema,
+  settingsPatchSchema,
   transitionDocument,
   type Conversation,
   type Document,
@@ -236,8 +237,8 @@ export function openStore(path: string) {
             )
           : { ...defaultSettings };
       },
-      set(input: import("zod").input<typeof settingsSchema>): Settings {
-        const value = settingsSchema.parse(input);
+      set(input: import("zod").input<typeof settingsPatchSchema>): Settings {
+        const value = settingsSchema.parse({ ...this.get(), ...settingsPatchSchema.parse(input) });
         db.prepare(
           "INSERT INTO settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
         ).run("app", JSON.stringify(value));

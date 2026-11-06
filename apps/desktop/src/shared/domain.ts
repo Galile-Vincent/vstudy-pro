@@ -275,6 +275,8 @@ export const settingsSchema = z
     lastDocumentId: documentIdSchema.nullable().default(null),
   })
   .strict();
+/** Omitted keys stay unchanged; explicit undefined clears optional preferences. */
+export const settingsPatchSchema = settingsSchema.partial();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
   ...themePreferencesSchema.parse({}),
