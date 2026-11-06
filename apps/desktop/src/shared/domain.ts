@@ -176,7 +176,7 @@ export type TutorMode = z.infer<typeof tutorModeSchema>;
 // Legacy parts may omit the decision; partial stored decisions receive safe defaults.
 export const tutorDecisionSchema = z.object({
   level: z.enum(['guide', 'hint', 'direct']).default('direct'),
-  reason: z.enum(['legacy', 'disabled', 'requested', 'stuck', 'repeated', 'question-budget', 'multi-question', 'give-first', 'fatigue', 'exit-offer', 'attempt', 'guide']).default('legacy'),
+  reason: z.enum(['legacy', 'disabled', 'requested', 'stuck', 'repeated', 'question-budget', 'multi-question', 'give-first', 'fatigue', 'exit-offer', 'lookup', 'exam-prep', 'planning', 'attempt', 'guide']).default('legacy'),
   move: z.enum(['probe', 'scaffold', 'worked-step', 'answer']).default('answer'),
   threadId: z.string().min(1).max(200).default('legacy'),
   step: z.number().int().min(0).max(100000).default(0),
