@@ -7,8 +7,8 @@ import type { Store } from '../db';
 import type { ProviderRegistry } from '../providers';
 import type { createIpcRegistrar } from './register';
 import { type IpcChannel } from '../../shared/ipc';
-import { requestIdSchema, conversationIdSchema, documentIdSchema } from '../../shared/domain';
-import { rendererArtifact, reviewGenerateIpc, reviewProgressChannel, reviewProgressSchema, type ReviewProgress } from '../../shared/review-generate';
+import { requestIdSchema, conversationIdSchema, documentIdSchema, type Usage } from '../../shared/domain';
+import { rendererArtifact, reviewGenerateIpc, reviewProgressChannel, reviewProgressSchema, type GenerationRequest, type ReviewProgress } from '../../shared/review-generate';
 import { ArtifactRepository } from '../review/artifact-repository';
 import { GenerationService } from '../review/generate';
 import { excerptKind } from '../review/source-kind';
@@ -45,6 +45,7 @@ export function progressFor(event: IpcMainInvokeEvent) {
     };
 }
 export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>, providers: ProviderRegistry, admission: Admission = reviewAdmission) {
+    const reservation = (prompt: string, r: GenerationRequest) => { const usage = priceUsage(r.modelId, { inputTokens: Buffer.byteLength(prompt), outputTokens: r.providerId.endsWith('-cli') ? 240000 : 8192, costSource: 'estimated' }, store.settings.get().priceOverrides); return { ...usage, costUsd: usage.costUsd }; };
     const repo = new ArtifactRepository(store.db), attempts = new Attempts(repo);
     repo.recover();
     const service = new GenerationService(repo, {
@@ -63,9 +64,9 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
         finally {
             await file.close();
         } },
-        estimate(prompt, r) { const usage = priceUsage(r.modelId, { inputTokens: Buffer.byteLength(prompt), outputTokens: r.providerId.endsWith('-cli') ? 240000 : 8192, costSource: 'estimated' }, store.settings.get().priceOverrides); return { ...usage, costUsd: usage.costUsd }; },
-        async call(prompt, r, signal, onUsage) { let output = '', done = false; let measured = priceUsage(r.modelId, { inputTokens: Buffer.byteLength(prompt), outputTokens: 0, costSource: 'estimated' }, store.settings.get().priceOverrides); try {
-            for await (const event of providers.get(r.providerId).stream({ scope: 'general', requestId: requestIdSchema.parse(randomUUID()), conversationId: conversationIdSchema.parse(randomUUID()), providerId: r.providerId, modelId: r.modelId, userMessage: 'Generate a study aid from the supplied data.', prompt, allowPresentation: false, maxOutputTokens: 8192, onUsageSnapshot: usage => { measured = priceUsage(r.modelId, usage, store.settings.get().priceOverrides); onUsage({ ...measured, costUsd: measured.costUsd }); } }, signal)) {
+        estimate: reservation,
+        async call(prompt, r, signal, onUsage) { let output = '', done = false, usage: Usage | undefined; try {
+            for await (const event of providers.get(r.providerId).stream({ scope: 'general', requestId: requestIdSchema.parse(randomUUID()), conversationId: conversationIdSchema.parse(randomUUID()), providerId: r.providerId, modelId: r.modelId, userMessage: 'Generate a study aid from the supplied data.', prompt, allowPresentation: false, maxOutputTokens: 8192, onUsageSnapshot: snapshot => { usage = snapshot; } }, signal)) {
                 signal.throwIfAborted();
                 if (event.type === 'tool-call' || event.type === 'proposals' || event.type === 'error')
                     throw new Error('review.provider_failed');
@@ -75,7 +76,7 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
                         throw new Error('review.output_limit');
                 }
                 if (event.type === 'usage')
-                    measured = priceUsage(r.modelId, event.usage, store.settings.get().priceOverrides);
+                    usage = event.usage;
                 if (event.type === 'done')
                     done = true;
             }
@@ -84,8 +85,9 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
             return output;
         }
         finally {
-            if (measured.outputTokens === 0)
-                measured = priceUsage(r.modelId, { ...measured, outputTokens: Buffer.byteLength(output), costSource: 'estimated' }, store.settings.get().priceOverrides);
+            // A call that never completed has unseen remote output: keep the reservation unless the provider reported its cost.
+            const overrides = store.settings.get().priceOverrides;
+            const measured = done || usage?.costSource === 'reported' ? priceUsage(r.modelId, { ...usage ?? { inputTokens: Buffer.byteLength(prompt), costSource: 'estimated' as const }, outputTokens: usage?.outputTokens || Buffer.byteLength(output) }, overrides) : reservation(prompt, r);
             onUsage({ ...measured, costUsd: measured.costUsd });
             store.usage.record({ ...measured, id: randomUUID(), createdAt: new Date().toISOString(), providerId: r.providerId, modelId: r.modelId, kind: 'chat', aborted: signal.aborted });
         } },
