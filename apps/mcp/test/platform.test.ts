@@ -110,6 +110,19 @@ describe('platform connection and launch fixtures', () => {
     expect(resolveWindowsApp({ environment, query: () => { throw new Error('Unavailable'); }, isFile: path => path === expected })).toBe(expected);
     expect(registryAppPaths('HKEY_CURRENT_USER\\x\n    DisplayName    REG_SZ    Other App\n    InstallLocation    REG_SZ    C:\\Other\n', environment)).toEqual([]);
   });
+  it.each(['0.2.2', '0.3.0-rc.1+build.2'])('discovers a custom path from versioned NSIS metadata %s', async version => {
+    const exe = String.raw`E:\Student's custom install\VStudy Pro.exe`;
+    const query = () => 'HKEY_CURRENT_USER\\Software\\fixture\n    DisplayName    REG_SZ    VStudy Pro ' + version + '\n    DisplayIcon    REG_SZ    "' + exe + '",0\n';
+    const run = vi.fn(async () => {});
+    await launchApplication({platform: 'win32', environment, query, isFile: path => path === exe, run});
+    expect(run).toHaveBeenCalledOnce();
+    expect(run).toHaveBeenCalledWith(exe, ['--mcp-background'], true);
+  });
+  it('rejects similarly named registry products and command-shaped display names', () => {
+    for (const name of ['VStudy Pro Tools', 'VStudy Pro 0.2.2 helper', 'VStudy Pro 0.2.2 & other.exe', 'Other VStudy Pro 0.2.2']) {
+      expect(registryAppPaths('HKEY_CURRENT_USER\\x\n    DisplayName    REG_SZ    ' + name + '\n    DisplayIcon    REG_SZ    C:\\Other\\VStudy Pro.exe\n', environment)).toEqual([]);
+    }
+  });
   it('prefers a custom HKCU InstallLocation over the standard per-user directory', () => {
     const directory = 'E:\\Custom VStudy';
     const custom = directory + '\\VStudy Pro.exe';

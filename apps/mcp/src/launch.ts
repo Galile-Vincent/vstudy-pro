@@ -21,7 +21,7 @@ export function registryAppPaths(text: string, environment: NodeJS.ProcessEnv): 
       const match = line.match(/^\s+(DisplayName|InstallLocation|DisplayIcon)\s+REG_(?:EXPAND_)?SZ\s+(.+)$/);
       if (match) values[match[1]!] = match[2]!.trim();
     }
-    if (values.DisplayName !== 'VStudy Pro') continue;
+    if (!/^VStudy Pro(?: \d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)?$/.test(values.DisplayName ?? '')) continue;
     if (values.InstallLocation) paths.push(win32.join(values.InstallLocation.replace(/^"|"$/g, ''), 'VStudy Pro.exe'));
     const icon = values.DisplayIcon?.match(/^"([^"]+\.exe)"(?:,-?\d+)?$|^(.+\.exe)(?:,-?\d+)?$/i);
     if (icon) paths.push(icon[1] ?? icon[2]!);
