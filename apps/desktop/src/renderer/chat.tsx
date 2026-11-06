@@ -137,7 +137,7 @@ export function Chat({
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
-    <EarlierMessages runtime={runtime} conversationId={conversation.id} cursor={historyCursor} onLoaded={messages => {
+    <EarlierMessages jumpMessageId={jumpMessageId} runtime={runtime} conversationId={conversation.id} cursor={historyCursor} onLoaded={messages => {
       setEarlierHistory(current => [...messages, ...current]);
       for (const message of messages) for (const part of message.parts) if (part.selection) selections.current.set(message.id, part.selection);
     }}/>

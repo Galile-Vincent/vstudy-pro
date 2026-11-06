@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ExportedMessageRepository, type AssistantRuntime, useAuiState, type ThreadMessageLike } from '@assistant-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { Conversation, Message } from '../shared';
@@ -22,13 +22,13 @@ export function chatHistoryMessages(history: Message[]): ThreadMessageLike[] {
     }));
 }
 
-export function EarlierMessages({runtime,conversationId,cursor:initialCursor,onLoaded}:{runtime:AssistantRuntime;conversationId:Conversation['id'];cursor?:MessageCursor|null|undefined;onLoaded:(messages:Message[])=>void}) {
+export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jumpMessageId,onLoaded}:{runtime:AssistantRuntime;conversationId:Conversation['id'];cursor?:MessageCursor|null|undefined;jumpMessageId?:string|undefined;onLoaded:(messages:Message[])=>void}) {
   useTranslation();
   const running = useAuiState(state => state.thread.isRunning);
   const [cursor,setCursor] = useState(initialCursor), [loading,setLoading] = useState(false), [error,setError] = useState('');
   const pending = useRef(false), live = useRef(true);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!cursor || pending.current || runtime.thread.getState().isRunning) return;
     pending.current = true; setLoading(true); setError('');
     try {
@@ -42,7 +42,10 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,onL
       setCursor(page.nextCursor); onLoaded(page.items);
     } catch (failure) { if (live.current) setError(errorText(failure)); }
     finally { pending.current = false; if (live.current) setLoading(false); }
-  };
+  }, [cursor, runtime, conversationId, onLoaded]);
+  useEffect(() => {
+    if (jumpMessageId && cursor && !loading && !error && !running && !runtime.thread.getState().messages.some(message => message.id === jumpMessageId)) void load();
+  }, [jumpMessageId, cursor, loading, error, running, runtime, load]);
   if (!cursor) return null;
   return <div>{error ? <LoadError message={error} retry={() => void load()}/> : <Button variant="ghost" disabled={loading || running} onClick={() => void load()}>{tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')}</Button>}</div>;
 }
