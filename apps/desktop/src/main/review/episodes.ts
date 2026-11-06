@@ -3,8 +3,11 @@ export const EPISODE_GAP_MS = 6 * 60 * 60 * 1000;
 export const STUDY_DAY_OFFSET_MS = 4 * 60 * 60 * 1000;
 export interface TimedEvidence {id:string;occurredAt:string}
 export interface Episode<T> {day:string;startAt:string;endAt:string;observations:T[]}
+const dayFormats = new Map<string,Intl.DateTimeFormat>();
 export function localDay(at:string, timeZone:string):string {
-  const parts = new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(at));
+  let format = dayFormats.get(timeZone);
+  if (!format) { format = new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit'}); dayFormats.set(timeZone,format); }
+  const parts = format.formatToParts(new Date(at));
   return ['year','month','day'].map(type=>parts.find(part=>part.type===type)!.value).join('-');
 }
 export function studyDay(at:string,timeZone='UTC'):string {

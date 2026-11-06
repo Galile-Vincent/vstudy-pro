@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import type { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { artifactSchema, generationRequestSchema, type GenerationRequest } from '../../shared/review-generate';
 import { studyPageInputSchema, type StudyPageInput } from '../../shared/review';
 import type { StudyResolvedScope, StudyTest } from '../../shared/review-artifacts';
 import { PROMPT_VERSION } from './prompts';
 import { eligibleSourceSql } from './eligibility';
-import type { ScopeInputs } from './scope';
+import { dateRange, type ScopeInputs } from './scope';
 export class ArtifactRepository {
     constructor(readonly db: DatabaseSync, readonly clock = Date.now) { }
     atomic<T>(fn: () => T): T { this.db.exec('SAVEPOINT review_artifact'); try {
@@ -52,13 +52,39 @@ export class ArtifactRepository {
         const last = items.at(-1);
         return { items, nextCursor: rows.length > items.length && last ? { at: last.createdAt, id: last.id } : null };
     }
-    scopeInputs(courseId: string): ScopeInputs {
-        const units = this.db.prepare('SELECT * FROM study_units WHERE courseId=? ORDER BY ordinal,id LIMIT 101').all(courseId);
-        const links = this.db.prepare('SELECT du.unitId,du.documentId FROM study_document_units du JOIN documents d ON d.id=du.documentId WHERE du.courseId=? AND d.deletedAt IS NULL AND d.status=\'ready\' LIMIT 1001').all(courseId);
-        const concepts = this.db.prepare('SELECT key,unitId FROM study_concepts WHERE courseId=? AND userState!=\'dismissed\' LIMIT 101').all(courseId);
-        const observations = this.db.prepare(`SELECT o.unitId,j.occurredAt FROM study_observations o JOIN study_jobs j ON j.id=o.jobId JOIN conversations c ON c.id=j.conversationId LEFT JOIN documents d ON d.id=c.documentId JOIN messages u ON u.id=j.userMessageId JOIN messages a ON a.id=j.assistantMessageId JOIN study_chat_links l ON l.conversationId=c.id WHERE o.courseId=? AND (${eligibleSourceSql}) LIMIT 1001`).all(courseId);
-        if (units.length > 100 || links.length > 1000 || concepts.length > 100 || observations.length > 1000)
+    /** Reads only what `scope` selects; a limit error means the requested scope itself is too large. */
+    scopeInputs(courseId: string, scope: GenerationRequest['scope'], weakKeys?: ReadonlySet<string>): ScopeInputs {
+        const json = (values: readonly string[]) => JSON.stringify(values);
+        const unitsWhere = (where: string, ...values: SQLInputValue[]) => this.db.prepare(`SELECT * FROM study_units su WHERE su.courseId=? AND ${where} ORDER BY su.ordinal,su.id LIMIT 101`).all(courseId, ...values);
+        const conceptsWhere = (where: string, ...values: SQLInputValue[]) => this.db.prepare(`SELECT key,unitId FROM study_concepts WHERE courseId=? AND userState!='dismissed' AND ${where} LIMIT 101`).all(courseId, ...values);
+        const unitIdsOf = (rows: Record<string, unknown>[], column: string) => json(rows.flatMap(row => row[column] ? [String(row[column])] : []));
+        let units: Record<string, unknown>[], concepts: Record<string, unknown>[] | undefined, observations: ScopeInputs['observations'] = [];
+        if (scope.kind === 'units')
+            units = unitsWhere('su.id IN (SELECT value FROM json_each(?))', json(scope.unitIds));
+        else if (scope.kind === 'documents')
+            units = unitsWhere('su.id IN (SELECT unitId FROM study_document_units WHERE courseId=? AND documentId IN (SELECT value FROM json_each(?)))', courseId, json(scope.documentIds));
+        else if (scope.kind === 'concepts' || scope.kind === 'weak') {
+            const keys = scope.kind === 'concepts' ? scope.conceptKeys : [...weakKeys ?? []];
+            concepts = conceptsWhere('key IN (SELECT value FROM json_each(?))', json(keys));
+            units = concepts.length > 100 ? [] : unitsWhere('su.id IN (SELECT value FROM json_each(?))', unitIdsOf(concepts, 'unitId'));
+        }
+        else {
+            const range = dateRange(scope.fromDate, scope.toDate, scope.timeZone);
+            const inRange = `FROM study_observations o JOIN study_jobs j ON j.id=o.jobId JOIN conversations c ON c.id=j.conversationId LEFT JOIN documents d ON d.id=c.documentId JOIN messages u ON u.id=j.userMessageId JOIN messages a ON a.id=j.assistantMessageId JOIN study_chat_links l ON l.conversationId=c.id WHERE o.courseId=? AND (${eligibleSourceSql}) AND j.occurredAt>=? AND j.occurredAt<?`;
+            units = unitsWhere(`((coalesce(su.startsAt,'')!='' AND coalesce(su.endsAt,'')!='' AND su.startsAt<? AND su.endsAt>?) OR ((coalesce(su.startsAt,'')='' OR coalesce(su.endsAt,'')='') AND su.id IN (SELECT o.unitId ${inRange})))`, range.to, range.from, courseId, range.from, range.to);
+            if (units.length <= 100)
+                observations = this.db.prepare(`SELECT o.unitId,min(j.occurredAt) occurredAt ${inRange} AND o.unitId IN (SELECT value FROM json_each(?)) GROUP BY o.unitId`).all(courseId, range.from, range.to, unitIdsOf(units, 'id')) as unknown as ScopeInputs['observations'];
+        }
+        if (units.length > 100)
             throw new Error('review.scope_limit');
-        return { units: units.map(u => ({ id: String(u.id), startsAt: u.startsAt as string | null, endsAt: u.endsAt as string | null, documentIds: links.filter(l => l.unitId === u.id).map(l => String(l.documentId)) })), documents: [...new Set(links.map(l => String(l.documentId)))], concepts: concepts.map(c => ({ key: String(c.key), unitId: c.unitId as string | null })), observations: observations.map(o => ({ unitId: o.unitId as string | null, occurredAt: String(o.occurredAt) })) };
+        concepts ??= conceptsWhere('unitId IN (SELECT value FROM json_each(?))', unitIdsOf(units, 'id'));
+        const links = this.db.prepare('SELECT du.unitId,du.documentId FROM study_document_units du JOIN documents d ON d.id=du.documentId WHERE du.courseId=? AND d.deletedAt IS NULL AND d.status=\'ready\' AND du.unitId IN (SELECT value FROM json_each(?)) LIMIT 1001').all(courseId, unitIdsOf(units, 'id'));
+        if (concepts.length > 100 || links.length > 1000)
+            throw new Error('review.scope_limit');
+        return { units: units.map(u => ({ id: String(u.id), startsAt: u.startsAt as string | null, endsAt: u.endsAt as string | null, documentIds: links.filter(l => l.unitId === u.id).map(l => String(l.documentId)) })), documents: [...new Set(links.map(l => String(l.documentId)))], concepts: concepts.map(c => ({ key: String(c.key), unitId: c.unitId as string | null, ...(scope.kind === 'weak' ? { weak: true } : {}) })), observations };
+    }
+    /** Which of `ids` are still ready, linked to a unit of this course. */
+    liveDocuments(courseId: string, ids: readonly string[]): string[] {
+        return this.db.prepare('SELECT DISTINCT du.documentId FROM study_document_units du JOIN documents d ON d.id=du.documentId WHERE du.courseId=? AND d.deletedAt IS NULL AND d.status=\'ready\' AND du.documentId IN (SELECT value FROM json_each(?))').all(courseId, JSON.stringify(ids)).map(row => String(row.documentId));
     }
 }
