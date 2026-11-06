@@ -8,10 +8,10 @@
   "scripts": {
     "dev": "pnpm --filter @vstudy/desktop dev",
     "build": "pnpm --filter @vstudy/desktop build",
-    "test": "pnpm --filter @vstudy/mcp test && pnpm --filter @vstudy/desktop test",
-    "typecheck": "pnpm --filter @vstudy/mcp typecheck && pnpm --filter @vstudy/desktop typecheck && pnpm --filter @vstudy/website typecheck",
+    "test": "pnpm --filter @vstudy/mcp test && pnpm --filter @vstudy/desktop test && pnpm --filter @vstudy/newsletter test",
+    "typecheck": "pnpm --filter @vstudy/mcp typecheck && pnpm --filter @vstudy/desktop typecheck && pnpm --filter @vstudy/website typecheck && pnpm --filter @vstudy/newsletter typecheck",
     "package": "pnpm --filter @vstudy/desktop package",
-    "lint": "pnpm --filter @vstudy/mcp lint && pnpm --filter @vstudy/desktop lint && pnpm --filter @vstudy/website lint",
+    "lint": "pnpm --filter @vstudy/mcp lint && pnpm --filter @vstudy/desktop lint && pnpm --filter @vstudy/website lint && pnpm --filter @vstudy/newsletter lint",
     "smoke": "pnpm --filter @vstudy/desktop smoke",
     "security:check": "node apps/desktop/scripts/security-audit.mjs && pnpm lint && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs && pnpm test --pool=forks --maxWorkers=2",
     "e2e": "node apps/desktop/scripts/e2e.mjs",
