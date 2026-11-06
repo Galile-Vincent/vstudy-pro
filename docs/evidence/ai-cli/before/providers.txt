@@ -1,0 +1,48 @@
+- dialog "Settings":
+  - heading "Settings" [level=2]
+  - button "Close settings"
+  - tablist "Settings":
+    - tab "General"
+    - tab "Appearance"
+    - tab "AI services" [selected]
+    - tab "Usage"
+    - tab "Storage"
+    - tab "Privacy"
+  - tabpanel "AI services":
+    - banner:
+      - heading "AI services" [level=2]
+      - paragraph: Keys are saved securely in the desktop app and never read back.
+    - region "How to get AI answers":
+      - heading "How to get AI answers" [level=3]
+      - paragraph: You can read and organise documents, view connected school deadlines, and make a study plan without AI. Answers about your reading need a connected AI service.
+      - list:
+        - listitem: Choose an AI service approved by your school. Ask your teacher or IT team if you are unsure. A ChatGPT or Claude chat subscription does not include API credit. The service may charge separately.
+        - listitem: Use Get a key below for that service. Paste its secret code into the matching field. Choose Use without saving keys for this session, or Save key. If Mac permission is denied, you can retry or use the session option.
+        - listitem: Select Test connection and wait for confirmation. Close Settings, choose a model in Chat, select a passage, and ask a question. If the check fails, follow its message or ask your school for help.
+      - heading "No AI account or secret code?" [level=4]
+      - paragraph: "You do not need Terminal or a paid account to keep reading. Ask your teacher or IT team which AI access your school permits. You can copy this request:"
+      - blockquote: I use VStudy Pro to read course materials. Does our school provide an approved AI service and an API key? How do I connect it, and are there any costs or restrictions? If AI access is unavailable, who can help me with questions about my reading?
+      - paragraph: Never paste your school password into AI settings or a chat. A connected AI service receives your question, chat history, and document context, including selected text. Check your school rules before sharing coursework.
+      - button "Continue without AI"
+    - heading "AI services" [level=3]
+    - strong: Anthropic
+    - text: No key saved
+    - button "Get a key"
+    - button "Test connection"
+    - paragraph: An API key is a secret code from your AI service’s developer website. A chat login is different. The service may charge you for use.
+    - paragraph: On Mac, saving may ask for your Mac login password so VStudy Pro can use Keychain. A session key lasts only until you quit the app.
+    - textbox "Anthropic API key":
+      - /placeholder: Enter API key
+    - button "Save key" [disabled]
+    - button "Use without saving keys" [disabled]
+    - strong: OpenAI
+    - text: No key saved
+    - button "Get a key"
+    - button "Test connection"
+    - paragraph: An API key is a secret code from your AI service’s developer website. A chat login is different. The service may charge you for use.
+    - paragraph: On Mac, saving may ask for your Mac login password so VStudy Pro can use Keychain. A session key lasts only until you quit the app.
+    - textbox "OpenAI API key":
+      - /placeholder: Enter API key
+    - button "Save key" [disabled]
+    - button "Use without saving keys" [disabled]
+    - group: Advanced · local services and Terminal tools

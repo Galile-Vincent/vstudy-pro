@@ -1,0 +1,2 @@
+ts	phase	decision	why	evidence	result
+2026-11-06T03:20:54.443783+00:00	design	Choose action-scoped PTYs and versioned managed binaries	Interactive auth needs terminal semantics and running chats must retain their binary	docs/AI_CLI_SETUP_DESIGN.md	contract ready
