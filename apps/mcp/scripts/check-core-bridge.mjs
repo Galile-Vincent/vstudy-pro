@@ -5,7 +5,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import assert from 'node:assert/strict';
 import { setTimeout, clearTimeout } from 'node:timers';
@@ -26,6 +26,7 @@ try {
   }, nodePaths: [resolve('../desktop/node_modules')], bundle: true, platform: 'node', format: 'cjs', outdir: root, outExtension: { '.js': '.cjs' }, mainFields: ['module', 'main'] });
   const { createMcpEngine } = require(join(root, 'engine.cjs'));
   const { createUnixBridge } = require(join(root, 'bridge.cjs'));
+  const { doctor } = require(join(dirname(bin), 'installer.cjs'));
   const helper = values['peer-helper'] ? resolve(values['peer-helper']) : join(root, 'mcp-peer');
   if (!values['peer-helper']) execFileSync(process.execPath, [join(core, 'scripts/build-mcp-peer.mjs'), '--output', helper]);
   const account = '10000000-0000-4000-8000-000000000001';
@@ -84,6 +85,11 @@ try {
   await connecting;
   assert.equal((await client.listTools()).tools.length, 27);
   assert.equal(engine.state().grants.length, 0);
+  const diagnose = async () => {
+    const result = await doctor({ home, userData, client: 'codex', command: process.execPath, binPath: bin, environment: {} });
+    assert.ok(!JSON.stringify(result).includes(schoolSecret));
+    return result.checks.find(check => check.name === 'codex-grant');
+  };
   const read = args => client.callTool({ name: 'get_course', arguments: { account, courseId, ...args } });
   const first = await read({});
   assert.equal(first.structuredContent.ok, true);
@@ -95,6 +101,7 @@ try {
   assert.ok(!JSON.stringify(first).includes(privateCursor));
   await read({ cursor: first.structuredContent.nextCursor });
   assert.equal(seenCursors.at(-1), privateCursor);
+  assert.equal((await diagnose()).ok, true);
   assert.ok((await Promise.all(Array.from({ length: 8 }, () => read({})))).every(result => result.structuredContent.ok));
   const info = engine.state().grants[0];
   engine.editGrant({ grantId: info.id, scopes: [...scopes, 'write:local'], accountIds: [account], expiresAt: info.expiresAt });
@@ -111,12 +118,21 @@ try {
   assert.equal(finishes, pairingFinishes);
   const expiredCursor = await read({ cursor: first.structuredContent.nextCursor });
   assert.equal(expiredCursor.structuredContent.error.code, 'INVALID_ARGUMENT');
+  engine.editGrant({ grantId: info.id, scopes: ['read:content'], accountIds: [account], expiresAt: info.expiresAt });
+  assert.match((await diagnose()).detail, /SCOPE_REQUIRED/);
+  engine.editGrant({ grantId: info.id, scopes, accountIds: [account], expiresAt: '2020-01-01T00:00:00.000Z' });
+  assert.match((await diagnose()).detail, /EXPIRED/);
+  engine.editGrant({ grantId: info.id, scopes, accountIds: [account], expiresAt: info.expiresAt });
   engine.setEnabled(false);
   const disabled = await read({});
   assert.equal(disabled.structuredContent.error.code, 'DISABLED');
+  assert.match((await diagnose()).detail, /DISABLED/);
+  engine.setEnabled(true); engine.revoke(info.id);
+  assert.match((await diagnose()).detail, /DENIED.*revoked/);
+  assert.equal(finishes, pairingFinishes);
   assert.ok(stderr.includes('pairing code'));
   assert.ok(!stderr.includes(schoolSecret));
-  console.log('PASS real core engine, native peer helper, official SDK, 27 schemas, pending DENIED pairing, one-shot finish, opaque cursor roundtrip, eight queued reads, approved write, restart, disabled JSON-RPC error.');
+  console.log('PASS real core engine, native peer helper, official SDK, 27 schemas, pending DENIED pairing, one-shot finish, opaque cursor roundtrip, eight queued reads, approved write, restart, disabled JSON-RPC error, authenticated nonpairing doctor revocation/expiry/scope/disabled probes.');
 } finally {
   for (const timer of timers) clearTimeout(timer);
   await client?.close();

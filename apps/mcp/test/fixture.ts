@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import { Frames, encodeFrame } from '../src/framing';
-import { bridgeRequestSchema, type BridgeRequest, type ToolResult, type ToolName } from '../src/contract';
+import { bridgeRequestSchema, type BridgeRequest, type ToolResult, type ToolName, type McpErrorCode } from '../src/contract';
 
 export const account = '10000000-0000-4000-8000-000000000001';
 export const courseId = '20000000-0000-4000-8000-000000000002';
@@ -25,6 +25,9 @@ export interface FixtureOptions {
   silentFinish?: boolean;
   pendingFinishes?: number;
   pairingDurationMs?: number;
+  toolFailure?: McpErrorCode;
+  toolFailureRpc?: boolean;
+  enabled?: boolean;
 }
 
 export async function fixture(options: FixtureOptions = {}) {
@@ -54,7 +57,7 @@ export async function fixture(options: FixtureOptions = {}) {
         calls.push(request);
         if (options.silent) continue;
         const send = (result: unknown) => socket.write(encodeFrame({ jsonrpc: '2.0', id: request.id, result }));
-        if (request.method === 'ping') send({ version: 1, enabled: true });
+        if (request.method === 'ping') send({ version: 1, enabled: options.enabled ?? true });
         if (request.method === 'pair.begin') {
           const pairingId = randomUUID();
           pairings.set(pairingId, { socket, clientId: request.params.clientId, clientName: request.params.clientName, attempts: 0 });
@@ -81,6 +84,12 @@ export async function fixture(options: FixtureOptions = {}) {
           toolCalls++;
           if ((options.disconnectRead === request.params.name || options.disconnectWrite === request.params.name) && toolCalls === 1) {
             socket.destroy(); continue;
+          }
+          if (options.toolFailure) {
+            if (options.toolFailureRpc) socket.write(encodeFrame({ jsonrpc: '2.0', id: request.id,
+              error: { code: -32000, message: grant, data: { code: options.toolFailure, hint: grant } } }));
+            else send({ ok: false, error: { code: options.toolFailure, message: grant, hint: grant } });
+            continue;
           }
           if (options.rpcSecretError) {
             socket.write(encodeFrame({ jsonrpc: '2.0', id: request.id, error: { code: -32000,

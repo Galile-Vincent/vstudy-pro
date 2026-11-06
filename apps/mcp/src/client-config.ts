@@ -15,11 +15,19 @@ export interface ClientOptions {
   binPath?: string;
   dryRun?: boolean;
 }
+export interface StdioEntry {
+  command: string;
+  args: [string, '--client', InstallableClient];
+  type?: 'stdio';
+  timeout?: number;
+  tool_timeout_sec?: number;
+  timeoutSeconds?: number;
+}
 export interface ClientConfig {
   client: InstallableClient;
   path: string;
   format: 'json' | 'jsonc' | 'toml';
-  entry: Record<string, unknown>;
+  entry: StdioEntry;
 }
 
 export function findExecutable(name: string, environment = process.env): string | undefined {
@@ -50,7 +58,7 @@ export function clientConfig(options: ClientOptions): ClientConfig {
   if ([command, binPath].some(value => value.includes('${') || /[\r\n\0]/.test(value))) {
     throw new LocalFileError('Client interpolation or control characters in launcher paths are unsupported.');
   }
-  const entry: Record<string, unknown> = { command, args: [binPath, '--client', client] };
+  const entry: StdioEntry = { command, args: [binPath, '--client', client] };
   if (client === 'claude') { entry.type = 'stdio'; entry.timeout = 300_000; }
   if (client === 'codex') entry.tool_timeout_sec = 300;
   if (client === 'agy') entry.timeoutSeconds = 300;

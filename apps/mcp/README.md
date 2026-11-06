@@ -24,7 +24,7 @@ Turn on **Settings > Agents** in VStudy. The first tool or resource read connect
 
 If the socket is absent or refuses connection, the CLI runs `/usr/bin/open -g -j -a 'VStudy Pro' --args --mcp-background` with bounded backoff and a launch cooldown. Other platforms require the user to open the app. Permission failures do not trigger a launch.
 
-Pairing begins and finishes on one connection. Compare the code on stderr with VStudy before approving. Discovery, help, install, and doctor do not pair. The per-client file `~/.config/vstudy-mcp/<client>.json` contains a random client UUID, an opaque local grant, and its expiry. The directory is 0700 and the file is 0600. Nothing reads a Moodle password, cookie, WS token, or autologin key.
+Pairing begins and finishes on one connection. Compare the code on stderr with VStudy before approving. Discovery, help, install, and doctor do not pair. Doctor authenticates stored bearers through `list_accounts` on its existing ping connection, discards account content, and reports revoked, expired, disabled, or insufficient-scope results without launching the app. The per-client file `~/.config/vstudy-mcp/<client>.json` contains a random client UUID, an opaque local grant, and its expiry. The directory is 0700 and the file is 0600. Nothing reads a Moodle password, cookie, WS token, or autologin key.
 
 Pairing polls `pair.finish` on the same connection when the app returns pending `DENIED`, until the advertised expiry. Core currently allows two minutes for pairing. Tool roundtrips allow 130 seconds for the core's 120-second whole-call bound, including its 60-second write approval window. Installed Claude Code, Codex, and agy entries allow 300 seconds per tool call, including initial pairing and a write approval. Desktop and Cursor timeout behavior still needs live-client acceptance.
 
@@ -47,6 +47,8 @@ Prompts are `plan-my-week`, `prepare-for-exam`, `catch-up`, and `summarize-annou
 `transport.ts` owns framing, response correlation, and a four-request queue matching the core bridge limit. `bridge.ts` owns lazy pairing and retry policy. `credentials.ts` owns the private identity. `client-config.ts`, `config-edit.ts`, and `installer.ts` own verified client paths, source-preserving edits, and file transactions.
 
 ## Desktop integration
+
+`detectClients.command` is a quoted, actionable install command for display or copying. Execute installer APIs or argv arrays rather than passing that display string to a shell in main.
 
 `dist/installer.cjs` exports `installClient`, `uninstallClient`, `restoreConfigBackup`, `detectClients`, and `doctor`. Installer functions return `{changed, diff, configPath, backupPath?}`. Doctor returns `{ok, checks}`. These functions do not write stdout or start a stdio server. Call them only behind validated main-process IPC. `ClientOptions` in `src/client-config.ts` documents explicit runtime and bin path overrides.
 
@@ -74,3 +76,5 @@ pnpm --filter @vstudy/mcp exec node scripts/check-core-bridge.mjs
 ```
 
 `--core-root /absolute/path` selects an isolated extraction of a core commit. `--bin /absolute/path` and `--peer-helper /absolute/path` select packaged artifacts. This check uses the actual security engine and native same-UID verifier with a controlled backend. It verifies pending consent, one-shot finish, opaque cursors, approved writes, concurrent reads, restart, and disabled errors. It never connects to a school.
+
+After building an app directory, run `pnpm --filter @vstudy/mcp verify:package`. It checks the actual resources, standalone CLI, and executable native helper outside ASAR. The release workflow runs this after packaging.

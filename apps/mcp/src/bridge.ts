@@ -10,7 +10,7 @@ import { Credentials } from './credentials';
 import { BridgeError, failed, failure } from './errors';
 import { Wire } from './transport';
 
-const pingSchema = z.object({ version: z.literal(MCP_PROTOCOL_VERSION) }).passthrough();
+const pingSchema = z.object({ version: z.literal(MCP_PROTOCOL_VERSION), enabled: z.boolean() }).passthrough();
 export interface BridgeOptions {
   socketPath: string;
   credentials: Credentials;
@@ -145,6 +145,10 @@ export class BridgeClient {
 
 export async function pingBridge(socketPath: string): Promise<number> {
   const wire = await Wire.connect(socketPath);
-  try { return pingSchema.parse(await wire.rpc({ method: 'ping', params: {} }, 2000)).version; }
+  try { return (await pingWire(wire)).version; }
   finally { wire.close(); }
+}
+
+export async function pingWire(wire: Wire) {
+  return pingSchema.parse(await wire.rpc({ method: 'ping', params: {} }, 2000));
 }
