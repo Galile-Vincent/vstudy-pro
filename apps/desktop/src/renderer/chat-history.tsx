@@ -16,7 +16,7 @@ export function chatHistoryMessages(history: Message[]): ThreadMessageLike[] {
       role: m.role,
       content: m.role === 'assistant' ? m.parts.flatMap(p => assistantContent(p.text,p.reasoning,p.citations,p.toolCalls)) : m.parts.map(p => ({type:'text' as const,text:p.text})),
       createdAt: new Date(m.createdAt),
-      ...(m.role === 'assistant' && m.parts.some(p => p.status === 'error') ? { status: { type: 'incomplete' as const, reason: 'error' as const, error: errorText(new Error(m.parts.find(p => p.status === 'error')?.error ?? '')) } } : {}),
+      ...(m.role === 'assistant' && m.parts.some(p => p.status === 'error') ? { status: { type: 'incomplete' as const, reason: 'error' as const, error: m.parts.find(p => p.status === 'error')?.error?.includes('VSTUDY_STATUS:') ? errorText(new Error(m.parts.find(p => p.status === 'error')?.error ?? '')) : tr('errors:provider_unavailable') } } : {}),
       ...(m.role === 'assistant' && m.parts.some(p => p.status === 'aborted') ? {status:{type:'incomplete' as const,reason:'cancelled' as const}} : {}),
       metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage, modelId: m.parts[0]?.modelId, options: m.parts[0]?.options, selection: m.parts[0]?.selection, turnId: m.parts[0]?.turnId, citations: m.parts[0]?.citations } },
     }));
