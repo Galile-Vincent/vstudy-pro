@@ -5,8 +5,9 @@
  * @packageDocumentation
  */
 /** Backups restore on another data root and survive interruptions without touching live data early. */
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { mkdtemp, mkdir, readFile, writeFile, rm, rename, readdir } from 'node:fs/promises';
+import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -17,6 +18,7 @@ import { exportBackup, stageRestore, recoverRestore } from './backup';
 import { clearConverted, checkIntegrity, storageUsage } from './service';
 import { exclusiveStorage, enterStorageRequest, storageBusy } from './maintenance';
 import { fingerprint, writeZip } from './zip';
+vi.mock('node:fs/promises',async importOriginal=>{const actual=await importOriginal<typeof import('node:fs/promises')>();return {...actual,statfs:vi.fn(actual.statfs)};});
 const id='11111111-1111-4111-a111-111111111111';
 async function fixture(root:string){
   const store=openStore(join(root,'vstudy.sqlite'));
@@ -53,7 +55,7 @@ it('rejects corrupted bytes, an invalid manifest, duplicate paths and traversal 
       await expect(stageRestore(root,path)).rejects.toThrow();expect(store.documents.list()).toHaveLength(1);
       const manifest=join(root,'invalid.json');await writeFile(manifest,'{}');const entry={name:'manifest.json',path:manifest,...await fingerprint(manifest)};
       await writeZip(path,[entry]);await expect(stageRestore(root,path)).rejects.toThrow('invalid_backup');
-      await writeZip(path,[entry,entry]);await expect(stageRestore(root,path)).rejects.toThrow();
+      await expect(writeZip(path,[entry,entry])).rejects.toThrow('storage.invalid_backup');
       await expect(writeZip(path,[{...entry,name:'../escape'}])).rejects.toThrow('invalid_backup');
       expect((await readdir(root)).some(name=>name.startsWith('.restore-'))).toBe(false);
     } finally {store.close();await rm(path,{force:true});}
@@ -197,5 +199,18 @@ it('restores a legacy v1 inventory with no converted image entries',async()=>{
   const zip=join(target,'legacy.zip');await writeZip(zip,[...files,{name:'manifest.json',path:manifest,...await fingerprint(manifest)}]);
   await stageRestore(target,zip);await recoverRestore(target);
   const restored=openStore(join(target,'vstudy.sqlite'));try {const d=restored.documents.get(id as never)!;expect(await readFile(d.markdownPath,'utf8')).toBe(bytes);expect(restored.settings.get().chatSide).toBe('right');}finally{restored.close();}
+ } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
+
+it.each(['export','restore'])('refuses %s before staging when disk space is insufficient', async operation=>{
+ const root=await mkdtemp(join(tmpdir(),'vstudy-full-source-')),target=await mkdtemp(join(tmpdir(),'vstudy-full-target-'));
+ const {store}=await fixture(root);const zip=join(target,'backup.zip');
+ try {
+  await exportBackup(store,root,zip);const previous=await readFile(zip);
+  const stats=await fs.statfs(root);const space=vi.mocked(fs.statfs).mockResolvedValueOnce({...stats,bavail:0});
+  try {
+   await expect(operation==='export'?exportBackup(store,root,zip):stageRestore(root,zip)).rejects.toMatchObject({name:'StorageSpaceError',code:'ENOSPC',message:'storage.disk_full',availableBytes:0,requiredBytes:expect.any(Number)});
+   expect(await readFile(zip)).toEqual(previous);expect((await readdir(root)).filter(name=>name.startsWith('.backup-') || name.startsWith('.restore-') || name==='restore-pending.json')).toEqual([]);
+  } finally {space.mockClear();}
  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });

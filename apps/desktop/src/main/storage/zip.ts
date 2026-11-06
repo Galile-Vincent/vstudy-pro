@@ -54,6 +54,8 @@ export async function writeZip(destination: string, files: ArchiveFile[]): Promi
       const end=Buffer.alloc(22);end.writeUInt32LE(0x06054b50);end.writeUInt16LE(files.length,8);end.writeUInt16LE(files.length,10);
       end.writeUInt32LE(offset-start,12);end.writeUInt32LE(start,16);await write(end);await output.sync();
     } finally {await output.close();}
+    const verified=await readZip(temporary);
+    if(verified.size!==files.length || files.some(expected=>{const actual=verified.get(expected.name);return !actual || actual.bytes!==expected.bytes || actual.sha256!==expected.sha256;}))throw new Error('storage.invalid_backup');
     await retryBusy(() => rename(temporary,destination));await syncDirectory(dirname(destination));
   } finally {await rm(temporary,{force:true});}
 }
@@ -65,6 +67,10 @@ async function read(file: FileHandle, position:number, length:number):Promise<Bu
 
 /** Extract into an empty private staging directory. Reject traversal, compression, duplicates, and malformed headers. */
 export async function extractZip(source:string, destination:string):Promise<Map<string,{bytes:number;sha256:string}>> {
+  return readZip(source,destination);
+}
+
+async function readZip(source:string, destination?:string):Promise<Map<string,{bytes:number;sha256:string}>> {
   const file=await open(source,'r');
   try {
     const size=(await file.stat()).size;
@@ -74,7 +80,7 @@ export async function extractZip(source:string, destination:string):Promise<Map<
     const count=end.readUInt16LE(10),directorySize=end.readUInt32LE(12),directoryStart=end.readUInt32LE(16);
     if(count!==end.readUInt16LE(8) || count>50000 || directoryStart+directorySize!==size-22 || directorySize>16*1024*1024)throw new Error('storage.invalid_backup');
     const directory=await read(file,directoryStart,directorySize);
-    const directories=new Set<string>([destination]);
+    const directories=new Set<string>(destination?[destination]:[]);
     const entries=new Map<string,{bytes:number;sha256:string}>();let cursor=0,total=0;
     for(let i=0;i<count;i++){
       if(cursor+46>directory.length || directory.readUInt32LE(cursor)!==0x02014b50)throw new Error('storage.invalid_backup');
@@ -89,13 +95,17 @@ export async function extractZip(source:string, destination:string):Promise<Map<
       if(local.readUInt32LE(0)!==0x04034b50 || local.readUInt16LE(6)!==flags || local.readUInt16LE(8)!==method || local.readUInt32LE(14)!==crc || local.readUInt32LE(18)!==bytes || local.readUInt32LE(22)!==bytes)throw new Error('storage.invalid_backup');
       const localName=local.readUInt16LE(26),localExtra=local.readUInt16LE(28),start=offset+30+localName+localExtra;
       if((await read(file,offset+30,localName)).toString('utf8')!==name || start+bytes>directoryStart)throw new Error('storage.invalid_backup');
-      const path=join(destination,name);await mkdir(dirname(path),{recursive:true,mode:0o700});
-      for(let directory=dirname(path);directory!==destination;directory=dirname(directory))directories.add(directory);
-      const output=await open(path,'wx',0o600);const hash=createHash('sha256');let actualCrc=0;
+      let output:FileHandle|undefined;
+      if(destination){
+        const path=join(destination,name);await mkdir(dirname(path),{recursive:true,mode:0o700});
+        for(let directory=dirname(path);directory!==destination;directory=dirname(directory))directories.add(directory);
+        output=await open(path,'wx',0o600);
+      }
+      const hash=createHash('sha256');let actualCrc=0;
       try {
-        for(let n=0;n<bytes;n+=65536){const chunk=await read(file,start+n,Math.min(65536,bytes-n));hash.update(chunk);actualCrc=crc32(chunk,actualCrc);await output.writeFile(chunk);}
-        await output.sync();
-      } finally {await output.close();}
+        for(let n=0;n<bytes;n+=65536){const chunk=await read(file,start+n,Math.min(65536,bytes-n));hash.update(chunk);actualCrc=crc32(chunk,actualCrc);await output?.writeFile(chunk);}
+        await output?.sync();
+      } finally {await output?.close();}
       if(actualCrc!==crc)throw new Error('storage.invalid_backup');
       entries.set(name,{bytes,sha256:hash.digest('hex')});cursor+=46+length+extra+comment;
     }
