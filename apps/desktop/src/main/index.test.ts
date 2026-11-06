@@ -49,6 +49,7 @@ vi.mock('./storage/restore-startup', () => ({ confirmRestoreStartup: mocks.confi
 vi.mock('./storage/backup', () => ({ recoverRestore: vi.fn() }));
 vi.mock('./logging', () => ({ log: mocks.log, copyDiagnostics: mocks.copyDiagnostics }));
 vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage, showStartupError: mocks.fatal }));
+vi.mock('./window-state', () => ({readWindowState: () => ({width:1200,height:800,maximized:false}), trackWindowState:vi.fn()}));
 vi.mock('./shutdown', () => ({ coordinateShutdown: () => vi.fn() }));
 vi.mock('./ownership', () => ({ acquireOwnership: (_app: unknown, _window: unknown, restore: () => void) => { mocks.restore = restore; return true; } }));
 vi.mock('./i18n', () => ({ tr: (key: string) => key }));

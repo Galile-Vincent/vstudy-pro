@@ -11,6 +11,7 @@ import { applyNativeTheme, nativeBackground } from './theme';
 import { initializeMoodleProtocol } from './moodle/sso-protocol';
 import { log, copyDiagnostics } from './logging';
 import { showAttachedMessage, showStartupError, type StartupStage } from './dialogs';
+import { readWindowState, trackWindowState } from './window-state';
 import { coordinateShutdown } from './shutdown';
 import { acquireOwnership } from './ownership';
 import { tr } from './i18n';
@@ -88,9 +89,10 @@ async function createWindow(show = true): Promise<void> {
   const appearance = store!.settings.get();
   applyNativeTheme(appearance);
   if (!app.isPackaged && process.platform === "darwin") app.dock?.setIcon(join(__dirname, "../../build/icon-mac.png"));
+  const state = readWindowState(app.getPath('userData'));
+  const { x, y, width, height } = state;
   const current = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    ...(x === undefined ? {} : {x}), ...(y === undefined ? {} : {y}), width, height,
     minWidth: 720,
     minHeight: 480,
     show: false,
@@ -111,6 +113,7 @@ async function createWindow(show = true): Promise<void> {
     },
   });
   window = current;
+  trackWindowState(current, app.getPath('userData'), state);
   applyNativeTheme(appearance);
   current.webContents.on('will-frame-navigate', event => { if (!event.isMainFrame) event.preventDefault(); });
   current.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
