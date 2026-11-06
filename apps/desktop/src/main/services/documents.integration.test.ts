@@ -38,12 +38,19 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     await cp(resolve("resources/converter/pdf_md"), join(resources, "pdf_md"), { recursive: true });
     const python = await converter.ensureReady().catch(error => {console.error('Converter fixture setup failed', {progress, diagnostics});throw error;});
     executable = python;
-    const runtime = spawnSync(python, ['-I', '-S', '-c', 'import json,platform,sys;print(json.dumps({"version":sys.version,"machine":platform.machine()}))'], {
+    const runtime = spawnSync(python, ['-I', '-S', '-c', 'import json,platform,sys,sysconfig;print(json.dumps({"version":sys.version,"machine":platform.machine(),"buildPlatform":sysconfig.get_platform()}))'], {
       cwd: directory, env: scrubbedEnvironment(directory), encoding: 'utf8', windowsHide: true, timeout: 10000,
     });
     expect(runtime.status, runtime.stderr).toBe(0);
     console.info('Converter fixture runtime', runtime.stdout.trim());
-    if (process.platform === 'win32' && process.arch === 'arm64') expect(JSON.parse(runtime.stdout).machine.toLowerCase()).toMatch(/^(amd64|x86_64)$/);
+    if (process.platform === 'win32' && process.arch === 'arm64') {
+      expect(JSON.parse(runtime.stdout).buildPlatform).toBe('win-amd64');
+      const binary = await readFile(python);
+      expect(binary.toString('ascii', 0, 2)).toBe('MZ');
+      const pe = binary.readUInt32LE(0x3c);
+      expect(binary.toString('ascii', pe, pe + 4)).toBe('PE\0\0');
+      expect(binary.readUInt16LE(pe + 4)).toBe(0x8664);
+    }
     expect(await converter.ensureReady()).toBe(python);
     expect(progress).toContain("Converter ready");
     progress.length = 0;
