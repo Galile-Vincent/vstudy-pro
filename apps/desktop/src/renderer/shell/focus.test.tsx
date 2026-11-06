@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act } from 'react';
+import { act, Suspense } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { defaultSettings } from '../../shared';
@@ -49,4 +49,21 @@ it('reopens settings and restores its Welcome entry after it is ready',async()=>
     await click('welcome-entry');await click('close-welcome');
     await act(async()=>vi.advanceTimersByTime(1));expect(document.activeElement).toBe(entry);
   } finally {window.removeEventListener('vstudy:open-settings',reopen);entry.remove();}
+});
+
+it('restores Welcome entry focus only after a suspended return route commits',async()=>{
+  let hold=false,release!:()=>void;
+  const pending=new Promise<void>(resolve=>{release=resolve;});
+  function DeferredRoutes(){
+    const {route,navigate,closeWelcome}=useNavigate();
+    if(route.view==='home'&&hold)throw pending;
+    return route.view==='welcome'?<button id="close-welcome" onClick={closeWelcome}>Close</button>:<button id="welcome-entry" onClick={()=>navigate('welcome')}>Welcome</button>;
+  }
+  await act(()=>root.render(<AppShell><Suspense fallback={<p>Loading route</p>}><DeferredRoutes/></Suspense></AppShell>));
+  await act(()=>vi.advanceTimersByTime(20));await click('welcome-entry');hold=true;await click('close-welcome');
+  await act(()=>vi.advanceTimersByTime(50));
+  expect(host.querySelector('#welcome-entry')).toBeNull();
+  hold=false;await act(async()=>release());
+  await act(()=>vi.advanceTimersByTime(50));
+  expect(document.activeElement?.id).toBe('welcome-entry');
 });
