@@ -1,7 +1,7 @@
 /** Verify the actual ASAR/native PTY package with release fuses enabled and isolated smoke data. */
 import assert from 'node:assert/strict';
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, rm, copyFile, writeFile, stat } from 'node:fs/promises';
+import { chmod, mkdtemp, mkdir, readFile, rm, copyFile, writeFile, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { setTimeout, clearTimeout } from 'node:timers';
@@ -11,8 +11,12 @@ const evidence = resolve('../../docs/evidence/ai-cli/packaged');
 await mkdir(evidence, { recursive: true });
 const root = await mkdtemp(join(tmpdir(), 'vstudy-packaged-smoke-'));
 const bundle = resolve('release/mac-arm64/VStudy Pro.app');
+const helper = join(bundle, 'Contents/Resources/app.asar.unpacked/node_modules/node-pty/prebuilds/darwin-arm64/spawn-helper');
 let child;
+let helperMode;
 try {
+  helperMode = (await stat(helper)).mode & 0o777;
+  await chmod(helper, 0o644);
   const signature = execFileSync('/usr/bin/codesign', ['--verify', '--deep', '--strict', bundle], { encoding: 'utf8' });
   const fuses = await getCurrentFuseWire(bundle);
   assert.equal(fuses[F.RunAsNode], 48); assert.equal(fuses[F.EnableNodeCliInspectArguments], 48);
@@ -27,9 +31,11 @@ try {
   const timer = setTimeout(() => child.kill('SIGKILL'), 40000);
   const code = await new Promise(resolve => child.once('exit', resolve)); clearTimeout(timer);
   const result = JSON.parse(await readFile(join(root, 'smoke-result.json'), 'utf8'));
-  await writeFile(join(evidence, 'result.json'), JSON.stringify({ code, signatureVerified: true, signature, fuses, nativeFiles, result }, null, 2));
+  const helperModeAfter = (await stat(helper)).mode & 0o777;
+  await writeFile(join(evidence, 'result.json'), JSON.stringify({ code, signatureVerified: true, signature, fuses, nativeFiles, helperModeBefore: '0644', helperModeAfter: helperModeAfter.toString(8), result }, null, 2));
   await writeFile(join(evidence, 'launch.log'), log);
   await copyFile(join(root, 'ai-cli-packaged.png'), join(evidence, 'ai-cli-packaged.png')).catch(() => {});
   assert.equal(code, 0); assert.equal(result.ok, true); assert.equal(result.nativeCommandAnswered, true); assert.equal(result.closed, true);
+  assert.equal(helperModeAfter & 0o111, 0o111, 'the real ASAR runtime repaired its resolved helper before the PTY spawn');
   console.log(JSON.stringify({ ...result, signatureVerified: true, releaseFusesEnabled: true, nativeFiles }));
-} finally { child?.kill('SIGKILL'); await rm(root, { recursive: true, force: true }); }
+} finally { child?.kill('SIGKILL'); if (helperMode !== undefined) await chmod(helper, helperMode); await rm(root, { recursive: true, force: true }); }
