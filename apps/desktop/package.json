@@ -158,6 +158,11 @@
           "vstudymoodle"
         ]
       }
-    ]
+    ],
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": false,
+      "perMachine": false
+    }
   }
 }

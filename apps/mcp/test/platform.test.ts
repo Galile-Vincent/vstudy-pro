@@ -94,6 +94,19 @@ describe('platform connection and launch fixtures', () => {
     expect(resolveWindowsApp({ environment, query: () => { throw new Error('Unavailable'); }, isFile: path => path === expected })).toBe(expected);
     expect(registryAppPaths('HKEY_CURRENT_USER\\x\n    DisplayName    REG_SZ    Other App\n    InstallLocation    REG_SZ    C:\\Other\n', environment)).toEqual([]);
   });
+  it('prefers a custom HKCU InstallLocation over the standard per-user directory', () => {
+    const directory = 'E:\\Custom VStudy';
+    const custom = directory + '\\VStudy Pro.exe';
+    const query = vi.fn(() => 'HKEY_CURRENT_USER\\Software\\fixture\n    DisplayName    REG_SZ    VStudy Pro\n    InstallLocation    REG_SZ    ' + directory + '\n');
+    expect(resolveWindowsApp({ environment, query, isFile: () => true })).toBe(custom);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+  it('prefers the standard per-user directory before probing legacy machine-wide installs', () => {
+    const query = vi.fn(() => '');
+    const expected = 'C:\\Users\\Student Name\\AppData\\Local\\Programs\\VStudy Pro\\VStudy Pro.exe';
+    expect(resolveWindowsApp({ environment, query, isFile: path => path === expected })).toBe(expected);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
   it('does not launch missing apps or registry command text', async () => {
     const run = vi.fn(async () => {});
     await expect(launchApplication({ platform: 'win32', environment, query: () => '', isFile: () => false, run })).rejects.toMatchObject({ code: 'DISCONNECTED' });

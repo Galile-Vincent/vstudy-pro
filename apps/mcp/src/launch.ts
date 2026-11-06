@@ -35,18 +35,21 @@ export function resolveWindowsApp(options: LaunchOptions = {}): string | undefin
   if (!win32.isAbsolute(system) || !/^[a-z]:/i.test(system)) throw unavailable();
   const registry = win32.join(system, 'System32', 'reg.exe');
   const query = options.query ?? ((executable, args) => execFileSync(executable, args, { encoding: 'utf8', timeout: 2000, maxBuffer: 2 * 1024 * 1024, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] }));
-  const candidates: string[] = [];
-  for (const key of [
-    String.raw`HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall`,
-    String.raw`HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall`,
-    String.raw`HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall`,
-  ]) {
-    try { candidates.push(...registryAppPaths(query(registry, ['query', key, '/s']), environment)); } catch { continue; }
-  }
-  if (environment.LOCALAPPDATA) candidates.push(win32.join(environment.LOCALAPPDATA, 'Programs', 'VStudy Pro', 'VStudy Pro.exe'));
   const isFile = options.isFile ?? (path => existsSync(path) && lstatSync(path).isFile() && !lstatSync(path).isSymbolicLink());
-  return candidates.find(path => win32.isAbsolute(path) && /^[a-z]:/i.test(path) && ![...path].some(character => character.charCodeAt(0) < 32)
+  const installed = (paths: string[]) => paths.find(path => win32.isAbsolute(path) && /^[a-z]:/i.test(path)
+    && ![...path].some(character => character.charCodeAt(0) < 32)
     && win32.basename(path).toLowerCase() === 'vstudy pro.exe' && isFile(path));
+  const fromRegistry = (key: string) => {
+    try { return installed(registryAppPaths(query(registry, ['query', key, '/s']), environment)); }
+    catch { return undefined; }
+  };
+  const currentUser = fromRegistry(String.raw`HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall`);
+  if (currentUser) return currentUser;
+  const standard = environment.LOCALAPPDATA && installed([win32.join(environment.LOCALAPPDATA, 'Programs', 'VStudy Pro', 'VStudy Pro.exe')]);
+  if (standard) return standard;
+  return fromRegistry(String.raw`HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall`)
+    ?? fromRegistry(String.raw`HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall`);
+
 }
 
 function run(executable: string, args: string[], detached: boolean): Promise<void> {
