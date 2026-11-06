@@ -4,6 +4,7 @@
  * Privileged IO stays in main; callers receive validated domain data rather than raw paths or secrets.
  * @packageDocumentation
  */
+import { assertMessageText } from "../../shared/message-text";
 import { chatTurnContext } from './chat-turn-context';
 import { CourseContextCache } from "../planner/context";
 import { PlannerRepository } from "../planner/repository";
@@ -110,6 +111,7 @@ export class ChatService {
   }
   /** Validate options and ownership before accepting exactly one producer for the conversation. */
   start(request: ChatRequest, owner: ChatOwner): void | Promise<void> {
+    assertMessageText(request.userMessage);
     if (this.stopped) throw new Error("Chat service is closed");
     this.revision++;
     if (!Object.keys(request.options ?? {}).length) return this.accept(request, owner);

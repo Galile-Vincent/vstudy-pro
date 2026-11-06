@@ -119,3 +119,12 @@ it('routes IPC stacks through redaction without exposing private filenames', asy
     expect(JSON.stringify(output.mock.calls)).not.toContain('private-paper');
   } finally {registrar.dispose();output.mockRestore();raw.mockRestore();}
 });
+it('returns a localized size error before accepting an oversize user chat message',async()=>{
+  let invoke:((event:IpcMainInvokeEvent,payload:unknown)=>unknown)|undefined;
+  let calls=0;
+  const registrar=createIpcRegistrar({handle:(_channel,listener)=>{invoke=listener;},removeHandler:()=>{}},()=>true);
+  registrar.handle('chat:start',()=>{calls++;return {ok:true};});
+  const request={scope:'general',requestId:'11111111-1111-4111-a111-111111111111',conversationId:'22222222-2222-4222-a222-222222222222',providerId:'openai-api',modelId:'fixture',userMessage:'x'.repeat(2_000_001)};
+  await expect(invoke!({} as IpcMainInvokeEvent,request)).rejects.toThrow('VSTUDY_STATUS:{"code":"errors.message_too_large","params":{}}');
+  expect(calls).toBe(0);registrar.dispose();
+});

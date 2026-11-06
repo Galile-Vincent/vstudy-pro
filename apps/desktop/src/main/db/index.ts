@@ -4,6 +4,8 @@
  * Applied SQL remains immutable; repositories share one connection and use bound query values.
  * @packageDocumentation
  */
+import { assertMessageText } from '../../shared/message-text';
+import { tr } from '../../shared/i18n';
 import { migrations } from './migrations';
 import { migrate } from "./migrate";
 import { chatHistoryRepository } from './chat-history';
@@ -59,6 +61,18 @@ const messageRow = z
   .transform((row) =>
     messageSchema.parse({ ...row, parts: JSON.parse(row.parts) }),
   );
+
+/** Isolate damaged legacy content without rewriting it or including it in prompt context. */
+function readMessages(rows: Record<string,unknown>[]): Message[] {
+  return rows.flatMap(row=>{
+    try { return [messageRow.parse(row)]; }
+    catch {
+      const placeholder=messageSchema.safeParse({id:row.id,conversationId:row.conversationId,role:row.role,createdAt:row.createdAt,
+        parts:[{type:'text',text:tr('errors:message_unreadable'),status:'error',contextExcluded:true,error:'VSTUDY_STATUS:'+JSON.stringify({code:'errors.message_unreadable',params:{}})}]});
+      return placeholder.success?[placeholder.data]:[];
+    }
+  });
+}
 
 /** Open and migrate a private SQLite store; the caller must close it after dependent work settles. */
 export function openStore(path: string) {
@@ -143,8 +157,8 @@ export function openStore(path: string) {
   return {
     db,
     validateChats(): void {
-      for (const [table, schema] of [["conversations", conversationRow], ["messages", messageRow]] as const) {
-        for (const row of db.prepare(`SELECT * FROM ${table}`).iterate()) {
+      for (const [table, schema, query] of [["conversations", conversationRow, "SELECT * FROM conversations WHERE deletedAt IS NULL"], ["messages", messageRow, "SELECT messages.* FROM messages JOIN conversations ON conversations.id=messages.conversationId WHERE messages.supersededBy IS NULL AND conversations.deletedAt IS NULL"]] as const) {
+        for (const row of db.prepare(query).iterate()) {
           try { schema.parse(row); }
           catch (cause) { throw new Error(`storage.invalid_backup`, { cause: new Error(`${table} ${row.id}`, { cause }) }); }
         }
@@ -195,9 +209,9 @@ export function openStore(path: string) {
         const size = Math.min(100, Math.max(1, Math.floor(limit)));
         const backward = direction === 'backward';
         const rows = db.prepare(`SELECT * FROM messages WHERE conversationId=? AND supersededBy IS NULL ${cursor ? `AND (createdAt,id)${backward ? '<' : '>'}(?,?)` : ''} ORDER BY createdAt ${backward ? 'DESC' : 'ASC'},id ${backward ? 'DESC' : 'ASC'} LIMIT ?`).all(conversationId,...(cursor ? [cursor.createdAt,cursor.id] : []),size+1);
-        const items=rows.slice(0,size).map(r=>messageRow.parse(r));
-        const last=items.at(-1);
-        return {items:backward ? items.reverse() : items,nextCursor:rows.length>size&&last?{createdAt:last.createdAt,id:last.id}:null};
+        const items=readMessages(rows.slice(0,size));
+        const last=rows.slice(0,size).at(-1);
+        return {items:backward ? items.reverse() : items,nextCursor:rows.length>size&&last?{createdAt:String(last.createdAt),id:String(last.id) as Message['id']}:null};
       },
       supersede(ids: Message['id'][], replacementId: string) {
         const update = db.prepare('UPDATE messages SET supersededBy=? WHERE id=? AND supersededBy IS NULL');
@@ -211,6 +225,7 @@ export function openStore(path: string) {
         for (const id of ids) { const row = db.prepare("SELECT * FROM messages WHERE id=?").get(id); if (row) { const m = messageRow.parse(row); update.run(JSON.stringify(m.parts.map(p => ({ ...p, contextExcluded: true }))), id); } }
       },
       insert(input: Message): Message {
+        if(input.role==='user')for(const part of input.parts)assertMessageText(part.text);
         const m = messageSchema.parse(input);
         db.prepare(
           "INSERT INTO messages(id,conversationId,role,parts,createdAt) VALUES (?,?,?,?,?)",
@@ -224,15 +239,7 @@ export function openStore(path: string) {
         return m;
       },
       list(conversationId: Conversation["id"]): Message[] {
-        return z
-          .array(messageRow)
-          .parse(
-            db
-              .prepare(
-                "SELECT * FROM messages WHERE conversationId=? AND supersededBy IS NULL ORDER BY createdAt,id",
-              )
-              .all(conversationId),
-          );
+        return readMessages(db.prepare("SELECT * FROM messages WHERE conversationId=? AND supersededBy IS NULL ORDER BY createdAt,id").all(conversationId));
       },
     },
     settings: {

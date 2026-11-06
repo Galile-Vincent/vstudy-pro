@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import { z } from "zod";
+import { MAX_MESSAGE_TEXT_LENGTH } from "./message-text";
 import { materialRequestSchema } from "./planner";
 import { themePreferencesSchema } from './themes';
 import { moodleAgentActionSchema } from "./moodle";
@@ -171,7 +172,7 @@ export const toolCallSchema = z.object({
 export type ToolCall = z.infer<typeof toolCallSchema>;
 /** Persisted content and turn metadata, including abort state and context exclusion. */
 export const messagePartSchema = z
-  .object({ type: z.literal("text"), text: z.string().max(2_000_000), proposals: z.array(moodleAgentActionSchema).max(5).optional(), reasoning: z.string().max(2_000_000).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
+  .object({ type: z.literal("text"), text: z.string().max(MAX_MESSAGE_TEXT_LENGTH), proposals: z.array(moodleAgentActionSchema).max(5).optional(), reasoning: z.string().max(MAX_MESSAGE_TEXT_LENGTH).optional(), citations: z.array(documentCitationSchema).max(128).optional(), toolCalls: z.array(toolCallSchema).max(16).optional(), usage: usageSchema.optional(), modelId: z.string().optional(), options: modelOptionsSchema.optional(), turnId: z.string().optional(), error: z.string().optional(), selection: selectionSchema.optional(), status: z.enum(["complete", "aborted", "error"]).optional() })
   .extend({ contextExcluded: z.boolean().optional() })
   .strict();
 /** Validated stored message parts; model and selection metadata stay associated with their original turn. */
@@ -220,7 +221,7 @@ const chatFields = {
     conversationId: conversationIdSchema,
     providerId: providerIdSchema,
     modelId: z.string().min(1).max(300),
-    userMessage: z.string().min(1),
+    userMessage: z.string().min(1).max(MAX_MESSAGE_TEXT_LENGTH),
     options: modelOptionsSchema.optional(),
     turnId: z.string().max(200).optional(),
     contextTurnIds: z.array(z.string().max(200)).max(10000).optional(),
@@ -235,7 +236,7 @@ export type ChatRequest = z.infer<typeof chatRequestSchema>;
 /** Validated stream events; terminal state and request ownership are enforced by the chat service. */
 export const chatEventSchema = z.discriminatedUnion("type", [
  z.object({type: z.literal("proposals"), actions: z.array(moodleAgentActionSchema).max(5)}).strict(),
-  z.object({ type: z.literal("reasoning-delta"), text: z.string().max(2_000_000) }).strict(),
+  z.object({ type: z.literal("reasoning-delta"), text: z.string().max(MAX_MESSAGE_TEXT_LENGTH) }).strict(),
   z.object({ type: z.literal("citations"), citations: z.array(documentCitationSchema).max(128) }).strict(),
   z.object({ type: z.literal("tool-call"), call: toolCallSchema }).strict(),
   z.object({ type: z.literal("usage"), usage: usageSchema }).strict(),

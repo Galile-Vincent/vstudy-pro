@@ -176,7 +176,7 @@ it('restores converted image bytes and their Markdown references', async()=>{
   finally {restored.close();}
  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
-it.each(['message','superseded message','deleted conversation'])('rejects domain-invalid %s before scheduling restore',async kind=>{
+it.each(['message','superseded message','deleted conversation'])('validates only readable chat rows when restoring an invalid %s',async kind=>{
  const root=await mkdtemp(join(tmpdir(),'vstudy-chat-source-')),target=await mkdtemp(join(tmpdir(),'vstudy-chat-target-'));
  const {store}=await fixture(root);
  try {
@@ -185,8 +185,16 @@ it.each(['message','superseded message','deleted conversation'])('rejects domain
   if(kind==='deleted conversation')store.db.prepare("UPDATE conversations SET options='[]',deletedAt=? WHERE id=?").run(c.createdAt,c.id);
   else store.db.prepare("UPDATE messages SET parts='{}',supersededBy=? WHERE id=?").run(kind==='superseded message'?'replacement':null,m.id);
   const zip=join(target,'backup.zip');await exportBackup(store,root,zip);
-  await expect(stageRestore(target,zip)).rejects.toThrow('storage.invalid_backup');
-  expect(await readdir(target)).toEqual(['backup.zip']);expect(store.documents.list()).toHaveLength(1);
+  if(kind==='message') {
+   await expect(stageRestore(target,zip)).rejects.toThrow('storage.invalid_backup');
+   expect(await readdir(target)).toEqual(['backup.zip']);
+  } else {
+   await stageRestore(target,zip);await recoverRestore(target);
+   const restored=openStore(join(target,'vstudy.sqlite'));
+   try {expect(restored.conversations.list(id as never)).toHaveLength(kind==='deleted conversation'?0:1);expect(restored.messages.list(c.id)).toHaveLength(kind==='deleted conversation'?1:0);}
+   finally {restored.close();}
+  }
+  expect(store.documents.list()).toHaveLength(1);
  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
 it('restores a legacy v1 inventory with no converted image entries',async()=>{

@@ -4,6 +4,8 @@
  * Request and response validation and sender ownership stay at the IPC boundary.
  * @packageDocumentation
  */
+import { z } from 'zod';
+import { MessageTextLimitError } from '../../shared/message-text';
 import { log, redact } from '../logging';
 import { enterStorageRequest } from "../storage/maintenance";
 import { MoodleAuthError } from '../moodle/auth';
@@ -51,6 +53,9 @@ export function createIpcRegistrar(
           const response = await handler(request, event);
           return ipcContract[channel].response.parse(response);
         } catch (error) {
+          if (error instanceof MessageTextLimitError || channel === 'chat:start' && error instanceof z.ZodError && error.issues.some(issue=>issue.code==='too_big' && issue.path[0]==='userMessage')) {
+            throw new Error('VSTUDY_STATUS:'+JSON.stringify({code:'errors.message_too_large',params:{}}));
+          }
           if (channel.startsWith('storage:') || error instanceof Error && error.message.startsWith('storage.')) {
             const errno=(error as NodeJS.ErrnoException).code;
             const code=errno==='ENOSPC' ? 'disk_full' : errno==='EACCES' || errno==='EPERM' ? 'permission' : errno==='EBUSY' ? 'busy' : error instanceof Error && error.message.startsWith('storage.') ? error.message.slice(8) : 'failed';
