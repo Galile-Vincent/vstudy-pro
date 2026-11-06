@@ -142,7 +142,7 @@
   },
   "gui": {
     "launched": true,
-    "launchCount": 1,
+    "launchCount": 2,
     "recordedAt": "2026-11-06T06:09:57.072746+00:00",
     "packagedPty": "Passed. The resolved Release helper repaired 0644 to 0755 before a real native PTY answer. The action closed, preferences reset, and the app exited with code 0.",
     "result": "../packaged/result.json",
@@ -151,7 +151,16 @@
     "postLaunchGuard": "pgrep -fl \"VStudy Pro|Electron\" returned no matches.",
     "slotReleased": true,
     "updatedFakeCliMatrix": "Prepared for explicit native fake selection; not rerun after the security changes.",
-    "newManualUiScreenshots": "Not captured. The packaged screenshot covers the setup host; manual UI has three-language component coverage."
+    "newManualUiScreenshots": "Not captured. The packaged screenshot covers the setup host; manual UI has three-language component coverage.",
+    "repeatAfterSlotCorrection": {
+      "recordedAt": "2026-11-06T06:11:33.662624+00:00",
+      "launchCount": 1,
+      "passed": true,
+      "preLaunchGuard": "pgrep -fl \"VStudy Pro|Electron\" returned no matches.",
+      "postLaunchGuard": "pgrep -fl \"VStudy Pro|Electron\" returned no matches.",
+      "resultIdenticalToPriorRun": true,
+      "slotReleased": true
+    }
   },
   "notes": [
     "Static security has three existing external-link warnings and no unreviewed dependency advisories.",
