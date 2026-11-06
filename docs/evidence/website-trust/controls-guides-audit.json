@@ -1,0 +1,104 @@
+{
+  "controls": [
+    "Previous wraps to the last school. Enter activates dots. ArrowLeft changes schools. Tab follows control order. Page motion pause is respected."
+  ],
+  "guides": [
+    {
+      "language": "en",
+      "width": 390,
+      "scheme": "light",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "scheme": "dark",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "scheme": "light",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "scheme": "dark",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "zh-Hant",
+      "width": 390,
+      "scheme": "light",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "zh-Hant",
+      "width": 390,
+      "scheme": "dark",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "zh-Hant",
+      "width": 1440,
+      "scheme": "light",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "zh-Hant",
+      "width": 1440,
+      "scheme": "dark",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "ja",
+      "width": 390,
+      "scheme": "light",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "ja",
+      "width": 390,
+      "scheme": "dark",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "ja",
+      "width": 1440,
+      "scheme": "light",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    },
+    {
+      "language": "ja",
+      "width": 1440,
+      "scheme": "dark",
+      "violations": [],
+      "overflow": false,
+      "cycu": true
+    }
+  ],
+  "errors": []
+}
