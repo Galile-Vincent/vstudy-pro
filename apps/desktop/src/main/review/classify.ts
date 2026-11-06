@@ -20,10 +20,8 @@ export function classify(input:ClassificationInput):Classification {
   if (valid(input.scopeCourseId)) return result(input.scopeCourseId,'scope',1);
   const documents = [...new Set(input.documentCourseIds?.filter(valid) ?? [])];
   if (documents.length===1) return result(documents[0]!,'document',1);
-  if (documents.length>1) return unsorted();
   const aliases = input.courses.filter(course=>[course.title,...course.aliases].some(alias=>containsAlias(input.text,alias)));
   if (aliases.length===1) return result(aliases[0]!.id,'alias',0.85);
-  if (aliases.length>1) return unsorted();
   const model = input.modelSuggestion;
   if (model && valid(model.courseId) && Number.isFinite(model.confidence) && model.confidence>=TENTATIVE_CONFIDENCE && model.confidence<=1) return result(model.courseId,'model',model.confidence);
   return unsorted();

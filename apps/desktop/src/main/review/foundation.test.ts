@@ -51,6 +51,8 @@ it.each([
   [{text:'help',modelSuggestion:{courseId:'a',confidence:0.8}},'a','model'],
   [{text:'help',modelSuggestion:{courseId:'a',confidence:0.49}},null,null],
   [{text:'微積分與計組'},null,null],
+  [{documentCourseIds:['a','b'],text:'微積分'},'a','alias'],
+  [{text:'微積分與計組',modelSuggestion:{courseId:'b',confidence:0.9}},'b','model'],
   [{text:'help',manualOverride:{courseId:'b'}},'b','manual'],
 ] as const)('uses the classification ladder %#', (input,id,method) => {
   expect(classify({...input,courses})).toMatchObject({courseId:id,method});
