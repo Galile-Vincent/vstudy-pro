@@ -35,13 +35,13 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
     return track(Promise.resolve().then(operation).finally(release));
   };
   let engine:McpEngine|undefined;
-  let requestedEnabled = false;
+  let requestedEnabled:boolean|undefined;
   let unavailable = false;
   const state = ():AgentsState => ({
     ...(engine?.state() ?? {enabled:false, grants:[], pairings:[], proposals:[], activity:[], activeCalls:0, accounts:[]}),
     unavailable,
   });
-  const start = ():Promise<void> => {
+  const start = (restore=false):Promise<void> => {
     if (stopped) return Promise.reject(new McpFailure('DISCONNECTED'));
     if (bridge && engine) return Promise.resolve();
     return starting ??= Promise.resolve().then(async () => {
@@ -65,7 +65,7 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
         },
       });
       engine = created;
-      created.setEnabled(false);
+      if (restore && !(requestedEnabled ?? created.state().enabled)) return;
       bridge = await (options.transport ?? createPlatformBridge)({userData:options.userData,
         ...(options.peerHelper ? {peerHelper:options.peerHelper} : {}),
         handleRequest:(request, id) => created.handleRequest(request, id), onDisconnect:id => created.disconnect(id),
@@ -76,11 +76,12 @@ export function createMcpRuntime(options:McpRuntimeOptions) {
     get engine() { if (!engine) throw new McpFailure('DISABLED'); return engine; },
     get ready() { return starting?.catch(() => {}) ?? Promise.resolve(); },
     state,
-    async setEnabled(enabled:boolean) {
-      requestedEnabled = enabled;
+    restore() { return this.setEnabled(undefined); },
+    async setEnabled(enabled:boolean|undefined) {
+      if (enabled!==undefined) requestedEnabled = enabled;
       try {
-        if (enabled) await start();
-        if (!stopped) engine?.setEnabled(requestedEnabled);
+        if (enabled!==false) await start(enabled===undefined);
+        if (!stopped && requestedEnabled!==undefined) engine?.setEnabled(requestedEnabled);
         unavailable = false;
       } catch {
         unavailable = true;

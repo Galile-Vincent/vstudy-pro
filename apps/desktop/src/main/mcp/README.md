@@ -40,7 +40,7 @@ Required bridge options are `userData`, absolute `peerHelper`, `handleRequest`, 
 
 ## Main integration
 
-`createMcpRuntime` defers backend, engine, private-state and transport construction until `setEnabled(true)`. Supply a backend factory to keep desktop startup independent of MCP availability. Its `state()` returns safe idle state without constructing the engine. Initialization failures log only a fixed diagnostic and set `unavailable`; Settings displays the translated platform message. Access must be enabled again after restarting the app.
+`createMcpRuntime` defers backend, engine and protected-state construction until the first window exists. Main calls `restore()` from `browser-window-created`. Restoration starts the transport only for a saved enabled opt-in, including hidden background launches. It does not write the enabled flag. New profiles remain off. Settings calls `setEnabled(boolean)` for explicit changes. Supply a backend factory to keep desktop startup independent of MCP availability. Its `state()` returns safe idle state before restoration. Initialization and state-validation failures log only a fixed diagnostic and set `unavailable`; Settings displays the translated platform message.
 
 ```ts
 import { createMcpRuntime } from './mcp/runtime';
@@ -55,13 +55,13 @@ const runtime = createMcpRuntime({
 });
 ```
 
-Register renderer methods only through the existing sender-validated, schema-validated IPC. Use `runtime.state()` for state reads and `runtime.setEnabled(enabled)` for the master switch. Access `runtime.engine` for decisions only after enabling. Consent must come from the trusted app main frame. No bridge approval method exists. Await `runtime.dispose()` before closing backend storage.
+Register renderer methods only through the existing sender-validated, schema-validated IPC. Call `runtime.restore()` after window creation and await `runtime.ready` when startup restoration must settle. Use `runtime.state()` for state reads and `runtime.setEnabled(enabled)` for the master switch. Access `runtime.engine` for decisions only after enabling. Consent must come from the trusted app main frame. No bridge approval method exists. Await `runtime.dispose()` before closing backend storage.
 
 Build the helper from the repository root with `node scripts/build-mcp-peer.mjs`. Its default output is `apps/desktop/resources/mcp-peer`. `--output /absolute/path` selects another output for tests or packaging. The parent must bundle this binary as an executable outside ASAR and pass its absolute path. The helper uses `getpeereid` on macOS and `SO_PEERCRED` on Linux. Node inherits the accepted, paused `Socket` as stdio FD 3. The helper does not read protocol bytes. Missing helpers or failed verification reject connections before parsing requests.
 
 ## Pairing and tool calls
 
-`ping` returns `{version: MCP_PROTOCOL_VERSION, enabled}` when a bridge exists. No bridge is constructed until the student enables access. The master switch starts off after every app restart.
+`ping` returns `{version: MCP_PROTOCOL_VERSION, enabled}` when a bridge exists. No bridge is constructed before window creation or without a saved opt-in. The master switch defaults off for new profiles and restores the saved choice on restart.
 
 `pair.begin` returns the shared `{pairingId, code, expiresAt}` shape immediately. The app shows the same random code and the self-reported client name. Pairing expires after two minutes. `pair.finish` returns a fixed `DENIED` error while consent is pending. The client can retry on the same connection after the student decides. Only that connection can finish. Successful finish consumes consent and returns `{grant, grantInfo}` once. Cross-connection finish and replay fail. Disconnect and switching off discard consent. Only requested scopes and explicitly selected existing accounts can be granted. The renderer should select shared `defaultScopes` initially and exclude grades and writes unless requested by the student.
 

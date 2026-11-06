@@ -1,0 +1,8 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-bb0a65fc/apps/mcp
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  14:05:12
+   Duration  909ms (transform 22ms, setup 0ms, import 72ms, tests 791ms, environment 0ms)

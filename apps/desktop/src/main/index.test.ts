@@ -17,7 +17,7 @@ const electron = await vi.hoisted(async () => {
     show = vi.fn();
     focus = vi.fn();
     isDestroyed = () => this.destroyed;
-    constructor() { super(); Window.instances.push(this); }
+    constructor() { super(); Window.instances.push(this); app.emit('browser-window-created', {}, this); }
     close() { this.destroyed = true; this.webContents.emit('destroyed'); this.emit('closed'); }
     static getAllWindows() { return Window.instances.filter(w => !w.destroyed); }
   }
@@ -150,6 +150,49 @@ it.each([
     expect(JSON.stringify(mocks.log.mock.calls)).not.toContain('school-secret');
   } finally {
     Object.defineProperty(process, 'getuid', descriptor);
+    await runtime?.dispose();
+  }
+});
+
+
+it.each(['enabled', 'throwing', 'absent', 'corrupt'] as const)('restores %s MCP state after creating a hidden background window', async persisted => {
+  const {createMcpRuntime} = await vi.importActual<typeof import('./mcp/runtime')>('./mcp/runtime');
+  const previousArgv = [...process.argv];
+  const write = vi.fn();
+  const read = vi.fn(() => {
+    expect(electron.BrowserWindow.instances).toHaveLength(1);
+    if (persisted === 'throwing') throw Error('private token=school-secret');
+    return persisted === 'absent' ? undefined : persisted === 'corrupt' ? '{broken' : JSON.stringify({version:1, enabled:true, grants:[], activity:[]});
+  });
+  const transport = vi.fn(async () => ({endpoint:{kind:'unix' as const, path:'/fixture'}, dispose:async()=>{}}));
+  const onFailure = vi.fn();
+  let runtime:McpRuntime | undefined;
+  let restoring:Promise<void> | undefined;
+  try {
+    process.argv.push('--mcp-background');
+    mocks.registerIpc.mockImplementation(() => {
+      runtime = createMcpRuntime({userData:'.', backend:{accounts:()=>[], prepare:async()=>{throw Error('unused');}},
+        persistence:{read, write}, transport, secretValues:()=>[], restoreWindow:()=>{}, onFailure,
+      });
+      electron.app.once('browser-window-created', () => {restoring = runtime!.restore();});
+      expect(read).not.toHaveBeenCalled();
+      return () => runtime!.dispose();
+    });
+    const window = await start();
+    window.emit('ready-to-show');
+    expect(window.show).not.toHaveBeenCalled();
+    window.webContents.emit('did-finish-load');
+    await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
+    await restoring;
+    expect(electron.app.exit).not.toHaveBeenCalled();
+    expect(mocks.closeStore).not.toHaveBeenCalled();
+    expect(read).toHaveBeenCalledOnce();
+    expect(runtime!.state()).toMatchObject({enabled:persisted === 'enabled', unavailable:['throwing','corrupt'].includes(persisted)});
+    expect(transport).toHaveBeenCalledTimes(persisted === 'enabled' ? 1 : 0);
+    expect(write).not.toHaveBeenCalled();
+    expect(onFailure).toHaveBeenCalledTimes(['throwing','corrupt'].includes(persisted) ? 1 : 0);
+  } finally {
+    process.argv.splice(0, process.argv.length, ...previousArgv);
     await runtime?.dispose();
   }
 });
