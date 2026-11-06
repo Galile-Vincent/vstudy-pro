@@ -1,3 +1,4 @@
+import { useChatMotion } from './motion/chat-motion';
 import { FileText } from 'lucide-react';
 import { ChatAnnouncement, CopyAnswerButton } from './chat-accessibility';
 import { ReaderOfflineNotice } from './workspace/offline-notice';
@@ -70,6 +71,7 @@ export function Chat({
   documentPageCount?: number; documentTitle?: string;
 }) {
   useTranslation();
+  const motion = useChatMotion(history);
   const [options, setOptions] = useState<Record<string,string|boolean>>(conversation.options ?? {});
   useEffect(() => setOptions(conversation.options ?? {}), [conversation.providerId,conversation.modelId]);
   const declared = providers.find(p => p.config.id === conversation.providerId)?.models.find(m => m.id === conversation.modelId || m.resolvedId === conversation.modelId)?.options ?? [];
@@ -138,8 +140,8 @@ export function Chat({
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
-    <Thread components={documentComponents} autoFocus={autoFocus} />
-    <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
+    <div className="chat-motion" ref={motion}><Thread components={documentComponents} autoFocus={autoFocus} />
+    </div><p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }
 

@@ -59,3 +59,20 @@ html[data-theme-transition=view]::view-transition-new(root) {
 @media(prefers-reduced-motion:reduce) {
   .moodle-assistant-panel, .app-shell[data-sidebar-overlay=true] .shell-sidebar { transition:none; }
 }
+
+.chat-motion { display:contents; }
+.chat-pane > .chat-motion > .aui-thread-root { flex:1; height:auto; min-height:0; }
+.chat-motion [data-message-id] {
+  animation-duration:var(--motion-fast);
+  animation-timing-function:var(--ease-out-soft);
+}
+.chat-motion .chat-restored-message { animation:none; }
+.chat-motion .aui-tool-fallback-content { animation:none; transition:none; }
+.chat-motion .aui-tool-fallback-content > div {
+  animation:surface-tool-reveal var(--motion-fast) var(--ease-out-soft);
+  filter:none;
+}
+@keyframes surface-tool-reveal { from { opacity:0; } to { opacity:1; } }
+@media(prefers-reduced-motion:reduce) {
+  .chat-motion [data-message-id], .chat-motion .aui-tool-fallback-content > div { animation:none; }
+}
