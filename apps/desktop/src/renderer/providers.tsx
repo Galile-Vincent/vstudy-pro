@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSettings } from './language-settings';
 import { tr } from '../shared/i18n';
 import { UsageSettings } from './usage/settings';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { desktop } from './bridge';
 import { type Providers } from './provider-metadata';
 import { ProviderRow } from './provider-row';
@@ -44,6 +44,17 @@ export function ProviderSettings({
   const [structuredTables, setStructuredTables] = useState(false);
   const [featureError, setFeatureError] = useState('');
   const [tab, setTab] = useState(initialTab);
+  const [tabsList, setTabsList] = useState<HTMLDivElement | null>(null);
+  const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical');
+  useLayoutEffect(() => {
+    const list = tabsList;
+    if (!list) return;
+    const syncOrientation = () => setOrientation(getComputedStyle(list).flexDirection === 'row' ? 'horizontal' : 'vertical');
+    syncOrientation();
+    const observer = new ResizeObserver(syncOrientation);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [tabsList]);
   useEffect(() => {
     const section = ({providers:'ai',agents:'ai',general:'general',privacy:'privacy',appearance:'appearance',storage:'storage',usage:'usage',moodle:'moodle'} as const)[tab as 'general' | 'providers' | 'agents' | 'privacy' | 'appearance' | 'storage' | 'usage' | 'moodle'];
     if (section) track('settings_opened', {settings_section:section});
@@ -84,8 +95,8 @@ export function ProviderSettings({
           </Button>
         </div>
         {guide && <Onboarding onComplete={() => setGuide(false)} />}
-        <Tabs orientation="vertical" value={tab} onValueChange={setTab} className="settings-body">
-          <TabsList variant="line" className="settings-tabs" aria-label={tr('common:settings')}>
+        <Tabs orientation={orientation} value={tab} onValueChange={setTab} className="settings-body">
+          <TabsList ref={setTabsList} variant="line" className="settings-tabs" aria-label={tr('common:settings')}>
             {(
               [
                 ['general', SlidersHorizontal],
@@ -153,6 +164,13 @@ export function ProviderSettings({
                     <UsageSettings />
                   ) : (
                     <>
+                      <div className="settings-intro">
+                        <p>{tr('novice:privacy')}</p>
+                        <p>{tr('novice:step_access')}</p>
+                        <p>{tr('novice:step_key')}</p>
+                        <p>{tr('settings:key_help')}</p>
+                        <p>{tr('settings:keychain_help')}</p>
+                      </div>
                       <details className="settings-disclosure">
                         <summary>{tr('novice:setup_title')}</summary>
                         <div className="settings-disclosure-body"><AiSetupGuide onClose={onClose} /></div>

@@ -49,6 +49,7 @@
   padding: var(--space-3);
   border-inline-end: 1px solid var(--hairline);
   justify-content: start;
+  flex-direction: column;
   align-items: stretch;
   gap: 2px;
   background: transparent;
@@ -95,10 +96,11 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 }
 
 .settings-pane {
+  position: relative;
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, var(--ink) 25%, transparent) transparent;
+  scrollbar-color: var(--line) var(--material-sheet);
   min-width: 0;
   min-height: 0;
   padding: var(--space-6) var(--space-8) var(--space-8);
@@ -531,6 +533,10 @@ html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
   gap: var(--space-3);
   padding: var(--space-4);
   border: 0;
+}
+
+.settings-dialog .settings-card > .provider-row + .provider-row {
+  border-top: 1px solid var(--hairline);
 }
 
 .provider-row .row {
