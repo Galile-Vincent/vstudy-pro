@@ -128,5 +128,9 @@
   "status_failed": "Could not complete",
   "status_academic_integrity": "Blocked by academic integrity policy",
   "status_session_required": "School sign-in required",
-  "status_revoked": "Access revoked"
+  "status_revoked": "Access revoked",
+  "acting_one": "Agent active · {{count}} call",
+  "acting_other": "Agent active · {{count}} calls",
+  "queued_one": "{{count}} request waiting for review",
+  "queued_other": "{{count}} requests waiting for review"
 }

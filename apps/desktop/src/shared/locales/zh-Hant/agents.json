@@ -128,5 +128,9 @@
   "status_failed": "無法完成",
   "status_academic_integrity": "因學術誠信政策而封鎖",
   "status_session_required": "需要登入學校",
-  "status_revoked": "存取權限已撤銷"
+  "status_revoked": "存取權限已撤銷",
+  "acting_one": "代理程式執行中 · {{count}} 個呼叫",
+  "acting_other": "代理程式執行中 · {{count}} 個呼叫",
+  "queued_one": "{{count}} 個請求等待確認",
+  "queued_other": "{{count}} 個請求等待確認"
 }

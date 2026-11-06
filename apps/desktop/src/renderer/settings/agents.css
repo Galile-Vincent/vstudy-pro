@@ -76,6 +76,9 @@
   box-shadow: var(--elevation-floating);
 }
 .agents-dialog [data-slot=dialog-title] { font-size: var(--type-lg); line-height: 1.35; }
+.agents-dialog.agents-consent-dialog { display: flex; flex-direction: column; overflow: hidden; }
+.agents-consent-dialog > :not(.agents-consent-body) { flex-shrink: 0; }
+.agents-consent-body { display: grid; gap: var(--space-4); overflow: auto; min-height: 0; }
 .agents-dialog [data-slot=dialog-description] { color: var(--muted); font-size: var(--type-base); }
 .agents-dialog button, .agents-settings button { white-space: normal; height: auto; min-height: var(--control-height); border-radius: var(--r-sm); }
 .agents-selection { display: grid; gap: var(--space-4); }
@@ -96,6 +99,8 @@
 .agents-live { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--accent-color); font-size: var(--type-sm); }
 .agents-live [data-slot=button] { color: inherit; white-space: normal; }
 .agents-live-dot { width: var(--space-2); height: var(--space-2); flex: none; background: currentColor; border-radius: var(--r-pill); }
+.shell-workspace-status { display: flex; justify-content: flex-end; padding: var(--space-1) var(--space-5); background: var(--surface); }
+.shell-workspace-status:empty { display: none; }
 @media (max-width: 719px) {
   .agents-details > div { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
   [data-slot=dialog-content].agents-dialog { padding: var(--space-4); }

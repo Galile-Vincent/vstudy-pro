@@ -11,6 +11,8 @@ import { HomeView } from "./home";
 import { Workspace } from "./workspace";
 import { desktop } from './bridge';
 import { ProviderSettings, type Providers } from './providers';
+import { AgentsProvider } from './settings/agents-state';
+import { AgentConsent, AgentStatus } from './settings/agents-consent';
 function GlobalSettings() {
   const [open, setOpen] = useState(false);
   const [initialTab, setInitialTab] = useState('general');
@@ -48,8 +50,10 @@ function Views() {
 }
 export function App() {
   return (
-    <AppShell sidebar={<LibrarySidebar />}>
-      <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/>
-    </AppShell>
+    <AgentsProvider>
+      <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
+        <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AgentConsent />
+      </AppShell>
+    </AgentsProvider>
   );
 }

@@ -68,7 +68,7 @@ export function AgentConnect({ onClose }: { onClose: () => void }) {
         <h3>{tr(`agents:client_${setup.client.client}`)}</h3>
         <p>{tr(`agents:${setup.step === 'installed' ? 'installed' : 'preview_help'}`)}</p>
         <h4>{tr('agents:diff')}</h4>
-        <pre className="agents-raw">{setup.diff || tr('agents:no_change')}</pre>
+        <pre className="agents-raw" data-testid="agent-install-diff">{setup.diff || tr('agents:no_change')}</pre>
         <div className="agents-actions">
           <Button variant="secondary" disabled={!!busy} onClick={() => setSetup({ step: 'choose' })}>{tr('agents:choose_client')}</Button>
           {setup.step === 'preview' && setup.changed && <Button disabled={!!busy} onClick={install}>{tr('agents:install')}</Button>}

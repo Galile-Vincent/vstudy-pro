@@ -24,7 +24,7 @@ function GrantEditor({ grant, onClose }: { grant: Grant; onClose: () => void }) 
   const disabled = agents.pending || agents.connection !== 'ready' || !!grant.revokedAt;
   const validSelection = scopes.length > 0 && accountIds.length > 0 && accountIds.every(id => accounts.some(a => a.id === id));
   const save = async () => {
-    if (disabled || !validExpiry || !validSelection) return;
+    if (disabled || !validExpiry || expires <= Date.now() || !validSelection) return;
     if (await agents.act('mcp:edit-grant', { grantId: grant.id, scopes, accountIds, expiresAt: new Date(expiry).toISOString() })) onClose();
   };
   return <Dialog open onOpenChange={open => { if (!open && !agents.pending) onClose(); }}>
@@ -50,7 +50,7 @@ export function AgentGrants() {
   return <section aria-labelledby="agents-grants-title" className="agents-section">
     <h3 id="agents-grants-title">{tr('agents:grants')}</h3>
     {!grants.length && <p className="agents-muted">{tr('agents:no_grants')}</p>}
-    {grants.map(grant => <article className="agents-card" key={grant.id}>
+    {grants.map(grant => <article className="agents-card" data-grant-id={grant.id} key={grant.id}>
       <header className="agents-card-header"><h4>{grant.clientName}</h4><span className="agents-badge">{tr(`agents:${grant.revokedAt ? 'revoked' : Date.parse(grant.expiresAt) <= Date.now() ? 'expired' : 'active'}`)}</span></header>
       <dl className="agents-details">
         <div><dt>{tr('agents:client_id')}</dt><dd><code>{grant.clientId}</code></dd></div>

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /** Polling and commands share one authority even when several UI consumers mount. */
-import { act } from 'react';
+import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { AgentsProvider, useAgents } from './agents-state';
@@ -79,4 +79,11 @@ it('stops polling after the provider unmounts', async () => {
   await act(() => root.render(null));
   await act(() => vi.advanceTimersByTimeAsync(5000));
   expect(invoke).toHaveBeenCalledTimes(1);
+});
+
+it('keeps one polling loop under the app StrictMode lifecycle', async () => {
+  await act(() => root.render(<StrictMode><AgentsProvider><Consumer /><Consumer /></AgentsProvider></StrictMode>));
+  expect(invoke.mock.calls).toEqual([['mcp:state', {}]]);
+  await act(() => vi.advanceTimersByTimeAsync(1000));
+  expect(invoke.mock.calls).toEqual([['mcp:state', {}], ['mcp:state', {}]]);
 });

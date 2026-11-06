@@ -47,9 +47,11 @@ export function useNavigate() {
 export function AppShell({
   children,
   sidebar,
+  status,
 }: {
   children: ReactNode;
   sidebar?: ReactNode;
+  status?: ReactNode;
 }) {
   useTranslation();
   const [sidebarVisible, setSidebarVisible] = useState(true);
@@ -175,9 +177,11 @@ export function AppShell({
                   : route.view === "history" ? tr("history:title") : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
               </span>
             )}
+            {route.view !== 'workspace' && status}
             <HelpMenu />
             <Button variant="ghost" className="shell-history-trigger" aria-label={tr('history:find')} title={tr('history:find') + ' (' + tr('history:shortcut') + ')'} onClick={() => window.dispatchEvent(new Event('vstudy:find-history'))}><Search size={16}/><span>{tr('history:find')}</span><kbd>{tr('history:shortcut')}</kbd></Button>
           </header>
+          {route.view === 'workspace' && <div className="shell-workspace-status">{status}</div>}
           <div id="shell-content" role={route.view === "library" ? "main" : undefined} className="shell-content" tabIndex={-1}>
             {children}
           </div>
