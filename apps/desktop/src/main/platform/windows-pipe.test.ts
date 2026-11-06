@@ -1,6 +1,7 @@
 /** Run the actual ACL pipe host on Windows. Other hosts cannot validate the Windows kernel boundary. */
 import { expect, it } from 'vitest';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { createConnection } from 'node:net';
 import { randomBytes } from 'node:crypto';
 import { createInterface } from 'node:readline';
@@ -37,6 +38,16 @@ it.skipIf(process.platform !== 'win32')('round-trips bytes only through the curr
     expect(acl).toContain(`;;;${trustee})`);
     expect(acl).toMatch(/\(D;[^)]*;;;NU\)/);
     expect(acl).not.toMatch(/\(A;[^)]*;;;(?:WD|AU|BU)\)/);
+    if (process.env.VSTUDY_WINDOWS_ACCOUNT_TEST === '1') {
+      const result = JSON.parse(execFileSync(executable, ['-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+        '-File', resolve('test-fixtures/windows/foreign-pipe-user.ps1'), '-PipeName', name], {
+        encoding: 'utf8', windowsHide: true, timeout: 120000, stdio: ['ignore', 'pipe', 'pipe'],
+      }));
+      expect(result).toEqual({schemaVersion: 1, differentUser: true, administrator: false, accessDenied: true, win32Error: 5, accountRemoved: true});
+      const evidence = resolve('../../docs/evidence/distribution');
+      await mkdir(evidence, {recursive: true});
+      await writeFile(resolve(evidence, 'win32-pipe-isolation.json'), JSON.stringify(result, null, 2) + '\n');
+    }
     const peer = createConnection(`\\\\.\\pipe\\${name}`);
     try {
       const response = once(peer, 'data');
@@ -70,4 +81,4 @@ it.skipIf(process.platform !== 'win32')('round-trips bytes only through the curr
     await closed;
     lines.close();
   }
-}, process.arch === 'arm64' ? 180000 : 60000);
+}, process.arch === 'arm64' ? 300000 : 180000);
