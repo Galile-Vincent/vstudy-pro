@@ -1,0 +1,78 @@
+// @vitest-environment jsdom
+import { StrictMode } from 'react';
+import { afterEach, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { IpcResponse } from '../../shared/ipc';
+import { TestPlayer } from './test-player';
+const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
+vi.mock('../bridge', () => ({ desktop: { invoke } }));
+vi.mock('../../shared/i18n', () => ({ tr: (key: string) => key }));
+afterEach(() => { cleanup(); vi.resetAllMocks(); });
+const source = { documentId: 'doc', version: 'original' as const, excerptHash: 'a'.repeat(64), quote: 'Source passage' };
+const artifact = { id: 'artifact', title: 'Practice', test: { version: 1, items: [
+ { id: 'a', conceptKey: 'chain', type: 'mcq', stem: 'First question', options: ['A', 'B'], answer: 1, explanation: 'First explanation', source, optionRationales: ['Why A', 'Why B'], nextStep: 'Try another example' },
+ { id: 'b', conceptKey: 'product', type: 'cloze', stem: 'Second question', answer: 'product', alternatives: [], explanation: 'Second explanation', source },
+ { id: 'c', conceptKey: 'chain', type: 'true_false', stem: 'Third question', answer: true, explanation: 'Third explanation', source },
+] } } as NonNullable<IpcResponse<'review:artifact:get'>>;
+function fixture() {
+ let attempt = { id: 'attempt', artifactId: 'artifact', phase: 'answering', answers: {} as Record<string, unknown>, startedAt: '', committedAt: null, confirmedAt: null, results: artifact.test!.items.map(item => ({ itemId: item.id, conceptKey: item.conceptKey, correct: null as boolean | null, reportedBad: false })) };
+ invoke.mockImplementation(async (channel: string, request: Record<string, unknown>) => {
+  if (channel === 'review:attempt:answer') attempt = { ...attempt, answers: { ...attempt.answers, [String(request.itemId)]: request.answer } };
+  if (channel === 'review:attempt:commit') attempt = { ...attempt, phase: 'graded', results: attempt.results.map((r, index) => ({ ...r, correct: index !== 0 })) };
+  if (channel === 'review:attempt:confirm') attempt = { ...attempt, phase: 'confirmed' };
+  if (channel === 'review:attempt:report-bad') attempt = { ...attempt, results: attempt.results.map(r => r.itemId === request.itemId ? { ...r, reportedBad: true } : r) };
+  return attempt;
+ });
+}
+async function answerAll() {
+ fireEvent.click(await screen.findByLabelText('B'));
+ fireEvent.click(screen.getByRole('button', { name: 'review:answer_next' }));
+ fireEvent.change(await screen.findByLabelText('review:your_answer'), { target: { value: 'product' } });
+ fireEvent.click(screen.getByRole('button', { name: 'review:answer_next' }));
+ fireEvent.click(await screen.findByLabelText('review:answer_true'));
+ fireEvent.click(screen.getByRole('button', { name: 'review:finish_test' }));
+ await screen.findByText('Third explanation');
+}
+it('persists each answer, hides explanations until commit, and locks all committed answers', async () => {
+ fixture(); render(<TestPlayer artifact={artifact} onRetake={vi.fn()} />);
+ await screen.findByText('First question');
+ expect(screen.queryByText('First explanation')).toBeNull();
+ expect(screen.queryByText('Source passage')).toBeNull();
+ await answerAll();
+ expect(invoke).toHaveBeenCalledWith('review:attempt:answer', { attemptId: 'attempt', itemId: 'b', answer: 'product' });
+ expect(invoke).toHaveBeenCalledWith('review:attempt:commit', { attemptId: 'attempt' });
+ expect(screen.queryByRole('textbox')).toBeNull();
+ expect(invoke).not.toHaveBeenCalledWith('review:attempt:confirm', expect.anything());
+ fireEvent.click(screen.getByRole('button', { name: 'review:previous_item' }));
+ expect(await screen.findByText('Second explanation')).toBeTruthy();
+ expect(screen.queryByRole('textbox')).toBeNull();
+});
+it('shows results, applies review updates only on confirmation, and retakes missed concepts', async () => {
+ fixture(); const onRetake = vi.fn(); render(<TestPlayer artifact={artifact} onRetake={onRetake} />); await answerAll();
+ fireEvent.click(screen.getByRole('button', { name: 'review:view_results' }));
+ expect(await screen.findByText('review:worth_another_look')).toBeTruthy();
+ expect(screen.getByRole('button', { name: 'review:retake_missed' }).hasAttribute('disabled')).toBe(true);
+ fireEvent.click(screen.getByRole('button', { name: 'review:update_review_list' }));
+ await screen.findByText('review:review_list_updated');
+ fireEvent.click(screen.getByRole('button', { name: 'review:retake_missed' }));
+ expect(onRetake).toHaveBeenCalledWith('attempt');
+});
+it('excludes reported questions and recovers a failed attempt load', async () => {
+ fixture(); const responder = invoke.getMockImplementation()!; invoke.mockRejectedValueOnce(new Error('offline'));
+ render(<TestPlayer artifact={artifact} onRetake={vi.fn()} />);
+ expect(await screen.findByRole('alert')).toBeTruthy();
+ invoke.mockImplementation(responder); fireEvent.click(screen.getByRole('button', { name: 'review:retry' }));
+ await answerAll(); fireEvent.click(screen.getByRole('button', { name: 'review:report_bad_question' }));
+ await waitFor(() => expect(invoke).toHaveBeenCalledWith('review:attempt:report-bad', { attemptId: 'attempt', itemId: 'c' }));
+ expect(await screen.findByText('review:question_reported')).toBeTruthy();
+});
+it('shows loading while an attempt opens', () => {
+ invoke.mockReturnValue(new Promise(() => {})); render(<TestPlayer artifact={artifact} onRetake={vi.fn()} />);
+ expect(screen.getByRole('status').textContent).toBe('review:loading');
+});
+
+it('opens a single attempt under StrictMode', async () => {
+ fixture(); render(<StrictMode><TestPlayer artifact={artifact} onRetake={vi.fn()} /></StrictMode>);
+ await screen.findByText('First question');
+ expect(invoke.mock.calls.filter(([channel]) => channel === 'review:attempt:start')).toHaveLength(1);
+});
