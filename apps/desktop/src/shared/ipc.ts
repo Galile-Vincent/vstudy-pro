@@ -1,3 +1,4 @@
+import { newsletterContract } from './newsletter';
 import { analyticsContract } from './analytics';
 /**
  * Define the validated request, response, and event contracts exposed by preload.
@@ -43,6 +44,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 /** Source of request and response types for the narrow preload bridge. Every main handler validates both directions. */
 export const ipcContract = {
   ...analyticsContract,
+  ...newsletterContract,
   ...mcpIpc,
   ...mcpNavigationIpc,
   ...aiCliContract,

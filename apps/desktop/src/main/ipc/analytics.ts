@@ -6,6 +6,8 @@ import type { Onboarding } from '../../shared/analytics';
 export type NewsletterConsentHook = (consent:Pick<Onboarding,'email_provided'|'updates_opted_in'>)=>void|Promise<void>;
 export function registerAnalyticsIpc(registrar:ReturnType<typeof createIpcRegistrar>,implemented:Set<IpcChannel>,service:AnalyticsService,newsletter?:NewsletterConsentHook) {
   for (const channel of ['analytics:getState','analytics:setConsent','analytics:completeOnboarding','analytics:track','analytics:requestDeletion'] as const) implemented.add(channel);
+  implemented.add('analytics:getInstallationId');
+  registrar.handle('analytics:getInstallationId',()=>service.getInstallationId());
   registrar.handle('analytics:getState',()=>service.getState());
   registrar.handle('analytics:setConsent',({enabled})=>service.setConsent(enabled));
   registrar.handle('analytics:completeOnboarding',input=>{

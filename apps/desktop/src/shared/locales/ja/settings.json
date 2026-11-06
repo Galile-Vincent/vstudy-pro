@@ -92,5 +92,7 @@
   "enable_downloads": "ダウンロードを許可して再試行",
   "get_key": "キーを取得",
   "test_connection": "接続を確認",
-  "connection_success": "接続できました。キーは使えます。"
+  "connection_success": "接続できました。キーは使えます。",
+  "event_newsletter_subscribe": "製品ニュースの登録",
+  "event_analytics_capture": "利用状況の分析"
 }

@@ -1,4 +1,5 @@
 /** Appearance settings compose complete theme packs with independent reading preferences. */
+import { track } from '../analytics';
 import { useEffect, useRef, useState } from 'react';
 import { Copy, Pencil, Plus, Check } from 'lucide-react';
 import { type Settings } from '../../shared';
@@ -29,6 +30,7 @@ export function AppearanceSection() {
         const latest = await desktop.invoke('settings:get', {});
         const next = await desktop.invoke('settings:set', { ...latest, ...patch });
         applyAppearance(next, true);
+        if (patch.colorScheme && patch.colorScheme !== latest.colorScheme) track('theme_changed', {theme:next.colorScheme});
         setSettings(next);
         setError('');
         return next;

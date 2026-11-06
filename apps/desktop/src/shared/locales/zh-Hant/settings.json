@@ -92,5 +92,7 @@
   "enable_downloads": "允許下載並重試",
   "get_key": "取得金鑰",
   "test_connection": "測試連線",
-  "connection_success": "連線成功！金鑰可以使用。"
+  "connection_success": "連線成功！金鑰可以使用。",
+  "event_newsletter_subscribe": "產品更新訂閱",
+  "event_analytics_capture": "使用分析"
 }

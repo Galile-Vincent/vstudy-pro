@@ -1,4 +1,5 @@
 import { analytics } from '../analytics/service';
+import { registerNewsletterIpc } from './newsletter';
 import { registerAnalyticsIpc, type NewsletterConsentHook } from './analytics';
 /**
  * Register validated index IPC operations and delegate privileged work to main services.
@@ -74,6 +75,7 @@ export function registerIpc(
     "secrets:delete",
   ]);
   const telemetry=analytics();
+  registerNewsletterIpc(registrar, implemented);
   if (telemetry) registerAnalyticsIpc(registrar,implemented,telemetry,options.newsletterConsent);
   registrar.handle("shell:openExternal", async ({ url }) => {
     const target = new URL(url);

@@ -161,5 +161,9 @@
   "example_chat_title": "考試準備筆記",
   "recorded_video": "觀看實際畫面步驟",
   "recorded_body": "這段影片使用 App 的實際英文介面畫面，可在播放器選擇字幕。學校和 AI 回答都是測試範例，沒有使用真實帳號。",
-  "record_confirm": "確認學校網站正確後再繼續登入。這裡使用的是測試學校。"
+  "record_confirm": "確認學校網站正確後再繼續登入。這裡使用的是測試學校。",
+  "step_acquisition": "您如何得知 VStudy Pro？",
+  "step_acquisition_body": "選填，您可以略過這個問題。",
+  "step_privacy": "使用分析",
+  "step_privacy_body": "由您決定。無論選擇哪一項，都能使用所有學習功能。"
 }

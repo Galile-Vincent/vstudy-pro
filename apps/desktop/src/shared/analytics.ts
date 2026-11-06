@@ -5,6 +5,7 @@ export const onboarding = z.object({acquisition_source:acquisitionSource,email_p
 export const analyticsState = z.object({enabled:z.boolean(),onboarding_completed:z.boolean(),onboarding:onboarding.nullable(),installation_id_present:z.boolean(),acquisition_source:acquisitionSource.nullable(),deletion_pending:z.boolean()});
 export const rendererEvents = ['onboarding_started','onboarding_skipped','settings_opened','screen_viewed','theme_changed','language_changed'] as const;
 export const analyticsContract = {
+  'analytics:getInstallationId':{request:z.object({}).strict(),response:z.object({installation_id:z.string().uuid().nullable()})},
   'analytics:getState':{request:z.object({}).strict(),response:analyticsState},
   'analytics:setConsent':{request:z.object({enabled:z.boolean()}).strict(),response:analyticsState},
   'analytics:completeOnboarding':{request:onboarding,response:analyticsState},

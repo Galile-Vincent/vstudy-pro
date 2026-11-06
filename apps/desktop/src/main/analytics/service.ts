@@ -36,6 +36,7 @@ export class AnalyticsService {
   private write(key:string,value:unknown) { this.db.prepare('INSERT INTO analytics_state VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run(key,JSON.stringify(value)); }
   onConsentChanged?:()=>void;
   get consentRevision() {return this.epoch;}
+  getInstallationId() { return { installation_id: this.installationId || null }; }
   get permitted() { return this.enabled && !!this.config?.enabled && !!this.installationId; }
   getState() {
     return this.safe(() => analyticsState.parse({enabled:this.enabled,onboarding_completed:this.read('onboarding_completed',false),onboarding:this.read('onboarding',null),installation_id_present:!!this.installationId,acquisition_source:this.read('acquisition_source',null),deletion_pending:this.read('deletion_pending',false)})) ?? {enabled:false,onboarding_completed:false,onboarding:null,installation_id_present:false,acquisition_source:null,deletion_pending:false};

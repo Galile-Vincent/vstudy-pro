@@ -92,5 +92,7 @@
   "enable_downloads": "Enable downloads and retry",
   "get_key": "Get a key",
   "test_connection": "Test connection",
-  "connection_success": "Connected! Your key works."
+  "connection_success": "Connected! Your key works.",
+  "event_newsletter_subscribe": "Product-update subscription",
+  "event_analytics_capture": "Usage analytics"
 }
