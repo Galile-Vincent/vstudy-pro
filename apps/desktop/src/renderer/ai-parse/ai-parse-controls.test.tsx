@@ -56,3 +56,14 @@ it('discovers a cold catalog, selects another model, and starts without cap or o
   if(previous)Object.defineProperty(window,'desktop',previous);else Reflect.deleteProperty(window,'desktop');
  }
 });
+
+it('shows an actionable publication failure and hides unusable AI version actions',async()=>{
+ const doc=documentSchema.parse({id:'00000000-0000-4000-8000-000000000001',title:'Document',sourceName:'source.md',sourceHash:'a'.repeat(64),sourcePath:'/tmp/source.md',markdownPath:'/tmp/content.md',mime:'text/markdown',status:'ready',createdAt:new Date().toISOString()});
+ const previous=Object.getOwnPropertyDescriptor(window,'desktop');Object.defineProperty(window,'desktop',{configurable:true,value:{invoke:vi.fn(async()=>({documentId:doc.id,status:'cancelled',code:'ai_parse.publish_failed',activeVersion:'original',pages:[{page:1,status:'done'}]}))}});
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ try {
+  await act(async()=>root.render(<AiParseControls document={doc} providers={[]} pageCount={1} initiallyOpen onProvidersChanged={async()=>{}} onReload={async()=>{}} onSettings={()=>{}}/>));
+  expect(document.querySelector('[role=alert]')?.textContent).toContain('could not be saved');
+  expect(Array.from(document.querySelectorAll('button')).some(button=>button.textContent==='Use AI version')).toBe(false);
+ } finally {await act(async()=>root.unmount());host.remove();if(previous)Object.defineProperty(window,'desktop',previous);else Reflect.deleteProperty(window,'desktop');}
+});
