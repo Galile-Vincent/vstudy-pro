@@ -4,7 +4,8 @@
  * Main owns privileged resources; shutdown must settle work before releasing those resources.
  * @packageDocumentation
  */
-import { homedir } from 'node:os';
+import { app, clipboard } from 'electron';
+import { homedir, release }  from 'node:os';
 /** Remove credential-shaped values before diagnostics reach logs. */
 export function redact(value: unknown): string {
   const text = value instanceof Error ? value.message : typeof value === 'string' ? value : JSON.stringify(value);
@@ -17,3 +18,8 @@ export function redact(value: unknown): string {
 export function log(value: unknown): void { console.log(redact(value)); }
 /** Return a stable public failure label without exposing internal diagnostics. */
 export function publicError(): string { return 'The operation failed. Please retry.'; }
+
+/** Copy only application/runtime metadata and redacted diagnostic records. */
+export function copyDiagnostics(): void {
+  clipboard.writeText(`VStudy Pro ${app.getVersion()}\nOS ${process.platform} ${release()}\nArch ${process.arch}`);
+}

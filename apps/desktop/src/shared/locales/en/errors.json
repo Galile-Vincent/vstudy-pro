@@ -41,5 +41,6 @@
   "startup_recovery": "VStudy could not recover local data. Keep your files and try restarting.",
   "startup_database": "VStudy could not open the local database. Keep your files and try restarting.",
   "startup_services": "VStudy could not initialize application services. Try restarting.",
-  "startup_window": "VStudy could not open the study window. Try restarting."
+  "startup_window": "VStudy could not open the study window. Try restarting.",
+  "window_unavailable": "The study window stopped responding. Automatic recovery has stopped. Quit and reopen VStudy, or copy diagnostics for support."
 }

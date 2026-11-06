@@ -9,7 +9,7 @@ import { confirmRestoreStartup, rollbackRestoreStartup } from "./storage/restore
 import { recoverRestore } from "./storage/backup";
 import { applyNativeTheme, nativeBackground } from './theme';
 import { initializeMoodleProtocol } from './moodle/sso-protocol';
-import { log } from './logging';
+import { log, copyDiagnostics } from './logging';
 import { showAttachedMessage, showStartupError, type StartupStage } from './dialogs';
 import { coordinateShutdown } from './shutdown';
 import { acquireOwnership } from './ownership';
@@ -17,7 +17,7 @@ import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { runPackagedSmoke } from './packaged-smoke';
-import { app, BrowserWindow, nativeTheme, session, safeStorage, protocol, ipcMain } from "electron";
+import { app, BrowserWindow, nativeTheme, session, safeStorage, protocol, ipcMain, dialog } from "electron";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { mkdirSync } from "node:fs";
@@ -73,6 +73,7 @@ const entryUrl =
   developmentUrl ??
   (app.isPackaged ? "vstudy://app/index.html" : pathToFileURL(join(__dirname, "../renderer/index.html")).href);
 
+let reloads: number[] = [];
 let openingWindow: Promise<void> | undefined;
 async function restoreMainWindow(): Promise<void> {
   if (window && !window.isDestroyed()) {window.show();window.focus();return;}
@@ -118,8 +119,41 @@ async function createWindow(show = true): Promise<void> {
   current.webContents.on("will-attach-webview", (event) =>
     event.preventDefault(),
   );
-  current.once("ready-to-show", () => {if (show) current.show();});
+  let shown = false;
+  const showWindow = () => {
+    if (show && !shown && !current.isDestroyed()) { shown = true; current.show(); }
+  };
+  const showTimeout = setTimeout(showWindow, 10_000);
+  showTimeout.unref();
+  current.once('ready-to-show', () => { clearTimeout(showTimeout); showWindow(); });
+  let settleNavigation = () => {};
+  let recoveryDialogOpen = false;
+  const recoverRenderer = () => {
+    if (current.isDestroyed()) return;
+    const now = Date.now();
+    reloads = reloads.filter(time => now - time < 60_000);
+    if (reloads.length < 2) {
+      reloads.push(now);
+      current.webContents.reload();
+      return;
+    }
+    settleNavigation();
+    if (recoveryDialogOpen) return;
+    recoveryDialogOpen = true;
+    void dialog.showMessageBox(current, {
+      type: 'error', message: tr('errors:window_unavailable'),
+      buttons: [tr('common:menu_quit'), tr('common:copy_diagnostics')], defaultId: 0, cancelId: 1,
+    }).then(({ response }) => { if (response === 0) app.quit(); else copyDiagnostics(); })
+      .catch(error => log({phase:'window-recovery-dialog-failed', error}))
+      .finally(() => { recoveryDialogOpen = false; });
+  };
+  current.webContents.on('render-process-gone', (_event, details) => {
+    log({phase:'main-window-render-process-gone', reason:details.reason, code:details.exitCode});
+    recoverRenderer();
+  });
+  current.on('unresponsive', () => { log({phase:'main-window-unresponsive'}); recoverRenderer(); });
   current.on("closed", () => {
+    clearTimeout(showTimeout);
     if (window === current) window = null;
   });
   if (smokeRoot) current.webContents.once('did-finish-load', () => { void runPackagedSmoke(current, realpathSync(smokeRoot)); });
@@ -132,6 +166,7 @@ async function createWindow(show = true): Promise<void> {
       if (error) reject(error);
       else resolve();
     };
+    settleNavigation = () => settle();
     const loaded = () => settle();
     const closed = () => settle();
     const failed = (_event: Electron.Event, code: number, description: string, _url: string, mainFrame: boolean) => {

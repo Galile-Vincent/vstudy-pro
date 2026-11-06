@@ -366,5 +366,7 @@
   "tool_cancelled_label": "工具已取消",
   "tool_failed_label": "工具執行失敗",
   "attachment_label": "附件 {{name}}（{{type}}）{{status}}",
-  "uploading": "上傳中"
+  "uploading": "上傳中",
+  "reload": "重新載入",
+  "copy_diagnostics": "複製診斷資訊"
 }
