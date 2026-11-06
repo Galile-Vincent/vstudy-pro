@@ -54,3 +54,14 @@ it('Moodle account removal preserves local courses and erases only Moodle chat e
     expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
   }finally{db.close();}
 });
+it('document deletion cascades linked document chat evidence and attachment links',()=>{
+ const db=fixture();try{
+  db.prepare("INSERT INTO documents(id,title,sourceName,sourceHash,sourcePath,mime,status,markdownPath,createdAt) VALUES('document','Text','text.md','hash','/source.md','text/markdown','ready','/content.md',?)").run(at);
+  db.prepare("INSERT INTO study_course_documents VALUES('course','document',?)").run(at);
+  db.prepare("INSERT INTO conversations(id,scope,documentId,providerId,modelId,createdAt) VALUES('doc-chat','document','document','p','m',?)").run(at);
+  for(const [id,role]of [['du','user'],['da','assistant']])db.prepare('INSERT INTO messages(id,conversationId,role,parts,createdAt) VALUES(?,?,?,?,?)').run(id!,'doc-chat',role!,'[]',at);
+  job(db,'job','du','da','doc-chat');observation(db,'evidence','chain',null);
+  db.prepare("DELETE FROM documents WHERE id='document'").run();
+  expect(db.prepare('SELECT count(*) n FROM study_jobs').get()!.n).toBe(0);expect(db.prepare('SELECT count(*) n FROM study_observations').get()!.n).toBe(0);expect(db.prepare('SELECT count(*) n FROM study_course_documents').get()!.n).toBe(0);expect(db.prepare("SELECT id FROM study_courses WHERE id='course'").get()).toBeDefined();expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+ }finally{db.close();}
+});
