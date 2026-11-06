@@ -102,10 +102,11 @@ export function AppShell({
     update(); media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, [route.view]);
+  const welcomeReturn = useRef<Element | null>(null);
   const focusTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(focusTimer.current), []);
   useEffect(() => {
-    if (route.view === 'welcome' || route.aiParse || focusTimer.current !== undefined) return;
+    if (route.view === 'welcome' || route.aiParse || welcomeReturn.current || focusTimer.current !== undefined) return;
     const frame = requestAnimationFrame(() => { document.getElementById("shell-content")?.focus(); });
     return () => cancelAnimationFrame(frame);
   }, [route.view, route.documentId, route.courseId]);
@@ -115,6 +116,7 @@ export function AppShell({
   const navigate: Navigation["navigate"] = (value) => {
     clearTimeout(focusTimer.current);
     focusTimer.current = undefined;
+    welcomeReturn.current = null;
     if (sidebarOverlay) closeSidebar();
     const next = typeof value === "string" ? { view: value } : value;
     if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = route; returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
@@ -125,7 +127,12 @@ export function AppShell({
   };
   const closeWelcome = () => {
     navigate(previous.current);
-    const origin = document.activeElement;
+    welcomeReturn.current = document.activeElement;
+  };
+  useEffect(() => {
+    if (route.view === 'welcome' || !welcomeReturn.current) return;
+    const origin = welcomeReturn.current;
+    welcomeReturn.current = null;
     focusTimer.current = setTimeout(() => {
       focusTimer.current = undefined;
       const active = document.activeElement;
@@ -140,7 +147,7 @@ export function AppShell({
       } else if (returnFocus.current?.isConnected) returnFocus.current.focus();
       else document.getElementById("welcome-entry")?.focus();
     }, 0);
-  };
+  }, [route.view]);
   return (
     <NavigationContext.Provider value={{ route, navigate, closeWelcome }}>
       <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view} data-sidebar-overlay={sidebarOverlay}>

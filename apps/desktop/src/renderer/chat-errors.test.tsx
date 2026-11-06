@@ -69,3 +69,10 @@ it('keeps recent messages visible when loading older messages fails and retries'
   fail=false;fireEvent.click(screen.getByRole('button',{name:tr('common:retry')}));
   expect(await screen.findByText('Earlier answer')).toBeTruthy();expect(screen.getByText('Recent answer')).toBeTruthy();
 });
+
+it('restores provider guidance for legacy unstructured saved errors',async()=>{
+  await i18n.changeLanguage('en');
+  mount([{id:'legacy',conversationId:'c',role:'assistant',createdAt:'2026-11-01T00:00:00Z',parts:[{type:'text',text:'Saved partial answer',status:'error',error:'Raw provider failure'}]}] as Message[]);
+  expect(await screen.findByText(tr('errors:provider_unavailable'))).toBeTruthy();
+  expect(screen.queryByText('Raw provider failure')).toBeNull();
+});

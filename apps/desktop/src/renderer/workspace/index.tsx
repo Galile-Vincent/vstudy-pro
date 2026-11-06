@@ -57,8 +57,18 @@ export function Workspace() {
 
   const [startupError, setStartupError] = useState(''), [sourceError, setSourceError] = useState(''),
     [conversationError, setConversationError] = useState(''), [historyError, setHistoryError] = useState('');
-  const [loadRevision, setLoadRevision] = useState(0);
-  const retryLoad = () => setLoadRevision(value => value + 1);
+  const startup = useRef<{ settings?: Settings; documents?: Document[]; providers?: Providers }>({});
+  const [startupRevision, setStartupRevision] = useState(0);
+  const [conversationRevision, setConversationRevision] = useState(0);
+  const [historyRevision, setHistoryRevision] = useState(0);
+  const [compact, setCompact] = useState(() => window.matchMedia?.('(max-width:819px)').matches ?? false);
+  useEffect(() => {
+    const media = window.matchMedia?.('(max-width:819px)');
+    if (!media) return;
+    const update = () => setCompact(media.matches);
+    update(); media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
   const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
   useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   useEffect(() => {
@@ -139,11 +149,11 @@ export function Workspace() {
     let active = true;
     setStartupError('');
     void Promise.all([
-      desktop.invoke("settings:get", {}),
-      (route.documentId
+      startup.current.settings ? Promise.resolve(startup.current.settings) : desktop.invoke("settings:get", {}).then(value => { startup.current.settings = value; return value; }),
+      (startup.current.documents ? Promise.resolve(startup.current.documents) : (route.documentId
         ? desktop.invoke("documents:get", {documentId:route.documentId}).then(doc => doc ? [doc] : [])
-        : desktop.invoke("documents:list", {})).then(rows => { if (active) setDocuments(rows); return rows; }),
-      desktop.invoke("providers:list", {discover:false}),
+        : desktop.invoke("documents:list", {}))).then(rows => { startup.current.documents = rows; if (active) setDocuments(rows); return rows; }),
+      startup.current.providers ? Promise.resolve(startup.current.providers) : desktop.invoke("providers:list", {discover:false}).then(value => { startup.current.providers = value; return value; }),
     ])
       .then(([s, d, p]) => {
         if (!active) return;
@@ -160,7 +170,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [report, loadRevision]);
+  }, [report, startupRevision]);
   useEffect(() => {
     if (!documents.some((d) => d.status === "converting")) return;
     const timer = setInterval(() => {
@@ -174,7 +184,6 @@ export function Workspace() {
   useEffect(() => {
     let active = true;
     setConversationError('');
-    setSource("");
     setSelection(null);
     setConversation(null);
     setHistory(null);
@@ -198,7 +207,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [documentId, report, loadRevision]);
+  }, [documentId, report, conversationRevision]);
   useEffect(() => {
     if (!conversation) return;
     try { localStorage.setItem(`vstudy-conversation:${(conversation.scope === "course" ? conversation.courseId : conversation.scope === "general" ? "general" : conversation.documentId)}`, conversation.id); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
@@ -221,7 +230,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [doc?.id, doc?.status, readerRevision, report, loadRevision]);
+  }, [doc?.id, doc?.status, readerRevision, report]);
   useEffect(() => {
     let active = true;
     setHistoryError('');
@@ -236,7 +245,7 @@ export function Workspace() {
     return () => {
       active = false;
     };
-  }, [conversation?.id, report, loadRevision]);
+  }, [conversation?.id, report, historyRevision]);
   const saveSettings = async (next: Partial<Settings>) => {
     try {
       const saved = await desktop.invoke("settings:set", next);
@@ -357,7 +366,7 @@ export function Workspace() {
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
       <header className="art-reader-chat-header"><span><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</span>{chatControls}</header>
-      {conversationError || historyError ? <LoadError message={conversationError || historyError} retry={retryLoad}/> : conversation && history ? (
+      {conversationError || historyError ? <LoadError message={conversationError || historyError} retry={() => conversationError ? setConversationRevision(value => value + 1) : setHistoryRevision(value => value + 1)}/> : conversation && history ? (
         <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}>{chatDocument === documentId ? <Chat
           documentPageCount={documentPageCount}
           documentTitle={doc?.title ?? tr('common:document')}
@@ -466,7 +475,7 @@ export function Workspace() {
           >
             {tr('common:retry_conversion')}</button><p>{tr('library:retry_hint')}</p>
         </div>
-      ) : sourceError ? <LoadError message={sourceError} retry={retryLoad}/> : loadingSource ? (
+      ) : sourceError ? <LoadError message={sourceError} retry={() => setReaderRevision(value => value + 1)}/> : loadingSource ? (
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
@@ -538,7 +547,7 @@ export function Workspace() {
           </button>
         </div>
       </header>
-      {startupError && <LoadError message={startupError} retry={retryLoad}/>}
+      {startupError && <LoadError message={startupError} retry={() => setStartupRevision(value => value + 1)}/>}
       {notice && (
         <div className="notice" role="status">
           <span>{notice}</span>
@@ -567,9 +576,9 @@ export function Workspace() {
               <Panel
                 key={pane}
                 id={pane}
-                role="tabpanel"
-                aria-labelledby={`workspace-tab-${pane}`}
-                tabIndex={0}
+                role={compact ? "tabpanel" : undefined}
+                aria-labelledby={compact ? `workspace-tab-${pane}` : undefined}
+                tabIndex={compact ? 0 : undefined}
                 order={index}
                 minSize={25}
                 defaultSize={pane === "chat" ? 42 : 58}

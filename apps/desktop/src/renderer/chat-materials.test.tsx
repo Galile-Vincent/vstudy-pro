@@ -11,7 +11,7 @@ vi.mock('./chat-adapter',()=>({createChatAdapter:(_bridge:unknown,context:typeof
 vi.mock('./usage/meter',()=>({useUsage:()=>({}),useBudgetGuard:()=>({}),UsageButton:()=>null,UsageMeter:()=>null}));
 vi.mock('./components/assistant-ui/elements/thread.aui',()=>({Thread:()=>null}));
 vi.mock('./model-controls',()=>({ModelControls:()=>null}));
-vi.mock('@assistant-ui/react',async importOriginal=>({...await importOriginal<typeof import('@assistant-ui/react')>(),AssistantRuntimeProvider:({children}:{children:React.ReactNode})=>children,useLocalRuntime:()=>({thread:{append:state.append,composer:{setText:()=>{},subscribe:()=>()=>{}}}})}));
+vi.mock('@assistant-ui/react',async importOriginal=>({...await importOriginal<typeof import('@assistant-ui/react')>(),useAuiState:()=>false,AssistantRuntimeProvider:({children}:{children:React.ReactNode})=>children,useLocalRuntime:()=>({thread:{append:state.append,composer:{setText:()=>{},subscribe:()=>()=>{}}}})}));
 (globalThis as {IS_REACT_ACT_ENVIRONMENT?:boolean}).IS_REACT_ACT_ENVIRONMENT=true;
 it('does not retain material consent after the runtime refuses append',async()=>{
   const conversation={id:'00000000-0000-4000-8000-000000000001',scope:'course',courseId:'00000000-0000-4000-8000-000000000002',providerId:'anthropic-api',modelId:'fake',createdAt:'2026-11-01T00:00:00Z'} as Conversation;

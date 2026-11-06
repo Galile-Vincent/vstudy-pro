@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ExportedMessageRepository, type AssistantRuntime, useAuiState, type ThreadMessageLike } from '@assistant-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { Conversation, Message } from '../shared';
@@ -16,19 +16,19 @@ export function chatHistoryMessages(history: Message[]): ThreadMessageLike[] {
       role: m.role,
       content: m.role === 'assistant' ? m.parts.flatMap(p => assistantContent(p.text,p.reasoning,p.citations,p.toolCalls)) : m.parts.map(p => ({type:'text' as const,text:p.text})),
       createdAt: new Date(m.createdAt),
-      ...(m.role === 'assistant' && m.parts.some(p => p.status === 'error') ? { status: { type: 'incomplete' as const, reason: 'error' as const, error: errorText(new Error(m.parts.find(p => p.status === 'error')?.error ?? '')) } } : {}),
+      ...(m.role === 'assistant' && m.parts.some(p => p.status === 'error') ? { status: { type: 'incomplete' as const, reason: 'error' as const, error: m.parts.find(p => p.status === 'error')?.error?.includes('VSTUDY_STATUS:') ? errorText(new Error(m.parts.find(p => p.status === 'error')?.error ?? '')) : tr('errors:provider_unavailable') } } : {}),
       ...(m.role === 'assistant' && m.parts.some(p => p.status === 'aborted') ? {status:{type:'incomplete' as const,reason:'cancelled' as const}} : {}),
       metadata: { custom: { usage: m.parts.find(p => p.usage)?.usage, modelId: m.parts[0]?.modelId, options: m.parts[0]?.options, selection: m.parts[0]?.selection, turnId: m.parts[0]?.turnId, citations: m.parts[0]?.citations } },
     }));
 }
 
-export function EarlierMessages({runtime,conversationId,cursor:initialCursor,onLoaded}:{runtime:AssistantRuntime;conversationId:Conversation['id'];cursor?:MessageCursor|null|undefined;onLoaded:(messages:Message[])=>void}) {
+export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jumpMessageId,onLoaded}:{runtime:AssistantRuntime;conversationId:Conversation['id'];cursor?:MessageCursor|null|undefined;jumpMessageId?:string|undefined;onLoaded:(messages:Message[],cursor:MessageCursor|null)=>void}) {
   useTranslation();
   const running = useAuiState(state => state.thread.isRunning);
   const [cursor,setCursor] = useState(initialCursor), [loading,setLoading] = useState(false), [error,setError] = useState('');
   const pending = useRef(false), live = useRef(true);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!cursor || pending.current || runtime.thread.getState().isRunning) return;
     pending.current = true; setLoading(true); setError('');
     try {
@@ -39,10 +39,13 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,onL
       const older = ExportedMessageRepository.fromArray(chatHistoryMessages(page.items.filter(message => !ids.has(message.id))));
       const parentId = older.messages.at(-1)?.message.id;
       if (parentId) runtime.thread.import({...current,messages:[...older.messages,...current.messages.map(item => item.parentId === null ? {...item,parentId} : item)]});
-      setCursor(page.nextCursor); onLoaded(page.items);
+      setCursor(page.nextCursor); onLoaded(page.items,page.nextCursor);
     } catch (failure) { if (live.current) setError(errorText(failure)); }
     finally { pending.current = false; if (live.current) setLoading(false); }
-  };
+  }, [cursor, runtime, conversationId, onLoaded]);
+  useEffect(() => {
+    if (jumpMessageId && cursor && !loading && !error && !running && !runtime.thread.getState().messages.some(message => message.id === jumpMessageId)) void load();
+  }, [jumpMessageId, cursor, loading, error, running, runtime, load]);
   if (!cursor) return null;
   return <div>{error ? <LoadError message={error} retry={() => void load()}/> : <Button variant="ghost" disabled={loading || running} onClick={() => void load()}>{tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')}</Button>}</div>;
 }

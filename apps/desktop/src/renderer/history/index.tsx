@@ -76,7 +76,7 @@ function HistoryContent() {
     setDraft('');
     setFailed('');
     if (route.conversationId)
-      void Promise.all([refreshProviders(), desktop.invoke('chats:get', { conversationId: route.conversationId }), desktop.invoke('messages:page', { conversationId: route.conversationId, limit:50, direction:'backward' })]).then(([, conversation, messages]) => { if (live) {
+      void Promise.all([desktop.invoke('chats:get', { conversationId: route.conversationId }), desktop.invoke('messages:page', { conversationId: route.conversationId, limit:50, direction:'backward' })]).then(([conversation, messages]) => { if (live) {
         if (conversation)
           setLoaded({ conversation, messages });
         else
@@ -84,6 +84,7 @@ function HistoryContent() {
       } }).catch(error => { if (live) setFailed(errorText(error)); });
     return () => { live = false; };
   }, [route.conversationId, revision]);
+  useEffect(() => { void refreshProviders().catch(() => {}); }, []);
   const open = (hit: ChatHit, messageId?: string) => navigate({ view: 'history', conversationId: hit.id, messageId });
   const changeModel = async (value: string) => {
     if (!loaded)
