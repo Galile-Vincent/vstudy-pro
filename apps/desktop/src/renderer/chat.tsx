@@ -1,4 +1,5 @@
 import { CourseChip } from './review/course-chip';
+import { MemoryConsentCard } from './review/memory-consent';
 import { TutorModeControl, useTutorMode } from "./tutor-mode-control";
 import { chatHistoryMessages, EarlierMessages, type MessageCursor } from './chat-history';
 import { useChatMotion } from './motion/chat-motion';
@@ -169,7 +170,7 @@ function ComposerSelection() {
 function ComposerBanner() {
   useTranslation();
   const {usage,budget} = useDocumentChat();
-  return <><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert" title={tr('common:the_estimate_allows_1_024_output_tokens_actual_usage_can_be_higher')}><span>{budget.reason}</span><div className="usage-warning-actions"><Button type="button" variant="outline" size="sm" onClick={budget.approve}>{tr('common:send_anyway')}</Button><Button type="button" variant="ghost" size="sm" onClick={budget.dismiss}>{tr('common:cancel')}</Button></div></div>}</>;
+  return <><MemoryConsentCard /><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert" title={tr('common:the_estimate_allows_1_024_output_tokens_actual_usage_can_be_higher')}><span>{budget.reason}</span><div className="usage-warning-actions"><Button type="button" variant="outline" size="sm" onClick={budget.approve}>{tr('common:send_anyway')}</Button><Button type="button" variant="ghost" size="sm" onClick={budget.dismiss}>{tr('common:cancel')}</Button></div></div>}</>;
 }
 function ComposerModel() {
   useTranslation(); return useDocumentChat().picker; }
