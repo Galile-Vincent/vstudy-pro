@@ -1,0 +1,20 @@
+Courses refinement verification.
+
+Main merged before refinement. Latest U2 main 5d12844 merged before final verification. Final git merge main reports Already up to date.
+
+pnpm --filter @vstudy/desktop build. Passed.
+pnpm --filter @vstudy/desktop typecheck. Passed after the U2 merge.
+pnpm --filter @vstudy/desktop lint. Passed after the U2 merge.
+pnpm knip. Passed. Existing configuration hint about CSS import tracking.
+pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2. Passed after the U2 merge. 997 passed, 14 skipped. 132 test files passed, 5 skipped.
+pnpm --filter @vstudy/desktop contrast:check. Passed. All 9 packs, both schemes, all contrast settings from 100 through 150. Includes a 76% hero scrim over a worst-case white source and both U1 and U2 checks.
+pnpm security:static. Passed. Three existing dynamic shell.openExternal warnings outside the changed files.
+git diff --check. Passed.
+
+REFINE_PHASE=before node e2e/refine-courses.mjs. Ember/Grove, light/dark. Home, grid, card and course before captures.
+REFINE_PHASE=round-1 node e2e/refine-courses.mjs. First implementation captures and harsh critique.
+REFINE_PHASE=round-2 node e2e/refine-courses.mjs. Fine contours, larger artwork, Quiet folio chrome, reference comparison and second critique.
+REFINE_PHASE=final node e2e/refine-courses.mjs. Passed. All 9 packs, light/dark. 72 captures at 1440×900 plus 8 captures at 1200×768 and 720×768. Axe WCAG A/AA checks on all 36 home/course views. Keyboard course opening. No renderer page errors or horizontal course-page overflow.
+node e2e/compare-courses-art.mjs <reference-one-path> <reference-two-path>. Passed. Creates unchanged reference crops beside the actual refined card and its before state, plus a before/after grid board.
+
+No live school or external provider was contacted. Screenshots remain local under the repository's ignore rules. Independent parent review remains required before release.

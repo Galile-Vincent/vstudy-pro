@@ -1,0 +1,25 @@
+{
+  "phase": "final",
+  "artifact": "Built Electron with reusable public Moodle fixture. No school network.",
+  "results": [
+    "vstudy/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "vstudy/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "ocean/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "ocean/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "grove/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "grove/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "ember/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "ember/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "iris/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "iris/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "rose/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "rose/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "slate/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "slate/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "paper/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "paper/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "contrast/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "contrast/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow."
+  ],
+  "errors": []
+}

@@ -1,0 +1,11 @@
+{
+  "phase": "round-1",
+  "artifact": "Built Electron with reusable public Moodle fixture. No school network.",
+  "results": [
+    "ember/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "ember/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "grove/light. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow.",
+    "grove/dark. Home, grid, card close-up, and course hero. Keyboard course opening. No horizontal overflow."
+  ],
+  "errors": []
+}
