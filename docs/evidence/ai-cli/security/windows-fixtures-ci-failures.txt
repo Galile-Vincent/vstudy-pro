@@ -1,0 +1,21 @@
+FAIL  src/main/ipc/ai-cli.test.ts > notifies the existing preload bridge and sanitizes native errors before the registrar logs them
+FAIL  src/main/ipc/ai-cli.test.ts > opens a manual login terminal on linux for claude while embedded login stays unsupported
+FAIL  src/main/ipc/ai-cli.test.ts > opens a manual login terminal on linux for codex while embedded login stays unsupported
+FAIL  src/main/ipc/ai-cli.test.ts > opens a manual login terminal on linux for agy while embedded login stays unsupported
+FAIL  src/main/ipc/ai-cli.test.ts > revokes previews on a main document reload and preserves same-document navigation
+FAIL  src/main/providers/setup/probes.test.ts > uses Codex exit status 0 without parsing account text
+FAIL  src/main/providers/setup/probes.test.ts > uses Codex exit status 1 without parsing account text
+FAIL  src/main/providers/setup/probes.test.ts > probes agy using initialize and session/new without authenticate or browser launch
+FAIL  src/main/providers/setup/pty.test.ts > passes argv literally, supports quoted paths, and scrubs inherited secrets and browser openers
+FAIL  src/main/providers/setup/service.test.ts > performs file-only discovery without consent and never launches on preview or disabled actions
+FAIL  src/main/providers/setup/service.test.ts > installs, verifies real auth, signs in with one PTY, and tests through the real Claude adapter
+FAIL  src/main/providers/setup/service.test.ts > checks updates only with separate consent, throttles checks, preserves cache offline, and rolls back
+FAIL  src/main/providers/setup/service.test.ts > rejects automatic install if a chat starts and finishes during a download
+FAIL  src/main/providers/setup/service.test.ts > cancels a live login when the existing provider configuration revokes consent
+FAIL  src/main/providers/setup/service.test.ts > keeps an existing account through manual update and rollback without requesting sign-in again
+FAIL  src/main/providers/setup/store.test.ts > switches new sessions while a real old transport remains leased and can roll back
+FAIL  src/main/providers/setup/store.test.ts > still requires existing changed-file confirmation for the active managed path
+FAIL  src/main/providers/setup/store.test.ts > never publishes failed verification, version validation, or a new busy activation
+FAIL  src/main/providers/setup/store.test.ts > extracts only the expected regular executable and preserves its verified bytes
+FAIL  src/main/providers/setup/store.test.ts > keeps a newly activated executable when an old pending check resolves with false
+FAIL  src/main/providers/setup/store.test.ts > keeps a newly activated executable when an old pending check resolves with true

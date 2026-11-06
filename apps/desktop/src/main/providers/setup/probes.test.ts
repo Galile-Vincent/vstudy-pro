@@ -6,18 +6,19 @@ import { ActionPty } from './pty';
 import { authStatus, tinyTest } from './probes';
 import { buildPlan } from './plans';
 import { ProviderRegistry } from '../index';
-import { AgyAdapter } from '../agy';
+import { AgyAdapter, agyArgs } from '../agy';
 import { temporaryDirectories } from './test-fixtures';
 const temporary = temporaryDirectories();
 it.each([0, 1])('uses Codex exit status %s without parsing account text', async code => {
-  const root = await temporary(), binary = join(root, 'codex');
-  await writeFile(binary, `#!${process.execPath}\nconsole.log('localized account description');process.exit(${code});\n`, { mode: 0o700 });
-  const plan = buildPlan('status-codex', root, binary, null, null, Date.now());
+  const root = await temporary(), script = join(root, 'login');
+  const program = `console.log('localized account description');process.exit(${code});\n`;
+  await writeFile(script, program);
+  const plan = buildPlan('status-codex', root, process.execPath, null, null, Date.now());
   expect(await authStatus('codex', plan, new ActionPty(), AbortSignal.timeout(5000))).toBe(code === 0);
 });
 it('probes agy using initialize and session/new without authenticate or browser launch', async () => {
-  const root = await temporary(), binary = join(root, 'agy'), auth = join(root, 'signed-in'), methods = join(root, 'methods');
-  await writeFile(binary, `#!${process.execPath}
+  const root = await temporary(), script = join(root, 'acp'), auth = join(root, 'signed-in'), methods = join(root, 'methods');
+  const program = `
 const fs=require('fs'), readline=require('readline');
 const send=value=>console.log(JSON.stringify({jsonrpc:'2.0',...value}));
 readline.createInterface({input:process.stdin}).on('line',line=>{const r=JSON.parse(line);fs.appendFileSync(${JSON.stringify(methods)},r.method+'\\n');
@@ -26,12 +27,13 @@ else if(r.method==='session/new'){if(!fs.existsSync(${JSON.stringify(auth)}))sen
 else if(r.method==='session/set_model')send({id:r.id,result:{}});
 else if(r.method==='session/prompt'){send({method:'session/update',params:{sessionId:'test',update:{sessionUpdate:'agent_message_chunk',content:{type:'text',text:'AGY_OK'}}}});send({id:r.id,result:{stopReason:'end_turn'}});}
 });
-`, { mode: 0o700 });
-  const plan = buildPlan('status-agy', root, binary, null, null, Date.now());
+`;
+  await writeFile(script, program);
+  const plan = buildPlan('status-agy', root, process.execPath, null, null, Date.now());
   expect(await authStatus('agy', plan, new ActionPty(), AbortSignal.timeout(5000))).toBe(false);
   await writeFile(auth, 'yes');
   expect(await authStatus('agy', plan, new ActionPty(), AbortSignal.timeout(5000))).toBe(true);
-  const registry = new ProviderRegistry(), adapter = new AgyAdapter({ findBinary: async () => binary });
+  const registry = new ProviderRegistry(), adapter = new AgyAdapter({ findBinary: async () => process.execPath, args: [script, ...agyArgs] });
   registry.configure({ kind: 'cli', id: 'agy-cli', enabled: true }); registry.register('agy-cli', adapter);
   try { expect(await tinyTest(registry, 'agy', AbortSignal.timeout(5000))).toBe('AGY_OK'); }
   finally { adapter.dispose(); }

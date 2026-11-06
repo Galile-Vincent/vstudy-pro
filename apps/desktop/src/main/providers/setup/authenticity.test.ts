@@ -8,6 +8,7 @@ import { artifactVerifier, codexPin, manualInstallation } from './authenticity';
 import { claudeFingerprint } from './publisher';
 import { SetupStore } from './store';
 import { payloadNetwork, payloadRelease, temporaryDirectories } from './test-fixtures';
+import { fixtureBinary } from './native-fixtures';
 
 const temporary = temporaryDirectories();
 const signal = () => AbortSignal.timeout(5000);
@@ -20,14 +21,14 @@ async function signedRelease(bytes: Buffer) {
   return { release: { ...release, evidence: JSON.stringify({ manifest, signature: Buffer.from(signature).toString('base64'), key: keys.publicKey, fingerprint: claudeFingerprint }) }, fingerprint: privateKey.getFingerprint().toUpperCase() };
 }
 
-it.skipIf(process.platform === 'win32')('validates a pinned-key signature before probing and when an installation is loaded again', async () => {
-  const root = await temporary(), bytes = Buffer.from('#!/bin/sh\nexit 0\n');
+it('validates a pinned-key signature before probing and when an installation is loaded again', async () => {
+  const root = await temporary(), bytes = fixtureBinary('#!/bin/sh\nexit 0\n');
   const { release, fingerprint } = await signedRelease(bytes), probe = vi.fn(async () => {});
   const store = new SetupStore(join(root, 'tools'), artifactVerifier(fingerprint));
   const installed = await store.install(release, payloadNetwork(bytes), signal(), () => {}, () => true, probe);
   expect(probe).toHaveBeenCalledOnce();
   expect((await store.identity('claude'))?.hash).toBe(createHash('sha256').update(bytes).digest('hex'));
-  const altered = Buffer.from('#!/bin/sh\necho substituted\n'); await writeFile(installed.identity.path, altered);
+  const altered = fixtureBinary('#!/bin/sh\necho substituted\n'); await writeFile(installed.identity.path, altered);
   const recordPath = join(root, 'tools/claude/1.0.0/installed.json');
   const record = JSON.parse(await readFile(recordPath, 'utf8')); record.identity.hash = createHash('sha256').update(altered).digest('hex');
   record.release.digest = record.identity.hash;
@@ -35,8 +36,8 @@ it.skipIf(process.platform === 'win32')('validates a pinned-key signature before
   await expect(store.identity('claude')).rejects.toMatchObject({ code: 'signature' });
 });
 
-it.skipIf(process.platform === 'win32')('refuses a feed and record key that merely claim the pinned fingerprint', async () => {
-  const root = await temporary(), bytes = Buffer.from('#!/bin/sh\nexit 0\n'), { release } = await signedRelease(bytes);
+it('refuses a feed and record key that merely claim the pinned fingerprint', async () => {
+  const root = await temporary(), bytes = fixtureBinary('#!/bin/sh\nexit 0\n'), { release } = await signedRelease(bytes);
   const store = new SetupStore(join(root, 'tools')), probe = vi.fn(async () => {});
   await expect(store.install(release, payloadNetwork(bytes), signal(), () => {}, () => true, probe)).rejects.toMatchObject({ code: 'signature' });
   expect(probe).not.toHaveBeenCalled(); expect(store.active('claude')).toBeNull();

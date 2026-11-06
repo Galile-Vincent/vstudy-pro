@@ -1,6 +1,8 @@
 /** Real native PTY boundaries, ownership, and process-tree cancellation. @packageDocumentation */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { stripVTControlCharacters } from 'node:util';
+import { spawn } from 'node-pty';
 import { expect, it } from 'vitest';
 import { ActionPty, TerminalText, type TerminalPlan } from './pty';
 import { ActionSessions } from './sessions';
@@ -12,13 +14,26 @@ const terminalPlan = (cwd: string, code: string): TerminalPlan => ({ executable:
 it('passes argv literally, supports quoted paths, and scrubs inherited secrets and browser openers', async () => {
   const cwd = await temporary(), arg = 'space "quote" $(touch PWNED)';
   const base = buildPlan('login-claude', cwd, '/fake/cli with "quotes"', null, null, Date.now());
-  const plan = { ...base, executable: process.execPath, args: ['-e', 'console.log(JSON.stringify({arg:process.argv[1],secret:process.env.ANTHROPIC_API_KEY,browser:process.env.BROWSER,updates:process.env.DISABLE_AUTOUPDATER,agy:process.env.AGY_CLI_DISABLE_AUTO_UPDATE}))', arg] };
+  const plan = { ...base, executable: process.execPath, args: ['-e', "const value={arg:process.argv[1],secret:process.env.ANTHROPIC_API_KEY,browser:process.env.BROWSER,updates:process.env.DISABLE_AUTOUPDATER,agy:process.env.AGY_CLI_DISABLE_AUTO_UPDATE};console.log('FIXTURE_JSON\\n'+Buffer.from(JSON.stringify(value)).toString('base64')+'\\nFIXTURE_END')", arg] };
   const result = await new ActionPty().run(plan, AbortSignal.timeout(5000), () => {});
   expect(result.exitCode).toBe(0);
-  expect(JSON.parse(result.output)).toMatchObject({ arg, browser: process.platform === 'win32' ? expect.stringContaining('where.exe') : '/usr/bin/true', updates: '1', agy: 'true' });
-  expect(JSON.parse(result.output)).not.toHaveProperty('secret');
+  const encoded = stripVTControlCharacters(result.output).match(/FIXTURE_JSON\s+([\s\S]*?)\s+FIXTURE_END/);
+  expect(encoded).not.toBeNull();
+  const value = JSON.parse(Buffer.from(encoded![1]!.replace(/\s/g, ''), 'base64').toString('utf8'));
+  expect(value).toMatchObject({ arg, browser: process.platform === 'win32' ? expect.stringContaining('where.exe') : '/usr/bin/true', updates: '1', agy: 'true' });
+  expect(value).not.toHaveProperty('secret');
   await expect(readFile(join(cwd, 'PWNED'))).rejects.toMatchObject({ code: 'ENOENT' });
   expect(displayCommand('/fake/a b', ['quote\'here'], 'darwin')).toContain("'quote'\\''here'");
+});
+it.skipIf(process.platform !== 'win32')('uses the pinned native ConPTY agent on Windows for the real action lifecycle', async () => {
+  let conpty = false;
+  const pty = new ActionPty((file, args, options) => {
+    const terminal = spawn(file, args, options);
+    conpty = (terminal as unknown as { _agent: { _useConpty: boolean } })._agent._useConpty;
+    return terminal;
+  });
+  const result = await pty.run(terminalPlan(await temporary(), "console.log('CONPTY_READY')"), AbortSignal.timeout(5000), () => {});
+  expect(result.exitCode).toBe(0); expect(result.output).toContain('CONPTY_READY'); expect(conpty).toBe(true);
 });
 it('accepts bounded input and resize, then awaits cancellation of a TERM-resistant tree', async () => {
   const cwd = await temporary(), pty = new ActionPty(), controller = new AbortController();

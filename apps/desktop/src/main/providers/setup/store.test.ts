@@ -8,16 +8,17 @@ import { ExecutablePins, setExecutablePins, pinnedCli } from '../executable-pins
 import { executableLeased } from './leases';
 import { runCli } from '../cli-transport';
 import { payloadNetwork, payloadRelease, tarPayload, temporaryDirectories, fixtureStore } from './test-fixtures';
+import { fixtureBinary, transportFixture } from './native-fixtures';
 const temporary = temporaryDirectories();
 const signal = () => AbortSignal.timeout(5000);
 it('switches new sessions while a real old transport remains leased and can roll back', async () => {
   const directory = await temporary(), store = fixtureStore(join(directory, 'tools'));
-  const script = (label: string) => Buffer.from(`#!/bin/sh\nprintf '%s\\n' '{"type":"stream_event","event":{"type":"content_block_delta","delta":{"type":"text_delta","text":"${label}"}}}'\nwhile :; do /bin/sleep 1; done\n`);
-  const old = script('old'), next = script('new');
+  const oldTransport = transportFixture('old'), nextTransport = transportFixture('new');
+  const old = oldTransport.bytes, next = nextTransport.bytes;
   const first = await store.install(payloadRelease(old), payloadNetwork(old), signal(), () => {});
   const confirm = vi.fn(async () => false), pins = new ExecutablePins(join(directory, 'pins.json'), confirm);
   pins.setManagedResolver(binary => store.identity(binary), binary => store.describe(binary)); pins.activateManaged('claude', first.identity); setExecutablePins(pins);
-  const stream = runCli(first.identity.path, [], '', directory, 'claude', new AbortController().signal);
+  const stream = runCli(first.identity.path, oldTransport.args, '', directory, 'claude', new AbortController().signal);
   let newStream: ReturnType<typeof runCli> | undefined;
   try {
     expect((await stream.next()).value).toMatchObject({ type: 'text-delta', text: 'old' });
@@ -28,7 +29,7 @@ it('switches new sessions while a real old transport remains leased and can roll
     expect(await pinnedCli('claude')).toBe(second.identity.path);
     expect(await readFile(first.identity.path)).toEqual(old);
     expect(executableLeased(first.identity.path)).toBe(true);
-    newStream = runCli((await pinnedCli('claude'))!, [], '', directory, 'claude', new AbortController().signal);
+    newStream = runCli((await pinnedCli('claude'))!, nextTransport.args, '', directory, 'claude', new AbortController().signal);
     expect((await newStream.next()).value).toMatchObject({ type: 'text-delta', text: 'new' });
     expect(confirm).not.toHaveBeenCalled();
     const restored = await store.rollback('claude'); pins.activateManaged('claude', restored.identity); expect(restored.release.version).toBe('1.0.0');
@@ -38,20 +39,20 @@ it('switches new sessions while a real old transport remains leased and can roll
   expect(executableLeased(first.identity.path)).toBe(false);
 });
 it('still requires existing changed-file confirmation for the active managed path', async () => {
-  const directory = await temporary(), store = fixtureStore(join(directory, 'tools')), bytes = Buffer.from('#!/bin/sh\nexit 0\n');
+  const directory = await temporary(), store = fixtureStore(join(directory, 'tools')), bytes = fixtureBinary('#!/bin/sh\nexit 0\n');
   const installed = await store.install(payloadRelease(bytes), payloadNetwork(bytes), signal(), () => {});
   const confirm = vi.fn(async () => false), pins = new ExecutablePins(join(directory, 'pins.json'), confirm);
   await pins.choose('claude', installed.identity.path); pins.setManagedResolver(binary => store.identity(binary), binary => store.describe(binary));
-  await writeFile(installed.identity.path, '#!/bin/sh\nexit 1\n');
+  await writeFile(installed.identity.path, fixtureBinary('#!/bin/sh\nexit 1\n'));
   expect(await pins.resolve('claude')).toBeNull(); expect(confirm).toHaveBeenCalledTimes(1);
 });
 it('never publishes failed verification, version validation, or a new busy activation', async () => {
-  const directory = await temporary(), store = fixtureStore(join(directory, 'tools')), bytes = Buffer.from('#!/bin/sh\nexit 0\n');
+  const directory = await temporary(), store = fixtureStore(join(directory, 'tools')), bytes = fixtureBinary('#!/bin/sh\nexit 0\n');
   const release = payloadRelease(bytes);
   await expect(store.install({ ...release, digest: '0'.repeat(64) }, payloadNetwork(bytes), signal(), () => {})).rejects.toMatchObject({ code: 'checksum' });
   expect(store.active('claude')).toBeNull();
   await expect(store.install(release, payloadNetwork(bytes), signal(), () => {}, () => true, async () => { throw new Error('wrong version'); })).rejects.toThrow('wrong version');
-  await expect(store.install(release, payloadNetwork(bytes), signal(), () => {}, () => true, async binary => { await writeFile(binary, '#!/bin/sh\nexit 2\n'); })).rejects.toMatchObject({ code: 'checksum' });
+  await expect(store.install(release, payloadNetwork(bytes), signal(), () => {}, () => true, async binary => { await writeFile(binary, fixtureBinary('#!/bin/sh\nexit 2\n')); })).rejects.toMatchObject({ code: 'checksum' });
   await expect(store.install(release, payloadNetwork(bytes), signal(), () => {}, () => false)).rejects.toMatchObject({ code: 'busy' });
   expect(store.active('claude')).toBeNull(); expect(await readdir(join(directory, 'tools/claude'))).toEqual([]);
 });
@@ -73,20 +74,20 @@ it.each(['1', '2', '5', 'x'])('rejects non-regular tar type %s', async type => {
   await expect(extractExecutable(archive, join(directory, 'out'), 'antigravity', signal())).rejects.toMatchObject({ code: 'blocked' });
 });
 it('extracts only the expected regular executable and preserves its verified bytes', async () => {
-  const directory = await temporary(), bytes = Buffer.from('#!/bin/sh\nexit 0\n'), archive = tarPayload('antigravity', bytes);
+  const directory = await temporary(), bytes = fixtureBinary('#!/bin/sh\nexit 0\n'), archive = tarPayload('antigravity', bytes);
   const store = fixtureStore(join(directory, 'tools'), async (_release, binary) => { expect(await readFile(binary)).toEqual(bytes); });
   const result = await store.install({ ...payloadRelease(archive, '1.0.0', 'agy'), archive: 'tar.gz', executable: 'antigravity' }, payloadNetwork(archive), signal(), () => {});
   expect(await readFile(result.identity.path)).toEqual(bytes);
   await chmod(result.identity.path, 0o700);
 });
 it.each([false, true])('keeps a newly activated executable when an old pending check resolves with %s', async approved => {
-  const directory = await temporary(), store = fixtureStore(join(directory, 'tools')), bytes = Buffer.from('#!/bin/sh\nexit 0\n');
+  const directory = await temporary(), store = fixtureStore(join(directory, 'tools')), bytes = fixtureBinary('#!/bin/sh\nexit 0\n');
   const first = await store.install(payloadRelease(bytes), payloadNetwork(bytes), signal(), () => {});
   let approve!: (allowed: boolean) => void, started!: () => void;
   const waiting = new Promise<void>(resolve => { started = resolve; });
   const pins = new ExecutablePins(join(directory, 'pins.json'), () => { started(); return new Promise<boolean>(resolve => { approve = resolve; }); });
   pins.setManagedResolver(binary => store.identity(binary), binary => store.describe(binary)); pins.activateManaged('claude', first.identity);
-  await writeFile(first.identity.path, '#!/bin/sh\nexit 1\n');
+  await writeFile(first.identity.path, fixtureBinary('#!/bin/sh\nexit 1\n'));
   const oldResolution = pins.resolve('claude'); await waiting;
   const second = await store.install(payloadRelease(bytes, '1.1.0'), payloadNetwork(bytes), signal(), () => {});
   pins.activateManaged('claude', second.identity);
