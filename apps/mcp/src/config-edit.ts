@@ -9,6 +9,12 @@ const begin = '# vstudy-mcp managed entry begin';
 const end = '# vstudy-mcp managed entry end';
 const object = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 
+function withoutEmptyServerTable(root: Record<string, unknown>, key: string): Record<string, unknown> {
+  const normalized = {...root};
+  if (object(normalized[key]) && !Object.keys(normalized[key]).length) delete normalized[key];
+  return normalized;
+}
+
 function uniqueKeys(node: Node): void {
   if (node.type === 'object') {
     const seen = new Set<string>();
@@ -69,9 +75,7 @@ export function editConfig(before: string | undefined, config: ClientConfig, uni
   const after = parseConfig(text, 'toml');
   const rest = { ...servers };
   delete rest.vstudy;
-  const remaining = Object.keys(rest).length ? { ...root, [key]: rest } : { ...root };
-  if (!Object.keys(rest).length) delete remaining[key];
-  if (object(after[key]) && !Object.keys(after[key]).length && !Object.keys(rest).length) remaining[key] = {};
-  if (!isDeepStrictEqual(after, remaining, { skipPrototype: true })) throw new LocalFileError('The managed block includes unrelated settings. No files were changed.');
+  const remaining = {...root, [key]: rest};
+  if (!isDeepStrictEqual(withoutEmptyServerTable(after, key), withoutEmptyServerTable(remaining, key), { skipPrototype: true })) throw new LocalFileError('The managed block includes unrelated settings. No files were changed.');
   return { text, changed: true };
 }
