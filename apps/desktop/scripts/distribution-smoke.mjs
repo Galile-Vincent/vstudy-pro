@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { setTimeout, clearTimeout } from 'node:timers';
+import { finished } from 'node:stream/promises';
 import { packagedExecutable, targetFor } from './release-contract.mjs';
 
 export function validateSmokeReport(report, target) {
@@ -69,6 +70,7 @@ export async function runSmoke({ executable, args = [], target, output, timeoutM
     clearTimeout(deadline);
     stdout.end();
     stderr.end();
+    await Promise.all([finished(stdout), finished(stderr)]);
     await writeFile(join(output, 'launch.json'), JSON.stringify({ executable, target: target.key, root, timedOut, ...outcome }, null, 2) + '\n');
     if (timedOut) {
       await copyFile(join(root, 'smoke-result.json'), join(output, 'smoke-result.json')).catch(() => {});

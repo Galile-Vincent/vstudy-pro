@@ -1,68 +1,186 @@
-name: Unsigned release artifacts
+name: Desktop distribution
 on:
   push:
     tags: ['v*.*.*']
+    branches: ['ci/**']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build unsigned artifacts only, without signing secrets or release publication
+        type: boolean
+        required: true
+        default: true
 permissions:
   contents: read
+concurrency:
+  group: distribution-${{ github.ref }}
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash
+env:
+  CI: 'true'
 jobs:
-  package:
-    runs-on: macos-14
-    timeout-minutes: 30
-    env:
-      CI: 'true'
-      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      version: ${{ steps.plan.outputs.version }}
+      publish: ${{ steps.plan.outputs.publish }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version
+      - id: plan
+        env:
+          RELEASE_DRY_RUN: ${{ inputs.dry_run }}
+        run: node apps/desktop/scripts/release-plan.mjs
+  package:
+    needs: plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          architecture: ${{ matrix.arch }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Validate version tag
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          node --input-type=module <<'JS'
-          import { readFileSync } from 'node:fs';
-          const version = JSON.parse(readFileSync('apps/desktop/package.json')).version;
-          if (!/^v\d+\.\d+\.\d+$/.test(process.env.RELEASE_TAG) || process.env.RELEASE_TAG !== `v${version}`) {
-            throw new Error('Tag must equal v plus the desktop package version');
-          }
-          JS
-      - run: pnpm typecheck
-      - run: pnpm lint
-      - run: pnpm test --pool=forks --maxWorkers=2
+      - run: pnpm --filter @vstudy/desktop typecheck
+      - run: pnpm --filter @vstudy/desktop lint
+      - run: pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2
+      - run: pnpm --filter @vstudy/desktop test:release
       - run: pnpm security:static
       - run: pnpm vendor:check
-      - run: pnpm knip
       - run: pnpm build
-      - run: pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish never -c.mac.notarize=false -c.mac.identity=null
-      - name: Checksums
-        working-directory: apps/desktop/release
-        run: shasum -a 256 ./*.dmg > SHA256SUMS.txt
-      - uses: actions/upload-artifact@v4
+      - name: Package unsigned branch or dry-run artifacts
+        if: needs.plan.outputs.publish != 'true'
+        working-directory: apps/desktop
+        run: node scripts/package-release.mjs --target "$TARGET" --unsigned
+        env:
+          TARGET: ${{ matrix.key }}
+      - name: Package release with automatic signing when credentials are complete
+        if: needs.plan.outputs.publish == 'true'
+        working-directory: apps/desktop
+        run: node scripts/package-release.mjs --target "$TARGET"
+        env:
+          TARGET: ${{ matrix.key }}
+          CSC_LINK: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.CSC_KEY_PASSWORD || '' }}
+          APPLE_API_KEY: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.APPLE_API_KEY || '' }}
+          APPLE_API_KEY_ID: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.APPLE_API_KEY_ID || '' }}
+          APPLE_API_ISSUER: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.APPLE_API_ISSUER || '' }}
+          APPLE_ID: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.APPLE_TEAM_ID || '' }}
+          WIN_CSC_LINK: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.WIN_CSC_LINK || '' }}
+          WIN_CSC_KEY_PASSWORD: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.WIN_CSC_KEY_PASSWORD || '' }}
+          WIN_SIGNTOOL_HOOK: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.WIN_SIGNTOOL_HOOK || '' }}
+          AZURE_TENANT_ID: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_TENANT_ID || '' }}
+          AZURE_CLIENT_ID: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_CLIENT_ID || '' }}
+          AZURE_CLIENT_SECRET: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_CLIENT_SECRET || '' }}
+          AZURE_ENDPOINT: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_ENDPOINT || '' }}
+          AZURE_CODE_SIGNING_ACCOUNT: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_CODE_SIGNING_ACCOUNT || '' }}
+          AZURE_CERTIFICATE_PROFILE: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && secrets.AZURE_CERTIFICATE_PROFILE || '' }}
+          WIN_PUBLISHER_NAME: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'win' && vars.WIN_PUBLISHER_NAME || '' }}
+      - name: Launch the packaged Mac app with native smoke reporting
+        if: matrix.platform == 'mac'
+        working-directory: apps/desktop
+        env:
+          TARGET: ${{ matrix.key }}
+        run: node scripts/distribution-smoke.mjs --target "$TARGET"
+      - name: Install, launch, and uninstall Windows under a non-administrator token
+        if: matrix.platform == 'win'
+        working-directory: apps/desktop
+        env:
+          TARGET: ${{ matrix.key }}
+        run: node scripts/windows-install-smoke.mjs --target "$TARGET"
+      - name: Stage stable and versioned assets, update feeds, and provenance
+        id: stage
+        env:
+          TARGET: ${{ matrix.key }}
+        run: node apps/desktop/scripts/release-assets.mjs stage --target "$TARGET"
+      - name: Retain native smoke report, window capture, and process logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: unsigned-${{ github.ref_name }}
-          path: |
-            apps/desktop/release/*.dmg
-            apps/desktop/release/SHA256SUMS.txt
+          name: smoke-${{ matrix.key }}
+          path: apps/desktop/release/smoke/${{ matrix.key }}/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Retain distribution artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: distribution-${{ matrix.key }}-${{ steps.stage.outputs.label }}
+          path: artifacts/${{ matrix.key }}/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+  assemble:
+    needs: [plan, package]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: distribution-*
+          path: artifacts
+      - name: Assemble and verify all four native targets
+        run: node apps/desktop/scripts/release-assets.mjs assemble
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-assets-${{ needs.plan.outputs.version }}
+          path: release-assets/
+          if-no-files-found: error
+          compression-level: 0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-notes-${{ needs.plan.outputs.version }}
+          path: release-notes.md
           if-no-files-found: error
   publish:
-    needs: package
+    needs: [plan, assemble]
+    if: needs.plan.outputs.publish == 'true' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: desktop-public-release
+      cancel-in-progress: false
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          name: unsigned-${{ github.ref_name }}
-          path: artifacts
-      - name: Attach unsigned artifacts to draft release
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-assets-${{ needs.plan.outputs.version }}
+          path: release-assets
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-notes-${{ needs.plan.outputs.version }}
+      - name: Publish non-draft tag release and verify stable latest download URLs
         env:
           GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --draft --title "$RELEASE_TAG (unsigned)" --notes 'Unsigned CI build for testing. Not notarized or approved for distribution. See CONTRIBUTING.md for signed release checks.'
-          gh release upload "$RELEASE_TAG" artifacts/* --clobber
+          RELEASE_DRY_RUN: ${{ inputs.dry_run }}
+        run: node apps/desktop/scripts/release-publish.mjs

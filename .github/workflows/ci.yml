@@ -34,6 +34,7 @@ jobs:
       - run: pnpm --filter @vstudy/desktop typecheck
       - run: pnpm --filter @vstudy/desktop lint
       - run: pnpm --filter @vstudy/desktop test --pool=forks --maxWorkers=2
+      - run: pnpm --filter @vstudy/desktop test:release
       - run: pnpm security:static
       - run: pnpm vendor:check
       - run: pnpm build
