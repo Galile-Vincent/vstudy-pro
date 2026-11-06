@@ -33,3 +33,8 @@ it('new quiz failure overrides an older resolved observation or understood click
  const attempts=[{at:iso(3),correct:false,confirmed:true},{at:iso(4),correct:false,confirmed:true}];
  expect(computeMastery([row(0),row(1,{resolved:true,signal:'resolved'})],{now:base+4*day,understoodAt:iso(2),attempts}).state).toBe('needs_review');
 });
+it('counts several errors followed by a correction as one reduced session signal',()=>{
+ const observations=[0,1].flatMap(d=>[row(d),row(d+.01),row(d+.02,{signal:'resolved',errorType:'none',resolved:true})]);
+ expect(computeMastery(observations,{now:base+2*day}).negative).toBeLessThan(.6);
+ expect(computeMastery(observations,{now:base+2*day}).state).not.toBe('needs_review');
+});

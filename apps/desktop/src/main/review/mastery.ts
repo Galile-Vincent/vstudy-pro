@@ -44,10 +44,17 @@ export function computeMastery(observations:readonly MasteryObservation[], optio
   const confirmed=(options.attempts ?? []).filter(a=>a.confirmed && !a.reportedBad && Date.parse(a.at)<=options.now);
   const decay = (at:string,halfLife:number) => 0.5 ** (Math.max(0,options.now-Date.parse(at))/DAY_MS/halfLife);
   let negative=0, positive=0;
-  for (const o of rows) {
-    const weight = o.evidenceKind==='paraphrase' ? MASTERY_WEIGHTS.paraphraseFactor : 1;
-    negative += negativeWeight(o)*weight*decay(o.occurredAt,NEGATIVE_HALF_LIFE_DAYS);
-    if (originallyResolved.has(o.id)) positive+=MASTERY_WEIGHTS.resolvedPositive*weight*decay(o.occurredAt,POSITIVE_HALF_LIFE_DAYS);
+  for (const episode of episodes) {
+    let correctedNegative=0;
+    for (const o of episode.observations) {
+      const weight = o.evidenceKind==='paraphrase' ? MASTERY_WEIGHTS.paraphraseFactor : 1;
+      const contribution=negativeWeight(o)*weight*decay(o.occurredAt,NEGATIVE_HALF_LIFE_DAYS);
+      // Several guesses before one successful restatement are one reduced signal.
+      if (o.resolved) correctedNegative=Math.max(correctedNegative,contribution);
+      else negative+=contribution;
+      if (o.resolved) positive+=MASTERY_WEIGHTS.resolvedPositive*weight*decay(o.occurredAt,POSITIVE_HALF_LIFE_DAYS);
+    }
+    negative+=correctedNegative;
   }
   for (const item of confirmed) {
     if (item.correct) positive+=MASTERY_WEIGHTS.quiz*decay(item.at,POSITIVE_HALF_LIFE_DAYS);
