@@ -25,9 +25,9 @@ it.each(['materialize','link','sync','download','normal-link'] as const)('maps M
    f.store.db.prepare("DELETE FROM study_document_units WHERE courseId=?").run(study.id);
    f.r.linkDocument(study.id,f.d);
   }
-  const input=f.a.scopeInputs(study.id),unit=f.r.listUnits({courseId:study.id}).items.find(u=>u.sourceKey===section.id)!;
+  const unit=f.r.listUnits({courseId:study.id}).items.find(u=>u.sourceKey===section.id)!;
   for(const scope of [{kind:'units' as const,unitIds:[unit.id]},{kind:'concepts' as const,conceptKeys:['energy']},{kind:'dates' as const,fromDate:'2026-09-06',toDate:'2026-09-07',timeZone:'UTC'}]){
-   const result=resolveScope(scope,input);expect(result.status).toBe('resolved');expect(result.snapshot.documentIds).toContain(f.d);
+   const result=resolveScope(scope,f.a.scopeInputs(study.id,scope));expect(result.status).toBe('resolved');expect(result.snapshot.documentIds).toContain(f.d);
   }
   expect(f.store.db.prepare('SELECT count(*) n FROM study_document_units WHERE courseId=? AND unitId=? AND documentId=?').get(study.id,unit.id,f.d)?.n).toBe(1);
  }finally{f.store.close();}
