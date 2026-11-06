@@ -1,3 +1,4 @@
+import { CourseChip } from './review/course-chip';
 import { TutorModeControl, useTutorMode } from "./tutor-mode-control";
 import { chatHistoryMessages, EarlierMessages, type MessageCursor } from './chat-history';
 import { useChatMotion } from './motion/chat-motion';
@@ -137,7 +138,7 @@ export function Chat({
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
     selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
-    picker: <><TutorModeControl mode={tutorMode} onChange={setTutorMode} onAnswer={() => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); }}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
+    picker: <><CourseChip key={conversation.id} conversationId={conversation.id} /><TutorModeControl mode={tutorMode} onChange={setTutorMode} onAnswer={() => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); }}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
