@@ -1,3 +1,4 @@
+import { TutorModeControl, useTutorMode } from "./tutor-mode-control";
 import { chatHistoryMessages, EarlierMessages, type MessageCursor } from './chat-history';
 import { useChatMotion } from './motion/chat-motion';
 import { FileText } from 'lucide-react';
@@ -73,6 +74,7 @@ export function Chat({
   documentPageCount?: number; documentTitle?: string;
 }) {
   useTranslation();
+  const [tutorMode, setTutorMode] = useTutorMode();
   const [earlierHistory, setEarlierHistory] = useState<Message[]>([]);
   const restoredHistory = useMemo(() => [...earlierHistory, ...history], [earlierHistory, history]);
   const motion = useChatMotion(restoredHistory);
@@ -84,8 +86,8 @@ export function Chat({
   const budget = useBudgetGuard(usage.data, conversation.id, draft);
   const available = providers.find(p => p.config.id === conversation.providerId);
   const unavailable = !available?.config.enabled || !available.availability.available;
-  const current = useRef({ conversation, selection, onClearSelection, onProposals });
-  current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, onClearSelection, onProposals };
+  const current = useRef({ conversation, selection, onClearSelection, onProposals, tutorMode });
+  current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, onClearSelection, onProposals, tutorMode };
   const partialHistory = useRef(!!historyCursor);
   const connection = useMemo(
     () =>
@@ -94,6 +96,7 @@ export function Chat({
         async () => {
           const { conversation: c, selection: s } = current.current;
           return {
+            tutorMode: current.current.tutorMode,
             conversationId: c.id,
             ...(c.scope === "course" ? {scope:"course" as const,courseId:c.courseId} : c.scope === "general" ? {scope:"general" as const} : {documentId:c.documentId}),
             providerId: c.providerId,
@@ -134,7 +137,7 @@ export function Chat({
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
     selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
-    picker: <ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} />,
+    picker: <><TutorModeControl mode={tutorMode} onChange={setTutorMode} onAnswer={() => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); }}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>

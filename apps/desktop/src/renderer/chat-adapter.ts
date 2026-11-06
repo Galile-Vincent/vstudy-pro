@@ -23,6 +23,7 @@ export function createChatAdapter(
       const turnId = String(user?.metadata?.custom?.turnId ?? user?.id ?? crypto.randomUUID());
       const details = contexts.get(turnId) ?? await context();
       const saved = user?.metadata?.custom;
+      if (saved?.tutorMode === "direct") details.tutorMode = "direct";
       const materials = materialRequestSchema.safeParse(saved?.materials);
       if (details.scope === "course" && materials.success) details.materials = materials.data;
       if (saved?.turnId) {
@@ -73,7 +74,7 @@ export function createChatAdapter(
         // An unloaded prefix is not a deleted branch; let main retain its full context.
         // Main may emit the entire response before its start acknowledgement resolves.
         void bridge
-          .invoke("chat:start", { ...details, requestId, userMessage, turnId, ...(!partialHistory() ? {contextTurnIds: messages.filter(m => m.role === "user").slice(0, -1).map(m => String(m.metadata?.custom?.turnId ?? m.id))} : {}) })
+          .invoke("chat:start", { ...details, tutorMode: details.tutorMode ?? "direct", requestId, userMessage, turnId, ...(!partialHistory() ? {contextTurnIds: messages.filter(m => m.role === "user").slice(0, -1).map(m => String(m.metadata?.custom?.turnId ?? m.id))} : {}) })
           .catch((error) =>
             push({
               type: "error",

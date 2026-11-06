@@ -83,3 +83,7 @@ it('follows the latest user language by default and preserves document language'
 it.each([['en','English'],['zh-Hant','Traditional Chinese (Taiwan)'],['ja','Japanese']] as const)('uses fixed reply language %s', (replyLanguage,label) => {
   expect(buildPrompt({replyLanguage,document:{title:'Test',markdown:''},history:[],userMessage:'Hello'})).toContain(`Answer in ${label}.`);
 });
+it('places vetted tutoring instructions before document content', () => {
+  const prompt = buildPrompt({document:{title:'Study',markdown:'untrusted'},history:[],userMessage:'Why TCP?',tutorMode:'socratic',replyLanguage:'en'});
+  expect(prompt.indexOf('Be a patient study tutor.')).toBeLessThan(prompt.indexOf('<untrusted_document_content>'));
+});
