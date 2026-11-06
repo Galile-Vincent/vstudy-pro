@@ -1,0 +1,5 @@
+
+> vstudy-pro@ vendor:check /Users/vc/.t3/worktrees/vstudy-pro/t3-a6602acc
+> node apps/desktop/scripts/vendor-check.mjs
+
+55 vendor sources and 1 application files match reviewed hashes

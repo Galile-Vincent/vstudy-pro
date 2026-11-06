@@ -1,0 +1,15 @@
+{
+  "phase": "before",
+  "artifact": "Real built Electron with fixture Moodle read handlers. No school connection.",
+  "results": [
+    "vstudy/light/1200x768 home and course captured.",
+    "vstudy/dark/1200x768 home and course captured.",
+    "ocean/light/1200x768 home and course captured.",
+    "ocean/dark/1200x768 home and course captured.",
+    "vstudy/light/1440x900 home and course captured.",
+    "vstudy/dark/1440x900 home and course captured.",
+    "ocean/light/1440x900 home and course captured.",
+    "ocean/dark/1440x900 home and course captured."
+  ],
+  "errors": []
+}

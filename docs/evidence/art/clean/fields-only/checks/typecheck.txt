@@ -1,0 +1,19 @@
+
+> vstudy-pro@ typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-a6602acc
+> pnpm --filter @vstudy/desktop typecheck && pnpm --filter @vstudy/website typecheck
+
+
+> @vstudy/desktop@0.2.1 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-a6602acc/apps/desktop
+> node scripts/generate-locales.mjs && tsc --noEmit
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-a6602acc/apps/desktop/src/shared/locales.generated.ts (20 namespaces).
+
+> @vstudy/website@0.1.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-a6602acc/apps/website
+> astro check
+
+10:44:27 [types] Generated 28ms
+10:44:27 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-a6602acc/apps/website...
+Result (20 files):
+- 0 errors
+- 0 warnings
+- 0 hints
