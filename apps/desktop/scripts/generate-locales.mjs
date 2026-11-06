@@ -53,5 +53,5 @@ const fallback = await Promise.all(languages.map(async language => {
   const common = JSON.parse(await readFile(new URL(`locales/${language}/common.json`, shared), 'utf8'));
   return `<p lang="${language}">${escapeHtml(common.surface_render_error)}</p>`;
 }));
-const nextHtml = html.replace(/<!-- startup-fallback:start -->[\s\S]*?<!-- startup-fallback:end -->/, `<!-- startup-fallback:start --><section role="alert" style="visibility:visible">${fallback.join('')}</section><!-- startup-fallback:end -->`);
+const nextHtml = html.replace(/<!-- startup-fallback:start -->[\s\S]*?<!-- startup-fallback:end -->/, `<!-- startup-fallback:start --><section class="bootstrap-fallback" role="alert">${fallback.join('')}</section><!-- startup-fallback:end -->`);
 if (nextHtml !== html) await writeFile(htmlPath, nextHtml);

@@ -61,5 +61,5 @@ it('generates escaped static recovery text from every locale',async()=>{
   const {root,generate}=await fixture();await generate();
   const html=await readFile(join(root,'src/renderer/index.html'),'utf8');
   for(const language of ['en','zh-Hant','ja'])expect(html).toContain(`<p lang="${language}">${language} &lt;Retry&gt; &amp; recover</p>`);
-  expect(html).toContain('visibility:visible');expect(html).toContain('role="alert"');
+  expect(html).toContain('class="bootstrap-fallback"');expect(html).not.toContain('visibility:visible');expect(html).toContain('role="alert"');
 });
