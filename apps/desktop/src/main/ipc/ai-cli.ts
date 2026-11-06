@@ -69,7 +69,7 @@ export function registerAiCliIpc(registrar: ReturnType<typeof createIpcRegistrar
     const setup = await ready, plan = await setup.terminalPlan(event.sender, actionId, token);
     clipboard.writeText(plan.command);
     if (process.platform === 'darwin') {
-      await new Promise<void>((resolve, reject) => execFile('/usr/bin/open', ['-a', 'Terminal', plan.cwd], { timeout: 10_000 }, error => error ? reject(error) : resolve()));
+      await new Promise<void>((resolve, reject) => execFile('/usr/bin/open', ['-a', 'Terminal', plan.cwd], { timeout: 10_000, cwd: plan.cwd, env: { ...plan.env } }, error => error ? reject(error) : resolve()));
     } else {
       const launch = async (binary: string, args: string[]) => {
         const child = spawn(binary, args, { cwd: plan.cwd, env: { ...plan.env }, shell: false, detached: true, stdio: 'ignore', windowsHide: false });

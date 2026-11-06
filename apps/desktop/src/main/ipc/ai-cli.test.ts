@@ -93,6 +93,7 @@ it.each([
   } finally { Object.defineProperty(process, 'platform', original); logging.mockRestore(); }
 });
 it.skipIf(process.platform !== 'darwin')('copies a direct manual login command after executable approval and rejects a changed file', async () => {
+  vi.stubEnv('OPENAI_API_KEY', 'PRIVATE'); vi.stubEnv('BASH_ENV', '/private/fixture');
   const { invoke, pins, root, confirm } = await backend(), binary = join(root, 'claude');
   await writeFile(binary, '#!/bin/sh\nexit 0\n', { mode: 0o700 }); await pins.choose('claude', binary);
   await invoke('ai-cli:consent', { provider: 'claude', enabled: true });
@@ -100,6 +101,9 @@ it.skipIf(process.platform !== 'darwin')('copies a direct manual login command a
   const logging = vi.spyOn(console, 'error').mockImplementation(() => {});
   await expect(invoke('ai-cli:openTerminal', { actionId: 'login-claude', token: preview.token })).rejects.toThrow('VSTUDY_STATUS');
   expect(electron.clipboard.writeText).toHaveBeenLastCalledWith(`'${binary}' 'auth' 'login'`);
+  expect(execFile).toHaveBeenLastCalledWith('/usr/bin/open', ['-a', 'Terminal', expect.any(String)], expect.objectContaining({ cwd: expect.any(String), env: expect.objectContaining({ DISABLE_AUTOUPDATER: '1' }) }), expect.any(Function));
+  expect(vi.mocked(execFile).mock.calls.at(-1)?.[2]).not.toHaveProperty('env.OPENAI_API_KEY');
+  expect(vi.mocked(execFile).mock.calls.at(-1)?.[2]).not.toHaveProperty('env.BASH_ENV');
   expect(confirm).not.toHaveBeenCalled();
   const changed = aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview', { actionId: 'login-claude' }));
   await writeFile(binary, '#!/bin/sh\nexit 1\n');
