@@ -5,7 +5,7 @@ import type { McpRuntime } from './mcp/runtime';
 
 const mocks = vi.hoisted(() => ({
   confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
-  showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), log: vi.fn(), registerIpc: vi.fn(),
+  showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), log: vi.fn(), registerIpc: vi.fn(), restore: undefined as undefined | (() => void),
 }));
 const electron = await vi.hoisted(async () => {
   const { EventEmitter } = await import('node:events');
@@ -50,7 +50,7 @@ vi.mock('./storage/backup', () => ({ recoverRestore: vi.fn() }));
 vi.mock('./logging', () => ({ log: mocks.log, copyDiagnostics: mocks.copyDiagnostics }));
 vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage, showStartupError: mocks.fatal }));
 vi.mock('./shutdown', () => ({ coordinateShutdown: () => vi.fn() }));
-vi.mock('./ownership', () => ({ acquireOwnership: () => true }));
+vi.mock('./ownership', () => ({ acquireOwnership: (_app: unknown, _window: unknown, restore: () => void) => { mocks.restore = restore; return true; } }));
 vi.mock('./i18n', () => ({ tr: (key: string) => key }));
 vi.mock('./packaged-smoke', () => ({ runPackagedSmoke: vi.fn() }));
 
@@ -92,7 +92,7 @@ it.each(['closed', 'destroyed'])('completes startup after an aborted reload foll
   expect(window.webContents.listenerCount('did-fail-load')).toBe(0);
   expect(window.webContents.listenerCount('destroyed')).toBe(0);
   electron.app.emit('activate');
-  expect(electron.BrowserWindow.instances).toHaveLength(2);
+  await vi.waitFor(() => expect(electron.BrowserWindow.instances).toHaveLength(2));
   electron.BrowserWindow.instances[1]!.webContents.emit('did-finish-load');
 });
 it('waits through a reload cancellation until its replacement navigation finishes', async () => {
@@ -243,4 +243,46 @@ it('settles initial navigation when renderer recovery is exhausted', async () =>
   const window = await start();
   for (let i=0;i<3;i++) window.webContents.emit('render-process-gone', {}, {reason:'crashed',exitCode:1});
   await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
+});
+
+it('queues second launches until startup and the store are ready', async () => {
+  let release!: () => void;
+  mocks.rollback.mockImplementationOnce(() => new Promise<boolean>(resolve => {release=()=>resolve(false);}));
+  await import('./index');
+  await vi.waitFor(() => expect(mocks.rollback).toHaveBeenCalledOnce());
+  mocks.restore!(); mocks.restore!();
+  await Promise.resolve();
+  expect(electron.BrowserWindow.instances).toHaveLength(0);
+  expect(electron.app.exit).not.toHaveBeenCalled();
+  release();
+  await vi.waitFor(() => expect(electron.BrowserWindow.instances).toHaveLength(1));
+  const window = electron.BrowserWindow.instances[0]!;
+  window.webContents.emit('did-finish-load');
+  await vi.waitFor(() => expect(window.focus).toHaveBeenCalled());
+  expect(electron.BrowserWindow.instances).toHaveLength(1);
+});
+function rejectInMain(reason: unknown) {
+  const listener = eventProcess.rawListeners('unhandledRejection').find(listener => !processListeners.get('unhandledRejection')!.includes(listener))!;
+  listener(reason);
+}
+it('logs unhandled rejections after startup and keeps the app running', async () => {
+  const window = await start(); window.webContents.emit('did-finish-load');
+  await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce());
+  rejectInMain(Error('runtime failure'));
+  expect(mocks.log).toHaveBeenCalledWith(expect.objectContaining({phase:'main-unhandled-rejection'}));
+  expect(electron.app.exit).not.toHaveBeenCalled();
+  expect(mocks.fatal).not.toHaveBeenCalled();
+});
+it('shows fatal startup rejections before exiting', async () => {
+  await start();
+  const error = Error('startup rejection'); rejectInMain(error);
+  expect(mocks.fatal).toHaveBeenCalledWith(error, 'window');
+  expect(electron.app.exit).toHaveBeenCalledWith(1);
+});
+it('settles deferred second launches after startup fails', async () => {
+  mocks.rollback.mockRejectedValueOnce(Error('restore failed'));
+  await import('./index'); mocks.restore!();
+  await vi.waitFor(() => expect(electron.app.exit).toHaveBeenCalledWith(1));
+  expect(electron.BrowserWindow.instances).toHaveLength(0);
+  expect(mocks.fatal).toHaveBeenCalledWith(expect.any(Error), 'recovery');
 });

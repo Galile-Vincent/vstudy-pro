@@ -53,7 +53,10 @@ process.on('exit', code => log({phase:'main-exit',code}));
 app.on('child-process-gone', (_event,details) => log({phase:'main-child-process-gone',code:details.exitCode,reason:details.reason,type:details.type}));
 app.on('render-process-gone', (_event,_contents,details) => log({phase:'main-render-process-gone',code:details.exitCode,reason:details.reason}));
 process.on('uncaughtExceptionMonitor', error => log({phase:'main-uncaught-exception',code:(error as NodeJS.ErrnoException).code ?? error.name}));
-process.on('unhandledRejection', () => { log({phase:'main-unhandled-rejection',code:'UNHANDLED_REJECTION'}); app.exit(1); });
+process.on('unhandledRejection', error => {
+  log({phase:'main-unhandled-rejection', error: error instanceof Error ? error.stack ?? error.message : error});
+  if (!startupComplete) { failStartup(error); app.exit(1); }
+});
 process.umask(0o077);
 app.enableSandbox();
 if (app.isPackaged) {
@@ -76,6 +79,7 @@ const entryUrl =
 let reloads: number[] = [];
 let openingWindow: Promise<void> | undefined;
 async function restoreMainWindow(): Promise<void> {
+  if (!await appReady) return;
   if (window && !window.isDestroyed()) {window.show();window.focus();return;}
   await (openingWindow ??= createWindow().finally(() => {openingWindow=undefined;}));
 }
@@ -182,7 +186,21 @@ async function createWindow(show = true): Promise<void> {
 }
 
 let startupStage: StartupStage = 'recovery';
-const ownsApplication = acquireOwnership(app, () => window, () => {void restoreMainWindow();});
+let startupComplete = false;
+let startupFailed = false;
+let resolveAppReady!: (ready: boolean) => void;
+const appReady = new Promise<boolean>(resolve => { resolveAppReady = resolve; });
+function failStartup(error: unknown): void {
+  if (startupFailed) return;
+  startupFailed = true;
+  resolveAppReady(false);
+  log({phase:'startup-failed', stage:startupStage, error: error instanceof Error ? error.stack ?? error.message : error});
+  showStartupError(error, startupStage);
+}
+function requestMainWindow(): void {
+  void restoreMainWindow().catch(error => log({phase:'window-restore-failed', error}));
+}
+const ownsApplication = acquireOwnership(app, () => window, requestMainWindow);
 if (ownsApplication) void app.whenReady().then(async () => {
   if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
   const userData = app.getPath("userData");
@@ -239,7 +257,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.sender === window.webContents &&
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
-    () => {void restoreMainWindow();},
+    requestMainWindow,
     process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {},
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
@@ -262,21 +280,22 @@ if (ownsApplication) void app.whenReady().then(async () => {
   });
   nativeTheme.on("updated", () => { if (store) applyNativeTheme(store.settings.get()); });
   app.on("activate", () => {
-    void restoreMainWindow();
+    requestMainWindow();
   });
   startupStage = 'window';
   await createWindow(!process.argv.includes('--mcp-background'));
   if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
+  startupComplete = true;
+  resolveAppReady(true);
 }).catch(async error => {
-  showStartupError(error, startupStage);
-  log({phase:"startup-failed",code:(error as NodeJS.ErrnoException).code ?? error.name});
-  await disposeIpc?.();
-  store?.close();store=undefined;
-  if(await rollbackRestoreStartup(app.getPath("userData"))) {
-    app.relaunch();app.exit(1);return;
-  }
-  app.exit(1);
+  failStartup(error);
+  try {
+    await disposeIpc?.();
+    store?.close(); store = undefined;
+    if (await rollbackRestoreStartup(app.getPath('userData'))) app.relaunch();
+  } catch (cleanupError) { log({phase:'startup-cleanup-failed', error:cleanupError}); }
+  finally { app.exit(1); }
 });
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
