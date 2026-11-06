@@ -22,9 +22,9 @@ Use `install --client <client> [--dry-run]`, `uninstall --client <client> [--dry
 
 ## Pairing and recovery
 
-Turn on **Settings > Agents** in VStudy. The first tool or resource read connects to `<userData>/mcp/bridge.sock`. On macOS the default userData is `~/Library/Application Support/@vstudy/desktop`. `VSTUDY_USER_DATA` selects an explicit development or test profile. It is a local filesystem path, never a school URL.
+Turn on **Settings > Agents** in VStudy. The first tool or resource read connects to `<userData>/mcp/bridge.sock` on Unix. On macOS the default userData is `~/Library/Application Support/@vstudy/desktop`. `VSTUDY_USER_DATA` selects an explicit development or test profile. It is a local filesystem path, never a school URL. Windows uses the shared SID-derived pipe endpoint and requires the authenticated connector described below.
 
-If the socket is absent or refuses connection, the CLI runs `/usr/bin/open -g -j -a 'VStudy Pro' --args --mcp-background` with bounded backoff and a launch cooldown. Other platforms require the user to open the app. Permission failures do not trigger a launch.
+If the Mac socket is absent or refuses connection, the CLI runs `/usr/bin/open -g -j -a 'VStudy Pro' --args --mcp-background` with bounded backoff and a launch cooldown. The Windows launcher resolves installed app metadata and uses native argv, but the default Windows transport currently fails closed before launch. Linux requires the user to open the app. Permission failures do not trigger a launch.
 
 Pairing begins and finishes on one connection. Compare the code on stderr with VStudy before approving. Discovery, help, install, and doctor do not pair. Doctor authenticates stored bearers through `list_accounts` on its existing ping connection, discards account content, and reports revoked, expired, disabled, or insufficient-scope results without launching the app. On Unix the per-client file `~/.config/vstudy-mcp/<client>.json` contains a random client UUID, an opaque local grant, and its expiry. The directory is 0700 and the file is 0600. Nothing reads a Moodle password, cookie, WS token, or autologin key.
 
