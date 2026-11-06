@@ -1,0 +1,1332 @@
+{
+  "captureTime": "2026-11-06T02:00:00.000Z",
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "scale": 2
+  },
+  "artifact": "Built Electron app, synthetic course/provider/saved-conversation fixtures, real document imports and planner IPC",
+  "shots": [
+    {
+      "name": "course-page",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 120248,
+      "avifBytes": 60700,
+      "file": "course-page-vstudy-dark.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 154792,
+      "avifBytes": 85819,
+      "file": "courses-home-vstudy-dark.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 68012,
+      "avifBytes": 33772,
+      "file": "history-search-vstudy-dark.webp"
+    },
+    {
+      "name": "home",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 136694,
+      "avifBytes": 68671,
+      "file": "home-vstudy-dark.webp"
+    },
+    {
+      "name": "library",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 100080,
+      "avifBytes": 51726,
+      "file": "library-vstudy-dark.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 144730,
+      "avifBytes": 74611,
+      "file": "moodle-webview-vstudy-dark.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 62736,
+      "avifBytes": 32257,
+      "file": "onboarding-welcome-vstudy-dark.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 106062,
+      "avifBytes": 52762,
+      "file": "planner-today-vstudy-dark.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 176014,
+      "avifBytes": 88937,
+      "file": "reader-chat-with-answer-vstudy-dark.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 54334,
+      "avifBytes": 27112,
+      "file": "storage-settings-vstudy-dark.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 63228,
+      "avifBytes": 33763,
+      "file": "themes-settings-vstudy-dark.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 125206,
+      "avifBytes": 64447,
+      "file": "course-page-vstudy-light.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 163584,
+      "avifBytes": 90780,
+      "file": "courses-home-vstudy-light.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 69040,
+      "avifBytes": 36008,
+      "file": "history-search-vstudy-light.webp"
+    },
+    {
+      "name": "home",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 145042,
+      "avifBytes": 76534,
+      "file": "home-vstudy-light.webp"
+    },
+    {
+      "name": "library",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 105660,
+      "avifBytes": 57205,
+      "file": "library-vstudy-light.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 149002,
+      "avifBytes": 79877,
+      "file": "moodle-webview-vstudy-light.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 67446,
+      "avifBytes": 35763,
+      "file": "onboarding-welcome-vstudy-light.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 110260,
+      "avifBytes": 57043,
+      "file": "planner-today-vstudy-light.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 176742,
+      "avifBytes": 97172,
+      "file": "reader-chat-with-answer-vstudy-light.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 58760,
+      "avifBytes": 30467,
+      "file": "storage-settings-vstudy-light.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 64974,
+      "avifBytes": 35607,
+      "file": "themes-settings-vstudy-light.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 124758,
+      "avifBytes": 62463,
+      "file": "course-page-ocean-dark.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 158762,
+      "avifBytes": 87354,
+      "file": "courses-home-ocean-dark.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 68776,
+      "avifBytes": 34098,
+      "file": "history-search-ocean-dark.webp"
+    },
+    {
+      "name": "home",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 137588,
+      "avifBytes": 68936,
+      "file": "home-ocean-dark.webp"
+    },
+    {
+      "name": "library",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 101314,
+      "avifBytes": 52097,
+      "file": "library-ocean-dark.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 147296,
+      "avifBytes": 75146,
+      "file": "moodle-webview-ocean-dark.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 63980,
+      "avifBytes": 32740,
+      "file": "onboarding-welcome-ocean-dark.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 106680,
+      "avifBytes": 52998,
+      "file": "planner-today-ocean-dark.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 176948,
+      "avifBytes": 89548,
+      "file": "reader-chat-with-answer-ocean-dark.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 55246,
+      "avifBytes": 27643,
+      "file": "storage-settings-ocean-dark.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 64244,
+      "avifBytes": 33981,
+      "file": "themes-settings-ocean-dark.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 132106,
+      "avifBytes": 67510,
+      "file": "course-page-ocean-light.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 170140,
+      "avifBytes": 94558,
+      "file": "courses-home-ocean-light.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 72494,
+      "avifBytes": 38805,
+      "file": "history-search-ocean-light.webp"
+    },
+    {
+      "name": "home",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 149994,
+      "avifBytes": 80005,
+      "file": "home-ocean-light.webp"
+    },
+    {
+      "name": "library",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 110314,
+      "avifBytes": 60824,
+      "file": "library-ocean-light.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 154902,
+      "avifBytes": 81789,
+      "file": "moodle-webview-ocean-light.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 70438,
+      "avifBytes": 37928,
+      "file": "onboarding-welcome-ocean-light.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 115074,
+      "avifBytes": 59688,
+      "file": "planner-today-ocean-light.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 186566,
+      "avifBytes": 104291,
+      "file": "reader-chat-with-answer-ocean-light.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 61560,
+      "avifBytes": 32656,
+      "file": "storage-settings-ocean-light.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 67920,
+      "avifBytes": 37837,
+      "file": "themes-settings-ocean-light.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 119976,
+      "avifBytes": 61527,
+      "file": "course-page-grove-dark.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 158654,
+      "avifBytes": 88850,
+      "file": "courses-home-grove-dark.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 68020,
+      "avifBytes": 33231,
+      "file": "history-search-grove-dark.webp"
+    },
+    {
+      "name": "home",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 135714,
+      "avifBytes": 68417,
+      "file": "home-grove-dark.webp"
+    },
+    {
+      "name": "library",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 98456,
+      "avifBytes": 51622,
+      "file": "library-grove-dark.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 143088,
+      "avifBytes": 74152,
+      "file": "moodle-webview-grove-dark.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 63228,
+      "avifBytes": 31813,
+      "file": "onboarding-welcome-grove-dark.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 105614,
+      "avifBytes": 52708,
+      "file": "planner-today-grove-dark.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 173202,
+      "avifBytes": 87621,
+      "file": "reader-chat-with-answer-grove-dark.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 54790,
+      "avifBytes": 26375,
+      "file": "storage-settings-grove-dark.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 63252,
+      "avifBytes": 33250,
+      "file": "themes-settings-grove-dark.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 122462,
+      "avifBytes": 64233,
+      "file": "course-page-grove-light.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 162746,
+      "avifBytes": 92630,
+      "file": "courses-home-grove-light.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 67238,
+      "avifBytes": 35356,
+      "file": "history-search-grove-light.webp"
+    },
+    {
+      "name": "home",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 136486,
+      "avifBytes": 73991,
+      "file": "home-grove-light.webp"
+    },
+    {
+      "name": "library",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 100738,
+      "avifBytes": 55678,
+      "file": "library-grove-light.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 144752,
+      "avifBytes": 78004,
+      "file": "moodle-webview-grove-light.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 64804,
+      "avifBytes": 34751,
+      "file": "onboarding-welcome-grove-light.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 105362,
+      "avifBytes": 56039,
+      "file": "planner-today-grove-light.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 170054,
+      "avifBytes": 94729,
+      "file": "reader-chat-with-answer-grove-light.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 56860,
+      "avifBytes": 29615,
+      "file": "storage-settings-grove-light.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 64818,
+      "avifBytes": 35014,
+      "file": "themes-settings-grove-light.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 124430,
+      "avifBytes": 63230,
+      "file": "course-page-ember-dark.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 159456,
+      "avifBytes": 89372,
+      "file": "courses-home-ember-dark.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 68432,
+      "avifBytes": 34278,
+      "file": "history-search-ember-dark.webp"
+    },
+    {
+      "name": "home",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 139624,
+      "avifBytes": 71675,
+      "file": "home-ember-dark.webp"
+    },
+    {
+      "name": "library",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 100008,
+      "avifBytes": 53899,
+      "file": "library-ember-dark.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 144472,
+      "avifBytes": 75354,
+      "file": "moodle-webview-ember-dark.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 63358,
+      "avifBytes": 32110,
+      "file": "onboarding-welcome-ember-dark.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 106892,
+      "avifBytes": 53419,
+      "file": "planner-today-ember-dark.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 175194,
+      "avifBytes": 89255,
+      "file": "reader-chat-with-answer-ember-dark.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 54648,
+      "avifBytes": 26705,
+      "file": "storage-settings-ember-dark.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 64590,
+      "avifBytes": 33604,
+      "file": "themes-settings-ember-dark.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128608,
+      "avifBytes": 65735,
+      "file": "course-page-ember-light.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 167528,
+      "avifBytes": 92567,
+      "file": "courses-home-ember-light.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 69378,
+      "avifBytes": 36567,
+      "file": "history-search-ember-light.webp"
+    },
+    {
+      "name": "home",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 146172,
+      "avifBytes": 77338,
+      "file": "home-ember-light.webp"
+    },
+    {
+      "name": "library",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 107134,
+      "avifBytes": 57963,
+      "file": "library-ember-light.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 151084,
+      "avifBytes": 80030,
+      "file": "moodle-webview-ember-light.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 68038,
+      "avifBytes": 36690,
+      "file": "onboarding-welcome-ember-light.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 111020,
+      "avifBytes": 57453,
+      "file": "planner-today-ember-light.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 177894,
+      "avifBytes": 98529,
+      "file": "reader-chat-with-answer-ember-light.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 59264,
+      "avifBytes": 31546,
+      "file": "storage-settings-ember-light.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 66752,
+      "avifBytes": 36780,
+      "file": "themes-settings-ember-light.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 117248,
+      "avifBytes": 60329,
+      "file": "course-page-iris-dark.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 151496,
+      "avifBytes": 84692,
+      "file": "courses-home-iris-dark.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 68238,
+      "avifBytes": 33316,
+      "file": "history-search-iris-dark.webp"
+    },
+    {
+      "name": "home",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 134696,
+      "avifBytes": 69177,
+      "file": "home-iris-dark.webp"
+    },
+    {
+      "name": "library",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 97298,
+      "avifBytes": 51293,
+      "file": "library-iris-dark.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 142750,
+      "avifBytes": 74446,
+      "file": "moodle-webview-iris-dark.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 61804,
+      "avifBytes": 32165,
+      "file": "onboarding-welcome-iris-dark.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 104308,
+      "avifBytes": 52886,
+      "file": "planner-today-iris-dark.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 173554,
+      "avifBytes": 87907,
+      "file": "reader-chat-with-answer-iris-dark.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 53678,
+      "avifBytes": 27460,
+      "file": "storage-settings-iris-dark.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 62068,
+      "avifBytes": 34153,
+      "file": "themes-settings-iris-dark.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 121538,
+      "avifBytes": 63201,
+      "file": "course-page-iris-light.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 159292,
+      "avifBytes": 89124,
+      "file": "courses-home-iris-light.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 68688,
+      "avifBytes": 36156,
+      "file": "history-search-iris-light.webp"
+    },
+    {
+      "name": "home",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 142400,
+      "avifBytes": 75219,
+      "file": "home-iris-light.webp"
+    },
+    {
+      "name": "library",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 103418,
+      "avifBytes": 56490,
+      "file": "library-iris-light.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 146348,
+      "avifBytes": 79060,
+      "file": "moodle-webview-iris-light.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 66002,
+      "avifBytes": 35343,
+      "file": "onboarding-welcome-iris-light.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 109286,
+      "avifBytes": 56059,
+      "file": "planner-today-iris-light.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 173984,
+      "avifBytes": 96469,
+      "file": "reader-chat-with-answer-iris-light.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 58038,
+      "avifBytes": 30572,
+      "file": "storage-settings-iris-light.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 65136,
+      "avifBytes": 35299,
+      "file": "themes-settings-iris-light.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 116974,
+      "avifBytes": 60108,
+      "file": "course-page-rose-dark.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 154238,
+      "avifBytes": 86155,
+      "file": "courses-home-rose-dark.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 68366,
+      "avifBytes": 33028,
+      "file": "history-search-rose-dark.webp"
+    },
+    {
+      "name": "home",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 134648,
+      "avifBytes": 68309,
+      "file": "home-rose-dark.webp"
+    },
+    {
+      "name": "library",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 97544,
+      "avifBytes": 50872,
+      "file": "library-rose-dark.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 142278,
+      "avifBytes": 73900,
+      "file": "moodle-webview-rose-dark.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 61732,
+      "avifBytes": 31516,
+      "file": "onboarding-welcome-rose-dark.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 104392,
+      "avifBytes": 52089,
+      "file": "planner-today-rose-dark.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 172788,
+      "avifBytes": 87178,
+      "file": "reader-chat-with-answer-rose-dark.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 54086,
+      "avifBytes": 26368,
+      "file": "storage-settings-rose-dark.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 62636,
+      "avifBytes": 32891,
+      "file": "themes-settings-rose-dark.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 120430,
+      "avifBytes": 62376,
+      "file": "course-page-rose-light.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 161508,
+      "avifBytes": 89672,
+      "file": "courses-home-rose-light.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 67428,
+      "avifBytes": 35058,
+      "file": "history-search-rose-light.webp"
+    },
+    {
+      "name": "home",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 140966,
+      "avifBytes": 73965,
+      "file": "home-rose-light.webp"
+    },
+    {
+      "name": "library",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 102740,
+      "avifBytes": 55572,
+      "file": "library-rose-light.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 145024,
+      "avifBytes": 78138,
+      "file": "moodle-webview-rose-light.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 65392,
+      "avifBytes": 34657,
+      "file": "onboarding-welcome-rose-light.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 107726,
+      "avifBytes": 55511,
+      "file": "planner-today-rose-light.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 171912,
+      "avifBytes": 95106,
+      "file": "reader-chat-with-answer-rose-light.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 57686,
+      "avifBytes": 29683,
+      "file": "storage-settings-rose-light.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 64566,
+      "avifBytes": 35049,
+      "file": "themes-settings-rose-light.webp"
+    }
+  ],
+  "errors": []
+}
