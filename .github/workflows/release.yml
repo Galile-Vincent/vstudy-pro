@@ -64,18 +64,7 @@ jobs:
       - name: Place the pinned converter bootstrap tool in its supported user location
         env:
           UV_EXECUTABLE: ${{ steps.uv.outputs.uv-path }}
-        run: |
-          node --input-type=module <<'JS'
-          import { copyFileSync, mkdirSync, chmodSync } from 'node:fs';
-          import { homedir } from 'node:os';
-          import { join } from 'node:path';
-          const directory = join(homedir(), '.local', 'bin');
-          mkdirSync(directory, { recursive: true, mode: 0o700 });
-          chmodSync(directory, 0o700);
-          const executable = join(directory, process.platform === 'win32' ? 'uv.exe' : 'uv');
-          copyFileSync(process.env.UV_EXECUTABLE, executable);
-          chmodSync(executable, 0o700);
-          JS
+        run: node apps/desktop/scripts/provision-ci-uv.mjs
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @vstudy/desktop typecheck
       - run: pnpm --filter @vstudy/desktop lint
