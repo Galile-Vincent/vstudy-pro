@@ -46,7 +46,7 @@ it('teaches global History search and the Escape return path in every language',
   for (const language of ['en', 'zh-Hant', 'ja', 'en-XA']) {
     await act(async () => { await i18n.changeLanguage(language); root.render(<Walkthrough key={language} lesson="history"/>); });
     const text = host.querySelector('.walkthrough-transcript')!.textContent!;
-    expect(text).toContain('Cmd/Ctrl+K');
+    expect(text).toMatch(/(?:Cmd|Ctrl)\+K/);
     expect(text).toMatch(/Escape|Ëscápë/);
     expect(text).not.toContain('ux:');
     expect(text).not.toContain('not all coursework');

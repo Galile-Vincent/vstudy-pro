@@ -4,6 +4,7 @@
  * Integrations are opt-in; subprocesses use argv arrays and release resources on cancellation.
  * @packageDocumentation
  */
+import { terminateProcess } from '../platform/process';
 import { recordEgress } from '../services/egress';
 import { rmSync } from "node:fs";
 import { spawn } from "node:child_process";
@@ -56,7 +57,7 @@ interface Options { findBinary?: () => Promise<string | null>; timeoutMs?: numbe
 export async function* runAgy(binary: string, args: string[], cwd: string, request: ProviderRequest | undefined, signal: AbortSignal, timeoutMs: number): AsyncIterable<ChatEvent | Model[]> {
   if (signal.aborted) { yield { type: "done" }; return; }
   recordEgress(request ? 'agy_chat' : 'agy_discovery', 'Google / Antigravity CLI managed endpoints');
-  const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, detached: process.platform !== "win32", stdio: ["pipe", "pipe", "pipe"] });
+  const child = spawn(binary, args, { cwd, env: cliEnvironment(), shell: false, windowsHide: true, detached: process.platform !== "win32", stdio: ["pipe", "pipe", "pipe"] });
   let failure: AgyError | undefined;
   let sessionId: string | undefined;
   let stopped = false;
@@ -64,7 +65,7 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
   let killTimer: ReturnType<typeof setTimeout> | undefined;
   let stderr = "";
   const terminate = (signal: NodeJS.Signals) => {
-    try { if (child.pid && process.platform !== "win32") process.kill(-child.pid, signal); else child.kill(signal); } catch { /* Already exited. */ }
+    void terminateProcess(child, signal);
   };
   const stop = () => {
     if (stopped) return;
@@ -138,7 +139,7 @@ export async function* runAgy(binary: string, args: string[], cwd: string, reque
     stop(); await closed;
     if (killTimer) clearTimeout(killTimer);
     // The leader may exit before a stubborn descendant; still terminate its process group.
-    terminate("SIGKILL");
+    await terminateProcess(child, "SIGKILL");
   }
 }
 

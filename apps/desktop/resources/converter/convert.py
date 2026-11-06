@@ -119,10 +119,8 @@ def fallback_text(source):
 
 
 def main():
-    import resource
-    resource.setrlimit(resource.RLIMIT_NOFILE, (128, 128))
-    resource.setrlimit(resource.RLIMIT_FSIZE, (64 * 1024 * 1024, 64 * 1024 * 1024))
-    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    from limits import install_limits, peak_memory_bytes
+    install_limits()
     import socket
     def deny_network(*args, **kwargs):
         raise PermissionError("Converter network disabled")
@@ -134,9 +132,7 @@ def main():
 
     def monitor_memory():
         while True:
-            rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            if sys.platform != "darwin":
-                rss *= 1024
+            rss = peak_memory_bytes()
             if rss > 1500 * 1024 * 1024:
                 os.write(
                     2,

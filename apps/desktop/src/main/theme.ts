@@ -20,6 +20,6 @@ export function applyNativeTheme(settings: Settings): void {
   if (nativeTheme.themeSource !== settings.colorScheme) nativeTheme.themeSource = settings.colorScheme;
   for (const window of BrowserWindow.getAllWindows()) {
     window.setBackgroundColor(nativeBackground(settings));
-    window.setVibrancy(settings.material === 'glass' && settings.glassOpacity < 100 && !nativeTheme.prefersReducedTransparency ? 'under-window' : null);
+    if (process.platform === 'darwin') window.setVibrancy(settings.material === 'glass' && settings.glassOpacity < 100 && !nativeTheme.prefersReducedTransparency ? 'under-window' : null);
   }
 }

@@ -1,0 +1,9 @@
+{
+  "codex_unavailable": "Codex CLI is unavailable on Windows. Its verified tool-free transport requires the macOS process sandbox. Use an API-key provider, Claude CLI, or Antigravity CLI instead.",
+  "storage_waiting": "Accessing Windows secure storage…",
+  "storage_help": "Saved keys are encrypted with Windows DPAPI for your Windows account. Unlock saved keys explicitly after each app restart. Windows normally does not show a password prompt. A session key lasts only until you quit.",
+  "storage_failed": "Could not access Windows secure storage. Retry or use a key for this session without saving it.",
+  "school_storage_help": "Windows DPAPI protects saved school sign-in data for your Windows account. Windows normally does not show a password prompt. You can also connect for this session only.",
+  "before_school": "Choose Connect my school below. Search by school name, country, or Moodle URL. Checking a site contacts it and may download its logo. Confirm the site before signing in. Windows DPAPI protects saved sign-in data. Never paste your school password into AI chat.",
+  "converter_copy": "PDF and Office conversion needs a one-time tool download after your approval. Documents stay on this computer. Downloads use PyPI; Python may come from GitHub. On Windows, Python network guards are not a kernel sandbox, and native libraries could bypass them. File descriptor and core-dump limits are unavailable. Choose Offline mode to read Markdown and text without installation downloads."
+}

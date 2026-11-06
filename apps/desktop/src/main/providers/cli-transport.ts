@@ -11,6 +11,8 @@ import { assertCodexChatEvent } from './codex-events';
 import { ProviderError } from "./api";
 import { spawn } from "node:child_process";
 import { delimiter } from "node:path";
+import { systemExecutable, terminateProcess } from '../platform/process';
+import { dirname } from 'node:path';
 import { parseStream, type ParserKind } from "./parsers";
 import type { Usage } from "../../shared/domain";
 /** Build a scrubbed provider environment without inheriting unrelated application secrets. */
@@ -27,9 +29,15 @@ export function cliEnvironment(
     "LANG",
     "LC_ALL",
     "SYSTEMROOT",
+    "SystemRoot",
+    "USERPROFILE",
+    "APPDATA",
+    "LOCALAPPDATA",
+    "TEMP",
+    "TMP",
   ])
     if (source[key]) env[key] = source[key];
-  env.PATH = [...installDirectories(), '/usr/bin', '/bin'].join(delimiter);
+  env.PATH = [...installDirectories(), ...(process.platform === 'win32' ? [dirname(systemExecutable('cmd.exe'))] : ['/usr/bin', '/bin'])].join(delimiter);
   env.DISABLE_TELEMETRY = '1';
   env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';
   return env;
@@ -96,6 +104,7 @@ export async function* runCli(
     cwd,
     env: { ...cliEnvironment(), ...environment },
     shell: false,
+    windowsHide: true,
     detached: process.platform !== "win32",
     stdio: ["pipe", "pipe", "pipe"],
   });
@@ -108,15 +117,8 @@ export async function* runCli(
     child.once("close", resolve);
   });
   let killTimer: ReturnType<typeof setTimeout> | undefined;
-  const terminate = (signal: NodeJS.Signals) => {
-    try {
-      if (process.platform !== "win32" && child.pid)
-        process.kill(-child.pid, signal);
-      else child.kill(signal);
-    } catch {
-      /* The process may already have exited. */
-    }
-  };
+  const terminations = new Set<Promise<void>>();
+  const terminate = (signal: NodeJS.Signals) => { const work = terminateProcess(child, signal); terminations.add(work); void work.finally(() => terminations.delete(work)); };
   const kill = () => {
     child.stdout.unpipe();
     child.stdout.destroy();
@@ -190,5 +192,6 @@ export async function* runCli(
     // Parent exit does not imply that TERM-resistant descendants left its process group.
     terminate("SIGKILL");
     if (killTimer) clearTimeout(killTimer);
+    await Promise.all(terminations);
   }
 }

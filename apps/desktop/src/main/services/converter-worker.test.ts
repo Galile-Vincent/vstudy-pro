@@ -28,7 +28,7 @@ for line in sys.stdin:
   print(json.dumps({'progress': str(os.getpid())}), flush=True)
   print(json.dumps({'done': True}), flush=True)
 `);
-  const worker = new WarmWorker("python3", script, directory);
+  const worker = new WarmWorker(process.platform === 'win32' ? 'python' : 'python3', script, directory);
   try {
     const pids: string[] = [];
     await worker.run("one", "", "", pid => pids.push(pid));
@@ -49,7 +49,7 @@ for line in sys.stdin:
   } finally { vi.useRealTimers(); worker.stop(); await rm(directory, { recursive: true, force: true }); }
 });
 
-it('cancels bootstrap, reaps its process group and allows immediate venv removal', async () => {
+it.skipIf(process.platform === 'win32')('cancels bootstrap, reaps its process group and allows immediate venv removal', async () => {
   const { createConverter } = await import('../../../resources/converter');
   const { mkdir, readFile, chmod } = await import('node:fs/promises');
   const directory = await mkdtemp(join(tmpdir(), 'vstudy-bootstrap-stop-'));
@@ -82,7 +82,7 @@ wait
   } finally { await converter.dispose(); resolveExecutable.mockRestore(); vi.unstubAllEnvs(); await rm(directory,{recursive:true,force:true}); }
 });
 
-it('reaps descendants when an installer exits before its child',async()=>{
+it.skipIf(process.platform === 'win32')('reaps descendants when an installer exits before its child',async()=>{
   const {ProcessScope}=await import('../../../resources/converter/process-scope');
   const scope=new ProcessScope();
   const script=`const child=require('child_process').spawn(process.execPath,['-e','setInterval(()=>{},100)'],{stdio:'ignore'}); console.log(child.pid); child.unref();`;
@@ -115,10 +115,11 @@ for line in sys.stdin:
     expect(progress).toEqual(['NETWORK_DENIED']);
   } finally { worker.stop(); await rm(directory, { recursive: true, force: true }); }
 });
-it('sets kernel file/core limits before accepting converter jobs', async () => {
+it.skipIf(process.platform === 'win32')('sets kernel file/core limits before accepting converter jobs', async () => {
   const { spawnSync } = await import('node:child_process');
   const { resolve } = await import('node:path');
   const result = spawnSync('python3', ['-c', `import importlib.util, json, resource, sys
+sys.path.insert(0, __import__('os').path.dirname(sys.argv[1]))
 spec=importlib.util.spec_from_file_location('converter',sys.argv[1])
 module=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)

@@ -2,6 +2,7 @@ import { ProcessScope } from "./process-scope";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
 import { scrubbedEnvironment, type Progress } from "./contracts";
+import { pythonInvocation } from '../../src/main/platform/process';
 
 export class WarmWorker {
   private child: ChildProcessWithoutNullStreams | undefined;
@@ -16,10 +17,9 @@ export class WarmWorker {
     if (this.ready) return this.ready;
     this.ready = new Promise<void>((resolve, reject) => {
       const args = ["-B", "-E", "-s", this.script, "--warm-worker"];
-      const executable = process.platform === 'darwin' ? '/usr/bin/sandbox-exec' : this.python;
-      const launchArgs = process.platform === 'darwin' ? ['-p', '(version 1)(allow default)(deny network*)', this.python, ...args] : args;
-      const child = (this.scope ? this.scope.spawn.bind(this.scope) : spawn)(executable, launchArgs, {
-        cwd: this.cwd, env: scrubbedEnvironment(this.cwd), shell: false, stdio: ["pipe", "pipe", "pipe"],
+      const invocation = pythonInvocation(this.python, args);
+      const child = (this.scope ? this.scope.spawn.bind(this.scope) : spawn)(invocation.executable, invocation.args, {
+        cwd: this.cwd, env: scrubbedEnvironment(this.cwd), shell: false, windowsHide: true, stdio: ["pipe", "pipe", "pipe"],
       });
       this.child = child as ChildProcessWithoutNullStreams;
       child.stdin!.on("error", error => this.stop(error));

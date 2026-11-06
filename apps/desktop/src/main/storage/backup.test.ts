@@ -8,7 +8,7 @@
 import { expect, it } from 'vitest';
 import { mkdtemp, mkdir, readFile, writeFile, rm, rename, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 import { createHash } from 'node:crypto';
 import { openStore } from '../db';
 import { documentSchema } from '../../shared/domain';
@@ -41,7 +41,7 @@ it.each(['none','database-moved','database-published','library-moved'])('round-t
     const restored=openStore(join(target,'vstudy.sqlite'));
     try {expect(restored.settings.get().chatSide).toBe('right');const document=restored.documents.get(id as never)!;expect(document.sourcePath.startsWith(target)).toBe(true);expect(await readFile(document.sourcePath,'utf8')).toBe(bytes);expect(await checkIntegrity(restored,target)).toEqual({ok:true,issues:0});}
     finally{restored.close();}
-    expect(await readFile(join(previous,'library',live.directory.split('/').at(-1)!,'source.md'),'utf8')).toBe(bytes);
+    expect(await readFile(join(previous,'library',basename(live.directory),'source.md'),'utf8')).toBe(bytes);
   }finally{await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
 it('rejects corrupted bytes, an invalid manifest, duplicate paths and traversal without replacing live data',async()=>{
@@ -144,4 +144,20 @@ it.each(['failure','interrupted-rollback','success'])('recovers startup after re
     const restored=openStore(join(target,'vstudy.sqlite'));
     try {expect(restored.settings.get().chatSide).toBe(outcome==='success'?'right':'left');expect(await readFile(restored.documents.get(id as never)!.sourcePath,'utf8')).toBe(previous.bytes);} finally {restored.close();}
   } finally {await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
+
+it('restores a database whose document paths were saved on Windows', async () => {
+  const root=await mkdtemp(join(tmpdir(),'vstudy-windows-backup-'));
+  const target=await mkdtemp(join(tmpdir(),'vstudy-windows-restore-'));
+  const {store,bytes}=await fixture(root);
+  try {
+    store.db.prepare('UPDATE documents SET sourcePath=?').run('C:\\Users\\Student\\library\\source.md');
+    const archive=join(target,'backup.zip');
+    await exportBackup(store,root,archive);
+    await stageRestore(target,archive);
+    await recoverRestore(target);
+    const restored=openStore(join(target,'vstudy.sqlite'));
+    try {expect(await readFile(restored.documents.get(id as never)!.sourcePath,'utf8')).toBe(bytes);}
+    finally {restored.close();}
+  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });

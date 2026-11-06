@@ -21,7 +21,7 @@
   "zoom-reset": "表示倍率をリセット",
   "focus": "ページにフォーカス",
   "copied": "リンクをコピーしました",
-  "footer_hint": "Esc で閉じる · ⌘/Ctrl R で再読み込み",
+  "footer_hint": "Esc で閉じる · {{modifier}} R で再読み込み",
   "reconnect": "再接続",
   "sign_in": "再ログイン",
   "original": "元のページを表示",

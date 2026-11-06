@@ -21,7 +21,7 @@
   "zoom-reset": "Reset zoom",
   "focus": "Focus page",
   "copied": "Link copied",
-  "footer_hint": "Esc closes · ⌘/Ctrl R reloads",
+  "footer_hint": "Esc closes · {{modifier}} R reloads",
   "reconnect": "Reconnect",
   "sign_in": "Sign in again",
   "original": "View original page",

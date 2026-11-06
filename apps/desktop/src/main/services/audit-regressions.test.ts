@@ -51,7 +51,7 @@ it('puts hostile filenames and HTML titles exclusively inside the untrusted bloc
     expect(prompt.match(/<\/untrusted_document_content>/g)).toHaveLength(1);
   }
 });
-it('ignores a fake CLI in PATH and rejects writable binaries',async()=>{
+it.skipIf(process.platform === 'win32')('ignores a fake CLI in PATH and rejects writable binaries',async()=>{
   const root=await mkdtemp(join(tmpdir(),'vstudy-fake-cli-'));
   try {
     const file=join(root,'claude'); await writeFile(file,'#!/bin/sh\necho HIJACKED'); await chmod(file,0o777);
@@ -68,12 +68,12 @@ it('pins the real executable and requires confirmation after its contents change
   const {ExecutablePins}=await import('../providers/executable-pins');
   const root=await mkdtemp(join(tmpdir(),'vstudy-cli-pins-'));
   try {
-    const binary=join(root,'claude');await writeFile(binary,'#!/bin/sh\necho original');await chmod(binary,0o700);
+    const binary=join(root,process.platform === 'win32' ? 'claude.exe' : 'claude');await writeFile(binary,process.platform === 'win32' ? 'MZ original' : '#!/bin/sh\necho original');await chmod(binary,0o700);
     let confirmations=0;
     const pins=new ExecutablePins(join(root,'pins.json'),async()=>{confirmations++;return false;});
     await pins.choose('claude',binary);
     expect(await pins.resolve('claude')).toBe(await realpath(binary));
-    await writeFile(binary,'#!/bin/sh\necho changed');
+    await writeFile(binary,process.platform === 'win32' ? 'MZ changed' : '#!/bin/sh\necho changed');
     expect(await pins.resolve('claude')).toBeNull();expect(confirmations).toBe(1);
     const approved=new ExecutablePins(join(root,'pins.json'),async()=>true);
     expect(await approved.resolve('claude')).toBe(await realpath(binary));
@@ -90,7 +90,7 @@ it('does not detect or discover CLI providers before explicit enablement',async(
   const row=(await registry.list()).find(p=>p.config.id==='claude-cli');
   expect(row?.config.enabled).toBe(false);expect(detect).not.toHaveBeenCalled();expect(listModels).not.toHaveBeenCalled();
 });
-it('repairs private database/WAL/SHM modes, including existing public files',async()=>{
+it.skipIf(process.platform === 'win32')('repairs private database/WAL/SHM modes, including existing public files',async()=>{
   const {openStore}=await import('../db');const {stat}=await import('node:fs/promises');
   const root=await mkdtemp(join(tmpdir(),'vstudy-db-modes-'));const file=join(root,'vstudy.sqlite');
   let store=openStore(file);

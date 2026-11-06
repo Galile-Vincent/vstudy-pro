@@ -37,14 +37,14 @@ it('spawns a fake CLI without inherited secrets in argv or environment', () => {
 it('rejects symlinks, hardlinks and signature mismatches; deletes every data tree', async () => {
   const root = await mkdtemp(join(tmpdir(), 'vstudy-security-'));
   try {
-    expect((await stat(root)).mode & 0o777).toBe(0o700);
+    if (process.platform !== 'win32') expect((await stat(root)).mode & 0o777).toBe(0o700);
     const file = join(root, 'source.md'); await writeFile(file, 'safe', { mode: 0o600 });
     await symlink(file, join(root, 'sym.md'));
     expect(() => validateImport(join(root, 'sym.md'), 'md')).toThrow();
     await expect(exportFile(file, join(root, 'sym.md'))).rejects.toThrow();
     await expect(exportFile(file, file)).rejects.toThrow();
     await exportFile(file, join(root, 'export.md'));
-    expect((await stat(join(root, 'export.md'))).mode & 0o777).toBe(0o600);
+    if (process.platform !== 'win32') expect((await stat(join(root, 'export.md'))).mode & 0o777).toBe(0o600);
     await link(file, join(root, 'hard.md'));
     await expect(exportFile(file, join(root, 'hard.md'))).rejects.toThrow();
     expect(() => validateImport(file, 'md')).toThrow();
@@ -60,7 +60,7 @@ it('rejects symlinks, hardlinks and signature mismatches; deletes every data tre
     await expect(access(root)).rejects.toThrow();
   } finally { await import('node:fs/promises').then(fs => fs.rm(root, { recursive: true, force: true })); }
 });
-it('repairs DB, library and secret file permissions on every start', async () => {
+it.skipIf(process.platform === 'win32')('repairs DB, library and secret file permissions on every start', async () => {
   const { chmod, rm } = await import('node:fs/promises');
   const { openStore } = await import('./db');
   const { DocumentService } = await import('./services/documents');

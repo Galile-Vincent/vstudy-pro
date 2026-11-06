@@ -11,7 +11,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { createConverter, runProcess, scrubbedEnvironment } from "../../../resources/converter";
 
-const available = ["uv", "python3"].some((command) => spawnSync(command, ["--version"]).status === 0);
+const available = ["uv", "python3", "python"].some((command) => spawnSync(command, ["--version"]).status === 0);
 describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3.10+; skipped when neither is installed)", () => {
   let directory: string;
   let executable: string;
@@ -26,6 +26,7 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     await expect(converter.ensureReady()).rejects.toThrow();
     await copyFile(resolve("resources/converter/requirements.lock.txt"), join(resources, "requirements.lock.txt"));
     await copyFile(resolve("resources/converter/convert.py"), join(resources, "convert.py"));
+    await copyFile(resolve("resources/converter/limits.py"), join(resources, "limits.py"));
     await cp(resolve("resources/converter/pdf_md"), join(resources, "pdf_md"), { recursive: true });
     const python = await converter.ensureReady();
     executable = python;
@@ -34,10 +35,10 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     progress.length = 0;
     const cached = createConverter(options);
     expect(await cached.ensureReady()).toBe(python);
-    cached.dispose();
+    await cached.dispose();
     expect(progress).toEqual([]);
   }, 900_000);
-  afterAll(async () => { converter?.dispose(); if (directory) await rm(directory, { recursive: true, force: true }); });
+  afterAll(async () => { await converter?.dispose(); if (directory) await rm(directory, { recursive: true, force: true }); });
   it.each(["docx", "pptx", "xlsx", "html", "pdf", "csv"])("converts a real %s fixture", async (extension) => {
     const output = join(directory, `result-${extension}.md`);
     const parser = await converter.convert(resolve(`test-fixtures/converter/sample.${extension}`), output);

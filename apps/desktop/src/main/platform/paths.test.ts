@@ -1,6 +1,10 @@
 /** Exercise Windows path semantics on every host and portable archive names. */
 import { expect, it } from 'vitest';
 import { isPathWithin, isPortableRelativePath, portableBasename } from './paths';
+import { mkdtemp, mkdir, writeFile, rm, realpath } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { containedPath } from '../services/file-paths';
 
 it.each([
   ['C:\\Users\\Student\\Library', 'c:\\users\\student\\library\\notes.md', true],
@@ -23,4 +27,16 @@ it('keeps ordinary Unicode filenames and extracts names from either OS', () => {
   expect(isPortableRelativePath('assets/學習筆記 1.png')).toBe(true);
   expect(portableBasename('C:\\Users\\Student\\library\\source.pdf')).toBe('source.pdf');
   expect(portableBasename('/Users/student/library/source.pdf')).toBe('source.pdf');
+});
+
+it('contains a Unicode library file whose absolute path exceeds 260 characters', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'vstudy-long-path-'));
+  try {
+    const directory = join(root, 'a'.repeat(100), 'b'.repeat(100), 'c'.repeat(100));
+    await mkdir(directory, {recursive: true});
+    const file = join(directory, '學習.md');
+    await writeFile(file, '# Study');
+    expect(file.length).toBeGreaterThan(260);
+    expect(containedPath(root, file)).toBe(await realpath(file));
+  } finally { await rm(root, {recursive: true, force: true, maxRetries: 3}); }
 });

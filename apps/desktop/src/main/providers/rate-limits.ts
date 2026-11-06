@@ -7,6 +7,7 @@
 import { recordEgress } from '../services/egress';
 import { createInterface } from 'node:readline';
 import { z } from 'zod';
+import { tmpdir } from 'node:os';
 import { ProcessScope } from '../../../resources/converter/process-scope';
 import { cliEnvironment, findCli } from './cli';
 import type { Usage } from '../../shared/domain';
@@ -15,7 +16,7 @@ const windowSchema = z.object({ usedPercent: z.number().min(0).max(100), windowD
 export async function probeCodexRateLimits(binary: string, args = ['app-server'], timeoutMs = 2500): Promise<Usage['rateLimit']> {
   recordEgress('codex_quota', 'OpenAI / Codex CLI managed endpoints');
   const scope = new ProcessScope();
-  const child = scope.spawn(binary, args, { cwd: process.env.TMPDIR ?? '/tmp', env: cliEnvironment(), shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
+  const child = scope.spawn(binary, args, { cwd: tmpdir(), env: cliEnvironment(), shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
   child.stdin!.on('error', () => {});
   child.stderr!.resume();
   const lines = createInterface({ input: child.stdout! });
@@ -50,7 +51,7 @@ export async function probeCodexRateLimits(binary: string, args = ['app-server']
   } finally { clearTimeout(timer); lines.close(); await scope.dispose(); }
 }
 /** Create a cached quota probe that shares concurrent work and supports cleanup. */
-export function createRateLimitProbe(load = async () => { const binary = await findCli('codex'); return binary ? probeCodexRateLimits(binary) : undefined; }) {
+export function createRateLimitProbe(load = async () => { if (process.platform !== 'darwin') return undefined; const binary = await findCli('codex'); return binary ? probeCodexRateLimits(binary) : undefined; }) {
   let cached: { expires: number; value: Usage['rateLimit'] } | undefined;
   let pending: Promise<Usage['rateLimit']> | undefined;
   return () => {

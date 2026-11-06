@@ -18,7 +18,7 @@ const signal = new AbortController().signal;
 it('passes only a private temporary file to the document importer and removes it afterward',async () => {
   let path = '';
   const importPath = vi.fn(async (value:string) => {
-    path=value;expect(await readFile(path,'utf8')).toBe('# Notes');expect((await stat(path)).mode & 0o777).toBe(0o600);
+    path=value;expect(await readFile(path,'utf8')).toBe('# Notes');if (process.platform !== 'win32') expect((await stat(path)).mode & 0o777).toBe(0o600);
     return documentSchema.parse({id:'11111111-1111-4111-a111-111111111111',title:'Notes',sourceName:'notes.md',sourcePath:path,sourceHash:'a'.repeat(64),mime:'text/markdown',status:'ready',markdownPath:path,createdAt:new Date().toISOString(),converter:'markitdown'});
   });
   const request = vi.fn(async () => new Response('# Notes'));

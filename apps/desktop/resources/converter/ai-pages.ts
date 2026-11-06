@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { ProcessScope } from './process-scope';
 import { runProcess } from './index';
 import { containedPath } from '../../src/main/services/file-paths';
+import { pythonInvocation } from '../../src/main/platform/process';
 export type AiPage = {image:Buffer; text:string};
 export function createPageRenderer(ensureReady:()=>Promise<string>, resources:string) {
  return async (source:string, page:number, signal:AbortSignal):Promise<AiPage> => {
@@ -17,7 +18,7 @@ export function createPageRenderer(ensureReady:()=>Promise<string>, resources:st
   try {
    signal.throwIfAborted();
    try {await access(containedPath(cache,path));await access(containedPath(cache,path+'.json'));z.object({text:z.string().max(1_000_000)}).strict().parse(JSON.parse(await readFile(containedPath(cache,path+'.json'),'utf8')));}
-   catch {const args=['-B','-E','-s',join(resources,'render_page.py'),source,String(page),path];await runProcess(process.platform==='darwin'?'/usr/bin/sandbox-exec':python,process.platform==='darwin'?['-p','(version 1)(allow default)(deny network*)',python,...args]:args,cache,25_000,4096,undefined,undefined,scope);}
+   catch {const args=['-B','-E','-s',join(resources,'render_page.py'),source,String(page),path];const invocation=pythonInvocation(python,args);await runProcess(invocation.executable,invocation.args,cache,25_000,4096,undefined,undefined,scope);}
    signal.throwIfAborted();
    if((await stat(path)).size>8*1024*1024)throw new Error('ai_parse.size');
    const metadata=z.object({text:z.string().max(1_000_000)}).strict().parse(JSON.parse(await readFile(containedPath(cache,path+'.json'),'utf8')));

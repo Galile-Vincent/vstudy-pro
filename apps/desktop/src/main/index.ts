@@ -30,6 +30,8 @@ import { developmentCsp, isAppUrl, productionCsp } from "./security";
 import { deleteAllData } from "./services/delete-data";
 import { createIpcRegistrar } from "./ipc/register";
 import { assetHandler } from "./assets";
+import { isPathWithin } from './platform/paths';
+import { relative } from 'node:path';
 
 initializeMoodleProtocol();
 
@@ -38,7 +40,7 @@ protocol.registerSchemesAsPrivileged(['vstudy-asset', 'vstudy'].map(scheme => ({
 const smokeRoot = process.env.VSTUDY_PACKAGED_SMOKE_DIR;
 if (smokeRoot) {
   const canonical = realpathSync(smokeRoot), temporary = realpathSync(tmpdir());
-  if (!canonical.startsWith(temporary + '/vstudy-packaged-smoke-') || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
+  if (!isPathWithin(temporary, canonical) || !/^vstudy-packaged-smoke-[^/\\]+$/.test(relative(temporary, canonical)) || process.env.VSTUDY_FAKE_PROVIDER !== '1') throw new Error('Invalid isolated smoke directory');
   const isolated = join(canonical, 'user-data');
   mkdirSync(isolated, {recursive:true,mode:0o700});
   if (lstatSync(isolated).isSymbolicLink() || realpathSync(isolated) !== isolated) throw new Error('Smoke user data must be an isolated directory');
@@ -79,6 +81,9 @@ async function createWindow(): Promise<void> {
     show: false,
     backgroundColor: nativeBackground(appearance),
     title: "VStudy Pro",
+    titleBarStyle: 'default',
+    titleBarOverlay: false,
+    autoHideMenuBar: process.platform === 'win32',
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
       contextIsolation: true,

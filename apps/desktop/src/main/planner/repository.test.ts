@@ -94,7 +94,7 @@ it("backs up v20 with private permissions and persists planner data after reopen
   db.prepare("INSERT INTO settings VALUES (?,?)").run("sentinel", JSON.stringify("課業 日本語"));
   db.close();
   const store = openStore(path);
-  expect(statSync(path + ".before-v21.bak").mode & 0o777).toBe(0o600);
+  if (process.platform !== 'win32') expect(statSync(path + ".before-v21.bak").mode & 0o777).toBe(0o600);
   const backup = new DatabaseSync(path + ".before-v21.bak");
   expect(backup.prepare("SELECT value FROM settings WHERE key='sentinel'").get()?.value).toBe(JSON.stringify("課業 日本語"));
   expect(backup.prepare("SELECT name FROM sqlite_master WHERE name='planner_tasks'").get()).toBeUndefined();

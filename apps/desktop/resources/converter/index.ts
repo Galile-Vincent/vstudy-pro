@@ -74,7 +74,7 @@ export async function runProcess(
 }
 
 async function findExecutable(name: string): Promise<string | undefined> {
-  return (await resolveInstalledExecutable(name, [...installDirectories(), '/usr/bin', '/bin'])) ?? undefined;
+  return (await resolveInstalledExecutable(name, [...installDirectories(), ...(process.platform === 'win32' ? [] : ['/usr/bin', '/bin'])])) ?? undefined;
 }
 
 export function createConverter(options: {
@@ -123,7 +123,7 @@ export function createConverter(options: {
       const cache = join(homedir(), ".cache", uv ? "uv" : "pip");
       await mkdir(cache, { recursive: true, mode: 0o700 });
       let systemPython: string | undefined;
-      for (const name of ["python3.12", "python3.11", "python3.10", "python3"]) {
+      for (const name of process.platform === 'win32' ? ['python', 'python3'] : ["python3.12", "python3.11", "python3.10", "python3"]) {
         const candidate = await findExecutable(name);
         if (!candidate) continue;
         try {
