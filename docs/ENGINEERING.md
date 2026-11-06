@@ -100,9 +100,27 @@ Use read-only Moodle functions unless the user explicitly approves a write actio
 
 ## Prepare a release
 
-Follow [CONTRIBUTING](../CONTRIBUTING.md). `pnpm release` regenerates the changelog only. Signed packaging uses `pnpm package:signed` and requires external credentials. Unsigned tag builds are test artifacts.
+Follow [the release checklist](../CONTRIBUTING.md#release-checklist). The desktop package version is authoritative. `pnpm release --tag vX.Y.Z` regenerates the changelog only. Write the owner-reviewed release body in `docs/releases/X.Y.Z.md`. Do not create or push a tag during implementation or a dry run.
 
-See [cleanup verification](ENGINEERING_CLEANUP.md) for current command results and explicit Knip exceptions. [The stream H report](REPO_HYGIENE.md) is historical.
+The release workflow supports dry runs on `ci/**` branch pushes and `workflow_dispatch`. Push only a branch the owner has authorized. A `ci/**` push must never use signing secrets, create a release, or upload to Releases. It retains unsigned installers and reports as Actions artifacts. Manual dispatch is also nonpublishing. Confirm its inputs in `.github/workflows/release.yml` before dispatching.
+
+Inspect real GitHub-hosted Mac and Windows packaging and launch results. A source build, a local Mac smoke, or an uploaded artifact alone does not prove a Windows installer works. See [the distribution plan](DISTRIBUTION_PLAN.md) for targets and the packaged smoke contract. Codex is disabled on Windows because this implementation has no equivalent verified kernel sandbox. API providers remain the cross-platform alternative.
+
+For trusted jobs authorized to sign, no credentials produces unsigned Windows builds and Mac builds without Developer ID or notarization. Complete credentials enable signing automatically. Partial or invalid credentials fail. Use [SIGNING.md](SIGNING.md) for setup and verification. Branch-only CI always stays unsigned. Test the exact downloaded files, not a different build. Keep checksums synchronized with the final signed and stapled bytes.
+
+Only an owner-approved `v*.*.*` version tag may publish a non-draft release with `docs/releases/<version>.md` as its body. Stable aliases support one-click downloads on the website. Keep their names unchanged when signing is enabled. Record signing status, architecture tests, workflow URLs, and unresolved limits in the release review. Automatic updates remain disabled until a separate signed-update rollout is reviewed.
+
+For website changes, run the checks below. The download inventory and architecture recommendation live in `apps/website/src/data/downloads.ts`. Installer version and size stay hidden unless verified against published assets. Shared site redesigns can move `Download.astro` without copying detection rules.
+
+```sh
+pnpm --filter @vstudy/website typecheck
+pnpm --filter @vstudy/website build
+pnpm --filter @vstudy/website verify:static
+node apps/website/scripts/verify-downloads.mjs
+node scripts/check-readme-links.mjs
+```
+
+See [cleanup verification](ENGINEERING_CLEANUP.md) for command results and explicit Knip exceptions. [The stream H report](REPO_HYGIENE.md) is historical.
 
 ## Test Node and locale changes
 

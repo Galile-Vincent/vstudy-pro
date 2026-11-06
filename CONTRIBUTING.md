@@ -28,8 +28,8 @@ The desktop version in `apps/desktop/package.json` is authoritative. Use SemVer.
 
 1. Update the desktop version in a release PR.
 2. Run `pnpm release --tag vX.Y.Z` to regenerate `CHANGELOG.md` with that proposed version.
-3. Review the grouped history. Summarize user impact and call out migrations or breaking changes.
-4. Complete the release checklist below, then merge the release PR.
+3. Review the grouped history. Write `docs/releases/<version>.md`, for example `docs/releases/0.2.1.md`. Summarize user impact, migrations, tested architectures, signing status, and known limits. Keep the filename version equal to the desktop package version without the leading `v`.
+4. Complete a nonpublishing workflow dry run and the release checklist below, then merge the release PR.
 5. A maintainer creates an annotated `vX.Y.Z` tag on the reviewed commit and pushes that tag. Never move a published tag.
 
 `pnpm release` only generates the changelog. It does not bump versions, commit, tag, push, or publish.
@@ -37,15 +37,36 @@ Git-cliff fits this single-app repository without a changeset file per change or
 
 ## Release checklist
 
-- [ ] Typecheck, lint, tests, build, `pnpm security:check`, `pnpm vendor:check`, and `pnpm knip` pass on the release commit.
-- [ ] Review [the security model](docs/SECURITY.md), dependency exceptions, privacy, migration backups, and recovery behavior.
-- [ ] Run the Electron smoke and E2E checks on a machine with sufficient memory. Review keyboard, VoiceOver, locales, and first-run behavior.
-- [ ] Set signing and notarization credentials outside the repository as described below.
-- [ ] Run `pnpm package:signed`. Verify codesign, stapling, Gatekeeper, and first open on a clean Mac using the commands below.
-- [ ] Generate SHA-256 checksums for the exact signed DMG. Attach checksums, evidence, and release notes.
-- [ ] Confirm the version matches the tag and obtain maintainer approval before distributing the signed artifact.
+- [ ] Typecheck, lint, tests with two fork workers, build, security, vendor checks, and Knip pass on the reviewed release commit. Avoid launching a second local Electron instance.
+- [ ] Review [the security model](docs/SECURITY.md), privacy disclosures, dependency exceptions, migration backups, and recovery behavior on Mac and Windows.
+- [ ] Commit `docs/releases/<version>.md`. State actual signing and notarization status. Include the lack of a Windows kernel network deny for Python conversion and that Codex is disabled on Windows.
+- [ ] Trigger the release workflow on a `ci/**` branch push or by manual **workflow_dispatch** for a dry run. CI branch pushes must never use signing secrets, publish a release, or upload to Releases. Inspect the workflow's dispatch inputs before running it. Dry-run output belongs in Actions artifacts.
+- [ ] Inspect GitHub-hosted packaging and smoke evidence for Mac arm64, Mac x64, Windows x64, and Windows ARM64. Each packaged smoke must launch a window, exercise SQLite, check converter availability without an implicit download, and exit. A missing target or skipped launch is an open gap.
+- [ ] Test direct download, per-user install, first launch, manual upgrade, and uninstall on clean Mac and Windows machines. Review Cmd on Mac, Ctrl on Windows, native controls, accessibility, locales, and first-run behavior.
+- [ ] For a separately authorized signing run, verify the delivered signatures and Mac notarization using [SIGNING.md](docs/SIGNING.md#verify-the-delivered-artifacts). Invalid or partial credentials must fail. The branch-only CI dry run remains unsigned regardless of configured secrets.
+- [ ] Compare the installer aliases below with the versioned files. Generate `SHA256SUMS.txt` only after all signing, notarization, and stapling finish. Validate update metadata without enabling an updater.
+- [ ] Record workflow run URLs, commit SHA, platform results, artifact checksums, and signing gaps in the release review. Have the owner approve the exact reviewed commit before a tag is pushed.
 
-A tag push produces an unsigned macOS test DMG, checksums, and a draft GitHub release. It never receives signing secrets. The unsigned CI artifact does not satisfy the signed release checklist. Replace it with verified signed artifacts before publication.
+The owner may authorize pushing a reviewed branch under `ci/**` to trigger a branch-only dry run. That authorization is not permission to tag or publish. A CI push receives no signing credentials, creates no release, and uploads no files to Releases. Retain installers and reports as Actions artifacts.
+
+Manual dispatch is also nonpublishing. Use the GitHub Actions **Run workflow** form on the reviewed branch, or the commands below after confirming the workflow's dispatch inputs. Replace the branch placeholder. If the workflow exposes a dry-run input, select its nonpublishing value explicitly.
+
+```sh
+gh workflow view release.yml --repo ava-apple/vstudy-pro --yaml
+gh workflow run release.yml --repo ava-apple/vstudy-pro --ref YOUR_REVIEWED_BRANCH
+```
+
+Only the owner-controlled `v*.*.*` tag path may publish a non-draft release. The tag version must match `apps/desktop/package.json`, and its release notes come from `docs/releases/X.Y.Z.md`. Never publish from `workflow_dispatch` or `ci/**`, move an existing release tag, or call `gh release create` as part of a dry run. A successful dry run alone does not authorize publishing.
+
+The latest published release must contain these stable assets, versioned archives, and checksums. Signing must not change their names.
+
+- `VStudy-Pro-mac-arm64.dmg`
+- `VStudy-Pro-mac-x64.dmg`
+- `VStudy-Pro-win-x64.exe`
+- `VStudy-Pro-win-arm64.exe`
+- `SHA256SUMS.txt`
+
+After an owner-approved publication, test each `https://github.com/ava-apple/vstudy-pro/releases/latest/download/<filename>` link as an unauthenticated user. Check the release body and its actual signing status. Do not advertise an architecture whose packaged checks failed. Website version and file size must come from verified published assets, not the source package version or an estimate.
 
 ## Store evidence without growing Git
 
@@ -64,16 +85,8 @@ Run `node scripts/check-readme-links.mjs` before submitting. Pre-push runs the s
 
 ## Sign a distribution build
 
-Install a Developer ID Application certificate in your build keychain. Set `CSC_NAME` to its identity, or set `CSC_LINK` to a private certificate file and `CSC_KEY_PASSWORD` to its password. For notarization, set `APPLE_API_KEY` to your private `.p8` path, `APPLE_API_KEY_ID`, and `APPLE_API_ISSUER`. Alternatively, use `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`. Keep all credentials outside Git.
+Use [the signing guide](docs/SIGNING.md) for account enrollment, certificate export, exact secret names, Azure and PFX options, safe `gh secret set` examples, rotation, and artifact verification.
 
-`pnpm package:signed` rejects missing signing or notarization configuration, builds with hardened runtime, and requests notarization. Verify the actual artifact before distribution.
+For trusted jobs permitted to sign, no credentials produces explicitly unsigned builds. Complete credentials enable signing on the same targets. Partial or invalid credentials fail instead of falling back to unsigned. Mac direct distribution needs Developer ID Application signing and successful Apple notarization. Windows uses one configured signing route. Verify signatures on the actual installer and installed executable. A `ci/**` push must never receive signing secrets.
 
-```sh
-pnpm package:signed
-codesign --verify --deep --strict 'apps/desktop/release/mac-arm64/VStudy Pro.app'
-xcrun stapler staple 'apps/desktop/release/mac-arm64/VStudy Pro.app'
-xcrun stapler validate 'apps/desktop/release/mac-arm64/VStudy Pro.app'
-spctl --assess --type execute --verbose 'apps/desktop/release/mac-arm64/VStudy Pro.app'
-```
-
-Verify first-open behavior on a quarantined copy on a clean Mac. Generate `SHA256SUMS.txt` with `shasum -a 256 ./*.dmg > SHA256SUMS.txt` from `apps/desktop/release`. Attach it beside the exact signed DMG. An unsigned build passing packaging checks does not establish Developer ID trust or notarization.
+Keep updates manual. Activating `electron-updater` is separate work after signing, Mac notarization, feed validation, user controls, and rollback policy are verified.
