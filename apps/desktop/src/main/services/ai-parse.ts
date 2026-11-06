@@ -80,6 +80,7 @@ export class AiParseService {
    if(settings.monthlyBudgetUsd!==undefined && (spent.unknownPrices || estimate.costUsd===undefined || (spent.costUsd??0)+estimate.costUsd>settings.monthlyBudgetUsd) && !r.options.confirmBudgetOverride)throw new Error('ai_parse.budget');
    if(settings.monthlyTokenBudget!==undefined && spent.inputTokens+spent.outputTokens+estimate.inputTokens+estimate.outputTokens>settings.monthlyTokenBudget && !r.options.confirmBudgetOverride)throw new Error('ai_parse.budget');
    controller.signal.throwIfAborted();
+   this.store.db.prepare("UPDATE ai_parse_pages SET code=NULL WHERE documentId=? AND code='ai_parse.publish_failed'").run(d.id);
    this.store.db.prepare("INSERT INTO ai_parse_jobs VALUES(?,?,'running',?,?) ON CONFLICT(documentId) DO UPDATE SET request=excluded.request,status='running',updatedAt=excluded.updatedAt,promptVersion=excluded.promptVersion").run(r.documentId,JSON.stringify(r),new Date().toISOString(),AI_PARSE_PROMPT_VERSION);
    for(const p of this.selected(r,pages))this.store.db.prepare("INSERT OR IGNORE INTO ai_parse_pages(documentId,page,cacheKey,status) VALUES(?,?,?,'pending')").run(d.id,p.page,'');
    const promise=this.run(r,d,pages,controller).catch(()=>{

@@ -198,3 +198,26 @@ it.each(['page count','options','legacy identity'])('conservatively charges cach
   expect(render).toHaveBeenCalledTimes(1);
  } finally {await x.cleanup();}
 });
+it.each(['cancelled','complete'])('clears stale publication failures after a later narrow run is %s',async outcome=>{
+ let later=false,entered!:()=>void;
+ const started=new Promise<void>(resolve=>{entered=resolve;});
+ const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test'}],async *stream(r,signal){
+  if(later && outcome==='cancelled') {entered();await new Promise<void>(resolve=>signal.addEventListener('abort',()=>resolve(),{once:true}));signal.throwIfAborted();}
+  yield {type:'text-delta',text:!later && r.userMessage.includes('delta')?'invented unrelated content':r.userMessage};yield {type:'done'};
+ }};
+ const x=await setup(adapter);try {
+  await writeFile(x.imported.markdownPath,'<!-- page 1 -->alpha beta gamma<!-- page 2 -->delta epsilon zeta');
+  const path=join(x.imported.markdownPath,'..','content.ai.md');await mkdir(path);
+  await x.service.start(x.request);await x.service.waitForIdle();
+  expect(x.service.status(x.imported.id).code).toBe('ai_parse.publish_failed');
+  await rm(path,{recursive:true});later=true;
+  await x.service.start({...x.request,scope:'currentPage',startPage:2});
+  if(outcome==='cancelled'){await started;x.service.cancel(x.imported.id);}
+  await x.service.waitForIdle();
+  const state=x.service.status(x.imported.id);
+  expect(state.status).toBe(outcome);expect(state.code).toBeUndefined();
+  expect(state.pages.some(page=>page.code==='ai_parse.publish_failed')).toBe(false);
+  await x.service.use(x.imported.id,'ai');await x.service.discard(x.imported.id);
+  expect(x.service.status(x.imported.id).status).toBe('idle');
+ } finally {await x.cleanup();}
+});
