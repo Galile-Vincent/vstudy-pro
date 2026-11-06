@@ -1,8 +1,7 @@
 /** Windows pipe bytes enter the shared protocol only after the helper verifies a current-user ACL and peer SID. */
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
-import { join, resolve, win32 } from 'node:path';
-import { app } from 'electron';
+import { win32 } from 'node:path';
 import { MCP_MAX_FRAME, type BridgeRequest, type BridgeResponse } from '../../shared/mcp';
 import type { McpTransportOptions, McpTransport } from '../../shared/mcp-platform';
 import { RequestFrames, responseFrame } from './protocol';
@@ -10,6 +9,7 @@ import { currentWindowsSid, resolveMcpEndpoint } from './endpoint';
 import { McpFailure, publicFailure } from './errors';
 import { systemExecutable } from '../platform/process';
 import { cliEnvironment } from '../providers/cli-transport';
+import { desktopResourcePath } from '../platform/resources';
 
 interface Connection {
   frames: RequestFrames;
@@ -24,7 +24,7 @@ export async function createWindowsBridge(options: WindowsBridgeOptions): Promis
   if (process.platform !== 'win32') throw new McpFailure('UNSUPPORTED');
   const sid = currentWindowsSid();
   const endpoint = resolveMcpEndpoint(options.userData, 'win32', sid);
-  const script = options.script ?? (app.isPackaged ? join(process.resourcesPath, 'mcp', 'windows-pipe.ps1') : resolve(__dirname, '../../resources/mcp/windows-pipe.ps1'));
+  const script = options.script ?? desktopResourcePath('mcp', 'windows-pipe.ps1');
   const powershell = systemExecutable('WindowsPowerShell/v1.0/powershell.exe');
   const environment = cliEnvironment();
   const host = spawn(powershell, [

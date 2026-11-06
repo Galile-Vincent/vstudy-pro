@@ -1,12 +1,12 @@
 /** Persist MCP state only through a current-SID ACL check and atomic flushed replacement. @packageDocumentation */
 import type { McpStatePersistence } from '../../shared/mcp-platform';
-import { app } from 'electron';
 import { execFileSync } from 'node:child_process';
 import { lstatSync } from 'node:fs';
-import { join, resolve, win32 } from 'node:path';
+import { win32 } from 'node:path';
 import { TextDecoder } from 'node:util';
 import { systemExecutable } from '../platform/process';
 import { cliEnvironment } from '../providers/cli-transport';
+import { desktopResourcePath } from '../platform/resources';
 
 const maximum = 8 * 1024 * 1024;
 interface StateExecution {
@@ -45,7 +45,7 @@ export function createWindowsStatePersistence(options: WindowsStateOptions = {})
   };
   const run: NonNullable<WindowsStateOptions['execute']> = options.execute ?? ((executable, args, execution) => execFileSync(executable, args, execution));
   const execute = (userData: string, operation: 'read' | 'write', input?: string) => {
-    const script = options.script ?? (app.isPackaged ? join(process.resourcesPath, 'mcp', 'windows-state.ps1') : resolve(__dirname, '../../resources/mcp/windows-state.ps1'));
+    const script = options.script ?? desktopResourcePath('mcp', 'windows-state.ps1');
     const powershell = systemExecutable('WindowsPowerShell/v1.0/powershell.exe');
     try {
       return run(powershell,
