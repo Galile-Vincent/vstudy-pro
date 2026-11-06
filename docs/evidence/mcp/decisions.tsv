@@ -1,0 +1,4 @@
+ts	phase	decision	why	evidence	result
+2026-11-06T00:00:00Z	design	Use a fixed tool registry and a private local bridge	Keep school credentials in the existing app and make authorization enumerable	docs/MCP_DESIGN.md	contract defined
+2026-11-06T00:01:00Z	policy	Exclude quiz execution and synthetic video completion	A warning cannot enforce the required academic-integrity boundary	docs/MCP_DESIGN.md	policy retained
+2026-11-06T00:02:00Z	workflow	Use three isolated Codex worktrees after the contract commit	Owner explicitly authorized max-effort parallel implementation	apps/desktop/src/shared/mcp.ts	ready to delegate
