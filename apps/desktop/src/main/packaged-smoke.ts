@@ -5,12 +5,14 @@
  * @packageDocumentation
  */
 import { app, BrowserWindow, dialog } from 'electron';
+import { runSetupPackagedSmoke } from './providers/setup-packaged-smoke';
 import { writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 /** Run opt-in packaged-artifact assertions against an isolated application data directory. */
 export async function runPackagedSmoke(window: BrowserWindow, root: string) {
   try {
     await window.webContents.executeJavaScript(`new Promise(resolve => { const check=()=>window.desktop ? resolve(true) : setTimeout(check,20);check(); })`);
+    if (process.env.VSTUDY_CLI_PTY_SMOKE === '1') { await runSetupPackagedSmoke(window, root); app.quit(); return; }
     const invoke = (channel: string, request: unknown) => window.webContents.executeJavaScript(`window.desktop.invoke(${JSON.stringify(channel)},${JSON.stringify(request)})`);
     if (process.env.VSTUDY_KEYCHAIN_PROBE === '1') {
       while (!window.isVisible()) await new Promise(resolve => setTimeout(resolve,10));

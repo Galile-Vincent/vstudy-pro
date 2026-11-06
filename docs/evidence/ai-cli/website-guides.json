@@ -1,0 +1,17 @@
+[
+  {
+    "language": "en",
+    "allAiProviderSections": true,
+    "gettingStartedGenerated": true
+  },
+  {
+    "language": "zh-Hant",
+    "allAiProviderSections": true,
+    "gettingStartedGenerated": true
+  },
+  {
+    "language": "ja",
+    "allAiProviderSections": true,
+    "gettingStartedGenerated": true
+  }
+]

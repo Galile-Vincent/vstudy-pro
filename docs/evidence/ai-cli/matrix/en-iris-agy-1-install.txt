@@ -1,0 +1,45 @@
+- dialog "Set up an AI tool":
+  - banner:
+    - heading "Set up an AI tool" [level=2]
+    - paragraph: Install, sign in, and test here. You can keep reading at any time.
+    - button "Close setup and stop its action"
+  - group "Choose your tool":
+    - text: Choose your tool
+    - radio "Claude Code Your Anthropic account"
+    - strong: Claude Code
+    - text: Your Anthropic account
+    - radio "Codex Your OpenAI account"
+    - strong: Codex
+    - text: Your OpenAI account
+    - radio "Antigravity Your Google account" [checked]
+    - strong: Antigravity
+    - text: Your Google account
+  - strong: Antigravity
+  - status: Not installed
+  - list "Setup progress":
+    - listitem:
+      - strong: Install
+      - text: You are here
+    - listitem:
+      - strong: Sign in
+    - listitem:
+      - strong: Test
+  - paragraph: What happens next
+  - heading "Install your AI tool." [level=2]
+  - paragraph: Review the official Antigravity download below. VStudy verifies it and keeps it in its app folder. Your Google sign-in comes next.
+  - checkbox "Allow VStudy to run Antigravity Optional. No tool launches until you allow it and run a reviewed action."
+  - text: Allow VStudy to run Antigravity Optional. No tool launches until you allow it and run a reviewed action.
+  - group: Account and cost
+  - paragraph: First allow this tool above. Then we will show its exact installation or sign-in plan before anything runs.
+  - region "Keep your tool ready":
+    - heading "Keep your tool ready" [level=3]
+    - paragraph: Updates and rollback apply to new chats. Ongoing sessions continue with their current version.
+    - button "Review account status check" [disabled]
+    - button "Sign in again" [disabled]
+  - group: Which tool should I choose?
+  - group: Install another way
+  - group: Advanced general shell
+  - group: Need help from your teacher or IT team?
+  - contentinfo:
+    - paragraph: AI is optional. Your reading stays available.
+    - button "Continue reading"

@@ -10,6 +10,7 @@ import { LearningHelp, ContextCoach } from "./onboarding/help";
 import { HomeView } from "./home";
 import { Workspace } from "./workspace";
 import { desktop } from './bridge';
+import { AiCliSetupHost } from './ai-cli/setup';
 import { ProviderSettings, type Providers } from './providers';
 import { AgentsProvider } from './settings/agents-state';
 import { AgentNavigation } from './settings/agents-navigation';
@@ -53,7 +54,7 @@ export function App() {
   return (
     <AgentsProvider>
       <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
-        <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AgentConsent /><AgentNavigation />
+        <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/><AgentConsent /><AgentNavigation />
       </AppShell>
     </AgentsProvider>
   );

@@ -66,6 +66,10 @@ interface ActiveRequest {
 export class ChatService {
   private readonly courseContext: CourseContextCache;
   private stopped = false;
+  private starting = 0;
+  private revision = 0;
+  get isBusy() { return this.starting > 0 || this.active.size > 0 || this.producers.size > 0; }
+  get activityRevision() { return this.revision; }
   private readonly producers = new Set<Promise<void>>();
   private readonly deleting = new Set<string>();
   /** Exclude new chats while the document deletion callback owns its files and metadata. */
@@ -107,12 +111,14 @@ export class ChatService {
   /** Validate options and ownership before accepting exactly one producer for the conversation. */
   start(request: ChatRequest, owner: ChatOwner): void | Promise<void> {
     if (this.stopped) throw new Error("Chat service is closed");
+    this.revision++;
     if (!Object.keys(request.options ?? {}).length) return this.accept(request, owner);
     const adapter = this.providers.get(request.providerId);
+    this.starting++;
     return adapter.listModels().then(models => {
       validateOptions(models.find(m => m.id === request.modelId || m.resolvedId === request.modelId), request.options);
       this.accept(request, owner);
-    });
+    }).finally(() => { this.starting--; });
   }
   private accept(request: ChatRequest, owner: ChatOwner): void {
     if (this.stopped) throw new Error("Chat service is closed");

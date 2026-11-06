@@ -4,6 +4,7 @@
  * Request and response validation and sender ownership stay at the IPC boundary.
  * @packageDocumentation
  */
+import { registerAiCliIpc } from "./ai-cli";
 import { registerPlannerIpc } from "./planner";
 import { join } from "node:path";
 import { createMcpBackend } from "../mcp/backend";
@@ -105,6 +106,7 @@ export function registerIpc(
   });
   registerUsageIpc(registrar, store, implemented, () => providers.config('codex-cli').enabled);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
+  const disposeAiCli = registerAiCliIpc(registrar, implemented, providers, pins, chat);
   const disposeDocuments = registerDocumentsIpc(registrar, store, implemented, (id, remove) => chat.deleteDocument(id, remove), providers);
   const disposePlanner = registerPlannerIpc(registrar, store, implemented);
   const disposeMoodle = registerMoodleIpc(registrar, store, secrets, implemented, disposeDocuments, restoreMainWindow, options.moodleRequest);
@@ -135,5 +137,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { registrar.dispose(); await mcp.dispose(); navigation.clear(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }

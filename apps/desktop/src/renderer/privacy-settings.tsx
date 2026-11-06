@@ -1,3 +1,4 @@
+import { CliPrivacyPreferences } from './ai-cli/preferences';
 import { SettingsGroup, SettingsRow } from './settings/layout';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
@@ -58,6 +59,7 @@ export function PrivacySettings() {
           <div className="network-event empty">{tr('settings:empty_network')}</div>
         )}
       </SettingsGroup>
+      <CliPrivacyPreferences />
       <SettingsGroup title={tr('settings:converter')}>
         {!loaded && <Button onClick={() => void load()}>{tr('settings:retry')}</Button>}
         {offline !== undefined && <p role="status">{tr(offline ? 'settings:mode_offline' : 'settings:mode_online')}</p>}
