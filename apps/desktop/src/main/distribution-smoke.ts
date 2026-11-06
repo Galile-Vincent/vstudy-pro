@@ -17,6 +17,7 @@ import { installDirectories, resolveInstalledExecutable } from './providers/trus
 import { scrubbedEnvironment } from '../../resources/converter/contracts';
 import { managedConverterPython, systemExecutable } from './platform/process';
 import { ActionPty } from './providers/setup/pty';
+import { createWindowsStatePersistence } from './mcp/windows-state';
 
 const execute = promisify(execFile);
 
@@ -33,6 +34,9 @@ export function prepareDistributionSmoke(): string | undefined {
   const userData = join(root, 'user-data');
   mkdirSync(userData, { mode: 0o700 });
   app.setPath('userData', userData);
+  if (process.platform === 'win32' && process.env.VSTUDY_DISTRIBUTION_SMOKE_MCP_ENABLED === '1') {
+    createWindowsStatePersistence().write(userData, JSON.stringify({version: 1, enabled: true, grants: [], activity: []}));
+  }
   return root;
 }
 
@@ -91,6 +95,11 @@ export async function runDistributionSmoke(window: BrowserWindow, store: Store, 
     );
     if (rendererLoaded !== true || !window.webContents.getURL().startsWith('vstudy://app/')) throw new Error('Packaged renderer did not mount with its preload bridge');
     report.rendererLoaded = true;
+    const mcpEnabled = process.env.VSTUDY_DISTRIBUTION_SMOKE_MCP_ENABLED === '1';
+    if (mcpEnabled) await window.webContents.executeJavaScript('window.desktop.invoke("mcp:enable", {enabled:true})');
+    const agents: unknown = await window.webContents.executeJavaScript('window.desktop.invoke("mcp:state", {})');
+    if (!agents || typeof agents !== 'object' || !('enabled' in agents) || agents.enabled !== mcpEnabled) throw new Error('Packaged MCP startup state did not match its isolated fixture');
+    report.mcp = {enabled: agents.enabled, expectedEnabled: mcpEnabled, windowCreated: true, realPersistence: process.platform === 'win32'};
     const capture = await window.webContents.capturePage();
     if (capture.isEmpty()) throw new Error('Native window capture was empty');
     await writeFile(join(root, 'window.png'), capture.toPNG());

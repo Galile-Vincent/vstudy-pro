@@ -36,7 +36,8 @@ const executable = join(installDirectory, 'VStudy Pro.exe');
 const uninstaller = join(installDirectory, 'Uninstall VStudy Pro.exe');
 const shortcut = join(process.env.APPDATA, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'VStudy Pro.lnk');
 if (existsSync(installDirectory) || existsSync(shortcut)) throw new Error('Installer smoke requires no previous VStudy installation');
-const report = { schemaVersion: 1, target: target.key, administrator, installDirectory, ok: false, installed: false, launched: false, uninstalled: false, startMenu: false };
+const report = { schemaVersion: 1, target: target.key, administrator, installDirectory, ok: false, installed: false, launched: false, uninstalled: false, startMenu: false,
+  mcpStartup: {disabled: false, enabled: false} };
 async function run(exe, args, name, timeout = 180000) {
   try {
     const stdout = execFileSync(exe, args, { encoding: 'utf8', timeout, windowsHide: true, maxBuffer: 1024 * 1024 });
@@ -57,6 +58,10 @@ try {
   await run(process.execPath, [fileURLToPath(new URL('distribution-smoke.mjs', import.meta.url)), '--target', target.key,
     '--executable', executable, '--output', output], 'installed-app', 120000);
   report.launched = true;
+  report.mcpStartup.disabled = true;
+  await run(process.execPath, [fileURLToPath(new URL('distribution-smoke.mjs', import.meta.url)), '--target', target.key,
+    '--executable', executable, '--output', join(output, 'mcp-enabled'), '--mcp-enabled'], 'installed-app-mcp-enabled', 120000);
+  report.mcpStartup.enabled = true;
 } catch (error) { failure = error; }
 try {
   if (existsSync(uninstaller)) await run(uninstaller, ['/S', '/currentuser'], 'uninstall');
@@ -64,7 +69,7 @@ try {
   while ((existsSync(executable) || existsSync(shortcut)) && Date.now() < deadline) await setTimeout(200);
   if (existsSync(executable) || existsSync(shortcut)) throw new Error('Uninstall left the application executable or Start menu shortcut');
   report.uninstalled = report.installed;
-  report.ok = report.installed && report.launched && report.startMenu && report.uninstalled;
+  report.ok = report.installed && report.launched && report.startMenu && report.uninstalled && report.mcpStartup.disabled && report.mcpStartup.enabled;
   if (report.uninstalled) await rm(installDirectory, { recursive: true, force: true });
 } catch (error) { failure ??= error; }
 if (failure) report.error = String(failure);

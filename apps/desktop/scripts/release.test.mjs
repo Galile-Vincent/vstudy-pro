@@ -43,6 +43,7 @@ function smokeReport(target) {
     },
     safeStorage: target.platform === 'win' ? { backend: 'dpapi', roundTrip: true, ciphertextCleared: true } : { probed: false },
     nativeTerminal: {engine: 'node-pty', architecture: target.arch, roundTrip: true, exitCode: 0},
+    mcp: {enabled: false, expectedEnabled: false, windowCreated: true, realPersistence: target.platform === 'win'},
   };
 }
 
@@ -196,6 +197,7 @@ test('packaged smoke rejects wrong architecture, failed DB writes, and invented 
   }
   const win = targetFor('win-x64');
   assert.throws(() => validateSmokeReport({ ...smokeReport(win), safeStorage: { probed: false } }, win), /DPAPI/);
+  assert.throws(() => validateSmokeReport(smokeReport(win), win, true), /MCP startup/);
   assert.throws(() => validateSmokeReport({ ...smokeReport(win), nativeTerminal: undefined }, win), /node-pty/);
   assert.throws(() => validateSmokeReport({ ...smokeReport(win), nativeTerminal: {engine: 'node-pty', architecture: 'arm64', roundTrip: true, exitCode: 0} }, win), /node-pty/);
   const intel = targetFor('mac-x64');
@@ -242,7 +244,13 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
     await writeFile(join(smoke, 'smoke-result.json'), JSON.stringify(smokeReport(target)));
     if (target.platform === 'win') await writeFile(join(smoke, 'installer-smoke.json'), JSON.stringify({
       schemaVersion: 1, target: target.key, ok: true, administrator: false, installed: true, launched: true, startMenu: true, uninstalled: true,
+      mcpStartup: {disabled: true, enabled: true},
     }));
+    if (target.platform === 'win') {
+      await mkdir(join(smoke, 'mcp-enabled'));
+      await writeFile(join(smoke, 'mcp-enabled', 'smoke-result.json'), JSON.stringify({...smokeReport(target),
+        mcp: {enabled: true, expectedEnabled: true, windowCreated: true, realPersistence: true}}));
+    }
     const output = join(root, 'artifacts', `distribution-${target.key}-unsigned`);
     await stageAssets({ target, version, input, smoke, output, env: {} });
     if (target.platform === 'win') {
@@ -250,6 +258,11 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
       await writeFile(join(smoke, 'installer-smoke.json'), JSON.stringify({ ...installation, administrator: true }));
       await assert.rejects(stageAssets({ target, version, input, smoke, output: join(root, 'rejected', target.key), env: {} }), /non-admin/);
       await writeFile(join(smoke, 'installer-smoke.json'), JSON.stringify(installation));
+      const enabledPath = join(smoke, 'mcp-enabled', 'smoke-result.json');
+      const enabled = await readFile(enabledPath, 'utf8');
+      await writeFile(enabledPath, JSON.stringify(smokeReport(target)));
+      await assert.rejects(stageAssets({ target, version, input, smoke, output: join(root, 'disabled', target.key), env: {} }), /MCP startup/);
+      await writeFile(enabledPath, enabled);
     }
     assert.deepEqual(await readFile(join(output, names.stable)), await readFile(join(output, names.installer)));
     const metadata = JSON.parse(await readFile(join(output, `latest-${target.key}.yml`), 'utf8'));

@@ -27,11 +27,16 @@ export async function stageAssets({ target, version, input, smoke, output, env =
   const report = JSON.parse(await readFile(join(smoke, 'smoke-result.json'), 'utf8'));
   validateSmokeReport(report, target);
   let installation;
+  let mcpEnabledSmoke;
   if (target.platform === 'win') {
     installation = JSON.parse(await readFile(join(smoke, 'installer-smoke.json'), 'utf8'));
     if (installation.schemaVersion !== 1 || installation.target !== target.key || installation.ok !== true ||
         installation.administrator !== false || installation.installed !== true || installation.launched !== true ||
-        installation.startMenu !== true || installation.uninstalled !== true) throw new Error('Windows installer smoke did not verify non-admin install, launch, Start menu, and uninstall');
+        installation.startMenu !== true || installation.uninstalled !== true || installation.mcpStartup?.disabled !== true ||
+        installation.mcpStartup?.enabled !== true) throw new Error('Windows installer smoke did not verify non-admin install, MCP-off/on launch, Start menu, and uninstall');
+    mcpEnabledSmoke = JSON.parse(await readFile(join(smoke, 'mcp-enabled', 'smoke-result.json'), 'utf8'));
+    validateSmokeReport(mcpEnabledSmoke, target, true);
+    if (mcpEnabledSmoke.appVersion !== version) throw new Error('MCP-enabled smoke version does not match the release version');
   }
   if (report.appVersion !== version) throw new Error('Smoke version does not match the release version');
   if (signing.target !== target.key || signing.schemaVersion !== 1 || typeof signing.signed !== 'boolean' ||
@@ -55,7 +60,7 @@ export async function stageAssets({ target, version, input, smoke, output, env =
     schemaVersion: 1, version, target: target.key, platform: target.platform, arch: target.arch, signing,
     source: { repository: env.GITHUB_REPOSITORY ?? null, commit: env.GITHUB_SHA ?? null, ref: env.GITHUB_REF ?? null,
       run: env.GITHUB_RUN_ID ? `https://github.com/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}` : null },
-    builtAt: date, smoke: report, ...(installation ? { installation } : {}), assets: await inventory(output),
+    builtAt: date, smoke: report, ...(installation ? { installation, mcpEnabledSmoke } : {}), assets: await inventory(output),
   };
   await writeJson(join(output, `VStudy-Pro-${version}-${target.key}.provenance.json`), provenance);
   await writeFile(join(output, `VStudy-Pro-${version}-${target.key}.build-notes.txt`),

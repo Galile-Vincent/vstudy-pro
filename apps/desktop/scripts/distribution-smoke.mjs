@@ -10,7 +10,7 @@ import { setTimeout, clearTimeout } from 'node:timers';
 import { finished } from 'node:stream/promises';
 import { packagedExecutable, targetFor } from './release-contract.mjs';
 
-export function validateSmokeReport(report, target) {
+export function validateSmokeReport(report, target, mcpEnabled = false) {
   if (report.schemaVersion !== 1 || !report.ok || report.exitCode !== 0 ||
       report.platform !== (target.platform === 'mac' ? 'darwin' : 'win32') || report.arch !== target.arch ||
       report.windowCreated !== true || report.rendererLoaded !== true ||
@@ -22,6 +22,10 @@ export function validateSmokeReport(report, target) {
   }
   if (target.platform === 'win' && (report.safeStorage?.backend !== 'dpapi' || report.safeStorage?.roundTrip !== true || report.safeStorage?.ciphertextCleared !== true)) {
     throw new Error('Windows packaged smoke did not verify the native DPAPI round-trip');
+  }
+  if (report.mcp?.enabled !== mcpEnabled || report.mcp?.expectedEnabled !== mcpEnabled || report.mcp?.windowCreated !== true ||
+      (target.platform === 'win' && report.mcp?.realPersistence !== true)) {
+    throw new Error('Packaged smoke did not verify its expected MCP startup state and real Windows persistence');
   }
   if (report.nativeTerminal?.engine !== 'node-pty' || report.nativeTerminal?.architecture !== target.arch ||
       report.nativeTerminal?.roundTrip !== true || report.nativeTerminal?.exitCode !== 0) {
@@ -35,13 +39,13 @@ export function validateSmokeReport(report, target) {
   }
 }
 
-export async function runSmoke({ executable, args = [], target, output, timeoutMs = 90000 }) {
+export async function runSmoke({ executable, args = [], target, output, timeoutMs = 90000, mcpEnabled = false }) {
   if (!Number.isFinite(timeoutMs) || timeoutMs < 100 || timeoutMs > 300000) throw new Error('Smoke deadline must be between 100 and 300000 ms');
   await mkdir(output, { recursive: true });
   const root = await mkdtemp(join(tmpdir(), 'vstudy-distribution-smoke-'));
   const stdout = createWriteStream(join(output, 'stdout.log'));
   const stderr = createWriteStream(join(output, 'stderr.log'));
-  const env = { ...process.env, VSTUDY_DISTRIBUTION_SMOKE_DIR: root };
+  const env = { ...process.env, VSTUDY_DISTRIBUTION_SMOKE_DIR: root, VSTUDY_DISTRIBUTION_SMOKE_MCP_ENABLED: mcpEnabled ? '1' : '0' };
   for (const key of ['ELECTRON_RUN_AS_NODE', 'NODE_OPTIONS', 'ELECTRON_RENDERER_URL', 'VSTUDY_PACKAGED_SMOKE_DIR', 'VSTUDY_FAKE_PROVIDER']) delete env[key];
   let child;
   let deadline;
@@ -73,7 +77,7 @@ export async function runSmoke({ executable, args = [], target, output, timeoutM
     await copyFile(join(root, 'window.png'), join(output, 'window.png'));
     const report = JSON.parse(await readFile(join(output, 'smoke-result.json'), 'utf8'));
     if (outcome.code !== 0) throw new Error(`Packaged application exited ${outcome.code}, signal ${outcome.signal}`);
-    validateSmokeReport(report, target);
+    validateSmokeReport(report, target, mcpEnabled);
     console.log(`Packaged smoke passed for ${target.key}; converter availability was probed without download or conversion`);
     return report;
   } finally {
@@ -93,6 +97,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   const { values } = parseArgs({ options: {
     target: { type: 'string', default: `${process.platform === 'darwin' ? 'mac' : 'win'}-${process.arch}` },
     executable: { type: 'string' }, output: { type: 'string' }, timeout: { type: 'string', default: '90000' },
+    'mcp-enabled': { type: 'boolean', default: false },
   } });
   const target = targetFor(values.target);
   const output = resolve(values.output ?? join('release', 'smoke', target.key));
@@ -107,5 +112,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   for (const fuse of [F.OnlyLoadAppFromAsar, F.EnableEmbeddedAsarIntegrityValidation]) {
     if (fuses[fuse] !== FuseState.ENABLE) throw new Error(`Packaged fuse ${F[fuse]} must be enabled`);
   }
-  await runSmoke({ executable, target, output, timeoutMs: Number(values.timeout) });
+  await runSmoke({ executable, target, output, timeoutMs: Number(values.timeout), mcpEnabled: values['mcp-enabled'] });
 }
