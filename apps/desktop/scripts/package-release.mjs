@@ -36,12 +36,6 @@ const platform = target.platform === 'mac' ? Platform.MAC : Platform.WINDOWS;
 const signing = signingConfiguration(target.platform, mode, process.env);
 const repository = process.env.GITHUB_REPOSITORY ?? 'ava-apple/vstudy-pro';
 if (!/^[\w.-]+\/[\w.-]+$/.test(repository)) throw new Error('Invalid release repository');
-if (target.platform === 'win') {
-  const { default: sharp } = await import('sharp');
-  const icon = join(output, 'icon.png');
-  await sharp('build/icon.svg').resize(256, 256).png().toFile(icon);
-  signing.win.icon = icon;
-}
 const packageApplication = () => build({
   targets: platform.createTarget(target.platform === 'mac' ? ['dmg', 'zip'] : ['nsis', 'zip'], Arch[target.arch]),
   publish: 'never',
