@@ -97,7 +97,9 @@
       "!**/*.test.*",
       "!**/test/**",
       "!**/__fixtures__/**",
-      "!node_modules/**"
+      "!node_modules/**",
+      "node_modules/node-pty/**/*",
+      "node_modules/node-addon-api/**/*"
     ],
     "extraResources": [
       {
@@ -143,6 +145,9 @@
           "vstudymoodle"
         ]
       }
+    ],
+    "asarUnpack": [
+      "node_modules/node-pty/**/*"
     ]
   }
 }
