@@ -1,3 +1,4 @@
+import { ownerWindow } from '../dialogs';
 /**
  * Register validated usage IPC operations and delegate privileged work to main services.
  * Owned by main/ipc.
@@ -39,8 +40,8 @@ export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemen
     const rateLimit = codexEnabled() ? await probe() : undefined;
     return rateLimit ? [...rows.filter(r => r.providerId !== 'codex-cli'), { providerId: 'codex-cli' as const, createdAt: new Date().toISOString(), rateLimit }] : rows;
   });
-  registrar.handle('usage:export', async () => {
-    const result = await dialog.showSaveDialog({ title:tr('usage:export_title'), defaultPath: 'vstudy-usage.csv', filters: [{ name: 'CSV', extensions: ['csv'] }] });
+  registrar.handle('usage:export', async (_request, event) => {
+    const result = await dialog.showSaveDialog(ownerWindow(event.sender), { title:tr('usage:export_title'), defaultPath: 'vstudy-usage.csv', filters: [{ name: 'CSV', extensions: ['csv'] }] });
     if (result.canceled || !result.filePath) return { saved: false };
     await exportText(await readUsageCsv(store), result.filePath);
     return { saved: true };

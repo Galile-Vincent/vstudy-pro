@@ -260,13 +260,13 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.sender === window.webContents &&
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
-    requestMainWindow,
+    restoreMainWindow,
     process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {},
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deleteAllData');
-  deletion.handle('settings:deleteAllData', async () => {
-    const result = await showAttachedMessage({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 });
+  deletion.handle('settings:deleteAllData', async (_request, event) => {
+    const result = await showAttachedMessage({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 }, event.sender);
     if (result.response !== 1) return { ok: true };
     await deleteAllData(userData, async () => {
       window?.destroy();

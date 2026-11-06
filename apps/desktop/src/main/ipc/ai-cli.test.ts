@@ -168,7 +168,7 @@ it.each(['darwin', 'win32'] as const)('confirms the official manual command befo
     approval.show.mockResolvedValueOnce({ response: 0, checkboxChecked: false });
     expect(await invoke('ai-cli:openTerminal', { actionId: 'terminal-agy', token: preview.token })).toEqual({ ok: false });
     expect(electron.clipboard.writeText).not.toHaveBeenCalled(); expect(execFile).not.toHaveBeenCalled(); expect(spawn).not.toHaveBeenCalled();
-    expect(approval.show).toHaveBeenLastCalledWith(expect.objectContaining({ detail: expect.stringContaining(preview.command), defaultId: 0, cancelId: 0 }));
+    expect(approval.show).toHaveBeenLastCalledWith(expect.objectContaining({ detail: expect.stringContaining(preview.command), defaultId: 0, cancelId: 0 }),expect.objectContaining({id:1}));
     const opening = invoke('ai-cli:openTerminal', { actionId: 'terminal-agy', token: preview.token });
     if (platform === 'darwin') {
       await expect(opening).rejects.toThrow('VSTUDY_STATUS');

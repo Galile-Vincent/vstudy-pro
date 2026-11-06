@@ -20,7 +20,7 @@ import type { McpTransportFactory, McpStatePersistence } from "../../shared/mcp-
 import { registerStorageIpc } from "./storage";
 import { applyNativeTheme } from '../theme';
 import { registerMoodleIpc } from './moodle';
-import { showAttachedMessage } from '../dialogs';
+import { showAttachedMessage, ownerWindow } from '../dialogs';
 import { disposeSearchWorkers } from '../services/search-runner';
 import { disposeDiscovery } from '../providers/models';
 import { networkActivity, recordEgress } from '../services/egress';
@@ -29,7 +29,7 @@ import { tr, updateApplicationMenu } from "../i18n";
 import { registerLibraryIpc } from "./library";
 import { registerUsageIpc } from "./usage";
 import { createProviderRegistry } from "../providers";
-import { app, dialog, nativeTheme, shell, ipcMain, type IpcMainInvokeEvent } from "electron";
+import { app, BrowserWindow, dialog, nativeTheme, shell, ipcMain, type IpcMainInvokeEvent } from "electron";
 import type { Store } from "../db";
 import type { SecretStore } from "../services/secrets";
 import { ipcContract, type IpcChannel } from "../../shared/ipc";
@@ -50,7 +50,7 @@ export function registerIpc(
   store: Store,
   secrets: SecretStore,
   isTrusted: (event: IpcMainInvokeEvent) => boolean,
-  restoreMainWindow: () => void = () => {},
+  restoreMainWindow: () => void | Promise<void> = () => {},
   options:AppIpcOptions = {},
 ): () => Promise<void> {
   const pins = new ExecutablePins(`${app.getPath('userData')}/executable-pins.json`, async (previous, current) => {
@@ -70,15 +70,15 @@ export function registerIpc(
     "secrets:has",
     "secrets:delete",
   ]);
-  registrar.handle("shell:openExternal", async ({ url }) => {
+  registrar.handle("shell:openExternal", async ({ url }, event) => {
     const target = new URL(url);
-    const result = await showAttachedMessage({ type: 'question', message: tr("settings:external",{target:target.hostname || target.protocol}), detail: target.protocol === 'mailto:' ? tr('settings:mail_detail',{address:decodeURIComponent(target.pathname),subject:target.searchParams.get('subject') ?? '',length:(target.searchParams.get('body') ?? '').length,url}) : url, buttons: [tr('common:cancel'), tr('common:open')], defaultId: 0, cancelId: 0 });
+    const result = await showAttachedMessage({ type: 'question', message: tr("settings:external",{target:target.hostname || target.protocol}), detail: target.protocol === 'mailto:' ? tr('settings:mail_detail',{address:decodeURIComponent(target.pathname),subject:target.searchParams.get('subject') ?? '',length:(target.searchParams.get('body') ?? '').length,url}) : url, buttons: [tr('common:cancel'), tr('common:open')], defaultId: 0, cancelId: 0 }, event.sender);
     if (result.response === 1) { recordEgress('external_open', target.protocol === 'mailto:' ? 'Default mail application' : target.origin); await shell.openExternal(url); }
     return { ok: true };
   });
   implemented.add('providers:chooseExecutable');
-  registrar.handle('providers:chooseExecutable', async ({binary}) => {
-    const result = await dialog.showOpenDialog({title:tr('settings:choose_binary',{binary}),properties:['openFile']});
+  registrar.handle('providers:chooseExecutable', async ({binary},event) => {
+    const result = await dialog.showOpenDialog(ownerWindow(event.sender), {title:tr('settings:choose_binary',{binary}),properties:['openFile']});
     return {path: result.canceled || !result.filePaths[0] ? null : await pins.choose(binary,result.filePaths[0])};
   });
   implemented.add('settings:networkActivity');
@@ -116,7 +116,10 @@ export function registerIpc(
   const mcpBackend=()=>backend ??= createMcpBackend({store,moodle:disposeMoodle.service,documents:disposeDocuments,openModule:navigation.openModule,exportCalendar:async selection=>{
     const context=new PlannerRepository(store.db).context();
     const text=plannerCalendar(context.snapshot,context.deadlines,selection);
-    const result=await dialog.showSaveDialog({defaultPath:'vstudy-study-plan.ics',filters:[{name:tr('planner:calendar_file'),extensions:['ics']}]});
+    await restoreMainWindow();
+    const owner = BrowserWindow.getFocusedWindow();
+    if (!owner || owner.isDestroyed()) return {saved:false};
+    const result=await dialog.showSaveDialog(owner, {defaultPath:'vstudy-study-plan.ics',filters:[{name:tr('planner:calendar_file'),extensions:['ics']}]});
     if (result.canceled || !result.filePath) return {saved:false};
     await exportText(text,result.filePath);return {saved:true};
   }});
