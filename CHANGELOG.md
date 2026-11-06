@@ -3,13 +3,19 @@
 Generated from Git history with git-cliff. Historical subjects are preserved.
 Pre-baseline changes without a conventional prefix appear under Other changes.
 
-## Unreleased
+## v0.2.0
 
 ### Documentation
 - docs(repo): normalize verification logs and record final size (5d83019)
 - docs: record Moodle webview integration and verification (8155252)
 - docs(storage): map ownership and add bounded database benchmark (e6210a1)
 - docs: record first-run audit and merged onboarding acceptance (59cc0fa)
+- docs: record cleanup checks and proposed release evidence (e0d3d97)
+- docs: record first-time student test results and evidence (1cc3920)
+- docs(readme): add multilingual download and app guides (6413eba)
+- docs(readme): merge multilingual README and download guide (396213f)
+- docs: record website reference measurements and design decisions (cfc5f57)
+- docs(website): record browser and performance acceptance evidence (20713fe)
 
 ### Features
 - feat: add student planning domain and approval-based course tools (8af5a45)
@@ -28,12 +34,36 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 - feat: integrate onboarding with schools, themes, and recorded guides (a01dcf6)
 - feat(onboarding): merge guided first run (0f74be5)
 - feat(agent): merge study planner and agent actions (726b8be)
+- feat(website): add localized marketing site and searchable docs (1ef1159)
+- feat(website): merge marketing and docs site (48a14bb)
 
 ### Fixes
 - fix: preserve Moodle pane focus and themed loading (41c7390)
 - fix(storage): harden migrations, file publication, and Moodle caching (635ebd0)
 - fix(storage): validate exports and finish integrated verification (6a3b1a0)
 - fix: preserve recorded walkthrough frames and caption duration (b333be6)
+- fix(history): dismiss finder after setup replay and restore focus (c37a5f3)
+- fix(courses): preserve tab semantics and nested Escape behavior (75ca0a1)
+- fix(ui): keep guidance and navigation usable in short windows (2c5e980)
+- fix(ux): merge student UX detail pass (cae7325)
+- fix(storage): pin restored schemas and chat file roots (d310576)
+- fix(storage): validate planner restores and roll back failed startup (0ee5e6b)
+- fix(moodle): gate native downloads during storage maintenance (cbd2e82)
+- fix(planner): treat submitted assignment tasks as completed (1fe8922)
+- fix(planner): read the active material version (f8508a4)
+- fix(history): preserve results during refresh and pagination (e424c05)
+- fix(history): check current messages before switching models (1083fd1)
+- fix(storage): report cancelled cleanup confirmations (b1752aa)
+- fix(chat): clear material approval after every append attempt (8baf38e)
+- fix(history): restore untitled state when undoing a rename (f9c06a4)
+- fix(moodle): expire copy feedback and report it only on success (4dd6e38)
+- fix(planner): localize native calendar export filters (669ad64)
+- fix(review): merge verified review fixes (8e78ed6)
+- fix: guide first-time students through optional AI setup (1977add)
+- fix(onboarding): merge first-time-user test fixes (cb781d2)
+- fix(history): tolerate thread updates and recover view failures (2bc006c)
+- fix(startup): settle initial navigation when its window closes (f259009)
+- fix(history): merge re-check fixes for History crash and startup (d638dcd)
 
 ### Maintenance
 - chore(repo): stop tracking generated release evidence (1e1a681)
@@ -49,6 +79,9 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 - chore: merge webview history and storage integration (b868f6a)
 - chore: merge guided onboarding and verify planner integration (7a47597)
 - chore: repair dependency and vendor verification gates (c121263)
+- chore(cleanup): merge green checks, locale generation, module docs (e7f0082)
+- chore(merge): integrate stream J cleanup into UX polish (30995d9)
+- chore(renderer): remove unused vendor files after stream J merge (fcbd530)
 
 ### Refactoring
 - refactor: route renderer colors through semantic theme tokens (9b72fa1)
@@ -56,6 +89,11 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 
 ### Tests
 - test: capture selected themes and visible recorded playback (85423de)
+- test(ux): audit merged screens and await actual document readiness (56ee941)
+- test(storage): record review regressions and Electron restore evidence (e8eef70)
+- test(history): reproduce filtering and unrecovered render failures (619d009)
+- test(startup): reproduce aborted navigation hanging on close (49c7a94)
+- test(regressions): verify History and startup in Electron (4c28b1d)
 ## v0.1.0
 
 ### Documentation
