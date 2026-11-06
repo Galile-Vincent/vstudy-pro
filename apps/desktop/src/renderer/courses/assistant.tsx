@@ -85,7 +85,7 @@ export function CourseAssistant(
         aria-expanded={open}
         aria-controls="course-assistant-panel"
       >
-        <MessageCircle />
+        <MessageCircle /><span>{tr("moodle:course_assistant")}</span>
         {pending && (
           <span
             className="moodle-proposal-dot"

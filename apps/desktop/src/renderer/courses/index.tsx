@@ -4,14 +4,13 @@ import {
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   ArrowUpRight,
-  BookOpen,
   CalendarDays,
+  BookOpen,
   Check,
   ChevronRight,
   Clock3,
@@ -23,7 +22,6 @@ import {
   WifiOff,
 } from "lucide-react";
 import type {
-  MoodleCourse,
   MoodleCourseDetail,
   MoodleDeadline,
   MoodleOverview,
@@ -52,7 +50,10 @@ import {
   matchesTerm,
 } from "../../shared/moodle-course-display";
 import type { MoodleTermFilter } from "../../shared/moodle-course";
+import "./art/tokens.css";
 import "./courses.css";
+import { CourseArtwork, CourseCover as Cover, CourseProgress, courseArt } from "./art/cover";
+import "./art/surfaces.css";
 import { ConnectDialog } from "./connect";
 import { Planner } from "./planner";
 export { ConnectDialog } from "./connect";
@@ -91,37 +92,6 @@ function relative(value: string) {
     numeric: "auto",
   }).format(Math.round(valueInUnit), unit);
 }
-function courseStyle(id: string): CSSProperties {
-  const colors = [
-    "var(--folder-blue)",
-    "var(--folder-sage)",
-    "var(--folder-amber)",
-  ];
-  const hash = Array.from(id).reduce((sum, c) => sum + c.charCodeAt(0), 0);
-  return { "--course-color": colors[hash % colors.length] } as CSSProperties;
-}
-function Cover({ course }: { course: MoodleCourse }) {
-  return (
-    <div className="moodle-cover" style={courseStyle(course.id)}>
-      {course.imageUrl ? (
-        <img src={course.imageUrl} alt="" referrerPolicy="no-referrer" />
-      ) : (
-        <BookOpen aria-hidden="true" />
-      )}
-      <span className="moodle-course-code">
-        {[course.identity.term, course.identity.code]
-          .filter(Boolean)
-          .join(" · ") || course.shortName}
-      </span>
-      {course.identity.hasProgress && course.progress !== null && (
-        <progress className="moodle-cover-progress" max={100} value={Math.round(course.progress)}
-          title={tr("moodle:course_progress", {count: Math.round(course.progress)})}
-          aria-label={tr("moodle:course_progress", {count: Math.round(course.progress)})} />
-      )}
-    </div>
-  );
-}
-
 function IdentityLine({value, label}: {value: string; label: string}) {
   return <p className="moodle-identity-line">{value || <span className="moodle-identity-unknown" aria-label={label}>—</span>}</p>;
 }
@@ -262,6 +232,13 @@ function CoursesBody({
     } catch {
       failure();
     }
+  };
+  const disconnect = async (accountId: string) => {
+    try {
+      await api.disconnect(accountId);
+      if (courseId) onCourse();
+      else await refresh();
+    } catch { failure(); }
   };
   const openFile = async (fileId: string) => {
     setOpening(fileId);
@@ -477,7 +454,6 @@ function CoursesBody({
   return (
     <main className="moodle-page">
       <div className="moodle-content">
-        <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
         <header className="moodle-header">
           <div>
             {courseId && (
@@ -491,16 +467,16 @@ function CoursesBody({
               </Button>
             )}
             {!courseId && <h1>{tr("moodle:courses")}</h1>}
-            <p>
-              {courseId
-                ? tr("moodle:course_subtitle")
-                : tr("moodle:home_subtitle")}
-            </p>
+            {!courseId && <p>{tr("moodle:home_subtitle")}</p>}
           </div>
+          <div className="moodle-header-actions">
+          {detail && <Button variant="ghost" size="icon" aria-label={tr("moodle:disconnect")} title={tr("moodle:disconnect")} onClick={() => void disconnect(detail.course.accountId)}><Unplug /></Button>}
+          <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
           <Button variant="outline" onClick={() => setConnect(true)}>
             <GraduationCap />
             {tr("moodle:connect_school")}
           </Button>
+          </div>
         </header>
         <div role="status" aria-live="polite">
           {notice && (
@@ -527,7 +503,7 @@ function CoursesBody({
             </Button>
           </div>
         )}
-        {!!overview?.accounts.length && (
+        {!!overview?.accounts.length && (!courseId || overview.accounts.some(account => account.status === "expired" || account.signInStorage)) && (
           <div className="moodle-accounts">
             {overview.accounts.map((account) => (
               <div key={account.id} className="moodle-account">
@@ -558,15 +534,7 @@ function CoursesBody({
                   variant="ghost"
                   size="icon"
                   aria-label={tr("moodle:disconnect")}
-                  onClick={async () => {
-                    try {
-                      await api.disconnect(account.id);
-                      if (courseId) onCourse();
-                      else await refresh();
-                    } catch {
-                      failure();
-                    }
-                  }}
+                  onClick={() => void disconnect(account.id)}
                 >
                   <Unplug />
                 </Button>
@@ -602,9 +570,9 @@ function CoursesBody({
         ) : courseId ? (
           detail ? (
             <>
-              <div className="moodle-hero">
-                <Cover course={detail.course} />
-                <div>
+              <div className="moodle-hero" style={courseArt(detail.course.id, detail.course.identity.term).style}>
+                <CourseArtwork course={detail.course} />
+                <div className="moodle-hero-body">
                   <span className="moodle-eyebrow">
                     {[detail.course.identity.term, detail.course.identity.code]
                       .filter(Boolean)
@@ -618,12 +586,17 @@ function CoursesBody({
                     )}
                   </h1>
                   <p className="muted" data-testid="course-cache-state">{tr('storage:cached_'+(detail.cacheState ?? 'stale'))}{' · '}{detail.lastSyncedAt ? tr('storage:last_synced',{time:relative(detail.lastSyncedAt)}) : tr('storage:never_synced')}</p>
+                  <div className="moodle-hero-meta">
                   <IdentityLine value={displayTeachers(detail.course.identity, lang)} label={tr("moodle:teacher_unknown")} />
                   <IdentityLine value={displayClass(detail.course.identity)} label={tr("moodle:class_unknown")} />
+                  </div>
+                  <div className="moodle-hero-actions">
+                  <Button variant="outline" disabled={syncing} onClick={() => void sync()}><RefreshCw className={syncing ? "moodle-spin" : ""} />{tr("moodle:refresh")}</Button>
                   <Button variant="outline" onClick={() => {
                     const account = overview?.accounts.find(a => a.id === detail.course.accountId);
                     if (account) openMoodle(account.id,{kind:'page',url:account.siteUrl + '/course/view.php?id=' + detail.course.remoteId});
                   }}><ArrowUpRight />{tr('webview:open')}</Button>
+                  </div>
                   <details className="moodle-raw-name">
                     <summary>{tr("moodle:original_name")}</summary>
                     {detail.course.fullName}
@@ -635,7 +608,7 @@ function CoursesBody({
                     .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
                     .slice(0, 1)
                     .map((d) => (
-                      <p key={d.id}>
+                      <p key={d.id} className="moodle-hero-next">
                         {tr("moodle:up_next")} · {d.title} · {relative(d.dueAt)}
                       </p>
                     ))}
@@ -864,15 +837,11 @@ function CoursesBody({
                         key={d.id}
                         className="moodle-due-card"
                         data-deadline-group={deadlineGroup(d)}
-                        style={courseStyle(d.courseId)}
+                        style={courseArt(d.courseId, course?.identity.term ?? null).style}
                       >
-                        {course && <Cover course={course} />}
-                        <div className="moodle-card-body">
-                          <h3><button className="moodle-due-link" onClick={() => onCourse(d.courseId)}>{d.title}</button></h3>
-                          <IdentityLine value={course ? displayTeachers(course.identity, lang) : ''} label={tr("moodle:teacher_unknown")} />
-                          <IdentityLine value={course ? displayClass(course.identity) : ''} label={tr("moodle:class_unknown")} />
-                          <footer><time dateTime={d.dueAt}>{relative(d.dueAt)}<span>{date(d.dueAt)}</span></time>{remind(d)}</footer>
-                        </div>
+                        <div className="moodle-due-meta"><span className="moodle-due-course">{course?.identity.code || course?.shortName}</span><span className="moodle-urgency" data-urgent={Date.parse(d.dueAt) - Date.now() < 86400000}>{tr("courses-art:due_relative", {time: relative(d.dueAt)})}</span></div>
+                        <h3><button className="moodle-due-link" onClick={() => onCourse(d.courseId)}>{d.title}</button></h3>
+                        <footer><time dateTime={d.dueAt}>{date(d.dueAt)}</time>{remind(d)}</footer>
                       </article>
                     );
                   })}
@@ -928,51 +897,29 @@ function CoursesBody({
                     <div className="moodle-grid">
                       {overview.courses
                         .filter((course) => matchesTerm(course, filter))
-                        .map((course) => (
-                          <article
+                        .map((course, index) => {
+                          const next = dueSoon.find(d => d.courseId === course.id);
+                          const unread = homeDetails.find(d => d.course.id === course.id)?.notifications.filter(n => !n.read).length ?? 0;
+                          return <article
                             key={course.id}
                             className="moodle-course-card"
+                            style={{...courseArt(course.id, course.identity.term).style, animationDelay: `${index * 30}ms`, ...(index >= 6 ? {animation: "none"} : {})}}
                             title={[course.fullName, course.identity.lifecycle === "unknown" ? tr("moodle:dates_unavailable") : null].filter(Boolean).join(" · ")}
                           >
                             <Cover course={course} />
                             <div className="moodle-card-body">
-                              <h3>
-                                <button
-                                  type="button"
-                                  onClick={() => onCourse(course.id)}
-                                >
-                                  {displayTitle(
-                                    course.identity,
-                                    lang,
-                                    course.fullName,
-                                  )}
-                                </button>
-                              </h3>
+                              <h3><button type="button" onClick={() => onCourse(course.id)}>{displayTitle(course.identity, lang, course.fullName)}</button></h3>
                               <IdentityLine value={displayTeachers(course.identity, lang)} label={tr("moodle:teacher_unknown")} />
-                              <IdentityLine value={displayClass(course.identity)} label={tr("moodle:class_unknown")} />
+                              <CourseProgress course={course} />
                               <footer>
-                                <span>
-                                  <CalendarDays />
-                                  {tr("moodle:due_count", {
-                                    count: dueSoon.filter(
-                                      (d) => d.courseId === course.id,
-                                    ).length,
-                                  })}
+                                <span className="moodle-urgency" data-urgent={!!next && Date.parse(next.dueAt) - Date.now() < 86400000}>
+                                  <CalendarDays />{next ? tr("courses-art:due_relative", {time: relative(next.dueAt)}) : tr("courses-art:no_due")}
                                 </span>
-                                <span>
-                                  {tr("moodle:course_unread", {
-                                    count:
-                                      homeDetails
-                                        .find((d) => d.course.id === course.id)
-                                        ?.notifications.filter((n) => !n.read)
-                                        .length ?? 0,
-                                  })}
-                                  <ArrowUpRight />
-                                </span>
+                                <span className="moodle-card-unread">{unread > 0 && <span className="moodle-unread" aria-hidden="true" />}{tr("moodle:course_unread", {count: unread})}<ArrowUpRight /></span>
                               </footer>
                             </div>
-                          </article>
-                        ))}
+                          </article>;
+                        })}
                     </div>
                   </TabsContent>
                 ))}
