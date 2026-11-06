@@ -169,4 +169,3 @@ try {
     if ($env:VSTUDY_PIPE_FIXTURE_TRACE -eq '1') { [Console]::Error.WriteLine('pipe-phase:compiled') }
     [void]$compiled.CompiledAssembly.GetType('VStudyPipeHost').GetMethod('Run').Invoke($null, [object[]]@($PipeName))
 } finally { $provider.Dispose() }
-
