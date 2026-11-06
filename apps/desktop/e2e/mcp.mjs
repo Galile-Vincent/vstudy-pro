@@ -2,7 +2,7 @@
 import { _electron as electron } from 'playwright';
 import { build } from 'vite';
 import AxeBuilder from '@axe-core/playwright';
-import { createRequire } from 'node:module';
+import { createRequire, isBuiltin } from 'node:module';
 import { mkdir, mkdtemp, writeFile, readFile, rm, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import assert from 'node:assert/strict';
@@ -25,7 +25,7 @@ try {
   await mkdir(data,{mode:0o700});await mkdir(home,{mode:0o700});await mkdir(evidence,{recursive:true});
   const entry=join(root,'entry.ts');
   await writeFile(entry,mcpAppSource({desktop:resolve('.'),userData:data,serverBin,peerHelper,accountId,courseId,pageId,quizId,assignId,fileId,school,functions,token,privateToken,malicious,fixtureUrl:fixture.url}));
-  await build({configFile:false,logLevel:'error',resolve:{conditions:['node']},build:{outDir:join(root,'bundle'),lib:{entry,formats:['cjs'],fileName:()=>'app.cjs'},rollupOptions:{external:['electron',/^node:/]}}});
+  await build({configFile:false,logLevel:'error',resolve:{conditions:['node']},build:{outDir:join(root,'bundle'),lib:{entry,formats:['cjs'],fileName:()=>'app.cjs'},rollupOptions:{external:id=>id==='electron'||id==='node-pty'||isBuiltin(id)}}});
   await writeFile(join(root,'package.json'),JSON.stringify({name:'vstudy-mcp-acceptance',main:'bundle/app.cjs'}));
   const launch=async()=>{
     app=await electron.launch({args:[root],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
