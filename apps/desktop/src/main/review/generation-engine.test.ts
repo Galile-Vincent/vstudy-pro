@@ -58,3 +58,25 @@ it('caps artifact page bytes and advances a keyset cursor without reading bodies
     expect(page.items.length + next.items.length).toBe(20);
     expect(next.items.some(item => page.items.some(previous => previous.id === item.id))).toBe(false);
 });
+it('generates through installed W2 admission and fails closed when that service is suspended',async()=>{
+ const {store,repo,request,excerpt}=materials();request.kind='note';
+ const {getReviewAdmission}=await import('./admission');
+ const {installReviewAdmission,reviewAdmission}=await import('./admission-port');
+ const admission=getReviewAdmission(store);installReviewAdmission(admission);
+ let calls=0;
+ const service=new GenerationService(repo,{admission:reviewAdmission,readExcerpt:async()=>excerpt,estimate:()=>({inputTokens:10,outputTokens:10,costUsd:.01}),call:async()=>{calls++;return JSON.stringify({bodyMarkdown:`Force [src:${excerpt.documentId}]`,citations:[{documentId:excerpt.documentId,version:excerpt.version,excerptHash:excerpt.excerptHash,quote:'Force causes acceleration.'}],omitted:[]});}});
+ cleanup.push(()=>service.dispose());
+ const first=service.generate(request);await service.waitForIdle();
+ expect(repo.find(first.id)?.status).toBe('ready');expect(calls).toBe(1);
+ admission.suspend();
+ const second=service.generate({...request,idempotencyKey:randomUUID()});await service.waitForIdle();
+ expect(repo.find(second.id)?.errorCode).toBe('review.suspended');expect(calls).toBe(1);
+ expect(admission.inFlight.calls).toBe(0);
+});
+it('keeps abandoned generation untouched when constructing a service outside normal startup',async()=>{
+ const {repo,request,snapshot}=setup();
+ const artifact=repo.create(request,snapshot,'pending-token');
+ const service=new GenerationService(repo,{admission:new FakeAdmission(),readExcerpt:async()=>{throw Error('unexpected');},estimate:()=>({inputTokens:1,outputTokens:1,costUsd:1}),call:async()=>''});
+ cleanup.push(()=>service.dispose());
+ expect(repo.find(artifact.id)?.status).toBe('generating');
+});

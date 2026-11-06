@@ -1,3 +1,5 @@
+import { getReviewAdmission } from '../review/admission';
+import { installReviewAdmission } from '../review/admission-port';
 import { startMemory } from '../review/memory';
 import { registerReviewGenerateIpc } from './review-generate';
 import { registerReviewIpc } from "./review";
@@ -111,6 +113,9 @@ export function registerIpc(
     return { ok: true };
   });
   registerReviewIpc(registrar, store, implemented);
+  const admission = getReviewAdmission(store);
+  installReviewAdmission(admission);
+  reviewWorkers.register(admission);
   startMemory(store, providers);
   registerReviewGenerateIpc(registrar, store, implemented, providers);
   registerUsageIpc(registrar, store, implemented, () => providers.config('codex-cli').enabled);

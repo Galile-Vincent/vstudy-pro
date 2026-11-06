@@ -27,7 +27,7 @@ export class GenerationService implements ReviewWorker {
     private stopped = false;
     private disposed = false;
     private unregister: () => void;
-    constructor(readonly repo: ArtifactRepository, private readonly deps: GenerationDependencies) { repo.recover(); this.unregister = reviewWorkers.register(this); }
+    constructor(readonly repo: ArtifactRepository, private readonly deps: GenerationDependencies) { this.unregister = reviewWorkers.register(this); }
     generate(request: GenerationRequest, progress: (event: ReviewProgress) => void = () => { }) {
         const existing = this.repo.byKey(request.idempotencyKey);
         if (existing) {

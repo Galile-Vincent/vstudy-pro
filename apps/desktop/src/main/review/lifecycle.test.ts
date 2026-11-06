@@ -1,0 +1,61 @@
+import {randomUUID} from 'node:crypto';
+import {mkdtemp,writeFile,access,rm} from 'node:fs/promises';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {expect,it,vi} from 'vitest';
+
+it.each(['storage settle','shutdown','delete-all'] as const)('drains both real worker families before %s closes storage',async path=>{
+ vi.resetModules();
+ const {openStore}=await import('../db');
+ const {ReviewRepository}=await import('./repository');
+ const {ArtifactRepository}=await import('./artifact-repository');
+ const {GenerationService}=await import('./generate');
+ const {startMemory}=await import('./memory');
+ const {ProviderRegistry}=await import('../providers');
+ const {reviewWorkers}=await import('./workers');
+ const {FakeAdmission}=await import('./admission-port');
+ const store=openStore(':memory:');
+ const root=await mkdtemp(join(tmpdir(),'review-lifecycle-'));
+ await writeFile(join(root,'owned'),'data');
+ const course=new ReviewRepository(store.db).createCourse({title:'Physics'});
+ let release!:()=>void,memoryEntered!:()=>void;
+ const pending=new Promise<void>(r=>{release=r;}),memoryStarted=new Promise<void>(r=>{memoryEntered=r;});
+ const chat=randomUUID(),user=randomUUID(),assistant=randomUUID(),at=new Date().toISOString();
+ store.db.prepare("INSERT INTO conversations(id,scope,providerId,modelId,createdAt) VALUES(?,'general','openai-api','gpt-5.4',?)").run(chat,at);
+ for(const [id,role] of [[user,'user'],[assistant,'assistant']])store.db.prepare('INSERT INTO messages(id,conversationId,role,parts,createdAt,parentMessageId) VALUES(?,?,?,?,?,?)').run(id!,chat,role!,JSON.stringify([{type:'text',text:'Why force?',status:'complete'}]),at,role==='assistant'?user:null);
+ new ReviewRepository(store.db).assignChat(chat,course.id);
+ const providers=new ProviderRegistry();
+ providers.register('openai-api',{detect:async()=>({available:true}),listModels:async()=>[],async *stream(_request,signal){memoryEntered();await pending;signal.throwIfAborted();yield {type:'done'};}});
+ const memory=startMemory(store,providers);await memoryStarted;
+ const calls:string[]=[];
+ const suspend=memory.suspend.bind(memory),idle=memory.waitForIdle.bind(memory),dispose=memory.dispose.bind(memory);
+ vi.spyOn(memory,'suspend').mockImplementation(()=>{calls.push('memory suspend');suspend();});
+ vi.spyOn(memory,'waitForIdle').mockImplementation(async()=>{calls.push('memory idle');await idle();});
+ vi.spyOn(memory,'dispose').mockImplementation(async()=>{calls.push('memory dispose');await dispose();});
+ const repo=new ArtifactRepository(store.db);
+ let entered!:()=>void;
+ const started=new Promise<void>(r=>{entered=r;});
+ const generation=new GenerationService(repo,{admission:new FakeAdmission(),readExcerpt:async()=>{entered();await pending;return {documentId:randomUUID(),version:'original',excerptHash:'a'.repeat(64),text:'source'};},estimate:()=>({inputTokens:1,outputTokens:1,costUsd:1}),call:async()=>''});
+ const doc=randomUUID();
+ store.db.prepare("INSERT INTO documents(id,title,sourceName,sourceHash,sourcePath,mime,status,markdownPath,createdAt) VALUES(?,'Physics','p.pdf',?,'/tmp/p','application/pdf','ready','/tmp/content',?)").run(doc,doc,new Date().toISOString());
+ new ReviewRepository(store.db).linkDocument(course.id,doc,['Force']);
+ const request={requestId:randomUUID(),courseId:course.id,kind:'note' as const,title:'Notes',scope:{kind:'documents' as const,documentIds:[doc]},idempotencyKey:randomUUID(),providerId:'openai-api' as const,modelId:'gpt-5.4',locale:'en' as const};
+ const artifact=generation.generate(request);await started;
+ let settled=false;
+ const settle=async()=>{settled=true;expect(calls).toContain('memory idle');expect(repo.find(artifact.id)?.status).toBe('interrupted');};
+ let operation:Promise<unknown>;
+ if(path==='storage settle'){
+  const {exclusiveStorage}=await import('../storage/maintenance');
+  operation=exclusiveStorage(settle,async()=>{expect(settled).toBe(true);});
+ }else{
+  const stop=async()=>{await reviewWorkers.dispose();await settle();};
+  operation=path==='delete-all' ? (await import('../services/delete-data')).deleteAllData(root,stop) : stop();
+ }
+ await Promise.resolve();expect(settled).toBe(false);
+ expect(()=>generation.generate({...request,idempotencyKey:randomUUID()})).toThrow('suspended');
+ expect(calls).toContain('memory suspend');
+ release();await operation;expect(settled).toBe(true);
+ if(path==='delete-all')await expect(access(root)).rejects.toThrow();
+ if(path!=='storage settle')expect(calls).toContain('memory dispose');
+ await generation.dispose();await memory.dispose();store.close();await rm(root,{recursive:true,force:true});
+});

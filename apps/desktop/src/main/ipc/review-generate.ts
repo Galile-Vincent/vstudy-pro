@@ -45,6 +45,7 @@ export function progressFor(event: IpcMainInvokeEvent) {
 }
 export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>, providers: ProviderRegistry, admission: Admission = reviewAdmission) {
     const repo = new ArtifactRepository(store.db), attempts = new Attempts(repo);
+    repo.recover();
     const service = new GenerationService(repo, {
         admission,
         async readExcerpt(id, maxBytes, signal) { signal.throwIfAborted(); const doc = store.documents.get(documentIdSchema.parse(id)); if (!doc || doc.status !== 'ready')

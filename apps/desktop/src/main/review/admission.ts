@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { Price, Usage, UsageRecord, UsageSummary } from '../../shared/domain';
 import type { ProviderAdapter, ProviderRequest } from '../providers';
 import { priceUsage } from '../pricing';
+import type { Admission, ReviewEstimate } from './admission-port';
 
 export type ReviewPurpose = 'extraction' | 'generation';
 export interface ReviewCall {
@@ -22,8 +23,17 @@ export class ReviewBudgetError extends Error {
 }
 
 /** Share one instance between extraction and generation; each retry is a new execute call. */
-export class ReviewAdmission {
-  private reservations = new Map<symbol, Usage>();
+export class ReviewAdmission implements Admission {
+  private suspended = false;
+  private disposed = false;
+  private readonly idleWaiters = new Set<() => void>();
+  suspend(): void { this.suspended = true; }
+  resume(): void { if (!this.disposed) this.suspended = false; }
+  async waitForIdle(): Promise<void> {
+    if (this.reservations.size) await new Promise<void>(resolve => this.idleWaiters.add(resolve));
+  }
+  dispose(): void { this.disposed = true; this.suspend(); }
+  private reservations = new Map<string, ReviewEstimate>();
   constructor(private readonly store: AdmissionStore) {}
 
   get inFlight() {
@@ -33,6 +43,27 @@ export class ReviewAdmission {
       result.outputTokens += usage.outputTokens; result.costUsd += usage.costUsd ?? 0;
     }
     return result;
+  }
+
+  reserve(estimate: ReviewEstimate): string {
+    if (this.suspended) throw new Error('review.suspended');
+    const settings = this.store.settings.get();
+    const spent = this.store.usage.summary('month'), reserved = this.inFlight;
+    if (![estimate.inputTokens, estimate.outputTokens].every(n => Number.isSafeInteger(n) && n >= 0) ||
+      estimate.costUsd === undefined || !Number.isFinite(estimate.costUsd) || estimate.costUsd < 0 ||
+      settings.monthlyBudgetUsd !== undefined && (spent.unknownPrices > 0 || (spent.costUsd ?? 0) + reserved.costUsd + estimate.costUsd > settings.monthlyBudgetUsd) ||
+      settings.monthlyTokenBudget !== undefined && spent.inputTokens + spent.outputTokens + reserved.inputTokens + reserved.outputTokens + estimate.inputTokens + estimate.outputTokens > settings.monthlyTokenBudget)
+      throw new ReviewBudgetError();
+    const handle = randomUUID();
+    this.reservations.set(handle, estimate);
+    return handle;
+  }
+  settle(handle: string): void {
+    this.reservations.delete(handle);
+    if (!this.reservations.size) {
+      for (const resolve of this.idleWaiters) resolve();
+      this.idleWaiters.clear();
+    }
   }
 
   async execute(call:ReviewCall, signal:AbortSignal):Promise<string> {
@@ -49,16 +80,9 @@ export class ReviewAdmission {
       inputTokens:Buffer.byteLength(request.prompt) + Buffer.byteLength(request.systemPrompt ?? ''),
       outputTokens, costSource:'estimated',
     },settings.priceOverrides);
-    const spent = this.store.usage.summary('month'), reserved = this.inFlight;
-    if (estimate.costUsd === undefined ||
-      settings.monthlyBudgetUsd !== undefined && (spent.unknownPrices > 0 || (spent.costUsd ?? 0) + reserved.costUsd + estimate.costUsd > settings.monthlyBudgetUsd) ||
-      settings.monthlyTokenBudget !== undefined && spent.inputTokens + spent.outputTokens + reserved.inputTokens + reserved.outputTokens + estimate.inputTokens + estimate.outputTokens > settings.monthlyTokenBudget)
-      throw new ReviewBudgetError();
-
-    const token = Symbol(call.purpose);
+    const token = this.reserve({...estimate,costUsd:estimate.costUsd});
     let usage:Usage | undefined, output = '', outputBytes = 0, done = false;
     // No await may separate this reservation from dispatch.
-    this.reservations.set(token,estimate);
     try {
       for await (const event of adapter.stream({...request,allowPresentation:false,maxOutputTokens:outputTokens,
         onUsageSnapshot:value => { usage = value; }},signal)) {
@@ -85,7 +109,7 @@ export class ReviewAdmission {
         this.store.usage.record({...measured,id:randomUUID(),createdAt:new Date().toISOString(),
           providerId:request.providerId,modelId:request.modelId,kind:'chat',
           conversationId:request.conversationId,...(request.scope === 'document' ? {documentId:request.documentId} : {}),aborted:signal.aborted});
-      } finally { this.reservations.delete(token); }
+      } finally { this.settle(token); }
     }
   }
 }
