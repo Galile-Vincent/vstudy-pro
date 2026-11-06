@@ -239,8 +239,6 @@ export function CourseAgentPanel({
                 suggestions={[
                   { id: "summarize_notifications", label: tr("moodle:summarize_notifications") },
                   { id: "plan_week", label: tr("planner:plan_week") },
-                  { id: "catch_up", label: tr("planner:catch_up") },
-                  { id: "exam_prep", label: tr("planner:exam_prep") },
                 ]}
                 disabled={!conversation}
                 cycle={0}
@@ -248,6 +246,9 @@ export function CourseAgentPanel({
                 onSuggestion={quick}
               />
             </div>
+            <details className="moodle-study-tools">
+              <summary>{tr("courses-art:assistant_tools")}</summary>
+              <Suggestions suggestions={[{id:"catch_up",label:tr("planner:catch_up")},{id:"exam_prep",label:tr("planner:exam_prep")}]} disabled={!conversation} cycle={0} variant="list" onSuggestion={quick} />
             <fieldset className="planner-materials">
               <legend>{tr("planner:materials")}</legend>
               <p>{tr("planner:material_hint")}</p>
@@ -259,6 +260,7 @@ export function CourseAgentPanel({
               <div className="planner-actions">{(["summarize-course-materials", "generate-practice-quiz"] as const).map(type => <Button key={type} variant="ghost" disabled={!conversation || !selectedDocuments.length || status === "busy"}
                 onClick={() => setActions(current => [...current, { id: crypto.randomUUID(), action: { type, documentIds: selectedDocuments } }])}>{tr(`planner:action_${type}`)}</Button>)}</div>
             </fieldset>
+            </details>
             {conversations.length > 0 && (
               <ConversationList current={conversation ?? null} canCreate={!!conversation} onSelect={(c,messageId)=>{setHistoryJump(messageId);void load(c).catch(onError);}} onNew={async()=>{
                 if(!conversation)return;
