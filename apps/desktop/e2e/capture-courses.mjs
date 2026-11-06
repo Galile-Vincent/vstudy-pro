@@ -2,8 +2,9 @@ import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import sharp from 'sharp';
 import assert from 'node:assert/strict';
-import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { captureTime, seedCoursesDesign, changeDeadlineOnNextSync } from './fixtures/courses-design.mjs';
 
@@ -12,8 +13,10 @@ const phase=process.env.COURSES_CAPTURE_PHASE ?? 'single-line-final';
 const isBefore=phase.startsWith('before');
 const narrowOnly=process.env.COURSES_CAPTURE_NARROW_ONLY==='1';
 const evidence=resolve('../../docs/evidence/courses/design-pass');
-const scratch='/private/tmp/claude-501/-Users-vincent-vstudy-pro/c4e4dad1-3aa9-4721-a360-58e4c6702853/scratchpad';
-await mkdir(scratch,{recursive:true}); await mkdir(evidence,{recursive:true});
+const scratchPath=process.env.COURSES_CAPTURE_SCRATCH ?? tmpdir();
+await mkdir(scratchPath,{recursive:true});
+const scratch=await realpath(scratchPath);
+await mkdir(evidence,{recursive:true});
 const profile=await mkdtemp(join(scratch,'courses-profile-'));
 const artifact=await mkdtemp(join(scratch,'courses-artifact-'));
 const artifactApp=join(artifact,'desktop');
@@ -106,7 +109,7 @@ try {
         assert.ok(geometry.every(row=>row.height===rowHeight && row.padding===(rowHeight===40?'10px 12px':'8px 12px') && row.radius==='8px'),'Rows follow the 40px / 52px container density');
         assert.ok(geometry.every(row=>row.slots.every((slot,index)=>slot.width===56 && slot.right===geometry[0].slots[index].right)),'Two fixed slots align across all rows');
         assert.ok(geometry.every(row=>Math.abs(row.titleWidth-row.headingWidth)<.5),'Course-open fills its heading for ellipsis');
-        const headings=await page.locator('.course-column-headings > span').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent,right:node.getBoundingClientRect().right,width:node.getBoundingClientRect().width,height:node.getBoundingClientRect().height,fontSize:getComputedStyle(node).fontSize,align:getComputedStyle(node).textAlign})));
+        const headings=await page.locator('.course-column-headings[data-repeat=false] > span').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent,right:node.getBoundingClientRect().right,width:node.getBoundingClientRect().width,height:node.getBoundingClientRect().height,fontSize:getComputedStyle(node).fontSize,align:getComputedStyle(node).textAlign})));
         assert.deepEqual(headings.map(heading=>heading.text),{en:['Overdue','Unread'],'zh-Hant':['逾期','未讀'],ja:['期限切れ','未読']}[language]);
         assert.ok(headings.every((heading,index)=>heading.right===geometry[0].slots[index].right && heading.width===56 && heading.height===20 && heading.fontSize==='12px' && heading.align==='end'),'One-line headers align exactly above fixed number slots');
         results.columnHeadings ??=[]; results.columnHeadings.push({language,scheme,width,headings});
@@ -122,7 +125,7 @@ try {
       const first=await page.locator('.moodle-course-card').first().boundingBox();
       const third=await page.locator('.moodle-course-card').nth(2).boundingBox();
       const catalog=await page.locator('.courses-catalog').boundingBox();
-      const headingBox=await page.locator('.course-column-headings').boundingBox();
+      const headingBox=await page.locator('.course-column-headings[data-repeat=false]').boundingBox();
       const clipY=Math.max(0,(headingBox?.y ?? first.y)-4);
       const clip={x:Math.max(0,catalog.x-14),y:clipY,width:Math.min(width-catalog.x+14,catalog.width+28),height:third.y+third.height-clipY+4};
       await row.hover();
@@ -153,6 +156,49 @@ try {
   if(!isBefore && !narrowOnly) {
     await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(1280,800));
     await cdp.send('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:2,mobile:false});
+    for(const language of ['en','zh-Hant','ja']) for(const scheme of ['dark','light']) {
+      await route(scheme,language);
+      const group=page.locator('.course-view-switch');
+      assert.equal(await group.getAttribute('role'),'group');
+      assert.equal(await page.locator('.moodle-grid').getAttribute('data-view'),'list','List is the default view');
+      const listHeight=await page.locator('.moodle-course-card').first().evaluate(node=>node.getBoundingClientRect().height);
+      assert.equal(listHeight,40);
+      await group.locator('button').nth(1).focus();await page.keyboard.press('Enter');
+      assert.equal(await page.locator('.moodle-grid').getAttribute('data-view'),'cards');
+      assert.equal(await group.locator('button').nth(1).getAttribute('aria-pressed'),'true');
+      const cards=await page.locator('.moodle-course-card').evaluateAll(nodes=>nodes.slice(0,2).map(node=>node.getBoundingClientRect()));
+      assert.ok(cards[1].x>cards[0].x+cards[0].width-1,'Cards sit in two columns');
+      assert.equal(await page.locator('.course-heading-row .course-column-headings:visible').count(),2,'Column labels repeat over each card column');
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+      await audit(`cards-${language}-${scheme}`);
+      await page.mouse.move(0,0);await shot(`view-cards-${language}-${scheme}`);
+      await page.reload();await page.locator('.moodle-course-card').first().waitFor();
+      assert.equal(await page.locator('.moodle-grid').getAttribute('data-view'),'cards','The choice survives a reload');
+      await page.evaluate(()=>localStorage.setItem('vstudy.courses.view','list'));
+      await page.reload();await page.locator('.moodle-course-card').first().waitFor();
+      await shot(`view-list-${language}-${scheme}`);
+    }
+    await route('dark');
+    await page.evaluate(()=>localStorage.setItem('vstudy.courses.view','cards'));
+    await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(520,800));
+    await cdp.send('Emulation.setDeviceMetricsOverride',{width:520,height:800,deviceScaleFactor:2,mobile:false});
+    await page.reload();await page.locator('.moodle-course-card').first().waitFor();
+    assert.equal(await page.locator('.course-view-switch').isVisible(),false,'The switch hides below 560px');
+    assert.equal(await page.locator('.moodle-grid').evaluate(node=>getComputedStyle(node).display),'flex','Stored cards render as the list when narrow');
+    await shot('view-cards-narrow');
+    await page.evaluate(()=>localStorage.removeItem('vstudy.courses.view'));
+    await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(1280,800));
+    await cdp.send('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:2,mobile:false});
+    for(const scheme of ['dark','light']) {
+      await route(scheme);
+      await page.evaluate(()=>localStorage.setItem('vstudy-onboarding-v1',JSON.stringify({version:1,step:'start',goal:'school',status:'completed',done:['setup'],dismissed:[]})));
+      await page.reload();await page.locator('.context-coach').waitFor();
+      const hint=await page.locator('.context-coach').boundingBox();
+      assert.ok(hint.height<=48,`The first-run hint is a compact strip (${hint.height}px)`);
+      await shot(`hint-${scheme}`);
+      await page.getByRole('button',{name:'Dismiss this tip permanently'}).click();
+      assert.equal(await page.locator('.context-coach').count(),0,'Dismissing removes the hint');
+    }
     const firstPinId=fixture.details[5].course.id, secondPinId=fixture.details[7].course.id;
     const rowFor=id=>page.locator(`[data-course-id="${id}"]`);
     for(const language of ['zh-Hant','en']) for(const scheme of ['dark','light']) {
