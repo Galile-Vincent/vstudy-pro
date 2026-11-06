@@ -16,7 +16,7 @@ export function ActionPreview({ plan, busy, run }: { plan: CliActionPlan; busy: 
     <div className="ai-cli-actions">
       <Button disabled={busy || !plan.available} onClick={() => void run()}>{tr(native ? 'ai-cli:run_native' : 'ai-cli:run')}</Button>
       <Button variant="ghost" disabled={busy} onClick={() => void navigator.clipboard.writeText(plan.command).then(() => { setCopied(true); setCopyError(false); }).catch(() => setCopyError(true))}>{tr(copied ? 'ai-cli:copied' : native ? 'ai-cli:copy_plan' : 'ai-cli:copy_command')}</Button>
-      {!native && <Button variant="ghost" disabled={busy || !plan.available} onClick={() => void run(true)}>{tr('ai-cli:own_terminal')}</Button>}
+      {!native && <Button variant="ghost" disabled={busy || !plan.available && !(plan.reason === 'unsupported' && plan.actionId.startsWith('login-'))} onClick={() => void run(true)}>{tr('ai-cli:own_terminal')}</Button>}
     </div>
     {copyError && <p role="alert">{tr('ai-cli:copy_error')}</p>}
   </section>;

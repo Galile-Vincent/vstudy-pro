@@ -31,3 +31,16 @@ it('reaches guided setup from the Reader with no covering settings dialog', asyn
     expect(document.querySelector('.ai-cli-sheet')).not.toBeNull();
   } finally { await act(async () => root.unmount()); host.remove(); }
 });
+
+it('opens setup directly from the Reader no-AI card', async () => {
+  await i18n.changeLanguage('en');
+  bridge.invoke.mockImplementation(cliFixture().invoke);
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  try {
+    await act(async () => root.render(<><ReaderOfflineNotice onSettings={() => {}} /><AiCliSetupHost /></>));
+    const entry = [...host.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent === 'Guided AI tool setup');
+    await act(async () => entry!.click());
+    expect(document.querySelectorAll('[role=dialog]')).toHaveLength(1);
+    expect(document.querySelector('.ai-cli-sheet')).not.toBeNull();
+  } finally { await act(async () => root.unmount()); host.remove(); }
+});

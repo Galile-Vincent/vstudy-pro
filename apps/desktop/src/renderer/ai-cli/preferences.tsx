@@ -20,7 +20,7 @@ export function CliPrivacyPreferences() {
   const save = async (key: keyof CliPreferences, enabled: boolean) => {
     if (!preferences) return;
     setBusy(true); setError(false);
-    try { setPreferences(await desktop.invoke('ai-cli:setPreferences', { ...preferences, [key]: enabled })); aiCliChanged(); }
+    try { setPreferences(await desktop.invoke('ai-cli:setPreferences', { ...preferences, [key]: enabled, ...(key === 'updateChecks' && !enabled ? { autoUpdateWhenIdle: false } : {}) })); aiCliChanged(); }
     catch { setError(true); }
     finally { setBusy(false); }
   };
@@ -32,7 +32,7 @@ export function CliPrivacyPreferences() {
   };
   return <SettingsGroup title={tr('ai-cli:privacy_title')}>
     <div className="ai-cli-preferences"><p>{tr('ai-cli:inventory')}</p>
-      {preferences && <>{(['updateChecks', 'autoUpdateWhenIdle', 'advancedShell'] as const).map(key => <label className="ai-cli-consent" key={key}><input type="checkbox" checked={preferences[key]} disabled={busy} onChange={event => void save(key, event.target.checked)} /><span>{tr(`ai-cli:pref_${key}`)}<small>{tr(`ai-cli:pref_${key}_help`)}</small></span></label>)}
+      {preferences && <>{(['updateChecks', 'autoUpdateWhenIdle', 'advancedShell'] as const).map(key => <label className="ai-cli-consent" key={key}><input type="checkbox" checked={preferences[key]} disabled={busy || key === 'autoUpdateWhenIdle' && !preferences.updateChecks} onChange={event => void save(key, event.target.checked)} /><span>{tr(`ai-cli:pref_${key}`)}<small>{tr(`ai-cli:pref_${key}_help`)}</small></span></label>)}
       <Button variant="secondary" disabled={busy} onClick={() => void check()}>{tr('ai-cli:check_now')}</Button></>}
       {busy && <p role="status">{tr('ai-cli:checking')}</p>}{checked && <p role="status">{tr('ai-cli:checked')}</p>}
       {error && <div role="alert"><p>{tr('ai-cli:preferences_error')}</p>{!preferences && <Button variant="secondary" onClick={() => void load()}>{tr('ai-cli:retry')}</Button>}</div>}

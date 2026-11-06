@@ -12,6 +12,7 @@ import { cliNames, cliProviders, currentStep, setupAction, setupSteps } from './
 import { useCliTools } from './use-tools';
 import { useCliAction } from './use-action';
 import { ActionPreview } from './preview';
+import { ProviderChoice } from './choice';
 import { CliTerminal } from './terminal';
 import { AdvancedShell } from './preferences';
 import './setup.css';
@@ -85,6 +86,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
           </div><div className="ai-cli-action-area" aria-busy={busy}>
             {!tool.consented && <p className="ai-cli-preview">{tr('ai-cli:consent_first')}</p>}
             {runner.busy && <p role="status">{tr('ai-cli:preparing')}</p>}
+            {runner.externalOpened && <p role="status">{tr('ai-cli:own_terminal_opened')}</p>}
             {runner.plan && (tool.consented || runner.plan.actionId === 'advanced-shell') && <ActionPreview key={runner.plan.token} plan={runner.plan} busy={busy} run={runner.run} />}
             {!runner.plan && !busy && tool.consented && <Button variant="secondary" onClick={() => void runner.preview(setupAction(provider, step))}>{tr('ai-cli:review_next')}</Button>}
             {running && <Button variant="secondary" onClick={() => void runner.close(false).catch(() => setLocalError(true))}>{tr('ai-cli:cancel')}</Button>}
@@ -102,6 +104,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
             {tool.releaseNotesUrl && <Button variant="link" disabled={busy} onClick={() => void desktop.invoke('shell:openExternal', { url: tool.releaseNotesUrl! }).catch(() => setLocalError(true))}>{tr('ai-cli:release_notes')}</Button>}
           </div>{updatePlan && !updatePlan.available && <p>{tr(`ai-cli:failure_${updatePlan.reason ?? 'unsupported'}`)}</p>}</section>
         </>}
+        <ProviderChoice />
         <AdvancedShell busy={busy} onPreview={() => void review('advanced-shell')} />
         <details className="ai-cli-help"><summary>{tr('ai-cli:ask_title')}</summary><p>{tr('ai-cli:ask_body')}</p><blockquote>{tr('ai-cli:school_request', { provider: cliNames[provider] })}</blockquote><Button variant="secondary" onClick={() => void navigator.clipboard.writeText(tr('ai-cli:school_request', { provider: cliNames[provider] })).then(() => setCopied(true)).catch(() => setLocalError(true))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_request')}</Button></details>
         {localError && <p role="alert">{tr('ai-cli:load_error')}</p>}

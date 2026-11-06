@@ -21,6 +21,7 @@ import { AiCliSetup, AiCliSetupHost } from './setup';
 import { CliPrivacyPreferences } from './preferences';
 import { openAiCliSetup } from './entry';
 import { CliTerminal } from './terminal';
+import { ProviderChoice } from './choice';
 import { terminalDelta } from './model';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -125,6 +126,14 @@ it('does not offer an incompatible update', async () => {
   expect(runs()).toHaveLength(0);
 });
 
+it('offers current account plans through the existing confirmed link boundary', async () => {
+  await mount(<ProviderChoice />);
+  await act(async () => document.querySelector('summary')!.click());
+  expect(document.body.textContent).toContain('Installing a tool is free.');
+  await click('Check Antigravity plans');
+  expect(fixture.calls.at(-1)).toEqual({ channel: 'shell:openExternal', payload: { url: 'https://antigravity.google/pricing' } });
+});
+
 it('persists separate default-off privacy opt-ins and permits an explicit single update check', async () => {
   await mount(<CliPrivacyPreferences />);
   const inputs = [...document.querySelectorAll<HTMLInputElement>('input[type=checkbox]')];
@@ -216,5 +225,20 @@ it('offers the main-owned command in an external terminal only after preview', a
   await mount(); await click('Open in my own Terminal');
   const external = fixture.calls.find(call => call.channel === 'ai-cli:openTerminal');
   expect(external?.payload).toEqual({ actionId: 'login-claude', token: '11111111-1111-4111-8111-111111111111' });
+  expect(document.body.textContent).toContain('Your terminal is open and the command is copied.');
   expect(runs()).toHaveLength(0);
+});
+
+it('keeps a manual terminal fallback when embedded sign-in is unsupported', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', status: 'installed-not-signed-in' });
+  bridge.invoke.mockImplementation(async (channel, payload) => {
+    const response = await fixture.invoke(channel, payload);
+    return channel === 'ai-cli:preview' ? { ...response, available: false, reason: 'unsupported' } : response;
+  });
+  await mount();
+  expect(button('Run this action').disabled).toBe(true);
+  expect(button('Open in my own Terminal').disabled).toBe(false);
+  await click('Open in my own Terminal');
+  expect(runs()).toHaveLength(0);
+  expect(fixture.calls.some(call => call.channel === 'ai-cli:openTerminal')).toBe(true);
 });

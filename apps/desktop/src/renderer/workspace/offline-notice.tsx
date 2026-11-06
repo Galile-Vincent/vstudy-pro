@@ -4,6 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import { Button } from '../components/ui/button';
+import { openAiCliSetup } from '../ai-cli/entry';
 
 /** Students can dismiss setup and continue reading without enabling a provider. */
 export function ReaderOfflineNotice({ onSettings }: { onSettings: () => void }) {
@@ -16,6 +17,7 @@ export function ReaderOfflineNotice({ onSettings }: { onSettings: () => void }) 
     <p>{tr('art-reader:offline_body')}</p>
     <div className="art-reader-offline-actions">
       <Button onClick={onSettings}>{tr('art-reader:setup')}</Button>
+      <Button variant="secondary" onClick={() => openAiCliSetup()}>{tr('ai-cli:wizard')}</Button>
       <Button variant="ghost" onClick={() => { setDismissed(true); window.dispatchEvent(new Event('vstudy:read-without-ai')); }}>{tr('art-reader:without_ai')}</Button>
     </div>
   </aside>;

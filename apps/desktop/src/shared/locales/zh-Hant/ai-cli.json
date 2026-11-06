@@ -17,9 +17,9 @@
   "account_claude": "你的 Anthropic 帳號",
   "account_codex": "你的 OpenAI 帳號",
   "account_agy": "你的 Google 帳號",
-  "cost_claude": "Claude Code 需要符合資格的 Claude 使用權限，並適用帳號方案與用量限制。安裝工具不會購買訂閱。",
-  "cost_codex": "Codex 需要符合資格的 OpenAI 使用權限，並適用方案與用量限制。API 費用與 ChatGPT 訂閱分開計算。",
-  "cost_agy": "Antigravity 需要符合資格的 Google 帳號。可用性與用量限制依帳號而定。使用課程資料前，請確認學校規定。",
+  "cost_claude": "Anthropic 帳號需要有 Claude Code 使用權。免費與付費優惠可能變更，付款前請確認目前方案。安裝不會新增訂閱。",
+  "cost_codex": "使用你的 ChatGPT 帳號。免費與付費方案有不同額度，API 另外計費。VStudy 只支援已驗證的 macOS CLI 版本。",
+  "cost_agy": "符合資格的 Google 帳號可使用供應商提供的免費額度。付費 Google AI 方案有不同額度。分享課業資料前請先詢問學校。",
   "privacy_copy": "登入由工具處理。問題與你分享的內容會傳給服務商。測試只傳送一小段提示，不包含你的文件，可能計入用量。",
   "consent": "允許 VStudy 執行 {{provider}}",
   "consent_help": "此為選用功能。只有在允許並確認執行操作後，才會啟動工具。",
@@ -130,5 +130,10 @@
   "terminal_input": "目前操作的終端機輸入",
   "too_much_output": "更多內容可於「文字輸出與登入代碼」查看。",
   "row_help": "使用引導式設定，即可在這裡安裝、登入及測試。已安裝工具仍可使用啟用開關。",
-  "onboarding_login_body": "透過 AI 工具引導式設定，即可在這裡安裝與登入。每個工具執行前都需要你的許可，並適用服務商的方案限制與費用。"
+  "onboarding_login_body": "透過 AI 工具引導式設定，即可在這裡安裝與登入。每個工具執行前都需要你的許可，並適用服務商的方案限制與費用。",
+  "which_tool": "我該選哪一個工具？",
+  "which_tool_help": "先選擇學校核准的帳號。安裝工具免費，服務使用權與額度則取決於供應商及帳號。付款前請先確認目前方案。",
+  "current_plans": "查看 {{provider}} 方案",
+  "link_error": "無法開啟方案頁面。請重試或詢問資訊人員。",
+  "own_terminal_opened": "已開啟終端機並複製指令。請貼上指令並按 Enter。完成登入後，回到這裡檢查帳號狀態。"
 }

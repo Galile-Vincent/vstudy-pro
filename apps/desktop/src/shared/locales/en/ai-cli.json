@@ -17,9 +17,9 @@
   "account_claude": "Your Anthropic account",
   "account_codex": "Your OpenAI account",
   "account_agy": "Your Google account",
-  "cost_claude": "Claude Code needs eligible Claude access. Your plan and usage limits apply. Installing the tool does not buy a subscription.",
-  "cost_codex": "Codex needs eligible OpenAI access. Your plan and usage limits apply. API billing is separate from a ChatGPT subscription.",
-  "cost_agy": "Antigravity needs an eligible Google account. Availability and usage limits depend on your account. Check school approval before using coursework.",
+  "cost_claude": "You need Claude Code access on your Anthropic account. Free and paid offers can change. Check current plans before paying. Installing does not add a subscription.",
+  "cost_codex": "Use your ChatGPT account. Free and paid plans have different limits. API billing is separate. VStudy supports only its audited macOS CLI version.",
+  "cost_agy": "An eligible Google account can use free access where offered. Paid Google AI plans have different limits. Ask your school before sharing coursework.",
   "privacy_copy": "Sign-in stays with the tool. Questions and the context you share go to its provider. This test sends a tiny prompt without your documents and may use your allowance.",
   "consent": "Allow VStudy to run {{provider}}",
   "consent_help": "Optional. No tool launches until you allow it and run a reviewed action.",
@@ -130,5 +130,10 @@
   "terminal_input": "Active action terminal input",
   "too_much_output": "More output is available in Readable output and sign-in codes.",
   "row_help": "Use guided setup to install, sign in, and test here. The enable switch remains available for an existing installation.",
-  "onboarding_login_body": "Use guided AI tool setup to install and sign in here. Each tool needs your permission before it runs. Provider plan limits and fees still apply."
+  "onboarding_login_body": "Use guided AI tool setup to install and sign in here. Each tool needs your permission before it runs. Provider plan limits and fees still apply.",
+  "which_tool": "Which tool should I choose?",
+  "which_tool_help": "Start with an account your school approves. Installing a tool is free. Service access and limits depend on the provider and your account. Check the current offer before paying.",
+  "current_plans": "Check {{provider}} plans",
+  "link_error": "The plans page could not open. Try again or ask IT.",
+  "own_terminal_opened": "Your terminal is open and the command is copied. Paste it there and press Enter. After sign-in, return here and review the account status check."
 }

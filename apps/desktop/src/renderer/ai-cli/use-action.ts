@@ -9,6 +9,7 @@ export function useCliAction(onFinished: () => Promise<void>) {
   const [session, setSession] = useState<CliActionSession>();
   const [error, setError] = useState<CliFailure>();
   const [busy, setBusy] = useState(false);
+  const [externalOpened, setExternalOpened] = useState(false);
   const mounted = useRef(true);
   const active = useRef<CliActionSession | undefined>(undefined);
   const generation = useRef(0);
@@ -17,7 +18,7 @@ export function useCliAction(onFinished: () => Promise<void>) {
   finish.current = onFinished;
   const close = useCallback(async (clearOutput = true) => {
     generation.current++;
-    setPlan(undefined); setError(undefined);
+    setPlan(undefined); setError(undefined); setExternalOpened(false);
     if (clearOutput) setSession(undefined);
     const value = active.current;
     if (value) {
@@ -39,7 +40,7 @@ export function useCliAction(onFinished: () => Promise<void>) {
   const preview = useCallback(async (actionId: CliActionId) => {
     if (locked.current || active.current?.phase === 'running') return;
     const request = ++generation.current;
-    setPlan(undefined); setError(undefined); setBusy(true);
+    setPlan(undefined); setError(undefined); setBusy(true); setExternalOpened(false);
     try {
       const next = await desktop.invoke('ai-cli:preview', { actionId });
       if (mounted.current && request === generation.current) setPlan(next);
@@ -47,7 +48,7 @@ export function useCliAction(onFinished: () => Promise<void>) {
     finally { if (mounted.current && request === generation.current) setBusy(false); }
   }, []);
   const run = async (ownTerminal = false) => {
-    if (!plan?.available || busy || locked.current || active.current?.phase === 'running') return;
+    if (!plan || !plan.available && !(ownTerminal && plan.reason === 'unsupported' && plan.actionId.startsWith('login-')) || busy || locked.current || active.current?.phase === 'running') return;
     locked.current = true;
     setBusy(true); setError(undefined);
     const request = generation.current;
@@ -58,7 +59,7 @@ export function useCliAction(onFinished: () => Promise<void>) {
       }
       if (ownTerminal) {
         await desktop.invoke('ai-cli:openTerminal', { actionId: plan.actionId, token: plan.token });
-        if (mounted.current) setPlan(undefined);
+        if (mounted.current) { setPlan(undefined); setExternalOpened(true); }
         return;
       }
       const next = await desktop.invoke('ai-cli:run', { actionId: plan.actionId, token: plan.token });
@@ -93,5 +94,5 @@ export function useCliAction(onFinished: () => Promise<void>) {
     void poll();
     return () => { stopped = true; if (timer) clearTimeout(timer); document.removeEventListener('visibilitychange', visibility); };
   }, [session?.id, session?.phase]);
-  return { plan, session, error, busy, preview, run, close };
+  return { plan, session, error, busy, externalOpened, preview, run, close };
 }
