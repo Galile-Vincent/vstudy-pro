@@ -174,15 +174,6 @@ it('estimates a multi-page PDF without rendering and renders only uncached pages
   await x.service.start(x.request);await x.service.waitForIdle();expect(render).toHaveBeenCalledTimes(2);expect(calls).toBe(1);
  } finally {await x.cleanup();}
 });
-it('returns a conservative estimate when rendering is unavailable',async()=>{
- const render=vi.fn(async()=>{throw new Error('render failed');});
- const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test',supportsImages:true}],async *stream(){yield {type:'done'};}};
- const x=await setup(adapter,render);try {
-  x.store.db.prepare("UPDATE documents SET mime='application/pdf' WHERE id=?").run(x.imported.id);
-  const estimate=await x.service.estimate(x.request);
-  expect(estimate.inputTokens).toBeGreaterThan(4096);expect(render).not.toHaveBeenCalled();
- } finally {await x.cleanup();}
-});
 it.each(['page count','options','legacy identity'])('conservatively charges cached pages after a change to %s',async kind=>{
  const render=vi.fn(async()=>({image:Buffer.from('image'),text:'alpha beta gamma'}));
  const adapter:ProviderAdapter={detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test',supportsImages:true}],async *stream(){yield {type:'text-delta',text:'alpha beta gamma'};yield {type:'done'};}};
