@@ -70,6 +70,19 @@ export class ReviewRepository {
         this.db.prepare('UPDATE study_observations SET unitId=NULL WHERE unitId=? AND courseId=?').run(String(unit.id), courseId);
         this.db.prepare('UPDATE study_concepts SET unitId=NULL WHERE unitId=? AND courseId=?').run(String(unit.id), courseId);
     } this.db.prepare('DELETE FROM study_course_documents WHERE courseId=? AND documentId=?').run(courseId, documentId); this.db.prepare("DELETE FROM study_units WHERE courseId=? AND kind='document' AND sourceKey=?").run(courseId, documentId); }); }
+    getChatLink(conversationId: string) {
+        studyIdSchema.parse(conversationId);
+        if (!this.db.prepare('SELECT 1 FROM study_chat_links l JOIN conversations c ON c.id=l.conversationId WHERE l.conversationId=? AND c.deletedAt IS NULL').get(conversationId)) return null;
+        return this.chatLink(conversationId);
+    }
+    deleteQuestionSummary(id: string): void {
+        studyIdSchema.parse(id);
+        this.atomic(() => {
+            const result=this.db.prepare("UPDATE study_jobs SET questionSummary=NULL,status='skipped',attemptToken=NULL,errorCode='summary_deleted',updatedAt=? WHERE id=?").run(this.now(),id);
+            if (!result.changes) throw new Error('Study exchange unavailable');
+            this.db.prepare('DELETE FROM study_observations WHERE jobId=?').run(id);
+        });
+    }
     private chatLink(id: string) { const row = this.db.prepare('SELECT * FROM study_chat_links WHERE conversationId=?').get(id); if (!row)
         throw new Error('Chat link unavailable'); return studyChatLinkSchema.parse({ ...row, confirmed: row.confirmed === 1, excludeFromMemory: row.excludeFromMemory === 1 }); }
     assignChat(conversationId: string, courseId: string | null) {
@@ -108,11 +121,11 @@ export class ReviewRepository {
     restoreConcept(id: string) { this.atomic(() => { this.db.prepare("UPDATE study_concepts SET userState='none' WHERE id=?").run(id); this.event(id, 'restored'); }); }
     understoodConcept(id: string) { this.event(id, 'understood'); }
     jobsPage(input:StudyPageInput&{courseId:string}) {
-      return this.page(`SELECT j.id,j.conversationId,j.userMessageId,j.assistantMessageId,j.courseId,j.status,j.questionSummary,j.occurredAt,j.createdAt,j.errorCode FROM study_jobs j ${jobSourceJoins} WHERE j.courseId=? AND (${eligibleSourceSql}) AND (? IS NULL OR j.occurredAt<? OR (j.occurredAt=? AND j.id<?)) ORDER BY j.occurredAt DESC,j.id DESC`,[input.courseId],input,row=>studyJobSummarySchema.parse(row),'occurredAt');
+      return this.page(`SELECT j.id,j.conversationId,j.userMessageId,j.assistantMessageId,j.courseId,j.status,j.questionSummary,j.occurredAt,j.createdAt,j.errorCode FROM study_jobs j ${jobSourceJoins} WHERE j.courseId=? AND j.errorCode IS NOT 'summary_deleted' AND (${eligibleSourceSql}) AND (? IS NULL OR j.occurredAt<? OR (j.occurredAt=? AND j.id<?)) ORDER BY j.occurredAt DESC,j.id DESC`,[input.courseId],input,row=>studyJobSummarySchema.parse(row),'occurredAt');
     }
     editJob(id:string,changes:z.input<typeof studyJobEditSchema>):void {
       studyIdSchema.parse(id);const patch=studyJobEditSchema.parse(changes);
-      const result=this.db.prepare('UPDATE study_jobs SET questionSummary=?,updatedAt=? WHERE id=?').run(patch.questionSummary,this.now(),id);
+      const result=this.db.prepare('UPDATE study_jobs SET questionSummary=?,updatedAt=? WHERE id=? AND errorCode IS NOT \'summary_deleted\'').run(patch.questionSummary,this.now(),id);
       if(!result.changes)throw new Error('Study exchange unavailable');
     }
     observationsPage(input: StudyPageInput & {

@@ -81,3 +81,26 @@ it('rejects multibyte aliases that would exceed restore JSON bounds',()=>{
  const aliases=Array.from({length:40},(_,i)=>'概念'.repeat(70)+i);
  expect(()=>repo.createCourse({title:'Physics',aliases})).toThrow();
 });
+
+it('clears only one exchange summary and its evidence without deleting its chat', () => {
+    const { repo, store } = setup();
+    const first = repo.createCourse({ title: 'Physics' });
+    const chat = '11111111-1111-4111-8111-111111111111', user = '22222222-2222-4222-8222-222222222222', assistant = '33333333-3333-4333-8333-333333333333', job = '44444444-4444-4444-8444-444444444444', observation = '55555555-5555-4555-8555-555555555555';
+    const at = '2030-01-01T00:00:00.000Z';
+    store.db.prepare("INSERT INTO conversations(id,scope,providerId,modelId,createdAt) VALUES(?,'general','p','m',?)").run(chat, at);
+    for (const [id, role] of [[user, 'user'], [assistant, 'assistant']])
+        store.db.prepare('INSERT INTO messages(id,conversationId,role,parts,createdAt) VALUES(?,?,?,?,?)').run(id!, chat, role!, JSON.stringify([{ type: 'text', text: 'Answer', status: 'complete' }]), at);
+    expect(repo.inbox({}).items[0]?.conversationId).toBe(chat);
+    repo.assignChat(chat, first.id);
+    repo.addConcept({ courseId: first.id, label: 'Force' });
+    store.db.prepare("INSERT INTO study_jobs(id,conversationId,userMessageId,assistantMessageId,extractorVersion,courseId,assignmentRevision,status,occurredAt,createdAt,updatedAt) VALUES(?,?,?,?,?,?,1,'succeeded',?,?,?)").run(job, chat, user, assistant, 'v1', first.id, at, at, at);
+    store.db.prepare("INSERT INTO study_observations(id,jobId,courseId,conceptKey,errorType,signal,evidenceQuote,confidence,createdAt) VALUES(?,?,?,'force','misconception','wrong','my answer',1,?)").run(observation, job, first.id, at);
+    expect(repo.computeCourseMastery(first.id, Date.parse(at))[0]?.mastery.state).toBe('needs_review');
+    expect(repo.getChatLink(chat)?.courseId).toBe(first.id);
+    repo.deleteQuestionSummary(job);
+    expect(repo.observationsPage({courseId:first.id}).items).toHaveLength(0);
+    expect(repo.computeCourseMastery(first.id,Date.parse(at))[0]?.mastery.state).toBe('candidate');
+    expect(store.db.prepare('SELECT questionSummary FROM study_jobs WHERE id=?').get(job)?.questionSummary).toBeNull();
+    expect(store.db.prepare('SELECT 1 FROM conversations WHERE id=?').get(chat)).toBeDefined();
+    expect(repo.getChatLink(chat)?.courseId).toBe(first.id);
+});

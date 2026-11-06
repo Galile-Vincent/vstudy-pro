@@ -17,6 +17,8 @@ it('registers every bounded review channel and drains privacy workers before era
  expect(Object.keys(reviewIpc).every(channel=>implemented.has(channel as IpcChannel)&&handlers.has(channel))).toBe(true);
  const invoke=(channel:string,input:unknown)=>handlers.get(channel)!({} as IpcMainInvokeEvent,input);
  await expect(invoke('review:courses:list',{limit:101})).rejects.toThrow();
+ await expect(invoke('review:chat:link-get',{conversationId:'11111111-1111-4111-8111-111111111111'})).resolves.toBeNull();
+ await expect(invoke('review:jobs:delete',{jobId:'bad'})).rejects.toThrow();
  const course=repo.createCourse({title:'Physics'});const calls:string[]=[];
  let settle!:()=>void;const pending=new Promise<void>(resolve=>{settle=resolve;});
  const unregister=reviewWorkers.register({suspend(){calls.push('suspend');},resume(){calls.push('resume');},async waitForIdle(){calls.push('idle');await pending;},dispose(){}});

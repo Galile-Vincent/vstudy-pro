@@ -50,6 +50,7 @@ export function registerReviewIpc(registrar: ReturnType<typeof createIpcRegistra
         return { ok: true };
     });
     registrar.handle('review:docs:unlink', ({ courseId, documentId }) => { repo.unlinkDocument(courseId, documentId); return { ok: true }; });
+    registrar.handle('review:chat:link-get', ({conversationId}) => repo.getChatLink(conversationId));
     registrar.handle('review:chat:assign', ({ conversationId, courseId }) => repo.assignChat(conversationId, courseId));
     registrar.handle('review:chat:exclude', ({ conversationId, excluded }) => repo.excludeChat(conversationId, excluded));
     registrar.handle('review:chat:inbox', input => repo.inbox(input));
@@ -62,6 +63,7 @@ export function registerReviewIpc(registrar: ReturnType<typeof createIpcRegistra
     registrar.handle('review:observations:page', input => repo.observationsPage(input));
     registrar.handle('review:observations:edit', ({ observationId, changes }) => { repo.editObservation(observationId, changes); return { ok: true }; });
     registrar.handle('review:observations:delete', ({ observationId }) => { repo.deleteObservation(observationId); return { ok: true }; });
+    registrar.handle('review:jobs:delete', ({jobId}) => {repo.deleteQuestionSummary(jobId);return {ok:true};});
     registrar.handle('review:jobs:retry', ({jobId}) => { retryMemoryJob(store,jobId);return {ok:true}; });
     registrar.handle('review:jobs:page',input=>repo.jobsPage(input));
     registrar.handle('review:jobs:edit',({jobId,changes})=>{repo.editJob(jobId,changes);return {ok:true};});

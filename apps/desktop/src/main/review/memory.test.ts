@@ -97,3 +97,13 @@ it('reopens a durable store after pending, claim and committed boundaries withou
 it('records zero-concept success for an unclassified eligible exchange',()=>{
  const f=fixture();f.store.db.exec('DELETE FROM study_jobs; DELETE FROM study_chat_links');f.jobs.enqueue(f.assistant);const job=f.jobs.claim()!;expect(f.jobs.commit(job.id,job.attemptToken,empty)).toBe(true);expect(f.store.db.prepare('SELECT status,questionSummary,courseId FROM study_jobs').get()).toMatchObject({status:'succeeded',questionSummary:'A plain question',courseId:null});
 });
+it('keeps summary deletion fenced against late extraction, retry and recovery',()=>{
+ const f=fixture();const job=f.jobs.claim()!;
+ f.repo.deleteQuestionSummary(job.id);
+ expect(f.jobs.commit(job.id,job.attemptToken,{...empty,courseId:f.course.id})).toBe(false);
+ f.jobs.retry(job.id);f.jobs.recover();
+ expect(f.jobs.claim()).toBeNull();
+ expect(f.repo.jobsPage({courseId:f.course.id}).items).toHaveLength(0);
+ expect(f.store.db.prepare('SELECT status,questionSummary FROM study_jobs WHERE id=?').get(job.id)).toMatchObject({status:'skipped',questionSummary:null});
+ expect(f.store.db.prepare('SELECT id FROM conversations WHERE id=?').get(f.chat)).toBeDefined();
+});
