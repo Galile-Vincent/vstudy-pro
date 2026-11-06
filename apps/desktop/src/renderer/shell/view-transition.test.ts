@@ -28,3 +28,22 @@ it('a pending snapshot cannot replace a newer immediate document navigation',()=
  const routes:string[]=[];transitionTo(()=>routes.push('library'));transitionTo(()=>routes.push('document'),false,true);update();
  expect(routes).toEqual(['document']);
 });
+
+it('reveals committed local content without delaying immediate navigation for a snapshot',()=>{
+  vi.stubGlobal('matchMedia',()=>({matches:false}));
+  const content=document.createElement('div');content.id='shell-content';document.body.append(content);
+  const animate=vi.fn(()=>({cancel:vi.fn()}));Object.defineProperty(content,'animate',{value:animate});
+  document.startViewTransition=vi.fn();
+  try {
+    transitionTo(()=>{content.textContent='Reader ready';},false,true);
+    expect(content.textContent).toBe('Reader ready');
+    expect(document.startViewTransition).not.toHaveBeenCalled();
+    expect(animate).toHaveBeenCalledOnce();
+  } finally {content.remove();}
+});
+it('immediate navigation has no reveal animation under reduced motion',()=>{
+  vi.stubGlobal('matchMedia',()=>({matches:true}));
+  const content=document.createElement('div');content.id='shell-content';document.body.append(content);
+  const animate=vi.fn();Object.defineProperty(content,'animate',{value:animate});
+  try {transitionTo(()=>{},false,true);expect(animate).not.toHaveBeenCalled();} finally {content.remove();}
+});
