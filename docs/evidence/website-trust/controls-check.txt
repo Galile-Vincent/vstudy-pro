@@ -1,7 +1,0 @@
-{
-  "controls": [
-    "Previous wraps to the last school. Enter activates dots. ArrowLeft changes schools. Tab follows control order. Page motion pause is respected."
-  ],
-  "guideStates": 12,
-  "errors": []
-}

@@ -1,0 +1,6 @@
+
+> vstudy-pro@ knip /Users/vc/.t3/worktrees/vstudy-pro/t3-3c8c1de3
+> knip --include files,dependencies,unlisted,binaries
+
+Configuration hints (1)
+.css  apps/desktop  knip.json  Compiled extension excluded by project (imports not followed)

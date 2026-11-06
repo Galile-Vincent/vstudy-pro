@@ -1,0 +1,41 @@
+[
+  {
+    "language": "en",
+    "name": "home",
+    "url": "http://127.0.0.1:4338/vstudy-pro/en/",
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "cls": 0,
+    "runtimeError": null
+  },
+  {
+    "language": "zh-Hant",
+    "name": "home",
+    "url": "http://127.0.0.1:4338/vstudy-pro/zh-Hant/",
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "cls": 0,
+    "runtimeError": null
+  },
+  {
+    "language": "ja",
+    "name": "home",
+    "url": "http://127.0.0.1:4338/vstudy-pro/ja/",
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "cls": 0,
+    "runtimeError": null
+  }
+]
