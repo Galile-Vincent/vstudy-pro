@@ -132,5 +132,6 @@
   "acting_one": "Agent active · {{count}} call",
   "acting_other": "Agent active · {{count}} calls",
   "queued_one": "{{count}} request waiting for review",
-  "queued_other": "{{count}} requests waiting for review"
+  "queued_other": "{{count}} requests waiting for review",
+  "own_work": "I confirm this is my own work and I want to submit this exact text."
 }

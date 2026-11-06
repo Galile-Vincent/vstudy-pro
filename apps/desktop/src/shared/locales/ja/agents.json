@@ -132,5 +132,6 @@
   "acting_one": "エージェント実行中 · {{count}} 件",
   "acting_other": "エージェント実行中 · {{count}} 件",
   "queued_one": "確認待ちのリクエスト {{count}} 件",
-  "queued_other": "確認待ちのリクエスト {{count}} 件"
+  "queued_other": "確認待ちのリクエスト {{count}} 件",
+  "own_work": "これは自分の課題であり、この正確な文章を提出することを確認します。"
 }

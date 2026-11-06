@@ -81,14 +81,14 @@ it('shows the exact proposal target, payload, account and risk as text', async (
 });
 
 it.each([true, false])('sends a one-shot proposal decision with approve=%s and the exact ID', async approve => {
-  state.proposals = [proposalFixture()]; await mount();
+  state.proposals = [proposalFixture()]; await mount(); await toggle('I confirm this is my own work');
   await click(approve ? 'Approve once' : 'Deny');
   expect(decisions()).toEqual([['mcp:proposal-decision', { proposalId: ids.proposal, approve }]]);
   expect(document.querySelector('[role=dialog]')).toBeNull();
 });
 
 it('uses Escape as a denial', async () => {
-  state.proposals = [proposalFixture()]; await mount();
+  state.proposals = [proposalFixture()]; await mount(); await toggle('I confirm this is my own work');
   await act(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
   expect(decisions()).toEqual([['mcp:proposal-decision', { proposalId: ids.proposal, approve: false }]]);
 });
@@ -100,6 +100,7 @@ it.each(['pairing', 'proposal'])('disables %s approval at the exact expiry deadl
   else state.proposals = [{ ...proposalFixture(), expiresAt }];
   await mount();
   if (kind === 'pairing') { await toggle('I compared both codes'); await toggle('Example University'); }
+  else await toggle('I confirm this is my own work');
   const approve = button(kind === 'pairing' ? 'Pair with selected access' : 'Approve once');
   expect(approve.disabled).toBe(false);
   await act(() => vi.advanceTimersByTimeAsync(600));
@@ -112,7 +113,7 @@ it.each(['pairing', 'proposal'])('disables %s approval at the exact expiry deadl
 });
 
 it('rejects approval when the wall clock passes expiry before the UI clock rerenders', async () => {
-  vi.useFakeTimers(); state.proposals = [proposalFixture()]; await mount();
+  vi.useFakeTimers(); state.proposals = [proposalFixture()]; await mount(); await toggle('I confirm this is my own work');
   const approve = button('Approve once'); expect(approve.disabled).toBe(false);
   vi.setSystemTime(Date.now() + 61000);
   await act(() => approve.click());
@@ -120,7 +121,7 @@ it('rejects approval when the wall clock passes expiry before the UI clock reren
 });
 
 it('disables all decisions during async work and never retries an uncertain decision', async () => {
-  vi.useFakeTimers(); state.proposals = [proposalFixture()]; await mount();
+  vi.useFakeTimers(); state.proposals = [proposalFixture()]; await mount(); await toggle('I confirm this is my own work');
   let reject!: (error: Error) => void;
   invoke.mockImplementationOnce(() => new Promise((_resolve, fail) => { reject = fail; }));
   await act(() => { button('Approve once').click(); button('Approve once').click(); button('Deny').click(); });
@@ -144,7 +145,7 @@ it('never approves an already expired proposal and does not auto-deny by sending
 });
 
 it('removes stale requests when the master is disabled or the backend cancels them', async () => {
-  vi.useFakeTimers(); state.proposals = [proposalFixture()]; await mount();
+  vi.useFakeTimers(); state.proposals = [proposalFixture()]; await mount(); await toggle('I confirm this is my own work');
   const approve = button('Approve once');
   state = { ...state, enabled: false, proposals: [] };
   await act(() => vi.advanceTimersByTimeAsync(1000));
@@ -172,7 +173,7 @@ it('blocks pairing after all requested permissions are deselected', async () => 
 });
 
 it('blocks approval when polling goes offline and allows a safe local dismissal', async () => {
-  vi.useFakeTimers(); state.proposals = [proposalFixture()]; await mount();
+  vi.useFakeTimers(); state.proposals = [proposalFixture()]; await mount(); await toggle('I confirm this is my own work');
   invoke.mockRejectedValueOnce(new Error('private raw failure'));
   await act(() => vi.advanceTimersByTimeAsync(1000));
   expect(button('Approve once').disabled).toBe(true);
@@ -212,4 +213,13 @@ it.each(['en', 'zh-Hant', 'ja'])('translates pairing scopes and risk labels in %
   expect(document.body.textContent).toContain(tr('agents:scope_read_courses'));
   expect(document.body.textContent).toContain(tr('agents:pair_title'));
   expect(document.body.textContent).not.toContain('agents:');
+});
+it('requires the student to confirm ownership before approving an assignment submission',async()=>{
+  state.proposals=[{...proposalFixture(),tool:'submit_assignment',risk:'high',payload:{text:'My own reflection.',studentOwned:true}}];
+  await mount();
+  expect(button('Approve once').disabled).toBe(true);
+  await toggle('I confirm this is my own work');
+  expect(button('Approve once').disabled).toBe(false);
+  await click('Approve once');
+  expect(decisions()).toEqual([['mcp:proposal-decision',{proposalId:ids.proposal,approve:true}]]);
 });

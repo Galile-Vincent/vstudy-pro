@@ -71,8 +71,10 @@ function PairingConsent({ request, dismiss }: { request: Pairing; dismiss: () =>
 
 function ProposalConsent({ request, dismiss }: { request: Proposal; dismiss: () => void }) {
   const agents = useAgents();
+  const [studentOwned,setStudentOwned]=useState(false);
+  const needsOwnership=request.tool==='submit_assignment';
   const decide = (approve: boolean) => void agents.act('mcp:proposal-decision', { proposalId: request.id, approve });
-  return <ConsentFrame id={request.id} expiresAt={request.expiresAt} canApprove approve={() => decide(true)} deny={() => decide(false)} dismiss={dismiss}>
+  return <ConsentFrame id={request.id} expiresAt={request.expiresAt} canApprove={!needsOwnership || studentOwned} approve={() => decide(true)} deny={() => decide(false)} dismiss={dismiss}>
     <div><p className="agents-muted">{tr('agents:claimed_name')}</p><p className="agents-client-name">{request.clientName}</p><p className="agents-muted">{tr('agents:self_reported')}</p></div>
     <dl className="agents-details">
       <div><dt>{tr('agents:tool')}</dt><dd><code>{request.tool}</code></dd></div>
@@ -81,6 +83,7 @@ function ProposalConsent({ request, dismiss }: { request: Proposal; dismiss: () 
       <div><dt>{tr('agents:risk')}</dt><dd className="agents-risk" data-risk={request.risk}>{tr(`agents:risk_${request.risk}`)}</dd></div>
     </dl>
     {request.risk === 'high' && <p className="agents-risk" data-risk="high">{tr('agents:high_risk')}</p>}
+    {needsOwnership && <label className="agents-choice"><Checkbox checked={studentOwned} disabled={agents.pending} onCheckedChange={value=>setStudentOwned(value===true)}/><span>{tr('agents:own_work')}</span></label>}
     <section><h3>{tr('agents:payload')}</h3><pre className="agents-raw">{JSON.stringify(request.payload, null, 2)}</pre></section>
   </ConsentFrame>;
 }

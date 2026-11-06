@@ -132,5 +132,6 @@
   "acting_one": "代理程式執行中 · {{count}} 個呼叫",
   "acting_other": "代理程式執行中 · {{count}} 個呼叫",
   "queued_one": "{{count}} 個請求等待確認",
-  "queued_other": "{{count}} 個請求等待確認"
+  "queued_other": "{{count}} 個請求等待確認",
+  "own_work": "我確認這是我自己的作業，並要提交這份完整文字。"
 }
