@@ -46,7 +46,7 @@ export class GenerationService implements ReviewWorker {
         this.launch(artifact.id, token, request, progress);
         return artifact;
     }
-    retry(id: string, requestId: string, locale: 'en' | 'zh-Hant', progress: (event: ReviewProgress) => void = () => { }) { this.admit(); const artifact = this.repo.find(id); if (!artifact)
+    retry(id: string, requestId: string, locale: GenerationRequest['locale'], progress: (event: ReviewProgress) => void = () => { }) { this.admit(); const artifact = this.repo.find(id); if (!artifact)
         throw new Error('review.artifact_unavailable'); const retakeId = artifact.resolvedScope.assumptions.find(a => a.startsWith('retakeAttempt:'))?.slice(14); const size=artifact.resolvedScope.size; const token = randomUUID(); if (!this.repo.retry(id, token))
         return artifact; this.launch(id, token, { requestId, courseId: artifact.courseId, kind: artifact.kind, title: artifact.title, scope: artifact.scope, idempotencyKey: id, providerId: artifact.providerId, modelId: artifact.modelId, locale, size, ...(retakeId ? { retakeAttemptId: retakeId } : {}) }, progress); return this.repo.find(id)!; }
     private admit() { if (this.stopped || this.disposed)

@@ -27,8 +27,8 @@ Every request is a strict object. UUID means standard UUID string. Invoke throug
 
 | Channel | Request | Response |
 |---|---|---|
-| `review:artifact:generate` | `{requestId,courseId,kind:'note'|'test',title,scope,idempotencyKey,providerId,modelId,locale?:'en'|'zh-Hant',size?:'short'|'standard'|'long',retakeAttemptId?:UUID}` | Artifact immediately, background work continues |
-| `review:artifact:retry` | `{artifactId,requestId,locale?:'en'|'zh-Hant'}` | Artifact; only failed/interrupted starts a new attempt |
+| `review:artifact:generate` | `{requestId,courseId,kind:'note'|'test',title,scope,idempotencyKey,providerId,modelId,locale?:'en'|'zh-Hant'|'ja',size?:'short'|'standard'|'long',retakeAttemptId?:UUID}` | Artifact immediately, background work continues |
+| `review:artifact:retry` | `{artifactId,requestId,locale?:'en'|'zh-Hant'|'ja'}` | Artifact; only failed/interrupted starts a new attempt |
 | `review:artifact:cancel` | `{artifactId}` | `{ok:true}` |
 | `review:artifact:list` | `{courseId,limit?,cursor?}` | `{items:ArtifactSummary[],nextCursor}` |
 | `review:artifact:get` | `{artifactId}` | Artifact or null |
@@ -72,7 +72,7 @@ Subscribe before invoking generate/retry, filter by requestId then artifactId, a
 - `blueprint.ts`: `BLUEPRINT_COUNTS`, `BlueprintSlot`, `buildBlueprint(conceptKeys,unitCount,size?) -> {status:'ready'|'infeasible',reason,slots}`.
 - `note-plan.ts`: `notePlan(unitCount,concepts:{key,mastery}[],weak=false)` returns word/character/prompt budgets, depth, omissions and review offsets.
 - `test-validate.ts`: `Excerpt`, `REVIEW_VALIDATION_NOTICE`, `normalizeStem`, `stemHash`, `validateTest(raw,excerpts,excludedStems=[]) -> {version:1,items,warnings}`.
-- `prompts/index.ts`: `PROMPT_VERSION`, `notePrompt(data,locale)`, `testPrompt(data,locale)`.
+- `prompts/index.ts`: `PROMPT_VERSION`, `notePrompt(data,locale)`, `testPrompt(data,locale)`. `ja` keeps the English instruction text and adds one explicit instruction to write natural Japanese in the です・ます style; `zh-Hant` swaps in Traditional Chinese style rules.
 - `artifact-repository.ts`: `ArtifactRepository(db,clock=Date.now)`; `atomic`, `find`, `byKey`, `create`, `retry`, `snapshot`, `finish`, `fail`, `cancel`, `recover`, `delete`, `list`, `scopeInputs`.
 - `generate.ts`: `GenerationDependencies`, `GenerationService(repo,deps)`; `generate(request,progress?)`, `retry(id,requestId,locale,progress?)`, `cancel(id)`, `suspend`, `resume`, `waitForIdle`, `dispose`. Registers with W1 `reviewWorkers`; recovery runs in normal IPC registration, outside the constructor.
 - `attempts.ts`: `Attempts(repo)`; `get(id)`, `start(artifactId)`, `answer(id,itemId,answer)`, `commit(id,itemId?)`, `confirm(id)`, `reportBad(id,itemId)`, `retake(id)`.

@@ -3,7 +3,7 @@ export const studyIdSchema = z.string().uuid();
 const title = z.string().trim().min(1).max(240);
 const courseAliases=z.array(title).max(50).refine(value=>new TextEncoder().encode(JSON.stringify(value)).byteLength<=8192,'Aliases exceed JSON byte limit');
 const at = z.string().datetime();
-export const studyPrefsSchema = z.object({ memoryEnabled: z.boolean().default(true), noticeAcknowledged: z.boolean().default(false), timeZone: z.string().min(1).max(100).refine(zone => { try {
+export const studyPrefsSchema = z.object({ memoryEnabled: z.boolean().default(true), noticeAcknowledged: z.boolean().default(false), consentAcknowledged: z.boolean().default(false), timeZone: z.string().min(1).max(100).refine(zone => { try {
         new Intl.DateTimeFormat('en', { timeZone: zone });
         return true;
     }
@@ -11,6 +11,8 @@ export const studyPrefsSchema = z.object({ memoryEnabled: z.boolean().default(tr
         return false;
     } }).default('UTC') }).strict();
 export type StudyPrefs = z.infer<typeof studyPrefsSchema>;
+/** Extraction sends conversation excerpts to the chat's provider, so a pref row from an earlier build (memoryEnabled true, no consent) stays inactive until the student agrees. */
+export const studyMemoryActive = (prefs: Pick<StudyPrefs, 'memoryEnabled' | 'consentAcknowledged'>) => prefs.memoryEnabled && prefs.consentAcknowledged;
 export const studyCourseSchema = z.object({ id: studyIdSchema, title, aliases: courseAliases, moodleCourseId: studyIdSchema.nullable(), createdAt: at, archivedAt: at.nullable() }).strict();
 export const studyUnitSchema = z.object({ id: studyIdSchema, courseId: studyIdSchema, kind: z.enum(['moodle', 'document', 'manual']), ordinal: z.number().int(), title, sourceKey: z.string().min(1).max(240), sourceSectionId: z.string().nullable(), startsAt: at.nullable(), endsAt: at.nullable() }).strict();
 export const studyConceptSchema = z.object({ id: studyIdSchema, courseId: studyIdSchema, key: title, label: title, source: z.enum(['heading', 'user', 'promoted']), unitId: studyIdSchema.nullable(), userState: z.enum(['none', 'dismissed']), note: z.string().max(240).nullable(), createdAt: at }).strict();

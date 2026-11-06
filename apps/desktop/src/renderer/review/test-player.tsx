@@ -19,6 +19,9 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
  const operation = useRef(false);
  const opening = useRef<{ id: string; promise: Promise<Attempt> } | null>(null);
  const heading = useRef<HTMLHeadingElement>(null);
+ const feedbackRegion = useRef<HTMLDivElement>(null);
+ const justSubmitted = useRef(false);
+ const [labels, setLabels] = useState<Record<string, string>>({});
  const items = artifact.test?.items ?? [];
  const item = items[index];
  const result = attempt?.results.find(result => result.itemId === item?.id);
@@ -43,6 +46,24 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
   // Each player belongs to one artifact; the parent keys it by artifact id.
  }, [artifact.id]);
  useEffect(() => { heading.current?.focus(); }, [index, results]);
+ useEffect(() => {
+  if (locked && justSubmitted.current) { justSubmitted.current = false; feedbackRegion.current?.focus(); }
+ }, [locked]);
+ useEffect(() => {
+  if (!results) return;
+  let active = true;
+  void (async () => {
+   const found: Record<string, string> = {};
+   let cursor: { at: string; id: string } | undefined;
+   do {
+    const page = await desktop.invoke('review:concepts:list', { courseId: artifact.courseId, limit: 100, ...(cursor ? { cursor } : {}) });
+    for (const concept of page.items) found[concept.key] = concept.label;
+    cursor = page.nextCursor ?? undefined;
+   } while (cursor && active);
+   if (active) setLabels(found);
+  })().catch(() => { /* The stable concept key stays visible when labels cannot load. */ });
+  return () => { active = false; };
+ }, [results, artifact.courseId]);
  const move = (nextIndex: number) => {
   setIndex(nextIndex); setDraft(attempt?.answers[items[nextIndex]?.id ?? ''] ?? null);
  };
@@ -53,6 +74,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
    setAttempt(saved);
    const commit = async () => { setAttempt(await desktop.invoke('review:attempt:commit', { attemptId: saved.id, itemId:item.id })); };
    retryAction.current = commit;
+   justSubmitted.current = true;
    await commit();
   });
  };
@@ -72,7 +94,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
     </fieldset>
     <p>{tr('review:commit_notice')}</p>
     <Button type="submit" disabled={busy || draft === null || draft === ''}>{tr(index === items.length - 1 ? 'review:finish_test' : 'review:answer_next')}</Button>
-   </form> : <>
+   </form> : <div ref={feedbackRegion} tabIndex={-1} role="status" aria-live="polite" aria-label={tr('review:item_feedback')}>
     <p>{tr(result?.reportedBad ? 'review:question_reported' : result?.correct ? 'review:answer_matches' : 'review:worth_another_look')}</p>
     <p>{tr('review:correct_answer')}: {feedback?.type === 'mcq' ? feedback.options[feedback.answer] : feedback?.type === 'true_false' ? tr(feedback.answer ? 'review:answer_true' : 'review:answer_false') : feedback?.answer}</p>
     <p>{feedback?.explanation}</p>
@@ -80,7 +102,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
     {feedback?.nextStep && <p>{feedback?.nextStep}</p>}
     {feedback && <details><summary><span className="review-chip">{tr('review:source_reference', { document: feedback.source.documentId, version: feedback.source.version })}</span></summary><blockquote>{feedback.source.quote}</blockquote></details>}
     <Button disabled={busy || result?.reportedBad} onClick={() => void run(async () => setAttempt(await desktop.invoke('review:attempt:report-bad', { attemptId: attempt.id, itemId: item.id })))}>{tr('review:report_bad_question')}</Button>
-   </>}
+   </div>}
    <div className="review-actions">
     <Button disabled={busy || index === 0} onClick={() => move(index - 1)}>{tr('review:previous_item')}</Button>
     {locked && index < items.length - 1 && <Button onClick={() => move(index + 1)}>{tr('review:next_item')}</Button>}
@@ -91,7 +113,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
    <h3 ref={heading} tabIndex={-1}>{tr('review:results_title')}</h3>
    <p>{tr('review:results_counts', { matched: reviewed.filter(result => result.correct).length, reviewed: reviewed.length, revisit: missed.length })}</p>
    <h4>{tr('review:worth_another_look')}</h4>
-   <ul>{[...new Set(attempt.results.map(result => result.conceptKey))].map(key => <li key={key}>{key}: {tr('review:concept_counts', { count: missed.filter(result => result.conceptKey === key).length })}</li>)}</ul>
+   <ul>{[...new Set(missed.map(result => result.conceptKey))].map(key => <li key={key}>{tr('review:concept_missed', { label: labels[key] ?? key, count: missed.filter(result => result.conceptKey === key).length })}</li>)}</ul>
    <p>{tr('review:confirm_notice')}</p>
    {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button disabled={busy} onClick={() => void run(async () => setAttempt(await desktop.invoke('review:attempt:confirm', { attemptId: attempt.id })))}>{tr('review:update_review_list')}</Button>}
    <div className="review-actions"><Button disabled={busy || attempt.phase !== 'confirmed' || !missed.length} onClick={() => onRetake(attempt.id)}>{tr('review:retake_missed')}</Button><Button onClick={() => setResults(false)}>{tr('review:review_answers')}</Button></div>

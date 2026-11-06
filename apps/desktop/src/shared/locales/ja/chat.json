@@ -6,5 +6,8 @@
   "socratic_mode": "ソクラテス式モード",
   "socratic_description": "小さなステップとヒントで理解を助け、必要なときは直接答えます。",
   "answer_directly": "直接答える",
-  "answer_directly_request": "前の質問の答えを直接教えてください。"
+  "answer_directly_request": "前の質問の答えを直接教えてください。",
+  "answer_directly_running": "現在の返信が終わってから、直接の回答を求めてください。",
+  "answer_directly_empty": "先に質問してください。「直接答える」は直前の質問への返答です。",
+  "answer_directly_unavailable": "このチャットのモデルは利用できません。先に利用可能なモデルを選んでください。"
 }

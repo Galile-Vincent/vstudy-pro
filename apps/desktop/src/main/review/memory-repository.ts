@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 import { ReviewRepository } from './repository';
+import { studyMemoryActive } from '../../shared/review';
 import { eligibleSourceSql, eligibleExchangeSql } from './eligibility';
 import { classify } from './classify';
 import { conceptKey } from './concept-match';
@@ -18,7 +19,7 @@ export class MemoryRepository {
  private now(){return new Date(this.clock()).toISOString();}
  private atomic<T>(fn:()=>T):T {this.db.exec('SAVEPOINT memory_write');try{const value=fn();if(value===false)this.db.exec('ROLLBACK TO memory_write');this.db.exec('RELEASE memory_write');return value;}catch(error){this.db.exec('ROLLBACK TO memory_write; RELEASE memory_write');throw error;}}
  enqueue(assistantId:string):void {
-  if(!this.review.getPrefs().memoryEnabled)return;
+  if(!studyMemoryActive(this.review.getPrefs()))return;
   if(Number(this.db.prepare("SELECT count(*) n FROM study_jobs WHERE status IN ('pending','running')").get()!.n)>=MEMORY_QUEUE_LIMIT)return;
   this.db.prepare(`INSERT INTO study_jobs(id,conversationId,userMessageId,assistantMessageId,extractorVersion,status,courseId,assignmentRevision,occurredAt,createdAt,updatedAt)
    SELECT ?,a.conversationId,u.id,a.id,?,'pending',l.courseId,coalesce(l.revision,0),u.createdAt,?,? FROM messages a JOIN messages u ON u.id=a.parentMessageId JOIN conversations c ON c.id=a.conversationId LEFT JOIN study_chat_links l ON l.conversationId=c.id LEFT JOIN documents d ON d.id=c.documentId
@@ -29,7 +30,7 @@ export class MemoryRepository {
  }
  recover():void {
   this.db.prepare("UPDATE study_jobs SET status=CASE WHEN attempts<3 THEN 'pending' ELSE 'failed' END,attemptToken=NULL,errorCode='interrupted',updatedAt=? WHERE status='running'").run(this.now());
-  if(!this.review.getPrefs().memoryEnabled)return;
+  if(!studyMemoryActive(this.review.getPrefs()))return;
   // Recovery is deliberately recent and bounded; it never initiates calls itself.
   const rows=this.db.prepare(`SELECT a.id FROM messages a JOIN conversations c ON c.id=a.conversationId WHERE a.role='assistant' AND a.parentMessageId IS NOT NULL AND c.deletedAt IS NULL AND a.createdAt>=? AND NOT EXISTS(SELECT 1 FROM study_jobs j WHERE j.assistantMessageId=a.id AND j.extractorVersion=?) ORDER BY a.createdAt DESC,a.id DESC LIMIT 100`).all(new Date(this.clock()-7*86400000).toISOString(),EXTRACTOR_VERSION);
   for(const row of rows)this.enqueue(String(row.id));
@@ -41,7 +42,7 @@ export class MemoryRepository {
  }
  candidates(){return this.review.listCourses({limit:100}).items;}
  claim():MemoryJob|null {
-  if(!this.review.getPrefs().memoryEnabled)return null;
+  if(!studyMemoryActive(this.review.getPrefs()))return null;
   return this.atomic(()=>{
    const rows=this.db.prepare("SELECT * FROM study_jobs WHERE status='pending' AND errorCode IS NOT 'budget' AND attempts<3 ORDER BY createdAt,id LIMIT 100").all();
    for(const row of rows){
@@ -60,7 +61,7 @@ export class MemoryRepository {
  }
  commit(id:string,token:string,result:MemoryResult):boolean {
   return this.atomic(()=>{
-   if(!this.review.getPrefs().memoryEnabled)return false;
+   if(!studyMemoryActive(this.review.getPrefs()))return false;
    const job=this.db.prepare("SELECT * FROM study_jobs WHERE id=? AND attemptToken=? AND status='running'").get(id,token);if(!job)return false;
    const jobView={...job,id,attemptToken:token,conversationId:String(job.conversationId),assistantMessageId:String(job.assistantMessageId),courseId:job.courseId as string|null,assignmentRevision:Number(job.assignmentRevision)};
    const choice=this.classify(jobView,buildThreadSnapshot(this.db,jobView.assistantMessageId).messages.filter(m=>m.role==='user').map(m=>m.text).join('\n'),{courseId:result.courseId,confidence:result.confidence});
@@ -87,5 +88,5 @@ export class MemoryRepository {
   for(const [key,group] of groups)if(buildEpisodes(group.times,this.review.getPrefs().timeZone).length>=2){this.db.prepare("INSERT INTO study_concepts(id,courseId,key,label,unitId,source,userState,createdAt) VALUES(?,?,?,?,?,'promoted','none',?) ON CONFLICT DO NOTHING").run(randomUUID(),courseId,key,group.label,group.unitId,this.now());this.db.prepare('UPDATE OR IGNORE study_observations SET conceptKey=?,proposedLabel=NULL WHERE courseId=? AND proposedLabel=?').run(key,courseId,group.label);}
  }
  settle(job:MemoryJob,errorCode:string):void {this.db.prepare("UPDATE study_jobs SET status=?,errorCode=?,attemptToken=NULL,updatedAt=? WHERE id=? AND attemptToken=? AND status='running'").run(errorCode==='budget'||errorCode==='interrupted'?'pending':'failed',errorCode,this.now(),job.id,job.attemptToken);}
- retry(id:string):void {if(!this.review.getPrefs().memoryEnabled)throw new Error('Study memory disabled');if(Number(this.db.prepare("SELECT count(*) n FROM study_jobs WHERE status IN ('pending','running')").get()!.n)>=MEMORY_QUEUE_LIMIT)throw new Error('Study queue full');this.db.prepare("UPDATE study_jobs SET status='pending',attemptToken=NULL,attempts=0,errorCode=NULL,updatedAt=? WHERE id=? AND status IN ('failed','pending')").run(this.now(),id);}
+ retry(id:string):void {if(!studyMemoryActive(this.review.getPrefs()))throw new Error('Study memory disabled');if(Number(this.db.prepare("SELECT count(*) n FROM study_jobs WHERE status IN ('pending','running')").get()!.n)>=MEMORY_QUEUE_LIMIT)throw new Error('Study queue full');this.db.prepare("UPDATE study_jobs SET status='pending',attemptToken=NULL,attempts=0,errorCode=NULL,updatedAt=? WHERE id=? AND status IN ('failed','pending')").run(this.now(),id);}
 }

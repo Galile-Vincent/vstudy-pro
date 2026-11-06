@@ -147,29 +147,22 @@ export function useBudgetGuard(
   const form = useRef<HTMLFormElement | null>(null);
   const [reason, setReason] = useState('');
 
+  const pending = useRef<(() => void) | null>(null);
+
   const approve = () => {
-    allow.current = true;
     setWarning(false);
+    const send = pending.current;
+    pending.current = null;
+    if (send) { send(); return; }
+    allow.current = true;
     form.current?.requestSubmit();
   };
 
-  const guard = (event: SyntheticEvent) => {
-    if (allow.current) {
-      allow.current = false;
-      return;
-    }
-    if (data && !data.settings.monthlyBudgetUsd && !data.settings.monthlyTokenBudget) return;
-    event.preventDefault();
-    event.stopPropagation();
-    form.current =
-      event.currentTarget instanceof HTMLFormElement
-        ? event.currentTarget
-        : (event.currentTarget as HTMLElement).closest('form');
+  const check = (userMessage: string) => {
     if (checking.current) return;
     checking.current = true;
-
     void Promise.all([
-      desktop.invoke('usage:estimate', { conversationId, userMessage: draft }),
+      desktop.invoke('usage:estimate', { conversationId, userMessage }),
       desktop.invoke('usage:summary', { period: 'month' }),
       desktop.invoke('settings:get', {}),
     ])
@@ -197,5 +190,30 @@ export function useBudgetGuard(
       });
   };
 
-  return { guard, warning, reason, dismiss: () => setWarning(false), approve };
+  const noBudget = () => !!data && !data.settings.monthlyBudgetUsd && !data.settings.monthlyTokenBudget;
+
+  const guard = (event: SyntheticEvent) => {
+    if (allow.current) {
+      allow.current = false;
+      return;
+    }
+    if (noBudget()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    form.current =
+      event.currentTarget instanceof HTMLFormElement
+        ? event.currentTarget
+        : (event.currentTarget as HTMLElement).closest('form');
+    pending.current = null;
+    check(draft);
+  };
+
+  /** Sends a message that is not in the composer through the same budget check as a typed one. */
+  const guardSend = (userMessage: string, send: () => void) => {
+    if (noBudget()) { send(); return; }
+    pending.current = send;
+    check(userMessage);
+  };
+
+  return { guard, guardSend, warning, reason, dismiss: () => { pending.current = null; setWarning(false); }, approve };
 }
