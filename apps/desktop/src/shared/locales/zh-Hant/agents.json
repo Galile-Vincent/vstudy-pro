@@ -49,7 +49,7 @@
   "result": "結果",
   "unknown_status": "未知結果",
   "connect": "連接代理程式",
-  "connect_help": "複製設定指令或預覽設定變更。安裝不會授予學校存取權限。",
+  "connect_help": "請先在這部電腦安裝 Node.js 24.11.1 或更新版本，再複製設定指令或預覽設定變更。安裝不會授予學校存取權限。",
   "client_claude": "Claude Code",
   "client_codex": "Codex",
   "client_agy": "Antigravity",

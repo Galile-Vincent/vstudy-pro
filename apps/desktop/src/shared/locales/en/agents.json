@@ -49,7 +49,7 @@
   "result": "Result",
   "unknown_status": "Unknown result",
   "connect": "Connect an agent",
-  "connect_help": "Copy a setup command or preview the configuration change. Installation never grants school access.",
+  "connect_help": "Install Node.js 24.11.1 or later on this computer, then copy a setup command or preview the configuration change. Installation never grants school access.",
   "client_claude": "Claude Code",
   "client_codex": "Codex",
   "client_agy": "Antigravity",

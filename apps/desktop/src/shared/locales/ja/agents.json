@@ -49,7 +49,7 @@
   "result": "結果",
   "unknown_status": "不明な結果",
   "connect": "エージェントを接続",
-  "connect_help": "設定コマンドをコピーするか、設定の変更をプレビューします。インストールだけでは学校へのアクセスは許可されません。",
+  "connect_help": "このコンピューターに Node.js 24.11.1 以降をインストールしてから、設定コマンドをコピーするか変更をプレビューします。インストールだけでは学校へのアクセスは許可されません。",
   "client_claude": "Claude Code",
   "client_codex": "Codex",
   "client_agy": "Antigravity",
