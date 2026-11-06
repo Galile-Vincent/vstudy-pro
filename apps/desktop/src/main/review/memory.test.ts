@@ -11,13 +11,22 @@ import { MemoryWorker } from './memory';
 import { buildThreadSnapshot } from './thread-snapshot';
 const stores: ReturnType<typeof openStore>[] = [];
 afterEach(() => stores.splice(0).forEach(s => s.close()));
-function fixture() {
- const store=openStore(':memory:');stores.push(store);const repo=new ReviewRepository(store.db);
+function fixture(consent=true) {
+ const store=openStore(':memory:');stores.push(store);const repo=new ReviewRepository(store.db);if(consent)repo.setPrefs({consentAcknowledged:true});
  const course=repo.createCourse({title:'Physics'}),chat=randomUUID(),user=randomUUID(),assistant=randomUUID(),at=new Date().toISOString();
  store.db.prepare("INSERT INTO conversations(id,scope,providerId,modelId,createdAt) VALUES(?,'general','openai-api','gpt-6.1-sol',?)").run(chat,at);
  for(const [id,role,text] of [[user,'user','Why force?'],[assistant,'assistant','Force explained']])store.db.prepare('INSERT INTO messages(id,conversationId,role,parts,createdAt,parentMessageId) VALUES(?,?,?,?,?,?)').run(id!,chat,role!,JSON.stringify([{type:'text',text,status:'complete'}]),role==='user'?new Date(Date.parse(at)-1).toISOString():at,role==='assistant'?user:null);
  repo.assignChat(chat,course.id);const jobs=new MemoryRepository(store.db);jobs.enqueue(assistant);return {store,repo,jobs,course,chat,user,assistant};
 }
+it('queues, claims and retries nothing until the student has acknowledged the disclosure, even when memory is on from an earlier build',()=>{
+ const f=fixture(false);expect(f.repo.getPrefs()).toMatchObject({memoryEnabled:true,consentAcknowledged:false});
+ expect(f.store.db.prepare('SELECT * FROM study_jobs').all()).toHaveLength(0);
+ f.store.db.prepare("INSERT INTO settings(key,value) VALUES('studyPrefs',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").run(JSON.stringify({memoryEnabled:true,noticeAcknowledged:true,timeZone:'UTC'}));
+ expect(f.repo.getPrefs().consentAcknowledged).toBe(false);
+ f.jobs.recover();f.jobs.enqueue(f.assistant);expect(f.jobs.claim()).toBeNull();expect(f.store.db.prepare('SELECT * FROM study_jobs').all()).toHaveLength(0);
+ f.repo.setPrefs({consentAcknowledged:true});f.jobs.enqueue(f.assistant);expect(f.store.db.prepare('SELECT * FROM study_jobs').all()).toHaveLength(1);
+ f.repo.setPrefs({memoryEnabled:false});f.repo.setPrefs({memoryEnabled:true});expect(f.repo.getPrefs().consentAcknowledged).toBe(true);
+});
 const empty:MemoryResult={courseId:null,confidence:1,questionSummary:'A plain question',observations:[]};
 it('deduplicates finish, commits zero-concept success once and rejects stale attempt tokens',()=>{
  const f=fixture();f.jobs.enqueue(f.assistant);const job=f.jobs.claim()!;expect(f.jobs.claim()).toBeNull();

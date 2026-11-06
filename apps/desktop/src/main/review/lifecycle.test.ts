@@ -17,7 +17,8 @@ it.each(['storage settle','shutdown','delete-all'] as const)('drains both real w
  const store=openStore(':memory:');
  const root=await mkdtemp(join(tmpdir(),'review-lifecycle-'));
  await writeFile(join(root,'owned'),'data');
- const course=new ReviewRepository(store.db).createCourse({title:'Physics'});
+ const reviewRepo=new ReviewRepository(store.db);reviewRepo.setPrefs({consentAcknowledged:true});
+ const course=reviewRepo.createCourse({title:'Physics'});
  let release!:()=>void,memoryEntered!:()=>void;
  const pending=new Promise<void>(r=>{release=r;}),memoryStarted=new Promise<void>(r=>{memoryEntered=r;});
  const chat=randomUUID(),user=randomUUID(),assistant=randomUUID(),at=new Date().toISOString();

@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, expect, it } from "vitest";
 import { openStore } from "../db";
+import { ReviewRepository } from "../review/repository";
 import {
   documentSchema,
   chatRequestSchema,
@@ -676,16 +677,22 @@ it('streams Socratic output unchanged and replays the persisted decision', async
   expect(store.messages.list(request.conversationId).at(-1)?.parts[0]?.tutorDecision).toMatchObject({level:'direct',reason:'requested',step:1});
 });
 
+const consent=<T extends {store:{db:import('node:sqlite').DatabaseSync}}>(f:T):T=>{new ReviewRepository(f.store.db).setPrefs({consentAcknowledged:true});return f;};
+it('queues no memory job for a successful answer until the student has agreed to the disclosure', async () => {
+ const adapter:ProviderAdapter={...available,async *stream(){yield {type:'text-delta',text:'Saved answer'};yield {type:'done'};}};
+ const f=await setup(adapter);await f.chat.start(f.request,f.owner);await f.chat.waitForIdle();
+ expect(f.owner.events.at(-1)?.type).toBe('done');expect(f.store.db.prepare('SELECT * FROM study_jobs').all()).toHaveLength(0);
+});
 it('saves one pending memory job with a successful answer and preserves answers when enqueue fails', async () => {
  const adapter:ProviderAdapter={...available,async *stream(){yield {type:'text-delta',text:'Saved answer'};yield {type:'done'};}};
- const first=await setup(adapter);await first.chat.start(first.request,first.owner);await first.chat.waitForIdle();
+ const first=consent(await setup(adapter));await first.chat.start(first.request,first.owner);await first.chat.waitForIdle();
  expect(first.store.db.prepare('SELECT status FROM study_jobs').all()).toMatchObject([{status:'pending'}]);
- const second=await setup(adapter);second.store.db.exec("CREATE TEMP TRIGGER fail_enqueue BEFORE INSERT ON study_jobs BEGIN SELECT RAISE(ABORT,'queue unavailable'); END;");
+ const second=consent(await setup(adapter));second.store.db.exec("CREATE TEMP TRIGGER fail_enqueue BEFORE INSERT ON study_jobs BEGIN SELECT RAISE(ABORT,'queue unavailable'); END;");
  await second.chat.start(second.request,second.owner);await second.chat.waitForIdle();
  expect(second.owner.events.at(-1)?.type).toBe('done');expect(second.store.messages.list(second.request.conversationId).at(-1)?.parts[0]).toMatchObject({text:'Saved answer',status:'complete'});
  expect(second.store.db.prepare('SELECT * FROM study_jobs').all()).toHaveLength(0);
 });
 it.each(['aborted','error','empty'] as const)('never queues memory for %s answers',async kind=>{
  const adapter:ProviderAdapter={...available,async *stream(_request,signal){if(kind==='empty'){yield {type:'done'};return;}yield {type:'text-delta',text:'Partial'};if(kind==='error'){yield {type:'error',message:'offline'};return;}await new Promise<void>(resolve=>signal.addEventListener('abort',()=>resolve(),{once:true}));}};
- const f=await setup(adapter);await f.chat.start(f.request,f.owner);if(kind==='aborted'){await new Promise<void>(resolve=>setImmediate(resolve));f.chat.abort(f.request.requestId,f.owner);}await f.chat.waitForIdle();expect(f.store.db.prepare('SELECT * FROM study_jobs').all()).toHaveLength(0);
+ const f=consent(await setup(adapter));await f.chat.start(f.request,f.owner);if(kind==='aborted'){await new Promise<void>(resolve=>setImmediate(resolve));f.chat.abort(f.request.requestId,f.owner);}await f.chat.waitForIdle();expect(f.store.db.prepare('SELECT * FROM study_jobs').all()).toHaveLength(0);
 });
