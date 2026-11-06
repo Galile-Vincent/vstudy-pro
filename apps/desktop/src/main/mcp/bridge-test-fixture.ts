@@ -16,12 +16,13 @@ export let helper: string;
 const fixtures: {root: string; engine: McpEngine; bridge: UnixBridge}[] = [];
 const clients: WireClient[] = [];
 beforeAll(() => {
+  if (process.platform==='win32') return;
   helperDirectory = mkdtempSync(join(tmpdir(), 'vmp-helper-'));
   helper = join(helperDirectory, 'mcp-peer');
   const built = spawnSync(process.execPath, [resolve('../../scripts/build-mcp-peer.mjs'), '--output', helper], {encoding: 'utf8'});
   expect({status: built.status, stderr: built.stderr}).toEqual({status: 0, stderr: ''});
 });
-afterAll(() => rmSync(helperDirectory, {recursive: true, force: true}));
+afterAll(() => {if (helperDirectory)rmSync(helperDirectory,{recursive:true,force:true});});
 afterEach(async () => {
   for (const client of clients.splice(0)) client.socket.destroy();
   for (const fixture of fixtures.splice(0)) {

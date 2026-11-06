@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { afterEach, expect, vi } from 'vitest';
 import { bridgeRequestSchema, pairBeginResultSchema, pairFinishResultSchema, scopeSchema, toolResultSchema, type BridgeRequest, type McpBackend, type Scope, type ToolName } from '../../shared/mcp';
 import { McpEngine, type McpEngineOptions } from './engine';
+import { testStatePersistence } from './state-test-fixture';
 
 const fixtures: {root: string; engine: McpEngine}[] = [];
 afterEach(() => { for (const fixture of fixtures.splice(0)) { fixture.engine.dispose(); rmSync(fixture.root, {recursive: true, force: true}); } vi.useRealTimers(); vi.restoreAllMocks(); });
@@ -21,9 +22,10 @@ export function fixture(options: Partial<Omit<McpEngineOptions, 'userData' | 'ba
     return {accountId, target: 'Example course', provenance: {account: accountId, school: account.school, courseId: null, moduleId: null, author: null, syncedAt: null}, execute};
   });
   const backend: McpBackend = {accounts: () => accounts, prepare};
-  const engine = new McpEngine({userData: root, backend, ...options, limits: {spacingMs: 0, jitterMs: 0, ...options.limits}});
+  const persistence=options.persistence ?? testStatePersistence(root);
+  const engine = new McpEngine({userData: root, backend, ...options,...(persistence?{persistence}:{}), limits: {spacingMs: 0, jitterMs: 0, ...options.limits}});
   fixtures.push({root, engine});
-  return {root, engine, backend, account, other, accounts, execute, prepare};
+  return {root, engine, backend, persistence, account, other, accounts, execute, prepare};
 }
 
 export function rpc(engine: McpEngine, connection: string, method: BridgeRequest['method'], params: unknown) {

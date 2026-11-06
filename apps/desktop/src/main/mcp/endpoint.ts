@@ -1,7 +1,7 @@
 /** Resolve current-user bridge addresses without opening a transport or accepting a remote pipe host. @packageDocumentation */
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { join, win32 } from 'node:path';
+import { posix, win32 } from 'node:path';
 import type { McpEndpoint } from '../../shared/mcp-platform';
 import { McpFailure } from './errors';
 
@@ -19,6 +19,6 @@ export function currentWindowsSid():string {
 }
 export function resolveMcpEndpoint(userData:string,platform:NodeJS.Platform=process.platform,userIdentity?:string):McpEndpoint {
   if (platform==='win32') return {kind:'named-pipe',path:windowsPipeName(userIdentity ?? currentWindowsSid())};
-  if (platform==='darwin' || platform==='linux') return {kind:'unix',path:join(userData,'mcp','bridge.sock')};
+  if (platform==='darwin' || platform==='linux') return {kind:'unix',path:posix.join(userData,'mcp','bridge.sock')};
   throw new McpFailure('UNSUPPORTED');
 }

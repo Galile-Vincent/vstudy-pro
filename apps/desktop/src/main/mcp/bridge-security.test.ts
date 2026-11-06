@@ -7,7 +7,9 @@ import { expect, it, vi } from 'vitest';
 import { createUnixBridge } from './bridge';
 import { fixture, frame, helper, WireClient } from './bridge-test-fixture';
 
-it.each(['wrong-uid', 'missing-helper', 'failed-verifier'] as const)('%s fails closed before request handling', async kind => {
+const unixIt = it.skipIf(process.platform === 'win32');
+
+unixIt.each(['wrong-uid', 'missing-helper', 'failed-verifier'] as const)('%s fails closed before request handling', async kind => {
   const options = kind === 'wrong-uid' ? {verifyPeer: async () => process.getuid!() + 1} : kind === 'missing-helper' ? {peerHelper: '/nonexistent/vstudy-mcp-peer'} : {verifyPeer: async () => { throw new Error('private exception'); }};
   const {bridge, handler} = await fixture(options);
   const client = new WireClient(bridge.socketPath);
@@ -17,7 +19,7 @@ it.each(['wrong-uid', 'missing-helper', 'failed-verifier'] as const)('%s fails c
   expect(handler).not.toHaveBeenCalled();
 });
 
-it.each([
+unixIt.each([
   Buffer.from([0, 0, 0, 0]),
   Buffer.from([0, 16, 0, 1]),
   Buffer.from([0, 0, 0, 1, 0xff]),
@@ -33,7 +35,7 @@ it.each([
   expect(handler).not.toHaveBeenCalled();
 });
 
-it('bounds incomplete frames by idle timeout', async () => {
+unixIt('bounds incomplete frames by idle timeout', async () => {
   const {bridge, handler} = await fixture({idleMs: 100});
   const client = new WireClient(bridge.socketPath);
   await client.connected;
@@ -42,7 +44,7 @@ it('bounds incomplete frames by idle timeout', async () => {
   expect(handler).not.toHaveBeenCalled();
 });
 
-it('bounds request duration, per-connection concurrency, and total connections', async () => {
+unixIt('bounds request duration, per-connection concurrency, and total connections', async () => {
   let finish!: () => void;
   const gate = new Promise<void>(resolve => { finish = resolve; });
   const handler = vi.fn(async request => { await gate; return {jsonrpc: '2.0' as const, id: request.id, result: {}}; });
@@ -60,7 +62,7 @@ it('bounds request duration, per-connection concurrency, and total connections',
   expect(handler).toHaveBeenCalledTimes(1);
 });
 
-it('times out a request whose handler does not settle', async () => {
+unixIt('times out a request whose handler does not settle', async () => {
   let finish!: () => void;
   const gate = new Promise<void>(resolve => { finish = resolve; });
   const {bridge} = await fixture({requestTimeoutMs: 100, handleRequest: async request => { await gate; return {jsonrpc: '2.0', id: request.id, result: {}}; }});
@@ -71,7 +73,7 @@ it('times out a request whose handler does not settle', async () => {
   finish();
 });
 
-it('rejects symlinked socket paths and lock files without following or deleting their targets', async () => {
+unixIt('rejects symlinked socket paths and lock files without following or deleting their targets', async () => {
   const root = mkdtempSync(join(tmpdir(), 'vmp-'));
   const external = join(root, 'external');
   const options = {userData: root, peerHelper: helper, handleRequest: async () => ({jsonrpc: '2.0' as const, id: randomUUID(), result: {}}), onDisconnect: () => {}};
@@ -88,7 +90,7 @@ it('rejects symlinked socket paths and lock files without following or deleting 
   } finally { rmSync(root, {recursive: true, force: true}); }
 });
 
-it('returns fixed errors when a handler fails and rejects oversized responses', async () => {
+unixIt('returns fixed errors when a handler fails and rejects oversized responses', async () => {
   const {bridge} = await fixture({handleRequest: async () => { throw new Error('SCHOOL-TOKEN-CANARY https://school.example'); }});
   const client = new WireClient(bridge.socketPath);
   await client.connected;

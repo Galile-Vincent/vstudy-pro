@@ -97,7 +97,7 @@ it('persists across engine restart without returning hashes or retaining raw tok
   expect(saved).not.toContain('SCHOOL-CANARY');
   expect(saved).not.toContain(client.grant);
   f.engine.dispose();
-  const restarted = new McpEngine({userData: f.root, backend: f.backend, limits: {spacingMs: 0, jitterMs: 0}});
+  const restarted = new McpEngine({userData: f.root, backend: f.backend,...(f.persistence?{persistence:f.persistence}:{}), limits: {spacingMs: 0, jitterMs: 0}});
   try { expect(await call(restarted, client.grant, 'list_courses')).toMatchObject({ok: true}); }
   finally { restarted.dispose(); }
 });

@@ -11,7 +11,9 @@ import { createUnixBridge } from './bridge';
 import { fixture, frame, helper, WireClient } from './bridge-test-fixture';
 import { peerUid } from './peer';
 
-it('verifies the real accepted socket UID through fd 3 before serving even a ping', async () => {
+const unixIt = it.skipIf(process.platform === 'win32');
+
+unixIt('verifies the real accepted socket UID through fd 3 before serving even a ping', async () => {
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
   let uid: number | undefined;
@@ -33,7 +35,7 @@ it('verifies the real accepted socket UID through fd 3 before serving even a pin
   expect(withoutSocket.stdout).toBe('');
 });
 
-it('serves concurrent clients and multiple coalesced requests with independent connection IDs', async () => {
+unixIt('serves concurrent clients and multiple coalesced requests with independent connection IDs', async () => {
   const {bridge, handler} = await fixture();
   const a = new WireClient(bridge.socketPath);
   const b = new WireClient(bridge.socketPath);
@@ -43,7 +45,7 @@ it('serves concurrent clients and multiple coalesced requests with independent c
   expect(new Set(handler.mock.calls.map(call => call[1])).size).toBe(2);
 });
 
-it('keeps pairing socket-bound across real connections and rejects replay or scope escape', async () => {
+unixIt('keeps pairing socket-bound across real connections and rejects replay or scope escape', async () => {
   const {bridge, engine, account, execute} = await fixture();
   engine.setEnabled(true);
   const a = new WireClient(bridge.socketPath);
@@ -59,7 +61,7 @@ it('keeps pairing socket-bound across real connections and rejects replay or sco
   expect(await b.request('tools.call', {grant: grant.grant, name: 'list_courses', args: {}})).toMatchObject({result: {ok: true}});
 });
 
-it('disconnect cancels pending consent and the engine can reconnect after a bridge restart', async () => {
+unixIt('disconnect cancels pending consent and the engine can reconnect after a bridge restart', async () => {
   const {bridge, engine, root, account} = await fixture();
   engine.setEnabled(true);
   const client = new WireClient(bridge.socketPath);
@@ -78,7 +80,7 @@ it('disconnect cancels pending consent and the engine can reconnect after a brid
   } finally { await restarted.dispose(); }
 });
 
-it('revoking a grant cancels a write awaiting renderer approval over the real socket', async () => {
+unixIt('revoking a grant cancels a write awaiting renderer approval over the real socket', async () => {
   const {bridge, engine, account, execute} = await fixture();
   engine.setEnabled(true);
   const client = new WireClient(bridge.socketPath);
@@ -94,7 +96,7 @@ it('revoking a grant cancels a write awaiting renderer approval over the real so
   expect(engine.state().proposals).toEqual([]);
 });
 
-it('refuses to replace a live listener and leaves the original socket usable', async () => {
+unixIt('refuses to replace a live listener and leaves the original socket usable', async () => {
   const {bridge, root} = await fixture();
   await expect(createUnixBridge({userData: root, peerHelper: helper, handleRequest: async request => ({jsonrpc: '2.0', id: request.id, result: {}}), onDisconnect: () => {}})).rejects.toThrow();
   const client = new WireClient(bridge.socketPath);
@@ -102,7 +104,7 @@ it('refuses to replace a live listener and leaves the original socket usable', a
   expect(await client.request('ping', {})).toMatchObject({result: {version: 1}});
 });
 
-it('recovers a stale socket and PID lock left by a killed listener', async () => {
+unixIt('recovers a stale socket and PID lock left by a killed listener', async () => {
   const root = mkdtempSync(join(tmpdir(), 'vmp-'));
   mkdirSync(join(root, 'mcp'), {mode: 0o700});
   const path = join(root, 'mcp/bridge.sock');
@@ -122,7 +124,7 @@ it('recovers a stale socket and PID lock left by a killed listener', async () =>
   expect(await client.request('ping', {})).toMatchObject({result: {version: 1}});
 });
 
-it('closes duplicate in-flight request IDs without executing a second handler', async () => {
+unixIt('closes duplicate in-flight request IDs without executing a second handler', async () => {
   let finish!: () => void;
   const gate = new Promise<void>(resolve => { finish = resolve; });
   const handler = vi.fn(async request => { await gate; return {jsonrpc: '2.0' as const, id: request.id, result: {}}; });
