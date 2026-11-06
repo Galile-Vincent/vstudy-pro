@@ -41,12 +41,15 @@ let startupComplete = false;
 let startupFailed = false;
 let resolveAppReady!: (ready: boolean) => void;
 const appReady = new Promise<boolean>(resolve => { resolveAppReady = resolve; });
-function failStartup(error: unknown): void {
+class RendererRecoveryExhausted extends Error {
+  constructor(readonly dialogClosed: Promise<void>) { super('Renderer recovery exhausted'); }
+}
+function failStartup(error: unknown, reported = false): void {
   if (startupFailed) return;
   startupFailed = true;
   resolveAppReady(false);
   log({phase:'startup-failed', stage:startupStage, error: error instanceof Error ? error.stack ?? error.message : error});
-  showStartupError(error, startupStage);
+  if (!reported) showStartupError(error, startupStage);
 }
 function requestMainWindow(): void {
   void restoreMainWindow().catch(error => log({phase:'window-restore-failed', error}));
@@ -155,7 +158,7 @@ async function createWindow(show = true): Promise<void> {
   const showTimeout = setTimeout(showWindow, 10_000);
   showTimeout.unref();
   current.once('ready-to-show', () => { clearTimeout(showTimeout); showWindow(); });
-  let settleNavigation = () => {};
+  let settleNavigation: (dialogClosed: Promise<void>) => boolean = () => false;
   let recoveryDialogOpen = false;
   const recoverRenderer = () => {
     if (current.isDestroyed()) return;
@@ -166,15 +169,15 @@ async function createWindow(show = true): Promise<void> {
       current.webContents.reload();
       return;
     }
-    settleNavigation();
     if (recoveryDialogOpen) return;
     recoveryDialogOpen = true;
-    void dialog.showMessageBox(current, {
+    const dialogClosed = dialog.showMessageBox(current, {
       type: 'error', message: tr('errors:window_unavailable'),
       buttons: [tr('common:menu_quit'), tr('common:copy_diagnostics')], defaultId: 0, cancelId: 1,
-    }).then(({ response }) => { if (response === 0) app.quit(); else copyDiagnostics(); })
+    }).then(({ response }) => { if (response === 0) { if (!failedNavigation) app.quit(); } else copyDiagnostics(); })
       .catch(error => log({phase:'window-recovery-dialog-failed', error}))
       .finally(() => { recoveryDialogOpen = false; });
+    const failedNavigation = settleNavigation(dialogClosed);
   };
   let unresponsiveTimeout: ReturnType<typeof setTimeout> | undefined;
   const cancelUnresponsive = () => { clearTimeout(unresponsiveTimeout); unresponsiveTimeout = undefined; };
@@ -201,6 +204,7 @@ async function createWindow(show = true): Promise<void> {
   if (smokeRoot) current.webContents.once('did-finish-load', () => { void runPackagedSmoke(current, realpathSync(smokeRoot)); });
   await new Promise<void>((resolve, reject) => {
     const settle = (error?: unknown) => {
+      settleNavigation = () => false;
       current.removeListener('closed', closed);
       current.webContents.removeListener('destroyed', closed);
       current.webContents.removeListener('did-finish-load', loaded);
@@ -208,7 +212,7 @@ async function createWindow(show = true): Promise<void> {
       if (error) reject(error);
       else resolve();
     };
-    settleNavigation = () => settle(new Error('Renderer recovery exhausted'));
+    settleNavigation = dialogClosed => { settle(new RendererRecoveryExhausted(dialogClosed)); return true; };
     const loaded = () => settle();
     const closed = () => settle();
     const failed = (_event: Electron.Event, code: number, description: string, _url: string, mainFrame: boolean) => {
@@ -313,7 +317,8 @@ if (ownsApplication) void app.whenReady().then(async () => {
   startupComplete = true;
   resolveAppReady(true);
 }).catch(async error => {
-  failStartup(error);
+  if (error instanceof RendererRecoveryExhausted) await error.dialogClosed;
+  failStartup(error, error instanceof RendererRecoveryExhausted);
   try {
     await disposeIpc?.();
     store?.close(); store = undefined;

@@ -32,6 +32,7 @@ it.each(['oversize','invalid JSON','invalid parts','invalid user parts'])('keeps
     expect(all[1]?.parts[0]?.text.length).toBeGreaterThan(0);
     const request=chatRequestSchema.parse({scope:'general',requestId:randomUUID(),conversationId:conversation.id,providerId:'anthropic-api',modelId:'fake',userMessage:'next'});
     expect(chatTurnContext(all,request).history.some(m=>m.id===messages[1]!.id)).toBe(false);
+    if(kind==='invalid user parts')expect(chatTurnContext(all,request).history).toEqual([]);
     const first=store.messages.page(conversation.id,2);
     expect(first.items).toEqual(all.slice(0,2));
     expect(store.messages.page(conversation.id,2,first.nextCursor!).items).toEqual(all.slice(2));

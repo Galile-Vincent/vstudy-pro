@@ -17,6 +17,16 @@ afterEach(() => { for (const root of roots.splice(0)) rmSync(root,{recursive:tru
 it.each([`${homedir()}/Documents/private-paper.pdf`, '/Volumes/School/private-paper.pdf', 'C:\\Users\\Student\\private-paper.pdf', 'private-paper.pdf', '/Volumes/School/Private Coursework/private-paper.pdf', '\\\\School\\Student\\private-paper.pdf'])('removes private paths and filenames: %s', path => {
   expect(redact(`ENOENT open '${path}' sk-secret Bearer secret x-api-key: hidden`)).not.toMatch(/private-paper|Documents|Student|Coursework|School|sk-secret|Bearer secret|hidden/);
 });
+it('bounds redaction work for long dotted diagnostics while removing paths and filenames', () => {
+  const input = "private-paper.pdf '/Volumes/School/private-paper.pdf' " + 'a.'.repeat(200_000);
+  const started = performance.now();
+  const result = redact(input);
+  expect(performance.now() - started).toBeLessThan(200);
+  expect(result.length).toBeLessThanOrEqual(20_000);
+  expect(result).toContain('[file]');
+  expect(result).toContain('[path]');
+  expect(result).not.toContain('private-paper');
+});
 it('writes redacted logs with restrictive permissions and bounded rotation', () => {
   const directory=fixture(); vi.spyOn(console,'log').mockImplementation(()=>{});
   for (let i=0;i<300;i++) log({phase:'failure',stack:'x'.repeat(8000)+' /private/private-paper.pdf sk-secret'});
@@ -68,6 +78,25 @@ it.each([
 ])('redacts credentials: %j', value => {
   expect(redact(value)).not.toContain('PRIVATE_');
 });
+it.each(['sesskey', 'private_key', 'private-key', 'passwd', 'PASSWD', 'password'])('redacts %s in plain, JSON and query forms', key => {
+  for (const value of [
+    `${key}=PRIVATE_CANARY`, `${key}: PRIVATE_CANARY TWO_WORDS`,
+    {[key]:'PRIVATE_CANARY TWO_WORDS'}, `{"${key}":"PRIVATE_CANARY TWO_WORDS"}`,
+    `${key}=PRIVATE_CANARY&next=ok`, `?next=ok&${key}=PRIVATE_CANARY`,
+    `https://school.example/login?${key}=PRIVATE_CANARY&next=ok`,
+  ]) {
+    expect(redact(value)).not.toMatch(/PRIVATE_CANARY|TWO_WORDS/);
+  }
+});
+it.each(['Digest', 'Negotiate'])('redacts %s authorization in plain, JSON and query forms', scheme => {
+  for (const key of ['Authorization', 'Proxy-Authorization']) {
+    for (const value of [
+      `${key}: ${scheme} PRIVATE_CANARY`, {[key]:`${scheme} PRIVATE_CANARY`},
+      `?${key}=${scheme}%20PRIVATE_CANARY&next=ok`,
+      `${key}: ${scheme} username="PRIVATE_USER", response="PRIVATE_RESPONSE"`,
+    ]) expect(redact(value)).not.toContain('PRIVATE_');
+  }
+});
 it('copies persisted diagnostic lines verbatim with intact timestamps and labels', () => {
   fixture(); vi.spyOn(console,'log').mockImplementation(()=>{});
   vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-06T12:34:56.789Z'));
@@ -79,6 +108,16 @@ it('copies persisted diagnostic lines verbatim with intact timestamps and labels
     expect(stored).toContain('2026-11-06T12:34:56.789Z');
     expect(stored).toContain('rows.0.id');
   } finally { vi.useRealTimers(); }
+});
+it('redacts credentials in diagnostic files written by older versions before copying', () => {
+  const directory=fixture(); vi.spyOn(console,'log').mockImplementation(()=>{});
+  log({phase:'initialize'});
+  writeFileSync(join(directory,'main.log.1'),'2026-11-06T12:34:56.789Z sesskey=PRIVATE_CANARY\n');
+  writeFileSync(join(directory,'main.log'),'2026-11-06T12:34:56.789Z Authorization: Digest username="PRIVATE_USER", response="PRIVATE_RESPONSE"\n');
+  copyDiagnostics();
+  const text=mocks.copy.mock.calls.at(-1)![0] as string;
+  expect(text).not.toContain('PRIVATE_');
+  expect(text).toContain('2026-11-06T12:34:56.789Z');
 });
 it.each(['renameSync','rmSync'] as const)('continues file logging when rotation %s fails', operation => {
   const directory=fixture(); vi.spyOn(console,'log').mockImplementation(()=>{});

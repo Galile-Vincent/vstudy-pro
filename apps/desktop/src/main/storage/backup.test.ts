@@ -176,24 +176,27 @@ it('restores converted image bytes and their Markdown references', async()=>{
   finally {restored.close();}
  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
-it.each(['message','superseded message','deleted conversation'])('validates only readable chat rows when restoring an invalid %s',async kind=>{
+it.each(['message','superseded message','deleted conversation'])('round-trips damaged chat content without rewriting rows (%s)',async kind=>{
  const root=await mkdtemp(join(tmpdir(),'vstudy-chat-source-')),target=await mkdtemp(join(tmpdir(),'vstudy-chat-target-'));
  const {store}=await fixture(root);
  try {
   const c=store.conversations.insert(conversationSchema.parse({id:'22222222-2222-4222-a222-222222222222',documentId:id,providerId:'openai-api',modelId:'test',createdAt:new Date().toISOString()}));
   const m=store.messages.insert(messageSchema.parse({id:'33333333-3333-4333-a333-333333333333',conversationId:c.id,role:'user',parts:[{type:'text',text:'hello'}],createdAt:c.createdAt}));
+  const healthy=store.messages.insert(messageSchema.parse({id:'44444444-4444-4444-a444-444444444444',conversationId:c.id,role:'assistant',parts:[{type:'text',text:'Healthy answer',status:'complete'}],createdAt:c.createdAt}));
   if(kind==='deleted conversation')store.db.prepare("UPDATE conversations SET options='[]',deletedAt=? WHERE id=?").run(c.createdAt,c.id);
   else store.db.prepare("UPDATE messages SET parts='{}',supersededBy=? WHERE id=?").run(kind==='superseded message'?'replacement':null,m.id);
   const zip=join(target,'backup.zip');await exportBackup(store,root,zip);
-  if(kind==='message') {
-   await expect(stageRestore(target,zip)).rejects.toThrow('storage.invalid_backup');
-   expect(await readdir(target)).toEqual(['backup.zip']);
-  } else {
-   await stageRestore(target,zip);await recoverRestore(target);
-   const restored=openStore(join(target,'vstudy.sqlite'));
-   try {expect(restored.conversations.list(id as never)).toHaveLength(kind==='deleted conversation'?0:1);expect(restored.messages.list(c.id)).toHaveLength(kind==='deleted conversation'?1:0);}
-   finally {restored.close();}
-  }
+  const raw=store.db.prepare('SELECT * FROM messages WHERE id=?').get(m.id);
+  const readable=store.messages.list(c.id);
+  await stageRestore(target,zip);await recoverRestore(target);
+  const restored=openStore(join(target,'vstudy.sqlite'));
+  try {
+   expect(restored.conversations.list(id as never)).toHaveLength(kind==='deleted conversation'?0:1);
+   expect(restored.messages.list(c.id)).toEqual(readable);
+   if(kind==='message')expect(readable[0]?.parts[0]).toMatchObject({status:'error',contextExcluded:true});
+   expect(restored.messages.list(c.id)).toContainEqual(healthy);
+   expect(restored.db.prepare('SELECT * FROM messages WHERE id=?').get(m.id)).toEqual(raw);
+  } finally {restored.close();}
   expect(store.documents.list()).toHaveLength(1);
  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
