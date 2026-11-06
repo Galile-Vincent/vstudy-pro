@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="290" height="290" viewBox="0 0 290 290" role="img" aria-label="VStudy Pro symbol">
+<title>VStudy Pro — symbol</title>
+<defs>
+  <!-- All symbols and type are true editable vector geometry -->
+  <linearGradient id="blueMain" x1="14" y1="16" x2="124" y2="155" gradientUnits="userSpaceOnUse">
+    <stop offset="0%" stop-color="#AFD2FF"/><stop offset="40%" stop-color="#7BA8FA"/>
+    <stop offset="100%" stop-color="#5576EC"/>
+  </linearGradient>
+  <linearGradient id="violetMain" x1="124" y1="164" x2="237" y2="10" gradientUnits="userSpaceOnUse">
+    <stop offset="0%" stop-color="#8A78F1"/><stop offset="57%" stop-color="#B48EF5"/>
+    <stop offset="100%" stop-color="#CDA5F5"/>
+  </linearGradient>
+  <linearGradient id="blueLower" x1="55" y1="104" x2="105" y2="185" gradientUnits="userSpaceOnUse">
+    <stop offset="0%" stop-color="#7D9FF2"/><stop offset="52%" stop-color="#A8BEF9"/>
+    <stop offset="100%" stop-color="#CFD8FF"/>
+  </linearGradient>
+  <linearGradient id="violetLower" x1="150" y1="101" x2="188" y2="184" gradientUnits="userSpaceOnUse">
+    <stop offset="0%" stop-color="#967DED"/><stop offset="48%" stop-color="#B3A1F4"/>
+    <stop offset="100%" stop-color="#D5C6F9"/>
+  </linearGradient>
+  <!-- Upper wing fades gently where it folds over the lower wing -->
+  <linearGradient id="upperFade" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+    <stop offset="0.47" stop-color="#fff" stop-opacity="1"/>
+    <stop offset="0.74" stop-color="#fff" stop-opacity="0.64"/>
+    <stop offset="1" stop-color="#fff" stop-opacity="0.06"/>
+  </linearGradient>
+  <mask id="leftWingMask" maskUnits="userSpaceOnUse" x="0" y="0" width="125" height="190">
+    <rect x="0" y="0" width="125" height="190" fill="url(#upperFade)"/>
+  </mask>
+  <mask id="rightWingMask" maskUnits="userSpaceOnUse" x="124" y="0" width="125" height="190">
+    <rect x="124" y="0" width="125" height="190" fill="url(#upperFade)"/>
+  </mask>
+  <linearGradient id="pro" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#5643F3"/><stop offset="0.53" stop-color="#6E46F5"/><stop offset="1" stop-color="#7A50EB"/>
+  </linearGradient>
+  <linearGradient id="proLight" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#B89AFB"/><stop offset="1" stop-color="#CFB1FA"/>
+  </linearGradient>
+  <linearGradient id="lightBackground" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F6F5FD"/>
+  </linearGradient>
+  <linearGradient id="darkBackground" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#191D35"/><stop offset="1" stop-color="#0C1025"/>
+  </linearGradient>
+</defs>
+<rect x="0" y="0" width="290" height="290" rx="65" fill="url(#lightBackground)"/>
+<g transform="translate(21 48)"><g class="vstudy-butterfly-mark">
+  <path d="M 124 94 C 107 54 76 22 28 12 C 14 9 10 13 12 30 C 15 68 29 105 46 121 C 35 145 39 173 59 183 C 76 193 100 183 124 174 Z" fill="url(#blueLower)" opacity="0.88"/>
+  <path d="M 124 94 C 141 54 172 22 220 12 C 234 9 238 13 236 30 C 233 68 219 105 202 121 C 213 145 209 173 189 183 C 172 193 148 183 124 174 Z" fill="url(#violetLower)" opacity="0.92"/>
+  <path d="M 124 94 C 107 54 76 22 28 12 C 14 9 10 13 12 30 C 15 68 35 110 67 137 C 91 153 110 165 124 174 Z" fill="url(#blueMain)" mask="url(#leftWingMask)"/>
+  <path d="M 124 94 C 141 54 172 22 220 12 C 234 9 238 13 236 30 C 233 68 213 110 181 137 C 157 153 138 165 124 174 Z" fill="url(#violetMain)" mask="url(#rightWingMask)"/>
+</g></g>
+</svg>

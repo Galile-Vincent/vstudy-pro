@@ -16,7 +16,7 @@
     "smoke": "pnpm build && node scripts/smoke.mjs",
     "package:verify": "npx --no-install @electron/fuses read --app \"release/mac-arm64/VStudy Pro.app\" && python3 scripts/verify-packaged.py",
     "locales:generate": "node scripts/generate-locales.mjs",
-    "icon": "node scripts/make-icon.mjs"
+    "icon": "node ../../scripts/make-brand.mjs"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.32",
@@ -110,6 +110,10 @@
       {
         "from": "resources/samples",
         "to": "samples"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "brand/icon.png"
       }
     ],
     "mac": {
@@ -139,6 +143,22 @@
           "vstudymoodle"
         ]
       }
-    ]
+    ],
+    "win": {
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "icon": "build/icons",
+      "category": "Education"
+    },
+    "dmg": {
+      "icon": "build/icon.icns",
+      "background": "build/dmg-background.png"
+    },
+    "nsis": {
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
+    }
   }
 }
