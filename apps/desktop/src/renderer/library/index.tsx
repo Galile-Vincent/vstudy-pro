@@ -1,3 +1,4 @@
+import { DocumentArt } from '../shell/document-art';
 import type { CSSProperties } from 'react';
 import { Badge } from '../components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
@@ -343,10 +344,18 @@ export function LibraryView() {
   useLayoutEffect(()=>{const bar=bulkBar.current;if(!bar){setBulkHeight(0);return;}const observer=new ResizeObserver(()=>setBulkHeight(bar.getBoundingClientRect().height));observer.observe(bar);return()=>observer.disconnect();},[selected.length]);
   const [textScale,setTextScale]=useState(()=>parseFloat(getComputedStyle(document.documentElement).fontSize));
   useEffect(()=>{const update=()=>setTextScale(parseFloat(getComputedStyle(document.documentElement).fontSize));const observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['style']});window.addEventListener('resize',update);return()=>{observer.disconnect();window.removeEventListener('resize',update);};},[]);
+  const [viewportWidth, setViewportWidth] = useState(700);
+  useLayoutEffect(() => {
+    const viewport = scroller.current;
+    if (!viewport) return;
+    const observer = new ResizeObserver(() => setViewportWidth(viewport.clientWidth));
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [loading, grid, items.length > 0]);
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const rowHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--library-card-height")) : rowRem * textScale,
+  const rowHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : rowRem * textScale,
     columns = grid
-      ? Math.max(1, Math.floor((scroller.current?.clientWidth ?? 700) / 260))
+      ? Math.max(1, Math.floor(viewportWidth / 280))
       : 1,
     start = Math.min(Math.max(0,items.length-columns),Math.max(0, Math.floor(top / rowHeight) - 2) * columns),
     end = Math.min(
@@ -707,7 +716,7 @@ export function LibraryView() {
                   onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: rowHeight,
+                    height: grid ? rowHeight - 16 : rowHeight,
                     position: "absolute",
                     top: Math.floor(index / columns) * rowHeight,
                     left: `${((index % columns) * 100) / columns}%`,
@@ -834,7 +843,7 @@ export function LibraryView() {
                     }
                   }}
                 >
-{grid ? <>                  <div className="document-cell">
+{grid ? <><DocumentArt id={d.id} kind={d.sourceName.split('.').pop()?.toUpperCase() ?? 'MD'}/><div className="document-cell">
                     <FileText className="document-glyph" aria-hidden="true" />
                     <div className="document-info">
                       <Button variant="outline"

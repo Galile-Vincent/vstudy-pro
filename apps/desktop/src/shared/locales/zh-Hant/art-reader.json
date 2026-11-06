@@ -1,0 +1,22 @@
+{
+  "workspace": "學習空間",
+  "collection": "我的收藏",
+  "companion": "學習夥伴",
+  "welcome_title": "一點好奇，讀出新的理解。",
+  "selection_title": "讓我們再看仔細一點。",
+  "welcome_body": "一起探索《{{title}}》中的想法。",
+  "summarize": "摘要這個章節",
+  "explain": "解釋一個詞",
+  "quiz": "考考我",
+  "prompt_summarize": "請摘要《{{title}}》中{{context}}的重點。",
+  "prompt_explain": "請用生活中的例子，解釋《{{title}}》中{{context}}的重要詞彙。",
+  "prompt_quiz": "請針對《{{title}}》中{{context}}出題考我，一次問一題。",
+  "selected_passage": "選取的段落",
+  "open_document": "目前文件",
+  "offline_title": "安心閱讀，準備好了再用 AI。",
+  "offline_body": "現在就能閱讀與整理文件。想一起探索內容時，隨時都能連接 AI 服務。",
+  "setup": "設定 AI",
+  "without_ai": "先不使用 AI",
+  "local": "你的個人學習空間",
+  "tip": "閱讀小提示"
+}

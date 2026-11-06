@@ -1,0 +1,22 @@
+{
+  "workspace": "ワークスペース",
+  "collection": "コレクション",
+  "companion": "学習パートナー",
+  "welcome_title": "小さな好奇心から、新しい理解へ。",
+  "selection_title": "もう少し詳しく見てみましょう。",
+  "welcome_body": "「{{title}}」のアイデアを一緒に探りましょう。",
+  "summarize": "この節を要約",
+  "explain": "用語を説明",
+  "quiz": "クイズに挑戦",
+  "prompt_summarize": "「{{title}}」の{{context}}の要点をまとめてください。",
+  "prompt_explain": "「{{title}}」の{{context}}の重要な用語を、身近な例で説明してください。",
+  "prompt_quiz": "「{{title}}」の{{context}}について、一問ずつクイズを出してください。",
+  "selected_passage": "選択した文章",
+  "open_document": "開いている文書",
+  "offline_title": "まずは読書から。AI はいつでも。",
+  "offline_body": "文書の閲覧と整理はすぐに始められます。一緒に内容を探りたくなったら、AI サービスに接続しましょう。",
+  "setup": "AI を設定",
+  "without_ai": "AI なしで使う",
+  "local": "あなたの学習スペース",
+  "tip": "読書のヒント"
+}

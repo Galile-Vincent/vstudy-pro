@@ -136,7 +136,7 @@ export function LibrarySidebar() {
   return (
     <>
 
-      <nav className="library-smart" aria-label={tr("library:smartViews")}>
+      <p className="art-reader-sidebar-label">{tr("art-reader:collection")}</p><nav className="library-smart" aria-label={tr("library:smartViews")}>
         {(
           ["all", "recent", "pinned", "unfiled", "converting-failed"] as const
         ).map((view) => (

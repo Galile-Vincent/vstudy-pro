@@ -2,7 +2,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { URL } from 'node:url';
-import { builtinThemes, adjustedTokens, contrastFailures } from '../src/shared/themes/index.ts';
+import { builtinThemes, adjustedTokens, contrastFailures, contrastRatio } from '../src/shared/themes/index.ts';
 
 for (const theme of builtinThemes) {
   for (const scheme of ['light','dark']) {
@@ -10,6 +10,7 @@ for (const theme of builtinThemes) {
       const failures=contrastFailures(adjustedTokens(theme[scheme],scheme,contrast));
       assert.deepEqual(failures,[],`${theme.id} ${scheme} ${contrast}%`);
     }
+    assert.ok(contrastRatio(theme[scheme].ink,theme[scheme].surface)>=4.5,`${theme.id} ${scheme} document-cover label over opaque surface scrim`);
     console.log(`${theme.name} ${scheme}: WCAG AA passed at every contrast setting`);
   }
 }

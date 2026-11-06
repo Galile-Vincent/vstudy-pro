@@ -139,9 +139,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx",
       "registrySha256": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da",
-      "patchedSha256": "25cf2f48a8c0fbd68240a1c0aa14a8a012e7aebc6f08065eb3a385f809061610",
+      "patchedSha256": "1889dbd31a95d3b83d1b3354d3c25a0e9a4764ca014e066ba18e2c77d30e56aa",
       "patch": "docs/vendor-patches/assistant-ui--elements--thread.aui.tsx.patch",
-      "reason": "Retain localized composition slots, validated presentation grouping, app-owned chat controls, and message IDs for history navigation; apply semantic theme colors."
+      "reason": "Retain localized slots, grouping and history IDs. Dock ViewportFooter outside the scrolling viewport and add a ThreadNotice slot for inline provider setup."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback.aui.tsx",

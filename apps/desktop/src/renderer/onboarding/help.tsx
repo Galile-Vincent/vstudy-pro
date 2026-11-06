@@ -7,6 +7,8 @@ import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { Progress } from '../components/ui/progress';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip';
 import { useNavigate } from '../shell';
 import { Onboarding } from './onboarding';
@@ -57,12 +59,12 @@ export function GettingStarted() {
   }, [hasDocument]);
   const items = ['setup', 'document', 'walkthrough', 'help'] as const;
   return <section className="getting-started" aria-labelledby="getting-started-title"><div className="getting-started-heading"><h2 id="getting-started-title">{tr('onboarding:checklist')}</h2><span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span></div><p>{tr('onboarding:checklist_body')}</p>
-    <ol>{items.map(item => <li key={item} data-complete={progress.done.includes(item)}><span aria-hidden="true">{progress.done.includes(item) ? <Check size={16}/> : null}</span><Button variant="ghost" onClick={() => item === 'document' ? navigate('library') : openLearningHelp(item === 'walkthrough' ? 'walkthroughs' : item === 'help' ? 'shortcuts' : 'setup')}>{tr(`onboarding:check_${item}`)}{progress.done.includes(item) && <small>{tr('onboarding:completed')}</small>}</Button></li>)}</ol>
+    <Progress className="art-reader-setup-progress" aria-label={tr('onboarding:checklist')} value={progress.done.length / items.length * 100}/><ol>{items.map(item => <li key={item} data-complete={progress.done.includes(item)}><span aria-hidden="true">{progress.done.includes(item) ? <Check size={16}/> : null}</span><Button variant="ghost" onClick={() => item === 'document' ? navigate('library') : openLearningHelp(item === 'walkthrough' ? 'walkthroughs' : item === 'help' ? 'shortcuts' : 'setup')}>{tr(`onboarding:check_${item}`)}{progress.done.includes(item) && <small>{tr('onboarding:completed')}</small>}</Button></li>)}</ol>
     {progress.status === 'paused' && <Button variant="outline" onClick={() => { try { saveProgress({ status: 'active' }); openLearningHelp('setup'); } catch { setError(tr('onboarding:save_error')); } }}>{tr('onboarding:resume')}</Button>}
     {error && <p role="alert">{error}</p>}
   </section>;
 }
-export function ContextCoach() {
+export function ContextCoach({ inline = false }: { inline?: boolean }) {
   useTranslation();
   const { route } = useNavigate();
   const progress = useLearningProgress();
@@ -75,6 +77,12 @@ export function ContextCoach() {
     return () => media.removeEventListener('change', resize);
   }, []);
   const kind = route.view === 'workspace' ? 'workspace' : route.view === 'courses' ? 'courses' : null;
-  if (!kind || progress.dismissed.includes(kind)) return null;
+  if (!kind || progress.dismissed.includes(kind) || (kind === 'workspace' && !inline)) return null;
+  if (kind === 'workspace') return <Popover><PopoverTrigger asChild><Button variant="ghost" size="sm" className="art-reader-coach-trigger"><CircleHelp size={15}/>{tr('art-reader:tip')}</Button></PopoverTrigger><PopoverContent align="start" className="art-reader-coach">
+    <strong>{tr('onboarding:coach_workspace')}</strong><p>{tr('onboarding:coach_workspace_body')}</p>
+    <Button variant="link" onClick={() => openLearningHelp('walkthroughs')}>{tr('onboarding:help_walkthroughs')}</Button>
+    <Button variant="ghost" size="icon" aria-label={tr('onboarding:dismiss_tip')} onClick={() => { try { saveProgress({ dismissed: [...progress.dismissed, kind] }); } catch { setError(tr('onboarding:save_error')); } }}><X size={16}/></Button>
+    {error && <p role="alert">{error}</p>}
+  </PopoverContent></Popover>;
   return <aside className="context-coach" aria-label={tr('onboarding:tip')}><div><details open={expanded} onToggle={event => setExpanded(event.currentTarget.open)}><summary><strong>{tr(`onboarding:coach_${kind}`)}</strong></summary><p>{tr(`onboarding:coach_${kind}_body`)}</p></details><Button variant="ghost" onClick={() => openLearningHelp('walkthroughs')}>{tr('onboarding:help_walkthroughs')}</Button>{error && <p role="alert">{error}</p>}</div><Tooltip><TooltipTrigger asChild><Button variant="ghost" aria-label={tr('onboarding:dismiss_tip')} onClick={() => { try { saveProgress({ dismissed: [...progress.dismissed, kind] }); } catch { setError(tr('onboarding:save_error')); } }}><X size={16}/></Button></TooltipTrigger><TooltipContent>{tr('onboarding:dismiss_tip')}</TooltipContent></Tooltip></aside>;
 }

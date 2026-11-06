@@ -135,6 +135,7 @@ export type ThreadComponents = {
   TaskGroup?: ComponentType<{ group: ThreadGroupPart }> | undefined;
   Source?: SourceMessagePartComponent | undefined;
   WelcomeExtra?: ComponentType | undefined;
+  ThreadNotice?: ComponentType | undefined;
   Announcement?: ComponentType | undefined;
   CopyAction?: ComponentType | undefined;
   Text?: ComponentType | undefined;
@@ -189,8 +190,6 @@ const EMPTY_COMPONENTS: ThreadComponents = {};
 const ThreadComponentsContext =
   createContext<ThreadComponents>(EMPTY_COMPONENTS);
 
-// Startup exposes a loading placeholder thread; treat it as a new chat so
-// the composer mounts centered. Loads after startup keep the docked layout.
 const isNewChatView = (s: AssistantState) =>
   s.thread.messages.length === 0 &&
   (!s.thread.isLoading || s.threads.isLoading);
@@ -228,21 +227,16 @@ export const Thread: FC<ThreadProps> = ({
   autoFocus = true,
 }) => {
   useTranslation();
-  const isEmpty = useAuiState(isNewChatView);
-
   return (
     <ThreadComponentsContext.Provider value={components}>
-      <ThreadRoot isEmpty={isEmpty} autoFocus={autoFocus} />
+      <ThreadRoot autoFocus={autoFocus} />
     </ThreadComponentsContext.Provider>
   );
 };
 
-const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
-  isEmpty,
-  autoFocus,
-}) => {
+const ThreadRoot: FC<{ autoFocus: boolean }> = ({ autoFocus }) => {
   useTranslation();
-  const { Announcement, Welcome = ThreadWelcome } = useContext(ThreadComponentsContext);
+  const { Announcement, ThreadNotice, Welcome = ThreadWelcome } = useContext(ThreadComponentsContext);
 
   return (
     <ThreadPrimitive.Root
@@ -274,6 +268,7 @@ const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
             <ThreadHistorySkeleton />
           </AuiIf>
 
+          {ThreadNotice && <ThreadNotice />}
           <ThreadLoadEarlier />
 
           <div
@@ -284,23 +279,16 @@ const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
               {() => <ThreadMessage />}
             </ThreadPrimitive.Messages>
           </div>
-
-          <ThreadPrimitive.ViewportFooter
-            className={cn(
-              "aui-thread-viewport-footer bg-background mt-auto flex flex-col gap-4 overflow-visible pb-4 md:pb-6",
-              !isEmpty &&
-                "sticky bottom-0 mt-auto rounded-t-(--composer-radius)",
-            )}
-          >
-            <ThreadScrollToBottom />
-            <ThreadFollowupSuggestions />
-            <Composer autoFocus={autoFocus} />
-            <AuiIf condition={(s) => isNewChatView(s) && s.composer.isEmpty}>
-              <ThreadSuggestions />
-            </AuiIf>
-          </ThreadPrimitive.ViewportFooter>
         </div>
       </ThreadPrimitive.Viewport>
+      <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible pb-4 md:pb-6">
+        <ThreadScrollToBottom />
+        <ThreadFollowupSuggestions />
+        <Composer autoFocus={autoFocus} />
+        <AuiIf condition={(s) => isNewChatView(s) && s.composer.isEmpty}>
+          <ThreadSuggestions />
+        </AuiIf>
+      </ThreadPrimitive.ViewportFooter>
     </ThreadPrimitive.Root>
   );
 };

@@ -1,3 +1,4 @@
+/** Navigation frame and profile-local routes shared by the study views. */
 import { HelpMenu } from "../onboarding/help";
 import { useSidebarOverlay } from './use-sidebar-overlay';
 import { applyAppearance } from '../settings/apply-appearance';
@@ -22,6 +23,7 @@ import { tr } from "../../shared/i18n";
 import type { Document } from "../../shared";
 import type { LibraryQuery } from "../../shared/library";
 import "./shell.css";
+import "./art-reader.css";
 export type View = "home" | "library" | "workspace" | "welcome" | "courses" | "history";
 export type Route = {
   view: View;
@@ -51,6 +53,12 @@ export function AppShell({
 }) {
   useTranslation();
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [displayName, setDisplayName] = useState('');
+  useEffect(() => {
+    const toggle = () => setSidebarVisible(visible => !visible);
+    window.addEventListener('vstudy:toggle-sidebar', toggle);
+    return () => window.removeEventListener('vstudy:toggle-sidebar', toggle);
+  }, []);
   const closeSidebar = useCallback(() => setSidebarVisible(false), []);
   const sidebarOverlay = useSidebarOverlay(closeSidebar);
   useEffect(() => {
@@ -62,7 +70,7 @@ export function AppShell({
   useEffect(() => {
     void desktop
       .invoke("settings:get", {})
-      .then((s) => { applyAppearance(s); return applyLanguage(s.language); });
+      .then((s) => { setDisplayName(s.displayName ?? ''); applyAppearance(s); return applyLanguage(s.language); });
     void desktop.invoke("settings:appearance", {}).then((a) => {
       document.documentElement.dataset.reducedTransparency = String(
         a.reducedTransparency,
@@ -82,7 +90,7 @@ export function AppShell({
     return { view: "home" };
   });
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 999px)');
+    const media = window.matchMedia('(max-width: 1199px)');
     const update = () => { if (media.matches && (route.view === 'workspace' || window.innerWidth < 720)) setSidebarVisible(false); };
     update(); media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
@@ -115,8 +123,8 @@ export function AppShell({
           className="shell-sidebar"
           aria-label={tr("common:document_library")}
         >
-          <SidebarHeader className="shell-brand">{tr("library:brand")}</SidebarHeader><SidebarContent>
-          <SidebarGroup><SidebarMenu>
+          <SidebarHeader className="shell-brand"><span className="art-reader-brand-mark" aria-hidden="true"><BookOpen size={18}/></span><span>{tr("library:brand")}</span></SidebarHeader><SidebarContent>
+          <SidebarGroup><p className="art-reader-sidebar-label">{tr("art-reader:workspace")}</p><SidebarMenu>
             <SidebarMenuItem><SidebarMenuButton
               aria-current={route.view === "home" ? "page" : undefined}
               onClick={() => navigate("home")}
@@ -126,7 +134,7 @@ export function AppShell({
             </SidebarMenuButton></SidebarMenuItem>
             <SidebarMenuItem><SidebarMenuButton
               data-parent={!!route.query?.folderId}
-              aria-current={route.view === "library" ? "page" : undefined}
+              aria-current={route.view === "library" || route.view === "workspace" ? "page" : undefined}
               onClick={() => navigate("library")}
             >
               <BookOpen />
@@ -135,7 +143,7 @@ export function AppShell({
             <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "courses" ? "page" : undefined} onClick={() => navigate("courses")}><GraduationCap />{tr("moodle:courses")}</SidebarMenuButton></SidebarMenuItem>
             <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "history" ? "page" : undefined} onClick={() => navigate("history")}><HistoryIcon/>{tr("history:title")}</SidebarMenuButton></SidebarMenuItem>
           </SidebarMenu></SidebarGroup>
-          {sidebar}</SidebarContent><SidebarFooter><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
+          {sidebar}</SidebarContent><SidebarFooter><div className="art-reader-profile"><span className="art-reader-avatar" aria-hidden="true">{displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <BookOpen size={16}/>}</span><span><strong>{displayName || tr("library:brand")}</strong><small>{tr("art-reader:local")}</small></span></div><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
         </Sidebar>
         <div className="shell-main">
           <header className="shell-topbar">
