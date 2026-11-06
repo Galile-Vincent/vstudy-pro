@@ -1,0 +1,2 @@
+ts	phase	decision	why	evidence	result
+2026-11-06T00:00:00Z	plan	Keep stable installer aliases across signing modes	One-click links must survive addition of secrets	docs/DISTRIBUTION_PLAN.md	planned
