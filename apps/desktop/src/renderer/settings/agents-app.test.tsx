@@ -33,6 +33,7 @@ beforeEach(async () => {
     if (channel === 'settings:appearance') return { reducedTransparency: false };
     if (channel === 'settings:systemLocale') return 'en';
     if (channel === 'providers:list') return [];
+    if (channel === 'ai-cli:list') return [];
     return { ok: true };
   });
   host = document.createElement('div'); document.body.append(host); root = createRoot(host);
