@@ -7,7 +7,8 @@
 /** Portable backups contain SQLite and immutable library files. Secrets and executables are excluded. */
 import { backup, DatabaseSync } from 'node:sqlite';
 import { mkdtemp, readdir, readFile, rm, mkdir, lstat, rename } from 'node:fs/promises';
-import { join, basename, dirname, resolve, sep } from 'node:path';
+import { join, basename, dirname, resolve } from 'node:path';
+import { isPathWithin, portableBasename } from '../platform/paths';
 import { z } from 'zod';
 import type { Store } from '../db';
 import { openStore } from '../db';
@@ -42,7 +43,7 @@ export async function libraryFiles(root:string):Promise<string[]> {
 
 /** Call with writers settled and the IPC maintenance gate held. SQLite backup includes WAL pages. */
 export async function exportBackup(store:Store,root:string,destination:string):Promise<void> {
-  if(resolve(destination).startsWith(resolve(root)+sep))throw new Error('storage.unsafe_file');
+  if(resolve(destination) === resolve(root) || isPathWithin(root,destination))throw new Error('storage.unsafe_file');
   const stage=await mkdtemp(join(root,'.backup-'));
   try {
     const snapshot=join(stage,'vstudy.sqlite');await backup(store.db,snapshot);
@@ -54,7 +55,7 @@ export async function exportBackup(store:Store,root:string,destination:string):P
     const snapshotDb=new DatabaseSync(snapshot,{readOnly:true});
     try {
       for(const row of snapshotDb.prepare('SELECT sourceHash,sourcePath,status,activeVersion FROM documents').all()){
-        const hash=String(row.sourceHash),source=`library/${hash}/${basename(String(row.sourcePath))}`;
+        const hash=String(row.sourceHash),source=`library/${hash}/${portableBasename(String(row.sourcePath))}`;
         if(inventory.get(source)?.sha256!==hash || row.status==='ready' && !inventory.has(`library/${hash}/content.md`) || row.activeVersion==='ai' && !inventory.has(`library/${hash}/content.ai.md`))throw new Error('storage.invalid_backup');
       }
     } finally {snapshotDb.close();}
@@ -81,7 +82,7 @@ export async function stageRestore(root:string,source:string):Promise<void> {
       store.settings.get();
       new PlannerRepository(store.db).snapshot(true);
       for(const row of store.db.prepare('SELECT id,sourceHash,sourcePath,markdownPath,status,activeVersion FROM documents').all()){
-        const hash=String(row.sourceHash),name=basename(String(row.sourcePath)),original=`library/${hash}/${name}`;
+        const hash=String(row.sourceHash),name=portableBasename(String(row.sourcePath)),original=`library/${hash}/${name}`;
         if(!/^[a-f0-9]{64}$/.test(hash) || !/^source\.[a-z0-9]{1,12}$/.test(name) || entries.get(original)?.sha256!==hash)throw new Error('storage.invalid_backup');
         if(row.status==='ready' && !entries.has(`library/${hash}/content.md`))throw new Error('storage.invalid_backup');
         if(row.activeVersion==='ai' && !entries.has(`library/${hash}/content.ai.md`))throw new Error('storage.invalid_backup');

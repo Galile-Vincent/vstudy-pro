@@ -23,6 +23,8 @@ export async function retryBusy<T>(operation: () => Promise<T>): Promise<T> {
 
 /** Flush a directory after publishing or removing a file. */
 export async function syncDirectory(path: string): Promise<void> {
+  // Windows cannot open a directory through Node's file API. File contents are still flushed.
+  if (process.platform === 'win32') return;
   const directory = await open(path, 'r');
   try { await directory.sync(); } finally { await directory.close(); }
 }
@@ -45,8 +47,10 @@ export function atomicWriteSync(path: string, data: string | Uint8Array): void {
     const file = openSync(temporary, 'wx', 0o600);
     try { writeFileSync(file, data); fsyncSync(file); } finally { closeSync(file); }
     renameSync(temporary, path);
-    const directory = openSync(dirname(path), 'r');
-    try { fsyncSync(directory); } finally { closeSync(directory); }
+    if (process.platform !== 'win32') {
+      const directory = openSync(dirname(path), 'r');
+      try { fsyncSync(directory); } finally { closeSync(directory); }
+    }
   } finally { rmSync(temporary, { force: true }); }
 }
 

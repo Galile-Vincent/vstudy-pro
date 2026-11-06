@@ -7,24 +7,19 @@
 import { containedPath } from "./services/file-paths";
 import { productionCsp } from "./security";
 import { readFile, stat } from "node:fs/promises";
-import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { extname, join, resolve } from "node:path";
+import { isPathWithin, isPortableRelativePath } from './platform/paths';
 import { documentIdSchema } from "../shared/domain";
 import type { Store } from "./db";
-
-function isWithin(root: string, candidate: string): boolean {
-  const path = relative(root, candidate);
-  return path !== "" && path !== ".." && !path.startsWith(`..${sep}`) && !isAbsolute(path);
-}
 
 /** Resolve only assets contained by a known library document; reject linked or escaping paths. */
 export async function resolveAssetPath(root: string, encodedPath: string): Promise<string> {
   const path = decodeURIComponent(encodedPath);
-  if (!path || path.includes("\\") || [...path].some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127) ||
-      isAbsolute(path) || path.split("/").some((part) => part === ".." || part === ".")) {
+  if (!isPortableRelativePath(path)) {
     throw new Error("Invalid asset path");
   }
   const candidate = resolve(root, path);
-  if (!isWithin(resolve(root), candidate)) throw new Error("Asset outside document");
+  if (!isPathWithin(root, candidate)) throw new Error("Asset outside document");
   return containedPath(root, candidate);
 }
 
