@@ -42,6 +42,8 @@ Node does not expose portable Unix peer credentials. A small bundled native help
 
 Pairing begins on a connection and returns a random short code for display on stderr. The app shows the same code, the claimed client name, requested scopes, and selected accounts. Finish is bound to that connection and delivers one random bearer token once. Only its SHA-256 hash is persisted in the app. The client saves its bearer in a private file. The short code is a comparison aid, not a credential or proof of client identity. Client names are self-reported.
 
+The Windows client must authenticate the actual pipe server owner before sending a frame. Review found that a predictable pipe name plus server-side ACLs could still let a client send a bearer to another user's pre-bound server. `apps/mcp/src/connection.ts` now requires a same-handle authenticated connector with Identification-level impersonation. No bare Node pipe fallback remains. Stream P must wire and validate that connector; the default Windows CLI fails closed until then. The launcher uses HKCU uninstall metadata for custom paths, the per-user Programs location next, and legacy HKLM metadata last. It never executes a registry command string.
+
 The switch defaults off. No pairing is accepted until the student enables it in Settings > Agents. Grants expire after 30 days and restrict both scopes and account IDs. Newly added accounts are not silently included. Revocation and switching off cancel pending approvals and deny subsequent calls. Closing a window on macOS keeps the bridge alive. An explicit Quit stops it. `--mcp-background` starts without showing the main window. Consent restores the app window.
 
 ## Tools and capability detection
@@ -71,6 +73,8 @@ Every returned data payload is an explicit untrusted-content envelope with schoo
 A regression test found that learning secret values only when creating a live Moodle client left the first cached read dependent on secret-format heuristics. Preparation now loads stored school token values into the main-only redactor before output, including expired sessions. This makes cached reads safe without contacting the school. A failure to obtain the redaction snapshot fails the request without returning cached content.
 
 Pagination bounds arrays and converted document text. Cursors are validated and tied to the tool, account, and query. Redaction runs on tool output, errors, consent payloads, and activity entries. Activity records contain redacted arguments and fixed result codes, retain 30 days locally, and have a hard count limit. A bounded record cannot become a second course-content archive.
+
+Write payloads must survive the redaction pass unchanged. Otherwise the request is rejected, preserving the relationship between the exact approved payload and the executed call. This deliberately restricts some otherwise valid text containing links, markup, or credential-like values. Tests cover full 20,000-character payloads and rejection rather than silent truncation.
 
 Prompt injection can still affect an agent that ignores the envelope. The app's independent scopes and approvals limit the resulting actions. A local grant cannot stop an authorized agent from copying data it legitimately reads.
 

@@ -48,6 +48,8 @@ Forum replies and assignment submissions always require a fresh high-risk approv
 
 Assignment submission accepts your own text with `studentOwned: true`. The app also requires you to confirm that it is your own work before enabling approval. The tool supports plain-text online submissions. File-only assignments, unsupported team workflows, and school-specific statements need the normal Moodle page. The agent cannot upload arbitrary local paths or reuse Moodle draft file IDs.
 
+If redaction would change an action payload, VStudy rejects it instead of showing different text for approval. Use Moodle directly for text that contains removed links, markup, credential-like values, or unsupported formatting.
+
 ## Complete assessed work yourself
 
 Quiz tools provide names, schedules, attempt states, and grades. They do not return attempt questions or answers. There is no tool to start an attempt, save answers, submit a quiz, bypass an exam rule, autoplay a graded activity, or send synthetic video progress.
@@ -113,7 +115,9 @@ VStudy removes active HTML and remote links from results. Results contain stable
 
 ## Diagnose a connection
 
-Run `vstudy-mcp doctor` with the same client identity and data location used by its server. Doctor reports app discovery, socket, protocol version, and local grant status. The in-app wizard also has **Test connection**. A missing grant before first pairing is expected.
+Run `vstudy-mcp doctor --client <client>` with the same identity and data location used by its server. Doctor reports app discovery, connection, protocol version, and grant status. It verifies an existing grant through the app and discards returned account content. It does not pair or launch the app. The in-app wizard also has **Test connection**. A missing grant before first pairing is expected.
+
+To pair again after expiry or revocation, stop the client's VStudy MCP server and run `vstudy-mcp reset --client <client>`. Restart it and call a tool to request fresh consent. Reset clears only that local bearer and expiry. It preserves the client UUID and does not revoke an app grant. It supports `--dry-run`.
 
 When the app is absent, open or install it first. If the socket is missing on macOS, the server tries to launch **VStudy Pro** in the background. Closing the app window keeps the bridge running on macOS. Use the Dock icon to restore it. **Quit** stops the bridge. A later read reconnects. An interrupted write requires checking its outcome before repeating it.
 
@@ -142,6 +146,8 @@ A copied local bearer has no authority after revocation or expiry. Removing clie
 The bridge has no TCP listener. macOS and Linux use a Unix socket with a 0700 directory and 0600 socket. A bundled native helper asks the kernel for the peer UID before parsing requests. The peer must be the same OS user. Each tool call separately requires a bearer whose hash is stored by the app.
 
 The Windows transport contract uses a current-user-SID-restricted named pipe and private ACL-backed state. Stream P supplies that host; Windows transport execution is not verified by this Mac-only stream. The app fails closed when the platform adapter is absent. Unix permission tests skip explicitly on Windows; portable authorization and protocol tests still run.
+
+The Windows client also requires an authenticated connector that checks the server SID on the same connected handle before sending any bytes. The default CLI stays unavailable until Stream P wires it. The launcher discovers custom paths through HKCU uninstall metadata, then tries `%LOCALAPPDATA%\Programs\VStudy Pro\VStudy Pro.exe`, followed by legacy HKLM metadata. App data stays under `%APPDATA%\@vstudy\desktop`. The [client-format reference](../apps/mcp/CLIENT_FORMATS.md) records Windows configuration paths and acceptance limits.
 
 Scopes, account allowlists, expiring grants, exact one-shot approvals, capability checks, bounded scheduling, fixed errors, redaction, and untrusted-content envelopes are independent controls. The local activity log retains bounded redacted entries for 30 days, up to 1,000 calls. It is not a school-content archive or a tamper-proof audit log.
 
