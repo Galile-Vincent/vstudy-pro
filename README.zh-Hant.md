@@ -4,7 +4,7 @@
 
 在 Mac 上閱讀課程教材、整合 Moodle 作業期限，並把待辦事項排成讀書計畫。
 
-![版本 0.2.1](https://img.shields.io/badge/version-0.2.1-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
+![版本 0.2.2](https://img.shields.io/badge/version-0.2.2-blue) ![macOS arm64](https://img.shields.io/badge/platform-macOS_arm64-black)
 
 ![圖論筆記、已選段落、示範回答與來源引用](docs/assets/readme/reader.webp)
 
@@ -14,7 +14,7 @@
 
 前往 [GitHub Releases](https://github.com/ava-apple/vstudy-pro/releases/latest)，下載同一版本的 DMG 與 `SHA256SUMS.txt`。此儲存庫目前為私人儲存庫，需要存取權限。若尚無已發布版本，請向維護者取得權限，或依下方說明自行建置。
 
-目前本機建置產生的檔案是 **`VStudy-Pro-0.2.1-arm64.dmg`**，檔名中的版本會隨發布更新。[Release workflow](.github/workflows/release.yml) 在推送 `v*.*.*` 標籤後執行，確認標籤與桌面版版本相符，再將未經 Developer ID 簽署的安裝檔與校驗碼附加到**草稿版本**。草稿不等於已開放下載的正式版本。
+目前本機建置產生的檔案是 **`VStudy-Pro-0.2.2-arm64.dmg`**，檔名中的版本會隨發布更新。[Release workflow](.github/workflows/release.yml) 在推送 `v*.*.*` 標籤後執行，確認標籤與桌面版版本相符，再將未經 Developer ID 簽署的安裝檔與校驗碼附加到**草稿版本**。草稿不等於已開放下載的正式版本。
 
 需要 Apple silicon Mac（arm64）。產生的 app 宣告最低系統版本為 macOS 12.0。Builder 設定未固定架構，預設使用建置主機的架構；目前已驗證 arm64 建置。Intel 與 universal 建置尚未驗證。Release workflow 同樣依 runner 決定架構；Intel Mac 使用者須先確認實際發布檔案。未提供 Windows 或 Linux 版本。AI 與學校同步需要網路；閱讀本機 Markdown 與文字檔不需要 AI 帳號。
 
@@ -63,7 +63,7 @@ pnpm build
 pnpm --filter @vstudy/desktop exec electron-builder --mac dmg dir --publish never -c.mac.notarize=false -c.mac.identity=null
 ```
 
-在 arm64 主機上會產生 `apps/desktop/release/VStudy-Pro-0.2.1-arm64.dmg` 與 `apps/desktop/release/mac-arm64/VStudy Pro.app`。上述指令停用 Developer ID 簽署與公證；`pnpm package` 則使用設定中的預設簽署與公證流程。對外發布請參閱[發布指南](docs/ENGINEERING.md#prepare-a-release)與[簽署憑證設定](CONTRIBUTING.md#sign-a-distribution-build)。
+在 arm64 主機上會產生 `apps/desktop/release/VStudy-Pro-0.2.2-arm64.dmg` 與 `apps/desktop/release/mac-arm64/VStudy Pro.app`。上述指令停用 Developer ID 簽署與公證；`pnpm package` 則使用設定中的預設簽署與公證流程。對外發布請參閱[發布指南](docs/ENGINEERING.md#prepare-a-release)與[簽署憑證設定](CONTRIBUTING.md#sign-a-distribution-build)。
 
 轉換非純文字文件前，需另外安裝 **uv** 或 **Python 3.10+**。首次轉換會先徵求同意，才從 PyPI 下載以雜湊鎖定的相依套件；uv 也可能從 GitHub 下載 Python。「**設定 > 隱私權**」提供重試與持續生效的離線模式。Markdown 與文字檔不需要安裝這些套件。
 

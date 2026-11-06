@@ -3,6 +3,31 @@
 Generated from Git history with git-cliff. Historical subjects are preserved.
 Pre-baseline changes without a conventional prefix appear under Other changes.
 
+## v0.2.2
+
+### Documentation
+- docs(website): record v2 design evidence and quality checks (9bc0ec2)
+- docs(desktop): record calm art decisions and visual evidence (9d8dae4)
+- docs(art): record fields-only cover regression evidence (03fd9e4)
+- docs(website): verify clean-art integration and scrolled header (2aab3b5)
+
+### Features
+- feat(website): redesign marketing around neutral surfaces and live demos (829f62b)
+- feat(desktop): soften course and document artwork (3c53162)
+- feat(desktop): animate user appearance changes (7a37e2a)
+- feat(art): merge calm course art, borderless chrome and smooth theme transitions (e41052e)
+- feat(website): merge neutral redesign v2 with refreshed screenshots (5569d15)
+
+### Fixes
+- fix(desktop): reveal header fades only while content scrolls (3a3c528)
+- fix(art): prevent supplied images from reintroducing patterns (9d01964)
+- fix(art): merge fields-only course art with no stripe overlays (6d26b91)
+
+### Maintenance
+- chore(marketing): refresh product captures with fields-only course art (816f147)
+
+### Tests
+- test(desktop): verify calm art and theme transition frames (7ce29c3)
 ## v0.2.1
 
 ### Features
@@ -16,6 +41,9 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 - feat(marketing): add curated app screenshot pipeline (3dff35e)
 - feat(website): show curated product views across marketing docs (dbe6326)
 - feat(marketing): merge curated screenshots, capture pipeline and refreshed site (e61ba2c)
+
+### Maintenance
+- chore(release): prepare v0.2.1 (ec24a40)
 
 ### Tests
 - test(courses): add reusable art fixtures and Electron evidence (87d202b)
