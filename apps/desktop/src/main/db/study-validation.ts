@@ -1,7 +1,7 @@
 /** Side-effect-free payload checks for staged backups, including historical study rows. */
 import type { DatabaseSync } from 'node:sqlite';
 import { z } from 'zod';
-import { studyScopeSchema, studyResolvedScopeSchema, studyTestSchema, studyAnswersSchema, type StudyTest } from '../../shared/review-artifacts';
+import { isStudyAnswer, studyScopeSchema, studyResolvedScopeSchema, studyTestSchema, studyAnswersSchema, type StudyTest } from '../../shared/review-artifacts';
 import { studyCourseSchema, studyUnitSchema, studyConceptSchema, studyChatLinkSchema, studyPrefsSchema } from '../../shared/review';
 
 const id=z.string().uuid(), at=z.string().datetime(), text=z.string().min(1).max(240), bit=z.union([z.literal(0),z.literal(1)]);
@@ -34,16 +34,20 @@ export function validateStudyData(db:DatabaseSync):void {
   check('study_artifacts',row=>{
    const artifact=artifactSchema.parse(row); const scope=studyScopeSchema.parse(json(artifact.scopeJson,8192));
    const resolved=studyResolvedScopeSchema.parse(json(artifact.resolvedScopeJson,65536));
-   // Ready artifacts retain immutable source snapshots after unlink or deletion.
-   // Existing units still have to belong to this course; retries must resolve live sources anew.
+   // Snapshots outlive membership. Existing objects must never acquire another course's ownership.
+   const historical=artifact.status!=='generating';
    for(const unitId of [...resolved.unitIds,...(scope.kind==='units'?scope.unitIds:[])]){
-    const historical=artifact.status==='ready'&&resolved.unitIds.includes(unitId)&&!db.prepare('SELECT 1 FROM study_units WHERE id=?').get(unitId);
-    if(!historical)courseMember('study_units','id',unitId,artifact.courseId);
+    if(!historical||db.prepare('SELECT 1 FROM study_units WHERE id=?').get(unitId))
+     courseMember('study_units','id',unitId,artifact.courseId);
    }
-   for(const key of [...resolved.conceptKeys,...(scope.kind==='concepts'?scope.conceptKeys:[])])courseMember('study_concepts','key',key,artifact.courseId);
+   const conceptMember=(key:string)=>{
+    if(!historical||db.prepare('SELECT 1 FROM study_concepts WHERE key=?').get(key))
+     courseMember('study_concepts','key',key,artifact.courseId);
+   };
+   for(const key of [...resolved.conceptKeys,...(scope.kind==='concepts'?scope.conceptKeys:[])])conceptMember(key);
    for(const documentId of [...resolved.documentIds,...(scope.kind==='documents'?scope.documentIds:[])]){
-    const historical=artifact.status==='ready'&&resolved.sources.some(source=>source.documentId===documentId);
-    if(!historical)documentMember(documentId,artifact.courseId);
+    if(!historical||db.prepare('SELECT 1 FROM study_course_documents WHERE documentId=?').get(documentId))
+     documentMember(documentId,artifact.courseId);
    }
    for(const source of resolved.sources)if(!resolved.documentIds.includes(source.documentId))throw new Error('unresolved source');
    if(scope.kind==='dates'){
@@ -53,7 +57,8 @@ export function validateStudyData(db:DatabaseSync):void {
    if(artifact.testJson!==null){
     const test=studyTestSchema.parse(json(artifact.testJson,262144));tests.set(artifact.id,test);
     for(const item of test.items){
-     courseMember('study_concepts','key',item.conceptKey,artifact.courseId);
+     if(!resolved.conceptKeys.includes(item.conceptKey))throw new Error('unresolved item concept');
+     conceptMember(item.conceptKey);
      if(!resolved.sources.some(source=>source.documentId===item.source.documentId&&source.version===item.source.version&&source.excerptHash===item.source.excerptHash))throw new Error('invalid item source');
     }
    }
@@ -64,7 +69,7 @@ export function validateStudyData(db:DatabaseSync):void {
    if(attempt.committedAt!==null&&attempt.committedAt<attempt.startedAt||attempt.confirmedAt!==null&&attempt.confirmedAt<attempt.committedAt!)throw new Error('invalid attempt chronology');
    for(const [itemId,answer]of Object.entries(answers)){
     const item=test.items.find(item=>item.id===itemId);if(!item)throw new Error('invalid answer item');
-    if(answer!==null&&(item.type==='mcq'?(typeof answer!=='number'||answer>=item.options.length):item.type==='true_false'?typeof answer!=='boolean':typeof answer!=='string'))throw new Error('invalid answer type');
+    if(!isStudyAnswer(item,answer))throw new Error('invalid answer type');
    }
    for(const raw of db.prepare('SELECT * FROM study_attempt_items WHERE attemptId=?').all(attempt.id)){
     const item=test.items.find(item=>item.id===raw.itemId);

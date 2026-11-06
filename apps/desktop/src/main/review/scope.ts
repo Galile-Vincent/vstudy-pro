@@ -20,22 +20,27 @@ export interface ScopeInputs {
 }
 function midnight(date: string, zone: string): string {
     const target = Date.parse(date + 'T00:00:00Z');
-    const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
-    let time = target;
-    for (let i = 0; i < 6; i++) {
+    const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' });
+    const localDate = (time: number) => {
         const p = Object.fromEntries(fmt.formatToParts(time).map(p => [p.type, p.value]));
-        const local = Date.parse(`${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}Z`);
-        const delta = target - local;
-        if (!delta)
-            return new Date(time).toISOString();
-        time += delta;
+        return `${p.year}-${p.month}-${p.day}`;
+    };
+    // Search the date boundary, not an exact midnight which DST can skip or repeat.
+    const hour = 3600000;
+    for (let time = target - 36 * hour; time <= target + 36 * hour; time += hour) {
+        if (localDate(time) !== date) continue;
+        let low = time - hour, high = time;
+        while (high - low > 1) {
+            const mid = Math.floor((low + high) / 2);
+            if (localDate(mid) < date) low = mid;
+            else high = mid;
+        }
+        return new Date(high).toISOString();
     }
     throw new Error('review.invalid_date');
 }
 export function dateRange(fromDate: string, toDate: string, timeZone: string) {
     studyScopeSchema.parse({ kind: 'dates', fromDate, toDate, timeZone });
-    if (!/^(?:UTC|[A-Za-z_]+\/[A-Za-z_+\-/]+)$/.test(timeZone))
-        throw new Error('review.invalid_zone');
     const days = (Date.parse(toDate) - Date.parse(fromDate)) / 86400000;
     if (days <= 0 || days > 366)
         throw new Error('review.invalid_date');
@@ -63,7 +68,8 @@ export function resolveScope(raw: z.input<typeof studyScopeSchema>, data: ScopeI
         }
         return false;
     });
-    const documentIds = [...new Set(units.flatMap(u => u.documentIds).concat(scope.kind === 'documents' ? scope.documentIds : []))].filter(id => data.documents.includes(id));
-    const snapshot: StudyResolvedScope = { unitIds: units.map(u => u.id), documentIds, conceptKeys: requestedConcepts.filter(c => c.unitId && units.some(u => u.id === c.unitId)).map(c => c.key), from: range?.from ?? null, to: range?.to ?? null, timeZone: scope.kind === 'dates' ? scope.timeZone : 'UTC', sources: [], assumptions: fallback.length ? ['Undated units based on when you asked: ' + fallback.join(', ')] : [] };
+    const unitless = requestedConcepts.some(c => c.unitId === null);
+    const documentIds = [...new Set(units.flatMap(u => u.documentIds).concat(scope.kind === 'documents' ? scope.documentIds : (scope.kind === 'concepts' || scope.kind === 'weak') && unitless ? data.documents : []))].filter(id => data.documents.includes(id));
+    const snapshot: StudyResolvedScope = { unitIds: units.map(u => u.id), documentIds, conceptKeys: requestedConcepts.filter(c => c.unitId === null || units.some(u => u.id === c.unitId)).map(c => c.key), from: range?.from ?? null, to: range?.to ?? null, timeZone: scope.kind === 'dates' ? scope.timeZone : 'UTC', sources: [], assumptions: fallback.length ? ['Undated units based on when you asked: ' + fallback.join(', ')] : [] };
     return { status: documentIds.length ? 'resolved' as const : 'needs_source_selection' as const, snapshot };
 }

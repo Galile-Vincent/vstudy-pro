@@ -7,7 +7,7 @@ import { serializeUntrusted } from './untrusted';
 const id = '10000000-0000-4000-8000-000000000001';
 describe('date scope', () => {
     it.each([['2026-03-08', '2026-03-09', 23], ['2026-11-01', '2026-11-02', 25]])('handles DST %s', (from, to, hours) => { const r = dateRange(from, to, 'America/New_York'); expect((Date.parse(r.to) - Date.parse(r.from)) / 3600000).toBe(hours); });
-    it('uses Taipei midnight and rejects offsets and invalid ranges', () => { expect(dateRange('2026-11-06', '2026-11-07', 'Asia/Taipei').from).toBe('2026-11-05T16:00:00.000Z'); for (const args of [['2026-11-06T00:00:00+08:00', '2026-11-07', 'Asia/Taipei'], ['2026-11-06', '2026-11-06', 'UTC'], ['2025-01-01', '2026-11-01', 'UTC'], ['2026-11-06', '2026-11-07', '+08:00']])
+    it('uses Taipei midnight and rejects invalid ranges', () => { expect(dateRange('2026-11-06', '2026-11-07', 'Asia/Taipei').from).toBe('2026-11-05T16:00:00.000Z'); for (const args of [['2026-11-06T00:00:00+08:00', '2026-11-07', 'Asia/Taipei'], ['2026-11-06', '2026-11-06', 'UTC'], ['2025-01-01', '2026-11-01', 'UTC']])
         expect(() => dateRange(...args as [
             string,
             string,

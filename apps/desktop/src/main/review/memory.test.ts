@@ -107,3 +107,10 @@ it('keeps summary deletion fenced against late extraction, retry and recovery',(
  expect(f.store.db.prepare('SELECT status,questionSummary FROM study_jobs WHERE id=?').get(job.id)).toMatchObject({status:'skipped',questionSummary:null});
  expect(f.store.db.prepare('SELECT id FROM conversations WHERE id=?').get(f.chat)).toBeDefined();
 });
+
+it('promotes proposals with the unit provided by separated eligible evidence',()=>{
+ const f=fixture();const unit=randomUUID();f.store.db.prepare("INSERT INTO study_units(id,courseId,kind,ordinal,title,sourceKey) VALUES(?,?,'document',0,'Text','text')").run(unit,f.course.id);const result:MemoryResult={...empty,courseId:f.course.id,observations:[{unitId:unit,conceptKey:null,proposedLabel:'Force',errorType:'none',signal:'asked',evidenceQuote:'Why force?',evidenceKind:'quote',weaknessNote:null,confidence:1,resolved:false,wrongAttempt:false}]};
+ const first=f.jobs.claim()!;expect(f.jobs.commit(first.id,first.attemptToken,result)).toBe(true);expect(f.repo.listConcepts({courseId:f.course.id}).items).toHaveLength(0);
+ const user=randomUUID(),assistant=randomUUID(),at=new Date(Date.now()+86400000).toISOString();for(const [id,role] of [[user,'user'],[assistant,'assistant']])f.store.db.prepare('INSERT INTO messages(id,conversationId,role,parts,createdAt,parentMessageId) VALUES(?,?,?,?,?,?)').run(id!,f.chat,role!,JSON.stringify([{type:'text',text:'Why force?',status:'complete'}]),at,role==='assistant'?user:null);
+ f.jobs.enqueue(assistant);const next=f.jobs.claim()!;expect(f.jobs.commit(next.id,next.attemptToken,result)).toBe(true);expect(f.repo.listConcepts({courseId:f.course.id}).items).toMatchObject([{source:'promoted',key:'force',unitId:unit}]);expect(f.repo.observationsPage({courseId:f.course.id}).items.every(o=>o.conceptKey==='force')).toBe(true);
+});

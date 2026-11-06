@@ -32,3 +32,12 @@ export const studyTestSchema=z.object({version:z.literal(1),items:z.array(studyT
 export const studyAnswersSchema=z.record(text,z.union([z.string().max(2000),z.number().int().min(0).max(5),z.boolean(),z.null()])).refine(value=>Object.keys(value).length<=100);
 export type StudyResolvedScope=z.infer<typeof studyResolvedScopeSchema>;
 export type StudyTest=z.infer<typeof studyTestSchema>;
+
+
+/** Runtime answers and restored answers must obey the same item-specific contract. */
+export function isStudyAnswer(item: StudyTest['items'][number], answer: unknown): boolean {
+ if(answer===null)return true;
+ if(item.type==='mcq')return typeof answer==='number'&&Number.isInteger(answer)&&answer>=0&&answer<item.options.length;
+ if(item.type==='true_false')return typeof answer==='boolean';
+ return typeof answer==='string'&&answer.length<=2000;
+}

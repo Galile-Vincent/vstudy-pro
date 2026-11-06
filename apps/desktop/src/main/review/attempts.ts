@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { attemptSchema } from '../../shared/review-generate';
-import { studyAnswersSchema, studyTestSchema } from '../../shared/review-artifacts';
+import { isStudyAnswer, studyAnswersSchema, studyTestSchema } from '../../shared/review-artifacts';
 import { ArtifactRepository } from './artifact-repository';
 import { normalizeStem, stemHash } from './test-validate';
 export class Attempts {
@@ -12,7 +12,10 @@ export class Attempts {
         this.repo.db.prepare('INSERT INTO study_attempt_items(attemptId,itemId,conceptKey,reportedBad) VALUES(?,?,?,0)').run(id, item.id, item.conceptKey); return this.get(id); }); }
     answer(id: string, itemId: string, answer: string | number | boolean | null) { const attempt = this.get(id); if (attempt.phase !== 'answering')
         throw new Error('review.answers_locked'); if (attempt.results.some(i=>i.itemId===itemId && i.correct!==null)) throw new Error('review.answers_locked'); if (!attempt.results.some(i => i.itemId === itemId))
-        throw new Error('review.item_unavailable'); const answers = studyAnswersSchema.parse({ ...attempt.answers, [itemId]: answer }); this.repo.db.prepare("UPDATE study_attempts SET answersJson=? WHERE id=? AND phase='answering'").run(JSON.stringify(answers), id); return this.get(id); }
+        throw new Error('review.item_unavailable');
+        const item = this.repo.find(attempt.artifactId)?.test?.items.find(item => item.id === itemId);
+        if (!item || !isStudyAnswer(item, answer)) throw new Error('review.invalid_answer');
+        const answers = studyAnswersSchema.parse({ ...attempt.answers, [itemId]: answer }); this.repo.db.prepare("UPDATE study_attempts SET answersJson=? WHERE id=? AND phase='answering'").run(JSON.stringify(answers), id); return this.get(id); }
     commit(id: string, itemId?: string) {
         return this.repo.atomic(() => {
             const attempt = this.get(id);
