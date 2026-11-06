@@ -1,0 +1,1459 @@
+{
+  "decoded": 264,
+  "dimensions": [
+    {
+      "file": "apps/website/src/assets/shots/course-page-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-vstudy-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-vstudy-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-vstudy-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-vstudy-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-ocean-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-ocean-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-ocean-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-ocean-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-grove-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-grove-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-grove-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-grove-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-ember-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-ember-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-ember-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-ember-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-iris-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-iris-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-iris-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-iris-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-rose-dark.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-rose-dark.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/course-page-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/courses-home-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/history-search-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/home-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/library-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/moodle-webview-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/onboarding-welcome-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/planner-today-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/reader-chat-with-answer-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/storage-settings-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-rose-light.webp",
+      "width": 2880,
+      "height": 1800
+    },
+    {
+      "file": "apps/website/src/assets/shots/themes-settings-rose-light.avif",
+      "width": 2880,
+      "height": 1800
+    }
+  ],
+  "aliasChecks": [
+    {
+      "name": "courses-home",
+      "alias": "courses",
+      "format": "webp",
+      "sha256": "2d5e9bacc6809a0faf4081cae8b128c29fdd34e670d576755a283ce4110174a2"
+    },
+    {
+      "name": "courses-home",
+      "alias": "courses",
+      "format": "avif",
+      "sha256": "309e4bea5404487cfce8ed6811747d34a1dff3a9d2a7a0d38dc08999a61adbb9"
+    },
+    {
+      "name": "course-page",
+      "alias": "course",
+      "format": "webp",
+      "sha256": "bcbe806cda6ea5b8da82df413ad9376faff62d6c3a97e341d9a05c5f07788ff5"
+    },
+    {
+      "name": "course-page",
+      "alias": "course",
+      "format": "avif",
+      "sha256": "23ba059c4f641ff01522640ec09b08c572b8b1ffc1664e809bf10b0079b389f0"
+    },
+    {
+      "name": "planner-today",
+      "alias": "planner",
+      "format": "webp",
+      "sha256": "ac3bc16ff15a9128e78f71ced4d63c4d44d6ed59991b8838c491648111f2a689"
+    },
+    {
+      "name": "planner-today",
+      "alias": "planner",
+      "format": "avif",
+      "sha256": "bb271ec5a03db1214b558bef3037a5859e0fa753a9782ff23d6e9adf2753f75f"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "alias": "reader",
+      "format": "webp",
+      "sha256": "a3fac41bbb4f0998b8adef93696bc3aedce476bdde7de93382b778471ae273dd"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "alias": "reader",
+      "format": "avif",
+      "sha256": "6abef4ee23ed4676d40962aa1b4934c49e0beab08d15626f3d784da7d189e131"
+    },
+    {
+      "name": "history-search",
+      "alias": "history",
+      "format": "webp",
+      "sha256": "643aa84df5284d2d96cdcf1bf686c41d4db8357d4cef1c41e9d1e5089dec5fab"
+    },
+    {
+      "name": "history-search",
+      "alias": "history",
+      "format": "avif",
+      "sha256": "eca82af4f6154b4b3fda490fe9ec6adcbb6646e8e73902ca5e956c782fdcd45b"
+    },
+    {
+      "name": "library",
+      "alias": "library",
+      "format": "webp",
+      "sha256": "704f911048eda0d09bd12794e93a0dd091e48a577e96fb4116a7e6ab2ae3bdb4"
+    },
+    {
+      "name": "library",
+      "alias": "library",
+      "format": "avif",
+      "sha256": "c6883342317500fc9c56f16b090ad74e4c3e6ff7303579c0ce5138896d3b2a83"
+    },
+    {
+      "name": "home",
+      "alias": "home",
+      "format": "webp",
+      "sha256": "692086f3f7c6a36be12d159a50b1c9d7c1b61dd85b85168a8ba4000c461eb017"
+    },
+    {
+      "name": "home",
+      "alias": "home",
+      "format": "avif",
+      "sha256": "65fb5262888ded67e4de685f166b0f0bdfe566db43f674c08717474d19468cb6"
+    },
+    {
+      "name": "themes-settings",
+      "alias": "themes",
+      "format": "webp",
+      "sha256": "8913faf8434da4731fd3338ef11f72e32c4b6461ca9b9edae946d955e0119a1e"
+    },
+    {
+      "name": "themes-settings",
+      "alias": "themes",
+      "format": "avif",
+      "sha256": "3e2656faed7d6b714e065d0102e65ae5a8ee2fdb3963d729610de037c7a054f6"
+    },
+    {
+      "name": "moodle-webview",
+      "alias": "webview",
+      "format": "webp",
+      "sha256": "a8cfd24d707c0998877c6ae06124886cbc79c44b4cfa8740b3990a912dd26d5e"
+    },
+    {
+      "name": "moodle-webview",
+      "alias": "webview",
+      "format": "avif",
+      "sha256": "782294bfb51fdc5e77ac1e5fef0b85ae1f60e0fcd32f27f885f3ba22a28075e5"
+    },
+    {
+      "name": "storage-settings",
+      "alias": "storage",
+      "format": "webp",
+      "sha256": "5b1668b8f566ae5910670a979f4419acdd419e2e0ee1e53470ff9a68c19cfed1"
+    },
+    {
+      "name": "storage-settings",
+      "alias": "storage",
+      "format": "avif",
+      "sha256": "028083d0b994de8e8584154cd27f5c138fa8a7d9884624f24d2c7c1f6bb1190f"
+    },
+    {
+      "name": "onboarding-welcome",
+      "alias": "onboarding",
+      "format": "webp",
+      "sha256": "5e25ebcb93178d4f1fe5760f86bb8002982573616deb82324075a2a8d933dd67"
+    },
+    {
+      "name": "onboarding-welcome",
+      "alias": "onboarding",
+      "format": "avif",
+      "sha256": "02f694d4a92628f2ce86962e12fbe9d2ed474a454a3c56e235a3fcac4e3e2e85"
+    }
+  ]
+}

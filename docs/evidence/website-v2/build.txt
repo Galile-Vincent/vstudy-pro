@@ -1,0 +1,100 @@
+
+> @vstudy/website@0.1.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-6068bbec/apps/website
+> astro build
+
+10:32:36 [types] Generated 21ms
+10:32:36 [build] output: "static"
+10:32:36 [build] mode: "static"
+10:32:36 [build] directory: /Users/vc/.t3/worktrees/vstudy-pro/t3-6068bbec/apps/website/dist/
+10:32:36 [build] Collecting build info...
+10:32:36 [build] ✓ Completed in 34ms.
+10:32:36 [build] Building static entrypoints...
+10:32:36 [vite] ✓ built in 113ms
+10:32:36 [vite] ✓ built in 9ms
+10:32:36 [build] Rearranging server assets...
+
+ generating static routes
+10:32:36   ├─ /en/docs/getting-started/index.html (+5ms)
+10:32:36   ├─ /en/docs/connect-your-school/index.html (+1ms)
+10:32:36   ├─ /en/docs/courses-and-deadlines/index.html (+1ms)
+10:32:36   ├─ /en/docs/study-planner/index.html (+1ms)
+10:32:36   ├─ /en/docs/reading-documents/index.html (+1ms)
+10:32:36   ├─ /en/docs/ai-providers/index.html (+1ms)
+10:32:36   ├─ /en/docs/themes/index.html (+1ms)
+10:32:36   ├─ /en/docs/chat-history/index.html (+1ms)
+10:32:36   ├─ /en/docs/moodle-pages/index.html (+1ms)
+10:32:36   ├─ /en/docs/data-and-storage/index.html (+1ms)
+10:32:36   ├─ /en/docs/privacy-and-network/index.html (+0ms)
+10:32:36   ├─ /en/docs/keyboard-shortcuts/index.html (+0ms)
+10:32:36   ├─ /en/docs/troubleshooting/index.html (+0ms)
+10:32:36   ├─ /en/docs/architecture/index.html (+0ms)
+10:32:36   ├─ /en/docs/development/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/getting-started/index.html (+1ms)
+10:32:36   ├─ /zh-Hant/docs/connect-your-school/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/courses-and-deadlines/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/study-planner/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/reading-documents/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/ai-providers/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/themes/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/chat-history/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/moodle-pages/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/data-and-storage/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/privacy-and-network/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/keyboard-shortcuts/index.html (+1ms)
+10:32:36   ├─ /zh-Hant/docs/troubleshooting/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/architecture/index.html (+0ms)
+10:32:36   ├─ /zh-Hant/docs/development/index.html (+0ms)
+10:32:36   ├─ /ja/docs/getting-started/index.html (+1ms)
+10:32:36   ├─ /ja/docs/connect-your-school/index.html (+0ms)
+10:32:36   ├─ /ja/docs/courses-and-deadlines/index.html (+0ms)
+10:32:36   ├─ /ja/docs/study-planner/index.html (+0ms)
+10:32:36   ├─ /ja/docs/reading-documents/index.html (+0ms)
+10:32:36   ├─ /ja/docs/ai-providers/index.html (+0ms)
+10:32:36   ├─ /ja/docs/themes/index.html (+0ms)
+10:32:36   ├─ /ja/docs/chat-history/index.html (+0ms)
+10:32:36   ├─ /ja/docs/moodle-pages/index.html (+0ms)
+10:32:36   ├─ /ja/docs/data-and-storage/index.html (+0ms)
+10:32:36   ├─ /ja/docs/privacy-and-network/index.html (+0ms)
+10:32:36   ├─ /ja/docs/keyboard-shortcuts/index.html (+0ms)
+10:32:36   ├─ /ja/docs/troubleshooting/index.html (+0ms)
+10:32:36   ├─ /ja/docs/architecture/index.html (+0ms)
+10:32:36   ├─ /ja/docs/development/index.html (+0ms)
+10:32:36   ├─ /en/search.json (+1ms)
+10:32:36   ├─ /zh-Hant/search.json (+0ms)
+10:32:36   ├─ /ja/search.json (+0ms)
+10:32:36   ├─ /en/index.html (+1ms)
+10:32:36   ├─ /zh-Hant/index.html (+1ms)
+10:32:36   ├─ /ja/index.html (+1ms)
+10:32:36   ├─ /index.html (+1ms)
+10:32:36 ✓ Completed in 40ms.
+
+ generating optimized images
+10:32:36   ▶ /_astro/onboarding-welcome.CvwYqFle_ZPATMl.webp (reused cache entry) (+2ms) (1/24)
+10:32:36   ▶ /_astro/planner-today.DtdZKx2v_Z7HxBr.webp (reused cache entry) (+2ms) (2/24)
+10:32:36   ▶ /_astro/course-page.DfCHbMMw_Z1270Vi.webp (reused cache entry) (+2ms) (3/24)
+10:32:36   ▶ /_astro/courses-home.BXDpyw99_Koc9T.webp (reused cache entry) (+2ms) (4/24)
+10:32:36   ▶ /_astro/themes-settings.B8p1kLZC_Z1ka9BA.webp (reused cache entry) (+2ms) (5/24)
+10:32:36   ▶ /_astro/reader-chat-with-answer.CoxKPf3Z_1sSv7l.webp (reused cache entry) (+2ms) (6/24)
+10:32:36   ▶ /_astro/history-search.CUtPBwPE_Z192hdB.webp (reused cache entry) (+2ms) (7/24)
+10:32:36   ▶ /_astro/courses-home-grove-light.CZJ_1PRJ_Z1RdCOy.webp (reused cache entry) (+2ms) (8/24)
+10:32:36   ▶ /_astro/moodle-webview.BzmcY3oz_QH6uO.webp (reused cache entry) (+2ms) (9/24)
+10:32:36   ▶ /_astro/courses-home-iris-light.DCv4J-xe_16c1kp.webp (reused cache entry) (+2ms) (10/24)
+10:32:36   ▶ /_astro/courses-home-ember-light.C4wuUHdi_8HA6a.webp (reused cache entry) (+2ms) (11/24)
+10:32:36   ▶ /_astro/courses-home-ocean-light.Dd8FZNxf_upoXD.webp (reused cache entry) (+2ms) (12/24)
+10:32:36   ▶ /_astro/course-page.DfCHbMMw_ZOJze.webp (reused cache entry) (+1ms) (13/24)
+10:32:36   ▶ /_astro/moodle-webview.BzmcY3oz_HD0yq.webp (reused cache entry) (+1ms) (14/24)
+10:32:36   ▶ /_astro/courses-home.BXDpyw99_BJhAs.webp (reused cache entry) (+1ms) (15/24)
+10:32:36   ▶ /_astro/reader-chat-with-answer.CoxKPf3Z_2d8JvK.webp (reused cache entry) (+1ms) (16/24)
+10:32:36   ▶ /_astro/courses-home-vstudy-dark.C4f1aZT4_xK6Gu.webp (reused cache entry) (+1ms) (17/24)
+10:32:36   ▶ /_astro/courses-home-ocean-dark.DvPs0sHC_2baQ6f.webp (reused cache entry) (+1ms) (18/24)
+10:32:36   ▶ /_astro/courses-home-grove-dark.CKL6UZBx_1MmtSX.webp (reused cache entry) (+1ms) (19/24)
+10:32:36   ▶ /_astro/courses-home-rose-light.D5IvpBp3_odVop.webp (reused cache entry) (+1ms) (20/24)
+10:32:36   ▶ /_astro/courses-home-ember-dark.D1OedER4_SutEz.webp (reused cache entry) (+1ms) (21/24)
+10:32:36   ▶ /_astro/courses-home-iris-dark.3xkENCff_1RtGJo.webp (reused cache entry) (+3ms) (22/24)
+10:32:36   ▶ /_astro/courses-home.BXDpyw99_11aEF0.webp (reused cache entry) (+3ms) (23/24)
+10:32:36   ▶ /_astro/courses-home-rose-dark.DOwUqooR_1BwV9Q.webp (reused cache entry) (+3ms) (24/24)
+10:32:36 ✓ Completed in 9ms.
+
+10:32:36 [build] ✓ Completed in 191ms.
+10:32:36 [build] 49 page(s) built in 235ms
+10:32:36 [build] Complete!

@@ -1,0 +1,98 @@
+[
+  {
+    "url": "/vstudy-pro/en/",
+    "width": 1440,
+    "scheme": "dark",
+    "scrollY": 1100,
+    "scrollEvents": 42,
+    "scrolled": true,
+    "opacity": "1",
+    "backdrop": "blur(16px)",
+    "background": "color(srgb 0.0431373 0.0431373 0.0509804 / 0.85)",
+    "border": "0px"
+  },
+  {
+    "url": "/vstudy-pro/en/docs/getting-started/",
+    "width": 1440,
+    "scheme": "dark",
+    "scrollY": 1250,
+    "scrollEvents": 49,
+    "scrolled": true,
+    "opacity": "1",
+    "backdrop": "blur(16px)",
+    "background": "color(srgb 0.0431373 0.0431373 0.0509804 / 0.85)",
+    "border": "0px"
+  },
+  {
+    "url": "/vstudy-pro/en/",
+    "width": 1440,
+    "scheme": "light",
+    "scrollY": 1100,
+    "scrollEvents": 42,
+    "scrolled": true,
+    "opacity": "1",
+    "backdrop": "blur(16px)",
+    "background": "color(srgb 0.980392 0.980392 0.980392 / 0.85)",
+    "border": "0px"
+  },
+  {
+    "url": "/vstudy-pro/en/docs/getting-started/",
+    "width": 1440,
+    "scheme": "light",
+    "scrollY": 1250,
+    "scrollEvents": 49,
+    "scrolled": true,
+    "opacity": "1",
+    "backdrop": "blur(16px)",
+    "background": "color(srgb 0.980392 0.980392 0.980392 / 0.85)",
+    "border": "0px"
+  },
+  {
+    "url": "/vstudy-pro/en/",
+    "width": 390,
+    "scheme": "dark",
+    "scrollY": 1100,
+    "scrollEvents": 46,
+    "scrolled": true,
+    "opacity": "1",
+    "backdrop": "blur(16px)",
+    "background": "color(srgb 0.0431373 0.0431373 0.0509804 / 0.85)",
+    "border": "0px"
+  },
+  {
+    "url": "/vstudy-pro/en/docs/getting-started/",
+    "width": 390,
+    "scheme": "dark",
+    "scrollY": 1250,
+    "scrollEvents": 49,
+    "scrolled": true,
+    "opacity": "1",
+    "backdrop": "blur(16px)",
+    "background": "color(srgb 0.0431373 0.0431373 0.0509804 / 0.85)",
+    "border": "0px"
+  },
+  {
+    "url": "/vstudy-pro/en/",
+    "width": 390,
+    "scheme": "light",
+    "scrollY": 1100,
+    "scrollEvents": 46,
+    "scrolled": true,
+    "opacity": "1",
+    "backdrop": "blur(16px)",
+    "background": "color(srgb 0.980392 0.980392 0.980392 / 0.85)",
+    "border": "0px"
+  },
+  {
+    "url": "/vstudy-pro/en/docs/getting-started/",
+    "width": 390,
+    "scheme": "light",
+    "scrollY": 1250,
+    "scrollEvents": 49,
+    "scrolled": true,
+    "opacity": "1",
+    "backdrop": "blur(16px)",
+    "background": "color(srgb 0.980392 0.980392 0.980392 / 0.85)",
+    "border": "0px"
+  }
+]

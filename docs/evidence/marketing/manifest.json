@@ -13,8 +13,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 120248,
-      "avifBytes": 60700,
+      "webpBytes": 105412,
+      "avifBytes": 52904,
       "file": "course-page-vstudy-dark.webp"
     },
     {
@@ -23,8 +23,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 154792,
-      "avifBytes": 85819,
+      "webpBytes": 95770,
+      "avifBytes": 51090,
       "file": "courses-home-vstudy-dark.webp"
     },
     {
@@ -33,8 +33,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68012,
-      "avifBytes": 33772,
+      "webpBytes": 68780,
+      "avifBytes": 34175,
       "file": "history-search-vstudy-dark.webp"
     },
     {
@@ -43,8 +43,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 136694,
-      "avifBytes": 68671,
+      "webpBytes": 130700,
+      "avifBytes": 65957,
       "file": "home-vstudy-dark.webp"
     },
     {
@@ -53,8 +53,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 100080,
-      "avifBytes": 51726,
+      "webpBytes": 92030,
+      "avifBytes": 47315,
       "file": "library-vstudy-dark.webp"
     },
     {
@@ -63,8 +63,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 144730,
-      "avifBytes": 74611,
+      "webpBytes": 142084,
+      "avifBytes": 72928,
       "file": "moodle-webview-vstudy-dark.webp"
     },
     {
@@ -73,8 +73,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 62736,
-      "avifBytes": 32257,
+      "webpBytes": 62380,
+      "avifBytes": 31975,
       "file": "onboarding-welcome-vstudy-dark.webp"
     },
     {
@@ -83,8 +83,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 106062,
-      "avifBytes": 52762,
+      "webpBytes": 102930,
+      "avifBytes": 50017,
       "file": "planner-today-vstudy-dark.webp"
     },
     {
@@ -103,8 +103,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 54334,
-      "avifBytes": 27112,
+      "webpBytes": 53970,
+      "avifBytes": 26553,
       "file": "storage-settings-vstudy-dark.webp"
     },
     {
@@ -113,8 +113,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 63228,
-      "avifBytes": 33763,
+      "webpBytes": 62762,
+      "avifBytes": 33561,
       "file": "themes-settings-vstudy-dark.webp"
     },
     {
@@ -123,8 +123,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 125206,
-      "avifBytes": 64447,
+      "webpBytes": 112776,
+      "avifBytes": 57930,
       "file": "course-page-vstudy-light.webp"
     },
     {
@@ -133,8 +133,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 163584,
-      "avifBytes": 90780,
+      "webpBytes": 110202,
+      "avifBytes": 59042,
       "file": "courses-home-vstudy-light.webp"
     },
     {
@@ -143,8 +143,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 69040,
-      "avifBytes": 36008,
+      "webpBytes": 68706,
+      "avifBytes": 35780,
       "file": "history-search-vstudy-light.webp"
     },
     {
@@ -153,8 +153,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 145042,
-      "avifBytes": 76534,
+      "webpBytes": 141286,
+      "avifBytes": 74200,
       "file": "home-vstudy-light.webp"
     },
     {
@@ -163,8 +163,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 105660,
-      "avifBytes": 57205,
+      "webpBytes": 101856,
+      "avifBytes": 53955,
       "file": "library-vstudy-light.webp"
     },
     {
@@ -173,8 +173,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 149002,
-      "avifBytes": 79877,
+      "webpBytes": 146326,
+      "avifBytes": 78682,
       "file": "moodle-webview-vstudy-light.webp"
     },
     {
@@ -183,8 +183,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 67446,
-      "avifBytes": 35763,
+      "webpBytes": 67688,
+      "avifBytes": 35551,
       "file": "onboarding-welcome-vstudy-light.webp"
     },
     {
@@ -193,8 +193,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 110260,
-      "avifBytes": 57043,
+      "webpBytes": 107960,
+      "avifBytes": 55853,
       "file": "planner-today-vstudy-light.webp"
     },
     {
@@ -204,7 +204,7 @@
       "width": 2880,
       "height": 1800,
       "webpBytes": 176742,
-      "avifBytes": 97172,
+      "avifBytes": 97122,
       "file": "reader-chat-with-answer-vstudy-light.webp"
     },
     {
@@ -213,8 +213,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 58760,
-      "avifBytes": 30467,
+      "webpBytes": 58554,
+      "avifBytes": 30309,
       "file": "storage-settings-vstudy-light.webp"
     },
     {
@@ -223,8 +223,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64974,
-      "avifBytes": 35607,
+      "webpBytes": 65404,
+      "avifBytes": 35615,
       "file": "themes-settings-vstudy-light.webp"
     },
     {
@@ -233,8 +233,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 124758,
-      "avifBytes": 62463,
+      "webpBytes": 105370,
+      "avifBytes": 53071,
       "file": "course-page-ocean-dark.webp"
     },
     {
@@ -243,8 +243,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 158762,
-      "avifBytes": 87354,
+      "webpBytes": 96736,
+      "avifBytes": 51581,
       "file": "courses-home-ocean-dark.webp"
     },
     {
@@ -253,8 +253,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68776,
-      "avifBytes": 34098,
+      "webpBytes": 69512,
+      "avifBytes": 34031,
       "file": "history-search-ocean-dark.webp"
     },
     {
@@ -263,8 +263,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 137588,
-      "avifBytes": 68936,
+      "webpBytes": 131564,
+      "avifBytes": 66108,
       "file": "home-ocean-dark.webp"
     },
     {
@@ -273,8 +273,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 101314,
-      "avifBytes": 52097,
+      "webpBytes": 93130,
+      "avifBytes": 47575,
       "file": "library-ocean-dark.webp"
     },
     {
@@ -283,8 +283,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 147296,
-      "avifBytes": 75146,
+      "webpBytes": 142234,
+      "avifBytes": 73047,
       "file": "moodle-webview-ocean-dark.webp"
     },
     {
@@ -293,8 +293,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 63980,
-      "avifBytes": 32740,
+      "webpBytes": 63812,
+      "avifBytes": 32227,
       "file": "onboarding-welcome-ocean-dark.webp"
     },
     {
@@ -303,8 +303,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 106680,
-      "avifBytes": 52998,
+      "webpBytes": 103368,
+      "avifBytes": 50262,
       "file": "planner-today-ocean-dark.webp"
     },
     {
@@ -313,8 +313,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 176948,
-      "avifBytes": 89548,
+      "webpBytes": 176988,
+      "avifBytes": 89529,
       "file": "reader-chat-with-answer-ocean-dark.webp"
     },
     {
@@ -323,8 +323,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 55246,
-      "avifBytes": 27643,
+      "webpBytes": 55294,
+      "avifBytes": 27362,
       "file": "storage-settings-ocean-dark.webp"
     },
     {
@@ -333,8 +333,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64244,
-      "avifBytes": 33981,
+      "webpBytes": 63904,
+      "avifBytes": 33772,
       "file": "themes-settings-ocean-dark.webp"
     },
     {
@@ -343,8 +343,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 132106,
-      "avifBytes": 67510,
+      "webpBytes": 116500,
+      "avifBytes": 59732,
       "file": "course-page-ocean-light.webp"
     },
     {
@@ -353,8 +353,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 170140,
-      "avifBytes": 94558,
+      "webpBytes": 113886,
+      "avifBytes": 60372,
       "file": "courses-home-ocean-light.webp"
     },
     {
@@ -363,8 +363,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 72494,
-      "avifBytes": 38805,
+      "webpBytes": 72822,
+      "avifBytes": 38637,
       "file": "history-search-ocean-light.webp"
     },
     {
@@ -373,8 +373,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 149994,
-      "avifBytes": 80005,
+      "webpBytes": 146128,
+      "avifBytes": 77619,
       "file": "home-ocean-light.webp"
     },
     {
@@ -383,8 +383,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 110314,
-      "avifBytes": 60824,
+      "webpBytes": 106274,
+      "avifBytes": 57608,
       "file": "library-ocean-light.webp"
     },
     {
@@ -393,8 +393,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 154902,
-      "avifBytes": 81789,
+      "webpBytes": 148160,
+      "avifBytes": 79102,
       "file": "moodle-webview-ocean-light.webp"
     },
     {
@@ -403,8 +403,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 70438,
-      "avifBytes": 37928,
+      "webpBytes": 70344,
+      "avifBytes": 37702,
       "file": "onboarding-welcome-ocean-light.webp"
     },
     {
@@ -413,8 +413,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 115074,
-      "avifBytes": 59688,
+      "webpBytes": 112784,
+      "avifBytes": 58371,
       "file": "planner-today-ocean-light.webp"
     },
     {
@@ -423,8 +423,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 186566,
-      "avifBytes": 104291,
+      "webpBytes": 186564,
+      "avifBytes": 104281,
       "file": "reader-chat-with-answer-ocean-light.webp"
     },
     {
@@ -433,8 +433,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 61560,
-      "avifBytes": 32656,
+      "webpBytes": 61300,
+      "avifBytes": 32608,
       "file": "storage-settings-ocean-light.webp"
     },
     {
@@ -443,8 +443,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 67920,
-      "avifBytes": 37837,
+      "webpBytes": 68174,
+      "avifBytes": 37890,
       "file": "themes-settings-ocean-light.webp"
     },
     {
@@ -453,8 +453,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 119976,
-      "avifBytes": 61527,
+      "webpBytes": 104080,
+      "avifBytes": 52517,
       "file": "course-page-grove-dark.webp"
     },
     {
@@ -463,8 +463,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 158654,
-      "avifBytes": 88850,
+      "webpBytes": 96518,
+      "avifBytes": 51132,
       "file": "courses-home-grove-dark.webp"
     },
     {
@@ -473,8 +473,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68020,
-      "avifBytes": 33231,
+      "webpBytes": 68734,
+      "avifBytes": 33105,
       "file": "history-search-grove-dark.webp"
     },
     {
@@ -483,8 +483,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 135714,
-      "avifBytes": 68417,
+      "webpBytes": 130548,
+      "avifBytes": 65756,
       "file": "home-grove-dark.webp"
     },
     {
@@ -493,8 +493,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 98456,
-      "avifBytes": 51622,
+      "webpBytes": 91408,
+      "avifBytes": 47315,
       "file": "library-grove-dark.webp"
     },
     {
@@ -503,8 +503,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 143088,
-      "avifBytes": 74152,
+      "webpBytes": 141308,
+      "avifBytes": 72674,
       "file": "moodle-webview-grove-dark.webp"
     },
     {
@@ -513,8 +513,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 63228,
-      "avifBytes": 31813,
+      "webpBytes": 63070,
+      "avifBytes": 31556,
       "file": "onboarding-welcome-grove-dark.webp"
     },
     {
@@ -523,8 +523,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 105614,
-      "avifBytes": 52708,
+      "webpBytes": 102004,
+      "avifBytes": 50036,
       "file": "planner-today-grove-dark.webp"
     },
     {
@@ -543,8 +543,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 54790,
-      "avifBytes": 26375,
+      "webpBytes": 54404,
+      "avifBytes": 26475,
       "file": "storage-settings-grove-dark.webp"
     },
     {
@@ -553,8 +553,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 63252,
-      "avifBytes": 33250,
+      "webpBytes": 62980,
+      "avifBytes": 33245,
       "file": "themes-settings-grove-dark.webp"
     },
     {
@@ -563,8 +563,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 122462,
-      "avifBytes": 64233,
+      "webpBytes": 106832,
+      "avifBytes": 56469,
       "file": "course-page-grove-light.webp"
     },
     {
@@ -573,8 +573,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 162746,
-      "avifBytes": 92630,
+      "webpBytes": 106634,
+      "avifBytes": 58327,
       "file": "courses-home-grove-light.webp"
     },
     {
@@ -583,8 +583,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 67238,
-      "avifBytes": 35356,
+      "webpBytes": 67486,
+      "avifBytes": 35140,
       "file": "history-search-grove-light.webp"
     },
     {
@@ -593,8 +593,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 136486,
-      "avifBytes": 73991,
+      "webpBytes": 133824,
+      "avifBytes": 71884,
       "file": "home-grove-light.webp"
     },
     {
@@ -603,8 +603,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 100738,
-      "avifBytes": 55678,
+      "webpBytes": 96978,
+      "avifBytes": 52730,
       "file": "library-grove-light.webp"
     },
     {
@@ -613,8 +613,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 144752,
-      "avifBytes": 78004,
+      "webpBytes": 143696,
+      "avifBytes": 77423,
       "file": "moodle-webview-grove-light.webp"
     },
     {
@@ -623,8 +623,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64804,
-      "avifBytes": 34751,
+      "webpBytes": 64888,
+      "avifBytes": 34669,
       "file": "onboarding-welcome-grove-light.webp"
     },
     {
@@ -633,8 +633,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 105362,
-      "avifBytes": 56039,
+      "webpBytes": 103376,
+      "avifBytes": 54692,
       "file": "planner-today-grove-light.webp"
     },
     {
@@ -643,7 +643,7 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 170054,
+      "webpBytes": 170068,
       "avifBytes": 94729,
       "file": "reader-chat-with-answer-grove-light.webp"
     },
@@ -653,8 +653,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 56860,
-      "avifBytes": 29615,
+      "webpBytes": 56796,
+      "avifBytes": 29688,
       "file": "storage-settings-grove-light.webp"
     },
     {
@@ -663,8 +663,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64818,
-      "avifBytes": 35014,
+      "webpBytes": 64738,
+      "avifBytes": 35152,
       "file": "themes-settings-grove-light.webp"
     },
     {
@@ -673,8 +673,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 124430,
-      "avifBytes": 63230,
+      "webpBytes": 106342,
+      "avifBytes": 53937,
       "file": "course-page-ember-dark.webp"
     },
     {
@@ -683,8 +683,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 159456,
-      "avifBytes": 89372,
+      "webpBytes": 97296,
+      "avifBytes": 51924,
       "file": "courses-home-ember-dark.webp"
     },
     {
@@ -693,8 +693,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68432,
-      "avifBytes": 34278,
+      "webpBytes": 69420,
+      "avifBytes": 34515,
       "file": "history-search-ember-dark.webp"
     },
     {
@@ -703,8 +703,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 139624,
-      "avifBytes": 71675,
+      "webpBytes": 133252,
+      "avifBytes": 68594,
       "file": "home-ember-dark.webp"
     },
     {
@@ -713,8 +713,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 100008,
-      "avifBytes": 53899,
+      "webpBytes": 92740,
+      "avifBytes": 49060,
       "file": "library-ember-dark.webp"
     },
     {
@@ -723,8 +723,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 144472,
-      "avifBytes": 75354,
+      "webpBytes": 142156,
+      "avifBytes": 73938,
       "file": "moodle-webview-ember-dark.webp"
     },
     {
@@ -733,8 +733,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 63358,
-      "avifBytes": 32110,
+      "webpBytes": 63196,
+      "avifBytes": 31715,
       "file": "onboarding-welcome-ember-dark.webp"
     },
     {
@@ -743,8 +743,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 106892,
-      "avifBytes": 53419,
+      "webpBytes": 103714,
+      "avifBytes": 51257,
       "file": "planner-today-ember-dark.webp"
     },
     {
@@ -754,7 +754,7 @@
       "width": 2880,
       "height": 1800,
       "webpBytes": 175194,
-      "avifBytes": 89255,
+      "avifBytes": 89241,
       "file": "reader-chat-with-answer-ember-dark.webp"
     },
     {
@@ -763,8 +763,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 54648,
-      "avifBytes": 26705,
+      "webpBytes": 54734,
+      "avifBytes": 26636,
       "file": "storage-settings-ember-dark.webp"
     },
     {
@@ -773,8 +773,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64590,
-      "avifBytes": 33604,
+      "webpBytes": 64340,
+      "avifBytes": 33829,
       "file": "themes-settings-ember-dark.webp"
     },
     {
@@ -783,8 +783,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 128608,
-      "avifBytes": 65735,
+      "webpBytes": 112270,
+      "avifBytes": 57523,
       "file": "course-page-ember-light.webp"
     },
     {
@@ -793,8 +793,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 167528,
-      "avifBytes": 92567,
+      "webpBytes": 111414,
+      "avifBytes": 58919,
       "file": "courses-home-ember-light.webp"
     },
     {
@@ -803,8 +803,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 69378,
-      "avifBytes": 36567,
+      "webpBytes": 68810,
+      "avifBytes": 36352,
       "file": "history-search-ember-light.webp"
     },
     {
@@ -813,8 +813,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 146172,
-      "avifBytes": 77338,
+      "webpBytes": 141936,
+      "avifBytes": 74954,
       "file": "home-ember-light.webp"
     },
     {
@@ -823,8 +823,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 107134,
-      "avifBytes": 57963,
+      "webpBytes": 102826,
+      "avifBytes": 54668,
       "file": "library-ember-light.webp"
     },
     {
@@ -833,8 +833,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 151084,
-      "avifBytes": 80030,
+      "webpBytes": 146554,
+      "avifBytes": 77808,
       "file": "moodle-webview-ember-light.webp"
     },
     {
@@ -843,8 +843,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68038,
-      "avifBytes": 36690,
+      "webpBytes": 68048,
+      "avifBytes": 36498,
       "file": "onboarding-welcome-ember-light.webp"
     },
     {
@@ -853,8 +853,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 111020,
-      "avifBytes": 57453,
+      "webpBytes": 109228,
+      "avifBytes": 56193,
       "file": "planner-today-ember-light.webp"
     },
     {
@@ -864,7 +864,7 @@
       "width": 2880,
       "height": 1800,
       "webpBytes": 177894,
-      "avifBytes": 98529,
+      "avifBytes": 98558,
       "file": "reader-chat-with-answer-ember-light.webp"
     },
     {
@@ -873,8 +873,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 59264,
-      "avifBytes": 31546,
+      "webpBytes": 59118,
+      "avifBytes": 31435,
       "file": "storage-settings-ember-light.webp"
     },
     {
@@ -883,8 +883,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 66752,
-      "avifBytes": 36780,
+      "webpBytes": 66900,
+      "avifBytes": 36649,
       "file": "themes-settings-ember-light.webp"
     },
     {
@@ -893,8 +893,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 117248,
-      "avifBytes": 60329,
+      "webpBytes": 102932,
+      "avifBytes": 52239,
       "file": "course-page-iris-dark.webp"
     },
     {
@@ -903,8 +903,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 151496,
-      "avifBytes": 84692,
+      "webpBytes": 94288,
+      "avifBytes": 50555,
       "file": "courses-home-iris-dark.webp"
     },
     {
@@ -913,8 +913,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68238,
-      "avifBytes": 33316,
+      "webpBytes": 67668,
+      "avifBytes": 33391,
       "file": "history-search-iris-dark.webp"
     },
     {
@@ -923,8 +923,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 134696,
-      "avifBytes": 69177,
+      "webpBytes": 128600,
+      "avifBytes": 66220,
       "file": "home-iris-dark.webp"
     },
     {
@@ -933,8 +933,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 97298,
-      "avifBytes": 51293,
+      "webpBytes": 90086,
+      "avifBytes": 46680,
       "file": "library-iris-dark.webp"
     },
     {
@@ -943,8 +943,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 142750,
-      "avifBytes": 74446,
+      "webpBytes": 141326,
+      "avifBytes": 73145,
       "file": "moodle-webview-iris-dark.webp"
     },
     {
@@ -953,8 +953,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 61804,
-      "avifBytes": 32165,
+      "webpBytes": 61274,
+      "avifBytes": 31807,
       "file": "onboarding-welcome-iris-dark.webp"
     },
     {
@@ -963,8 +963,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 104308,
-      "avifBytes": 52886,
+      "webpBytes": 100990,
+      "avifBytes": 50317,
       "file": "planner-today-iris-dark.webp"
     },
     {
@@ -983,8 +983,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 53678,
-      "avifBytes": 27460,
+      "webpBytes": 53516,
+      "avifBytes": 27341,
       "file": "storage-settings-iris-dark.webp"
     },
     {
@@ -993,8 +993,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 62068,
-      "avifBytes": 34153,
+      "webpBytes": 61686,
+      "avifBytes": 33805,
       "file": "themes-settings-iris-dark.webp"
     },
     {
@@ -1003,8 +1003,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 121538,
-      "avifBytes": 63201,
+      "webpBytes": 109694,
+      "avifBytes": 56550,
       "file": "course-page-iris-light.webp"
     },
     {
@@ -1013,8 +1013,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 159292,
-      "avifBytes": 89124,
+      "webpBytes": 108368,
+      "avifBytes": 58110,
       "file": "courses-home-iris-light.webp"
     },
     {
@@ -1023,8 +1023,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68688,
-      "avifBytes": 36156,
+      "webpBytes": 68514,
+      "avifBytes": 35845,
       "file": "history-search-iris-light.webp"
     },
     {
@@ -1033,8 +1033,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 142400,
-      "avifBytes": 75219,
+      "webpBytes": 139226,
+      "avifBytes": 73313,
       "file": "home-iris-light.webp"
     },
     {
@@ -1043,8 +1043,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 103418,
-      "avifBytes": 56490,
+      "webpBytes": 99610,
+      "avifBytes": 53304,
       "file": "library-iris-light.webp"
     },
     {
@@ -1053,8 +1053,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 146348,
-      "avifBytes": 79060,
+      "webpBytes": 144618,
+      "avifBytes": 77773,
       "file": "moodle-webview-iris-light.webp"
     },
     {
@@ -1063,8 +1063,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 66002,
-      "avifBytes": 35343,
+      "webpBytes": 65914,
+      "avifBytes": 35030,
       "file": "onboarding-welcome-iris-light.webp"
     },
     {
@@ -1073,8 +1073,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 109286,
-      "avifBytes": 56059,
+      "webpBytes": 107178,
+      "avifBytes": 55201,
       "file": "planner-today-iris-light.webp"
     },
     {
@@ -1083,8 +1083,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 173984,
-      "avifBytes": 96469,
+      "webpBytes": 174040,
+      "avifBytes": 96389,
       "file": "reader-chat-with-answer-iris-light.webp"
     },
     {
@@ -1093,8 +1093,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 58038,
-      "avifBytes": 30572,
+      "webpBytes": 58012,
+      "avifBytes": 30281,
       "file": "storage-settings-iris-light.webp"
     },
     {
@@ -1103,8 +1103,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 65136,
-      "avifBytes": 35299,
+      "webpBytes": 65008,
+      "avifBytes": 35174,
       "file": "themes-settings-iris-light.webp"
     },
     {
@@ -1113,8 +1113,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 116974,
-      "avifBytes": 60108,
+      "webpBytes": 102390,
+      "avifBytes": 51776,
       "file": "course-page-rose-dark.webp"
     },
     {
@@ -1123,8 +1123,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 154238,
-      "avifBytes": 86155,
+      "webpBytes": 94244,
+      "avifBytes": 50306,
       "file": "courses-home-rose-dark.webp"
     },
     {
@@ -1133,8 +1133,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68366,
-      "avifBytes": 33028,
+      "webpBytes": 69238,
+      "avifBytes": 32787,
       "file": "history-search-rose-dark.webp"
     },
     {
@@ -1143,8 +1143,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 134648,
-      "avifBytes": 68309,
+      "webpBytes": 128510,
+      "avifBytes": 65395,
       "file": "home-rose-dark.webp"
     },
     {
@@ -1153,8 +1153,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 97544,
-      "avifBytes": 50872,
+      "webpBytes": 90202,
+      "avifBytes": 46445,
       "file": "library-rose-dark.webp"
     },
     {
@@ -1163,8 +1163,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 142278,
-      "avifBytes": 73900,
+      "webpBytes": 140710,
+      "avifBytes": 72764,
       "file": "moodle-webview-rose-dark.webp"
     },
     {
@@ -1173,8 +1173,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 61732,
-      "avifBytes": 31516,
+      "webpBytes": 61160,
+      "avifBytes": 31021,
       "file": "onboarding-welcome-rose-dark.webp"
     },
     {
@@ -1183,8 +1183,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 104392,
-      "avifBytes": 52089,
+      "webpBytes": 101054,
+      "avifBytes": 49741,
       "file": "planner-today-rose-dark.webp"
     },
     {
@@ -1203,8 +1203,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 54086,
-      "avifBytes": 26368,
+      "webpBytes": 53460,
+      "avifBytes": 26167,
       "file": "storage-settings-rose-dark.webp"
     },
     {
@@ -1213,8 +1213,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 62636,
-      "avifBytes": 32891,
+      "webpBytes": 62406,
+      "avifBytes": 32705,
       "file": "themes-settings-rose-dark.webp"
     },
     {
@@ -1223,8 +1223,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 120430,
-      "avifBytes": 62376,
+      "webpBytes": 108032,
+      "avifBytes": 55659,
       "file": "course-page-rose-light.webp"
     },
     {
@@ -1233,8 +1233,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 161508,
-      "avifBytes": 89672,
+      "webpBytes": 107506,
+      "avifBytes": 56866,
       "file": "courses-home-rose-light.webp"
     },
     {
@@ -1243,8 +1243,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 67428,
-      "avifBytes": 35058,
+      "webpBytes": 67546,
+      "avifBytes": 34976,
       "file": "history-search-rose-light.webp"
     },
     {
@@ -1253,8 +1253,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 140966,
-      "avifBytes": 73965,
+      "webpBytes": 137054,
+      "avifBytes": 71954,
       "file": "home-rose-light.webp"
     },
     {
@@ -1263,8 +1263,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 102740,
-      "avifBytes": 55572,
+      "webpBytes": 99132,
+      "avifBytes": 52489,
       "file": "library-rose-light.webp"
     },
     {
@@ -1273,8 +1273,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 145024,
-      "avifBytes": 78138,
+      "webpBytes": 144284,
+      "avifBytes": 77500,
       "file": "moodle-webview-rose-light.webp"
     },
     {
@@ -1283,8 +1283,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 65392,
-      "avifBytes": 34657,
+      "webpBytes": 65544,
+      "avifBytes": 34676,
       "file": "onboarding-welcome-rose-light.webp"
     },
     {
@@ -1293,8 +1293,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 107726,
-      "avifBytes": 55511,
+      "webpBytes": 105480,
+      "avifBytes": 54428,
       "file": "planner-today-rose-light.webp"
     },
     {
@@ -1303,8 +1303,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 171912,
-      "avifBytes": 95106,
+      "webpBytes": 171948,
+      "avifBytes": 94991,
       "file": "reader-chat-with-answer-rose-light.webp"
     },
     {
@@ -1313,8 +1313,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 57686,
-      "avifBytes": 29683,
+      "webpBytes": 57382,
+      "avifBytes": 29859,
       "file": "storage-settings-rose-light.webp"
     },
     {
@@ -1323,8 +1323,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64566,
-      "avifBytes": 35049,
+      "webpBytes": 64524,
+      "avifBytes": 35405,
       "file": "themes-settings-rose-light.webp"
     }
   ],
