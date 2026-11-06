@@ -1,3 +1,4 @@
+import { reviewWorkers } from "../review/workers";
 /**
  * Serialize storage maintenance against active document and chat work.
  * Owned by main/storage.
@@ -18,5 +19,5 @@ export function enterStorageRequest():()=>void {
 /** Run maintenance only when document, conversion, and chat ownership permits it. */
 export async function exclusiveStorage<T>(settle:()=>Promise<void>,work:()=>Promise<T>):Promise<T>{
   if(busy)throw new Error('storage.busy');busy=true;
-  try {await Promise.all(active);await settle();return await work();}finally{busy=locked;}
+  try {reviewWorkers.suspend("storage");await Promise.all(active);await reviewWorkers.waitForIdle();await settle();return await work();}finally{busy=locked;if(!locked)reviewWorkers.resume("storage");}
 }
