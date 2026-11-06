@@ -11,6 +11,7 @@ import { requestIdSchema, conversationIdSchema, documentIdSchema } from '../../s
 import { rendererArtifact, reviewGenerateIpc, reviewProgressChannel, reviewProgressSchema, type ReviewProgress } from '../../shared/review-generate';
 import { ArtifactRepository } from '../review/artifact-repository';
 import { GenerationService } from '../review/generate';
+import { excerptKind } from '../review/source-kind';
 import { Attempts } from '../review/attempts';
 import { reviewAdmission, type Admission } from '../review/admission-port';
 import { containedPath } from '../services/file-paths';
@@ -57,7 +58,7 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
             const { bytesRead } = await file.read(buffer, 0, maxBytes, 0);
             const text = new TextDecoder('utf-8', { fatal: false }).decode(buffer.subarray(0, bytesRead), { stream: true });
             signal.throwIfAborted();
-            return { documentId: id, version: doc.activeVersion, excerptHash: createHash('sha256').update(text).digest('hex'), text, truncated: stat.size > maxBytes };
+            return { documentId: id, version: doc.activeVersion, excerptHash: createHash('sha256').update(text).digest('hex'), text, kind: excerptKind(store.db, id) ?? 'unknown', truncated: stat.size > maxBytes };
         }
         finally {
             await file.close();

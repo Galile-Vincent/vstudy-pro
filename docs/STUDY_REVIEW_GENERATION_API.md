@@ -116,18 +116,16 @@ items stay intact so the existing three-round slot retry can regenerate the reje
 slots. Shorter tests cannot enforce those proportions meaningfully. Unique longest
 MCQ keys, option counts other than four and all/none shortcuts are always rejected.
 
-The concurrent generation integration must pass the complete blueprint counts and
-all previously accepted items at the test-only validator call, include remaining
-answer-position/truth-value capacity in the next prompt, and collect gate warnings.
-The current call site does not yet pass this context, so whole-test distribution is
-not enforced in production until that integration lands. Leave context absent for
+Production generation passes complete blueprint counts and all previously accepted
+items across batches and retries to the test-only validator call, includes remaining
+answer-position/truth-value capacity in each prompt, and collects gate warnings. Leave context absent for
 note citation validation, whose synthetic true/false rows are not quiz items.
 
 `Excerpt.kind` may carry the source kind. Known `assignment` and `exam` kinds are
 refused by the validator; the prompt additionally forbids deriving answer keys from
-assignment/exam problem excerpts. The production excerpt reader currently omits
-kind, so it must pass document kind to enable this deterministic refusal for those
-sources. Text alone cannot reliably distinguish an assignment from a worked example.
+assignment/exam problem excerpts. The production excerpt reader derives known assignment/exam kinds from linked
+Moodle module metadata (including assign/quiz module names). Locally imported
+documents have no kind metadata. Text alone cannot reliably distinguish an assignment from a worked example.
 
 Recorded quoted misconceptions can be used without a positive `help_level_used`.
 The extraction schema lacks a per-concept explicit corrected-assertion flag, so an

@@ -145,6 +145,8 @@ export class GenerationService implements ReviewWorker {
             else {
                 const accepted: ReturnType<typeof validateTest>['items'] = [];
                 const warnings: string[] = [];
+                const plannedMcqCount = slots.filter(s => s.type === 'mcq').length;
+                const plannedTrueFalseCount = slots.filter(s => s.type === 'true_false').length;
                 let pending = slots;
                 for (let round = 0; round < 3 && pending.length; round++) {
                     const next: typeof pending = [];
@@ -152,7 +154,10 @@ export class GenerationService implements ReviewWorker {
                         const slots = pending.slice(offset, offset + 6);
                         let raw: unknown;
                         try {
-                            raw = JSON.parse(await call(testPrompt({ ...data, blueprint: slots }, request.locale)));
+                            raw = JSON.parse(await call(testPrompt({ ...data, blueprint: slots, balance: {
+                                remainingMcqPositions: [0, 1, 2, 3].map(position => Math.max(0, Math.max(1, Math.floor(plannedMcqCount * .4)) - accepted.filter(i => i.type === 'mcq' && i.answer === position).length)),
+                                remainingTruthValues: Object.fromEntries([true, false].map(value => [String(value), Math.max(0, Math.ceil(plannedTrueFalseCount / 2) - accepted.filter(i => i.type === 'true_false' && i.answer === value).length)])),
+                            } }, request.locale)));
                         }
                         catch (error) {
                             if (error instanceof SyntaxError) {
@@ -162,7 +167,8 @@ export class GenerationService implements ReviewWorker {
                             throw error;
                         }
                         emit('validating');
-                        const gate = validateTest(raw, excerpts, [...excludedStems, ...accepted.map(i => i.stem)]);
+                        const gate = validateTest(raw, excerpts, [...excludedStems, ...accepted.map(i => i.stem)], { acceptedItems: accepted, plannedMcqCount, plannedTrueFalseCount });
+                        warnings.push(...gate.warnings);
                         for (const slot of slots) {
                             const item = gate.items.find(i => i.id === slot.id && i.conceptKey === slot.conceptKey && i.type === slot.type && i.bloom === slot.bloom && i.difficulty === slot.difficulty && i.unitId === slot.unitId && (!slot.unitId || !!input.units.find(u => u.id === slot.unitId)?.documentIds.includes(i.source.documentId)) && (i.type !== 'mcq' || i.optionRationales?.length === i.options.length));
                             if (item)

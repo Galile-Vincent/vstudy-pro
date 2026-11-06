@@ -24,7 +24,7 @@ it('meters two item retries then drops unsupported items with coverage warnings'
             conceptKey: string;
             bloom: string;
             difficulty: string;
-        }) => ({ ...slot, stem: 'Question ' + slot.id, answer: slot.type === 'mcq' ? 0 : slot.type === 'cloze' ? 'force' : true, ...(slot.type === 'mcq' ? { options: ['force', 'speed', 'power', 'other'], optionRationales: ['why', 'why', 'why', 'why'] } : slot.type === 'cloze' ? { alternatives: [] } : {}), explanation: 'source', source: { documentId: excerpt.documentId, version: excerpt.version, excerptHash: excerpt.excerptHash, quote: slot.id === 'q1' ? 'Force causes acceleration.' : 'invented quote' } })) }); } }); cleanup.push(() => service.dispose()); const artifact = service.generate(request); await service.waitForIdle(); const result = repo.find(artifact.id); expect(result?.status).toBe('ready'); expect(result?.test?.items).toHaveLength(1); expect(result?.test?.warnings).toHaveLength(7); expect(calls).toBe(6); expect(admission.settled).toHaveLength(calls); });
+        }) => ({ ...slot, stem: 'Question ' + slot.id, answer: slot.type === 'mcq' ? 0 : slot.type === 'cloze' ? 'force' : true, ...(slot.type === 'mcq' ? { options: ['force', 'speed', 'power', 'other'], optionRationales: ['why', 'why', 'why', 'why'] } : slot.type === 'cloze' ? { alternatives: [] } : {}), explanation: 'source', source: { documentId: excerpt.documentId, version: excerpt.version, excerptHash: excerpt.excerptHash, quote: slot.id === 'q1' ? 'Force causes acceleration.' : 'invented quote' } })) }); } }); cleanup.push(() => service.dispose()); const artifact = service.generate(request); await service.waitForIdle(); const result = repo.find(artifact.id); expect(result?.status).toBe('ready'); expect(result?.test?.items).toHaveLength(1); expect(result?.test?.warnings?.filter(w => w.startsWith('Not covered:'))).toHaveLength(7); expect(calls).toBe(6); expect(admission.settled).toHaveLength(calls); });
 it('aborts and fences late provider output during suspension', async () => { const { repo, request, excerpt } = materials(); let release!: () => void; const pending = new Promise<void>(resolve => { release = resolve; }); let started!: () => void; const startedPromise = new Promise<void>(resolve => { started = resolve; }); const admission = new FakeAdmission(); const service = new GenerationService(repo, { admission, readExcerpt: async () => excerpt, estimate: () => ({ inputTokens: 1, outputTokens: 1, costUsd: 1 }), call: async () => { started(); await pending; return '{}'; } }); cleanup.push(() => service.dispose()); const artifact = service.generate(request); await startedPromise; service.suspend(); expect(() => service.generate({ ...request, idempotencyKey: randomUUID() })).toThrow('suspended'); release(); await service.waitForIdle(); expect(repo.find(artifact.id)?.status).toBe('interrupted'); expect(admission.pending.size).toBe(0); });
 it('deduplicates retake stems across generations', async () => { const { repo, request, snapshot } = setup(); const artifact = repo.create(request, snapshot, 'token'); const source = { documentId: randomUUID(), version: 'original' as const, excerptHash: 'a'.repeat(64), quote: 'source' }; repo.finish(artifact.id, 'token', { test: { version: 1, excludedStemHashes: ['b'.repeat(64)], items: [{ id: 'q1', conceptKey: 'force', stem: 'Ｗhat is force?', type: 'true_false', answer: true, explanation: 'Source', source }] } }); const attempts = new Attempts(repo); const attempt = attempts.start(artifact.id); attempts.commit(attempt.id); attempts.confirm(attempt.id); const retake = attempts.retake(attempt.id); expect(retake.conceptKeys).toEqual(['force']); expect(retake.excludedStems).toHaveLength(2); expect(retake.excludedStems).toContain('b'.repeat(64)); });
 it('rejects generation beyond the in-flight cap before creating more artifacts', () => { const { repo, request } = setup(); const service = new GenerationService(repo, { admission: new FakeAdmission(), readExcerpt: async () => { throw Error('unexpected'); }, estimate: () => ({ inputTokens: 1, outputTokens: 1, costUsd: 1 }), call: async () => '' }); cleanup.push(() => service.dispose()); service.generate(request); service.generate({ ...request, idempotencyKey: randomUUID() }); expect(() => service.generate({ ...request, idempotencyKey: randomUUID() })).toThrow('review.busy'); expect(repo.list({ courseId: request.courseId }).items).toHaveLength(2); });
@@ -128,4 +128,38 @@ it('preserves requested size through a failed generation retry',async()=>{
  const artifact=service.generate(request);await service.waitForIdle();
  service.retry(artifact.id,randomUUID(),'en');await service.waitForIdle();
  expect(sizes).toEqual(['long','long']);
+});
+it('regenerates only skewed slots across batches within the three-round budget', async () => {
+ const {repo,request,excerpt}=materials(); request.size='long';
+ const batches: string[][]=[];
+ const admission=new FakeAdmission();
+ const service=new GenerationService(repo,{admission,readExcerpt:async()=>excerpt,estimate:()=>({inputTokens:1,outputTokens:1,costUsd:1}),call:async prompt=>{
+  const data=JSON.parse(prompt.split('<UNTRUSTED_REVIEW_DATA>\n')[1]!.split('\n</UNTRUSTED_REVIEW_DATA>')[0]!);
+  batches.push(data.blueprint.map((s:{id:string})=>s.id));
+  const positions=[...(data.balance?.remainingMcqPositions ?? [99,99,99,99])];
+  const truths={...(data.balance?.remainingTruthValues ?? {true:99,false:99})};
+  return JSON.stringify({version:1,items:data.blueprint.map((slot:{id:string;type:string})=>{
+   const retry=batches.length>4;
+   const answer=slot.type==='mcq'?(retry?positions.findIndex(n=>n>0):0):slot.type==='true_false'?(retry?truths.true>0:true):'force';
+   if(slot.type==='mcq')positions[Number(answer)]!--;
+   if(slot.type==='true_false')truths[String(answer)]--;
+   return {...slot,stem:'Question '+slot.id,answer,explanation:'source',source:{documentId:excerpt.documentId,version:excerpt.version,excerptHash:excerpt.excerptHash,quote:'Force causes acceleration.'},...(slot.type==='mcq'?{options:['force','speed','power','other'],optionRationales:['why','why','why','why']}:slot.type==='cloze'?{alternatives:[]}: {})};
+  })});
+ }}); cleanup.push(()=>service.dispose());
+ const artifact=service.generate(request); await service.waitForIdle();
+ const test=repo.find(artifact.id)?.test;
+ expect(test?.items).toHaveLength(20);
+ expect(batches.length).toBeGreaterThan(4); expect(batches.length).toBeLessThanOrEqual(6);
+ expect(batches.slice(4).flat().length).toBeLessThan(20);
+ expect(test?.warnings?.join()).toContain('answer-position bias');
+ expect(test?.warnings?.join()).toContain('true/false skew');
+ expect(admission.settled).toHaveLength(batches.length);
+});
+it('refuses assignment excerpts as answer keys through all generation retries',async()=>{
+ const {repo,request,excerpt}=materials(); let calls=0;
+ const service=new GenerationService(repo,{admission:new FakeAdmission(),readExcerpt:async()=>({...excerpt,kind:'assignment'}),estimate:()=>({inputTokens:1,outputTokens:1,costUsd:1}),call:async prompt=>{
+  calls++; const data=JSON.parse(prompt.split('<UNTRUSTED_REVIEW_DATA>\n')[1]!.split('\n</UNTRUSTED_REVIEW_DATA>')[0]!);
+  return JSON.stringify({version:1,items:data.blueprint.map((slot:{id:string;type:string})=>({...slot,stem:'Question '+slot.id,answer:slot.type==='mcq'?0:slot.type==='cloze'?'force':true,explanation:'source',source:{documentId:excerpt.documentId,version:excerpt.version,excerptHash:excerpt.excerptHash,quote:'Force causes acceleration.'},...(slot.type==='mcq'?{options:['force','speed','power','other'],optionRationales:['why','why','why','why']}:slot.type==='cloze'?{alternatives:[]}: {})}))});
+ }});cleanup.push(()=>service.dispose()); const artifact=service.generate(request);await service.waitForIdle();
+ expect(repo.find(artifact.id)).toMatchObject({status:'failed',errorCode:'review.invalid_output',test:null});expect(calls).toBe(6);
 });
