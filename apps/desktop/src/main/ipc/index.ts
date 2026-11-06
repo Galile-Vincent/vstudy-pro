@@ -1,3 +1,4 @@
+import { startMemory } from '../review/memory';
 import { registerReviewIpc } from "./review";
 import { reviewWorkers } from "../review/workers";
 /**
@@ -109,6 +110,7 @@ export function registerIpc(
     return { ok: true };
   });
   registerReviewIpc(registrar, store, implemented);
+  startMemory(store, providers);
   registerUsageIpc(registrar, store, implemented, () => providers.config('codex-cli').enabled);
   const chat = registerChatIpc(registrar, store, secrets, implemented, providers);
   const disposeAiCli = registerAiCliIpc(registrar, implemented, providers, pins, chat);

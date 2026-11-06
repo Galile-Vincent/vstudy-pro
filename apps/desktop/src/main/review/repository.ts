@@ -108,7 +108,7 @@ export class ReviewRepository {
     restoreConcept(id: string) { this.atomic(() => { this.db.prepare("UPDATE study_concepts SET userState='none' WHERE id=?").run(id); this.event(id, 'restored'); }); }
     understoodConcept(id: string) { this.event(id, 'understood'); }
     jobsPage(input:StudyPageInput&{courseId:string}) {
-      return this.page(`SELECT j.id,j.conversationId,j.userMessageId,j.assistantMessageId,j.courseId,j.status,j.questionSummary,j.occurredAt,j.createdAt FROM study_jobs j ${jobSourceJoins} WHERE j.courseId=? AND (${eligibleSourceSql}) AND (? IS NULL OR j.occurredAt<? OR (j.occurredAt=? AND j.id<?)) ORDER BY j.occurredAt DESC,j.id DESC`,[input.courseId],input,row=>studyJobSummarySchema.parse(row),'occurredAt');
+      return this.page(`SELECT j.id,j.conversationId,j.userMessageId,j.assistantMessageId,j.courseId,j.status,j.questionSummary,j.occurredAt,j.createdAt,j.errorCode FROM study_jobs j ${jobSourceJoins} WHERE j.courseId=? AND (${eligibleSourceSql}) AND (? IS NULL OR j.occurredAt<? OR (j.occurredAt=? AND j.id<?)) ORDER BY j.occurredAt DESC,j.id DESC`,[input.courseId],input,row=>studyJobSummarySchema.parse(row),'occurredAt');
     }
     editJob(id:string,changes:z.input<typeof studyJobEditSchema>):void {
       studyIdSchema.parse(id);const patch=studyJobEditSchema.parse(changes);
