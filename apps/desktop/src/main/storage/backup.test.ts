@@ -270,7 +270,7 @@ it.each(['opt-out','deletion'])('preserves analytics decisions made after stagin
  }finally{store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
 
-it.each(['locked', 'garbage'])('completes recovery with staged analytics when live database is %s', async mode => {
+it.each(['locked', 'garbage'])('preserves staged analytics when live database is %s (Windows retries after releasing file locks)', async mode => {
   const root=await mkdtemp(join(tmpdir(),'restore-unreadable-source-'));
   const target=await mkdtemp(join(tmpdir(),'restore-unreadable-target-'));
   let lock: import('node:sqlite').DatabaseSync | undefined;
@@ -293,6 +293,13 @@ it.each(['locked', 'garbage'])('completes recovery with staged analytics when li
       await writeFile(join(target,'vstudy.sqlite'),'garbage'.repeat(1000));
       await rm(join(target,'vstudy.sqlite-wal'),{force:true});
       await rm(join(target,'vstudy.sqlite-shm'),{force:true});
+    }
+    if(mode==='locked' && process.platform==='win32') {
+      // Windows cannot rename an open SQLite WAL. Keep the journal and retry
+      // after the external connection closes, rather than losing the staged restore.
+      await expect(recoverRestore(target)).rejects.toMatchObject({code:'EBUSY'});
+      expect(await readdir(target)).toContain('restore-pending.json');
+      lock?.exec('ROLLBACK');lock?.close();lock=undefined;
     }
     await expect(recoverRestore(target)).resolves.toBe(true);
     lock?.exec('ROLLBACK');lock?.close();lock=undefined;

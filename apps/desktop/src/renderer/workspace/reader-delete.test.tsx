@@ -51,14 +51,15 @@ it('moves focus to Undo after Delete and back to the reader after Undo',async()=
 });
 it('removes the reader Undo notice after 30 seconds like the library page',async()=>{
   setup();
-  vi.useFakeTimers({toFake:['setTimeout','clearTimeout'],shouldAdvanceTime:true});
+  render(<Workspace/>);await screen.findByText('Readable document');
+  vi.useFakeTimers({toFake:['setTimeout','clearTimeout']});
   try{
-    render(<Workspace/>);await screen.findByText('Readable document');
-    fireEvent.click(screen.getByRole('button',{name:tr('common:delete_document')}));
-    await screen.findByRole('button',{name:tr('library:undo')});
-    await act(async()=>{vi.advanceTimersByTime(29000)});
+    // Flush the async delete and its passive expiry effect before advancing the clock.
+    await act(async()=>{fireEvent.click(screen.getByRole('button',{name:tr('common:delete_document')}));});
+    expect(screen.getByRole('button',{name:tr('library:undo')})).not.toBeNull();
+    await act(async()=>{await vi.advanceTimersByTimeAsync(29999)});
     expect(screen.queryByRole('button',{name:tr('library:undo')})).not.toBeNull();
-    await act(async()=>{vi.advanceTimersByTime(2000)});
+    await act(async()=>{await vi.advanceTimersByTimeAsync(1)});
     expect(screen.queryByRole('button',{name:tr('library:undo')})).toBeNull();
     expect(screen.queryByText(tr('library:deleted',{count:1,formatted:'1'}))).toBeNull();
   }finally{vi.useRealTimers()}

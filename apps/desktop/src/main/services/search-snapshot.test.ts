@@ -110,7 +110,10 @@ it.each(['SIGKILL', 'SIGTERM', 'worker termination'] as const)('cleans snapshot 
       await stopped;
     }
     const before = bytes();
-    if (kind === 'SIGKILL') await new SearchService(db, root).rebuild();
+    // Windows kill('SIGTERM') also hard-terminates: no JS cleanup handler can run.
+    // Both hard-kill paths must be scavenged by the next maintenance run.
+    if (kind === 'SIGKILL' || (kind === 'SIGTERM' && process.platform === 'win32'))
+      await new SearchService(db, root).rebuild();
     const after = bytes();
     process.stdout.write(`SNAPSHOT ${kind} interruptedBytes=${before} afterCleanupBytes=${after}\n`);
     expect(after).toBe(0);
