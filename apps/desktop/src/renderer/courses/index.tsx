@@ -166,6 +166,8 @@ function CoursesBody({
   const [showUpdates, setShowUpdates] = useState(false);
   const [allDue, setAllDue] = useState(false);
   const updatesTrigger = useRef<HTMLButtonElement>(null);
+  const disconnectTrigger = useRef<HTMLButtonElement>(null);
+  const disconnectSchool = useRef<string | undefined>(undefined);
   const [showPlanner, setShowPlanner] = useState(false);
   const openMoodle = useMoodleWebview();
   const [overview, setOverview] = useState<MoodleOverview>();
@@ -534,7 +536,7 @@ function CoursesBody({
           </div>
           <div className="moodle-header-actions">
           {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry" onClick={() => setShowUpdates(true)}><Inbox />{tr("moodle:updates")}{unreadUpdates > 0 && <span className="updates-count">{unreadUpdates}</span>}</Button>}
-          {detail && <Button variant="ghost" size="icon" aria-label={tr("moodle:disconnect")} title={tr("moodle:disconnect")} onClick={() => setConfirmDisconnect(detail.course.accountId)}><Unplug /></Button>}
+          {detail && <Button ref={disconnectTrigger} variant="ghost" size="icon" aria-label={tr("moodle:disconnect")} title={tr("moodle:disconnect")} onClick={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}><Unplug /></Button>}
           <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
           <Button variant="outline" onClick={() => setConnect(true)}>
             <GraduationCap />
@@ -987,9 +989,9 @@ function CoursesBody({
           )
         )}
         <Dialog open={!!confirmDisconnect} onOpenChange={open => { if (!open) setConfirmDisconnect(undefined); }}>
-          <DialogContent>
+          <DialogContent onCloseAutoFocus={event => { event.preventDefault(); disconnectTrigger.current?.focus(); }}>
             <DialogHeader>
-              <DialogTitle>{tr("moodle:disconnect_title", { school: overview?.accounts.find(account => account.id === confirmDisconnect)?.siteName ?? tr("moodle:this_school") })}</DialogTitle>
+              <DialogTitle>{tr("moodle:disconnect_title", { school: disconnectSchool.current ?? tr("moodle:this_school") })}</DialogTitle>
               <DialogDescription asChild><div className="grid gap-2"><p>{tr("moodle:disconnect_removes")}</p><p>{tr("moodle:disconnect_keeps")}</p></div></DialogDescription>
             </DialogHeader>
             <DialogFooter>

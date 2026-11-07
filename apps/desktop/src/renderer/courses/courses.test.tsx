@@ -255,6 +255,19 @@ describe("Courses", () => {
     expect(host.querySelector("[role=status]")?.textContent).toBe("");
     expect((await api.overview()).accounts).toEqual([]);
   });
+  it("returns focus to the Disconnect school button when Escape closes the dialog", async () => {
+    const api = createMockMoodleApi(),
+      courseId = (await api.overview()).courses[0]!.id;
+    await mount(api, courseId);
+    const trigger = host.querySelector<HTMLButtonElement>('[aria-label="Disconnect school"]')!;
+    await act(async () => trigger.click());
+    const dialog = document.querySelector("[role=dialog]")!;
+    await act(async () => {
+      dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    });
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    expect(document.activeElement).toBe(trigger);
+  });
   it("reports a failed file opening and lets the student retry", async () => {
     const api = createMockMoodleApi();
     const courseId = (await api.overview()).courses[0]!.id;
