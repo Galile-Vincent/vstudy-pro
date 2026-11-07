@@ -66,28 +66,48 @@ export function chatHistoryRepository(db: DatabaseSync) {
       const roleSql = q.role ? ' AND role=?' : '';
       if (q.role)
         searchValues.push(q.role);
-      const cursorSql = q.cursor ? 'WHERE rank>? OR (rank=? AND (updatedAt<? OR (updatedAt=? AND id<?)))' : '';
-      const cursorValues = q.cursor ? [q.cursor.rank, q.cursor.rank, q.cursor.updatedAt, q.cursor.updatedAt, q.cursor.id] : [];
-      const rows = db.prepare(`WITH hits AS MATERIALIZED (
-    SELECT conversationId,${q.query && long ? 'bm25(chat_fts,0,0,0,8,1)' : '0'} AS score FROM chat_fts WHERE ${matching}${roleSql}
-   ), ranked AS (
-    SELECT c.id,c.scope,c.documentId,${course} AS courseId,c.providerId,c.modelId,c.createdAt,
-    coalesce(c.updatedAt,c.createdAt) AS updatedAt,c.pinned,c.archived,
-    coalesce(c.title,(SELECT substr(json_extract(parts,'$[0].text'),1,120) FROM messages WHERE conversationId=c.id AND role='user' AND supersededBy IS NULL ORDER BY createdAt,id LIMIT 1),'') AS title,
-    d.title AS documentTitle,json_extract(mc.data,'$.fullName') AS courseTitle,
-    json_extract(mc.data,'$.color') AS courseColor,${term} AS term,
-    ${attachment} AS hasAttachments,${citation} AS hasCitations,min(hits.score) AS rank
-    FROM hits JOIN conversations c ON c.id=hits.conversationId
-    LEFT JOIN documents d ON d.id=c.documentId LEFT JOIN moodle_courses mc ON mc.id=${course}
-    WHERE ${filters.join(' AND ')} GROUP BY c.id
-   ) SELECT * FROM ranked ${cursorSql} ORDER BY rank,updatedAt DESC,id DESC LIMIT ?`).all(...searchValues, ...values, ...cursorValues, q.limit + 1);
-      const items = rows.slice(0, q.limit).map(row => {
-        const snippets = db.prepare(`SELECT messageId,role,${q.query && long ? "snippet(chat_fts,4,'[mark]','[/mark]','…',40)" : 'text'} AS snippet
-     FROM chat_fts WHERE conversationId=? AND messageId IS NOT NULL AND ${matching}${roleSql}
-     ORDER BY ${q.query && long ? 'bm25(chat_fts,0,0,0,8,1),' : ''} rowid DESC LIMIT 3`).all(String(row.id), ...searchValues);
-        return chatHitSchema.parse({ ...row, pinned: !!row.pinned, archived: !!row.archived, hasAttachments: !!row.hasAttachments, hasCitations: !!row.hasCitations,
-          titleSnippet: markedSnippet(String(row.title), q.query), matches: snippets.map(m => ({ ...m, snippet: long && q.query ? m.snippet : markedSnippet(String(m.snippet), q.query) })) });
-      });
+      if (!q.query && q.role)
+        add('EXISTS(SELECT 1 FROM messages WHERE conversationId=c.id AND supersededBy IS NULL AND role=?)', q.role);
+      const cursorSql = q.cursor ? q.query
+        ? 'WHERE rank>? OR (rank=? AND (updatedAt<? OR (updatedAt=? AND id<?)))'
+        : 'WHERE (updatedAt,id)<(?,?)' : '';
+      const cursorValues = q.cursor ? q.query
+        ? [q.cursor.rank, q.cursor.rank, q.cursor.updatedAt, q.cursor.updatedAt, q.cursor.id]
+        : [q.cursor.updatedAt, q.cursor.id] : [];
+      // OFFSET prevents flattening while allowing BM25 evaluation in a streaming coroutine.
+      const hits = q.query ? `hits AS (
+        SELECT conversationRowid,${long ? 'bm25(chat_fts,0,0,0,8,1)' : '0'} AS score FROM chat_fts WHERE ${matching}${roleSql} LIMIT -1 OFFSET 0
+      ), scores AS (SELECT conversationRowid,min(score) AS rank FROM hits GROUP BY conversationRowid),` : '';
+      const rows = db.prepare(`WITH ${hits} candidates AS (
+        SELECT c.*,${q.query ? 'scores.rank' : '0 AS rank'} FROM conversations c
+        ${q.query ? 'JOIN scores ON scores.conversationRowid=c.rowid' : 'INDEXED BY conversations_history_recent'}
+        LEFT JOIN documents d ON d.id=c.documentId ${q.term !== undefined ? `LEFT JOIN moodle_courses mc ON mc.id=${course}` : ''}
+        WHERE ${filters.join(' AND ')}
+      ), page AS MATERIALIZED (
+        SELECT * FROM candidates ${cursorSql} ORDER BY ${q.query ? 'rank,' : ''}updatedAt DESC,id DESC LIMIT ?
+      ) SELECT c.id,c.scope,c.documentId,${course} AS courseId,c.providerId,c.modelId,c.createdAt,
+        c.updatedAt,c.pinned,c.archived,c.rank,
+        coalesce(c.title,(SELECT substr(json_extract(parts,'$[0].text'),1,120) FROM messages WHERE conversationId=c.id AND role='user' AND supersededBy IS NULL ORDER BY createdAt,id LIMIT 1),'') AS title,
+        d.title AS documentTitle,json_extract(mc.data,'$.fullName') AS courseTitle,
+        json_extract(mc.data,'$.color') AS courseColor,${term} AS term,
+        ${attachment} AS hasAttachments,${citation} AS hasCitations
+        FROM page c LEFT JOIN documents d ON d.id=c.documentId LEFT JOIN moodle_courses mc ON mc.id=${course}
+        ORDER BY ${q.query ? 'rank,' : ''}c.updatedAt DESC,c.id DESC`).all(...(q.query ? searchValues : []), ...values, ...cursorValues, q.limit + 1);
+      const selected = rows.slice(0, q.limit);
+      const snippets = selected.length && q.query ? db.prepare(`SELECT c.id AS conversationId,messageId,role,text AS snippet
+        FROM chat_fts JOIN conversations c ON c.rowid=chat_fts.conversationRowid WHERE chat_fts.rowid IN (SELECT rowid FROM messages WHERE conversationId IN (${selected.map(() => '?').join(',')}) AND supersededBy IS NULL)
+        ${roleSql}
+        ORDER BY chat_fts.rowid DESC`).all(...selected.map(row => String(row.id)), ...(q.role ? [q.role] : [])) : [];
+      const matches = new Map<string, typeof snippets>();
+      for (const snippet of snippets) {
+        if (!String(snippet.snippet).toLowerCase().includes(q.query.toLowerCase())) continue;
+        const id = String(snippet.conversationId), group = matches.get(id) ?? [];
+        if (group.length < 3) group.push(snippet);
+        matches.set(id, group);
+      }
+      const items = selected.map(row => chatHitSchema.parse({ ...row,
+        pinned: !!row.pinned, archived: !!row.archived, hasAttachments: !!row.hasAttachments, hasCitations: !!row.hasCitations,
+        titleSnippet: markedSnippet(String(row.title), q.query), matches: (matches.get(String(row.id)) ?? []).map(m => ({ messageId: m.messageId, role: m.role, snippet: markedSnippet(String(m.snippet), q.query) })) }));
       const last = items.at(-1);
       return { items, nextCursor: rows.length > q.limit && last ? { rank: last.rank, updatedAt: last.updatedAt, id: last.id } : null };
     },
