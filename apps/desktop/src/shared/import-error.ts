@@ -8,7 +8,11 @@ import type { Status } from './status';
 /** Map structured conversion failures to stable localized error codes. */
 export function importError(error: unknown): Status {
   const message = error instanceof Error ? error.message : String(error);
-  const code = /empty|zero.byte/i.test(message) ? 'empty_file'
+  const errno = String((error as { code?: unknown } | null)?.code ?? '');
+  const code = errno === 'ENOSPC' || /ENOSPC/.test(message) ? 'disk_full'
+    : ['EACCES', 'EPERM', 'EROFS'].includes(errno) || /EACCES|EPERM|EROFS/.test(message) ? 'permission_denied'
+    : ['ENOTFOUND', 'ECONNREFUSED', 'ENETUNREACH', 'EAI_AGAIN'].includes(errno) ? 'offline'
+    : /empty|zero.byte/i.test(message) ? 'empty_file'
     : /50 MiB|too large/i.test(message) ? 'file_too_large'
     : /Unsupported document type/.test(message) ? 'unsupported_type'
     : /ZIP|archive|Symlink|regular file/.test(message) ? 'unsafe_archive'

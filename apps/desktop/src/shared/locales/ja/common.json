@@ -198,7 +198,7 @@
   "usage": "使用量",
   "keys_are_saved_securely_in_the_desktop_app_and_never_read_back": "キーはデスクトップアプリに安全に保存され、再表示されません。",
   "could_not_save_structured_table_setting": "構造化テーブルの設定を保存できませんでした。",
-  "read_only_structured_tables_api_providers_only": "読み取り専用の構造化テーブル（API プロバイダーのみ）",
+  "read_only_structured_tables_api_providers_only": "回答を表で表示",
   "optional_table_presentations_off_by_default_cli_tools_remain_disabled": "任意で有効にできる表形式の表示です。初期設定はオフです。CLI ツールは無効のままです。",
   "could_not_check_key_status": "キーの状態を確認できませんでした",
   "could_not_save_provider": "プロバイダーを保存できませんでした",

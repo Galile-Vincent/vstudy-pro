@@ -3,7 +3,9 @@ import { statusSchema, type Status } from '../shared/status';
 export function statusText(status: Status): string {
  const index=status.code.indexOf('.');
  const key=index<0?'errors:generic':`${status.code.slice(0,index)}:${status.code.slice(index+1)}`;
- return i18n.exists(key) ? tr(key,status.params) : tr('errors:generic');
+ if(i18n.exists(key)) return tr(key,status.params);
+ if(import.meta.env.DEV) console.warn(`Unmapped status code: ${status.code}`);
+ return tr('errors:generic');
 }
 export function errorText(error: unknown): string {
  const structured=statusSchema.safeParse(error);

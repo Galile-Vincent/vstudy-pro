@@ -238,6 +238,19 @@ describe("Courses", () => {
         .querySelector<HTMLButtonElement>('[aria-label="Disconnect school"]')!
         .click(),
     );
+    const dialog = document.querySelector("[role=dialog]")!;
+    expect((await api.overview()).accounts).toHaveLength(1);
+    expect(dialog.textContent).toContain("Disconnect 中原大學 CYCU?");
+    expect(dialog.textContent).toContain("planner tasks, goals and exams");
+    await click("Cancel", dialog);
+    expect((await api.overview()).accounts).toHaveLength(1);
+    expect(onCourse).not.toHaveBeenCalled();
+    await act(async () =>
+      host
+        .querySelector<HTMLButtonElement>('[aria-label="Disconnect school"]')!
+        .click(),
+    );
+    await click("Disconnect school", document.querySelector("[role=dialog]")!);
     expect(onCourse.mock.calls).toEqual([[]]);
     expect(host.querySelector("[role=status]")?.textContent).toBe("");
     expect((await api.overview()).accounts).toEqual([]);

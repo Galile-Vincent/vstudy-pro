@@ -1,9 +1,8 @@
 {
   "welcome": "Make space for understanding",
-  "welcome_body": "Read your own documents and ask about the passages that matter. Your library stays on this computer.",
+  "welcome_body": "Your library stays on this computer. AI is optional, and nothing from your documents is sent until you ask.",
   "language": "Language",
   "connect": "Use your Claude Code / Codex / Antigravity login",
-  "connect_body": "CLI providers start disabled. Enable one here to use its login. Discovery and chat may contact provider services and CLI telemetry endpoints. Chat sends questions, conversation history, document metadata and selected text to your chosen provider. You can read without connecting. Without a selection, the document outline and opening excerpt are sent. Earlier selections can remain in conversation history.",
   "signin": "Not ready yet? Install the CLI and sign in in Terminal, then check again.",
   "refresh": "Check again",
   "ready": "Ready",
@@ -28,7 +27,6 @@
   "progress": "Step {{current}} of {{total}}",
   "name": "Your name (optional)",
   "preview_label": "Reader and grounded chat preview",
-  "setup_help": "AI comes from another service. Reading files is free of AI charges. To ask AI, first set up an account with OpenAI or Anthropic. An API key is a secret code from that account; API use can cost extra, even with a chat subscription. CLI means a separate app that you install and sign in to before refreshing this list. You can skip this and read a sample now.",
   "read_only": "Read without AI",
   "step_welcome": "Study, with a way forward",
   "step_language": "Language and text size",
