@@ -19,7 +19,7 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
             '以下連結指向最新已發布版本，儲存庫已公開。若缺少檔案，請到「版本說明與檔案狀態」確認發布平台與驗證結果。試跑不等於已發布版本。AI、學校登入與新課程資料需要網路。',
           ],
           steps: [
-            '從「其他平台」下載適合的安裝檔與同一版本的 SHA256SUMS.txt。',
+            '從「下載」頁面取得適合的安裝檔與同一版本的 SHA256SUMS.txt。',
             '比對檔案與校驗碼清單中對應項目的完整雜湊。Mac 使用 shasum -a 256 加上檔名；Windows PowerShell 使用 Get-FileHash -Algorithm SHA256 加上檔名。校驗碼可偵測檔案變動，無法證明發布者身分。',
             'Mac：開啟 DMG，將 VStudy Pro 拖入「應用程式」，退出映像檔後開啟安裝的 app。',
             'Windows：執行 EXE，安裝至目前使用者帳號。若此個人安裝程式意外要求管理員權限，請停止操作。',
@@ -81,7 +81,7 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
             'リンクは最新の公開リリースを指します。リポジトリは公開されています。ファイルがない場合は「リリースノートと配布状況」で配布対象と検証結果を確認してください。試行ビルドは公開リリースではありません。AI、学校へのログイン、新しい授業内容にはネット接続が必要です。',
           ],
           steps: [
-            '「ほかのプラットフォーム」から適切なインストーラーと同じリリースの SHA256SUMS.txt を取得します。',
+            '「ダウンロード」ページから適切なインストーラーと同じリリースの SHA256SUMS.txt を取得します。',
             'チェックサム一覧の該当ファイルとハッシュ全体を照合します。Mac は shasum -a 256 にファイル名を続け、Windows PowerShell は Get-FileHash -Algorithm SHA256 にファイル名を続けます。チェックサムは改変を検出しますが、発行元は証明しません。',
             'Mac：DMG を開き、VStudy Pro を「アプリケーション」にドラッグします。イメージを取り出し、インストールしたアプリを開きます。',
             'Windows：EXE を実行し、現在のユーザー用にインストールします。このユーザー用インストーラーが管理者権限を要求したら操作を止めてください。',

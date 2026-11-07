@@ -34,7 +34,7 @@ export const guides: Guide[] = [
           'The links below point to the latest published release. The repository is public. If an asset is absent, check Release notes and availability for published targets and verification results. A dry run is not a published release. AI, school sign-in, and fresh course content need internet access.',
         ],
         steps: [
-          'Download your installer and SHA256SUMS.txt from the same release using Other platforms.',
+          'Download your installer and SHA256SUMS.txt from the same release on the Download page.',
           'Verify your file against its entry in the checksum list. On Mac, use shasum -a 256 followed by the filename. On Windows PowerShell, use Get-FileHash -Algorithm SHA256 followed by the filename. Compare the entire hash. Checksums detect changed bytes, not publisher identity.',
           'Mac: open the DMG and drag VStudy Pro into Applications. Eject the image and open the installed app.',
           'Windows: run the EXE to install for the current user. Stop if this per-user installer unexpectedly asks for administrator access.',

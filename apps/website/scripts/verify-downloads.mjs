@@ -27,16 +27,23 @@ for (const [name, ua, hints, expected] of cases) {
 }
 assert.equal(new Set(installers.map(item => item.file)).size, 4);
 assert.deepEqual(releaseMetadata, {}, 'Unverified release metadata must remain hidden');
-for (const route of ['', 'en/', 'zh-Hant/', 'ja/', 'en/docs/getting-started/', 'zh-Hant/docs/getting-started/', 'ja/docs/getting-started/']) {
+const downloadRoutes = ['en/download/', 'zh-Hant/download/', 'ja/download/'];
+for (const route of downloadRoutes) {
   const html = await readFile(new URL(`../dist/${route}index.html`, import.meta.url), 'utf8');
   for (const installer of installers) {
     const linked = html.includes(`href="${downloadBase}/${installer.file}"`);
     assert.equal(linked, installer.releaseEnabled, `${route} no-JS publication scope ${installer.id}`);
-    assert.ok(html.includes(`data-installer="${installer.id}"`), `${route} includes planned platforms`);
+    assert.ok(html.includes(`data-installer="${installer.id}"`), `${route} lists every target`);
   }
   assert.ok(html.includes(`href="${downloadBase}/SHA256SUMS.txt"`), `${route} checksums`);
-  assert.match(html, /<details[^>]*class="download-platforms/);
-  if (!route.includes('/docs/')) assert.match(html, /class="intel-alternative"/);
+  assert.match(html, /<section class="dl-recommend"[^>]*\shidden/, `${route} recommendation stays hidden without JavaScript`);
   assert.doesNotMatch(html, /\d+(?:\.\d+)?\s*(?:MB|MiB)\b/, 'No invented installer size');
 }
-console.log(`PASS: ${cases.length} platform cases; four homepages and three guides link enabled installers and checksums, and mark other targets as planned.`);
+/* Every other page points at the download page and carries no installer links of its own. */
+for (const route of ['', 'en/', 'zh-Hant/', 'ja/', 'en/docs/getting-started/', 'zh-Hant/docs/getting-started/', 'ja/docs/getting-started/']) {
+  const html = await readFile(new URL(`../dist/${route}index.html`, import.meta.url), 'utf8');
+  const lang = route.split('/')[0] || 'en';
+  assert.ok(html.includes(`href="/${lang}/download/"`), `${route} links to the download page`);
+  for (const installer of installers) assert.ok(!html.includes(`${downloadBase}/${installer.file}`), `${route} must not link installers directly`);
+}
+console.log(`PASS: ${cases.length} platform cases; three download pages link enabled installers and checksums and mark other targets as planned; homepages and guides link to the download page.`);

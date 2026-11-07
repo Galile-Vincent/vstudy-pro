@@ -1,7 +1,6 @@
 ---
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
-import Download from '../components/Download.astro';
 import { path, REPO_URL, VERSION } from '../config';
 import { languages, languageNames, ui, type Language } from '../data/ui';
 interface Props { language: Language; title: string; description: string; slug?: string; docs?: boolean; page?: string; }
@@ -44,19 +43,34 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       <nav class="nav container" aria-label="VStudy Pro">
         <a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup /></a>
         <div class="nav-links">
-          <a class="desktop-link" href={path(`${language}/#features`)}>{t.features}</a>
+          <a href={path(`${language}/#features`)}>{t.features}</a>
           <a href={path(`${language}/docs/getting-started/`)} aria-current={docs ? 'page' : undefined}>{t.docs}</a>
-          <a class="desktop-link" href={REPO_URL}>GitHub</a>
-          <Download {language} compact />
         </div>
-        <div class="nav-tools">
-          <label class="sr-only" for="site-language">{t.language}</label>
-          <select id="site-language" class="language-select">
-            {languages.map(lang => <option value={route(lang)} selected={lang === language}>{languageNames[lang]}</option>)}
-          </select>
-          <button class="scheme-button" id="scheme-toggle" aria-label={t.appearance}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
-          </button>
+        <div class="nav-end">
+          <a class="button compact nav-download" href={path(`${language}/download/`)} aria-current={page === 'download/' ? 'page' : undefined}>{t.download}<span aria-hidden="true">↓</span></a>
+          <details class="menu" data-menu>
+            <summary class="menu-button" aria-label={t.settings}>
+              <svg class="icon-gear" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+              <svg class="icon-menu" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </summary>
+            <div class="menu-panel">
+              <nav class="menu-group menu-pages" aria-label={t.menu}>
+                <a href={path(`${language}/#features`)}>{t.features}</a>
+                <a href={path(`${language}/docs/getting-started/`)} aria-current={docs ? 'page' : undefined}>{t.docs}</a>
+              </nav>
+              <div class="menu-group" role="group" aria-labelledby="menu-language">
+                <p class="menu-label" id="menu-language">{t.language}</p>
+                {languages.map(lang => <a class="menu-item" href={route(lang)} lang={lang} hreflang={lang} aria-current={lang === language ? 'true' : undefined}>{languageNames[lang]}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></a>)}
+              </div>
+              <div class="menu-group" role="group" aria-labelledby="menu-theme">
+                <p class="menu-label" id="menu-theme">{t.theme}</p>
+                <div class="segmented">
+                  <button type="button" data-scheme-set="light" aria-pressed="false">{t.light}</button>
+                  <button type="button" data-scheme-set="dark" aria-pressed="false">{t.dark}</button>
+                </div>
+              </div>
+            </div>
+          </details>
         </div>
       </nav>
     </header>
@@ -64,39 +78,49 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <footer class="site-footer">
       <div class="container footer-inner">
         <div><a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup /></a><p>{t.footer}</p><p><small>{t.version} {VERSION}</small></p></div>
-        <div class="footer-links"><a href={path(`${language}/docs/getting-started/`)}>{t.docs}</a><a href={path(`${language}/privacy/`)}>{t.privacy}</a><a href={path(`${language}/terms/`)}>{t.terms}</a><a href={REPO_URL}>{t.source}</a></div>
+        <div class="footer-links"><a href={path(`${language}/download/`)}>{t.download}</a><a href={path(`${language}/docs/getting-started/`)}>{t.docs}</a><a href={path(`${language}/privacy/`)}>{t.privacy}</a><a href={path(`${language}/terms/`)}>{t.terms}</a><a href={REPO_URL}>{t.source}</a></div>
       </div>
     </footer>
     <script>
       import { transitionTheme } from '../scripts/theme';
       requestAnimationFrame(() => { document.documentElement.dataset.themeReady = ''; });
-      const toggle = document.querySelector<HTMLButtonElement>('#scheme-toggle');
+      const schemeButtons = document.querySelectorAll<HTMLButtonElement>('[data-scheme-set]');
       const system = matchMedia('(prefers-color-scheme: dark)');
       let manual = false;
       try { manual = ['light','dark'].includes(localStorage.getItem('vstudy-scheme') ?? ''); } catch {}
-      toggle?.addEventListener('click', () => {
-        const scheme = document.documentElement.dataset.scheme === 'dark' ? 'light' : 'dark';
+      const syncSchemeButtons = () => schemeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.schemeSet === document.documentElement.dataset.scheme)));
+      syncSchemeButtons();
+      schemeButtons.forEach(button => button.addEventListener('click', () => {
+        const scheme = button.dataset.schemeSet === 'dark' ? 'dark' : 'light';
+        manual = true;
+        try { localStorage.setItem('vstudy-scheme', scheme); } catch {}
+        if (document.documentElement.dataset.scheme === scheme) return;
         transitionTheme(() => {
           document.documentElement.dataset.scheme = scheme;
           document.dispatchEvent(new Event('scheme-change'));
+          syncSchemeButtons();
         });
-        manual = true;
-        try { localStorage.setItem('vstudy-scheme', scheme); } catch {}
-      });
+      }));
       system.addEventListener('change', event => {
         if (manual) return;
         transitionTheme(() => {
           document.documentElement.dataset.scheme = event.matches ? 'dark' : 'light';
           document.dispatchEvent(new Event('scheme-change'));
+          syncSchemeButtons();
         });
       });
+      const menu = document.querySelector<HTMLDetailsElement>('[data-menu]');
+      document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape' || !menu?.open) return;
+        menu.open = false;
+        menu.querySelector('summary')?.focus();
+      });
+      document.addEventListener('click', event => { if (menu?.open && event.target instanceof Node && !menu.contains(event.target)) menu.open = false; });
+      menu?.addEventListener('focusout', event => { if (menu.open && event.relatedTarget instanceof Node && !menu.contains(event.relatedTarget)) menu.open = false; });
       const header = document.querySelector('.site-header');
       const updateHeader = () => header?.classList.toggle('is-scrolled', window.scrollY > 12);
       updateHeader();
       window.addEventListener('scroll', updateHeader, { passive: true });
-      document.querySelector<HTMLSelectElement>('#site-language')?.addEventListener('change', event => {
-        if (event.currentTarget instanceof HTMLSelectElement) location.href = event.currentTarget.value;
-      });
     </script>
   </body>
 </html>
