@@ -20,7 +20,6 @@ export function scrubbedEnvironment(cwd: string): NodeJS.ProcessEnv {
     PIP_DISABLE_PIP_VERSION_CHECK: "1",
     PIP_CONFIG_FILE: process.platform === 'win32' ? 'NUL' : '/dev/null',
     PIP_NO_INPUT: "1",
-    UV_PYTHON_PREFERENCE: 'only-managed',
     UV_NO_CONFIG: "1",
     UV_NO_PROGRESS: "1",
   };
