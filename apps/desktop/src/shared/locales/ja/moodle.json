@@ -250,5 +250,6 @@
   "sort_name": "名前",
   "view_label": "表示",
   "view_list": "リスト",
-  "view_cards": "カード"
+  "view_cards": "カード",
+  "open_file": "ファイルを開く：{{name}}"
 }

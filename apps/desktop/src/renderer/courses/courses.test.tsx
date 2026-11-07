@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { act } from "react";
+import { fireEvent, getByRole, queryByRole } from "@testing-library/dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Courses, deadlineGroup } from "./index";
@@ -158,6 +159,10 @@ describe("Courses", () => {
     const courseId = (await api.overview()).courses[0]!.id;
     await mount(api, courseId, onDocument);
     await tab("Files");
+    const file = (await api.course(courseId)).files[0]!;
+    const fileRow = getByRole(host, 'button', {name:`Open file: ${file.name}`});
+    expect(fileRow.title).toBe(`Open file: ${file.name}`);
+    expect(getByRole(host, 'button', {name:`Open in Moodle: ${file.name}`}).title).toBe('Open in Moodle');
     expect(
       host.querySelector("[role=tabpanel][data-state=active]")?.textContent,
     ).toContain("Practice worksheet.docx");
@@ -288,11 +293,9 @@ describe("Courses", () => {
         />,
       ),
     );
-    await act(async () =>
-      host
-        .querySelector<HTMLButtonElement>('[aria-label="Disconnect school"]')!
-        .click(),
-    );
+    expect(queryByRole(host, 'button', {name:'Disconnect school'})).toBeNull();
+    await act(async () => fireEvent.keyDown(getByRole(host,'button',{name:'More options'}), {key:'Enter'}));
+    await act(async () => fireEvent.click(getByRole(document.body,'menuitem',{name:'Disconnect school'})));
     const dialog = document.querySelector("[role=dialog]")!;
     expect((await api.overview()).accounts).toHaveLength(1);
     expect(dialog.textContent).toContain("Disconnect 中原大學 CYCU?");
@@ -300,22 +303,21 @@ describe("Courses", () => {
     await click("Cancel", dialog);
     expect((await api.overview()).accounts).toHaveLength(1);
     expect(onCourse).not.toHaveBeenCalled();
-    await act(async () =>
-      host
-        .querySelector<HTMLButtonElement>('[aria-label="Disconnect school"]')!
-        .click(),
-    );
+    expect(queryByRole(host, 'button', {name:'Disconnect school'})).toBeNull();
+    await act(async () => fireEvent.keyDown(getByRole(host,'button',{name:'More options'}), {key:'Enter'}));
+    await act(async () => fireEvent.click(getByRole(document.body,'menuitem',{name:'Disconnect school'})));
     await click("Disconnect school", document.querySelector("[role=dialog]")!);
     expect(onCourse.mock.calls).toEqual([[]]);
     expect(host.querySelector("[role=status]")?.textContent).toBe("");
     expect((await api.overview()).accounts).toEqual([]);
   });
-  it("returns focus to the Disconnect school button when Escape closes the dialog", async () => {
+  it("returns focus to More options when Escape closes the disconnect dialog", async () => {
     const api = createMockMoodleApi(),
       courseId = (await api.overview()).courses[0]!.id;
     await mount(api, courseId);
-    const trigger = host.querySelector<HTMLButtonElement>('[aria-label="Disconnect school"]')!;
-    await act(async () => trigger.click());
+    const trigger = getByRole(host,'button',{name:'More options'});
+    await act(async () => fireEvent.keyDown(trigger, {key:'Enter'}));
+    await act(async () => fireEvent.click(getByRole(document.body,'menuitem',{name:'Disconnect school'})));
     const dialog = document.querySelector("[role=dialog]")!;
     await act(async () => {
       dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));

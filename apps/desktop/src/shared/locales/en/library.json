@@ -169,7 +169,7 @@
   "chat_network_error": "Could not connect. Check your internet, then try again.",
   "ai_parse.range_error": "Enter whole page numbers from 1 to the document’s last page. The first page must come before or equal the last.",
   "openMethod": "Open with",
-  "openReader": "VStudy reader (Markdown)",
+  "openReader": "VStudy reader",
   "openOriginal": "Original file in system app",
   "downloadCopy": "Download a copy…",
   "saveToLibrary": "Save to document library",
@@ -186,5 +186,6 @@
   "breadcrumb": "Library location",
   "folderFiles": "{{formatted}} files",
   "folderFiles_one": "{{formatted}} file",
-  "folderFiles_other": "{{formatted}} files"
+  "folderFiles_other": "{{formatted}} files",
+  "openAs": "Open as"
 }

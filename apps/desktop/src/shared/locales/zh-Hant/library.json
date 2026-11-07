@@ -169,7 +169,7 @@
   "chat_network_error": "無法連線。請檢查網路後重試。",
   "ai_parse.range_error": "請輸入 1 到文件最後一頁之間的整數，起始頁不得大於結束頁。",
   "openMethod": "開啟方式",
-  "openReader": "VStudy 閱讀器（Markdown）",
+  "openReader": "VStudy 閱讀器",
   "openOriginal": "以系統應用程式開啟原始檔案",
   "downloadCopy": "下載副本⋯",
   "saveToLibrary": "儲存至文件庫",
@@ -186,5 +186,6 @@
   "breadcrumb": "文件庫位置",
   "folderFiles": "{{formatted}} 份文件",
   "folderFiles_one": "{{formatted}} 份文件",
-  "folderFiles_other": "{{formatted}} 份文件"
+  "folderFiles_other": "{{formatted}} 份文件",
+  "openAs": "開啟方式"
 }
