@@ -94,20 +94,19 @@ export function chatHistoryRepository(db: DatabaseSync) {
         FROM page c LEFT JOIN documents d ON d.id=c.documentId LEFT JOIN moodle_courses mc ON mc.id=${course}
         ORDER BY ${q.query ? 'rank,' : ''}c.updatedAt DESC,c.id DESC`).all(...(q.query ? searchValues : []), ...values, ...cursorValues, q.limit + 1);
       const selected = rows.slice(0, q.limit);
-      const snippets = selected.length && q.query ? db.prepare(`SELECT c.id AS conversationId,messageId,role,text AS snippet
+      const snippets = selected.length && q.query ? db.prepare(`SELECT c.id AS conversationId,messageId,role,${long ? "snippet(chat_fts,4,'[mark]','[/mark]',' … ',32)" : 'text'} AS snippet
         FROM chat_fts JOIN conversations c ON c.rowid=chat_fts.conversationRowid WHERE chat_fts.rowid IN (SELECT rowid FROM messages WHERE conversationId IN (${selected.map(() => '?').join(',')}) AND supersededBy IS NULL)
-        ${roleSql}
-        ORDER BY chat_fts.rowid DESC`).all(...selected.map(row => String(row.id)), ...(q.role ? [q.role] : [])) : [];
+        AND ${long ? matching : `(chat_fts.title LIKE ? ESCAPE '\\' OR text LIKE ? ESCAPE '\\')`}${roleSql}
+        ORDER BY chat_fts.rowid DESC`).all(...selected.map(row => String(row.id)), ...searchValues) : [];
       const matches = new Map<string, typeof snippets>();
       for (const snippet of snippets) {
-        if (!String(snippet.snippet).toLowerCase().includes(q.query.toLowerCase())) continue;
         const id = String(snippet.conversationId), group = matches.get(id) ?? [];
         if (group.length < 3) group.push(snippet);
         matches.set(id, group);
       }
       const items = selected.map(row => chatHitSchema.parse({ ...row,
         pinned: !!row.pinned, archived: !!row.archived, hasAttachments: !!row.hasAttachments, hasCitations: !!row.hasCitations,
-        titleSnippet: markedSnippet(String(row.title), q.query), matches: (matches.get(String(row.id)) ?? []).map(m => ({ messageId: m.messageId, role: m.role, snippet: markedSnippet(String(m.snippet), q.query) })) }));
+        titleSnippet: markedSnippet(String(row.title), q.query), matches: (matches.get(String(row.id)) ?? []).map(m => ({ messageId: m.messageId, role: m.role, snippet: long ? String(m.snippet) : markedSnippet(String(m.snippet), q.query) })) }));
       const last = items.at(-1);
       return { items, nextCursor: rows.length > q.limit && last ? { rank: last.rank, updatedAt: last.updatedAt, id: last.id } : null };
     },

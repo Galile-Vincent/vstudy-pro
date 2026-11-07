@@ -17,7 +17,7 @@ import { randomUUID } from 'node:crypto';
 import { fingerprint, writeZip } from './zip';
 const id='11111111-1111-4111-a111-111111111111',at='2026-11-01T00:00:00.000Z';
 async function stagedDb(root:string){const journal=JSON.parse(await readFile(join(root,'restore-pending.json'),'utf8'));return new DatabaseSync(join(root,journal.directory,'vstudy.sqlite'));}
-it('stages a populated v21 backup through v24 with no worker startup',async()=>{
+it('stages a populated v21 backup through the latest schema with no worker startup',async()=>{
  const root=await mkdtemp(join(tmpdir(),'study-v21-')),target=await mkdtemp(join(tmpdir(),'study-target-'));
  try{
   const path=join(root,'vstudy.sqlite'),db=new DatabaseSync(path);db.exec('PRAGMA foreign_keys=ON');migrate(db,migrations.filter(m=>m.version<=21));
@@ -26,10 +26,10 @@ it('stages a populated v21 backup through v24 with no worker startup',async()=>{
   await writeFile(manifest,JSON.stringify({format:'vstudy-backup',version:1,createdAt:at,files:[{path:file.name,bytes:file.bytes,sha256:file.sha256}]}));
   const archive=join(root,'backup.zip');await writeZip(archive,[file,{name:'manifest.json',path:manifest,...await fingerprint(manifest)}]);
   await stageRestore(target,archive);const restored=await stagedDb(target);
-  try {expect(restored.prepare('SELECT MAX(version) version FROM migrations').get()!.version).toBe(24);expect(restored.prepare('SELECT id FROM conversations').get()!.id).toBe(id);validateStudyData(restored);expect(restored.prepare('SELECT count(*) n FROM study_jobs').get()!.n).toBe(0);}finally{restored.close();}
+  try {expect(restored.prepare('SELECT MAX(version) version FROM migrations').get()!.version).toBe(Math.max(...migrations.map(m => m.version)));expect(restored.prepare('SELECT id FROM conversations').get()!.id).toBe(id);validateStudyData(restored);expect(restored.prepare('SELECT count(*) n FROM study_jobs').get()!.n).toBe(0);}finally{restored.close();}
  }finally{await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
-it('round-trips study courses and strict preferences through v24 backup',async()=>{
+it('round-trips study courses and strict preferences through a current-schema backup',async()=>{
  const root=await mkdtemp(join(tmpdir(),'study-v22-')),target=await mkdtemp(join(tmpdir(),'study-target-'));
  const store=openStore(join(root,'vstudy.sqlite'));
  try{

@@ -212,3 +212,10 @@ it('backs up v24 and records a verified v25 checksum before reopening', () => {
     reopened.close();
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+it('uses SQLite trigram folding for matching message snippets', () => {
+ const s=setup(), {m}=conversation(s,'Ὀδυσσεύς studies ſome science');
+ const hit=search(s,{query:'some'}).items[0]!;
+ expect(hit.matches).toHaveLength(1);
+ expect(hit.matches[0]).toMatchObject({messageId:m.id,snippet:expect.stringContaining('[mark]ſome[/mark]')});
+});

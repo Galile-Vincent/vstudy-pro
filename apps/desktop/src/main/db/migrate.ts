@@ -7,7 +7,7 @@
 /** Forward-only SQLite migrations. Legacy version rows adopt checksums on their first verified open. */
 import type { DatabaseSync } from 'node:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
-import { chmodSync, linkSync, unlinkSync, openSync, closeSync, fsyncSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { chmodSync, linkSync, unlinkSync, openSync, closeSync, fsyncSync, existsSync, readdirSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 
 export interface Migration { version: number; sql: string }
@@ -33,11 +33,11 @@ export function backupBeforeMigration(db: DatabaseSync, path: string, version: n
 
 export const MIGRATION_BACKUP_RETENTION = 3;
 
-function pruneMigrationBackups(path: string): void {
+function pruneMigrationBackups(path: string, currentVersion: number): void {
   const directory = dirname(path), prefix = `${basename(path)}.before-v`;
   const backups = readdirSync(directory).filter(name => name.startsWith(prefix) && /^\d+\.bak$/.test(name.slice(prefix.length)))
-    .map(name => ({ path: join(directory, name), modified: statSync(join(directory, name)).mtimeMs }))
-    .sort((a, b) => b.modified - a.modified);
+    .map(name => ({ path: join(directory, name), version: Number(name.slice(prefix.length, -4)) }))
+    .sort((a, b) => Number(b.version === currentVersion) - Number(a.version === currentVersion) || b.version - a.version);
   for (const backup of backups.slice(MIGRATION_BACKUP_RETENTION)) unlinkSync(backup.path);
 }
 
@@ -69,5 +69,5 @@ export function migrate(db: DatabaseSync, migrations: readonly Migration[], path
       db.exec('COMMIT');
     } catch (error) { db.exec('ROLLBACK'); throw error; }
   }
-  if (firstPending && path !== ':memory:') pruneMigrationBackups(path);
+  if (firstPending && path !== ':memory:') pruneMigrationBackups(path, firstPending.version);
 }
