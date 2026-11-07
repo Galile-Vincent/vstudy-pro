@@ -85,7 +85,7 @@ describe("document lifecycle", () => {
 });
 
 it("loads preexisting settings with a default last document", () => {
-  expect(settingsSchema.parse({ chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku" })).toEqual({ themeId:"vstudy",colorScheme:"system",contrast:100,glassOpacity:80,cardTransparency:"solid",customThemes:[], uiScale:100,density:"comfortable",accent:"neutral",readerFont:"system",readerSize:"m",material:"solid",welcomeSeen: false, language:"auto", replyLanguage:"auto", chatSide: "left", documentOpenMethod: "reader", lastProviderId: "claude-cli", lastModelId: "haiku", lastDocumentId: null, warnAtPercent: 80, priceOverrides: {}, converterIdleMinutes:5,converterOffline:false,enableGenerativeUI:false, modelDisplayNames:{} });
+  expect(settingsSchema.parse({ chatSide: "left", lastProviderId: "claude-cli", lastModelId: "haiku" })).toEqual({ themeId:"vstudy",colorScheme:"system",contrast:100,glassOpacity:80,cardTransparency:"soft",customThemes:[], uiScale:100,density:"comfortable",accent:"neutral",readerFont:"system",readerSize:"m",material:"solid",welcomeSeen: false, language:"auto", replyLanguage:"auto", chatSide: "left", documentOpenMethod: "reader", lastProviderId: "claude-cli", lastModelId: "haiku", lastDocumentId: null, warnAtPercent: 80, priceOverrides: {}, converterIdleMinutes:5,converterOffline:false,enableGenerativeUI:false, modelDisplayNames:{} });
 });
 
 it('bounds stored message text at the existing two-million-character reasoning limit', () => {

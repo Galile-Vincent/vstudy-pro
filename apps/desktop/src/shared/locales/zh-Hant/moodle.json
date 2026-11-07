@@ -251,5 +251,6 @@
   "view_label": "檢視方式",
   "view_list": "清單",
   "view_cards": "卡片",
-  "open_file": "開啟檔案：{{name}}"
+  "open_file": "開啟檔案：{{name}}",
+  "course_more": "更多課程操作"
 }

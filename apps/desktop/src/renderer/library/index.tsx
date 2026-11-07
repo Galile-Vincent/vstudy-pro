@@ -18,6 +18,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import {
   FileText,
@@ -73,6 +74,19 @@ function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpe
  return <Tooltip delayDuration={500} open={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}}><TooltipTrigger asChild><Button ref={ref} variant="ghost" className="document-title" tabIndex={-1} lang={contentLanguage(title)} onClick={onOpen}>{title}</Button></TooltipTrigger><TooltipContent className="document-tooltip"><div>{title}</div><div>{details}</div></TooltipContent></Tooltip>;
 }
 const defaults: LibraryQuery = { sort: "manual", direction: "asc", limit: 50 };
+const compactQuery = "(max-width: 1099px)";
+function useCompactToolbar() {
+  return useSyncExternalStore(
+    (change) => {
+      if (typeof matchMedia !== "function") return () => {};
+      const query = matchMedia(compactQuery);
+      query.addEventListener("change", change);
+      return () => query.removeEventListener("change", change);
+    },
+    () => typeof matchMedia === "function" && matchMedia(compactQuery).matches,
+    () => false,
+  );
+}
 export function Snippet({ text }: { text: string }) {
   return (
     <>
@@ -106,6 +120,7 @@ export function LibraryView() {
   });
   const [customDates,setCustomDates] = useState(false);
   const [filtersOpen,setFiltersOpen] = useState(false);
+  const compactToolbar = useCompactToolbar();
   useEffect(() => {
     if (filtersOpen) document.querySelector<HTMLElement>('.filter-panel input,.filter-panel button')?.focus();
   }, [filtersOpen]);
@@ -421,6 +436,53 @@ export function LibraryView() {
     if(rowTop<viewport.scrollTop)viewport.scrollTop=rowTop;
     else if(rowTop+rowHeight>viewport.scrollTop+available)viewport.scrollTop=rowTop+rowHeight-available;
   },[selected,bulkHeight,rowHeight,columns,shown]);
+  const viewControls = (
+    <div className="library-view-controls">
+        <Select
+          className="library-sort"
+          aria-label={tr("library:sort")}
+          value={query.sort}
+          onChange={(e) =>
+            setQuery((q) => ({
+              ...q,
+              sort: e.target.value as LibraryQuery["sort"],
+            }))
+          }
+        >
+          {["manual", "name", "createdAt", "lastOpenedAt", "size", "type"].map(
+            (v) => (
+              <option key={v} value={v}>
+                {tr(`library:${v}`)}
+              </option>
+            ),
+          )}
+        </Select>
+        <Button variant="outline"
+          className="library-sort"
+          aria-label={tr("library:direction")}
+          onClick={() =>
+            setQuery((q) => ({
+              ...q,
+              direction: q.direction === "asc" ? "desc" : "asc",
+            }))
+          }
+        >
+          {query.direction === "asc" ? "↑" : "↓"}
+        </Button>
+        <Button variant="outline"
+          aria-label={tr("library:viewToggle")}
+          aria-pressed={grid}
+          onClick={() =>
+            setGrid((v) => {
+              localStorage.setItem("library-grid", String(!v));
+              return !v;
+            })
+          }
+        >
+          {grid ? <LayoutGrid /> : <List />}
+        </Button>
+    </div>
+  );
   return (
     <section
       onDragOver={(e) => e.preventDefault()}
@@ -442,7 +504,7 @@ export function LibraryView() {
           <h1>{route.title ?? (folderPath(folders, query.folderId) || tr("common:library"))}</h1>
           <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) + (cursor ? "+" : "") })}</p>
         </div>
-        <Button variant="outline"
+        <Button variant="outline" className="primary"
           hidden={!loading && !items.length && !text && !filters.length}
           data-testid="import-document"
           onClick={() => void run(() => importFiles(query.folderId ?? null))}
@@ -535,56 +597,11 @@ export function LibraryView() {
             <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select></label>
+            {!showFolders && compactToolbar && <div className="filter-view"><span>{tr("library:sort")}</span>{viewControls}</div>}
             <footer><Button variant="outline" className="ghost" onClick={() => setQuery(defaults)}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
           </PopoverContent>
         </Popover>
-        {!showFolders && (
-          <>
-        <Select
-          className="library-sort"
-          aria-label={tr("library:sort")}
-          value={query.sort}
-          onChange={(e) =>
-            setQuery((q) => ({
-              ...q,
-              sort: e.target.value as LibraryQuery["sort"],
-            }))
-          }
-        >
-          {["manual", "name", "createdAt", "lastOpenedAt", "size", "type"].map(
-            (v) => (
-              <option key={v} value={v}>
-                {tr(`library:${v}`)}
-              </option>
-            ),
-          )}
-        </Select>
-        <Button variant="outline"
-          className="library-sort"
-          aria-label={tr("library:direction")}
-          onClick={() =>
-            setQuery((q) => ({
-              ...q,
-              direction: q.direction === "asc" ? "desc" : "asc",
-            }))
-          }
-        >
-          {query.direction === "asc" ? "↑" : "↓"}
-        </Button>
-        <Button variant="outline"
-          aria-label={tr("library:viewToggle")}
-          aria-pressed={grid}
-          onClick={() =>
-            setGrid((v) => {
-              localStorage.setItem("library-grid", String(!v));
-              return !v;
-            })
-          }
-        >
-          {grid ? <LayoutGrid /> : <List />}
-        </Button>
-          </>
-        )}
+        {!showFolders && !compactToolbar && viewControls}
       </div>
       <div className="filter-chips">
         {filters.map(([key, value]) => (

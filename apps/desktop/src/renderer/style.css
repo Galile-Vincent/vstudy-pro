@@ -974,7 +974,6 @@ html[data-input-modality=keyboard] [data-slot=aui_composer-shell]:has(:focus-vis
 [class~="text-[12px]"] { font-size:0.75rem; }
 [class~="text-[13px]"] { font-size:0.8125rem; }
 
-[data-slot=dialog-overlay] { backdrop-filter:var(--material-filter); }
 
 /* Each composed text field owns one border; its inner input stays unboxed. */
 :is(input[data-slot],textarea[data-slot],[cmdk-input]) { box-shadow:none; }
@@ -983,4 +982,4 @@ html:not([data-input-modality=keyboard]) :is(input[data-slot],textarea[data-slot
 .library-search:focus-within,[data-slot=command-input-wrapper]:focus-within { box-shadow:none; }
 html[data-input-modality=keyboard] :is(.library-search,[data-slot=command-input-wrapper]):has(:focus-visible) { outline:2px solid var(--composer-focus-ring); outline-offset:2px; }
 
-:root :is(.moodle-panel,.moodle-week,.document-card:not(:hover):not([data-selected=true]),.library-results[data-view=list]) { background:var(--surface-card); }
+:root :is(.moodle-panel,.moodle-week,.document-card:not(:hover):not([data-selected=true])) { background:var(--surface-card); }

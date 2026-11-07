@@ -1094,11 +1094,6 @@
 .moodle-assistant-panel .moodle-course-chat .aui-thread-root {
   height: auto;
 }
-.moodle-people {
-  font-size: 12px;
-  color: var(--muted);
-  margin: 0 0 var(--space-4);
-}
 .moodle-identity-line {
   height: 1.5em;
   line-height: 1.5;

@@ -91,7 +91,7 @@ describe("SQLite repositories", () => {
     const file = join(path, "store.sqlite");
     const first = openStore(file);
     expect(first.settings.get()).toEqual({
-      themeId:"vstudy",colorScheme:"system",contrast:100,glassOpacity:80,cardTransparency:"solid",customThemes:[],
+      themeId:"vstudy",colorScheme:"system",contrast:100,glassOpacity:80,cardTransparency:"soft",customThemes:[],
       uiScale:100,density:"comfortable",accent:"neutral",readerFont:"system",readerSize:"m",material:"solid",
       welcomeSeen:false,language:"auto",replyLanguage:"auto",
       chatSide: "left", documentOpenMethod: "reader", warnAtPercent: 80, priceOverrides: {}, converterIdleMinutes:5,converterOffline:false,enableGenerativeUI:false, modelDisplayNames:{},

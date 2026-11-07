@@ -36,6 +36,26 @@ for (const theme of builtinThemes) for (const scheme of ['light','dark']) {
   }
 }
 console.log(`Translucent surfaces: minimum text contrast ${surfaceMinimum.toFixed(2)}:1`);
+/* Quiet glass (tokens.css): Solid 100%, Soft 68%, Glass 50% of --glass-base over the page field, whose
+   busiest points are the accent haze (9%) and the muted haze (8%) over --background. Dark glass lifts the
+   base 7% toward ink. Tonal chips, selected rows and settings groups add ink at up to 9% on top and carry ink or muted text only. */
+let glassMinimum=Infinity, glassWorst='';
+for (const theme of builtinThemes) for (const scheme of ['light','dark']) for (let contrast=100;contrast<=150;contrast+=25) {
+  const tokens=adjustedTokens(theme[scheme],scheme,contrast);
+  const base=scheme==='dark' ? composite(tokens.surface,tokens.ink,.93) : tokens.surface;
+  const fields=[tokens.background,composite(tokens['accent-color'],tokens.background,.09),composite(tokens.muted,tokens.background,.08)];
+  const surfaces=fields.map(surface => [surface,['ink','muted','accent-color','danger']]);
+  for (const field of fields) for (const opacity of [1,.68,.5]) {
+    const glass=composite(base,field,opacity);
+    surfaces.push([glass,['ink','muted','accent-color','danger']],[composite(tokens.ink,glass,scheme==='dark'?.09:.08),['ink','muted']]);
+  }
+  for (const [surface,foregrounds] of surfaces) for (const foreground of foregrounds) {
+    const ratio=contrastRatio(tokens[foreground],surface);
+    if (ratio<glassMinimum) { glassMinimum=ratio; glassWorst=`${theme.id} ${scheme} ${contrast}% ${foreground} on ${surface}`; }
+    assert.ok(ratio>=4.5,`${theme.id} ${scheme} ${contrast}% quiet glass: ${foreground} on ${surface} ${ratio}`);
+  }
+}
+console.log(`Quiet glass over the page field: minimum text contrast ${glassMinimum.toFixed(2)}:1 (${glassWorst})`);
 let count=0;
 async function audit(url) {
   for (const entry of await readdir(url,{withFileTypes:true})) {

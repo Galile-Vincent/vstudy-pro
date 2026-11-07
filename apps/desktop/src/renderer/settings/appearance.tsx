@@ -45,7 +45,7 @@ export function AppearanceSection() {
     const latest = await desktop.invoke('settings:get', {});
     return update({ themeId: theme.id, customThemes: [...latest.customThemes.filter(t => t.id !== theme.id), theme] });
   };
-  const toggles = (field: 'uiScale' | 'density' | 'readerSize' | 'material', values: readonly (string | number)[]) => (
+  const toggles = (field: 'uiScale' | 'density' | 'readerSize', values: readonly (string | number)[]) => (
     <ToggleGroup type="single" size="sm" aria-label={tr(`settings:${field}`)} value={String(settings?.[field] ?? '')}
       onValueChange={value => { if (value) void update({[field]:field === 'uiScale' ? Number(value) : value}); }}>
       {values.map(v => <ToggleGroupItem key={v} value={String(v)} aria-label={field === 'uiScale' ? `${v}%` : tr(`settings:${v}`)}>
@@ -111,7 +111,6 @@ export function AppearanceSection() {
       <summary>{tr('settings:advanced')}</summary>
       <div className="settings-disclosure-body">
         <SettingsGroup>
-          <SettingsRow label={tr('settings:material')}>{toggles('material',['glass','solid'])}</SettingsRow>
           {slider('contrast')}
           {slider('glassOpacity')}
           <SettingsRow label={tr('themes:custom')} description={tr('themes:custom_hint')}>

@@ -21,6 +21,10 @@ function FolderArt() {
           <stop offset="0" style={{ stopColor: "var(--folder-front-hi)" }} />
           <stop offset="1" style={{ stopColor: "var(--folder-front)" }} />
         </linearGradient>
+        <linearGradient id={`${id}-sheen`} x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" style={{ stopColor: "var(--surface)", stopOpacity: 0.5 }} />
+          <stop offset="0.55" style={{ stopColor: "var(--surface)", stopOpacity: 0 }} />
+        </linearGradient>
         <linearGradient id={`${id}-back`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" style={{ stopColor: "var(--folder-back-hi)" }} />
           <stop offset="1" style={{ stopColor: "var(--folder-back)" }} />
@@ -32,6 +36,7 @@ function FolderArt() {
         <rect className="folder-paper folder-paper-front" x="12" y="25" width="86" height="42" rx="4" />
       </g>
       <path className="folder-front" fill={`url(#${id}-front)`} d="M6 38a8 8 0 0 1 8-8h84a8 8 0 0 1 8 8v34a8 8 0 0 1-8 8H14a8 8 0 0 1-8-8Z" />
+      <path className="folder-sheen" fill={`url(#${id}-sheen)`} d="M6 38a8 8 0 0 1 8-8h84a8 8 0 0 1 8 8v34a8 8 0 0 1-8 8H14a8 8 0 0 1-8-8Z" />
       <path className="folder-edge" d="M14.5 30.75h83" />
     </svg>
   );

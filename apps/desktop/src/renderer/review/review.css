@@ -1,4 +1,4 @@
-.review-page { height:100%;overflow:auto;padding:var(--space-8);background:var(--surface);color:var(--ink);scrollbar-color:var(--active) transparent; }
+.review-page { height:100%;overflow:auto;padding:var(--space-8);background:transparent;color:var(--ink);scrollbar-color:var(--active) transparent; }
 .review-content {max-width:1040px;margin-inline:auto;padding-block:var(--space-6);}
 .review-heading,.review-section-heading {display:flex;align-items:start;justify-content:space-between;gap:var(--space-4);}
 .review-page h1 {font-size:var(--type-hero);font-weight:600;margin:0;}

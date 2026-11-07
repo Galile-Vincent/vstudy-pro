@@ -251,5 +251,6 @@
   "view_label": "View",
   "view_list": "List",
   "view_cards": "Cards",
-  "open_file": "Open file: {{name}}"
+  "open_file": "Open file: {{name}}",
+  "course_more": "More course actions"
 }

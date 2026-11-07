@@ -145,8 +145,6 @@ html:lang(zh-Hant) { --font-ui:var(--font-cjk,"PingFang TC","Noto Sans CJK TC",s
 html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",system-ui,sans-serif); }
 .markdown:lang(zh-Hant),.markdown:lang(ja) { --reader-leading:1.85; --reader-tracking:0; }
 .aui-md:lang(zh-Hant),.aui-md:lang(ja) { --chat-leading:1.85; --chat-tracking:0; }
-html[data-material=solid] { --material-card:var(--surface); --material-sheet:var(--surface); --material-filter:none; }
-html[data-material=solid] * { backdrop-filter:none!important; }
 ::selection { background:var(--selection-color); color:var(--ink); }
 
 /* Tonal controls retain explicit boundaries in accessibility contrast modes. */
@@ -163,3 +161,85 @@ html[data-material=solid] * { backdrop-filter:none!important; }
 :root { --surface-opacity:100%; --surface-card:color-mix(in srgb,var(--surface) var(--surface-opacity),transparent); --surface-card-strong:var(--surface-card); }
 html[data-card-transparency=solid],html[data-theme=contrast],html[data-reduced-transparency=true] { --surface-opacity:100%!important; }
 @media(prefers-reduced-transparency:reduce), (prefers-contrast:more), (forced-colors:active) { :root { --surface-opacity:100%!important; } }
+
+/* Quiet glass. One translucent surface level: fill, blur, a soft layered shadow and an inner top
+   highlight. Never a border line. Card transparency sets --surface-opacity (Solid 100, Soft 68, Glass 50). */
+:root {
+ --glass-alpha:var(--surface-opacity,68%);
+ --glass-base:var(--surface);
+ --glass-fill:color-mix(in oklab,var(--glass-base) var(--glass-alpha),transparent);
+ --glass-fill-hover:color-mix(in oklab,var(--glass-base) min(100%,calc(var(--glass-alpha) + 14%)),transparent);
+ --glass-fill-float:color-mix(in oklab,var(--glass-base) min(100%,calc(var(--glass-alpha) + 24%)),transparent);
+ --glass-blur:blur(18px) saturate(1.3);
+ --glass-edge:inset 0 1px 0 color-mix(in oklab,var(--surface) 80%,transparent);
+ --glass-depth:0 1px 2px color-mix(in srgb,var(--shadow-color) 5%,transparent),0 8px 24px -10px color-mix(in srgb,var(--shadow-color) 16%,transparent);
+ --glass-depth-hover:0 2px 4px color-mix(in srgb,var(--shadow-color) 6%,transparent),0 16px 32px -12px color-mix(in srgb,var(--shadow-color) 22%,transparent);
+ --glass-depth-float:0 4px 12px color-mix(in srgb,var(--shadow-color) 8%,transparent),0 24px 56px -16px color-mix(in srgb,var(--shadow-color) 28%,transparent);
+ --glass-shadow:var(--glass-edge),var(--glass-depth);
+ --glass-shadow-hover:var(--glass-edge),var(--glass-depth-hover);
+ --glass-shadow-float:var(--glass-edge),var(--glass-depth-float);
+ --glass-tone:color-mix(in oklab,var(--ink) 5%,transparent);
+ --glass-tone-strong:color-mix(in oklab,var(--ink) 8%,transparent);
+ --primary-shadow:0 1px 2px color-mix(in srgb,var(--shadow-color) 12%,transparent),0 6px 16px -8px color-mix(in srgb,var(--shadow-color) 40%,transparent);
+ --page-field:radial-gradient(ellipse 70% 55% at 100% 0%,color-mix(in oklab,var(--accent-color) 9%,transparent),transparent 70%),radial-gradient(ellipse 60% 50% at 0% 100%,color-mix(in oklab,var(--muted) 8%,transparent),transparent 70%),var(--background);
+
+ --elevation-raised:var(--glass-shadow);
+ --elevation-floating:var(--glass-shadow-float);
+ --material-card:var(--glass-fill-float);
+ --material-sheet:color-mix(in oklab,var(--glass-base) min(100%,calc(var(--glass-alpha) + 28%)),transparent);
+ --material-filter:var(--glass-blur);
+ --art-reader-ring:transparent;
+ --art-reader-shadow:var(--glass-shadow);
+ --art-reader-glass:var(--glass-fill);
+ --course-shadow:var(--glass-shadow);
+ --course-glass:var(--glass-fill);
+ --surface-card:var(--glass-fill);
+}
+:root.dark {
+ --glass-base:color-mix(in oklab,var(--surface) 93%,var(--ink));
+ --glass-edge:inset 0 1px 0 color-mix(in oklab,var(--ink) 9%,transparent);
+ --glass-depth:0 1px 2px color-mix(in srgb,var(--shadow-color) 45%,transparent),0 10px 28px -10px color-mix(in srgb,var(--shadow-color) 70%,transparent);
+ --glass-depth-hover:0 2px 4px color-mix(in srgb,var(--shadow-color) 50%,transparent),0 18px 36px -12px color-mix(in srgb,var(--shadow-color) 80%,transparent);
+ --glass-depth-float:0 4px 14px color-mix(in srgb,var(--shadow-color) 55%,transparent),0 28px 60px -16px color-mix(in srgb,var(--shadow-color) 85%,transparent);
+ --glass-tone:color-mix(in oklab,var(--ink) 7%,transparent);
+ --glass-tone-strong:color-mix(in oklab,var(--ink) 9%,transparent);
+ --primary-shadow:0 1px 2px color-mix(in srgb,var(--shadow-color) 50%,transparent),0 6px 16px -8px color-mix(in srgb,var(--shadow-color) 80%,transparent);
+}
+html[data-card-transparency=glass] { --glass-blur:blur(28px) saturate(1.5); }
+html[data-card-transparency=solid] { --glass-blur:none; }
+html[data-reduced-transparency=true],html[data-theme=contrast] { --glass-blur:none; --glass-fill:var(--glass-base); --glass-fill-hover:var(--glass-base); --glass-fill-float:var(--glass-base); --page-field:var(--background); }
+@media(prefers-reduced-transparency:reduce) { :root { --glass-blur:none; --glass-fill:var(--glass-base); --glass-fill-hover:var(--glass-base); --glass-fill-float:var(--glass-base); --page-field:var(--background); } }
+@media(prefers-contrast:more) { :root { --glass-blur:none; --glass-fill:var(--surface); --glass-fill-hover:var(--surface); --glass-fill-float:var(--surface); --page-field:var(--background); } }
+
+.glass,[data-slot=card] { border:0; border-radius:var(--glass-radius); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
+.glass-pill { border:0; border-radius:var(--r-pill); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
+.glass-lift { transition:box-shadow var(--motion-base) var(--ease-out-soft),transform var(--motion-base) var(--ease-out-soft),background-color var(--motion-base) var(--ease-out-soft); }
+.glass-lift:hover { box-shadow:var(--glass-shadow-hover); transform:translateY(-1px); }
+
+/* Secondary buttons are glass pills of the same recipe; primary buttons stay solid with a soft shadow. */
+:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary) {
+ border:0; background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); color:var(--ink);
+ transition:box-shadow var(--motion-fast) var(--ease-standard),background-color var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard);
+}
+:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):is(:hover,[aria-expanded=true]) { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); color:var(--ink); }
+:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):active { box-shadow:var(--glass-shadow); transform:translateY(.5px); }
+:is([data-slot=button][data-variant=default],button.primary) { box-shadow:var(--primary-shadow); transition:box-shadow var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard),filter var(--motion-fast) var(--ease-standard); }
+:is([data-slot=button][data-variant=default],button.primary):active { transform:translateY(1px); box-shadow:none; filter:brightness(.92); }
+:root.dark :is([data-slot=button][data-variant=default],button.primary):active { filter:brightness(.86); }
+
+/* Floating surfaces: popovers, menus, selects and dialogs share the stronger glass fill. */
+:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=tooltip-content]:not(.bg-foreground),.select-popup) { border:0; }
+:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup):not(.settings-dialog) { background:var(--glass-fill-float); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-float); }
+
+/* Chrome: no band or line under the top bar; scrolled content fades out under it instead. */
+.app-shell .shell-main { background:var(--page-field); }
+.app-shell .shell-topbar { background:transparent; backdrop-filter:none; box-shadow:none; border:0; }
+.app-shell:not([data-view=workspace]) .shell-content [data-scrolled=true] { mask-image:linear-gradient(to bottom,transparent 0,var(--ink) var(--space-6)); }
+
+@media(prefers-contrast:more) {
+ .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid var(--ink); box-shadow:none; }
+}
+@media(forced-colors:active) {
+ .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid CanvasText; }
+}
+@media(prefers-reduced-motion:reduce) { .glass-lift,.glass-lift:hover { transition:none; transform:none; } }

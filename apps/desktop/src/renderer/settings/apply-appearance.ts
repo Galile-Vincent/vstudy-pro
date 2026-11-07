@@ -19,7 +19,7 @@ export function applyTheme(preferences: ThemePreferences, preview?: ThemePack): 
   for (const [name, value] of Object.entries(adjustedTokens(theme[scheme], scheme, preferences.contrast))) {
     root.style.setProperty(`--${name === "sidebar" ? "sidebar-surface" : name}`, value);
   }
-  root.style.setProperty('--surface-opacity', `${{solid:100,soft:88,glass:72}[preferences.cardTransparency]}%`);
+  root.style.setProperty('--surface-opacity', `${{solid:100,soft:68,glass:50}[preferences.cardTransparency]}%`);
   root.dataset.cardTransparency = preferences.cardTransparency;
   root.style.setProperty('--glass-opacity', `${preferences.glassOpacity}%`);
   root.dataset.theme = theme.id;

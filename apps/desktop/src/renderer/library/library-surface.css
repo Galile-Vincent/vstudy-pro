@@ -44,3 +44,57 @@ html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:f
 
 .document-course-inline { display:none; }
 @container docs (width < 52rem) { .document-course-inline { display:block; color:var(--muted); font-size:var(--type-xs); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } }
+
+/* Toolbar: glass pills placed directly on the page. Search takes the remaining width. */
+.library-view .library-toolbar { gap:var(--space-2); flex-wrap:nowrap; }
+.library-view .library-mode { height:36px; padding:3px; gap:2px; border-radius:var(--r-pill); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
+.library-view .library-mode > button { height:30px; min-height:30px; padding-inline:var(--space-3) var(--space-4); border-radius:var(--r-pill); }
+.library-view .library-mode > button:hover { background:var(--glass-tone); }
+.library-view .library-mode > button[aria-pressed=true] { background:var(--glass-tone-strong); color:var(--ink); }
+.library-view .library-search { flex:1 1 12rem; min-width:10rem; height:36px; padding-inline:var(--space-4); border-radius:var(--r-pill); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
+.library-view .library-search:focus-within { box-shadow:var(--glass-shadow-hover); }
+.library-view .library-toolbar > button,.library-view .library-view-controls > button { height:36px; min-height:36px; border-radius:var(--r-pill); padding-inline:var(--space-4); }
+.library-view-controls { display:flex; flex:none; align-items:center; gap:var(--space-2); }
+.library-view .library-view-controls > [data-slot=button][aria-label] { width:36px; padding:0; }
+.library-view-controls .app-select { height:36px; min-height:36px; padding-inline:var(--space-4) var(--space-3); border:0; border-radius:var(--r-pill); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
+.library-view-controls .app-select:hover { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); }
+.filter-view { display:grid; grid-template-columns:7rem minmax(0,1fr); align-items:center; gap:var(--space-2); padding-bottom:var(--space-3); font-size:var(--type-base); }
+.filter-view .library-view-controls { min-width:0; flex-wrap:wrap; }
+.filter-view .library-view-controls .app-select { flex:1 1 100%; width:100%; min-width:0; background:var(--glass-tone); box-shadow:none; backdrop-filter:none; }
+.filter-view .library-view-controls > [data-slot=button] { height:32px; min-height:32px; width:32px; padding:0; background:var(--glass-tone); box-shadow:none; backdrop-filter:none; border-radius:var(--r-pill); }
+
+/* List rows sit on the page; a soft tone marks hover and selection. */
+.library-results[data-view=list] .library-document:hover { background:var(--glass-tone); }
+.library-results[data-view=list] .library-document[data-selected=true],.library-results[data-view=list] .library-document[data-selected=true]:hover { background:var(--glass-tone-strong); }
+
+/* Folder tiles: no box. The folder lifts on hover; focus keeps a visible ring. */
+.library-folders { padding:var(--space-2) var(--space-1) var(--space-8); }
+.folder-grid { grid-template-columns:repeat(auto-fill,minmax(11rem,1fr)); gap:var(--space-6) var(--space-4); }
+.course-folder { gap:var(--space-1); padding:var(--space-2) var(--space-2) var(--space-3); border-radius:var(--r-lg); align-content:start; }
+.course-folder:hover { transform:none; background:transparent; }
+.course-folder-stage { aspect-ratio:4/3; margin-bottom:var(--space-2); }
+.folder-art { width:76%; filter:drop-shadow(0 2px 2px color-mix(in oklab,var(--shadow-color) 8%,transparent)) drop-shadow(0 10px 14px color-mix(in oklab,var(--folder-tone) 22%,transparent)); transition:transform var(--motion-base) var(--ease-out-soft),filter var(--motion-base) var(--ease-out-soft); }
+.course-folder:is(:hover,:focus-visible) .folder-art { transform:translateY(-3px); filter:drop-shadow(0 3px 3px color-mix(in oklab,var(--shadow-color) 10%,transparent)) drop-shadow(0 16px 20px color-mix(in oklab,var(--folder-tone) 30%,transparent)); }
+.course-folder:active .folder-art { transform:translateY(-1px) scale(.99); }
+.course-folder-name { font-size:var(--type-base); }
+.folder-front { opacity:.94; }
+.course-folder { --folder-back:color-mix(in oklab,var(--folder-tone) 30%,var(--surface)); --folder-back-hi:color-mix(in oklab,var(--folder-tone) 18%,var(--surface)); --folder-front:color-mix(in oklab,var(--folder-tone) 58%,var(--surface)); --folder-front-hi:color-mix(in oklab,var(--folder-tone) 40%,var(--surface)); }
+:root.dark .course-folder { --folder-back:color-mix(in oklab,var(--folder-tone) 34%,var(--surface)); --folder-back-hi:color-mix(in oklab,var(--folder-tone) 46%,var(--surface)); --folder-front:color-mix(in oklab,var(--folder-tone) 46%,var(--surface)); --folder-front-hi:color-mix(in oklab,var(--folder-tone) 62%,var(--surface)); --folder-paper:color-mix(in oklab,var(--surface) 70%,var(--ink)); }
+
+/* Breadcrumb sits on the page, no bar. */
+.library-view .folder-crumbs { gap:var(--space-1); min-height:36px; }
+.library-view .folder-crumbs .folder-back-button { width:36px; height:36px; border-radius:var(--r-pill); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
+.library-view .folder-crumbs .folder-back-button:hover { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); }
+.folder-crumb-root { border-radius:var(--r-pill); }
+.folder-crumb-root:hover { background:var(--glass-tone); }
+
+@media(max-width:599px) { .library-view .library-toolbar { flex-wrap:wrap; } .library-view .library-search { flex-basis:100%; order:3; } }
+@media(prefers-reduced-motion:reduce) { .folder-art,.course-folder:is(:hover,:focus-visible) .folder-art { transition:none; transform:none; } }
+@media(prefers-contrast:more) { .library-view .library-mode,.library-view-controls .app-select,.library-view .folder-crumbs .folder-back-button { border:1px solid var(--ink); box-shadow:none; } }
+@media(forced-colors:active) { .library-view .library-mode,.library-view-controls .app-select,.library-view .folder-crumbs .folder-back-button { border:1px solid CanvasText; } }
+
+/* Card meta wraps without leaving a separator at the start of a line. */
+.app-shell .library-results[data-view=grid] .document-card .document-meta { gap:var(--space-1) var(--space-4); overflow:hidden; }
+.app-shell .library-results[data-view=grid] .document-card .document-meta > span { position:relative; overflow:visible; }
+.app-shell .library-results[data-view=grid] .document-card .document-meta > span + span::before { position:absolute; inset-inline-start:calc(var(--space-4) / -2 - .25em); margin:0; }
+.library-results[data-view=grid] .document-card .document-title { background:transparent; box-shadow:none; }

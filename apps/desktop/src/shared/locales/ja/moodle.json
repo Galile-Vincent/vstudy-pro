@@ -251,5 +251,6 @@
   "view_label": "表示",
   "view_list": "リスト",
   "view_cards": "カード",
-  "open_file": "ファイルを開く：{{name}}"
+  "open_file": "ファイルを開く：{{name}}",
+  "course_more": "その他のコース操作"
 }

@@ -56,6 +56,18 @@ async function click(text: string, scope: ParentNode = document) {
     button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
 }
+async function openCourseMenu() {
+  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+  const trigger = getByRole(host, "button", { name: "More course actions" });
+  await act(async () => {
+    trigger.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  });
+  return trigger;
+}
+async function chooseDisconnect() {
+  await openCourseMenu();
+  await act(async () => getByRole(document.body, "menuitem", { name: "Disconnect school" }).click());
+}
 async function tab(name: string) {
   const trigger = [...host.querySelectorAll<HTMLElement>("[role=tab]")].find(
     (b) => b.textContent === name,
@@ -86,20 +98,24 @@ describe("Courses", () => {
     expect(host.querySelector(".moodle-due-list")?.textContent).toContain('Amplifier lab report');
     expect(host.textContent).not.toContain('No deadlines this week');
   });
-  it("keeps baseline course header actions and refresh busy feedback", async () => {
+  it("groups course header actions behind one primary action, refresh and an overflow menu", async () => {
     const api = createMockMoodleApi();
     const courseId = (await api.overview()).courses[0]!.id;
     const detail = await api.course(courseId);
     await mount(api, courseId);
-    const header = host.querySelector(".moodle-header")!;
-    const group = host.querySelector('.moodle-hero-actions')!;
-    expect(group.textContent).toContain("Refresh courses");
-    expect(group.textContent).toContain("Open in Moodle");
-    expect(header.textContent).toContain("Connect school");
-    expect(header.querySelector(".planner-entry")).not.toBeNull();
-    expect(host.querySelector(".moodle-raw-name")?.textContent).toContain(detail.course.fullName);
-    expect(host.querySelector(".moodle-hero-next")).not.toBeNull();
-    const refresh = group.querySelector("button")!;
+    const head = host.querySelector<HTMLElement>(".course-head")!;
+    expect(getByRole(head, "button", { name: "All courses" })).not.toBeNull();
+    const group = getByRole(head, "group", { name: "Course actions" });
+    expect([...group.querySelectorAll("button")].map(button => button.getAttribute("aria-label") ?? button.textContent)).toEqual(["Open in Moodle", "Refresh courses", "More course actions"]);
+    expect(head.textContent).not.toContain("Connect school");
+    expect(head.querySelector(".planner-entry")).toBeNull();
+    expect(host.querySelector(".moodle-hero-next")).toBeNull();
+    expect(head.querySelector(".course-head-meta")?.textContent).toContain("TANG, SONG-NIEN");
+    expect(head.querySelector("[data-testid=course-cache-state]")).not.toBeNull();
+    await openCourseMenu();
+    expect(document.querySelector(".moodle-raw-name")?.textContent).toContain(detail.course.fullName);
+    expect(getByRole(document.body, "menuitem", { name: "Disconnect school" })).not.toBeNull();
+    const refresh = getByRole(group, "button", { name: "Refresh courses" }) as HTMLButtonElement;
     let finish!: () => void;
     const course = api.course;
     api.course = async (id, force) => {
@@ -288,7 +304,7 @@ describe("Courses", () => {
         />,
       ),
     );
-    await act(async () => getByRole(host, "button", {name:"Disconnect school"}).click());
+    await chooseDisconnect();
     const dialog = document.querySelector("[role=dialog]")!;
     expect((await api.overview()).accounts).toHaveLength(1);
     expect(dialog.textContent).toContain("Disconnect 中原大學 CYCU?");
@@ -296,18 +312,18 @@ describe("Courses", () => {
     await click("Cancel", dialog);
     expect((await api.overview()).accounts).toHaveLength(1);
     expect(onCourse).not.toHaveBeenCalled();
-    await act(async () => getByRole(host, "button", {name:"Disconnect school"}).click());
+    await chooseDisconnect();
     await click("Disconnect school", document.querySelector("[role=dialog]")!);
     expect(onCourse.mock.calls).toEqual([[]]);
     expect(host.querySelector("[role=status]")?.textContent).toBe("");
     expect((await api.overview()).accounts).toEqual([]);
   });
-  it("returns focus to Disconnect school when Escape closes the disconnect dialog", async () => {
+  it("returns focus to the course menu when Escape closes the disconnect dialog", async () => {
     const api = createMockMoodleApi(),
       courseId = (await api.overview()).courses[0]!.id;
     await mount(api, courseId);
-    const trigger = getByRole(host,'button',{name:'Disconnect school'});
-    await act(async () => trigger.click());
+    const trigger = await openCourseMenu();
+    await act(async () => getByRole(document.body, "menuitem", { name: "Disconnect school" }).click());
     const dialog = document.querySelector("[role=dialog]")!;
     await act(async () => {
       dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
