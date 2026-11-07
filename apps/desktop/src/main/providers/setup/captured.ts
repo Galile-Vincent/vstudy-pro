@@ -6,7 +6,7 @@
 import { spawn } from 'node:child_process';
 import { terminateProcess } from '../../platform/process';
 import type { TerminalPlan } from './pty';
-import { SetupError } from './types';
+import { failure, SetupError } from './types';
 export async function captureCommand(plan: TerminalPlan, signal: AbortSignal, timeout = 15_000, cap = 262144) {
   signal.throwIfAborted();
   const child = spawn(plan.executable, [...plan.args], { cwd: plan.cwd, env: { ...plan.env }, shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -25,7 +25,7 @@ export async function captureCommand(plan: TerminalPlan, signal: AbortSignal, ti
   };
   child.stdout.on('data', collect); child.stderr.on('data', collect);
   const closed = new Promise<number>(resolve => {
-    child.once('error', () => { error ??= new SetupError('permission-denied'); resolve(-1); });
+    child.once('error', cause => { error ??= new SetupError(failure(cause)); resolve(-1); });
     child.once('close', code => resolve(code ?? -1));
   });
   const abort = () => stop(new SetupError('cancelled'));

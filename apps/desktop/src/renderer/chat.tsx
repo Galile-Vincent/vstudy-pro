@@ -204,8 +204,8 @@ function DocumentWelcome() {
   return <ReaderWelcome title={documentTitle} hasSelection={!!selection} onQuestion={prompt => aui.composer().setText(prompt)}/>;
 }
 function DocumentNotice() {
-  const { unavailable, onSettings } = useDocumentChat();
-  return unavailable ? <ReaderOfflineNotice onSettings={onSettings}/> : null;
+  const { unavailable } = useDocumentChat();
+  return unavailable ? <ReaderOfflineNotice/> : null;
 }
 const documentComponents = { Announcement: ChatAnnouncement, CopyAction: CopyAnswerButton, Text: MarkdownText, Welcome:DocumentWelcome, ThreadNotice:DocumentNotice, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 

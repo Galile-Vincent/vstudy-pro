@@ -8,7 +8,7 @@ import { z } from 'zod';
 export const cliProviderSchema = z.enum(['claude', 'codex', 'agy']);
 export type CliProvider = z.infer<typeof cliProviderSchema>;
 export const cliStatusSchema = z.enum(['not-installed', 'installing', 'installed-not-signed-in', 'signing-in', 'ready', 'update-available', 'updating', 'error']);
-export const cliFailureSchema = z.enum(['offline', 'permission-denied', 'terminal-unavailable', 'manual-install-required', 'blocked', 'wrong-version', 'browser-not-opened', 'login-expired', 'not-signed-in', 'checksum', 'signature', 'unsupported', 'not-consented', 'cancelled', 'busy', 'unknown']);
+export const cliFailureSchema = z.enum(['command-not-found', 'rate-limit', 'offline', 'permission-denied', 'terminal-unavailable', 'manual-install-required', 'blocked', 'wrong-version', 'browser-not-opened', 'login-expired', 'not-signed-in', 'checksum', 'signature', 'unsupported', 'not-consented', 'cancelled', 'busy', 'unknown']);
 export type CliFailure = z.infer<typeof cliFailureSchema>;
 const stateFields = {
   provider: cliProviderSchema,

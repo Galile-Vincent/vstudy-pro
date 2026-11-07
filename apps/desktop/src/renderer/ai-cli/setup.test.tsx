@@ -42,7 +42,7 @@ function button(text: string) {
 }
 async function click(text: string) { await act(async () => button(text).click()); }
 async function mount(node = <AiCliSetup onClose={close} />) { await act(async () => root.render(node)); }
-async function allow() { await act(async () => document.querySelector<HTMLInputElement>('.ai-cli-consent input')!.click()); }
+async function allow() { await act(async () => document.querySelector<HTMLButtonElement>('button.ai-cli-consent')!.click()); }
 const runs = () => fixture.calls.filter(call => call.channel === 'ai-cli:run');
 beforeEach(async () => {
   await i18n.changeLanguage('en');
@@ -58,7 +58,7 @@ afterEach(async () => { await act(async () => root.unmount()); host.remove(); Re
 
 it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through explicit consent, install, login and test', async provider => {
   await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
-  expect(document.body.textContent).toContain('First allow this tool');
+  expect(document.body.textContent).toContain('Allow VStudy');
   expect(runs()).toHaveLength(0);
   expect(fixture.calls.some(call => call.channel === 'ai-cli:preview')).toBe(false);
   await allow();
@@ -84,7 +84,7 @@ it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through exp
 it('recovers from checksum failure with a fresh preview before retry', async () => {
   fixture.fail('checksum'); await mount(); await allow(); await click('Run this plan');
   expect(document.querySelector('[role=alert]')?.textContent).toContain('integrity check');
-  expect(document.body.textContent).toContain('Claude Code access');
+  expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain('Copy details');
   fixture.fail(null); await click('Try again');
   expect(runs()).toHaveLength(1);
   await click('Run this plan'); expect(runs()).toHaveLength(2);
@@ -137,7 +137,7 @@ it('does not offer an incompatible update', async () => {
 it.each(['en', 'zh-Hant', 'ja'].flatMap(language => (['claude', 'codex', 'agy'] as const).map(provider => ({ language, provider }))))('guides manual installation for $provider in $language without executing the download', async ({ language, provider }) => {
   await i18n.changeLanguage(language);
   Object.assign(fixture.tools.find(tool => tool.provider === provider)!, { manualInstallRequired: true, manualUpdateRequired: true });
-  const writeText = vi.fn(async () => {});
+  const writeText = vi.fn<(text: string) => Promise<void>>(async () => {});
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
   try {
     await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
@@ -170,38 +170,29 @@ it('keeps unpinned updates manual and routes the vendor link through external co
   expect(document.body.textContent).toContain('New version available: install it yourself');
   expect(fixture.calls.some(call => call.channel === 'ai-cli:preview')).toBe(false);
   await act(async () => root.render(<AiCliInventory />));
-  expect(document.querySelector('.ai-cli-version small')?.textContent).toBe('New version available: install it yourself');
-  await click(i18n.t('ai-cli:vendor_install_link'));
+  expect(document.querySelector('.ai-cli-versions')).toBeNull();
+  await act(async () => root.render(<AiCliSetup onClose={close} />));
+  await click(i18n.t('ai-cli:release_notes'));
   expect(fixture.calls.at(-1)).toEqual({ channel: 'shell:openExternal', payload: { url: 'https://example.com/release' } });
   expect(runs()).toHaveLength(0);
 });
 
-it('lists each tool in Settings as one row with its version, state and a single setup action', async () => {
-  Object.assign(fixture.tools[1]!, { version: '2.1.0', status: 'ready' });
-  const opened: unknown[] = [];
-  const listener = (event: Event) => opened.push((event as CustomEvent).detail);
-  window.addEventListener('vstudy:ai-cli-setup', listener);
-  try {
-    await act(async () => root.render(<AiCliInventory settings />));
-    expect(document.querySelector('.settings-group h3')?.textContent).toBe(i18n.t('ai-cli:tools'));
-    const rows = [...document.querySelectorAll<HTMLButtonElement>('.ai-cli-tool')];
-    expect(rows.map(row => row.textContent)).toEqual([
-      `Claude Code${i18n.t('ai-cli:missing')}${i18n.t('ai-cli:status_not-installed')}`,
-      `Codex2.1.0${i18n.t('ai-cli:status_ready')}`,
-      `Antigravity${i18n.t('ai-cli:missing')}${i18n.t('ai-cli:status_not-installed')}`,
-    ]);
-    await act(async () => rows[1]!.click());
-    await act(async () => document.querySelector<HTMLButtonElement>('.ai-cli-inventory-entry')!.click());
-    expect(opened).toEqual([{ provider: 'codex' }, { provider: undefined }]);
-    expect(button(i18n.t('ai-cli:check_now'))).toBeDefined();
-  } finally { window.removeEventListener('vstudy:ai-cli-setup', listener); }
+it('shows one Settings summary and opens the recommended tool through setup', async () => {
+  Object.assign(fixture.tools[1]!, { version: '2.1.0', status: 'ready', consented: true, tested: true });
+  await mount(<AiCliInventory settings />);
+  expect(document.querySelectorAll('.ai-cli-tool')).toHaveLength(0);
+  expect(document.querySelector('[role=status]')?.textContent).toBe('Codex · Ready to study');
+  expect(document.querySelector('details')).toBeNull();
+  await mount(<AiCliSetup onClose={close} />);
+  expect(document.querySelector('.ai-cli-tool-heading strong')?.textContent).toBe('Codex');
+  expect(document.querySelector<HTMLDetailsElement>('.ai-cli-more')?.open).toBe(false);
 });
 
 it.each(['en', 'zh-Hant', 'ja'].flatMap(language => (['claude', 'agy'] as const).map(provider => ({ language, provider }))))('shows Windows installation steps for $provider in $language', async ({ language, provider }) => {
   await i18n.changeLanguage(language);
   vi.mocked(desktopPlatform).mockReturnValue('win32');
   Object.assign(fixture.tools.find(tool => tool.provider === provider)!, { manualInstallRequired: true });
-  const writeText = vi.fn(async () => {});
+  const writeText = vi.fn<(text: string) => Promise<void>>(async () => {});
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
   try {
     await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
@@ -396,4 +387,35 @@ it('recovers an unsupported existing Codex version by offering the audited manag
   expect(document.querySelector('.ai-cli-steps [aria-current=step]')?.textContent).toContain('Install');
   await click('Run this plan');
   expect(runs()[0]?.payload.actionId).toBe('install-codex');
+});
+
+it.each(['en', 'zh-Hant'])('keeps the three guided steps visible and advanced options closed in %s', async language => {
+  await i18n.changeLanguage(language); await mount();
+  expect(document.querySelectorAll('.ai-cli-steps li')).toHaveLength(3);
+  expect(document.querySelectorAll('.ai-cli-steps [aria-current=step]')).toHaveLength(1);
+  expect(document.querySelector<HTMLDetailsElement>('.ai-cli-more')?.open).toBe(false);
+  expect(document.querySelector('.ai-cli-workarea')?.textContent).not.toMatch(/CLI|PATH|MCP/);
+});
+it('copies redacted details beside the failed action and offers sign-in recovery', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'ready' });
+  fixture.fail('login-expired'); fixture.output('expired token=secret123 /Users/student/private');
+  const writeText = vi.fn<(text: string) => Promise<void>>(async () => {});
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+  try {
+    await mount(); await click('Test it');
+    expect(document.querySelector('.ai-cli-action-area [role=alert]')?.textContent).toContain('Your sign-in expired');
+    await click('Copy details');
+    expect(writeText.mock.calls[0]?.[0]).toContain('Exit code: 1');
+    expect(writeText.mock.calls[0]?.[0]).not.toMatch(/secret123|student|Users/);
+    const recovery = document.querySelector<HTMLButtonElement>('.ai-cli-recovery button')!;
+    await act(async () => recovery.click());
+    expect(fixture.calls.at(-1)?.payload.actionId).toBe('login-claude');
+  } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
+});
+
+it('previews only the detected recommendation when another tool already has consent', async () => {
+  fixture.tools[0]!.consented = true;
+  Object.assign(fixture.tools[1]!, { consented: true, version: '0.166.0', status: 'installed-not-signed-in' });
+  await mount();
+  expect(fixture.calls.filter(call => call.channel === 'ai-cli:preview').map(call => call.payload.actionId)).toEqual(['login-codex']);
 });

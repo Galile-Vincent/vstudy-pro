@@ -1,3 +1,4 @@
+import { setupFailure } from '../../../shared/ai-setup-errors';
 /**
  * Read actual provider auth state and exercise the existing tool-free transport for a tiny test.
  * Authentication JSON and provider responses never enter application logs or setup output.
@@ -41,7 +42,7 @@ export async function authStatus(provider: CliProvider, plan: TerminalPlan, pty:
   if (provider === 'codex') {
     if (result.exitCode === 0) return true;
     if (result.exitCode === 1) return false;
-    throw new SetupError(/network|offline|connect/i.test(result.output) ? 'offline' : 'unknown');
+    throw new SetupError(setupFailure(result.output));
   }
   try {
     const text = result.output.trim();
@@ -57,7 +58,7 @@ export async function tinyTest(registry: Pick<ProviderRegistry, 'get'>, provider
   const request = { ...chatRequestSchema.parse({ scope: 'general' as const, requestId: id, conversationId: id, providerId: providerId(provider), modelId: provider === 'agy' ? 'gemini-3.8-flash-high' : 'default', userMessage: 'Reply with OK.' }), prompt: 'Reply with the single word OK. Do not use tools.', allowPresentation: false };
   for await (const event of registry.get(providerId(provider)).stream(request, signal)) {
     signal.throwIfAborted();
-    if (event.type === 'error') throw new SetupError(/auth|log.?in|sign.?in/i.test(event.message) ? 'login-expired' : 'unknown');
+    if (event.type === 'error') throw new SetupError(setupFailure(event.message));
     if (event.type === 'tool-call') throw new SetupError('blocked');
     if (event.type === 'text-delta') text += event.text;
     if (text.length > 8192) throw new SetupError('blocked');

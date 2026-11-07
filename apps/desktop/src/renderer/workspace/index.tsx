@@ -419,7 +419,7 @@ export function Workspace() {
       ) : (
         <div className="chat-start">
           <div className="art-reader-start-content"><ReaderWelcome title={doc?.title ?? tr('common:document')} hasSelection={!!selection} onQuestion={canChat && !busy ? text => { setDraft(text); void newConversation(); } : undefined} />
-          {connected && !providers.some(p => p.config.enabled && p.availability.available && p.models.length > 0) && <ReaderOfflineNotice onSettings={() => { setSettingsTab('providers'); setShowSettings(true); }} />}
+          {connected && !providers.some(p => p.config.enabled && p.availability.available && p.models.length > 0) && <ReaderOfflineNotice />}
           </div>
           {selection && (
             <div className="selection-chip">

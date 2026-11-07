@@ -38,7 +38,7 @@ export class VendorNetwork {
         url = vendorUrl(provider, new URL(location, url).href);
         continue;
       }
-      if (!response.ok) { await response.body?.cancel(); throw new SetupError(response.status === 403 ? 'blocked' : 'offline'); }
+      if (!response.ok) { await response.body?.cancel(); throw new SetupError(response.status === 429 ? 'rate-limit' : response.status === 403 ? 'blocked' : 'offline'); }
       return response;
     }
     throw new SetupError('blocked');
