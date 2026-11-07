@@ -1,17 +1,7 @@
-/* Library surfaces: one translucent toolbar, document cards and course folders. Colors flow from the --library-* tokens in library.css. */
-.app-shell section.library-view { background:transparent; }
-.app-shell section.library-view .library-toolbar {
-  gap:var(--space-1); padding:var(--space-1); border-radius:var(--r-lg);
-  background:var(--library-surface); backdrop-filter:var(--surface-blur);
-  box-shadow:0 0 0 1px var(--library-ring);
-}
-.library-toolbar > :is(button,[data-slot=popover-trigger]) { border-radius:var(--r-md); }
-.library-view .library-results[data-view=grid] { backdrop-filter:none; }
-
-.library-mode { display:inline-flex; flex:none; gap:2px; padding:2px; border-radius:var(--r-md); background:var(--library-control); }
-.library-view .library-mode > button { display:inline-flex; align-items:center; gap:var(--space-2); min-height:calc(var(--space-8) - 4px); padding:var(--space-1) var(--space-3); border:0; border-radius:calc(var(--r-md) - 2px); background:transparent; color:var(--muted); font-size:var(--type-base); font-weight:500; box-shadow:none; white-space:nowrap; }
+.library-mode { display:inline-flex; flex:none; gap:2px; padding:2px; border-radius:var(--r-md); background:color-mix(in oklab, var(--ink) 5%, var(--surface)); }
+.library-view .library-mode > button { display:inline-flex; align-items:center; gap:var(--space-2); height:var(--space-8); min-height:calc(var(--space-8) - 4px); padding:var(--space-1) var(--space-3); border:0; border-radius:calc(var(--r-md) - 2px); background:transparent; color:var(--muted); font-size:var(--type-base); font-weight:500; box-shadow:none; white-space:nowrap; }
 .library-view .library-mode > button:hover { color:var(--ink); background:transparent; }
-.library-view .library-mode > button[aria-pressed=true] { color:var(--ink); background:var(--surface); box-shadow:0 0 0 1px var(--library-ring),0 1px 2px color-mix(in srgb,var(--shadow-color) 10%,transparent); }
+.library-view .library-mode > button[aria-pressed=true] { color:var(--ink); background:var(--active); }
 .library-mode svg { width:var(--space-4); height:var(--space-4); }
 @container library (width < 40rem) { .library-mode > button { padding-inline:var(--space-2); } }
 
@@ -25,14 +15,14 @@
   --folder-front-hi:color-mix(in oklab, var(--folder-tone) 50%, var(--surface));
   --folder-paper:color-mix(in oklab, var(--surface) 90%, var(--ink));
   display:grid; gap:var(--space-2); width:100%; height:100%; padding:var(--space-3); border:0; border-radius:var(--r-xl); text-align:center; cursor:pointer;
-  color:var(--ink); background:var(--library-surface); backdrop-filter:var(--surface-blur); box-shadow:0 0 0 1px var(--library-ring);
+  color:var(--ink); background:transparent; box-shadow:none;
   transition:transform var(--motion-base) var(--ease-out-soft),box-shadow var(--motion-base) var(--ease-out-soft);
 }
 .course-folder[data-uncategorized=true] { --folder-tone:var(--muted); }
-.course-folder:hover { transform:translateY(-2px); box-shadow:0 0 0 1px var(--library-ring),var(--elevation-raised); }
+.course-folder:hover { transform:translateY(-2px); background:var(--active); }
 .course-folder:active { transform:scale(.985); }
 html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-.course-folder-stage { display:grid; place-items:center; aspect-ratio:16/10; border-radius:var(--r-lg); background:var(--library-control); }
+.course-folder-stage { display:grid; place-items:center; aspect-ratio:16/10; background:transparent; }
 .folder-art { width:62%; height:auto; overflow:visible; filter:drop-shadow(0 6px 8px color-mix(in oklab, var(--folder-tone) 22%, transparent)); }
 .folder-paper { fill:var(--folder-paper); stroke:color-mix(in oklab, var(--ink) 8%, transparent); stroke-width:1; }
 .folder-paper-back { opacity:.7; }
@@ -47,33 +37,10 @@ html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:f
 .folder-crumbs .folder-back-button { flex:none; width:var(--space-8); height:var(--space-8); padding:0; border-radius:var(--r-md); }
 .folder-crumbs svg { width:var(--space-4); height:var(--space-4); }
 .folder-crumb-root { border:0; background:transparent; padding:var(--space-1) var(--space-2); border-radius:var(--r-sm); color:var(--muted); font:inherit; cursor:pointer; }
-.folder-crumb-root:hover { color:var(--ink); background:var(--library-control); }
+.folder-crumb-root:hover { color:var(--ink); background:color-mix(in oklab, var(--ink) 5%, var(--surface)); }
 .folder-crumb-separator { flex:none; color:var(--muted); }
 .folder-crumb-current { font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-.app-shell .library-view .library-results[data-view=grid] .document-card {
-  display:flex; flex-direction:column; align-items:stretch; padding:0; border-radius:var(--r-lg); overflow:hidden;
-  background:var(--library-surface); backdrop-filter:var(--surface-blur); box-shadow:0 0 0 1px var(--library-ring);
-  transition:transform var(--motion-base) var(--ease-out-soft),box-shadow var(--motion-base) var(--ease-out-soft);
-}
-.app-shell .library-view .library-results[data-view=grid] .document-card:hover { box-shadow:0 0 0 1px var(--library-ring),var(--elevation-raised); }
-.app-shell .library-view .library-results[data-view=grid] .document-card[data-selected=true],.app-shell .library-view .library-results[data-view=grid] .document-card[data-selected=true]:hover { background:color-mix(in oklab, var(--accent-color) 9%, var(--library-surface)); box-shadow:0 0 0 2px var(--accent-color); }
-.app-shell .library-view .library-results[data-view=grid] .document-card:focus-visible { outline:none; }
-html[data-input-modality=keyboard] .app-shell .library-view .library-results[data-view=grid] .document-card:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-.library-view .library-results[data-view=grid] .document-card > .art-reader-cover { height:5.5rem; min-height:5.5rem; flex:none; }
-.library-view .library-results[data-view=grid] .document-card .art-reader-cover-type { left:var(--space-3); bottom:var(--space-2); }
-.library-view .library-results[data-view=grid] .document-card > .document-cell { flex:1; min-height:0; padding:var(--space-3) var(--space-4) var(--space-4); overflow:hidden; }
-.library-view .library-results[data-view=grid] .document-card .document-title { font-size:var(--type-md); line-height:1.35; }
-.document-course { display:flex; align-items:center; gap:var(--space-1); margin-top:var(--space-1); color:var(--muted); font-size:var(--type-sm); min-width:0; }
-.document-course svg { flex:none; width:14px; height:14px; }
-.document-course span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.library-view .library-results[data-view=grid] .document-card .document-meta { margin-top:var(--space-2); }
-.library-view .library-results[data-view=grid] .document-card .search-snippet { margin:var(--space-2) 0 0; }
-.app-shell .library-view .library-results[data-view=grid] .document-card .document-cell > button { top:var(--space-2); right:var(--space-2); min-width:32px; min-height:32px; opacity:0; transition:opacity var(--motion-fast) var(--ease-out-soft); }
-.app-shell .library-view .library-results[data-view=grid] .document-card .document-cell > button:nth-last-child(2) { right:calc(var(--space-2) + 32px + var(--space-1)); }
-.library-view .library-results[data-view=grid] .document-card:is(:hover,:focus-within,[data-selected=true]) .document-cell > button,.library-view .library-results[data-view=grid] .document-card .document-cell > button[aria-pressed=true] { opacity:1; }
-@media(hover:none) { .library-view .library-results[data-view=grid] .document-card .document-cell > button { opacity:1; } }
-@media(prefers-reduced-motion:reduce) { .course-folder,.folder-papers { transition:none; } .course-folder:hover,.course-folder:active { transform:none; } .course-folder:is(:hover,:focus-visible) .folder-papers { transform:none; } }
-@media(prefers-contrast:more) { .course-folder,.library-mode { border:1px solid var(--ink); } }
-@media(forced-colors:active) { .course-folder { border:1px solid CanvasText; } .folder-art { forced-color-adjust:none; } }
-.library-view .library-results[data-view=grid] { padding:2px; }
+
+.document-course-inline { display:none; }
+@container docs (width < 52rem) { .document-course-inline { display:block; color:var(--muted); font-size:var(--type-xs); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } }

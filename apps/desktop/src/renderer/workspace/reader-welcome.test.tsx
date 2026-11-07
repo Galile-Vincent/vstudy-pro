@@ -34,6 +34,8 @@ it('allows reading without AI and keeps the setup action explicit', async () => 
     await act(async () => root.render(<ReaderOfflineNotice/>));
     await act(async () => Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent === i18n.t('ai-cli:wizard'))!.click());
     expect(setup).toHaveBeenCalledOnce();
+    await act(async () => Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent === i18n.t('art-reader:setup'))!.click());
+    expect(setup).toHaveBeenCalledTimes(2);
     await act(async () => Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent === i18n.t('art-reader:without_ai'))!.click());
     expect(read).toHaveBeenCalledOnce();
     expect(host.querySelector('aside')).toBeNull();

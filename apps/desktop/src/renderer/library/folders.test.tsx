@@ -18,6 +18,7 @@ function mount(lang = 'en') {
   document.documentElement.lang = lang;
   document.documentElement.style.fontSize = '16px';
   document.documentElement.style.setProperty('--library-row-height', '4');
+  document.documentElement.style.setProperty('--art-reader-card-height', '240px');
   state.invoke.mockImplementation(async (channel: string) => channel === 'library:documents:list' ? { items: library, nextCursor: null } : []);
   return render(<TooltipProvider><LibraryView /></TooltipProvider>);
 }

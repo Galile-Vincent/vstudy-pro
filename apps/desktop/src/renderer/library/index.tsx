@@ -20,12 +20,13 @@ import {
   useState,
 } from "react";
 import {
+  FileText,
   Search,
   Pin,
   MoreHorizontal,
   LayoutGrid,
   List,
-  SlidersHorizontal, AlertTriangle, LoaderCircle, X, FolderClosed,
+  SlidersHorizontal, AlertTriangle, LoaderCircle, X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { libraryQuerySchema, type LibraryQuery } from "../../shared/library";
@@ -399,10 +400,9 @@ export function LibraryView() {
     return () => observer.disconnect();
   }, [loading, grid, items.length > 0, showFolders]);
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const cardRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--library-card-row'));
-  const rowHeight = grid ? (Number.isFinite(cardRem) ? cardRem : 15) * textScale : rowRem * textScale,
+  const rowHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : rowRem * textScale,
     columns = grid
-      ? Math.max(1, Math.floor(viewportWidth / 264))
+      ? Math.max(1, Math.floor(viewportWidth / 280))
       : 1,
     start = Math.min(Math.max(0,shown.length-columns),Math.max(0, Math.floor(top / rowHeight) - 2) * columns),
     end = Math.min(
@@ -906,6 +906,7 @@ export function LibraryView() {
                   }}
                 >
 {grid ? <><DocumentArt id={d.id} kind={d.sourceName.split('.').pop()?.toUpperCase() ?? 'MD'}/><div className="document-cell">
+                    <FileText className="document-glyph" aria-hidden="true" />
                     <div className="document-info">
                       <Button variant="outline"
                         className="document-title"
@@ -915,9 +916,11 @@ export function LibraryView() {
                       >
                         {d.title}
                       </Button>
-                      <div className="document-course" title={placeOf(item)}><FolderClosed aria-hidden="true" /><span>{placeOf(item)}</span></div>
-                      <div className="document-meta" title={`${d.sourceName} · ${d.converter} · ${formatSize(item.sizeBytes, language)}`}>
+                      <div className="document-meta" title={`${d.sourceName} · ${d.converter}`}>
+                        {!query.folderId && <span className="document-course">{placeOf(item)}</span>}
+                        <span>{d.sourceName.split('.').pop()?.toUpperCase()}</span>
                         {item.pageCount != null && <span>{tr("library:pages", {count:item.pageCount, formatted:format.number(item.pageCount)})}</span>}
+                        <span>{formatSize(item.sizeBytes, document.documentElement.lang)}</span>
                         <span>{format.date(d.createdAt)}</span>
                         {d.status !== 'ready' && <span className="status-badge" data-status={d.status}>{d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}{tr(`library:${d.status}`)}</span>}
                       </div>

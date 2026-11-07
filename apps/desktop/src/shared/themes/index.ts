@@ -37,7 +37,7 @@ export const themePreferencesSchema = z.object({
   themeId: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/).default('vstudy'),
   colorScheme: z.enum(['system', 'light', 'dark']).default('system'),
   contrast: z.number().int().min(100).max(150).default(100),
-  cardTransparency: z.enum(['solid', 'soft', 'glass']).default('soft'),
+  cardTransparency: z.enum(['solid', 'soft', 'glass']).default('solid'),
   glassOpacity: z.number().int().min(50).max(100).default(80),
   customThemes: z.array(themePackSchema).max(30).superRefine((themes, context) => {
     const ids = new Set(palettes.map(p => p.id));

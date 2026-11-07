@@ -168,7 +168,8 @@ it('keeps unpinned updates manual and routes the vendor link through external co
   expect(document.body.textContent).toContain('New version available: install it yourself');
   expect(fixture.calls.some(call => call.channel === 'ai-cli:preview')).toBe(false);
   await act(async () => root.render(<AiCliInventory />));
-  expect(document.querySelector('.ai-cli-versions')).toBeNull();
+  expect(document.querySelector('.ai-cli-versions')).not.toBeNull();
+  expect(runs()).toHaveLength(0);
   await act(async () => root.render(<AiCliSetup onClose={close} />));
   await click(i18n.t('ai-cli:release_notes'));
   expect(fixture.calls.at(-1)).toEqual({ channel: 'shell:openExternal', payload: { url: 'https://example.com/release' } });

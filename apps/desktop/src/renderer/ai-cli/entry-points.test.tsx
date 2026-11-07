@@ -24,14 +24,14 @@ it('keeps API keys and custom connections inside one Settings disclosure', async
   } finally { await act(async () => root.unmount()); host.remove(); }
 });
 
-it('opens setup directly from the Reader no-AI card', async () => {
+it.each(['art-reader:setup', 'ai-cli:wizard'])('opens current Connect AI setup from the Reader %s action', async key => {
   await i18n.changeLanguage('en');
   bridge.invoke.mockImplementation(cliFixture().invoke);
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
   try {
     await act(async () => root.render(<><ReaderOfflineNotice /><AiCliSetupHost /></>));
-    expect(host.querySelectorAll('.art-reader-offline-actions button')).toHaveLength(2);
-    const entry = [...host.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent === 'Connect an AI');
+    expect(host.querySelectorAll('.art-reader-offline-actions button')).toHaveLength(3);
+    const entry = [...host.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent === i18n.t(key));
     await act(async () => entry!.click());
     expect(document.querySelectorAll('[role=dialog]')).toHaveLength(1);
     expect(document.querySelector('.ai-cli-sheet')).not.toBeNull();

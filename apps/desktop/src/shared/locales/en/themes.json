@@ -1,10 +1,9 @@
 {
   "cardTransparency": "Card transparency",
-  "cardTransparency_hint": "Choose how much background shows through cards and panels; Glass adds blur independently of Material. Accessibility preferences keep surfaces solid.",
+  "cardTransparency_hint": "Choose how much background shows through cards and panels. Accessibility preferences keep surfaces solid.",
   "card_solid": "Solid",
   "card_soft": "Soft",
   "card_glass": "Glass",
-
   "loading": "Loading appearance…",
   "scheme": "Color scheme",
   "system": "System",

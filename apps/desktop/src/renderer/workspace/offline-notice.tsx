@@ -16,7 +16,8 @@ export function ReaderOfflineNotice() {
     <strong>{tr('art-reader:offline_title')}</strong>
     <p>{tr('art-reader:offline_body')}</p>
     <div className="art-reader-offline-actions">
-      <Button onClick={() => openAiCliSetup()}>{tr('ai-cli:wizard')}</Button>
+      <Button onClick={() => openAiCliSetup()}>{tr('art-reader:setup')}</Button>
+      <Button variant="secondary" onClick={() => openAiCliSetup()}>{tr('ai-cli:wizard')}</Button>
       <Button variant="ghost" onClick={() => { setDismissed(true); window.dispatchEvent(new Event('vstudy:read-without-ai')); }}>{tr('art-reader:without_ai')}</Button>
     </div>
   </aside>;

@@ -208,7 +208,7 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/card.tsx",
       "registrySha256": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059",
-      "patchedSha256": "b19b6699af5713686ceda1f200a5f9a105defedb6bba0e5259ffd0707c5cd646",
+      "patchedSha256": "b8e6dbae3605e13cda623e495657d17bb56cb37fa29ba41ae40662bab586592d",
       "patch": "docs/vendor-patches/ui--card.tsx.patch",
       "reason": "Use the local cn helper and the translucent card surface tokens with a hairline border."
     },

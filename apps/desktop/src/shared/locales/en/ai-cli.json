@@ -92,7 +92,7 @@
   "advanced_enable": "Enable the separate advanced shell preference in Settings > Privacy first.",
   "advanced_preview": "Review advanced shell action",
   "advanced_start_confirm": "Start a general shell in {{cwd}}? It can change or delete files and run any program with your account's permissions.",
-  "wizard": "Connect an AI",
+  "wizard": "Guided AI tool setup",
   "status_not-installed": "Not installed",
   "status_installing": "Installing",
   "status_installed-not-signed-in": "Sign in needed",

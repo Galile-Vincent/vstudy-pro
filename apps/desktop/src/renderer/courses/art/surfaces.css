@@ -60,7 +60,7 @@
 }
 @media (prefers-contrast:more), (forced-colors:active) {
   .moodle-page { background:var(--background); }
-  .moodle-hero,.moodle-hero-meta .moodle-identity-line { color:var(--ink); background:var(--surface); }
+  .moodle-hero,.moodle-hero-meta .moodle-identity-line,.moodle-hero .moodle-hero-next { color:var(--ink); background:var(--surface); }
 }
 @media(max-width:760px) { .moodle-hero > div.moodle-hero-body { padding:24px; } }
 .moodle-agent[data-conversation="true"] .moodle-agent-suggestions [data-slot="suggestions"] { display:flex; flex-direction:row; flex-wrap:wrap; }
@@ -94,6 +94,7 @@
   .moodle-header-actions > button { flex:1; min-width:0; max-width:100%; height:auto; white-space:normal; overflow-wrap:anywhere; padding:12px; }
   .moodle-account > div:not(.moodle-expired) { min-width:0; }
   .moodle-account span { overflow-wrap:anywhere; }
+  .moodle-hero-actions button { max-width:100%; height:auto; white-space:normal; overflow-wrap:anywhere; }
 }
 @media(max-width:1000px) {
   .moodle-account { display:grid; grid-template-columns:32px minmax(0,1fr) 44px 44px; gap:8px; }
@@ -114,11 +115,14 @@
 .moodle-hero [data-testid="course-cache-state"] { margin-bottom:16px; }
 .moodle-hero-meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
 .moodle-hero-meta .moodle-identity-line { height:auto; margin:0; color:var(--ink); padding:4px 0; background:transparent; border-radius:var(--r-pill); font-size:14px; line-height:20px; }
+.moodle-hero-actions { display:flex; gap:8px; flex-wrap:wrap; }
 .moodle-hero [data-slot="button"] { background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--hairline); }
 .moodle-hero [data-slot="button"]:hover { background:var(--surface); }
 .moodle-hero .moodle-raw-name { margin-top:12px; }
+.moodle-hero .moodle-hero-next { display:inline-flex; padding:10px 14px; border-radius:var(--r-pill); background:var(--surface); box-shadow:0 0 0 1px var(--hairline); margin:20px 0 0; }
 @media(max-width:1000px) {
   .moodle-hero > div.moodle-hero-body { width:100%; max-width:none; }
+  .moodle-hero-actions button { max-width:100%; height:auto; white-space:normal; overflow-wrap:anywhere; }
 }
 @media(max-width:719px) {
   .moodle-hero { margin-inline:-16px; }
@@ -128,6 +132,8 @@
 @media(prefers-contrast:more), (forced-colors:active) {
   .moodle-hero [data-slot="button"],.moodle-hero .moodle-eyebrow { background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line); }
 }
+:root[data-theme="contrast"] .moodle-hero .moodle-hero-next { box-shadow:inset 0 0 0 1px var(--line); }
+@media(prefers-contrast:more), (forced-colors:active) { .moodle-hero .moodle-hero-next { box-shadow:inset 0 0 0 1px var(--line); } }
 
 :root[data-theme=contrast] .moodle-empty,:root[data-theme=contrast] .moodle-empty-inline::before { background:var(--surface); }
 @media(prefers-contrast:more), (forced-colors:active) { .moodle-empty,.moodle-empty-inline::before { background:var(--surface); } }
