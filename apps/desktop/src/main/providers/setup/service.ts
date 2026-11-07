@@ -97,6 +97,7 @@ export class AiCliSetup {
     if (!preferences.advancedShell) void this.sessions.cancelProvider('advanced-shell');
     this.deps.changed?.(); return result;
   }
+  get actionsDirectory() { return join(this.deps.store.root, 'actions'); }
   async preview(owner: SetupOwner, actionId: CliActionId) {
     this.attach(owner);
     const revision = this.documentRevision.get(owner);
@@ -124,7 +125,7 @@ export class AiCliSetup {
       }
     }
     if (owner.isDestroyed() || revision !== this.documentRevision.get(owner)) throw new SetupError('cancelled');
-    return this.tokens.issue(owner, buildPlan(actionId, join(this.deps.store.root, 'actions'), binary, release, reason, this.now(), this.deps.loginInterpreters));
+    return this.tokens.issue(owner, buildPlan(actionId, this.actionsDirectory, binary, release, reason, this.now(), this.deps.loginInterpreters));
   }
   private takePlan(owner: SetupOwner, actionId: CliActionId, token: string, target: PlanTarget = 'embedded') {
     if (this.stopped) throw new SetupError('cancelled');

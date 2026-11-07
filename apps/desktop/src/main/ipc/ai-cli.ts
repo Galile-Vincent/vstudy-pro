@@ -17,6 +17,7 @@ import type { ChatService } from '../services/chat';
 import { systemExecutable } from '../platform/process';
 import { showAttachedMessage } from '../dialogs';
 import { tr } from '../i18n';
+import { SetupError } from '../providers/setup/types';
 import { SetupStore } from '../providers/setup/store';
 import { ReleaseSource } from '../providers/setup/releases';
 import { setupNetwork } from '../providers/setup/fixtures';
@@ -52,7 +53,14 @@ export function registerAiCliIpc(registrar: ReturnType<typeof createIpcRegistrar
   safe.handle('ai-cli:list', async () => (await ready).list());
   safe.handle('ai-cli:consent', async ({ provider, enabled }) => { await (await ready).consent(provider, enabled); return { ok: true }; });
   safe.handle('ai-cli:preview', async ({ actionId }, event) => (await ready).preview(event.sender, actionId));
-  safe.handle('ai-cli:run', async ({ actionId, token }, event) => (await ready).run(event.sender, actionId, token));
+  safe.handle('ai-cli:run', async ({ actionId, token }, event) => {
+    const setup = await ready;
+    if (!actionParts(actionId).provider) {
+      const result = await showAttachedMessage({ type: 'warning', message: tr('ai-cli:advanced_title'), detail: tr('ai-cli:advanced_start_confirm', { cwd: setup.actionsDirectory }), buttons: [tr('common:cancel'), tr('settings:allow')], defaultId: 0, cancelId: 0 }, event.sender);
+      if (result.response !== 1) throw new SetupError('cancelled');
+    }
+    return setup.run(event.sender, actionId, token);
+  });
   safe.handle('ai-cli:read', async ({ id }, event) => (await ready).sessions.read(event.sender, id));
   safe.handle('ai-cli:input', async ({ id, data }, event) => { (await ready).sessions.input(event.sender, id, data); return { ok: true }; });
   safe.handle('ai-cli:resize', async ({ id, columns, rows }, event) => { (await ready).sessions.resize(event.sender, id, columns, rows); return { ok: true }; });

@@ -91,6 +91,7 @@
   "advanced_warning": "経験のある方のみお使いください。ガイド付き設定にシェルは不要です。開く前に操作内容を確認してください。",
   "advanced_enable": "先に「設定 > プライバシー」でシェルの個別設定を有効にしてください。",
   "advanced_preview": "シェルの操作内容を確認",
+  "advanced_start_confirm": "{{cwd}} でシェルを開始しますか？アカウントの権限でファイルの変更や削除、任意のプログラムの実行ができます。",
   "wizard": "ガイド付き AI ツール設定",
   "status_not-installed": "未インストール",
   "status_installing": "インストール中",
