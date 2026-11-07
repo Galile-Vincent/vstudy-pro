@@ -62,6 +62,7 @@ small { font-size: var(--text-xs); }
 .site-footer { border-top:1px solid var(--line); padding:var(--space-10) 0; }
 .footer-inner { display:flex; justify-content:space-between; gap:var(--space-8); align-items:start; font-size:var(--text-sm); }
 .footer-inner p { margin-top:var(--space-2); }
+.footer-credit { margin-top:var(--space-8); padding-top:var(--space-4); border-top:1px solid var(--line); color:var(--muted); font-size:var(--text-xs); }
 .footer-contact { display:flex; flex-direction:column; gap:var(--space-2); color:var(--muted); }
 .footer-contact strong { color:var(--ink); font-weight:600; }
 .footer-links { display:flex; flex-wrap:wrap; gap:var(--space-6); color:var(--muted); }
