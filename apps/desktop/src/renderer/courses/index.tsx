@@ -21,6 +21,7 @@ import {
   GraduationCap,
   LoaderCircle,
   Inbox,
+  Info,
   AlarmClock,
   Mail,
   Pin,
@@ -542,12 +543,23 @@ function CoursesBody({
           </div>
           <div className="moodle-header-actions">
           {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry" onClick={() => setShowUpdates(true)}><Inbox />{tr("moodle:updates")}{unreadUpdates > 0 && <span className="updates-count">{unreadUpdates}</span>}</Button>}
-          {detail && <Button ref={disconnectTrigger} variant="ghost" size="icon" aria-label={tr("moodle:disconnect")} title={tr("moodle:disconnect")} onClick={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}><Unplug /></Button>}
-          <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
-          <Button variant="outline" onClick={() => setConnect(true)}>
-            <GraduationCap />
-            {tr("moodle:connect_school")}
-          </Button>
+          {courseId ? detail && <>
+            <div className="moodle-detail-actions" role="group" aria-label={tr("moodle:course_actions")}>
+              <Button variant="outline" title={tr("moodle:refresh")} disabled={syncing} aria-busy={syncing} onClick={() => void sync()}><RefreshCw className={syncing ? "moodle-spin" : ""} />{tr("moodle:refresh")}</Button>
+              <Button variant="outline" title={tr('webview:open')} onClick={() => {
+                const account = overview?.accounts.find(a => a.id === detail.course.accountId);
+                if (account) openMoodle(account.id,{kind:'page',url:account.siteUrl + '/course/view.php?id=' + detail.course.remoteId});
+              }}><ArrowUpRight />{tr('webview:open')}</Button>
+              <details className="moodle-raw-name">
+                <summary title={tr("moodle:original_name")}><Info />{tr("moodle:original_name")}</summary>
+                <p>{detail.course.fullName}</p>
+              </details>
+            </div>
+          <Button ref={disconnectTrigger} variant="ghost" size="icon" aria-label={tr("moodle:disconnect")} title={tr("moodle:disconnect")} onClick={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}><Unplug /></Button>
+          </> : <>
+            <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
+            <Button variant="outline" onClick={() => setConnect(true)}><GraduationCap />{tr("moodle:connect_school")}</Button>
+          </>}
           </div>
         </header>
   );
@@ -659,6 +671,7 @@ function CoursesBody({
               <div className="moodle-hero">
                 <div className="moodle-hero-navigation">{header}</div>
                 <div className="moodle-hero-body">
+                  <div className="moodle-detail-heading">
                   <span className="moodle-eyebrow">
                     {[detail.course.identity.term, detail.course.identity.code]
                       .filter(Boolean)
@@ -672,32 +685,11 @@ function CoursesBody({
                     )}
                   </h1>
                   <p className="muted" data-testid="course-cache-state">{tr('storage:cached_'+(detail.cacheState ?? 'stale'))}{' · '}{detail.lastSyncedAt ? tr('storage:last_synced',{time:relative(detail.lastSyncedAt)}) : tr('storage:never_synced')}</p>
+                  </div>
                   <div className="moodle-hero-meta">
                   <IdentityLine value={displayTeachers(detail.course.identity, lang)} label={tr("moodle:teacher_unknown")} />
                   <IdentityLine value={displayClass(detail.course.identity)} label={tr("moodle:class_unknown")} />
                   </div>
-                  <div className="moodle-hero-actions">
-                  <Button variant="outline" disabled={syncing} onClick={() => void sync()}><RefreshCw className={syncing ? "moodle-spin" : ""} />{tr("moodle:refresh")}</Button>
-                  <Button variant="outline" onClick={() => {
-                    const account = overview?.accounts.find(a => a.id === detail.course.accountId);
-                    if (account) openMoodle(account.id,{kind:'page',url:account.siteUrl + '/course/view.php?id=' + detail.course.remoteId});
-                  }}><ArrowUpRight />{tr('webview:open')}</Button>
-                  </div>
-                  <details className="moodle-raw-name">
-                    <summary>{tr("moodle:original_name")}</summary>
-                    {detail.course.fullName}
-                  </details>
-                  {detail.deadlines
-                    .filter(
-                      (d) => !d.submitted && Date.parse(d.dueAt) >= Date.now(),
-                    )
-                    .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
-                    .slice(0, 1)
-                    .map((d) => (
-                      <p key={d.id} className="moodle-hero-next">
-                        {tr("moodle:up_next")} · {d.title} · {relative(d.dueAt)}
-                      </p>
-                    ))}
 
                 </div>
               </div>
@@ -712,7 +704,7 @@ function CoursesBody({
                     aria-label={tr("moodle:course_sections")}
                   >
                     {tabs.map((key) => (
-                      <TabsTrigger key={key} value={key}>
+                      <TabsTrigger key={key} value={key} onFocus={event => event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"})}>
                         {tr(`moodle:${key}`)}
                       </TabsTrigger>
                     ))}
