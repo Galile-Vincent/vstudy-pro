@@ -693,10 +693,8 @@ it("opens module attachments through the existing reader API", async () => {
     "Operational amplifiers.pdf",
     host.querySelector(".moodle-weeks")!,
   );
-  await click(
-    "Operational amplifiers.pdf",
-    document.querySelector("[data-slot=sheet-content]")!,
-  );
+  await act(async () => {});
+  await click("Open", document.querySelector(".course-file-actions")!);
   expect(onDocument.mock.calls).toEqual([
     [(await api.course(courseId)).files[0]!.documentId],
   ]);
