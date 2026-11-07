@@ -4,6 +4,7 @@ export type InstallerId = 'mac-arm64' | 'mac-x64' | 'win-x64' | 'win-arm64';
 export const downloadBase = 'https://github.com/ava-apple/vstudy-pro/releases/latest/download';
 export const installers = targets.map(target => ({
   id: target.key as InstallerId, label: target.label,
+  platform: target.platform as 'mac' | 'win', arch: target.arch as 'arm64' | 'x64', kind: target.installer as 'dmg' | 'exe',
   file: `VStudy-Pro-${target.key}.${target.installer}`, releaseEnabled: target.releaseEnabled,
 }));
 

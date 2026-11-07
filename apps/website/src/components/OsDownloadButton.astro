@@ -1,0 +1,22 @@
+---
+import { path } from '../config';
+import { ui, type Language } from '../data/ui';
+interface Props { language: Language; }
+const { language } = Astro.props;
+const t = ui[language];
+---
+<a class="button os-download" href={path(`${language}/download/`)} data-os-download data-label-mac={t.downloadMac} data-label-win={t.downloadWin}>
+  <span data-os-download-text>{t.download}</span><span aria-hidden="true">↓</span>
+</a>
+<script>
+  import { detectInstaller } from '../scripts/platform';
+  import { installers } from '../data/downloads';
+  detectInstaller(id => {
+    const platform = installers.find(installer => installer.id === id)?.platform;
+    document.querySelectorAll<HTMLElement>('[data-os-download]').forEach(link => {
+      const label = platform && link.dataset[platform === 'mac' ? 'labelMac' : 'labelWin'];
+      const text = link.querySelector('[data-os-download-text]');
+      if (label && text) text.textContent = label;
+    });
+  });
+</script>
