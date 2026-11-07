@@ -7,6 +7,11 @@ describe('setup recovery', () => {
     ['unknown', 'session expired', 'login-expired'], ['unknown', 'ENOTFOUND', 'offline'],
     ['unknown', 'EACCES permission denied', 'permission-denied'], ['unknown', 'ENOENT', 'command-not-found'],
     ['unknown', 'version too old', 'wrong-version'], ['unknown', '429 quota exceeded', 'rate-limit'],
+    ['unknown', 'TLS certificate expired', 'certificate'],
+    ['unknown', 'SSL certificate verification failed', 'certificate'],
+    ['unknown', 'token expired', 'login-expired'],
+    ['unknown', 'expired authentication credentials', 'login-expired'],
+    ['unknown', 'download URL expired', 'unknown'],
     ['unknown', 'something unexpected', 'unknown'],
   ])('classifies %s %s into actionable recovery', (code, text, expected) => {
     const issue = classifySetupError(code, text);
@@ -14,6 +19,20 @@ describe('setup recovery', () => {
     expect(setupErrors[issue].title).toBeTruthy();
     expect(setupErrors[issue].next).toBeTruthy();
     if (code === 'unknown') expect(setupFailure(text)).toBe(expected);
+  });
+  it.each([
+    '--password swordfish123',
+    '-----BEGIN PRIVATE KEY-----\nPRIVATEKEYMATERIAL123\n-----END PRIVATE KEY-----',
+    'Login failed for user AliceNg',
+    '--token hostileToken123 -p hiddenPassword123 /Users/AliceNg/private',
+  ])('excludes hostile raw errors from copied diagnostics: %s', error => {
+    const result = setupDiagnostic({ tool: 'Codex', version: '0.166.0', os: 'darwin', exitCode: 1, error });
+    expect(result).not.toMatch(/swordfish123|PRIVATE KEY|PRIVATEKEYMATERIAL123|AliceNg|hostileToken123|hiddenPassword123/);
+    expect(result).toContain('Exit code: 1');
+  });
+  it('rejects injected diagnostic metadata', () => {
+    const result = setupDiagnostic({ tool: 'Codex\nuser AliceNg', version: 'secret123', os: '/Users/AliceNg', exitCode: NaN, error: 'private output' });
+    expect(result).toBe('Tool: unknown\nVersion: unknown\nOS: unknown\nExit code: unknown\nLast error: unknown');
   });
   it('copies metadata and last error without credentials or home paths on any platform', () => {
     const result = setupDiagnostic({ tool: 'Codex', version: '0.166.0', os: 'darwin', exitCode: 1,

@@ -172,7 +172,7 @@
   "consent_manual": "インストール後に VStudy が {{provider}} を使うことを許可する",
   "consent_manual_help": "先にインストールしても大丈夫です。ここで許可するまで、VStudy がこのツールを使うことはありません。",
   "more_options": "その他のオプション",
-  "plan_details": "操作の詳細を表示",
+  "plan_details": "詳細を表示",
   "other_actions": "この操作の別の実行方法",
   "api_options": "設定でAPIキーやカスタム接続を管理",
   "copy_details": "詳細をコピー",
@@ -194,5 +194,10 @@
   "error_next_wait": "アカウントの上限がリセットされるまで待ってから、再試行してください。",
   "error_next_retry": "操作を確認して、もう一度お試しください。",
   "failure_command-not-found": "このAIが見つかりません。インストールを確認してください。",
-  "failure_rate-limit": "アカウントの上限に達しました。しばらくしてからもう一度お試しください。"
+  "failure_rate-limit": "アカウントの上限に達しました。しばらくしてからもう一度お試しください。",
+  "error_title_certificate": "安全な接続に失敗しました",
+  "error_next_certificate": "端末の日付とネットワークを確認してください。解決しない場合は、学校やネットワーク管理者に証明書の確認を依頼してください。",
+  "pick_hint": "迷ったら Claude Code を選びましょう",
+  "first_click_consent": "「{{action}}」を選ぶと、VStudy が {{provider}} を使用することを許可します。",
+  "failure_certificate": "安全な接続に失敗しました。端末の日付とネットワークを確認してください。解決しない場合は、学校やネットワーク管理者に証明書の確認を依頼してください。"
 }

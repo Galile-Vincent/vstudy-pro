@@ -37,10 +37,10 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
   const manualStep = !!tool?.manualInstallRequired && step === 'install';
   const running = runner.session?.phase === 'running';
   const busy = running || runner.busy || savingConsent;
-  const failed = runner.error ?? (runner.plan && !runner.plan.available ? runner.plan.reason : undefined) ?? runner.session?.error ?? (tool?.status === 'error' ? tool.error.hint : undefined);
+  const failed = runner.error ?? (runner.plan && !runner.plan.available ? runner.plan.reason : undefined) ?? (!runner.plan ? runner.session?.error ?? (tool?.status === 'error' ? tool.error.hint : undefined) : undefined);
   useEffect(() => {
-    if (tool?.consented && !tool.tested && !running && !manualStep) void runner.preview(setupAction(provider, step));
-  }, [provider, step, tool?.consented, tool?.tested, running, manualStep, runner.preview]);
+    if (tool?.consented && !tool.tested && !running && !manualStep && !savingConsent && !runner.session?.error) void runner.preview(setupAction(provider, step));
+  }, [provider, step, tool?.consented, tool?.tested, running, manualStep, savingConsent, runner.session?.error, runner.preview]);
   useEffect(() => {
     let disposed = false;
     setUpdatePlan(undefined);
@@ -56,6 +56,16 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
     setSavingConsent(true); setLocalError(false);
     try { await desktop.invoke('ai-cli:consent', { provider, enabled }); await refresh(); aiCliChanged(); }
     catch { setLocalError(true); }
+    finally { setSavingConsent(false); }
+  };
+  const start = async () => {
+    setSavingConsent(true); setLocalError(false);
+    try {
+      await desktop.invoke('ai-cli:consent', { provider, enabled: true });
+      await refresh(); aiCliChanged();
+      const plan = await runner.preview(setupAction(provider, step));
+      if (plan) await runner.run(false, plan);
+    } catch { setLocalError(true); }
     finally { setSavingConsent(false); }
   };
   const choose = async (next: CliProvider) => {
@@ -75,12 +85,13 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
             <h2>{tr(tool.tested ? 'ai-cli:ready_title' : `ai-cli:heading_${step}`)}</h2>
             {manualStep ? <ManualInstallReason key={provider} provider={provider} /> : <p>{tr(tool.tested ? 'ai-cli:ready_body' : `ai-cli:instruction_${provider}_${step}`)}</p>}
           </div><div className="ai-cli-action-area" aria-busy={busy}>
-            {!tool.consented && !manualStep && <Button className="ai-cli-consent" disabled={busy} onClick={() => void consent(true)}>{tr('ai-cli:consent', { provider: cliNames[provider] })}</Button>}
+            {!tool.consented && !manualStep && <Button className="ai-cli-consent" disabled={busy} onClick={() => void start()}>{tr(`ai-cli:step_${step}`)}</Button>}
+            {!tool.consented && !manualStep && <p>{tr('ai-cli:first_click_consent', { action: tr(`ai-cli:step_${step}`), provider: cliNames[provider] })}</p>}
             {runner.busy && <p role="status">{tr('ai-cli:preparing')}</p>}
             {runner.externalOpened && <p role="status">{tr('ai-cli:own_terminal_opened')}</p>}
             {manualStep && <ManualInstall key={provider} provider={provider} required busy={busy} onCheck={refresh} />}
-            {runner.plan && (!manualStep || runner.plan.actionId === 'advanced-shell') && (tool.consented || runner.plan.actionId === 'advanced-shell') && <ActionPreview key={runner.plan.token} plan={runner.plan} busy={busy} run={runner.run} />}
-            {!runner.plan && !busy && tool.consented && !tool.tested && !manualStep && <Button variant="secondary" onClick={() => void runner.preview(setupAction(provider, step))}>{tr('ai-cli:review_next')}</Button>}
+            {runner.plan && (!manualStep || runner.plan.actionId === 'advanced-shell') && (tool.consented || runner.plan.actionId === 'advanced-shell') && <ActionPreview key={runner.plan.token} plan={runner.plan} hideAction={!!failed} busy={busy} run={runner.run} guided={/^(install|login|test)-/.test(runner.plan.actionId)} />}
+            {!failed && !runner.plan && !busy && tool.consented && !tool.tested && !manualStep && <Button variant="secondary" onClick={() => void start()}>{tr(`ai-cli:step_${step}`)}</Button>}
             {running && <Button variant="secondary" onClick={() => void runner.close(false).catch(() => setLocalError(true))}>{tr('ai-cli:cancel')}</Button>}
             {failed && <SetupRecovery failure={failed} tool={tool} session={runner.session} busy={busy} onAction={action => void runner.preview(action ? `${action}-${provider}` : runner.session?.actionId ?? setupAction(provider, step))} />}
 
@@ -90,7 +101,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
           </div></div>
           {runner.session && <details open={running || runner.session.actionId.startsWith('login-') || undefined}><summary>{tr('ai-cli:terminal')}</summary><Suspense fallback={null}><CliTerminal session={runner.session} /></Suspense></details>}
         </>}
-        <details className="ai-cli-more"><summary>{tr('ai-cli:more_options')}</summary>
+        <details className="ai-cli-more"><summary>{tr('ai-cli:more_options')}</summary><p>{tr('ai-cli:pick_hint')}</p>
         <fieldset className="ai-cli-chooser" disabled={busy}><legend>{tr('ai-cli:choose')}</legend>{cliProviders.map(id => <label key={id} data-selected={provider === id}><input type="radio" name="ai-cli-provider" checked={provider === id} onChange={() => void choose(id)} /><strong>{cliNames[id]}</strong><span>{tr(`ai-cli:account_${id}`)}</span></label>)}</fieldset>
             <details className="ai-cli-account"><summary>{tr('ai-cli:account_title')}</summary><p>{tr(`ai-cli:cost_${provider}`)}</p><p>{tr('ai-cli:privacy_copy')}</p></details>
           {tool && <>
