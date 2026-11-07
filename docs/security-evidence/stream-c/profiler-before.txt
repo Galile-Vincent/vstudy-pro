@@ -1,0 +1,67 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-a9977441/apps/desktop
+
+stdout | src/renderer/markdown-plugins.test.tsx > commits plain document Markdown once
+document: fixtureBytes=33803, commits=2, durationsMs=148.05,56.72
+
+stdout | src/renderer/markdown-plugins.test.tsx > commits plain reply Markdown once
+reply: fixtureBytes=33803, commits=2, durationsMs=44.56,37.49
+
+ × src/renderer/markdown-plugins.test.tsx > commits plain document Markdown once 233ms
+   → expected [ Array(2) ] to have a length of 1 but got 2
+stdout | src/renderer/markdown-plugins.test.tsx > loads the math plugin lazily and commits the rendered formula
+math: fixtureBytes=14, commits=2
+
+ × src/renderer/markdown-plugins.test.tsx > commits plain reply Markdown once 95ms
+   → expected [ 44.56411500000081, …(1) ] to have a length of 1 but got 2
+ ✓ src/renderer/markdown-plugins.test.tsx > loads the math plugin lazily and commits the rendered formula 59ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/markdown-plugins.test.tsx > commits plain document Markdown once
+AssertionError: expected [ Array(2) ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/renderer/markdown-plugins.test.tsx:28:21
+     26|     console.log(`${kind}: fixtureBytes=${source.length}, commits=${com…
+     27|     expect(container.querySelector('strong')?.textContent).toBe('empha…
+     28|     expect(commits).toHaveLength(1);
+       |                     ^
+     29|     expect(mathLoaded).not.toHaveBeenCalled();
+     30|   } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/renderer/markdown-plugins.test.tsx > commits plain reply Markdown once
+AssertionError: expected [ 44.56411500000081, …(1) ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/renderer/markdown-plugins.test.tsx:28:21
+     26|     console.log(`${kind}: fixtureBytes=${source.length}, commits=${com…
+     27|     expect(container.querySelector('strong')?.textContent).toBe('empha…
+     28|     expect(commits).toHaveLength(1);
+       |                     ^
+     29|     expect(mathLoaded).not.toHaveBeenCalled();
+     30|   } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  10:41:24
+   Duration  832ms (transform 139ms, setup 0ms, import 236ms, tests 388ms, environment 162ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-a9977441/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/renderer/markdown-plugins.test.tsx --pool=forks --maxWorkers=2 --reporter=verbose

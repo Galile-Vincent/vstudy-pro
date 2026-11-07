@@ -1,0 +1,21 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-a9977441/apps/desktop
+
+stdout | src/renderer/markdown-plugins.test.tsx > commits plain document Markdown once
+document: fixtureBytes=33803, commits=1, durationsMs=129.71
+
+stdout | src/renderer/markdown-plugins.test.tsx > commits plain reply Markdown once
+reply: fixtureBytes=33803, commits=1, durationsMs=42.95
+
+ ✓ src/renderer/markdown-plugins.test.tsx > commits plain document Markdown once 142ms
+ ✓ src/renderer/markdown-plugins.test.tsx > commits plain reply Markdown once 48ms
+stdout | src/renderer/markdown-plugins.test.tsx > loads the math plugin lazily and commits the rendered formula
+math: fixtureBytes=14, commits=2
+
+ ✓ src/renderer/markdown-plugins.test.tsx > loads the math plugin lazily and commits the rendered formula 60ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  10:41:04
+   Duration  709ms (transform 145ms, setup 0ms, import 246ms, tests 251ms, environment 167ms)
+
