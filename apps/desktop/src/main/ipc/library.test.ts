@@ -107,3 +107,24 @@ it('starts maintenance after creation even for a hidden window and cancels dispo
     } finally { failed(); failureLog.mockRestore(); }
   } finally { dispose(); rebuild.mockRestore(); registrar.dispose(); store.close(); rmSync(mocked.root,{recursive:true,force:true}); }
 });
+
+it('aborts active maintenance on disposal and supplies the app-owned userData path', async () => {
+  mocked.root = mkdtempSync(join(tmpdir(), 'library-maintenance-dispose-'));
+  const store = openStore(':memory:');
+  const registrar = createIpcRegistrar({handle:()=>{},removeHandler:()=>{}},()=>true);
+  let signal: AbortSignal | undefined;
+  const rebuild = vi.spyOn(SearchService.prototype, 'rebuild').mockImplementation(async options => {
+    expect(options?.userData).toBe(mocked.root);
+    signal = options?.signal;
+    await new Promise<void>(resolve => signal!.addEventListener('abort', () => resolve(), {once:true}));
+  });
+  const dispose = registerLibraryIpc(registrar,store,new Set());
+  try {
+    app.emit('browser-window-created', {}, new EventEmitter());
+    await new Promise<void>(resolve => setImmediate(resolve));
+    expect(signal?.aborted).toBe(false);
+    dispose();
+    await dispose.waitForIdle();
+    expect(signal?.aborted).toBe(true);
+  } finally { dispose(); rebuild.mockRestore(); registrar.dispose(); store.close(); rmSync(mocked.root,{recursive:true,force:true}); }
+});

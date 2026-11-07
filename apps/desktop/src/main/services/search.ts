@@ -7,6 +7,7 @@
 import { containedPath } from "./file-paths";
 import { dirname, join } from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { mkdirSync, mkdtempSync, readdirSync, statSync, rmSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
 import { Worker } from 'node:worker_threads';
 import type { DatabaseSync } from 'node:sqlite';
 import { documentIdSchema } from '../../shared/domain';
@@ -46,39 +47,94 @@ function scanSearchIndex(db: DatabaseSync, valid = checkSearchIndex(db)) {
     return { rowids, missing };
 }
 
-async function scanInWorker(path: string): Promise<MaintenanceRows> {
+function hasSearchDesync(db: DatabaseSync): boolean {
+    return !!db.prepare("WITH indexed AS MATERIALIZED (SELECT documentId,count(*) copies FROM document_fts GROUP BY documentId) SELECT 1 FROM documents d LEFT JOIN indexed f ON f.documentId=d.id WHERE d.status='ready' AND d.deletedAt IS NULL AND coalesce(f.copies,0)!=1 UNION ALL SELECT 1 FROM indexed f WHERE NOT EXISTS(SELECT 1 FROM documents d WHERE d.id=f.documentId AND d.deletedAt IS NULL) LIMIT 1").get();
+}
+
+function scavengeSnapshots(directory: string): void {
+    mkdirSync(directory, {recursive:true,mode:0o700});
+    for (const name of readdirSync(directory)) {
+        const match = /^vstudy-search-check-(\d+)-/.exec(name);
+        if (!match) continue;
+        const path = join(directory, name);
+        let dead = false;
+        try { process.kill(Number(match[1]), 0); }
+        catch (error) { dead = (error as NodeJS.ErrnoException).code === 'ESRCH'; }
+        if (dead || Date.now() - statSync(path).mtimeMs > 5 * 60_000)
+            rmSync(path, {recursive:true,force:true});
+    }
+}
+
+type CheckState = {lastSuccess?: number | undefined; pending?: boolean};
+function readCheckState(path: string): CheckState {
+    try {
+        const value = JSON.parse(readFileSync(path, 'utf8'));
+        return {lastSuccess: typeof value.lastSuccess === 'number' ? value.lastSuccess : undefined, pending: value.pending !== false};
+    } catch { return {}; }
+}
+function writeCheckState(path: string, state: CheckState): void {
+    const temporary = path + '.tmp';
+    writeFileSync(temporary, JSON.stringify(state), {mode:0o600});
+    renameSync(temporary, path);
+}
+
+async function scanInWorker(path: string, directory: string, check: boolean, signal?: AbortSignal): Promise<MaintenanceRows & {checked: boolean}> {
+    const cleanup = () => rmSync(directory, {recursive:true,force:true});
+    if (signal?.aborted) { cleanup(); throw new Error('Search maintenance cancelled'); }
     return new Promise((resolve, reject) => {
-        const worker = new Worker(`
+        let worker: Worker;
+        try { worker = new Worker(`
             const { parentPort, workerData } = require('node:worker_threads');
             const { DatabaseSync, backup } = require('node:sqlite');
-            const { mkdtempSync, rmSync, chmodSync } = require('node:fs');
-            const { tmpdir } = require('node:os');
+            const { rmSync, chmodSync } = require('node:fs');
             const { join } = require('node:path');
-            const db = new DatabaseSync(workerData);
-            const directory = mkdtempSync(join(tmpdir(), 'vstudy-search-check-'));
             const checkSearchIndex = ${checkSearchIndex.toString()};
+            const hasSearchDesync = ${hasSearchDesync.toString()};
             (async () => {
+                let db;
                 try {
+                    db = new DatabaseSync(workerData.path);
                     db.exec('PRAGMA busy_timeout=5000');
-                    const path = join(directory, 'snapshot.sqlite');
-                    db.exec('BEGIN');
-                    db.prepare('SELECT count(*) FROM sqlite_master').get();
-                    try { await backup(db, path); } finally { db.exec('COMMIT'); }
-                    chmodSync(path, 0o600);
-                    const snapshot = new DatabaseSync(path);
-                    let valid;
-                    try { valid = checkSearchIndex(snapshot); } finally { snapshot.close(); }
+                    const checked = hasSearchDesync(db) || workerData.check;
+                    let valid = true;
+                    if (checked) {
+                        const path = join(workerData.directory, 'snapshot.sqlite');
+                        db.exec('BEGIN');
+                        db.prepare('SELECT count(*) FROM sqlite_master').get();
+                        try { await backup(db, path); } finally { db.exec('COMMIT'); }
+                        chmodSync(path, 0o600);
+                        const snapshot = new DatabaseSync(path);
+                        try { valid = checkSearchIndex(snapshot); } finally { snapshot.close(); }
+                    }
                     const result = (${scanSearchIndex.toString()})(db, valid);
-                    parentPort.postMessage(result);
-                } finally { db.close(); rmSync(directory, {recursive:true,force:true}); }
+                    parentPort.postMessage({...result, checked});
+                } finally {
+                    try { db?.close(); } finally { rmSync(workerData.directory, {recursive:true,force:true}); }
+                }
             })().catch(error => { throw error; });
-        `, { eval: true, workerData: path });
-        let result: MaintenanceRows | undefined;
+        `, { eval: true, workerData: {path, directory, check} }); }
+        catch (error) { cleanup(); reject(error); return; }
+        const onExit = () => cleanup();
+        const onSignal = (signal: NodeJS.Signals) => { cleanup(); process.removeListener('SIGTERM', onTerm); process.removeListener('SIGINT', onInterrupt); process.kill(process.pid, signal); };
+        const onTerm = () => onSignal('SIGTERM');
+        const onInterrupt = () => onSignal('SIGINT');
+        process.once('exit', onExit);
+        process.once('SIGTERM', onTerm);
+        process.once('SIGINT', onInterrupt);
+        const abort = () => { void worker.terminate(); };
+        signal?.addEventListener('abort', abort, {once:true});
+        let result: MaintenanceRows & {checked: boolean} | undefined;
+        let failure: Error | undefined;
         worker.once('message', value => { result = value; });
-        worker.once('error', reject);
+        worker.once('error', error => { failure = error; });
         worker.once('exit', code => {
-            if (code === 0 && result) resolve(result);
-            else reject(new Error('Search maintenance worker stopped'));
+            signal?.removeEventListener('abort', abort);
+            process.removeListener('exit', onExit);
+            process.removeListener('SIGTERM', onTerm);
+            process.removeListener('SIGINT', onInterrupt);
+            cleanup();
+            if (code === 0 && result && !signal?.aborted) resolve(result);
+            else reject(failure ?? new Error('Search maintenance worker stopped'));
         });
     });
 }
@@ -102,10 +158,28 @@ export class SearchService {
             throw e;
         }
     }
-    async rebuild(): Promise<void> {
+    async rebuild(options: {userData?: string; signal?: AbortSignal} = {}): Promise<void> {
         const path = String(this.db.prepare('PRAGMA database_list').get()!.file);
-        const { rowids, missing } = path ? await scanInWorker(path) : scanSearchIndex(this.db) as MaintenanceRows;
+        const userData = options.userData ?? dirname(path);
+        const marker = join(userData, 'fts-check.json');
+        let state: CheckState = {};
+        let checked = false;
+        let rows: MaintenanceRows;
+        if (path) {
+            const snapshots = join(userData, 'tmp', 'fts-check');
+            scavengeSnapshots(snapshots);
+            state = readCheckState(marker);
+            const elapsed = Date.now() - (state.lastSuccess ?? 0);
+            const check = !state.lastSuccess || state.pending === true || elapsed < 0 || elapsed >= 7 * 86400000;
+            writeCheckState(marker, {...state, pending:true});
+            const directory = mkdtempSync(join(snapshots, `vstudy-search-check-${process.pid}-`));
+            const result = await scanInWorker(path, directory, check, options.signal);
+            checked = result.checked;
+            rows = result;
+        } else rows = scanSearchIndex(this.db) as MaintenanceRows;
+        const {rowids, missing} = rows;
         for (const {rowid} of rowids) {
+            options.signal?.throwIfAborted();
             const row = this.db.prepare('SELECT title,filename,substr(content,1,1000000) content,length(content) chars FROM document_fts WHERE rowid=?').get(rowid!);
             if (!row) continue;
             const title = indexedText(String(row.title)), filename = indexedText(String(row.filename)), content = indexedText(String(row.content));
@@ -114,6 +188,7 @@ export class SearchService {
             await new Promise<void>(resolve=>setImmediate(resolve));
         }
         for (const d of missing) {
+            options.signal?.throwIfAborted();
             try {
                 const path = d.activeVersion==='ai' ? join(dirname(String(d.markdownPath)),'content.ai.md') : String(d.markdownPath);
                 const content = await readFile(this.root ? containedPath(this.root, path) : path, 'utf8');
@@ -122,6 +197,8 @@ export class SearchService {
             }
             catch { /* A missing source is retried on the next startup. */ }
         }
+        options.signal?.throwIfAborted();
+        if (path) writeCheckState(marker, {lastSuccess: checked ? Date.now() : state.lastSuccess, pending:false});
     }
     search(text: string, limit = 50, cursor?: {
         rank: number;
