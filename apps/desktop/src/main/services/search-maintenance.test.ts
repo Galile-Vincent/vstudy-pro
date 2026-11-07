@@ -31,3 +31,29 @@ it.each(['missing and duplicate rows', 'corrupt index'])('repairs %s in a disk d
     expect(db.prepare('SELECT count(*) count FROM document_fts').get()?.count).toBe(1);
   } finally { db.close(); rmSync(root,{recursive:true,force:true}); }
 });
+
+it('keeps overlapping main writes below 50ms while checking 2000 documents', async () => {
+  const root=mkdtempSync(join(tmpdir(),'search-contention-')), db=new DatabaseSync(join(root,'test.sqlite'));
+  let maxWrite=0,maxGap=0,last=performance.now(),writes=0;
+  let timer:ReturnType<typeof setInterval>|undefined;
+  try {
+    db.exec("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; CREATE TABLE documents(id TEXT PRIMARY KEY,title TEXT,sourceName TEXT,deletedAt TEXT,status TEXT,markdownPath TEXT,activeVersion TEXT,contentChars INTEGER); CREATE TABLE heartbeat(id INTEGER PRIMARY KEY,value INTEGER); CREATE VIRTUAL TABLE document_fts USING fts5(documentId UNINDEXED,title,filename,content,tokenize='trigram')");
+    const content=Array.from({length:10000},(_,i)=>`word${i}`).join(' ').slice(0,60000);
+    db.exec('BEGIN');
+    for(let i=0;i<2000;i++) {
+      db.prepare("INSERT INTO documents VALUES(?,'Notes','notes.md',NULL,'ready','','original',60000)").run(String(i));
+      db.prepare("INSERT INTO document_fts VALUES(?,'Notes','notes.md',?)").run(String(i),content);
+    }
+    db.exec('COMMIT');
+    db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+    last=performance.now();
+    timer=setInterval(()=>{
+      const now=performance.now();maxGap=Math.max(maxGap,now-last);last=now;
+      const start=performance.now();db.exec('INSERT OR REPLACE INTO heartbeat VALUES(1,1)');maxWrite=Math.max(maxWrite,performance.now()-start);writes++;
+    },30);
+    await new SearchService(db,root).rebuild();
+    process.stdout.write(`CONTENTION documents=2000 maxWriteMs=${maxWrite.toFixed(1)} maxEventLoopGapMs=${maxGap.toFixed(1)} writes=${writes}\n`);
+    expect(writes).toBeGreaterThan(0);
+    expect(maxWrite).toBeLessThan(50);
+  } finally {clearInterval(timer);db.close();rmSync(root,{recursive:true,force:true});}
+},120000);

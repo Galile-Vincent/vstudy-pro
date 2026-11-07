@@ -27,15 +27,20 @@ type MaintenanceRows = {
 };
 
 // This function is serialized into a worker; keep it independent of module bindings.
-function scanSearchIndex(db: DatabaseSync) {
+function checkSearchIndex(db: DatabaseSync): boolean {
     try {
         db.exec("INSERT INTO document_fts(document_fts) VALUES('integrity-check')");
-    }
-    catch (error) {
+        return true;
+    } catch (error) {
         if (((error as {errcode?: number}).errcode ?? 0) % 256 !== 11) throw error;
-        db.exec("DROP TABLE document_fts; CREATE VIRTUAL TABLE document_fts USING fts5(documentId UNINDEXED,title,filename,content,tokenize='trigram')");
+        return false;
     }
-    db.exec('DELETE FROM document_fts WHERE documentId NOT IN(SELECT id FROM documents WHERE deletedAt IS NULL)');
+}
+
+function scanSearchIndex(db: DatabaseSync, valid = checkSearchIndex(db)) {
+    if (!valid) db.exec("DROP TABLE document_fts; CREATE VIRTUAL TABLE document_fts USING fts5(documentId UNINDEXED,title,filename,content,tokenize='trigram')");
+    const orphans = db.prepare('SELECT rowid FROM document_fts WHERE documentId NOT IN(SELECT id FROM documents WHERE deletedAt IS NULL)').all();
+    for (const {rowid} of orphans) db.prepare('DELETE FROM document_fts WHERE rowid=?').run(rowid!);
     const rowids = db.prepare('SELECT rowid FROM document_fts').all();
     const missing = db.prepare("WITH indexed AS MATERIALIZED (SELECT documentId,count(*) copies,max(length(content)) chars FROM document_fts GROUP BY documentId) SELECT d.id,d.markdownPath,d.activeVersion FROM documents d LEFT JOIN indexed f ON f.documentId=d.id WHERE d.status='ready' AND d.deletedAt IS NULL AND (coalesce(f.copies,0)!=1)").all();
     return { rowids, missing };
@@ -45,14 +50,28 @@ async function scanInWorker(path: string): Promise<MaintenanceRows> {
     return new Promise((resolve, reject) => {
         const worker = new Worker(`
             const { parentPort, workerData } = require('node:worker_threads');
-            const { DatabaseSync } = require('node:sqlite');
+            const { DatabaseSync, backup } = require('node:sqlite');
+            const { mkdtempSync, rmSync, chmodSync } = require('node:fs');
+            const { tmpdir } = require('node:os');
+            const { join } = require('node:path');
             const db = new DatabaseSync(workerData);
-            try {
-                db.exec('PRAGMA busy_timeout=5000');
-                const result = (${scanSearchIndex.toString()})(db);
-                db.close();
-                parentPort.postMessage(result);
-            } catch (error) { db.close(); throw error; }
+            const directory = mkdtempSync(join(tmpdir(), 'vstudy-search-check-'));
+            const checkSearchIndex = ${checkSearchIndex.toString()};
+            (async () => {
+                try {
+                    db.exec('PRAGMA busy_timeout=5000');
+                    const path = join(directory, 'snapshot.sqlite');
+                    db.exec('BEGIN');
+                    db.prepare('SELECT count(*) FROM sqlite_master').get();
+                    try { await backup(db, path); } finally { db.exec('COMMIT'); }
+                    chmodSync(path, 0o600);
+                    const snapshot = new DatabaseSync(path);
+                    let valid;
+                    try { valid = checkSearchIndex(snapshot); } finally { snapshot.close(); }
+                    const result = (${scanSearchIndex.toString()})(db, valid);
+                    parentPort.postMessage(result);
+                } finally { db.close(); rmSync(directory, {recursive:true,force:true}); }
+            })().catch(error => { throw error; });
         `, { eval: true, workerData: path });
         let result: MaintenanceRows | undefined;
         worker.once('message', value => { result = value; });

@@ -139,8 +139,23 @@ it('ignores usage updates and refreshes when history changes or the window regai
   expect(invoke).not.toHaveBeenCalled();
   for (const event of ['vstudy:history-changed', 'focus']) {
     await act(() => window.dispatchEvent(new Event(event)));
-    await act(() => vi.advanceTimersByTimeAsync(150));
+    await act(() => vi.advanceTimersByTimeAsync(650));
     expect(invoke).toHaveBeenCalledWith('chats:search', expect.anything());
     invoke.mockClear();
   }
+});
+
+it('refreshes completed background content within one second and bounds event bursts', async () => {
+ vi.useFakeTimers(); let completed=false;
+ invoke.mockImplementation(async channel=>channel==='chats:facets'?{courses:[],documents:[],models:[]}:{items:completed?[hit]:[],nextCursor:null});
+ const host=await render(<HistorySearch onOpen={()=>{}}/>);
+ await act(()=>vi.advanceTimersByTimeAsync(150)); invoke.mockClear(); completed=true;
+ for(let i=0;i<10;i++) {
+  await act(()=>window.dispatchEvent(new Event('vstudy:history-changed')));
+  await act(()=>vi.advanceTimersByTimeAsync(50));
+ }
+ await act(()=>vi.advanceTimersByTimeAsync(450));
+ process.stdout.write(`FRESHNESS elapsedMs=950 visibleResults=${host.querySelectorAll('[data-history-result]').length} searches=${invoke.mock.calls.filter(c=>c[0]==='chats:search').length}\n`);
+ expect(host.querySelectorAll('[data-history-result]')).toHaveLength(1);
+ expect(invoke.mock.calls.filter(c=>c[0]==='chats:search').length).toBeLessThanOrEqual(2);
 });

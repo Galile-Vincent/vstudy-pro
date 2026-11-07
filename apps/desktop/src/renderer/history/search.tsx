@@ -46,7 +46,19 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
       setLoading(false); }); }, 120);
     return () => { clearTimeout(timer); serial.current++; };
   }, [filters, revision]);
-  useEffect(() => { const refresh = () => setRevision(n => n + 1); window.addEventListener('focus', refresh); window.addEventListener('vstudy:history-changed', refresh); return () => { window.removeEventListener('focus', refresh); window.removeEventListener('vstudy:history-changed', refresh); }; }, []);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let last = -Infinity;
+    const refresh = () => {
+      if (timer !== undefined) return;
+      const run = () => { timer = undefined; last = Date.now(); setRevision(n => n + 1); };
+      const delay = Math.max(0, 500 - (Date.now() - last));
+      if (delay) timer = setTimeout(run, delay); else run();
+    };
+    window.addEventListener('focus', refresh);
+    window.addEventListener('vstudy:history-changed', refresh);
+    return () => { clearTimeout(timer); window.removeEventListener('focus', refresh); window.removeEventListener('vstudy:history-changed', refresh); };
+  }, []);
   useEffect(() => { if (!undo)
     return; const timer = setTimeout(() => setUndo(null), 30000); return () => clearTimeout(timer); }, [undo]);
   const update = async (hit: ChatHit, patch: ChatPatch) => {
@@ -62,7 +74,6 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
       if (patch.deleted !== undefined)
         previous.deleted = false;
       setUndo({ id: hit.id, patch: previous });
-      setRevision(n => n + 1);
       window.dispatchEvent(new Event('vstudy:history-changed'));
     }
     catch {
@@ -120,7 +131,7 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
    <label><input type="checkbox" checked={!!filters.hasCitations} onChange={e => set({ hasCitations: e.target.checked ? true : undefined })}/>{tr('history:citations')}</label>
    <label><input type="checkbox" checked={grouped} onChange={e => setGrouped(e.target.checked)}/>{tr('history:group_courses')}</label>
   </div></details>
-  {undo && <div role="status" className="history-undo">{tr('history:updated')}<button onClick={() => { void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { setUndo(null); setRevision(n => n + 1); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}>{tr('history:undo')}</button></div>}
+  {undo && <div role="status" className="history-undo">{tr('history:updated')}<button onClick={() => { void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { setUndo(null); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}>{tr('history:undo')}</button></div>}
   {error && <p role="alert">{tr('history:error')} <button onClick={() => setRevision(n => n + 1)}>{tr('common:retry')}</button></p>}
   <div className="history-results" aria-busy={loading}>
    <p role="status">{loading && !page.items.length ? tr('history:searching') : ''}</p>

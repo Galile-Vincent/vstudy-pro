@@ -5,7 +5,7 @@ import {
   moodleProgressChannel, moodleProgressSchema,
   documentProgressChannel, documentProgressSchema,
   chatEnvelopeSchema,
-  chatEventChannel,
+  chatEventChannel, historyChangedChannel, historyChangedArgumentsSchema,
   ipcContract,
   requestIdSchema,
   type DesktopApi,
@@ -21,6 +21,9 @@ if (process.isMainFrame) {
   });
   new MutationObserver(removeFrames).observe(document, {childList:true,subtree:true,attributes:true,attributeFilter:['sandbox','src','srcdoc']});
 }
+ipcRenderer.on(historyChangedChannel, (_event, ...args: unknown[]) => {
+  if (historyChangedArgumentsSchema.safeParse(args).success) window.dispatchEvent(new Event(historyChangedChannel));
+});
 ipcRenderer.on('vstudy:providers-changed', () => window.dispatchEvent(new Event('vstudy:providers-changed')));
 ipcRenderer.on('vstudy:open-settings', () => window.dispatchEvent(new Event('vstudy:open-settings')));
 const dropTokens = new Map<string, string>();

@@ -13,7 +13,8 @@ import { openStore } from "../db";
 import { ProviderRegistry, fakeAdapter } from "../providers";
 import { createIpcRegistrar } from "./register";
 import type { IpcChannel } from "../../shared/ipc";
-vi.mock("electron", () => ({ app: { getPath: () => "/unused" } }));
+const historyNotify = vi.hoisted(() => vi.fn());
+vi.mock("electron", () => ({ BrowserWindow: {getAllWindows:()=>[{isDestroyed:()=>false,webContents:{send:historyNotify}}]}, app: { getPath: () => "/unused" } }));
 import { registerChatIpc } from "./chat";
 it("registers every chat handler with validated repository round trips and disposes them", async () => {
   const store = openStore(":memory:");
@@ -110,6 +111,8 @@ it("registers every chat handler with validated repository round trips and dispo
     const conversation = conversations[0];
     if (!conversation) throw new Error("Missing conversation");
     expect(created).toEqual(conversation);
+    expect(historyNotify).toHaveBeenCalledWith('vstudy:history-changed');
+    historyNotify.mockClear();
     expect(await invoke("conversations:list", { documentId: doc.id })).toEqual(
       conversations,
     );
@@ -128,6 +131,12 @@ it("registers every chat handler with validated repository round trips and dispo
     await expect(invoke('chats:search',{query:'x',unexpected:true})).rejects.toThrow();
     await expect(invoke('chats:update',{conversationId:conversation.id,patch:{pinned:'true'}})).rejects.toThrow();
     expect(await invoke('chats:update',{conversationId:conversation.id,patch:{pinned:true}})).toEqual({ok:true});
+    expect(historyNotify).toHaveBeenCalledWith('vstudy:history-changed');
+    const general = await invoke('conversations:create', {scope:'general',providerId:'anthropic-api',modelId:'fake'}) as import('../../shared/domain').Conversation;
+    historyNotify.mockClear();
+    await invoke('chat:start', {scope:'general',requestId:randomUUID(),conversationId:general.id,providerId:'anthropic-api',modelId:'fake',userMessage:'Background freshness'});
+    await vi.waitFor(() => expect(store.messages.list(general.id).some(m=>m.role==='assistant')).toBe(true));
+    expect(historyNotify).toHaveBeenCalledExactlyOnceWith('vstudy:history-changed');
     expect(await invoke("providers:list", {})).toHaveLength(6);
     expect(
       await invoke("providers:configure", {

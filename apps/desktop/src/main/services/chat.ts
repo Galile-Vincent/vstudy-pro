@@ -1,3 +1,6 @@
+import { BrowserWindow } from 'electron';
+import { historyChangedChannel } from '../../shared/ipc';
+
 import { MemoryRepository } from '../review/memory-repository';
 import { wakeMemory } from '../review/memory';
 import { log } from '../logging';
@@ -40,6 +43,12 @@ import { buildPrompt } from "../prompt";
 import { citationCatalog, citedReferences } from "../prompt/citations";
 import { presentationSchema } from "../../shared/presentation";
 import { chatEventSchema, type DocumentCitation, type ToolCall } from "../../shared/domain";
+export function notifyHistoryChanged(): void {
+  for (const window of BrowserWindow?.getAllWindows() ?? []) {
+    try { if (!window.isDestroyed()) window.webContents.send(historyChangedChannel); } catch { continue; }
+  }
+}
+
 /** Minimal owning-window port. Events must return only to the window that accepted the request. */
 export interface ChatOwner {
   isDestroyed(): boolean;
@@ -108,6 +117,7 @@ export class ChatService {
         createdAt: new Date().toISOString(),
       }),
     );
+    notifyHistoryChanged();
     analytics()?.track('conversation_started',{conversation_id:created.id,ai_feature:'chat'});
     return created;
   }
@@ -116,6 +126,7 @@ export class ChatService {
       if (entry.request.conversationId === id)
         this.abort(entry.request.requestId, entry.owner);
     this.store.conversations.delete(id);
+    notifyHistoryChanged();
     analytics()?.track('conversation_cleared');
   }
   /** Validate options and ownership before accepting exactly one producer for the conversation. */
@@ -304,6 +315,7 @@ export class ChatService {
         catch { log({phase:'review-memory-enqueue',code:'FAILED'}); }
       }
       this.store.db.exec("RELEASE finish_chat");
+      notifyHistoryChanged();
       setImmediate(() => wakeMemory(this.store));
     } catch {
       this.store.db.exec("ROLLBACK TO finish_chat; RELEASE finish_chat");

@@ -7,7 +7,7 @@
 /** Every released schema must upgrade without losing existing records or mutating its backup. */
 import { expect, it } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { mkdtempSync, rmSync, existsSync, readdirSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, existsSync, readdirSync, readFileSync, utimesSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { migrate, migrationChecksum } from './migrate';
@@ -113,4 +113,16 @@ it('keeps the three newest successful batch snapshots and preserves the first sn
     migrate(db,history,path);
     expect(readFileSync(path+'.before-v6.bak')).toEqual(snapshot);
   } finally { db.close(); rmSync(dir,{recursive:true,force:true}); }
+});
+
+it.each([false,true])('protects the current snapshot despite future mtimes (higher versions=%s)', higher => {
+ const root=mkdtempSync(join(tmpdir(),'retention-clock-')), path=join(root,'db.sqlite'), db=new DatabaseSync(path);
+ const history=Array.from({length:4},(_,i)=>({version:i+1,sql:`CREATE TABLE v${i+1}(v TEXT)`}));
+ try {
+  for(const version of [1,2,3]) { migrate(db,history.slice(0,version),path); utimesSync(path+`.before-v${version}.bak`,new Date('2030-01-01'),new Date('2030-01-01')); }
+  if (higher) for (const version of [1,2,3]) renameSync(path+`.before-v${version}.bak`,path+`.before-v${version+90}.bak`);
+  migrate(db,history,path);
+  expect(existsSync(path+'.before-v4.bak')).toBe(true);
+  expect(existsSync(path+'.before-v1.bak')).toBe(false);
+ } finally {db.close();rmSync(root,{recursive:true,force:true});}
 });

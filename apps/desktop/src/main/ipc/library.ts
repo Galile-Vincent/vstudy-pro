@@ -8,7 +8,7 @@ import { ownerWindow } from '../dialogs';
 import { storageBusy } from "../storage/maintenance";
 import { searchInWorker } from '../services/search-runner';
 import { documentIdSchema } from '../../shared/domain';
-import { app, dialog, shell, type BrowserWindow } from 'electron';
+import { app, dialog, shell } from 'electron';
 import { safeFilename } from "../security";
 import { exportFile } from '../services/export-file';
 import { basename, extname, join } from 'node:path';
@@ -23,16 +23,12 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     const library = new LibraryService(store, join(app.getPath('userData'), 'library')), activity = new ActivityService(store);
     let startup: Promise<void> = Promise.resolve();
     let disposed = false;
-    let firstWindow: BrowserWindow | undefined;
-    const afterShow = () => {
+    const afterCreated = () => {
         startup = new Promise<void>(resolve => setImmediate(resolve))
             .then(() => { if (!disposed) return library.search.rebuild(); })
             .catch(() => { console.error("Search rebuild deferred until next startup"); });
     };
-    const onWindow = (_event: Electron.Event, window: BrowserWindow) => {
-        firstWindow = window;
-        window.once('show', afterShow);
-    };
+    const onWindow = () => afterCreated();
     app.once('browser-window-created', onWindow);
     let purging: Promise<void> = Promise.resolve();
     const handle: typeof registrar.handle = (channel, handler) => { implemented.add(channel); registrar.handle(channel, handler); };
@@ -94,7 +90,6 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     return Object.assign(() => {
         clearInterval(purge);
         app.removeListener('browser-window-created', onWindow);
-        firstWindow?.removeListener('show', afterShow);
         disposed = true;
     }, {waitForIdle:async()=>{await startup;await purging;}});
 }
