@@ -1,3 +1,4 @@
+import { assertCatalogModel } from './catalog-model';
 /**
  * Coordinate budgeted AI page conversion, version persistence, and cancellation.
  * Owned by main/services.
@@ -48,7 +49,7 @@ export class AiParseService {
  async estimate(r:AiParseRequest,signal=new AbortController().signal):Promise<AiParseEstimate> {
   signal.throwIfAborted();
   const d=this.document(r.documentId), all=await this.pages(d), pages=this.selected(r,all);
-  const models=await this.providers.get(r.providerId).listModels();const model=models.find(m=>m.id===r.modelId);
+  const model=await assertCatalogModel(this.providers,r.providerId,r.modelId,'ai_parse.model_unavailable');
   signal.throwIfAborted();
   const supportsImages=model?.supportsImages===true;
   const billable:typeof pages=[];
@@ -74,7 +75,7 @@ export class AiParseService {
   try {
    const d=this.document(r.documentId), pages=await this.pages(d), estimate=await this.estimate(r,controller.signal);
    if(estimate.reason)throw new Error(estimate.reason);
-   const model=(await this.providers.get(r.providerId).listModels()).find(m=>m.id===r.modelId);validateOptions(model,r.options.modelOptions);
+   const model=await assertCatalogModel(this.providers,r.providerId,r.modelId,'ai_parse.model_unavailable');validateOptions(model,r.options.modelOptions);
    const settings=this.store.settings.get(),spent=this.store.usage.summary('month');
    if(r.options.hardCapUsd!==undefined && (estimate.costUsd===undefined || estimate.costUsd>r.options.hardCapUsd))throw new Error('ai_parse.cap');
    if(settings.monthlyBudgetUsd!==undefined && (spent.unknownPrices || estimate.costUsd===undefined || (spent.costUsd??0)+estimate.costUsd>settings.monthlyBudgetUsd) && !r.options.confirmBudgetOverride)throw new Error('ai_parse.budget');

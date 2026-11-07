@@ -1,3 +1,4 @@
+import { assertCatalogModel } from '../services/catalog-model';
 import { app, dialog, type IpcMainInvokeEvent } from 'electron';
 import { constants } from 'node:fs';
 import { open } from 'node:fs/promises';
@@ -65,7 +66,7 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
             await file.close();
         } },
         estimate: reservation,
-        async call(prompt, r, signal, onUsage) { let output = '', done = false, usage: Usage | undefined; try {
+        async call(prompt, r, signal, onUsage) { await assertCatalogModel(providers, r.providerId, r.modelId, 'review.model_unavailable'); let output = '', done = false, usage: Usage | undefined; try {
             for await (const event of providers.get(r.providerId).stream({ scope: 'general', requestId: requestIdSchema.parse(randomUUID()), conversationId: conversationIdSchema.parse(randomUUID()), providerId: r.providerId, modelId: r.modelId, userMessage: 'Generate a study aid from the supplied data.', prompt, allowPresentation: false, maxOutputTokens: 8192, onUsageSnapshot: snapshot => { usage = snapshot; } }, signal)) {
                 signal.throwIfAborted();
                 if (event.type === 'tool-call' || event.type === 'proposals' || event.type === 'error')
@@ -94,7 +95,7 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
     });
     for (const channel of Object.keys(reviewGenerateIpc) as (keyof typeof reviewGenerateIpc)[])
         implemented.add(channel);
-    registrar.handle('review:artifact:generate', (r, event) => rendererArtifact(service.generate(r, progressFor(event))));
+    registrar.handle('review:artifact:generate', async (r, event) => { await assertCatalogModel(providers, r.providerId, r.modelId, 'review.model_unavailable'); return rendererArtifact(service.generate(r, progressFor(event))); });
     registrar.handle('review:artifact:retry', (r, event) => rendererArtifact(service.retry(r.artifactId, r.requestId, r.locale, progressFor(event))));
     registrar.handle('review:artifact:cancel', ({ artifactId }) => { service.cancel(artifactId); return { ok: true }; });
     registrar.handle('review:artifact:get', ({ artifactId }) => {const artifact=repo.find(artifactId); return artifact ? rendererArtifact(artifact) : null;});
