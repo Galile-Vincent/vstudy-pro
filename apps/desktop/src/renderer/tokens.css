@@ -9,6 +9,13 @@
  --elevation-flat:none; --elevation-raised:0 1px 3px color-mix(in srgb,var(--shadow-color) 10%,transparent),0 4px 12px color-mix(in srgb,var(--shadow-color) 8%,transparent);
  --elevation-floating:0 2px 8px color-mix(in srgb,var(--shadow-color) 16%,transparent),0 16px 48px color-mix(in srgb,var(--shadow-color) 24%,transparent);
 
+ --surface-opacity:88%;
+ --surface-card:color-mix(in srgb,var(--subtle) var(--surface-opacity),transparent);
+ --surface-card-strong:color-mix(in srgb,var(--surface) max(96%,var(--surface-opacity)),transparent);
+ --surface-bar:color-mix(in srgb,var(--sidebar-surface) var(--surface-opacity),transparent);
+ --surface-border:var(--hairline);
+ --surface-blur:blur(16px);
+
  --material-card:color-mix(in oklab,var(--glass-tint) var(--glass-opacity),transparent);
  --material-sheet:color-mix(in oklab,var(--glass-tint) max(90%,var(--glass-opacity)),transparent);
 
@@ -157,4 +164,15 @@ html[data-material=solid] * { backdrop-filter:none!important; }
 
 @media(prefers-contrast:more), (forced-colors:active) {
  :root [data-slot=select-content],:root [data-slot=select-trigger] { border:1px solid var(--ink); }
+}
+
+/* Accessibility choices override the effective opacity, including inline preferences. */
+html[data-card-transparency=solid],html[data-theme=contrast],html[data-reduced-transparency=true] {
+ --surface-opacity:100%!important; --surface-blur:none;
+}
+@media(prefers-reduced-transparency:reduce), (prefers-contrast:more) {
+ :root { --surface-opacity:100%!important; --surface-blur:none; }
+}
+@media(forced-colors:active) {
+ :root { --surface-card:Canvas; --surface-card-strong:Canvas; --surface-bar:Canvas; --surface-border:CanvasText; --surface-blur:none; }
 }

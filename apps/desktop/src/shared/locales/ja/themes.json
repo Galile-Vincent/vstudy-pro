@@ -1,4 +1,10 @@
 {
+  "cardTransparency": "カードの透明度",
+  "cardTransparency_hint": "カードやパネルの背景の透け方を選びます。アクセシビリティ設定では不透明になります。",
+  "card_solid": "不透明",
+  "card_soft": "ソフト",
+  "card_glass": "ガラス",
+
   "loading": "外観を読み込み中…",
   "scheme": "カラーモード",
   "system": "システム",

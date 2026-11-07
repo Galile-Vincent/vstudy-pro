@@ -19,6 +19,8 @@ export function applyTheme(preferences: ThemePreferences, preview?: ThemePack): 
   for (const [name, value] of Object.entries(adjustedTokens(theme[scheme], scheme, preferences.contrast))) {
     root.style.setProperty(`--${name === "sidebar" ? "sidebar-surface" : name}`, value);
   }
+  root.style.setProperty('--surface-opacity', `${{solid:100,soft:88,glass:72}[preferences.cardTransparency]}%`);
+  root.dataset.cardTransparency = preferences.cardTransparency;
   root.style.setProperty('--glass-opacity', `${preferences.glassOpacity}%`);
   root.dataset.theme = theme.id;
   root.dataset.scheme = scheme;
@@ -28,7 +30,7 @@ export function applyTheme(preferences: ThemePreferences, preview?: ThemePack): 
 
 /** The cache avoids a default-theme paint while the authoritative SQLite settings load. */
 export function applyAppearance(settings: Settings, animate = false): void {
-  const nextKey = JSON.stringify([resolveTheme(settings), settings.colorScheme, settings.contrast, settings.glassOpacity, settings.material]);
+  const nextKey = JSON.stringify([resolveTheme(settings), settings.colorScheme, settings.contrast, settings.glassOpacity, settings.material, settings.cardTransparency]);
   const changed = appearanceKey !== undefined && appearanceKey !== nextKey;
   appearanceKey = nextKey;
   if (!animate || changed) transition(() => {

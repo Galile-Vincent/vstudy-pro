@@ -18,6 +18,24 @@ for (const theme of builtinThemes) {
     console.log(`${theme.name} ${scheme}: WCAG AA passed at every contrast setting`);
   }
 }
+function composite(foreground, background, opacity) {
+  return '#' + [1,3,5].map(i => Math.round(parseInt(foreground.slice(i,i+2),16)*opacity
+    + parseInt(background.slice(i,i+2),16)*(1-opacity)).toString(16).padStart(2,'0')).join('');
+}
+let surfaceMinimum=Infinity;
+for (const theme of builtinThemes) for (const scheme of ['light','dark']) {
+  const tokens=theme[scheme];
+  for (const opacity of [1,.88,.72]) for (const tint of ['surface','sidebar']) {
+    for (const background of ['background','surface','sidebar','subtle','active']) {
+      for (const foreground of ['ink','muted','accent-color','danger','success','warning','info']) {
+        const ratio=contrastRatio(tokens[foreground],composite(tokens[tint],tokens[background],opacity));
+        surfaceMinimum=Math.min(surfaceMinimum,ratio);
+        assert.ok(ratio>=4.5,`${theme.id} ${scheme} ${opacity} translucent ${tint} over ${background}: ${foreground} ${ratio}`);
+      }
+    }
+  }
+}
+console.log(`Translucent surfaces: minimum text contrast ${surfaceMinimum.toFixed(2)}:1`);
 let count=0;
 async function audit(url) {
   for (const entry of await readdir(url,{withFileTypes:true})) {
