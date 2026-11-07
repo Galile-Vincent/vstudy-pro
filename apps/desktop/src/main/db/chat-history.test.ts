@@ -13,6 +13,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openStore } from './index';
 import { migrations } from './migrations';
+import { migrationChecksum } from './migrate';
 import { chatSearchSchema } from '../../shared/chat-history';
 import { conversationSchema, messageSchema } from '../../shared/domain';
 const stores: ReturnType<typeof openStore>[] = [];
@@ -136,4 +137,78 @@ it('clears a renamed title so future messages can supply its automatic title',()
   const s=setup(),{c}=conversation(s,'Automatic title');
   s.chatHistory.update(c.id,{title:'Renamed'});s.chatHistory.update(c.id,{title:''});
   expect(search(s,{}).items[0]?.title).toBe('Automatic title');
+});
+
+it('preserves literal FTS results and ranks when backfilling v24 into v25', () => {
+  const db = new DatabaseSync(':memory:');
+  try {
+    db.exec('PRAGMA foreign_keys=ON');
+    for (const migration of migrations.filter(m => m.version <= 24)) db.exec(migration.sql);
+    const cid = randomUUID(), mid = randomUUID(), hidden = randomUUID();
+    db.prepare("INSERT INTO conversations(id,scope,providerId,modelId,createdAt,title) VALUES(?,'general','anthropic-api','fake','2026-11-01','calculus 資料')").run(cid);
+    const insert = db.prepare("INSERT INTO messages(id,conversationId,role,parts,createdAt,supersededBy) VALUES(?,?,'user',?,'2026-11-01',?)");
+    insert.run(mid, cid, JSON.stringify([{ type: 'text', text: 'calculus 資料 😀' }]), null);
+    insert.run(hidden, cid, JSON.stringify([{ type: 'text', text: 'hidden calculus' }]), mid);
+    const results = (keyed = false) => ['calculus', '資料', '😀'].map(query => db.prepare(`SELECT ${keyed ? '(SELECT id FROM conversations WHERE rowid=conversationRowid)' : 'conversationId'} AS conversationId,messageId,role,title,text,${query === 'calculus' ? 'bm25(chat_fts,0,0,0,8,1)' : '0'} AS rank FROM chat_fts WHERE ${query === 'calculus' ? 'chat_fts MATCH ?' : 'text LIKE ? OR title LIKE ?'} ORDER BY conversationId,messageId`).all(...(query === 'calculus' ? ['"calculus"'] : [`%${query}%`, `%${query}%`])));
+    const before = results();
+    db.exec(migrations.find(m => m.version === 25)!.sql);
+    expect(results(true)).toEqual(before);
+    expect(db.prepare('SELECT rowid FROM chat_fts WHERE messageId=?').get(mid)?.rowid).toBe(db.prepare('SELECT rowid FROM messages WHERE id=?').get(mid)?.rowid);
+    expect(db.prepare('SELECT count(*) AS n FROM chat_fts').get()?.n).toBe(2);
+    expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+  } finally { db.close(); }
+});
+
+it('pages empty history using the recent index without touching FTS, including empty conversations', () => {
+  const s = setup();
+  const { c } = conversation(s, 'old');
+  const empty = conversationSchema.parse({ id: randomUUID(), scope: 'general', providerId: 'anthropic-api', modelId: 'fake', createdAt: '2026-11-02T00:00:00Z' });
+  s.conversations.insert(empty);
+  s.db.exec('DROP TABLE chat_fts');
+  const first = search(s, { limit: 1 });
+  expect(first.items.map(h => h.id)).toEqual([empty.id]);
+  expect(first.items[0]?.matches).toEqual([]);
+  expect(search(s, { limit: 1, cursor: first.nextCursor }).items.map(h => h.id)).toEqual([c.id]);
+  const plan = s.db.prepare("EXPLAIN QUERY PLAN SELECT id FROM conversations WHERE deletedAt IS NULL AND (updatedAt,id)<(?,?) ORDER BY updatedAt DESC,id DESC LIMIT 30").all(empty.createdAt, empty.id);
+  expect(JSON.stringify(plan)).toContain('conversations_history_recent');
+  expect(JSON.stringify(plan)).not.toContain('TEMP B-TREE');
+});
+
+it('keeps keyed FTS rows correct on message moves, reactivation, individual deletes and document cascades', () => {
+  const s = setup(), a = conversation(s, 'movable'), b = conversation(s, 'destination');
+  s.db.prepare('UPDATE messages SET conversationId=? WHERE id=?').run(b.c.id, a.m.id);
+  expect(search(s, { query: 'movable' }).items.map(h => h.id)).toEqual([b.c.id]);
+  s.db.prepare('UPDATE messages SET supersededBy=? WHERE id=?').run(b.m.id, a.m.id);
+  expect(search(s, { query: 'movable' }).items).toEqual([]);
+  s.db.prepare("UPDATE messages SET supersededBy=NULL,role='assistant' WHERE id=?").run(a.m.id);
+  expect(search(s, { query: 'movable', role: 'assistant' }).items[0]?.matches[0]?.messageId).toBe(a.m.id);
+  s.db.prepare('DELETE FROM messages WHERE id=?').run(a.m.id);
+  expect(search(s, { query: 'movable' }).items).toEqual([]);
+  const doc = randomUUID();
+  s.db.prepare("INSERT INTO documents(id,title,sourceName,sourceHash,sourcePath,mime,status,markdownPath,createdAt) VALUES(?,'Doc','a','hash','/tmp/a','text/plain','ready','/tmp/a','2026-11-01')").run(doc);
+  s.db.prepare("UPDATE conversations SET scope='document',documentId=? WHERE id IN (?,?)").run(doc, a.c.id, b.c.id);
+  s.db.prepare('DELETE FROM documents WHERE id=?').run(doc);
+  expect(s.db.prepare('SELECT * FROM chat_fts').all()).toEqual([]);
+});
+
+
+it('backs up v24 and records a verified v25 checksum before reopening', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'chat-v25-')), path = join(dir, 'db.sqlite');
+  try {
+    const db = new DatabaseSync(path);
+    db.exec('PRAGMA foreign_keys=ON; CREATE TABLE migrations(version INTEGER PRIMARY KEY,appliedAt TEXT NOT NULL,checksum TEXT)');
+    for (const migration of migrations.filter(m => m.version <= 24)) {
+      db.exec(migration.sql);
+      db.prepare('INSERT INTO migrations VALUES(?,?,?)').run(migration.version, '2026-11-01', migrationChecksum(migration.sql));
+    }
+    db.close();
+    const s = openStore(path);
+    try {
+      expect(existsSync(path + '.before-v25.bak')).toBe(true);
+      if (process.platform !== 'win32') expect(statSync(path + '.before-v25.bak').mode & 0o777).toBe(0o600);
+      expect(s.db.prepare('SELECT checksum FROM migrations WHERE version=25').get()?.checksum).toBe(migrationChecksum(migrations.find(m => m.version === 25)!.sql));
+    } finally { s.close(); }
+    const reopened = openStore(path);
+    reopened.close();
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });

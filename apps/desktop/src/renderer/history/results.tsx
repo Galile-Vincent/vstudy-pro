@@ -19,7 +19,8 @@ export function courseColor(id: string | null) {
   return ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'][Math.abs(hash) % 5];
 }
 type ContextValue = {
-  items: ChatHit[];
+  byId: Map<string, ChatHit>;
+  firstInGroup: Set<string>;
   open: (hit: ChatHit, messageId?: string) => void;
   update: (hit: ChatHit, patch: ChatPatch) => void;
   rename: (hit: ChatHit) => void;
@@ -29,11 +30,11 @@ const Context = createContext<ContextValue | null>(null);
 function Result() {
   useTranslation();
   const id = useAuiState(s => s.threadListItem.id), context = useContext(Context)!;
-  const hit = context.items.find(h => h.id === id);
+  const hit = context.byId.get(id);
   // assistant-ui updates thread IDs in an effect, after the new search data renders.
   if (!hit) return null;
   const group = hit.courseTitle || hit.documentTitle || tr('history:' + hit.scope);
-  const first = context.items.find(h => (h.courseId ?? h.documentId ?? h.scope) === (hit.courseId ?? hit.documentId ?? hit.scope))?.id === id;
+  const first = context.firstInGroup.has(id);
   return <>{context.groupByCourse && first && <h2 className="history-group">{group}</h2>}<ThreadListItemPrimitive.Root className="history-result" data-testid="history-result">
   <ThreadListItemPrimitive.Trigger asChild><button className="history-result-title" data-history-result>
    <strong><HistorySnippet text={hit.titleSnippet || tr('common:new_chat')}/></strong>
@@ -58,7 +59,14 @@ export function HistoryResults({ items, onOpen, onUpdate, onRename, groupByCours
   groupByCourse?: boolean;
 }) {
   const ordered = groupByCourse ? [...items].sort((a, b) => (a.courseTitle || a.documentTitle || a.scope).localeCompare(b.courseTitle || b.documentTitle || b.scope)) : items;
-  const runtime = useExternalStoreRuntime<ThreadMessage>({ messages: [], onNew: async () => { }, adapters: { threadList: { threads: ordered.map(h => ({ id: h.id, title: h.title, status: 'regular' as const })), onSwitchToThread: id => { const hit = items.find(h => h.id === id); if (hit)
+  const byId = new Map<string, ChatHit>(ordered.map(hit => [hit.id, hit]));
+  const groups = new Set<string>(), firstInGroup = new Set<string>();
+  for (const hit of ordered) {
+    const group = hit.courseId ?? hit.documentId ?? hit.scope;
+    if (!groups.has(group)) firstInGroup.add(hit.id);
+    groups.add(group);
+  }
+  const runtime = useExternalStoreRuntime<ThreadMessage>({ messages: [], onNew: async () => { }, adapters: { threadList: { threads: ordered.map(h => ({ id: h.id, title: h.title, status: 'regular' as const })), onSwitchToThread: id => { const hit = byId.get(id); if (hit)
           onOpen(hit, hit.matches[0]?.messageId); } } } });
-  return <AssistantRuntimeProvider runtime={runtime}><Context.Provider value={{ items: ordered, open: onOpen, update: onUpdate, rename: onRename, groupByCourse }}><ThreadListRoot><ThreadListPrimitive.Items components={{ ThreadListItem: Result }}/></ThreadListRoot></Context.Provider></AssistantRuntimeProvider>;
+  return <AssistantRuntimeProvider runtime={runtime}><Context.Provider value={{ byId, firstInGroup, open: onOpen, update: onUpdate, rename: onRename, groupByCourse }}><ThreadListRoot><ThreadListPrimitive.Items components={{ ThreadListItem: Result }}/></ThreadListRoot></Context.Provider></AssistantRuntimeProvider>;
 }

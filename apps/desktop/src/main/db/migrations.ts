@@ -8,7 +8,7 @@ import { analyticsMigration } from './analytics-migration';
 import { studyMigration } from './study-migration';
 import { plannerMigration } from './planner-migration';
 import { storageMigration } from '../cache/migration';
-import { chatHistoryMigration } from './chat-history-migration';
+import { chatHistoryMigration, chatHistoryRowidMigration } from './chat-history-migration';
 import { moodleMigration, moodleSiteMigration, moodleCapabilitiesMigration, moodleCourseDetailsMigration } from './moodle-migration';
 import { aiParseMigration, aiParseRollupRepair } from './ai-parse-migration';
 import { libraryMigration } from './library-migration';
@@ -107,4 +107,5 @@ export const migrations = [
     );
   ` },
   { version:24, sql:studyMigration },
+  { version:25, sql:chatHistoryRowidMigration },
 ];

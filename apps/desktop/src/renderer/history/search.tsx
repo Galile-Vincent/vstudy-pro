@@ -46,7 +46,7 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
       setLoading(false); }); }, 120);
     return () => { clearTimeout(timer); serial.current++; };
   }, [filters, revision]);
-  useEffect(() => { const refresh = () => setRevision(n => n + 1); window.addEventListener('usage-updated', refresh); window.addEventListener('vstudy:history-changed', refresh); return () => { window.removeEventListener('usage-updated', refresh); window.removeEventListener('vstudy:history-changed', refresh); }; }, []);
+  useEffect(() => { const refresh = () => setRevision(n => n + 1); window.addEventListener('focus', refresh); window.addEventListener('vstudy:history-changed', refresh); return () => { window.removeEventListener('focus', refresh); window.removeEventListener('vstudy:history-changed', refresh); }; }, []);
   useEffect(() => { if (!undo)
     return; const timer = setTimeout(() => setUndo(null), 30000); return () => clearTimeout(timer); }, [undo]);
   const update = async (hit: ChatHit, patch: ChatPatch) => {

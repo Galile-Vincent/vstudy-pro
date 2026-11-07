@@ -127,3 +127,20 @@ it.each([false, true])('replaces existing results safely when a filter returns a
     expect(open).toHaveBeenCalledWith(replacement, replacement.matches[0]!.messageId);
   }
 });
+
+it('ignores usage updates and refreshes when history changes or the window regains focus', async () => {
+  vi.useFakeTimers();
+  invoke.mockImplementation(async channel => channel === 'chats:facets' ? { courses: [], documents: [], models: [] } : { items: [], nextCursor: null });
+  await render(<HistorySearch onOpen={() => { }}/>);
+  await act(() => vi.advanceTimersByTimeAsync(150));
+  invoke.mockClear();
+  await act(() => window.dispatchEvent(new Event('usage-updated')));
+  await act(() => vi.advanceTimersByTimeAsync(150));
+  expect(invoke).not.toHaveBeenCalled();
+  for (const event of ['vstudy:history-changed', 'focus']) {
+    await act(() => window.dispatchEvent(new Event(event)));
+    await act(() => vi.advanceTimersByTimeAsync(150));
+    expect(invoke).toHaveBeenCalledWith('chats:search', expect.anything());
+    invoke.mockClear();
+  }
+});

@@ -60,3 +60,43 @@ CREATE TRIGGER history_message_delete AFTER DELETE ON messages BEGIN
 DELETE FROM chat_fts WHERE messageId=OLD.id;
 END;
 `;
+
+/** Positive rowids identify messages; negative rowids and conversationRowid identify conversations. */
+export const chatHistoryRowidMigration = `
+DROP TRIGGER history_conversation_insert;
+DROP TRIGGER history_conversation_title;
+DROP TRIGGER history_conversation_delete;
+DROP TRIGGER history_message_insert;
+DROP TRIGGER history_message_update;
+DROP TRIGGER history_message_delete;
+DROP TABLE chat_fts;
+CREATE VIRTUAL TABLE chat_fts USING fts5(conversationRowid UNINDEXED,messageId UNINDEXED,role UNINDEXED,title,text,tokenize='trigram');
+INSERT INTO chat_fts(rowid,conversationRowid,messageId,role,title,text)
+SELECT -rowid,rowid,NULL,NULL,coalesce(title,''),'' FROM conversations;
+INSERT INTO chat_fts(rowid,conversationRowid,messageId,role,title,text)
+SELECT rowid,(SELECT rowid FROM conversations WHERE id=messages.conversationId),id,role,'',coalesce((SELECT group_concat(json_extract(value,'$.text'),char(10)) FROM json_each(parts)),'')
+FROM messages WHERE supersededBy IS NULL;
+UPDATE conversations SET updatedAt=createdAt WHERE updatedAt IS NULL;
+CREATE TRIGGER history_conversation_insert AFTER INSERT ON conversations BEGIN
+INSERT INTO chat_fts(rowid,conversationRowid,messageId,role,title,text) VALUES(-NEW.rowid,NEW.rowid,NULL,NULL,coalesce(NEW.title,''),'');
+UPDATE conversations SET updatedAt=createdAt WHERE rowid=NEW.rowid AND updatedAt IS NULL;
+END;
+CREATE TRIGGER history_conversation_title AFTER UPDATE OF title ON conversations BEGIN
+UPDATE chat_fts SET title=coalesce(NEW.title,'') WHERE rowid=-OLD.rowid;
+END;
+CREATE TRIGGER history_conversation_delete AFTER DELETE ON conversations BEGIN
+DELETE FROM chat_fts WHERE rowid=-OLD.rowid;
+END;
+CREATE TRIGGER history_message_insert AFTER INSERT ON messages WHEN NEW.supersededBy IS NULL BEGIN
+INSERT INTO chat_fts(rowid,conversationRowid,messageId,role,title,text) VALUES(NEW.rowid,(SELECT rowid FROM conversations WHERE id=NEW.conversationId),NEW.id,NEW.role,'',
+coalesce((SELECT group_concat(json_extract(value,'$.text'),char(10)) FROM json_each(NEW.parts)),''));
+END;
+CREATE TRIGGER history_message_update AFTER UPDATE OF parts,role,supersededBy,conversationId ON messages BEGIN
+DELETE FROM chat_fts WHERE rowid=OLD.rowid;
+INSERT INTO chat_fts(rowid,conversationRowid,messageId,role,title,text)
+SELECT NEW.rowid,(SELECT rowid FROM conversations WHERE id=NEW.conversationId),NEW.id,NEW.role,'',coalesce((SELECT group_concat(json_extract(value,'$.text'),char(10)) FROM json_each(NEW.parts)),'') WHERE NEW.supersededBy IS NULL;
+END;
+CREATE TRIGGER history_message_delete AFTER DELETE ON messages BEGIN
+DELETE FROM chat_fts WHERE rowid=OLD.rowid;
+END;
+`;
