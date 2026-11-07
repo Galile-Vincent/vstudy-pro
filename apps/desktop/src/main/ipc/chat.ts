@@ -11,7 +11,7 @@ import { app } from "electron";
 import { join } from "node:path";
 import type { Store } from "../db";
 import type { SecretStore } from "../services/secrets";
-import { ChatService } from "../services/chat";
+import { ChatService, notifyHistoryChanged } from "../services/chat";
 import { createProviderRegistry, type ProviderRegistry } from "../providers";
 import type { IpcChannel } from "../../shared/ipc";
 import type { createIpcRegistrar } from "./register";
@@ -39,8 +39,11 @@ export function registerChatIpc(
   implemented.add('chats:get');
   registrar.handle('chats:get', ({conversationId}) => store.conversations.get(conversationId));
   implemented.add('chats:search'); implemented.add('chats:update');
-  registrar.handle('chats:search', input => input.query ? searchInWorker('chats:search', input, String(store.db.prepare('PRAGMA database_list').get()!.file), '', 1500) : store.chatHistory.search(input));
-  registrar.handle('chats:update', ({conversationId,patch}) => { store.chatHistory.update(conversationId,patch); return {ok:true}; });
+  registrar.handle('chats:search', input => {
+    const path = String(store.db.prepare('PRAGMA database_list').get()!.file);
+    return input.query && path ? searchInWorker('chats:search', input, path, '', 1500) : store.chatHistory.search(input);
+  });
+  registrar.handle('chats:update', ({conversationId,patch}) => { store.chatHistory.update(conversationId,patch); notifyHistoryChanged(); return {ok:true}; });
   const channels = [
     "providers:test",
     "providers:list",
@@ -80,7 +83,9 @@ export function registerChatIpc(
     const adapter = providers.get(providerId);
     const models = await adapter.listModels();
     if (!(await adapter.detect()).available || !models.some(m => m.id === modelId || m.resolvedId === modelId)) throw new Error('Model unavailable');
-    return store.conversations.setModel(conversationId,providerId,modelId);
+    const conversation = store.conversations.setModel(conversationId,providerId,modelId);
+    notifyHistoryChanged();
+    return conversation;
   });
   registrar.handle("conversations:options", async ({ conversationId, options }) => {
     const conversation = store.conversations.get(conversationId);

@@ -192,6 +192,8 @@ export type IpcResponse<C extends IpcChannel> = z.infer<
 export const documentProgressChannel = "documents:progress";
 /** Conversion progress is a validated event rather than an invoke result. */
 export const documentProgressSchema = z.object({ documentId: documentIdSchema, code:statusSchema.shape.code.optional(), params:statusSchema.shape.params.optional(), message: z.string().min(1).max(200) }).strict();
+export const historyChangedChannel = "vstudy:history-changed";
+export const historyChangedArgumentsSchema = z.tuple([]);
 export const chatEventChannel = "chat:events";
 /** Multiplex streams on a fixed event channel and filter by validated request ID. */
 export const chatEnvelopeSchema = z
