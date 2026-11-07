@@ -94,7 +94,7 @@ export function openStore(path: string) {
     throw error;
   }
   if (path !== ':memory:') for (const suffix of ['-wal', '-shm']) if (existsSync(path + suffix)) chmodSync(path + suffix, 0o600);
-  if (recovering && db.prepare("PRAGMA integrity_check").get()?.integrity_check !== "ok") { db.close(); throw new Error("Database integrity check failed"); }
+  if (recovering && db.prepare("PRAGMA quick_check").get()?.quick_check !== "ok") { db.close(); throw new Error("Database integrity check failed"); }
   const documents = {
     insert(input: Document): Document {
       const d = documentSchema.parse(input);

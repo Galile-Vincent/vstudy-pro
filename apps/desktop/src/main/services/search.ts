@@ -7,6 +7,7 @@
 import { containedPath } from "./file-paths";
 import { dirname, join } from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { Worker } from 'node:worker_threads';
 import type { DatabaseSync } from 'node:sqlite';
 import { documentIdSchema } from '../../shared/domain';
 /** Normalize Markdown text for literal FTS indexing without trusting embedded markup. */
@@ -19,6 +20,50 @@ export function validateSearchQuery(text: string): string {
     if ([...q].length < 2 || q.length > 200 || new Set(q.toLocaleLowerCase()).size < 2) throw new Error('Refine your query: use at least two distinct characters');
     return q;
 }
+
+type MaintenanceRows = {
+    rowids: { rowid: number | bigint }[];
+    missing: { id: string; markdownPath: string; activeVersion: string }[];
+};
+
+// This function is serialized into a worker; keep it independent of module bindings.
+function scanSearchIndex(db: DatabaseSync) {
+    try {
+        db.exec("INSERT INTO document_fts(document_fts) VALUES('integrity-check')");
+    }
+    catch (error) {
+        if (((error as {errcode?: number}).errcode ?? 0) % 256 !== 11) throw error;
+        db.exec("DROP TABLE document_fts; CREATE VIRTUAL TABLE document_fts USING fts5(documentId UNINDEXED,title,filename,content,tokenize='trigram')");
+    }
+    db.exec('DELETE FROM document_fts WHERE documentId NOT IN(SELECT id FROM documents WHERE deletedAt IS NULL)');
+    const rowids = db.prepare('SELECT rowid FROM document_fts').all();
+    const missing = db.prepare("WITH indexed AS MATERIALIZED (SELECT documentId,count(*) copies,max(length(content)) chars FROM document_fts GROUP BY documentId) SELECT d.id,d.markdownPath,d.activeVersion FROM documents d LEFT JOIN indexed f ON f.documentId=d.id WHERE d.status='ready' AND d.deletedAt IS NULL AND (coalesce(f.copies,0)!=1)").all();
+    return { rowids, missing };
+}
+
+async function scanInWorker(path: string): Promise<MaintenanceRows> {
+    return new Promise((resolve, reject) => {
+        const worker = new Worker(`
+            const { parentPort, workerData } = require('node:worker_threads');
+            const { DatabaseSync } = require('node:sqlite');
+            const db = new DatabaseSync(workerData);
+            try {
+                db.exec('PRAGMA busy_timeout=5000');
+                const result = (${scanSearchIndex.toString()})(db);
+                db.close();
+                parentPort.postMessage(result);
+            } catch (error) { db.close(); throw error; }
+        `, { eval: true, workerData: path });
+        let result: MaintenanceRows | undefined;
+        worker.once('message', value => { result = value; });
+        worker.once('error', reject);
+        worker.once('exit', code => {
+            if (code === 0 && result) resolve(result);
+            else reject(new Error('Search maintenance worker stopped'));
+        });
+    });
+}
+
 /** Index and search literal document text with bounded result pagination. */
 export class SearchService {
     constructor(private readonly db: DatabaseSync, private readonly root?: string) { }
@@ -39,14 +84,9 @@ export class SearchService {
         }
     }
     async rebuild(): Promise<void> {
-        try {
-            this.db.exec("INSERT INTO document_fts(document_fts) VALUES('integrity-check')");
-        }
-        catch {
-            this.db.exec("DROP TABLE document_fts; CREATE VIRTUAL TABLE document_fts USING fts5(documentId UNINDEXED,title,filename,content,tokenize='trigram')");
-        }
-        this.db.exec('DELETE FROM document_fts WHERE documentId NOT IN(SELECT id FROM documents WHERE deletedAt IS NULL)');
-        for (const {rowid} of this.db.prepare('SELECT rowid FROM document_fts').all()) {
+        const path = String(this.db.prepare('PRAGMA database_list').get()!.file);
+        const { rowids, missing } = path ? await scanInWorker(path) : scanSearchIndex(this.db) as MaintenanceRows;
+        for (const {rowid} of rowids) {
             const row = this.db.prepare('SELECT title,filename,substr(content,1,1000000) content,length(content) chars FROM document_fts WHERE rowid=?').get(rowid!);
             if (!row) continue;
             const title = indexedText(String(row.title)), filename = indexedText(String(row.filename)), content = indexedText(String(row.content));
@@ -54,7 +94,6 @@ export class SearchService {
                 this.db.prepare('UPDATE document_fts SET title=?,filename=?,content=? WHERE rowid=?').run(title,filename,content,rowid!);
             await new Promise<void>(resolve=>setImmediate(resolve));
         }
-        const missing = this.db.prepare("WITH indexed AS MATERIALIZED (SELECT documentId,count(*) copies,max(length(content)) chars FROM document_fts GROUP BY documentId) SELECT d.id,d.markdownPath,d.activeVersion FROM documents d LEFT JOIN indexed f ON f.documentId=d.id WHERE d.status='ready' AND d.deletedAt IS NULL AND (coalesce(f.copies,0)!=1)").all();
         for (const d of missing) {
             try {
                 const path = d.activeVersion==='ai' ? join(dirname(String(d.markdownPath)),'content.ai.md') : String(d.markdownPath);

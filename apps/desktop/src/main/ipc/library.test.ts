@@ -4,6 +4,9 @@
  * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
  * @packageDocumentation
  */
+import { EventEmitter } from 'node:events';
+import { SearchService } from '../services/search';
+import { app } from 'electron';
 import { it, expect, vi } from 'vitest';
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -16,7 +19,7 @@ import { registerLibraryIpc } from './library';
 import { libraryContract } from '../../shared/library';
 import type { IpcChannel } from '../../shared/ipc';
 const mocked = vi.hoisted(() => ({ root: '', save: vi.fn(async ():Promise<{canceled:boolean;filePath?:string}> => ({ canceled: true })) }));
-vi.mock('electron', () => ({ BrowserWindow:{fromWebContents:()=>({id:1,isDestroyed:()=>false})}, app: { getPath: () => mocked.root }, dialog: { showSaveDialog: mocked.save }, shell: { showItemInFolder: vi.fn(), openPath: vi.fn(async () => '') } }));
+vi.mock('electron', () => ({ BrowserWindow:{fromWebContents:()=>({id:1,isDestroyed:()=>false})}, app: Object.assign(new EventEmitter(), { getPath: () => mocked.root }), dialog: { showSaveDialog: mocked.save }, shell: { showItemInFolder: vi.fn(), openPath: vi.fn(async () => '') } }));
 it('registers every library contract through strict validation and sender checks', async () => { mocked.root = mkdtempSync(join(tmpdir(), 'library-ipc-')); mkdirSync(join(mocked.root, 'library')); const store = openStore(':memory:'); const handlers = new Map<string, (event: IpcMainInvokeEvent, r: unknown) => unknown>(); let trusted = true; const registrar = createIpcRegistrar({ handle: (c, h) => { handlers.set(c, h); }, removeHandler: () => { } }, () => trusted); const implemented = new Set<IpcChannel>(); const dispose = registerLibraryIpc(registrar, store, implemented); const invoke = (c: string, r: unknown) => handlers.get(c)!({ sender: { id: 1 } } as IpcMainInvokeEvent, r); try {
     expect(implemented.size).toBe(Object.keys(libraryContract).length);
     await expect(invoke('library:tree', {})).resolves.toEqual([]);
@@ -61,4 +64,43 @@ it.each(['library:exportOriginal','library:exportMarkdown'])('parents %s and set
     expect(await handlers.get(channel)!({sender:{id:7}} as IpcMainInvokeEvent,{documentId:document.id})).toEqual({saved:false});
     expect(mocked.save).toHaveBeenCalledWith(expect.objectContaining({id:1}),expect.objectContaining({defaultPath:'notes.md'}));
   } finally {dispose();registrar.dispose();store.close();rmSync(mocked.root,{recursive:true,force:true});}
+});
+
+
+it('creates and shows the window before starting maintenance, and cancels an unshown startup', async () => {
+  mocked.root = mkdtempSync(join(tmpdir(), 'library-startup-'));
+  const store = openStore(':memory:');
+  const order: string[] = [];
+  const rebuild = vi.spyOn(SearchService.prototype, 'rebuild').mockImplementation(async () => { order.push('maintenance'); });
+  const registrar = createIpcRegistrar({handle:()=>{},removeHandler:()=>{}},()=>true);
+  const dispose = registerLibraryIpc(registrar,store,new Set());
+  try {
+    expect(rebuild).not.toHaveBeenCalled();
+    const window = new EventEmitter();
+    order.push('window-created');
+    app.emit('browser-window-created', {}, window);
+    expect(rebuild).not.toHaveBeenCalled();
+    order.push('window-shown'); window.emit('show');
+    expect(rebuild).not.toHaveBeenCalled();
+    await new Promise<void>(resolve=>setImmediate(resolve));
+    await dispose.waitForIdle();
+    expect(order).toEqual(['window-created','window-shown','maintenance']);
+    console.log('startup-order: ' + order.join(' -> '));
+    dispose();
+    const cancelled = registerLibraryIpc(registrar,store,new Set());
+    cancelled();
+    app.emit('browser-window-created', {}, new EventEmitter());
+    await new Promise<void>(resolve=>setImmediate(resolve));
+    expect(rebuild).toHaveBeenCalledTimes(1);
+    const failureLog = vi.spyOn(console,'error').mockImplementation(()=>{});
+    rebuild.mockRejectedValueOnce(new Error('unavailable'));
+    const failed = registerLibraryIpc(registrar,store,new Set());
+    const nextWindow = new EventEmitter();
+    app.emit('browser-window-created',{},nextWindow);
+    nextWindow.emit('show');
+    try {
+      await failed.waitForIdle();
+      expect(failureLog).toHaveBeenCalledWith('Search rebuild deferred until next startup');
+    } finally { failed(); failureLog.mockRestore(); }
+  } finally { dispose(); rebuild.mockRestore(); registrar.dispose(); store.close(); rmSync(mocked.root,{recursive:true,force:true}); }
 });
