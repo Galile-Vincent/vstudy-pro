@@ -35,3 +35,27 @@ it('cuts the announced excerpt on code points so no lone surrogate precedes the 
  expect(announcementExcerpt('短'.repeat(240))).toBe('短'.repeat(240));
  expect(announcementExcerpt('短'.repeat(241))).toBe('短'.repeat(240)+'…');
 });
+
+const graphemes=(text:string)=>Array.from(new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(text),part=>part.segment);
+it.each([
+ ['a ZWJ family emoji at the boundary','👨‍👩‍👧','a'.repeat(239)],
+ ['a flag at the boundary','🇹🇼','a'.repeat(239)],
+ ['a base letter with a combining mark at the boundary','e\u0301','a'.repeat(239)],
+])('keeps %s whole or drops it entirely',(_name,cluster,prefix)=>{
+ const excerpt=announcementExcerpt(prefix+cluster+cluster+'tail');
+ expect(excerpt.endsWith('…')).toBe(true);
+ const body=graphemes(excerpt.slice(0,-1));
+ expect(body.length).toBeLessThanOrEqual(240);
+ expect(body.slice(239)).toEqual([cluster]);
+ expect(excerpt).not.toMatch(/\u200D…$/);
+});
+it('does not leave a dangling joiner or half a flag when the cut falls inside a cluster',()=>{
+ expect(announcementExcerpt('a'.repeat(239)+'👨‍👩‍👧tail')).toBe('a'.repeat(239)+'👨‍👩‍👧…');
+ expect(announcementExcerpt('a'.repeat(239)+'🇹🇼tail')).toBe('a'.repeat(239)+'🇹🇼…');
+ expect(announcementExcerpt('a'.repeat(239)+'e\u0301tail')).toBe('a'.repeat(239)+'e\u0301…');
+});
+it('leaves plain ASCII and 300 CJK characters cut at 240 with the ellipsis cue',()=>{
+ expect(announcementExcerpt('word '.repeat(100))).toBe(('word '.repeat(48)).trim()+'…');
+ expect(announcementExcerpt('short answer')).toBe('short answer');
+ expect(announcementExcerpt('字'.repeat(300))).toBe('字'.repeat(240)+'…');
+});
