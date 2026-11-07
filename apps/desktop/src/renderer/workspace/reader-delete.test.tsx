@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { Workspace } from './index';
 import { defaultSettings } from '../../shared';
@@ -37,6 +37,31 @@ it('soft-deletes from the reader without a native confirm and offers Undo',async
   fireEvent.click(await screen.findByRole('button',{name:tr('library:undo')}));
   await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:restore',{documentId:doc.id}));
   await waitFor(()=>expect(state.navigate).toHaveBeenLastCalledWith({view:'workspace',documentId:doc.id}));
+});
+it('moves focus to Undo after Delete and back to the reader after Undo',async()=>{
+  setup();
+  render(<Workspace/>);await screen.findByText('Readable document');
+  const del=screen.getByRole('button',{name:tr('common:delete_document')});del.focus();
+  fireEvent.click(del);
+  const undo=await screen.findByRole('button',{name:tr('library:undo')});
+  await waitFor(()=>expect(document.activeElement).toBe(undo));
+  fireEvent.click(undo);
+  await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:restore',{documentId:doc.id}));
+  await waitFor(()=>expect(document.activeElement).toBe(document.getElementById('reading-content')));
+});
+it('removes the reader Undo notice after 30 seconds like the library page',async()=>{
+  setup();
+  vi.useFakeTimers({toFake:['setTimeout','clearTimeout'],shouldAdvanceTime:true});
+  try{
+    render(<Workspace/>);await screen.findByText('Readable document');
+    fireEvent.click(screen.getByRole('button',{name:tr('common:delete_document')}));
+    await screen.findByRole('button',{name:tr('library:undo')});
+    await act(async()=>{vi.advanceTimersByTime(29000)});
+    expect(screen.queryByRole('button',{name:tr('library:undo')})).not.toBeNull();
+    await act(async()=>{vi.advanceTimersByTime(2000)});
+    expect(screen.queryByRole('button',{name:tr('library:undo')})).toBeNull();
+    expect(screen.queryByText(tr('library:deleted',{count:1,formatted:'1'}))).toBeNull();
+  }finally{vi.useRealTimers()}
 });
 it('does not repeat the AI re-parse control inside the reading pane',async()=>{
   setup();
