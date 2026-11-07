@@ -133,7 +133,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
       <div className="onboarding-top"><p role="status">{tr('onboarding:progress', { current: index + 1, total: steps.length })}</p><Button variant="ghost" disabled={busy} onClick={() => void exit(false)}>{tr('onboarding:later')}</Button></div>
       <div className="onboarding-progress" aria-hidden="true">{steps.map(item => <span key={item} data-current={item === step}/>)}</div>
       <DialogTitle asChild><h1 id="onboarding-title" ref={heading} tabIndex={-1}>{tr(`onboarding:step_${step}`)}</h1></DialogTitle>
-      {step !== 'welcome' && <p id="onboarding-intro" className="onboarding-intro">{tr(`onboarding:step_${step}_body`)}</p>}
+      <p id="onboarding-intro" className="onboarding-intro">{tr(step === 'welcome' ? 'onboarding:welcome_body' : `onboarding:step_${step}_body`)}</p>
       <div className="onboarding-content" key={step} tabIndex={0} role="region" aria-labelledby="onboarding-title">
         {step === 'welcome' && <ProductPreview/>}
         {step === 'language' && <>
