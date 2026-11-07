@@ -4,6 +4,9 @@ import { startMemory } from '../review/memory';
 import { registerReviewGenerateIpc } from './review-generate';
 import { registerReviewIpc } from "./review";
 import { reviewWorkers } from "../review/workers";
+import { analytics } from '../analytics/service';
+import { registerNewsletterIpc } from './newsletter';
+import { registerAnalyticsIpc, type NewsletterConsentHook } from './analytics';
 /**
  * Register validated index IPC operations and delegate privileged work to main services.
  * Owned by main/ipc.
@@ -45,6 +48,7 @@ import { registerChatIpc } from "./chat";
 
 /** App-owned transport and packaged paths are injected only by the composition root. */
 export interface AppIpcOptions {
+  newsletterConsent?:NewsletterConsentHook;
   moodleRequest?:typeof fetch;
   mcpPaths?:{peerHelper?:string;serverBin:string};
   mcpTransport?:McpTransportFactory;
@@ -78,6 +82,9 @@ export function registerIpc(
     "secrets:has",
     "secrets:delete",
   ]);
+  const telemetry=analytics();
+  registerNewsletterIpc(registrar, implemented);
+  if (telemetry) registerAnalyticsIpc(registrar,implemented,telemetry,options.newsletterConsent);
   registrar.handle("shell:openExternal", async ({ url }, event) => {
     const target = new URL(url);
     const result = await showAttachedMessage({ type: 'question', message: tr("settings:external",{target:target.hostname || target.protocol}), detail: target.protocol === 'mailto:' ? tr('settings:mail_detail',{address:decodeURIComponent(target.pathname),subject:target.searchParams.get('subject') ?? '',length:(target.searchParams.get('body') ?? '').length,url}) : url, buttons: [tr('common:cancel'), tr('common:open')], defaultId: 0, cancelId: 0 }, event.sender);

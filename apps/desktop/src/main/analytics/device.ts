@@ -1,0 +1,5 @@
+import { deviceSchema } from './schema';
+export function deviceProperties(input:{platform:string;os:string;arch:string;version:string;language:string;memory:number;cores:number;width:number;scale:number;electron:string;chrome:string}) {
+  const bucket = (value:number,steps:number[]) => steps.find(n=>value<=n);
+  return deviceSchema.parse({platform:input.platform === 'darwin' ? 'macos' : input.platform === 'win32' ? 'windows' : 'linux',os_version:input.os.match(/^\d+(?:\.\d+)?/)?.[0] ?? '0',cpu_arch:input.arch,app_version:input.version,app_language:input.language,memory_bucket:input.memory<=4 ? '<=4' : String(bucket(input.memory,[8,16,32]) ?? '>32'),cpu_cores_bucket:input.cores<=2 ? '<=2' : String(bucket(input.cores,[4,8,16]) ?? '>16'),display_size_bucket:input.width<1280 ? 'small' : input.width<1920 ? 'medium' : 'large',display_scale_bucket:input.scale<=1 ? '1' : input.scale<=1.5 ? '1.5' : input.scale<=2 ? '2' : '>2',electron_major:Number(input.electron.split('.')[0]),chrome_major:Number(input.chrome.split('.')[0])});
+}

@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { z } from 'zod';
 import { documentIdSchema } from '../../shared/domain';
 
-export const steps = ['welcome', 'language', 'appearance', 'goal', 'ai', 'start'] as const;
+export const steps = ['welcome', 'language', 'appearance', 'acquisition', 'privacy', 'goal', 'ai', 'start'] as const;
 export const goals = ['school', 'documents', 'sample'] as const;
 const progressSchema = z.object({
   version: z.literal(1),

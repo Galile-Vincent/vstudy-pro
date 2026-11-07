@@ -1,0 +1,17 @@
+name = "vstudy-newsletter"
+main = "src/index.ts"
+compatibility_date = "2026-11-06"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vstudy-newsletter"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Disable automatic URL/header traces: URLs contain bearer tokens.
+[observability]
+enabled = false
+# Owner sets all five values via wrangler secret put; no values belong here.

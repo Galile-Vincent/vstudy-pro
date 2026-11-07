@@ -161,7 +161,7 @@ reviewWorkers: ReviewWorkerRegistry; // inert singleton, W2/W3 register services
 
 Suspension reasons are independent. Storage maintenance drains workers, then resumes except after staged restore. Erase keeps privacy suspension until explicit re-enable. Shutdown and delete-all dispose workers before store closure.
 
-`main/db/study-migration.ts` exports `studyMigration:string` as migration 22. Migrations 1-21 are unchanged. `main/db/study-validation.ts` exports `validateStudyData(db:DatabaseSync):void`, a read-only validator invoked after staged restore migration.
+`main/db/study-migration.ts` exports `studyMigration:string` as migration 23. Migrations 1-22 are unchanged. `main/db/study-validation.ts` exports `validateStudyData(db:DatabaseSync):void`, a read-only validator invoked after staged restore migration.
 
 `shared/review-artifacts.ts` exports strict bounded schemas `studyScopeSchema`, `studySourceSnapshotSchema`, `studyResolvedScopeSchema`, `studyTestItemSchema`, `studyTestSchema`, `studyAnswersSchema`, and types `StudyResolvedScope`, `StudyTest`. W3 must use these persisted payload contracts. Ready artifacts retain source snapshots after document unlink/deletion; retries and new generation must re-resolve live source ownership.
 

@@ -161,5 +161,9 @@
   "example_chat_title": "Exam preparation notes",
   "recorded_video": "Watch recorded steps",
   "recorded_body": "Recorded steps from the real app, with an English interface. Choose subtitles in the player. The school and AI responses are test examples, and no real account is used.",
-  "record_confirm": "Confirm the school before continuing to sign in. This example uses a test school."
+  "record_confirm": "Confirm the school before continuing to sign in. This example uses a test school.",
+  "step_acquisition": "How did you hear about VStudy Pro?",
+  "step_acquisition_body": "Optional. You can skip this question.",
+  "step_privacy": "Analytics",
+  "step_privacy_body": "Your choice. Both options let you use every study feature."
 }

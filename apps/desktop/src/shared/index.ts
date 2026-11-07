@@ -8,3 +8,4 @@ export * from "./domain";
 export * from "./ipc";
 
 export * from './review-generate';
+export type { AnalyticsState, AcquisitionSource, Onboarding } from "./analytics";

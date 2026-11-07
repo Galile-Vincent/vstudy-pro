@@ -1,4 +1,6 @@
 import { reviewGenerateIpc, type ReviewProgress } from './review-generate';
+import { newsletterContract } from './newsletter';
+import { analyticsContract } from './analytics';
 /**
  * Define the validated request, response, and event contracts exposed by preload.
  * Owned by shared.
@@ -46,6 +48,8 @@ export const ipcContract = {
   'app:reportError': { request: z.object({phase:z.enum(['render','bootstrap']),code:z.string().max(100),componentStack:z.string().max(4000).optional()}).strict(), response:ack },
   ...reviewIpc,
   ...reviewGenerateIpc,
+  ...analyticsContract,
+  ...newsletterContract,
   ...mcpIpc,
   ...mcpNavigationIpc,
   ...aiCliContract,

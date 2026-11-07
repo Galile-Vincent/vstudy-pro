@@ -8,7 +8,7 @@ function fixture() {
   for (const migration of migrations.filter(m => m.version <= 21)) db.exec(migration.sql);
   db.prepare("INSERT INTO conversations(id,scope,providerId,modelId,createdAt) VALUES(?,'general','p','m',?)").run('chat',at);
   for (const [id,role] of [['user','user'],['assistant','assistant']]) db.prepare('INSERT INTO messages(id,conversationId,role,parts,createdAt) VALUES(?,?,?,?,?)').run(id!,'chat',role!,'[]',at);
-  const migration=migrations.find(m=>m.version===22); expect(migration).toBeDefined(); db.exec(migration!.sql);
+  const migration=migrations.find(m=>m.version===23); expect(migration).toBeDefined(); db.exec(migration!.sql);
   db.prepare('INSERT INTO study_courses(id,title,createdAt) VALUES(?,?,?)').run('course','Calculus',at);
   db.prepare('INSERT INTO study_courses(id,title,createdAt) VALUES(?,?,?)').run('other','Physics',at);
   db.prepare("INSERT INTO study_units(id,courseId,kind,ordinal,title,sourceKey) VALUES('unit','course','manual',0,'Derivatives','unit')").run();
@@ -20,7 +20,7 @@ function job(db:DatabaseSync,id='job',user='user',assistant='assistant',conversa
 function observation(db:DatabaseSync,id:string,key:string|null,label:string|null,course='course',unit:string|null=null) {
   return db.prepare("INSERT INTO study_observations(id,jobId,courseId,unitId,conceptKey,proposedLabel,errorType,signal,evidenceQuote,confidence,createdAt) VALUES(?,'job',?,?,?,?,'gap','wrong','wrong attempt',0.9,?)").run(id,course,unit,key,label,at);
 }
-describe('study migration 22',()=>{
+describe('study migration 23',()=>{
   it('upgrades populated v21 without losing chat data and has sound integrity',()=>{
     const db=fixture();try { expect(db.prepare('SELECT count(*) n FROM messages').get()!.n).toBe(2); expect(db.prepare('PRAGMA integrity_check').get()!.integrity_check).toBe('ok');expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]); } finally {db.close();}
   });

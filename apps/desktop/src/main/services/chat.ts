@@ -1,6 +1,7 @@
 import { MemoryRepository } from '../review/memory-repository';
 import { wakeMemory } from '../review/memory';
 import { log } from '../logging';
+import { analytics } from '../analytics/service';
 /**
  * Own request acceptance, stream lifetime, cancellation, and transactional chat persistence.
  * Owned by main/services.
@@ -100,19 +101,22 @@ export class ChatService {
         throw new Error("Document not found");
     }
     this.providers.get(input.providerId);
-    return this.store.conversations.insert(
+    const created = this.store.conversations.insert(
       conversationSchema.parse({
         ...input,
         id: randomUUID(),
         createdAt: new Date().toISOString(),
       }),
     );
+    analytics()?.track('conversation_started',{conversation_id:created.id,ai_feature:'chat'});
+    return created;
   }
   deleteConversation(id: Conversation["id"]): void {
     for (const entry of this.active.values())
       if (entry.request.conversationId === id)
         this.abort(entry.request.requestId, entry.owner);
     this.store.conversations.delete(id);
+    analytics()?.track('conversation_cleared');
   }
   /** Validate options and ownership before accepting exactly one producer for the conversation. */
   start(request: ChatRequest, owner: ChatOwner): void | Promise<void> {
@@ -186,6 +190,10 @@ export class ChatService {
       text: "",
       onDestroyed: () => this.abort(request.requestId, owner),
     };
+    const turn = history.filter(message=>message.role === 'user').length+1;
+    if (regenerating) analytics()?.track('question_regenerated');
+    else analytics()?.track('question_asked',{question_category:request.scope === 'course' && request.materials?.mode === 'quiz' ? 'exam_practice' : request.scope === 'course' && request.materials?.mode === 'summary' ? 'summarization' : request.scope !== 'course' && request.scope !== 'general' && request.selection ? 'concept_explanation' : 'unknown',subject_category:'unknown',question_source:turn>1 ? 'follow_up' : request.scope !== 'course' && request.scope !== 'general' && request.selection ? 'selected_document_text' : request.scope === 'general' ? 'typed' : 'document_chat',question_length:[...request.userMessage].length,conversation_turn:turn,is_follow_up:turn>1,has_document_context:request.scope !== 'general'});
+    if (!regenerating && turn>1) analytics()?.track('conversation_continued',{conversation_turn:turn,is_follow_up:true});
     this.active.set(request.requestId, entry);
     owner.once("destroyed", entry.onDestroyed);
     // Start after the invoke acknowledgement so subscribers can process acceptance first.

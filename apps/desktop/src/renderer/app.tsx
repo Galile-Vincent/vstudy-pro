@@ -1,5 +1,7 @@
 import { SurfaceErrorBoundary } from './components/surface-error-boundary';
 import { ReviewView } from "./review";
+import { ExistingAnalyticsPrompt } from './analytics-ui';
+import { track } from './analytics';
 import { HistoryView, HistoryFinder } from "./history";
 import { lazy, Suspense, useEffect, useMemo, useState, type ComponentType } from "react";
 let loadedWelcome: ComponentType | undefined;
@@ -36,6 +38,10 @@ function GlobalSettings() {
 }
 function Views() {
   const { route } = useNavigate();
+  useEffect(() => {
+    const screen = ({library:'library',workspace:'document',courses:'moodle',history:'chat'} as const)[route.view as 'library' | 'workspace' | 'courses' | 'history'];
+    if (screen) track('screen_viewed', {screen_name:screen});
+  }, [route.view]);
   const Tour = useMemo(() => route.view === 'welcome' ? loadedWelcome ?? WelcomeView : WelcomeView, [route.view]);
   useEffect(() => {
     // Parse the optional tour during idle, outside the click's frame budget.
@@ -56,7 +62,7 @@ export function App() {
   return (
     <AgentsProvider>
       <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
-        <ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/><AgentConsent /><AgentNavigation />
+        <ExistingAnalyticsPrompt/><ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/><AgentConsent /><AgentNavigation />
       </AppShell>
     </AgentsProvider>
   );

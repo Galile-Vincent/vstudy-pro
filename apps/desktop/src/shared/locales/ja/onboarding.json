@@ -161,5 +161,9 @@
   "example_chat_title": "試験の準備ノート",
   "recorded_video": "実際の画面で手順を見る",
   "recorded_body": "実際のアプリの英語画面を使った手順です。プレーヤーで字幕を選べます。学校と AI の回答はテスト用の例で、実際のアカウントは使っていません。",
-  "record_confirm": "接続先の学校を確認してからログインします。ここではテスト用の学校を使っています。"
+  "record_confirm": "接続先の学校を確認してからログインします。ここではテスト用の学校を使っています。",
+  "step_acquisition": "VStudy Pro をどこで知りましたか？",
+  "step_acquisition_body": "任意です。回答せずに続けられます。",
+  "step_privacy": "利用状況の分析",
+  "step_privacy_body": "どちらを選んでも、すべての学習機能を利用できます。"
 }

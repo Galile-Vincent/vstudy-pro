@@ -15,6 +15,7 @@ import type { ProviderAdapter } from "./index";
 import { parseStream } from "./parsers";
 import { presentationTool } from "../../shared/presentation";
 const errorMessages = {
+  timeout: 'Provider request timed out. Try again.',
   'auth failed': 'Authentication failed. Check the API key in Settings.',
   'rate limited': 'Provider rate limited. Try again shortly.',
   network: 'Network error. Check your connection and try again.',
@@ -31,7 +32,7 @@ export class ProviderError extends Error {
 export function httpError(status: number): ProviderError {
   if (status === 401 || status === 403) return new ProviderError('auth failed');
   if ([429, 529].includes(status)) return new ProviderError('rate limited');
-  if (status === 408) return new ProviderError('network', 'Provider request timed out (HTTP 408). Try again.');
+  if (status === 408) return new ProviderError('timeout', 'Provider request timed out (HTTP 408). Try again.');
   if ([409, 425].includes(status)) return new ProviderError('server error', `Provider temporarily unavailable (HTTP ${status}). Try again.`);
   if (status >= 500) return new ProviderError('server error', `Provider server error (HTTP ${status}). Try again.`);
   return new ProviderError('bad request');
@@ -176,7 +177,7 @@ export function createApiAdapter(
             ] : request.prompt }],
           }),
         },
-      ).catch(() => { throw new ProviderError("network"); });
+      ).catch(error => { throw new ProviderError(error instanceof Error && error.name === 'TimeoutError' ? 'timeout' : 'network'); });
       if (!response.ok || !response.body) {
         await response.body?.cancel();
         throw httpError(response.status);

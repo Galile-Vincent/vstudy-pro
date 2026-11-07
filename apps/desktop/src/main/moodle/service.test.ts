@@ -14,6 +14,8 @@ import { openStore, type Store } from '../db';
 import { createSecretStore, moodleSecretId } from '../services/secrets';
 import { DocumentService } from '../services/documents';
 import { MoodleRepository } from './repository';
+import { AnalyticsService, setAnalytics } from '../analytics/service';
+import { MoodleAuthError } from './auth';
 import { MoodleService } from './service';
 import { importMoodleFile, authenticatedFileUrl } from './files';
 import { calendarText, startReminders } from './reminders';
@@ -24,7 +26,7 @@ import { plannerTaskDone } from '../../shared/planner-policy';
 
 const stores: Store[] = [];
 const directories: string[] = [];
-afterEach(() => { vi.useRealTimers(); for (const store of stores.splice(0)) store.close(); for (const path of directories.splice(0)) rmSync(path,{force:true,recursive:true}); });
+afterEach(() => { setAnalytics(undefined);vi.useRealTimers(); for (const store of stores.splice(0)) store.close(); for (const path of directories.splice(0)) rmSync(path,{force:true,recursive:true}); });
 async function setup() {
   const directory = mkdtempSync(join(tmpdir(),'moodle-test-')); directories.push(directory);
   const store = openStore(':memory:'); stores.push(store);
@@ -707,4 +709,30 @@ it('routes a selected alternate identity provider through SSO instead of the pas
     expect(used).toEqual([0]);
     expect(request.mock.calls.some(call => String(call[0]).includes('/login/token.php'))).toBe(false);
   } finally {await service.dispose();}
+});
+
+it('hydrates a verified school from restored connections and sync without reconnecting',async()=>{
+  const {store,repository,secrets,request}=await setup();
+  const analytics=new AnalyticsService(store.db,{enabled:true,host:'https://example.org',key:'test'},{app_version:'0.3.0',platform:'macos'});
+  setAnalytics(analytics);const school=vi.spyOn(analytics,'school');
+  const service=new MoodleService(repository,secrets,{login:async()=>{throw new Error('must not reconnect');}},request);
+  expect(school).toHaveBeenCalledWith({id:'cycu',name:'Chung Yuan Christian University'});
+  school.mockClear();await service.sync(account.id);
+  expect(school).toHaveBeenCalledWith({id:'cycu',name:'Chung Yuan Christian University'});
+  expect(JSON.parse(String(store.db.prepare("SELECT value FROM analytics_state WHERE key='school_profile'").get()!.value))).toMatchObject({moodle_connected:true,school_id:'cycu'});
+  await service.dispose();
+});
+it('reports cancelled login separately and never reports success followed by failure',async()=>{
+  const {store,repository,secrets,request}=await setup();
+  const analytics=new AnalyticsService(store.db,null,{app_version:'0.3.0',platform:'macos'});setAnalytics(analytics);
+  const track=vi.spyOn(analytics,'track');
+  const service=new MoodleService(repository,secrets,{login:async()=>{throw new MoodleAuthError('cancelled');}},request);
+  await expect(service.connect({siteUrl:account.siteUrl,storage:'session'})).rejects.toThrow();
+  expect(track.mock.calls.map(c=>c[0])).toEqual(['moodle_connection_started','moodle_connection_cancelled']);
+  track.mockClear();
+  const failed=new MoodleService(repository,secrets,{login:async(_site,_provider,accept)=>accept({token:'token'})},request);
+  vi.spyOn(repository,'saveCapabilities').mockImplementation(()=>{throw new Error('storage failed');});
+  await expect(failed.connect({siteUrl:account.siteUrl,storage:'session'})).rejects.toThrow();
+  expect(track.mock.calls.map(c=>c[0])).toEqual(['moodle_connection_started','moodle_connection_failed']);
+  await service.dispose();await failed.dispose();
 });

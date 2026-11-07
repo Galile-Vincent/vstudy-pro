@@ -24,11 +24,11 @@ async function events(kind: 'claude' | 'codex') {
 }
 it('parses real Claude 2.1.316 final result once with reported cost and cache totals',async () => {
   const result = await events('claude');
-  expect(result.filter(e=>e.type==='usage')).toEqual([{type:'usage',usage:{inputTokens:3230,outputTokens:21,cacheReadTokens:649,cacheWriteTokens:1399,reasoningTokens:0,costUsd:0.0058314000000000005,costSource:'reported'}}]);
+  expect(result.filter(e=>e.type==='usage')).toEqual([{type:'usage',usage:{reportedTokens:{input:3230,output:21},inputTokens:3230,outputTokens:21,cacheReadTokens:649,cacheWriteTokens:1399,reasoningTokens:0,costUsd:0.0058314000000000005,costSource:'reported'}}]);
   expect(result.at(-1)).toEqual({type:'done'});
 });
 it('parses real Codex 0.166.0 turn.completed usage',async () => {
-  expect((await events('codex')).filter(e=>e.type==='usage')).toEqual([{type:'usage',usage:{inputTokens:23458,outputTokens:5,cacheReadTokens:12288,cacheWriteTokens:0,reasoningTokens:0,costSource:'unknown'}}]);
+  expect((await events('codex')).filter(e=>e.type==='usage')).toEqual([{type:'usage',usage:{reportedTokens:{input:23458,output:5},inputTokens:23458,outputTokens:5,cacheReadTokens:12288,cacheWriteTokens:0,reasoningTokens:0,costSource:'unknown'}}]);
 });
 it('supports token_count primary and secondary rate limits without double counting cumulative totals', () => {
   const fixture = JSON.stringify({type:'event_msg',payload:{type:'token_count',info:{total_token_usage:{input_tokens:1200,output_tokens:340}},rate_limits:{primary:{used_percent:62,window_minutes:300,resets_at:1793715000},secondary:{used_percent:18,window_minutes:10080,resets_at:1794027600}}}});
@@ -73,13 +73,13 @@ it('warns at literal budget boundaries and predicts exceeding either cap', () =>
 it('merges Anthropic start/delta counters and emits one usage before the terminal frame',async()=>{
   async function* chunks(){yield 'data: {"type":"message_start","message":{"usage":{"input_tokens":100,"cache_read_input_tokens":20,"cache_creation_input_tokens":10,"output_tokens":1}}}\n\n';yield 'data: {"type":"message_delta","usage":{"output_tokens":40}}\n\ndata: {"type":"message_stop"}\n\n';}
   const snapshots: unknown[]=[];const result=[];for await(const event of parseStream(chunks(),'anthropic',true,u=>snapshots.push(u)))result.push(event);
-  expect(result).toEqual([{type:'usage',usage:{inputTokens:130,outputTokens:40,cacheReadTokens:20,cacheWriteTokens:10,costSource:'unknown'}},{type:'done'}]);
+  expect(result).toEqual([{type:'usage',usage:{reportedTokens:{input:130,output:40},inputTokens:130,outputTokens:40,cacheReadTokens:20,cacheWriteTokens:10,costSource:'unknown'}},{type:'done'}]);
   expect(snapshots.at(-1)).toMatchObject({inputTokens:130,outputTokens:40});
 });
 it('reads OpenAI usage-only chunks, cache details and reasoning details',async()=>{
   async function* chunks(){yield 'data: {"choices":[],"usage":{"prompt_tokens":1200,"completion_tokens":340,"prompt_tokens_details":{"cached_tokens":200},"completion_tokens_details":{"reasoning_tokens":40}}}\n\ndata: [DONE]\n\n';}
   const result=[];for await(const event of parseStream(chunks(),'openai',true))result.push(event);
-  expect(result).toEqual([{type:'usage',usage:{inputTokens:1200,outputTokens:340,cacheReadTokens:200,reasoningTokens:40,costSource:'unknown'}},{type:'done'}]);
+  expect(result).toEqual([{type:'usage',usage:{reportedTokens:{input:1200,output:340},inputTokens:1200,outputTokens:340,cacheReadTokens:200,reasoningTokens:40,costSource:'unknown'}},{type:'done'}]);
 });
 it('dashboard aggregates all-time usage and zero-fills calendar days without counting cache or reasoning twice',()=>{
   const store=openStore(':memory:');
@@ -108,5 +108,5 @@ it('prices verified Luna, Astra and Terra list rates and Claude aliases literall
 });
 
 it('parses Claude stream-json rate_limit_event utilization and reset',()=>{
-  expect(extractUsage('{"type":"rate_limit_event","rate_limit_info":{"rateLimitType":"five_hour","utilization":0.62,"resetsAt":1793715000}}','claude')).toEqual({inputTokens:0,outputTokens:0,costSource:'unknown',rateLimit:{label:'five_hour',usedPercent:62,resetsAt:'2026-11-03T14:10:00.000Z'}});
+  expect(extractUsage('{"type":"rate_limit_event","rate_limit_info":{"rateLimitType":"five_hour","utilization":0.62,"resetsAt":1793715000}}','claude')).toEqual({reportedTokens:{input:null,output:null},inputTokens:0,outputTokens:0,costSource:'unknown',rateLimit:{label:'five_hour',usedPercent:62,resetsAt:'2026-11-03T14:10:00.000Z'}});
 });

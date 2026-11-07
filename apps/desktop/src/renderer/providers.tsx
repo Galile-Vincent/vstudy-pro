@@ -9,6 +9,7 @@ import { SettingsGroup, SettingsRow } from './settings/layout';
 import { AppearanceSection } from './settings/appearance';
 import './settings/settings.css';
 import { Dialog, DialogContent, DialogTitle } from './components/ui/dialog';
+import { track } from './analytics';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
 import { Button } from './components/ui/button';
 import { useOptionalNavigation } from './shell';
@@ -56,6 +57,11 @@ export function ProviderSettings({
   const [structuredTables, setStructuredTables] = useState(false);
   const [featureError, setFeatureError] = useState('');
   const [tab, setTab] = useState(initialTab);
+  useEffect(() => {
+    const section = ({providers:'ai',agents:'ai',general:'general',privacy:'privacy',appearance:'appearance',storage:'storage',usage:'usage',moodle:'moodle'} as const)[tab as 'general' | 'providers' | 'agents' | 'privacy' | 'appearance' | 'storage' | 'usage' | 'moodle'];
+    if (section) track('settings_opened', {settings_section:section});
+  }, [tab]);
+  useEffect(() => { track('screen_viewed', {screen_name:'settings'}); }, []);
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;

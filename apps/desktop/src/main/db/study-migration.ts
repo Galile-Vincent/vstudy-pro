@@ -1,4 +1,4 @@
-/** Migration 22 keeps private study evidence separate from library and Moodle content. */
+/** Migration 23 keeps private study evidence separate from library and Moodle content. */
 export const studyMigration = `
 CREATE TABLE study_courses (
  id TEXT PRIMARY KEY NOT NULL, title TEXT NOT NULL CHECK(length(title) BETWEEN 1 AND 240),

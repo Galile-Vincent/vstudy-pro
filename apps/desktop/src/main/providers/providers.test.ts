@@ -141,7 +141,7 @@ it("kills a real subprocess on abort and on timeout", async () => {
           50,
         ),
       ),
-    ).rejects.toThrow("Provider unavailable");
+    ).rejects.toThrow("Provider request timed out");
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -260,4 +260,11 @@ it('serializes image input with separate system instructions and no tools for bo
   const messages=body.messages as {role:string;content:unknown}[];
   if(id==='anthropic-api')expect(body.system).toBe('SYSTEM_ONLY');else expect(messages[0]).toEqual({role:'system',content:'SYSTEM_ONLY'});
  }
+});
+
+it('preserves transport timeout classification without response details',async()=>{
+  const {classifyError}=await import('../analytics/provider');
+  const adapter=createApiAdapter(()=>({kind:'api',id:'openai-api',enabled:true}),{getInMainOnly:()=> 'test'},async()=>{throw new DOMException('private timeout detail','TimeoutError');});
+  try {await collect(adapter.stream(request,new AbortController().signal));throw new Error('expected failure');}
+  catch(error){expect(classifyError(error)).toBe('timeout');expect(String(error)).not.toContain('private timeout detail');}
 });
