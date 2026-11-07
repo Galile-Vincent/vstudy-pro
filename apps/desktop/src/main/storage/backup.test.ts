@@ -225,3 +225,31 @@ it.each(['export','restore'])('refuses %s before staging when disk space is insu
   } finally {space.mockClear();}
  } finally {store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
+
+it.each(['opt-out','deletion','fresh'])('keeps receiving analytics local on restore (%s)',async decision=>{
+ const root=await mkdtemp(join(tmpdir(),'analytics-source-')),target=await mkdtemp(join(tmpdir(),'analytics-target-'));
+ const {store}=await fixture(root);
+ const {AnalyticsService}=await import('../analytics/service');
+ const config={enabled:true,host:'https://analytics.example',key:'test'};
+ try {
+  const source=new AnalyticsService(store.db,config,{});source.setConsent(true);source.track('app_opened');
+  expect(store.db.prepare('SELECT count(*) n FROM analytics_queue').get()?.n).toBeGreaterThan(0);
+  const zip=join(target,'backup.zip');await exportBackup(store,root,zip);
+  let receivingId:string|null=null;
+  if(decision!=='fresh') {
+   const receiving=await fixture(target);const local=new AnalyticsService(receiving.store.db,config,{});
+   local.setConsent(true);local.setConsent(false);if(decision==='deletion')local.requestDeletion();
+   receivingId=local.getInstallationId().installation_id;receiving.store.close();
+  }
+  await stageRestore(target,zip);await recoverRestore(target);
+  const restored=openStore(join(target,'vstudy.sqlite'));
+  try {
+   expect(restored.db.prepare('SELECT count(*) n FROM analytics_queue').get()?.n).toBe(0);
+   expect(restored.db.prepare('SELECT count(*) n FROM analytics_seen').get()?.n).toBe(0);
+   const analytics=new AnalyticsService(restored.db,config,{});
+   expect(analytics.getState()).toMatchObject({enabled:false,consent_decided:decision!=='fresh',deletion_pending:decision==='deletion'});
+   if(receivingId)expect(analytics.getInstallationId().installation_id).toBe(receivingId);
+   else expect(analytics.getInstallationId()).not.toEqual(source.getInstallationId());
+  }finally{restored.close();}
+ }finally{store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});

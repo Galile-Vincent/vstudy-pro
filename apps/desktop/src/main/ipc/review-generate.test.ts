@@ -36,14 +36,15 @@ function setup(stream: (prompt: string, signal: AbortSignal) => AsyncGenerator<E
         store.db.prepare("INSERT INTO moodle_files(id,courseId,url,data,documentId) VALUES(?,?,'https://example.edu/file','{}',?)").run(file, moodleCourse, documentId);
         store.db.prepare('INSERT INTO moodle_course_details(courseId,data) VALUES(?,?)').run(moodleCourse, JSON.stringify({ sections: [{ modules: [{ kind: 'assignment', modname: 'assign', fileIds: [file] }] }] }));
     }
-    const providers = { get: () => ({ stream: (request: { prompt: string }, signal: AbortSignal) => stream(request.prompt, signal) }) } as unknown as ProviderRegistry;
-    const registrar = createIpcRegistrar({ handle: () => undefined, removeHandler: () => undefined }, () => true);
+    const providers = { get: () => ({ listModels: async () => [{id:'gpt-5.4',name:'test'}], stream: (request: { prompt: string }, signal: AbortSignal) => stream(request.prompt, signal) }) } as unknown as ProviderRegistry;
+    const handlers = new Map<string, (event: never, request: unknown) => unknown>();
+    const registrar = createIpcRegistrar({ handle: (channel, handler) => { handlers.set(channel, handler); }, removeHandler: () => undefined }, () => true);
     const admission = new FakeAdmission();
     const service: GenerationService = registerReviewGenerateIpc(registrar, store, new Set(), providers, admission);
     cleanup.push(() => service.dispose());
     const request: GenerationRequest = { requestId: randomUUID(), courseId: course.id, kind: 'note', title: 'Note', scope: { kind: 'documents', documentIds: [documentId] }, idempotencyKey: randomUUID(), providerId: 'openai-api', modelId: 'gpt-5.4', locale: 'en' };
     const ledger = () => store.db.prepare('SELECT count(*) n,coalesce(sum(inputTokens),0) input,coalesce(sum(outputTokens),0) output FROM usage_events').get() as { n: number; input: number; output: number };
-    return { store, service, request, admission, ledger, documentId };
+    return { store, service, request, admission, ledger, documentId, handlers };
 }
 const note = (documentId: string) => JSON.stringify({ bodyMarkdown: `Force [src:${documentId}]`, citations: [{ documentId, version: 'original', excerptHash: createHash('sha256').update(TEXT).digest('hex'), quote: 'Force causes acceleration.' }], omitted: [] });
 const RESERVED_OUTPUT = 8192;
@@ -120,4 +121,11 @@ it('accepts the same document as a source when no Moodle assignment owns it', as
     const artifact = service.generate(request);
     await service.waitForIdle();
     expect(service.repo.find(artifact.id)?.status).toBe('ready');
+});
+
+it('rejects an unknown generation model at IPC with a stable code', async () => {
+    const stream = vi.fn(async function* () { yield {type:'done'}; });
+    const {handlers, request} = setup(stream);
+    await expect(handlers.get('review:artifact:generate')!({} as never, {...request, modelId:'unknown'})).rejects.toThrow('review.model_unavailable');
+    expect(stream).not.toHaveBeenCalled();
 });

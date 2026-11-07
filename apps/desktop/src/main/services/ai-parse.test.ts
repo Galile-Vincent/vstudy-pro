@@ -212,3 +212,14 @@ it.each(['cancelled','complete'])('clears stale publication failures after a lat
   expect(x.service.status(x.imported.id).status).toBe('idle');
  } finally {await x.cleanup();}
 });
+
+it('rejects unknown models before estimate or dispatch with a stable code',async()=>{
+ const stream=vi.fn(async function*(){yield {type:'done' as const};});
+ const x=await setup({detect:async()=>({available:true}),listModels:async()=>[{id:'claude-haiku-5-5',name:'test'}],stream});
+ try {
+  await expect(x.service.estimate({...x.request,modelId:'unknown'})).rejects.toThrow('ai_parse.model_unavailable');
+  await expect(x.service.start({...x.request,modelId:'unknown'})).rejects.toThrow('ai_parse.model_unavailable');
+  expect(stream).not.toHaveBeenCalled();
+  expect((await x.service.estimate(x.request)).pages).toBe(1);
+ }finally{await x.cleanup();}
+});

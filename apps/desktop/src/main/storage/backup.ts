@@ -103,6 +103,19 @@ export async function stageRestore(root:string,source:string):Promise<void> {
         store.db.prepare('UPDATE documents SET sourcePath=?,markdownPath=? WHERE id=?').run(join(root,original),join(root,'library',hash,'content.md'),row.id!);
       }
       store.documents.list();
+      // Archive checks finish before replacing imported analytics with installation-local decisions.
+      store.db.exec('DELETE FROM analytics_state; DELETE FROM analytics_queue; DELETE FROM analytics_seen');
+      const livePath=join(root,'vstudy.sqlite');
+      if(await exists(livePath)) {
+        const local=new DatabaseSync(livePath,{readOnly:true});
+        try {
+          if(local.prepare("SELECT 1 FROM sqlite_schema WHERE type='table' AND name='analytics_state'").get()) {
+            const rows=local.prepare("SELECT key,value FROM analytics_state WHERE key IN ('installation_id','analytics_enabled','consent_decided','deletion_pending')").all();
+            const insert=store.db.prepare('INSERT INTO analytics_state(key,value) VALUES (?,?)');
+            for(const row of rows)insert.run(row.key!,row.value!);
+          }
+        } finally {local.close();}
+      }
       store.db.exec("DELETE FROM moodle_response_cache; UPDATE moodle_accounts SET data=json_set(data,'$.status','expired'); PRAGMA wal_checkpoint(TRUNCATE)");
     } finally {store.close();}
     await mkdir(join(stage,'library'),{recursive:true,mode:0o700});
