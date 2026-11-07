@@ -10,6 +10,7 @@ import { mkdtemp, readdir, readFile, rm, mkdir, lstat, rename } from 'node:fs/pr
 import { join, basename, dirname, resolve } from 'node:path';
 import { isPathWithin, portableBasename } from '../platform/paths';
 import { z } from 'zod';
+import { log } from '../logging';
 import type { Store } from '../db';
 import { openStore } from '../db';
 import { validateStudyData } from '../db/study-validation';
@@ -114,15 +115,21 @@ export async function stageRestore(root:string,source:string):Promise<void> {
 }
 const exists=async(path:string):Promise<boolean>=>lstat(path).then(()=>true).catch(error=>{if(error.code==='ENOENT')return false;throw error;});
 
-async function applyLocalAnalytics(root:string,restored:DatabaseSync):Promise<void> {
+async function applyLocalAnalytics(root:string,restored:DatabaseSync,recover = false):Promise<void> {
   const livePath=join(root,'vstudy.sqlite');
   const rows:ReturnType<ReturnType<DatabaseSync['prepare']>['all']>=[];
-  if(await exists(livePath)) {
-    const local=new DatabaseSync(livePath,{readOnly:true});
-    try {
-      if(local.prepare("SELECT 1 FROM sqlite_schema WHERE type='table' AND name='analytics_state'").get())
-        rows.push(...local.prepare("SELECT key,value FROM analytics_state WHERE key IN ('installation_id','analytics_enabled','consent_decided','deletion_pending')").all());
-    } finally {local.close();}
+  try {
+    if(await exists(livePath)) {
+      const local=new DatabaseSync(livePath,{readOnly:true});
+      try {
+        if(local.prepare("SELECT 1 FROM sqlite_schema WHERE type='table' AND name='analytics_state'").get())
+          rows.push(...local.prepare("SELECT key,value FROM analytics_state WHERE key IN ('installation_id','analytics_enabled','consent_decided','deletion_pending')").all());
+      } finally {local.close();}
+    }
+  } catch(error) {
+    if(!recover)throw error;
+    log({phase:'restore-analytics-fallback',warning:'Live analytics unreadable; retaining staged decisions',error});
+    return;
   }
   restored.exec('BEGIN IMMEDIATE');
   try {
@@ -144,7 +151,7 @@ export async function recoverRestore(root:string):Promise<boolean> {
   const swapStarted=(await Promise.all(['vstudy.sqlite','vstudy.sqlite-wal','vstudy.sqlite-shm'].map(name=>exists(join(previous,name))))).some(Boolean);
   if(!swapStarted && await exists(join(stage,'vstudy.sqlite'))) {
     const restored=new DatabaseSync(join(stage,'vstudy.sqlite'));
-    try {await applyLocalAnalytics(root,restored);}
+    try {await applyLocalAnalytics(root,restored,true);}
     finally {restored.close();}
   }
   for(const name of ['vstudy.sqlite-wal','vstudy.sqlite-shm','vstudy.sqlite','library']){
