@@ -198,7 +198,7 @@
   "usage": "Usage",
   "keys_are_saved_securely_in_the_desktop_app_and_never_read_back": "Keys are saved securely in the desktop app and never read back.",
   "could_not_save_structured_table_setting": "Could not save structured table setting.",
-  "read_only_structured_tables_api_providers_only": "Read-only structured tables (API providers only)",
+  "read_only_structured_tables_api_providers_only": "Show answers as tables",
   "optional_table_presentations_off_by_default_cli_tools_remain_disabled": "Optional table presentations. Off by default. CLI tools remain disabled.",
   "could_not_check_key_status": "Could not check key status",
   "could_not_save_provider": "Could not save provider",

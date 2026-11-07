@@ -198,7 +198,7 @@
   "usage": "用量",
   "keys_are_saved_securely_in_the_desktop_app_and_never_read_back": "金鑰安全儲存於桌面應用程式中，不會傳回顯示。",
   "could_not_save_structured_table_setting": "無法儲存結構化表格設定。",
-  "read_only_structured_tables_api_providers_only": "唯讀結構化表格（僅限 API 服務供應商）",
+  "read_only_structured_tables_api_providers_only": "以表格呈現回答",
   "optional_table_presentations_off_by_default_cli_tools_remain_disabled": "可選用的表格呈現功能，預設關閉。CLI 工具仍維持停用。",
   "could_not_check_key_status": "無法確認金鑰狀態",
   "could_not_save_provider": "無法儲存服務供應商",
