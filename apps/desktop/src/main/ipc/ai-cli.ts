@@ -84,6 +84,10 @@ export function registerAiCliIpc(registrar: ReturnType<typeof createIpcRegistrar
       const result = await showAttachedMessage({ type: 'question', message: terminal, detail: tr('ai-cli:manual_terminal_confirm', { command }), buttons: [tr('common:cancel'), terminal], defaultId: 0, cancelId: 0 },event.sender);
       if (result.response !== 1) return { ok: false };
     }
+    if (!actionParts(actionId).provider) {
+      const result = await showAttachedMessage({ type: 'warning', message: tr('ai-cli:advanced_title'), detail: tr('ai-cli:advanced_start_confirm', { cwd: setup.actionsDirectory }), buttons: [tr('common:cancel'), tr('settings:allow')], defaultId: 0, cancelId: 0 }, event.sender);
+      if (result.response !== 1) return { ok: false };
+    }
     const plan = await setup.terminalPlan(event.sender, actionId, token);
     clipboard.writeText(plan.command);
     if (process.platform === 'darwin') {

@@ -239,3 +239,26 @@ it('never prompts for provider actions that are not the general shell', async ()
   logging.mockRestore();
   expect(approval.show).not.toHaveBeenCalled();
 });
+
+it('R2 native confirmation also covers advanced-shell openTerminal', async () => {
+ const {invoke}=await backend();
+ await invoke('ai-cli:setPreferences',{updateChecks:false,autoUpdateWhenIdle:false,advancedShell:true});
+ approval.show.mockClear(); vi.mocked(execFile).mockClear();
+ const plan=aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview',{actionId:'advanced-shell'}));
+ const logging=vi.spyOn(console,'error').mockImplementation(()=>{});
+ await invoke('ai-cli:openTerminal',{actionId:'advanced-shell',token:plan.token}).catch(()=>{});
+ logging.mockRestore();
+ console.log('R2: native confirmations='+approval.show.mock.calls.length+', terminal launch attempts='+vi.mocked(execFile).mock.calls.length);
+ expect(approval.show).toHaveBeenCalledTimes(1);
+});
+
+it('does not copy or launch an advanced terminal when native approval is declined', async () => {
+ const {invoke}=await backend();
+ await invoke('ai-cli:setPreferences',{updateChecks:false,autoUpdateWhenIdle:false,advancedShell:true});
+ const plan=aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview',{actionId:'advanced-shell'}));
+ approval.show.mockClear();approval.show.mockResolvedValueOnce({response:0,checkboxChecked:false});
+ electron.clipboard.writeText.mockClear();vi.mocked(execFile).mockClear();vi.mocked(spawn).mockClear();
+ expect(await invoke('ai-cli:openTerminal',{actionId:'advanced-shell',token:plan.token})).toEqual({ok:false});
+ expect(approval.show).toHaveBeenCalledTimes(1);
+ expect(electron.clipboard.writeText).not.toHaveBeenCalled();expect(execFile).not.toHaveBeenCalled();expect(spawn).not.toHaveBeenCalled();
+});

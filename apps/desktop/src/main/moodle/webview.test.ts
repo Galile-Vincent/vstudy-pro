@@ -79,7 +79,7 @@ it('does not import a pluginfile navigation that no user input caused', async ()
   await settle();
   expect(event.preventDefault).toHaveBeenCalled();
   expect(mock.imports).not.toHaveBeenCalled();
-  expect(views.state(owner, state.id)).toMatchObject({ error: null, documentId: null });
+  expect(views.state(owner, state.id)).toMatchObject({ status: 'error', error: 'blocked', documentId: null });
   expect(mock.log).toHaveBeenCalledWith(expect.objectContaining({ phase: 'moodle-webview-import-refused', reason: 'no-gesture' }));
 });
 
@@ -155,4 +155,24 @@ it('clears the account partition storage on disconnect', async () => {
   expect(browser.clearStorageData).toHaveBeenCalled();
   expect(browser.clearCache).toHaveBeenCalled();
   expect(browser.closeAllConnections).toHaveBeenCalled();
+});
+
+it('R2 one click cannot authorize a download and then another navigation import', async () => {
+ const { contents, browser } = await open();
+ click(contents);
+ browser.emit('will-download', {preventDefault:vi.fn()}, {getURL:()=>file('download.pdf'),hasUserGesture:()=>true}, contents);
+ await settle();
+ navigate(contents,file('second.pdf')); await settle();
+ console.log('R2: physical clicks=1, imports='+mock.imports.mock.calls.length);
+ expect(mock.imports).toHaveBeenCalledTimes(1);
+});
+
+it('imports an app-opened file after slow authentication',async()=>{
+ const {views,owner,browser}=await open();let release!:()=>void;
+ const gate=new Promise<void>(resolve=>{release=resolve;});
+ const cookies=(browser as unknown as {cookies:{get:ReturnType<typeof vi.fn>}}).cookies;
+ cookies.get.mockImplementationOnce(async()=>{await gate;return [{name:'MoodleSession',value:'cookie'}];});
+ views.open(owner,accountId,{kind:'file',fileId:'1c9b5f0e-0f84-4d4e-8f44-3c1d2a5b6e70'});
+ await settle();vi.setSystemTime(Date.now()+11_000);release();
+ await vi.waitFor(()=>expect(mock.imports).toHaveBeenCalledTimes(1));
 });

@@ -20,10 +20,11 @@ export function redact(value: unknown): string {
     .replace(/((?:cookie|set-cookie)["'\s]*:\s*["']?)[^"'\r\n}]+/gi, '$1[redacted]')
     .replace(/((?:proxy-)?authorization["'\s]*[:=]\s*)(?:"(?:\\.|[^"\\\r\n])*"?|'(?:\\.|[^'\\\r\n])*'?|[^&\r\n}]+)/gi, '$1[redacted]')
     .replace(/((?:Basic|Bearer|Digest|Negotiate)(?:\s+|%20|\+))[^\s"'&,}]+/gi, '$1[redacted]')
-    .replace(/((?:x-api-key|api[_-]?key|(?<![a-z0-9])key|token|sesskey|private[_-]?key|passw(?:or)?d|(?:client[_-])?secret)["'\s]*[:=]\s*)(?:"(?:\\.|[^"\\\r\n])*"?|'(?:\\.|[^'\\\r\n])*'?|[^&"'\r\n,}]+)/gi, '$1[redacted]')
+    .replace(/((?:x-api-key|api[_-]?key|token|sesskey|private[_-]?key|passw(?:or)?d|(?:client[_-])?secret)["'\s]*[:=]\s*)(?:"(?:\\.|[^"\\\r\n])*"?|'(?:\\.|[^'\\\r\n])*'?|[^&"'\r\n,}]+)/gi, '$1[redacted]')
+    .replace(/((?<![a-z0-9_-])key["'\s]*[:=]\s*)(["']?)([a-z0-9_-]{12,})(?![a-z0-9_-])/gi, '$1$2[redacted]')
     .replace(/(["'])(?:[a-z]:[\\/]+|\\\\|~?\/)[^"'\r\n]*\1/gi, '$1[path]$1')
     .replace(/(?:[a-z]:[\\/]+Users[\\/]+|\/(?:Users|home)\/|~\/)[^"'\r\n<>|)]+/gi, '[path]')
-    .replace(/[a-z]:[\\/]+[^\s"'<>|)]+|(?:~|file:\/\/)?\/[^\s"'<>|)]+/gi, '[path]')
+    .replace(/[a-z]:[\\/]+[^\s"'<>|)]+|(?:~|file:\/\/)?\/[^\s"'<>|)]+/gi, path => /^\/v\d+(?:\/[a-z0-9_-]+)+$/i.test(path) ? path : '[path]')
     .replace(/[\p{L}\p{N}_.-]+/gu, token => /\.(?:pdf|docx?|xlsx?|pptx?|txt|md|csv|json|db|sqlite|log|[cm]?js|tsx?|png|jpe?g|zip)\b/i.test(token) ? '[file]' : token);
 }
 const maxBytes = 1024 * 1024;

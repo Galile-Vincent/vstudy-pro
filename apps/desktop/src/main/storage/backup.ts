@@ -104,18 +104,7 @@ export async function stageRestore(root:string,source:string):Promise<void> {
       }
       store.documents.list();
       // Archive checks finish before replacing imported analytics with installation-local decisions.
-      store.db.exec('DELETE FROM analytics_state; DELETE FROM analytics_queue; DELETE FROM analytics_seen');
-      const livePath=join(root,'vstudy.sqlite');
-      if(await exists(livePath)) {
-        const local=new DatabaseSync(livePath,{readOnly:true});
-        try {
-          if(local.prepare("SELECT 1 FROM sqlite_schema WHERE type='table' AND name='analytics_state'").get()) {
-            const rows=local.prepare("SELECT key,value FROM analytics_state WHERE key IN ('installation_id','analytics_enabled','consent_decided','deletion_pending')").all();
-            const insert=store.db.prepare('INSERT INTO analytics_state(key,value) VALUES (?,?)');
-            for(const row of rows)insert.run(row.key!,row.value!);
-          }
-        } finally {local.close();}
-      }
+      await applyLocalAnalytics(root,store.db);
       store.db.exec("DELETE FROM moodle_response_cache; UPDATE moodle_accounts SET data=json_set(data,'$.status','expired'); PRAGMA wal_checkpoint(TRUNCATE)");
     } finally {store.close();}
     await mkdir(join(stage,'library'),{recursive:true,mode:0o700});
@@ -125,6 +114,26 @@ export async function stageRestore(root:string,source:string):Promise<void> {
 }
 const exists=async(path:string):Promise<boolean>=>lstat(path).then(()=>true).catch(error=>{if(error.code==='ENOENT')return false;throw error;});
 
+async function applyLocalAnalytics(root:string,restored:DatabaseSync):Promise<void> {
+  const livePath=join(root,'vstudy.sqlite');
+  const rows:ReturnType<ReturnType<DatabaseSync['prepare']>['all']>=[];
+  if(await exists(livePath)) {
+    const local=new DatabaseSync(livePath,{readOnly:true});
+    try {
+      if(local.prepare("SELECT 1 FROM sqlite_schema WHERE type='table' AND name='analytics_state'").get())
+        rows.push(...local.prepare("SELECT key,value FROM analytics_state WHERE key IN ('installation_id','analytics_enabled','consent_decided','deletion_pending')").all());
+    } finally {local.close();}
+  }
+  restored.exec('BEGIN IMMEDIATE');
+  try {
+    restored.exec('DELETE FROM analytics_state; DELETE FROM analytics_queue; DELETE FROM analytics_seen');
+    const insert=restored.prepare('INSERT INTO analytics_state(key,value) VALUES (?,?)');
+    for(const row of rows)insert.run(row.key!,row.value!);
+    restored.exec('COMMIT');
+  } catch(error) {restored.exec('ROLLBACK');throw error;}
+  restored.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+}
+
 /** Before opening SQLite, roll a prepared restore forward. Each rename is safe to repeat after a crash. */
 export async function recoverRestore(root:string):Promise<boolean> {
   const journal=join(root,'restore-pending.json');if(!await exists(journal))return false;
@@ -132,6 +141,12 @@ export async function recoverRestore(root:string):Promise<boolean> {
   const stage=join(root,directory);
   if(!(await lstat(stage)).isDirectory() || (await lstat(stage)).isSymbolicLink())throw new Error('storage.invalid_backup');
   const previous=join(stage,'previous');await mkdir(previous,{recursive:true,mode:0o700});
+  const swapStarted=(await Promise.all(['vstudy.sqlite','vstudy.sqlite-wal','vstudy.sqlite-shm'].map(name=>exists(join(previous,name))))).some(Boolean);
+  if(!swapStarted && await exists(join(stage,'vstudy.sqlite'))) {
+    const restored=new DatabaseSync(join(stage,'vstudy.sqlite'));
+    try {await applyLocalAnalytics(root,restored);}
+    finally {restored.close();}
+  }
   for(const name of ['vstudy.sqlite-wal','vstudy.sqlite-shm','vstudy.sqlite','library']){
     const current=join(root,name),old=join(previous,name),incoming=join(stage,name);
     if(await exists(incoming) || name.endsWith('-wal') || name.endsWith('-shm')){
