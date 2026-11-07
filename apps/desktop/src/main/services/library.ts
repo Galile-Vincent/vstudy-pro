@@ -12,10 +12,19 @@ import { join, dirname } from 'node:path';
 import type { SQLInputValue } from 'node:sqlite';
 import type { Store } from '../db';
 import { documentIdSchema, documentSchema } from '../../shared/domain';
-import { folderSchema, libraryDocumentSchema, libraryQuerySchema, savedFilterSchema, tagSchema, type LibraryQuery } from '../../shared/library';
+import { folderSchema, libraryCourseSchema, libraryDocumentSchema, libraryQuerySchema, savedFilterSchema, tagSchema, type LibraryQuery } from '../../shared/library';
 import { SearchService, validateSearchQuery } from './search';
 import { containedPath } from "./file-paths";
 export { containedPath } from "./file-paths";
+function courseOf(row: Record<string, unknown>) {
+    if (typeof row.courseId !== 'string' || typeof row.courseData !== 'string') return null;
+    try {
+        const data = JSON.parse(row.courseData) as { fullName?: unknown; identity?: Record<string, unknown> };
+        const parsed = libraryCourseSchema.safeParse({ id: row.courseId, fullName: data.fullName, identity: { title: data.identity?.title, teachers: data.identity?.teachers, term: data.identity?.term } });
+        return parsed.success ? parsed.data : null;
+    }
+    catch { return null; }
+}
 /** Organize and page library metadata without reading full document bodies. */
 export class LibraryService {
     readonly search: SearchService;
@@ -78,7 +87,7 @@ export class LibraryService {
     } }); }
     require(id: string) { const d = this.store.documents.get(documentIdSchema.parse(id)); if (!d)
         throw new Error('Document not found'); return d; }
-    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','activeVersion','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: row.sizeBytes === null ? null : Number(row.sizeBytes), contentChars: row.contentChars === null ? null : Number(row.contentChars) }); }
+    item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','activeVersion','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: row.sizeBytes === null ? null : Number(row.sizeBytes), contentChars: row.contentChars === null ? null : Number(row.contentChars), course: courseOf(row) }); }
     list(input: LibraryQuery) {
         const q = libraryQuerySchema.parse(input), args: SQLInputValue[] = [], where = ['d.deletedAt IS NULL'];
         const add = (sql: string, ...values: SQLInputValue[]) => { where.push(sql); args.push(...values); };
@@ -135,7 +144,7 @@ export class LibraryService {
         const column = pinOrder ? "coalesce(d.pinnedAt,'')" : recentOrder ? "coalesce(d.lastOpenedAt,'')" : columns[q.sort], op = direction === 'asc' ? '>' : '<';
         if (q.cursor)
             add(`(${column} ${op} ? OR (${column}=? AND d.id ${op} ?))`, q.cursor.value, q.cursor.value, q.cursor.id);
-        const rows = this.store.db.prepare(`SELECT d.* FROM documents d WHERE ${where.join(' AND ')} ORDER BY ${column} ${direction},d.id ${direction} LIMIT ?`).all(...args, q.limit + 1);
+        const rows = this.store.db.prepare(`SELECT d.*,mc.id AS courseId,mc.data AS courseData FROM documents d LEFT JOIN moodle_courses mc ON mc.id=(SELECT courseId FROM moodle_files WHERE documentId=d.id ORDER BY id LIMIT 1) WHERE ${where.join(' AND ')} ORDER BY ${column} ${direction},d.id ${direction} LIMIT ?`).all(...args, q.limit + 1);
         const items = rows.slice(0, q.limit).map(r => this.item(r));
         if (items.length) {
             const assignments=this.store.db.prepare(`SELECT dt.documentId,t.* FROM document_tags dt JOIN tags t ON t.id=dt.tagId WHERE dt.documentId IN(${items.map(()=>'?').join(',')})`).all(...items.map(i=>i.document.id));

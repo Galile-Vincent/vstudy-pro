@@ -167,5 +167,15 @@
   "estimate_hint": "先にモデルを選び、費用を見積もってください。",
   "chat_error": "回答を完了できませんでした。設定でモデルを確認して、もう一度試してください。",
   "chat_network_error": "接続できません。インターネットを確認して、もう一度試してください。",
-  "ai_parse.range_error": "1から文書の最終ページまでの整数を入力してください。開始ページは終了ページ以下にしてください。"
+  "ai_parse.range_error": "1から文書の最終ページまでの整数を入力してください。開始ページは終了ページ以下にしてください。",
+  "viewMode": "ライブラリの表示",
+  "viewFiles": "すべての資料",
+  "viewFolders": "フォルダ",
+  "backToFolders": "すべてのフォルダに戻る",
+  "folderList": "コースのフォルダ",
+  "openFolder": "フォルダを開く：{{name}}",
+  "breadcrumb": "ライブラリの場所",
+  "folderFiles": "{{formatted}} 件の資料",
+  "folderFiles_one": "{{formatted}} 件の資料",
+  "folderFiles_other": "{{formatted}} 件の資料"
 }

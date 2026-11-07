@@ -14,17 +14,17 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import {
-  FileText,
   Search,
   Pin,
   MoreHorizontal,
   LayoutGrid,
   List,
-  SlidersHorizontal, AlertTriangle, LoaderCircle, X,
+  SlidersHorizontal, AlertTriangle, LoaderCircle, X, FolderClosed,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { libraryQuerySchema, type LibraryQuery } from "../../shared/library";
@@ -42,10 +42,18 @@ import {
   importFiles,
   moveDocuments,
   selectedRange,
+  courseName,
+  groupByCourse,
+  readMode,
+  writeMode,
+  uncategorizedKey,
   type Item,
   type Folder,
+  type LibraryMode,
 } from "./model";
+import { FolderCrumbs, FolderGrid, LibraryModeToggle } from "./folders";
 import "./library.css";
+import "./library-surface.css";
 export { LibrarySidebar } from "./sidebar";
 function folderPath(folders: Folder[], id: string | null | undefined) {
   const names: string[] = [];
@@ -132,11 +140,45 @@ export function LibraryView() {
     [undo, setUndo] = useState<(() => Promise<void>) | null>(null),
     [notice, setNotice] = useState("");
   const menuAnchor = useRef<HTMLElement | null>(null);
+  const placeOf = (item: Item) => courseName(item, language) ?? (folderPath(folders, item.folderId) || tr("library:unfiled"));
   const scroller = useRef<HTMLDivElement>(null),
     anchor = useRef(""),
     generation = useRef(0),
     fetching = useRef(false);
   const previousQuery = useRef(JSON.stringify(query));
+  const language = document.documentElement.lang;
+  const filters = Object.entries(query).filter(
+    ([key, value]) =>
+      !["sort", "direction", "limit", "cursor", "view", "text", "folderId", "subfolders"].includes(key) &&
+      value !== undefined,
+  );
+  const [mode, setModeState] = useState<LibraryMode>(readMode);
+  const [openKey, setOpenKey] = useState<string | null>(() => {
+    try { return sessionStorage.getItem(`library-folder:${viewKey}`); } catch { return null; }
+  });
+  const groupedView = mode === "folders" && viewKey === "all" && !query.text && !filters.length && !query.folderId;
+  const groups = useMemo(() => groupByCourse(items, language), [items, language]);
+  const openGroup = groupedView && openKey ? groups.find((g) => g.key === openKey) : undefined;
+  const showFolders = groupedView && !openGroup;
+  const shown = groupedView ? (openGroup?.items ?? []) : items;
+  const selectFolder = (key: string | null) => {
+    setOpenKey(key);
+    setSelected([]);
+    restoreTop.current = 0;
+    try { if (key) sessionStorage.setItem(`library-folder:${viewKey}`, key); else sessionStorage.removeItem(`library-folder:${viewKey}`); }
+    catch { /* A blocked session store only loses the reopened folder. */ }
+  };
+  const chooseMode = (next: LibraryMode) => {
+    writeMode(next);
+    setModeState(next);
+    selectFolder(null);
+  };
+  useEffect(() => {
+    if (openKey && !loading && !cursor && groupedView && !groups.some((g) => g.key === openKey)) selectFolder(null);
+  }, [openKey, loading, cursor, groupedView, groups]);
+  useEffect(() => {
+    if (groupedView && cursor && !loading) void more();
+  }, [groupedView, cursor, loading, items.length]);
   const refresh = useCallback(() => {
     setRevision((v) => v + 1);
   }, []);
@@ -288,7 +330,7 @@ export function LibraryView() {
     }
     setItems(all);
     setCursor(undefined);
-    setSelected(all.map((i) => i.document.id));
+    setSelected((openGroup ? all.filter((i) => (i.course?.id ?? uncategorizedKey) === openGroup.key) : all).map((i) => i.document.id));
   };
   const open = (item: Item) =>
     navigate({
@@ -339,11 +381,6 @@ export function LibraryView() {
     if (!destination) return;
     await run(() => desktop.invoke("library:documents:move", { documentIds: [item.document.id], ...destination }));
   };
-  const filters = Object.entries(query).filter(
-    ([key, value]) =>
-      !["sort", "direction", "limit", "cursor", "view", "text", "folderId", "subfolders"].includes(key) &&
-      value !== undefined,
-  );
   const bulkBar=useRef<HTMLDivElement>(null);
   const [bulkHeight,setBulkHeight]=useState(0);
   useLayoutEffect(()=>{const bar=bulkBar.current;if(!bar){setBulkHeight(0);return;}const observer=new ResizeObserver(()=>setBulkHeight(bar.getBoundingClientRect().height));observer.observe(bar);return()=>observer.disconnect();},[selected.length]);
@@ -356,15 +393,16 @@ export function LibraryView() {
     const observer = new ResizeObserver(() => setViewportWidth(viewport.clientWidth));
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, [loading, grid, items.length > 0]);
+  }, [loading, grid, items.length > 0, showFolders]);
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const rowHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : rowRem * textScale,
+  const cardRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--library-card-row'));
+  const rowHeight = grid ? (Number.isFinite(cardRem) ? cardRem : 15) * textScale : rowRem * textScale,
     columns = grid
-      ? Math.max(1, Math.floor(viewportWidth / 280))
+      ? Math.max(1, Math.floor(viewportWidth / 264))
       : 1,
-    start = Math.min(Math.max(0,items.length-columns),Math.max(0, Math.floor(top / rowHeight) - 2) * columns),
+    start = Math.min(Math.max(0,shown.length-columns),Math.max(0, Math.floor(top / rowHeight) - 2) * columns),
     end = Math.min(
-      items.length,
+      shown.length,
       start +
         Math.ceil((scroller.current?.clientHeight ?? 800) / rowHeight + 5) *
           columns,
@@ -372,13 +410,13 @@ export function LibraryView() {
   useLayoutEffect(()=>{
     const viewport=scroller.current;
     if(!viewport||!selected.length||!bulkHeight)return;
-    const index=items.findIndex(item=>item.document.id===selected[selected.length-1]);
+    const index=shown.findIndex(item=>item.document.id===selected[selected.length-1]);
     if(index<0)return;
     const rowTop=Math.floor(index/columns)*rowHeight;
     const available=Math.max(rowHeight,viewport.clientHeight-bulkHeight-24);
     if(rowTop<viewport.scrollTop)viewport.scrollTop=rowTop;
     else if(rowTop+rowHeight>viewport.scrollTop+available)viewport.scrollTop=rowTop+rowHeight-available;
-  },[selected,bulkHeight,rowHeight,columns,items]);
+  },[selected,bulkHeight,rowHeight,columns,shown]);
   return (
     <section
       onDragOver={(e) => e.preventDefault()}
@@ -419,6 +457,7 @@ export function LibraryView() {
             onChange={(e) => setText(e.target.value)}
           />
         </label>
+        {viewKey === "all" && !query.folderId && <LibraryModeToggle mode={mode} onChange={chooseMode} />}
         <Popover open={filtersOpen} onOpenChange={setFiltersOpen}><PopoverTrigger asChild>
           <Button variant="outline" className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel"><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button></PopoverTrigger>
           <PopoverContent id="library-filter-panel" aria-label={tr("library:filters")} align="start" className="filter-panel">
@@ -495,6 +534,8 @@ export function LibraryView() {
             <footer><Button variant="outline" className="ghost" onClick={() => setQuery(defaults)}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
           </PopoverContent>
         </Popover>
+        {!showFolders && (
+          <>
         <Select
           aria-label={tr("library:sort")}
           value={query.sort}
@@ -536,6 +577,8 @@ export function LibraryView() {
         >
           {grid ? <LayoutGrid /> : <List />}
         </Button>
+          </>
+        )}
       </div>
       <div className="filter-chips">
         {filters.map(([key, value]) => (
@@ -656,7 +699,13 @@ export function LibraryView() {
           </Button>
           {!text && !filters.length && <Button variant="outline" className="ghost" onClick={() => void run(async () => { await desktop.invoke('documents:importSample',{language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}); changed(); })}>{tr('onboarding:sample')}</Button>}
         </div>
+      ) : showFolders ? (
+        <div className="library-folders">
+          <FolderGrid groups={groups} formatNumber={format.number} onOpen={selectFolder} />
+        </div>
       ) : (
+        <>
+        {openGroup && <FolderCrumbs name={openGroup.name ?? tr("library:unfiled")} onBack={() => selectFolder(null)} />}
         <div
           ref={scroller}
           className="library-results"
@@ -700,11 +749,11 @@ export function LibraryView() {
         >
           <div
             style={{
-              height: Math.ceil(items.length / columns) * rowHeight,
+              height: Math.ceil(shown.length / columns) * rowHeight,
               position: "relative",
             }}
           >
-            {items.slice(start, end).map((item, offset) => {
+            {shown.slice(start, end).map((item, offset) => {
               const d = item.document,
                 index = start + offset;
               return (
@@ -714,7 +763,7 @@ export function LibraryView() {
                   data-index={index}
                   role="listitem"
                   aria-posinset={index + 1}
-                  aria-setsize={items.length}
+                  aria-setsize={shown.length}
                   data-selected={selected.includes(d.id)}
                   tabIndex={activeRow === d.id || (!activeRow && index === 0) ? 0 : -1}
                   onFocus={() => { setActiveRow(d.id);  }}
@@ -775,7 +824,7 @@ export function LibraryView() {
                       return;
                     setSelected((current) =>
                       e.shiftKey
-                        ? selectedRange(items, anchor.current, d.id)
+                        ? selectedRange(shown, anchor.current, d.id)
                         : e.metaKey || e.ctrlKey
                           ? current.includes(d.id)
                             ? current.filter((id) => id !== d.id)
@@ -791,8 +840,10 @@ export function LibraryView() {
                   }}
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return;
+                    const sideways = grid && ["ArrowLeft", "ArrowRight"].includes(e.key);
+                    const step = sideways ? 1 : grid ? columns : 1;
                     if (
-                      ["ArrowUp", "ArrowDown", "Home", "End"].includes(e.key) &&
+                      (["ArrowUp", "ArrowDown", "Home", "End"].includes(e.key) || sideways) &&
                       !e.altKey &&
                       !e.metaKey &&
                       !e.ctrlKey
@@ -802,15 +853,15 @@ export function LibraryView() {
                         e.key === "Home"
                           ? 0
                           : e.key === "End"
-                            ? items.length - 1
+                            ? shown.length - 1
                             : Math.max(
                                 0,
                                 Math.min(
-                                  items.length - 1,
-                                  index + (e.key === "ArrowUp" ? -1 : 1),
+                                  shown.length - 1,
+                                  index + (e.key === "ArrowUp" || e.key === "ArrowLeft" ? -step : step),
                                 ),
                               );
-                      if (e.shiftKey) setSelected(selectedRange(items, anchor.current ?? d.id, items[next]!.document.id));
+                      if (e.shiftKey) setSelected(selectedRange(shown, anchor.current ?? d.id, shown[next]!.document.id));
                       if (!anchor.current) anchor.current = d.id;
                       if (scroller.current) {
                         scroller.current.scrollTop =
@@ -849,7 +900,6 @@ export function LibraryView() {
                   }}
                 >
 {grid ? <><DocumentArt id={d.id} kind={d.sourceName.split('.').pop()?.toUpperCase() ?? 'MD'}/><div className="document-cell">
-                    <FileText className="document-glyph" aria-hidden="true" />
                     <div className="document-info">
                       <Button variant="outline"
                         className="document-title"
@@ -859,11 +909,9 @@ export function LibraryView() {
                       >
                         {d.title}
                       </Button>
-                      <div className="document-meta" title={`${d.sourceName} · ${d.converter}`}>
-                        {!query.folderId && <span>{folderPath(folders, item.folderId) || tr("library:unfiled")}</span>}
-                        <span>{d.sourceName.split('.').pop()?.toUpperCase()}</span>
+                      <div className="document-course" title={placeOf(item)}><FolderClosed aria-hidden="true" /><span>{placeOf(item)}</span></div>
+                      <div className="document-meta" title={`${d.sourceName} · ${d.converter} · ${formatSize(item.sizeBytes, language)}`}>
                         {item.pageCount != null && <span>{tr("library:pages", {count:item.pageCount, formatted:format.number(item.pageCount)})}</span>}
-                        <span>{formatSize(item.sizeBytes, document.documentElement.lang)}</span>
                         <span>{format.date(d.createdAt)}</span>
                         {d.status !== 'ready' && <span className="status-badge" data-status={d.status}>{d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}{tr(`library:${d.status}`)}</span>}
                       </div>
@@ -927,12 +975,12 @@ export function LibraryView() {
                     <span className="sr-only">{d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):''}</span>
                   </div>
                   <div className="document-title-cell">
-                    <DocumentTitle title={d.title} onOpen={()=>open(item)} details={`${folderPath(folders,item.folderId)||tr('library:unfiled')} · ${d.sourceName.split('.').pop()?.toUpperCase()} · ${item.pageCount!=null?tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)}):''} · ${formatSize(item.sizeBytes,document.documentElement.lang)} · ${format.date(d.createdAt)}`}/>
+                    <DocumentTitle title={d.title} onOpen={()=>open(item)} details={`${placeOf(item)} · ${d.sourceName.split('.').pop()?.toUpperCase()} · ${item.pageCount!=null?tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)}):''} · ${formatSize(item.sizeBytes,document.documentElement.lang)} · ${format.date(d.createdAt)}`}/>
 
                     {item.snippet&&<p className="search-snippet"><Snippet text={item.snippet}/></p>}
                   </div>
                   <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge variant="outline" key={t.id}>{t.name}</Badge>)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
-                  <div className="document-folder">{folderPath(folders,item.folderId)||tr('library:unfiled')}</div>
+                  <div className="document-folder" title={placeOf(item)}>{placeOf(item)}</div>
                   <div className="document-size">{item.pageCount!=null&&<>{tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)})} · </>}{item.sizeBytes===null?tr("library:unknown_size"):new Intl.NumberFormat(document.documentElement.lang,{style:"unit",unit:"kilobyte",unitDisplay:"short",maximumFractionDigits:1}).format(item.sizeBytes/1000)}</div>
                   <div className="document-added">{d.status==='failed'?<Button variant="ghost" size="sm" onClick={()=>void run(()=>desktop.invoke('documents:retry',{documentId:d.id}))}>{tr('library:retry')}</Button>:d.status==='converting'?<progress value={progress[d.id]?.page} max={progress[d.id]?.total} aria-label={tr('common:conversion_progress')}/>:format.date(d.createdAt)}</div>
                   <div className="document-type"><Badge variant="secondary">{d.sourceName.split('.').pop()?.toUpperCase()}</Badge></div>
@@ -941,12 +989,13 @@ export function LibraryView() {
               );
             })}
           </div>
-          {cursor && (
+          {cursor && !groupedView && (
             <Button variant="outline" className="load-more" onClick={() => void more()}>
               {tr("library:loadMore")}
             </Button>
           )}
         </div>
+        </>
       )}
       <div className="library-live" aria-live="polite">
         {tr("library:loaded", {

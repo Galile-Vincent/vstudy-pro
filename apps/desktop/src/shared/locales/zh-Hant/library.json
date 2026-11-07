@@ -167,5 +167,15 @@
   "estimate_hint": "請先選擇模型並估算費用。",
   "chat_error": "回答無法完成。請到設定檢查模型，再重試。",
   "chat_network_error": "無法連線。請檢查網路後重試。",
-  "ai_parse.range_error": "請輸入 1 到文件最後一頁之間的整數，起始頁不得大於結束頁。"
+  "ai_parse.range_error": "請輸入 1 到文件最後一頁之間的整數，起始頁不得大於結束頁。",
+  "viewMode": "文件庫檢視方式",
+  "viewFiles": "全部文件",
+  "viewFolders": "資料夾",
+  "backToFolders": "返回所有資料夾",
+  "folderList": "課程資料夾",
+  "openFolder": "開啟資料夾：{{name}}",
+  "breadcrumb": "文件庫位置",
+  "folderFiles": "{{formatted}} 份文件",
+  "folderFiles_one": "{{formatted}} 份文件",
+  "folderFiles_other": "{{formatted}} 份文件"
 }

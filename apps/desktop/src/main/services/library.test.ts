@@ -79,3 +79,17 @@ it.each(['asc','desc'])('paginates unknown and known sizes without dropping rows
  do {const page=lib.list(libraryQuerySchema.parse({sort:'size',direction,limit:1,...(cursor?{cursor}:{})}));ids.push(...page.items.map(i=>i.document.id));cursor=page.nextCursor;}while(cursor);
  expect(ids).toHaveLength(4);expect(new Set(ids).size).toBe(4);
 });
+
+it('reports the course a document was saved from and tolerates damaged course data', () => {
+  const { s, lib, doc } = fixture(); const account = randomUUID(), course = randomUUID(), broken = randomUUID(), plain = documentSchema.parse({ ...doc, id: randomUUID(), sourceHash: randomUUID().replaceAll('-', '').repeat(2) }), other = documentSchema.parse({ ...doc, id: randomUUID(), sourceHash: randomUUID().replaceAll('-', '').repeat(2) });
+  s.documents.insert(plain); s.documents.insert(other);
+  s.db.prepare("INSERT INTO moodle_accounts(id,siteUrl,remoteUserId,data) VALUES(?,'https://school.example',1,'{}')").run(account);
+  s.db.prepare('INSERT INTO moodle_courses(id,accountId,data) VALUES(?,?,?)').run(course, account, JSON.stringify({ fullName: '1142電子電路實驗', identity: { title: { zh: '電子電路實驗', en: 'Electronics Laboratory' }, teachers: [], term: '1142' } }));
+  s.db.prepare('INSERT INTO moodle_courses(id,accountId,data) VALUES(?,?,?)').run(broken, account, '{}');
+  s.db.prepare("INSERT INTO moodle_files(id,courseId,url,data,documentId) VALUES(?,?,'https://school.example/a','{}',?)").run(randomUUID(), course, doc.id);
+  s.db.prepare("INSERT INTO moodle_files(id,courseId,url,data,documentId) VALUES(?,?,'https://school.example/b','{}',?)").run(randomUUID(), broken, other.id);
+  const items = lib.list(libraryQuerySchema.parse({})).items, byId = (id: string) => items.find(i => i.document.id === id)!;
+  expect(byId(doc.id).course).toEqual({ id: course, fullName: '1142電子電路實驗', identity: { title: { zh: '電子電路實驗', en: 'Electronics Laboratory' }, teachers: [], term: '1142' } });
+  expect(byId(plain.id).course).toBeNull();
+  expect(byId(other.id).course).toBeNull();
+});
