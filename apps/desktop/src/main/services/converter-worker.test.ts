@@ -8,6 +8,7 @@ import { expect, it, vi } from "vitest";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { execFileSync } from "node:child_process";
 import { WarmWorker } from "../../../resources/converter/warm-worker";
 import { ProcessScope } from "../../../resources/converter/process-scope";
 
@@ -30,7 +31,10 @@ for line in sys.stdin:
   print(json.dumps({'done': True}), flush=True)
 `);
   const scope = new ProcessScope();
-  const worker = new WarmWorker(process.platform === 'win32' ? 'python' : 'python3', script, directory, scope);
+  // Resolve on the test runner PATH before WarmWorker deliberately scrubs that PATH.
+  const python = execFileSync(process.platform === 'win32' ? 'python' : 'python3',
+    ['-c', 'import sys; print(sys.executable)'], {encoding:'utf8'}).trim();
+  const worker = new WarmWorker(python, script, directory, scope);
   try {
     const pids: string[] = [];
     await worker.run("one", "", "", pid => pids.push(pid));
