@@ -167,5 +167,14 @@
   "estimate_hint": "請先選擇模型並估算費用。",
   "chat_error": "回答無法完成。請到設定檢查模型，再重試。",
   "chat_network_error": "無法連線。請檢查網路後重試。",
-  "ai_parse.range_error": "請輸入 1 到文件最後一頁之間的整數，起始頁不得大於結束頁。"
+  "ai_parse.range_error": "請輸入 1 到文件最後一頁之間的整數，起始頁不得大於結束頁。",
+  "openMethod": "開啟方式",
+  "openReader": "VStudy 閱讀器（Markdown）",
+  "openOriginal": "以系統應用程式開啟原始檔案",
+  "downloadCopy": "下載副本⋯",
+  "saveToLibrary": "儲存至文件庫",
+  "savedToLibrary": "已儲存至文件庫",
+  "downloadedCopy": "已下載副本",
+  "defaultOpenMethod": "預設文件開啟方式",
+  "originalHint": "原始檔案會以系統預設應用程式開啟。開啟檔案時仍可切換方式。"
 }

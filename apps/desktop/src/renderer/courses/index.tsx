@@ -1,3 +1,5 @@
+import { performDocumentAction, type DocumentAction } from '../document-open';
+import { documentIdSchema } from '../../shared/domain';
 import { Brand } from '../components/brand';
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
@@ -282,11 +284,15 @@ function CoursesBody({
       else await refresh(true);
     } catch { failure(); }
   };
-  const openFile = async (fileId: string) => {
+  const openFile = async (fileId: string, action?: DocumentAction) => {
     setOpening(fileId);
     try {
       const result = await api.openFile(fileId);
-      onDocument(result.documentId);
+      const documentId = documentIdSchema.parse(result.documentId);
+      const outcome = await performDocumentAction(documentId, () => onDocument(documentId), action);
+      if (outcome === 'saved') setNotice(tr('library:savedToLibrary'));
+      if (outcome === 'downloaded') setNotice(tr('library:downloadedCopy'));
+      return outcome;
     } catch {
       failure();
     } finally {

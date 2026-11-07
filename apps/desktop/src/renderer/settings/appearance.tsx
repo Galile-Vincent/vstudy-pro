@@ -1,4 +1,5 @@
 /** Appearance settings compose complete theme packs with independent reading preferences. */
+import { DocumentSettings } from './documents';
 import { track } from '../analytics';
 import { useEffect, useRef, useState } from 'react';
 import { Copy, Pencil, Plus, Check } from 'lucide-react';
@@ -72,6 +73,7 @@ export function AppearanceSection() {
       </div>
     </section>
     <SettingsGroup title={tr('settings:text_reading')}>
+      <DocumentSettings />
       {(['uiScale','density','readerFont','readerSize'] as const).map(field => <SettingsRow key={field} label={tr(`settings:${field}`)}>
         {field === 'readerFont' ? <Select aria-label={tr('settings:readerFont')} value={settings.readerFont} onChange={e => void update({readerFont:e.target.value as Settings['readerFont']})}>
           {['system','serif','mono'].map(v => <option key={v} value={v}>{tr(`settings:${v}`)}</option>)}

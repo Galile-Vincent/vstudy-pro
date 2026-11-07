@@ -1,3 +1,4 @@
+import { CourseFileActions, type DocumentAction, type DocumentOutcome } from '../document-open';
 import { useMoodleWebview } from './webview';
 import {
   createElement,
@@ -241,7 +242,7 @@ export function CourseContent({
   openFile,
 }: {
   detail: MoodleCourseDetail;
-  openFile: (id: string) => Promise<void>;
+  openFile: (id: string, action?: DocumentAction) => Promise<DocumentOutcome | undefined>;
   onError: () => void;
 }) {
   const openMoodle = useMoodleWebview();
@@ -309,22 +310,10 @@ export function CourseContent({
                 const file = detail.files.find((f) => f.id === id);
                 return (
                   file && (
-                    <Button
-                      key={id}
-                      variant="outline"
-                      disabled={opening}
-                      onClick={async () => {
-                        setOpening(true);
-                        try {
-                          await openFile(id);
-                        } finally {
-                          setOpening(false);
-                        }
-                      }}
-                    >
-                      <FileText />
-                      {file.name}
-                    </Button>
+                    <CourseFileActions key={id} name={file.name} disabled={opening} onAction={async action => {
+                      setOpening(true);
+                      try {return await openFile(id, action);} finally {setOpening(false);}
+                    }}/>
                   )
                 );
               })}

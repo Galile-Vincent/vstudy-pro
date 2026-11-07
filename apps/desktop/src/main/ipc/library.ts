@@ -1,3 +1,4 @@
+import { stat } from 'node:fs/promises';
 import { ownerWindow } from '../dialogs';
 /**
  * Register validated library IPC operations and delegate privileged work to main services.
@@ -80,7 +81,7 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
             return { saved: true };
         });
     handle('library:reveal', r => { shell.showItemInFolder(containedPath(library.root, library.require(r.documentId).sourcePath)); return { ok: true }; });
-    handle('library:openOriginal', async (r) => { const d = library.require(r.documentId), path = containedPath(library.root, d.sourcePath); if (!['.pdf', '.docx', '.xlsx', '.pptx', '.md', '.txt', '.csv'].includes(extname(path).toLowerCase()))
+    handle('library:openOriginal', async (r) => { const d = library.require(r.documentId), path = containedPath(library.root, d.sourcePath); if (!(await stat(path)).isFile() || !['.pdf', '.docx', '.xlsx', '.pptx', '.md', '.txt', '.csv'].includes(extname(path).toLowerCase()))
         throw new Error('File type cannot be opened'); const error = await shell.openPath(path); if (error)
         throw new Error('Open failed'); return { ok: true }; });
     const purge = setInterval(() => {

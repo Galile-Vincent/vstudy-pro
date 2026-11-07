@@ -167,5 +167,14 @@
   "estimate_hint": "First choose a model and estimate the cost.",
   "chat_error": "The answer could not finish. Check your model in Settings, then try again.",
   "chat_network_error": "Could not connect. Check your internet, then try again.",
-  "ai_parse.range_error": "Enter whole page numbers from 1 to the document’s last page. The first page must come before or equal the last."
+  "ai_parse.range_error": "Enter whole page numbers from 1 to the document’s last page. The first page must come before or equal the last.",
+  "openMethod": "Open with",
+  "openReader": "VStudy reader (Markdown)",
+  "openOriginal": "Original file in system app",
+  "downloadCopy": "Download a copy…",
+  "saveToLibrary": "Save to document library",
+  "savedToLibrary": "Saved to document library",
+  "downloadedCopy": "Copy downloaded",
+  "defaultOpenMethod": "Open documents by default with",
+  "originalHint": "Original files open in your system’s default app. You can choose another method when opening a file."
 }

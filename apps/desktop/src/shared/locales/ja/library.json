@@ -167,5 +167,14 @@
   "estimate_hint": "先にモデルを選び、費用を見積もってください。",
   "chat_error": "回答を完了できませんでした。設定でモデルを確認して、もう一度試してください。",
   "chat_network_error": "接続できません。インターネットを確認して、もう一度試してください。",
-  "ai_parse.range_error": "1から文書の最終ページまでの整数を入力してください。開始ページは終了ページ以下にしてください。"
+  "ai_parse.range_error": "1から文書の最終ページまでの整数を入力してください。開始ページは終了ページ以下にしてください。",
+  "openMethod": "開く方法",
+  "openReader": "VStudy リーダー（Markdown）",
+  "openOriginal": "システムアプリで元のファイルを開く",
+  "downloadCopy": "コピーをダウンロード…",
+  "saveToLibrary": "ライブラリに保存",
+  "savedToLibrary": "ライブラリに保存しました",
+  "downloadedCopy": "コピーをダウンロードしました",
+  "defaultOpenMethod": "既定の開き方",
+  "originalHint": "元のファイルはシステムの既定アプリで開きます。開く際に方法を変更できます。"
 }

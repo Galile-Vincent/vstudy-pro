@@ -262,6 +262,8 @@ export const chatEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("error"), message: z.string(), code:z.string().max(100).optional(), params:z.record(z.union([z.string(),z.number()])).optional() }).strict(),
 ]);
 export type ChatEvent = z.infer<typeof chatEventSchema>;
+export const documentOpenMethodSchema = z.enum(["reader", "original"]);
+export type DocumentOpenMethod = z.infer<typeof documentOpenMethodSchema>;
 /** Complete persisted settings with defaults that migrate older records on read. */
 export const settingsSchema = z
   .object({
@@ -270,6 +272,7 @@ export const settingsSchema = z
     density: z.enum(['comfortable','compact']).default('comfortable'),
     coursesSort: z.object({future:z.enum(['smart','name']).optional(),current:z.enum(['smart','name']).optional(),past:z.enum(['smart','name']).optional(),all:z.enum(['smart','name']).optional()}).strict().optional(),
     accent: z.enum(['neutral','blue','green','violet','amber']).default('neutral'),
+    documentOpenMethod: documentOpenMethodSchema.default("reader"),
     readerFont: z.enum(['system','serif','mono']).default('system'),
     readerSize: z.enum(['s','m','l','xl']).default('m'),
     material: z.enum(['glass','solid']).default('solid'),
@@ -301,7 +304,7 @@ export const defaultSettings: Settings = {
   ...themePreferencesSchema.parse({}),
   uiScale:100, density:"comfortable", accent:"neutral", readerFont:"system", readerSize:"m", material:"solid",
   language: "auto", replyLanguage: "auto", welcomeSeen: false,
-  chatSide: "left",
+  chatSide: "left", documentOpenMethod: "reader",
   converterIdleMinutes: 5, converterOffline: false, enableGenerativeUI: false, modelDisplayNames: {},
   warnAtPercent: 80, priceOverrides: {},
   lastProviderId: null,

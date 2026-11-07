@@ -41,6 +41,8 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
           <div className="document-menu"><DropdownMenuLabel>{tr("library:details")}</DropdownMenuLabel>
             <Button variant="ghost" data-testid="document-details" onClick={()=>{setDetails(menu);setMenu(null);}}><Info/>{tr('library:viewDetails')}</Button>
             <Button variant="ghost" onClick={() => open(menu)}><FileText/>{tr("library:open")}</Button>
+            <Button variant="ghost" onClick={() => {navigate({view:'workspace',documentId:menu.document.id});setMenu(null);}}><FileText/>{tr('library:openReader')}</Button>
+            <Button variant="ghost" onClick={() => void run(() => desktop.invoke('library:openOriginal',{documentId:menu.document.id}))}><ExternalLink/>{tr('library:openOriginal')}</Button>
             <Button variant="ghost"
               onClick={async () => {
                 const title = await prompt(
