@@ -1288,7 +1288,7 @@
   .moodle-page[data-course="true"] .moodle-hero-body { grid-template-columns:minmax(0,1fr); }
   .moodle-page[data-course="true"] .moodle-hero-meta { flex-direction:row; max-width:none; gap:var(--space-3); }
 }
-@media(max-width:600px) {
+@media(max-width:900px) {
   .moodle-page[data-course="true"] .moodle-header-actions { margin-inline-start:0; width:100%; }
   .moodle-detail-actions { flex:1; }
   .moodle-detail-actions .moodle-raw-name { max-width:100%; }

@@ -68,9 +68,14 @@ it('persists the default using existing settings and reports write failures', as
   const host=document.createElement('div'); document.body.append(host); const root=createRoot(host);
   try {
     await act(async () => root.render(<DocumentSettings/>));
+    expect(host.textContent).not.toContain("Original files open in your system’s default app");
     await chooseMethod(getByRole(host,'combobox'), 'Original file in system app');
     expect(desktop.invoke).toHaveBeenCalledWith('settings:set',expect.objectContaining({displayName:'Student',documentOpenMethod:'original'}));
     expect(getByRole(host,'combobox').textContent).toContain('Original file in system app');
+    expect(host.textContent).toContain("Original files open in your system’s default app");
+    await chooseMethod(getByRole(host,'combobox'), 'VStudy reader');
+    expect(host.textContent).not.toContain("Original files open in your system’s default app");
+    await chooseMethod(getByRole(host,'combobox'), 'Original file in system app');
     vi.mocked(desktop.invoke).mockRejectedValueOnce(new Error('Disk full'));
     await chooseMethod(getByRole(host,'combobox'), 'VStudy reader');
     expect(getByRole(host,'alert').textContent).toBeTruthy();

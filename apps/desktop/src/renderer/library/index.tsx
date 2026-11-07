@@ -541,6 +541,7 @@ export function LibraryView() {
         {!showFolders && (
           <>
         <Select
+          className="library-sort"
           aria-label={tr("library:sort")}
           value={query.sort}
           onChange={(e) =>
@@ -559,6 +560,7 @@ export function LibraryView() {
           )}
         </Select>
         <Button variant="outline"
+          className="library-sort"
           aria-label={tr("library:direction")}
           onClick={() =>
             setQuery((q) => ({
@@ -981,6 +983,7 @@ export function LibraryView() {
                   <div className="document-title-cell">
                     <DocumentTitle title={d.title} onOpen={()=>open(item)} details={`${placeOf(item)} · ${d.sourceName.split('.').pop()?.toUpperCase()} · ${item.pageCount!=null?tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)}):''} · ${formatSize(item.sizeBytes,document.documentElement.lang)} · ${format.date(d.createdAt)}`}/>
 
+                    <div className="document-course-inline" title={placeOf(item)}>{placeOf(item)}</div>
                     {item.snippet&&<p className="search-snippet"><Snippet text={item.snippet}/></p>}
                   </div>
                   <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge variant="outline" key={t.id}>{t.name}</Badge>)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>

@@ -63,8 +63,11 @@ it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through exp
   expect(fixture.calls.some(call => call.channel === 'ai-cli:preview')).toBe(false);
   await click('Install');
   expect(document.body.textContent).toContain('Connect your account.');
+  expect(document.querySelector('.ai-cli-success')).toBeNull();
   await click('Sign in');
   expect(document.body.textContent).toContain('Try your first answer.');
+  expect(document.querySelector('.ai-cli-success')).toBeNull();
+  expect(document.querySelector('.ai-cli-chip')?.textContent).toBe('Not tested');
   await click('Test');
   expect(document.body.textContent).toContain('Ready to study');
   expect(document.body.textContent).toContain('Your tool answered. Ready to study.');
@@ -453,4 +456,16 @@ it('does not launch after closing while first-click consent is pending', async (
   await act(async () => root.render(null));
   await act(async () => finish({ ok: true }));
   expect(runs()).toHaveLength(0);
+});
+
+it('replaces Ready with an error after an offline test, and recovers on retry', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, version: '1.0.0', path: '/claude', status: 'ready', tested: false });
+  await mount();
+  expect(document.querySelector('.ai-cli-chip')?.textContent).toBe('Not tested');
+  fixture.fail('offline');
+  await click('Test');
+  expect(document.querySelector('.ai-cli-chip')?.textContent).not.toBe('Ready');
+  expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain('No internet connection');
+  fixture.fail(null); await click('Try again'); await click('Test');
+  expect(document.querySelector('.ai-cli-chip')?.textContent).toBe('Ready');
 });
