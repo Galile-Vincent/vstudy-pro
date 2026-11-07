@@ -13,7 +13,7 @@ import { Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, FileText, Pa
 import { errorText, statusText } from "../status";
 import { conversionStatus } from "../../shared/status";
 import { useTranslation } from "react-i18next";
-import { applyLanguage } from "../i18n";
+import { applyLanguage, useFormat } from "../i18n";
 import { tr } from '../../shared/i18n';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -37,6 +37,7 @@ import { ProviderSettings, type Providers } from "../providers";
 export function Workspace() {
   const { route, navigate } = useNavigate();
   useTranslation();
+  const format = useFormat();
   const [practice, setPractice] = useState(() => { try { return sessionStorage.getItem('vstudy:practice'); } catch { return null; } });
   const [settings, setSettings] = useState<Settings>(defaultSettings),
     [connected, setConnected] = useState(false);
@@ -52,6 +53,7 @@ export function Workspace() {
   const [selection, setSelection] = useState<Selection | null>(null),
     [showSettings, setShowSettings] = useState(false),
     [notice, setNotice] = useState(""),
+    [undo, setUndo] = useState<{ message: string; run: () => Promise<void> } | null>(null),
     [busy, setBusy] = useState(false),
     [loadingSource, setLoadingSource] = useState(false);
 
@@ -93,7 +95,6 @@ export function Workspace() {
   const [progress, setProgress] = useState<Record<string, string>>({});
   const [readerVersion,setReaderVersion] = useState<'original'|'ai'>('original');
   const [readerRevision,setReaderRevision] = useState(0);
-  const [aiOpen,setAiOpen] = useState(0);
   const [partialSource, setPartialSource] = useState("");
   useEffect(() => {
     setPartialSource("");
@@ -134,6 +135,22 @@ export function Workspace() {
       ),
     [],
   );
+  const removeDocument = async (id: Document["id"]) => {
+    try {
+      await desktop.invoke("library:documents:softDelete", { documentId: id });
+      const list = await desktop.invoke("documents:list", {});
+      setDocuments(list); setDocumentId(list[0]?.id ?? null);
+      if (list[0]) navigate({ view: 'workspace', documentId: list[0].id });
+      const message = tr("library:deleted", { count: 1, formatted: format.number(1) });
+      setNotice(message);
+      setUndo({ message, run: async () => {
+        await desktop.invoke("library:documents:restore", { documentId: id });
+        setDocuments(await desktop.invoke("documents:list", {})); setDocumentId(id);
+        navigate({ view: 'workspace', documentId: id });
+        setNotice("");
+      } });
+    } catch (error) { report(error); }
+  };
   const refreshProviders = useCallback(async () => {
     const list = await desktop.invoke("providers:list", {});
     setProviders(list);
@@ -423,14 +440,8 @@ export function Workspace() {
       <div className="pane-toolbar">
         <ContextCoach inline/>
         <span className="eyebrow">{doc?.sourceName ?? tr('common:reading_space')}</span>
-        {doc && <button className="icon-button" title={tr('common:delete_document')} aria-label={tr('common:delete_document')} onClick={() => {
-          if (!window.confirm(tr('library:delete_document',{title:doc.title}))) return;
-          void desktop.invoke("documents:delete", { documentId: doc.id }).then(async () => {
-            const list = await desktop.invoke("documents:list", {}); setDocuments(list); setDocumentId(list[0]?.id ?? null);
-            navigate(list[0] ? { view: 'workspace', documentId: list[0].id } : 'library');
-          }).catch(report);
-        }}><Trash2 size={16} /></button>}
-        {doc && <AiParseControls key={`${doc.id}-${aiOpen}`} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse || aiOpen>0} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
+        {doc && <button className="icon-button" title={tr('common:delete_document')} aria-label={tr('common:delete_document')} onClick={() => void removeDocument(doc.id)}><Trash2 size={16} /></button>}
+        {doc && <AiParseControls key={doc.id} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
         <span className="muted">
           {doc?.status === "ready" ? tr('novice:ready_to_read') : ""}
         </span>
@@ -479,7 +490,7 @@ export function Workspace() {
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
-        <>{doc.mime !== 'text/markdown' && doc.mime !== 'text/plain' && <div className="document-conversion-hint"><span>{tr('library:ai_parse.poor_conversion')}</span><Button variant="ghost" size="sm" onClick={()=>setAiOpen(value=>value+1)}>{tr('library:ai_parse.title')}</Button></div>}<DocumentMarkdown
+        <><DocumentMarkdown
           key={`${doc.id}-${readerVersion}-${readerRevision}`}
           version={readerVersion}
           source={source}
@@ -551,6 +562,7 @@ export function Workspace() {
       {notice && (
         <div className="notice" role="status">
           <span>{notice}</span>
+          {undo?.message === notice && <Button variant="outline" size="sm" onClick={() => void undo.run().catch(report)}>{tr('library:undo')}</Button>}
           <button
             aria-label={tr('common:dismiss_notification')}
             onClick={() => setNotice("")}
