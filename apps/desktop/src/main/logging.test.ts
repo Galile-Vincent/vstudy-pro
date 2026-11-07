@@ -141,3 +141,13 @@ it.each([
 it('keeps ordinary words that merely contain key', () => {
   expect(redact('keyboard monkey hotkey shortcut')).toBe('keyboard monkey hotkey shortcut');
 });
+
+it.each([
+ 'key: Enter','cache key: course:12:files','primary key = id','{"key":"a"}',
+ 'monkey=banana','hotkey=cmd','/v1/key/abc123/items','keyboard shortcut',
+])('preserves non-secret key diagnostics: %s',value=>{expect(redact(value)).toBe(value);});
+it.each([
+ 'key=0123456789abcdef0123456789abcdef','key: 0123456789abcdef0123456789abcdef',
+ '{"key":"0123456789abcdef0123456789abcdef"}','autologin key=0123456789abcdef0123456789abcdef',
+ 'AIzaSyA1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q',
+])('redacts token-shaped key diagnostics: %s',value=>{expect(redact(value)).toContain('[redacted]');});
