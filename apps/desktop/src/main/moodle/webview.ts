@@ -70,7 +70,7 @@ export class MoodleWebviews {
     const download = (event:Electron.Event,item:Electron.DownloadItem,contents:WebContents) => {
       event.preventDefault();
       const pane = [...this.panes.values()].find(p => p.view.webContents === contents);
-      if (pane) void this.importFile(pane,item.getURL(),item.hasUserGesture());
+      if (pane) { this.takeGesture(pane); void this.importFile(pane,item.getURL(),item.hasUserGesture()); }
     };
     browser.on('will-download',download);
     const hasCookie = async () => (await browser.cookies.get({url:account.siteUrl + '/'})).some(cookie => cookie.name.startsWith('MoodleSession') && !!cookie.value);
@@ -98,7 +98,7 @@ export class MoodleWebviews {
     const view = new WebContentsView({webPreferences:{session:account.browser,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,navigateOnDragDrop:false,spellcheck:false}});
     const state:WebviewState = {id:randomUUID(),status:'connecting',url:publicWebviewUrl(url),title:tr('webview:title'),secure:false,canGoBack:false,canGoForward:false,zoom:1,error:null,retryAt:null,documentId:null};
     const cleanup = () => this.closeOwner(owner.id);
-    const pane:Pane = {owner,window,view,account,state,target:url,retries:0,visible:false,timer:undefined,keepalive:setInterval(() => void this.keepalive(pane),4 * 60_000),abort:new AbortController(),importing:false,externalPending:false,cleanup,gestureAt:target.kind === 'file' ? Date.now() : 0,imports:[]};
+    const pane:Pane = {owner,window,view,account,state,target:url,retries:0,visible:false,timer:undefined,keepalive:setInterval(() => void this.keepalive(pane),4 * 60_000),abort:new AbortController(),importing:false,externalPending:false,cleanup,gestureAt:0,imports:[]};
     this.panes.set(owner.id,pane);
     window.contentView.addChildView(view);
     view.setVisible(false);
@@ -144,7 +144,10 @@ export class MoodleWebviews {
     try {
       if (this.dependencies.account(pane.account.account.id).status !== 'connected') throw new WebviewSessionError('session-expired');
       await pane.account.auth.ensure(force);
-      if (!pane.abort.signal.aborted) await this.navigate(pane,pane.target);
+      if (!pane.abort.signal.aborted) {
+        if (webviewFile(pane.target,pane.account.policy)) pane.gestureAt = Date.now();
+        await this.navigate(pane,pane.target);
+      }
     } catch (error) { this.fail(pane,error); }
   }
   private guard(pane:Pane,url:string): boolean {
@@ -171,10 +174,10 @@ export class MoodleWebviews {
     pane.state.url = publicWebviewUrl(url); pane.state.secure = new URL(url).protocol === 'https:';
     pane.target = url;
   }
-  private takeGesture(pane:Pane) { const fresh = Date.now() - pane.gestureAt <= GESTURE_WINDOW_MS; pane.gestureAt = 0; return fresh; }
+  private takeGesture(pane:Pane) { const fresh = pane.gestureAt > 0 && Date.now() - pane.gestureAt <= GESTURE_WINDOW_MS; pane.gestureAt = 0; return fresh; }
   private async importFile(pane:Pane,url:string,gesture:boolean) {
     if (pane.importing || pane.abort.signal.aborted) return;
-    if (!gesture) { log({phase:'moodle-webview-import-refused',reason:'no-gesture'}); return; }
+    if (!gesture) { log({phase:'moodle-webview-import-refused',reason:'no-gesture'}); this.fail(pane,new WebviewSessionError('blocked')); return; }
     const now = Date.now();
     pane.imports = pane.imports.filter(at => now - at < IMPORT_WINDOW_MS);
     if (pane.imports.length >= IMPORT_LIMIT) { log({phase:'moodle-webview-import-refused',reason:'rate-limit'}); this.fail(pane,new WebviewSessionError('blocked')); return; }
