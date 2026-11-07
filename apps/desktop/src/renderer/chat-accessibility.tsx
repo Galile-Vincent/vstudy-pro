@@ -7,6 +7,10 @@ import { copyAnswer } from './copy-answer';
 import { documentCitationSchema } from '../shared';
 import { tr } from '../shared/i18n';
 import { TooltipIconButton } from './components/assistant-ui/elements/tooltip-icon-button';
+export function announcementExcerpt(plain: string): string {
+  const points = Array.from(plain);
+  return `${points.slice(0, 240).join('').trimEnd()}${points.length > 240 ? '…' : ''}`;
+}
 export function ChatAnnouncement() {
   useTranslation();
   const announcement = useAuiState(s => {
@@ -15,7 +19,7 @@ export function ChatAnnouncement() {
     if (!last || last.role !== 'assistant') return '';
     const text = last.content.filter(p => p.type === 'text').map(p => p.text).join('\n');
     const plain = plainText(text, documentCitationSchema.array().safeParse(last.metadata.custom.citations).data ?? []);
-    return `${tr(last.status?.type === 'incomplete' ? last.status.reason === 'error' ? 'common:answer_error' : 'common:answer_stopped' : 'common:answer_complete')}: ${plain.slice(0,240).trimEnd()}${plain.length > 240 ? '…' : ''}`;
+    return `${tr(last.status?.type === 'incomplete' ? last.status.reason === 'error' ? 'common:answer_error' : 'common:answer_stopped' : 'common:answer_complete')}: ${announcementExcerpt(plain)}`;
   });
   return <span data-testid="chat-announcement" role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</span>;
 }

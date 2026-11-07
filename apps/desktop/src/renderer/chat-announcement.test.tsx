@@ -3,7 +3,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { expect, it } from 'vitest';
 import { AssistantRuntimeProvider, ComposerPrimitive, useLocalRuntime, type ChatModelAdapter } from '@assistant-ui/react';
-import { ChatAnnouncement } from './chat-accessibility';
+import { ChatAnnouncement, announcementExcerpt } from './chat-accessibility';
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT=true;
 function Harness({adapter}:{adapter:ChatModelAdapter}) {
  const runtime=useLocalRuntime(adapter);
@@ -27,4 +27,11 @@ it('announces a 5k-token answer once at completion and never announces token del
  expect(texts.filter(t=>t==='Assistant is answering')).toHaveLength(1);
  expect(texts).toHaveLength(2);expect(region.textContent).toBe('Answer complete: ' + ('word '.repeat(48)).trim() + '…');
  observer.disconnect();await act(async()=>root.unmount());host.remove();
+});
+it('cuts the announced excerpt on code points so no lone surrogate precedes the ellipsis',()=>{
+ const excerpt=announcementExcerpt('a'.repeat(239)+'😀'+'tail');
+ expect(excerpt).toBe('a'.repeat(239)+'😀…');
+ expect(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(excerpt)).toBe(false);
+ expect(announcementExcerpt('短'.repeat(240))).toBe('短'.repeat(240));
+ expect(announcementExcerpt('短'.repeat(241))).toBe('短'.repeat(240)+'…');
 });
