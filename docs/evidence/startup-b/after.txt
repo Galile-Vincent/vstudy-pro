@@ -1,0 +1,7 @@
+10:43:16 AM [vite] (client) Re-optimizing dependencies because vite config has changed
+documents=1000 textBytes=15360 ftsCheckMs=267.4 rebuildMs=376.4 heartbeatTicks=63 maxHeartbeatGapMs=6.4
+documents=3000 textBytes=15360 ftsCheckMs=798.2 rebuildMs=1112.3 heartbeatTicks=188 maxHeartbeatGapMs=6.6
+documents=6000 textBytes=15360 ftsCheckMs=1567.3 rebuildMs=2328.6 heartbeatTicks=400 maxHeartbeatGapMs=6.6
+largeDbBytes=514039808 integrityCheckMs=1779.0 quickCheckMs=1900.0
+relationalDbBytes=200196096 integrityCheckMs=175.1 quickCheckMs=33.1
+pending=3 migrationMs=226.2 snapshots=1

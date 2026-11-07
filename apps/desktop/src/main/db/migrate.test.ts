@@ -7,7 +7,7 @@
 /** Every released schema must upgrade without losing existing records or mutating its backup. */
 import { expect, it } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { mkdtempSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, rmSync, existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { migrate, migrationChecksum } from './migrate';
@@ -73,4 +73,44 @@ it('accepts chat history v18 after a pre-merge storage v19 database and restores
     expect(db.prepare('PRAGMA integrity_check').get()?.integrity_check).toBe('ok');
     expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
   } finally {db.close();}
+});
+
+it.each([false,true])('snapshots a three-migration batch before its first mutation (failure=%s)', fails => {
+  const dir = mkdtempSync(join(tmpdir(), 'migration-batch-')), path = join(dir, 'test.sqlite');
+  const db = new DatabaseSync(path);
+  const first = {version: 1, sql: "CREATE TABLE sentinel(value TEXT); INSERT INTO sentinel VALUES('original')"};
+  const pending = [
+    {version: 2, sql: "UPDATE sentinel SET value='changed'"},
+    {version: 3, sql: 'CREATE TABLE added(value TEXT)'},
+    {version: 4, sql: fails ? 'INVALID SQL' : 'CREATE TABLE finished(value TEXT)'},
+  ];
+  try {
+    migrate(db, [first]);
+    if (fails) expect(() => migrate(db, [first, ...pending], path)).toThrow();
+    else migrate(db, [first, ...pending], path);
+    expect(readdirSync(dir).filter(name => name.endsWith('.bak'))).toEqual(['test.sqlite.before-v2.bak']);
+    expect(db.prepare('SELECT version FROM migrations ORDER BY version').all().map(row => row.version)).toEqual(fails ? [1,2,3] : [1,2,3,4]);
+    const backup = new DatabaseSync(path + '.before-v2.bak');
+    try {
+      expect(backup.prepare('SELECT value FROM sentinel').get()?.value).toBe('original');
+      expect(backup.prepare('SELECT version FROM migrations').all()).toEqual([{version:1}]);
+      expect(backup.prepare('PRAGMA integrity_check').get()?.integrity_check).toBe('ok');
+      migrate(backup, [first, ...pending.slice(0,2), {version:4,sql:'CREATE TABLE repaired(value TEXT)'}]);
+      expect(backup.prepare('SELECT count(*) count FROM migrations').get()?.count).toBe(4);
+    } finally { backup.close(); }
+  } finally { db.close(); rmSync(dir, {recursive:true,force:true}); }
+});
+
+it('keeps the three newest successful batch snapshots and preserves the first snapshot on retry', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'migration-retention-')), path = join(dir, 'test.sqlite');
+  const db = new DatabaseSync(path);
+  const history = Array.from({length:6}, (_, i) => ({version:i+1,sql:`CREATE TABLE v${i+1}(value TEXT)`}));
+  try {
+    migrate(db, history.slice(0,1));
+    for (let i=2; i<=6; i++) migrate(db, history.slice(0,i), path);
+    expect(readdirSync(dir).filter(name=>name.endsWith('.bak')).sort()).toEqual([4,5,6].map(v=>`test.sqlite.before-v${v}.bak`));
+    const snapshot = readFileSync(path+'.before-v6.bak');
+    migrate(db,history,path);
+    expect(readFileSync(path+'.before-v6.bak')).toEqual(snapshot);
+  } finally { db.close(); rmSync(dir,{recursive:true,force:true}); }
 });
