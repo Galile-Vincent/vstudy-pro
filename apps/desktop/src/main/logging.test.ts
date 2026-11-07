@@ -151,3 +151,40 @@ it.each([
  '{"key":"0123456789abcdef0123456789abcdef"}','autologin key=0123456789abcdef0123456789abcdef',
  'AIzaSyA1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q',
 ])('redacts token-shaped key diagnostics: %s',value=>{expect(redact(value)).toContain('[redacted]');});
+
+const leak: [string, string, string][] = [
+ ['django SECRET_KEY', 'SECRET_KEY=django-insecure-9x8y7z6w5v4u3t2s1r0q', 'django-insecure'],
+ ['azure apim hdr', 'Ocp-Apim-Subscription-Key: 0123456789abcdef0123456789abcdef', '0123456789abcdef'],
+ ['aws secret env', 'AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY', 'wJalrXUtnFEMI'],
+ ['stripe/hex STRIPE_KEY', 'STRIPE_KEY=0123456789abcdef0123456789abcdef', '0123456789abcdef'],
+ ['mistral in env ENCRYPTION_KEY', 'ENCRYPTION_KEY: Zm9vYmFyYmF6cXV4MTIzNDU2Nzg5MA', 'Zm9vYmFy'],
+ ['access_key json', '{"access_key":"AKIAIOSFODNN7EXAMPLE0123456789abc"}', 'AKIAIOSFODNN7EXAMPLE0123'],
+ ['secret_key json', '{"secret_key":"0123456789abcdef0123456789abcdef"}', '0123456789abcdef'],
+ ['base64 key tail', 'key=AbCdEfGhIjKl+MnOpQrStUv/WxYz0123==', 'MnOpQrStUv'],
+ ['jwt key tail', 'key=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV', 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV'],
+ ['key quoted w/ symbol', 'key: "my-s3cret-v@lue-9999"', 'v@lue'],
+ ['plain subscription key=', 'subscription-key=0123456789abcdef0123456789abcdef', '0123456789abcdef'],
+ ['key= hex 11 chars', 'key=0123456789a', '0123456789a'],
+ ['licence key', 'license key: ABCDE-12345-FGHIJ-67890', 'FGHIJ'],
+];
+it.each(leak)('fully redacts reviewer secret case: %s', (_name, input) => {
+  const secret = input.match(/[:=]\s*["']?([^"'\s}]+)/)![1]!;
+  expect(redact(input)).toContain('[redacted]');
+  expect(redact(input)).not.toContain(secret);
+});
+it.each(['Enter key: Enter', '{"key":"Enter"}', 'primary key = id', 'keyboard shortcut Cmd+K', 'monkey=banana', 'hotkey=cmd', '/v1/key/abc123/items', 'Missing key "title"', 'index key is missing'])('preserves ordinary key text: %s', input => {
+  expect(redact(input)).toBe(input);
+});
+it.each([
+  ['assignments', 'key='.repeat(262144)],
+  ['base64', 'ENCRYPTION_KEY=' + 'aB9+/='.repeat(174763)],
+  ['identifier', 'x'.repeat(1048576)],
+  ['dotted', 'a.'.repeat(524288)],
+  ['quotes', 'key: "'.repeat(174763)],
+])('bounds one MB hostile input: %s', (shape, input) => {
+  const started = performance.now();
+  redact(input);
+  const elapsed = performance.now() - started;
+  process.stdout.write(`${shape}: ${elapsed.toFixed(2)} ms\n`);
+  expect(elapsed).toBeLessThan(50);
+});
