@@ -269,3 +269,42 @@ it.each(['opt-out','deletion'])('preserves analytics decisions made after stagin
   }finally{restored.close();}
  }finally{store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
+
+it.each(['locked', 'garbage'])('completes recovery with staged analytics when live database is %s', async mode => {
+  const root=await mkdtemp(join(tmpdir(),'restore-unreadable-source-'));
+  const target=await mkdtemp(join(tmpdir(),'restore-unreadable-target-'));
+  let lock: import('node:sqlite').DatabaseSync | undefined;
+  try {
+    const {store}=await fixture(root);
+    const receiving=await fixture(target);
+    const {AnalyticsService}=await import('../analytics/service');
+    const config={enabled:true,host:'https://analytics.example',key:'test'};
+    const local=new AnalyticsService(receiving.store.db,config,{});
+    local.setConsent(true);
+    const stagedState=local.getState();
+    const zip=join(target,'backup.zip');
+    await exportBackup(store,root,zip);store.close();
+    await stageRestore(target,zip);receiving.store.close();
+    if(mode==='locked') {
+      const {DatabaseSync}=await import('node:sqlite');
+      lock=new DatabaseSync(join(target,'vstudy.sqlite'));
+      lock.exec('PRAGMA locking_mode=EXCLUSIVE;BEGIN EXCLUSIVE');
+    } else {
+      await writeFile(join(target,'vstudy.sqlite'),'garbage'.repeat(1000));
+      await rm(join(target,'vstudy.sqlite-wal'),{force:true});
+      await rm(join(target,'vstudy.sqlite-shm'),{force:true});
+    }
+    await expect(recoverRestore(target)).resolves.toBe(true);
+    lock?.exec('ROLLBACK');lock?.close();lock=undefined;
+    expect(await recoverRestore(target)).toBe(false);
+    expect(await readdir(target)).not.toContain('restore-pending.json');
+    const restored=openStore(join(target,'vstudy.sqlite'));
+    try {
+      expect(new AnalyticsService(restored.db,config,{}).getState()).toEqual(stagedState);
+      expect(restored.documents.list()).toHaveLength(1);
+    } finally {restored.close();}
+  } finally {
+    lock?.exec('ROLLBACK');lock?.close();
+    await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});
+  }
+});

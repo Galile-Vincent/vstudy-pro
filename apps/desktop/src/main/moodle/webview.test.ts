@@ -13,6 +13,7 @@ const mock = vi.hoisted(() => ({
   log: vi.fn(),
 }));
 vi.mock('../logging', () => ({ log: mock.log }));
+vi.mock('./webview-transport', () => ({ exchangeWebviewCookie: vi.fn(async () => undefined), probeWebviewSession: vi.fn(async () => true) }));
 vi.mock('./webview-files', () => ({ importWebviewFile: () => mock.imports() }));
 vi.mock('electron', async () => {
   const { EventEmitter } = await import('node:events');
@@ -54,7 +55,7 @@ const account = { status: 'connected', id: accountId, siteUrl: site, siteName: '
 const users: MoodleWebviews[] = [];
 async function open() {
   const owner = Object.assign(new EventEmitter(), { id: 1, isDestroyed: () => false, focus: vi.fn(), getZoomFactor: () => 1 }) as unknown as WebContents;
-  const views = new MoodleWebviews({ account: () => account as never, credentials: async () => ({ token: 't', privateToken: 'p' }), file: () => ({ account: account as never, url: file() }), documents: { importPath: vi.fn() } as never });
+  const views = new MoodleWebviews({ request: async () => new Response(JSON.stringify({key:'autologin-test-key'})), account: () => account as never, credentials: async () => ({ token: 't', privateToken: 'p' }), file: () => ({ account: account as never, url: file() }), documents: { importPath: vi.fn() } as never });
   users.push(views);
   const state = views.open(owner, accountId, { kind: 'page', url: `${site}/course/view.php?id=2` });
   await vi.waitFor(() => expect(mock.panes.at(-1)!.contents.loadURL).toHaveBeenCalled());
@@ -124,13 +125,14 @@ it('cancels scripted downloads and accepts only downloads the browser tied to a 
   };
   expect(download(false).preventDefault).toHaveBeenCalled(); await settle();
   expect(mock.imports).not.toHaveBeenCalled();
+  click(contents);
   expect(download(true).preventDefault).toHaveBeenCalled(); await settle();
   expect(mock.imports).toHaveBeenCalledTimes(1);
 });
 
 it('keeps the file the user opened from the app importable without a page gesture', async () => {
   const owner = Object.assign(new EventEmitter(), { id: 2, isDestroyed: () => false, focus: vi.fn(), getZoomFactor: () => 1 }) as unknown as WebContents;
-  const views = new MoodleWebviews({ account: () => account as never, credentials: async () => ({ token: 't', privateToken: 'p' }), file: () => ({ account: account as never, url: file() }), documents: { importPath: vi.fn() } as never });
+  const views = new MoodleWebviews({ request: async () => new Response(JSON.stringify({key:'autologin-test-key'})), account: () => account as never, credentials: async () => ({ token: 't', privateToken: 'p' }), file: () => ({ account: account as never, url: file() }), documents: { importPath: vi.fn() } as never });
   users.push(views);
   views.open(owner, accountId, { kind: 'file', fileId: '1c9b5f0e-0f84-4d4e-8f44-3c1d2a5b6e70' });
   await vi.waitFor(() => expect(mock.imports).toHaveBeenCalledTimes(1));
@@ -175,4 +177,60 @@ it('imports an app-opened file after slow authentication',async()=>{
  views.open(owner,accountId,{kind:'file',fileId:'1c9b5f0e-0f84-4d4e-8f44-3c1d2a5b6e70'});
  await settle();vi.setSystemTime(Date.now()+11_000);release();
  await vi.waitFor(()=>expect(mock.imports).toHaveBeenCalledTimes(1));
+});
+
+const download = (browser: EventEmitter, contents: EventEmitter, name: string, gesture = true) =>
+  browser.emit('will-download', { preventDefault: vi.fn() }, { getURL: () => file(name), hasUserGesture: () => gesture }, contents);
+
+it('spends one click across navigation and a subsequent download', async () => {
+  const { contents, browser } = await open();
+  click(contents);
+  navigate(contents, file('a.pdf')); await settle();
+  download(browser, contents, 'b.pdf'); await settle();
+  expect(mock.imports).toHaveBeenCalledTimes(1);
+});
+it('spends one click across two browser-reported user downloads', async () => {
+  const { contents, browser } = await open();
+  click(contents);
+  download(browser, contents, 'a.pdf'); await settle();
+  download(browser, contents, 'b.pdf'); await settle();
+  expect(mock.imports).toHaveBeenCalledTimes(1);
+});
+it('does not authorize a scripted file import after page reload', async () => {
+  const { contents, views, owner, state } = await open();
+  vi.setSystemTime(1_000_000 + 60_000);
+  await views.action(owner, state.id, 'reload'); await settle();
+  navigate(contents, file('evil.pdf')); await settle();
+  expect(mock.imports).not.toHaveBeenCalled();
+});
+it('does not authorize a scripted file import after page reconnect', async () => {
+  const { contents, views, owner, state } = await open();
+  vi.setSystemTime(1_000_000 + 60_000);
+  await views.action(owner, state.id, 'reconnect'); await settle();
+  navigate(contents, file('evil.pdf')); await settle();
+  expect(mock.imports).not.toHaveBeenCalled();
+});
+
+it.each(['reload', 'reconnect'] as const)('imports an app file again on %s without leaving page authorization', async action => {
+  const {views,owner,contents}=await open();
+  const state=views.open(owner,accountId,{kind:'file',fileId:'1c9b5f0e-0f84-4d4e-8f44-3c1d2a5b6e70'});
+  await vi.waitFor(()=>expect(mock.imports).toHaveBeenCalledTimes(1));
+  await views.action(owner,state.id,action);
+  await vi.waitFor(()=>expect(mock.imports).toHaveBeenCalledTimes(2));
+  navigate(mock.panes.at(-1)!.contents,file('scripted.pdf'));await settle();
+  expect(mock.imports).toHaveBeenCalledTimes(2);
+  expect(contents.loadURL).toHaveBeenCalledTimes(1);
+});
+it('requires a click even if Chromium reports a user download', async () => {
+  const {contents,browser}=await open();
+  download(browser,contents,'scripted.pdf');await settle();
+  expect(mock.imports).not.toHaveBeenCalled();
+  click(contents);download(browser,contents,'clicked.pdf');await settle();
+  expect(mock.imports).toHaveBeenCalledTimes(1);
+});
+it('uses local gesture tracking when the browser has no gesture API', async () => {
+  const {contents,browser}=await open();
+  click(contents);
+  browser.emit('will-download',{preventDefault:vi.fn()},{getURL:()=>file()},contents);
+  await settle();expect(mock.imports).toHaveBeenCalledTimes(1);
 });
