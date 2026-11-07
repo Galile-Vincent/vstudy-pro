@@ -4,6 +4,7 @@
  * Request and response validation and sender ownership stay at the IPC boundary.
  * @packageDocumentation
  */
+import { searchInWorker } from '../services/search-runner';
 import { createApiAdapter } from "../providers/api";
 import { validateOptions } from "../providers/models";
 import { app } from "electron";
@@ -38,7 +39,7 @@ export function registerChatIpc(
   implemented.add('chats:get');
   registrar.handle('chats:get', ({conversationId}) => store.conversations.get(conversationId));
   implemented.add('chats:search'); implemented.add('chats:update');
-  registrar.handle('chats:search', input => store.chatHistory.search(input));
+  registrar.handle('chats:search', input => input.query ? searchInWorker('chats:search', input, String(store.db.prepare('PRAGMA database_list').get()!.file), '', 1500) : store.chatHistory.search(input));
   registrar.handle('chats:update', ({conversationId,patch}) => { store.chatHistory.update(conversationId,patch); return {ok:true}; });
   const channels = [
     "providers:test",

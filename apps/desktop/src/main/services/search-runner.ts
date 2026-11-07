@@ -18,7 +18,7 @@ export async function disposeSearchWorkers(): Promise<void> {
 }
 export const SEARCH_TIMEOUT = 'Search took too long; refine your query';
 /** Execute a bounded search in a killable process and reject when its deadline expires. */
-export function searchInWorker<C extends 'library:search' | 'library:documents:list'>(channel: C, request: IpcRequest<C>, path: string, root: string, timeoutMs = 1500, entry = join(__dirname, 'search-worker.js')): Promise<IpcResponse<C>> {
+export function searchInWorker<C extends 'library:search' | 'library:documents:list' | 'chats:search'>(channel: C, request: IpcRequest<C>, path: string, root: string, timeoutMs = 1500, entry = join(__dirname, 'search-worker.js')): Promise<IpcResponse<C>> {
   if (stopped) return Promise.reject(new Error("Search service closed"));
   return new Promise((resolve, reject) => {
     // A process can be killed while SQLite is inside native code; V8 thread termination cannot guarantee that.
@@ -39,7 +39,7 @@ export function searchInWorker<C extends 'library:search' | 'library:documents:l
     worker.once('message', value => finish(value.error ? new Error(value.error) : undefined, value.result));
     (worker as EventEmitter).once('error', error => finish(error));
     (worker as EventEmitter).once('exit', () => { if (!settled) finish(new Error('Search worker stopped')); });
-    const job = {kind:channel==='library:search'?'search':'list',request,path,root};
+    const job = {kind:channel==='chats:search'?'chat':channel==='library:search'?'search':'list',request,path,root};
     if (electron) (worker as Electron.UtilityProcess).postMessage(job); else (worker as import('node:child_process').ChildProcess).send(job);
   });
 }
