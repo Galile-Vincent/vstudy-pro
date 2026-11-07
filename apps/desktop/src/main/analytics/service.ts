@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { createHash, randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 import { analyticsState, onboarding, rendererEvents, type Onboarding } from '../../shared/analytics';
+import { PRIVACY_EMAIL, WEBSITE_URL } from '../../shared/website';
 import { recordEgress } from '../services/egress';
 import { sanitizeEvent, sanitizeQueuedEvent, type AnalyticsEvent } from './schema';
 import type { analyticsConfig } from './config';
@@ -83,7 +84,7 @@ export class AnalyticsService {
   requestDeletion() {
     this.setConsent(false);
     this.safe(() => this.write('deletion_pending',true));
-    return {pending:true as const,installation_id:this.installationId,method:'contact' as const,contact_url:'https://github.com/ava-apple/vstudy-pro',instructions:'Copy this installation ID and contact the app publisher through the support contact in the app distribution. Request deletion of the PostHog person and all associated events. Do not post the ID publicly.'};
+    return {pending:true as const,installation_id:this.installationId,method:'contact' as const,contact_url:`${WEBSITE_URL}/en/privacy/`,instructions:`Copy this installation ID and email it to ${PRIVACY_EMAIL}. Ask for deletion of the PostHog person and all associated events. Do not post the ID publicly.`};
   }
   rendererTrack(event:string,properties:unknown,eventId?:string) {
     if (event === 'onboarding_started') {

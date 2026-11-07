@@ -1,8 +1,5 @@
 name: Deploy website to GitHub Pages
 on:
-  push:
-    branches: [main]
-    paths: ['apps/website/**', 'apps/desktop/package.json', 'apps/desktop/src/shared/themes/palettes.json', 'pnpm-lock.yaml', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read

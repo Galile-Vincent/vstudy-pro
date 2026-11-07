@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname, extname } from 'node:path';
 
 const root = fileURLToPath(new URL('../dist/', import.meta.url));
-const base = (process.env.BASE_PATH ?? '/vstudy-pro').replace(/\/$/, '');
+const base = (process.env.BASE_PATH ?? '/').replace(/\/$/, '');
 async function files(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
   return (await Promise.all(entries.map(entry => entry.isDirectory() ? files(join(dir, entry.name)) : join(dir, entry.name)))).flat();

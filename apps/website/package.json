@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "typecheck": "astro check",
     "lint": "astro check",
-    "verify:static": "node scripts/verify-static.mjs"
+    "verify:static": "node scripts/verify-static.mjs",
+    "deploy": "astro build && pnpm dlx wrangler@4 pages deploy dist --project-name vstudy --branch main"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.4",

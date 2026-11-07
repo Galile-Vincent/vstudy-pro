@@ -8,7 +8,7 @@ Anything in this list that is not yet decided renders on the page as highlighted
 
 | Item | Where | What to do |
 |---|---|---|
-| Contact email | `CONTACT_EMAIL` in `apps/website/src/config.ts` | Put a monitored address there. Until then the Contact sections show a highlighted note and only the GitHub issues route. A public issue is a weak route for privacy requests, so an email is strongly recommended. |
+| Contact email | `CONTACT_EMAIL` in `apps/website/src/config.ts` and `PRIVACY_EMAIL` in `apps/desktop/src/shared/website.ts` | Done: vincent@vcstudio.app, forwarded by Cloudflare Email Routing. Keep the two constants equal. |
 | Governing law and venue | `GOVERNING_LAW` in `config.ts`, used by Terms, "Governing law and general terms" | Replace with a sentence fragment such as "the laws of Taiwan, and the courts of ... have jurisdiction". The sentence is "These terms are governed by {{law}}." in all three languages, so check the grammar of the fragment per language. |
 | Who "we" are | Privacy, "Who we are" | Replace the marker with the legal name or entity that decides what is collected. The page cannot name a controller until you do. |
 | Retention periods (proposal) | Privacy, "How long we keep data" | Proposed: analytics events 12 months, then deleted. Confirmed newsletter subscription until unsubscribe, then address removed within 30 days apart from a minimal opt-out record. Unconfirmed sign-ups 7 days. Confirm or change each, then remove the proposal marker. Also configure PostHog and Resend to match. |
