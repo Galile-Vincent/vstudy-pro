@@ -6,9 +6,9 @@
  */
 import { EventEmitter } from 'node:events';
 import { SearchService } from '../services/search';
-import { app } from 'electron';
+import { app, shell } from 'electron';
 import { it, expect, vi } from 'vitest';
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync, realpathSync, symlinkSync, linkSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { IpcMainInvokeEvent } from 'electron';
@@ -127,4 +127,50 @@ it('aborts active maintenance on disposal and supplies the app-owned userData pa
     await dispose.waitForIdle();
     expect(signal?.aborted).toBe(true);
   } finally { dispose(); rebuild.mockRestore(); registrar.dispose(); store.close(); rmSync(mocked.root,{recursive:true,force:true}); }
+});
+
+it('opens only a stored, contained regular original through the trusted IPC boundary', async () => {
+  mocked.root = mkdtempSync(join(tmpdir(), 'library-original-'));
+  const directory = join(mocked.root, 'library', 'a'.repeat(64));
+  mkdirSync(directory, {recursive:true});
+  const sourcePath = join(directory, 'source.pdf');
+  const outside = join(mocked.root, 'outside.pdf');
+  writeFileSync(sourcePath, '%PDF-original'); writeFileSync(outside, '%PDF-outside');
+  const store = openStore(':memory:');
+  const document = store.documents.insert(documentSchema.parse({id:'00000000-0000-4000-8000-000000000001', title:'Lecture', sourceName:'lecture.pdf', sourceHash:'a'.repeat(64), sourcePath, markdownPath:join(directory,'content.md'), mime:'application/pdf', status:'failed', error:'Conversion unavailable', createdAt:new Date().toISOString()}));
+  const handlers = new Map<string,(event:IpcMainInvokeEvent,payload:unknown)=>unknown>();
+  let trusted = true;
+  const registrar = createIpcRegistrar({handle:(c,h)=>{handlers.set(c,h);},removeHandler:()=>{}},()=>trusted);
+  const dispose = registerLibraryIpc(registrar, store, new Set());
+  const invoke = (payload:unknown) => handlers.get('library:openOriginal')!({sender:{id:1}} as IpcMainInvokeEvent,payload);
+  const pointTo = (path:string) => store.db.prepare('UPDATE documents SET sourcePath=? WHERE id=?').run(path,document.id);
+  vi.mocked(shell.openPath).mockClear();
+  try {
+    await expect(invoke({documentId:document.id})).resolves.toEqual({ok:true});
+    expect(shell.openPath).toHaveBeenCalledWith(realpathSync.native(sourcePath));
+    const destination = join(mocked.root,'lecture-copy.pdf');
+    mocked.save.mockResolvedValueOnce({canceled:false,filePath:destination});
+    await expect(handlers.get('library:exportOriginal')!({sender:{id:42}} as IpcMainInvokeEvent,{documentId:document.id})).resolves.toEqual({saved:true});
+    expect(readFileSync(destination,'utf8')).toBe('%PDF-original');
+    expect(mocked.save).toHaveBeenLastCalledWith(expect.anything(),{defaultPath:'lecture.pdf'});
+    vi.mocked(shell.openPath).mockClear();
+    await expect(invoke({documentId:document.id,path:outside})).rejects.toThrow();
+    trusted = false;
+    await expect(invoke({documentId:document.id})).rejects.toThrow('Untrusted');
+    trusted = true;
+    const symbolic = join(directory,'linked.pdf'), hard = join(directory,'hard.pdf');
+    symlinkSync(outside,symbolic); linkSync(outside,hard);
+    const executable = join(directory,'source.command'); writeFileSync(executable,'echo unsafe');
+    const folder = join(directory,'folder.pdf'); mkdirSync(folder);
+    for (const path of [outside,symbolic,hard,executable,folder,join(directory,'missing.pdf')]) {
+      pointTo(path);
+      await expect(invoke({documentId:document.id})).rejects.toThrow();
+    }
+    expect(shell.openPath).not.toHaveBeenCalled();
+    pointTo(sourcePath);
+    vi.mocked(shell.openPath).mockResolvedValueOnce('No application available');
+    await expect(invoke({documentId:document.id})).rejects.toThrow('VSTUDY_STATUS:');
+    store.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(new Date().toISOString(),document.id);
+    await expect(invoke({documentId:document.id})).rejects.toThrow();
+  } finally {dispose();registrar.dispose();store.close();rmSync(mocked.root,{recursive:true,force:true});}
 });

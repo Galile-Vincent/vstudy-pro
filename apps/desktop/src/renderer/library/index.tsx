@@ -1,3 +1,4 @@
+import { openDocument } from '../document-open';
 import { Brand } from '../components/brand';
 import { DocumentArt } from '../shell/document-art';
 import type { CSSProperties } from 'react';
@@ -290,13 +291,14 @@ export function LibraryView() {
     setCursor(undefined);
     setSelected(all.map((i) => i.document.id));
   };
-  const open = (item: Item) =>
-    navigate({
+  const open = (item: Item) => {
+    void run(() => openDocument(item.document.id, () => navigate({
       view: "workspace",
       documentId: item.document.id,
       query: route.query,
       title: route.title,
-    });
+    })));
+  };
   const ids =
     menu && !selected.includes(menu.document.id)
       ? [menu.document.id]
