@@ -244,12 +244,13 @@ try {
     await page.locator('[data-slot=aui_thread-list-item]').first().getByRole('button',{name:'More options',exact:true}).click();
     await page.getByRole('menuitem',{name:'Delete',exact:true}).click();
     await page.locator(".aui-composer-input").waitFor();
-    page.once("dialog", dialog => dialog.dismiss());
+    const documentCount = () => page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length);
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
-    assert.equal(await page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length), 2, "cancel keeps document");
-    page.once("dialog", dialog => dialog.accept());
+    await poll(async()=>await documentCount() === 1);
+    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await poll(async()=>await documentCount() === 2);
     await page.getByRole("button", { name: "Delete document", exact: true }).click();
-    await poll(()=>page.evaluate(async()=>(await window.desktop.invoke("documents:list",{})).length === 1));
+    await poll(async()=>await documentCount() === 1);
     await page.getByRole('button',{name:'Open settings',exact:true}).click();
     const keyForm = page.locator('.provider-row').filter({hasText:'OpenAI compatible'});
     await keyForm.getByRole('textbox',{name:'OpenAI compatible API key',exact:true}).fill('local-test-key');
