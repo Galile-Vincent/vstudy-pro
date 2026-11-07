@@ -253,3 +253,19 @@ it.each(['opt-out','deletion','fresh'])('keeps receiving analytics local on rest
   }finally{restored.close();}
  }finally{store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });
+
+it.each(['opt-out','deletion'])('preserves analytics decisions made after staging (%s)',async decision=>{
+ const root=await mkdtemp(join(tmpdir(),'late-source-')),target=await mkdtemp(join(tmpdir(),'late-target-'));
+ const {store}=await fixture(root),receiving=await fixture(target);
+ const {AnalyticsService}=await import('../analytics/service');const config={enabled:true,host:'https://analytics.example',key:'test'};
+ try {
+  const local=new AnalyticsService(receiving.store.db,config,{});local.setConsent(true);const id=local.getInstallationId().installation_id;
+  const zip=join(target,'backup.zip');await exportBackup(store,root,zip);await stageRestore(target,zip);
+  local.setConsent(false);if(decision==='deletion')local.requestDeletion();receiving.store.close();await recoverRestore(target);
+  const restored=openStore(join(target,'vstudy.sqlite'));
+  try {const analytics=new AnalyticsService(restored.db,config,{});
+   expect(analytics.getState()).toMatchObject({enabled:false,consent_decided:true,deletion_pending:decision==='deletion'});
+   expect(analytics.getInstallationId().installation_id).toBe(id);
+  }finally{restored.close();}
+ }finally{store.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
+});
