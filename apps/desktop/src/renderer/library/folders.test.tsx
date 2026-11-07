@@ -95,3 +95,18 @@ describe('library folders view', () => {
     await waitFor(() => expect(document.activeElement?.id).toBe('library-document-notes'));
   });
 });
+
+
+it.each([false, true])('keeps a keyboard entry row after changing course folders (grid %s)', async grid => {
+  localStorage.setItem('library-grid', String(grid));
+  mount();
+  fireEvent.click(await screen.findByRole('button', { name: tr('library:openFolder', { name: 'Circuits' }) }));
+  let results = await screen.findByRole('list', { name: tr('library:documents') });
+  fireEvent.focus(within(results).getAllByRole('listitem')[1]!);
+  fireEvent.click(screen.getByRole('button', { name: tr('library:backToFolders') }));
+  fireEvent.click(await screen.findByRole('button', { name: tr('library:openFolder', { name: 'Logic' }) }));
+  results = await screen.findByRole('list', { name: tr('library:documents') });
+  const entries = within(results).getAllByRole('listitem').filter(row => row.tabIndex === 0);
+  expect(entries).toHaveLength(1);
+  expect(entries[0]!.textContent).toContain('gates');
+});

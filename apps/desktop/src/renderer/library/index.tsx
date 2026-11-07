@@ -164,6 +164,7 @@ export function LibraryView() {
   const shown = groupedView ? (openGroup?.items ?? []) : items;
   const selectFolder = (key: string | null) => {
     setOpenKey(key);
+    setActiveRow(undefined);
     setSelected([]);
     restoreTop.current = 0;
     try { if (key) sessionStorage.setItem(`library-folder:${viewKey}`, key); else sessionStorage.removeItem(`library-folder:${viewKey}`); }
@@ -279,6 +280,7 @@ export function LibraryView() {
   }, [undo]);
   const focusAfter = useRef<string | null>(null);
   const [activeRow, setActiveRow] = useState<string>();
+  const tabRow = shown.some(item => item.document.id === activeRow) ? activeRow : shown[0]?.document.id;
   useLayoutEffect(() => {
     if (!loading && focusAfter.current) {
       const target = document.getElementById(focusAfter.current);
@@ -449,6 +451,7 @@ export function LibraryView() {
         </Button>
       </div>
       <div className="library-toolbar" hidden={!loading && !items.length && !text && !filters.length && !query.folderId}>
+        {viewKey === "all" && !query.folderId && <LibraryModeToggle mode={mode} onChange={chooseMode} />}
         <label className="library-search">
           <Search aria-hidden="true" />
           <Input
@@ -459,7 +462,6 @@ export function LibraryView() {
             onChange={(e) => setText(e.target.value)}
           />
         </label>
-        {viewKey === "all" && !query.folderId && <LibraryModeToggle mode={mode} onChange={chooseMode} />}
         <Popover open={filtersOpen} onOpenChange={setFiltersOpen}><PopoverTrigger asChild>
           <Button variant="outline" className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel"><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button></PopoverTrigger>
           <PopoverContent id="library-filter-panel" aria-label={tr("library:filters")} align="start" className="filter-panel">
@@ -767,7 +769,7 @@ export function LibraryView() {
                   aria-posinset={index + 1}
                   aria-setsize={shown.length}
                   data-selected={selected.includes(d.id)}
-                  tabIndex={activeRow === d.id || (!activeRow && index === 0) ? 0 : -1}
+                  tabIndex={tabRow === d.id ? 0 : -1}
                   onFocus={() => { setActiveRow(d.id);  }}
                   onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}

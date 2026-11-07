@@ -11,7 +11,7 @@
 
  --surface-opacity:88%;
  --surface-card:color-mix(in srgb,var(--subtle) var(--surface-opacity),transparent);
- --surface-card-strong:color-mix(in srgb,var(--surface) max(96%,var(--surface-opacity)),transparent);
+ --surface-card-strong:var(--surface);
  --surface-bar:color-mix(in srgb,var(--sidebar-surface) var(--surface-opacity),transparent);
  --surface-border:var(--hairline);
  --surface-blur:blur(16px);
@@ -153,7 +153,6 @@ html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",syst
 .markdown:lang(zh-Hant),.markdown:lang(ja) { --reader-leading:1.85; --reader-tracking:0; }
 .aui-md:lang(zh-Hant),.aui-md:lang(ja) { --chat-leading:1.85; --chat-tracking:0; }
 html[data-material=solid] { --material-card:var(--surface); --material-sheet:var(--surface); --material-filter:none; }
-html[data-material=solid] * { backdrop-filter:none!important; }
 ::selection { background:var(--selection-color); color:var(--ink); }
 
 /* Tonal controls retain explicit boundaries in accessibility contrast modes. */
