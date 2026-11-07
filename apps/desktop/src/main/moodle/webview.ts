@@ -70,7 +70,7 @@ export class MoodleWebviews {
     const download = (event:Electron.Event,item:Electron.DownloadItem,contents:WebContents) => {
       event.preventDefault();
       const pane = [...this.panes.values()].find(p => p.view.webContents === contents);
-      if (pane) { this.takeGesture(pane); void this.importFile(pane,item.getURL(),item.hasUserGesture()); }
+      if (pane) { const gesture = this.takeGesture(pane); void this.importFile(pane,item.getURL(),gesture && (typeof item.hasUserGesture !== 'function' || item.hasUserGesture())); }
     };
     browser.on('will-download',download);
     const hasCookie = async () => (await browser.cookies.get({url:account.siteUrl + '/'})).some(cookie => cookie.name.startsWith('MoodleSession') && !!cookie.value);
@@ -145,8 +145,8 @@ export class MoodleWebviews {
       if (this.dependencies.account(pane.account.account.id).status !== 'connected') throw new WebviewSessionError('session-expired');
       await pane.account.auth.ensure(force);
       if (!pane.abort.signal.aborted) {
-        if (webviewFile(pane.target,pane.account.policy)) pane.gestureAt = Date.now();
-        await this.navigate(pane,pane.target);
+        if (webviewFile(pane.target,pane.account.policy)) await this.importFile(pane,pane.target,true);
+        else await this.navigate(pane,pane.target);
       }
     } catch (error) { this.fail(pane,error); }
   }
@@ -214,8 +214,8 @@ export class MoodleWebviews {
     if (action === 'close') {const state = {...pane.state,status:'closed' as const};this.closeOwner(owner.id);return state;}
     if (action === 'back' && contents.navigationHistory.canGoBack()) contents.navigationHistory.goBack();
     if (action === 'forward' && contents.navigationHistory.canGoForward()) contents.navigationHistory.goForward();
-    if (action === 'reload') {pane.retries = 0;pane.gestureAt = Date.now();void this.load(pane);}
-    if (action === 'reconnect') {pane.retries = 0;pane.gestureAt = Date.now();void this.load(pane,true);}
+    if (action === 'reload') {pane.retries = 0;pane.gestureAt = 0;void this.load(pane);}
+    if (action === 'reconnect') {pane.retries = 0;pane.gestureAt = 0;void this.load(pane,true);}
     if (action === 'stop') {contents.stop();clearTimeout(pane.timer);if (pane.state.status === 'loading') pane.state.status = 'ready';}
     if (action === 'focus') contents.focus();
     if (action === 'external') await this.external(pane,pane.state.url);
