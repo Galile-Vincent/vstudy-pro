@@ -40,7 +40,7 @@ try {
       input: await input.evaluate(element => { const style = window.getComputedStyle(element); return { border: style.borderTopWidth, outlineStyle: style.outlineStyle, shadow: style.boxShadow }; }),
     });
     const floating = name === 'composer' || name === 'edit-composer';
-    const borderless = floating || ['library-search', 'settings-input', 'settings-textarea'].includes(name);
+    const borderless = floating || name === 'library-search';
     await input.click();
     const pointer = await styles();
     assert.equal(pointer.owner.border, borderless ? '0px' : '1px', `${name} uses its intended field boundary`);

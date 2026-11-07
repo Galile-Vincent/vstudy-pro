@@ -23,14 +23,11 @@ export function AiSetupGuide({ onClose }: { onClose: () => void }) {
     <h3>{tr('novice:setup_title')}</h3>
     <p>{tr('novice:without_ai')}</p>
     <ol>
-      <li>{tr('novice:step_access')}</li>
-      <li>{tr('novice:step_key')}</li>
       <li>{tr('novice:step_answer')}</li>
     </ol>
     <h4>{tr('novice:no_account')}</h4>
     <p>{tr('novice:ask_school')}</p>
     <blockquote>{tr('novice:school_request')}</blockquote>
-    <p>{tr('novice:privacy')}</p>
     <Button variant="secondary" size="sm" onClick={onClose}>{tr('novice:continue_reading')}</Button>
   </section>;
 }

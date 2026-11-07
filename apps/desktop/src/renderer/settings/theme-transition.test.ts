@@ -30,7 +30,7 @@ it('interpolates fallback colors only for the duration of a user change', () => 
   run(() => document.documentElement.style.setProperty('--background', '#123456'), true);
   expect(document.documentElement.style.getPropertyValue('--background')).toBe('#123456');
   expect(document.documentElement.dataset.themeTransition).toBe('tokens');
-  vi.advanceTimersByTime(320);
+  vi.advanceTimersByTime(360);
   expect(document.documentElement.dataset.themeTransition).toBeUndefined();
 });
 
@@ -41,7 +41,7 @@ it('restarts fallback cleanup when the user drags a slider', () => {
   run(() => {}, true);
   vi.advanceTimersByTime(120);
   expect(document.documentElement.dataset.themeTransition).toBe('tokens');
-  vi.advanceTimersByTime(200);
+  vi.advanceTimersByTime(240);
   expect(document.documentElement.dataset.themeTransition).toBeUndefined();
 });
 

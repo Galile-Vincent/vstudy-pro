@@ -1,0 +1,19 @@
+.history-swipe-viewport { position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:80; view-transition-name:history-indicator; }
+.history-swipe-circle { position:absolute; left:0; top:clamp(0px, calc(var(--swipe-y, 50%) - 28px), calc(100% - 56px)); display:flex; align-items:center; justify-content:flex-end; width:56px; height:56px; padding:10px; border-radius:50%; background:var(--surface); color:var(--ink); box-shadow:0 2px 12px color-mix(in srgb,var(--shadow-color) 14%,transparent); opacity:0; transform:translateX(-100%); transition:transform 180ms ease-out,opacity 180ms ease-out; will-change:transform,opacity; }
+.history-swipe-viewport[data-tracking=true] .history-swipe-circle { transition:none; }
+.history-swipe-viewport[data-direction=forward] .history-swipe-circle { left:auto; right:0; justify-content:flex-start; }
+.history-swipe-circle svg { width:16px; height:16px; opacity:.4; transition:opacity 80ms ease-out; }
+.history-swipe-viewport[data-armed=true] svg { opacity:1; }
+.history-swipe-viewport[data-direction=back] .history-swipe-forward,.history-swipe-viewport[data-direction=forward] .history-swipe-back { display:none; }
+::view-transition-group(history-indicator),::view-transition-new(history-indicator) { animation:none; }
+::view-transition-old(history-indicator) { display:none; }
+html[data-history-direction=back] { --history-enter:-32px; --history-exit:28px; }
+html[data-history-direction=forward] { --history-enter:32px; --history-exit:-28px; }
+html[data-history-direction]::view-transition-old(root) { animation:history-page-out 240ms cubic-bezier(.2,.7,.2,1) both; }
+html[data-history-direction]::view-transition-new(root) { animation:history-page-in 240ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes history-page-out { to { transform:translateX(var(--history-exit)); opacity:0; } }
+@keyframes history-page-in { from { transform:translateX(var(--history-enter)); opacity:0; } to { transform:translateX(0); opacity:1; } }
+@media(prefers-reduced-motion:reduce) {
+  .history-swipe-circle,.history-swipe-circle svg { transition:none; }
+  html[data-history-direction]::view-transition-old(root),html[data-history-direction]::view-transition-new(root) { animation:none; }
+}

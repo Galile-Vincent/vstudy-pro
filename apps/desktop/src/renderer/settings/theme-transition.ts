@@ -1,4 +1,4 @@
-/** User appearance changes share one cancellable transition. Startup and system sync paint immediately. */
+/** Appearance changes share one cancellable transition. Startup paints immediately. */
 export function createThemeTransition(root: HTMLElement = document.documentElement) {
   let active: ViewTransition | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -38,6 +38,6 @@ export function createThemeTransition(root: HTMLElement = document.documentEleme
     root.dataset.themeTransition = 'tokens';
     void getComputedStyle(root).getPropertyValue('--background');
     update();
-    timer = setTimeout(cleanup, 320);
+    timer = setTimeout(cleanup, 360);
   };
 }

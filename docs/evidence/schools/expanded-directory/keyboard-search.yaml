@@ -1,0 +1,41 @@
+- dialog "Bring your courses together":
+  - heading "Bring your courses together" [level=2]
+  - paragraph: Connect any school that supports the official Moodle mobile service.
+  - list "Connection steps":
+    - listitem: 1 Find your school
+    - listitem: 2 Check site
+    - listitem: 3 Sign in
+  - text: School name, country, or Moodle URL
+  - combobox "School name, country, or Moodle URL" [expanded]: taiwan
+  - text: Search stays on this device. Choosing a school or checking a URL contacts that school and may download its logo. Requests appear in Settings > Privacy.
+  - button "Find my school"
+  - status: 24 schools found
+  - listbox "Schools":
+    - group "School directory":
+      - option "Central Police University CPU moodle.cpu.edu.tw · Taiwan" [selected]
+      - option "China Medical University CMU moodle.cmu.edu.tw · Taiwan"
+      - option "Chinese Culture University PCCU moodle.pccu.edu.tw · Taiwan"
+      - option "Chung Yuan Christian University CYCU ilearning.cycu.edu.tw · Taiwan"
+      - option "CTBC University of Technology CTBCTECH moodle.ctbctech.edu.tw · Taiwan"
+      - option "Feng Chia University FCU ilearn.fcu.edu.tw · Taiwan"
+      - option "Hsuan Chuang University HCU ilearn.hcu.edu.tw · Taiwan"
+      - option "HungKuo Delin University of Technology HDUT moodle.hdut.edu.tw · Taiwan"
+      - option "I-Shou University ISU moodle.isu.edu.tw · Taiwan"
+      - option "Ming Chuan University MCU moodle.mcu.edu.tw · Taiwan"
+      - option "National Cheng Kung University NCKU moodle.ncku.edu.tw · Taiwan"
+      - option "National Chengchi University NCCU moodle45.nccu.edu.tw · Taiwan"
+      - option "National Chi Nan University NCNU moodle.ncnu.edu.tw · Taiwan"
+      - option "National Chung Cheng University CCU ecourse2.ccu.edu.tw · Taiwan"
+      - option "National Dong Hwa University NDHU elearn4.ndhu.edu.tw/moodle · Taiwan"
+      - option "National Ilan University NIU euni.niu.edu.tw · Taiwan"
+      - option "National Taipei University NTPU lms3.ntpu.edu.tw · Taiwan"
+      - option "National Taipei University of Education NTUE md.ntue.edu.tw · Taiwan"
+      - option "National Taiwan University of Science and Technology NTUST moodle2.ntust.edu.tw · Taiwan"
+      - option "National Tsing Hua University NTHU elearn.nthu.edu.tw · Taiwan"
+      - option "National University of Kaohsiung NUK elearningv4.nuk.edu.tw · Taiwan"
+      - option "National Yang Ming Chiao Tung University NYCU e3p.nycu.edu.tw · Taiwan"
+      - option "Tungnan University TNU moodle.tnu.edu.tw · Taiwan"
+      - option "Tzu Chi University TCU moodle.tcu.edu.tw · Taiwan"
+  - button "Add by URL"
+  - text: You can connect several schools and accounts. Existing connections stay signed in.
+  - button "Close"

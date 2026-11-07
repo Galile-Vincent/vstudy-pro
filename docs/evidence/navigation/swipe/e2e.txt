@@ -1,0 +1,23 @@
+(node:10016) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS first history entry has no indicator or navigation
+PASS right swipe goes Back through real visits
+PASS left swipe goes Forward
+PASS short swipe cancels
+PASS last history entry cannot go Forward
+PASS Due soon horizontal overflow scrolls without navigating
+PASS real Settings dialog blocks navigation
+PASS focused composer or text field blocks swipes begun inside it and history keys
+PASS platform history shortcuts navigate
+PASS Alt+Left and Alt+Right route through the same actions
+PASS mouse buttons 3 and 4 navigate
+PASS native app-command routes Back and Forward through guarded keyboard input
+PASS three-finger system swipe is ignored
+PASS post-release momentum never navigates a second time
+PASS reduced motion applies route synchronously without calling View Transitions
+PASS live indicator and directional transition captured as at least 10 frames
+PASS five untraced swipe round trips preserve routes and record handler and frame timing
+PASS real WebContentsView receives wheel input without parent wheel delivery or route navigation
+PASS document visits restore the document ID and preserve the forward visit
+PASS real wheel listener p95 below 4ms with no geometry or computed-style reads
+PASS renderer has no page errors

@@ -1,0 +1,33 @@
+[
+  {
+    "file": "/Users/vincent/vstudy-pro/apps/desktop/resources/onboarding/hero-dark.webp",
+    "width": 2560,
+    "height": 1474,
+    "bytes": 93936
+  },
+  {
+    "file": "/Users/vincent/vstudy-pro/apps/desktop/resources/onboarding/hero-light.webp",
+    "width": 2560,
+    "height": 1474,
+    "bytes": 95696
+  },
+  {
+    "file": "/Users/vincent/vstudy-pro/docs/evidence/onboarding/hero/welcome-dark-2x.png",
+    "width": 2240,
+    "height": 1536,
+    "bytes": 294464,
+    "naturalWidth": 2560,
+    "renderedWidth": 1056,
+    "scheme": "dark"
+  },
+  {
+    "file": "/Users/vincent/vstudy-pro/docs/evidence/onboarding/hero/welcome-light-2x.png",
+    "width": 2240,
+    "height": 1536,
+    "bytes": 292659,
+    "naturalWidth": 2560,
+    "renderedWidth": 1056,
+    "scheme": "light"
+  }
+]
+PASS. Fresh-profile Electron welcome renders a still at 2x in both schemes.

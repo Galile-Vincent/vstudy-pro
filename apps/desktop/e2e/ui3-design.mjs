@@ -93,14 +93,14 @@ try {
   await page.locator('.library-title h1').hover();await shot('library');
   await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog').waitFor();let dialogSize;
   for(const section of ['general','appearance','providers','usage','privacy']) {
-   await page.locator('.settings-tabs [role=tab]').nth(['general','appearance','providers','usage','privacy'].indexOf(section)).click();
+   await page.locator(`.settings-tabs [role=tab][aria-controls$="-${section}"]`).click();
    const layout=await page.evaluate(()=>{const d=window.document.querySelector('.settings-dialog'),p=window.document.querySelector('.settings-pane:not([hidden])'),r=d.getBoundingClientRect();return {w:r.width,h:r.height,overflow:d.scrollWidth>d.clientWidth+1||p.scrollWidth>p.clientWidth+1,viewport:r.left>=0&&r.top>=0&&r.right<=window.innerWidth+1&&r.bottom<=window.innerHeight+1,nested:d.querySelectorAll('.settings-card .settings-card').length,rowsOverlap:[...p.querySelectorAll('.settings-row')].some(row=>{const label=row.querySelector('.settings-label'),control=row.querySelector('.settings-control');if(!label||!control)return false;const a=label.getBoundingClientRect(),b=control.getBoundingClientRect();return Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top);})};});
    assert.equal(layout.overflow,false,JSON.stringify({...context,section,layout}));assert.equal(layout.viewport,true);assert.equal(layout.nested,0);assert.equal(layout.rowsOverlap,false);if(dialogSize)assert.deepEqual([layout.w,layout.h],dialogSize);else dialogSize=[layout.w,layout.h];
    if(section==='usage') {
-    await page.locator('.usage-settings input').first().waitFor();
-    assert.equal(await page.locator('.usage-dashboard').evaluate(e=>!!e.closest('.settings-card')),true);
-    const usageSpacing=await page.locator('.settings-pane:not([hidden])').evaluate(p=>({heading:parseFloat(window.getComputedStyle(p.querySelector('.settings-section-header')).marginBottom),gap:parseFloat(window.getComputedStyle(p.querySelector('.usage-settings')).rowGap),groupMargins:[...p.querySelectorAll('.usage-settings > .settings-group')].map(e=>parseFloat(window.getComputedStyle(e).marginTop))}));
-    assert.equal(usageSpacing.heading,usageSpacing.gap);assert.deepEqual(usageSpacing.groupMargins,[0,0,0]);
+    await page.locator('.usage-settings input[type=number]').first().waitFor();
+    assert.equal(await page.locator('.usage-dashboard').evaluate(e=>e.parentElement.classList.contains('usage-settings')),true);
+    const usageSpacing=await page.locator('.settings-pane:not([hidden])').evaluate(p=>({heading:parseFloat(window.getComputedStyle(p.querySelector('.settings-pane-inner')).rowGap),gap:parseFloat(window.getComputedStyle(p.querySelector('.usage-settings')).rowGap),groupMargins:[...p.querySelectorAll('.usage-settings > .settings-group')].map(e=>parseFloat(window.getComputedStyle(e).marginTop))}));
+    assert.equal(usageSpacing.heading,usageSpacing.gap);assert.ok(usageSpacing.groupMargins.length&&usageSpacing.groupMargins.every(margin=>margin===0),JSON.stringify(usageSpacing));
    }
    if(section==='privacy')assert.equal(await page.locator('[data-testid=privacy-settings] .settings-group').first().evaluate(e=>e.querySelector('h3').textContent===e.querySelector('.settings-label > div').textContent),false);
 
@@ -109,6 +109,7 @@ try {
     assert.ok(reply.width>=16*reply.font-1,JSON.stringify({context,reply}));assert.equal(reply.clipped,false);
    }
    if(section==='appearance') {
+    await page.locator('.settings-pane:not([hidden]) .appearance-preview').waitFor();
     const appearance=await page.evaluate(()=>{const pane=window.document.querySelector('.settings-pane:not([hidden])'),control=pane.querySelector('.settings-control'),preview=pane.querySelector('.appearance-preview'),items=[...pane.querySelectorAll('[data-slot=toggle-group-item]')];return {firstControl:control.getBoundingClientRect().bottom<=pane.getBoundingClientRect().bottom,previewAfter:preview.getBoundingClientRect().top>control.getBoundingClientRect().top,wrapped:items.some(e=>e.scrollHeight>e.clientHeight+1)};});
     if(scale===1)assert.equal(await page.locator('.appearance-layout .settings-row').evaluateAll(rows=>rows.every(row=>{const a=row.querySelector('.settings-label').getBoundingClientRect(),b=row.querySelector('.settings-control').getBoundingClientRect();return Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<=1;})),true,JSON.stringify(context));
     assert.equal(appearance.firstControl,true,JSON.stringify({context,appearance}));assert.equal(appearance.previewAfter,true);assert.equal(appearance.wrapped,false);

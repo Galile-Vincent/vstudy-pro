@@ -11,7 +11,6 @@
   "school_request": "I use VStudy Pro to read course materials. Does our school provide an approved AI service and an API key? How do I connect it, and are there any costs or restrictions? If AI access is unavailable, who can help me with questions about my reading?",
   "privacy": "Never paste your school password into AI settings or a chat. A connected AI service receives your question, chat history, and document context, including selected text. Check your school rules before sharing coursework.",
   "continue_reading": "Continue without AI",
-  "ai_services": "AI services",
   "advanced": "Advanced · local services and Terminal tools",
   "advanced_help": "These options are for students who already use a local AI service or a command-line tool. You can skip them.",
   "ready_to_read": "Ready to read",

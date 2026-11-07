@@ -26,7 +26,7 @@ try {
    const findings=await new AxeBuilder({page}).setLegacyMode(true).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa','best-practice']).analyze();
    results.push({language,theme,width,screen,violations:findings.violations});
    await page.screenshot({path:`${output}/${language}-${theme}-${width}-${screen}.png`,animations:'disabled'});
-   if(screen==='privacy') { await page.locator('.settings-dialog').evaluate(e => {e.scrollTop=e.scrollHeight;}); await page.screenshot({path:`${output}/${language}-${theme}-${width}-privacy-delete.png`,animations:'disabled'}); }
+   if(screen==='privacy') { await page.locator('.settings-pane:not([hidden])').evaluate(e => {e.scrollTop=e.scrollHeight;}); await page.screenshot({path:`${output}/${language}-${theme}-${width}-privacy-delete.png`,animations:'disabled'}); }
    if(screen==='privacy')assert.equal(await page.locator('[data-testid=privacy-settings] section').last().getByRole('button').isDisabled(),true);
   }
   await page.keyboard.press('Escape');

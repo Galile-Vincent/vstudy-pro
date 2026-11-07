@@ -94,5 +94,12 @@
   "test_connection": "Test connection",
   "connection_success": "Connected! Your key works.",
   "event_newsletter_subscribe": "Product-update subscription",
-  "event_analytics_capture": "Usage analytics"
+  "event_analytics_capture": "Usage analytics",
+  "show": "Show",
+  "open": "Open",
+  "welcome_guide_hint": "Replay the first-run tour.",
+  "about_hint": "What the app does, with a sample to try.",
+  "text_reading": "Text and reading",
+  "advanced": "Advanced",
+  "api_keys": "API keys"
 }

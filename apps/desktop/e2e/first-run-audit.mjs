@@ -17,12 +17,13 @@ try {
   const screens = [];
   const baseline = process.env.VSTUDY_CAPTURE_BASELINE === '1';
   const prefix = baseline ? 'before' : 'after';
-  for (let i = 0; i < (baseline ? 4 : 6); i++) {
+  for (let i = 0; i < (baseline ? 4 : 8); i++) {
     const path = join(evidence, `${prefix}-${i + 1}.png`);
     await page.screenshot({ path });
     screens.push({ path, text: await page.locator('.onboarding').innerText() });
-    if (!baseline && i === 5) await page.locator('.onboarding-content > button').click();
-    await page.locator('.onboarding footer .primary').click();
+    if (!baseline && i === 7) await page.locator('.onboarding-content > button').click();
+    if (!baseline && i === 4) await page.locator('.analytics-choices button').last().click();
+    else await page.locator('.onboarding footer .primary').click();
   }
   await page.locator('.onboarding').waitFor({ state: 'detached' });
   if (!baseline) {

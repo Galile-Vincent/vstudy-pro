@@ -1,6 +1,6 @@
 # Authenticated Moodle pages
 
-`webview.ts` owns one WebContentsView per app window and one ephemeral Chromium partition per connected Moodle account. The app renderer owns the toolbar, errors, theme tokens, and measured bounds. The remote view has no preload and cannot call app IPC.
+`webview.ts` owns one WebContentsView per app window and one ephemeral Chromium partition per connected Moodle account. The app renderer owns the toolbar, errors, theme tokens, and measured bounds. The school's page keeps its own colors: the app sets only the pane's empty background and injects no CSS, because forcing a dark foreground and background onto a third-party theme left light text on white cards. The remote view has no preload and cannot call app IPC.
 
 `webview-session.ts` models the account lifecycle as idle, authenticating, ready, expired, or disposed. It coalesces concurrent opens and waits at least six minutes between key requests, including failed requests. Closing a pane keeps its account cookie in memory. Disconnect and application shutdown clear the partition and close its connections.
 

@@ -1,4 +1,4 @@
-.moodle-school-results { max-height: 280px; overflow-y: auto; }
+.moodle-school-results { max-height: clamp(100px, calc(100dvh - 574px), 280px); overflow-y: auto; overscroll-behavior: contain; }
 .moodle-school-results [aria-selected="true"] { background: var(--subtle); outline: 2px solid var(--ring); outline-offset: -2px; }
 .moodle-school-logo, .moodle-school-monogram {
   width: 36px;

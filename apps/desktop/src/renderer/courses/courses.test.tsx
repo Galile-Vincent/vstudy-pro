@@ -6,6 +6,7 @@ import { Courses, deadlineGroup } from "./index";
 import { CourseAgentPanel } from "./agent";
 import { createMockMoodleApi } from "../dev-mock";
 import { i18n } from "../../shared/i18n";
+import { displayTitle } from "../../shared/moodle-course-display";
 import type { MoodleApi } from "./api";
 import type { MoodleAgentAction } from "../../shared/moodle";
 
@@ -23,6 +24,7 @@ let host: HTMLDivElement;
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
 beforeEach(async () => {
+  vi.stubGlobal("matchMedia",vi.fn(() => ({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})));
   await i18n.changeLanguage("en");
   host = document.createElement("div");
   document.body.append(host);
@@ -62,7 +64,7 @@ async function tab(name: string) {
 }
 
 describe("Courses", () => {
-  it("shows course progress, due-soon cards, and per-course unread counts", async () => {
+  it("shows compact courses, deadline rows, and meaningful unread indicators", async () => {
     const api = createMockMoodleApi(),
       overview = await api.overview();
     overview.courses[0]!.progress = 64.4;
@@ -78,14 +80,10 @@ describe("Courses", () => {
     expect(host.querySelector(".moodle-course-card")?.textContent).toContain(
       "Electronics Laboratory",
     );
-    expect(host.querySelector(".moodle-course-card progress")?.getAttribute("aria-label")).toBe("64% complete");
-    expect(host.querySelector(".moodle-course-card progress")?.getAttribute("value")).toBe("64");
-    expect(host.querySelector(".moodle-course-card")?.textContent).toContain(
-      "2 unread",
-    );
-    expect(host.querySelector(".moodle-due-strip")?.textContent).toContain(
-      "Amplifier lab report",
-    );
+    expect(host.querySelector(".moodle-course-card progress")).toBeNull();
+    expect(host.querySelector('.moodle-course-card [id$="-unread"]')?.textContent).toBe('2 unread');
+    expect(host.querySelector(".moodle-due-list")?.textContent).toContain('Amplifier lab report');
+    expect(host.textContent).not.toContain('No deadlines this week');
   });
   it("associates every term tab with its course panel", async () => {
     await mount(createMockMoodleApi());
@@ -415,6 +413,7 @@ it("shows and marks account-wide notifications read on Courses home", async () =
       {
         ...detail.notifications[0]!,
         courseId: null,
+        id: "00000000-0000-4000-a000-000000000999",
         subject: "School notice",
         read,
       },
@@ -425,12 +424,11 @@ it("shows and marks account-wide notifications read on Courses home", async () =
     read = true;
   };
   await mount(api);
-  expect(host.textContent).toContain("Other notifications");
+  await click("Updates");
   expect(host.textContent).toContain("School notice");
-  await click("Mark as read");
-  expect(
-    host.querySelector(".moodle-notification")?.getAttribute("data-unread"),
-  ).toBe("false");
+  await click("School notice");
+  expect(read).toBe(true);
+  expect(document.querySelector(".update-reader")?.textContent).toContain("School notice");
 });
 it("does not replace newer refresh state with an older response", async () => {
   const api = createMockMoodleApi();
@@ -440,11 +438,14 @@ it("does not replace newer refresh state with an older response", async () => {
     ...original,
     otherNotifications: [{ ...detail.notifications[0]!, courseId: null }],
   });
+  let progressListener: Parameters<NonNullable<MoodleApi["onProgress"]>>[0] | undefined;
+  api.onProgress = listener => {progressListener=listener;return () => {};};
   await mount(api);
   const pending: ((value: typeof original) => void)[] = [];
   api.overview = () => new Promise((resolve) => pending.push(resolve));
-  await click("Mark as read");
-  await click("Mark as read");
+  await click("Show all");
+  await act(async () => {progressListener?.({accountId:original.accounts[0]!.id,state:"idle",completed:0,total:0}); await new Promise(resolve => setTimeout(resolve,60));});
+  await act(async () => {progressListener?.({accountId:original.accounts[0]!.id,state:"idle",completed:0,total:0}); await new Promise(resolve => setTimeout(resolve,60));});
   await act(async () =>
     pending[1]!({
       ...original,
@@ -496,7 +497,7 @@ it("uses semantic course cards and labels unread indicators", async () => {
   await mount(api);
   expect(host.querySelectorAll("button h3, button progress")).toHaveLength(0);
   expect(
-    host.querySelectorAll("article.moodle-course-card button"),
+    host.querySelectorAll("li.moodle-course-card .course-open"),
   ).toHaveLength(1);
   await mount(api, (await api.overview()).courses[0]!.id);
   await tab("Notifications");
@@ -629,7 +630,7 @@ it("labels unknown lifecycle dates on Current and All", async () => {
   };
   api.overview = async () => overview;
   await mount(api);
-  expect(host.querySelector(".moodle-course-card")?.getAttribute("title")).toContain("Dates unavailable");
+  expect(host.querySelector('.moodle-course-card [id$="-raw"]')?.textContent).toContain("Dates unavailable");
   expect(host.querySelectorAll(".moodle-course-card")).toHaveLength(1);
 });
 
@@ -679,4 +680,101 @@ it('still shows an initial panel skeleton when course content is absent',async()
   api.course=async()=>detail;
   await mount(api,detail.course.id);
   expect(host.querySelector('.moodle-skeleton')).not.toBeNull();
+});
+
+it('keeps empty count slots, caps the visible number, and orders the accessible row name', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const course = overview.courses[0]!;
+  const template = overview.summaries![0]!.notifications[0]!;
+  const notifications = Array.from({length:120},(_,index)=>({...template,id:`00000000-0000-4000-a000-${String(index).padStart(12,'0')}`,read:false}));
+  api.overview = async () => ({...overview,courses:[course],summaries:[{course,notifications,reminders:[]}]});
+  await mount(api);
+  expect(host.querySelector('.course-unread-count')?.textContent).toBe('99+');
+  expect(host.querySelector('.course-unread-count')?.getAttribute('title')).toBe('120 unread updates');
+  expect(host.querySelector('.course-counts')?.children).toHaveLength(2);
+  expect(host.querySelector('.course-heading-row')?.getAttribute('aria-hidden')).toBe('true');
+  expect(host.querySelector('.course-column-headings')?.textContent).toBe('OverdueUnread');
+  const button = host.querySelector<HTMLButtonElement>('.course-open')!;
+  const labels = button.getAttribute('aria-labelledby')!.split(' ').map(id=>document.getElementById(id)!.textContent);
+  expect(labels[0]).toBe(displayTitle(course.identity,'en',course.fullName));
+  expect(labels[1]).toBe(course.identity.teachers[0]!.en);
+  expect(labels.at(-2)).toBe('120 unread');
+  expect(labels.at(-1)).toMatch(/^Due/);
+  expect(button.title).toContain(course.fullName);
+  expect(button.title).toContain('120 unread');
+  api.overview = async () => ({...overview,courses:[{...course,identity:{...course.identity,teachers:[]}}],upcoming:[],summaries:[]});
+  await mount({...api});
+  expect(host.querySelector('.course-meta')).toBeNull();
+  expect([...host.querySelectorAll('.course-count')].map(node=>node.textContent)).toEqual(['','']);
+});
+
+it('pins without opening a course, exposes pressed state, and keeps the course button mounted after moving', async () => {
+  const api = createMockMoodleApi();
+  const original=api.overview;
+  api.overview=async () => {const overview=await original();return {...overview,courses:overview.courses.map(course => ({...course,identity:{...course.identity,lifecycle:'current'}}))};};
+  await mount(api);
+  const rows = [...host.querySelectorAll('.moodle-course-card')];
+  const target = rows.at(-1)!;
+  const open = target.querySelector<HTMLButtonElement>('.course-open')!;
+  const pin = target.querySelector<HTMLButtonElement>('.course-pin')!;
+  expect(pin.getAttribute('aria-label')).toBe('Pin course');
+  expect(pin.getAttribute('aria-pressed')).toBe('false');
+  expect(pin.title).toBe('Pin course');
+  expect(pin.tabIndex).toBe(0);
+  pin.focus();
+  await act(async () => pin.click());
+  expect(host.querySelector('.course-open')).toBe(open);
+  expect(document.activeElement).toBe(pin);
+  expect(pin.getAttribute('aria-pressed')).toBe('true');
+  expect(pin.getAttribute('aria-label')).toBe('Unpin course');
+  expect(host.querySelector('.course-group-label')?.textContent).toBe('Pinned');
+  expect((await api.overview()).pinnedCourseIds).toContain(target.getAttribute('data-course-id'));
+  await act(async () => pin.click());
+  expect(pin.getAttribute('aria-pressed')).toBe('false');
+  expect(host.querySelector('.course-group-label')).toBeNull();
+});
+
+describe("Courses view switch", () => {
+  afterEach(() => localStorage.clear());
+  const list = () => host.querySelector<HTMLElement>(".moodle-grid")!;
+  const switchButton = (label: string) => host.querySelector<HTMLButtonElement>(`.course-view-switch button[aria-label="${label}"]`)!;
+
+  it("starts as a list and exposes a labelled two-button group", async () => {
+    await mount(createMockMoodleApi());
+    expect(list().dataset.view).toBe("list");
+    const group = host.querySelector(".course-view-switch")!;
+    expect(group.getAttribute("role")).toBe("group");
+    expect(group.getAttribute("aria-label")).toBe("View");
+    expect(switchButton("List").getAttribute("aria-pressed")).toBe("true");
+    expect(switchButton("Cards").getAttribute("aria-pressed")).toBe("false");
+    expect(switchButton("Cards").title).toBe("Cards");
+  });
+
+  it("switches to cards, keeps every row and its accessible name, and remembers the choice", async () => {
+    await mount(createMockMoodleApi());
+    const before = [...host.querySelectorAll(".course-open")].map(button => button.getAttribute("aria-labelledby"));
+    await act(async () => switchButton("Cards").click());
+    expect(list().dataset.view).toBe("cards");
+    expect(switchButton("Cards").getAttribute("aria-pressed")).toBe("true");
+    expect(switchButton("List").getAttribute("aria-pressed")).toBe("false");
+    expect([...host.querySelectorAll(".course-open")].map(button => button.getAttribute("aria-labelledby"))).toEqual(before);
+    await act(async () => root.unmount());
+    root = createRoot(host);
+    await mount(createMockMoodleApi());
+    expect(list().dataset.view).toBe("cards");
+  });
+
+  it("treats an unknown stored value as a list", async () => {
+    localStorage.setItem("vstudy.courses.view", "carousel");
+    await mount(createMockMoodleApi());
+    expect(list().dataset.view).toBe("list");
+  });
+
+  it("keeps the repeated column labels out of the accessibility tree", async () => {
+    await mount(createMockMoodleApi());
+    const row = host.querySelector(".course-heading-row")!;
+    expect(row.getAttribute("aria-hidden")).toBe("true");
+    expect(row.querySelectorAll(".course-column-headings")).toHaveLength(2);
+  });
 });

@@ -130,6 +130,18 @@ it('uses exact verified school sites and never guesses from hostname substrings'
   expect(resolveSchool('https://ilearning.cycu.edu.tw')).toEqual({id:'cycu',name:'Chung Yuan Christian University'});
   expect(resolveSchool('https://ilearning.cycu.edu.tw.evil.example')).toBeNull();
   expect(resolveSchool('https://unknown.example')).toBeNull();
+  const {schools}=await import('../moodle/schools');
+  for (const school of schools.filter(school => !['cycu','ucl','warwick','unsw'].includes(school.id))) {
+    expect(resolveSchool(school.host)).toBeNull();
+    const {service,queued}=setup();
+    service.setConsent(true);
+    service.school(resolveSchool(school.host));
+    expect(queued().at(-1).properties.$set).toMatchObject({school_id:null,school_name:null,school_source:'unknown',moodle_connected:true});
+    service.track('moodle_connection_succeeded',{school_id:resolveSchool(school.host)?.id ?? null});
+    expect(queued().at(-1).properties.school_id).toBeNull();
+    expect(queued().at(-1).event).toBe('moodle_connection_succeeded');
+    expect(JSON.stringify(queued())).not.toContain(school.name);
+  }
   expect(resolveSchool('https://moodle.ucl.ac.uk/other-school')).toBeNull();
 });
 it('does not resend an acknowledged unchanged device profile',async()=>{

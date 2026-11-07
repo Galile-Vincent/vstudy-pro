@@ -17,7 +17,7 @@ try {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.getByRole('button', { name: 'Save and leave', exact: true }).click();
   await app.evaluate(({ ipcMain }) => {
-    globalThis.cliVisualTools = ['claude', 'codex', 'agy'].map(provider => ({ provider, status: 'not-installed', consented: true, version: null, path: null, managed: false, latestVersion: null, releaseNotesUrl: null, checkedAt: null, previousVersion: null, appliesToNewChats: false, tested: false, error: null }));
+    globalThis.cliVisualTools = ['claude', 'codex', 'agy'].map(provider => ({ provider, status: 'not-installed', consented: true, version: null, path: null, managed: false, manualInstallRequired: false, manualUpdateRequired: false, latestVersion: null, releaseNotesUrl: null, checkedAt: null, previousVersion: null, appliesToNewChats: false, tested: false, error: null }));
     const handlers = {
       'ai-cli:list': () => globalThis.cliVisualTools,
       'ai-cli:preferences': () => ({ updateChecks: false, autoUpdateWhenIdle: false, advancedShell: false }),

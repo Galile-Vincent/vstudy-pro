@@ -4,7 +4,7 @@
 
 `model.ts` derives the Install, Sign in, or Test step from `CliToolState`. `use-tools.ts` reads the inventory. `use-action.ts` previews and runs one main-issued action capability, polls output while visible, and closes late sessions on teardown. `preview.tsx` shows the plan before its Run button. Copy-only vendor installer commands in `manual-install.tsx` are never submitted to main for execution.
 
-`terminal.tsx` renders bounded inert text with xterm.js. It reveals a new action's output, follows semantic theme tokens, and accepts input only for a running login or explicitly enabled advanced shell. HTTPS links pass through the existing native external-link confirmation. `inventory.tsx` keeps versions and update state visible in the sidebar. `preferences.tsx` supplies default-off update and advanced-shell controls in Privacy.
+`terminal.tsx` renders bounded inert text with xterm.js. It reveals a new action's output, follows semantic theme tokens, and accepts input only for a running login or explicitly enabled advanced shell. HTTPS links pass through the existing native external-link confirmation. `inventory.tsx` keeps versions and update state visible in the sidebar. With `settings` it renders the AI services pane rows, one button per tool that opens its setup, plus guided setup and the update check. `preferences.tsx` supplies default-off update and advanced-shell controls in Privacy.
 
 Keep all new UI strings in `shared/locales/{en,zh-Hant,ja}/ai-cli.json`. The sheet uses existing semantic tokens, supports enlarged text and keyboard dismissal, and never builds an executable command to send to main. Status and tiny tests use the real main adapters.
 

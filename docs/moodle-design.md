@@ -74,9 +74,9 @@ Reference for data: iCYCU app (`/Users/vc/Local/CYCU`, `iLearningCourseDetailVie
 
 ## Schools
 
-School search uses a bundled curated directory and accepts any public HTTPS Moodle root. A directory entry is a hint, not a claim that the school's mobile service is enabled. The initial bundle includes CYCU, UCL, Warwick, and UNSW. Warwick and UNSW document mobile app restrictions. The live check reports the school's actual availability before sign-in.
+School search uses a bundled curated directory and accepts any public HTTPS Moodle root. A directory entry is a hint, not a claim that the school's mobile service is enabled. The bundle contains 27 schools, including 24 in Taiwan. Warwick and UNSW document mobile app restrictions. The live check reports the school's actual availability before sign-in.
 
-`main/moodle/schools.ts` owns entries with a stable `id`, `name`, `localizedNames`, ISO `country`, canonical `host`, login hint, nullable `logoUrl`, and maintainer `notes`. Search matches names in all bundled languages, country names, abbreviations, and hostnames. Connected schools come first, then recent sites, then directory entries. The picker deduplicates by canonical root. It supports arrow keys, Home, End, Enter, ordinary pointer selection, and a labelled combobox with an active option. A missing result always offers URL entry. All new copy lives in the `schools` locale namespace for English, Traditional Chinese, and Japanese.
+`main/moodle/schools.ts` owns entries with a stable `id`, `name`, `localizedNames`, ISO `country`, canonical `host`, login hint, nullable `logoUrl`, and maintainer `notes`. Search matches names in all bundled languages, country names, abbreviations, and hostnames. Connected schools come first, then recent sites, then directory entries. A Traditional Chinese UI or system locale puts Taiwan directory entries first and sorts localized names within each group. Other locales sort directory names alphabetically using the UI language. Search folds 臺 and 台, accepts Taiwan, 台灣, 臺灣, and the exact country token TW, and includes common Chinese short names. The picker deduplicates by canonical root. Its results scroll independently, with a viewport-relative height capped at 280 px and contained wheel scrolling. This keeps search and URL entry visible at a 720 px content height. It supports arrow keys, Home, End, Enter, ordinary pointer selection, and a labelled combobox with an active option. A missing result always offers URL entry. All new copy lives in the `schools` locale namespace for English, Traditional Chinese, and Japanese.
 
 ### Directory decision
 
@@ -85,6 +85,69 @@ We ship local search plus URL entry. There is no remote directory call or backgr
 A remote directory would disclose students' school queries to another service and add availability and inventory obligations. It offers no necessary capability for URL-based connection. A future remote search must be separately opt-in, name its recipient before consent, validate responses, and record requests in Settings > Privacy. It must preserve local search and URL entry when disabled or offline.
 
 Directory source pages are [UCL Moodle](https://www.ucl.ac.uk/isd/services/digital-education/digital-tools/moodle), [Warwick login guidance](https://warwick.ac.uk/services/digitallearning/support/student-guides/moodle/loggingin/), and [UNSW Moodle guidance](https://www.unsw.edu.au/student/managing-your-studies/academic-life/edtech/moodle). CYCU uses the existing tested iLearning configuration. These URLs are references for maintainers, not runtime network dependencies.
+
+### Taiwan directory verification
+
+Measured on 2026-11-06 from the maintainer's machine. The directory contains 27 schools, including 24 in Taiwan. Each of the 23 added schools returned HTTP 200 over HTTPS with Moodle HTML markup and a valid `tool_mobile_get_public_config` response. The table records the result of the app's unmodified `checkSite()` and `authPlan()` functions from `discovery.ts`.
+
+The throwaway verifier bundled `discovery.ts` with esbuild and injected a real, anonymous GET-only transport. That transport moved the JSON request body to the endpoint's `args` query parameter. It retained TLS validation, manual discovery redirects, canonical-root validation, and the discovery response parser. It made no login or credential requests. This verifies public configuration, not authenticated access or the default POST transport. Requests ran sequentially with a pause between sites. Candidate sources included the [Taiwan Moodle showcase](https://www.moodle.tw/zh-hant/about-us/showcase), [NCCU's current platform](https://moodle45.nccu.edu.tw), [Taiwan Tech's migration notice](https://www.cc.ntust.edu.tw/p/404-1050-126352.php?Lang=zh-tw), and [NYCU's published course link](https://timetable.nycu.edu.tw/?Acy=113&CrsNo=566000&Sem=X&lang=zh-tw&r=main%2Fcrsoutline). The linked school roots below are also direct evidence sources. No source is a runtime directory dependency.
+
+`browser` and `embedded` results produce the `sso-launch` hint. Password and unavailable results produce `discover`. "Enabled" means the public response explicitly returned both `enablewebservices=1` and `enablemobilewebservice=1`. It does not prove that every authenticated function is permitted. Disabled sites follow the existing Warwick and UNSW directory precedent and carry explicit restriction notes. Live discovery still decides whether sign-in can proceed.
+
+| Added school | Verified HTTPS Moodle root | Date | Discovery result | Official mobile service |
+| --- | --- | --- | --- | --- |
+| 中信科技大學 / CTBC University of Technology | [https://moodle.ctbctech.edu.tw](https://moodle.ctbctech.edu.tw) | 2026-11-06 | `unavailable / webservices-disabled` | Disabled; web services also disabled |
+| 中央警察大學 / Central Police University | [https://moodle.cpu.edu.tw](https://moodle.cpu.edu.tw) | 2026-11-06 | `unavailable / webservices-disabled` | Disabled; web services also disabled |
+| 中國醫藥大學 / China Medical University | [https://moodle.cmu.edu.tw](https://moodle.cmu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 中國文化大學 / Chinese Culture University | [https://moodle.pccu.edu.tw](https://moodle.pccu.edu.tw) | 2026-11-06 | `browser` | Enabled |
+| 逢甲大學 / Feng Chia University | [https://ilearn.fcu.edu.tw](https://ilearn.fcu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 玄奘大學 / Hsuan Chuang University | [https://ilearn.hcu.edu.tw](https://ilearn.hcu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 宏國德霖科技大學 / HungKuo Delin University of Technology | [https://moodle.hdut.edu.tw](https://moodle.hdut.edu.tw) | 2026-11-06 | `unavailable / mobile-disabled` | Disabled |
+| 義守大學 / I-Shou University | [https://moodle.isu.edu.tw](https://moodle.isu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 銘傳大學 / Ming Chuan University | [https://moodle.mcu.edu.tw](https://moodle.mcu.edu.tw) | 2026-11-06 | `embedded` | Enabled |
+| 國立成功大學 / National Cheng Kung University | [https://moodle.ncku.edu.tw](https://moodle.ncku.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 國立政治大學 / National Chengchi University | [https://moodle45.nccu.edu.tw](https://moodle45.nccu.edu.tw) | 2026-11-06 | `browser` | Enabled |
+| 國立暨南國際大學 / National Chi Nan University | [https://moodle.ncnu.edu.tw](https://moodle.ncnu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 國立中正大學 / National Chung Cheng University | [https://ecourse2.ccu.edu.tw](https://ecourse2.ccu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 國立東華大學 / National Dong Hwa University | [https://elearn4.ndhu.edu.tw/moodle](https://elearn4.ndhu.edu.tw/moodle) | 2026-11-06 | `unavailable / webservices-disabled` | Disabled; web services also disabled |
+| 國立宜蘭大學 / National Ilan University | [https://euni.niu.edu.tw](https://euni.niu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 國立臺北大學 / National Taipei University | [https://lms3.ntpu.edu.tw](https://lms3.ntpu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 國立臺北教育大學 / National Taipei University of Education | [https://md.ntue.edu.tw](https://md.ntue.edu.tw) | 2026-11-06 | `browser` | Enabled |
+| 國立臺灣科技大學 / National Taiwan University of Science and Technology | [https://moodle2.ntust.edu.tw](https://moodle2.ntust.edu.tw) | 2026-11-06 | `embedded` | Enabled |
+| 國立清華大學 / National Tsing Hua University | [https://elearn.nthu.edu.tw](https://elearn.nthu.edu.tw) | 2026-11-06 | `unavailable / mobile-disabled` | Disabled |
+| 國立高雄大學 / National University of Kaohsiung | [https://elearningv4.nuk.edu.tw](https://elearningv4.nuk.edu.tw) | 2026-11-06 | `browser` | Enabled |
+| 國立陽明交通大學 / National Yang Ming Chiao Tung University | [https://e3p.nycu.edu.tw](https://e3p.nycu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 東南科技大學 / Tungnan University | [https://moodle.tnu.edu.tw](https://moodle.tnu.edu.tw) | 2026-11-06 | `password` | Enabled |
+| 慈濟大學 / Tzu Chi University | [https://moodle.tcu.edu.tw](https://moodle.tcu.edu.tw) | 2026-11-06 | `password` | Enabled |
+
+The [sanitized verification records](evidence/schools/expanded-directory/live-verification.json) retain the observed flags and login modes without session keys, cookies, provider URLs, or credentials. CYCU also returned an enabled mobile service and `embedded` login on this date. No worldwide schools were added. The existing UCL root returned an HTTP 403 challenge, UNSW returned an HTTP 405 human-verification page and an unsafe redirect during discovery, and Warwick returned an SSO error page at its root while public discovery returned `embedded`. Existing entries remain in the directory with their prior restriction guidance.
+
+### Candidates excluded from this expansion
+
+Measured on 2026-11-06. These are failures to verify from this machine, not claims that a university has no Moodle deployment. A failed candidate is never substituted into the directory. Older host failures remain listed even when a current host passed.
+
+| Candidate | Attempted HTTPS root | Reason excluded |
+| --- | --- | --- |
+| NTNU | `https://moodle3.ntnu.edu.tw` | Moodle markup confirmed, but GET public configuration returned a codingerror object with “Invalid json in request: Syntax error”; app discovery failed. |
+| NTUST | `https://moodle.ntust.edu.tw` | DNS ENOTFOUND for the old host. The verified current moodle2 host is included. |
+| NCU | `https://moodle.ncu.edu.tw` | DNS ENOTFOUND. |
+| NYCU | `https://e3.nycu.edu.tw` | HTTPS connection refused. The verified current e3p host is included. |
+| NSYSU | `https://cu.nsysu.edu.tw` | TLS connection reset. |
+| NCHU | `https://lms2020.nchu.edu.tw` | Root served iLearning 3.0 without Moodle markup; public configuration returned HTTP 404. |
+| NTUT | `https://istudy.ntut.edu.tw` | HTTPS connection timeout. |
+| TKU | `https://moodle.tku.edu.tw` | HTTPS connection timeout. |
+| FJU | `https://elearn2.fju.edu.tw` | Root identified itself as the TronClass platform; no verified Moodle site. |
+| SCU | `https://isee.scu.edu.tw` | Moodle markup confirmed, but discovery rejected an unsafe HTTP redirect. |
+| YZU | `https://crs.comm.yzu.edu.tw/moodle` | TLS certificate chain could not be verified. Certificate checks were not bypassed. |
+| CGU | `https://el.cgu.edu.tw` | Redirect destination esp.cgu.edu.tw timed out. |
+| NTCU | `https://moodle.ntcu.edu.tw` | DNS ENOTFOUND. |
+| NPUST | `https://moodle.npust.edu.tw/moodleset` | Root redirected to HTTP and timed out; no supported HTTPS Moodle root verified. |
+| HFU | `https://m26.hfu.edu.tw/moodle` | HTTPS connection timeout. |
+| THU | `https://moodle.thu.edu.tw` | TLS certificate chain could not be verified. Certificate checks were not bypassed. |
+| CUTE | `https://moodle.cute.edu.tw` | Moodle markup confirmed, but public configuration returned HTTP 404 and app discovery failed. |
+| CHU | `https://moodle.chu.edu.tw` | Resolved to the CHUMoodle portal rather than a verified Moodle root; discovery failed. |
+| NUU | `https://elearning.nuu.edu.tw` | No Moodle markup or valid public configuration at the attempted root. |
+| NKUST | `https://elearning.nkust.edu.tw` | No Moodle markup or valid public configuration at the attempted root. |
 
 ### Discovery and authentication
 
@@ -100,8 +163,10 @@ Accounts are keyed by site root and remote user ID. Multiple schools and multipl
 
 ### Logos and network inventory
 
-`main/moodle/logos.ts` fetches a selected school's public compact logo, then its full logo if necessary. Requests are HTTPS, same-origin, unauthenticated, and reject redirects and token-bearing URLs. There is no third-party image proxy or tracker. All app-owned Moodle HTTPS requests record a hostname-only destination in the session inventory under Settings > Privacy. No paths, query strings, passwords, or tokens enter that inventory.
+`main/moodle/logos.ts` fetches a selected school's public compact logo, then its full logo if necessary. Requests are HTTPS, same-origin, unauthenticated, and reject redirects and token-bearing URLs. There is no third-party image proxy or tracker. Directory rows retain their existing initials tiles. No school logo assets or registry are bundled. All app-owned Moodle HTTPS requests record a hostname-only destination in the session inventory under Settings > Privacy. No paths, query strings, passwords, or tokens enter that inventory.
 
 The logo cache is `<userData>/moodle/logos`. Source pointers and image content use SHA-256 filenames, atomic replacement, 0700 directories, and 0600 files. A source URL is fetched once while cached and survives app restarts. Files are validated again by content hash and raster metadata when read. PNG, JPEG, GIF, and WebP must match their declared MIME type, stay within 1 MiB, have positive dimensions no larger than 4096 per axis, and contain at most 4,194,304 pixels. SVG and other active formats are rejected. Logo failures never block connection. The renderer receives only raster data URLs and otherwise generates a monogram from the school name. No automatic expiry refresh occurs; changed source URLs fetch new content, and clearing app data removes cached logos.
+
+Analytics owns an explicit four-school allowlist in `main/analytics/school.ts`, independent of directory membership. All added schools resolve to null for analytics, just like pasted URLs. Their profile uses `school_id=null`, `school_name=null`, `school_source=unknown`, and the actual `moodle_connected` state. The existing analytics schema remains unchanged.
 
 Tests use recorded public-config shapes, raster fixtures, mocked transports, and temporary directories. No unit test calls a live university. `e2e/schools-registry.mjs` exercises the built Electron app with fixture discovery and saves screenshots under `docs/evidence/schools`.

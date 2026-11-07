@@ -8,7 +8,6 @@
   "create": "Create theme",
   "add": "Add theme",
   "untitled": "My theme",
-  "interface": "Interface",
   "contrast": "Contrast",
   "contrast_hint": "Strengthen text, borders, and focus indicators. 100% is the accessible baseline.",
   "glassOpacity": "Glass opacity",
@@ -72,5 +71,7 @@
   "token_syntax-string": "Code strings",
   "token_syntax-number": "Code numbers",
   "token_course-start": "Course gradient start",
-  "token_course-end": "Course gradient end"
+  "token_course-end": "Course gradient end",
+  "custom": "Custom themes",
+  "custom_hint": "Create a theme or import a theme file."
 }

@@ -9,12 +9,16 @@
   margin-block: var(--space-2);
   line-height: 1.5;
 }
-.ai-setup-guide ol { padding-inline-start: var(--space-6); }
+.ai-setup-guide ol { list-style: decimal; padding-inline-start: var(--space-5); }
+.ai-setup-guide li { padding-inline-start: var(--space-1); }
+.ai-setup-guide li::marker { font-weight: 600; font-variant-numeric: tabular-nums; }
+.ai-setup-guide h4 { margin-block-start: var(--space-4); font-size: var(--type-base); font-weight: 600; }
 .ai-setup-guide blockquote {
   margin-block: var(--space-3);
   margin-inline: 0;
   padding: var(--space-3);
   border-radius: var(--r-sm);
-  background: var(--surface);
+  background: transparent;
+  border: 1px solid var(--hairline);
   user-select: text;
 }

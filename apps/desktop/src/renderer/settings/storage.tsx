@@ -27,17 +27,17 @@ export function StorageSettings(){
   };
   const disabled=busy || scheduled;
   return <div data-testid="storage-settings" aria-busy={busy}>
-    <p className="muted settings-storage-intro">{tr('storage:description')}</p>
+    <p className="settings-intro">{tr('storage:description')}</p>
     <SettingsGroup title={tr('storage:usage')}>
       {usage?.categories.map(category=><SettingsRow key={category.id} label={tr('storage:'+category.id)}><output className="storage-bytes">{bytes(category.bytes)}</output></SettingsRow>)}
-      {usage && <p className="settings-copy muted">{tr('storage:logical_cache',{size:bytes(usage.cacheBytes)})}</p>}
+      {usage && <p className="muted">{tr('storage:logical_cache',{size:bytes(usage.cacheBytes)})}</p>}
     </SettingsGroup>
     <SettingsGroup>
       <SettingsRow label={tr('storage:clear_cache')} description={tr('storage:cache_limit')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:clearCache',{});return 'cancelled' in result ? '' : tr('storage:done');})}>{tr('storage:clear_cache')}</Button></SettingsRow>
       <SettingsRow label={tr('storage:clear_converted')} description={tr('storage:clear_converted_copy')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:clearConverted',{});return 'cancelled' in result ? '' : tr('storage:done');})}>{tr('storage:clear_converted')}</Button></SettingsRow>
     </SettingsGroup>
     <SettingsGroup title={tr('storage:backup')}>
-      <p className="settings-copy muted">{tr('storage:backup_copy')}</p>
+      <p className="muted">{tr('storage:backup_copy')}</p>
       <SettingsRow label={tr('storage:export')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:export',{});return result.saved ? tr('storage:done') : '';})}>{tr('storage:export')}</Button></SettingsRow>
       <SettingsRow label={tr('storage:restore')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:restore',{});setScheduled(result.scheduled);return result.scheduled ? tr('storage:scheduled') : '';})}>{tr('storage:restore')}</Button></SettingsRow>
       <SettingsRow label={tr('storage:integrity')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:integrity',{});return result.ok ? tr('storage:integrity_ok') : tr('storage:integrity_issues',{count:result.issues});})}>{tr('storage:integrity')}</Button></SettingsRow>

@@ -1,5 +1,5 @@
 [
-  {"id":"vstudy","name":"VStudy","light":["#f5f6fa","#ffffff","#edf0f8","#e0e5f2","#22293c","#505b73","#53617b","#435caa"],"dark":["#171b28","#202637","#1b2131","#303c55","#eef1fa","#b7c1d6","#7d90b2","#a7baff"]},
+  {"id":"vstudy","name":"VStudy","light":["#ffffff","#ffffff","#f6f6f6","#ececec","#0a0a0a","#525252","#767676","#0a0a0a"],"dark":["#000000","#111111","#0a0a0a","#242424","#fafafa","#b3b3b3","#7a7a7a","#fafafa"]},
   {"id":"ocean","name":"Ocean","light":["#eef7f9","#fbfeff","#e3f0f3","#d4e7ed","#173b4a","#496672","#567785","#12627d"],"dark":["#0e222c","#162f3c","#112833","#224655","#e5f4fa","#a8c7d5","#6c9bae","#7ed3f1"]},
   {"id":"grove","name":"Grove","light":["#f0f5ec","#fcfef9","#e6efdf","#d9e5d1","#253e2a","#52674e","#617a58","#38643b"],"dark":["#17231b","#203127","#1b2b20","#314a35","#e9f4e7","#b7cbb1","#809f78","#acd79a"]},
   {"id":"ember","name":"Ember","light":["#fcf2eb","#fffcf8","#f6e7dc","#efdbcc","#4b2b21","#78584b","#986e57","#984421"],"dark":["#2a1c18","#382720","#30211c","#52392b","#fceee2","#d9bca7","#b48a6b","#f8b27e"]},

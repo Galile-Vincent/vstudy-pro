@@ -1,3 +1,4 @@
+import { attachNavigationInput } from './navigation-input';
 import { initializeAnalytics } from './analytics/runtime';
 import { analytics } from './analytics/service';
 const analyticsStartup = performance.now();
@@ -144,6 +145,7 @@ async function createWindow(show = true): Promise<void> {
   });
   window = current;
   trackWindowState(current, app.getPath('userData'), state);
+  attachNavigationInput(current);
   current.on('focus',()=>telemetry?.activity.focus(true));
   current.on('blur',()=>telemetry?.activity.focus(false));
   current.on('minimize',()=>{telemetry?.activity.focus(false);analytics()?.track('app_minimized');});

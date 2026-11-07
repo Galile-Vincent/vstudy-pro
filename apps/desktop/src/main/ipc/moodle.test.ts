@@ -34,7 +34,7 @@ it('registers every Moodle channel behind strict requests and trusted main-frame
     expect([...handlers.keys()].sort()).toEqual([...Object.values(moodleChannels),...Object.keys(moodleWebviewContract)].sort());
     expect(await invoke('moodle:schools',{})).toEqual(expect.arrayContaining([expect.objectContaining({id:'cycu',login:'sso-launch'})]));
 
-    expect(await invoke('moodle:overview',{})).toEqual({accounts:[],courses:[],summaries:[],upcoming:[],otherNotifications:[],unreadNotifications:0});
+    expect(await invoke('moodle:overview',{})).toEqual({accounts:[],courses:[],summaries:[],upcoming:[],otherNotifications:[],unreadNotifications:0,pinnedCourseIds:[]});
     await expect(invoke('moodle:schools',{}, {sender:{id:2,mainFrame:frame},senderFrame:frame})).rejects.toThrow('Untrusted');
     await expect(invoke('moodle:overview',{}, {sender,senderFrame:{}})).rejects.toThrow('Untrusted');
     await expect(invoke('moodle:webview-open',{}, {sender,senderFrame:{}})).rejects.toThrow('Untrusted');

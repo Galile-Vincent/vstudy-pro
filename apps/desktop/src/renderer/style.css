@@ -924,8 +924,6 @@ h3 {
 .provider-row label:has(input[type="checkbox"], [role="checkbox"]) { display: flex; align-items: center; gap: var(--space-2); }
 .provider-row code { overflow-wrap: anywhere; }
 .provider-row p[role="alert"] { color: var(--ink); font-weight: 600; }
-[data-testid="privacy-settings"] section { margin-block: var(--space-5); }
-[data-testid="privacy-settings"] label { display: grid; gap: var(--space-2); margin-block: var(--space-3); }
 [data-testid="privacy-settings"] p, [data-testid="privacy-settings"] li { overflow-wrap: anywhere; }
 
 
@@ -949,10 +947,9 @@ h3 {
 html[data-input-modality=keyboard] [data-slot=aui_composer-shell]:has(:focus-visible),html[data-input-modality=keyboard] .aui-edit-composer-root:has(:focus-visible) { outline:2px solid var(--composer-focus-ring); outline-offset:2px; }
 .aui-composer-input,.aui-edit-composer-input { border:0!important; outline:none!important; box-shadow:none!important; background:transparent; }
 
-.settings-dialog[data-slot=dialog-content],.onboarding[data-slot=dialog-content] { margin:0; display:block; max-width:calc(100vw - var(--space-8)); max-height:calc(100dvh - var(--space-8)); overflow:auto; }
+.settings-dialog[data-slot=dialog-content] { margin:0; display:block; max-width:calc(100vw - var(--space-8)); max-height:calc(100dvh - var(--space-8)); overflow:auto; }
 .settings-dialog[data-slot=dialog-content] { width:680px; }
-.onboarding[data-slot=dialog-content] { width:608px; }
-[data-slot=dialog-overlay] { background:color-mix(in oklab,var(--ink) 24%,transparent); }
+[data-slot=dialog-overlay] { background:var(--overlay); }
 
 .app-shell { width:100%; min-width:0; }
 

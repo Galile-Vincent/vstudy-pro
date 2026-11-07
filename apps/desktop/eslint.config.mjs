@@ -20,4 +20,10 @@ export default ts.config(
       globals: { process: "readonly", console: "readonly", window: "readonly" },
     },
   },
+  {
+    files: ["e2e/**/*.mjs"],
+    languageOptions: {
+      globals: Object.fromEntries(["Buffer", "Element", "Event", "EventTarget", "KeyboardEvent", "MutationObserver", "URL", "cancelAnimationFrame", "devicePixelRatio", "document", "getComputedStyle", "innerHeight", "innerWidth", "localStorage", "performance", "requestAnimationFrame", "setTimeout", "structuredClone"].map(name => [name, "readonly"])),
+    },
+  },
 );

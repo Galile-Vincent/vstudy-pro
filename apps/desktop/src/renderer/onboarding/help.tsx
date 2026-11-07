@@ -70,13 +70,7 @@ export function ContextCoach({ inline = false }: { inline?: boolean }) {
   const { route } = useNavigate();
   const progress = useLearningProgress();
   const [error, setError] = useState('');
-  const [expanded, setExpanded] = useState(() => !window.matchMedia('(max-height: 600px)').matches);
-  useEffect(() => {
-    const media = window.matchMedia('(max-height: 600px)');
-    const resize = () => setExpanded(!media.matches);
-    media.addEventListener('change', resize);
-    return () => media.removeEventListener('change', resize);
-  }, []);
+  const [expanded, setExpanded] = useState(false);
   const kind = route.view === 'workspace' ? 'workspace' : route.view === 'courses' ? 'courses' : null;
   if (!kind || progress.dismissed.includes(kind) || (kind === 'workspace' && !inline)) return null;
   if (kind === 'workspace') return <Popover><PopoverTrigger asChild><Button variant="ghost" size="sm" className="art-reader-coach-trigger"><CircleHelp size={15}/>{tr('art-reader:tip')}</Button></PopoverTrigger><PopoverContent align="start" className="art-reader-coach">

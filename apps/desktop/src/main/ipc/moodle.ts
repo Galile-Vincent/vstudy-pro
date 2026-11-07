@@ -79,7 +79,8 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     if (file.documentId && documents.get(documentIdSchema.parse(file.documentId))) return documentIdSchema.parse(file.documentId);
     return documentIdSchema.parse(await importMoodleFile(repository,fileId,account.siteUrl,await service.token(account.id),documents,undefined,join(app.getPath("userData"),"moodle-downloads")));
   });
-  registrar.handle(moodleChannels.markRead,async ({notificationId}) => { await service.markRead(notificationId); return {ok:true}; });
+  registrar.handle(moodleChannels.setPinned,({accountId,courseId,pinned}) => {repository.setPinned(accountId,courseId,pinned);return {ok:true};});
+  registrar.handle(moodleChannels.markRead,async ({notificationId,read}) => { await service.markRead(notificationId,read); return {ok:true}; });
   registrar.handle(moodleChannels.createReminder,input => {
     const [deadline] = repository.deadlines([input.deadlineId]);
     if (input.createdBy === 'agent' && (Date.parse(input.remindAt) <= Date.now() || Date.parse(input.remindAt) >= Date.parse(deadline!.dueAt))) throw new Error('Invalid agent reminder time');

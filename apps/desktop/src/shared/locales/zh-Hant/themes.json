@@ -8,7 +8,6 @@
   "create": "建立主題",
   "add": "加入主題",
   "untitled": "我的主題",
-  "interface": "介面",
   "contrast": "對比度",
   "contrast_hint": "提高文字、邊框與焦點的對比度。100% 為無障礙基準。",
   "glassOpacity": "玻璃不透明度",
@@ -72,5 +71,7 @@
   "token_syntax-string": "程式碼字串",
   "token_syntax-number": "程式碼數值",
   "token_course-start": "課程漸層起點",
-  "token_course-end": "課程漸層終點"
+  "token_course-end": "課程漸層終點",
+  "custom": "自訂主題",
+  "custom_hint": "建立主題，或匯入主題檔案。"
 }

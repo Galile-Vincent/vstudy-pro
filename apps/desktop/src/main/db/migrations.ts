@@ -100,5 +100,11 @@ export const migrations = [
   { version:20, sql:"CREATE INDEX IF NOT EXISTS conversations_course_page ON conversations(courseId,createdAt DESC,id DESC);" },
   { version:21, sql:plannerMigration },
   { version:22, sql:analyticsMigration },
-  { version:23, sql:studyMigration },
+  { version:23, sql:`
+    CREATE TABLE moodle_course_pins (
+      courseId TEXT PRIMARY KEY REFERENCES moodle_courses(id) ON DELETE CASCADE,
+      accountId TEXT NOT NULL REFERENCES moodle_accounts(id) ON DELETE CASCADE
+    );
+  ` },
+  { version:24, sql:studyMigration },
 ];

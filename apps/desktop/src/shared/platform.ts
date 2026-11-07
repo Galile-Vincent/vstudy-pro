@@ -32,7 +32,6 @@ const windowsMessages: Readonly<Record<string, string>> = {
   'errors:keychain_unavailable': 'storage_failed',
   'moodle:keychain_waiting': 'storage_waiting',
   'moodle:keychain_hint': 'school_storage_help',
-  'onboarding:ai_keychain_body': 'storage_help',
   'onboarding:before_school': 'before_school',
   'settings:converter_copy': 'converter_copy',
 };

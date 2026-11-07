@@ -94,5 +94,12 @@
   "test_connection": "接続を確認",
   "connection_success": "接続できました。キーは使えます。",
   "event_newsletter_subscribe": "製品ニュースの登録",
-  "event_analytics_capture": "利用状況の分析"
+  "event_analytics_capture": "利用状況の分析",
+  "show": "表示",
+  "open": "開く",
+  "welcome_guide_hint": "初回のガイドをもう一度表示します。",
+  "about_hint": "機能の紹介とサンプルを試せます。",
+  "text_reading": "文字と読書",
+  "advanced": "詳細設定",
+  "api_keys": "API キー"
 }

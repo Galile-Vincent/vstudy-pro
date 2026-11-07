@@ -3,12 +3,12 @@ import { useSyncExternalStore } from 'react';
 import { z } from 'zod';
 import { documentIdSchema } from '../../shared/domain';
 
-export const steps = ['welcome', 'language', 'appearance', 'acquisition', 'privacy', 'goal', 'ai', 'start'] as const;
+export const steps = ['welcome', 'language', 'appearance', 'acquisition', 'privacy', 'goal', 'start'] as const;
 export const goals = ['school', 'documents', 'sample'] as const;
 const progressSchema = z.object({
   version: z.literal(1),
   documentId: documentIdSchema.optional(),
-  step: z.enum(steps),
+  step: z.preprocess(value => value === 'ai' ? 'start' : value, z.enum(steps)),
   goal: z.enum(goals),
   status: z.enum(['active', 'paused', 'completed']),
   done: z.array(z.enum(['setup', 'document', 'walkthrough', 'help'])),

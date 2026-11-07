@@ -79,19 +79,38 @@ export function ProviderRow({
     <section className={settingsView ? 'provider-row settings-row' : 'provider-row'} data-layout={settingsView ? 'stack' : undefined} aria-busy={busy}>
       {busy && !waitingKeychain && <p role="status">{tr('common:checking_provider')}</p>}
       <div className="row">
-        <strong>{providerName[provider.config.id]}</strong>
-        <span className="muted provider-status">
-          <span className={`provider-status-dot ${statusTone}`} aria-hidden="true" />
-          {hasKey && !isCli && <Check size={14} aria-hidden="true" />}
-          <span>{statusText}</span>
+        <span className="provider-title">
+          <strong>{providerName[provider.config.id]}</strong>
+          <span className="muted provider-status">
+            <span className={`provider-status-dot ${statusTone}`} aria-hidden="true" />
+            {hasKey && !isCli && <Check size={14} aria-hidden="true" />}
+            <span>{statusText}</span>
+          </span>
+        </span>
+        <span className="provider-actions">
+          {isCli ? (
+            <>
+              <Button variant="secondary" size="sm" disabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
+              <Button variant="secondary" size="sm" disabled={busy || unsupportedCli} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="link" onClick={() => void perform(() => desktop.invoke('shell:openExternal', { url: provider.config.id === 'anthropic-api' ? 'https://platform.claude.com/settings/keys' : provider.config.id === 'openai-api' ? 'https://platform.openai.com/api-keys' : new URL(baseUrl).origin }))}>{tr('settings:get_key')}</Button>
+              <Button variant="secondary" size="sm" disabled={busy} onClick={() => void perform(async () => {
+                const id = provider.config.id;
+                if (id !== 'anthropic-api' && id !== 'openai-api' && id !== 'openai-compatible') return;
+                setTestResult('');
+                const result = await desktop.invoke('providers:test', { providerId: id });
+                setTestResult(tr(result === 'success' ? 'settings:connection_success' : `errors:connection_${result}`));
+              })}>{tr('settings:test_connection')}</Button>
+            </>
+          )}
         </span>
       </div>
       {isCli && (
         <>
           {unsupportedCli && <p role="note">{tr('distribution:codex_unavailable')}</p>}
-          <Button variant="secondary" disabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
           <p className="muted">{tr('ai-cli:row_help')}</p>
-          <Button disabled={busy || unsupportedCli} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
           <label className="provider-cli-label">
             {settingsView ? (
               <Switch
@@ -144,17 +163,7 @@ export function ProviderRow({
       )}
       {!isCli && (
         <>
-          <Button variant="link" onClick={() => void perform(() => desktop.invoke('shell:openExternal', { url: provider.config.id === 'anthropic-api' ? 'https://platform.claude.com/settings/keys' : provider.config.id === 'openai-api' ? 'https://platform.openai.com/api-keys' : new URL(baseUrl).origin }))}>{tr('settings:get_key')}</Button>
-          <Button disabled={busy} onClick={() => void perform(async () => {
-            const id = provider.config.id;
-            if (id !== 'anthropic-api' && id !== 'openai-api' && id !== 'openai-compatible') return;
-            setTestResult('');
-            const result = await desktop.invoke('providers:test', { providerId: id });
-            setTestResult(tr(result === 'success' ? 'settings:connection_success' : `errors:connection_${result}`));
-          })}>{tr('settings:test_connection')}</Button>
           {testResult && <p role="status">{testResult}</p>}
-          <p className="muted">{tr('settings:key_help')}</p>
-          <p className="muted">{tr('settings:keychain_help')}</p>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -251,6 +260,10 @@ export function ProviderRow({
               </Button>
             </form>
           )}
+          <div className="provider-help">
+            <p className="muted">{tr('settings:key_help')}</p>
+            <p className="muted">{tr('settings:keychain_help')}</p>
+          </div>
         </>
       )}
       {waitingKeychain && <p role="status">{tr('settings:waiting')}</p>}

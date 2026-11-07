@@ -16,10 +16,10 @@ export function PolicyLinks() {
   return <nav className="analytics-links" aria-label={tr('analytics:policies')}>{(['privacy','terms'] as const).map(page => <a key={page} href={`${WEBSITE_URL}/${lang}/${page}`} onClick={event => { event.preventDefault(); void desktop.invoke('shell:openExternal', {url:event.currentTarget.href}).catch(() => setError(true)); }}>{tr(`analytics:${page}`)}</a>)}{error && <span role="alert">{tr('errors:generic')}</span>}</nav>;
 }
 export function AnalyticsDisclosure() {
-  return <div className="analytics-disclosure"><p>{tr('analytics:summary')}</p><p>{tr('analytics:excluded')}</p><p>{tr('analytics:pseudonymous')}</p><PolicyLinks/></div>;
+  return <div className="analytics-disclosure"><p>{tr('analytics:intro')}</p><details><summary>{tr('analytics:details_toggle')}</summary><p>{tr('analytics:summary')}</p><p>{tr('analytics:excluded')}</p><p>{tr('analytics:pseudonymous')}</p></details><PolicyLinks/></div>;
 }
 export function ConsentChoice({ onChoose, busy = false }: { onChoose: (enabled: boolean) => void; busy?: boolean }) {
-  return <div className="analytics-choices">{[true,false].map(enabled => <Button key={String(enabled)} variant="secondary" disabled={busy} onClick={() => onChoose(enabled)}>{tr(enabled ? 'analytics:share' : 'analytics:decline')}</Button>)}</div>;
+  return <div className="analytics-choices">{[false,true].map(enabled => <Button key={String(enabled)} variant="secondary" disabled={busy} onClick={() => onChoose(enabled)}>{tr(enabled ? 'analytics:share' : 'analytics:decline')}</Button>)}</div>;
 }
 export async function completeAnalyticsOnboarding(enabled: boolean, input: import('../shared/analytics').Onboarding) {
   await desktop.invoke('analytics:setConsent', { enabled });

@@ -22,8 +22,8 @@ import { exchangeWebviewCookie, probeWebviewSession } from './webview-transport'
 interface AccountSession { account:MoodleAccount; browser:Session; policy:WebviewPolicy; auth:MoodleWebviewSession; cleanup:()=>void }
 interface Pane {
   owner:WebContents; window:BrowserWindow; view:WebContentsView; account:AccountSession;
-  state:WebviewState; target:string; retries:number; visible:boolean; theme:WebviewTheme|null;
-  css:string|null; timer:ReturnType<typeof setTimeout>|undefined; keepalive:ReturnType<typeof setInterval>;
+  state:WebviewState; target:string; retries:number; visible:boolean;
+  timer:ReturnType<typeof setTimeout>|undefined; keepalive:ReturnType<typeof setInterval>;
   abort:AbortController; importing:boolean; externalPending:boolean; cleanup:()=>void;
 }
 export interface MoodleWebviewDependencies {
@@ -92,7 +92,7 @@ export class MoodleWebviews {
     const view = new WebContentsView({webPreferences:{session:account.browser,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,navigateOnDragDrop:false,spellcheck:false}});
     const state:WebviewState = {id:randomUUID(),status:'connecting',url:publicWebviewUrl(url),title:tr('webview:title'),secure:false,canGoBack:false,canGoForward:false,zoom:1,error:null,retryAt:null,documentId:null};
     const cleanup = () => this.closeOwner(owner.id);
-    const pane:Pane = {owner,window,view,account,state,target:url,retries:0,visible:false,theme:null,css:null,timer:undefined,keepalive:setInterval(() => void this.keepalive(pane),4 * 60_000),abort:new AbortController(),importing:false,externalPending:false,cleanup};
+    const pane:Pane = {owner,window,view,account,state,target:url,retries:0,visible:false,timer:undefined,keepalive:setInterval(() => void this.keepalive(pane),4 * 60_000),abort:new AbortController(),importing:false,externalPending:false,cleanup};
     this.panes.set(owner.id,pane);
     window.contentView.addChildView(view);
     view.setVisible(false);
@@ -108,7 +108,7 @@ export class MoodleWebviews {
     contents.on('did-stop-loading',() => { clearTimeout(pane.timer); });
     contents.on('did-navigate',(_event,url) => this.committed(pane,url));
     contents.on('did-navigate-in-page',(_event,url,isMainFrame) => { if (isMainFrame) this.committed(pane,url); });
-    contents.on('did-finish-load',() => {void this.style(pane).then(() => {if (!pane.abort.signal.aborted && state.status === 'loading') {state.status = 'ready';view.setVisible(pane.visible);} });});
+    contents.on('did-finish-load',() => {if (!pane.abort.signal.aborted && state.status === 'loading') {state.status = 'ready';view.setVisible(pane.visible);}});
     contents.on('page-title-updated',(_event,title) => { state.title = title.replace(/[\p{Cc}\p{Cf}]/gu,'').slice(0,300); });
     contents.on('did-fail-load',(_event,code,_description,_url,isMainFrame) => { if (isMainFrame && code !== -3) this.fail(pane,new WebviewSessionError(webviewLoadError(code))); });
     contents.on('render-process-gone',() => this.fail(pane,new WebviewSessionError('load-failed')));
@@ -191,15 +191,6 @@ export class MoodleWebviews {
     pane.visible = visible && bounds.width > 0 && bounds.height > 0;
     pane.view.setBackgroundColor(theme.background);
     pane.view.setVisible(pane.visible && pane.state.status === 'ready' && !pane.state.error && !pane.importing);
-    if (JSON.stringify(theme) !== JSON.stringify(pane.theme)) { pane.theme = theme; void this.style(pane); }
-  }
-  private async style(pane:Pane) {
-    if (!pane.theme || pane.abort.signal.aborted) return;
-    const {dark,background,foreground,accent} = pane.theme;
-    try {
-      if (pane.css) await pane.view.webContents.removeInsertedCSS(pane.css);
-      pane.css = await pane.view.webContents.insertCSS(`:root {color-scheme:${dark ? 'dark' : 'light'};--vstudy-bg:${background};--vstudy-fg:${foreground};--vstudy-accent:${accent}} body,#page,#page-content,#region-main,.card,.drawer,.navbar {background-color:var(--vstudy-bg)!important;color:var(--vstudy-fg)!important} a {color:var(--vstudy-accent)} input,textarea,select {color-scheme:${dark ? 'dark' : 'light'}}`,{cssOrigin:'user'});
-    } catch { /* Navigation can replace a document while its previous style is removed. */ }
   }
   async action(owner:WebContents,id:string,action:WebviewAction):Promise<WebviewState> {
     const pane = this.pane(owner,id), contents = pane.view.webContents;

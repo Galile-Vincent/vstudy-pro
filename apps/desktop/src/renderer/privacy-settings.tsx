@@ -105,7 +105,7 @@ export function PrivacySettings() {
           </Button>
         </SettingsRow>
       </SettingsGroup>
-      <SettingsGroup title={tr('settings:delete')} danger>
+      <SettingsGroup danger>
         <SettingsRow
           label={tr('settings:delete')}
           description={tr('settings:delete_copy')}

@@ -17,7 +17,7 @@ async function mount(input='',accounts:MoodleAccount[]=[]) {
 }
 it('keeps search local and selects a matching school with the keyboard',async () => {
   const {find}=await mount('Taiwan');
-  expect(document.querySelectorAll('[role=option]')).toHaveLength(1);
+  expect(document.querySelectorAll('[role=option]')).toHaveLength(schools.filter(school => school.country === 'TW').length);
   expect(find).not.toHaveBeenCalled();
   const input=document.querySelector('[role=combobox]')!;
   await act(async () => input.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true})));
@@ -44,4 +44,16 @@ it('uses monograms without loading remote logos while searching',async () => {
   await mount();
   expect(document.querySelectorAll('img')).toHaveLength(0);
   expect(document.querySelectorAll('.moodle-school-monogram')).toHaveLength(schools.length);
+});
+
+it('puts Taiwan directory entries first in Traditional Chinese and sorts English names alphabetically',async () => {
+  await i18n.changeLanguage('zh-Hant');
+  await mount();
+  const taiwan=schools.filter(school => school.country === 'TW');
+  const options=document.querySelector('[role=group][aria-label="學校目錄"]')!.querySelectorAll('[role=option]');
+  expect(Array.from(options).slice(0,taiwan.length-1).every(option => option.textContent?.includes('.edu.tw'))).toBe(true);
+  await i18n.changeLanguage('en');
+  await mount();
+  const names=Array.from(document.querySelector('[role=group][aria-label="School directory"]')!.querySelectorAll('[role=option]')).map(option => option.querySelector('span:not(.moodle-school-monogram)')!.firstChild!.textContent ?? '');
+  expect(names).toEqual([...names].sort(new Intl.Collator('en').compare));
 });

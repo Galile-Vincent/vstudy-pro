@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /Users/vincent/vstudy-pro/apps/desktop
+
+
+ Test Files  5 passed (5)
+      Tests  40 passed (40)
+   Start at  23:03:21
+   Duration  871ms (transform 241ms, setup 0ms, import 378ms, tests 111ms, environment 643ms)
+

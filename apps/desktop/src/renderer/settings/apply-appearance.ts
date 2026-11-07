@@ -50,7 +50,7 @@ export async function initializeAppearance(): Promise<void> {
     applyTheme(cached);
   } catch { applyTheme(current); }
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    if (current.colorScheme === 'system') applyTheme(current);
+    if (current.colorScheme === 'system') transition(() => applyTheme(current), true);
   });
   try { applyAppearance(await desktop.invoke('settings:get', {})); }
   catch { /* The validated cache keeps the app usable if settings cannot be loaded. */ }

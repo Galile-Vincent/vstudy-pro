@@ -33,6 +33,7 @@
 .app-shell .shell-content { position:relative; }
 .app-shell[data-view=workspace] .shell-content > .context-coach { display:none; }
 .app-shell .workspace { background:var(--art-reader-mesh),var(--background); }
+:root[data-theme=vstudy] .app-shell .workspace { background:var(--background); }
 .app-shell .workspace .app-header { min-height:64px; padding:var(--space-2) var(--space-6); background:var(--art-reader-glass); backdrop-filter:var(--material-filter); gap:var(--space-5); }
 .workspace .app-header button { min-height:44px; border-radius:var(--art-reader-control); background:transparent; }
 .workspace .app-header > .row:first-child { gap:var(--space-2); overflow:hidden; }

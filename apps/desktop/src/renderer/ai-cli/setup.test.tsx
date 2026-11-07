@@ -176,6 +176,27 @@ it('keeps unpinned updates manual and routes the vendor link through external co
   expect(runs()).toHaveLength(0);
 });
 
+it('lists each tool in Settings as one row with its version, state and a single setup action', async () => {
+  Object.assign(fixture.tools[1]!, { version: '2.1.0', status: 'ready' });
+  const opened: unknown[] = [];
+  const listener = (event: Event) => opened.push((event as CustomEvent).detail);
+  window.addEventListener('vstudy:ai-cli-setup', listener);
+  try {
+    await act(async () => root.render(<AiCliInventory settings />));
+    expect(document.querySelector('.settings-group h3')?.textContent).toBe(i18n.t('ai-cli:tools'));
+    const rows = [...document.querySelectorAll<HTMLButtonElement>('.ai-cli-tool')];
+    expect(rows.map(row => row.textContent)).toEqual([
+      `Claude Code${i18n.t('ai-cli:missing')}${i18n.t('ai-cli:status_not-installed')}`,
+      `Codex2.1.0${i18n.t('ai-cli:status_ready')}`,
+      `Antigravity${i18n.t('ai-cli:missing')}${i18n.t('ai-cli:status_not-installed')}`,
+    ]);
+    await act(async () => rows[1]!.click());
+    await act(async () => document.querySelector<HTMLButtonElement>('.ai-cli-inventory-entry')!.click());
+    expect(opened).toEqual([{ provider: 'codex' }, { provider: undefined }]);
+    expect(button(i18n.t('ai-cli:check_now'))).toBeDefined();
+  } finally { window.removeEventListener('vstudy:ai-cli-setup', listener); }
+});
+
 it.each(['en', 'zh-Hant', 'ja'].flatMap(language => (['claude', 'agy'] as const).map(provider => ({ language, provider }))))('shows Windows installation steps for $provider in $language', async ({ language, provider }) => {
   await i18n.changeLanguage(language);
   vi.mocked(desktopPlatform).mockReturnValue('win32');

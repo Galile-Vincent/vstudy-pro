@@ -56,10 +56,8 @@ try {
     const header=view==='courses'?'.shell-topbar':'.app-header';
     const scroller=view==='courses'?'.moodle-page':'.reading-scroll';
     assert.equal(await page.locator(header).evaluate(el=>window.getComputedStyle(el).borderBottomWidth),'0px');
-    assert.equal(await page.locator(header).evaluate(el=>window.getComputedStyle(el,'::after').opacity),'0');
     await page.locator(scroller).evaluate(el=>{el.scrollTop=180;});
     await page.waitForFunction(selector=>window.document.querySelector(selector)?.dataset.scrolled==='true',scroller);
-    assert.equal(await page.locator(header).evaluate(el=>window.getComputedStyle(el,'::after').opacity),'1');
     await page.screenshot({path:join(evidence,`${view}-scrolled.png`)});
     await page.locator(scroller).evaluate(el=>{el.scrollTop=0;});
     await page.waitForFunction(selector=>window.document.querySelector(selector)?.dataset.scrolled==='false',scroller);
@@ -80,6 +78,7 @@ try {
     const dialogLayout=await page.locator('.settings-dialog').boundingBox();
     await click('.scheme-card:last-child');
     await page.waitForFunction(()=>window.document.getAnimations().some(a=>a.animationName==='theme-crossfade'&&a.playState==='paused'));
+    assert.equal(await page.evaluate(()=>window.document.getAnimations().find(a=>a.animationName==='theme-crossfade').effect.getTiming().duration),320,'Scheme cross-fade lasts 320ms');
     const frames=[];
     for(const time of [0,80,160,320]) {
       const opacity=await page.evaluate(time=>{
@@ -93,6 +92,9 @@ try {
       const offset=(350*1440+80)*3;
       frames.push({time,opacity,pixel:Array.from(data.slice(offset,offset+3)),path});
     }
+    assert.equal(Number(frames[0].opacity),0,'New theme starts transparent');
+    assert.ok(Number(frames[1].opacity)>0&&Number(frames[1].opacity)<Number(frames[2].opacity),'New theme fades in through intermediate opacity');
+    assert.equal(Number(frames[3].opacity),1,'New theme is opaque at 320ms');
     assert.notDeepEqual(frames[0].pixel,frames[1].pixel,'80ms has an intermediate rendered color');
     assert.notDeepEqual(frames[1].pixel,frames[2].pixel,'160ms advances the rendered color');
     assert.notDeepEqual(frames[2].pixel,frames[3].pixel,'320ms reaches the final color');
@@ -143,6 +145,7 @@ try {
     }
     await waitEnd();
     results.push({view,frames,liveFrames,trials});
+    await page.locator('.appearance-layout details').evaluate(details=>{details.open=true;});
     await page.getByRole('slider',{name:'Contrast',exact:true}).focus();
     await page.keyboard.press('ArrowRight');
     await page.waitForFunction(()=>window.document.documentElement.dataset.themeTransition==='view');

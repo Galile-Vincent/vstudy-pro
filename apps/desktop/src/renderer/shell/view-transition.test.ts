@@ -47,3 +47,26 @@ it('immediate navigation has no reveal animation under reduced motion',()=>{
   const animate=vi.fn();Object.defineProperty(content,'animate',{value:animate});
   try {transitionTo(()=>{},false,true);expect(animate).not.toHaveBeenCalled();} finally {content.remove();}
 });
+it('applies history synchronously under reduced motion and leaves no direction marker', () => {
+  vi.stubGlobal('matchMedia', () => ({ matches: true }));
+  document.startViewTransition = vi.fn();
+  const apply = vi.fn(); transitionTo(apply, false, false, 'back');
+  expect(apply).toHaveBeenCalledTimes(1);
+  expect(document.startViewTransition).not.toHaveBeenCalled();
+  expect(document.documentElement.dataset.historyDirection).toBeUndefined();
+});
+
+it('keeps the newer transition direction when the older transition finishes', async () => {
+  Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
+  vi.stubGlobal('matchMedia', () => ({ matches: false }));
+  const finishes: Array<() => void> = [];
+  document.startViewTransition = vi.fn(() => ({
+    ready: Promise.resolve(), finished: new Promise<void>(resolve => finishes.push(resolve)), skipTransition: vi.fn(),
+  }) as unknown as ViewTransition);
+  transitionTo(vi.fn(), false, false, 'back');
+  transitionTo(vi.fn(), false, false, 'forward');
+  finishes[0]!(); await new Promise(resolve => setTimeout(resolve));
+  expect(document.documentElement.dataset.historyDirection).toBe('forward');
+  finishes[1]!(); await new Promise(resolve => setTimeout(resolve));
+  expect(document.documentElement.dataset.historyDirection).toBeUndefined();
+});

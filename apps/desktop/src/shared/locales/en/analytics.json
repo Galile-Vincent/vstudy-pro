@@ -45,5 +45,7 @@
   "source_search_engine": "Search engine",
   "source_teacher_school": "Teacher or school",
   "source_other": "Other",
-  "source_prefer_not_to_say": "Prefer not to say"
+  "source_prefer_not_to_say": "Prefer not to say",
+  "intro": "Help improve VStudy Pro with usage data. We never collect your name, documents, questions or answers. Studying works the same either way.",
+  "details_toggle": "What is collected"
 }

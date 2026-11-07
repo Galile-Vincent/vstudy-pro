@@ -142,13 +142,12 @@ try {
   await page.getByRole('button',{name:'Open in Moodle',exact:true}).click();
   await page.waitForFunction(() => window.document.querySelector('.moodle-webview-header strong')?.textContent === 'Week 4 · Moodle');
   assert.equal(keys,1);nativeId=await native();
-  const expectedBackground = await page.evaluate(() => window.getComputedStyle(window.document.documentElement).getPropertyValue('--reader-background').trim());
   const actualBackground = await app.evaluate(async ({webContents},id) => webContents.fromId(id).executeJavaScript('getComputedStyle(document.documentElement).getPropertyValue("--vstudy-bg").trim()'),nativeId);
-  assert.equal(actualBackground,expectedBackground);
+  assert.equal(actualBackground,'','the app injects no theme variables into the school page');
   await page.screenshot({path:join(evidence,'02-ocean-dark-pane.png')});
   const darkPng = await app.evaluate(async ({webContents},id) => (await webContents.fromId(id).capturePage()).toPNG().toString('base64'),nativeId);
   await writeFile(join(evidence,'02-ocean-dark-page-content.png'),Buffer.from(darkPng,'base64'));
-  report.push('PASS. The Ocean dark theme reaches the pane and its native Moodle document through the shared reader tokens. Native content screenshots are separate from Chromium toolbar screenshots.');
+  report.push('PASS. The school page keeps its own colors and receives no injected app theme. Native content screenshots are separate from Chromium toolbar screenshots.');
   report.push('PASS. Closing destroys the view. Reopening reuses the account cookie and does not request another autologin key.');
   const isolated = await app.evaluate(async ({session}) => {
     const partitions = ['moodle-content-' + process.getBuiltinModule('crypto').createHash('sha256').update('33333333-3333-4333-a333-333333333333' + '\0' + globalThis.webviewFixtureInputs.account.siteUrl).digest('hex')];
