@@ -17,6 +17,7 @@ import { SearchService } from "./search";
 import { ActivityService } from "./activity";
 import { profileStage } from "../../../resources/converter/profile";
 import { decodeHtmlEntities } from "../../shared/html";
+import { importError } from "../../shared/import-error";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
 import { link, mkdir, mkdtemp, open, readFile, rm, stat } from "node:fs/promises";
@@ -221,8 +222,10 @@ export class DocumentService {
           this.options.onProgress?.(document.id, "Conversion complete");
         }
       } catch (error) {
+        const mapped = importError(error).code;
+        const specific = mapped === 'errors.disk_full' || mapped === 'errors.permission_denied' || mapped === 'errors.offline' ? mapped : null;
         if (!this.stopped && this.options.store.documents.getIncludingDeleted(document.id)) this.options.store.documents.transition(document.id, {
-          status: "failed", error: 'VSTUDY_STATUS:' + JSON.stringify({code: error instanceof Error && /NO_TEXT_LAYER|no text layer|OCR/.test(error.message) ? 'errors.pdf_no_text' : error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed',params:{}}),
+          status: "failed", error: 'VSTUDY_STATUS:' + JSON.stringify({code: specific ?? (error instanceof Error && /NO_TEXT_LAYER|no text layer|OCR/.test(error.message) ? 'errors.pdf_no_text' : error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed'),params:{}}),
         });
       }
     }).finally(() => { this.jobs.delete(document.id); activeConversions.delete(document.id); });

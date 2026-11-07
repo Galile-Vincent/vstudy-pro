@@ -148,9 +148,21 @@ export function Workspace() {
         setDocuments(await desktop.invoke("documents:list", {})); setDocumentId(id);
         navigate({ view: 'workspace', documentId: id });
         setNotice("");
+        setUndo(null);
+        requestAnimationFrame(() => document.getElementById('reading-content')?.focus());
       } });
     } catch (error) { report(error); }
   };
+  const undoButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!undo) return;
+    undoButton.current?.focus();
+    const timer = setTimeout(() => {
+      setUndo(null);
+      setNotice(current => current === undo.message ? "" : current);
+    }, 30000);
+    return () => clearTimeout(timer);
+  }, [undo]);
   const refreshProviders = useCallback(async () => {
     const list = await desktop.invoke("providers:list", {});
     setProviders(list);
@@ -562,7 +574,7 @@ export function Workspace() {
       {notice && (
         <div className="notice" role="status">
           <span>{notice}</span>
-          {undo?.message === notice && <Button variant="outline" size="sm" onClick={() => void undo.run().catch(report)}>{tr('library:undo')}</Button>}
+          {undo?.message === notice && <Button ref={undoButton} variant="outline" size="sm" onClick={() => void undo.run().catch(report)}>{tr('library:undo')}</Button>}
           <button
             aria-label={tr('common:dismiss_notification')}
             onClick={() => setNotice("")}

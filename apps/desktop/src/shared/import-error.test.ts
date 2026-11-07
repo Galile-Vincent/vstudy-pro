@@ -26,3 +26,10 @@ it.each([
 ])('maps system error %# to a specific next-step reason',(error,code) => {
  expect(importError(error)).toEqual({code,params:{}});
 });
+it.each([
+ [Object.assign(new TypeError('fetch failed'),{cause:Object.assign(new Error('getaddrinfo ENOTFOUND pypi.org'),{code:'ENOTFOUND'})}),'errors.offline'],
+ [Object.assign(new Error('copy failed'),{cause:{code:'ENOSPC'}}),'errors.disk_full'],
+ [Object.assign(new Error('copy failed'),{cause:{code:'EACCES'}}),'errors.permission_denied'],
+])('reads error.cause.code when error.code is absent %#',(error,code) => {
+ expect(importError(error)).toEqual({code,params:{}});
+});
