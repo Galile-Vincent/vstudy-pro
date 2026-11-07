@@ -41,7 +41,7 @@ html[data-input-modality=keyboard] .library-view .library-search:has(:focus-visi
   position:absolute; top:100%; right:0; z-index:20;
   width:var(--filter-width); max-height:70vh; max-width:calc(100vw - var(--space-6)); overflow:auto;
   display:grid; gap:var(--space-4); padding:var(--space-4);
-  border:0; border-radius:var(--r-lg); background:var(--library-surface); backdrop-filter:var(--material-filter); box-shadow:0 0 0 1px var(--library-ring),var(--elevation-floating);
+  border:0; border-radius:var(--r-lg); background:var(--library-surface); backdrop-filter:var(--surface-blur); box-shadow:0 0 0 1px var(--library-ring),var(--elevation-floating);
 }
 [data-slot=popover-content].filter-panel { position:relative; inset:auto; margin:0; }
 .filter-panel[hidden] { display:none; }
@@ -59,7 +59,7 @@ html[data-input-modality=keyboard] .library-view .library-search:has(:focus-visi
 .filter-chips:empty { display:none; }
 .filter-chips button { font-size:var(--type-sm); border:0; border-radius:var(--r-sm); box-shadow:none; background:var(--library-control); }
 .filter-chips button.ghost,.library-empty > button.ghost { border:0; background:transparent; color:var(--muted); box-shadow:none; }
-.library-results { flex:0 1 auto; min-height:0; overflow:auto; border:0; border-radius:var(--r-lg); background:var(--library-surface); backdrop-filter:var(--material-filter); box-shadow:0 0 0 1px var(--library-ring); }
+.library-results { flex:0 1 auto; min-height:0; overflow:auto; border:0; border-radius:var(--r-lg); background:var(--library-surface); backdrop-filter:var(--surface-blur); box-shadow:0 0 0 1px var(--library-ring); }
 .library-document { display:flex; gap:var(--space-3); padding:var(--space-4); align-items:flex-start; border:0; overflow:hidden; }
 .library-document[data-selected=true] { background:var(--active); box-shadow:none; }
 .document-info { flex:1; min-width:0; }
@@ -205,8 +205,19 @@ mark { background:var(--active); color:var(--ink); font-weight:600; }
 .shell-sidebar .library-toast { position:fixed; inset:auto var(--space-8) var(--space-8) auto; z-index:40; width:max-content; max-width:calc(100vw - var(--space-8) * 2); }
 
 :root {
-  --library-surface:var(--material-card);
+  --library-surface:var(--surface-card);
   --library-control:color-mix(in oklab, var(--ink) 6%, transparent);
   --library-control-hover:color-mix(in oklab, var(--ink) 10%, transparent);
   --library-ring:var(--hairline);
+}
+
+.filter-panel [data-slot=checkbox] {
+  border:1px solid var(--muted); border-radius:var(--r-xs); background:transparent; color:var(--ink);
+}
+.filter-panel [data-slot=checkbox][data-state=checked] {
+  border-color:var(--ink); background:var(--ink); color:var(--surface);
+}
+@media(forced-colors:active) {
+  .filter-panel [data-slot=checkbox] { border-color:CanvasText; }
+  .filter-panel [data-slot=checkbox][data-state=checked] { background:Highlight; color:HighlightText; border-color:Highlight; }
 }

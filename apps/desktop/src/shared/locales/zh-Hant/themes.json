@@ -1,6 +1,6 @@
 {
   "cardTransparency": "卡片透明度",
-  "cardTransparency_hint": "選擇卡片與面板透出背景的程度。輔助使用偏好會保留不透明表面。",
+  "cardTransparency_hint": "選擇卡片與面板透出背景的程度；玻璃會加上模糊效果，不受材質設定影響。輔助使用偏好會保留不透明表面。",
   "card_solid": "不透明",
   "card_soft": "柔和",
   "card_glass": "玻璃",

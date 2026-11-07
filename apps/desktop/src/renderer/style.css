@@ -992,7 +992,7 @@ html[data-input-modality=keyboard] :is(.library-search,[data-slot=command-input-
 :root :is([data-slot=card],.surface-card,.home-page .home-card:not(.home-recent-section),.home-reading-card,
  .settings-card,.theme-card,.getting-started,.review-list>li,.review-consent,.review-artifact-reader,.moodle-panel,.moodle-course-card,.planner-panel,.planner-proposal,.library-results[data-view=list],.document-card:not([data-selected=true]),
  .workspace .pane,.moodle-assistant-panel,.update-reader,.analytics-banner,.provider-row,.moodle-empty,.moodle-banner) {
- background:var(--surface-card); border:1px solid var(--surface-border);
+ background:var(--surface-card); border:1px solid var(--surface-border); backdrop-filter:var(--surface-blur);
 }
 :root .app-shell :is(.home-pins .home-card,.home-recent-section) { background:transparent; border:0; }
 :root :is(.workspace .markdown,.pane .markdown) { background:transparent; }
