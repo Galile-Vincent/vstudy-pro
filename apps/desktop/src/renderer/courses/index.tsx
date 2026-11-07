@@ -59,6 +59,7 @@ import "./art/tokens.css";
 import "./courses.css";
 import "./art/surfaces.css";
 import { ConnectDialog } from "./connect";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Planner } from "./planner";
 import { courseAttention } from "./attention";
 import { orderCourses, type CourseSort, type CourseSortPreferences } from "../../shared/moodle-course-order";
@@ -182,6 +183,7 @@ function CoursesBody({
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState("");
   const [connect, setConnect] = useState(!!connectOnMount);
+  const [confirmDisconnect, setConfirmDisconnect] = useState<string>();
   useEffect(() => {if (reconnect) {setConnect(true);onReconnected?.();}},[reconnect,onReconnected]);
   const [tab, setTab] = useState<Tab>("content");
   const [term, setTerm] = useState<MoodleTermFilter>("current");
@@ -271,6 +273,7 @@ function CoursesBody({
     }
   };
   const disconnect = async (accountId: string) => {
+    setConfirmDisconnect(undefined);
     try {
       await api.disconnect(accountId);
       if (courseId) onCourse();
@@ -531,7 +534,7 @@ function CoursesBody({
           </div>
           <div className="moodle-header-actions">
           {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry" onClick={() => setShowUpdates(true)}><Inbox />{tr("moodle:updates")}{unreadUpdates > 0 && <span className="updates-count">{unreadUpdates}</span>}</Button>}
-          {detail && <Button variant="ghost" size="icon" aria-label={tr("moodle:disconnect")} title={tr("moodle:disconnect")} onClick={() => void disconnect(detail.course.accountId)}><Unplug /></Button>}
+          {detail && <Button variant="ghost" size="icon" aria-label={tr("moodle:disconnect")} title={tr("moodle:disconnect")} onClick={() => setConfirmDisconnect(detail.course.accountId)}><Unplug /></Button>}
           <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
           <Button variant="outline" onClick={() => setConnect(true)}>
             <GraduationCap />
@@ -983,6 +986,18 @@ function CoursesBody({
             </div>
           )
         )}
+        <Dialog open={!!confirmDisconnect} onOpenChange={open => { if (!open) setConfirmDisconnect(undefined); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{tr("moodle:disconnect_title", { school: overview?.accounts.find(account => account.id === confirmDisconnect)?.siteName ?? tr("moodle:this_school") })}</DialogTitle>
+              <DialogDescription asChild><div className="grid gap-2"><p>{tr("moodle:disconnect_removes")}</p><p>{tr("moodle:disconnect_keeps")}</p></div></DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setConfirmDisconnect(undefined)}>{tr("common:cancel")}</Button>
+              <Button variant="destructive" onClick={() => confirmDisconnect && void disconnect(confirmDisconnect)}>{tr("moodle:disconnect")}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <ConnectDialog
           accounts={overview?.accounts}
           open={connect}
