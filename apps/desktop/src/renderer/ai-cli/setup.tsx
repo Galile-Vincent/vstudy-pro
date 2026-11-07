@@ -1,5 +1,5 @@
 /** Guided setup coordinates explicit provider consent and previewed named actions in one sheet. */
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X } from 'lucide-react';
 import type { CliActionId, CliActionPlan, CliProvider } from '../../shared/ai-cli';
@@ -7,29 +7,18 @@ import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
-import { aiCliChanged, aiCliSetupEvent } from './entry';
+import { aiCliChanged } from './entry';
 import { cliNames, cliProviders, currentStep, setupAction, setupSteps } from './model';
 import { useCliTools } from './use-tools';
 import { useCliAction } from './use-action';
 import { ActionPreview } from './preview';
 import { ProviderChoice } from './choice';
 import { ManualInstall, ManualInstallReason } from './manual-install';
-import { CliTerminal } from './terminal';
+const CliTerminal = lazy(() => import('./terminal').then(module => ({ default: module.CliTerminal })));
 import { AdvancedShell } from './preferences';
 import './setup.css';
 
-export function AiCliSetupHost() {
-  const [request, setRequest] = useState<{ provider?: CliProvider }>();
-  useEffect(() => {
-    const show = (event: Event) => {
-      const provider = (event as CustomEvent<{ provider?: CliProvider }>).detail?.provider;
-      setRequest(provider && cliProviders.includes(provider) ? { provider } : {});
-    };
-    window.addEventListener(aiCliSetupEvent, show);
-    return () => window.removeEventListener(aiCliSetupEvent, show);
-  }, []);
-  return request ? <AiCliSetup key={request.provider ?? 'choose'} initialProvider={request.provider} onClose={() => setRequest(undefined)} /> : null;
-}
+export { AiCliSetupHost } from './setup-host';
 
 export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: CliProvider | undefined; onClose: () => void }) {
   useTranslation();
@@ -98,7 +87,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
             {runner.session?.phase === 'cancelled' && <p role="status">{tr('ai-cli:phase_cancelled')}</p>}
             {tool.appliesToNewChats && <p role="status">{tr('ai-cli:new_chats')}</p>}
           </div></div>
-          {runner.session && <CliTerminal session={runner.session} />}
+          {runner.session && <Suspense fallback={null}><CliTerminal session={runner.session} /></Suspense>}
           <section className="ai-cli-maintenance" aria-label={tr('ai-cli:manage')}><h3>{tr('ai-cli:manage')}</h3><p>{tr('ai-cli:new_chats')}</p><div className="ai-cli-actions">
             <Button variant="secondary" disabled={busy || !tool.consented || (!tool.version && !tool.path)} onClick={() => void review(`status-${provider}`)}>{tr('ai-cli:check_status')}</Button>
             <Button variant="ghost" disabled={busy || !tool.consented || (!tool.version && !tool.path)} onClick={() => void review(`login-${provider}`)}>{tr('ai-cli:sign_in_again')}</Button>

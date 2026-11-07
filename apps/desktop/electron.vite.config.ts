@@ -13,6 +13,7 @@ export default defineConfig({
     build: { externalizeDeps: false, rollupOptions: { output: { format: "cjs" } } },
   },
   renderer: {
+    build: { minify: "esbuild", cssMinify: true },
     resolve: { alias: { "@": resolve("src/renderer") } },
     html: { cspNonce: "vstudy-development" },
     plugins: [react(), tailwindcss()],

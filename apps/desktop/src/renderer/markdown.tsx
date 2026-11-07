@@ -1,3 +1,4 @@
+import { schema } from "./markdown-schema";
 import { useMarkdownPlugins } from './markdown-plugins';
 import { highlightCitation } from "./citation-highlight";
 import { errorText } from "./status";
@@ -7,7 +8,7 @@ import { tr } from '../shared/i18n';
 import { Children, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Markdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import rehypeSanitize from "rehype-sanitize";
 import {
   headingsIn,
   headingPath,
@@ -20,23 +21,6 @@ import { externalUrlSchema } from "../shared/ipc";
 import { documentCitationSchema } from "../shared";
 import type { Document, Selection } from "../shared";
 
-export const schema = {
-  ...defaultSchema,
-  protocols: { ...defaultSchema.protocols, src: ["data"] },
-  attributes: {
-    ...defaultSchema.attributes,
-    "*": [
-      ...(defaultSchema.attributes?.["*"] ?? []),
-      "data-start",
-      "data-end",
-      "data-source-text",
-    ],
-    code: [
-      ...(defaultSchema.attributes?.code ?? []),
-      ["className", /^language-./, "math-inline", "math-display"],
-    ],
-  },
-};
 export function safeImage(url: string): string | undefined {
   if (/^data:image\/(png|gif|jpeg|webp);base64,[a-z0-9+/=\s]+$/i.test(url))
     return url;

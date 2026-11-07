@@ -14,7 +14,7 @@ import { LearningHelp, ContextCoach } from "./onboarding/help";
 import { HomeView } from "./home";
 import { Workspace } from "./workspace";
 import { desktop } from './bridge';
-import { AiCliSetupHost } from './ai-cli/setup';
+import { AiCliSetupHost } from './ai-cli/setup-host';
 import { ProviderSettings, type Providers } from './providers';
 import { AgentsProvider } from './settings/agents-state';
 import { AgentNavigation } from './settings/agents-navigation';
