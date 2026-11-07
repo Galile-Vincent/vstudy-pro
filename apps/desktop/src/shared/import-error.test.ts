@@ -17,3 +17,12 @@ it.each([
 ])('provides a specific stable reason for %s', (message,code,params) => {
  expect(importError(new Error(message))).toEqual({code,params});
 });
+it.each([
+ [Object.assign(new Error('ENOSPC: no space left on device, copyfile'),{code:'ENOSPC'}),'errors.disk_full'],
+ [Object.assign(new Error('storage.disk_full'),{code:'ENOSPC'}),'errors.disk_full'],
+ [Object.assign(new Error("EACCES: permission denied, open 'empty.pdf'"),{code:'EACCES'}),'errors.permission_denied'],
+ [Object.assign(new Error('read-only file system'),{code:'EROFS'}),'errors.permission_denied'],
+ [Object.assign(new Error('getaddrinfo ENOTFOUND pypi.org'),{code:'ENOTFOUND'}),'errors.offline'],
+])('maps system error %# to a specific next-step reason',(error,code) => {
+ expect(importError(error)).toEqual({code,params:{}});
+});
