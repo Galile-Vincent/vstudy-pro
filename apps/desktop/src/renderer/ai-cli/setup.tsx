@@ -47,6 +47,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
     if (tool?.consented && tool.status === 'update-available' && !tool.manualUpdateRequired) void desktop.invoke('ai-cli:preview', { actionId: `update-${provider}` }).then(plan => { if (!disposed) setUpdatePlan(plan); }).catch(() => { if (!disposed) setLocalError(true); });
     return () => { disposed = true; };
   }, [provider, tool?.consented, tool?.status, tool?.latestVersion, tool?.manualUpdateRequired]);
+  const displayStatus = failed ? 'error' : tool?.status === 'ready' && !tool.tested ? 'not_tested' : tool?.status;
   const review = async (actionId: CliActionId) => {
     await runner.preview(actionId);
     requestAnimationFrame(() => document.getElementById('ai-cli-preview')?.focus());
@@ -79,7 +80,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
         {loadError && <div role="alert"><p>{tr('ai-cli:load_error')}</p><Button variant="secondary" onClick={() => void refresh()}>{tr('ai-cli:retry')}</Button></div>}
         {!loaded && !loadError && <p role="status">{tr('ai-cli:loading')}</p>}
         {tool && <>
-          <div className="ai-cli-tool-heading"><strong>{cliNames[provider]}</strong><span className="ai-cli-chip" role="status" data-status={tool.status}>{tr(`ai-cli:status_${tool.status}`)}</span></div>
+          <div className="ai-cli-tool-heading"><strong>{cliNames[provider]}</strong><span className="ai-cli-chip" role="status" data-status={displayStatus}>{tr(`ai-cli:status_${displayStatus}`)}</span></div>
           <ol className="ai-cli-steps" aria-label={tr('ai-cli:steps')}>{setupSteps.map((item, index) => <li key={item} aria-current={step === item ? 'step' : undefined} data-done={setupSteps.indexOf(step) > index || tool.tested}><span className="ai-cli-step-number" aria-hidden="true">{setupSteps.indexOf(step) > index || tool.tested ? <Check size={16} /> : index + 1}</span><span><strong>{tr(`ai-cli:step_${item}`)}</strong>{step === item && !tool.tested && <small>{tr('ai-cli:you_are_here')}</small>}</span></li>)}</ol>
           <div className="ai-cli-workarea"><div className="ai-cli-instructions">
             <h2>{tr(tool.tested ? 'ai-cli:ready_title' : `ai-cli:heading_${step}`)}</h2>
@@ -95,7 +96,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
             {running && <Button variant="secondary" onClick={() => void runner.close(false).catch(() => setLocalError(true))}>{tr('ai-cli:cancel')}</Button>}
             {failed && <SetupRecovery failure={failed} tool={tool} session={runner.session} busy={busy} onAction={action => void runner.preview(action ? `${action}-${provider}` : runner.session?.actionId ?? setupAction(provider, step))} />}
 
-            {runner.session?.phase === 'succeeded' && <p role="status" className="ai-cli-success">{tr(runner.session.actionId.startsWith('test-') ? 'ai-cli:test_success' : 'ai-cli:action_success')}</p>}
+            {runner.session?.phase === 'succeeded' && runner.session.actionId === setupAction(provider, step) && <p role="status" className="ai-cli-success">{tr(runner.session.actionId.startsWith('test-') ? 'ai-cli:test_success' : 'ai-cli:action_success')}</p>}
             {runner.session?.phase === 'cancelled' && <p role="status">{tr('ai-cli:phase_cancelled')}</p>}
             {tool.appliesToNewChats && <p role="status">{tr('ai-cli:new_chats')}</p>}
           </div></div>

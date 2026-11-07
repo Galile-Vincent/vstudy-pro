@@ -221,3 +221,12 @@ mark { background:var(--active); color:var(--ink); font-weight:600; }
   .filter-panel [data-slot=checkbox] { border-color:CanvasText; }
   .filter-panel [data-slot=checkbox][data-state=checked] { background:Highlight; color:HighlightText; border-color:Highlight; }
 }
+
+.document-course-inline { display:none; }
+@container docs (width < 52rem) {
+  .document-course-inline { display:block; color:var(--muted); font-size:var(--type-xs); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+}
+@media(width < 900px) {
+  .library-view .library-toolbar .library-sort { display:none; }
+  .library-view .library-search { min-width:min(100%,12rem); }
+}

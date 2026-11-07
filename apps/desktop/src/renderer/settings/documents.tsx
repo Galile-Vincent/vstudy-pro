@@ -19,7 +19,7 @@ export function DocumentSettings() {
     } catch {setError(tr('errors:generic'));}
     finally {setBusy(false);}
   };
-  return <><SettingsRow label={tr('library:defaultOpenMethod')} description={tr('library:originalHint')}>
+  return <><SettingsRow label={tr('library:defaultOpenMethod')} description={method === 'original' ? tr('library:originalHint') : undefined}>
     <OpenMethodSelect value={method ?? 'reader'} disabled={busy || !method} onChange={value => void update(value)}/>
   </SettingsRow>{error && <p role="alert">{error}</p>}</>;
 }
