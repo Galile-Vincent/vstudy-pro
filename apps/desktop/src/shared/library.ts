@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import { z } from 'zod';
+import { moodleCourseIdentitySchema } from './moodle-course';
 import { documentIdSchema, documentSchema, messageSchema, messageIdSchema, conversationIdSchema, usageRecordSchema } from './domain';
 export const folderIdSchema = z.string().uuid().brand<'FolderId'>();
 export const tagIdSchema = z.string().uuid().brand<'TagId'>();
@@ -16,7 +17,9 @@ const id = z.object({ documentId: documentIdSchema }).strict();
 export const folderSchema = z.object({ id: folderIdSchema, parentId: folderIdSchema.nullable(), name, color: z.string().max(32).nullable(), icon: z.string().max(64).nullable(), position: z.number(), pinned: z.number().int(), pinnedAt: z.string().nullable(), createdAt: z.string(), updatedAt: z.string(), count: z.number().optional() });
 export const tagSchema = z.object({ id: tagIdSchema, name, color: z.string().max(32).nullable() });
 /** Keep reader-compatible document metadata nested alongside organization and measured file metadata. */
-export const libraryDocumentSchema = z.object({ document: documentSchema, folderId: folderIdSchema.nullable(), position: z.number(), pinned: z.boolean(), pinnedAt: z.string().nullable(), lastOpenedAt: z.string().nullable(), pageCount: z.number().nullable(), sizeBytes: z.number().nullable(), contentChars: z.number().nullable(), tags:z.array(tagSchema).default([]), snippet:z.string().optional() });
+/** Course a document was saved from, with just enough identity to choose a localized title. */
+export const libraryCourseSchema = z.object({ id: z.string().uuid(), fullName: z.string(), identity: moodleCourseIdentitySchema.pick({ title: true, teachers: true, term: true }) }).strict();
+export const libraryDocumentSchema = z.object({ document: documentSchema, folderId: folderIdSchema.nullable(), position: z.number(), pinned: z.boolean(), pinnedAt: z.string().nullable(), lastOpenedAt: z.string().nullable(), pageCount: z.number().nullable(), sizeBytes: z.number().nullable(), contentChars: z.number().nullable(), tags:z.array(tagSchema).default([]), snippet:z.string().optional(), course: libraryCourseSchema.nullable().default(null) });
 /** Validated metadata filters and keyset pagination; callers cannot supply SQL expressions. */
 export const libraryQuerySchema = z.object({
     view: z.enum(['all', 'recent', 'pinned', 'unfiled', 'converting-failed']).optional(),

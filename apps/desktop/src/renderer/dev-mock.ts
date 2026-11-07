@@ -1,4 +1,5 @@
 import { createReviewMock, reviewDemoChat } from './review/dev-mock';
+import { libraryDemoItems } from './library/dev-mock';
 import realCourseRows from '../main/moodle/fixtures/real-cycu-courses.tsv?raw';
 import { parseCourseIdentity, courseLifecycle } from '../main/moodle/identity';
 import {
@@ -48,6 +49,7 @@ The relationship is $E = mc^2$.
 `;
 export function createMockBridge(): DesktopApi {
   const reviewDemo = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('reviewDemo') === '1';
+  const libraryDemo = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('libraryDemo') === '1';
   const reviewMock = createReviewMock(reviewDemo);
   const documents: Document[] = [],
     conversations: Conversation[] = [],
@@ -121,7 +123,7 @@ export function createMockBridge(): DesktopApi {
         result = {};
         break;
       case "library:documents:list":
-        result = { items: [...documents, ...moodleDocuments].map(document => ({ document, folderId: null, position: 0, pinned: false, pinnedAt: null, lastOpenedAt: null, pageCount: null, sizeBytes: null, contentChars: null, tags: [] })), nextCursor: null };
+        result = { items: [...[...documents, ...moodleDocuments].map(document => ({ document, folderId: null, position: 0, pinned: false, pinnedAt: null, lastOpenedAt: null, pageCount: null, sizeBytes: null, contentChars: null, tags: [], course: moodleDocumentCourses.get(document.id) ?? null })), ...(libraryDemo ? libraryDemoItems() : [])], nextCursor: null };
         break;
       case "settings:systemLocale":
         result = "en";
@@ -296,6 +298,7 @@ import type { MoodleApi } from './courses/api';
 import type { MoodleCourseDetail, MoodleAccount } from '../shared/moodle';
 
 const moodleDocuments: Document[] = [];
+const moodleDocumentCourses = new Map<string, NonNullable<IpcResponse<'library:documents:list'>['items'][number]['course']>>();
 const moodleDocumentSources = new Map<string, string>();
 export function createMockMoodleApi(): MoodleApi {
   const id = (n: number) => `10000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -373,6 +376,7 @@ export function createMockMoodleApi(): MoodleApi {
       file.documentId ??= crypto.randomUUID();
       if (!moodleDocuments.some(d => d.id === file.documentId)) moodleDocuments.push(documentSchema.parse({ id: file.documentId, title: file.name, sourceName: file.name, sourceHash: 'b'.repeat(64), sourcePath: `mock/${file.name}`, markdownPath: 'mock/content.md', mime: file.mime, status: 'ready', createdAt: at(0) }));
       const detail = active().find(d => d.course.id === file.courseId)!;
+      moodleDocumentCourses.set(file.documentId, { id: detail.course.id, fullName: detail.course.fullName, identity: { title: detail.course.identity.title, teachers: detail.course.identity.teachers, term: detail.course.identity.term } });
       const preparation = detail.course.shortName === 'CS 201'
         ? 'A binary tree gives each node at most two children. Compare preorder, inorder, and postorder traversal, then trace each traversal on a tree with seven nodes.'
         : detail.course.shortName === 'DES 102'

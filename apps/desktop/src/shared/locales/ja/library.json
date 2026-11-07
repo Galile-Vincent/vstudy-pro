@@ -176,5 +176,15 @@
   "savedToLibrary": "ライブラリに保存しました",
   "downloadedCopy": "コピーをダウンロードしました",
   "defaultOpenMethod": "既定の開き方",
-  "originalHint": "元のファイルはシステムの既定アプリで開きます。開く際に方法を変更できます。"
+  "originalHint": "元のファイルはシステムの既定アプリで開きます。開く際に方法を変更できます。",
+  "viewMode": "ライブラリの表示",
+  "viewFiles": "すべての資料",
+  "viewFolders": "フォルダ",
+  "backToFolders": "すべてのフォルダに戻る",
+  "folderList": "コースのフォルダ",
+  "openFolder": "フォルダを開く：{{name}}",
+  "breadcrumb": "ライブラリの場所",
+  "folderFiles": "{{formatted}} 件の資料",
+  "folderFiles_one": "{{formatted}} 件の資料",
+  "folderFiles_other": "{{formatted}} 件の資料"
 }

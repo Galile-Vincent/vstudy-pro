@@ -176,5 +176,15 @@
   "savedToLibrary": "已儲存至文件庫",
   "downloadedCopy": "已下載副本",
   "defaultOpenMethod": "預設文件開啟方式",
-  "originalHint": "原始檔案會以系統預設應用程式開啟。開啟檔案時仍可切換方式。"
+  "originalHint": "原始檔案會以系統預設應用程式開啟。開啟檔案時仍可切換方式。",
+  "viewMode": "文件庫檢視方式",
+  "viewFiles": "全部文件",
+  "viewFolders": "資料夾",
+  "backToFolders": "返回所有資料夾",
+  "folderList": "課程資料夾",
+  "openFolder": "開啟資料夾：{{name}}",
+  "breadcrumb": "文件庫位置",
+  "folderFiles": "{{formatted}} 份文件",
+  "folderFiles_one": "{{formatted}} 份文件",
+  "folderFiles_other": "{{formatted}} 份文件"
 }

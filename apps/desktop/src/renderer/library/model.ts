@@ -1,4 +1,5 @@
 import type { IpcResponse } from "../../shared/ipc";
+import { displayTitle } from "../../shared/moodle-course-display";
 import { desktop } from "../bridge";
 export type Folder = IpcResponse<"library:tree">[number];
 export type Item = IpcResponse<"library:documents:list">["items"][number];
@@ -57,4 +58,40 @@ export function reorderDestination(items: Item[], index: number, delta: number) 
   if (!target) return null;
   const before = delta < 0 ? target : items.slice(index + delta + 1).find(row => row.folderId === target.folderId);
   return { folderId: target.folderId, ...(before ? { beforeId: before.document.id } : {}) };
+}
+
+export type LibraryMode = 'folders' | 'files';
+const modeStorageKey = 'library-mode';
+export function readMode(): LibraryMode {
+  try { return localStorage.getItem(modeStorageKey) === 'files' ? 'files' : 'folders'; }
+  catch { return 'folders'; }
+}
+export function writeMode(mode: LibraryMode) {
+  try { localStorage.setItem(modeStorageKey, mode); }
+  catch { /* A blocked preference store only loses the remembered view. */ }
+}
+
+export function courseName(item: Item, language: string): string | null {
+  const course = item.course;
+  if (!course) return null;
+  return displayTitle({ ...course.identity, teachers: course.identity.teachers ?? [] } as Parameters<typeof displayTitle>[0], language, course.fullName) || null;
+}
+
+export type CourseGroup = { key: string; courseId: string | null; name: string | null; items: Item[]; pages: number; latest: string };
+export const uncategorizedKey = 'uncategorized';
+
+export function groupByCourse(items: Item[], language: string): CourseGroup[] {
+  const groups = new Map<string, CourseGroup>();
+  for (const item of items) {
+    const key = item.course?.id ?? uncategorizedKey;
+    let group = groups.get(key);
+    if (!group) {
+      group = { key, courseId: item.course?.id ?? null, name: courseName(item, language), items: [], pages: 0, latest: '' };
+      groups.set(key, group);
+    }
+    group.items.push(item);
+    group.pages += item.pageCount ?? 0;
+    if (item.document.createdAt > group.latest) group.latest = item.document.createdAt;
+  }
+  return [...groups.values()].sort((a, b) => (a.courseId === null ? 1 : 0) - (b.courseId === null ? 1 : 0) || b.latest.localeCompare(a.latest) || (a.name ?? '').localeCompare(b.name ?? ''));
 }

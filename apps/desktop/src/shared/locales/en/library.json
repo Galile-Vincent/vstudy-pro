@@ -176,5 +176,15 @@
   "savedToLibrary": "Saved to document library",
   "downloadedCopy": "Copy downloaded",
   "defaultOpenMethod": "Open documents by default with",
-  "originalHint": "Original files open in your system’s default app. You can choose another method when opening a file."
+  "originalHint": "Original files open in your system’s default app. You can choose another method when opening a file.",
+  "viewMode": "Library view",
+  "viewFiles": "All files",
+  "viewFolders": "Folders",
+  "backToFolders": "Back to all folders",
+  "folderList": "Course folders",
+  "openFolder": "Open folder: {{name}}",
+  "breadcrumb": "Library location",
+  "folderFiles": "{{formatted}} files",
+  "folderFiles_one": "{{formatted}} file",
+  "folderFiles_other": "{{formatted}} files"
 }
