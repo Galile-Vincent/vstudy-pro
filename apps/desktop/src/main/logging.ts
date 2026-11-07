@@ -16,10 +16,11 @@ export function redact(value: unknown): string {
   } catch { return '[unserializable diagnostic]'; }
   return text.slice(0, 20_000)
     .replace(/\bsk-[a-z0-9_-]+/gi, '[redacted]')
+    .replace(/\b(?:AIza[\w-]{20,}|gh[pousr]_\w{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{12,}|xox[abprs]-[\w-]{10,})/g, '[redacted]')
     .replace(/((?:cookie|set-cookie)["'\s]*:\s*["']?)[^"'\r\n}]+/gi, '$1[redacted]')
     .replace(/((?:proxy-)?authorization["'\s]*[:=]\s*)(?:"(?:\\.|[^"\\\r\n])*"?|'(?:\\.|[^'\\\r\n])*'?|[^&\r\n}]+)/gi, '$1[redacted]')
     .replace(/((?:Basic|Bearer|Digest|Negotiate)(?:\s+|%20|\+))[^\s"'&,}]+/gi, '$1[redacted]')
-    .replace(/((?:x-api-key|api[_-]?key|token|sesskey|private[_-]?key|passw(?:or)?d|(?:client[_-])?secret)["'\s]*[:=]\s*)(?:"(?:\\.|[^"\\\r\n])*"?|'(?:\\.|[^'\\\r\n])*'?|[^&"'\r\n,}]+)/gi, '$1[redacted]')
+    .replace(/((?:x-api-key|api[_-]?key|(?<![a-z0-9])key|token|sesskey|private[_-]?key|passw(?:or)?d|(?:client[_-])?secret)["'\s]*[:=]\s*)(?:"(?:\\.|[^"\\\r\n])*"?|'(?:\\.|[^'\\\r\n])*'?|[^&"'\r\n,}]+)/gi, '$1[redacted]')
     .replace(/(["'])(?:[a-z]:[\\/]+|\\\\|~?\/)[^"'\r\n]*\1/gi, '$1[path]$1')
     .replace(/(?:[a-z]:[\\/]+Users[\\/]+|\/(?:Users|home)\/|~\/)[^"'\r\n<>|)]+/gi, '[path]')
     .replace(/[a-z]:[\\/]+[^\s"'<>|)]+|(?:~|file:\/\/)?\/[^\s"'<>|)]+/gi, '[path]')
