@@ -62,6 +62,8 @@ small { font-size: var(--text-xs); }
 .site-footer { border-top:1px solid var(--line); padding:var(--space-10) 0; }
 .footer-inner { display:flex; justify-content:space-between; gap:var(--space-8); align-items:start; font-size:var(--text-sm); }
 .footer-inner p { margin-top:var(--space-2); }
+.footer-contact { display:flex; flex-direction:column; gap:var(--space-2); color:var(--muted); }
+.footer-contact strong { color:var(--ink); font-weight:600; }
 .footer-links { display:flex; flex-wrap:wrap; gap:var(--space-6); color:var(--muted); }
 .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 dialog { padding:var(--space-6); width:min(640px,calc(100% - var(--space-8))); max-height:80dvh; border:0; border-radius:var(--r-lg); background:var(--surface); color:var(--ink); box-shadow:var(--elevation); }

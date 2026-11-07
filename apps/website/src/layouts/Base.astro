@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
-import { path, REPO_URL, VERSION } from '../config';
+import { CONTACT_EMAIL, FOUNDER_URL, LINKEDIN_URL, path, REPO_URL, THREADS_URL, VERSION } from '../config';
 import { languages, languageNames, ui, type Language } from '../data/ui';
 interface Props { language: Language; title: string; description: string; slug?: string; docs?: boolean; page?: string; }
 const { language, title, description, slug = '', docs = false, page = '' } = Astro.props;
@@ -79,6 +79,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       <div class="container footer-inner">
         <div><a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup /></a><p>{t.footer}</p><p><small>{t.version} {VERSION}</small></p></div>
         <div class="footer-links"><a href={path(`${language}/download/`)}>{t.download}</a><a href={path(`${language}/docs/getting-started/`)}>{t.docs}</a><a href={path(`${language}/privacy/`)}>{t.privacy}</a><a href={path(`${language}/terms/`)}>{t.terms}</a><a href={REPO_URL}>{t.source}</a></div>
+        <nav class="footer-contact" aria-label={t.contact}>
+          <strong>{t.contact}</strong>
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+          <a href={FOUNDER_URL} rel="noopener">{t.aboutStudio}</a>
+          <a href={LINKEDIN_URL} rel="me noopener">LinkedIn</a>
+          <a href={THREADS_URL} rel="me noopener">Threads</a>
+        </nav>
       </div>
     </footer>
     <script>
