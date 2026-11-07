@@ -67,7 +67,7 @@ it.each(['library:exportOriginal','library:exportMarkdown'])('parents %s and set
 });
 
 
-it('creates and shows the window before starting maintenance, and cancels an unshown startup', async () => {
+it('starts maintenance after creation even for a hidden window and cancels disposed startup', async () => {
   mocked.root = mkdtempSync(join(tmpdir(), 'library-startup-'));
   const store = openStore(':memory:');
   const order: string[] = [];
@@ -80,11 +80,14 @@ it('creates and shows the window before starting maintenance, and cancels an uns
     order.push('window-created');
     app.emit('browser-window-created', {}, window);
     expect(rebuild).not.toHaveBeenCalled();
-    order.push('window-shown'); window.emit('show');
-    expect(rebuild).not.toHaveBeenCalled();
     await new Promise<void>(resolve=>setImmediate(resolve));
     await dispose.waitForIdle();
-    expect(order).toEqual(['window-created','window-shown','maintenance']);
+    expect(rebuild).toHaveBeenCalledTimes(1);
+    order.push('window-shown'); window.emit('show');
+    expect(rebuild).toHaveBeenCalledTimes(1);
+    await new Promise<void>(resolve=>setImmediate(resolve));
+    await dispose.waitForIdle();
+    expect(order).toEqual(['window-created','maintenance','window-shown']);
     console.log('startup-order: ' + order.join(' -> '));
     dispose();
     const cancelled = registerLibraryIpc(registrar,store,new Set());
