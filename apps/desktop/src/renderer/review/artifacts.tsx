@@ -7,7 +7,7 @@ import type { studyScopeSchema } from '../../shared/review-artifacts';
 import { tr } from '../../shared/i18n';
 import { describeAssumption } from '../../shared/review-assumptions';
 import { desktop } from '../bridge';
-import { DocumentMarkdown } from '../markdown';
+import { DocumentMarkdown } from '../lazy-reader';
 import { Button } from '../components/ui/button';
 import { useReviewPage, type Cursor } from './paging';
 import { ScopePicker } from './scope-picker';

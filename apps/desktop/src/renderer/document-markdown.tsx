@@ -6,7 +6,7 @@ import { documentCitationSchema } from '../shared';
 import { DocumentCitationLink } from './document-elements';
 import { externalUrlSchema } from '../shared/ipc';
 import { desktop } from './bridge';
-import { schema } from './markdown';
+import { schema } from './markdown-schema';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 const components = {

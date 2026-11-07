@@ -6,9 +6,9 @@ import { assertCourseAction } from "../../shared/course-actions";
 import { plannerApi } from "./planner-api";
 import { PlannerProposal } from "./planner-proposal";
 import { ConversationList } from "../conversation-list";
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { desktop } from "../bridge";
-import { Chat } from "../chat";
+const Chat = lazy(() => import("../chat").then(module => ({ default: module.Chat })));
 import type { Conversation } from "../../shared/domain";
 import type { Providers } from "../providers";
 import { Check, Sparkles } from "lucide-react";
@@ -271,7 +271,7 @@ export function CourseAgentPanel({
             )}
             {conversation && (
               <div className="moodle-course-chat">
-                <Chat
+                <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}><Chat
                   key={conversation.id}
                   conversation={conversation}
                   jumpMessageId={historyJump}
@@ -312,7 +312,7 @@ export function CourseAgentPanel({
                     setActions((current) => [...current, ...next.map(action => ({ id: crypto.randomUUID(), action }))])
                   }
                   {...(promptRequest ? { promptRequest } : {})}
-                />
+                /></Suspense>
               </div>
             )}
           </>
