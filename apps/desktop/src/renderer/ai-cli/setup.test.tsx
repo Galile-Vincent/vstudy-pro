@@ -42,7 +42,7 @@ function button(text: string) {
 }
 async function click(text: string) { await act(async () => button(text).click()); }
 async function mount(node = <AiCliSetup onClose={close} />) { await act(async () => root.render(node)); }
-async function allow() { await act(async () => document.querySelector<HTMLButtonElement>('button.ai-cli-consent')!.click()); }
+async function allow() { await act(async () => document.querySelector<HTMLInputElement>('.ai-cli-more .ai-cli-consent input')!.click()); }
 const runs = () => fixture.calls.filter(call => call.channel === 'ai-cli:run');
 beforeEach(async () => {
   await i18n.changeLanguage('en');
@@ -58,20 +58,14 @@ afterEach(async () => { await act(async () => root.unmount()); host.remove(); Re
 
 it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through explicit consent, install, login and test', async provider => {
   await mount(<AiCliSetup initialProvider={provider} onClose={close} />);
-  expect(document.body.textContent).toContain('Allow VStudy');
+  expect(button('Install').disabled).toBe(false);
   expect(runs()).toHaveLength(0);
   expect(fixture.calls.some(call => call.channel === 'ai-cli:preview')).toBe(false);
-  await allow();
-  expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('Download, verify SHA-256');
-  expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('/main/owned/folder');
-  expect(document.querySelector('.ai-cli-preview')?.textContent).toContain('Action plan');
-  expect([...document.querySelectorAll('button')].some(item => item.textContent === 'Open in my own Terminal')).toBe(false);
-  expect(runs()).toHaveLength(0);
-  await click('Run this plan');
+  await click('Install');
   expect(document.body.textContent).toContain('Connect your account.');
-  await click('Run this action');
+  await click('Sign in');
   expect(document.body.textContent).toContain('Try your first answer.');
-  await click('Test it');
+  await click('Test');
   expect(document.body.textContent).toContain('Ready to study');
   expect(document.body.textContent).toContain('Your tool answered. Ready to study.');
   expect(runs().map(call => call.payload.actionId)).toEqual([`install-${provider}`, `login-${provider}`, `test-${provider}`]);
@@ -82,21 +76,22 @@ it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through exp
 });
 
 it('recovers from checksum failure with a fresh preview before retry', async () => {
-  fixture.fail('checksum'); await mount(); await allow(); await click('Run this plan');
+  fixture.fail('checksum'); await mount(); await allow(); await click('Install');
   expect(document.querySelector('[role=alert]')?.textContent).toContain('integrity check');
   expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain('Copy details');
   fixture.fail(null); await click('Try again');
   expect(runs()).toHaveLength(1);
-  await click('Run this plan'); expect(runs()).toHaveLength(2);
+  await click('Install'); expect(runs()).toHaveLength(2);
   expect(document.body.textContent).toContain('Connect your account.');
 });
 
 it('stops a running action and closes the session when the sheet closes', async () => {
-  fixture.hold(true); await mount(); await allow(); await click('Run this plan');
+  fixture.hold(true); await mount(); await allow(); await click('Install');
   await click('Stop this action');
   expect(fixture.calls.filter(call => call.channel === 'ai-cli:close')).toHaveLength(1);
   expect(document.body.textContent).toContain('Stopped.');
-  await click('Run this plan');
+  await click('Try again');
+  await click('Install');
   const closeButton = document.querySelector<HTMLButtonElement>('[aria-label="Close setup and stop its action"]')!;
   await act(async () => closeButton.click());
   expect(close).toHaveBeenCalledOnce();
@@ -105,7 +100,7 @@ it('stops a running action and closes the session when the sheet closes', async 
 
 it('keeps output inert, shows login URLs, and sends them through external confirmation', async () => {
   fixture.output('<img src=x onerror="alert(1)">\nhttps://auth.openai.com/device\nDevice code ABCD-EFGH');
-  await mount(); await allow(); await click('Run this plan');
+  await mount(); await allow(); await click('Install');
   expect(document.querySelector('.ai-cli-output')?.textContent).toContain('<img src=x');
   expect(document.querySelector('.ai-cli-output img')).toBeNull();
   expect(document.body.textContent).toContain('ABCD-EFGH');
@@ -319,7 +314,7 @@ it('guides an existing unprobed binary to sign-in without requiring a version pr
 });
 
 it('pauses session polling while hidden and resumes when visible', async () => {
-  vi.useFakeTimers(); fixture.hold(true); await mount(); await allow(); await click('Run this plan');
+  vi.useFakeTimers(); fixture.hold(true); await mount(); await allow(); await click('Install');
   Object.defineProperty(document, 'hidden', { configurable: true, value: true });
   await act(async () => document.dispatchEvent(new Event('visibilitychange')));
   const reads = () => fixture.calls.filter(call => call.channel === 'ai-cli:read').length;
@@ -334,7 +329,7 @@ it('closes a session that finishes launching after its sheet is unmounted', asyn
   let resolve!: (value: unknown) => void;
   const pending = new Promise<unknown>(done => { resolve = done; });
   bridge.invoke.mockImplementation((channel, payload) => channel === 'ai-cli:run' ? pending : fixture.invoke(channel, payload));
-  await mount(); await allow(); await click('Run this plan');
+  await mount(); await allow(); await click('Install');
   await act(async () => root.render(null));
   const id = crypto.randomUUID();
   await act(async () => resolve({ id, actionId: 'install-claude', phase: 'running', output: '', truncated: false, exitCode: null, error: null }));
@@ -374,7 +369,7 @@ it('keeps a manual terminal fallback when embedded sign-in is unsupported', asyn
     return channel === 'ai-cli:preview' ? { ...response, available: false, reason: 'unsupported' } : response;
   });
   await mount();
-  expect(button('Run this action').disabled).toBe(true);
+  expect(document.querySelector('.ai-cli-action-area [data-slot=button]:not([data-variant=ghost])')?.textContent).toBe('Try again');
   expect(button('Open in my own Terminal').disabled).toBe(false);
   await click('Open in my own Terminal');
   expect(runs()).toHaveLength(0);
@@ -385,7 +380,7 @@ it('recovers an unsupported existing Codex version by offering the audited manag
   Object.assign(fixture.tools[1]!, { consented: true, path: '/existing/codex', version: '0.167.0', status: 'error', error: { code: 'wrong-version', hint: 'wrong-version' } });
   await mount(<AiCliSetup initialProvider="codex" onClose={close} />);
   expect(document.querySelector('.ai-cli-steps [aria-current=step]')?.textContent).toContain('Install');
-  await click('Run this plan');
+  await click('Install');
   expect(runs()[0]?.payload.actionId).toBe('install-codex');
 });
 
@@ -402,7 +397,7 @@ it('copies redacted details beside the failed action and offers sign-in recovery
   const writeText = vi.fn<(text: string) => Promise<void>>(async () => {});
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
   try {
-    await mount(); await click('Test it');
+    await mount(); await click('Test');
     expect(document.querySelector('.ai-cli-action-area [role=alert]')?.textContent).toContain('Your sign-in expired');
     await click('Copy details');
     expect(writeText.mock.calls[0]?.[0]).toContain('Exit code: 1');
@@ -418,4 +413,44 @@ it('previews only the detected recommendation when another tool already has cons
   Object.assign(fixture.tools[1]!, { consented: true, version: '0.166.0', status: 'installed-not-signed-in' });
   await mount();
   expect(fixture.calls.filter(call => call.channel === 'ai-cli:preview').map(call => call.payload.actionId)).toEqual(['login-codex']);
+});
+
+it.each(['en', 'zh-Hant', 'ja'])('keeps the default path plain and a failed test retry-only in %s', async language => {
+  await i18n.changeLanguage(language);
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'ready' });
+  fixture.fail('certificate'); fixture.output('TLS certificate expired');
+  await mount();
+  const details = document.querySelector<HTMLDetailsElement>('.ai-cli-plan-details')!;
+  expect(details.open).toBe(false);
+  expect(document.querySelector('.ai-cli-preview h3')).toBeNull();
+  expect(button(i18n.t('ai-cli:step_test')).disabled).toBe(false);
+  await click(i18n.t('ai-cli:step_test'));
+  expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain(i18n.t('ai-cli:error_title_certificate'));
+  expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain(i18n.t('ai-cli:error_next_certificate'));
+  expect([...document.querySelectorAll('.ai-cli-action-area button')].map(item => item.textContent)).toEqual([i18n.t('ai-cli:retry'), i18n.t('ai-cli:copy_details')]);
+});
+
+it.each(['login', 'test'] as const)('folds first consent into the %s click for an existing tool', async step => {
+  Object.assign(fixture.tools[0]!, { path: '/existing/claude', version: '1.0.0', status: step === 'login' ? 'installed-not-signed-in' : 'ready' });
+  await mount();
+  expect(runs()).toHaveLength(0);
+  await click(step === 'login' ? 'Sign in' : 'Test');
+  expect(fixture.tools[0]!.consented).toBe(true);
+  expect(runs().map(call => call.payload.actionId)).toEqual([`${step}-claude`]);
+});
+
+it('does not run a first action when consent cannot be saved', async () => {
+  bridge.invoke.mockImplementation((channel, payload) => channel === 'ai-cli:consent' ? Promise.reject(new Error('unavailable')) : fixture.invoke(channel, payload));
+  await mount(); await click('Install');
+  expect(runs()).toHaveLength(0);
+  expect(document.querySelector('[role=alert]')).not.toBeNull();
+});
+
+it('does not launch after closing while first-click consent is pending', async () => {
+  let finish!: (value: unknown) => void;
+  bridge.invoke.mockImplementation((channel, payload) => channel === 'ai-cli:consent' ? new Promise(resolve => { finish = resolve; }) : fixture.invoke(channel, payload));
+  await mount(); await click('Install');
+  await act(async () => root.render(null));
+  await act(async () => finish({ ok: true }));
+  expect(runs()).toHaveLength(0);
 });

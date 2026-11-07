@@ -43,11 +43,12 @@ export function useCliAction(onFinished: () => Promise<void>) {
     setPlan(undefined); setError(undefined); setBusy(true); setExternalOpened(false);
     try {
       const next = await desktop.invoke('ai-cli:preview', { actionId });
-      if (mounted.current && request === generation.current) setPlan(next);
+      if (mounted.current && request === generation.current) { setPlan(next); return next; }
     } catch { if (mounted.current && request === generation.current) setError('unknown'); }
     finally { if (mounted.current && request === generation.current) setBusy(false); }
   }, []);
-  const run = async (ownTerminal = false) => {
+  const run = async (ownTerminal = false, selectedPlan = plan) => {
+    const plan = selectedPlan;
     if (!plan || !plan.available && !(ownTerminal && plan.reason === 'unsupported' && plan.actionId.startsWith('login-')) || busy || locked.current || active.current?.phase === 'running') return;
     locked.current = true;
     setBusy(true); setError(undefined);

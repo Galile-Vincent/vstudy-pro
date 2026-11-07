@@ -172,7 +172,7 @@
   "consent_manual": "允許 VStudy 在安裝完成後使用 {{provider}}",
   "consent_manual_help": "你可以先安裝。只有在這裡勾選同意後，VStudy 才會使用這個工具。",
   "more_options": "更多選項",
-  "plan_details": "查看操作詳情",
+  "plan_details": "顯示詳細資訊",
   "other_actions": "其他執行方式",
   "api_options": "在設定管理 API 金鑰與自訂連線",
   "copy_details": "複製詳情",
@@ -194,5 +194,10 @@
   "error_next_wait": "等待帳號額度重設後再試一次。",
   "error_next_retry": "查看操作後再試一次。",
   "failure_command-not-found": "找不到此 AI，請查看安裝步驟。",
-  "failure_rate-limit": "帳號已達使用上限，請稍後再試。"
+  "failure_rate-limit": "帳號已達使用上限，請稍後再試。",
+  "error_title_certificate": "安全連線失敗",
+  "error_next_certificate": "請檢查裝置日期與網路。若問題持續，請學校或網路管理員檢查憑證。",
+  "pick_hint": "不確定？選 Claude Code",
+  "first_click_consent": "點選「{{action}}」即允許 VStudy 使用 {{provider}}。",
+  "failure_certificate": "安全連線失敗。請檢查裝置日期與網路。若問題持續，請學校或網路管理員檢查憑證。"
 }

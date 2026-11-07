@@ -172,7 +172,7 @@
   "consent_manual": "Allow VStudy to use {{provider}} once it is installed",
   "consent_manual_help": "You can install it first. VStudy will only use it after you allow it here.",
   "more_options": "More options",
-  "plan_details": "Show action details",
+  "plan_details": "Show details",
   "other_actions": "Other ways to run this action",
   "api_options": "API keys and custom connections in Settings",
   "copy_details": "Copy details",
@@ -194,5 +194,10 @@
   "error_next_wait": "Wait for your account limit to reset, then retry.",
   "error_next_retry": "Review the action and try again.",
   "failure_command-not-found": "We could not find this AI. Review installation.",
-  "failure_rate-limit": "Your account reached its limit. Try again later."
+  "failure_rate-limit": "Your account reached its limit. Try again later.",
+  "error_title_certificate": "The secure connection failed",
+  "error_next_certificate": "Check your device’s date and network. If it continues, ask your school or network administrator to check the certificate.",
+  "pick_hint": "Not sure? Pick Claude Code",
+  "first_click_consent": "Selecting {{action}} allows VStudy to use {{provider}}.",
+  "failure_certificate": "The secure connection failed. Check your device’s date and network. If it continues, ask your school or network administrator to check the certificate."
 }
