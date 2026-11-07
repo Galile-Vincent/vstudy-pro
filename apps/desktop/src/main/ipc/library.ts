@@ -8,7 +8,7 @@ import { ownerWindow } from '../dialogs';
 import { storageBusy } from "../storage/maintenance";
 import { searchInWorker } from '../services/search-runner';
 import { documentIdSchema } from '../../shared/domain';
-import { app, dialog, shell } from 'electron';
+import { app, dialog, shell, type BrowserWindow } from 'electron';
 import { safeFilename } from "../security";
 import { exportFile } from '../services/export-file';
 import { basename, extname, join } from 'node:path';
@@ -21,7 +21,19 @@ import { getDashboard } from '../services/dashboard';
 /** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, implemented: Set<IpcChannel>, deleteDocument: (id: import("../../shared/domain").Document["id"], remove: () => Promise<void>) => Promise<void> = (_id, remove) => remove(), resume: (id: import("../../shared/domain").Document["id"]) => void = () => {}) {
     const library = new LibraryService(store, join(app.getPath('userData'), 'library')), activity = new ActivityService(store);
-    const startup=library.search.rebuild().catch(()=>{console.error("Search rebuild deferred until next startup");});
+    let startup: Promise<void> = Promise.resolve();
+    let disposed = false;
+    let firstWindow: BrowserWindow | undefined;
+    const afterShow = () => {
+        startup = new Promise<void>(resolve => setImmediate(resolve))
+            .then(() => { if (!disposed) return library.search.rebuild(); })
+            .catch(() => { console.error("Search rebuild deferred until next startup"); });
+    };
+    const onWindow = (_event: Electron.Event, window: BrowserWindow) => {
+        firstWindow = window;
+        window.once('show', afterShow);
+    };
+    app.once('browser-window-created', onWindow);
     let purging: Promise<void> = Promise.resolve();
     const handle: typeof registrar.handle = (channel, handler) => { implemented.add(channel); registrar.handle(channel, handler); };
     handle('messages:page',r=>store.messages.page(r.conversationId,r.limit,r.cursor,r.direction));
@@ -79,5 +91,10 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
         purging=library.purgeAsync().catch(()=>{console.error('Library purge deferred until next idle pass');});
     }, 30000);
     purge.unref();
-    return Object.assign(() => clearInterval(purge), {waitForIdle:async()=>{await startup;await purging;}});
+    return Object.assign(() => {
+        clearInterval(purge);
+        app.removeListener('browser-window-created', onWindow);
+        firstWindow?.removeListener('show', afterShow);
+        disposed = true;
+    }, {waitForIdle:async()=>{await startup;await purging;}});
 }
