@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import { diagnosticUrl, MoodleSso } from './sso';
 import { checkSite } from './discovery';
 
-const mock = vi.hoisted(() => ({windows:[] as {options:unknown;url:string;destroyed:boolean;destroy:() => void;emit:(name:string,...args:unknown[]) => boolean;webContents:{getURL:() => string;emit:(name:string,...args:unknown[]) => boolean;setWindowOpenHandler:ReturnType<typeof vi.fn>}}[],partitions:[] as string[],clear:vi.fn(async () => undefined),permission:vi.fn(),request:vi.fn(),redirect:vi.fn(),external:false,open:vi.fn<(url:string) => Promise<void>>(async () => undefined),callbacks:new Set<(url:string) => boolean>(),loadError:undefined as string | undefined}));
+const mock = vi.hoisted(() => ({windows:[] as {options:unknown;url:string;destroyed:boolean;destroy:() => void;emit:(name:string,...args:unknown[]) => boolean;title:string;webContents:{getURL:() => string;emit:(name:string,...args:unknown[]) => boolean;setWindowOpenHandler:ReturnType<typeof vi.fn>}}[],partitions:[] as string[],clear:vi.fn(async () => undefined),permission:vi.fn(),request:vi.fn(),redirect:vi.fn(),external:false,open:vi.fn<(url:string) => Promise<void>>(async () => undefined),callbacks:new Set<(url:string) => boolean>(),loadError:undefined as string | undefined}));
 vi.mock('./sso-protocol',() => ({ssoProtocol:{get available() {return mock.external;},open:mock.open,subscribe:(callback:(url:string) => boolean) => {mock.callbacks.add(callback);return () => mock.callbacks.delete(callback);}}}));
 vi.mock('electron',async () => {
   const {EventEmitter} = await import('node:events');
@@ -19,6 +19,8 @@ vi.mock('electron',async () => {
       url = ''; destroyed = false;
       webContents = Object.assign(new EventEmitter(),{setWindowOpenHandler:vi.fn(),getURL:()=>this.url});
       constructor(readonly options:unknown) { super(); mock.windows.push(this); }
+      title = '';
+      setTitle(title:string) {this.title = title;}
       isDestroyed() {return this.destroyed;}
       destroy() {this.destroyed = true;this.emit('closed');}
       async loadURL(url:string) {this.url = url;if(mock.loadError && url.startsWith('https:')) {const code=mock.loadError;mock.loadError=undefined;throw Object.assign(new Error('network'),{code});}}
@@ -395,4 +397,15 @@ it('redacts system-browser open errors and session cleanup errors',async () => {
     expect(output).toContain('OPEN_FAILED');expect(output).toContain('STORAGE_CLEAR_FAILED');expect(output).not.toContain('CANARY');
     embedded.dispose();sso.dispose();
   } finally {mock.external = false;logs.mockRestore();}
+});
+
+it('shows the current host in the embedded window title and ignores page titles',async () => {
+  const {sso,window,result} = await start();
+  expect(window.title).toBe('school.example');
+  window.webContents.emit('will-navigate',{preventDefault:vi.fn()},'https://identity.example:8443/login');
+  expect(window.title).toBe('identity.example');
+  const titleEvent = {preventDefault:vi.fn()};
+  window.webContents.emit('page-title-updated',titleEvent,'school.example');
+  expect(titleEvent.preventDefault).toHaveBeenCalled();
+  sso.dispose();await result;
 });

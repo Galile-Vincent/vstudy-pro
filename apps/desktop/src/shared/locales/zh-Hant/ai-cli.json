@@ -91,6 +91,7 @@
   "advanced_warning": "僅供熟悉終端機的使用者。引導式設定不需要一般終端機。開啟前請先確認操作。",
   "advanced_enable": "請先在「設定 > 隱私」啟用獨立的進階終端機偏好設定。",
   "advanced_preview": "查看進階終端機操作",
+  "advanced_start_confirm": "要在 {{cwd}} 啟動一般終端機嗎？它可以你帳號的權限修改或刪除檔案，並執行任意程式。",
   "wizard": "AI 工具引導式設定",
   "status_not-installed": "尚未安裝",
   "status_installing": "安裝中",

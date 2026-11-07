@@ -206,3 +206,36 @@ it('revokes previews on a main document reload and preserves same-document navig
   expect(electron.clipboard.writeText).toHaveBeenLastCalledWith(next.command);
   logging.mockRestore();
 });
+
+it('asks natively with the working directory before every advanced shell session starts', async () => {
+  const { invoke } = await backend();
+  await invoke('ai-cli:setPreferences', { updateChecks: false, autoUpdateWhenIdle: false, advancedShell: true });
+  approval.show.mockClear();
+  const declined = aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview', { actionId: 'advanced-shell' }));
+  approval.show.mockResolvedValueOnce({ response: 0, checkboxChecked: false });
+  const logging = vi.spyOn(console, 'error').mockImplementation(() => {});
+  await expect(invoke('ai-cli:run', { actionId: 'advanced-shell', token: declined.token })).rejects.toThrow('VSTUDY_STATUS');
+  logging.mockRestore();
+  expect(approval.show).toHaveBeenCalledTimes(1);
+  expect(approval.show).toHaveBeenLastCalledWith(expect.objectContaining({ detail: expect.stringContaining(declined.cwd), defaultId: 0, cancelId: 0 }), expect.objectContaining({ id: 1 }));
+  const first = aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview', { actionId: 'advanced-shell' }));
+  const session = await invoke('ai-cli:run', { actionId: 'advanced-shell', token: first.token });
+  expect(aiCliContract['ai-cli:run'].response.parse(session).id).toBeTruthy();
+  expect(approval.show).toHaveBeenCalledTimes(2);
+  await invoke('ai-cli:close', { id: (session as { id: string }).id });
+  const second = aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview', { actionId: 'advanced-shell' }));
+  const again = await invoke('ai-cli:run', { actionId: 'advanced-shell', token: second.token });
+  expect(approval.show).toHaveBeenCalledTimes(3);
+  await invoke('ai-cli:close', { id: (again as { id: string }).id });
+});
+
+it('never prompts for provider actions that are not the general shell', async () => {
+  const { invoke } = await backend();
+  await invoke('ai-cli:consent', { provider: 'claude', enabled: true });
+  approval.show.mockClear();
+  const plan = aiCliContract['ai-cli:preview'].response.parse(await invoke('ai-cli:preview', { actionId: 'status-claude' }));
+  const logging = vi.spyOn(console, 'error').mockImplementation(() => {});
+  await invoke('ai-cli:run', { actionId: 'status-claude', token: plan.token }).catch(() => {});
+  logging.mockRestore();
+  expect(approval.show).not.toHaveBeenCalled();
+});

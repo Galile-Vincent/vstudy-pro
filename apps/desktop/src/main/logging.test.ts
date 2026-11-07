@@ -129,3 +129,15 @@ it.each(['renameSync','rmSync'] as const)('continues file logging when rotation 
   log({phase:'rotation-recovered'});
   expect(readFileSync(join(directory,'main.log'),'utf8')).toContain('rotation-recovered');
 });
+it.each([
+  'GET /login/token.php?autologin key=0123456789abcdef0123456789abcdef failed',
+  'https://moodle.example.test/auth/userkey/login.php?userid=7&key=PRIVATE_CANARY&urltogo=%2Fmy',
+  '{"key":"PRIVATE_CANARY"}',
+  'provider said AIzaSyA1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q rejected',
+  'push failed ghp_PRIVATECANARY0123456789abcdefghij and AKIAPRIVATECANARY12',
+])('redacts bare key values and non-sk API key shapes: %s', value => {
+  expect(redact(value)).not.toMatch(/PRIVATE|0123456789abcdef|AIzaSy|AKIA|ghp_/);
+});
+it('keeps ordinary words that merely contain key', () => {
+  expect(redact('keyboard monkey hotkey shortcut')).toBe('keyboard monkey hotkey shortcut');
+});

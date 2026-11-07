@@ -116,6 +116,9 @@ export class MoodleSso {
       const browser = window!;
       browser.webContents.setWindowOpenHandler(() => ({action:'deny'}));
       browser.webContents.on('will-attach-webview',event => event.preventDefault());
+      const showOrigin = (target: string) => { const host = diagnosticUrl(target).host; if (host && !browser.isDestroyed()) browser.setTitle(host); };
+      browser.webContents.on('page-title-updated',event => event.preventDefault());
+      showOrigin(launch.href);
       const showFailure = (error: MoodleAuthError, code: string, target: string) => {
         if (settled || browser.isDestroyed() || recoveryUrl) return;
         failure = error;
@@ -141,6 +144,7 @@ export class MoodleSso {
         try {
           if (new URL(target).protocol !== 'https:') throw new Error('scheme');
           diagnostic('navigate','ALLOW',target);
+          showOrigin(target);
         } catch { event.preventDefault(); showFailure(new MoodleAuthError('blocked'),'SCHEME_REJECTED',target); }
       };
       isolated!.webRequest.onBeforeRequest({urls:['<all_urls>']},(details,respond) => {
