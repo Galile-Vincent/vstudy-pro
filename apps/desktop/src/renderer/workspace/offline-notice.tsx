@@ -7,7 +7,7 @@ import { Button } from '../components/ui/button';
 import { openAiCliSetup } from '../ai-cli/entry';
 
 /** Students can dismiss setup and continue reading without enabling a provider. */
-export function ReaderOfflineNotice({ onSettings }: { onSettings: () => void }) {
+export function ReaderOfflineNotice() {
   useTranslation();
   const [dismissed, setDismissed] = useState(false);
   if (dismissed) return null;
@@ -16,8 +16,7 @@ export function ReaderOfflineNotice({ onSettings }: { onSettings: () => void }) 
     <strong>{tr('art-reader:offline_title')}</strong>
     <p>{tr('art-reader:offline_body')}</p>
     <div className="art-reader-offline-actions">
-      <Button onClick={onSettings}>{tr('art-reader:setup')}</Button>
-      <Button variant="secondary" onClick={() => openAiCliSetup()}>{tr('ai-cli:wizard')}</Button>
+      <Button onClick={() => openAiCliSetup()}>{tr('ai-cli:wizard')}</Button>
       <Button variant="ghost" onClick={() => { setDismissed(true); window.dispatchEvent(new Event('vstudy:read-without-ai')); }}>{tr('art-reader:without_ai')}</Button>
     </div>
   </aside>;

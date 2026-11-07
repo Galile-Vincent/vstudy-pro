@@ -1,5 +1,4 @@
 /** Explain optional AI access without requiring a student to understand developer tools. */
-import { openAiCliSetup } from './ai-cli/entry';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../shared/i18n';
 import { Button } from './components/ui/button';
@@ -12,7 +11,6 @@ export function AiSetupNotice({ onSettings }: { onSettings: () => void }) {
     <strong>{tr('novice:ai_off')}</strong>
     <p>{tr('novice:without_ai')}</p>
     <Button variant="secondary" size="sm" onClick={onSettings}>{tr('novice:connect_ai')}</Button>
-    <Button variant="secondary" size="sm" onClick={() => openAiCliSetup()}>{tr('ai-cli:wizard')}</Button>
   </aside>;
 }
 

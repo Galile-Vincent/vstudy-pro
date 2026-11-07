@@ -136,11 +136,7 @@ export function ProviderSettings({
               <div className="settings-pane-inner">
                 <header className="settings-section-header">
                   <h2>{tr(id === 'agents' ? 'agents:title' : id === 'storage' ? 'storage:title' : `settings:${id}`)}</h2>
-                  {id === 'providers' && (
-                    <p className="muted">
-                      {tr('common:keys_are_saved_securely_in_the_desktop_app_and_never_read_back')}
-                    </p>
-                  )}
+
                 </header>
                 {tab === id &&
                   (id === 'general' ? (
@@ -181,6 +177,10 @@ export function ProviderSettings({
                     <UsageSettings />
                   ) : (
                     <>
+                      <AiCliInventory settings />
+                      <details className="settings-disclosure">
+                      <summary>{tr('ai-cli:more_options')}</summary>
+                      <div className="settings-disclosure-body">
                       <div className="settings-intro">
                         <p>{tr('novice:privacy')}</p>
                         <ol>
@@ -192,16 +192,12 @@ export function ProviderSettings({
                         <summary>{tr('novice:setup_title')}</summary>
                         <div className="settings-disclosure-body"><AiSetupGuide onClose={requestClose} /></div>
                       </details>
-                      <AiCliInventory settings />
                       <SettingsGroup title={tr('settings:api_keys')}>
                         {providers.filter(provider => provider.config.kind === 'api').map(provider => (
                           <ProviderRow settingsView key={provider.config.id} provider={provider} onRefresh={onRefresh} />
                         ))}
                       </SettingsGroup>
-                      <details className="settings-disclosure">
-                      <summary>{tr('novice:advanced')}</summary>
-                      <div className="settings-disclosure-body">
-                      <p>{tr('novice:advanced_help')}</p>
+
                       <SettingsGroup>
                         <SettingsRow
                           label={tr('common:read_only_structured_tables_api_providers_only')}

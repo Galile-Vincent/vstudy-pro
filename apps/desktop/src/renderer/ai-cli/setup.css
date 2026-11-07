@@ -21,7 +21,7 @@
 .ai-cli-steps li[aria-current=step] { background:var(--subtle); color:var(--ink); }
 .ai-cli-step-number { display:grid; place-content:center; min-width:28px; height:28px; background:var(--active); color:var(--ink); border-radius:var(--r-pill); }
 .ai-cli-steps small { display:block; font-size:12px; line-height:18px; margin-top:var(--space-1); color:var(--muted); }
-.ai-cli-workarea { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:var(--space-8); }
+.ai-cli-workarea { display:grid; grid-template-columns:1fr; gap:var(--space-3); }
 .ai-cli-instructions h2 { font-size:22px; line-height:28px; letter-spacing:-.02em; margin:0 0 var(--space-3); font-weight:600; }
 .ai-cli-sheet p,.ai-cli-preferences p { font-size:14px; line-height:22px; margin:0 0 var(--space-3); }
 .ai-cli-account { margin-top:var(--space-5); color:var(--muted); }
@@ -80,3 +80,12 @@
 
 @media (max-height:800px) { .ai-cli-header .ai-cli-title { margin-bottom:var(--space-2); } .ai-cli-header [data-slot=dialog-description] { margin-bottom:0; } .ai-cli-chooser,.ai-cli-steps { margin-bottom:var(--space-3); } .ai-cli-preview code { max-height:64px; } }
 [data-theme=contrast] .ai-cli-sheet[data-slot=dialog-content] { box-shadow:none; outline:1px solid var(--line); }
+
+.ai-cli-sheet[data-slot=dialog-content] { width:min(720px,calc(100vw - var(--space-8))); }
+.ai-cli-more { margin-top:var(--space-5); border-top:1px solid var(--border); padding-top:var(--space-4); }
+.ai-cli-more>summary,.ai-cli-plan-details>summary { cursor:pointer; color:var(--muted); padding-block:var(--space-2); }
+.ai-cli-more[open]>summary { margin-bottom:var(--space-4); }
+.ai-cli-summary { font-size:14px; line-height:1.5; margin:var(--space-2) var(--space-3); color:var(--muted); }
+.ai-cli-action-area .ai-cli-preview { margin-top:0; }
+
+button.ai-cli-consent { display:inline-flex; align-items:center; padding:var(--space-3) var(--space-4); }

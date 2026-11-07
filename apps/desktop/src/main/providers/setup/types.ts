@@ -2,6 +2,7 @@
  * Main-owned setup domain and transition table. External metadata is parsed before use.
  * @packageDocumentation
  */
+import { setupFailure } from '../../../shared/ai-setup-errors';
 import { z } from 'zod';
 import type { CliFailure, CliProvider, CliToolState } from '../../../shared/ai-cli';
 
@@ -27,8 +28,7 @@ export function failure(error: unknown): CliFailure {
   if (code === 'EACCES' || code === 'EPERM') return 'permission-denied';
   if (code === 'ENOSPC' || code === 'EROFS') return 'blocked';
   if (error instanceof Error && error.name === 'AbortError') return 'cancelled';
-  if (error instanceof Error && /auth|log.?in|sign.?in/i.test(error.message)) return 'not-signed-in';
-  if (error instanceof Error && /network|fetch|ECONN|ENOTFOUND|timeout/i.test(error.message)) return 'offline';
+  if (error instanceof Error) return setupFailure(`${code ?? ''} ${error.message}`);
   return 'unknown';
 }
 export type SetupEvent = { type: 'install' | 'update' | 'login' | 'installed' | 'ready' | 'available' | 'unsigned' | 'missing' }

@@ -29,12 +29,13 @@ it('allows reading without AI and keeps the setup action explicit', async () => 
   const host = document.createElement('div'); document.body.append(host);
   const root = createRoot(host), setup = vi.fn(), read = vi.fn();
   window.addEventListener('vstudy:read-without-ai', read);
+  window.addEventListener('vstudy:ai-cli-setup', setup);
   try {
-    await act(async () => root.render(<ReaderOfflineNotice onSettings={setup}/>));
-    await act(async () => Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent === i18n.t('art-reader:setup'))!.click());
+    await act(async () => root.render(<ReaderOfflineNotice/>));
+    await act(async () => Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent === i18n.t('ai-cli:wizard'))!.click());
     expect(setup).toHaveBeenCalledOnce();
     await act(async () => Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent === i18n.t('art-reader:without_ai'))!.click());
     expect(read).toHaveBeenCalledOnce();
     expect(host.querySelector('aside')).toBeNull();
-  } finally { window.removeEventListener('vstudy:read-without-ai', read); await act(async () => root.unmount()); host.remove(); }
+  } finally { window.removeEventListener('vstudy:ai-cli-setup', setup); window.removeEventListener('vstudy:read-without-ai', read); await act(async () => root.unmount()); host.remove(); }
 });
