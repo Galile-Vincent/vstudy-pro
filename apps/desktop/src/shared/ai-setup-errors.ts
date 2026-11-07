@@ -14,16 +14,17 @@ export const setupErrors = {
   unknown: { title: 'unknown', next: 'retry', action: null },
 } as const satisfies Record<string, Recovery>;
 export type SetupIssue = keyof typeof setupErrors;
-export function classifySetupError(code: string, text = ''): SetupIssue {
+export function classifySetupError(code: string, rawText = ''): SetupIssue {
+  const text = rawText.slice(0, 4000);
   if (code !== 'unknown' && code in setupErrors) return code as SetupIssue;
   if (/429|rate.?limit|quota|too many requests|resource.exhausted/i.test(text)) return 'rate-limit';
-  if (/ENOENT|command not found|not recognized|executable.*not found/i.test(text)) return 'command-not-found';
+  if (/ENOENT|command not found|not recognized|executable[^\n]{0,80}not found/i.test(text)) return 'command-not-found';
   if (/EACCES|EPERM|permission denied/i.test(text)) return 'permission-denied';
   if (/certificate|CERT_HAS_EXPIRED|CERT_UNTRUSTED|UNABLE_TO_VERIFY|SELF_SIGNED_CERT/i.test(text)) return 'certificate';
   if (/invalid.grant/i.test(text) || /expired/i.test(text) && /auth|session|token|credential|sign.?in|log.?in/i.test(text)) return 'login-expired';
   if (/not.signed.in|unauthorized|authentication|log.?in|sign.?in/i.test(text)) return 'not-signed-in';
   if (/network|offline|fetch|ECONN|ENOTFOUND|timeout/i.test(text)) return 'offline';
-  if (/unsupported.version|version.*(?:old|unsupported)/i.test(text)) return 'wrong-version';
+  if (/unsupported.version|version[^\n]{0,80}(?:old|unsupported)/i.test(text)) return 'wrong-version';
   return 'unknown';
 }
 export function setupFailure(text: string): CliFailure {

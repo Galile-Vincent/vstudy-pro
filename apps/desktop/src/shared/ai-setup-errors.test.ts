@@ -42,3 +42,10 @@ describe('setup recovery', () => {
     expect(result).not.toMatch(/secret123|abc123|student|sk-example123|session=secret/);
   });
 });
+
+it('classifies and copies a huge error string without stalling', () => {
+  const start = Date.now();
+  const diagnostic = setupDiagnostic({ tool: 'codex', version: null, os: 'darwin', exitCode: 1, error: 'executable '.repeat(500_000) });
+  expect(diagnostic).toContain('Last error:');
+  expect(Date.now() - start).toBeLessThan(200);
+});
