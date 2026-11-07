@@ -250,5 +250,6 @@
   "sort_name": "Name",
   "view_label": "View",
   "view_list": "List",
-  "view_cards": "Cards"
+  "view_cards": "Cards",
+  "open_file": "Open file: {{name}}"
 }

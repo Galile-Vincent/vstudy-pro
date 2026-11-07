@@ -6,10 +6,11 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { defaultSettings, documentIdSchema, settingsSchema, settingsPatchSchema } from '../shared/domain';
 import { desktop } from './bridge';
 import { CourseFileActions, openDocument, performDocumentAction } from './document-open';
+import { AppearanceSection } from './settings/appearance';
 import { DocumentSettings } from './settings/documents';
 import { i18n } from '../shared/i18n';
 vi.mock('./bridge', () => ({desktop:{invoke:vi.fn()}}));
-vi.mock('./components/select', () => ({Select: ({children, ...props}: React.SelectHTMLAttributes<HTMLSelectElement>) => <select {...props}>{children}</select>}));
+HTMLElement.prototype.scrollIntoView = vi.fn();
 (globalThis as {IS_REACT_ACT_ENVIRONMENT?:boolean}).IS_REACT_ACT_ENVIRONMENT = true;
 afterEach(() => vi.resetAllMocks());
 const id = documentIdSchema.parse('00000000-0000-4000-8000-000000000001');
@@ -38,14 +39,18 @@ it('offers open, download and save in the course dialog, with a switchable metho
   await i18n.changeLanguage('en');
   vi.mocked(desktop.invoke).mockResolvedValue({...defaultSettings,documentOpenMethod:'original'});
   const action = vi.fn(async () => 'saved' as const);
-  const host=document.createElement('div'); const root=createRoot(host);
+  const host=document.createElement('div'); document.body.append(host); const root=createRoot(host);
   try {
     await act(async () => root.render(<CourseFileActions name="Lecture.pdf" disabled={false} onAction={action}/>));
     const method = getByRole(host,'combobox');
-    expect(method).toHaveProperty('value','original');
+    expect(method.textContent).toContain('Original file in system app');
+    expect(host.textContent).toContain('Open as');
+    expect(getByRole(host,'button',{name:'Open'}).getAttribute('data-variant')).toBe('default');
+    expect(getByRole(host,'button',{name:'Download a copy…'}).getAttribute('data-variant')).toBe('outline');
     await act(async () => fireEvent.click(getByRole(host,'button',{name:'Open'})));
     expect(action).toHaveBeenLastCalledWith({kind:'open',method:'original'});
-    await act(async () => fireEvent.change(method,{target:{value:'reader'}}));
+    await chooseMethod(method, 'VStudy reader');
+    expect(method.textContent).toContain('VStudy reader');
     await act(async () => fireEvent.click(getByRole(host,'button',{name:'Open'})));
     expect(action).toHaveBeenLastCalledWith({kind:'open',method:'reader'});
     await act(async () => fireEvent.click(getByRole(host,'button',{name:'Download a copy…'})));
@@ -54,23 +59,23 @@ it('offers open, download and save in the course dialog, with a switchable metho
     expect(action).toHaveBeenLastCalledWith({kind:'save'});
     expect(getByRole(host,'status').textContent).toBe('Saved to document library');
     expect(desktop.invoke).not.toHaveBeenCalledWith('settings:set',expect.anything());
-  } finally {await act(async () => root.unmount());}
+  } finally {await act(async () => root.unmount()); host.remove();}
 });
 
 it('persists the default using existing settings and reports write failures', async () => {
   await i18n.changeLanguage('en');
   vi.mocked(desktop.invoke).mockImplementation(async (channel,request) => channel === 'settings:set' ? request : {...defaultSettings,displayName:'Student'});
-  const host=document.createElement('div'); const root=createRoot(host);
+  const host=document.createElement('div'); document.body.append(host); const root=createRoot(host);
   try {
     await act(async () => root.render(<DocumentSettings/>));
-    await act(async () => fireEvent.change(getByRole(host,'combobox'),{target:{value:'original'}}));
+    await chooseMethod(getByRole(host,'combobox'), 'Original file in system app');
     expect(desktop.invoke).toHaveBeenCalledWith('settings:set',expect.objectContaining({displayName:'Student',documentOpenMethod:'original'}));
-    expect(getByRole(host,'combobox')).toHaveProperty('value','original');
+    expect(getByRole(host,'combobox').textContent).toContain('Original file in system app');
     vi.mocked(desktop.invoke).mockRejectedValueOnce(new Error('Disk full'));
-    await act(async () => fireEvent.change(getByRole(host,'combobox'),{target:{value:'reader'}}));
+    await chooseMethod(getByRole(host,'combobox'), 'VStudy reader');
     expect(getByRole(host,'alert').textContent).toBeTruthy();
-    expect(getByRole(host,'combobox')).toHaveProperty('value','original');
-  } finally {await act(async () => root.unmount());}
+    expect(getByRole(host,'combobox').textContent).toContain('Original file in system app');
+  } finally {await act(async () => root.unmount()); host.remove();}
 });
 
 it('saves without navigating and exports a copy through the native save dialog IPC', async () => {
@@ -84,4 +89,24 @@ it('saves without navigating and exports a copy through the native save dialog I
   expect(read).not.toHaveBeenCalled();
   vi.mocked(desktop.invoke).mockResolvedValueOnce({saved:false});
   expect(await performDocumentAction(id,read,{kind:'download'})).toBe('cancelled');
+});
+
+async function chooseMethod(trigger: HTMLElement, name: string) {
+  await act(async () => fireEvent.keyDown(trigger, {key:'Enter'}));
+  await act(async () => fireEvent.click(getByRole(document.body,'option',{name})));
+}
+
+it('places the document default in Documents, separate from Text and reading', async () => {
+  await i18n.changeLanguage('en');
+  vi.mocked(desktop.invoke).mockResolvedValue(defaultSettings);
+  const host=document.createElement('div'); const root=createRoot(host);
+  try {
+    await act(async () => root.render(<AppearanceSection/>));
+    const documents = getByRole(host,'heading',{name:'Documents'}).closest('section')!;
+    const reading = getByRole(host,'heading',{name:'Text and reading'}).closest('section')!;
+    expect(getByRole(documents,'combobox').textContent).toContain('VStudy reader');
+    expect(documents.textContent).toContain('Open documents by default');
+    expect(reading.textContent).not.toContain('Open documents by default');
+    expect(host.textContent).not.toContain('VStudy reader (Markdown)');
+  } finally {await act(async () => root.unmount());}
 });

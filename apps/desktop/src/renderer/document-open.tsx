@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { documentOpenMethodSchema, type DocumentOpenMethod, type Document } from '../shared/domain';
 import { tr } from '../shared/i18n';
 import { desktop } from './bridge';
-import { Select } from './components/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 import { Button } from './components/ui/button';
 import './document-open.css';
 
@@ -27,9 +27,13 @@ export async function performDocumentAction(documentId: Document['id'], read: ()
 export type DocumentOutcome = Awaited<ReturnType<typeof performDocumentAction>>;
 
 export function OpenMethodSelect({value, onChange, disabled = false}: {value: DocumentOpenMethod; onChange: (value: DocumentOpenMethod) => void; disabled?: boolean}) {
-  return <Select aria-label={tr('library:openMethod')} value={value} disabled={disabled} onChange={e => onChange(documentOpenMethodSchema.parse(e.target.value))}>
-    <option value="reader">{tr('library:openReader')}</option>
-    <option value="original">{tr('library:openOriginal')}</option>
+  const label = value === 'original' ? tr('library:openOriginal') : tr('library:openReader');
+  return <Select value={value} disabled={disabled} onValueChange={next => onChange(documentOpenMethodSchema.parse(next))}>
+    <SelectTrigger aria-label={tr('library:openMethod')}><SelectValue>{label}</SelectValue></SelectTrigger>
+    <SelectContent>
+      <SelectItem value="original">{tr('library:openOriginal')}</SelectItem>
+      <SelectItem value="reader">{tr('library:openReader')}</SelectItem>
+    </SelectContent>
   </Select>;
 }
 
@@ -52,8 +56,8 @@ export function CourseFileActions({name, disabled, onAction}: {name: string; dis
   };
   return <div className="course-file-actions" role="group" aria-label={name}>
     <p>{name}</p>
-    <OpenMethodSelect value={method} onChange={setMethod} disabled={disabled || !ready}/>
-    <Button variant="outline" disabled={disabled || !ready} onClick={() => void run({kind:'open', method})}>{tr('library:open')}</Button>
+    <div className="course-file-open-method"><span>{tr('library:openAs')}</span><OpenMethodSelect value={method} onChange={setMethod} disabled={disabled || !ready}/></div>
+    <Button disabled={disabled || !ready} onClick={() => void run({kind:'open', method})}>{tr('library:open')}</Button>
     <Button variant="outline" disabled={disabled} onClick={() => void run({kind:'download'})}>{tr('library:downloadCopy')}</Button>
     <Button variant="outline" disabled={disabled} onClick={() => void run({kind:'save'})}>{tr('library:saveToLibrary')}</Button>
     {error && <p role="alert">{error}</p>}

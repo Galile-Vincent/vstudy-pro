@@ -24,6 +24,7 @@ import {
   Info,
   AlarmClock,
   Mail,
+  MoreHorizontal,
   Pin,
   RefreshCw,
   Unplug,
@@ -46,6 +47,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../components/ui/dropdown-menu";
 import { Skeleton } from "../components/ui/skeleton";
 import { useMoodleApi, type MoodleApi } from "./api";
 import { Reminder } from "./reminder";
@@ -478,6 +480,8 @@ function CoursesBody({
               <button
                 type="button"
                 className="moodle-file-row"
+                title={tr("moodle:open_file", {name:f.name})}
+                aria-label={tr("moodle:open_file", {name:f.name})}
                 key={f.id}
                 disabled={!!opening}
                 onClick={() => void openFile(f.id)}
@@ -510,10 +514,10 @@ function CoursesBody({
                 {opening === f.id ? (
                   <LoaderCircle className="moodle-spin" />
                 ) : (
-                  <ArrowUpRight />
+                  <ChevronRight />
                 )}
               </button>
-              <Button variant="ghost" size="icon" aria-label={tr('webview:open')} title={tr('webview:open')} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})}><ArrowUpRight /></Button>
+              <Button variant="ghost" size="icon" aria-label={`${tr('webview:open')}: ${f.name}`} title={tr('webview:open')} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})}><ArrowUpRight /></Button>
               </div>
             ))}
         </section>
@@ -555,7 +559,12 @@ function CoursesBody({
                 <p>{detail.course.fullName}</p>
               </details>
             </div>
-          <Button ref={disconnectTrigger} variant="ghost" size="icon" aria-label={tr("moodle:disconnect")} title={tr("moodle:disconnect")} onClick={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}><Unplug /></Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild><Button ref={disconnectTrigger} variant="ghost" size="icon" aria-label={tr("common:more_options")} title={tr("common:more_options")}><MoreHorizontal /></Button></DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}><Unplug />{tr("moodle:disconnect")}</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           </> : <>
             <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
             <Button variant="outline" onClick={() => setConnect(true)}><GraduationCap />{tr("moodle:connect_school")}</Button>
