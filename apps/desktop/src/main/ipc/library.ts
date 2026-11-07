@@ -23,9 +23,10 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
     const library = new LibraryService(store, join(app.getPath('userData'), 'library')), activity = new ActivityService(store);
     let startup: Promise<void> = Promise.resolve();
     let disposed = false;
+    const maintenance = new AbortController();
     const afterCreated = () => {
         startup = new Promise<void>(resolve => setImmediate(resolve))
-            .then(() => { if (!disposed) return library.search.rebuild(); })
+            .then(() => { if (!disposed) return library.search.rebuild({userData:app.getPath('userData'), signal:maintenance.signal}); })
             .catch(() => { console.error("Search rebuild deferred until next startup"); });
     };
     const onWindow = () => afterCreated();
@@ -91,5 +92,6 @@ export function registerLibraryIpc(registrar: ReturnType<typeof createIpcRegistr
         clearInterval(purge);
         app.removeListener('browser-window-created', onWindow);
         disposed = true;
+        maintenance.abort();
     }, {waitForIdle:async()=>{await startup;await purging;}});
 }
