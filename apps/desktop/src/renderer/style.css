@@ -931,7 +931,7 @@ h3 {
 @custom-variant data-open (&:where([data-state="open"], [data-open]:not([data-open="false"])));
 
 @custom-variant data-closed (&:where([data-state="closed"], [data-closed]:not([data-closed="false"])));
-:root { --primary:var(--accent-color); --primary-foreground:var(--accent-foreground); --secondary:var(--subtle); --secondary-foreground:var(--ink); --muted-foreground:var(--muted); --accent:var(--active); --accent-foreground:var(--ink); --border:var(--hairline); --input:var(--hairline); --ring:var(--focus); --radius:var(--r-sm); --card:var(--surface); --card-foreground:var(--ink); --popover:var(--surface); --popover-foreground:var(--ink); --sidebar:var(--sidebar-surface); --sidebar-foreground:var(--ink); --sidebar-primary:var(--accent-color); --sidebar-primary-foreground:var(--accent-foreground); --sidebar-accent:var(--active); --sidebar-accent-foreground:var(--ink); --sidebar-border:var(--hairline); --sidebar-ring:var(--focus); }
+:root { --primary:var(--accent-color); --primary-foreground:var(--accent-foreground); --secondary:var(--subtle); --secondary-foreground:var(--ink); --muted-foreground:var(--muted); --accent:var(--active); --accent-foreground:var(--ink); --border:var(--hairline); --input:var(--hairline); --ring:var(--focus); --radius:var(--r-sm); --card:var(--surface-card); --card-foreground:var(--ink); --popover:var(--surface-card-strong); --popover-foreground:var(--ink); --sidebar:var(--sidebar-surface); --sidebar-foreground:var(--ink); --sidebar-primary:var(--accent-color); --sidebar-primary-foreground:var(--accent-foreground); --sidebar-accent:var(--active); --sidebar-accent-foreground:var(--ink); --sidebar-border:var(--hairline); --sidebar-ring:var(--focus); }
 [data-slot=sidebar-wrapper] { min-height:0; height:100%; }
 .shell-sidebar { display:flex; flex-direction:column; }
 .shell-sidebar[hidden] { display:none; }
@@ -982,3 +982,24 @@ html:not([data-input-modality=keyboard]) :is(input[data-slot],textarea[data-slot
 .library-search input,[data-slot=command-input-wrapper] input { border:0; border-radius:0; outline:none; box-shadow:none; background:transparent; }
 .library-search:focus-within,[data-slot=command-input-wrapper]:focus-within { box-shadow:none; }
 html[data-input-modality=keyboard] :is(.library-search,[data-slot=command-input-wrapper]):has(:focus-visible) { outline:2px solid var(--composer-focus-ring); outline-offset:2px; }
+
+/* Shared surfaces stay independent of page layout and opaque semantic color tokens. */
+:root .app-shell :is(.shell-main,.home-page,.library-view,.moodle-page) { background:transparent; }
+:root .app-shell :is(.shell-sidebar,.shell-topbar) {
+ background:var(--surface-bar); backdrop-filter:var(--surface-blur);
+}
+:root .app-shell .shell-topbar { border-bottom:1px solid var(--surface-border); }
+:root :is([data-slot=card],.surface-card,.home-page .home-card:not(.home-recent-section),.home-reading-card,
+ .settings-card,.theme-card,.getting-started,.review-list>li,.review-consent,.review-artifact-reader,.moodle-panel,.moodle-course-card,.planner-panel,.planner-proposal,.library-results[data-view=list],.document-card:not([data-selected=true]),
+ .workspace .pane,.moodle-assistant-panel,.update-reader,.analytics-banner,.provider-row,.moodle-empty,.moodle-banner) {
+ background:var(--surface-card); border:1px solid var(--surface-border);
+}
+:root .app-shell :is(.home-pins .home-card,.home-recent-section) { background:transparent; border:0; }
+:root :is(.workspace .markdown,.pane .markdown) { background:transparent; }
+:root :is(.surface-card-strong,.settings-dialog[data-slot=dialog-content],.theme-editor,.theme-transfer,
+ .model-popover,.conversation-list-popover,.select-popup,.filter-panel,.document-menu,.bulk-bar,
+ [data-slot=popover-content],[data-slot=select-content],[data-slot=dropdown-menu-content],
+ [data-slot=dropdown-menu-sub-content],[data-slot=context-menu-content],[data-slot=dialog-content],[data-slot=sheet-content],
+ [data-slot=aui_composer-shell],.aui-edit-composer-root,.new-chat-composer,.composer) {
+ background:var(--surface-card-strong); border:1px solid var(--surface-border); backdrop-filter:var(--surface-blur);
+}

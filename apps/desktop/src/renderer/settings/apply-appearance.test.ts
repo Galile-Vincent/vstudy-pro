@@ -69,3 +69,21 @@ it('does not cut the slider preview when its identical value is persisted', asyn
   await Promise.resolve();
   document.startViewTransition = undefined as unknown as typeof document.startViewTransition;
 });
+
+it.each([['solid','100%'],['soft','88%'],['glass','72%']] as const)('applies and caches %s card transparency', (cardTransparency, opacity) => {
+  applyAppearance({...defaultSettings,cardTransparency});
+  expect(document.documentElement.style.getPropertyValue('--surface-opacity')).toBe(opacity);
+  expect(document.documentElement.dataset.cardTransparency).toBe(cardTransparency);
+  expect(JSON.parse(localStorage.getItem('vstudy-appearance-v1')!)).toMatchObject({cardTransparency});
+});
+
+it('restores cached card transparency before settings resolve', async () => {
+  localStorage.setItem('vstudy-appearance-v1',JSON.stringify({...defaultSettings,cardTransparency:'glass'}));
+  let resolve!: (value: typeof defaultSettings) => void;
+  state.invoke.mockReturnValue(new Promise(done => {resolve=done;}));
+  const initialized=initializeAppearance();
+  expect(document.documentElement.style.getPropertyValue('--surface-opacity')).toBe('72%');
+  resolve({...defaultSettings,cardTransparency:'solid'});
+  await initialized;
+  expect(document.documentElement.style.getPropertyValue('--surface-opacity')).toBe('100%');
+});

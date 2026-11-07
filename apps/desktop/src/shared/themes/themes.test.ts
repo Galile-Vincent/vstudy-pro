@@ -53,3 +53,11 @@ describe('theme packs', () => {
     expect(contrastFailures(pack.light)).not.toEqual([]);
   });
 });
+
+it('defaults old settings to Soft and validates card transparency choices', () => {
+  expect(themePreferencesSchema.parse({}).cardTransparency).toBe('soft');
+  for (const cardTransparency of ['solid','soft','glass']) {
+    expect(themePreferencesSchema.parse({cardTransparency}).cardTransparency).toBe(cardTransparency);
+  }
+  expect(themePreferencesSchema.safeParse({cardTransparency:'invisible'}).success).toBe(false);
+});

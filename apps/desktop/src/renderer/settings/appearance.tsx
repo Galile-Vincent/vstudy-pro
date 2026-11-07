@@ -71,7 +71,16 @@ export function AppearanceSection() {
         </button>)}
       </div>
     </section>
+    <SettingsGroup>
+      <SettingsRow label={tr('themes:cardTransparency')} description={tr('themes:cardTransparency_hint')}>
+        <ToggleGroup type="single" size="sm" aria-label={tr('themes:cardTransparency')} value={settings.cardTransparency}
+          onValueChange={value => { if (value) void update({cardTransparency:value as Settings['cardTransparency']}); }}>
+          {(['solid','soft','glass'] as const).map(value => <ToggleGroupItem key={value} value={value} aria-label={tr(`themes:card_${value}`)}>{tr(`themes:card_${value}`)}</ToggleGroupItem>)}
+        </ToggleGroup>
+      </SettingsRow>
+    </SettingsGroup>
     <SettingsGroup title={tr('settings:text_reading')}>
+
       {(['uiScale','density','readerFont','readerSize'] as const).map(field => <SettingsRow key={field} label={tr(`settings:${field}`)}>
         {field === 'readerFont' ? <Select aria-label={tr('settings:readerFont')} value={settings.readerFont} onChange={e => void update({readerFont:e.target.value as Settings['readerFont']})}>
           {['system','serif','mono'].map(v => <option key={v} value={v}>{tr(`settings:${v}`)}</option>)}
