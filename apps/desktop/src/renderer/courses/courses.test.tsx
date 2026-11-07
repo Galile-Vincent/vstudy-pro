@@ -85,6 +85,61 @@ describe("Courses", () => {
     expect(host.querySelector(".moodle-due-list")?.textContent).toContain('Amplifier lab report');
     expect(host.textContent).not.toContain('No deadlines this week');
   });
+  it("keeps course actions in the top bar and deadlines in the overview cards", async () => {
+    const api = createMockMoodleApi();
+    const courseId = (await api.overview()).courses[0]!.id;
+    const detail = await api.course(courseId);
+    await mount(api, courseId);
+    const header = host.querySelector(".moodle-header")!;
+    const group = header.querySelector('[role="group"][aria-label="Course actions"]')!;
+    expect(group.textContent).toContain("Refresh courses");
+    expect(group.textContent).toContain("Open in Moodle");
+    expect(header.textContent).not.toContain("Connect school");
+    expect(header.querySelector(".planner-entry")).toBeNull();
+    const original = group.querySelector("details")!;
+    expect(original.querySelector("summary")?.title).toBe("Original course name");
+    expect(original.textContent).toContain(detail.course.fullName);
+    expect(host.querySelector(".moodle-hero-body button")).toBeNull();
+    expect(host.querySelector(".moodle-hero-next")).toBeNull();
+    expect(host.querySelector(".moodle-content-summary")?.textContent).toContain(detail.deadlines[0]!.title);
+    const refresh = group.querySelector("button")!;
+    expect(refresh.title).toBe("Refresh courses");
+    let finish!: () => void;
+    const course = api.course;
+    api.course = async (id, force) => {
+      if (force) await new Promise<void>(resolve => { finish = resolve; });
+      return course(id, force);
+    };
+    await act(async () => refresh.click());
+    expect(refresh.disabled).toBe(true);
+    expect(refresh.getAttribute("aria-busy")).toBe("true");
+    expect(refresh.querySelector(".moodle-spin")).not.toBeNull();
+    await act(async () => finish());
+    expect(refresh.disabled).toBe(false);
+    await mount(api);
+    expect(host.querySelector(".planner-entry")).not.toBeNull();
+    expect(host.querySelector(".moodle-header")?.textContent).toContain("Connect school");
+  });
+  it("preserves detail tab selection, arrow navigation, and panel associations", async () => {
+    const api = createMockMoodleApi();
+    await mount(api, (await api.overview()).courses[0]!.id);
+    const triggers = [...host.querySelectorAll<HTMLButtonElement>('.moodle-tabs [role="tab"]')];
+    expect(triggers).toHaveLength(6);
+    for (const trigger of triggers) {
+      await act(async () => trigger.focus());
+      expect(trigger.getAttribute("aria-selected")).toBe("true");
+      const panel = document.getElementById(trigger.getAttribute("aria-controls")!);
+      expect(panel?.getAttribute("role")).toBe("tabpanel");
+      expect(panel?.getAttribute("aria-labelledby")).toBe(trigger.id);
+    }
+    await act(async () => triggers[0]!.focus());
+    await act(async () => {
+      triggers[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+      await new Promise(resolve => setTimeout(resolve, 10));
+    });
+    expect(document.activeElement).toBe(triggers[1]);
+    expect(triggers[1]!.getAttribute("aria-selected")).toBe("true");
+  });
   it("associates every term tab with its course panel", async () => {
     await mount(createMockMoodleApi());
     const tabs = [...host.querySelectorAll<HTMLElement>('.moodle-term-tabs [role=tab]')];
