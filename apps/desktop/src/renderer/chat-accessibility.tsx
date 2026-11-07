@@ -7,9 +7,12 @@ import { copyAnswer } from './copy-answer';
 import { documentCitationSchema } from '../shared';
 import { tr } from '../shared/i18n';
 import { TooltipIconButton } from './components/assistant-ui/elements/tooltip-icon-button';
+const EXCERPT_LIMIT = 240;
 export function announcementExcerpt(plain: string): string {
-  const points = Array.from(plain);
-  return `${points.slice(0, 240).join('').trimEnd()}${points.length > 240 ? '…' : ''}`;
+  const units = typeof Intl.Segmenter === 'function'
+    ? Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(plain), part => part.segment)
+    : Array.from(plain);
+  return `${units.slice(0, EXCERPT_LIMIT).join('').trimEnd()}${units.length > EXCERPT_LIMIT ? '…' : ''}`;
 }
 export function ChatAnnouncement() {
   useTranslation();
