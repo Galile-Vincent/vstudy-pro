@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
+import OsDownloadButton from '../components/OsDownloadButton.astro';
 import { CONTACT_EMAIL, FOUNDER_URL, LINKEDIN_URL, path, REPO_URL, THREADS_URL, VERSION } from '../config';
 import { languages, languageNames, ui, type Language } from '../data/ui';
 interface Props { language: Language; title: string; description: string; slug?: string; docs?: boolean; page?: string; }
@@ -47,7 +48,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           <a href={path(`${language}/docs/getting-started/`)} aria-current={docs ? 'page' : undefined}>{t.docs}</a>
         </div>
         <div class="nav-end">
-          <a class="button compact nav-download" href={path(`${language}/download/`)} aria-current={page === 'download/' ? 'page' : undefined}>{t.download}<span aria-hidden="true">↓</span></a>
+          <OsDownloadButton {language} compact current={page === 'download/'} />
           <details class="menu" data-menu>
             <summary class="menu-button" aria-label={t.settings}>
               <svg class="icon-gear" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>

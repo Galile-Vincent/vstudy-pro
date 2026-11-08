@@ -3,7 +3,7 @@ import type { Language } from './ui';
 export const macInstall = "curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh | bash";
 export const windowsInstall = "Invoke-WebRequest https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.ps1 -OutFile install.ps1; Get-Content install.ps1; & .\\install.ps1";
 interface InstallCopy {
-  firstOpen: string; macHelpTitle: string; updateUninstallTitle: string; otherPlatformsTitle: string;
+  firstOpen: string; macHelpTitle: string; updateUninstallTitle: string;
   macTitle: string;
   dmgTitle: string;
   downloadDmg: string;
@@ -15,7 +15,7 @@ interface InstallCopy {
   terminalTitle: string; terminalOpen: string; terminalTools: string;
   bullets: string[]; read: string; aiTitle: string; aiText: string; prompt: string;
   windowsTitle: string; downloadExe: string; windowsSteps: string[]; windowsScript: string;
-  planned: string; updateTitle: string; update: string; uninstallTitle: string; uninstall: string;
+  updateTitle: string; update: string; uninstallTitle: string; uninstall: string;
   verifyTitle: string; verify: string; copy: string; copied: string; failed: string;
 }
 
@@ -24,7 +24,6 @@ export const installCopy = {
     "firstOpen": "First open on Mac? See the quick steps",
     "macHelpTitle": "Mac says it cannot be opened",
     "updateUninstallTitle": "Update and uninstall",
-    "otherPlatformsTitle": "Other platforms (Intel Mac and Windows ARM64 planned)",
     "macTitle": "Mac (Apple silicon)",
     "dmgTitle": "Option 1 - Download the DMG (easiest, nothing else needed)",
     "downloadDmg": "Download the .dmg",
@@ -66,7 +65,6 @@ export const installCopy = {
       "If SmartScreen warns, choose More info > Run anyway if offered. Continue only if the file came from this project’s releases page and you trust it. A school-managed computer may block this option."
     ],
     "windowsScript": "Or open PowerShell from the Start menu. Paste this command to download and display the script before it runs.",
-    "planned": "Intel Mac and Windows ARM64 installers are planned. No Linux installer yet.",
     "updateTitle": "Update",
     "update": "Quit VStudy Pro. Download the new DMG and drag VStudy Pro into Applications, choosing Replace. Or re-run the Terminal one-liner. On Windows, run the new EXE or re-run the PowerShell command. Your library and plans stay. You can export a backup in Settings > Storage first.",
     "uninstallTitle": "Uninstall",
@@ -82,7 +80,6 @@ export const installCopy = {
     "firstOpen": "第一次在 Mac 開啟？查看操作步驟",
     "macHelpTitle": "Mac 顯示無法開啟",
     "updateUninstallTitle": "更新與解除安裝",
-    "otherPlatformsTitle": "其他平台（Intel Mac 與 Windows ARM64 規劃中）",
     "macTitle": "Mac（Apple 晶片）",
     "dmgTitle": "方法 1 - 下載 DMG（最簡單，不必先裝其他工具）",
     "downloadDmg": "下載 .dmg 檔案",
@@ -124,7 +121,6 @@ export const installCopy = {
       "如果 SmartScreen 顯示警告，在有提供選項時按「其他資訊 > 仍要執行」。只有從本專案的版本發布頁下載，且你信任本專案時，才繼續。學校管理的電腦可能無法使用這個選項。"
     ],
     "windowsScript": "也可以從「開始」選單開啟 PowerShell，貼上以下指令。指令會先下載並顯示腳本內容，再執行安裝。",
-    "planned": "Intel Mac 與 Windows ARM64 安裝檔仍在規劃中。目前沒有 Linux 安裝檔。",
     "updateTitle": "更新",
     "update": "先關閉 VStudy Pro。下載新版 DMG，將 VStudy Pro 拖入「應用程式」並選「取代」，或重跑終端機的一行指令。Windows 可執行新版 EXE 或重跑 PowerShell 指令。你的文件庫與讀書計畫會保留。更新前也可以先到「設定 > 儲存空間」匯出備份。",
     "uninstallTitle": "解除安裝",
@@ -140,7 +136,6 @@ export const installCopy = {
     "firstOpen": "Mac で初めて開く場合は、起動手順を確認",
     "macHelpTitle": "Mac で開けないと表示されたら",
     "updateUninstallTitle": "更新とアンインストール",
-    "otherPlatformsTitle": "その他の環境（Intel Mac と Windows ARM64 は予定）",
     "macTitle": "Mac（Apple シリコン）",
     "dmgTitle": "方法 1 - DMG をダウンロード（いちばん簡単。事前の準備は不要）",
     "downloadDmg": ".dmg をダウンロード",
@@ -182,7 +177,6 @@ export const installCopy = {
       "SmartScreen の警告が出た場合は、表示されていれば「詳細情報 > 実行」を選びます。このプロジェクトのリリースページから入手し、信頼できる場合のみ続けてください。学校が管理するパソコンでは許可されない場合があります。"
     ],
     "windowsScript": "または、スタートメニューから PowerShell を開いて次のコマンドを貼り付けます。スクリプトをダウンロードして内容を表示してから実行します。",
-    "planned": "Intel Mac 版と Windows ARM64 版は予定しています。Linux 用のインストーラーはまだありません。",
     "updateTitle": "更新",
     "update": "VStudy Pro を終了します。新しい DMG をダウンロードし、VStudy Pro を「アプリケーション」にドラッグして「置き換える」を選びます。ターミナルの 1 行コマンドを再実行しても更新できます。Windows では新しい EXE か PowerShell コマンドを実行します。ライブラリと学習計画は残ります。必要なら先に「設定 > ストレージ」でバックアップを書き出してください。",
     "uninstallTitle": "アンインストール",
