@@ -1,0 +1,60 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-ed8723be/apps/desktop
+
+ ❯ src/renderer/chat-hosted-runtime.test.tsx (1 test | 1 failed) 8ms
+   × uses only the hosted runtime while loading and after it becomes available 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/chat-hosted-runtime.test.tsx > uses only the hosted runtime while loading and after it becomes available
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 2 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      Object {},
+      Object {
+        "adapters": Object {
+          "suggestion": Object {
+            "generate": [Function generate],
+          },
+        },
+        "initialMessages": Array [],
+      },
+    ]
+
+  2nd vi.fn() call:
+
+    Array [
+      Object {},
+      Object {
+        "adapters": Object {
+          "suggestion": Object {
+            "generate": [Function generate],
+          },
+        },
+        "initialMessages": Array [],
+      },
+    ]
+
+
+Number of calls: 2
+
+ ❯ src/renderer/chat-hosted-runtime.test.tsx:26:33
+     24|     state.runtime=undefined;
+     25|     await act(()=>root.render(<Chat {...props}/>));
+     26|     expect(useLocalRuntime).not.toHaveBeenCalled();
+       |                                 ^
+     27|     state.runtime={thread:{append:state.append,composer:{setText:vi.fn…
+     28|     await act(()=>root.render(<Chat {...props} promptRequest={{id:2,te…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  20:29:30
+   Duration  1.17s (transform 315ms, setup 0ms, import 802ms, tests 8ms, environment 304ms)
+

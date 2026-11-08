@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-ed8723be/apps/desktop
+
+
+ Test Files  11 passed (11)
+      Tests  43 passed (43)
+   Start at  20:29:43
+   Duration  4.30s (transform 720ms, setup 0ms, import 4.44s, tests 1.46s, environment 2.03s)
+

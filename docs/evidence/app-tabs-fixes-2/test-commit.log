@@ -1,0 +1,27 @@
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mpre-commit[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  lint-staged ❯ 
+
+┃  typecheck ❯ 
+
+> vstudy-pro@ typecheck-fast /Users/vc/.t3/worktrees/vstudy-pro/t3-ed8723be
+> node apps/desktop/scripts/generate-locales.mjs && pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-ed8723be/apps/desktop/src/shared/locales.generated.ts (28 namespaces).
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 6.99 seconds)
+✓ lint-staged (0.65 seconds)
+✓ typecheck (6.34 seconds)
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mcommit-msg[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  conventional ❯ 
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 0.60 seconds)
+✓ conventional (0.60 seconds)
+[t3/app-tabs-fixes-2 cffc12f3] test(desktop): detect duplicate hosted chat runtimes
+ 1 file changed, 32 insertions(+)
+ create mode 100644 apps/desktop/src/renderer/chat-hosted-runtime.test.tsx
