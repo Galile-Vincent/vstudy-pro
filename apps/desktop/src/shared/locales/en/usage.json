@@ -25,5 +25,16 @@
   "budget_help": "Tokens are small pieces of words. Leave a budget blank for no limit. The warning percentage tells you when you are near your monthly limit.",
   "advanced_prices": "Advanced: custom prices",
   "invalid_prices": "Check the price JSON. Use the example below.",
-  "save_failed": "Could not save. Check your budget values and try again."
+  "save_failed": "Could not save. Check your budget values and try again.",
+  "subscription_limits": "Subscription limits",
+  "quota_5h": "5h",
+  "quota_weekly": "Weekly",
+  "quota_not-signed-in": "Not signed in",
+  "quota_unsupported": "Unsupported",
+  "quota_unavailable": "Unavailable",
+  "quota_stale": "Stale",
+  "quota_unknown": "Unknown",
+  "quota_resets": "Resets",
+  "quota_updated": "Updated",
+  "quota_keychain": "Allow reading Claude Code credentials from macOS Keychain for this app session. Only sent to api.anthropic.com to read usage."
 }

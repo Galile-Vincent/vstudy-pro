@@ -9,6 +9,7 @@ import { App } from '../app';
 import { stateFixture, proposalFixture, pairingFixture, click } from './agents-test-helpers';
 import type { AgentsState } from '../../shared/mcp';
 
+vi.mock('../usage/subscriptions', () => ({ SubscriptionMeters: () => null }));
 const invoke = vi.hoisted(() => vi.fn());
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
 vi.mock('../home', () => ({ HomeView: () => <main>Home fixture</main> }));

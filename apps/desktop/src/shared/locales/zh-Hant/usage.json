@@ -25,5 +25,16 @@
   "budget_help": "Token 是文字的小片段。預算留白表示不設上限。警告百分比會在接近每月上限時提醒你。",
   "advanced_prices": "進階：自訂價格",
   "invalid_prices": "請檢查價格 JSON，參考下方範例。",
-  "save_failed": "無法儲存。請檢查預算數值後重試。"
+  "save_failed": "無法儲存。請檢查預算數值後重試。",
+  "subscription_limits": "訂閱用量",
+  "quota_5h": "5 小時",
+  "quota_weekly": "每週",
+  "quota_not-signed-in": "尚未登入",
+  "quota_unsupported": "不支援",
+  "quota_unavailable": "暫時無法取得",
+  "quota_stale": "資料已過期",
+  "quota_unknown": "未知",
+  "quota_resets": "重設時間",
+  "quota_updated": "更新時間",
+  "quota_keychain": "允許在本次應用程式工作階段讀取 macOS 鑰匙圈中的 Claude Code 憑證。僅傳送至 api.anthropic.com 以讀取用量。"
 }
