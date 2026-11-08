@@ -1,7 +1,7 @@
 /** Side-effect-free payload checks for staged backups, including historical study rows. */
 import type { DatabaseSync } from 'node:sqlite';
 import { z } from 'zod';
-import { isStudyAnswer, studyScopeSchema, studyResolvedScopeSchema, studyTestSchema, studyAnswersSchema, type StudyTest } from '../../shared/review-artifacts';
+import { EXAM_COURSE_ID, isStudyAnswer, studyScopeSchema, studyResolvedScopeSchema, studyTestSchema, studyAnswersSchema, type StudyTest } from '../../shared/review-artifacts';
 import { studyCourseSchema, studyUnitSchema, studyConceptSchema, studyChatLinkSchema, studyPrefsSchema } from '../../shared/review';
 
 const id=z.string().uuid(), at=z.string().datetime(), text=z.string().min(1).max(240), bit=z.union([z.literal(0),z.literal(1)]);
@@ -36,17 +36,21 @@ export function validateStudyData(db:DatabaseSync):void {
    const resolved=studyResolvedScopeSchema.parse(json(artifact.resolvedScopeJson,65536));
    // Snapshots outlive membership. Existing objects must never acquire another course's ownership.
    const historical=artifact.status!=='generating';
+   const exam=artifact.courseId===EXAM_COURSE_ID;
+   if(exam&&(!resolved.exam||scope.kind!=='documents'||resolved.unitIds.length||resolved.documentIds.length>8||resolved.conceptKeys.some(key=>!resolved.documentIds.includes(key))))throw new Error('invalid exam scope');
+   if(resolved.exam&&!exam)throw new Error('invalid exam course');
    for(const unitId of [...resolved.unitIds,...(scope.kind==='units'?scope.unitIds:[])]){
     if(!historical||db.prepare('SELECT 1 FROM study_units WHERE id=?').get(unitId))
      courseMember('study_units','id',unitId,artifact.courseId);
    }
    const conceptMember=(key:string)=>{
+    if(exam){if(!resolved.documentIds.includes(key))throw new Error('invalid exam concept');return;}
     if(!historical||db.prepare('SELECT 1 FROM study_concepts WHERE key=?').get(key))
      courseMember('study_concepts','key',key,artifact.courseId);
    };
    for(const key of [...resolved.conceptKeys,...(scope.kind==='concepts'?scope.conceptKeys:[])])conceptMember(key);
    for(const documentId of [...resolved.documentIds,...(scope.kind==='documents'?scope.documentIds:[])]){
-    if(!historical||db.prepare('SELECT 1 FROM study_course_documents WHERE documentId=?').get(documentId))
+    if(!exam&&(!historical||db.prepare('SELECT 1 FROM study_course_documents WHERE documentId=?').get(documentId)))
      documentMember(documentId,artifact.courseId);
    }
    for(const source of resolved.sources)if(!resolved.documentIds.includes(source.documentId))throw new Error('unresolved source');
