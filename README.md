@@ -15,25 +15,59 @@ Read course documents, keep Moodle deadlines together, and turn coursework into 
 
 ## Download and install
 
-### Install with a command or an AI agent
+### Mac (Apple silicon)
 
-The app is unsigned and not notarized. This command trusts this repository. [Read the script first](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh). It resolves the release, downloads the DMG and checksums, verifies SHA-256, mounts read-only, quits VStudy Pro, copies it to /Applications, and removes that app’s quarantine flag to allow it to open. It never uses sudo or deletes user data. A checksum detects changed bytes, not publisher identity.
+#### Option 1 - Download the DMG (easiest, nothing else needed)
+
+1. [Download the .dmg](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg).
+2. Double-click the downloaded .dmg file.
+3. Drag VStudy Pro into Applications in the window that opens.
+4. Eject the VStudy Pro disk image in Finder.
+5. Open VStudy Pro from Applications or Launchpad.
+
+<!-- mac-signing-status -->
+> **If macOS says it cannot open the app or verify the developer**
+>
+> The Mac app is not yet signed with an Apple Developer ID or notarized by Apple. Proceed only if you downloaded it from this project’s releases page and trust the project. [Project releases](https://github.com/ava-apple/vstudy-pro/releases/latest).
+>
+> 1. Try to open VStudy Pro once, then dismiss the warning.
+> 2. Open System Settings > Privacy & Security. Scroll down to Security.
+> 3. Click Open Anyway, authenticate if asked, then confirm with Open.
+>
+> On older macOS versions, right-click VStudy Pro in Applications, choose Open, then confirm with Open. Checking the checksum is optional. [Verify your download](#optional---verify-your-download). [Apple’s opening instructions](https://support.apple.com/en-us/102445).
+<!-- /mac-signing-status -->
+
+#### Option 2 - One line in Terminal (also needs nothing installed)
+
+Press Command-Space, type Terminal, then press Return. Paste this line and press Return.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh | bash
 ```
 
-To download, read, then run instead.
+No Homebrew, npm, Xcode, or Python needed. The command uses only tools built into macOS.
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh -o install.sh
-less install.sh
-bash install.sh --open
+- Downloads the latest DMG and checks its SHA-256 checksum.
+- Closes VStudy Pro and installs it in Applications. Your library stays.
+- Removes the quarantine flag only from this app so it can open. It never uses sudo.
+
+[Read the script first](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh).
+
+#### Option 3 - Let an AI agent do it
+
+Copy this prompt into your AI agent.
+
+```text
+Install VStudy Pro for me. First fetch and READ https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh on Apple silicon macOS, or install.ps1 in the same directory on Windows x64. Explain the signing status described on the download page and that the Mac script removes quarantine only from this app. Run the reviewed script, confirm SHA-256 verification passed, open VStudy Pro, and report the installed path and result. Do not use sudo, disable system protections globally, or delete user data. Stop on any verification failure.
 ```
 
-Use `bash install.sh --open` to open after install, `--version 0.3.0` to pin, `--dest ~/Applications` if /Applications is not writable, or `--dry-run` to preview. Intel Mac is not released yet. The manual DMG steps below remain available.
+### Windows x64
 
-Windows x64 (PowerShell). Download and read before running. The per-user unsigned installer may trigger SmartScreen. It does not require admin.
+1. [Download the EXE](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe).
+2. Double-click the downloaded EXE and follow the installer. It installs for your user without administrator access.
+3. If SmartScreen warns, choose More info > Run anyway if offered. Continue only if the file came from this project’s releases page and you trust it. A school-managed computer may block this option.
+
+Or open PowerShell from the Start menu. Paste this command to download and display the script before it runs.
 
 ```powershell
 Invoke-WebRequest https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.ps1 -OutFile install.ps1
@@ -41,44 +75,33 @@ Get-Content install.ps1
 & .\install.ps1
 ```
 
-```text
-Install VStudy Pro for me. First fetch and READ https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh on Apple silicon macOS, or install.ps1 in the same directory on Windows x64. Explain that this is unsigned, and that the Mac script removes quarantine only from this app. Run the reviewed script, confirm SHA-256 verification passed, open VStudy Pro, and report the installed path and result. Do not use sudo, disable system protections globally, or delete user data. Stop on any verification failure.
+Intel Mac and Windows ARM64 installers are planned. No Linux installer yet.
+
+### Update
+
+Quit VStudy Pro. Download the new DMG and drag VStudy Pro into Applications, choosing Replace. Or re-run the Terminal one-liner. On Windows, run the new EXE or re-run the PowerShell command. Your library and plans stay. You can export a backup in Settings > Storage first.
+
+### Uninstall
+
+On Mac, quit VStudy Pro and drag it from Applications to Trash. On Windows, use Settings > Apps > Installed apps. Removing the app keeps your library. If you also want to delete your data, first open VStudy Pro and use Settings > Privacy > Delete all data.
+
+### Optional - Verify your download
+
+Download SHA256SUMS.txt from the same release. In Terminal or PowerShell, open your Downloads folder and run the command for your system. Compare the entire result with the entry for your file. A matching checksum detects changed bytes. It does not identify the publisher.
+
+[SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt)
+
+```sh
+cd ~/Downloads
+shasum -a 256 VStudy-Pro-mac-arm64.dmg
 ```
 
-### Get the app
+```powershell
+cd $HOME\Downloads
+Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe
+```
 
-| Platform | Direct installer |
-| --- | --- |
-| Mac with Apple silicon | [Download DMG](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg) |
-| Mac with Intel | Planned. Full converter and native packaging checks are pending. |
-| Windows x64 | [Download EXE](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe) |
-| Windows ARM64 | Planned. Full converter and native installer checks are pending. |
-
-Download [SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt) from the same release. These stable links select the latest published assets. The repository is public. If an asset returns 404, check [the release notes](https://github.com/ava-apple/vstudy-pro/releases/latest) for published targets and verification results. A CI artifact or dry run is not a public release. No version, size, or successful platform test is implied by a link.
-
-The first release targets Apple silicon Mac and Windows x64. Intel Mac and Windows ARM64 remain planned until full conversion and native packaging checks pass. Full document conversion requires macOS 14+ on Apple silicon or macOS 13+ on Intel. Windows requires Windows 10+ for x64 or Windows 11+ for ARM64; the ARM64 app uses x64 Python through Windows emulation. The app can launch on macOS 12 for Markdown and text, but the converter has newer native dependencies. On Mac, choose Apple silicon unless About This Mac shows an Intel processor. On Windows, check Settings > System > About > System type. ARM-based Windows and Intel Mac users should wait for their planned installer. There is no Linux installer. AI and school sync need internet access. Reading local Markdown and text does not require an AI account.
-
-### Verify and open
-
-1. Verify the downloaded installer against its entry in `SHA256SUMS.txt`. On Mac, run `shasum -a 256 VStudy-Pro-mac-arm64.dmg` in the download folder, substituting your filename. On Windows, run `Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe` in PowerShell. Compare the complete hash. The checksum file includes other artifacts, so verify your downloaded file's entry. A matching checksum detects changed bytes; it does not identify the publisher.
-2. On Mac, open the DMG, drag **VStudy Pro.app** into **Applications**, eject the image, and open the installed copy. If an unsigned or ad-hoc build is blocked, attempt to open it once. Then use **System Settings > Privacy & Security > Open Anyway** if offered, after verifying that you trust the source. Do not disable Gatekeeper globally. See [Apple's first-open guidance](https://support.apple.com/en-us/102445).
-3. On Windows, run the EXE. The installer uses the current user's account. If SmartScreen warns about an unsigned installer, choose **More info > Run anyway** only after verification and only if offered. An organization policy may forbid this. Do not disable SmartScreen. Stop if a per-user installer unexpectedly requests administrator access.
-4. For a signed and notarized Mac release, use the ordinary first-open confirmation. For signed Windows releases, check the publisher in the file's signature details. Signing does not guarantee SmartScreen reputation. The release notes must state the actual signing status. See [signature verification](docs/SIGNING.md#verify-the-delivered-artifacts).
-5. Follow onboarding or open the sample document. Connect a school under **Courses** and configure optional AI under **Settings > AI services** when ready.
-
-VStudy encrypts saved credentials through Electron `safeStorage`. macOS uses a login-Keychain key and may ask for Keychain access, especially after an ad-hoc rebuild. Windows uses DPAPI tied to the Windows user, without a Mac-style Keychain dialog. Both systems defer decryption until you explicitly unlock saved keys after restart. Opening the main window does not unlock them. You can retry or use keys for the session without saving.
-
-### Update or uninstall
-
-For script installs, export a backup and re-run the same one-liner to update. To uninstall only the Mac app, download the script as above and run `bash install.sh --uninstall` (include your original `--dest` if used). To delete data, use **Settings > Privacy > Delete all data** before uninstalling. On Windows, re-run the PowerShell script to update and use **Settings > Apps > Installed apps** to uninstall.
-
-Updates are manual. Export a backup in **Settings > Storage**, quit VStudy Pro, and verify the new installer. On Mac, replace the app in Applications. On Windows, run the new installer for the same user. Keep the data folder to retain your library and plans. Database upgrades create migration backups. Downgrades are unsupported. Automatic updates remain a later change after signing and notarization are verified.
-
-To remove your data, use **Settings > Privacy > Delete all data**, type `DELETE`, and confirm the native dialog. The app removes its data namespace and quits. Then remove the Mac app from Applications, or uninstall VStudy Pro in Windows **Settings > Apps > Installed apps**. Removing only the app leaves local data.
-
-Main uses Electron `app.getPath('userData')`. The current package namespace is `@vstudy/desktop`. The default paths are `~/Library/Application Support/@vstudy/desktop` on Mac and `%APPDATA%\@vstudy\desktop` on Windows. They contain `vstudy.sqlite`, `library/`, `secrets.json`, and converter files. Test harnesses can override the location. See [storage ownership](docs/STORAGE.md).
-
-Delete-all does not remove originals outside the library, exported backups, CLI logins, shared Python download caches, or separate OS credential-store items. It is not secure erasure of backups or SSD blocks.
+[Project releases](https://github.com/ava-apple/vstudy-pro/releases/latest) · [Verify your download](https://vstudy.vcstudio.app/en/download/#verify-download)
 
 ### Build from source
 

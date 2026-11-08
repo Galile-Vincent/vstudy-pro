@@ -15,25 +15,59 @@
 
 ## 下載與安裝
 
-### 用指令或 AI 智能體安裝
+### Mac（Apple 晶片）
 
-此應用程式未簽署，也未經 Apple 公證。這個指令代表你信任此儲存庫。[請先閱讀腳本](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh)。腳本會解析版本、下載 DMG 與校驗碼、驗證 SHA-256、唯讀掛載、結束 VStudy Pro、複製到 /Applications，並移除此 app 的隔離標記以允許開啟。不會使用 sudo 或刪除使用者資料。校驗碼可偵測檔案變動，不能證明發布者身分。
+#### 方法 1 - 下載 DMG（最簡單，不必先裝其他工具）
+
+1. [下載 .dmg 檔案](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg)。
+2. 按兩下下載好的 .dmg 檔案。
+3. 在開啟的視窗中，將 VStudy Pro 拖入「應用程式」。
+4. 在 Finder 退出 VStudy Pro 磁碟映像。
+5. 從「應用程式」或 Launchpad 開啟 VStudy Pro。
+
+<!-- mac-signing-status -->
+> **如果 macOS 顯示無法開啟或無法驗證開發者**
+>
+> Mac 版尚未使用 Apple 開發者 ID 簽署，也尚未經 Apple 公證。只有從本專案的版本發布頁下載，且你信任本專案時，才繼續操作。 [專案版本發布頁](https://github.com/ava-apple/vstudy-pro/releases/latest)。
+>
+> 1. 先嘗試開啟 VStudy Pro 一次，再關閉警告。
+> 2. 開啟「系統設定 > 隱私權與安全性」，向下捲動至「安全性」。
+> 3. 按「強制打開」，依提示驗證身分，再按「打開」確認。
+>
+> 較舊的 macOS 可在「應用程式」中對 VStudy Pro 按右鍵，選「打開」，再按「打開」確認。 校驗碼驗證是選用步驟。 [驗證下載檔案](#選用步驟---驗證下載檔案)。 [Apple 的開啟說明](https://support.apple.com/en-us/102445)。
+<!-- /mac-signing-status -->
+
+#### 方法 2 - 在終端機貼上一行指令（同樣不必先裝其他工具）
+
+按 Command-Space，輸入 Terminal，再按 Return。貼上以下指令並按 Return。
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh | bash
 ```
 
-也可以先下載、閱讀，再執行.
+不需要 Homebrew、npm、Xcode 或 Python。指令只使用 macOS 內建工具。
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh -o install.sh
-less install.sh
-bash install.sh --open
+- 下載最新的 DMG，並驗證 SHA-256 校驗碼。
+- 關閉 VStudy Pro，安裝到「應用程式」。你的文件庫會保留。
+- 只移除此 app 的隔離標記，讓它能開啟。不會使用 sudo。
+
+[先閱讀安裝腳本](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh)。
+
+#### 方法 3 - 請 AI 智能體幫你安裝
+
+將這段提示詞複製給你的 AI 智能體。
+
+```text
+請幫我安裝 VStudy Pro。Apple 晶片 macOS 請先取得並完整閱讀 https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh；Windows x64 請閱讀同目錄的 install.ps1。說明下載頁列出的簽署狀態，以及 Mac 腳本只會移除此 app 的隔離標記。執行已閱讀的腳本，確認 SHA-256 驗證通過，開啟 VStudy Pro，回報安裝路徑與結果。不要使用 sudo、全面停用系統防護或刪除使用者資料。驗證失敗時立即停止。
 ```
 
-安裝後開啟可用 `bash install.sh --open`，固定版本用 `--version 0.3.0`，/Applications 無法寫入時用 `--dest ~/Applications`，預覽用 `--dry-run`。Intel Mac 尚未發布。也可使用下方手動 DMG 步驟。
+### Windows x64
 
-Windows x64（PowerShell）。先下載並閱讀再執行。未簽署的安裝程式僅安裝於目前使用者，可能觸發 SmartScreen，不需要管理員權限。
+1. [下載 EXE 安裝檔](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe)。
+2. 按兩下下載好的 EXE，依照畫面完成安裝。只安裝到你的使用者帳號，不需要管理員權限。
+3. 如果 SmartScreen 顯示警告，在有提供選項時按「其他資訊 > 仍要執行」。只有從本專案的版本發布頁下載，且你信任本專案時，才繼續。學校管理的電腦可能無法使用這個選項。
+
+也可以從「開始」選單開啟 PowerShell，貼上以下指令。指令會先下載並顯示腳本內容，再執行安裝。
 
 ```powershell
 Invoke-WebRequest https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.ps1 -OutFile install.ps1
@@ -41,44 +75,33 @@ Get-Content install.ps1
 & .\install.ps1
 ```
 
-```text
-請幫我安裝 VStudy Pro。Apple 晶片 macOS 請先取得並完整閱讀 https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh；Windows x64 請閱讀同目錄的 install.ps1。說明 app 未簽署，Mac 腳本只會移除此 app 的隔離標記。執行已閱讀的腳本，確認 SHA-256 驗證通過，開啟 VStudy Pro，回報安裝路徑與結果。不要使用 sudo、全面停用系統防護或刪除使用者資料。驗證失敗時立即停止。
+Intel Mac 與 Windows ARM64 安裝檔仍在規劃中。目前沒有 Linux 安裝檔。
+
+### 更新
+
+先關閉 VStudy Pro。下載新版 DMG，將 VStudy Pro 拖入「應用程式」並選「取代」，或重跑終端機的一行指令。Windows 可執行新版 EXE 或重跑 PowerShell 指令。你的文件庫與讀書計畫會保留。更新前也可以先到「設定 > 儲存空間」匯出備份。
+
+### 解除安裝
+
+Mac 請先關閉 VStudy Pro，再從「應用程式」拖到「垃圾桶」。Windows 請到「設定 > 應用程式 > 已安裝的應用程式」解除安裝。只移除 app 會保留文件庫。若也想刪除資料，請先開啟 VStudy Pro，到「設定 > 隱私權 > 刪除所有資料」操作。
+
+### 選用步驟 - 驗證下載檔案
+
+從同一個版本下載 SHA256SUMS.txt。在終端機或 PowerShell 切換到「下載項目」資料夾，執行對應系統的指令，再與檔案中的完整校驗碼比對。校驗碼相符代表檔案內容一致，不能證明發布者身分。
+
+[SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt)
+
+```sh
+cd ~/Downloads
+shasum -a 256 VStudy-Pro-mac-arm64.dmg
 ```
 
-### 取得軟體
+```powershell
+cd $HOME\Downloads
+Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe
+```
 
-| 平台 | 直接下載安裝檔 |
-| --- | --- |
-| Apple 晶片 Mac | [下載 DMG](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg) |
-| Intel Mac | 規劃中。仍待完整轉換與原生封裝驗證。 |
-| Windows x64 | [下載 EXE](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe) |
-| Windows ARM64 | 規劃中。仍待完整轉換與原生安裝驗證。 |
-
-請下載同一版本的 [SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt)。固定連結指向最新已發布的檔案，儲存庫已公開。若出現 404，請查看[版本說明](https://github.com/ava-apple/vstudy-pro/releases/latest)中的發布平台與驗證結果。CI 成果物與試跑不等於公開版本；連結本身不代表版本、大小或該平台已通過測試。
-
-首波發布提供 Apple 晶片 Mac 與 Windows x64。Intel Mac 與 Windows ARM64 仍在規劃中，通過完整轉換與原生封裝驗證後才會開放。完整文件轉換需要 Apple 晶片 macOS 14 以上，或 Intel macOS 13 以上。Windows x64 需要 Windows 10 以上，ARM64 需要 Windows 11 以上；ARM64 應用程式透過 Windows 模擬功能執行 x64 Python。應用程式本身可在 macOS 12 開啟並閱讀 Markdown 與文字，但轉換工具的原生相依套件需要較新的系統。Mac 預設選 Apple 晶片，除非「關於這台 Mac」顯示 Intel 處理器。Windows 請在「設定 > 系統 > 關於 > 系統類型」確認；ARM 處理器與 Intel Mac 使用者請等待對應安裝檔開放。未提供 Linux 安裝檔。AI 與學校同步需要網路；閱讀本機 Markdown 與文字檔不需要 AI 帳號。
-
-### 驗證並開啟
-
-1. 比對安裝檔與 `SHA256SUMS.txt` 中對應檔名的完整雜湊。Mac 可在下載資料夾執行 `shasum -a 256 VStudy-Pro-mac-arm64.dmg`，並替換成實際檔名。Windows 可在 PowerShell 執行 `Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe`。清單包含其他平台，請比對自己下載的那一項。校驗碼可偵測檔案變動，無法證明發布者身分。
-2. Mac：開啟 DMG，將 **VStudy Pro.app** 拖入「**應用程式**」，退出映像檔後開啟安裝的 app。若未簽署或臨時簽署版本遭阻擋，先嘗試開啟一次。確認來源可信任後，在「**系統設定 > 隱私權與安全性**」於提供選項時選擇「**強制打開**」。請勿全面停用 Gatekeeper。詳見 [Apple 首次開啟說明](https://support.apple.com/en-us/102445)。
-3. Windows：執行 EXE，安裝到目前使用者帳號。若 SmartScreen 警告未簽署安裝檔，僅在驗證後且有此選項時，選擇「**其他資訊 > 仍要執行**」。組織政策可能禁止此操作。請勿停用 SmartScreen。若此個人安裝程式意外要求管理員權限，請停止操作。
-4. 已簽署且公證的 Mac 版本使用一般首次開啟確認。已簽署 Windows 版本可在檔案數位簽章詳細資料確認發布者，但簽署不保證已有 SmartScreen 信譽。實際簽署狀態以版本說明為準，詳見[簽章驗證](docs/SIGNING.md#verify-the-delivered-artifacts)。
-5. 依首次使用導覽操作，或先開啟範例文件。需要時再到「**課程**」連接學校，到「**設定 > AI 服務**」設定 AI。
-
-VStudy 以 Electron `safeStorage` 加密已儲存憑證。macOS 使用登入鑰匙圈中的金鑰，臨時簽署重新建置後可能再次詢問存取權限。Windows 使用綁定目前 Windows 使用者的 DPAPI，不會顯示 Mac 式鑰匙圈提示。兩個系統都在重新啟動後，等待你明確解鎖才解密已儲存金鑰；開啟主視窗不會自動解鎖。你可重試，或只在本次執行使用金鑰而不儲存。
-
-### 更新或解除安裝
-
-腳本安裝後，請先匯出備份，再重跑同一行指令更新。僅移除 Mac app 時，依上方方式下載腳本後執行 `bash install.sh --uninstall`，若曾使用 `--dest` 請加上原路徑。要刪除資料，請先在 **設定 > 隱私權 > 刪除所有資料** 操作。Windows 重跑 PowerShell 腳本可更新，解除安裝請用 **設定 > 應用程式 > 已安裝的應用程式**。
-
-目前採手動更新。先到「**設定 > 儲存空間**」匯出備份，結束 VStudy Pro，並驗證新版安裝檔。Mac 取代「應用程式」中的 app；Windows 使用相同帳號執行新版安裝程式。保留資料目錄即可保留文件庫與計畫。資料庫升級會先建立遷移備份，不支援降版。自動更新需等簽署與公證驗證完成後另行實作。
-
-若要刪除資料，在 app 內開啟「**設定 > 隱私權 > 刪除所有資料**」，輸入 `DELETE` 並確認系統對話框。App 刪除專用資料目錄後結束，再將 Mac app 移到垃圾桶，或到 Windows「**設定 > 應用程式 > 已安裝的應用程式**」解除安裝。只刪除 app 會保留本機資料。
-
-Main 使用 Electron `app.getPath('userData')`。目前套件命名空間是 `@vstudy/desktop`，Mac 預設為 `~/Library/Application Support/@vstudy/desktop`，Windows 為 `%APPDATA%\@vstudy\desktop`，包含 `vstudy.sqlite`、`library/`、`secrets.json` 與轉換器檔案。測試可另設路徑，詳見[儲存空間說明](docs/STORAGE.md)。
-
-刪除所有資料不會移除文件庫外的原始檔、匯出備份、CLI 登入資料、共用 Python 下載快取，或獨立的系統憑證儲存項目，也不代表安全抹除備份或 SSD 區塊。
+[專案版本發布頁](https://github.com/ava-apple/vstudy-pro/releases/latest) · [驗證下載檔案](https://vstudy.vcstudio.app/zh-Hant/download/#verify-download)
 
 ### 從原始碼建置
 
