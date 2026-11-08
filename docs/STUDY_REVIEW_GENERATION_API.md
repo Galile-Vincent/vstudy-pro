@@ -132,3 +132,41 @@ The extraction schema lacks a per-concept explicit corrected-assertion flag, so 
 ordinary asked/confused question cannot safely be treated as a recorded misconception.
 Such distractors still use source-stated confusions or explicitly inferred examples,
 not invented student history. This requires a schema change to broaden safely.
+
+## Exams
+
+Exams reuse `test` artifacts and attempts, with the optional `exam` configuration
+on generation requests and resolved snapshots: `{prompt, counts, difficulty}`.
+`counts` contains `mcq`, `multi_select`, `calculation`, `cloze`, `true_false`
+(nonnegative integers, total 1–40). Difficulty is easy/medium/hard; `locale`
+selects English, Traditional Chinese, or Japanese. Exams use the archived internal
+course `00000000-0000-4000-8000-000000000026`, created lazily, and a documents
+scope of up to eight ready library documents, independent of course links. Source
+titles survive deletion in the resolved snapshot. Migration 26 adds a history
+lookup index only. Existing review generation and mastery behavior are preserved;
+exam confirmation cannot apply results to mastery.
+
+Multi-select answers are exact unordered sets of zero-based option indices.
+Calculation keys have a finite numeric `answer`, nonnegative absolute `tolerance`,
+and `unit`; student answers are numeric strings with an optional exact unit suffix.
+No expression evaluation or unit conversion occurs. Cloze keeps its existing
+normalized exact match against the key and accepted alternatives. Every exam
+question requires a substantive generated explanation. Generation retries invalid
+slots twice, then fails an incomplete exam rather than reducing requested counts.
+Source excerpts retain the existing first-6,000-byte/document and 48-KiB limits.
+
+`review:exam:history({limit?:1..20,cursor?})` returns a keyset page of artifact
+summaries and latest attempt summaries (phase, timestamps, correctness, item type).
+It never returns answer keys, explanations, or student answer payloads. Reopening
+uses `review:artifact:get` and `review:attempt:start/get`; prompts stay public and
+feedback appears only for committed answers. Answers are committed individually,
+locked, and reviewed immediately. Duration is wall time from attempt start to last
+commit, including pauses; there is one resumable attempt per artifact.
+
+`review:attempt:explain({attemptId,itemId,locale}) -> {text}` requires a committed
+item. It requests a fresh explanation from the artifact's provider/model with
+question, committed answer and key serialized as untrusted data. It shares the
+review admission gate, usage accounting, concurrency cap and shutdown fencing.
+It never grades or changes persisted correctness. Follow-up text is displayed on
+request and is not persisted. The normal dev mock supports empty exam history and
+explicit provider/attempt-unavailable errors rather than fabricated exam results.

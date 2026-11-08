@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import type { IpcResponse } from '../../shared/ipc';
+import { EXAM_COURSE_ID } from '../../shared/review-artifacts';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
 
 type Artifact = NonNullable<IpcResponse<'review:artifact:get'>>;
 type Attempt = IpcResponse<'review:attempt:start'>;
-type Answer = string | number | boolean | null;
+type Answer = string | number | boolean | number[] | null;
 
 export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetake: (attemptId: string) => void }) {
  const [attempt, setAttempt] = useState<Attempt | null>(null);
  const [index, setIndex] = useState(0);
  const [draft, setDraft] = useState<Answer>(null);
+ const exam = artifact.courseId === EXAM_COURSE_ID;
+ const [explanations,setExplanations]=useState<Record<string,string>>({});
  const [results, setResults] = useState(false);
  const [busy, setBusy] = useState(false);
  const [failed, setFailed] = useState(false);
@@ -38,7 +41,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
    if (!opening.current || opening.current.id !== artifact.id) opening.current = { id: artifact.id, promise: desktop.invoke('review:attempt:start', { artifactId: artifact.id }).then(value=>desktop.invoke('review:attempt:get',{attemptId:value.id})) };
    let next: Attempt;
    try { next = await opening.current.promise; } catch (error) { opening.current = null; throw error; }
-   if (active) { setAttempt(next); setDraft(next.answers[items[0]?.id ?? ''] ?? null); }
+   if (active) { if(exam&&next.phase!=='answering')setResults(true); setAttempt(next); setDraft(next.answers[items[0]?.id ?? ''] ?? null); }
   };
   retryAction.current = load; setBusy(true); setFailed(false);
   void load().catch(() => { if (active) setFailed(true); }).finally(() => { if (active) setBusy(false); });
@@ -89,6 +92,8 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
    {!locked ? <form onSubmit={event => { event.preventDefault(); submit(); }}>
     <fieldset disabled={busy}><legend>{tr('review:your_answer')}</legend>
      {item.type === 'mcq' && item.options.map((option, optionIndex) => <label key={optionIndex}><input type="radio" name={`answer-${artifact.id}`} checked={draft === optionIndex} onChange={() => setDraft(optionIndex)} />{option}</label>)}
+     {item.type === 'multi_select' && item.options.map((option,optionIndex)=><label key={optionIndex}><input type="checkbox" checked={Array.isArray(draft)&&draft.includes(optionIndex)} onChange={event=>setDraft(event.target.checked?[...(Array.isArray(draft)?draft:[]),optionIndex]:(Array.isArray(draft)?draft:[]).filter(i=>i!==optionIndex))}/>{option}</label>)}
+     {item.type === 'calculation' && <label>{tr('review:your_answer')} ({item.unit})<input autoComplete="off" maxLength={2000} value={typeof draft==='string'?draft:''} onChange={event=>setDraft(event.target.value)}/></label>}
      {item.type === 'true_false' && [true, false].map(value => <label key={String(value)}><input type="radio" name={`answer-${artifact.id}`} checked={draft === value} onChange={() => setDraft(value)} />{tr(value ? 'review:answer_true' : 'review:answer_false')}</label>)}
      {item.type === 'cloze' && <label>{tr('review:your_answer')}<input autoComplete="off" maxLength={2000} value={typeof draft === 'string' ? draft : ''} onChange={event => setDraft(event.target.value)} /></label>}
     </fieldset>
@@ -96,8 +101,10 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
     <Button type="submit" disabled={busy || draft === null || draft === ''}>{tr(index === items.length - 1 ? 'review:finish_test' : 'review:answer_next')}</Button>
    </form> : <div ref={feedbackRegion} tabIndex={-1} role="status" aria-live="polite" aria-label={tr('review:item_feedback')}>
     <p>{tr(result?.reportedBad ? 'review:question_reported' : result?.correct ? 'review:answer_matches' : 'review:worth_another_look')}</p>
-    <p>{tr('review:correct_answer')}: {feedback?.type === 'mcq' ? feedback.options[feedback.answer] : feedback?.type === 'true_false' ? tr(feedback.answer ? 'review:answer_true' : 'review:answer_false') : feedback?.answer}</p>
+    <p>{tr('review:correct_answer')}: {feedback?.type === 'mcq' ? feedback.options[feedback.answer] : feedback?.type === 'true_false' ? tr(feedback.answer ? 'review:answer_true' : 'review:answer_false') : feedback?.type==='multi_select'?feedback.answer.map(i=>feedback.options[i]).join(', '):feedback?.answer}</p>
     <p>{feedback?.explanation}</p>
+    {feedback&&<Button disabled={busy} onClick={()=>void run(async()=>{const reply=await desktop.invoke('review:attempt:explain',{attemptId:attempt.id,itemId:item.id,locale:document.documentElement.lang.startsWith('zh')?'zh-Hant':document.documentElement.lang.startsWith('ja')?'ja':'en'});setExplanations(old=>({...old,[item.id]:reply.text}));})}>{tr('exams:ask_ai')}</Button>}
+    {explanations[item.id]&&<div className="exam-explanation">{explanations[item.id]}</div>}
     {feedback?.type === 'mcq' && feedback.optionRationales?.map((rationale, optionIndex) => <p key={optionIndex}>{feedback.options[optionIndex]}: {rationale}</p>)}
     {feedback?.nextStep && <p>{feedback?.nextStep}</p>}
     {feedback && <details><summary><span className="review-chip">{tr('review:source_reference', { document: feedback.source.documentId, version: feedback.source.version })}</span></summary><blockquote>{feedback.source.quote}</blockquote></details>}
@@ -112,11 +119,13 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
   {attempt && results && <>
    <h3 ref={heading} tabIndex={-1}>{tr('review:results_title')}</h3>
    <p>{tr('review:results_counts', { matched: reviewed.filter(result => result.correct).length, reviewed: reviewed.length, revisit: missed.length })}</p>
+   {exam&&<><p>{tr('exams:duration', {minutes:Math.max(0,Math.round((Date.parse(attempt.committedAt??attempt.startedAt)-Date.parse(attempt.startedAt))/60000))})}</p><ul>{[...new Set(items.map(i=>i.type))].map(type=>{const rows=attempt.results.filter(r=>items.find(i=>i.id===r.itemId)?.type===type);return <li key={type}>{tr(`exams:${type}`)}: {rows.filter(r=>r.correct).length}/{rows.length}</li>;})}</ul></>}
    <h4>{tr('review:worth_another_look')}</h4>
    <ul>{[...new Set(missed.map(result => result.conceptKey))].map(key => <li key={key}>{tr('review:concept_missed', { label: labels[key] ?? key, count: missed.filter(result => result.conceptKey === key).length })}</li>)}</ul>
-   <p>{tr('review:confirm_notice')}</p>
+   {!exam&&<><p>{tr('review:confirm_notice')}</p>
    {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button disabled={busy} onClick={() => void run(async () => setAttempt(await desktop.invoke('review:attempt:confirm', { attemptId: attempt.id })))}>{tr('review:update_review_list')}</Button>}
-   <div className="review-actions"><Button disabled={busy || attempt.phase !== 'confirmed' || !missed.length} onClick={() => onRetake(attempt.id)}>{tr('review:retake_missed')}</Button><Button onClick={() => setResults(false)}>{tr('review:review_answers')}</Button></div>
+   </>}
+   <div className="review-actions">{!exam&&<Button disabled={busy || attempt.phase !== 'confirmed' || !missed.length} onClick={() => onRetake(attempt.id)}>{tr('review:retake_missed')}</Button>}<Button onClick={() => setResults(false)}>{tr('review:review_answers')}</Button></div>
   </>}
  </section>;
 }

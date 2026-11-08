@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { artifactSchema, generationRequestSchema, type GenerationRequest } from '../../shared/review-generate';
 import { studyPageInputSchema, type StudyPageInput } from '../../shared/review';
-import type { StudyResolvedScope, StudyTest } from '../../shared/review-artifacts';
+import { EXAM_COURSE_ID, type StudyResolvedScope, type StudyTest } from '../../shared/review-artifacts';
 import { PROMPT_VERSION } from './prompts';
 import { eligibleSourceSql } from './eligibility';
 import { dateRange, type ScopeInputs } from './scope';
@@ -54,6 +54,12 @@ export class ArtifactRepository {
     }
     /** Reads only what `scope` selects; a limit error means the requested scope itself is too large. */
     scopeInputs(courseId: string, scope: GenerationRequest['scope'], weakKeys?: ReadonlySet<string>): ScopeInputs {
+        if(courseId===EXAM_COURSE_ID){
+            if(scope.kind!=='documents')throw new Error('review.needs_source_selection');
+            const documents=this.liveDocuments(courseId,scope.documentIds);
+            if(documents.length!==new Set(scope.documentIds).size)throw new Error('review.source_unavailable');
+            return {units:[],documents,concepts:documents.map(id=>({key:id,unitId:null})),observations:[]};
+        }
         const json = (values: readonly string[]) => JSON.stringify(values);
         const unitsWhere = (where: string, ...values: SQLInputValue[]) => this.db.prepare(`SELECT * FROM study_units su WHERE su.courseId=? AND ${where} ORDER BY su.ordinal,su.id LIMIT 101`).all(courseId, ...values);
         const conceptsWhere = (where: string, ...values: SQLInputValue[]) => this.db.prepare(`SELECT key,unitId FROM study_concepts WHERE courseId=? AND userState!='dismissed' AND ${where} LIMIT 101`).all(courseId, ...values);
@@ -89,8 +95,12 @@ export class ArtifactRepository {
             throw new Error('review.scope_limit');
         return { units: units.map(u => ({ id: String(u.id), startsAt: u.startsAt as string | null, endsAt: u.endsAt as string | null, documentIds: links.filter(l => l.unitId === u.id).map(l => String(l.documentId)) })), documents: [...new Set([...links.map(l => String(l.documentId)), ...courseDocuments])], concepts: concepts.map(c => ({ key: String(c.key), unitId: c.unitId as string | null, ...(scope.kind === 'weak' ? { weak: true } : {}) })), observations };
     }
+    sourceTitles(ids:readonly string[]):Record<string,string>{
+        return Object.fromEntries(this.db.prepare('SELECT id,title FROM documents WHERE id IN (SELECT value FROM json_each(?))').all(JSON.stringify(ids)).map(r=>[String(r.id),String(r.title).slice(0,240)]));
+    }
     /** Which of `ids` are still ready, linked to a unit of this course. */
     liveDocuments(courseId: string, ids: readonly string[]): string[] {
+        if(courseId===EXAM_COURSE_ID)return this.db.prepare("SELECT id FROM documents WHERE deletedAt IS NULL AND status='ready' AND id IN (SELECT value FROM json_each(?))").all(JSON.stringify(ids)).map(r=>String(r.id));
         return this.db.prepare('SELECT DISTINCT du.documentId FROM study_document_units du JOIN documents d ON d.id=du.documentId WHERE du.courseId=? AND d.deletedAt IS NULL AND d.status=\'ready\' AND du.documentId IN (SELECT value FROM json_each(?))').all(courseId, JSON.stringify(ids)).map(row => String(row.documentId));
     }
 }
