@@ -6,7 +6,7 @@ import { App } from './app';
 import { tr } from '../shared/i18n';
 const state=vi.hoisted(()=>({route:{view:'home',documentId:'document-a'},fail:'home'}));
 vi.mock('./bridge',()=>({desktop:{invoke:async()=>[]}}));
-vi.mock('./shell',()=>({useNavigate:()=>({route:state.route}),AppShell:({children}:{children:React.ReactNode})=><><nav>Shell navigation</nav>{children}</>}));
+vi.mock('./shell',()=>({useNavigate:()=>({route:state.route,activeTabId:'test',tabs:{tabs:[{id:'test'}]}}),AppShell:({children}:{children:React.ReactNode})=><><nav>Shell navigation</nav>{children}</>}));
 vi.mock('./home',()=>({HomeView:()=>{if(state.fail==='home')throw new Error('home');return <p>Home content</p>;}}));
 vi.mock('./library',()=>({LibraryView:()=>{if(state.fail==='library')throw new Error('library');return <p>Library content</p>;},LibrarySidebar:()=>null}));
 vi.mock('./workspace',()=>({Workspace:()=>{const [opened]=useState(state.route.documentId);if(state.fail==='workspace')throw new Error('workspace');return <p>Opened {opened}</p>;}}));

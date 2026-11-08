@@ -38,6 +38,10 @@ function GlobalSettings() {
   }, []);
   return open ? <SurfaceErrorBoundary resetKeys={[initialTab]}><ProviderSettings initialTab={initialTab} providers={providers} onClose={() => { setOpen(false); window.dispatchEvent(new Event("vstudy:providers-changed")); }} onRefresh={refresh}/></SurfaceErrorBoundary> : null;
 }
+function ActiveViews() {
+  const { activeTabId, tabs } = useNavigate();
+  return <div id="active-tab-panel" role={tabs.tabs.length > 1 ? "tabpanel" : undefined} aria-labelledby={tabs.tabs.length > 1 ? `tab-${activeTabId}` : undefined} data-tab-id={activeTabId}><Views key={activeTabId} /></div>;
+}
 function Views() {
   const { route } = useNavigate();
   useEffect(() => {
@@ -64,7 +68,7 @@ export function App() {
   return (
     <AgentsProvider>
       <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
-        <ExistingAnalyticsPrompt/><ContextCoach /><Views /><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/><AgentConsent /><AgentNavigation />
+        <ExistingAnalyticsPrompt/><ContextCoach /><ActiveViews /><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/><AgentConsent /><AgentNavigation />
       </AppShell>
     </AgentsProvider>
   );

@@ -69,9 +69,9 @@ export function formatSize(bytes: number | null, locale: string) {
   const exponent = Math.min(3, Math.max(0, Math.floor(Math.log10(Math.max(1, bytes)) / 3)));
   return new Intl.NumberFormat(locale, { style: 'unit', unitDisplay:'long', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
 }
-function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpen:()=>void}) {
+function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpen:(event: React.MouseEvent<HTMLButtonElement>)=>void}) {
  const ref=useRef<HTMLButtonElement>(null);const [visible,setVisible]=useState(false);
- return <Tooltip delayDuration={500} open={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}}><TooltipTrigger asChild><Button ref={ref} variant="ghost" className="document-title" tabIndex={-1} lang={contentLanguage(title)} onClick={onOpen}>{title}</Button></TooltipTrigger><TooltipContent className="document-tooltip"><div>{title}</div><div>{details}</div></TooltipContent></Tooltip>;
+ return <Tooltip delayDuration={500} open={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}}><TooltipTrigger asChild><Button ref={ref} variant="ghost" className="document-title" tabIndex={-1} lang={contentLanguage(title)} onAuxClick={event=>{if(event.button===1){event.preventDefault();onOpen(event);}}} onClick={onOpen}>{title}</Button></TooltipTrigger><TooltipContent className="document-tooltip"><div>{title}</div><div>{details}</div></TooltipContent></Tooltip>;
 }
 const defaults: LibraryQuery = { sort: "manual", direction: "asc", limit: 50 };
 const compactQuery = "(max-width: 1099px)";
@@ -106,7 +106,7 @@ export function Snippet({ text }: { text: string }) {
 export function LibraryView() {
   useTranslation();
   const [prompt, promptDialog] = useLibraryPrompt();
-  const { route, navigate } = useNavigate(),
+  const { route, navigate, openTab } = useNavigate(),
     format = useFormat();
   const viewKey = route.query?.folderId ?? route.query?.view ?? "all";
   const restoreTop = useRef(
@@ -351,12 +351,12 @@ export function LibraryView() {
     setCursor(undefined);
     setSelected((openGroup ? all.filter((i) => (i.course?.id ?? uncategorizedKey) === openGroup.key) : all).map((i) => i.document.id));
   };
-  const open = (item: Item) => {
-    void run(() => openDocument(item.document.id, () => navigate({
+  const open = (item: Item, newTab = false) => {
+    void run(() => openDocument(item.document.id, () => (newTab ? openTab : navigate)({
       view: "workspace",
       documentId: item.document.id,
       query: route.query,
-      title: route.title,
+      title: newTab ? item.document.title : route.title,
     })));
   };
   const ids =
@@ -900,7 +900,7 @@ export function LibraryView() {
                       }
                       return;
                     }
-                    if (e.key === "Enter") open(item);
+                    if (e.key === "Enter") open(item, e.metaKey || e.ctrlKey);
                     if (e.key === " ") {
                       e.preventDefault();
                       setSelected([d.id]);
@@ -929,7 +929,8 @@ export function LibraryView() {
                         className="document-title"
                         tabIndex={-1}
                         lang={contentLanguage(d.title)}
-                        onClick={() => open(item)}
+                        onAuxClick={event => { if (event.button === 1) { event.preventDefault(); open(item, true); } }}
+                        onClick={event => open(item, event.metaKey || event.ctrlKey)}
                       >
                         {d.title}
                       </Button>
@@ -1001,7 +1002,7 @@ export function LibraryView() {
                     <span className="sr-only">{d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):''}</span>
                   </div>
                   <div className="document-title-cell">
-                    <DocumentTitle title={d.title} onOpen={()=>open(item)} details={`${placeOf(item)} · ${d.sourceName.split('.').pop()?.toUpperCase()} · ${item.pageCount!=null?tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)}):''} · ${formatSize(item.sizeBytes,document.documentElement.lang)} · ${format.date(d.createdAt)}`}/>
+                    <DocumentTitle title={d.title} onOpen={event=>open(item,event.button === 1 || event.metaKey || event.ctrlKey)} details={`${placeOf(item)} · ${d.sourceName.split('.').pop()?.toUpperCase()} · ${item.pageCount!=null?tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)}):''} · ${formatSize(item.sizeBytes,document.documentElement.lang)} · ${format.date(d.createdAt)}`}/>
 
                     <div className="document-course-inline" title={placeOf(item)}>{placeOf(item)}</div>
                     {item.snippet&&<p className="search-snippet"><Snippet text={item.snippet}/></p>}

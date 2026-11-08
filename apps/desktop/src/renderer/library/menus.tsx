@@ -18,7 +18,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
  open:(item:Item)=>void;
  setMenu:(item:Item|null)=>void;setMove:(value:boolean)=>void;setTagging:(value:boolean)=>void;
 }) {
- const {navigate} = useNavigate();
+ const {navigate,openTab} = useNavigate();
  const [details,setDetails]=useState<Item|null>(null);const format=useFormat();
  const path=(id:Item['folderId'])=>{const names:string[]=[];for(let n=0;id&&n<folders.length;n++){const folder=folders.find(f=>f.id===id);if(!folder)break;names.unshift(folder.name);id=folder.parentId;}return names.join(' › ')||tr('library:unfiled');};
  return <>
@@ -40,6 +40,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
         >
           <div className="document-menu"><DropdownMenuLabel>{tr("library:details")}</DropdownMenuLabel>
             <Button variant="ghost" data-testid="document-details" onClick={()=>{setDetails(menu);setMenu(null);}}><Info/>{tr('library:viewDetails')}</Button>
+            <Button variant="ghost" onClick={() => {openTab({view:"workspace",documentId:menu.document.id,title:menu.document.title});setMenu(null);}}><FileText/>{tr("tabs:open")}</Button>
             <Button variant="ghost" onClick={() => open(menu)}><FileText/>{tr("library:open")}</Button>
             <Button variant="ghost" onClick={() => {navigate({view:'workspace',documentId:menu.document.id});setMenu(null);}}><FileText/>{tr('library:openReader')}</Button>
             <Button variant="ghost" onClick={() => void run(() => desktop.invoke('library:openOriginal',{documentId:menu.document.id}))}><ExternalLink/>{tr('library:openOriginal')}</Button>

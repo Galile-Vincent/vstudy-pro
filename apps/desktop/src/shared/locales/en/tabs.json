@@ -1,0 +1,12 @@
+{
+  "title": "Tabs",
+  "new": "New tab",
+  "all": "All tabs",
+  "search": "Search tabs",
+  "close": "Close {{title}}",
+  "document": "Document",
+  "recent": "Recent documents",
+  "limit": "You can open up to 30 tabs.",
+  "reordered": "Moved {{title}} to position {{position}}",
+  "open": "Open in new tab"
+}

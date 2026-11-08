@@ -1,5 +1,8 @@
+import { TabStrip } from './tab-strip';
+import { activeTab, currentRoute, createTab, loadTabs, saveTabs, tabReducer, type TabAction } from './tab-state';
+import type { TabSet, TabRoute } from '../../shared/app-tabs';
 import { HistorySwipeNavigation, hasNavigationOverlay } from './history-swipe-navigation';
-import { createRouteHistory, pushRoute, moveHistory, canMoveHistory, historyRoute, type HistoryDirection } from './navigation-history';
+import { canMoveHistory, historyRoute, type HistoryDirection } from './navigation-history';
 import { ClipboardCheck } from "lucide-react";
 /** Navigation frame and profile-local routes shared by the study views. */
 import { Brand } from '../components/brand';
@@ -20,6 +23,7 @@ import {
   startTransition,
   useContext,
   useState,
+  useLayoutEffect,
   useRef,
   useEffect,
   type ReactNode,
@@ -27,23 +31,15 @@ import {
 import { Home, BookOpen, ArrowLeft, Menu, Settings, GraduationCap, Search, History as HistoryIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
-import type { Document } from "../../shared";
-import type { LibraryQuery } from "../../shared/library";
 import "./shell.css";
 import "./art-reader.css";
 export type View = "ai-chats" | "exams" | "home" | "library" | "workspace" | "welcome" | "courses" | "history" | "review";
-export type Route = {
+export type Route = Omit<TabRoute, 'view'> & {
   view: View;
-  conversationId?: import("../../shared/domain").Conversation["id"] | undefined;
-  messageId?: string | undefined;
-  courseId?: string | undefined;
-  documentId?: Document["id"] | undefined;
-  query?: Partial<LibraryQuery> | undefined;
-  title?: string | undefined;
   aiParse?: boolean;
   connectSchool?: boolean;
 };
-type Navigation = { route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void; canGoBack: boolean; canGoForward: boolean; goBack: () => void; goForward: () => void };
+type Navigation = { tabs: TabSet; activeTabId: string; openTab: (route: Route | View) => void; activateTab: (id: string) => void; closeTab: (id: string) => void; reorderTabs: (ids: string[]) => void; route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void; canGoBack: boolean; canGoForward: boolean; goBack: () => void; goForward: () => void };
 const NavigationContext = createContext<Navigation | null>(null);
 export function useOptionalNavigation() { return useContext(NavigationContext); }
 export function useNavigate() {
@@ -87,18 +83,44 @@ export function AppShell({
       );
     });
   }, []);
-  const [route, setRoute] = useState<Route>(() => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem("vstudy-route") ?? "null",
-      ) as Route | null;
-      if (saved && ["home", "library", "workspace", "courses", "history", "review", "exams", "ai-chats"].includes(saved.view))
-        return historyRoute(saved);
-    } catch {
-      /* Storage can be unavailable. */
-    }
-    return { view: "home" };
-  });
+  const [tabs, setTabs] = useState(() => loadTabs(localStorage, crypto.randomUUID()));
+  const tabsRef = useRef(tabs);
+  const [transientRoute, setTransientRoute] = useState<Pick<Route, 'aiParse' | 'connectSchool'> & { view?: 'welcome' }>({});
+  const route: Route = { ...currentRoute(tabs), ...transientRoute };
+  const history = activeTab(tabs).history;
+  const dispatch = (action: TabAction) => {
+    tabsRef.current = tabReducer(tabsRef.current, action);
+    setTabs(tabsRef.current);
+  };
+  useEffect(() => {
+    const timer = setTimeout(() => saveTabs(localStorage, tabs), 200);
+    const flush = () => { saveTabs(localStorage, tabsRef.current); };
+    window.addEventListener('pagehide', flush);
+    return () => { clearTimeout(timer); window.removeEventListener('pagehide', flush); };
+  }, [tabs]);
+  const capture = () => {
+    const tab = activeTab(tabsRef.current);
+    dispatch({ type: 'presentation', id: tab.id, presentation: { ...tab.presentation, scrollTop: document.getElementById('shell-content')?.scrollTop ?? 0 } });
+  };
+  useLayoutEffect(() => {
+    const content = document.getElementById('shell-content');
+    if (!content) return;
+    const top = activeTab(tabsRef.current).presentation.scrollTop;
+    content.scrollTop = top;
+    const observer = new ResizeObserver(() => { content.scrollTop = top; });
+    if (content.firstElementChild) observer.observe(content.firstElementChild);
+    const stop = () => observer.disconnect();
+    content.addEventListener('wheel', stop, { once: true });
+    const timer = setTimeout(stop, 1500);
+    return () => { stop(); clearTimeout(timer); content.removeEventListener('wheel', stop); };
+  }, [tabs.activeId]);
+  const openTab: Navigation['openTab'] = value => {
+    capture(); setTransientRoute({});
+    dispatch({ type: 'open', tab: createTab(crypto.randomUUID(), typeof value === 'string' ? { view: value } : value, Date.now()) });
+  };
+  const activateTab = (id: string) => { capture(); setTransientRoute({}); dispatch({ type: 'activate', id, now: Date.now() }); };
+  const closeTab = (id: string) => { capture(); setTransientRoute({}); dispatch({ type: 'close', id, fallback: createTab(crypto.randomUUID(), { view: 'home' }, Date.now()) }); };
+  const reorderTabs = (ids: string[]) => dispatch({ type: 'reorder', ids });
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1199px)');
     const update = () => { if (media.matches && (route.view === 'workspace' || window.innerWidth < 720)) setSidebarVisible(false); };
@@ -109,27 +131,18 @@ export function AppShell({
   const focusTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(focusTimer.current), []);
   useEffect(() => {
-    if (route.view === 'welcome' || route.aiParse || welcomeReturn.current || focusTimer.current !== undefined) return;
-    const frame = requestAnimationFrame(() => { document.getElementById("shell-content")?.focus(); });
+    if (document.activeElement?.closest('[role=tablist]') || route.view === 'welcome' || route.aiParse || welcomeReturn.current || focusTimer.current !== undefined) return;
+    const frame = requestAnimationFrame(() => {
+      if (!document.querySelector(".app-tabs-menu") && !document.activeElement?.closest("[role=tablist]")) document.getElementById("shell-content")?.focus();
+    });
     return () => cancelAnimationFrame(frame);
   }, [route.view, route.documentId, route.courseId]);
-  const [history, setHistory] = useState(() => createRouteHistory(route));
-  const historyRef = useRef(history);
   const lastHistoryMove = useRef(-Infinity);
-  const persistRoute = (next: Route) => {
-    if (next.view === "welcome") return;
-    try { localStorage.setItem("vstudy-route", JSON.stringify(historyRoute(next))); } catch { /* Route persistence is optional. */ }
-  };
   const goHistory = (direction: HistoryDirection) => {
-    if (performance.now() - lastHistoryMove.current < 300 || hasNavigationOverlay()) return;
-    const nextHistory = moveHistory(historyRef.current, direction);
-    if (nextHistory === historyRef.current) return;
+    if (performance.now() - lastHistoryMove.current < 300 || hasNavigationOverlay() || !canMoveHistory(activeTab(tabsRef.current).history, direction)) return;
     lastHistoryMove.current = performance.now();
-    historyRef.current = nextHistory;
-    const next = nextHistory.entries[nextHistory.index]!;
     if (sidebarOverlay) closeSidebar();
-    transitionTo(() => { setHistory(nextHistory); setRoute(next); }, false, false, direction);
-    persistRoute(next);
+    transitionTo(() => { setTransientRoute({}); dispatch({ type: 'history', id: tabsRef.current.activeId, direction }); }, false, false, direction);
   };
   const previous = useRef<Route>({ view: "home" });
   const returnSettings = useRef(false);
@@ -140,13 +153,15 @@ export function AppShell({
     welcomeReturn.current = null;
     if (sidebarOverlay) closeSidebar();
     const next = typeof value === "string" ? { view: value } : value;
-    historyRef.current = pushRoute(historyRef.current, next);
-    setHistory(historyRef.current);
+    const id = tabs.activeId;
+    const apply = () => {
+      if (id === tabsRef.current.activeId) setTransientRoute(next.view === 'welcome' ? { view: 'welcome' } : { ...(next.aiParse ? { aiParse: true } : {}), ...(next.connectSchool ? { connectSchool: true } : {}) });
+      if (next.view !== 'welcome') dispatch({ type: 'replace-route', id, route: next });
+    };
     if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = historyRoute(route); returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
-    if (next.view === 'welcome' || route.view === 'welcome') startTransition(() => setRoute(next));
-    else if ((next.view === 'workspace' && next.documentId) || (route.view === 'workspace' && next.view === 'library')) transitionTo(() => setRoute(next), false, true);
-    else transitionTo(() => setRoute(next));
-    persistRoute(next);
+    if (next.view === 'welcome' || route.view === 'welcome') startTransition(apply);
+    else if ((next.view === 'workspace' && next.documentId) || (route.view === 'workspace' && next.view === 'library')) transitionTo(apply, false, true);
+    else transitionTo(apply);
   };
   const closeWelcome = () => {
     navigate(previous.current);
@@ -172,7 +187,7 @@ export function AppShell({
     }, 0);
   }, [route.view]);
   return (
-    <NavigationContext.Provider value={{ route, navigate, canGoBack: canMoveHistory(history, 'back'), canGoForward: canMoveHistory(history, 'forward'), goBack: () => goHistory('back'), goForward: () => goHistory('forward'), closeWelcome }}>
+    <NavigationContext.Provider value={{ tabs, activeTabId: tabs.activeId, openTab, activateTab, closeTab, reorderTabs, route, navigate, canGoBack: canMoveHistory(history, 'back'), canGoForward: canMoveHistory(history, 'forward'), goBack: () => goHistory('back'), goForward: () => goHistory('forward'), closeWelcome }}>
       <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view} data-sidebar-overlay={sidebarOverlay}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
@@ -186,28 +201,29 @@ export function AppShell({
           <SidebarGroup><p className="art-reader-sidebar-label">{tr("art-reader:workspace")}</p><SidebarMenu>
             <SidebarMenuItem><SidebarMenuButton
               aria-current={route.view === "home" ? "page" : undefined}
-              onClick={() => navigate("home")}
+              onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("home")}
             >
               <Home />
               {tr("library:home")}
             </SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "ai-chats" ? "page" : undefined} onClick={() => navigate("ai-chats")}><HistoryIcon/>{tr("web-chat:title")}</SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "ai-chats" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("ai-chats")}><HistoryIcon/>{tr("web-chat:title")}</SidebarMenuButton></SidebarMenuItem>
             <SidebarMenuItem><SidebarMenuButton
               data-parent={!!route.query?.folderId}
               aria-current={route.view === "library" || route.view === "workspace" ? "page" : undefined}
-              onClick={() => navigate("library")}
+              onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("library")}
             >
               <BookOpen />
               {tr("common:library")}
             </SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "courses" ? "page" : undefined} onClick={() => navigate("courses")}><GraduationCap />{tr("moodle:courses")}</SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "exams" ? "page" : undefined} onClick={() => navigate("exams")}><ClipboardCheck/>{tr("exams:title")}</SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "review" ? "page" : undefined} onClick={() => navigate("review")}><BookOpen/>{tr("review:title")}</SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "history" ? "page" : undefined} onClick={() => navigate("history")}><HistoryIcon/>{tr("history:title")}</SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "courses" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("courses")}><GraduationCap />{tr("moodle:courses")}</SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "exams" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("exams")}><ClipboardCheck/>{tr("exams:title")}</SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "review" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("review")}><BookOpen/>{tr("review:title")}</SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "history" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("history")}><HistoryIcon/>{tr("history:title")}</SidebarMenuButton></SidebarMenuItem>
           </SidebarMenu></SidebarGroup>
           {sidebar}</SidebarContent><SidebarFooter><SubscriptionMeters compact /><div className="art-reader-profile"><span className="art-reader-avatar" aria-hidden="true">{displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <Brand/>}</span><span><strong>{displayName || tr("library:brand")}</strong><small>{tr("art-reader:local")}</small></span><Button variant="ghost" size="icon" aria-label={tr("common:settings")} title={tr("common:settings")} onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings aria-hidden="true"/></Button></div></SidebarFooter>
         </Sidebar>
         <div className="shell-main">
+          <TabStrip />
           <header className="shell-topbar">
             <Button variant="ghost"
               className="shell-toggle"

@@ -25,6 +25,7 @@ async function isolated(check) {
 try {
   await isolated(async app => {
     const page = await app.firstWindow(), errors = [];
+    await page.addInitScript(() => { if (localStorage.getItem('vstudy-route')) localStorage.removeItem('vstudy-tabs-v1'); });
     page.on('pageerror', error => errors.push(error.message));
     await page.waitForFunction(() => !!window.desktop);
     await page.evaluate(async () => {
@@ -34,7 +35,7 @@ try {
         const c = await window.desktop.invoke('conversations:create', { scope: 'general', providerId: 'anthropic-api', modelId: 'fake' });
         await window.desktop.invoke('chats:update', { conversationId: c.id, patch: { title } });
       }
-      window.localStorage.setItem('vstudy-route', JSON.stringify({ view: 'history' }));
+      window.localStorage.removeItem('vstudy-tabs-v1');window.localStorage.setItem('vstudy-route', JSON.stringify({ view: 'history' }));
     });
     await page.reload();
     await page.locator('[data-history-result]').nth(1).waitFor();

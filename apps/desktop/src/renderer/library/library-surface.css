@@ -99,3 +99,4 @@ html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:f
 .app-shell .library-results[data-view=grid] .document-card .document-meta > span + span::before { position:absolute; inset-inline-start:calc(var(--space-4) / -2 - .25em); margin:0; }
 .library-results[data-view=grid] .document-card .document-title { background:transparent; box-shadow:none; }
 .app-shell .library-results .library-document .document-title { background:transparent; backdrop-filter:none; box-shadow:none; }
+@container library (width < 36rem) { .library-view .library-toolbar { flex-wrap:wrap; } .library-view .library-search { flex-basis:100%; order:3; } }

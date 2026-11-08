@@ -37,7 +37,7 @@ import type {
 import type { Document } from "../../shared";
 import { tr, i18n } from "../../shared/i18n";
 import { plainText } from "../../shared/plain-text";
-import { useNavigate } from "../shell";
+import { useNavigate, useOptionalNavigation } from "../shell";
 import { Button } from "../components/ui/button";
 import {
   Tabs,
@@ -160,6 +160,7 @@ function CoursesBody({
   onDocument: (id: string) => void;
 }) {
   useTranslation("moodle");
+  const navigation = useOptionalNavigation();
   const pageRef = useRef<HTMLElement>(null);
   useScrollFades(pageRef);
   const [showUpdates, setShowUpdates] = useState(false);
@@ -890,13 +891,14 @@ function CoursesBody({
                       const urgent = !!attention.next && Date.parse(attention.next.dueAt)-Date.now()<86400000;
                       return <li key={course.id} className="moodle-course-card" title={course.fullName} data-course-id={course.id} data-pinned={pinned} data-group-start={pinsVisible && !pinned && index>0 && items[index-1]!.pinned}>
                         <div className="moodle-card-body">
-                          <h3><button className="course-open" type="button" title={tooltip} aria-labelledby={labels.join(' ')} aria-describedby={`${prefix}-raw`} onClick={() => onCourse(course.id)}><span className="course-title" id={`${prefix}-title`}>{name}</span></button></h3>
+                          <h3><button className="course-open" type="button" title={tooltip} aria-labelledby={labels.join(' ')} aria-describedby={`${prefix}-raw`} onAuxClick={event => {if(event.button === 1) {event.preventDefault();navigation?.openTab({view:"courses",courseId:course.id,title:name});}}} onClick={event => event.metaKey || event.ctrlKey ? navigation?.openTab({view:"courses",courseId:course.id,title:name}) : onCourse(course.id)}><span className="course-title" id={`${prefix}-title`}>{name}</span></button></h3>
                           {(teacher || attention.next) && <p className="course-meta">
                             {teacher && <span id={`${prefix}-teacher`}>{teacher}</span>}
                             {teacher && attention.next && <span className="course-meta-separator" aria-hidden="true">·</span>}
                             {attention.next && <time id={`${prefix}-deadline`} dateTime={attention.next.dueAt} title={attention.next.title} data-urgent={urgent}>{urgent && <Clock3 aria-hidden="true" />}{deadlinePhrase(attention.next.dueAt)}</time>}
                           </p>}
                         </div>
+                        <button type="button" aria-label={tr("tabs:open")} onClick={() => navigation?.openTab({view:"courses",courseId:course.id,title:name})}>{tr("tabs:open")}</button>
                         <div className="course-counts" aria-hidden="true">
                           <span className="course-count course-overdue" data-count={attention.overdue} title={attention.overdue ? tr('moodle:course_overdue_tooltip',{count:attention.overdue}) : undefined}>{attention.overdue>0 && <><AlarmClock />{attention.overdue>99 ? '99+' : attention.overdue}</>}</span>
                           <span className="course-count course-unread-count" data-count={attention.unread} title={attention.unread ? tr('moodle:course_unread_tooltip',{count:attention.unread}) : undefined}>{attention.unread>0 && <><Mail />{attention.unread>99 ? '99+' : attention.unread}</>}</span>

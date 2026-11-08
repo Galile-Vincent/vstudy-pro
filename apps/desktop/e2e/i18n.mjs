@@ -12,7 +12,8 @@ for(const language of ['en','zh-Hant','ja']) {
  try {
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
   const page=await app.firstWindow();
- await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(() => { if (localStorage.getItem('vstudy-route')) localStorage.removeItem('vstudy-tabs-v1'); });
+ await page.evaluate(()=>{window.localStorage.removeItem('vstudy-tabs-v1');window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}));}); await page.reload();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.waitForFunction(lang=>window.document.documentElement.lang===lang,language);
   await page.getByTestId('bridge-status').waitFor({state:'attached'});
   assert.ok((await app.evaluate(({Menu})=>Menu.getApplicationMenu().items.map(i=>i.label))).includes(catalog.file));

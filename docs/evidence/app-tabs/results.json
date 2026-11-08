@@ -1,0 +1,5 @@
+[
+  "PASS three tabs, workspace strip visible, click and keyboard switching, one panel",
+  "PASS middle click and Cmd/Ctrl+W close with neighbor selection",
+  "PASS keyboard and pointer reorder, restart restores order and active tab, only active view mounted"
+]

@@ -1,8 +1,8 @@
 # Visit history
 
-`navigation-history.ts` models up to 50 visits with an entries array and an index. `AppShell` owns the snapshot and applies routes. `navigate` pushes a visit, deduplicates the current entry, and discards a forward branch. `goBack` and `goForward` move the index without pushing. `useNavigate` and `useOptionalNavigation` expose those actions and the availability flags.
+`navigation-history.ts` models up to 50 visits with an entries array and an index. `AppShell` owns a tab set and applies routes to the active tab. `navigate` pushes a visit, deduplicates the current entry, and discards a forward branch. `goBack` and `goForward` move the index without pushing. `useNavigate` and `useOptionalNavigation` expose those actions and the availability flags.
 
-Entries preserve document, conversation, message, course, library query, and title values. Entries and the persisted current route omit `aiParse` and `connectSchool`. Welcome stays outside history. The visit stack lasts for one renderer session. Scroll restoration is outside this change.
+Entries preserve document, conversation, message, course, library query, and title values. Entries and persisted tabs omit `aiParse` and `connectSchool`. Welcome stays outside history. Each tab's visit stack survives a restart. Shell scroll restoration is described below.
 
 ## Inputs
 
@@ -64,3 +64,34 @@ Evidence goes to `docs/evidence/navigation/swipe` at the repository root. `resul
 ## Attribution
 
 The gesture design and momentum decay heuristic were informed by T3 Code, MIT licensed, copyright 2026 T3 Tools Inc. The implementation here uses VStudy's route state and typed preload contracts. No reference code was executed. See `navigation.LICENSE.txt` for the MIT notice.
+
+## In-app tabs
+
+`shared/app-tabs.ts` validates the version 1 tab set stored under `vstudy-tabs-v1`.
+A set contains 1–30 tabs and one active ID. Each tab owns its visit history;
+`history.entries[history.index]` is its only current route. Welcome and Settings
+remain outside tabs. The reducer in `tab-state.ts` opens, closes, activates,
+reorders and navigates tabs without changing another tab's history.
+
+Startup restores order and the active ID, or migrates `vstudy-route` once.
+Malformed storage falls back to one Home tab. Writes are validated and debounced
+by 200 ms, with a final write on page hide. Only the active tab's React view is
+mounted, keyed by tab ID. Switching captures `#shell-content.scrollTop` and
+restores it when content returns. Reader state and chat drafts belong to a later
+stage; native Moodle and hosted chat resources retain their existing lifecycle.
+
+The strip sits above the header so it remains visible in Workspace. With one
+tab, only the new-tab button appears. The picker opens Home, Courses, Library,
+AI chats or a recently opened document. All tabs provides title search. Close
+selects the right neighbor, then the left; closing the last tab opens Home.
+
+Cmd/Ctrl+T opens the picker, Cmd/Ctrl+W closes the active tab, Ctrl+Tab cycles,
+Cmd+Shift+[ or ] cycles, and Cmd/Ctrl+1–8 selects a position. 9 selects the last.
+Text fields and navigation overlays keep these shortcuts. Arrow keys, Home and
+End navigate the tablist; Shift+Left/Right reorders and announces the position.
+Dragging a tab at least 4 px to another tab reorders it. Middle click closes.
+Sidebar clicks navigate within the active tab; Cmd/Ctrl+click opens another.
+Document and course items also provide an explicit open-in-new-tab action.
+
+Run `node e2e/app-tabs.mjs` after building. It uses a temporary profile and saves
+screenshots and results to `docs/evidence/app-tabs` at the repository root.

@@ -1,0 +1,102 @@
+import { useEffect, useRef, useState } from 'react';
+import { Home, BookOpen, FileText, GraduationCap, History, ClipboardCheck, Plus, List, X } from 'lucide-react';
+import { useNavigate, type View } from './index';
+import { hasNavigationOverlay } from './history-swipe-navigation';
+import { tr } from '../../shared/i18n';
+import { desktop } from '../bridge';
+import { MAX_APP_TABS, type TabRoute } from '../../shared/app-tabs';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import './tab-strip.css';
+
+const icons = { Home, BookOpen, FileText, GraduationCap, History, ClipboardCheck };
+export function tabLabel(view: string): string {
+  switch (view) {
+    case 'home': return tr('library:home');
+    case 'library': return tr('common:library');
+    case 'workspace': return tr('tabs:document');
+    case 'courses': return tr('moodle:courses');
+    case 'history': return tr('history:title');
+    case 'review': return tr('review:title');
+    case 'exams': return tr('exams:title');
+    default: return tr('web-chat:title');
+  }
+}
+export function TabStrip() {
+  const { tabs, openTab, closeTab, activateTab, reorderTabs } = useNavigate();
+  const [picker, setPicker] = useState(false);
+  const [all, setAll] = useState(false);
+  const [search, setSearch] = useState('');
+  const [recent, setRecent] = useState<TabRoute[]>([]);
+  useEffect(() => {
+    if (!picker) return;
+    let active = true;
+    void desktop.invoke('dashboard:get', {}).then(data => {
+      if (active) setRecent(data.recentDocuments.slice(0, 5).map(({ document }) => ({ view: 'workspace', documentId: document.id, title: document.title })));
+    }).catch(() => { if (active) setRecent([]); });
+    return () => { active = false; };
+  }, [picker]);
+  const [announcement, setAnnouncement] = useState('');
+  const root = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ id: string; x: number } | null>(null);
+  const labels = tabs.tabs.map(tab => tab.title || tabLabel(tab.history.entries[tab.history.index]!.view));
+  useEffect(() => { root.current?.querySelector('[aria-selected="true"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }); }, [tabs.activeId, tabs.tabs.length]);
+  useEffect(() => {
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey || hasNavigationOverlay() || document.activeElement?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]')) return;
+      const index = tabs.tabs.findIndex(tab => tab.id === tabs.activeId);
+      let target: number | undefined;
+      if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === 't') { event.preventDefault(); setPicker(true); return; }
+      if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === 'w') { event.preventDefault(); closeTab(tabs.activeId); return; }
+      if (event.ctrlKey && event.key === 'Tab') target = (index + (event.shiftKey ? -1 : 1) + tabs.tabs.length) % tabs.tabs.length;
+      if (event.metaKey && event.shiftKey && ['BracketLeft', 'BracketRight'].includes(event.code)) target = (index + (event.code === 'BracketLeft' ? -1 : 1) + tabs.tabs.length) % tabs.tabs.length;
+      if ((event.metaKey || event.ctrlKey) && !event.shiftKey && /^[1-9]$/.test(event.key)) target = event.key === '9' ? tabs.tabs.length - 1 : Number(event.key) - 1;
+      if (target !== undefined && tabs.tabs[target]) { event.preventDefault(); activateTab(tabs.tabs[target]!.id); }
+    };
+    window.addEventListener('keydown', keyboard);
+    return () => window.removeEventListener('keydown', keyboard);
+  }, [tabs, activateTab, closeTab]);
+  const reorder = (index: number, target: number) => {
+    if (target < 0 || target >= tabs.tabs.length) return;
+    const ids = tabs.tabs.map(tab => tab.id);
+    ids.splice(target, 0, ids.splice(index, 1)[0]!);
+    reorderTabs(ids); setAnnouncement(tr('tabs:reordered', { title: labels[index], position: target + 1 }));
+  };
+  return <div ref={root} className={`app-tabs ${tabs.tabs.length === 1 ? 'app-tabs-single' : ''}`}>
+    {tabs.tabs.length > 1 && <div className="app-tabs-scroll" role="tablist" aria-label={tr('tabs:title')}>
+      {tabs.tabs.map((tab, index) => {
+        const Icon = icons[tab.icon];
+        return <div className="app-tab" key={tab.id} data-active={tab.id === tabs.activeId}
+          onPointerDown={event => { if (event.button === 0) drag.current = { id: tab.id, x: event.clientX }; }}
+          onPointerUp={event => {
+            const source = drag.current; drag.current = null;
+            if (source && source.id !== tab.id && Math.abs(event.clientX - source.x) >= 4) reorder(tabs.tabs.findIndex(item => item.id === source.id), index);
+          }}
+          onAuxClick={event => { if (event.button === 1) { event.preventDefault(); closeTab(tab.id); } }}>
+          <button type="button" role="tab" id={`tab-${tab.id}`} aria-controls="active-tab-panel" aria-selected={tab.id === tabs.activeId} tabIndex={tab.id === tabs.activeId ? 0 : -1}
+            title={labels[index]} onClick={() => activateTab(tab.id)} onKeyDown={event => {
+              const target = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.tabs.length - 1 : event.key === 'ArrowRight' ? (index + 1) % tabs.tabs.length : event.key === 'ArrowLeft' ? (index - 1 + tabs.tabs.length) % tabs.tabs.length : undefined;
+              if (target === undefined) return;
+              event.preventDefault();
+              if (event.shiftKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) reorder(index, index + (event.key === 'ArrowLeft' ? -1 : 1));
+              else { activateTab(tabs.tabs[target]!.id); document.getElementById(`tab-${tabs.tabs[target]!.id}`)?.focus(); }
+            }}><Icon size={15} aria-hidden="true"/><span>{labels[index]}</span></button>
+          <button type="button" className="app-tab-close" aria-label={tr('tabs:close', { title: labels[index] })} onClick={() => closeTab(tab.id)}><X size={13}/></button>
+        </div>;
+      })}
+    </div>}
+    <Popover open={picker} onOpenChange={setPicker}><PopoverTrigger asChild><button type="button" className="app-tabs-add" aria-label={tr('tabs:new')} title={tr('tabs:new')}><Plus size={17}/></button></PopoverTrigger>
+      <PopoverContent className="app-tabs-menu" aria-label={tr('tabs:new')}>
+        {tabs.tabs.length >= MAX_APP_TABS ? <p role="status">{tr('tabs:limit')}</p> : <>
+          {(['home', 'courses', 'library', 'ai-chats'] satisfies View[]).map(view => <button type="button" key={view} onClick={() => { setPicker(false); openTab(view); }}>{tabLabel(view)}</button>)}
+          <small>{tr('tabs:recent')}</small>
+          {recent.map(route => <button type="button" key={route.documentId} onClick={() => { setPicker(false); openTab(route); }}>{route.title}</button>)}
+        </>}
+      </PopoverContent>
+    </Popover>
+    {tabs.tabs.length > 1 && <Popover open={all} onOpenChange={setAll}><PopoverTrigger asChild><button type="button" aria-label={tr('tabs:all')}><List size={17}/></button></PopoverTrigger><PopoverContent className="app-tabs-menu">
+      <input type="search" aria-label={tr('tabs:search')} placeholder={tr('tabs:search')} value={search} onChange={event => setSearch(event.target.value)}/>
+      {tabs.tabs.map((tab, index) => labels[index]!.toLocaleLowerCase().includes(search.toLocaleLowerCase()) && <button type="button" key={tab.id} aria-current={tab.id === tabs.activeId ? 'page' : undefined} onClick={() => { setAll(false); activateTab(tab.id); }}>{labels[index]}</button>)}
+    </PopoverContent></Popover>}
+    <span className="sr-only" role="status">{announcement}</span>
+  </div>;
+}

@@ -16,6 +16,7 @@ let app;
 try {
   app = await electron.launch({ args: [resolve('.'), `--user-data-dir=${profile}`], env: { ...environment, ELECTRON_RUN_AS_NODE: '', VSTUDY_FAKE_PROVIDER: '1', VSTUDY_LOCALE: 'en' } });
   const page = await app.firstWindow();
+  await page.addInitScript(() => { if (localStorage.getItem('vstudy-route')) localStorage.removeItem('vstudy-tabs-v1'); });
   page.on('pageerror', error => results.errors.push(error.message));
   assert.equal(await app.evaluate(({ app }) => app.getPath('userData')), profile);
   results.versions = await app.evaluate(() => process.versions);
@@ -45,7 +46,7 @@ try {
     const settings = await window.desktop.invoke('settings:get', {});
     await window.desktop.invoke('settings:set', { ...settings, language: 'en', colorScheme: 'light', onboardingCompleted: true, welcomeSeen: true });
     await window.desktop.invoke('analytics:setConsent', { enabled: false });
-    localStorage.setItem('vstudy-route', JSON.stringify({ view: 'home', connectSchool: true, aiParse: true }));
+    localStorage.removeItem('vstudy-tabs-v1');localStorage.setItem('vstudy-route', JSON.stringify({ view: 'home', connectSchool: true, aiParse: true }));
     localStorage.setItem('vstudy-onboarding-v1', JSON.stringify({ version: 1, step: 'start', goal: 'documents', status: 'completed', done: ['setup'], dismissed: ['courses', 'home', 'library'] }));
   });
   await seedArtCourses(app);
@@ -215,10 +216,13 @@ try {
   check('real WebContentsView receives wheel input without parent wheel delivery or route navigation');
   await page.evaluate(async () => { await window.desktop.invoke('documents:importSample', { language: 'en' }); window.dispatchEvent(new Event('library-updated')); });
   await navigate('Home', 'home'); await navigate('Library', 'library');
+  if (await page.locator('.course-folder').count()) await page.locator('.course-folder').first().click();
   await page.locator('.library-document').first().focus(); await page.keyboard.press('Enter'); await waitView('workspace');
-  const documentRoute = await page.evaluate(() => JSON.parse(localStorage.getItem('vstudy-route')));
+  await page.waitForTimeout(250);
+  const documentRoute = await page.evaluate(() => (() => {const s=JSON.parse(localStorage.getItem('vstudy-tabs-v1'));const t=s.tabs.find(t=>t.id===s.activeId);return t.history.entries[t.history.index];})());
   await navigate('Courses', 'courses'); await swipe([-45, -55, -40]); await waitView('workspace');
-  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('vstudy-route')).documentId), documentRoute.documentId);
+  await page.waitForTimeout(250);
+  assert.equal(await page.evaluate(() => (() => {const s=JSON.parse(localStorage.getItem('vstudy-tabs-v1'));const t=s.tabs.find(t=>t.id===s.activeId);return t.history.entries[t.history.index];})().documentId), documentRoute.documentId);
   await swipe([45, 55, 40]); await waitView('courses'); check('document visits restore the document ID and preserve the forward visit');
 
   results.handler = await page.evaluate(() => {
