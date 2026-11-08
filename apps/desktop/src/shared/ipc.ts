@@ -1,3 +1,4 @@
+import { webChatContract } from './web-chat';
 import { reviewGenerateIpc, type ReviewProgress } from './review-generate';
 import { newsletterContract } from './newsletter';
 import { analyticsContract } from './analytics';
@@ -56,6 +57,7 @@ export const ipcContract = {
   ...plannerIpc,
   ...aiParseContract,
   ...moodleWebviewContract,
+  ...webChatContract,
   ...storageContract,
   ...chatHistoryContract,
   [moodleChannels.schools]: {request:empty,response:z.array(moodleSchoolSchema)},

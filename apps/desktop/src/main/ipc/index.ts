@@ -1,3 +1,4 @@
+import { WebChats } from '../web-chat/views';
 import { getReviewAdmission } from '../review/admission';
 import { installReviewAdmission } from '../review/admission-port';
 import { startMemory } from '../review/memory';
@@ -85,12 +86,19 @@ export function registerIpc(
   const telemetry=analytics();
   registerNewsletterIpc(registrar, implemented);
   if (telemetry) registerAnalyticsIpc(registrar,implemented,telemetry,options.newsletterConsent);
-  registrar.handle("shell:openExternal", async ({ url }, event) => {
+  const confirmExternal = async (owner:Electron.WebContents, url:string) => {
     const target = new URL(url);
-    const result = await showAttachedMessage({ type: 'question', message: tr("settings:external",{target:target.hostname || target.protocol}), detail: target.protocol === 'mailto:' ? tr('settings:mail_detail',{address:decodeURIComponent(target.pathname),subject:target.searchParams.get('subject') ?? '',length:(target.searchParams.get('body') ?? '').length,url}) : url, buttons: [tr('common:cancel'), tr('common:open')], defaultId: 0, cancelId: 0 }, event.sender);
-    if (result.response === 1) { recordEgress('external_open', target.protocol === 'mailto:' ? 'Default mail application' : target.origin); await shell.openExternal(url); }
-    return { ok: true };
-  });
+    const result = await showAttachedMessage({ type: 'question', message: tr("settings:external",{target:target.hostname || target.protocol}), detail: target.protocol === 'mailto:' ? tr('settings:mail_detail',{address:decodeURIComponent(target.pathname),subject:target.searchParams.get('subject') ?? '',length:(target.searchParams.get('body') ?? '').length,url}) : url, buttons: [tr('common:cancel'), tr('common:open')], defaultId: 0, cancelId: 0 }, owner);
+    if (result.response === 1 && !owner.isDestroyed()) { recordEgress('external_open', target.protocol === 'mailto:' ? 'Default mail application' : target.origin); await shell.openExternal(url); }
+  };
+  registrar.handle('shell:openExternal', async ({url},event)=>{await confirmExternal(event.sender,url);return {ok:true};});
+  const webChats=new WebChats(confirmExternal);
+  for(const channel of ['web-chat:open','web-chat:state','web-chat:layout','web-chat:action','web-chat:clear'] as const) implemented.add(channel);
+  registrar.handle('web-chat:open',({provider},event)=>webChats.open(event.sender,provider));
+  registrar.handle('web-chat:state',({provider},event)=>webChats.state(event.sender,provider));
+  registrar.handle('web-chat:layout',({provider,bounds,visible},event)=>{webChats.layout(event.sender,provider,bounds,visible);return {ok:true};});
+  registrar.handle('web-chat:action',({provider,action},event)=>webChats.action(event.sender,provider,action));
+  registrar.handle('web-chat:clear',async({provider},event)=>{await webChats.clear(event.sender,provider);return {ok:true};});
   implemented.add('providers:chooseExecutable');
   registrar.handle('providers:chooseExecutable', async ({binary},event) => {
     const result = await dialog.showOpenDialog(ownerWindow(event.sender), {title:tr('settings:choose_binary',{binary}),properties:['openFile']});
@@ -163,5 +171,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { await webChats.dispose(); await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }
