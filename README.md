@@ -9,7 +9,7 @@ English · [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md)
 
 Read course documents, keep Moodle deadlines together, and turn coursework into a study plan on macOS and Windows.
 
-![Version 0.3.0](https://img.shields.io/badge/version-0.3.0-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
+![Version 0.4.0](https://img.shields.io/badge/version-0.4.0-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
 
 ![Graph traversal notes with a selected passage, demo answer, and source citation](docs/assets/readme/reader.webp)
 
