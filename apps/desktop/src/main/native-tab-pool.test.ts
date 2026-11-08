@@ -32,3 +32,19 @@ it('deduplicates process memory and evicts chat first above the high threshold',
   pool.evaluate([{pid:1,memory:{workingSetSize:600*1024}},{pid:2,memory:{workingSetSize:600*1024}}]);
   expect(chat.discard).toHaveBeenCalledOnce(); expect(moodle.discard).not.toHaveBeenCalled();
 });
+it('applies the cap independently to each window',()=>{
+  const pool=new NativeTabPool();
+  for(let index=0;index<8;index++) expect(pool.acquire(resource(String(index),{ownerId:index<4?1:2,active:()=>true}))).toBe('ready');
+  expect(pool.size).toBe(8);
+  expect(pool.acquire(resource('9',{ownerId:1}))).toBe('resource-limit');
+});
+it('does not count a shared native process twice or evict protected work under pressure',()=>{
+  const pool=new NativeTabPool(()=>0);
+  const first=resource('1',{processId:()=>9}),second=resource('2',{processId:()=>9,protected:()=>true});
+  pool.acquire(first);pool.acquire(second);
+  pool.evaluate([{pid:9,memory:{workingSetSize:700*1024}}]);
+  expect(first.discard).not.toHaveBeenCalled();
+  pool.evaluate([{pid:9,memory:{workingSetSize:1100*1024}}]);
+  expect(first.discard).toHaveBeenCalledOnce();
+  expect(second.discard).not.toHaveBeenCalled();
+});

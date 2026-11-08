@@ -10,3 +10,9 @@ it('rejects more than 30 distinct tabs and unknown presentation fields', () => {
   expect(tabSetSchema.safeParse({ ...state, tabs: Array.from({ length: 31 }, (_, index) => ({ ...state.tabs[0], id: `00000000-0000-4000-8000-${String(index).padStart(12, '0')}` })) }).success).toBe(false);
   expect(tabSetSchema.safeParse({ ...state, tabs: [{ ...state.tabs[0], presentation: { kind: 'app', scrollTop: 0, draft: 'not allowed' } }] }).success).toBe(false);
 });
+it('persists only redacted native URLs',()=>{
+  const input={...state,tabs:[{...state.tabs[0],history:{entries:[{view:'moodle',accountId:state.activeId,target:{kind:'page',url:'https://school.example/?token=secret&id=1'}}],index:0},presentation:{kind:'moodle',accountId:state.activeId,url:'https://school.example/?sesskey=secret&id=1',zoom:1,scrollTop:20}}]};
+  const persisted=JSON.stringify(tabSetSchema.parse(input));
+  expect(persisted).not.toContain('secret');
+  expect(persisted).toContain('id=1');
+});

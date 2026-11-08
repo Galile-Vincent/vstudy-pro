@@ -21,7 +21,7 @@
   "zoom-reset": "表示倍率をリセット",
   "focus": "ページにフォーカス",
   "copied": "リンクをコピーしました",
-  "footer_hint": "Esc で閉じる · {{modifier}} R で再読み込み",
+  "footer_hint": "Cmd R で再読み込み",
   "reconnect": "再接続",
   "sign_in": "再ログイン",
   "original": "元のページを表示",
@@ -43,5 +43,7 @@
   "error_file-unsupported": "このファイルはリーダーで開けません",
   "hint_file-unsupported": "VStudy は 50 MB 以内の PDF、Office、HTML、CSV、Markdown、テキストに対応しています。ダウンロードフォルダには保存していません。",
   "error_load-failed": "このページを開けませんでした",
-  "hint_load-failed": "再読み込みしてください。学校のサービスが一時的に利用できない可能性があります。"
+  "hint_load-failed": "再読み込みしてください。学校のサービスが一時的に利用できない可能性があります。",
+  "error_resource-limit": "すべてのページを使用中です",
+  "hint_resource-limit": "タブを閉じるか処理の完了を待って再試行してください。"
 }

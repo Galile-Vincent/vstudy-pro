@@ -61,14 +61,7 @@ export function webviewFile(input: string, policy: WebviewPolicy): boolean {
   return !!url && url.origin === policy.site.origin && webviewNavigation(input,policy) === 'internal' && /\/(?:webservice\/)?pluginfile\.php(?:\/|$)/i.test(url.pathname);
 }
 /** Remove sensitive URL components before exposing webview state to the renderer. */
-export function publicWebviewUrl(input: string): string {
-  try {
-    const url = new URL(input);
-    url.username = ''; url.password = ''; url.hash = '';
-    for (const key of [...url.searchParams.keys()]) if (/token|key|pass|auth|secret|session|redirect|urltogo|return|target/i.test(key)) url.searchParams.delete(key);
-    return ['https:','http:'].includes(url.protocol) ? url.href : '';
-  } catch { return ''; }
-}
+export { publicWebviewUrl } from '../../shared/moodle-webview';
 /** The Moodle content view has no device, clipboard, notification, or filesystem permissions. */
 export function webviewPermission(permission: string): boolean { void permission; return false; }
 

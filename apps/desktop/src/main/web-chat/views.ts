@@ -3,8 +3,10 @@ import { BrowserWindow, WebContentsView, session, dialog, type Session, type Web
 import type { WebChatProvider, WebChatState } from '../../shared/web-chat';
 import type { WebviewBounds } from '../../shared/moodle-webview';
 import { webChatProviders, webChatNavigation, webChatResource, safeWebChatUrl } from './policy';
+import { nativeTabPool } from '../native-tab-pool';
+import { forwardNativeTabShortcut } from '../navigation-input';
 import { tr } from '../i18n';
-interface Pane { owner:WebContents; window:BrowserWindow; view:WebContentsView; provider:WebChatProvider; status:WebChatState['status']; popup:BrowserWindow|undefined; visible:boolean; pending:boolean; gestureAt:number }
+interface Pane { owner:WebContents; window:BrowserWindow; view:WebContentsView; provider:WebChatProvider; status:WebChatState['status']; popup:BrowserWindow|undefined; visible:boolean; active:boolean; pending:boolean; dirty:boolean; gestureAt:number }
 const preferences = {sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,navigateOnDragDrop:false};
 export class WebChats {
   private readonly panes=new Map<string,Pane>();
@@ -34,18 +36,21 @@ export class WebChats {
   open(owner:WebContents,provider:WebChatProvider):WebChatState {
     if (this.clearing.has(provider)) throw new Error('Web chat clearing');
     const existing=this.panes.get(this.key(owner,provider));
-    if (existing) return this.state(owner,provider);
+    if (existing) {existing.active=true;return this.state(owner,provider);}
     const window=BrowserWindow.fromWebContents(owner);
     if (!window) throw new Error('Missing owner');
+    if(nativeTabPool.makeRoom(owner.id)==='resource-limit') throw new Error('Native view resource limit');
     const view=new WebContentsView({webPreferences:{...preferences,session:this.browser(provider)}});
-    const pane:Pane={owner,window,view,provider,status:'loading',popup:undefined,visible:false,pending:false,gestureAt:0};
-    this.panes.set(this.key(owner,provider),pane);
+    const pane:Pane={owner,window,view,provider,status:'loading',popup:undefined,visible:false,active:true,pending:false,dirty:false,gestureAt:0};
+    const key=this.key(owner,provider);
+    if(nativeTabPool.acquire({key,ownerId:owner.id,kind:'web-chat',lastActiveAt:Date.now(),active:()=>pane.active,protected:()=>!!pane.popup || pane.pending || pane.dirty || pane.status==='loading',processId:()=>view.webContents.getOSProcessId(),discard:()=>{this.close(pane);this.panes.delete(key);}})==='resource-limit') {view.webContents.close({waitForBeforeUnload:false});throw new Error('Native view resource limit');}
+    this.panes.set(key,pane);
     window.contentView.addChildView(view);view.setVisible(false);
     this.guard(pane,view.webContents,true);
     view.webContents.on('did-start-loading',()=>{pane.status='loading';});
     view.webContents.on('did-finish-load',()=>{if(webChatNavigation(provider,view.webContents.getURL())) pane.status='ready';});
     view.webContents.on('did-fail-load',(_event,code,_description,_url,main)=>{if(main && code!==-3) pane.status='error';});
-    view.webContents.on('render-process-gone',()=>{pane.status='error';view.setVisible(false);});
+    view.webContents.on('render-process-gone',()=>{this.close(pane);this.panes.delete(key);});
     if (!this.owners.has(owner.id)) {
       const cleanup=()=>this.closeOwner(owner);
       this.owners.set(owner.id,cleanup);owner.once('destroyed',cleanup);owner.on('did-start-navigation',cleanup);
@@ -60,7 +65,7 @@ export class WebChats {
   private guard(pane:Pane,contents:WebContents,popups:boolean) {
     contents.on('will-attach-webview',event=>event.preventDefault());
     contents.on('before-mouse-event',(_event,input)=>{if(input.type==='mouseDown') pane.gestureAt=Date.now();});
-    contents.on('before-input-event',(_event,input)=>{if(input.type==='keyDown') pane.gestureAt=Date.now();});
+    contents.on('before-input-event',(event,input)=>{if(forwardNativeTabShortcut(pane.owner,event,input)) return;if(input.type==='keyDown') {pane.gestureAt=Date.now();if(!input.meta && !input.control && input.key.length===1) pane.dirty=true;}});
     const navigate=(event:Electron.Event,url:string)=>{
       if (webChatNavigation(pane.provider,url)) return;
       event.preventDefault();void this.openExternal(pane,url);
@@ -92,15 +97,17 @@ export class WebChats {
     const pane=this.pane(owner,provider),history=pane.view.webContents.navigationHistory;
     return {status:pane.status,canGoBack:history.canGoBack(),canGoForward:history.canGoForward()};
   }
-  layout(owner:WebContents,provider:WebChatProvider,bounds:WebviewBounds,visible:boolean,radius=0) {
-    const pane=this.pane(owner,provider),[width=0,height=0]=pane.window.getContentSize(),zoom=owner.getZoomFactor();
+  layout(owner:WebContents,provider:WebChatProvider,bounds:WebviewBounds,visible:boolean,radius=0,active=visible) {
+    const pane=this.pane(owner,provider);pane.active=active;
+    const [width=0,height=0]=pane.window.getContentSize(),zoom=owner.getZoomFactor();
     const x=Math.min(width,Math.round(bounds.x*zoom)),y=Math.min(height,Math.round(bounds.y*zoom));
     pane.view.setBounds({x,y,width:Math.min(width-x,Math.round(bounds.width*zoom)),height:Math.min(height-y,Math.round(bounds.height*zoom))});
     pane.view.setBorderRadius(Math.round(radius*zoom));
-    for (const other of this.panes.values()) if(other.owner===owner && other!==pane) this.visibility(other,false);
+    for (const other of this.panes.values()) if(other.owner===owner && other!==pane) {other.active=false;this.visibility(other,false);}
     this.visibility(pane,visible && bounds.width>0 && bounds.height>0);
   }
   private visibility(pane:Pane,visible:boolean) {
+    if(visible) nativeTabPool.touch(this.key(pane.owner,pane.provider));
     const changed=pane.visible!==visible;pane.visible=visible;pane.view.setVisible(visible);
     if(changed) {if(!visible) pane.popup?.hide();else pane.popup?.show();}
   }
@@ -126,6 +133,7 @@ export class WebChats {
     } finally {this.clearing.delete(provider);}
   }
   private close(pane:Pane) {
+    nativeTabPool.release(this.key(pane.owner,pane.provider));
     pane.popup?.destroy();
     if(!pane.window.isDestroyed()) pane.window.contentView.removeChildView(pane.view);
     if(!pane.view.webContents.isDestroyed()) pane.view.webContents.close({waitForBeforeUnload:false});

@@ -96,7 +96,7 @@ export function registerIpc(
   for(const channel of ['web-chat:open','web-chat:state','web-chat:layout','web-chat:action','web-chat:clear'] as const) implemented.add(channel);
   registrar.handle('web-chat:open',({provider},event)=>webChats.open(event.sender,provider));
   registrar.handle('web-chat:state',({provider},event)=>webChats.state(event.sender,provider));
-  registrar.handle('web-chat:layout',({provider,bounds,visible,radius},event)=>{webChats.layout(event.sender,provider,bounds,visible,radius);return {ok:true};});
+  registrar.handle('web-chat:layout',({provider,bounds,visible,radius,active},event)=>{webChats.layout(event.sender,provider,bounds,visible,radius,active);return {ok:true};});
   registrar.handle('web-chat:action',({provider,action},event)=>webChats.action(event.sender,provider,action));
   registrar.handle('web-chat:clear',async({provider},event)=>{await webChats.clear(event.sender,provider);return {ok:true};});
   implemented.add('providers:chooseExecutable');

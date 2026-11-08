@@ -38,7 +38,7 @@ export function HostedChat({provider,compact=false}:{provider:WebChatProvider;co
   useEffect(()=>{
     let live=true,opened=false,polling=false;
     const bounds=()=>{const r=slot.current?.getBoundingClientRect();return {x:Math.max(0,Math.round(r?.x??0)),y:Math.max(0,Math.round(r?.y??0)),width:Math.max(0,Math.round(r?.width??0)),height:Math.max(0,Math.round(r?.height??0))};};
-    const layout=()=>{if(opened) void desktop.invoke('web-chat:layout',{provider,bounds:bounds(),visible:live && !document.hidden && !hasChatOverlay() && !slot.current?.closest('[inert]'),...(compact?{radius:16}:{})}).catch(()=>{if(live)setFailed(true);});};
+    const layout=()=>{if(opened) void desktop.invoke('web-chat:layout',{provider,bounds:bounds(),active:live,visible:live && !document.hidden && !hasChatOverlay() && !slot.current?.closest('[inert]'),...(compact?{radius:16}:{})}).catch(()=>{if(live)setFailed(true);});};
     const poll=async()=>{if(!opened || polling || !live)return;polling=true;try{const next=await desktop.invoke('web-chat:state',{provider});if(live)setState(next);}catch{if(live)setFailed(true);}finally{polling=false;}};
     void desktop.invoke('web-chat:open',{provider}).then(next=>{opened=true;if(live){setState(next);setFailed(false);}layout();}).catch(()=>{if(live)setFailed(true);});
     const resize=new ResizeObserver(layout);if(slot.current)resize.observe(slot.current);
@@ -50,7 +50,7 @@ export function HostedChat({provider,compact=false}:{provider:WebChatProvider;co
   const action=async(action:'back'|'forward'|'reload'|'home'|'focus'|'external')=>{try{setFailed(false);setState(await desktop.invoke('web-chat:action',{provider,action}));}catch{setFailed(true);}};
   const tool=(actionName:'back'|'forward'|'reload'|'home'|'focus'|'external',Icon:typeof Home,disabled=false)=><Button variant="ghost" size="icon" aria-label={tr(`web-chat:${actionName}`)} title={tr(`web-chat:${actionName}`)} disabled={disabled} onClick={()=>void action(actionName)}><Icon/></Button>;
   const clear=()=>{setClearing(true);void desktop.invoke('web-chat:clear',{provider}).then(()=>setRevision(n=>n+1)).catch(()=>setFailed(true)).finally(()=>setClearing(false));};
-  const notice=(failed || state?.status==='error') && <div role="alert" className="web-chat-notice">{tr('web-chat:error')}<Button variant="outline" onClick={()=>{if(state)void action('reload');else setRevision(n=>n+1);}}>{tr('common:retry')}</Button></div>;
+  const notice=(failed || state?.status==='error') && <div role="alert" className="web-chat-notice">{tr('web-chat:error')}<Button variant="outline" onClick={()=>{setRevision(n=>n+1);}}>{tr('common:retry')}</Button></div>;
   const progress=state?.status==='loading' && <progress aria-label={tr('common:loading')}/>;
   if(compact) return <div className="web-chat-hosted web-chat-compact" role="tabpanel" id={`web-chat-panel-${provider}`}>
     {notice}{progress}

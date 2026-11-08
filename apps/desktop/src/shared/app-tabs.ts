@@ -1,21 +1,24 @@
 import { z } from 'zod';
 import { documentIdSchema, conversationIdSchema } from './domain';
+import { webviewTargetSchema, publicWebviewUrl } from './moodle-webview';
 import { libraryQuerySchema, type LibraryQuery } from './library';
 
 export const MAX_APP_TABS = 30;
 export const TAB_STORAGE_KEY = 'vstudy-tabs-v1';
 export const tabIdSchema = z.string().uuid();
 export const tabRouteSchema = z.object({
-  view: z.enum(['home', 'library', 'workspace', 'courses', 'history', 'review', 'exams', 'ai-chats']),
+  view: z.enum(['home', 'library', 'workspace', 'courses', 'history', 'review', 'exams', 'ai-chats', 'moodle']),
+  accountId: z.string().uuid().optional(), target: webviewTargetSchema.transform(target=>target.kind==='page' ? {...target,url:publicWebviewUrl(target.url)} : target).optional(),
   documentId: documentIdSchema.optional(), conversationId: conversationIdSchema.optional(),
   messageId: z.string().max(200).optional(), courseId: z.string().max(200).optional(),
   query: libraryQuerySchema.partial().strict().transform((query): Partial<LibraryQuery> => Object.fromEntries(Object.entries(query).filter(([, value]) => value !== undefined))).optional(), title: z.string().max(1000).optional(),
-}).strict();
+}).strict().refine(route=>route.view!=='moodle' || (!!route.accountId && !!route.target),'Moodle routes need an account and target');
 export const routeHistorySchema = z.object({
   entries: z.array(tabRouteSchema).min(1).max(50).readonly(), index: z.number().int().nonnegative(),
 }).strict().refine(value => value.index < value.entries.length, 'History index out of range');
 const scrollTop = z.number().finite().nonnegative();
 export const tabPresentationSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('moodle'), accountId: z.string().uuid(), url: z.string().max(8192).transform(publicWebviewUrl), zoom: z.number().min(.5).max(2), scrollTop }).strict(),
   z.object({ kind: z.literal('app'), scrollTop }).strict(),
   z.object({ kind: z.literal('document'), scrollTop, page: z.number().int().positive().optional(), anchor: z.string().max(1000).optional(), version: z.string().max(200).optional() }).strict(),
 ]);

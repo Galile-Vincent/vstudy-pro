@@ -1,3 +1,5 @@
+import { MoodleWebviewPane } from './courses/webview-pane';
+import { documentIdSchema } from '../shared/domain';
 import { ExamsView } from './exams';
 import { WebChatHub } from './web-chat';
 import { SurfaceErrorBoundary } from './components/surface-error-boundary';
@@ -39,11 +41,11 @@ function GlobalSettings() {
   return open ? <SurfaceErrorBoundary resetKeys={[initialTab]}><ProviderSettings initialTab={initialTab} providers={providers} onClose={() => { setOpen(false); window.dispatchEvent(new Event("vstudy:providers-changed")); }} onRefresh={refresh}/></SurfaceErrorBoundary> : null;
 }
 function ActiveViews() {
-  const { activeTabId, tabs } = useNavigate();
-  return <div id="active-tab-panel" role={tabs.tabs.length > 1 ? "tabpanel" : undefined} aria-labelledby={tabs.tabs.length > 1 ? `tab-${activeTabId}` : undefined} data-tab-id={activeTabId}><Views key={activeTabId} /></div>;
+  const { activeTabId, tabs, route } = useNavigate();
+  return <div id="active-tab-panel" data-native={route.view==='moodle'} role={tabs.tabs.length > 1 ? "tabpanel" : undefined} aria-labelledby={tabs.tabs.length > 1 ? `tab-${activeTabId}` : undefined} data-tab-id={activeTabId}><Views key={activeTabId} /></div>;
 }
 function Views() {
-  const { route } = useNavigate();
+  const { route, activeTabId, closeTab, navigate } = useNavigate();
   useEffect(() => {
     const screen = ({library:'library',workspace:'document',courses:'moodle',history:'chat'} as const)[route.view as 'library' | 'workspace' | 'courses' | 'history'];
     if (screen) track('screen_viewed', {screen_name:screen});
@@ -54,7 +56,7 @@ function Views() {
     const idle = window.requestIdleCallback(() => { void loadWelcome(); });
     return () => window.cancelIdleCallback(idle);
   }, []);
-  return <SurfaceErrorBoundary resetKeys={[JSON.stringify(route)]}>{route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "workspace" ? (
+  return <SurfaceErrorBoundary resetKeys={[JSON.stringify(route)]}>{route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "moodle" && route.accountId && route.target ? (<MoodleWebviewPane tabId={activeTabId} accountId={route.accountId} target={route.target} onClose={()=>closeTab(activeTabId)} onDocument={id=>navigate({view:"workspace",documentId:documentIdSchema.parse(id)})} onReconnect={()=>navigate({view:"courses",connectSchool:true})}/>) : route.view === "workspace" ? (
     <Workspace key={route.documentId} />
   ) : route.view === "ai-chats" ? (<WebChatHub/>) : route.view === "exams" ? (<ExamsView/>) : route.view === "review" ? (<ReviewView/>) : route.view === "history" ? (<HistoryView/>) : route.view === "courses" ? (
     <CoursesView />

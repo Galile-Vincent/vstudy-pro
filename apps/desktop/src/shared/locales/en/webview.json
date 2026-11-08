@@ -21,7 +21,7 @@
   "zoom-reset": "Reset zoom",
   "focus": "Focus page",
   "copied": "Link copied",
-  "footer_hint": "Esc closes · {{modifier}} R reloads",
+  "footer_hint": "Cmd R reloads",
   "reconnect": "Reconnect",
   "sign_in": "Sign in again",
   "original": "View original page",
@@ -43,5 +43,7 @@
   "error_file-unsupported": "This file cannot open in the reader",
   "hint_file-unsupported": "VStudy supports PDF, Office documents, HTML, CSV, Markdown and text files up to 50 MB. No file was saved to Downloads.",
   "error_load-failed": "This page could not open",
-  "hint_load-failed": "Try reloading. Your school may be temporarily unavailable."
+  "hint_load-failed": "Try reloading. Your school may be temporarily unavailable.",
+  "error_resource-limit": "All native views are busy",
+  "hint_resource-limit": "Close a tab or wait for its work to finish, then retry."
 }

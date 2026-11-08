@@ -1,3 +1,4 @@
+import { nativeTabPool, NATIVE_METRICS_INTERVAL_MS } from '../native-tab-pool';
 import { ownerWindow } from '../dialogs';
 /**
  * Register validated moodle IPC operations and delegate privileged work to main services.
@@ -31,6 +32,7 @@ import { moodleWebviewContract } from '../../shared/moodle-webview';
 
 /** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistrar>, store: Store, secrets: SecretStore, implemented: Set<IpcChannel>, documents: Pick<DocumentService,'importPath'|'get'>, restoreMainWindow: () => void = () => {}, request?:typeof fetch) {
+  const memoryTimer=setInterval(()=>nativeTabPool.evaluate(app.getAppMetrics()),NATIVE_METRICS_INTERVAL_MS);
   const owners=new Set<Electron.WebContents>();
   const repository = new MoodleRepository(store.db);
   const sso = new MoodleSso(restoreMainWindow);
@@ -52,10 +54,12 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   });
   for (const channel of Object.values(moodleChannels)) implemented.add(channel);
   for (const channel of Object.keys(moodleWebviewContract) as (keyof typeof moodleWebviewContract)[]) implemented.add(channel);
-  registrar.handle('moodle:webview-open',({accountId,target},event) => webviews.open(event.sender,accountId,target));
-  registrar.handle('moodle:webview-state',({id},event) => webviews.state(event.sender,id));
-  registrar.handle('moodle:webview-action',({id,action},event) => webviews.action(event.sender,id,action));
-  registrar.handle('moodle:webview-layout',({id,bounds,theme,visible},event) => {webviews.layout(event.sender,id,bounds,theme,visible);return {ok:true};});
+  registrar.handle('moodle:webview-open',({accountId,target,tabId,checkpoint},event) => webviews.open(event.sender,accountId,target,tabId,checkpoint));
+  registrar.handle('moodle:webview-sync',({tabIds},event)=>{return {ok:true,tabs:webviews.sync(event.sender,tabIds)};});
+  registrar.handle('moodle:webview-hide',({tabId,generation},event)=>{webviews.hide(event.sender,tabId,generation);return {ok:true};});
+  registrar.handle('moodle:webview-state',({id,tabId},event) => {webviews.assertTab(event.sender,tabId,id);return webviews.state(event.sender,id);});
+  registrar.handle('moodle:webview-action',({id,tabId,action},event) => {webviews.assertTab(event.sender,tabId,id);return webviews.action(event.sender,id,action);});
+  registrar.handle('moodle:webview-layout',({id,tabId,generation,bounds,theme,visible},event) => {webviews.assertTab(event.sender,tabId,id);webviews.layout(event.sender,id,bounds,theme,visible,generation);return {ok:true};});
   registrar.handle(moodleChannels.schools,() => schools);
   registrar.handle(moodleChannels.checkSite,({url}) => service.checkSite(url));
   registrar.handle(moodleChannels.preflight,async () => {
@@ -94,5 +98,5 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
     await exportText(text,result.filePath);
     return {saved:true};
   });
-  return Object.assign(async () => { stopReminders(); await webviews.dispose(); sso.dispose(); await service.dispose(); }, {waitForIdle:()=>service.waitForIdle(),service});
+  return Object.assign(async () => { clearInterval(memoryTimer); stopReminders(); await webviews.dispose(); sso.dispose(); await service.dispose(); }, {waitForIdle:()=>service.waitForIdle(),service});
 }

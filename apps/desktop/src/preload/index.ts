@@ -1,6 +1,7 @@
 import { reviewProgressChannel, reviewProgressSchema } from '../shared/review-generate';
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 import {
+  nativeTabShortcutChannel,nativeTabShortcutSchema,
   trackpadScrollBeginChannel, trackpadScrollEndChannel, trackpadEventArgumentsSchema,
   moodleProgressChannel, moodleProgressSchema,
   documentProgressChannel, documentProgressSchema,
@@ -48,6 +49,7 @@ const api: DesktopApi = {
     ipcRenderer.on(reviewProgressChannel,receive);
     return () => ipcRenderer.removeListener(reviewProgressChannel,receive);
   },
+  onNativeTabShortcut: listener => {const receive=(_event:Electron.IpcRendererEvent,payload:unknown)=>{const parsed=nativeTabShortcutSchema.safeParse(payload);if(parsed.success) listener(parsed.data);};ipcRenderer.on(nativeTabShortcutChannel,receive);return ()=>{ipcRenderer.removeListener(nativeTabShortcutChannel,receive);};},
   onTrackpadScrollBegin: listener => subscribeTrackpad(trackpadScrollBeginChannel, listener),
   onTrackpadScrollEnd: listener => subscribeTrackpad(trackpadScrollEndChannel, listener),
   onMoodleProgress(listener) {

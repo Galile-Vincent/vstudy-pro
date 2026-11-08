@@ -21,6 +21,7 @@ vi.mock('electron', async () => {
     openHandler?: (details: { url: string }) => unknown;
     navigationHistory = { canGoBack: () => false, canGoForward: () => false };
     setWindowOpenHandler(handler: (details: { url: string }) => unknown) { this.openHandler = handler; }
+    setZoomFactor = vi.fn();
     loadURL = vi.fn(async () => undefined); stop = vi.fn(); focus = vi.fn(); close = vi.fn(); isDestroyed() { return false; }
   }
   class WebContentsView {
@@ -45,6 +46,7 @@ vi.mock('electron', async () => {
     clipboard: { writeText: vi.fn() }, shell: { openExternal: vi.fn() }, dialog: { showMessageBox: vi.fn() },
   };
 });
+import { randomUUID } from 'node:crypto';
 import { EventEmitter } from 'node:events';
 import type { WebContents } from 'electron';
 import { MoodleWebviews } from './webview';
@@ -53,15 +55,15 @@ const accountId = '8b7f7a4e-3c1a-4a52-9a37-0f6d0c7e3a11', site = 'https://school
 const file = (name = 'a.pdf') => `${site}/pluginfile.php/1/mod_resource/content/0/${name}`;
 const account = { status: 'connected', id: accountId, siteUrl: site, siteName: 'School', remoteUserId: 7 };
 const users: MoodleWebviews[] = [];
-async function open() {
+async function open(tabId=randomUUID()) {
   const owner = Object.assign(new EventEmitter(), { id: 1, isDestroyed: () => false, focus: vi.fn(), getZoomFactor: () => 1 }) as unknown as WebContents;
   const views = new MoodleWebviews({ request: async () => new Response(JSON.stringify({key:'autologin-test-key'})), account: () => account as never, credentials: async () => ({ token: 't', privateToken: 'p' }), file: () => ({ account: account as never, url: file() }), documents: { importPath: vi.fn() } as never });
   users.push(views);
-  const state = views.open(owner, accountId, { kind: 'page', url: `${site}/course/view.php?id=2` });
+  const state = views.open(owner, accountId, { kind: 'page', url: `${site}/course/view.php?id=2` },tabId);
   await vi.waitFor(() => expect(mock.panes.at(-1)!.contents.loadURL).toHaveBeenCalled());
   vi.setSystemTime(1_000_000);
   const { contents } = mock.panes.at(-1)!;
-  return { views, owner, state, contents, browser: mock.browsers.at(-1)! };
+  return { tabId, views, owner, state, contents, browser: mock.browsers.at(-1)! };
 }
 const settle = async () => { for (let turn = 0; turn < 5; turn++) await Promise.resolve(); };
 const click = (contents: EventEmitter) => contents.emit('before-mouse-event', { preventDefault: vi.fn() }, { type: 'mouseDown', button: 'left' });
@@ -233,4 +235,39 @@ it('uses local gesture tracking when the browser has no gesture API', async () =
   click(contents);
   browser.emit('will-download',{preventDefault:vi.fn()},{getURL:()=>file()},contents);
   await settle();expect(mock.imports).toHaveBeenCalledTimes(1);
+});
+
+it('ensures a tab idempotently while isolating sibling tabs and owners', async () => {
+  const {views,owner,state}=await open();
+  const tab='12345678-1234-4234-a234-123456789012';
+  const first=views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=3'},tab);
+  expect(views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=3'},tab).id).toBe(first.id);
+  expect(first.id).not.toBe(state.id);
+  const stranger=Object.assign(new EventEmitter(),{id:2}) as unknown as WebContents;
+  expect(()=>views.state(stranger,first.id)).toThrow('Unknown Moodle pane');
+  views.sync(owner,[tab]);
+  expect(()=>views.state(owner,state.id)).toThrow();
+  expect(views.state(owner,first.id).id).toBe(first.id);
+});
+it('discards a crashed view and recreates it on the next ensure',async()=>{
+  const {views,owner,state,contents,tabId}=await open();
+  contents.emit('render-process-gone');
+  expect(()=>views.state(owner,state.id)).toThrow();
+  const next=views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=2'},tabId);
+  expect(next.id).not.toBe(state.id);
+});
+it('disconnect destroys every resource for the account',async()=>{
+  const {views,owner,state}=await open();
+  const second=views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=3'});
+  await views.disconnect(accountId);
+  expect(views.state(owner,state.id)).toMatchObject({status:'error',error:'session-expired'});
+  expect(views.state(owner,second.id)).toMatchObject({status:'error',error:'session-expired'});
+});
+it('schedules one account keepalive across sibling views',async()=>{
+  const timer=vi.spyOn(globalThis,'setInterval');
+  try {
+    const {views,owner}=await open();
+    views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=3'});
+    expect(timer.mock.calls.filter(([,delay])=>delay===4*60_000)).toHaveLength(1);
+  } finally {timer.mockRestore();}
 });

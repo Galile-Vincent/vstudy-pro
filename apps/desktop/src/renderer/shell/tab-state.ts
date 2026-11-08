@@ -22,7 +22,7 @@ export type TabAction =
   | { type: 'reorder'; ids: string[] }
   | { type: 'replace-route'; id: string; route: Route }
   | { type: 'history'; id: string; direction: HistoryDirection }
-  | { type: 'presentation'; id: string; presentation: TabPresentation };
+  | { type: 'presentation'; id: string; presentation: TabPresentation; title?:string };
 export function tabReducer(state: TabSet, action: TabAction): TabSet {
   switch (action.type) {
     case 'open': return state.tabs.length >= MAX_APP_TABS || state.tabs.some(tab => tab.id === action.tab.id) ? state : { ...state, activeId: action.tab.id, tabs: [...state.tabs, action.tab] };
@@ -37,7 +37,7 @@ export function tabReducer(state: TabSet, action: TabAction): TabSet {
     case 'reorder': return action.ids.length === state.tabs.length && new Set(action.ids).size === state.tabs.length && action.ids.every(id => state.tabs.some(tab => tab.id === id)) ? { ...state, tabs: action.ids.map(id => state.tabs.find(tab => tab.id === id)!) } : state;
     default: return { ...state, tabs: state.tabs.map(tab => {
       if (tab.id !== action.id) return tab;
-      if (action.type === 'presentation') return { ...tab, presentation: action.presentation };
+      if (action.type === 'presentation') return { ...tab, title:action.title ?? tab.title, presentation: action.presentation };
       if (action.type === 'history') {
         const history = moveHistory(tab.history, action.direction);
         return { ...createTab(tab.id, history.entries[history.index]!, tab.lastActiveAt), history };

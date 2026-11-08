@@ -12,25 +12,27 @@ import type { WebviewState, WebviewTarget, WebviewAction, WebviewBounds, Webview
 import type { MoodleTokens } from './auth';
 import type { DocumentService } from '../services/documents';
 import type { Fetch } from './client';
+import { forwardNativeTabShortcut } from '../navigation-input';
 import { tr } from '../i18n';
 import { documentIdSchema } from '../../shared/domain';
 import { MoodleWebviewSession, WebviewSessionError } from './webview-session';
 import { webviewPolicy, webviewNavigation, webviewResource, webviewFile, webviewLoginPage, publicWebviewUrl, webviewLoadError, webviewPermission, type WebviewPolicy } from './webview-policy';
 import { importWebviewFile } from './webview-files';
 import { exchangeWebviewCookie, probeWebviewSession } from './webview-transport';
+import { nativeTabPool, type NativeTabPool } from '../native-tab-pool';
 import { log } from '../logging';
 
 /** Electron 42 navigation events carry no gesture flag, so real input to the view stands in for one. */
 const GESTURE_WINDOW_MS = 10_000;
 const IMPORT_LIMIT = 5, IMPORT_WINDOW_MS = 60_000;
 
-interface AccountSession { account:MoodleAccount; browser:Session; policy:WebviewPolicy; auth:MoodleWebviewSession; cleanup:()=>void }
+interface AccountSession { account:MoodleAccount; browser:Session; policy:WebviewPolicy; auth:MoodleWebviewSession; cleanup:()=>void; imports:number[]; keepalive:ReturnType<typeof setInterval>; probing:boolean; lastProbeAt:number }
 interface Pane {
-  owner:WebContents; window:BrowserWindow; view:WebContentsView; account:AccountSession;
-  state:WebviewState; target:string; retries:number; visible:boolean;
-  timer:ReturnType<typeof setTimeout>|undefined; keepalive:ReturnType<typeof setInterval>;
+  tabId:string; dirty:boolean; scroll:number; owner:WebContents; window:BrowserWindow; view:WebContentsView; account:AccountSession;
+  state:WebviewState; target:string; retries:number; visible:boolean; active:boolean;
+  timer:ReturnType<typeof setTimeout>|undefined;
   abort:AbortController; importing:boolean; externalPending:boolean; cleanup:()=>void;
-  gestureAt:number; imports:number[];
+  onNavigation:(_event:Electron.Event,url:string,inPlace:boolean,isMainFrame:boolean)=>void; gestureAt:number;
 }
 export interface MoodleWebviewDependencies {
   account(id:string): MoodleAccount;
@@ -38,14 +40,19 @@ export interface MoodleWebviewDependencies {
   file(id:string): {account:MoodleAccount;url:string};
   documents:Pick<DocumentService,'importPath'>;
   request?:Fetch;
+  pool?:NativeTabPool;
   configuredHosts?:{ssoOrigins?:string[];cdnOrigins?:string[];loopback?:boolean};
 }
 /** Own account-scoped sandboxed views and route downloads through document validation. */
 export class MoodleWebviews {
   private readonly accounts = new Map<string,AccountSession>();
+  private readonly errors = new Map<string,WebviewState>();
+  private readonly generations = new Map<number,number>();
+  private readonly checkpoints = new Map<string,{accountId:string;state:WebviewState;scroll:number}>();
   private readonly budgets = new Map<string,{retryAt:number}>();
-  private readonly panes = new Map<number,Pane>();
-  constructor(private readonly dependencies:MoodleWebviewDependencies) {}
+  private readonly panes = new Map<string,Pane>();
+  private readonly pool:NativeTabPool;
+  constructor(private readonly dependencies:MoodleWebviewDependencies) {this.pool=dependencies.pool ?? nativeTabPool;}
   private account(id:string): AccountSession {
     const account = this.dependencies.account(id);
     if (account.status !== 'connected') throw new WebviewSessionError('session-expired');
@@ -81,29 +88,44 @@ export class MoodleWebviews {
       clear:() => browser.clearStorageData(),
       exchange:(key,signal) => exchangeWebviewCookie(browser,policy,account.remoteUserId,key,signal),
     },Date.now,this.dependencies.request,budget);
-    const value = {account,browser,policy,auth,cleanup:() => {browser.removeListener('will-download',download);browser.webRequest.onBeforeRequest(null);browser.webRequest.onBeforeSendHeaders(null);}};
+    const value:AccountSession = {account,browser,policy,auth,imports:[],probing:false,lastProbeAt:Date.now(),keepalive:setInterval(() => void this.keepaliveAccount(id),4 * 60_000),cleanup:() => {browser.removeListener('will-download',download);browser.webRequest.onBeforeRequest(null);browser.webRequest.onBeforeSendHeaders(null);}};
     this.accounts.set(id,value);
     return value;
   }
-  open(owner:WebContents,accountId:string,target:WebviewTarget): WebviewState {
+  open(owner:WebContents,accountId:string,target:WebviewTarget,tabId:string = randomUUID(),checkpoint?:{url:string;zoom:number;scrollTop:number}): WebviewState {
     const window = BrowserWindow.fromWebContents(owner);
     if (!window) throw new Error('Missing app window');
+    const resourceKey=`${owner.id}:${tabId}`;
+    if(this.errors.has(resourceKey) && this.dependencies.account(accountId).status!=='connected') return {...this.errors.get(resourceKey)!};
+    this.errors.delete(resourceKey);
     const account = this.account(accountId);
     const source = target.kind === 'file' ? this.dependencies.file(target.fileId) : null;
     if (source && source.account.id !== accountId) throw new WebviewSessionError('blocked');
     const raw = source?.url ?? (target.kind === 'page' ? target.url : '');
     const url = webviewFile(raw,account.policy) ? raw.replace('/webservice/pluginfile.php','/pluginfile.php') : raw;
     if (webviewNavigation(url,account.policy) !== 'internal') throw new WebviewSessionError('blocked');
-    this.closeOwner(owner.id);
+    const key = `${owner.id}:${tabId}`;
+    const generation=(this.generations.get(owner.id) ?? 0)+1;
+    this.generations.set(owner.id,generation);
+    for (const pane of this.panes.values()) if(pane.owner.id===owner.id) {pane.visible=false;pane.active=false;pane.view.setVisible(false);}
+    const existing = this.panes.get(key);
+    if (existing) {existing.active=true;existing.state.generation=generation;void existing.account.auth.ensure().catch(error=>this.fail(existing,error));return this.state(owner,existing.state.id);}
+    const saved = this.checkpoints.get(key) ?? (checkpoint ? {state:{url:publicWebviewUrl(checkpoint.url),zoom:checkpoint.zoom},scroll:checkpoint.scrollTop} : undefined);
+    const state:WebviewState = {id:randomUUID(),generation,scrollTop:0,status:'connecting',url:publicWebviewUrl(url),title:tr('webview:title'),secure:false,canGoBack:false,canGoForward:false,zoom:1,error:null,retryAt:null,documentId:null};
+    if(this.pool.makeRoom(owner.id)==='resource-limit') return {...state,status:'error',error:'resource-limit'};
     const view = new WebContentsView({webPreferences:{session:account.browser,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,navigateOnDragDrop:false,spellcheck:false}});
-    const state:WebviewState = {id:randomUUID(),status:'connecting',url:publicWebviewUrl(url),title:tr('webview:title'),secure:false,canGoBack:false,canGoForward:false,zoom:1,error:null,retryAt:null,documentId:null};
     const cleanup = () => this.closeOwner(owner.id);
-    const pane:Pane = {owner,window,view,account,state,target:url,retries:0,visible:false,timer:undefined,keepalive:setInterval(() => void this.keepalive(pane),4 * 60_000),abort:new AbortController(),importing:false,externalPending:false,cleanup,gestureAt:0,imports:[]};
-    this.panes.set(owner.id,pane);
+    const onNavigation=(_event:Electron.Event,_url:string,inPlace:boolean,isMainFrame:boolean)=>{if(isMainFrame && !inPlace) cleanup();};
+    const pane:Pane = {onNavigation,tabId,dirty:false,scroll:saved?.scroll ?? 0,owner,window,view,account,state,target:url,retries:0,visible:false,active:true,timer:undefined,abort:new AbortController(),importing:false,externalPending:false,cleanup,gestureAt:0};
+    const admission = this.pool.acquire({key,ownerId:owner.id,kind:'moodle',lastActiveAt:Date.now(),active:()=>pane.active,protected:()=>pane.importing || pane.externalPending || pane.dirty || ['connecting','loading'].includes(pane.state.status),processId:()=>view.webContents.getOSProcessId(),discard:()=>this.discard(key)});
+    if (admission === 'resource-limit') {view.webContents.close({waitForBeforeUnload:false});return {...state,status:'error',error:'resource-limit'};}
+    if (saved && webviewNavigation(saved.state.url,account.policy)==='internal' && !webviewFile(saved.state.url,account.policy)) {pane.target=saved.state.url;pane.state.zoom=saved.state.zoom;view.webContents.setZoomFactor(saved.state.zoom);}
+    this.checkpoints.delete(key);
+    this.panes.set(key,pane);
     window.contentView.addChildView(view);
     view.setVisible(false);
     owner.once('destroyed',cleanup);
-    owner.on('did-start-navigation',cleanup);
+    owner.on('did-start-navigation',onNavigation);
     const contents = view.webContents;
     contents.setWindowOpenHandler(({url}) => { void this.navigate(pane,url); return {action:'deny'}; });
     contents.on('will-attach-webview',event => event.preventDefault());
@@ -115,16 +137,18 @@ export class MoodleWebviews {
     contents.on('did-stop-loading',() => { clearTimeout(pane.timer); });
     contents.on('did-navigate',(_event,url) => this.committed(pane,url));
     contents.on('did-navigate-in-page',(_event,url,isMainFrame) => { if (isMainFrame) this.committed(pane,url); });
-    contents.on('did-finish-load',() => {if (!pane.abort.signal.aborted && state.status === 'loading') {state.status = 'ready';view.setVisible(pane.visible);}});
+    contents.on('did-finish-load',() => {if (!pane.abort.signal.aborted && state.status === 'loading') {state.status = 'ready';view.setVisible(pane.visible);if (saved) void contents.executeJavaScript(`window.scrollTo(0,${pane.scroll})`).catch(()=>{});}});
     contents.on('page-title-updated',(_event,title) => { state.title = title.replace(/[\p{Cc}\p{Cf}]/gu,'').slice(0,300); });
     contents.on('did-fail-load',(_event,code,_description,_url,isMainFrame) => { if (isMainFrame && code !== -3) this.fail(pane,new WebviewSessionError(webviewLoadError(code))); });
-    contents.on('render-process-gone',() => this.fail(pane,new WebviewSessionError('load-failed')));
+    contents.on('render-process-gone',() => this.discard(key));
     contents.on('certificate-error',(_event,_url,_error,_certificate,callback) => { callback(false); this.fail(pane,new WebviewSessionError('certificate')); });
     contents.on('before-input-event',(event,input) => {
+      if (forwardNativeTabShortcut(owner,event,input)) return;
       if (input.type !== 'keyDown') return;
       pane.gestureAt = Date.now();
+      if ((!input.meta && !input.control && input.key.length===1) || ['Backspace','Delete'].includes(input.key) || ((input.meta || input.control) && input.key.toLowerCase()==='v')) pane.dirty=true;
       const modifier = input.meta || input.control;
-      const action:WebviewAction|undefined = input.key === 'Escape' ? 'close' : modifier && input.key.toLowerCase() === 'r' ? 'reload' : modifier && input.key === '[' ? 'back' : modifier && input.key === ']' ? 'forward' : modifier && ['+','='].includes(input.key) ? 'zoom-in' : modifier && input.key === '-' ? 'zoom-out' : modifier && input.key === '0' ? 'zoom-reset' : undefined;
+      const action:WebviewAction|undefined = modifier && input.key.toLowerCase() === 'r' ? 'reload' : modifier && input.key === '[' ? 'back' : modifier && input.key === ']' ? 'forward' : modifier && ['+','='].includes(input.key) ? 'zoom-in' : modifier && input.key === '-' ? 'zoom-out' : modifier && input.key === '0' ? 'zoom-reset' : undefined;
       if (action) { event.preventDefault(); void this.action(owner,state.id,action); }
     });
     void this.load(pane);
@@ -137,6 +161,11 @@ export class MoodleWebviews {
     pane.state.error = error instanceof WebviewSessionError ? error.code : 'load-failed';
     pane.state.retryAt = error instanceof WebviewSessionError ? error.retryAt : null;
     pane.view.setVisible(false); clearTimeout(pane.timer);
+    if(pane.state.error==='session-expired') for(const sibling of this.panes.values()) {
+      if(sibling===pane || sibling.account!==pane.account) continue;
+      sibling.state.status='error';sibling.state.error='session-expired';sibling.state.secure=false;sibling.state.retryAt=pane.state.retryAt;
+      sibling.view.setVisible(false);clearTimeout(sibling.timer);
+    }
   }
   private async load(pane:Pane,force = false) {
     pane.state.status = 'connecting'; pane.state.error = null;
@@ -144,6 +173,7 @@ export class MoodleWebviews {
     try {
       if (this.dependencies.account(pane.account.account.id).status !== 'connected') throw new WebviewSessionError('session-expired');
       await pane.account.auth.ensure(force);
+      for(const sibling of this.panes.values()) if(sibling!==pane && sibling.account===pane.account && sibling.state.error==='session-expired') void this.load(sibling);
       if (!pane.abort.signal.aborted) {
         if (webviewFile(pane.target,pane.account.policy)) await this.importFile(pane,pane.target,true);
         else await this.navigate(pane,pane.target);
@@ -172,16 +202,16 @@ export class MoodleWebviews {
     if (webviewLoginPage(url,pane.account.policy)) { this.guard(pane,url); return; }
     if (webviewNavigation(url,pane.account.policy) !== 'internal') {this.fail(pane,new WebviewSessionError('blocked'));return;}
     pane.state.url = publicWebviewUrl(url); pane.state.secure = new URL(url).protocol === 'https:';
-    pane.target = url;
+    pane.target = publicWebviewUrl(url); pane.dirty=false;
   }
   private takeGesture(pane:Pane) { const fresh = pane.gestureAt > 0 && Date.now() - pane.gestureAt <= GESTURE_WINDOW_MS; pane.gestureAt = 0; return fresh; }
   private async importFile(pane:Pane,url:string,gesture:boolean) {
     if (pane.importing || pane.abort.signal.aborted) return;
     if (!gesture) { log({phase:'moodle-webview-import-refused',reason:'no-gesture'}); this.fail(pane,new WebviewSessionError('blocked')); return; }
     const now = Date.now();
-    pane.imports = pane.imports.filter(at => now - at < IMPORT_WINDOW_MS);
-    if (pane.imports.length >= IMPORT_LIMIT) { log({phase:'moodle-webview-import-refused',reason:'rate-limit'}); this.fail(pane,new WebviewSessionError('blocked')); return; }
-    pane.imports.push(now);
+    pane.account.imports = pane.account.imports.filter(at => now - at < IMPORT_WINDOW_MS);
+    if (pane.account.imports.length >= IMPORT_LIMIT) { log({phase:'moodle-webview-import-refused',reason:'rate-limit'}); this.fail(pane,new WebviewSessionError('blocked')); return; }
+    pane.account.imports.push(now);
     pane.importing = true; pane.state.status = 'loading';
     pane.view.setVisible(false);
     try {
@@ -190,28 +220,68 @@ export class MoodleWebviews {
     } catch (error) { this.fail(pane,error); }
     finally { pane.importing = false; }
   }
-  private async keepalive(pane:Pane) {
-    if (!pane.visible || pane.state.status !== 'ready') return;
+  private async keepaliveAccount(id:string) {
+    const account=this.accounts.get(id);
+    if (!account || account.probing || Date.now()-account.lastProbeAt<4*60_000) return;
+    const panes=[...this.panes.values()].filter(pane=>pane.account===account);
+    if (!panes.some(pane=>pane.visible && pane.state.status==='ready')) return;
+    account.probing=true;account.lastProbeAt=Date.now();
     try {
-      if (!await probeWebviewSession(pane.account.browser,pane.account.policy,AbortSignal.any([pane.abort.signal,AbortSignal.timeout(15_000)]))) this.guard(pane,pane.account.account.siteUrl + '/login/index.php');
-    } catch (error) { this.fail(pane,error); }
+      if (!await probeWebviewSession(account.browser,account.policy,AbortSignal.timeout(15_000))) {
+        for (const pane of panes) this.fail(pane,new WebviewSessionError('session-expired'));
+      }
+    } catch (error) {for (const pane of panes) this.fail(pane,error);}
+    finally {account.probing=false;}
   }
-  private pane(owner:WebContents,id:string) { const pane = this.panes.get(owner.id); if (!pane || pane.state.id !== id) throw new Error('Unknown Moodle pane'); return pane; }
+  private pane(owner:WebContents,id:string) { const pane = [...this.panes.values()].find(pane=>pane.owner.id===owner.id && pane.state.id===id); if (!pane) throw new Error('Unknown Moodle pane'); return pane; }
+  assertTab(owner:WebContents,tabId:string,id:string) {if(this.errors.get(`${owner.id}:${tabId}`)?.id===id) return;if(this.pane(owner,id).tabId!==tabId) throw new Error('Unknown Moodle tab');}
+  hide(owner:WebContents,tabId:string,generation?:number) {
+    const pane=this.panes.get(`${owner.id}:${tabId}`);
+    if (pane && (generation===undefined || generation===pane.state.generation)) {this.pool.touch(`${owner.id}:${tabId}`);pane.visible=false;pane.active=false;pane.view.setVisible(false);}
+  }
+  private discard(key:string) {
+    const pane=this.panes.get(key);
+    if (!pane) return;
+    const checkpoint={accountId:pane.account.account.id,state:{...pane.state,url:publicWebviewUrl(pane.state.url)},scroll:pane.scroll};
+    this.checkpoints.set(key,checkpoint);
+    this.sampleScroll(pane,scroll=>{checkpoint.scroll=scroll;});
+    this.closeResource(key);
+  }
+  sync(owner:WebContents,tabIds:string[]) {for(const key of this.errors.keys()) if(key.startsWith(`${owner.id}:`) && !tabIds.includes(key.slice(key.indexOf(':')+1))) this.errors.delete(key);for(const key of this.checkpoints.keys()) if(key.startsWith(`${owner.id}:`) && !tabIds.includes(key.slice(key.indexOf(':')+1))) this.checkpoints.delete(key);for (const [key,pane] of this.panes) if (pane.owner.id===owner.id && !tabIds.includes(pane.tabId)) this.closeResource(key);return tabIds.flatMap(tabId=>{const key=`${owner.id}:${tabId}`,pane=this.panes.get(key);return this.errors.has(key) ? [{tabId,status:'error' as const}] : pane ? [{tabId,status:(['connecting','loading'].includes(pane.state.status)?'loading':'live') as 'loading'|'live'|'discarded'|'error'}] : this.checkpoints.has(key) ? [{tabId,status:'discarded' as const}] : [];});}
+  private sampleScroll(pane:Pane,onScroll?:(scroll:number)=>void) {
+    const contents=pane.view.webContents;
+    if(contents.isDestroyed() || typeof contents.executeJavaScript!=='function') return;
+    void contents.executeJavaScript('Math.max(0, Math.min(10000000, Number(window.scrollY) || 0))').then((value:unknown)=>{
+      if(typeof value!=='number' || !Number.isFinite(value)) return;
+      pane.scroll=Math.max(0,Math.min(10000000,value));
+      onScroll?.(pane.scroll);
+    }).catch(()=>undefined);
+  }
   state(owner:WebContents,id:string):WebviewState {
+    const failed=[...this.errors.entries()].find(([key,state])=>key.startsWith(`${owner.id}:`) && state.id===id);
+    if(failed) return {...failed[1]};
     const pane = this.pane(owner,id);
-    return {...pane.state,canGoBack:pane.view.webContents.navigationHistory.canGoBack(),canGoForward:pane.view.webContents.navigationHistory.canGoForward()};
+    if(pane.state.status==='ready' && pane.visible) this.sampleScroll(pane);
+    return {...pane.state,scrollTop:pane.scroll,canGoBack:pane.view.webContents.navigationHistory.canGoBack(),canGoForward:pane.view.webContents.navigationHistory.canGoForward()};
   }
-  layout(owner:WebContents,id:string,bounds:WebviewBounds,theme:WebviewTheme,visible:boolean) {
+  layout(owner:WebContents,id:string,bounds:WebviewBounds,theme:WebviewTheme,visible:boolean,generation?:number) {
+    if ([...this.errors.entries()].some(([key,state])=>key.startsWith(`${owner.id}:`) && state.id===id)) return;
+    if (generation !== undefined && generation !== this.generations.get(owner.id)) return;
     const pane = this.pane(owner,id), [width=0,height=0] = pane.window.getContentSize(), zoom = owner.getZoomFactor();
     const x = Math.min(Math.round(bounds.x * zoom),width), y = Math.min(Math.round(bounds.y * zoom),height);
     pane.view.setBounds({x,y,width:Math.min(Math.round(bounds.width * zoom),width - x),height:Math.min(Math.round(bounds.height * zoom),height - y)});
+    if (visible) {for (const sibling of this.panes.values()) if (sibling.owner.id===owner.id && sibling!==pane) {sibling.visible=false;sibling.view.setVisible(false);}this.pool.touch(`${owner.id}:${pane.tabId}`);}
     pane.visible = visible && bounds.width > 0 && bounds.height > 0;
+    if (pane.visible) void this.keepaliveAccount(pane.account.account.id);
     pane.view.setBackgroundColor(theme.background);
     pane.view.setVisible(pane.visible && pane.state.status === 'ready' && !pane.state.error && !pane.importing);
   }
   async action(owner:WebContents,id:string,action:WebviewAction):Promise<WebviewState> {
+    const failed=[...this.errors.entries()].find(([key,state])=>key.startsWith(`${owner.id}:`) && state.id===id);
+    if(failed) {if(action==='close') {this.errors.delete(failed[0]);return {...failed[1],status:'closed'};}return {...failed[1]};}
     const pane = this.pane(owner,id), contents = pane.view.webContents;
-    if (action === 'close') {const state = {...pane.state,status:'closed' as const};this.closeOwner(owner.id);return state;}
+    if (action === 'discard') {if(!pane.active && !pane.importing && !pane.externalPending && !pane.dirty && !['connecting','loading'].includes(pane.state.status)) {const state={...pane.state,status:'discarded' as const};this.discard(`${owner.id}:${pane.tabId}`);return state;}return this.state(owner,id);}
+    if (action === 'close') {const state = {...pane.state,status:'closed' as const};this.checkpoints.delete(`${owner.id}:${pane.tabId}`);this.closeResource(`${owner.id}:${pane.tabId}`);return state;}
     if (action === 'back' && contents.navigationHistory.canGoBack()) contents.navigationHistory.goBack();
     if (action === 'forward' && contents.navigationHistory.canGoForward()) contents.navigationHistory.goForward();
     if (action === 'reload') {pane.retries = 0;pane.gestureAt = 0;void this.load(pane);}
@@ -233,19 +303,26 @@ export class MoodleWebviews {
     } catch {this.fail(pane,new WebviewSessionError('load-failed'));}
     finally {pane.externalPending = false;}
   }
-  private closeOwner(id:number) {
+  private closeOwner(ownerId:number) {
+    for(const [key,pane] of this.panes) if(pane.owner.id===ownerId) this.closeResource(key);
+    for(const key of this.checkpoints.keys()) if(key.startsWith(`${ownerId}:`)) this.checkpoints.delete(key);
+    for(const key of this.errors.keys()) if(key.startsWith(`${ownerId}:`)) this.errors.delete(key);
+    this.generations.delete(ownerId);
+  }
+  private closeResource(id:string) {
     const pane = this.panes.get(id);
     if (!pane) return;
-    this.panes.delete(id); pane.abort.abort(); clearTimeout(pane.timer); clearInterval(pane.keepalive);
-    pane.owner.removeListener('destroyed',pane.cleanup); pane.owner.removeListener('did-start-navigation',pane.cleanup);
+    this.panes.delete(id); pane.abort.abort(); clearTimeout(pane.timer); this.pool.release(id);
+    pane.owner.removeListener('destroyed',pane.cleanup); pane.owner.removeListener('did-start-navigation',pane.onNavigation);
     if (!pane.window.isDestroyed()) pane.window.contentView.removeChildView(pane.view);
     if (!pane.view.webContents.isDestroyed()) pane.view.webContents.close({waitForBeforeUnload:false});
-    if (!pane.owner.isDestroyed()) pane.owner.focus();
+
   }
   async disconnect(id:string) {
-    for (const pane of this.panes.values()) if (pane.account.account.id === id) this.closeOwner(pane.owner.id);
+    for(const [key,checkpoint] of this.checkpoints) if(checkpoint.accountId===id) this.checkpoints.delete(key);
+    for (const pane of this.panes.values()) if (pane.account.account.id === id) {const key=`${pane.owner.id}:${pane.tabId}`;this.errors.set(key,{...pane.state,status:'error',error:'session-expired'});this.closeResource(key);}
     const account = this.accounts.get(id); this.accounts.delete(id);
-    if (account) {await account.auth.dispose(); account.cleanup(); await account.browser.clearCache(); await account.browser.closeAllConnections();}
+    if (account) {clearInterval(account.keepalive);await account.auth.dispose(); account.cleanup(); await account.browser.clearCache(); await account.browser.closeAllConnections();}
   }
-  async dispose() { for (const pane of this.panes.values()) this.closeOwner(pane.owner.id); await Promise.all([...this.accounts.keys()].map(id => this.disconnect(id))); }
+  async dispose() { for (const pane of this.panes.values()) this.closeResource(`${pane.owner.id}:${pane.tabId}`); await Promise.all([...this.accounts.keys()].map(id => this.disconnect(id))); }
 }

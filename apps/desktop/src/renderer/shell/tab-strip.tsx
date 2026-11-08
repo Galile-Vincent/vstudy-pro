@@ -14,6 +14,7 @@ export function tabLabel(view: string): string {
     case 'home': return tr('library:home');
     case 'library': return tr('common:library');
     case 'workspace': return tr('tabs:document');
+    case 'moodle': return tr('webview:title');
     case 'courses': return tr('moodle:courses');
     case 'history': return tr('history:title');
     case 'review': return tr('review:title');
@@ -23,6 +24,20 @@ export function tabLabel(view: string): string {
 }
 export function TabStrip() {
   const { tabs, openTab, closeTab, activateTab, reorderTabs } = useNavigate();
+  const [native,setNative]=useState<Record<string,string>>({});
+  useEffect(()=>{
+    let active=true;
+    let timer:ReturnType<typeof setTimeout>;
+    const poll=async()=>{
+      try {
+        const result=await desktop.invoke('moodle:webview-sync',{tabIds:tabs.tabs.map(tab=>tab.id)});
+        if(active) setNative(Object.fromEntries(result.tabs.map(tab=>[tab.tabId,tab.status])));
+      } catch {if(active) setNative({});}
+      if(active) timer=setTimeout(()=>void poll(),1000);
+    };
+    void poll();
+    return ()=>{active=false;clearTimeout(timer);};
+  },[tabs.tabs]);
   const [picker, setPicker] = useState(false);
   const [all, setAll] = useState(false);
   const [search, setSearch] = useState('');
@@ -55,6 +70,13 @@ export function TabStrip() {
     window.addEventListener('keydown', keyboard);
     return () => window.removeEventListener('keydown', keyboard);
   }, [tabs, activateTab, closeTab]);
+  useEffect(()=>desktop.onNativeTabShortcut?.(shortcut=>{
+    if(shortcut==='new') {setPicker(true);return;}
+    if(shortcut==='close') {closeTab(tabs.activeId);return;}
+    const index=tabs.tabs.findIndex(tab=>tab.id===tabs.activeId);
+    const next=shortcut==='previous' ? (index-1+tabs.tabs.length)%tabs.tabs.length : shortcut==='next' ? (index+1)%tabs.tabs.length : shortcut==='9' ? tabs.tabs.length-1 : Number(shortcut)-1;
+    if(tabs.tabs[next]) activateTab(tabs.tabs[next]!.id);
+  }),[tabs,closeTab,activateTab]);
   const reorder = (index: number, target: number) => {
     if (target < 0 || target >= tabs.tabs.length) return;
     const ids = tabs.tabs.map(tab => tab.id);
@@ -65,6 +87,7 @@ export function TabStrip() {
     {tabs.tabs.length > 1 && <div className="app-tabs-scroll" role="tablist" aria-label={tr('tabs:title')}>
       {tabs.tabs.map((tab, index) => {
         const Icon = icons[tab.icon];
+        const nativeStatus=native[tab.id] ?? (tab.history.entries[tab.history.index]?.view==='moodle' && tab.id!==tabs.activeId ? 'discarded' : undefined);
         return <div className="app-tab" key={tab.id} data-active={tab.id === tabs.activeId}
           onPointerDown={event => { if (event.button === 0) drag.current = { id: tab.id, x: event.clientX }; }}
           onPointerUp={event => {
@@ -73,13 +96,13 @@ export function TabStrip() {
           }}
           onAuxClick={event => { if (event.button === 1) { event.preventDefault(); closeTab(tab.id); } }}>
           <button type="button" role="tab" id={`tab-${tab.id}`} aria-controls="active-tab-panel" aria-selected={tab.id === tabs.activeId} tabIndex={tab.id === tabs.activeId ? 0 : -1}
-            title={labels[index]} onClick={() => activateTab(tab.id)} onKeyDown={event => {
+            aria-busy={nativeStatus==='loading'} title={nativeStatus==='discarded' ? tr('tabs:discarded') : labels[index]} onClick={() => activateTab(tab.id)} onKeyDown={event => {
               const target = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.tabs.length - 1 : event.key === 'ArrowRight' ? (index + 1) % tabs.tabs.length : event.key === 'ArrowLeft' ? (index - 1 + tabs.tabs.length) % tabs.tabs.length : undefined;
               if (target === undefined) return;
               event.preventDefault();
               if (event.shiftKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) reorder(index, index + (event.key === 'ArrowLeft' ? -1 : 1));
               else { activateTab(tabs.tabs[target]!.id); document.getElementById(`tab-${tabs.tabs[target]!.id}`)?.focus(); }
-            }}><Icon size={15} aria-hidden="true"/><span>{labels[index]}</span></button>
+            }}><Icon size={15} aria-hidden="true"/><span>{nativeStatus==='loading' ? '◌ ' : nativeStatus==='discarded' ? '↻ ' : ''}{labels[index]}</span>{nativeStatus==='discarded' && <span className="sr-only">{tr('tabs:discarded')}</span>}</button>
           <button type="button" className="app-tab-close" aria-label={tr('tabs:close', { title: labels[index] })} onClick={() => closeTab(tab.id)}><X size={13}/></button>
         </div>;
       })}

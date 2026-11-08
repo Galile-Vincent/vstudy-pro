@@ -21,7 +21,7 @@
   "zoom-reset": "重設縮放",
   "focus": "聚焦網頁",
   "copied": "已複製連結",
-  "footer_hint": "Esc 關閉 · {{modifier}} R 重新載入",
+  "footer_hint": "Cmd R 重新載入",
   "reconnect": "重新連線",
   "sign_in": "重新登入",
   "original": "檢視原始網頁",
@@ -43,5 +43,7 @@
   "error_file-unsupported": "無法在閱讀器開啟此檔案",
   "hint_file-unsupported": "VStudy 支援 50 MB 以內的 PDF、Office、HTML、CSV、Markdown 與純文字檔。未儲存任何檔案至下載資料夾。",
   "error_load-failed": "無法開啟此網頁",
-  "hint_load-failed": "請嘗試重新載入。學校服務可能暫時無法使用。"
+  "hint_load-failed": "請嘗試重新載入。學校服務可能暫時無法使用。",
+  "error_resource-limit": "所有網頁分頁都在使用中",
+  "hint_resource-limit": "請關閉分頁或等候作業完成後重試。"
 }

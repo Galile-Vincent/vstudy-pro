@@ -207,12 +207,16 @@ export const chatEnvelopeSchema = z
   .object({ requestId: requestIdSchema, event: chatEventSchema })
   .strict();
 export type ChatEnvelope = z.infer<typeof chatEnvelopeSchema>;
+export const nativeTabShortcutChannel='navigation:tab-shortcut';
+export const nativeTabShortcutSchema=z.enum(['new','close','previous','next','1','2','3','4','5','6','7','8','9']);
+export type NativeTabShortcut=z.infer<typeof nativeTabShortcutSchema>;
 export const trackpadScrollBeginChannel = "navigation:scroll-begin";
 export const trackpadScrollEndChannel = "navigation:scroll-end";
 export const trackpadEventArgumentsSchema = z.tuple([]);
 
 /** Renderer capability boundary. Invoke only declared channels and unsubscribe event listeners on teardown. */
 export interface DesktopApi {
+  onNativeTabShortcut?(listener:(shortcut:NativeTabShortcut)=>void):()=>void;
   onReviewProgress(listener:(event:ReviewProgress)=>void):()=>void;
   onTrackpadScrollBegin?(listener: () => void): () => void;
   onTrackpadScrollEnd?(listener: () => void): () => void;

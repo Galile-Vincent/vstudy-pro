@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, mkdir, writeFile } from 'node:fs/promises';
@@ -87,3 +88,7 @@ finally {
   await writeFile(join(evidence, 'results.json'), JSON.stringify(results, null, 2));
   console.log(results.join('\n'));
 }
+
+const native=spawnSync(process.execPath,['scripts/measure-native-tabs.mjs','5'],{encoding:'utf8'});
+assert.equal(native.status,0,native.stdout+native.stderr);
+console.log('PASS five native tabs stay within four views, retain scroll, protect imports, and disconnect');

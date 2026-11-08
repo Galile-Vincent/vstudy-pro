@@ -1,4 +1,5 @@
 /** Runs one real Electron app against one loopback Moodle fixture. The production code has no fixture-mode IPC. */
+import { exerciseNativeTabs } from './native-tabs-fixture.mjs';
 import { _electron as electron } from 'playwright';
 import { build } from 'vite';
 import { createServer } from 'node:http';
@@ -10,7 +11,7 @@ import { URL, URLSearchParams } from 'node:url';
 import { Buffer } from 'node:buffer';
 
 const directory = await mkdtemp(join(tmpdir(),'vstudy-webview-'));
-const evidence = resolve('../../docs/evidence/moodle-webview');
+const evidence = resolve('../../docs/evidence/app-tabs-native');
 const accountId = '11111111-1111-4111-a111-111111111111';
 const courseId = '22222222-2222-4222-a222-222222222222';
 const issued = new Map();
@@ -38,7 +39,7 @@ const server = createServer(async (req,res) => {
   if (url.pathname.startsWith('/pluginfile.php/')) {res.setHeader('Content-Type','text/markdown');res.setHeader('Content-Disposition','attachment; filename="notes.md"');res.end('# Course notes\n\nImported through the authenticated reader pipeline.');return;}
   if (url.pathname === '/slow') return;
   res.setHeader('Content-Type','text/html; charset=utf-8');
-  res.end(`<!doctype html><title>Week 4 · Moodle</title><style>body{font:16px system-ui;padding:32px;line-height:1.7}a,button{display:block;margin:20px 0}</style><h1>${url.pathname.includes('/mod/') ? 'Teacher content' : 'Weekly materials'}</h1><p>Signed in as Test Student.</p><a id="page" href="/mod/page/view.php?id=2">Teacher’s original page</a><a id="file" href="/pluginfile.php/42/notes.md">Read course notes</a><button id="popup" onclick="window.open('/mod/page/view.php?id=3')">Open activity popup</button><a id="external" href="https://external.example.edu/page?sesskey=CANARY">External reading</a>`);
+  res.end(`<!doctype html><title>Week 4 · Moodle</title><style>body{font:16px system-ui;padding:32px;line-height:1.7;min-height:6000px}a,button{display:block;margin:20px 0}</style><h1>${url.pathname.includes('/mod/') ? 'Teacher content' : 'Weekly materials'}</h1><p>Signed in as Test Student.</p><a id="page" href="/mod/page/view.php?id=2">Teacher’s original page</a><a id="file" href="/pluginfile.php/42/notes.md">Read course notes</a><button id="popup" onclick="window.open('/mod/page/view.php?id=3')">Open activity popup</button><a id="external" href="https://external.example.edu/page?sesskey=CANARY">External reading</a>`);
 });
 await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));
 const siteUrl = 'http://127.0.0.1:' + server.address().port;
@@ -52,6 +53,7 @@ try {
   const page = await app.firstWindow();
   const errors = [];page.on('pageerror',error => errors.push(error.message));
   await page.waitForFunction(() => !!window.desktop?.invoke);
+  if(await page.getByRole('button',{name:'No thanks',exact:true}).count()) await page.getByRole('button',{name:'No thanks',exact:true}).click();
   await page.evaluate(async () => {const settings = await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...settings,welcomeSeen:true,onboardingCompleted:true,language:'en'});});
   await app.evaluate(({ipcMain,BrowserWindow,app,dialog},input) => {
     const fixture = process.getBuiltinModule('module').createRequire(process.execPath)(input.module);
@@ -79,14 +81,37 @@ try {
         if (event.sender !== BrowserWindow.getAllWindows()[0].webContents || event.senderFrame !== event.sender.mainFrame) throw Error('Untrusted fixture IPC');
         const request = contract.request.parse(raw), manager = globalThis.webviewManager;
         if (channel.endsWith('-open') && request.target.kind === 'page') request.target.url = request.target.url.replace('https://school.example',input.siteUrl);
-        const result = channel.endsWith('-open') ? manager.open(event.sender,request.accountId,request.target) : channel.endsWith('-state') ? manager.state(event.sender,request.id) : channel.endsWith('-action') ? manager.action(event.sender,request.id,request.action) : (manager.layout(event.sender,request.id,request.bounds,request.theme,request.visible),{ok:true});
+        const result = channel.endsWith('-sync') ? {ok:true,tabs:manager.sync(event.sender,request.tabIds)} : channel.endsWith('-hide') ? (manager.hide(event.sender,request.tabId,request.generation),{ok:true}) : channel.endsWith('-open') ? manager.open(event.sender,request.accountId,request.target,request.tabId) : channel.endsWith('-state') ? manager.state(event.sender,request.id) : channel.endsWith('-action') ? manager.action(event.sender,request.id,request.action) : (manager.layout(event.sender,request.id,request.bounds,request.theme,request.visible,request.generation),{ok:true});
         return Promise.resolve(result).then(value => contract.response.parse(value));
       });
     }
     BrowserWindow.getAllWindows()[0].setSize(1400,960);
   },{accountId,courseId,siteUrl,module:join(directory,'bundle/webview.cjs')});
-  await page.evaluate(courseId => window.localStorage.setItem('vstudy-route',JSON.stringify({view:'courses',courseId})),courseId);
-  await page.reload();await page.emulateMedia({reducedMotion:'reduce'});
+  if(process.env.VSTUDY_MEASURE_NATIVE_TABS) {
+    await app.evaluate(({ipcMain})=>{ipcMain.removeHandler('moodle:webview-sync');ipcMain.handle('moodle:webview-sync',()=>({ok:true,tabs:[]}));});
+    await page.evaluate(({accountId,siteUrl})=>{
+      const ids=Array.from({length:5},()=>window.crypto.randomUUID());
+      const tabSet={version:1,activeId:ids[4],tabs:ids.map((id,index)=>({id,history:{entries:[{view:'moodle',accountId,target:{kind:'page',url:siteUrl+'/course/view.php?id='+index}}],index:0},title:'Moodle '+index,icon:'GraduationCap',lastActiveAt:0,presentation:{kind:'app',scrollTop:0}}))};
+      const set=window.Storage.prototype.setItem;
+      set.call(localStorage,'vstudy-tabs-v1',JSON.stringify(tabSet));
+      window.Storage.prototype.setItem=function(key,value){if(key!=='vstudy-tabs-v1')set.call(this,key,value);};
+    },{accountId,siteUrl});
+    await page.reload();
+    await page.waitForFunction(()=>document.querySelector('.moodle-webview-header strong')?.textContent==='Week 4 · Moodle');
+    assert.equal(await app.evaluate(()=>globalThis.webviewManager.panes.size),1,'restored native tabs load only the active view');
+    assert.equal(await page.getByRole('tablist',{name:'Tabs'}).getByRole('tab').count(),5);
+    await page.screenshot({path:join(evidence,'native-tabs-restored.png')});
+    await page.getByRole('button',{name:'New tab',exact:true}).click();
+    await page.getByRole('button',{name:'Home',exact:true}).last().click();
+    const results=await exerciseNativeTabs(app,Number(process.env.VSTUDY_MEASURE_NATIVE_TABS));
+    results.rendererReloadRestoredTabs=5;results.rendererReloadLiveViews=1;
+
+    console.log(JSON.stringify(results,null,2));
+    await writeFile(join(evidence,'native-pool-results.json'),JSON.stringify(results,null,2));
+  } else {
+  await page.getByRole('button',{name:'Courses',exact:true}).click();
+  await page.locator('.course-open').first().click();
+  await page.emulateMedia({reducedMotion:'reduce'});
   await page.getByRole('button',{name:/Teacher page/}).click();
   const detailSheet = page.locator('[data-slot=sheet-content]');
   await detailSheet.getByText('Read the teacher instructions.',{exact:true}).waitFor();
@@ -126,14 +151,12 @@ try {
   assert.equal((await app.evaluate(({clipboard}) => clipboard.readText())).includes('CANARY'),false);
   report.push('PASS. Back navigation works. Same-school window.open reuses the controlled view without another window.');
   report.push('PASS. An external page prompts for native confirmation with a redacted link. Cancel leaves it inside the current school page. Copied links omit session credentials.');
-  await page.getByRole('button',{name:'Expand page',exact:true}).click();
   await page.getByRole('button',{name:'Zoom in',exact:true}).click();
   await page.getByRole('button',{name:'Reset zoom',exact:true}).filter({hasText:'110%'}).waitFor();
   await page.screenshot({path:join(evidence,'02-full-overlay.png')});
-  await page.getByRole('button',{name:'Close Moodle page',exact:true}).click();
+  await pane.getByRole('button',{name:'Close Moodle page',exact:true}).click();
   await pane.waitFor({state:'hidden'});
-  await page.waitForFunction(() => window.document.activeElement?.classList.contains('moodle-module'));
-  report.push('PASS. The module sheet renders sanitized content before View original page. Closing the native pane restores focus to the module row.');
+  report.push('PASS. The module sheet renders sanitized content before View original page. Closing the native tab returns to the course tab.');
   await page.evaluate(async () => {
     const settings = await window.desktop.invoke('settings:get',{});
     await window.desktop.invoke('settings:set',{...settings,themeId:'ocean',colorScheme:'dark'});
@@ -160,12 +183,13 @@ try {
   report.push('PASS. Another account partition has no school cookie. Simulated Chromium certificate failure displays a non-bypassable error.');
   await pane.getByRole('button',{name:'Reload',exact:true}).last().click();
   await page.waitForFunction(() => !window.document.querySelector('button[aria-label="Focus page"]')?.disabled);
-  await app.evaluate(async ({webContents},id) => {await webContents.fromId(id).executeJavaScript('window.document.querySelector("#file").click()',true);},nativeId);
+  await app.evaluate(async ({webContents},id) => {const contents=webContents.fromId(id);contents.emit('before-mouse-event',{}, {type:'mouseDown'});await contents.executeJavaScript('window.document.querySelector("#file").click()',true);},nativeId);
   await pane.waitFor({state:'hidden'});
   await page.waitForFunction(() => window.document.body.textContent.includes('Imported through the authenticated reader pipeline.'));
   assert.match(await app.evaluate(() => globalThis.webviewImported),/^[0-9a-f-]{36}$/);
   report.push('PASS. pluginfile.md is streamed through the real DocumentService, SQLite, and reader without saving to Downloads.');
-  await page.evaluate(courseId => window.localStorage.setItem('vstudy-route',JSON.stringify({view:'courses',courseId})),courseId);await page.reload();
+  await page.getByRole('button',{name:'Courses',exact:true}).click();
+  await page.locator('.course-open').first().click();
   await page.getByRole('button',{name:'Open in Moodle',exact:true}).click();
   await page.waitForFunction(() => window.document.querySelector('.moodle-webview-header strong')?.textContent === 'Week 4 · Moodle');
   expired=true;
@@ -181,6 +205,7 @@ try {
   await writeFile(join(evidence,'verification.txt'),report.join('\n') + '\n');
   await rm(join(evidence,'failure.png'),{force:true});
   console.log(report.join('\n'));
+  }
 } catch (error) {
   console.error({keys,exchanges,requests});
   if (app) console.error(await app.evaluate(() => globalThis.webviewNet));

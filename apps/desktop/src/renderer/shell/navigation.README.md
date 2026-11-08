@@ -95,3 +95,9 @@ Document and course items also provide an explicit open-in-new-tab action.
 
 Run `node e2e/app-tabs.mjs` after building. It uses a temporary profile and saves
 screenshots and results to `docs/evidence/app-tabs` at the repository root.
+
+## Moodle native tabs
+
+Course and approved agent page links open a `moodle` route with an account ID and page or file target. The active tab mounts a toolbar and a measured native slot inside its panel. It has no modal portal, inert root, focus trap, or Escape-to-close handler. Unmount hides the view. Closing the tab removes its resource through authoritative tab-ID reconciliation.
+
+Moodle presentation contains the account ID, public URL, zoom, and bounded scroll position. Main revalidates all restored URLs. Native runtime indicators stay outside persisted tabs. The strip polls those indicators and labels discarded pages with "Reloads when selected". Only the active page polls its full state. Guest shortcuts use the preload's validated enum subscription. Navigation to or from Moodle skips DOM View Transitions.

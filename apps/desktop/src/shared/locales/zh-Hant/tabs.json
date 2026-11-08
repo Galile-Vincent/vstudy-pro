@@ -8,5 +8,6 @@
   "recent": "最近文件",
   "limit": "最多可開啟 30 個分頁。",
   "reordered": "已將 {{title}} 移至第 {{position}} 個位置",
-  "open": "在新分頁開啟"
+  "open": "在新分頁開啟",
+  "discarded": "選取時會重新載入"
 }

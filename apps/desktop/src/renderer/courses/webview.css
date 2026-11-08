@@ -31,3 +31,8 @@
 .moodle-webview-footer { padding:8px 16px; background:var(--subtle); }
 .moodle-webview-progress { top:132px; }
 @media(max-width:760px) { .moodle-webview-pane { border-radius:0; } .moodle-webview-header { padding:12px 16px; } .moodle-webview-toolbar { flex-wrap:wrap; } .moodle-webview-location { order:-1; flex-basis:100%; margin:0; } }
+
+.moodle-webview-pane.moodle-tab-page { position:relative; inset:auto; width:100%; max-width:none; height:100%; min-height:0; border-radius:0; box-shadow:none; }
+
+.shell-content:has(> #active-tab-panel[data-native=true]) { display:flex; flex-direction:column; }
+#active-tab-panel[data-native=true] { display:block; flex:1; min-height:0; }

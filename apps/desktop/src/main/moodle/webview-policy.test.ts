@@ -78,7 +78,7 @@ describe('Moodle navigation policy',() => {
     const id = '11111111-1111-4111-a111-111111111111';
     expect(moodleWebviewContract['moodle:webview-open'].request.safeParse({accountId:id,target:{kind:'page',url:'https://school.example/campus'},token:'secret'}).success).toBe(false);
     expect(moodleWebviewContract['moodle:webview-action'].request.safeParse({id,action:'executeJavaScript'}).success).toBe(false);
-    const layout = {id,bounds:{x:0,y:50,width:800,height:600},visible:true,theme:{dark:true,background:'#101010',foreground:'#ffffff',accent:'#aaaaee'}};
+    const layout = {id,tabId:id,generation:1,bounds:{x:0,y:50,width:800,height:600},visible:true,theme:{dark:true,background:'#101010',foreground:'#ffffff',accent:'#aaaaee'}};
     expect(moodleWebviewContract['moodle:webview-layout'].request.safeParse(layout).success).toBe(true);
     expect(moodleWebviewContract['moodle:webview-layout'].request.safeParse({...layout,theme:{...layout.theme,background:'red;url(https://evil.example)'}}).success).toBe(false);
     expect(moodleWebviewContract['moodle:webview-layout'].request.safeParse({...layout,bounds:{...layout.bounds,x:-1}}).success).toBe(false);

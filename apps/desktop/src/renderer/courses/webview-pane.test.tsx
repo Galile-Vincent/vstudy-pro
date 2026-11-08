@@ -15,7 +15,7 @@ it.each([false,true])('announces copy only on success and clears it (failure %s)
   invoke.mockImplementation(async(channel,payload)=>{if(channel==='moodle:webview-action' && payload.action==='copy' && fail)throw new Error('Clipboard failed');return state;});
   const host=document.createElement('div'),root=createRoot(host);document.body.append(host);
   try{
-    await act(()=>root.render(<MoodleWebviewPane accountId="school" target={{kind:'page',url:'https://school.example/course/view.php?id=1'}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>));
+    await act(()=>root.render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" accountId="school" target={{kind:'page',url:'https://school.example/course/view.php?id=1'}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>));
     const footer=document.querySelector('footer.moodle-webview-footer')!,copy=footer.querySelectorAll('button')[3]!;
     await act(()=>copy.click());
     expect(footer.querySelector('[role=status]')?.textContent.includes('copied')).toBe(!fail);
@@ -33,13 +33,13 @@ it('offers Retry after opening fails and clears the failure on recovery and navi
   invoke.mockImplementation(async(channel)=>{if(channel==='moodle:webview-open'&&fail)throw new Error('offline');return state;});
   const props={accountId:'school',target:{kind:'page' as const,url:state.url},onClose:()=>{},onDocument:()=>{},onReconnect:()=>{}};
   try{
-    const view=render(<MoodleWebviewPane {...props}/>);
+    const view=render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" {...props}/>);
     await screen.findByRole('alert');
     fail=false;fireEvent.click(screen.getByRole('button',{name:tr('common:retry')}));
     await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
-    fail=true;view.rerender(<MoodleWebviewPane {...props} target={{kind:'page',url:'https://school.example/course/view.php?id=2'}}/>);
+    fail=true;view.rerender(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" {...props} target={{kind:'page',url:'https://school.example/course/view.php?id=2'}}/>);
     await screen.findByRole('alert');
-    fail=false;view.rerender(<MoodleWebviewPane {...props} target={{kind:'page',url:'https://school.example/course/view.php?id=3'}}/>);
+    fail=false;view.rerender(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" {...props} target={{kind:'page',url:'https://school.example/course/view.php?id=3'}}/>);
     await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
   }finally{cleanup();}
 });
@@ -48,11 +48,23 @@ it('clears an action failure when Reload succeeds',async()=>{
   const state={id:'action-pane',status:'ready',url:'https://school.example/course/view.php?id=1',title:'Course',secure:true,zoom:1,error:null,documentId:null,retryAt:null,canGoBack:false,canGoForward:false};
   invoke.mockImplementation(async(channel,payload)=>{if(channel==='moodle:webview-action'&&payload.action==='copy')throw new Error('clipboard');return state;});
   try{
-    render(<MoodleWebviewPane accountId="school" target={{kind:'page',url:state.url}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>);
+    render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" accountId="school" target={{kind:'page',url:state.url}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>);
     await waitFor(()=>expect(screen.getAllByRole('button',{name:'Copy link'})[0]!.hasAttribute('disabled')).toBe(false));
     fireEvent.click(screen.getAllByRole('button',{name:'Copy link'})[0]!);
     await screen.findByRole('alert');
     fireEvent.click(screen.getByRole('button',{name:'Reload'}));
     await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
   }finally{cleanup();}
+});
+it('hides on unmount and leaves the app root interactive',async()=>{
+  const {render,waitFor,cleanup}=await import('@testing-library/react');
+  invoke.mockResolvedValue({id:'pane',generation:1,status:'ready',url:'https://school.example/',title:'Course',secure:true,zoom:1,error:null,documentId:null,retryAt:null,canGoBack:false,canGoForward:false});
+  const tabId='11111111-1111-4111-a111-111111111111';
+  const view=render(<MoodleWebviewPane tabId={tabId} accountId={tabId} target={{kind:'page',url:'https://school.example/'}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>);
+  await waitFor(()=>expect(view.getByTestId('moodle-webview')).toBeTruthy());
+  expect(view.queryByRole('dialog')).toBeNull();
+  invoke.mockClear();view.unmount();
+  expect(invoke).toHaveBeenCalledWith('moodle:webview-hide',{tabId,generation:1});
+  expect(invoke.mock.calls.some(([channel,payload])=>channel==='moodle:webview-action' && payload.action==='close')).toBe(false);
+  cleanup();
 });
