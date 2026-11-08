@@ -113,10 +113,11 @@ async function mcpProbe(window: BrowserWindow, enabled: boolean) {
 export async function runDistributionSmoke(window: BrowserWindow, store: Store, root: string): Promise<void> {
   const report: Record<string, unknown> = {
     schemaVersion: 1, ok: false, exitCode: 1, platform: process.platform, arch: process.arch,
-    appVersion: app.getVersion(), runtime: process.versions, userData: app.getPath('userData'),
+    appName: app.getName(), appVersion: app.getVersion(), runtime: process.versions, userData: app.getPath('userData'),
     windowCreated: false, rendererLoaded: false,
   };
   try {
+    if (/electron/i.test(app.getName())) throw new Error('Unbranded runtime app name');
     if (!app.isPackaged || app.getPath('userData') !== join(root, 'user-data')) throw new Error('Smoke userData isolation was not configured');
     if (window.isDestroyed()) throw new Error('Main window was destroyed before smoke');
     report.windowCreated = true;

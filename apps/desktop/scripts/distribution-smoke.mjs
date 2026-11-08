@@ -3,8 +3,8 @@ import { spawn, execFileSync } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 import { copyFile, mkdir, mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { dirname, join, resolve } from 'node:path';
+import { URL, fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { setTimeout, clearTimeout } from 'node:timers';
 import { finished } from 'node:stream/promises';
@@ -105,6 +105,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   await mkdir(output, { recursive: true });
   const { getCurrentFuseWire, FuseV1Options: F, FuseState } = await import('@electron/fuses');
   const executable = values.executable ? resolve(values.executable) : packagedExecutable(target, resolve('release', target.key));
+  if (target.platform === 'mac') execFileSync(process.execPath, [fileURLToPath(new URL('../../../scripts/check-app-name.mjs', import.meta.url)), dirname(dirname(dirname(executable)))], { stdio: 'inherit' });
   const fuses = await getCurrentFuseWire(executable);
   await writeFile(join(output, 'fuses.json'), JSON.stringify(fuses, null, 2) + '\n');
   for (const fuse of [F.RunAsNode, F.EnableNodeOptionsEnvironmentVariable, F.EnableNodeCliInspectArguments, F.GrantFileProtocolExtraPrivileges]) {
