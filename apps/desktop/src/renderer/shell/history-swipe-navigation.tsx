@@ -10,7 +10,7 @@ const editableSelector = 'input, textarea, select, [contenteditable]:not([conten
 export function hasNavigationOverlay(): boolean {
   return [...document.querySelectorAll('.app-shell[data-view="welcome"], .app-shell[data-sidebar-overlay="true"] .shell-sidebar')].some(element=>!element.closest('[hidden], [aria-hidden="true"]')) ||
     [...document.querySelectorAll('[role="dialog"], [role="alertdialog"], [aria-modal="true"], dialog[open], [role="menu"], [role="listbox"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], .app-tabs-menu')]
-      .some(element => !element.closest('[hidden], [aria-hidden="true"], [data-state="closed"]'));
+      .some(element => [...element.getClientRects()].some(rect=>rect.width>0 && rect.height>0) && !element.closest('[hidden], [aria-hidden="true"], [data-state="closed"]'));
 }
 
 export function HistorySwipeNavigation({ canGoBack, canGoForward, onNavigate }: {

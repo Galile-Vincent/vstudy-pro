@@ -11,7 +11,7 @@ import { URL, URLSearchParams } from 'node:url';
 import { Buffer } from 'node:buffer';
 
 const directory = await mkdtemp(join(tmpdir(),'vstudy-webview-'));
-const evidence = resolve(process.env.VSTUDY_NATIVE_UI?'../../docs/evidence/app-tabs-fixes':'../../docs/evidence/app-tabs-native');
+const evidence = resolve(process.env.VSTUDY_NATIVE_UI?'../../docs/evidence/app-tabs-fixes-3':'../../docs/evidence/app-tabs-native');
 const accountId = '11111111-1111-4111-a111-111111111111';
 const courseId = '22222222-2222-4222-a222-222222222222';
 const issued = new Map();
@@ -82,7 +82,8 @@ try {
         if (event.sender !== BrowserWindow.getAllWindows()[0].webContents || event.senderFrame !== event.sender.mainFrame) throw Error('Untrusted fixture IPC');
         const request = contract.request.parse(raw), manager = globalThis.webviewManager;
         if (channel.endsWith('-open') && request.target.kind === 'page') request.target.url = request.target.url.replace('https://school.example',input.siteUrl);
-        const result = channel.endsWith('-sync') ? {ok:true,tabs:manager.sync(event.sender,request.tabIds)} : channel.endsWith('-hide') ? (manager.hide(event.sender,request.tabId,request.generation),{ok:true}) : channel.endsWith('-open') ? manager.open(event.sender,request.accountId,request.target,request.tabId) : channel.endsWith('-state') ? manager.state(event.sender,request.id) : channel.endsWith('-action') ? manager.action(event.sender,request.id,request.action) : (manager.layout(event.sender,request.id,request.bounds,request.theme,request.visible,request.generation),{ok:true});
+        if(request.id) manager.assertTab(event.sender,request.tabId,request.id);
+        const result = channel.endsWith('-sync') ? {ok:true,tabs:manager.sync(event.sender,request.tabIds)} : channel.endsWith('-hide') ? (manager.hide(event.sender,request.tabId,request.generation),{ok:true}) : channel.endsWith('-open') ? manager.open(event.sender,request.accountId,request.target,request.tabId,request.checkpoint,request.importedDocumentId) : channel.endsWith('-state') ? manager.state(event.sender,request.id) : channel.endsWith('-action') ? manager.action(event.sender,request.id,request.action) : (manager.layout(event.sender,request.id,request.bounds,request.theme,request.visible,request.generation),{ok:true});
         return Promise.resolve(result).then(value => contract.response.parse(value));
       });
     }
@@ -94,7 +95,7 @@ try {
     const tabId='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
     await page.evaluate(({tabId,accountId})=>{
       const routes=[1,2].map(id=>({view:'moodle',accountId,target:{kind:'page',url:'https://school.example/course/view.php?id='+id}}));
-      const state={version:1,activeId:tabId,tabs:[{id:tabId,history:{entries:routes,index:0},title:'Moodle',icon:'BookOpen',lastActiveAt:0,presentation:{kind:'app',scrollTop:0}}]};
+      const state={version:1,activeId:tabId,tabs:[{id:tabId,history:{entries:routes,index:0},title:'Moodle',icon:'BookOpen',lastActiveAt:0,presentation:{kind:'moodle',accountId,url:'https://school.example/course/view.php?id=1',zoom:1,scrollTop:0}}]};
       const set=window.Storage.prototype.setItem;set.call(localStorage,'vstudy-tabs-v1',JSON.stringify(state));
       window.Storage.prototype.setItem=function(key,value){if(key!=='vstudy-tabs-v1')set.call(this,key,value);};
     },{tabId,accountId});
@@ -122,6 +123,32 @@ try {
     await page.keyboard.press('Meta+[');await page.locator('.app-shell[data-view=moodle]').waitFor();
     await page.waitForTimeout(1200);assert.equal(await page.locator('.app-shell').getAttribute('data-view'),'moodle','Back does not redeliver import');
     assert.equal(await app.evaluate(()=>globalThis.webviewImported),imports);
+    await app.evaluate(async({BrowserWindow})=>{
+      const manager=globalThis.webviewManager,owner=BrowserWindow.getAllWindows()[0].webContents,account=globalThis.webviewFixtureInputs.account;
+      const tabId=process.getBuiltinModule('crypto').randomUUID(),target={kind:'page',url:account.siteUrl+'/course/view.php?id=88'};
+      const state=manager.open(owner,account.id,target,tabId,{accountId:account.id,requestedUrl:account.siteUrl+'/course/view.php?id=1',url:account.siteUrl+'/course/view.php?id=1',zoom:1,scrollTop:0});
+      const until=Date.now()+10000;while(manager.state(owner,state.id).status!=='ready' && Date.now()<until)await new Promise(resolve=>setTimeout(resolve,25));
+      const pane=[...manager.panes.values()].find(p=>p.tabId===tabId);
+      if(!pane.view.webContents.getURL().endsWith('id=88'))throw Error('Stale renderer checkpoint replaced requested target');
+      pane.view.webContents.emit('before-input-event',{preventDefault(){}},{type:'keyDown',key:'a'});
+      pane.view.webContents.emit('did-navigate-in-page',{},target.url+'#answer',true);
+      manager.hide(owner,tabId,state.generation);
+      if((await manager.action(owner,state.id,'discard')).status==='discarded')throw Error('Same-document navigation lost draft protection');
+    });
+    await page.evaluate(({tabId,accountId,imports})=>{
+      const fileRoute={view:'moodle',accountId,target:{kind:'file',fileId:'bbbbbbbb-bbbb-4bbb-abbb-bbbbbbbbbbbb'},importedDocumentId:imports};
+      localStorage.setItem('vstudy-tabs-v1',JSON.stringify({version:1,activeId:tabId,tabs:[{id:tabId,history:{entries:[fileRoute,{view:'workspace',documentId:imports}],index:1},title:'Imported file',icon:'FileText',lastActiveAt:0,presentation:{kind:'document',scrollTop:0}}]}));
+      const set=window.Storage.prototype.setItem;
+      window.Storage.prototype.setItem=function(key,value){if(key!=='vstudy-tabs-v1')set.call(this,key,value);};
+    },{tabId,accountId,imports});
+    await app.evaluate(({BrowserWindow})=>globalThis.webviewManager.sync(BrowserWindow.getAllWindows()[0].webContents,[]));
+    await page.reload();await page.locator('.app-shell[data-view=workspace]').waitFor();
+    await page.keyboard.press('Meta+[');await page.getByRole('button',{name:'Open document',exact:true}).waitFor();
+    assert.equal(await page.getByText('This file was imported',{exact:true}).count(),1,'restart Back displays imported-file card');
+    await app.evaluate(()=>{const manager=globalThis.webviewManager;for(const pane of manager.panes.values())pane.view.webContents.emit('render-process-gone',{}, {reason:'crashed'});});
+    await page.reload();await page.getByRole('button',{name:'Open document',exact:true}).waitFor();
+    assert.equal((await nativeState())[0].visible,false,'restored file card never reveals blank native view');
+    await page.getByRole('button',{name:'Open document',exact:true}).click();await page.locator('.app-shell[data-view=workspace]').waitFor();
     await page.locator('.app-tabs-add').click();
     await page.locator('.app-tabs-menu').getByRole('button',{name:'AI chats',exact:true}).click();
     const children=()=>app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].contentView.children.filter(v=>v.webContents).map(v=>v.webContents.id));
@@ -143,7 +170,7 @@ try {
       const tabSet={version:1,activeId:ids[4],tabs:ids.map((id,index)=>({id,history:{entries:[{view:'moodle',accountId,target:{kind:'page',url:siteUrl+'/course/view.php?id='+index}}],index:0},title:'Moodle '+index,icon:'GraduationCap',lastActiveAt:0,presentation:{kind:'app',scrollTop:0}}))};
       const set=window.Storage.prototype.setItem;
       set.call(localStorage,'vstudy-tabs-v1',JSON.stringify(tabSet));
-      window.window.Storage.prototype.setItem=function(key,value){if(key!=='vstudy-tabs-v1')set.call(this,key,value);};
+      window.Storage.prototype.setItem=function(key,value){if(key!=='vstudy-tabs-v1')set.call(this,key,value);};
     },{accountId,siteUrl});
     await page.reload();
     await page.waitForFunction(()=>document.querySelector('.moodle-webview-header strong')?.textContent==='Week 4 · Moodle');

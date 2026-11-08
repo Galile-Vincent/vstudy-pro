@@ -1,3 +1,4 @@
+import { documentIdSchema } from '../../shared/domain';
 import { MAX_APP_TABS, TAB_STORAGE_KEY, tabSetSchema, tabRouteSchema, type TabSet, type TabState, type TabPresentation } from '../../shared/app-tabs';
 import { createRouteHistory, pushRoute, moveHistory, historyRoute, type HistoryDirection } from './navigation-history';
 import type { Route } from './index';
@@ -16,6 +17,7 @@ export function currentRoute(state: TabSet): Route {
   return history.entries[history.index]!;
 }
 export type TabAction =
+  | { type: 'imported'; id:string; documentId:string }
   | { type: 'open'; tab: TabState }
   | { type: 'close'; id: string; fallback: TabState }
   | { type: 'activate'; id: string; now: number }
@@ -37,6 +39,7 @@ export function tabReducer(state: TabSet, action: TabAction): TabSet {
     case 'reorder': return action.ids.length === state.tabs.length && new Set(action.ids).size === state.tabs.length && action.ids.every(id => state.tabs.some(tab => tab.id === id)) ? { ...state, tabs: action.ids.map(id => state.tabs.find(tab => tab.id === id)!) } : state;
     default: return { ...state, tabs: state.tabs.map(tab => {
       if (tab.id !== action.id) return tab;
+      if (action.type === 'imported') return {...tab,history:{...tab.history,entries:tab.history.entries.map((route,index)=>index===tab.history.index && route.view==='moodle' ? {...route,importedDocumentId:documentIdSchema.parse(action.documentId)} : route)}};
       if (action.type === 'presentation') return { ...tab, title:action.title ?? tab.title, presentation: action.presentation };
       if (action.type === 'history') {
         const history = moveHistory(tab.history, action.direction);

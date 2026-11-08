@@ -59,3 +59,12 @@ it('retries quota failures without inactive drafts and anchors',()=>{
  expect(JSON.parse(stored[1]!).tabs[0].presentation).toEqual({kind:'document',scrollTop:20});
  expect(state.tabs[0]!.presentation).toHaveProperty('draft','large draft');
 });
+
+it('persists completed Moodle imports on their history entry across restart and Back',()=>{
+ let state=initialTabs(id(1),{view:'moodle',accountId:id(2),target:{kind:'file',fileId:id(3)}});
+ state=tabReducer(state,{type:'imported',id:id(1),documentId:id(4)});
+ state=tabReducer(state,{type:'replace-route',id:id(1),route:{view:'workspace',documentId:id(4) as never}});
+ const data=new Map<string,string>();const storage={getItem:(key:string)=>data.get(key)??null,setItem:(key:string,value:string)=>{data.set(key,value);},removeItem:()=>{}};
+ expect(saveTabs(storage,state)).toBe(true);state=loadTabs(storage,id(9));state=tabReducer(state,{type:'history',id:id(1),direction:'back'});
+ expect(currentRoute(state).importedDocumentId).toBe(id(4));
+});

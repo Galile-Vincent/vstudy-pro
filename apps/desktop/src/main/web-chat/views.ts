@@ -17,6 +17,13 @@ export class WebChats {
   private readonly owners=new Map<number,{owner:WebContents;cleanup:()=>void;navigation:(_event:Electron.Event,_url:string,inPlace:boolean,main:boolean)=>void}>();
   private readonly clearing=new Set<WebChatProvider>();
   constructor(private readonly external:(owner:WebContents,url:string)=>Promise<void>) {}
+  private registerOwner(owner:WebContents) {
+    if (!this.owners.has(owner.id)) {
+      const cleanup=()=>this.closeOwner(owner);
+      const navigation=(_event:Electron.Event,_url:string,inPlace:boolean,main:boolean)=>{if(main && !inPlace)cleanup();};
+      this.owners.set(owner.id,{owner,cleanup,navigation});owner.once('destroyed',cleanup);owner.on('did-start-navigation',navigation);
+    }
+  }
   private browser(provider:WebChatProvider) {
     let browser=this.sessions.get(provider);
     if (browser) return browser;
@@ -57,11 +64,7 @@ export class WebChats {
     view.webContents.on('did-finish-load',()=>{if(webChatNavigation(provider,view.webContents.getURL())) pane.status='ready';});
     view.webContents.on('did-fail-load',(_event,code,_description,_url,main)=>{if(main && code!==-3) pane.status='error';});
     view.webContents.on('render-process-gone',()=>this.discard(pane));
-    if (!this.owners.has(owner.id)) {
-      const cleanup=()=>this.closeOwner(owner);
-      const navigation=(_event:Electron.Event,_url:string,inPlace:boolean,main:boolean)=>{if(main && !inPlace)cleanup();};
-      this.owners.set(owner.id,{owner,cleanup,navigation});owner.once('destroyed',cleanup);owner.on('did-start-navigation',navigation);
-    }
+    this.registerOwner(owner);
     const saved=safeWebChatUrl(restoreUrl ?? '');
     if(saved){saved.search='';saved.hash='';}
     this.load(pane,(this.checkpoints.get(key)?.provider===provider?this.checkpoints.get(key)?.url:undefined) ?? (saved?.origin===new URL(webChatProviders[provider].url).origin?saved.href:webChatProviders[provider].url));
@@ -163,6 +166,7 @@ export class WebChats {
     if(pane?.provider===provider && pane.generation===generation) {pane.active=false;this.visibility(pane,false);}
   }
   sync(owner:WebContents,tabIds:string[]) {
+    this.registerOwner(owner);
     const keep=new Set(tabIds);
     for(const [key,pane] of this.panes) if(pane.owner===owner && !keep.has(pane.tabId)) {this.close(pane);this.panes.delete(key);}
     for(const [key,value] of this.checkpoints) if(key.startsWith(`${owner.id}:`) && !keep.has(value.tabId))this.checkpoints.delete(key);

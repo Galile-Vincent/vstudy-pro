@@ -12,7 +12,7 @@ it('requires owned tab identity and bounded activation generations',()=>{
   expect(moodleWebviewContract['moodle:webview-sync'].request.safeParse({tabIds:Array(31).fill(tabId)}).success).toBe(false);
 });
 it('redacts restoration URLs and rejects arbitrary scripts and invalid scroll',()=>{
-  const checkpoint={url:'https://user:pass@school.example/page?id=2&token=secret#private',zoom:1,scrollTop:20};
+  const checkpoint={accountId:tabId,requestedUrl:'https://school.example/page?id=2',url:'https://user:pass@school.example/page?id=2&token=secret#private',zoom:1,scrollTop:20};
   expect(nativeCheckpointSchema.parse(checkpoint).url).toBe('https://school.example/page?id=2');
   expect(nativeCheckpointSchema.safeParse({...checkpoint,script:'alert(1)'}).success).toBe(false);
   expect(nativeCheckpointSchema.safeParse({...checkpoint,scrollTop:Infinity}).success).toBe(false);

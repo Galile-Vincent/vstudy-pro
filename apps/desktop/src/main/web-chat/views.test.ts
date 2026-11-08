@@ -106,3 +106,8 @@ it('removes owner listeners on dispose after every pane was discarded',async()=>
  await chats.action(sender,'gemini','discard',tab(1));await chats.dispose();
  expect(sender.listenerCount('destroyed')).toBe(0);expect(sender.listenerCount('did-start-navigation')).toBe(0);
 });
+
+it('notifies a synced window that never activated a hosted pane when clearing',async()=>{
+ chats=new WebChats(async()=>{});const sender=owner(90),restored=owner(91);chats.sync(restored,[tab(1)]);
+ await chats.clear(sender,'gemini');expect(restored.send).toHaveBeenCalledWith('web-chat:cleared','gemini');
+});

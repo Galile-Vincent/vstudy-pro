@@ -7,7 +7,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
 const mock = vi.hoisted(() => ({
-  panes: [] as { contents: import('node:events').EventEmitter & { openHandler?: (details: { url: string }) => unknown; loadURL: ReturnType<typeof vi.fn> } }[],
+  panes: [] as { visible:boolean; contents: import('node:events').EventEmitter & { openHandler?: (details: { url: string }) => unknown; loadURL: ReturnType<typeof vi.fn> } }[],
   browsers: [] as (import('node:events').EventEmitter & { clearStorageData: ReturnType<typeof vi.fn>; clearCache: ReturnType<typeof vi.fn>; closeAllConnections: ReturnType<typeof vi.fn> })[],
   imports: vi.fn(async () => '5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60'),
   log: vi.fn(),
@@ -26,8 +26,8 @@ vi.mock('electron', async () => {
   }
   class WebContentsView {
     webContents = new Contents();
-    constructor() { mock.panes.push({ contents: this.webContents }); }
-    setVisible = vi.fn(); setBounds = vi.fn(); setBackgroundColor = vi.fn();
+    constructor() { mock.panes.push({ contents: this.webContents,visible:false }); }
+    setVisible = vi.fn((visible:boolean)=>{mock.panes.find(pane=>pane.contents===this.webContents)!.visible=visible;}); setBounds = vi.fn(); setBackgroundColor = vi.fn();
   }
   const window = { contentView: { addChildView: vi.fn(), removeChildView: vi.fn() }, isDestroyed: () => false, getContentSize: () => [800, 600] };
   return {
@@ -278,11 +278,12 @@ it('replaces a tab when its requested Moodle target changes',async()=>{
  expect(next.id).not.toBe(state.id);
  await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHaveBeenCalledWith(site+'/course/view.php?id=99'));
 });
-it('delivers an imported document once across reopening',async()=>{
+it('delivers an imported document until acknowledgement across reopening',async()=>{
  const {views,owner,tabId,contents}=await open();
  click(contents);navigate(contents,file());await settle();
  const first=views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=2'},tabId);
  expect(first.documentId).not.toBeNull();
+ await views.action(owner,first.id,'ack-document');
  expect(views.state(owner,first.id).documentId).toBeNull();
 });
 it('reloads the private committed URL while exposing only its public copy',async()=>{
@@ -321,4 +322,47 @@ it('does not replay an app file import after discard',async()=>{
  views.state(owner,first.id);mock.panes.at(-1)!.contents.emit('render-process-gone');
  views.open(owner,accountId,target,tab);await settle();
  expect(mock.imports).toHaveBeenCalledTimes(1);
+});
+
+it('ignores a renderer checkpoint for another requested target',async()=>{
+ const {views,owner,tabId}=await open();
+ views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=99'},tabId,{accountId,requestedUrl:site+'/course/view.php?id=2',url:site+'/course/view.php?id=2',zoom:1,scrollTop:0});
+ await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHaveBeenCalledWith(site+'/course/view.php?id=99'));
+});
+it('retains import delivery across reads and actions until acknowledged',async()=>{
+ const {views,owner,contents,state}=await open();click(contents);navigate(contents,file());await settle();
+ const id=views.state(owner,state.id).documentId;expect(id).not.toBeNull();
+ expect((await views.action(owner,state.id,'copy')).documentId).toBe(id);
+ expect(views.state(owner,state.id).documentId).toBe(id);
+ await views.action(owner,state.id,'ack-document');expect(views.state(owner,state.id).documentId).toBeNull();
+});
+it('keeps dirty protection through same-document navigation',async()=>{
+ const {views,owner,contents,state,tabId}=await open();contents.emit('did-finish-load');
+ contents.emit('before-input-event',{preventDefault:vi.fn()},{type:'keyDown',key:'a'});
+ contents.emit('did-navigate-in-page',{},site+'/course/view.php?id=2#answer',true);
+ views.hide(owner,tabId,state.generation);
+ expect((await views.action(owner,state.id,'discard')).status).toBe('ready');
+});
+it('restores the private URL after discard',async()=>{
+ const {views,owner,contents,tabId}=await open();const url=site+'/course/view.php?id=2&sesskey=secret&returnurl=lesson';
+ contents.emit('did-navigate',{},url);contents.emit('render-process-gone');
+ views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=2'},tabId);
+ await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHaveBeenCalledWith(url));
+});
+it('does not reimport a restored completed file target',async()=>{
+ const {views,owner}=await open();const marker='5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60';
+ const state=views.open(owner,accountId,{kind:'file',fileId:randomUUID()},randomUUID(),undefined,marker);await settle();
+ expect(mock.imports).not.toHaveBeenCalled();expect(views.state(owner,state.id)).toMatchObject({status:'ready',importedDocumentId:marker,documentId:null});
+});
+
+it('cleans owner handlers after failed admission',async()=>{
+ const {views,owner}=await open();await views.dispose();
+ const {nativeTabPool}=await import('../native-tab-pool');const room=vi.spyOn(nativeTabPool,'makeRoom').mockReturnValue('resource-limit');
+ try {views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=2'});expect(owner.listenerCount('destroyed')).toBe(1);owner.emit('destroyed');expect(owner.listenerCount('did-start-navigation')).toBe(0);} finally {room.mockRestore();}
+});
+
+it('never reveals a native view before a document has committed',async()=>{
+ const {views,owner,state}=await open();await views.action(owner,state.id,'stop');
+ views.layout(owner,state.id,{x:0,y:0,width:500,height:500},{dark:false,background:'#ffffff',foreground:'#000000',accent:'#0000ff'},true,state.generation);
+ expect(mock.panes.at(-1)!.visible).toBe(false);
 });

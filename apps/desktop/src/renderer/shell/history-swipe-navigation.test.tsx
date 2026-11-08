@@ -45,7 +45,7 @@ it('never shows an indicator at the first entry and never commits a short gestur
 it.each(['dialog', 'scroller', 'shadow-scroller', 'editable', 'pinch', 'line-mode', 'vertical'])('leaves %s alone', async kind => {
   await mount();
   let target: Element = host;
-  if (kind === 'dialog') { const dialog = document.createElement('div'); dialog.setAttribute('role', 'dialog'); host.append(dialog); }
+  if (kind === 'dialog') { const dialog = document.createElement('div'); dialog.setAttribute('role', 'dialog'); vi.spyOn(dialog,'getClientRects').mockReturnValue([{width:100,height:100}] as unknown as DOMRectList); host.append(dialog); }
   if (kind.includes('scroller')) {
     const panel = document.createElement('div'); host.append(panel);
     const scroller = document.createElement('div'); scroller.style.overflowX = 'auto';

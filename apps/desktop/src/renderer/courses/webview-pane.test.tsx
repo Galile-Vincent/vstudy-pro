@@ -76,3 +76,12 @@ it('offers one retry control for a resource-limited pane',async()=>{
  await screen.findByRole('alert');expect(screen.getAllByRole('button',{name:'Retry'})).toHaveLength(1);
  }finally{cleanup();}
 });
+it('offers the imported document after returning to a completed file',async()=>{
+ const {render,screen,fireEvent,cleanup}=await import('@testing-library/react');
+ const documentId='5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60',onDocument=vi.fn();
+ invoke.mockResolvedValue({id:'pane',generation:1,status:'ready',url:'https://school.example/pluginfile.php/a.pdf',title:'File',zoom:1,error:null,documentId:null,importedDocumentId:documentId});
+ try {
+ render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" accountId="school" target={{kind:'file',fileId:'11111111-1111-4111-a111-111111111111'}} onClose={()=>{}} onDocument={onDocument} onReconnect={()=>{}}/>);
+ fireEvent.click(await screen.findByRole('button',{name:'Open document'}));expect(onDocument).toHaveBeenCalledWith(documentId);
+ }finally{cleanup();}
+});

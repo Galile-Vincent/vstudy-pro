@@ -45,5 +45,7 @@
   "error_load-failed": "This page could not open",
   "hint_load-failed": "Try reloading. Your school may be temporarily unavailable.",
   "error_resource-limit": "All native views are busy",
-  "hint_resource-limit": "Close a tab or wait for its work to finish, then retry."
+  "hint_resource-limit": "Close a tab or wait for its work to finish, then retry.",
+  "imported": "This file was imported",
+  "open_document": "Open document"
 }

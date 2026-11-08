@@ -45,5 +45,7 @@
   "error_load-failed": "無法開啟此網頁",
   "hint_load-failed": "請嘗試重新載入。學校服務可能暫時無法使用。",
   "error_resource-limit": "所有網頁分頁都在使用中",
-  "hint_resource-limit": "請關閉分頁或等候作業完成後重試。"
+  "hint_resource-limit": "請關閉分頁或等候作業完成後重試。",
+  "imported": "此檔案已匯入",
+  "open_document": "開啟文件"
 }

@@ -45,5 +45,7 @@
   "error_load-failed": "このページを開けませんでした",
   "hint_load-failed": "再読み込みしてください。学校のサービスが一時的に利用できない可能性があります。",
   "error_resource-limit": "すべてのページを使用中です",
-  "hint_resource-limit": "タブを閉じるか処理の完了を待って再試行してください。"
+  "hint_resource-limit": "タブを閉じるか処理の完了を待って再試行してください。",
+  "imported": "このファイルはインポート済みです",
+  "open_document": "ドキュメントを開く"
 }

@@ -29,3 +29,9 @@ it('bounds drafts and reader state and validates hosted restoration',()=>{
   const saved=JSON.stringify(tabPresentationSchema.parse({kind:'hosted-chat',provider:'gemini',url:'https://gemini.google.com/app/thread?token=secret#secret',scrollTop:0}));
   expect(saved).not.toContain('secret');expect(saved).toContain('/app/thread');
 });
+it('validates imported document markers in persisted Moodle history',()=>{
+ const route={view:'moodle',accountId:'11111111-1111-4111-a111-111111111111',target:{kind:'file',fileId:'11111111-1111-4111-a111-111111111111'},importedDocumentId:'11111111-1111-4111-a111-111111111111'};
+ expect(tabRouteSchema.safeParse(route).success).toBe(true);
+ expect(tabRouteSchema.safeParse({...route,importedDocumentId:'invalid'}).success).toBe(false);
+ expect(tabRouteSchema.safeParse({...route,cookies:'secret'}).success).toBe(false);
+});

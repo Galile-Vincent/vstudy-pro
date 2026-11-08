@@ -8,7 +8,7 @@
 import { z } from 'zod';
 import { documentIdSchema } from './domain';
 
-export const nativeCheckpointSchema=z.object({url:z.string().max(8192).transform(value=>publicWebviewUrl(value)),zoom:z.number().min(.5).max(2),scrollTop:z.number().finite().min(0).max(10000000)}).strict();
+export const nativeCheckpointSchema=z.object({accountId:z.string().uuid(),requestedUrl:z.string().max(8192).transform(value=>publicWebviewUrl(value)),url:z.string().max(8192).transform(value=>publicWebviewUrl(value)),zoom:z.number().min(.5).max(2),scrollTop:z.number().finite().min(0).max(10000000)}).strict();
 const id = z.string().uuid();
 const url = z.string().url().max(8192);
 /** Identify an account-owned Moodle target without accepting renderer credentials. */
@@ -35,15 +35,15 @@ export const webviewStateSchema = z.object({
   scrollTop:z.number().min(0).max(10000000).default(0), id, generation:z.number().int().nonnegative().default(0), status:z.enum(['connecting','loading','ready','error','closed','discarded']),
   url:z.string(), title:z.string().max(300), secure:z.boolean(),
   canGoBack:z.boolean(), canGoForward:z.boolean(), zoom:z.number().min(0.5).max(2),
-  error:webviewErrorSchema.nullable(), retryAt:z.number().nullable(), documentId:documentIdSchema.nullable(),
+  error:webviewErrorSchema.nullable(), retryAt:z.number().nullable(), documentId:documentIdSchema.nullable(), importedDocumentId:documentIdSchema.nullable().default(null),
 }).strict();
 export type WebviewState = z.infer<typeof webviewStateSchema>;
-export const webviewActionSchema = z.enum(['discard','back','forward','reload','stop','reconnect','external','copy','close','focus','zoom-in','zoom-out','zoom-reset']);
+export const webviewActionSchema = z.enum(['ack-document','discard','back','forward','reload','stop','reconnect','external','copy','close','focus','zoom-in','zoom-out','zoom-reset']);
 export type WebviewAction = z.infer<typeof webviewActionSchema>;
 export const moodleWebviewContract = {
   'moodle:webview-sync': {request:z.object({tabIds:z.array(id).max(30)}).strict(),response:z.object({ok:z.literal(true),tabs:z.array(z.object({tabId:id,status:z.enum(['live','loading','discarded','error'])}).strict()).max(30)}).strict()},
   'moodle:webview-hide': {request:z.object({tabId:id,generation:z.number().int().nonnegative()}).strict(),response:z.object({ok:z.literal(true)}).strict()},
-  'moodle:webview-open': {request:z.object({tabId:id,accountId:id,target:webviewTargetSchema,checkpoint:nativeCheckpointSchema.optional()}).strict(),response:webviewStateSchema},
+  'moodle:webview-open': {request:z.object({tabId:id,accountId:id,target:webviewTargetSchema,checkpoint:nativeCheckpointSchema.optional(),importedDocumentId:documentIdSchema.optional()}).strict(),response:webviewStateSchema},
   'moodle:webview-state': {request:z.object({id,tabId:id}).strict(),response:webviewStateSchema},
   'moodle:webview-layout': {request:z.object({id,tabId:id,generation:z.number().int().nonnegative(),bounds:webviewBoundsSchema,theme:webviewThemeSchema,visible:z.boolean()}).strict(),response:z.object({ok:z.literal(true)}).strict()},
   'moodle:webview-action': {request:z.object({id,tabId:id,action:webviewActionSchema}).strict(),response:webviewStateSchema},

@@ -54,7 +54,7 @@ export function registerMoodleIpc(registrar: ReturnType<typeof createIpcRegistra
   });
   for (const channel of Object.values(moodleChannels)) implemented.add(channel);
   for (const channel of Object.keys(moodleWebviewContract) as (keyof typeof moodleWebviewContract)[]) implemented.add(channel);
-  registrar.handle('moodle:webview-open',({accountId,target,tabId,checkpoint},event) => webviews.open(event.sender,accountId,target,tabId,checkpoint));
+  registrar.handle('moodle:webview-open',({accountId,target,tabId,checkpoint,importedDocumentId},event) => webviews.open(event.sender,accountId,target,tabId,checkpoint,importedDocumentId));
   registrar.handle('moodle:webview-sync',({tabIds},event)=>{return {ok:true,tabs:webviews.sync(event.sender,tabIds)};});
   registrar.handle('moodle:webview-hide',({tabId,generation},event)=>{webviews.hide(event.sender,tabId,generation);return {ok:true};});
   registrar.handle('moodle:webview-state',({id,tabId},event) => {webviews.assertTab(event.sender,tabId,id);return webviews.state(event.sender,id);});
