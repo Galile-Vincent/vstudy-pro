@@ -1,0 +1,2 @@
+PASS Electron History filtering, empty results, pagination focus/scroll, silent refresh and render-failure retry.
+PASS Electron initial reload and close settles startup, confirms restore and reopens on activate.

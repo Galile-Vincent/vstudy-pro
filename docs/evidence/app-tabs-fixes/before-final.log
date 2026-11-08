@@ -1,0 +1,408 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-1625213d/apps/desktop
+
+ ❯ src/renderer/shell/tab-strip.test.tsx (2 tests | 2 failed) 37ms
+   × does not send a stale destructive chat sync after awaiting Moodle 20ms
+   × shows the existing limit message for attempts outside the picker 16ms
+ ❯ src/renderer/shell/native-overlay.test.tsx (3 tests | 3 failed) 9ms
+   × hides native content for <div class="app-tabs-menu" data-state="open"></div> 7ms
+   × hides native content for <div data-slot="popover-content"></div> 1ms
+   × hides native content for <div class="app-shell" data-sidebar-overlay="true"><aside class="shell-sidebar"></aside></div> 1ms
+(node:22620) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 will-download listeners added to [EventEmitter]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/main/web-chat/views.test.ts (12 tests | 9 failed) 8ms
+   × retries a failed hosted page on ensure 2ms
+   × protects draft edits from eviction for v and expires protection 1ms
+   × protects draft edits from eviction for x and expires protection 0ms
+   × protects draft edits from eviction for Backspace and expires protection 0ms
+   × protects draft edits from eviction for Delete and expires protection 0ms
+   × does not forward app tab shortcuts from an OAuth child 1ms
+   × returns a resource-limit state when every live draft is protected 0ms
+   × drops cleared provider checkpoints and broadcasts a renderer reset 1ms
+   × removes owner listeners on dispose after every pane was discarded 0ms
+ ❯ src/main/moodle/webview-policy.test.ts (61 tests | 1 failed) 5ms
+   × refuses tokenpluginfile paths containing embedded credentials 2ms
+ ❯ src/renderer/shell/tab-state.test.ts (6 tests | 1 failed) 4ms
+   × retries quota failures without inactive drafts and anchors 2ms
+ ❯ src/main/native-tab-pool.test.ts (7 tests | 1 failed) 4ms
+   × tolerates a process destroyed between metric ticks 2ms
+ ❯ src/main/navigation-input.test.ts (4 tests | 2 failed) 3ms
+   × forwards shifted bracket } by physical code 2ms
+   × forwards shifted bracket { by physical code 0ms
+ ❯ src/main/moodle/webview.test.ts (29 tests | 7 failed) 2837ms
+   × replaces a tab when its requested Moodle target changes 51ms
+   × delivers an imported document once across reopening 53ms
+   × reloads the private committed URL while exposing only its public copy 51ms
+   × keeps owner cleanup after discard until the owner is destroyed 53ms
+   × stops account keepalive when its last view closes and restarts it on ensure 51ms
+   × silently reauthenticates after a failed keepalive probe 1056ms
+   × does not replay an app file import after discard 106ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 26 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/native-tab-pool.test.ts > tolerates a process destroyed between metric ticks
+AssertionError: expected [Function] to not throw an error but 'Error: destroyed' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"Error: destroyed"
+
+ ❯ src/main/native-tab-pool.test.ts:53:36
+     51| it('tolerates a process destroyed between metric ticks',()=>{
+     52|  const pool=new NativeTabPool(()=>0);pool.acquire(resource('1',{proces…
+     53|  expect(()=>pool.evaluate([])).not.toThrow();
+       |                                    ^
+     54| });
+     55|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/26]⎯
+
+ FAIL  src/main/navigation-input.test.ts > forwards shifted bracket } by physical code
+ FAIL  src/main/navigation-input.test.ts > forwards shifted bracket { by physical code
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/main/navigation-input.test.ts:40:171
+     38| it.each([['}','BracketRight','next'],['{','BracketLeft','previous']])(…
+     39|  const send=vi.fn(),preventDefault=vi.fn();
+     40|  expect(forwardNativeTabShortcut({send} as unknown as WebContents,{pre…
+       |                                                                                                                                                                           ^
+     41|  expect(send).toHaveBeenCalledWith(expect.any(String),expected);
+     42| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/26]⎯
+
+ FAIL  src/main/moodle/webview-policy.test.ts > refuses tokenpluginfile paths containing embedded credentials
+AssertionError: expected 'internal' to be 'blocked' // Object.is equality
+
+Expected: "blocked"
+Received: "internal"
+
+ ❯ src/main/moodle/webview-policy.test.ts:88:108
+     86| });
+     87| it('refuses tokenpluginfile paths containing embedded credentials',()=…
+     88|  expect(webviewNavigation('https://school.example/campus/tokenpluginfi…
+       |                                                                                                            ^
+     89| });
+     90|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/26]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > replaces a tab when its requested Moodle target changes
+AssertionError: expected 'e93cda9e-1548-4626-9a5a-77b7b9d43acf' not to be 'e93cda9e-1548-4626-9a5a-77b7b9d43acf' // Object.is equality
+ ❯ src/main/moodle/webview.test.ts:278:22
+    276|  const {views,owner,tabId,state}=await open();
+    277|  const next=views.open(owner,accountId,{kind:'page',url:site+'/course/…
+    278|  expect(next.id).not.toBe(state.id);
+       |                      ^
+    279|  await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHa…
+    280| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/26]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > delivers an imported document once across reopening
+AssertionError: expected '5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60' to be null
+
+- Expected:
+null
+
++ Received:
+"5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60"
+
+ ❯ src/main/moodle/webview.test.ts:286:49
+    284|  const first=views.open(owner,accountId,{kind:'page',url:site+'/course…
+    285|  expect(first.documentId).not.toBeNull();
+    286|  expect(views.state(owner,first.id).documentId).toBeNull();
+       |                                                 ^
+    287| });
+    288| it('reloads the private committed URL while exposing only its public c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/26]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > reloads the private committed URL while exposing only its public copy
+AssertionError: expected last "vi.fn()" call to have been called with [ Array(1) ]
+
+- Expected
++ Received
+
+  [
+-   "https://school.example/course/view.php?id=2&return=lesson",
++   "https://school.example/course/view.php?id=2",
+  ]
+
+ ❯ src/main/moodle/webview.test.ts:293:27
+    291|  expect(views.state(owner,state.id).url).not.toContain('return');
+    292|  await views.action(owner,state.id,'reload');await settle();
+    293|  expect(contents.loadURL).toHaveBeenLastCalledWith(url);
+       |                           ^
+    294| });
+    295| it('keeps owner cleanup after discard until the owner is destroyed',as…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/26]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > keeps owner cleanup after discard until the owner is destroyed
+AssertionError: expected [ { …(2) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "status": "discarded",
++     "tabId": "9e6bfc48-189d-4545-b4bf-aa6575dca211",
++   },
++ ]
+
+ ❯ src/main/moodle/webview.test.ts:298:36
+    296|  const {views,owner,contents,tabId}=await open();
+    297|  contents.emit('render-process-gone');owner.emit('destroyed');
+    298|  expect(views.sync(owner,[tabId])).toEqual([]);
+       |                                    ^
+    299| });
+    300| it('stops account keepalive when its last view closes and restarts it …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/26]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > stops account keepalive when its last view closes and restarts it on ensure
+AssertionError: expected "clearInterval" to be called at least once
+ ❯ src/main/moodle/webview.test.ts:303:59
+    301|  const clear=vi.spyOn(globalThis,'clearInterval');
+    302|  const {views,owner,state}=await open();
+    303|  await views.action(owner,state.id,'close');expect(clear).toHaveBeenCa…
+       |                                                           ^
+    304|  const interval=vi.spyOn(globalThis,'setInterval');
+    305|  views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/26]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > silently reauthenticates after a failed keepalive probe
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/main/moodle/webview.test.ts:315:53
+    313|  vi.mocked(exchangeWebviewCookie).mockClear();vi.setSystemTime(Date.no…
+    314|  views.layout(owner,state.id,{x:0,y:0,width:500,height:500},{dark:fals…
+    315|  await vi.waitFor(()=>expect(exchangeWebviewCookie).toHaveBeenCalledOn…
+       |                                                     ^
+    316|  expect(views.state(owner,state.id).error).toBeNull();
+    317| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/26]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > does not replay an app file import after discard
+AssertionError: expected "vi.fn()" to be called 1 times, but got 2 times
+ ❯ src/main/moodle/webview.test.ts:323:23
+    321|  views.state(owner,first.id);mock.panes.at(-1)!.contents.emit('render-…
+    322|  views.open(owner,accountId,target,tab);await settle();
+    323|  expect(mock.imports).toHaveBeenCalledTimes(1);
+       |                       ^
+    324| });
+    325|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/26]⎯
+
+ FAIL  src/main/web-chat/views.test.ts > retries a failed hosted page on ensure
+AssertionError: expected 'error' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "error"
+
+ ❯ src/main/web-chat/views.test.ts:58:52
+     56|  chats.open(sender,'gemini',tab(1));fixture.views[0]!.webContents.emit…
+     57|  expect(chats.state(sender,'gemini',tab(1)).status).toBe('error');
+     58|  expect(chats.open(sender,'gemini',tab(1)).status).toBe('ready');
+       |                                                    ^
+     59| });
+     60| it.each(['v','x','Backspace','Delete'])('protects draft edits from evi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/26]⎯
+
+ FAIL  src/main/web-chat/views.test.ts > protects draft edits from eviction for v and expires protection
+ FAIL  src/main/web-chat/views.test.ts > protects draft edits from eviction for x and expires protection
+ FAIL  src/main/web-chat/views.test.ts > protects draft edits from eviction for Backspace and expires protection
+ FAIL  src/main/web-chat/views.test.ts > protects draft edits from eviction for Delete and expires protection
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/main/web-chat/views.test.ts:67:47
+     65|  fixture.views[0]!.webContents.emit('before-input-event',{preventDefau…
+     66|  for(let i=2;i<=5;i++)chats.open(sender,'gemini',tab(i));
+     67|  expect(fixture.views[0]!.webContents.closed).toBe(false);
+       |                                               ^
+     68|  vi.advanceTimersByTime(10*60000+1);
+     69|  chats.open(sender,'gemini',tab(6));expect(fixture.views[0]!.webConten…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/26]⎯
+
+ FAIL  src/main/web-chat/views.test.ts > does not forward app tab shortcuts from an OAuth child
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "navigation:tab-shortcut",
+      "close",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/main/web-chat/views.test.ts:88:26
+     86|  internals.guard([...internals.panes.values()][0],child,false);
+     87|  child.emit('before-input-event',{preventDefault:vi.fn()},{type:'keyDo…
+     88|  expect(sender.send).not.toHaveBeenCalled();
+       |                          ^
+     89| });
+     90| it('returns a resource-limit state when every live draft is protected'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/26]⎯
+
+ FAIL  src/main/web-chat/views.test.ts > returns a resource-limit state when every live draft is protected
+Error: Native view resource limit
+ ❯ WebChats.open src/main/web-chat/views.ts:46:67
+     44|     const window=BrowserWindow.fromWebContents(owner);
+     45|     if (!window) throw new Error('Missing owner');
+     46|     if(nativeTabPool.makeRoom(owner.id)==='resource-limit') throw new …
+       |                                                                   ^
+     47|     const view=new WebContentsView({webPreferences:{...preferences,ses…
+     48|     const pane:Pane={owner,window,view,provider,tabId,slotId,generatio…
+ ❯ src/main/web-chat/views.test.ts:93:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/26]⎯
+
+ FAIL  src/main/web-chat/views.test.ts > drops cleared provider checkpoints and broadcasts a renderer reset
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'web-chat:cleared', 'gemini' ]
+
+Number of calls: 0
+
+ ❯ src/main/web-chat/views.test.ts:100:22
+     98|  await chats.action(sender,'gemini','discard',tab(1));
+     99|  await chats.clear(sender,'gemini');
+    100|  expect(sender.send).toHaveBeenCalledWith('web-chat:cleared','gemini');
+       |                      ^
+    101|  chats.open(sender,'gemini',tab(1));expect(fixture.views.at(-1)!.webCo…
+    102| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/26]⎯
+
+ FAIL  src/main/web-chat/views.test.ts > removes owner listeners on dispose after every pane was discarded
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ src/main/web-chat/views.test.ts:106:44
+    104|  chats=new WebChats(async()=>{});const sender=owner(13);chats.open(sen…
+    105|  await chats.action(sender,'gemini','discard',tab(1));await chats.disp…
+    106|  expect(sender.listenerCount('destroyed')).toBe(0);expect(sender.liste…
+       |                                            ^
+    107| });
+    108|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/26]⎯
+
+ FAIL  src/renderer/shell/native-overlay.test.tsx > hides native content for <div class="app-tabs-menu" data-state="open"></div>
+ FAIL  src/renderer/shell/native-overlay.test.tsx > hides native content for <div data-slot="popover-content"></div>
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/renderer/shell/native-overlay.test.tsx:6:62
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/26]⎯
+
+ FAIL  src/renderer/shell/native-overlay.test.tsx > hides native content for <div class="app-shell" data-sidebar-overlay="true"><aside class="shell-sidebar"></aside></div>
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/renderer/shell/native-overlay.test.tsx:7:92
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/26]⎯
+
+ FAIL  src/renderer/shell/tab-state.test.ts > retries quota failures without inactive drafts and anchors
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/renderer/shell/tab-state.test.ts:58:34
+     56|  const stored:string[]=[];
+     57|  const storage={getItem:()=>null,removeItem:()=>{},setItem:(_key:strin…
+     58|  expect(saveTabs(storage,state)).toBe(true);
+       |                                  ^
+     59|  expect(JSON.parse(stored[1]!).tabs[0].presentation).toEqual({kind:'do…
+     60|  expect(state.tabs[0]!.presentation).toHaveProperty('draft','large dra…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/26]⎯
+
+ FAIL  src/renderer/shell/tab-strip.test.tsx > does not send a stale destructive chat sync after awaiting Moodle
+AssertionError: expected [ [ 'web-chat:sync', …(1) ], …(1) ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/renderer/shell/tab-strip.test.tsx:20:16
+     18|  await act(async()=>{release({tabs:[]});await pending;});
+     19|  const calls=fixture.invoke.mock.calls.filter(([channel])=>channel==='…
+     20|  expect(calls).toHaveLength(1);expect(calls[0]![1]).toEqual({tabIds:['…
+       |                ^
+     21| });
+     22| it('shows the existing limit message for attempts outside the picker',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/26]⎯
+
+ FAIL  src/renderer/shell/tab-strip.test.tsx > shows the existing limit message for attempts outside the picker
+AssertionError: expected '0123456789101112131415161718192021222…' to contain '30'
+
+Expected: "30"
+Received: "01234567891011121314151617181920212223242526272829"
+
+ ❯ src/renderer/shell/tab-strip.test.tsx:26:39
+     24|  fixture.invoke.mockResolvedValue({tabs:[]});
+     25|  const view=render(<TabStrip/>);await act(async()=>{window.dispatchEve…
+     26|  expect(view.baseElement.textContent).toContain('30');expect(view.base…
+       |                                       ^
+     27| });
+     28|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/26]⎯
+
+
+ Test Files  8 failed | 1 passed (9)
+      Tests  26 failed | 104 passed (130)
+   Start at  20:19:32
+   Duration  3.20s (transform 491ms, setup 0ms, import 1.30s, tests 3.07s, environment 648ms)
+

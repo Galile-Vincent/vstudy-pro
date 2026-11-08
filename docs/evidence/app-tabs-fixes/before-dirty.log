@@ -1,0 +1,39 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-1625213d/apps/desktop
+
+ ❯ src/main/web-chat/views.test.ts (8 tests | 4 failed) 6ms
+   × protects draft edits from eviction for v and expires protection 2ms
+   × protects draft edits from eviction for x and expires protection 0ms
+   × protects draft edits from eviction for Backspace and expires protection 0ms
+   × protects draft edits from eviction for Delete and expires protection 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/web-chat/views.test.ts > protects draft edits from eviction for v and expires protection
+ FAIL  src/main/web-chat/views.test.ts > protects draft edits from eviction for x and expires protection
+ FAIL  src/main/web-chat/views.test.ts > protects draft edits from eviction for Backspace and expires protection
+ FAIL  src/main/web-chat/views.test.ts > protects draft edits from eviction for Delete and expires protection
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/main/web-chat/views.test.ts:67:47
+     65|  fixture.views[0]!.webContents.emit('before-input-event',{preventDefau…
+     66|  for(let i=2;i<=5;i++)chats.open(sender,'gemini',tab(i));
+     67|  expect(fixture.views[0]!.webContents.closed).toBe(false);
+       |                                               ^
+     68|  vi.advanceTimersByTime(10*60000+1);
+     69|  chats.open(sender,'gemini',tab(6));expect(fixture.views[0]!.webConten…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 6 passed (10)
+   Start at  20:07:25
+   Duration  230ms (transform 181ms, setup 0ms, import 259ms, tests 7ms, environment 0ms)
+

@@ -1,0 +1,145 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-1625213d/apps/desktop
+
+ ❯ src/main/web-chat/views.test.ts (3 tests | 1 failed) 5ms
+   × retries a failed hosted page on ensure 2ms
+ ❯ src/main/native-tab-pool.test.ts (7 tests | 1 failed) 4ms
+   × tolerates a process destroyed between metric ticks 2ms
+ ❯ src/main/moodle/webview.test.ts (27 tests | 5 failed) 1730ms
+   × replaces a tab when its requested Moodle target changes 57ms
+   × delivers an imported document once across reopening 55ms
+   × reloads the private committed URL while exposing only its public copy 54ms
+   × keeps owner cleanup after discard until the owner is destroyed 55ms
+   × stops account keepalive when its last view closes and restarts it on ensure 53ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/native-tab-pool.test.ts > tolerates a process destroyed between metric ticks
+AssertionError: expected [Function] to not throw an error but 'Error: destroyed' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"Error: destroyed"
+
+ ❯ src/main/native-tab-pool.test.ts:53:36
+     51| it('tolerates a process destroyed between metric ticks',()=>{
+     52|  const pool=new NativeTabPool(()=>0);pool.acquire(resource('1',{proces…
+     53|  expect(()=>pool.evaluate([])).not.toThrow();
+       |                                    ^
+     54| });
+     55|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > replaces a tab when its requested Moodle target changes
+AssertionError: expected '9c260979-025f-4721-862e-efb7a8243fd9' not to be '9c260979-025f-4721-862e-efb7a8243fd9' // Object.is equality
+ ❯ src/main/moodle/webview.test.ts:278:22
+    276|  const {views,owner,tabId,state}=await open();
+    277|  const next=views.open(owner,accountId,{kind:'page',url:site+'/course/…
+    278|  expect(next.id).not.toBe(state.id);
+       |                      ^
+    279|  await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHa…
+    280| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > delivers an imported document once across reopening
+AssertionError: expected '5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60' to be null
+
+- Expected:
+null
+
++ Received:
+"5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60"
+
+ ❯ src/main/moodle/webview.test.ts:286:49
+    284|  const first=views.open(owner,accountId,{kind:'page',url:site+'/course…
+    285|  expect(first.documentId).not.toBeNull();
+    286|  expect(views.state(owner,first.id).documentId).toBeNull();
+       |                                                 ^
+    287| });
+    288| it('reloads the private committed URL while exposing only its public c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > reloads the private committed URL while exposing only its public copy
+AssertionError: expected last "vi.fn()" call to have been called with [ Array(1) ]
+
+- Expected
++ Received
+
+  [
+-   "https://school.example/course/view.php?id=2&return=lesson",
++   "https://school.example/course/view.php?id=2",
+  ]
+
+ ❯ src/main/moodle/webview.test.ts:293:27
+    291|  expect(views.state(owner,state.id).url).not.toContain('return');
+    292|  await views.action(owner,state.id,'reload');await settle();
+    293|  expect(contents.loadURL).toHaveBeenLastCalledWith(url);
+       |                           ^
+    294| });
+    295| it('keeps owner cleanup after discard until the owner is destroyed',as…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > keeps owner cleanup after discard until the owner is destroyed
+AssertionError: expected [ { …(2) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "status": "discarded",
++     "tabId": "9d1e1e1e-abbf-4a22-b577-2c7465fdd0a8",
++   },
++ ]
+
+ ❯ src/main/moodle/webview.test.ts:298:36
+    296|  const {views,owner,contents,tabId}=await open();
+    297|  contents.emit('render-process-gone');owner.emit('destroyed');
+    298|  expect(views.sync(owner,[tabId])).toEqual([]);
+       |                                    ^
+    299| });
+    300| it('stops account keepalive when its last view closes and restarts it …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > stops account keepalive when its last view closes and restarts it on ensure
+AssertionError: expected "clearInterval" to be called at least once
+ ❯ src/main/moodle/webview.test.ts:303:59
+    301|  const clear=vi.spyOn(globalThis,'clearInterval');
+    302|  const {views,owner,state}=await open();
+    303|  await views.action(owner,state.id,'close');expect(clear).toHaveBeenCa…
+       |                                                           ^
+    304|  const interval=vi.spyOn(globalThis,'setInterval');
+    305|  views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/main/web-chat/views.test.ts > retries a failed hosted page on ensure
+AssertionError: expected 'error' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "error"
+
+ ❯ src/main/web-chat/views.test.ts:58:52
+     56|  chats.open(sender,'gemini',tab(1));fixture.views[0]!.webContents.emit…
+     57|  expect(chats.state(sender,'gemini',tab(1)).status).toBe('error');
+     58|  expect(chats.open(sender,'gemini',tab(1)).status).toBe('ready');
+       |                                                    ^
+     59| });
+     60|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  7 failed | 30 passed (37)
+   Start at  20:06:36
+   Duration  2.08s (transform 302ms, setup 0ms, import 461ms, tests 1.74s, environment 0ms)
+

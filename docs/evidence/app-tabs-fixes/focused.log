@@ -1,0 +1,28 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-1625213d/apps/desktop
+
+ ❯ src/renderer/shell/native-overlay.test.tsx (3 tests | 1 failed) 10ms
+   × hides native content for <div class="app-shell" data-sidebar-overlay="true"><aside class="shell-sidebar"></aside></div> 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/shell/native-overlay.test.tsx > hides native content for <div class="app-shell" data-sidebar-overlay="true"><aside class="shell-sidebar"></aside></div>
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/renderer/shell/native-overlay.test.tsx:7:92
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 52 passed (53)
+   Start at  20:08:45
+   Duration  2.06s (transform 453ms, setup 0ms, import 739ms, tests 1.76s, environment 314ms)
+

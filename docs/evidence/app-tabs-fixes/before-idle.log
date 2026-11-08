@@ -1,0 +1,33 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-1625213d/apps/desktop
+
+ ❯ src/main/web-chat/views.test.ts (12 tests | 1 failed | 11 skipped) 5ms
+   × starts idle time when a used chat is hidden 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/web-chat/views.test.ts > starts idle time when a used chat is hidden
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/main/web-chat/views.test.ts:80:74
+     78|  chats.layout(sender,'gemini',{x:0,y:0,width:500,height:500},true,0,tr…
+     79|  vi.advanceTimersByTime(20*60000);chats.hide(sender,'gemini',tab(1),'p…
+     80|  nativeTabPool.evaluate([]);expect(fixture.views[0]!.webContents.close…
+       |                                                                          ^
+     81|  } finally {vi.useRealTimers();}
+     82| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  20:20:56
+   Duration  311ms (transform 179ms, setup 0ms, import 253ms, tests 5ms, environment 0ms)
+

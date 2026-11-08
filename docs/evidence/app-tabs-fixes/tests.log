@@ -1,0 +1,21 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-1625213d/apps/desktop
+
+(node:23945) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 will-download listeners added to [EventEmitter]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+SNAPSHOT SIGKILL interruptedBytes=67112960 afterCleanupBytes=0
+SNAPSHOT SIGTERM interruptedBytes=0 afterCleanupBytes=0
+SNAPSHOT worker termination interruptedBytes=0 afterCleanupBytes=0
+CONTENTION documents=2000 maxWriteMs=5.8 maxEventLoopGapMs=32.6 writes=72
+FRESHNESS elapsedMs=950 visibleResults=1 searches=2
+assignments: 0.36 ms
+base64: 0.10 ms
+identifier: 0.14 ms
+dotted: 0.16 ms
+quotes: 0.58 ms
+
+ Test Files  298 passed | 7 skipped (305)
+      Tests  2679 passed | 20 skipped (2699)
+   Start at  20:19:59
+   Duration  76.02s (transform 2.85s, setup 0ms, import 24.53s, tests 86.64s, environment 13.97s)
+

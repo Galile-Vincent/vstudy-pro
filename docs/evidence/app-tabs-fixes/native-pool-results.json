@@ -1,0 +1,314 @@
+{
+  "count": 5,
+  "discarded": true,
+  "scroll": 800,
+  "discardedScroll": 800,
+  "samples": [
+    {
+      "opened": 1,
+      "liveViews": 1,
+      "processes": [
+        {
+          "pid": 20984,
+          "type": "Browser",
+          "workingSetKiB": 250864
+        },
+        {
+          "pid": 20988,
+          "type": "GPU",
+          "workingSetKiB": 123952
+        },
+        {
+          "pid": 20989,
+          "type": "Utility",
+          "workingSetKiB": 50496
+        },
+        {
+          "pid": 20991,
+          "type": "Tab",
+          "workingSetKiB": 215136
+        },
+        {
+          "pid": 21002,
+          "type": "Tab",
+          "workingSetKiB": 91344
+        }
+      ]
+    },
+    {
+      "opened": 2,
+      "liveViews": 2,
+      "processes": [
+        {
+          "pid": 20984,
+          "type": "Browser",
+          "workingSetKiB": 251632
+        },
+        {
+          "pid": 20988,
+          "type": "GPU",
+          "workingSetKiB": 124304
+        },
+        {
+          "pid": 20989,
+          "type": "Utility",
+          "workingSetKiB": 50688
+        },
+        {
+          "pid": 20991,
+          "type": "Tab",
+          "workingSetKiB": 215296
+        },
+        {
+          "pid": 21002,
+          "type": "Tab",
+          "workingSetKiB": 91360
+        },
+        {
+          "pid": 21003,
+          "type": "Tab",
+          "workingSetKiB": 91296
+        }
+      ]
+    },
+    {
+      "opened": 3,
+      "liveViews": 3,
+      "processes": [
+        {
+          "pid": 20984,
+          "type": "Browser",
+          "workingSetKiB": 252592
+        },
+        {
+          "pid": 20988,
+          "type": "GPU",
+          "workingSetKiB": 124704
+        },
+        {
+          "pid": 20989,
+          "type": "Utility",
+          "workingSetKiB": 50768
+        },
+        {
+          "pid": 20991,
+          "type": "Tab",
+          "workingSetKiB": 215872
+        },
+        {
+          "pid": 21002,
+          "type": "Tab",
+          "workingSetKiB": 91360
+        },
+        {
+          "pid": 21003,
+          "type": "Tab",
+          "workingSetKiB": 91312
+        },
+        {
+          "pid": 21005,
+          "type": "Tab",
+          "workingSetKiB": 91392
+        }
+      ]
+    },
+    {
+      "opened": 4,
+      "liveViews": 4,
+      "processes": [
+        {
+          "pid": 20984,
+          "type": "Browser",
+          "workingSetKiB": 253504
+        },
+        {
+          "pid": 20988,
+          "type": "GPU",
+          "workingSetKiB": 124992
+        },
+        {
+          "pid": 20989,
+          "type": "Utility",
+          "workingSetKiB": 50928
+        },
+        {
+          "pid": 20991,
+          "type": "Tab",
+          "workingSetKiB": 215888
+        },
+        {
+          "pid": 21002,
+          "type": "Tab",
+          "workingSetKiB": 91360
+        },
+        {
+          "pid": 21003,
+          "type": "Tab",
+          "workingSetKiB": 91312
+        },
+        {
+          "pid": 21005,
+          "type": "Tab",
+          "workingSetKiB": 91408
+        },
+        {
+          "pid": 21006,
+          "type": "Tab",
+          "workingSetKiB": 91360
+        }
+      ]
+    },
+    {
+      "opened": 5,
+      "liveViews": 4,
+      "processes": [
+        {
+          "pid": 20984,
+          "type": "Browser",
+          "workingSetKiB": 253648
+        },
+        {
+          "pid": 20988,
+          "type": "GPU",
+          "workingSetKiB": 125008
+        },
+        {
+          "pid": 20989,
+          "type": "Utility",
+          "workingSetKiB": 50928
+        },
+        {
+          "pid": 20991,
+          "type": "Tab",
+          "workingSetKiB": 215888
+        },
+        {
+          "pid": 21003,
+          "type": "Tab",
+          "workingSetKiB": 91312
+        },
+        {
+          "pid": 21005,
+          "type": "Tab",
+          "workingSetKiB": 91408
+        },
+        {
+          "pid": 21006,
+          "type": "Tab",
+          "workingSetKiB": 91392
+        },
+        {
+          "pid": 21017,
+          "type": "Tab",
+          "workingSetKiB": 91296
+        }
+      ]
+    }
+  ],
+  "cycles": [
+    {
+      "cycle": 1,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581408
+    },
+    {
+      "cycle": 2,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 580672
+    },
+    {
+      "cycle": 3,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581568
+    },
+    {
+      "cycle": 4,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581568
+    },
+    {
+      "cycle": 5,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581680
+    },
+    {
+      "cycle": 6,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581632
+    },
+    {
+      "cycle": 7,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581696
+    },
+    {
+      "cycle": 8,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581600
+    },
+    {
+      "cycle": 9,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581552
+    },
+    {
+      "cycle": 10,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581616
+    },
+    {
+      "cycle": 11,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581472
+    },
+    {
+      "cycle": 12,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581504
+    },
+    {
+      "cycle": 13,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581696
+    },
+    {
+      "cycle": 14,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 582560
+    },
+    {
+      "cycle": 15,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581680
+    },
+    {
+      "cycle": 16,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581744
+    },
+    {
+      "cycle": 17,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 582800
+    },
+    {
+      "cycle": 18,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581920
+    },
+    {
+      "cycle": 19,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581872
+    },
+    {
+      "cycle": 20,
+      "liveViews": 3,
+      "rendererWorkingSetKiB": 581936
+    }
+  ],
+  "importProtected": true,
+  "disconnected": true,
+  "fullRestartRestoredTabs": 5,
+  "fullRestartLiveViews": 1
+}

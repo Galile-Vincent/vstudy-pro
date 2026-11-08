@@ -1,0 +1,127 @@
+{
+  keys: 1,
+  exchanges: 1,
+  requests: [
+    {
+      path: '/webservice/rest/server.php',
+      query: '',
+      cookie: '',
+      referrer: ''
+    },
+    {
+      path: '/admin/tool/mobile/autologin.php',
+      query: '',
+      cookie: '',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=1',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=2',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    }
+  ]
+}
+[
+  {
+    id: undefined,
+    url: 'http://127.0.0.1:56036/admin/tool/mobile/autologin.php',
+    error: 'net::ERR_ABORTED'
+  }
+]
+[
+  {
+    state: {
+      id: '05fe9a72-b90a-41ac-b825-233f34f9b73c',
+      generation: 3,
+      scrollTop: 0,
+      status: 'ready',
+      url: 'http://127.0.0.1:56036/course/view.php?id=2',
+      title: 'Week 4 · Moodle',
+      secure: false,
+      canGoBack: false,
+      canGoForward: false,
+      zoom: 1,
+      error: null,
+      retryAt: null,
+      documentId: null
+    },
+    entries: [ [Object] ]
+  }
+]
+Skip to content
+VStudy Pro
+
+Workspace
+
+Home
+AI chats
+Library
+Courses
+Exams
+Review
+History
+
+Your collection
+
+All documents
+Recent
+Pinned
+Unfiled
+Converting / Failed
+Folders
+
+No folders yet
+
+Subscription limits
+Claude
+Not signed in
+5h · Unknown
+Weekly · Unknown
+Codex
+Unsupported
+5h · Unknown
+Weekly · Unknown
+VStudy Pro
+Your personal study space
+Moodle page
+Help
+Find a conversation
+Cmd K
+Help improve VStudy Pro? Analytics is off until you choose.
+
+Help improve VStudy Pro with usage data. We never collect your name, documents, questions or answers. Studying works the same either way.
+
+What is collected
+Privacy policy
+Terms of use
+No thanks
+Share usage data
+Week 4 · Moodle
+Signed in with your school account
+127.0.0.1:56036
+Cmd R reloads
+100%
+Copy link
+Focus page
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: same tab displays its new target
+    at file:///Users/vc/.t3/worktrees/vstudy-pro/t3-1625213d/apps/desktop/e2e/moodle-webview.mjs:107:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v26.9.0
