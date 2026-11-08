@@ -10,7 +10,7 @@ Use the native font stack to match the macOS app and avoid font requests. The he
 
 The centered aurora prototype won over split studio and paper. It keeps the product legible at full width and gives the headline more presence. A slow glow behind the window is the single ambient gesture. Product motion, reveals, and approval entrance use transforms and opacity. A pause button stops them. Reduced motion also disables theme animation.
 
-The seven bento cards have mixed widths and real screenshots or local demonstrations. Their order is courses, approval, history, reading, themes, Moodle, and MCP. Examples label their data. MCP remains coming soon until its documentation and implementation land on main.
+The bento cards have mixed widths and real screenshots or local demonstrations. They cover courses, approval, history, reading, themes, Moodle, page attachments, usage, Connect AI, and MCP. Examples label their data. MCP links to the current permission and pairing guide.
 
 Headers have no bottom border. A pseudo-element fades in a neutral blurred background and faint shadow after scrolling. Sidebars stay flat and quiet. Dense FAQ rows and documentation content can use rules.
 

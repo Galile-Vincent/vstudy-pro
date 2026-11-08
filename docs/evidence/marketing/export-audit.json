@@ -1,14 +1,34 @@
 {
-  "shots": 132,
-  "formats": [
-    "webp",
-    "avif"
+  "captures": 306,
+  "views": [
+    "capture-to-chat",
+    "connect-ai",
+    "course-page",
+    "courses-home",
+    "document-figures",
+    "history-search",
+    "home",
+    "library",
+    "moodle-webview",
+    "onboarding-welcome",
+    "original-page",
+    "planner-today",
+    "reader-chat-with-answer",
+    "school",
+    "storage-settings",
+    "themes-settings",
+    "usage-settings"
   ],
+  "schemes": 2,
+  "palettes": 9,
+  "websiteDerivatives": 646,
   "dimensions": [
     2880,
     1800
   ],
-  "maxWebpBytes": 186566,
-  "maxAvifBytes": 104291,
+  "totalBytes": 62552224,
+  "maxWebp": 193548,
+  "maxAvif": 120579,
+  "orphanedFiles": 0,
   "failures": 0
 }

@@ -34,7 +34,7 @@ The first release targets Apple silicon Mac and Windows x64. Intel Mac and Windo
 2. On Mac, open the DMG, drag **VStudy Pro.app** into **Applications**, eject the image, and open the installed copy. If an unsigned or ad-hoc build is blocked, attempt to open it once. Then use **System Settings > Privacy & Security > Open Anyway** if offered, after verifying that you trust the source. Do not disable Gatekeeper globally. See [Apple's first-open guidance](https://support.apple.com/en-us/102445).
 3. On Windows, run the EXE. The installer uses the current user's account. If SmartScreen warns about an unsigned installer, choose **More info > Run anyway** only after verification and only if offered. An organization policy may forbid this. Do not disable SmartScreen. Stop if a per-user installer unexpectedly requests administrator access.
 4. For a signed and notarized Mac release, use the ordinary first-open confirmation. For signed Windows releases, check the publisher in the file's signature details. Signing does not guarantee SmartScreen reputation. The release notes must state the actual signing status. See [signature verification](docs/SIGNING.md#verify-the-delivered-artifacts).
-5. Follow onboarding or open the sample document. Connect a school under **Courses** and configure optional AI under **Settings > Providers** when ready.
+5. Follow onboarding or open the sample document. Connect a school under **Courses** and configure optional AI under **Settings > AI services** when ready.
 
 VStudy encrypts saved credentials through Electron `safeStorage`. macOS uses a login-Keychain key and may ask for Keychain access, especially after an ad-hoc rebuild. Windows uses DPAPI tied to the Windows user, without a Mac-style Keychain dialog. Both systems defer decryption until you explicitly unlock saved keys after restart. Opening the main window does not unlock them. You can retry or use keys for the session without saving.
 
@@ -69,7 +69,9 @@ Install **uv** or **Python 3.10+** separately when document conversion requires 
 - **Multi-school Moodle.** Search the bundled school directory or enter a public HTTPS Moodle URL. Keep multiple school accounts and identities separate. Password and supported SSO flows use the official Moodle mobile service.
 - **Study planner and agent.** Add tasks, goals, exams, and study blocks. Draft a daily or weekly schedule within your available time and export calendar blocks. The course assistant proposes changes through approval cards; review them before saving. Removing a course reference preserves student-owned plans.
 - **Reading with AI.** Import PDF, DOCX, XLSX, PPTX, HTML, CSV, Markdown, or text up to 50 MiB per file. Organize with folders, tags, pins, and saved filters. Select a passage, ask a connected model, follow citations, and view reported or estimated usage and cost.
-- **Themes.** Light, dark, or system mode; nine built-in theme packs; contrast and glass opacity controls; validated custom theme import and export.
+- **Original pages and figures.** Read converted figures with the text, inspect original PDF pages, and attach a page or region to image-capable AI chat. Supported Office files on macOS provide a first-page preview. Optional AI re-parsing can improve completed conversions.
+- **Usage and connection.** Connect AI guides you through Install, Sign in, and Test. Sidebar meters show available Claude/Codex subscription windows; Usage settings offer local monthly USD and token budgets.
+- **Themes.** Light, dark, or system mode; nine built-in theme packs; Solid, Soft, or Glass card transparency; contrast and glass opacity; text scale, density, reader font and size; English, Traditional Chinese, and Japanese; default opening in the reader or system app; validated custom theme import and export.
 - **Chat history search.** Search document, course, and general chats. Filter by course, document, scope, role, and date. Rename, pin, archive, or delete conversations.
 - **Moodle pages in-app.** Open supported teacher pages and announcements in isolated account views with the school session, navigation, zoom, and reload controls.
 - **Storage and backup.** Inspect usage, clear caches or converted files, check database integrity, and export or restore a portable backup. Backups exclude credentials; restored school accounts need sign-in again.
@@ -131,6 +133,8 @@ Search across conversations and reopen matching messages. Filters distinguish co
 
 ![Appearance settings with whole-app light and dark theme packs](docs/assets/readme/themes.webp)
 
+![Original page attached to a draft question](docs/assets/readme/capture.webp)
+
 ![Storage settings with local usage categories](docs/assets/readme/storage.webp)
 
 ### Help and Welcome
@@ -172,13 +176,13 @@ See the [MCP setup, tools, and security guide](docs/MCP.md), [client formats and
 
 Choose a school and confirm its Moodle site. Main discovers the official mobile service, signs in with the school's supported password or SSO flow, and stores account-scoped course snapshots in local SQLite. It checks server capabilities instead of assuming every school exposes the same functions.
 
-Imports copy your original into a content-addressed library. Markdown and text open directly; other formats use an on-demand Python converter to produce Markdown. The converter denies network access on macOS and stops after idle time. Conversion can lose formatting; it is not an exact PDF viewer.
+Imports copy your original into a content-addressed library. Markdown and text open directly; other formats use an on-demand Python converter to produce Markdown. The converter denies network access on macOS and stops after idle time. Conversion can lose formatting. Switch to Original file in the reader to inspect PDF pages and attach page images or captured regions to chat.
 
-AI is optional. Open **AI tools** in the sidebar, or **Set up AI** from onboarding, the Reader, or **Settings > Providers**. Choose Claude Code (`claude`), Codex (`codex`), or Antigravity (`agy`), then allow that tool individually. Discovery checks files without launching a disabled tool.
+AI is optional. Open **Connect AI** in the sidebar, or **Set up AI** from onboarding, the Reader, or **Settings > AI services**. Choose Claude Code (`claude`), Codex (`codex`), or Antigravity (`agy`), then allow that tool individually. Discovery checks files without launching a disabled tool.
 
 1. **Install.** Review the official download and private destination, then run the action. Managed downloads require an app-pinned hash or independently verified publisher signature before execution. Claude and audited macOS Codex 0.166.0 support this. Antigravity uses **Install another way**, with the official command to run in your own terminal. Managed versions need no administrator password or PATH changes.
 2. **Sign in.** Run the reviewed action in the embedded terminal on macOS. Follow its link or device code, then return to VStudy. Links ask for confirmation. You can also copy the command or open your own Terminal. Windows and Linux use that external-terminal fallback for sign-in.
-3. **Test.** Choose **Test it** to send a tiny prompt through the real provider. It contains no document text and may count toward your provider usage. Specific recovery hints and a request to copy to your teacher or IT team are available in the same sheet.
+3. **Test.** Choose **Test** to send a tiny prompt through the real provider. It contains no document text and may count toward your provider usage. Specific recovery hints and a request to copy to your teacher or IT team are available in the same sheet.
 
 The sidebar shows versions and update state. **Check for updates now** requests a one-time version check. Background checks and automatic updates while idle start off in **Settings > Privacy**. A requested update installs beside the current version. Running chats keep their executable, new chats use the update, and rollback keeps the previous version available. VStudy does not update a separately installed CLI. The copy-only vendor installer fallback explains how to select an existing executable in Providers settings.
 
@@ -296,4 +300,4 @@ Follow [CONTRIBUTING](CONTRIBUTING.md) for changes, translation synchronization,
 - No OCR. Scanned or image-only PDFs are unsupported. Complex tables, columns, equations, and images can lose fidelity. Single-file HTML and Markdown imports do not copy adjacent images.
 - Live-school features depend on the school's Moodle mobile service and permissions. Public HTTPS is required; LAN-only sites, self-signed TLS, and QR credential exchange are unsupported.
 - Local storage has no device sync. API and CLI models need their own access and may incur charges.
-- The AI document-improvement backend and panel exist, but the panel is not mounted in the current reader. Do not rely on that workflow. See [AI parsing status](docs/AI_PARSE.md).
+- The reader offers optional AI re-parsing after conversion. Review the model, range, and estimate before confirming; the panel has no guaranteed spending cap. See [AI parsing status](docs/AI_PARSE.md).

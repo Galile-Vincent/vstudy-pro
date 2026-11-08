@@ -1,0 +1,149 @@
+{
+  "results": [
+    {
+      "route": "/en/",
+      "status": 200,
+      "lang": "en",
+      "title": "Your semester, with room to think. · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/en/docs/reading-documents/",
+      "status": 200,
+      "lang": "en",
+      "title": "Reading documents with AI · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/en/docs/themes/",
+      "status": 200,
+      "lang": "en",
+      "title": "Customize your workspace · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/en/docs/usage/",
+      "status": 200,
+      "lang": "en",
+      "title": "Usage and limits · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/en/docs/ai-providers/",
+      "status": 200,
+      "lang": "en",
+      "title": "AI providers and keys · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/en/docs/connect-your-school/",
+      "status": 200,
+      "lang": "en",
+      "title": "Connect your school · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/zh-Hant/",
+      "status": 200,
+      "lang": "zh-Hant",
+      "title": "整理好學期，留點空間思考。 · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/zh-Hant/docs/reading-documents/",
+      "status": 200,
+      "lang": "zh-Hant",
+      "title": "使用 AI 閱讀文件 · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/zh-Hant/docs/themes/",
+      "status": 200,
+      "lang": "zh-Hant",
+      "title": "自訂工作空間 · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/zh-Hant/docs/usage/",
+      "status": 200,
+      "lang": "zh-Hant",
+      "title": "用量與限制 · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/zh-Hant/docs/ai-providers/",
+      "status": 200,
+      "lang": "zh-Hant",
+      "title": "AI 供應商與金鑰 · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/zh-Hant/docs/connect-your-school/",
+      "status": 200,
+      "lang": "zh-Hant",
+      "title": "連接學校 · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/ja/",
+      "status": 200,
+      "lang": "ja",
+      "title": "学期を整えて、考える余白を。 · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/ja/docs/reading-documents/",
+      "status": 200,
+      "lang": "ja",
+      "title": "AI と資料を読む · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/ja/docs/themes/",
+      "status": 200,
+      "lang": "ja",
+      "title": "ワークスペースのカスタマイズ · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/ja/docs/usage/",
+      "status": 200,
+      "lang": "ja",
+      "title": "使用量と制限 · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/ja/docs/ai-providers/",
+      "status": 200,
+      "lang": "ja",
+      "title": "AI プロバイダーとキー · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    },
+    {
+      "route": "/ja/docs/connect-your-school/",
+      "status": 200,
+      "lang": "ja",
+      "title": "学校に接続する · VStudy Pro",
+      "broken": [],
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

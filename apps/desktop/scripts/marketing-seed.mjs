@@ -2,11 +2,13 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { setTimeout } from 'node:timers/promises';
+import { marketingPdf } from './marketing-document.mjs';
 import { randomUUID } from 'node:crypto';
 import { waitForDocumentStatus } from '../e2e/helpers/document-status.mjs';
 import { seedArtCourses } from '../e2e/fixtures/art-courses.mjs';
 
-export const captureTime = Date.parse('2026-11-06T02:00:00Z');
+export const captureTime = Date.parse(process.env.SHOT_DATE ?? new Date(Date.now() + 86400000).toISOString().slice(0,10) + 'T02:00:00Z');
 export const passage = 'Breadth-first search explores a graph one layer at a time. A queue keeps the frontier in order, so every vertex is reached along a shortest path in an unweighted graph.';
 const reading = `# Graphs, one connection at a time
 
@@ -59,8 +61,18 @@ export async function seedMarketing(app, page, directory) {
     let sequence=0;
     process.getBuiltinModule('crypto').randomUUID=()=>`b00c0000-0000-4000-a000-${String(++sequence).padStart(12,'0')}`;
   },captureTime);
+  // No real CLI discovery or subscription credentials in marketing captures.
+  await app.evaluate(({ipcMain},now)=>{
+    const handlers={
+      'usage:subscriptions':()=>['claude','codex'].map((provider,i)=>({provider,status:'ready',windows:[{label:'5h',usedPercent:24+i*12,resetsAt:new Date(now+7200000).toISOString()},{label:'weekly',usedPercent:38+i*9,resetsAt:new Date(now+3*86400000).toISOString()}],fetchedAt:new Date(now).toISOString(),nextRefreshAt:new Date(now+60000).toISOString()})),
+      'ai-cli:list':()=>['claude','codex','agy'].map(provider=>({provider,consented:false,version:null,path:null,managed:false,manualInstallRequired:false,manualUpdateRequired:false,latestVersion:null,releaseNotesUrl:null,checkedAt:null,previousVersion:null,appliesToNewChats:false,tested:false,status:'not-installed',error:null})),
+    };
+    for(const [channel,handler] of Object.entries(handlers)){ipcMain.removeHandler(channel);ipcMain.handle(channel,handler);}
+  },captureTime);
+  await call('review:prefs:set',{memoryEnabled:false});
+  await call('analytics:setConsent',{enabled:false});
   const fixture = await seedArtCourses(app, captureTime);
-  await call('settings:set', {...await call('settings:get', {}), onboardingCompleted:true, welcomeSeen:true, displayName:'Alex', language:'en', chatSide:'right', lastProviderId:'anthropic-api', lastModelId:'fake'});
+  await call('settings:set', {...await call('settings:get', {}), onboardingCompleted:true, welcomeSeen:true, displayName:'Alex', language:'en', chatSide:'right', monthlyBudgetUsd:20, monthlyTokenBudget:1000000, lastProviderId:'anthropic-api', lastModelId:'fake'});
   await call('providers:configure', {kind:'api',id:'anthropic-api',enabled:true});
   await page.evaluate(() => {
     window.localStorage.setItem('vstudy-onboarding-v1', JSON.stringify({version:1,step:'start',goal:'documents',status:'completed',done:['setup','document','walkthrough','help'],dismissed:['workspace','courses']}));
@@ -80,6 +92,17 @@ export async function seedMarketing(app, page, directory) {
     await call('documents:read',{documentId:doc.id});
     documents.push(doc);
   }
+  const pdfPath=join(directory,'Graph traversal worksheet.pdf');
+  await writeFile(pdfPath,await marketingPdf());
+  await app.evaluate(({dialog},path)=>{dialog.showMessageBox=async()=>({response:1});dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},pdfPath);
+  const pdf=await call('documents:import',{folderId:folders.get('Course notes').id});
+  for(let attempt=0;attempt<600;attempt++){
+    const state=await call('documents:get',{documentId:pdf.id});
+    if(state.status==='ready')break;
+    if(state.status==='failed')throw Error(`Marketing PDF conversion failed: ${state.error}`);
+    await setTimeout(1000);
+  }
+  await waitForDocumentStatus(page,pdf.id);
   const at = days => new Date(captureTime + days * 86400000).toISOString();
   const tasks=[];
   for (const [i,title] of ['Trace three shortest paths','Finish the editorial moodboard','Review conditional probability','Sketch the network layers','Prepare interview questions'].entries()) {
@@ -89,6 +112,11 @@ export async function seedMarketing(app, page, directory) {
   await call('planner:approve',{approvalId:randomUUID(),action:{type:'create-exam',exam:{title:'Probability & Statistics · Midterm',courseId:fixture.details[2].course.id,date:at(4),scopeTopics:['Random variables','Conditional probability','Sampling & estimation'],materialIds:[],deadlineId:null}}});
   const db = new DatabaseSync(join(await app.evaluate(({app})=>app.getPath('userData')),'vstudy.sqlite'));
   try {
+    // Link synthetic library readings to synthetic courses, as a Moodle import does.
+    for(const [i,doc] of [...documents,pdf].entries()) {
+      const detail=fixture.details[[0,2,4,6,3,5,0][i]], file={...detail.files[0],id:randomUUID(),name:doc.title,documentId:doc.id};
+      db.prepare('INSERT INTO moodle_files(id,courseId,url,data,documentId) VALUES (?,?,?,?,?)').run(file.id,detail.course.id,'https://moodle.example.edu/demo.pdf',JSON.stringify(file),doc.id);
+    }
     const titles = ['Finding the shortest path','Designing a calmer reading experience','A little intuition for probability','How packets find their way','Better questions for interviews','Reading the city as an ecosystem','Seeing with light & shadow','A plan for the week ahead'];
     const offset = reading.indexOf(passage);
     const citation = {id:'s1',documentId:documents[0].id,title:'Start with the frontier',offset,quote:passage};
@@ -103,9 +131,13 @@ export async function seedMarketing(app, page, directory) {
         db.prepare('INSERT INTO messages(id,conversationId,role,parts,createdAt) VALUES (?,?,?,?,?)').run(`c17e0000-0000-4000-a000-${String(i*2+(role==='assistant'?2:1)).padStart(12,'0')}`,id,role,JSON.stringify([part]),new Date(Date.parse(date)+(role==='assistant'?1000:0)).toISOString());
       }
     }
+    for(let i=0;i<8;i++) {
+      const record={id:randomUUID(),createdAt:at(-1-i*.4),providerId:'anthropic-api',modelId:'fake',kind:'chat',documentId:documents[i%documents.length].id,inputTokens:2400+i*320,outputTokens:680+i*90,costUsd:.024+i*.003,costSource:'estimated'};
+      db.prepare('INSERT INTO usage_events(id,createdAt,providerId,modelId,kind,documentId,inputTokens,outputTokens,cacheReadTokens,cacheWriteTokens,reasoningTokens,costUsd,costSource,payload) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(record.id,record.createdAt,record.providerId,record.modelId,record.kind,record.documentId,record.inputTokens,record.outputTokens,0,0,0,record.costUsd,record.costSource,JSON.stringify(record));
+    }
   } finally {db.close();}
 
   const providers=await call('providers:list',{discover:false});
   await app.evaluate(({ipcMain},providers)=>{ipcMain.removeHandler('providers:list');ipcMain.handle('providers:list',()=>providers.map(provider=>({...provider,models:provider.models.map(model=>({...model,name:model.id==='fake'?'Demo assistant':model.name}))})));},providers);
-  return {fixture,documents,call};
+  return {fixture,documents,pdf,call};
 }

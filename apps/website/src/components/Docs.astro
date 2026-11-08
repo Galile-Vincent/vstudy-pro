@@ -15,7 +15,7 @@ interface Props { language: Language; slug: string; }
 const { language, slug } = Astro.props;
 const t = ui[language];
 const guide = getGuide(slug,language);
-const media = new Map(await Promise.all(guide.sections.filter(section => section.image && section.image.name !== 'school').map(async section => [section.image!.name, await getImage({src:shot(section.image!.name),width:1440,format:'webp',quality:82})] as const)));
+const media = new Map(await Promise.all(guide.sections.filter(section => section.image).map(async section => [section.image!.name, await getImage({src:shot(section.image!.name),width:1440,format:'webp',quality:82})] as const)));
 const fallback = language !== 'en' && !translations[language]?.[slug];
 const index = guides.findIndex(item => item.slug === slug);
 const prev = guides[index-1];

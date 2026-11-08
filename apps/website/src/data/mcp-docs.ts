@@ -6,11 +6,11 @@ export const mcpGuide: Guide = {
   description: 'Read Moodle coursework with Claude Code, Codex, Antigravity, Claude Desktop, or Cursor while keeping school credentials in VStudy.',
   sections: [
     {id: 'session', title: 'Use the school session you already have', paragraphs: [
-      'Use a VStudy build with Settings > Agents. VStudy signs in to Moodle through its existing school connection. The global agent receives a separate local grant. School passwords, tokens, cookies, signed file URLs and autologin keys stay outside the agent.',
+      'Open Settings > Agents in the current app. VStudy signs in to Moodle through its existing school connection. The global agent receives a separate local grant. School passwords, tokens, cookies, signed file URLs and autologin keys stay outside the agent.',
       'The bundled server uses MCP over stdio and needs Node.js 24.11.1 or later. Source builds use the pinned Node 24.19.0 and require at least 24.15.0. It connects to the local app. It does not sign in to schools or make school network requests. Available tools depend on the school’s enabled mobile-service functions and permissions.',
     ]},
     {id: 'connect', title: 'Connect your first agent', paragraphs: [
-      'Connect your school in Courses and sync it first. You can enter a public HTTPS Moodle URL when the directory has no match. If Agents is absent from Settings, update to an MCP-enabled build or build from source.',
+      'Connect your school in Courses and sync it first. You can enter a public HTTPS Moodle URL when the directory has no match. Agent connections are optional and off by default.',
       'The client name is self-reported. A familiar name does not authenticate a program. Compare the code while you are connecting that client, and select only the accounts and permissions you intend to share.',
     ], steps: [
       'Install Node.js 24.11.1 or later on the computer running your agent.',

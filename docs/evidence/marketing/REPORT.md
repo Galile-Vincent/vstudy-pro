@@ -1,95 +1,25 @@
-# U3 marketing refresh
+# Current marketing refresh
 
-The owner wanted the README and website to show the redesigned product as curated marketing art. The delivered images show the real built app with a populated semester, an answered Reader, and a styled teacher page inside the real Moodle pane.
+Base: main `6ee5617d`. Implementation branch: `chore/refresh-marketing-captures`.
 
-## Pipeline
+The app was built from this base, then captured with disposable synthetic fixtures. No user profile, school credentials, provider login, live school request, or paid AI request was used. Converter package downloads are the only external setup required by the fixture. The native Moodle page is served over loopback.
 
-Run from the repository root.
+## Scope
 
-```sh
-pnpm build
-node apps/desktop/scripts/marketing-shots.mjs
-```
+Retake the existing eleven views in every existing palette/mode. Extend to all nine app palettes and add converted figures, original PDF page, page attached to chat, Usage settings, Connect AI, and school discovery: 17 views × 9 palettes × 2 schemes = 306 variants, each WebP and AVIF, plus default aliases and README exports. Remove the stale public school-picker duplicate; preserve established shot names. The brand-only OG image does not need regeneration.
 
-`SHOT_THEMES`, `SHOT_MODES`, and `SHOT_ONLY` accept comma-separated filters. Filtered reshoots update matching manifest entries and preserve the rest of the contact sheet. See `docs/assets/readme/README.md` for the complete capture contract.
+Home feature cards now show attachments, subscription limits, Connect AI and the current MCP grant workflow. Appearance previews show Card transparency and default document opening. English, Traditional Chinese and Japanese share equivalent reader, customization and usage guides and feature lists. README feature/customization lists and AI parsing availability are updated in all three languages. Existing unrelated untranslated reference guides retain the explicit English fallback.
 
-The view registry prepares eleven real app views. The seed reuses the existing eight-course fixture and adds six documents in two folders, five tasks, one exam, three approved study blocks, and eight saved simulated conversations. The Reader stores structured selection metadata and a source citation. The isolated process fixes UUID generation and its date epoch. Main's elapsed clock keeps security rate limiting functional. It enables the existing fake provider and never contacts a real school or paid AI service.
+## Pipeline repairs
 
-One Electron instance captures 1440 × 900 CSS pixels at 2×. All 132 variants have 2880 × 1800 WebP and AVIF exports. WebP quality is 82. The byte ceiling is 220,000 per image. The largest WebP is 186,566 bytes; the largest AVIF is 104,291 bytes. `export-audit.json` verifies every exported image's dimensions, bytes, and manifest entry.
+The original fixed November 6 epoch caused production planner validation to reject study blocks once that date passed. Capture dates now default to tomorrow, with SHOT_DATE for an explicit valid future epoch. Old Moodle hero and Library row selectors no longer matched the current app. School discovery uses its actual combobox. New reader shots explicitly await the chat composer and the capture step rejects a loading conversation. Visible images are decoded and error alerts rejected. Synthetic subscription windows and CLI inventory avoid account discovery; analytics and memory consent cards are disabled in the fixture. A generated PDF exercises real figure extraction and page rendering. AVIF effort is reduced from 4 to 2 while retaining quality 50 and the same byte ceiling.
 
-## Shot sizes
+## Verification
 
-Sizes are bytes. The default columns are VStudy light. Each view also has Ocean, Grove, Ember, Iris, and Rose in light and dark. `manifest.json` contains every individual size.
+Final command results and image audit are recorded alongside this report. Raw PNGs, per-palette review sheets, and built-site screenshots remain local ignored evidence. The existing tracked full contact sheet is updated; older historical evidence files are preserved. The capture manifest is the source of truth for per-file dimensions, sizes and capture epoch.
 
-| Shot | Default WebP | Default AVIF | Largest WebP in matrix |
-| --- | ---: | ---: | ---: |
-| courses-home | 163,584 | 90,780 | 170,140 |
-| course-page | 125,206 | 64,447 | 132,106 |
-| planner-today | 110,260 | 57,043 | 115,074 |
-| reader-chat-with-answer | 176,742 | 97,172 | 186,566 |
-| history-search | 69,040 | 36,008 | 72,494 |
-| library | 105,660 | 57,205 | 110,314 |
-| home | 145,042 | 76,534 | 149,994 |
-| themes-settings | 64,974 | 35,607 | 67,920 |
-| moodle-webview | 149,002 | 79,877 | 154,902 |
-| storage-settings | 58,760 | 30,467 | 61,560 |
-| onboarding-welcome | 67,446 | 35,763 | 70,438 |
+The first capture attempts failed on the stale date and selectors, and visual review caught the memory consent card, a synthetic graph drawing mistake, and a transient loading conversation. These were corrected before accepting the corresponding captures. The shared preview DOM check worked, but preview screenshots twice timed out; local Playwright with isolated Chrome was used for built-site visual checks.
 
-## Before and after
+Final results: [VERIFICATION.md](VERIFICATION.md), [export audit](export-audit.json), and [browser checks](site/checks.json). All 306 final captures passed. The largest derivative is 193,548 bytes. Website build produced 64 pages; static verification checked 3,664 links with zero failures. Root typechecking, script lint and download verification passed.
 
-`before/reader.webp` shows the previous mostly empty reading workspace. The new `docs/assets/readme/reader.webp` has a selected passage, a complete simulated answer, and a source citation.
-
-`before/courses.webp` shows the previous flat course layout. The new `docs/assets/readme/courses.webp` frames seven complete art cards with teachers, progress, and deadlines. The eighth, past course remains in the fixture.
-
-`before/webview.webp` shows the old raw fixture content. `docs/assets/readme/course.webp` now shows the actual app course page. `docs/assets/readme/webview.webp` separately shows the styled demo teacher page.
-
-The website's three hero comparisons are `hero-reader.png`, `hero-courses.png`, and `hero-course-page.png`. Courses won because its artwork and short titles remain clear at website scale. Reader and course detail remain in their matching feature sections. `../../art/marketing-decision.md` records the design and capture decisions.
-
-The final `contact-sheet.png` contains all 132 accepted shots. The visual review rejected clipped cards, incorrect message order, model-name truncation, the empty Planner form, inherited course scroll, and white Moodle cards in dark mode. Each issue was corrected and reshot. Theme sheets and full-resolution raw PNGs remain local evidence; the source exports and full contact sheet are committed.
-
-## Website validation
-
-The production build emits 49 pages across English, Traditional Chinese, and Japanese. All 1,958 checked links pass. Every screenshot has alt text and explicit dimensions. Images below the hero are lazy. The final home-page image total is 213,606 bytes, below 400,000. `static.txt` records the audit.
-
-T3's preview browser checked all 49 pages at desktop and 390-pixel mobile widths, plus 72 home language, theme, scheme, and width combinations. All 170 cases have zero WCAG 2 A/AA and 2.1 AA axe violations and no horizontal page overflow. All six theme buttons load and decode the matching light and dark captures. `browser-audit.json` records the cases. The owned preview tabs were closed after verification.
-
-The following are individual local Lighthouse mobile runs against the production build. They are not production-hosting performance comparisons. The columns are performance, accessibility, best practices, and SEO.
-
-| Page | Lighthouse scores | CLS |
-| --- | --- | ---: |
-| docs-course | 100 / 100 / 100 / 100 | 0 |
-| docs-moodle | 100 / 100 / 100 / 100 | 0 |
-| docs-planner | 100 / 100 / 100 / 100 | 0 |
-| docs-reader | 100 / 100 / 100 / 100 | 0 |
-| home-en | 100 / 100 / 100 / 100 | 0 |
-| home-ja | 100 / 100 / 100 / 100 | 0 |
-| home-zh-Hant | 100 / 100 / 100 / 100 | 0 |
-
-## Commands and results
-
-| Command | Result |
-| --- | --- |
-| `pnpm install --frozen-lockfile` | Passed without changing the lockfile. |
-| `pnpm build` | Passed for built Electron main, preload, and renderer. |
-| `node apps/desktop/scripts/marketing-shots.mjs` | Passed for the full 132-shot matrix. Filtered course and Moodle reshoots passed and merged into that manifest. |
-| `pnpm typecheck` | Passed. The final website check also passed with zero errors, warnings, or hints. |
-| `pnpm lint` | Passed. The final capture scripts also pass scoped ESLint. |
-| `pnpm knip` | Passed with one existing CSS configuration hint. |
-| `pnpm security:static` | Passed with three existing Electron security lint warnings. |
-| `pnpm test --pool=forks --maxWorkers=2` | 997 passed, 14 skipped. Full suite ran once. Contrast checks passed. |
-| `pnpm --filter @vstudy/website build` | 49 production pages built. |
-| `pnpm --filter @vstudy/website verify:static` | Passed, including the 400 KB home image budget. |
-| Occupied fixture port runtime check | Expected EADDRINUSE, exit code 1, and no remaining Electron process. |
-| `node scripts/check-readme-links.mjs` | 134 local Markdown links passed. |
-| T3 `preview_*` browser and axe | 170 cases passed; six theme swaps decoded correctly. |
-| Lighthouse CLI | Seven pages scored 100 in every category, with CLS 0. |
-
-Lighthouse ran serially using `/tmp/vstudy-website-qa/node_modules/.bin/lighthouse`, `CHROME_PATH=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`, and `--chrome-flags='--headless --disable-gpu --no-sandbox' --only-categories=performance,accessibility,best-practices,seo --output=json --quiet`. The JSON files contain the measured settings and version. Electron and browser runs did not overlap.
-
-## Ownership and limits
-
-Production app behavior is unchanged. No shared IPC, desktop locale, or theme files changed. The existing Courses fixture is reused without modification. The app capture code is in three `apps/desktop/scripts/marketing-*.mjs` modules. Astro image lookup is in `apps/website/src/data/shots.ts`; `Window.astro`, `Home.astro`, `Docs.astro`, and the website copy consume the captures. The old public screenshot copies were removed. All three READMEs use the new defaults and localized alt text.
-
-The default marketing images use the English interface; the library includes Traditional Chinese material. The website's existing untranslated docs retain their explicit English fallback notice. Captures use synthetic coursework and saved simulated answers. They do not certify a live school or live AI provider. Disk-usage figures can vary slightly between machines. Independent review belongs to the parent coordinator; no nested agents or PRs were created.
-
-Model the Domain produced the view registry and manifest. Build the Lever produced the rerunnable pipeline. Prove It Works required real Electron captures and built-site browser evidence.
+Language coverage: English, Traditional Chinese and Japanese each gained equivalent reader (figures, original view, attachment, AI re-parsing), customization (nine palettes, Card transparency, text/density/font, language, opening method) and usage guides; updated Connect AI steps, home feature cards, MCP availability/permissions, demo captions, and README feature lists. Other established reference guides keep their existing explicit English fallback.

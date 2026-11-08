@@ -1,5 +1,5 @@
 {
-  "captureTime": "2026-11-06T02:00:00.000Z",
+  "captureTime": "2026-11-09T02:00:00.000Z",
   "viewport": {
     "width": 1440,
     "height": 900,
@@ -8,13 +8,33 @@
   "artifact": "Built Electron app, synthetic course/provider/saved-conversation fixtures, real document imports and planner IPC",
   "shots": [
     {
+      "name": "capture-to-chat",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 134766,
+      "avifBytes": 80999,
+      "file": "capture-to-chat-vstudy-dark.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 98408,
+      "avifBytes": 59240,
+      "file": "connect-ai-vstudy-dark.webp"
+    },
+    {
       "name": "course-page",
       "theme": "vstudy",
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 105412,
-      "avifBytes": 52904,
+      "webpBytes": 113260,
+      "avifBytes": 63514,
       "file": "course-page-vstudy-dark.webp"
     },
     {
@@ -23,9 +43,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 95770,
-      "avifBytes": 51090,
+      "webpBytes": 98154,
+      "avifBytes": 53856,
       "file": "courses-home-vstudy-dark.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133138,
+      "avifBytes": 76379,
+      "file": "document-figures-vstudy-dark.webp"
     },
     {
       "name": "history-search",
@@ -33,8 +63,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68780,
-      "avifBytes": 34175,
+      "webpBytes": 101788,
+      "avifBytes": 58445,
       "file": "history-search-vstudy-dark.webp"
     },
     {
@@ -43,8 +73,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 130700,
-      "avifBytes": 65957,
+      "webpBytes": 125462,
+      "avifBytes": 71656,
       "file": "home-vstudy-dark.webp"
     },
     {
@@ -53,8 +83,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 92030,
-      "avifBytes": 47315,
+      "webpBytes": 70052,
+      "avifBytes": 39071,
       "file": "library-vstudy-dark.webp"
     },
     {
@@ -63,8 +93,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 142084,
-      "avifBytes": 72928,
+      "webpBytes": 153846,
+      "avifBytes": 90094,
       "file": "moodle-webview-vstudy-dark.webp"
     },
     {
@@ -73,9 +103,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 62380,
-      "avifBytes": 31975,
+      "webpBytes": 134576,
+      "avifBytes": 86144,
       "file": "onboarding-welcome-vstudy-dark.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 127400,
+      "avifBytes": 75698,
+      "file": "original-page-vstudy-dark.webp"
     },
     {
       "name": "planner-today",
@@ -83,8 +123,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 102930,
-      "avifBytes": 50017,
+      "webpBytes": 103768,
+      "avifBytes": 55825,
       "file": "planner-today-vstudy-dark.webp"
     },
     {
@@ -93,9 +133,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 176014,
-      "avifBytes": 88937,
+      "webpBytes": 184582,
+      "avifBytes": 104002,
       "file": "reader-chat-with-answer-vstudy-dark.webp"
+    },
+    {
+      "name": "school",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133430,
+      "avifBytes": 78943,
+      "file": "school-vstudy-dark.webp"
     },
     {
       "name": "storage-settings",
@@ -103,8 +153,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 53970,
-      "avifBytes": 26553,
+      "webpBytes": 114254,
+      "avifBytes": 66988,
       "file": "storage-settings-vstudy-dark.webp"
     },
     {
@@ -113,9 +163,39 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 62762,
-      "avifBytes": 33561,
+      "webpBytes": 88184,
+      "avifBytes": 53889,
       "file": "themes-settings-vstudy-dark.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "vstudy",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129346,
+      "avifBytes": 77427,
+      "file": "usage-settings-vstudy-dark.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 131876,
+      "avifBytes": 83141,
+      "file": "capture-to-chat-vstudy-light.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 100206,
+      "avifBytes": 62755,
+      "file": "connect-ai-vstudy-light.webp"
     },
     {
       "name": "course-page",
@@ -123,8 +203,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 112776,
-      "avifBytes": 57930,
+      "webpBytes": 112100,
+      "avifBytes": 66449,
       "file": "course-page-vstudy-light.webp"
     },
     {
@@ -133,9 +213,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 110202,
-      "avifBytes": 59042,
+      "webpBytes": 96110,
+      "avifBytes": 55291,
       "file": "courses-home-vstudy-light.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129806,
+      "avifBytes": 78878,
+      "file": "document-figures-vstudy-light.webp"
     },
     {
       "name": "history-search",
@@ -143,8 +233,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68706,
-      "avifBytes": 35780,
+      "webpBytes": 99818,
+      "avifBytes": 60995,
       "file": "history-search-vstudy-light.webp"
     },
     {
@@ -153,8 +243,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 141286,
-      "avifBytes": 74200,
+      "webpBytes": 125642,
+      "avifBytes": 75699,
       "file": "home-vstudy-light.webp"
     },
     {
@@ -163,8 +253,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 101856,
-      "avifBytes": 53955,
+      "webpBytes": 67840,
+      "avifBytes": 39740,
       "file": "library-vstudy-light.webp"
     },
     {
@@ -173,8 +263,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 146326,
-      "avifBytes": 78682,
+      "webpBytes": 153386,
+      "avifBytes": 92241,
       "file": "moodle-webview-vstudy-light.webp"
     },
     {
@@ -183,9 +273,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 67688,
-      "avifBytes": 35551,
+      "webpBytes": 136496,
+      "avifBytes": 89775,
       "file": "onboarding-welcome-vstudy-light.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 125154,
+      "avifBytes": 77161,
+      "file": "original-page-vstudy-light.webp"
     },
     {
       "name": "planner-today",
@@ -193,8 +293,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 107960,
-      "avifBytes": 55853,
+      "webpBytes": 102584,
+      "avifBytes": 58918,
       "file": "planner-today-vstudy-light.webp"
     },
     {
@@ -203,9 +303,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 176742,
-      "avifBytes": 97122,
+      "webpBytes": 180198,
+      "avifBytes": 108674,
       "file": "reader-chat-with-answer-vstudy-light.webp"
+    },
+    {
+      "name": "school",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 132412,
+      "avifBytes": 83471,
+      "file": "school-vstudy-light.webp"
     },
     {
       "name": "storage-settings",
@@ -213,8 +323,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 58554,
-      "avifBytes": 30309,
+      "webpBytes": 117782,
+      "avifBytes": 72302,
       "file": "storage-settings-vstudy-light.webp"
     },
     {
@@ -223,9 +333,39 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 65404,
-      "avifBytes": 35615,
+      "webpBytes": 90074,
+      "avifBytes": 57425,
       "file": "themes-settings-vstudy-light.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "vstudy",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133098,
+      "avifBytes": 83477,
+      "file": "usage-settings-vstudy-light.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 135744,
+      "avifBytes": 82400,
+      "file": "capture-to-chat-ocean-dark.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 98666,
+      "avifBytes": 59411,
+      "file": "connect-ai-ocean-dark.webp"
     },
     {
       "name": "course-page",
@@ -233,8 +373,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 105370,
-      "avifBytes": 53071,
+      "webpBytes": 115846,
+      "avifBytes": 64985,
       "file": "course-page-ocean-dark.webp"
     },
     {
@@ -243,9 +383,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 96736,
-      "avifBytes": 51581,
+      "webpBytes": 97842,
+      "avifBytes": 53799,
       "file": "courses-home-ocean-dark.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133940,
+      "avifBytes": 77329,
+      "file": "document-figures-ocean-dark.webp"
     },
     {
       "name": "history-search",
@@ -253,8 +403,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 69512,
-      "avifBytes": 34031,
+      "webpBytes": 102992,
+      "avifBytes": 59160,
       "file": "history-search-ocean-dark.webp"
     },
     {
@@ -263,8 +413,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 131564,
-      "avifBytes": 66108,
+      "webpBytes": 125292,
+      "avifBytes": 72485,
       "file": "home-ocean-dark.webp"
     },
     {
@@ -273,8 +423,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 93130,
-      "avifBytes": 47575,
+      "webpBytes": 70236,
+      "avifBytes": 39695,
       "file": "library-ocean-dark.webp"
     },
     {
@@ -283,8 +433,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 142234,
-      "avifBytes": 73047,
+      "webpBytes": 154560,
+      "avifBytes": 90698,
       "file": "moodle-webview-ocean-dark.webp"
     },
     {
@@ -293,9 +443,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 63812,
-      "avifBytes": 32227,
+      "webpBytes": 135650,
+      "avifBytes": 86648,
       "file": "onboarding-welcome-ocean-dark.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128062,
+      "avifBytes": 76828,
+      "file": "original-page-ocean-dark.webp"
     },
     {
       "name": "planner-today",
@@ -303,8 +463,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 103368,
-      "avifBytes": 50262,
+      "webpBytes": 105036,
+      "avifBytes": 56165,
       "file": "planner-today-ocean-dark.webp"
     },
     {
@@ -313,9 +473,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 176988,
-      "avifBytes": 89529,
+      "webpBytes": 183614,
+      "avifBytes": 103897,
       "file": "reader-chat-with-answer-ocean-dark.webp"
+    },
+    {
+      "name": "school",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 131202,
+      "avifBytes": 78624,
+      "file": "school-ocean-dark.webp"
     },
     {
       "name": "storage-settings",
@@ -323,8 +493,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 55294,
-      "avifBytes": 27362,
+      "webpBytes": 114706,
+      "avifBytes": 67600,
       "file": "storage-settings-ocean-dark.webp"
     },
     {
@@ -333,9 +503,39 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 63904,
-      "avifBytes": 33772,
+      "webpBytes": 90276,
+      "avifBytes": 56226,
       "file": "themes-settings-ocean-dark.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "ocean",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129464,
+      "avifBytes": 78171,
+      "file": "usage-settings-ocean-dark.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 141010,
+      "avifBytes": 90974,
+      "file": "capture-to-chat-ocean-light.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 105464,
+      "avifBytes": 67434,
+      "file": "connect-ai-ocean-light.webp"
     },
     {
       "name": "course-page",
@@ -343,8 +543,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 116500,
-      "avifBytes": 59732,
+      "webpBytes": 123566,
+      "avifBytes": 73383,
       "file": "course-page-ocean-light.webp"
     },
     {
@@ -353,9 +553,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 113886,
-      "avifBytes": 60372,
+      "webpBytes": 102162,
+      "avifBytes": 60001,
       "file": "courses-home-ocean-light.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 142344,
+      "avifBytes": 88800,
+      "file": "document-figures-ocean-light.webp"
     },
     {
       "name": "history-search",
@@ -363,8 +573,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 72822,
-      "avifBytes": 38637,
+      "webpBytes": 105464,
+      "avifBytes": 66315,
       "file": "history-search-ocean-light.webp"
     },
     {
@@ -373,8 +583,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 146128,
-      "avifBytes": 77619,
+      "webpBytes": 137300,
+      "avifBytes": 83604,
       "file": "home-ocean-light.webp"
     },
     {
@@ -383,8 +593,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 106274,
-      "avifBytes": 57608,
+      "webpBytes": 72478,
+      "avifBytes": 43189,
       "file": "library-ocean-light.webp"
     },
     {
@@ -393,8 +603,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 148160,
-      "avifBytes": 79102,
+      "webpBytes": 156906,
+      "avifBytes": 95356,
       "file": "moodle-webview-ocean-light.webp"
     },
     {
@@ -403,9 +613,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 70344,
-      "avifBytes": 37702,
+      "webpBytes": 140062,
+      "avifBytes": 93168,
       "file": "onboarding-welcome-ocean-light.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133354,
+      "avifBytes": 83497,
+      "file": "original-page-ocean-light.webp"
     },
     {
       "name": "planner-today",
@@ -413,8 +633,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 112784,
-      "avifBytes": 58371,
+      "webpBytes": 112584,
+      "avifBytes": 64120,
       "file": "planner-today-ocean-light.webp"
     },
     {
@@ -423,9 +643,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 186564,
-      "avifBytes": 104281,
+      "webpBytes": 193548,
+      "avifBytes": 120579,
       "file": "reader-chat-with-answer-ocean-light.webp"
+    },
+    {
+      "name": "school",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 137086,
+      "avifBytes": 89629,
+      "file": "school-ocean-light.webp"
     },
     {
       "name": "storage-settings",
@@ -433,8 +663,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 61300,
-      "avifBytes": 32608,
+      "webpBytes": 125734,
+      "avifBytes": 78485,
       "file": "storage-settings-ocean-light.webp"
     },
     {
@@ -443,9 +673,39 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68174,
-      "avifBytes": 37890,
+      "webpBytes": 97854,
+      "avifBytes": 63960,
       "file": "themes-settings-ocean-light.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "ocean",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 142590,
+      "avifBytes": 90905,
+      "file": "usage-settings-ocean-light.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 134238,
+      "avifBytes": 81769,
+      "file": "capture-to-chat-grove-dark.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 96670,
+      "avifBytes": 59242,
+      "file": "connect-ai-grove-dark.webp"
     },
     {
       "name": "course-page",
@@ -453,8 +713,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 104080,
-      "avifBytes": 52517,
+      "webpBytes": 113502,
+      "avifBytes": 65110,
       "file": "course-page-grove-dark.webp"
     },
     {
@@ -463,9 +723,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 96518,
-      "avifBytes": 51132,
+      "webpBytes": 97386,
+      "avifBytes": 53962,
       "file": "courses-home-grove-dark.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 130254,
+      "avifBytes": 76350,
+      "file": "document-figures-grove-dark.webp"
     },
     {
       "name": "history-search",
@@ -473,8 +743,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68734,
-      "avifBytes": 33105,
+      "webpBytes": 100130,
+      "avifBytes": 58971,
       "file": "history-search-grove-dark.webp"
     },
     {
@@ -483,8 +753,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 130548,
-      "avifBytes": 65756,
+      "webpBytes": 124084,
+      "avifBytes": 72410,
       "file": "home-grove-dark.webp"
     },
     {
@@ -493,8 +763,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 91408,
-      "avifBytes": 47315,
+      "webpBytes": 68706,
+      "avifBytes": 39308,
       "file": "library-grove-dark.webp"
     },
     {
@@ -503,8 +773,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 141308,
-      "avifBytes": 72674,
+      "webpBytes": 152742,
+      "avifBytes": 90416,
       "file": "moodle-webview-grove-dark.webp"
     },
     {
@@ -513,9 +783,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 63070,
-      "avifBytes": 31556,
+      "webpBytes": 133988,
+      "avifBytes": 86647,
       "file": "onboarding-welcome-grove-dark.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 125906,
+      "avifBytes": 76388,
+      "file": "original-page-grove-dark.webp"
     },
     {
       "name": "planner-today",
@@ -523,8 +803,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 102004,
-      "avifBytes": 50036,
+      "webpBytes": 102832,
+      "avifBytes": 55656,
       "file": "planner-today-grove-dark.webp"
     },
     {
@@ -533,9 +813,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 173202,
-      "avifBytes": 87621,
+      "webpBytes": 178570,
+      "avifBytes": 102061,
       "file": "reader-chat-with-answer-grove-dark.webp"
+    },
+    {
+      "name": "school",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129786,
+      "avifBytes": 78913,
+      "file": "school-grove-dark.webp"
     },
     {
       "name": "storage-settings",
@@ -543,8 +833,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 54404,
-      "avifBytes": 26475,
+      "webpBytes": 114114,
+      "avifBytes": 67459,
       "file": "storage-settings-grove-dark.webp"
     },
     {
@@ -553,9 +843,39 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 62980,
-      "avifBytes": 33245,
+      "webpBytes": 88712,
+      "avifBytes": 55756,
       "file": "themes-settings-grove-dark.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "grove",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128880,
+      "avifBytes": 77765,
+      "file": "usage-settings-grove-dark.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 131992,
+      "avifBytes": 85054,
+      "file": "capture-to-chat-grove-light.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 97298,
+      "avifBytes": 63788,
+      "file": "connect-ai-grove-light.webp"
     },
     {
       "name": "course-page",
@@ -563,8 +883,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 106832,
-      "avifBytes": 56469,
+      "webpBytes": 112294,
+      "avifBytes": 68054,
       "file": "course-page-grove-light.webp"
     },
     {
@@ -573,9 +893,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 106634,
-      "avifBytes": 58327,
+      "webpBytes": 94574,
+      "avifBytes": 55378,
       "file": "courses-home-grove-light.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129548,
+      "avifBytes": 80874,
+      "file": "document-figures-grove-light.webp"
     },
     {
       "name": "history-search",
@@ -583,8 +913,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 67486,
-      "avifBytes": 35140,
+      "webpBytes": 98154,
+      "avifBytes": 62444,
       "file": "history-search-grove-light.webp"
     },
     {
@@ -593,8 +923,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 133824,
-      "avifBytes": 71884,
+      "webpBytes": 125390,
+      "avifBytes": 77392,
       "file": "home-grove-light.webp"
     },
     {
@@ -603,8 +933,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 96978,
-      "avifBytes": 52730,
+      "webpBytes": 66674,
+      "avifBytes": 39771,
       "file": "library-grove-light.webp"
     },
     {
@@ -613,8 +943,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 143696,
-      "avifBytes": 77423,
+      "webpBytes": 151774,
+      "avifBytes": 92489,
       "file": "moodle-webview-grove-light.webp"
     },
     {
@@ -623,9 +953,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64888,
-      "avifBytes": 34669,
+      "webpBytes": 134502,
+      "avifBytes": 90431,
       "file": "onboarding-welcome-grove-light.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 125046,
+      "avifBytes": 78774,
+      "file": "original-page-grove-light.webp"
     },
     {
       "name": "planner-today",
@@ -633,8 +973,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 103376,
-      "avifBytes": 54692,
+      "webpBytes": 102720,
+      "avifBytes": 59495,
       "file": "planner-today-grove-light.webp"
     },
     {
@@ -643,9 +983,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 170068,
-      "avifBytes": 94729,
+      "webpBytes": 175724,
+      "avifBytes": 109231,
       "file": "reader-chat-with-answer-grove-light.webp"
+    },
+    {
+      "name": "school",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128708,
+      "avifBytes": 84171,
+      "file": "school-grove-light.webp"
     },
     {
       "name": "storage-settings",
@@ -653,8 +1003,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 56796,
-      "avifBytes": 29688,
+      "webpBytes": 117350,
+      "avifBytes": 74141,
       "file": "storage-settings-grove-light.webp"
     },
     {
@@ -663,9 +1013,39 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64738,
-      "avifBytes": 35152,
+      "webpBytes": 89748,
+      "avifBytes": 60042,
       "file": "themes-settings-grove-light.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "grove",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 132496,
+      "avifBytes": 85354,
+      "file": "usage-settings-grove-light.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 136610,
+      "avifBytes": 82847,
+      "file": "capture-to-chat-ember-dark.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 98190,
+      "avifBytes": 60174,
+      "file": "connect-ai-ember-dark.webp"
     },
     {
       "name": "course-page",
@@ -673,8 +1053,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 106342,
-      "avifBytes": 53937,
+      "webpBytes": 116870,
+      "avifBytes": 66898,
       "file": "course-page-ember-dark.webp"
     },
     {
@@ -683,9 +1063,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 97296,
-      "avifBytes": 51924,
+      "webpBytes": 99070,
+      "avifBytes": 56437,
       "file": "courses-home-ember-dark.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 132194,
+      "avifBytes": 76980,
+      "file": "document-figures-ember-dark.webp"
     },
     {
       "name": "history-search",
@@ -693,8 +1083,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 69420,
-      "avifBytes": 34515,
+      "webpBytes": 102888,
+      "avifBytes": 61140,
       "file": "history-search-ember-dark.webp"
     },
     {
@@ -703,8 +1093,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 133252,
-      "avifBytes": 68594,
+      "webpBytes": 126948,
+      "avifBytes": 74116,
       "file": "home-ember-dark.webp"
     },
     {
@@ -713,8 +1103,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 92740,
-      "avifBytes": 49060,
+      "webpBytes": 70418,
+      "avifBytes": 40296,
       "file": "library-ember-dark.webp"
     },
     {
@@ -723,8 +1113,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 142156,
-      "avifBytes": 73938,
+      "webpBytes": 154486,
+      "avifBytes": 91416,
       "file": "moodle-webview-ember-dark.webp"
     },
     {
@@ -733,9 +1123,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 63196,
-      "avifBytes": 31715,
+      "webpBytes": 134962,
+      "avifBytes": 87457,
       "file": "onboarding-welcome-ember-dark.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128642,
+      "avifBytes": 77714,
+      "file": "original-page-ember-dark.webp"
     },
     {
       "name": "planner-today",
@@ -743,8 +1143,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 103714,
-      "avifBytes": 51257,
+      "webpBytes": 105100,
+      "avifBytes": 56546,
       "file": "planner-today-ember-dark.webp"
     },
     {
@@ -753,9 +1153,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 175194,
-      "avifBytes": 89241,
+      "webpBytes": 181608,
+      "avifBytes": 102991,
       "file": "reader-chat-with-answer-ember-dark.webp"
+    },
+    {
+      "name": "school",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 131890,
+      "avifBytes": 80589,
+      "file": "school-ember-dark.webp"
     },
     {
       "name": "storage-settings",
@@ -763,8 +1173,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 54734,
-      "avifBytes": 26636,
+      "webpBytes": 115224,
+      "avifBytes": 68223,
       "file": "storage-settings-ember-dark.webp"
     },
     {
@@ -773,9 +1183,39 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64340,
-      "avifBytes": 33829,
+      "webpBytes": 89786,
+      "avifBytes": 56129,
       "file": "themes-settings-ember-dark.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "ember",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 130490,
+      "avifBytes": 79309,
+      "file": "usage-settings-ember-dark.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 138286,
+      "avifBytes": 87471,
+      "file": "capture-to-chat-ember-light.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 101392,
+      "avifBytes": 65713,
+      "file": "connect-ai-ember-light.webp"
     },
     {
       "name": "course-page",
@@ -783,8 +1223,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 112270,
-      "avifBytes": 57523,
+      "webpBytes": 119122,
+      "avifBytes": 71175,
       "file": "course-page-ember-light.webp"
     },
     {
@@ -793,9 +1233,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 111414,
-      "avifBytes": 58919,
+      "webpBytes": 97764,
+      "avifBytes": 58175,
       "file": "courses-home-ember-light.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 136522,
+      "avifBytes": 84212,
+      "file": "document-figures-ember-light.webp"
     },
     {
       "name": "history-search",
@@ -803,8 +1253,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68810,
-      "avifBytes": 36352,
+      "webpBytes": 102226,
+      "avifBytes": 64711,
       "file": "history-search-ember-light.webp"
     },
     {
@@ -813,8 +1263,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 141936,
-      "avifBytes": 74954,
+      "webpBytes": 132608,
+      "avifBytes": 80362,
       "file": "home-ember-light.webp"
     },
     {
@@ -823,8 +1273,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 102826,
-      "avifBytes": 54668,
+      "webpBytes": 68882,
+      "avifBytes": 41242,
       "file": "library-ember-light.webp"
     },
     {
@@ -833,8 +1283,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 146554,
-      "avifBytes": 77808,
+      "webpBytes": 155144,
+      "avifBytes": 94356,
       "file": "moodle-webview-ember-light.webp"
     },
     {
@@ -843,9 +1293,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68048,
-      "avifBytes": 36498,
+      "webpBytes": 137782,
+      "avifBytes": 92196,
       "file": "onboarding-welcome-ember-light.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 130080,
+      "avifBytes": 80772,
+      "file": "original-page-ember-light.webp"
     },
     {
       "name": "planner-today",
@@ -853,8 +1313,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 109228,
-      "avifBytes": 56193,
+      "webpBytes": 108676,
+      "avifBytes": 62454,
       "file": "planner-today-ember-light.webp"
     },
     {
@@ -863,9 +1323,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 177894,
-      "avifBytes": 98558,
+      "webpBytes": 184062,
+      "avifBytes": 113337,
       "file": "reader-chat-with-answer-ember-light.webp"
+    },
+    {
+      "name": "school",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 132890,
+      "avifBytes": 87425,
+      "file": "school-ember-light.webp"
     },
     {
       "name": "storage-settings",
@@ -873,8 +1343,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 59118,
-      "avifBytes": 31435,
+      "webpBytes": 122912,
+      "avifBytes": 76833,
       "file": "storage-settings-ember-light.webp"
     },
     {
@@ -883,9 +1353,39 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 66900,
-      "avifBytes": 36649,
+      "webpBytes": 95374,
+      "avifBytes": 62099,
       "file": "themes-settings-ember-light.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "ember",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 140918,
+      "avifBytes": 88445,
+      "file": "usage-settings-ember-light.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 134656,
+      "avifBytes": 81903,
+      "file": "capture-to-chat-iris-dark.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 96286,
+      "avifBytes": 59030,
+      "file": "connect-ai-iris-dark.webp"
     },
     {
       "name": "course-page",
@@ -893,8 +1393,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 102932,
-      "avifBytes": 52239,
+      "webpBytes": 113370,
+      "avifBytes": 64772,
       "file": "course-page-iris-dark.webp"
     },
     {
@@ -903,9 +1403,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 94288,
-      "avifBytes": 50555,
+      "webpBytes": 97328,
+      "avifBytes": 54085,
       "file": "courses-home-iris-dark.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 131008,
+      "avifBytes": 76019,
+      "file": "document-figures-iris-dark.webp"
     },
     {
       "name": "history-search",
@@ -913,8 +1423,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 67668,
-      "avifBytes": 33391,
+      "webpBytes": 100438,
+      "avifBytes": 59129,
       "file": "history-search-iris-dark.webp"
     },
     {
@@ -923,8 +1433,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 128600,
-      "avifBytes": 66220,
+      "webpBytes": 122540,
+      "avifBytes": 71827,
       "file": "home-iris-dark.webp"
     },
     {
@@ -933,8 +1443,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 90086,
-      "avifBytes": 46680,
+      "webpBytes": 68928,
+      "avifBytes": 39159,
       "file": "library-iris-dark.webp"
     },
     {
@@ -943,8 +1453,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 141326,
-      "avifBytes": 73145,
+      "webpBytes": 152788,
+      "avifBytes": 90176,
       "file": "moodle-webview-iris-dark.webp"
     },
     {
@@ -953,9 +1463,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 61274,
-      "avifBytes": 31807,
+      "webpBytes": 133902,
+      "avifBytes": 86502,
       "file": "onboarding-welcome-iris-dark.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 126074,
+      "avifBytes": 76480,
+      "file": "original-page-iris-dark.webp"
     },
     {
       "name": "planner-today",
@@ -963,8 +1483,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 100990,
-      "avifBytes": 50317,
+      "webpBytes": 102564,
+      "avifBytes": 55609,
       "file": "planner-today-iris-dark.webp"
     },
     {
@@ -973,9 +1493,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 173554,
-      "avifBytes": 87907,
+      "webpBytes": 179552,
+      "avifBytes": 102040,
       "file": "reader-chat-with-answer-iris-dark.webp"
+    },
+    {
+      "name": "school",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129096,
+      "avifBytes": 78891,
+      "file": "school-iris-dark.webp"
     },
     {
       "name": "storage-settings",
@@ -983,8 +1513,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 53516,
-      "avifBytes": 27341,
+      "webpBytes": 113904,
+      "avifBytes": 67266,
       "file": "storage-settings-iris-dark.webp"
     },
     {
@@ -993,9 +1523,39 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 61686,
-      "avifBytes": 33805,
+      "webpBytes": 88622,
+      "avifBytes": 55172,
       "file": "themes-settings-iris-dark.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "iris",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128106,
+      "avifBytes": 78069,
+      "file": "usage-settings-iris-dark.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 135410,
+      "avifBytes": 87326,
+      "file": "capture-to-chat-iris-light.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 99866,
+      "avifBytes": 64857,
+      "file": "connect-ai-iris-light.webp"
     },
     {
       "name": "course-page",
@@ -1003,8 +1563,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 109694,
-      "avifBytes": 56550,
+      "webpBytes": 117144,
+      "avifBytes": 70916,
       "file": "course-page-iris-light.webp"
     },
     {
@@ -1013,9 +1573,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 108368,
-      "avifBytes": 58110,
+      "webpBytes": 98194,
+      "avifBytes": 58223,
       "file": "courses-home-iris-light.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133078,
+      "avifBytes": 83172,
+      "file": "document-figures-iris-light.webp"
     },
     {
       "name": "history-search",
@@ -1023,8 +1593,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 68514,
-      "avifBytes": 35845,
+      "webpBytes": 100502,
+      "avifBytes": 63727,
       "file": "history-search-iris-light.webp"
     },
     {
@@ -1033,8 +1603,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 139226,
-      "avifBytes": 73313,
+      "webpBytes": 130348,
+      "avifBytes": 80128,
       "file": "home-iris-light.webp"
     },
     {
@@ -1043,8 +1613,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 99610,
-      "avifBytes": 53304,
+      "webpBytes": 68090,
+      "avifBytes": 41204,
       "file": "library-iris-light.webp"
     },
     {
@@ -1053,8 +1623,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 144618,
-      "avifBytes": 77773,
+      "webpBytes": 153832,
+      "avifBytes": 93854,
       "file": "moodle-webview-iris-light.webp"
     },
     {
@@ -1063,9 +1633,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 65914,
-      "avifBytes": 35030,
+      "webpBytes": 136848,
+      "avifBytes": 91695,
       "file": "onboarding-welcome-iris-light.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128188,
+      "avifBytes": 80502,
+      "file": "original-page-iris-light.webp"
     },
     {
       "name": "planner-today",
@@ -1073,8 +1653,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 107178,
-      "avifBytes": 55201,
+      "webpBytes": 106112,
+      "avifBytes": 61879,
       "file": "planner-today-iris-light.webp"
     },
     {
@@ -1083,9 +1663,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 174040,
-      "avifBytes": 96389,
+      "webpBytes": 180428,
+      "avifBytes": 112394,
       "file": "reader-chat-with-answer-iris-light.webp"
+    },
+    {
+      "name": "school",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 131666,
+      "avifBytes": 86478,
+      "file": "school-iris-light.webp"
     },
     {
       "name": "storage-settings",
@@ -1093,8 +1683,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 58012,
-      "avifBytes": 30281,
+      "webpBytes": 121810,
+      "avifBytes": 75641,
       "file": "storage-settings-iris-light.webp"
     },
     {
@@ -1103,9 +1693,39 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 65008,
-      "avifBytes": 35174,
+      "webpBytes": 92598,
+      "avifBytes": 61380,
       "file": "themes-settings-iris-light.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "iris",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 138196,
+      "avifBytes": 87472,
+      "file": "usage-settings-iris-light.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133858,
+      "avifBytes": 81660,
+      "file": "capture-to-chat-rose-dark.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 95808,
+      "avifBytes": 58774,
+      "file": "connect-ai-rose-dark.webp"
     },
     {
       "name": "course-page",
@@ -1113,8 +1733,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 102390,
-      "avifBytes": 51776,
+      "webpBytes": 111866,
+      "avifBytes": 63551,
       "file": "course-page-rose-dark.webp"
     },
     {
@@ -1123,9 +1743,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 94244,
-      "avifBytes": 50306,
+      "webpBytes": 96308,
+      "avifBytes": 53660,
       "file": "courses-home-rose-dark.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 130184,
+      "avifBytes": 75119,
+      "file": "document-figures-rose-dark.webp"
     },
     {
       "name": "history-search",
@@ -1133,8 +1763,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 69238,
-      "avifBytes": 32787,
+      "webpBytes": 100492,
+      "avifBytes": 58691,
       "file": "history-search-rose-dark.webp"
     },
     {
@@ -1143,8 +1773,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 128510,
-      "avifBytes": 65395,
+      "webpBytes": 122628,
+      "avifBytes": 71062,
       "file": "home-rose-dark.webp"
     },
     {
@@ -1153,8 +1783,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 90202,
-      "avifBytes": 46445,
+      "webpBytes": 68424,
+      "avifBytes": 38539,
       "file": "library-rose-dark.webp"
     },
     {
@@ -1163,8 +1793,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 140710,
-      "avifBytes": 72764,
+      "webpBytes": 152468,
+      "avifBytes": 89773,
       "file": "moodle-webview-rose-dark.webp"
     },
     {
@@ -1173,9 +1803,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 61160,
-      "avifBytes": 31021,
+      "webpBytes": 133520,
+      "avifBytes": 86124,
       "file": "onboarding-welcome-rose-dark.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 126150,
+      "avifBytes": 75987,
+      "file": "original-page-rose-dark.webp"
     },
     {
       "name": "planner-today",
@@ -1183,8 +1823,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 101054,
-      "avifBytes": 49741,
+      "webpBytes": 102296,
+      "avifBytes": 54698,
       "file": "planner-today-rose-dark.webp"
     },
     {
@@ -1193,9 +1833,19 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 172788,
-      "avifBytes": 87178,
+      "webpBytes": 177794,
+      "avifBytes": 100795,
       "file": "reader-chat-with-answer-rose-dark.webp"
+    },
+    {
+      "name": "school",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128390,
+      "avifBytes": 78344,
+      "file": "school-rose-dark.webp"
     },
     {
       "name": "storage-settings",
@@ -1203,8 +1853,8 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 53460,
-      "avifBytes": 26167,
+      "webpBytes": 112490,
+      "avifBytes": 66273,
       "file": "storage-settings-rose-dark.webp"
     },
     {
@@ -1213,9 +1863,39 @@
       "mode": "dark",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 62406,
-      "avifBytes": 32705,
+      "webpBytes": 86916,
+      "avifBytes": 54187,
       "file": "themes-settings-rose-dark.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "rose",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 127274,
+      "avifBytes": 76658,
+      "file": "usage-settings-rose-dark.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 134348,
+      "avifBytes": 85765,
+      "file": "capture-to-chat-rose-light.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 98556,
+      "avifBytes": 64446,
+      "file": "connect-ai-rose-light.webp"
     },
     {
       "name": "course-page",
@@ -1223,8 +1903,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 108032,
-      "avifBytes": 55659,
+      "webpBytes": 116246,
+      "avifBytes": 68933,
       "file": "course-page-rose-light.webp"
     },
     {
@@ -1233,9 +1913,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 107506,
-      "avifBytes": 56866,
+      "webpBytes": 97166,
+      "avifBytes": 56951,
       "file": "courses-home-rose-light.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 131632,
+      "avifBytes": 81885,
+      "file": "document-figures-rose-light.webp"
     },
     {
       "name": "history-search",
@@ -1243,8 +1933,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 67546,
-      "avifBytes": 34976,
+      "webpBytes": 98464,
+      "avifBytes": 62887,
       "file": "history-search-rose-light.webp"
     },
     {
@@ -1253,8 +1943,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 137054,
-      "avifBytes": 71954,
+      "webpBytes": 128704,
+      "avifBytes": 77877,
       "file": "home-rose-light.webp"
     },
     {
@@ -1263,8 +1953,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 99132,
-      "avifBytes": 52489,
+      "webpBytes": 68262,
+      "avifBytes": 40339,
       "file": "library-rose-light.webp"
     },
     {
@@ -1273,8 +1963,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 144284,
-      "avifBytes": 77500,
+      "webpBytes": 152998,
+      "avifBytes": 93262,
       "file": "moodle-webview-rose-light.webp"
     },
     {
@@ -1283,9 +1973,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 65544,
-      "avifBytes": 34676,
+      "webpBytes": 135854,
+      "avifBytes": 91089,
       "file": "onboarding-welcome-rose-light.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 127086,
+      "avifBytes": 79567,
+      "file": "original-page-rose-light.webp"
     },
     {
       "name": "planner-today",
@@ -1293,8 +1993,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 105480,
-      "avifBytes": 54428,
+      "webpBytes": 106226,
+      "avifBytes": 60796,
       "file": "planner-today-rose-light.webp"
     },
     {
@@ -1303,9 +2003,19 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 171948,
-      "avifBytes": 94991,
+      "webpBytes": 177774,
+      "avifBytes": 110667,
       "file": "reader-chat-with-answer-rose-light.webp"
+    },
+    {
+      "name": "school",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129690,
+      "avifBytes": 84923,
+      "file": "school-rose-light.webp"
     },
     {
       "name": "storage-settings",
@@ -1313,8 +2023,8 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 57382,
-      "avifBytes": 29859,
+      "webpBytes": 118930,
+      "avifBytes": 74450,
       "file": "storage-settings-rose-light.webp"
     },
     {
@@ -1323,9 +2033,1039 @@
       "mode": "light",
       "width": 2880,
       "height": 1800,
-      "webpBytes": 64524,
-      "avifBytes": 35405,
+      "webpBytes": 91034,
+      "avifBytes": 60027,
       "file": "themes-settings-rose-light.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "rose",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 135446,
+      "avifBytes": 86090,
+      "file": "usage-settings-rose-light.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133776,
+      "avifBytes": 81931,
+      "file": "capture-to-chat-slate-dark.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 96546,
+      "avifBytes": 58808,
+      "file": "connect-ai-slate-dark.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 112856,
+      "avifBytes": 64257,
+      "file": "course-page-slate-dark.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 96704,
+      "avifBytes": 53302,
+      "file": "courses-home-slate-dark.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 130108,
+      "avifBytes": 76017,
+      "file": "document-figures-slate-dark.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 99780,
+      "avifBytes": 58841,
+      "file": "history-search-slate-dark.webp"
+    },
+    {
+      "name": "home",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 123440,
+      "avifBytes": 71618,
+      "file": "home-slate-dark.webp"
+    },
+    {
+      "name": "library",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 68472,
+      "avifBytes": 39044,
+      "file": "library-slate-dark.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 152706,
+      "avifBytes": 89737,
+      "file": "moodle-webview-slate-dark.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133902,
+      "avifBytes": 86112,
+      "file": "onboarding-welcome-slate-dark.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 125524,
+      "avifBytes": 76039,
+      "file": "original-page-slate-dark.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 102950,
+      "avifBytes": 55780,
+      "file": "planner-today-slate-dark.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 179856,
+      "avifBytes": 102253,
+      "file": "reader-chat-with-answer-slate-dark.webp"
+    },
+    {
+      "name": "school",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129172,
+      "avifBytes": 78375,
+      "file": "school-slate-dark.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 113564,
+      "avifBytes": 66722,
+      "file": "storage-settings-slate-dark.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 88444,
+      "avifBytes": 54987,
+      "file": "themes-settings-slate-dark.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "slate",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 127978,
+      "avifBytes": 76994,
+      "file": "usage-settings-slate-dark.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 132908,
+      "avifBytes": 85697,
+      "file": "capture-to-chat-slate-light.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 97616,
+      "avifBytes": 63897,
+      "file": "connect-ai-slate-light.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 114462,
+      "avifBytes": 69029,
+      "file": "course-page-slate-light.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 95260,
+      "avifBytes": 56387,
+      "file": "courses-home-slate-light.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 130762,
+      "avifBytes": 80971,
+      "file": "document-figures-slate-light.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 97872,
+      "avifBytes": 62927,
+      "file": "history-search-slate-light.webp"
+    },
+    {
+      "name": "home",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128078,
+      "avifBytes": 79186,
+      "file": "home-slate-light.webp"
+    },
+    {
+      "name": "library",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 67198,
+      "avifBytes": 40359,
+      "file": "library-slate-light.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 152190,
+      "avifBytes": 92936,
+      "file": "moodle-webview-slate-light.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 135586,
+      "avifBytes": 90679,
+      "file": "onboarding-welcome-slate-light.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 126080,
+      "avifBytes": 78846,
+      "file": "original-page-slate-light.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 103902,
+      "avifBytes": 60233,
+      "file": "planner-today-slate-light.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 176514,
+      "avifBytes": 109318,
+      "file": "reader-chat-with-answer-slate-light.webp"
+    },
+    {
+      "name": "school",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128220,
+      "avifBytes": 85453,
+      "file": "school-slate-light.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 118160,
+      "avifBytes": 74052,
+      "file": "storage-settings-slate-light.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 90212,
+      "avifBytes": 60062,
+      "file": "themes-settings-slate-light.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "slate",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133518,
+      "avifBytes": 85624,
+      "file": "usage-settings-slate-light.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 135034,
+      "avifBytes": 82208,
+      "file": "capture-to-chat-paper-dark.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 96838,
+      "avifBytes": 59152,
+      "file": "connect-ai-paper-dark.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 115206,
+      "avifBytes": 65259,
+      "file": "course-page-paper-dark.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 99692,
+      "avifBytes": 55364,
+      "file": "courses-home-paper-dark.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 130660,
+      "avifBytes": 76067,
+      "file": "document-figures-paper-dark.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 101128,
+      "avifBytes": 58978,
+      "file": "history-search-paper-dark.webp"
+    },
+    {
+      "name": "home",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 125490,
+      "avifBytes": 72564,
+      "file": "home-paper-dark.webp"
+    },
+    {
+      "name": "library",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 69324,
+      "avifBytes": 39528,
+      "file": "library-paper-dark.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 152768,
+      "avifBytes": 90195,
+      "file": "moodle-webview-paper-dark.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 134600,
+      "avifBytes": 86413,
+      "file": "onboarding-welcome-paper-dark.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 126796,
+      "avifBytes": 76528,
+      "file": "original-page-paper-dark.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 103926,
+      "avifBytes": 55551,
+      "file": "planner-today-paper-dark.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 177532,
+      "avifBytes": 101422,
+      "file": "reader-chat-with-answer-paper-dark.webp"
+    },
+    {
+      "name": "school",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129606,
+      "avifBytes": 79474,
+      "file": "school-paper-dark.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 113908,
+      "avifBytes": 66800,
+      "file": "storage-settings-paper-dark.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 88404,
+      "avifBytes": 54598,
+      "file": "themes-settings-paper-dark.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "paper",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 128866,
+      "avifBytes": 77148,
+      "file": "usage-settings-paper-dark.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 130822,
+      "avifBytes": 84007,
+      "file": "capture-to-chat-paper-light.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 96302,
+      "avifBytes": 61995,
+      "file": "connect-ai-paper-light.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 110758,
+      "avifBytes": 66890,
+      "file": "course-page-paper-light.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 92474,
+      "avifBytes": 54583,
+      "file": "courses-home-paper-light.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 127180,
+      "avifBytes": 79052,
+      "file": "document-figures-paper-light.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 96830,
+      "avifBytes": 61147,
+      "file": "history-search-paper-light.webp"
+    },
+    {
+      "name": "home",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 123566,
+      "avifBytes": 76317,
+      "file": "home-paper-light.webp"
+    },
+    {
+      "name": "library",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 65286,
+      "avifBytes": 38893,
+      "file": "library-paper-light.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 151768,
+      "avifBytes": 91916,
+      "file": "moodle-webview-paper-light.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 135294,
+      "avifBytes": 89330,
+      "file": "onboarding-welcome-paper-light.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 124156,
+      "avifBytes": 77780,
+      "file": "original-page-paper-light.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 101938,
+      "avifBytes": 59011,
+      "file": "planner-today-paper-light.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 171660,
+      "avifBytes": 106205,
+      "file": "reader-chat-with-answer-paper-light.webp"
+    },
+    {
+      "name": "school",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 126950,
+      "avifBytes": 82470,
+      "file": "school-paper-light.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 117244,
+      "avifBytes": 72287,
+      "file": "storage-settings-paper-light.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 89430,
+      "avifBytes": 58758,
+      "file": "themes-settings-paper-light.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "paper",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 132076,
+      "avifBytes": 83629,
+      "file": "usage-settings-paper-light.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 140372,
+      "avifBytes": 83011,
+      "file": "capture-to-chat-contrast-dark.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 103618,
+      "avifBytes": 59932,
+      "file": "connect-ai-contrast-dark.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 119580,
+      "avifBytes": 65843,
+      "file": "course-page-contrast-dark.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 102114,
+      "avifBytes": 54792,
+      "file": "courses-home-contrast-dark.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 139084,
+      "avifBytes": 78579,
+      "file": "document-figures-contrast-dark.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 105516,
+      "avifBytes": 59741,
+      "file": "history-search-contrast-dark.webp"
+    },
+    {
+      "name": "home",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 126326,
+      "avifBytes": 70473,
+      "file": "home-contrast-dark.webp"
+    },
+    {
+      "name": "library",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 71930,
+      "avifBytes": 39518,
+      "file": "library-contrast-dark.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 156924,
+      "avifBytes": 91398,
+      "file": "moodle-webview-contrast-dark.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 135928,
+      "avifBytes": 86662,
+      "file": "onboarding-welcome-contrast-dark.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 132714,
+      "avifBytes": 77832,
+      "file": "original-page-contrast-dark.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 108382,
+      "avifBytes": 58196,
+      "file": "planner-today-contrast-dark.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 190108,
+      "avifBytes": 106516,
+      "file": "reader-chat-with-answer-contrast-dark.webp"
+    },
+    {
+      "name": "school",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 141138,
+      "avifBytes": 81523,
+      "file": "school-contrast-dark.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 121062,
+      "avifBytes": 68992,
+      "file": "storage-settings-contrast-dark.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 92616,
+      "avifBytes": 55359,
+      "file": "themes-settings-contrast-dark.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "contrast",
+      "mode": "dark",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 137728,
+      "avifBytes": 80675,
+      "file": "usage-settings-contrast-dark.webp"
+    },
+    {
+      "name": "capture-to-chat",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 137996,
+      "avifBytes": 85543,
+      "file": "capture-to-chat-contrast-light.webp"
+    },
+    {
+      "name": "connect-ai",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 101700,
+      "avifBytes": 63283,
+      "file": "connect-ai-contrast-light.webp"
+    },
+    {
+      "name": "course-page",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 117392,
+      "avifBytes": 69225,
+      "file": "course-page-contrast-light.webp"
+    },
+    {
+      "name": "courses-home",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 97504,
+      "avifBytes": 56278,
+      "file": "courses-home-contrast-light.webp"
+    },
+    {
+      "name": "document-figures",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 133538,
+      "avifBytes": 80802,
+      "file": "document-figures-contrast-light.webp"
+    },
+    {
+      "name": "history-search",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 102636,
+      "avifBytes": 64393,
+      "file": "history-search-contrast-light.webp"
+    },
+    {
+      "name": "home",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 123534,
+      "avifBytes": 74344,
+      "file": "home-contrast-light.webp"
+    },
+    {
+      "name": "library",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 69710,
+      "avifBytes": 40465,
+      "file": "library-contrast-light.webp"
+    },
+    {
+      "name": "moodle-webview",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 155738,
+      "avifBytes": 94100,
+      "file": "moodle-webview-contrast-light.webp"
+    },
+    {
+      "name": "onboarding-welcome",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 137004,
+      "avifBytes": 90035,
+      "file": "onboarding-welcome-contrast-light.webp"
+    },
+    {
+      "name": "original-page",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 129916,
+      "avifBytes": 79381,
+      "file": "original-page-contrast-light.webp"
+    },
+    {
+      "name": "planner-today",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 104070,
+      "avifBytes": 60680,
+      "file": "planner-today-contrast-light.webp"
+    },
+    {
+      "name": "reader-chat-with-answer",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 182476,
+      "avifBytes": 110348,
+      "file": "reader-chat-with-answer-contrast-light.webp"
+    },
+    {
+      "name": "school",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 137706,
+      "avifBytes": 87424,
+      "file": "school-contrast-light.webp"
+    },
+    {
+      "name": "storage-settings",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 120704,
+      "avifBytes": 74625,
+      "file": "storage-settings-contrast-light.webp"
+    },
+    {
+      "name": "themes-settings",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 91934,
+      "avifBytes": 58657,
+      "file": "themes-settings-contrast-light.webp"
+    },
+    {
+      "name": "usage-settings",
+      "theme": "contrast",
+      "mode": "light",
+      "width": 2880,
+      "height": 1800,
+      "webpBytes": 136342,
+      "avifBytes": 86659,
+      "file": "usage-settings-contrast-light.webp"
     }
   ],
   "errors": []

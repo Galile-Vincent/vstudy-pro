@@ -1,11 +1,13 @@
 /** Human-readable localized guides. Other guides retain an explicit English fallback notice. */
 import type { Guide } from './docs';
 import type { Language } from './ui';
+import { workspaceGuides } from './workspace-guides';
 import { aiCliGuides } from './ai-cli-guides';
 import { mcpTranslations } from './mcp-docs';
 
 export const translations: Partial<Record<Language, Record<string, Pick<Guide, 'title' | 'description' | 'sections'>>>> = {
   'zh-Hant': {
+    ...workspaceGuides['zh-Hant'],
     'ai-providers': aiCliGuides['zh-Hant'],
     'agents-mcp': mcpTranslations['zh-Hant'],
     'getting-started': {
@@ -54,13 +56,13 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
           ],
         },
         {id:'onboarding',title:'試讀範例文件',paragraphs:['首次設定可選擇英文、繁體中文或日文，以及明亮或深色主題。先從內附範例開始，之後再連接學校或設定 AI 供應商。','在閱讀器打開範例，選取一句話即可體驗閱讀流程。AI 回答需要你自行啟用的供應商，單純閱讀範例則不需要 AI。'],image:{name:'onboarding',width:1440,height:900,alt:'歡迎導覽與閱讀工作區預覽'}},
-        {id:'optional-setup',title:'只加入你需要的功能',paragraphs:['在「課程」連接學校以加入 Moodle 課業。在「資料庫」匯入自己的文件。想使用 AI 時，可從側邊欄的「AI 工具」、首次導覽、閱讀器或「設定 > 供應商」開啟「設定 AI 工具」。','選擇工具並個別允許執行，再依序完成安裝、登入與測試。無法獨立驗證下載時，「其他安裝方式」會提供在自己終端機執行的官方指令。執行前會顯示操作內容。macOS 的內嵌終端機會顯示登入連結與代碼，也可使用自己的終端機。VStudy 不附帶 AI 訂閱，測試可能計入供應商用量。','PDF 等格式需要 Python 轉換環境。首次轉換會先詢問是否允許下載套件。Markdown 與純文字不需要此設定。「設定 > 隱私權」提供轉換器離線模式。', "Windows 沒有已驗證且等同 macOS 核心沙箱的機制，因此停用 Codex CLI 供應商，API 供應商仍可使用。Mac 額外以系統沙箱禁止轉換器連網。Windows 沒有對等的核心層網路封鎖，離線模式與 Python socket 攔截不構成作業系統安全邊界。"]},
+        {id:'optional-setup',title:'只加入你需要的功能',paragraphs:['在「課程」連接學校以加入 Moodle 課業。在「資料庫」匯入自己的文件。想使用 AI 時，可從側邊欄的「連接 AI」、首次導覽、閱讀器或「設定 > AI 服務」開啟「連接 AI」。','選擇工具並個別允許執行，再依序完成安裝、登入與測試。無法獨立驗證下載時，「其他安裝方式」會提供在自己終端機執行的官方指令。執行前會顯示操作內容。macOS 的內嵌終端機會顯示登入連結與代碼，也可使用自己的終端機。VStudy 不附帶 AI 訂閱，測試可能計入供應商用量。','PDF 等格式需要 Python 轉換環境。首次轉換會先詢問是否允許下載套件。Markdown 與純文字不需要此設定。「設定 > 隱私權」提供轉換器離線模式。', "Windows 沒有已驗證且等同 macOS 核心沙箱的機制，因此停用 Codex CLI 供應商，API 供應商仍可使用。Mac 額外以系統沙箱禁止轉換器連網。Windows 沒有對等的核心層網路封鎖，離線模式與 Python socket 攔截不構成作業系統安全邊界。"]},
       ],
     },
     'connect-your-school': {
       title:'連接學校', description:'找到 Moodle 網站、以學校帳號登入，並了解連線限制。',
       sections:[
-        {id:'find-school',title:'找到你的 Moodle 網站',paragraphs:['打開「課程 > 連接學校」。可依名稱、縮寫、國家或主機名稱搜尋內建名錄。搜尋在本機進行，選擇學校後才會向該校進行網路檢查。','找不到學校時，可輸入公開 HTTPS Moodle 網址。貼上的課程連結與子目錄安裝網址會自動正規化。不支援 HTTP、本機網路位址、非預設連接埠與不受信任的憑證。'],steps:['打開「課程 > 連接學校」。','選擇學校或輸入 Moodle 網址。','登入前確認偵測到的網站與服務狀態。'],image:{name:'school',width:1000,height:724,alt:'搜尋學校或輸入 Moodle 網址'}},
+        {id:'find-school',title:'找到你的 Moodle 網站',paragraphs:['打開「課程 > 連接學校」。可依名稱、縮寫、國家或主機名稱搜尋內建名錄。搜尋在本機進行，選擇學校後才會向該校進行網路檢查。','找不到學校時，可輸入公開 HTTPS Moodle 網址。貼上的課程連結與子目錄安裝網址會自動正規化。不支援 HTTP、本機網路位址、非預設連接埠與不受信任的憑證。'],steps:['打開「課程 > 連接學校」。','選擇學校或輸入 Moodle 網址。','登入前確認偵測到的網站與服務狀態。'],image:{name:'school',width:1440,height:900,alt:'搜尋學校或輸入 Moodle 網址'}},
         {id:'sign-in',title:'透過學校登入',paragraphs:['VStudy 會先檢查學校公開的行動服務設定。密碼登入網站使用學校的 Moodle token 端點。SSO 網站會開啟隔離的學校登入視窗，請在其中完成學校的一般登入與多因素驗證。','主程序會驗證回呼與帳號身分，token 不會交給應用程式渲染程序。請勿將 SSO token 貼入聊天。尚未實作 QR 憑證交換，請使用學校網址與一般登入。']},
         {id:'availability',title:"學校可用性",paragraphs:["VStudy Pro 透過行動服務連接 Moodle 學校。學校必須啟用服務並允許支援的登入方式。網站需使用公開 HTTPS、可信任的憑證及 Moodle 3.5 以上版本。維護、學校權限與活動外掛都可能限制可用功能。", "可透過 Moodle 註冊網站名錄查詢學校是否使用 Moodle。名錄依國家列出公開註冊的網站，不包含私人或未註冊網站，因此找不到學校不代表該校未使用 Moodle。列在名錄中也不保證行動服務已啟用或與 VStudy Pro 相容。如有疑問，請詢問學校的 Moodle 管理員。", "內建名錄協助探索學校網站，並非相容性認證、合作或背書。你也可以在「連接學校」輸入學校的 Moodle 網址。", "「最初以台灣 CYCU 測試」指早期測試，不代表完整相容性已確認。儲存庫截圖證實學校探索與本機 Moodle 視窗示範，無法證明真實學校登入或完整課程內容支援。CYCU 確認筆記記錄了失敗的內容與活動呼叫，仍待確認測試。合成資料測試驗證的是解析器行為，而非真實網站可用性。", "不要繞過學校限制或忽略憑證錯誤。繳交狀態與成績仍以學校網站為準。"],links:[{label:"查詢學校是否使用 Moodle",url:'https://stats.moodle.org/sites/'}]},
         {id:'accounts',title:'使用多個帳號',paragraphs:['每個網站根網址與遠端使用者身分都有獨立的 token、課程與同步狀態，可以同時連接多所學校。最近網站只保留公開資訊，不含憑證。','重新連接過期帳號時，請使用相同學校身分。若要改用其他身分，需先中斷該網站的過期帳號。還原備份後，也需要重新登入學校。']},
@@ -68,6 +70,7 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
     },
   },
   ja: {
+    ...workspaceGuides.ja,
     'ai-providers': aiCliGuides.ja,
     'agents-mcp': mcpTranslations.ja,
     'getting-started': {
@@ -116,13 +119,13 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
           ],
         },
         {id:'onboarding',title:'サンプル資料を読む',paragraphs:['初回設定では英語、繁体字中国語、日本語と、ライトまたはダークのテーマを選べます。まず付属のサンプルから始めて、学校や AI プロバイダーは後で接続できます。','サンプルをリーダーで開き、一文を選んで読み方を試します。AI の回答には自分で有効にしたプロバイダーが必要です。サンプルを読むだけなら AI は不要です。'],image:{name:'onboarding',width:1440,height:900,alt:'VStudy の初回設定とサンプル資料'}},
-        {id:'optional-setup',title:'必要な機能だけを追加する',paragraphs:['「授業」で学校を接続すると Moodle の授業を取得できます。「ライブラリ」では自分の資料を取り込めます。AI を使いたくなったら、サイドバーの「AI ツール」、初回案内、リーダー、または「設定 > プロバイダー」から「AI ツールを設定」を開きます。','ツールを選んで個別に実行を許可し、インストール、ログイン、テストと進みます。ダウンロードを独立して検証できない場合は「別のインストール方法」に自分のターミナルで実行する公式コマンドを表示します。各操作は実行前に確認できます。macOS の内蔵ターミナルにリンクとコードを表示し、自分のターミナルも使えます。VStudy に AI の契約は含まれず、テストは利用枠を消費する場合があります。','PDF などの変換には Python の変換環境が必要です。初回変換ではパッケージのダウンロード前に許可を求めます。Markdown とテキストはこの準備なしで使えます。「設定 > プライバシー」に変換器のオフラインモードがあります。', "Windows には検証済みの同等なカーネルサンドボックスがないため、Codex CLI プロバイダーは無効です。API プロバイダーは利用できます。Mac は OS のサンドボックスで変換器の通信を遮断します。Windows には同等のカーネルによる通信遮断がなく、オフライン設定と Python の socket 制限は OS のセキュリティ境界ではありません。"]},
+        {id:'optional-setup',title:'必要な機能だけを追加する',paragraphs:['「授業」で学校を接続すると Moodle の授業を取得できます。「ライブラリ」では自分の資料を取り込めます。AI を使いたくなったら、サイドバーの「AI に接続」、初回案内、リーダー、または「設定 > AI サービス」から「AI に接続」を開きます。','ツールを選んで個別に実行を許可し、インストール、ログイン、テストと進みます。ダウンロードを独立して検証できない場合は「別のインストール方法」に自分のターミナルで実行する公式コマンドを表示します。各操作は実行前に確認できます。macOS の内蔵ターミナルにリンクとコードを表示し、自分のターミナルも使えます。VStudy に AI の契約は含まれず、テストは利用枠を消費する場合があります。','PDF などの変換には Python の変換環境が必要です。初回変換ではパッケージのダウンロード前に許可を求めます。Markdown とテキストはこの準備なしで使えます。「設定 > プライバシー」に変換器のオフラインモードがあります。', "Windows には検証済みの同等なカーネルサンドボックスがないため、Codex CLI プロバイダーは無効です。API プロバイダーは利用できます。Mac は OS のサンドボックスで変換器の通信を遮断します。Windows には同等のカーネルによる通信遮断がなく、オフライン設定と Python の socket 制限は OS のセキュリティ境界ではありません。"]},
       ],
     },
     'connect-your-school': {
       title:'学校に接続する', description:'Moodle サイトを見つけて学校のアカウントでログインし、接続の制約を確認します。',
       sections:[
-        {id:'find-school',title:'Moodle サイトを見つける',paragraphs:['「授業 > 学校に接続」を開きます。内蔵一覧を名前、略称、国、ホスト名で検索できます。検索はローカルで行い、学校を選ぶとその学校への通信を始めます。','一覧にない学校は公開 HTTPS の Moodle URL を入力できます。授業リンクやサブディレクトリの URL も正規化します。HTTP、ローカルアドレス、既定以外のポート、信頼できない証明書は非対応です。'],steps:['「授業 > 学校に接続」を開きます。','学校を選ぶか Moodle URL を入力します。','検出したサイトと利用可否を確認してからログインします。'],image:{name:'school',width:1000,height:724,alt:'学校を検索するか Moodle URL を入力する画面'}},
+        {id:'find-school',title:'Moodle サイトを見つける',paragraphs:['「授業 > 学校に接続」を開きます。内蔵一覧を名前、略称、国、ホスト名で検索できます。検索はローカルで行い、学校を選ぶとその学校への通信を始めます。','一覧にない学校は公開 HTTPS の Moodle URL を入力できます。授業リンクやサブディレクトリの URL も正規化します。HTTP、ローカルアドレス、既定以外のポート、信頼できない証明書は非対応です。'],steps:['「授業 > 学校に接続」を開きます。','学校を選ぶか Moodle URL を入力します。','検出したサイトと利用可否を確認してからログインします。'],image:{name:'school',width:1440,height:900,alt:'学校を検索するか Moodle URL を入力する画面'}},
         {id:'sign-in',title:'学校の認証でログインする',paragraphs:['VStudy は認証前に公開モバイル設定を確認します。パスワード方式は学校の Moodle token エンドポイントを使います。SSO 方式は分離された学校のログイン画面を開きます。そこで通常のログインと多要素認証を完了します。','メインプロセスがコールバックとアカウントを検証し、token をアプリのレンダラーに渡しません。SSO token をチャットに貼らないでください。QR 認証情報の交換は未実装です。学校 URL と通常のログインを使ってください。']},
         {id:'availability',title:"学校の利用可否",paragraphs:["VStudy Pro はモバイルサービスを通して Moodle の学校に接続します。学校側でサービスを有効にし、対応するログイン方式を許可する必要があります。信頼できる証明書を使った公開 HTTPS と Moodle 3.5 以降が必要です。メンテナンス、学校の権限設定、活動プラグインによって利用できる機能は異なります。", "Moodle の登録サイト一覧で、学校が Moodle を使っているか調べられます。国別に公開登録サイトを掲載しており、非公開や未登録のサイトは含みません。一覧にない学校も Moodle を使っている場合があります。掲載はモバイルサービスの有効化や VStudy Pro との互換性を保証しません。不明な場合は学校の Moodle 管理者に確認してください。", "内蔵一覧は学校サイトを探すためのもので、互換性の認定、提携、推奨を意味しません。「学校に接続」で学校の Moodle URL を入力することもできます。", "「台湾の CYCU で初期テストを実施」は、互換性の確認完了を意味しません。リポジトリの画像で確認できるのは学校の検索とローカルの Moodle 画面デモです。実際の学校での認証や授業コンテンツ全体の対応を証明するものではありません。CYCU の確認メモにはコンテンツや活動 API の失敗と、確認テストが未完了であることを記録しています。合成データのテストはパーサーの動作を検証し、実サイトの動作は証明しません。", "学校の制限を回避したり、証明書エラーを無視したりしないでください。提出状況と成績は学校のサイトで確認してください。"],links:[{label:"学校が Moodle を使っているか調べる",url:'https://stats.moodle.org/sites/'}]},
         {id:'accounts',title:'複数のアカウントを使う',paragraphs:['サイトのルートとユーザー ID ごとに、token、授業、同期状態を分離します。複数の学校を接続できます。最近のサイトには公開情報だけを保存し、認証情報は含みません。','期限切れアカウントには同じ学校のユーザーとして再接続します。別のユーザーに切り替えるには、そのサイトの期限切れアカウントを先に切断します。バックアップを復元した後も、学校への再ログインが必要です。']},
