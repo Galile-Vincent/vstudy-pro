@@ -187,6 +187,18 @@ def publish(source, target, library_target, warm=False):
         print(json.dumps({"progress": f"Converting page {page}/{total}…"}), flush=True)
     text, converter = convert_document(source, isolated=not warm, warm=warm, on_page=page_done if warm else None)
 
+    from figures import FigureAssets, preserve_figures, decorative_images
+    from PIL import Image
+    import io
+    from pypdfium2 import PdfiumError
+
+    assets = FigureAssets(target + ".assets")
+    try:
+        text = preserve_figures(source, text, assets)
+    except PdfiumError:
+        DIAGNOSTICS["figure_warning"] = "PDF_FIGURES_UNAVAILABLE"
+    excluded_images = decorative_images(source)
+
     def image(match):
         extension = {"jpeg": "jpg", "png": "png", "gif": "gif", "webp": "webp"}.get(
             match[1].lower()
@@ -197,12 +209,17 @@ def publish(source, target, library_target, warm=False):
             data = base64.b64decode(match[2], validate=True)
         except ValueError:
             return "image omitted"
-        name = "image-" + hashlib.sha256(data).hexdigest() + "." + extension
-        with open(os.path.join(os.path.dirname(library_target), name), "wb") as asset:
-            asset.write(data)
-        return name
+        if hashlib.sha256(data).hexdigest() in excluded_images:
+            return "image omitted"
+        with Image.open(io.BytesIO(data)) as decoded:
+            if decoded.width * decoded.height > 4_000_000:
+                raise ValueError("Document image exceeds pixel limit")
+            if decoded.width < 24 or decoded.height < 24:
+                return "image omitted"
+            return assets.add(decoded.convert("RGBA"))
 
     text = re.sub(r"data:image/([^;]+);base64,([A-Za-z0-9+/=]+)", image, text)
+    text = re.sub(r"!\[[^\]\n]*\]\(image omitted\)", "", text)
     text = re.sub(r"data:[^\s)<>]+", "image omitted", text, flags=re.I)
     content = text.encode("utf-8")
     if len(content) > MAX_OUTPUT:
