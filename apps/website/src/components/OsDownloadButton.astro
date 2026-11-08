@@ -10,6 +10,7 @@ const t = ui[language];
   <span data-os-logo="mac" hidden><PlatformLogo platform="mac" /></span>
   <span data-os-logo="win" hidden><PlatformLogo platform="win" /></span>
   <span data-os-download-text>{t.download}</span>
+  <span data-os-download-short>{t.download}</span>
 </a>
 <script>
   import { detectInstaller } from '../scripts/platform';
@@ -29,7 +30,10 @@ const t = ui[language];
 <style>
   [data-os-logo] { display:inline-flex; flex-shrink:0; }
   [data-os-logo][hidden] { display:none; }
+  [data-os-download-short] { display:none; }
   @media(max-width:767px) {
-    .nav-download { max-width:156px; padding-inline:var(--space-3); font-size:var(--text-xs); }
+    .nav-download { padding-inline:var(--space-3); font-size:var(--text-xs); white-space:nowrap; }
+    .nav-download [data-os-download-text] { display:none; }
+    .nav-download [data-os-download-short] { display:inline; }
   }
 </style>
