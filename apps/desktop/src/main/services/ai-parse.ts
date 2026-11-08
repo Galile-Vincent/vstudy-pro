@@ -1,3 +1,4 @@
+import { preserveFigureLinks } from './document-figures';
 import { assertCatalogModel } from './catalog-model';
 /**
  * Coordinate budgeted AI page conversion, version persistence, and cancellation.
@@ -114,7 +115,7 @@ export class AiParseService {
  private async publish(d:Document,pages:string[],status:'cancelled'|'complete') {
   if(!this.store.documents.get(d.id))return;
   const rows=this.rows(d.id), path=this.path(d);
-  const markdown=pages.map((p,i)=>`<!-- page ${i+1} -->\n\n${rows.find(r=>r.page===i+1 && r.status==='done')?.markdown??p}`).join('\n\n');
+  const markdown=pages.map((p,i)=>`<!-- page ${i+1} -->\n\n${preserveFigureLinks(p,rows.find(r=>r.page===i+1 && r.status==='done')?.markdown??p)}`).join('\n\n');
   if(Buffer.byteLength(markdown)>8*1024*1024)throw new Error('ai_parse.size');
   await atomicWrite(path,markdown);
   await atomicWrite(path+'.json',JSON.stringify({...this.status(d.id),status,provenance:this.store.db.prepare('SELECT page,provenance FROM ai_parse_pages WHERE documentId=? ORDER BY page').all(d.id)}));

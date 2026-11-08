@@ -89,7 +89,7 @@ class PdfTests(unittest.TestCase):
 
             self.assertEqual(
                 json.loads(Path(str(source) + ".md.json").read_text()),
-                {"converter": "markitdown", "fallback_code": "PDF_EXTRACTION_FAILED"},
+                {"converter": "markitdown", "fallback_code": "PDF_EXTRACTION_FAILED", "figure_warning": "PDF_FIGURES_UNAVAILABLE"},
             )
             self.assertEqual(Path(str(source) + ".md").read_text(), "%PDF-1.4\ncorrupt")
 

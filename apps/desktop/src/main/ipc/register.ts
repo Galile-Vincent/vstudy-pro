@@ -20,7 +20,7 @@ import {
 
 export function channelPolicy(channel: string) {
   const expensive = /import|reconvert|retry|chat:start|aiParse:(?:start|estimate|use|discard)|review:(?:artifact:generate|attempt:(?:finish|commit|confirm|explain))|export/i.test(channel);
-  return { bytes: channel === 'chat:start' || channel === 'usage:estimate' ? 8 * 1024 * 1024 : 512 * 1024,
+  return { bytes: channel === 'chat:start' || channel === 'usage:estimate' || channel === 'documents:copyContext' ? 8 * 1024 * 1024 : 512 * 1024,
     requests: expensive ? 12 : channel === 'activity:heartbeat' ? 120 : 600, windowMs: 60_000 };
 }
 /** Validate sender, request, and response at one boundary before exposing a service operation. */

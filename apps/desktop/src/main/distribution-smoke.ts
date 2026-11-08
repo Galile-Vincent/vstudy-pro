@@ -47,7 +47,7 @@ export function prepareDistributionSmoke(): string | undefined {
 
 async function converterProbe(userData: string) {
   const resources = join(process.resourcesPath, 'converter');
-  for (const file of ['convert.py', 'limits.py', 'requirements.lock.txt', 'pdf_md/__init__.py']) await access(join(resources, file));
+  for (const file of ['convert.py', 'limits.py', 'figures.py', 'requirements.lock.txt', 'pdf_md/__init__.py']) await access(join(resources, file));
   let nativeWheel: { verified: boolean; version: string; sha256: string; minimumMacOS: string } | undefined;
   if (process.platform === 'darwin' && process.arch === 'x64') {
     const manifest: unknown = JSON.parse(await readFile(join(resources, 'wheels', 'native.json'), 'utf8'));

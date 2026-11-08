@@ -1,3 +1,4 @@
+import { publishFigureAssets, pruneFigureAssets } from "../../src/main/services/document-figures";
 import { atomicWrite } from "../../src/main/storage/atomic";
 import { recordEgress } from '../../src/main/services/egress';
 import { resolveInstalledExecutable, installDirectories } from '../../src/main/providers/trusted-executable';
@@ -216,7 +217,9 @@ export function createConverter(options: {
         const content = await readFile(temporaryOutput);
         if (content.length > MAX_MARKDOWN_BYTES) throw new Error("Converted Markdown exceeds 8 MiB");
         // The library may be on another volume, so publish via a sibling file.
+        const figures = await publishFigureAssets(`${temporaryOutput}.assets`, output);
         await atomicWrite(output, content);
+        await pruneFigureAssets(output, figures);
         const metadata: unknown = JSON.parse(await readFile(`${temporaryOutput}.json`, "utf8"));
         if (typeof metadata !== "object" || metadata === null || !("converter" in metadata) || (metadata.converter !== "pdf_md" && metadata.converter !== "markitdown")) throw new Error("Invalid converter metadata");
         return metadata.converter;

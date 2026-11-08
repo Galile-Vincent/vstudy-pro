@@ -150,3 +150,13 @@ it('sends the Just answer action as a direct turn while normal context stays Soc
   for await (const value of connection.adapter.run(options) as AsyncGenerator) void value;
   expect(invoke).toHaveBeenCalledWith('chat:start',expect.objectContaining({tutorMode:'direct'}));
 });
+
+it('forwards an original-page attachment from the composer context through IPC', async()=>{
+  const documentContext={documentId:context.documentId,documentName:'Lecture.pdf',page:24,kind:'page' as const,image:'data:image/png;base64,AAAA'};
+  let emit:(event:ChatEvent)=>void=()=>{};
+  const invoke=vi.fn(async()=>{emit({type:'done'});return {ok:true};});
+  const bridge={invoke,onChatEvent:(_id:string,listener:typeof emit)=>{emit=listener;return ()=>{};}} as unknown as DesktopApi;
+  const connection=createChatAdapter(bridge,async()=>({...context,documentContext}));
+  for await(const result of connection.adapter.run({messages:[{role:'user',content:[{type:'text',text:'Explain'}]}],abortSignal:new AbortController().signal} as unknown as ChatModelRunOptions) as AsyncGenerator){void result;}
+  expect(invoke).toHaveBeenCalledWith('chat:start',expect.objectContaining({documentContext,userMessage:'Explain'}));
+});

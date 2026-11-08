@@ -15,8 +15,12 @@ import { readFile } from "node:fs/promises";
 import { LibraryService } from '../services/library';
 import { tr } from "../i18n";
 import { conversionStatus } from "../../shared/status";
-import { app, dialog, ipcMain } from "electron";
-import { join } from "node:path";
+import { app, dialog, ipcMain, clipboard, nativeImage } from "electron";
+import { join, basename } from "node:path";
+import { containedPath } from "../services/file-paths";
+import { stat, mkdir } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import type { Store } from "../db";
 import { DocumentService, documentFormats } from "../services/documents";
 import { createConverter } from "../../../resources/converter";
@@ -57,6 +61,42 @@ export function registerDocumentsIpc(
     const owner = owners.get(documentId);
     if (owner && !owner.isDestroyed()) owner.send(documentProgressChannel, documentProgressSchema.parse({ documentId, message, ...conversionStatus(message) }));
   } });
+  const renderOriginal = createPageRenderer(converter.ensureReady, app.isPackaged ? join(process.resourcesPath,'converter') : join(app.getAppPath(),'resources/converter'));
+  implemented.add('documents:originalPage');
+  implemented.add('documents:copyContext');
+  registrar.handle('documents:originalPage', async ({documentId,page}) => {
+    const doc = documents.get(documentId);
+    if (!doc || doc.status !== 'ready') throw new Error('Document unavailable');
+    const root = join(userData,'library',doc.sourceHash);
+    const source = containedPath(root,doc.sourcePath);
+    if (doc.mime === 'application/pdf') {
+      const result = await renderOriginal(source,page,AbortSignal.timeout(30_000));
+      return {image:`data:image/png;base64,${result.image.toString('base64')}`,previewOnly:false};
+    }
+    if (page !== 1) throw new Error('Page outside document');
+    let path = source;
+    const previewOnly = !doc.mime.startsWith('image/');
+    if (previewOnly) {
+      if (process.platform !== 'darwin' || !/\.(pptx?|docx?)$/i.test(source)) throw new Error('Original preview unavailable');
+      const cache = join(root,'original-preview');
+      await mkdir(cache,{recursive:true,mode:0o700});
+      await promisify(execFile)('/usr/bin/qlmanage',['-t','-s','1800','-o',cache,source],{timeout:20_000,maxBuffer:4096});
+      path = containedPath(root,join(cache,basename(source)+'.png'));
+    }
+    if ((await stat(path)).size > 12 * 1024 * 1024) throw new Error('Image too large');
+    const image = nativeImage.createFromBuffer(await readFile(path));
+    if (image.isEmpty()) throw new Error('Original preview unavailable');
+    const size = image.getSize();
+    const bounded = Math.max(size.width,size.height)>2400 ? image.resize(size.width>=size.height?{width:2400}:{height:2400}) : image;
+    return {image:`data:image/png;base64,${bounded.toPNG().toString('base64')}`,previewOnly};
+  });
+  registrar.handle('documents:copyContext', context => {
+    if (!documents.get(context.documentId)) throw new Error('Document unavailable');
+    const image = nativeImage.createFromDataURL(context.image);
+    if (image.isEmpty()) throw new Error('Invalid image');
+    clipboard.write({image,text:JSON.stringify({document:context.documentName,page:context.page,kind:context.kind})});
+    return {ok:true};
+  });
   const ai=providers ? new AiParseService(store,providers,createPageRenderer(converter.ensureReady,app.isPackaged ? join(process.resourcesPath,'converter') : join(app.getAppPath(),'resources/converter')),state=>{const owner=aiOwners.get(state.documentId);if(owner && !owner.isDestroyed())owner.send(aiParseProgressChannel,state);}) : undefined;
   if(ai) {
     for(const channel of Object.keys(aiParseContract) as (keyof typeof aiParseContract)[])implemented.add(channel);

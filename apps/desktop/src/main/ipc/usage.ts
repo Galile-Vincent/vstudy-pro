@@ -1,3 +1,4 @@
+import { createSubscriptionReader } from '../providers/subscription-usage';
 import { ownerWindow } from '../dialogs';
 /**
  * Register validated usage IPC operations and delegate privileged work to main services.
@@ -22,6 +23,8 @@ export { usageCsv };
 /** Register this subsystem through the validated IPC registrar; return cleanup for window teardown. */
 export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemented: Set<IpcChannel>, codexEnabled: () => boolean = () => false) {
   const probe = createRateLimitProbe();
+  const subscriptions = createSubscriptionReader(undefined, Date.now, codexEnabled);
+  registrar.handle('usage:subscriptions', request => subscriptions(request));
   registrar.handle('usage:estimate', async ({ conversationId, userMessage }) => {
     const c = store.conversations.get(conversationId);
     if (!c) throw new Error('Conversation not found');
@@ -46,5 +49,5 @@ export function registerUsageIpc(registrar: IpcRegistrar, store: Store, implemen
     await exportText(await readUsageCsv(store), result.filePath);
     return { saved: true };
   });
-  for (const channel of ['usage:dashboard','usage:estimate','usage:summary','usage:forConversation','usage:forDocument','usage:rateLimits','usage:export'] as const) implemented.add(channel);
+  for (const channel of ['usage:subscriptions','usage:dashboard','usage:estimate','usage:summary','usage:forConversation','usage:forDocument','usage:rateLimits','usage:export'] as const) implemented.add(channel);
 }

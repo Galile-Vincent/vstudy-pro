@@ -1,3 +1,4 @@
+import { subscriptionUsageSchema } from './subscription-usage';
 import { webChatContract } from './web-chat';
 import { reviewGenerateIpc, type ReviewProgress } from './review-generate';
 import { newsletterContract } from './newsletter';
@@ -27,6 +28,7 @@ import {
   chatRequestSchema,
   conversationIdSchema,
   conversationSchema, conversationCreateSchema, conversationScopeSchema,
+  documentContextAttachmentSchema,
   documentIdSchema,
   documentSchema,
   messageSchema,
@@ -46,6 +48,8 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 }, "Only http, https and mailto URLs are allowed");
 /** Source of request and response types for the narrow preload bridge. Every main handler validates both directions. */
 export const ipcContract = {
+  'documents:originalPage': {request:z.object({documentId:documentIdSchema,page:z.number().int().min(1).max(10000)}).strict(),response:z.object({image:documentContextAttachmentSchema.shape.image,previewOnly:z.boolean()}).strict()},
+  'documents:copyContext': {request:documentContextAttachmentSchema,response:ack},
   'app:reportError': { request: z.object({phase:z.enum(['render','bootstrap']),code:z.string().max(100),componentStack:z.string().max(4000).optional()}).strict(), response:ack },
   ...reviewIpc,
   ...reviewGenerateIpc,
@@ -91,6 +95,7 @@ export const ipcContract = {
   "usage:summary": { request: z.object({ period: z.enum(['day', 'month', 'last30days']) }).strict(), response: usageSummarySchema },
   "usage:forConversation": { request: z.object({ conversationId: conversationIdSchema }).strict(), response: z.array(usageRecordSchema) },
   "usage:forDocument": { request: z.object({ documentId: documentIdSchema }).strict(), response: z.array(usageRecordSchema) },
+  "usage:subscriptions": { request: z.object({ refresh: z.boolean().optional(), allowClaudeKeychain: z.boolean().optional() }).strict(), response: z.array(subscriptionUsageSchema) },
   "usage:rateLimits": { request: empty, response: z.array(z.object({ providerId: providerIdSchema, createdAt: z.string().datetime(), rateLimit: rateLimitSchema })) },
   "usage:export": { request: empty, response: z.object({ saved: z.boolean() }).strict() },
   "shell:openExternal": {

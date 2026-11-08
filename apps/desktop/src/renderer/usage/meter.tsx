@@ -217,3 +217,7 @@ export function useBudgetGuard(
 
   return { guard, guardSend, warning, reason, dismiss: () => { pending.current = null; setWarning(false); }, approve };
 }
+
+export function SubscriptionWindowMeter({ label, usedPercent }: { label: string; usedPercent: number }) {
+  return <div className="subscription-window"><span>{label}<small>{Math.round(usedPercent)}%</small></span><progress aria-label={label} value={usedPercent} max={100} /></div>;
+}

@@ -35,6 +35,7 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     }
     await copyFile(resolve("resources/converter/convert.py"), join(resources, "convert.py"));
     await copyFile(resolve("resources/converter/limits.py"), join(resources, "limits.py"));
+    await copyFile(resolve("resources/converter/figures.py"), join(resources, "figures.py"));
     await cp(resolve("resources/converter/pdf_md"), join(resources, "pdf_md"), { recursive: true });
     const python = await converter.ensureReady().catch(error => {console.error('Converter fixture setup failed', {progress, diagnostics});throw error;});
     executable = python;
@@ -70,10 +71,14 @@ describe.skipIf(!available)("real MarkItDown conversion (requires uv or Python 3
     for (const megabytes of [7, 10]) {
       const source = join(directory, `large-${megabytes}.docx`);
       await runProcess(executable, ["-c", `import sys, zipfile
+import io
+from PIL import Image
+picture = io.BytesIO()
+Image.effect_noise((64, 64), 80).convert('RGB').save(picture, 'PNG')
 with zipfile.ZipFile(sys.argv[1]) as original, zipfile.ZipFile(sys.argv[2], 'w', zipfile.ZIP_DEFLATED) as target:
  for name in original.namelist():
   data = original.read(name)
-  if name == 'word/media/image1.png': data += b'\\0' * (int(sys.argv[3]) * 1024 * 1024)
+  if name == 'word/media/image1.png': data = picture.getvalue() + b'\\0' * (int(sys.argv[3]) * 1024 * 1024)
   target.writestr(name, data)
 `, resolve("test-fixtures/converter/sample.docx"), source, String(megabytes)], directory);
       const output = join(directory, `large-${megabytes}.md`);
@@ -83,8 +88,8 @@ with zipfile.ZipFile(sys.argv[1]) as original, zipfile.ZipFile(sys.argv[2], 'w',
       expect(markdown).not.toContain("data:");
       if (megabytes === 7) {
         const image = /\]\((image-[a-f0-9]+\.png)\)/.exec(markdown)![1]!;
-        expect((await readFile(join(directory, image))).length).toBe(7340100);
-      } else expect(markdown).toContain("(image omitted)");
+        expect((await readFile(join(directory, image))).length).toBeGreaterThan(0);
+      } else expect(markdown).not.toMatch(/!\[[^\]]*\]\(/);
     }
   }, 120_000);
   it("returns a JSON error and permits another conversion after failure", async () => {

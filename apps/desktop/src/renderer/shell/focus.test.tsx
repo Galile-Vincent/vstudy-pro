@@ -5,7 +5,8 @@ import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { defaultSettings } from '../../shared';
 import { AppShell, useNavigate } from './index';
 vi.mock('../bridge',()=>({desktop:{invoke:vi.fn(async()=>defaultSettings)}}));
-vi.mock('../ai-cli/inventory',()=>({AiCliInventory:()=>null}));
+
+vi.mock('../usage/subscriptions', () => ({ SubscriptionMeters: () => null }));
 vi.mock('../onboarding/help',()=>({HelpMenu:()=>null}));
 vi.mock('./view-transition',()=>({transitionTo:(apply:()=>void)=>apply()}));
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT=true;
