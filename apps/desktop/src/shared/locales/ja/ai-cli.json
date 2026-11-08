@@ -200,5 +200,20 @@
   "error_next_certificate": "端末の日付とネットワークを確認してください。解決しない場合は、学校やネットワーク管理者に証明書の確認を依頼してください。",
   "pick_hint": "迷ったら Claude Code を選びましょう",
   "first_click_consent": "「{{action}}」を選ぶと、VStudy が {{provider}} を使用することを許可します。",
-  "failure_certificate": "安全な接続に失敗しました。端末の日付とネットワークを確認してください。解決しない場合は、学校やネットワーク管理者に証明書の確認を依頼してください。"
+  "failure_certificate": "安全な接続に失敗しました。端末の日付とネットワークを確認してください。解決しない場合は、学校やネットワーク管理者に証明書の確認を依頼してください。",
+  "continue": "続ける",
+  "step_state_done": "完了",
+  "step_state_pending": "未開始",
+  "step_state_running": "実行中",
+  "step_state_failed": "確認が必要",
+  "step_state_next": "次のステップ",
+  "open_signin": "ログインページを開く",
+  "copy_signin_link": "リンクをコピー",
+  "returned_code": "ログインページから返されたコード",
+  "returned_code_help": "ページでコードをここに戻すよう求められた場合のみ貼り付けてください。デバイスコードはログインページに入力します。",
+  "send_code": "コードを送信",
+  "device_code": "ログインページで入力するコード：",
+  "signin_waiting": "ブラウザーでログインを完了してください。確認を待っています…",
+  "signin_preparing": "ログインを準備中…",
+  "code_sent": "コードを送信しました。ログインの確認を待っています…"
 }

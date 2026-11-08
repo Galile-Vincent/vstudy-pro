@@ -17,6 +17,7 @@ import { ManualInstall, ManualInstallReason } from './manual-install';
 const CliTerminal = lazy(() => import('./terminal').then(module => ({ default: module.CliTerminal })));
 import { SetupRecovery } from './recovery';
 import { AdvancedShell } from './preferences';
+import { SignInAction } from './sign-in';
 import './setup.css';
 
 export { AiCliSetupHost } from './setup-host';
@@ -28,6 +29,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
   const provider = selectedProvider ?? recommendedProvider(tools);
   const [savingConsent, setSavingConsent] = useState(false);
   const [localError, setLocalError] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [updatePlan, setUpdatePlan] = useState<CliActionPlan>();
   const runner = useCliAction(refresh);
@@ -81,8 +83,17 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
         {!loaded && !loadError && <p role="status">{tr('ai-cli:loading')}</p>}
         {tool && <>
           <div className="ai-cli-tool-heading"><strong>{cliNames[provider]}</strong><span className="ai-cli-chip" role="status" data-status={displayStatus}>{tr(`ai-cli:status_${displayStatus}`)}</span></div>
-          <ol className="ai-cli-steps" aria-label={tr('ai-cli:steps')}>{setupSteps.map((item, index) => <li key={item} aria-current={step === item ? 'step' : undefined} data-done={setupSteps.indexOf(step) > index || tool.tested}><span className="ai-cli-step-number" aria-hidden="true">{setupSteps.indexOf(step) > index || tool.tested ? <Check size={16} /> : index + 1}</span><span><strong>{tr(`ai-cli:step_${item}`)}</strong>{step === item && !tool.tested && <small>{tr('ai-cli:you_are_here')}</small>}</span></li>)}</ol>
-          <div className="ai-cli-workarea"><div className="ai-cli-instructions">
+          <ol className="ai-cli-steps" aria-label={tr('ai-cli:steps')}>{setupSteps.map((item, index) => {
+            const done = setupSteps.indexOf(step) > index || tool.tested;
+            const current = !tool.tested && step === item;
+            const state = done ? 'done' : !current ? 'pending' : failed ? 'failed' : running ? 'running' : 'pending';
+            return <li key={item} aria-current={current ? 'step' : undefined} data-state={state}>
+              <span className="ai-cli-step-number" aria-hidden="true">{done ? <Check size={16} /> : index + 1}</span>
+              <span><strong>{tr(`ai-cli:step_${item}`)}</strong><small>{tr(`ai-cli:step_state_${current && state === 'pending' ? 'next' : state}`)}</small></span>
+            </li>;
+          })}</ol>
+          <div className="ai-cli-workarea"><div className={`ai-cli-instructions${tool.tested ? ' ai-cli-complete' : ''}`}>
+            {tool.tested && <Check className="ai-cli-complete-icon" size={28} aria-hidden="true" />}
             <h2>{tr(tool.tested ? 'ai-cli:ready_title' : `ai-cli:heading_${step}`)}</h2>
             {manualStep ? <ManualInstallReason key={provider} provider={provider} /> : <p>{tr(tool.tested ? 'ai-cli:ready_body' : `ai-cli:instruction_${provider}_${step}`)}</p>}
           </div><div className="ai-cli-action-area" aria-busy={busy}>
@@ -100,7 +111,8 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
             {runner.session?.phase === 'cancelled' && <p role="status">{tr('ai-cli:phase_cancelled')}</p>}
             {tool.appliesToNewChats && <p role="status">{tr('ai-cli:new_chats')}</p>}
           </div></div>
-          {runner.session && <details open={running || runner.session.actionId.startsWith('login-') || undefined}><summary>{tr('ai-cli:terminal')}</summary><Suspense fallback={null}><CliTerminal session={runner.session} /></Suspense></details>}
+          {runner.session?.actionId.startsWith('login-') && <SignInAction key={runner.session.id} session={runner.session} />}
+          {runner.session && <details className="ai-cli-details" open={detailsOpen} onToggle={event => setDetailsOpen(event.currentTarget.open)}><summary>{tr('ai-cli:terminal')}</summary>{detailsOpen && <Suspense fallback={null}><CliTerminal session={runner.session} /></Suspense>}</details>}
         </>}
         <details className="ai-cli-more"><summary>{tr('ai-cli:more_options')}</summary><p>{tr('ai-cli:pick_hint')}</p>
         <fieldset className="ai-cli-chooser" disabled={busy}><legend>{tr('ai-cli:choose')}</legend>{cliProviders.map(id => <label key={id} data-selected={provider === id}><input type="radio" name="ai-cli-provider" checked={provider === id} onChange={() => void choose(id)} /><strong>{cliNames[id]}</strong><span>{tr(`ai-cli:account_${id}`)}</span></label>)}</fieldset>
@@ -123,7 +135,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
           <Button variant="link" onClick={() => void runner.close().then(() => { onClose(); window.dispatchEvent(new CustomEvent('vstudy:open-settings', { detail: { tab: 'providers' } })); }).catch(() => setLocalError(true))}>{tr('ai-cli:api_options')}</Button>
         </details>
         {localError && <p role="alert">{tr('ai-cli:load_error')}</p>}
-      </div><footer className="ai-cli-footer"><p>{tr('ai-cli:optional')}</p><Button variant="ghost" onClick={close}>{tr('ai-cli:continue_reading')}</Button></footer>
+      </div><footer className="ai-cli-footer"><p>{tr('ai-cli:optional')}</p><Button variant={tool?.tested ? 'default' : 'ghost'} onClick={close}>{tr(tool?.tested ? 'ai-cli:continue' : 'ai-cli:continue_reading')}</Button></footer>
     </DialogContent>
   </Dialog>;
 }

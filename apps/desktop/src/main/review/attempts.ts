@@ -2,7 +2,9 @@ import { randomUUID } from 'node:crypto';
 import { attemptSchema } from '../../shared/review-generate';
 import { isStudyAnswer, studyAnswersSchema, studyTestSchema } from '../../shared/review-artifacts';
 import { ArtifactRepository } from './artifact-repository';
-import { normalizeStem, stemHash } from './test-validate';
+import { gradeAnswer } from './grade';
+import { EXAM_COURSE_ID } from '../../shared/review-artifacts';
+import { stemHash } from './test-validate';
 export class Attempts {
     constructor(private readonly repo: ArtifactRepository) { }
     get(id: string) { const row = this.repo.db.prepare('SELECT * FROM study_attempts WHERE id=?').get(id); if (!row)
@@ -10,7 +12,7 @@ export class Attempts {
     start(artifactId: string) { const artifact = this.repo.find(artifactId); if (artifact?.status !== 'ready' || !artifact.test)
         throw new Error('review.test_unavailable'); return this.repo.atomic(() => { const existing=this.repo.db.prepare("SELECT id FROM study_attempts WHERE artifactId=? ORDER BY startedAt DESC,id DESC LIMIT 1").get(artifactId); if(existing) return this.get(String(existing.id)); const id = randomUUID(); this.repo.db.prepare("INSERT INTO study_attempts(id,artifactId,phase,answersJson,startedAt) VALUES(?,?,'answering','{}',?)").run(id, artifactId, new Date(this.repo.clock()).toISOString()); for (const item of artifact.test!.items)
         this.repo.db.prepare('INSERT INTO study_attempt_items(attemptId,itemId,conceptKey,reportedBad) VALUES(?,?,?,0)').run(id, item.id, item.conceptKey); return this.get(id); }); }
-    answer(id: string, itemId: string, answer: string | number | boolean | null) { const attempt = this.get(id); if (attempt.phase !== 'answering')
+    answer(id: string, itemId: string, answer: string | number | boolean | number[] | null) { const attempt = this.get(id); if (attempt.phase !== 'answering')
         throw new Error('review.answers_locked'); if (attempt.results.some(i=>i.itemId===itemId && i.correct!==null)) throw new Error('review.answers_locked'); if (!attempt.results.some(i => i.itemId === itemId))
         throw new Error('review.item_unavailable');
         const item = this.repo.find(attempt.artifactId)?.test?.items.find(item => item.id === itemId);
@@ -26,9 +28,7 @@ export class Attempts {
             for (const item of test.items) {
                 if (itemId && item.id !== itemId || attempt.results.find(r=>r.itemId===item.id)?.correct !== null) continue;
                 const answer = attempt.answers[item.id];
-                const correct = item.type === 'cloze'
-                    ? typeof answer === 'string' && [item.answer, ...item.alternatives].some(a => normalizeStem(a) === normalizeStem(answer))
-                    : answer === item.answer;
+                const correct = gradeAnswer(item, answer);
                 this.repo.db.prepare('UPDATE study_attempt_items SET correct=? WHERE attemptId=? AND itemId=? AND correct IS NULL').run(Number(correct), id, item.id);
             }
             if (!this.get(id).results.some(item => item.correct === null))
@@ -38,7 +38,7 @@ export class Attempts {
     }
     confirm(id: string) { return this.repo.atomic(() => { const attempt = this.get(id); if (attempt.phase === 'confirmed')
         return attempt; if (attempt.phase !== 'graded')
-        throw new Error('review.not_graded'); const at = new Date(this.repo.clock()).toISOString(); this.repo.db.prepare('UPDATE study_attempt_items SET appliedAt=? WHERE attemptId=? AND reportedBad=0 AND appliedAt IS NULL').run(at, id); this.repo.db.prepare("UPDATE study_attempts SET phase='confirmed',confirmedAt=? WHERE id=? AND phase='graded'").run(at, id); return this.get(id); }); }
+        throw new Error('review.not_graded'); if(this.repo.find(attempt.artifactId)?.courseId===EXAM_COURSE_ID) throw new Error('review.exam_no_mastery'); const at = new Date(this.repo.clock()).toISOString(); this.repo.db.prepare('UPDATE study_attempt_items SET appliedAt=? WHERE attemptId=? AND reportedBad=0 AND appliedAt IS NULL').run(at, id); this.repo.db.prepare("UPDATE study_attempts SET phase='confirmed',confirmedAt=? WHERE id=? AND phase='graded'").run(at, id); return this.get(id); }); }
     reportBad(id: string, itemId: string) { this.get(id); const change = this.repo.db.prepare('UPDATE study_attempt_items SET reportedBad=1,appliedAt=NULL WHERE attemptId=? AND itemId=?').run(id, itemId); if (!change.changes)
         throw new Error('review.item_unavailable'); return this.get(id); }
     retake(id: string) { const attempt = this.get(id); if (attempt.phase !== 'confirmed')

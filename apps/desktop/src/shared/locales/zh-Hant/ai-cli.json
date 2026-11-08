@@ -200,5 +200,20 @@
   "error_next_certificate": "請檢查裝置日期與網路。若問題持續，請學校或網路管理員檢查憑證。",
   "pick_hint": "不確定？選 Claude Code",
   "first_click_consent": "點選「{{action}}」即允許 VStudy 使用 {{provider}}。",
-  "failure_certificate": "安全連線失敗。請檢查裝置日期與網路。若問題持續，請學校或網路管理員檢查憑證。"
+  "failure_certificate": "安全連線失敗。請檢查裝置日期與網路。若問題持續，請學校或網路管理員檢查憑證。",
+  "continue": "繼續",
+  "step_state_done": "已完成",
+  "step_state_pending": "待處理",
+  "step_state_running": "進行中",
+  "step_state_failed": "需要處理",
+  "step_state_next": "下一步",
+  "open_signin": "開啟登入頁面",
+  "copy_signin_link": "複製連結",
+  "returned_code": "登入頁面傳回的代碼",
+  "returned_code_help": "只有頁面要求將代碼帶回時才貼在這裡。裝置代碼請在登入頁面輸入。",
+  "send_code": "送出代碼",
+  "device_code": "請在登入頁面輸入此代碼：",
+  "signin_waiting": "請在瀏覽器完成登入。正在等候確認…",
+  "signin_preparing": "正在準備登入…",
+  "code_sent": "已送出代碼，正在等候登入確認…"
 }

@@ -6,7 +6,6 @@ import '@xterm/xterm/css/xterm.css';
 import type { CliActionSession } from '../../shared/ai-cli';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { Button } from '../components/ui/button';
 import { outputLinks, terminalDelta } from './model';
 
 export function CliTerminal({ session }: { session: CliActionSession }) {
@@ -34,7 +33,6 @@ export function CliTerminal({ session }: { session: CliActionSession }) {
     });
     terminal.current = term;
     const fit = new FitAddon(); term.loadAddon(fit); term.open(host.current);
-    const reveal = requestAnimationFrame(() => host.current?.closest('.ai-cli-terminal')?.scrollIntoView({ block: 'start' }));
     const colors = () => {
       const css = getComputedStyle(document.documentElement);
       const token = (name: string) => css.getPropertyValue(`--${name}`).trim();
@@ -71,7 +69,7 @@ export function CliTerminal({ session }: { session: CliActionSession }) {
       }));
     } });
     previous.current = ''; term.write(latest.current.output); previous.current = latest.current.output;
-    return () => { cancelAnimationFrame(reveal); input.dispose(); links.dispose(); observer.disconnect(); theme.disconnect(); term.dispose(); terminal.current = undefined; previous.current = ''; };
+    return () => { input.dispose(); links.dispose(); observer.disconnect(); theme.disconnect(); term.dispose(); terminal.current = undefined; previous.current = ''; };
   }, [session.id]);
   useEffect(() => {
     const term = terminal.current;
@@ -83,12 +81,10 @@ export function CliTerminal({ session }: { session: CliActionSession }) {
     previous.current = session.output;
   }, [session.output, session.phase]);
   return <section className="ai-cli-terminal" aria-label={tr('ai-cli:terminal')}>
-    <div className="ai-cli-terminal-heading"><strong>{tr('ai-cli:terminal')}</strong><span role="status">{tr(`ai-cli:phase_${session.phase}`)}</span></div>
+    <div className="ai-cli-terminal-heading"><span role="status">{tr(`ai-cli:phase_${session.phase}`)}</span></div>
     <p className="muted">{tr('ai-cli:terminal_help')}</p>
     <div ref={host} className="ai-cli-xterm" />
     {session.truncated && <p>{tr('ai-cli:truncated')}</p>}
-    {outputLinks(session.output).map(url => <Button key={url} variant="link" onClick={() => openLink(url)}>{url}</Button>)}
-    <details><summary>{tr('ai-cli:plain_output')}</summary><pre className="ai-cli-output">{session.output}</pre></details>
     {error && <p role="alert">{tr('ai-cli:terminal_error')}</p>}
   </section>;
 }

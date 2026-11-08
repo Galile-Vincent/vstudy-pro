@@ -27,6 +27,7 @@ export interface SetupDependencies {
   describe?: (provider: CliProvider) => Promise<string | null>;
   createPty?: () => ActionPty;
   version?: typeof probeVersion;
+  auth?: typeof authStatus;
   now?: () => number;
   changed?: () => void;
   loginInterpreters?: readonly string[];
@@ -223,7 +224,7 @@ export class AiCliSetup {
         }
       }
       if (!this.enabled(provider)) throw new SetupError('not-consented');
-      const signedIn = await authStatus(provider, providerPlan, pty, signal, verb === 'login');
+      const signedIn = await (this.deps.auth ?? authStatus)(provider, providerPlan, signal);
       assertConsent();
       this.apply(provider, { type: signedIn ? 'ready' : 'unsigned' });
       if (!signedIn) throw new SetupError(verb === 'test' ? 'login-expired' : 'not-signed-in');
@@ -248,7 +249,7 @@ export class AiCliSetup {
         action.controller.signal.throwIfAborted();
         if (completed) break;
         try {
-          if (await authStatus('agy', { ...action.plan, executable: action.plan.binary! }, action.pty, AbortSignal.any([action.controller.signal, AbortSignal.timeout(15_000)]))) { login.abort(); await terminal.catch(() => {}); return; }
+          if (await authStatus('agy', { ...action.plan, executable: action.plan.binary! }, AbortSignal.any([action.controller.signal, AbortSignal.timeout(15_000)]))) { login.abort(); await terminal.catch(() => {}); return; }
         } catch { action.controller.signal.throwIfAborted(); }
       }
       await terminal;

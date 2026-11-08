@@ -129,3 +129,10 @@ it('rejects an unknown generation model at IPC with a stable code', async () => 
     await expect(handlers.get('review:artifact:generate')!({} as never, {...request, modelId:'unknown'})).rejects.toThrow('review.model_unavailable');
     expect(stream).not.toHaveBeenCalled();
 });
+it('validates exam history and explanation requests at the IPC boundary',async()=>{
+ const {handlers}=setup(async function*(){yield {type:'done'};});
+ expect(await handlers.get('review:exam:history')!({} as never,{limit:20})).toEqual({items:[],nextCursor:null});
+ await expect(handlers.get('review:exam:history')!({} as never,{courseId:randomUUID()})).rejects.toThrow();
+ await expect(handlers.get('review:attempt:explain')!({} as never,{attemptId:randomUUID(),itemId:'q1',locale:'en',answer:'injected'})).rejects.toThrow();
+ await expect(handlers.get('review:attempt:explain')!({} as never,{attemptId:randomUUID(),itemId:'q1',locale:'en'})).rejects.toThrow('review.attempt_unavailable');
+});

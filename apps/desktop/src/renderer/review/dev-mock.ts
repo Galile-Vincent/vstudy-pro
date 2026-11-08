@@ -75,6 +75,7 @@ export function createReviewMock(demo = false) {
     if(Object.hasOwn(reviewGenerateIpc,channel)) {
       const key=channel as keyof typeof reviewGenerateIpc;
       reviewGenerateIpc[key].request.parse(input);
+      if(key==='review:exam:history')return {items:[],nextCursor:null};
       if(key==='review:artifact:list') return {items:[],nextCursor:null};
       if(key==='review:artifact:get') return null;
       if(key==='review:artifact:delete'||key==='review:artifact:cancel') return {ok:true};

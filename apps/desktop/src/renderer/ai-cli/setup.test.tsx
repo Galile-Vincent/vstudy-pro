@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 /** Exercise student-visible setup and privileged boundary payloads without Electron. */
 import { act } from 'react';
+import { fireEvent } from '@testing-library/react';
+import { SignInAction } from './sign-in';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { i18n } from '../../shared/i18n';
@@ -66,11 +68,13 @@ it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through exp
   expect(document.querySelector('.ai-cli-success')).toBeNull();
   await click('Sign in');
   expect(document.body.textContent).toContain('Try your first answer.');
-  expect(document.querySelector('.ai-cli-success')).toBeNull();
+  expect(document.querySelector('.ai-cli-sign-in')?.textContent).toContain('Sign-in verified.');
   expect(document.querySelector('.ai-cli-chip')?.textContent).toBe('Not tested');
   await click('Test');
   expect(document.body.textContent).toContain('Ready to study');
-  expect(document.body.textContent).toContain('Your tool answered. Ready to study.');
+  expect(document.querySelector<HTMLDetailsElement>('.ai-cli-details')?.open).toBe(false);
+  expect(button('Continue').getAttribute('data-variant')).toBe('default');
+  expect([...document.querySelectorAll('.ai-cli-steps li')].every(li => li.getAttribute('data-state') === 'done')).toBe(true);
   expect(runs().map(call => call.payload.actionId)).toEqual([`install-${provider}`, `login-${provider}`, `test-${provider}`]);
   for (const call of runs()) {
     expect(Object.keys(call.payload).sort()).toEqual(['actionId', 'token']);
@@ -101,15 +105,39 @@ it('stops a running action and closes the session when the sheet closes', async 
   expect(fixture.calls.filter(call => call.channel === 'ai-cli:close')).toHaveLength(2);
 });
 
-it('keeps output inert, shows login URLs, and sends them through external confirmation', async () => {
-  fixture.output('<img src=x onerror="alert(1)">\nhttps://auth.openai.com/device\nDevice code ABCD-EFGH');
-  await mount(); await allow(); await click('Install');
-  expect(document.querySelector('.ai-cli-output')?.textContent).toContain('<img src=x');
-  expect(document.querySelector('.ai-cli-output img')).toBeNull();
+it('keeps raw output collapsed and makes the sign-in link an explicit confirmed action', async () => {
+  const session = { id: crypto.randomUUID(), actionId: 'login-codex' as const, phase: 'running' as const, output: '<img src=x onerror="alert(1)">\nhttps://auth.openai.com/device\nDevice code \u001b[32mABCD-EFGH\u001b[0m', truncated: false, exitCode: null, error: null };
+  await mount(<SignInAction session={session} />);
+  expect(document.querySelector('img')).toBeNull();
+  expect(document.body.textContent).not.toContain('https://auth.openai.com/device');
   expect(document.body.textContent).toContain('ABCD-EFGH');
   expect(fixture.calls.some(call => call.channel === 'shell:openExternal')).toBe(false);
-  await click('https://auth.openai.com/device');
+  await click('Open sign-in page');
   expect(fixture.calls.at(-1)).toEqual({ channel: 'shell:openExternal', payload: { url: 'https://auth.openai.com/device' } });
+});
+
+it('submits a returned code to the active PTY once and disables input on completion', async () => {
+  const session = { id: crypto.randomUUID(), actionId: 'login-claude' as const, phase: 'running' as const, output: 'Paste code here if prompted', truncated: false, exitCode: null, error: null };
+  await mount(<SignInAction session={session} />);
+  const input = document.querySelector('input')!;
+  await act(async () => fireEvent.change(input, { target: { value: 'returned-code#state' } }));
+  await click('Submit code');
+  expect(fixture.calls.at(-1)).toEqual({ channel: 'ai-cli:input', payload: { id: session.id, data: 'returned-code#state\r' } });
+  expect(document.body.textContent).toContain('Code submitted. Waiting for sign-in confirmation');
+  expect(input.value).toBe('');
+  await mount(<SignInAction session={{ ...session, phase: 'succeeded' }} />);
+  expect(document.querySelector('input')).toBeNull();
+  expect(document.body.textContent).toContain('Sign-in verified.');
+});
+
+it('shows pending, running and failed step states with specific recovery', async () => {
+  fixture.hold(true); await mount(); await click('Install');
+  expect([...document.querySelectorAll('.ai-cli-steps li')].map(li => li.getAttribute('data-state'))).toEqual(['running', 'pending', 'pending']);
+  fixture.fail('certificate'); fixture.hold(false);
+  await act(async () => { await new Promise(resolve => setTimeout(resolve, 400)); });
+  expect(document.querySelector('.ai-cli-steps li')?.getAttribute('data-state')).toBe('failed');
+  expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain('The secure connection failed');
+  expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain('date and network');
 });
 
 it('previews compatible updates and one-click rollback without disturbing existing chats', async () => {
@@ -469,4 +497,27 @@ it('replaces Ready with an error after an offline test, and recovers on retry', 
   expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain('No internet connection');
   fixture.fail(null); await click('Try again'); await click('Test');
   expect(document.querySelector('.ai-cli-chip')?.textContent).toBe('Ready');
+});
+
+it('copies the sign-in URL without opening it and rejects control characters in returned codes', async () => {
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+  const session = { id: crypto.randomUUID(), actionId: 'login-claude' as const, phase: 'running' as const, output: 'https://claude.com/ai/oauth/authorize?state=example', truncated: false, exitCode: null, error: null };
+  try {
+    await mount(<SignInAction session={session} />);
+    await click('Copy link');
+    expect(writeText).toHaveBeenCalledWith(session.output);
+    expect(fixture.calls).toHaveLength(0);
+    await act(async () => fireEvent.change(document.querySelector('input')!, { target: { value: 'code' + String.fromCharCode(27) + '[A' } }));
+    await click('Submit code');
+    expect(document.querySelector('[role=alert]')).not.toBeNull();
+    expect(fixture.calls).toHaveLength(0);
+  } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
+});
+
+it('shows the device code from real Codex output where it follows an expiry note on the next line', async () => {
+  const output = 'Follow these steps:\n\n1. Open this link\n   https://auth.openai.com/codex/device\n\n2. Enter this one-time code (expires in 15 minutes)\n   600B-FQMFE\n';
+  const session = { id: crypto.randomUUID(), actionId: 'login-codex' as const, phase: 'running' as const, output, truncated: false, exitCode: null, error: null };
+  await mount(<SignInAction session={session} />);
+  expect(document.querySelector('.ai-cli-device-code')?.textContent).toContain('600B-FQMFE');
 });
