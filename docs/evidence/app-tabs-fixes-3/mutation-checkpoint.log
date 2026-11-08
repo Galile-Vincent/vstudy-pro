@@ -1,0 +1,126 @@
+{
+  keys: 1,
+  exchanges: 1,
+  requests: [
+    {
+      path: '/webservice/rest/server.php',
+      query: '',
+      cookie: '',
+      referrer: ''
+    },
+    {
+      path: '/admin/tool/mobile/autologin.php',
+      query: '',
+      cookie: '',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=1',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=2',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/pluginfile.php/42/notes.md',
+      query: '',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=1',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    }
+  ]
+}
+[
+  {
+    id: undefined,
+    url: 'http://127.0.0.1:58282/admin/tool/mobile/autologin.php',
+    error: 'net::ERR_ABORTED'
+  }
+]
+[
+  {
+    state: {
+      id: 'fc9b1bfd-b672-42aa-a038-6c9260d92f22',
+      generation: 3,
+      scrollTop: 0,
+      status: 'ready',
+      url: 'http://127.0.0.1:58282/course/view.php?id=2',
+      title: 'Week 4 · Moodle',
+      secure: false,
+      canGoBack: false,
+      canGoForward: false,
+      zoom: 1,
+      error: null,
+      retryAt: null,
+      documentId: null,
+      importedDocumentId: 'aba0b992-fe78-4f38-92d6-affab151b1ec'
+    },
+    entries: [ [Object] ]
+  },
+  {
+    state: {
+      id: 'ea4472b0-e6ea-447a-8d12-567e9a7758d0',
+      generation: 4,
+      scrollTop: 0,
+      status: 'ready',
+      url: 'http://127.0.0.1:58282/course/view.php?id=1',
+      title: 'Week 4 · Moodle',
+      secure: false,
+      canGoBack: false,
+      canGoForward: false,
+      zoom: 1,
+      error: null,
+      retryAt: null,
+      documentId: null,
+      importedDocumentId: null
+    },
+    entries: [ [Object] ]
+  }
+]
+Skip to content
+Moodle page
+Help
+Find a conversation
+Cmd K
+Help improve VStudy Pro? Analytics is off until you choose.
+
+Help improve VStudy Pro with usage data. We never collect your name, documents, questions or answers. Studying works the same either way.
+
+What is collected
+Privacy policy
+Terms of use
+No thanks
+Share usage data
+Week 4 · Moodle
+Signed in with your school account
+127.0.0.1:58282
+
+This file was imported
+
+Open document
+Cmd R reloads
+100%
+Copy link
+Focus page
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+electronApplication.evaluate: Error: Stale renderer checkpoint replaced requested target
+    at eval (eval at evaluate (:290:30), <anonymous>:7:66)
+    at async <anonymous>:316:30
+    at /Users/vc/.t3/worktrees/vstudy-pro/t3-48d6ea52/apps/desktop/e2e/moodle-webview.mjs:126:15
+
+Node.js v26.9.0
+
+Mutation exit 1

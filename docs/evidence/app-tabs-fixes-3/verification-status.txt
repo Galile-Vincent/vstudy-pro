@@ -1,0 +1,10 @@
+moodle-webview 0
+app-tabs 0
+app-tabs-native-ui 0
+a11y-regressions 0
+i18n 0
+history-startup-regressions 0
+chat-history 0
+chat-controls 0
+measurement 0
+swipe-history 1

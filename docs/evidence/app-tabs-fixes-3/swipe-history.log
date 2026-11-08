@@ -1,0 +1,20 @@
+PASS first history entry has no indicator or navigation
+PASS right swipe goes Back through real visits
+PASS left swipe goes Forward
+PASS short swipe cancels
+PASS last history entry cannot go Forward
+PASS Due soon horizontal overflow scrolls without navigating
+PASS real Settings dialog blocks navigation
+PASS focused composer or text field blocks swipes begun inside it and history keys
+PASS platform history shortcuts navigate
+PASS Alt+Left and Alt+Right route through the same actions
+PASS mouse buttons 3 and 4 navigate
+AssertionError [ERR_ASSERTION]: native shell WebContents acquired focus before app-command
+    at file:///Users/vc/.t3/worktrees/vstudy-pro/t3-48d6ea52/apps/desktop/e2e/swipe-history.mjs:118:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

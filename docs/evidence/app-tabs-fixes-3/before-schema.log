@@ -1,0 +1,27 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-48d6ea52/apps/desktop
+
+ ❯ src/shared/app-tabs.test.ts (5 tests | 1 failed) 5ms
+   × validates imported document markers in persisted Moodle history 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/shared/app-tabs.test.ts > validates imported document markers in persisted Moodle history
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/shared/app-tabs.test.ts:34:50
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  20:49:24
+   Duration  105ms (transform 38ms, setup 0ms, import 52ms, tests 5ms, environment 0ms)

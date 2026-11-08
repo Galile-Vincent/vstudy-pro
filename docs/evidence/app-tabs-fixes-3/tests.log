@@ -1,0 +1,64 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-48d6ea52/apps/desktop
+
+Error: failed to create directory '/Users/vc/.t3/worktrees/vstudy-pro/t3-48d6ea52/node_modules/.pnpm/electron@42.11.16/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/ar.lproj': File exists (os error 17)
+stdout | src/main/moodle/service.test.ts
+Downloading Electron binary...
+
+ ❯ src/main/moodle/service.test.ts (0 test)
+assignments: 0.36 ms
+base64: 0.09 ms
+identifier: 0.14 ms
+dotted: 0.17 ms
+quotes: 0.61 ms
+FRESHNESS elapsedMs=950 visibleResults=1 searches=2
+(node:49908) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 will-download listeners added to [EventEmitter]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+SNAPSHOT SIGKILL interruptedBytes=45924352 afterCleanupBytes=0
+SNAPSHOT SIGTERM interruptedBytes=0 afterCleanupBytes=0
+SNAPSHOT worker termination interruptedBytes=0 afterCleanupBytes=0
+ ❯ src/renderer/shell/history-swipe-navigation.test.tsx (11 tests | 1 failed) 57ms
+   × leaves dialog alone 3ms
+CONTENTION documents=2000 maxWriteMs=0.6 maxEventLoopGapMs=32.3 writes=62
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/moodle/service.test.ts [ src/main/moodle/service.test.ts ]
+Error: Electron failed to install correctly. Please delete `node_modules/electron` and run "npx install-electron --no" manually.
+ ❯ getElectronPath ../../node_modules/.pnpm/electron@42.11.16/node_modules/electron/index.js:43:13
+ ❯ Object.<anonymous> ../../node_modules/.pnpm/electron@42.11.16/node_modules/electron/index.js:52:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/shell/history-swipe-navigation.test.tsx > leaves dialog alone
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "back",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/renderer/shell/history-swipe-navigation.test.tsx:59:24
+     57|   if (kind === 'editable') { const input = document.createElement('tex…
+     58|   bridge.begin(); await wheel(-140, target, { composed: true, ctrlKey:…
+     59|   expect(navigate).not.toHaveBeenCalled();
+       |                        ^
+     60| });
+     61| it('finishes with the idle fallback when native boundaries are unavail…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 297 passed | 7 skipped (306)
+      Tests  1 failed | 2640 passed | 20 skipped (2661)
+   Start at  20:44:31
+   Duration  77.03s (transform 3.52s, setup 0ms, import 31.24s, tests 90.63s, environment 16.35s)

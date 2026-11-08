@@ -1,0 +1,149 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-48d6ea52/apps/desktop
+
+ ❯ src/renderer/shell/native-overlay.test.tsx (6 tests | 3 failed) 14ms
+   × ignores invisible overlays <div role="listbox"></div> 2ms
+   × ignores invisible overlays <div role="menu" style="display:none"></div> 2ms
+   × ignores invisible overlays <div data-slot="popover-content" style="width:0;height:0"></div> 1ms
+ ❯ src/main/moodle/webview.test.ts (34 tests | 5 failed) 4272ms
+   × ignores a renderer checkpoint for another requested target 1059ms
+   × retains import delivery across reads and actions until acknowledged 55ms
+   × keeps dirty protection through same-document navigation 54ms
+   × restores the private URL after discard 1057ms
+   × does not reimport a restored completed file target 56ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/moodle/webview.test.ts > ignores a renderer checkpoint for another requested target
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "https://school.example/course/view.php?id=99",
++   "https://school.example/course/view.php?id=2",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/moodle/webview.test.ts:329:67
+    327|  const {views,owner,tabId}=await open();
+    328|  views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id…
+    329|  await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHa…
+       |                                                                   ^
+    330| });
+    331| it('retains import delivery across reads and actions until acknowledge…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > retains import delivery across reads and actions until acknowledged
+AssertionError: expected null to be '5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60' // Object.is equality
+
+- Expected:
+"5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60"
+
++ Received:
+null
+
+ ❯ src/main/moodle/webview.test.ts:334:65
+    332|  const {views,owner,contents,state}=await open();click(contents);navig…
+    333|  const id=views.state(owner,state.id).documentId;expect(id).not.toBeNu…
+    334|  expect((await views.action(owner,state.id,'copy')).documentId).toBe(i…
+       |                                                                 ^
+    335|  expect(views.state(owner,state.id).documentId).toBe(id);
+    336|  await views.action(owner,state.id,'ack-document');expect(views.state(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > keeps dirty protection through same-document navigation
+AssertionError: expected 'discarded' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "discarded"
+
+ ❯ src/main/moodle/webview.test.ts:343:64
+    341|  contents.emit('did-navigate-in-page',{},site+'/course/view.php?id=2#a…
+    342|  views.hide(owner,tabId,state.generation);
+    343|  expect((await views.action(owner,state.id,'discard')).status).toBe('r…
+       |                                                                ^
+    344| });
+    345| it('restores the private URL after discard',async()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > restores the private URL after discard
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "https://school.example/course/view.php?id=2&sesskey=secret&returnurl=lesson",
++   "https://school.example/course/view.php?id=2",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/moodle/webview.test.ts:349:67
+    347|  contents.emit('did-navigate',{},url);contents.emit('render-process-go…
+    348|  views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id…
+    349|  await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHa…
+       |                                                                   ^
+    350| });
+    351| it('does not reimport a restored completed file target',async()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > does not reimport a restored completed file target
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array []
+
+
+Number of calls: 1
+
+ ❯ src/main/moodle/webview.test.ts:354:27
+    352|  const {views,owner}=await open();const marker='5f0a7a2e-8d4b-4c63-9f0…
+    353|  const state=views.open(owner,accountId,{kind:'file',fileId:randomUUID…
+    354|  expect(mock.imports).not.toHaveBeenCalled();expect(views.state(owner,…
+       |                           ^
+    355| });
+    356|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/renderer/shell/native-overlay.test.tsx > ignores invisible overlays <div role="listbox"></div>
+ FAIL  src/renderer/shell/native-overlay.test.tsx > ignores invisible overlays <div role="menu" style="display:none"></div>
+ FAIL  src/renderer/shell/native-overlay.test.tsx > ignores invisible overlays <div data-slot="popover-content" style="width:0;height:0"></div>
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/renderer/shell/native-overlay.test.tsx:11:153
+      9|
+     10| it.each(['<div role="listbox"></div>','<div role="menu" style="display…
+     11|  document.body.innerHTML=html;vi.spyOn(Element.prototype,'getClientRec…
+       |                                                                                                                                                         ^
+     12| });
+     13|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  8 failed | 32 passed (40)
+   Start at  20:42:08
+   Duration  4.57s (transform 236ms, setup 0ms, import 376ms, tests 4.29s, environment 297ms)

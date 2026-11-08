@@ -1,0 +1,177 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-48d6ea52/apps/desktop
+
+(node:49185) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 will-download listeners added to [EventEmitter]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/main/web-chat/views.test.ts (13 tests | 1 failed) 8ms
+   × notifies a synced window that never activated a hosted pane when clearing 1ms
+ ❯ src/renderer/shell/tab-state.test.ts (7 tests | 1 failed) 4ms
+   × persists completed Moodle imports on their history entry across restart and Back 1ms
+ ❯ src/main/moodle/webview.test.ts (35 tests | 6 failed) 4307ms
+   × ignores a renderer checkpoint for another requested target 1061ms
+   × retains import delivery across reads and actions until acknowledged 57ms
+   × keeps dirty protection through same-document navigation 54ms
+   × restores the private URL after discard 1055ms
+   × does not reimport a restored completed file target 55ms
+   × cleans owner handlers after failed admission 54ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/moodle/webview.test.ts > ignores a renderer checkpoint for another requested target
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "https://school.example/course/view.php?id=99",
++   "https://school.example/course/view.php?id=2",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/moodle/webview.test.ts:330:67
+    328|  const {views,owner,tabId}=await open();
+    329|  views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id…
+    330|  await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHa…
+       |                                                                   ^
+    331| });
+    332| it('retains import delivery across reads and actions until acknowledge…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > retains import delivery across reads and actions until acknowledged
+AssertionError: expected null to be '5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60' // Object.is equality
+
+- Expected:
+"5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60"
+
++ Received:
+null
+
+ ❯ src/main/moodle/webview.test.ts:335:65
+    333|  const {views,owner,contents,state}=await open();click(contents);navig…
+    334|  const id=views.state(owner,state.id).documentId;expect(id).not.toBeNu…
+    335|  expect((await views.action(owner,state.id,'copy')).documentId).toBe(i…
+       |                                                                 ^
+    336|  expect(views.state(owner,state.id).documentId).toBe(id);
+    337|  await views.action(owner,state.id,'ack-document');expect(views.state(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > keeps dirty protection through same-document navigation
+AssertionError: expected 'discarded' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "discarded"
+
+ ❯ src/main/moodle/webview.test.ts:344:64
+    342|  contents.emit('did-navigate-in-page',{},site+'/course/view.php?id=2#a…
+    343|  views.hide(owner,tabId,state.generation);
+    344|  expect((await views.action(owner,state.id,'discard')).status).toBe('r…
+       |                                                                ^
+    345| });
+    346| it('restores the private URL after discard',async()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > restores the private URL after discard
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "https://school.example/course/view.php?id=2&sesskey=secret&returnurl=lesson",
++   "https://school.example/course/view.php?id=2",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/moodle/webview.test.ts:350:67
+    348|  contents.emit('did-navigate',{},url);contents.emit('render-process-go…
+    349|  views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id…
+    350|  await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHa…
+       |                                                                   ^
+    351| });
+    352| it('does not reimport a restored completed file target',async()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > does not reimport a restored completed file target
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array []
+
+
+Number of calls: 1
+
+ ❯ src/main/moodle/webview.test.ts:355:27
+    353|  const {views,owner}=await open();const marker='5f0a7a2e-8d4b-4c63-9f0…
+    354|  const state=views.open(owner,accountId,{kind:'file',fileId:randomUUID…
+    355|  expect(mock.imports).not.toHaveBeenCalled();expect(views.state(owner,…
+       |                           ^
+    356| });
+    357|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > cleans owner handlers after failed admission
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/main/moodle/webview.test.ts:361:123
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  src/main/web-chat/views.test.ts > notifies a synced window that never activated a hosted pane when clearing
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'web-chat:cleared', 'gemini' ]
+
+Number of calls: 0
+
+ ❯ src/main/web-chat/views.test.ts:112:59
+    110| it('notifies a synced window that never activated a hosted pane when c…
+    111|  chats=new WebChats(async()=>{});const sender=owner(90),restored=owner…
+    112|  await chats.clear(sender,'gemini');expect(restored.send).toHaveBeenCa…
+       |                                                           ^
+    113| });
+    114|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  src/renderer/shell/tab-state.test.ts > persists completed Moodle imports on their history entry across restart and Back
+TypeError: Cannot destructure property 'view' of 'route' as it is undefined.
+ ❯ historyRoute src/renderer/shell/navigation-history.ts:8:11
+      6|
+      7| export function historyRoute(route: Route): HistoryRoute {
+      8|   const { view, documentId, conversationId, messageId, courseId, query…
+       |           ^
+      9|   return { view: view === 'welcome' ? 'home' : view, documentId, conve…
+     10|     accountId, target, provider, query: query ? { ...query } : undefin…
+ ❯ createRouteHistory src/renderer/shell/navigation-history.ts:18:22
+ ❯ createTab src/renderer/shell/tab-state.ts:6:25
+ ❯ src/renderer/shell/tab-state.ts:45:19
+ ❯ tabReducer src/renderer/shell/tab-state.ts:38:50
+ ❯ src/renderer/shell/tab-state.test.ts:65:8
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  8 failed | 47 passed (55)
+   Start at  20:44:05
+   Duration  4.56s (transform 265ms, setup 0ms, import 408ms, tests 4.32s, environment 0ms)
