@@ -1,8 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import Logo from './Logo.astro';
 import { RELEASES_URL } from '../config';
-import { downloadBase, installers, type InstallerId } from '../data/downloads';
+import { downloadBase, installers, releaseMetadata } from '../data/downloads';
 import { installCopy, macInstall, windowsInstall } from '../data/install-copy';
 import { downloadCopy } from '../data/download-copy';
 import type { Language } from '../data/ui';
@@ -11,33 +10,42 @@ interface Props { language: Language; }
 const { language } = Astro.props;
 const c = downloadCopy[language];
 const install = installCopy[language];
-const kindLabel = { dmg: c.dmg, exe: c.exe };
 const href = (file: string) => `${downloadBase}/${file}`;
+const available = installers.filter(installer => installer.releaseEnabled);
 ---
 <Base {language} title={c.title} description={c.metaDescription} page="download/">
   <main id="main" tabindex="-1" class="dl container">
-    <header class="dl-head">
-      <span class="dl-mark"><Logo /></span>
-      <h1>{c.title}</h1>
-      <p class="dl-lead">{c.lead}</p>
-    </header>
+    <header class="dl-head"><h1>{c.title}</h1></header>
+    <ul class="dl-cards">
+      {available.map(installer => {
+        const metadata = releaseMetadata[installer.id];
+        const name = `${installer.platform === 'mac' ? c.osMac : c.osWin} (${c.arch[installer.id].name})`;
+        return <li class="dl-card" data-installer={installer.id}>
+          <h2>{name}</h2>
+          <span class="dl-badge" data-badge hidden>{c.badge}</span>
+          {metadata && <p>{metadata.version} · {(metadata.bytes / 1024 / 1024).toFixed(1)} MB</p>}
+          <a class="button" href={href(installer.file)}>{c.getIt} .{installer.kind}<span aria-hidden="true">↓</span></a>
+        </li>;
+      })}
+    </ul>
+    <p class="dl-reassurance"><a href="#mac-first-open" data-open-help>{install.firstOpen}</a></p>
 
-    <section class="dl-os" aria-labelledby="dl-mac">
-      <h2 id="dl-mac">{install.macTitle}</h2>
-      <p class="dl-hint">{c.arch['mac-arm64'].note} {c.macHint}</p>
-      <h3 id="dl-dmg">{install.dmgTitle}</h3>
-      <ol class="dl-steps">
-        <li><a class="text-link" href={href('VStudy-Pro-mac-arm64.dmg')}>{install.downloadDmg}<span aria-hidden="true">↓</span></a></li>
-        {install.steps.map(step => <li>{step}</li>)}
-      </ol>
+    <details class="dl-help" id="mac-first-open">
+      <summary>{install.macHelpTitle}<span aria-hidden="true">+</span></summary>
+      <div class="dl-help-body">
+        <ol class="dl-steps">{install.steps.map(step => <li>{step}</li>)}</ol>
       <aside class="dl-signing" aria-labelledby="dl-signing-title">
-        <h4 id="dl-signing-title">{install.signingStatus.title}</h4>
+        <h2 id="dl-signing-title">{install.signingStatus.title}</h2>
         <p>{install.signingStatus.text} <a href={RELEASES_URL}>{install.signingStatus.source}</a></p>
         <ol class="dl-steps">{install.signingStatus.steps.map(step => <li>{step}</li>)}</ol>
         <p>{install.signingStatus.older}</p>
         <p>{install.signingStatus.optional} <a href="#verify-download">{install.signingStatus.verifyLink}</a> · <a href="https://support.apple.com/en-us/102445">{install.signingStatus.apple}</a></p>
       </aside>
-      <h3 id="dl-script">{install.terminalTitle}</h3>
+      </div>
+    </details>
+    <details class="dl-help" id="dl-script">
+      <summary>{install.terminalTitle}<span aria-hidden="true">+</span></summary>
+      <div class="dl-help-body">
       <p>{install.terminalOpen}</p>
       <div class="code-block">
         <button type="button" data-install-copy aria-label={`${install.copy} macOS`}>{install.copy}</button>
@@ -46,16 +54,21 @@ const href = (file: string) => `${downloadBase}/${file}`;
       <p>{install.terminalTools}</p>
       <ul class="dl-steps">{install.bullets.map(bullet => <li>{bullet}</li>)}</ul>
       <a class="text-link" href="https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh">{install.read}</a>
-      <h3 id="dl-agent">{install.aiTitle}</h3>
+      </div>
+    </details>
+    <details class="dl-help" id="dl-agent">
+      <summary>{install.aiTitle}<span aria-hidden="true">+</span></summary>
+      <div class="dl-help-body">
       <p>{install.aiText}</p>
       <div class="code-block">
         <button type="button" data-install-copy aria-label={`${install.copy} ${install.aiTitle}`}>{install.copy}</button>
         <pre tabindex="0"><code>{install.prompt}</code></pre>
       </div>
-    </section>
-
-    <section class="dl-os" aria-labelledby="dl-windows">
-      <h2 id="dl-windows">{install.windowsTitle}</h2>
+      </div>
+    </details>
+    <details class="dl-help" id="windows-smartscreen">
+      <summary>Windows SmartScreen<span aria-hidden="true">+</span></summary>
+      <div class="dl-help-body">
       <p class="dl-hint">{c.arch['win-x64'].note} {c.winHint}</p>
       <ol class="dl-steps">
         <li><a class="text-link" href={href('VStudy-Pro-win-x64.exe')}>{install.downloadExe}<span aria-hidden="true">↓</span></a></li>
@@ -66,31 +79,10 @@ const href = (file: string) => `${downloadBase}/${file}`;
         <button type="button" data-install-copy aria-label={`${install.copy} PowerShell`}>{install.copy}</button>
         <pre tabindex="0"><code>{windowsInstall.replaceAll('; ', '\n')}</code></pre>
       </div>
-      <p class="dl-hint">{install.planned}</p>
-    </section>
+      </div>
+    </details>
     <p class="sr-only" role="status" data-install-status></p>
 
-    <section class="dl-recommend" data-recommend hidden aria-labelledby="dl-rec-title">
-      <p class="dl-eyebrow">{c.recommended}</p>
-      <div class="dl-rec-body">
-        <div class="dl-rec-copy">
-          <h2 id="dl-rec-title" data-rec-title></h2>
-          <p data-rec-meta></p>
-        </div>
-        <a class="button" data-rec-link hidden>{c.getIt}<span aria-hidden="true">↓</span></a>
-      </div>
-      <p class="dl-rec-planned" data-rec-planned hidden>{c.unavailable}</p>
-    </section>
-    <p class="dl-unknown" data-unknown hidden>{c.unknown}</p>
-
-    <section class="dl-info" aria-labelledby="dl-update">
-      <h2 id="dl-update">{install.updateTitle}</h2>
-      <p>{install.update}</p>
-    </section>
-    <section class="dl-info" aria-labelledby="dl-uninstall">
-      <h2 id="dl-uninstall">{install.uninstallTitle}</h2>
-      <p>{install.uninstall}</p>
-    </section>
     <details class="dl-help" id="verify-download">
       <summary>{install.verifyTitle}<span aria-hidden="true">+</span></summary>
       <div class="dl-help-body">
@@ -102,52 +94,22 @@ const href = (file: string) => `${downloadBase}/${file}`;
       </div>
     </details>
 
-    {[{ platform: 'mac', name: c.osMac, hint: c.macHint }, { platform: 'win', name: c.osWin, hint: c.winHint }].map(group => (
-      <section class="dl-os" aria-labelledby={`dl-inventory-${group.platform}`}>
-        <h2 id={`dl-inventory-${group.platform}`}>
-          {group.platform === 'mac'
-            ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2.5 19h19"/></svg>
-            : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M12 4v16M3.5 12h17"/></svg>}
-          {group.name}
-        </h2>
-        <ul class="dl-cards">
-          {installers.filter(installer => installer.platform === group.platform).map(installer => {
-            const copy = c.arch[installer.id as InstallerId];
-            const body = <>
-              <span class="dl-type" aria-hidden="true">.{installer.kind}</span>
-              <span class="dl-card-text">
-                <span class="dl-card-name">{copy.name}<span class="dl-badge" data-badge hidden>{c.badge}</span></span>
-                <span class="dl-card-note">{copy.note}</span>
-                <span class="dl-card-kind">{kindLabel[installer.kind]}</span>
-              </span>
-            </>;
-            return <li class:list={['dl-card', { 'is-planned': !installer.releaseEnabled }]}>
-              {installer.releaseEnabled
-                ? <a class="dl-card-main" href={href(installer.file)} data-installer={installer.id} data-title={installer.label} data-meta={`${kindLabel[installer.kind]} · ${copy.note}`} data-href={href(installer.file)}>
-                    {body}
-                    <svg class="dl-go" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14"/></svg>
-                  </a>
-                : <div class="dl-card-main" data-installer={installer.id} data-title={installer.label} data-meta={`${kindLabel[installer.kind]} · ${copy.note}`} aria-disabled="true">
-                    {body}
-                    <span class="dl-pill">{c.planned}</span>
-                  </div>}
-            </li>;
-          })}
-        </ul>
-        <p class="dl-hint">{group.hint}</p>
-      </section>
-    ))}
-
-    <section class="dl-info" aria-labelledby="dl-req">
-      <h2 id="dl-req">{c.requirementsTitle}</h2>
-      <p>{c.requirements}</p>
-      <ul class="dl-links">
-        <li><a class="text-link" href={`${downloadBase}/SHA256SUMS.txt`}>{c.checksums}<span aria-hidden="true">↓</span></a></li>
-        <li><a class="text-link" href={RELEASES_URL}>{c.releases}<span aria-hidden="true">↗</span></a></li>
-      </ul>
-    </section>
-
-    <p class="dl-status">{c.status}</p>
+    <details class="dl-help" id="update-uninstall">
+      <summary>{install.updateUninstallTitle}<span aria-hidden="true">+</span></summary>
+      <div class="dl-help-body">
+        <h2>{install.updateTitle}</h2><p>{install.update}</p>
+        <h2>{install.uninstallTitle}</h2><p>{install.uninstall}</p>
+      </div>
+    </details>
+    <details class="dl-help" id="other-platforms">
+      <summary>{install.otherPlatformsTitle}<span aria-hidden="true">+</span></summary>
+      <div class="dl-help-body">
+        <p>{install.planned}</p>
+        <h2>{c.requirementsTitle}</h2><p>{c.requirements}</p>
+        <p>{c.macHint}</p><p>{c.winHint}</p>
+        <p>{c.status}</p>
+      </div>
+    </details>
   </main>
 </Base>
 <script>
@@ -167,27 +129,21 @@ const href = (file: string) => `${downloadBase}/${file}`;
     });
   });
   import { detectInstaller } from '../scripts/platform';
-  const panel = document.querySelector<HTMLElement>('[data-recommend]');
-  const unknown = document.querySelector<HTMLElement>('[data-unknown]');
   const cards = [...document.querySelectorAll<HTMLElement>('[data-installer]')];
   detectInstaller(id => {
     cards.forEach(card => {
-      card.closest('.dl-card')?.classList.remove('is-recommended');
-      card.querySelector<HTMLElement>('[data-badge]')!.hidden = true;
+      const recommended = card.dataset.installer === id;
+      card.classList.toggle('is-recommended', recommended);
+      const badge = card.querySelector<HTMLElement>('[data-badge]');
+      if (badge) badge.hidden = !recommended;
     });
-    const card = cards.find(item => item.dataset.installer === id);
-    if (!panel || !unknown) return;
-    panel.hidden = !card;
-    unknown.hidden = !!card;
-    if (!card) return;
-    card.closest('.dl-card')?.classList.add('is-recommended');
-    card.querySelector<HTMLElement>('[data-badge]')!.hidden = false;
-    panel.querySelector('[data-rec-title]')!.textContent = card.dataset.title ?? '';
-    panel.querySelector('[data-rec-meta]')!.textContent = card.dataset.meta ?? '';
-    const link = panel.querySelector<HTMLAnchorElement>('[data-rec-link]')!;
-    const planned = panel.querySelector<HTMLElement>('[data-rec-planned]')!;
-    if (card.dataset.href) link.href = card.dataset.href; else link.removeAttribute('href');
-    link.hidden = !card.dataset.href;
-    planned.hidden = !!card.dataset.href;
+  });
+  document.querySelector('[data-open-help]')?.addEventListener('click', event => {
+    event.preventDefault();
+    const help = document.querySelector<HTMLDetailsElement>('#mac-first-open');
+    if (help) {
+      help.open = true;
+      help.querySelector('summary')?.focus();
+    }
   });
 </script>

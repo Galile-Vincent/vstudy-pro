@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const files = ['README.md', 'README.zh-Hant.md', 'README.ja.md', 'docs/README.md'];
+const files = ['README.md', 'README.zh-Hant.md', 'README.ja.md', 'docs/README.md', ...['INSTALL', 'GUIDE'].flatMap(name => ['', '.zh-Hant', '.ja'].map(locale => `docs/${name}${locale}.md`))];
 const errors = [];
 let checked = 0;
 for (const file of files) {

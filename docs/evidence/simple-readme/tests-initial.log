@@ -1,0 +1,97 @@
+
+> vstudy-pro@ test /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2
+> pnpm --filter @vstudy/mcp test && pnpm --filter @vstudy/desktop test && pnpm --filter @vstudy/newsletter test --pool=forks --maxWorkers=2
+
+
+> @vstudy/mcp@0.2.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/mcp
+> pnpm build && vitest run --pool=forks --maxWorkers=2
+
+
+> @vstudy/mcp@0.2.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/mcp
+> node scripts/build.mjs
+
+
+  dist/vstudy-mcp.cjs   825.3kb
+  dist/installer.cjs    254.7kb
+  dist/windows-acl.cjs  143.7kb
+
+⚡ Done in 32ms
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/mcp
+
+
+ Test Files  14 passed | 2 skipped (16)
+      Tests  132 passed | 3 skipped (135)
+   Start at  23:20:53
+   Duration  3.74s (transform 99ms, setup 0ms, import 385ms, tests 6.23s, environment 0ms)
+
+
+> @vstudy/desktop@0.4.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/desktop
+> node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/desktop/src/shared/locales.generated.ts (28 namespaces).
+(node:98421) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/desktop/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+VStudy light: WCAG AA passed at every contrast setting
+VStudy dark: WCAG AA passed at every contrast setting
+Ocean light: WCAG AA passed at every contrast setting
+Ocean dark: WCAG AA passed at every contrast setting
+Grove light: WCAG AA passed at every contrast setting
+Grove dark: WCAG AA passed at every contrast setting
+Ember light: WCAG AA passed at every contrast setting
+Ember dark: WCAG AA passed at every contrast setting
+Iris light: WCAG AA passed at every contrast setting
+Iris dark: WCAG AA passed at every contrast setting
+Rose light: WCAG AA passed at every contrast setting
+Rose dark: WCAG AA passed at every contrast setting
+Slate light: WCAG AA passed at every contrast setting
+Slate dark: WCAG AA passed at every contrast setting
+Paper light: WCAG AA passed at every contrast setting
+Paper dark: WCAG AA passed at every contrast setting
+High contrast light: WCAG AA passed at every contrast setting
+High contrast dark: WCAG AA passed at every contrast setting
+Translucent surfaces: minimum text contrast 4.96:1
+Quiet glass over the page field: minimum text contrast 4.71:1 (paper dark 100% muted on #524d40)
+46 renderer CSS files use semantic theme tokens
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/desktop
+
+Error: failed to create directory '/Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/node_modules/.pnpm/electron@42.11.16/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/fa_FEMININE.lproj': File exists (os error 17)
+stdout | src/main/moodle/service.test.ts
+Downloading Electron binary...
+
+ ❯ src/main/moodle/service.test.ts (0 test)
+assignments: 0.35 ms
+base64: 0.09 ms
+identifier: 0.12 ms
+dotted: 0.15 ms
+quotes: 0.58 ms
+FRESHNESS elapsedMs=950 visibleResults=1 searches=2
+(node:99150) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 will-download listeners added to [EventEmitter]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+SNAPSHOT SIGKILL interruptedBytes=65880064 afterCleanupBytes=0
+SNAPSHOT SIGTERM interruptedBytes=0 afterCleanupBytes=0
+SNAPSHOT worker termination interruptedBytes=0 afterCleanupBytes=0
+CONTENTION documents=2000 maxWriteMs=0.2 maxEventLoopGapMs=32.2 writes=61
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/moodle/service.test.ts [ src/main/moodle/service.test.ts ]
+Error: Electron failed to install correctly. Please delete `node_modules/electron` and run "npx install-electron --no" manually.
+ ❯ getElectronPath ../../node_modules/.pnpm/electron@42.11.16/node_modules/electron/index.js:43:13
+ ❯ Object.<anonymous> ../../node_modules/.pnpm/electron@42.11.16/node_modules/electron/index.js:52:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 300 passed | 7 skipped (308)
+      Tests  2657 passed | 20 skipped (2677)
+   Start at  23:20:58
+   Duration  76.97s (transform 3.68s, setup 0ms, import 32.67s, tests 87.70s, environment 16.72s)
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/desktop:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @vstudy/desktop@0.4.0 test: `node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run`
+Exit status 1
+ ELIFECYCLE  Test failed. See above for more details.

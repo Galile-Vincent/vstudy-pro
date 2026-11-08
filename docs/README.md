@@ -2,7 +2,7 @@
 
 # Documentation index
 
-[The project README](../README.md) is the current user guide. Audit reports and design reviews record dated snapshots; their historical pass counts are not current acceptance.
+[The project README](../README.md) introduces the app. [Installation](INSTALL.md) covers setup and removal. [The user guide](GUIDE.md) covers features, AI, privacy, and development. Audit reports and design reviews record dated snapshots; their historical pass counts are not current acceptance.
 
 | Document | Purpose |
 | --- | --- |

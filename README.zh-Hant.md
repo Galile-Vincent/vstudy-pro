@@ -2,361 +2,60 @@
 
 # VStudy Pro
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/generated/lockup-dark.svg">
-  <img src="assets/brand/generated/lockup-light.svg" width="320" alt="VStudy Pro">
-</picture>
-
 在 macOS 與 Windows 上閱讀課程教材、整合 Moodle 作業期限，並把待辦事項排成讀書計畫。
 
 ![版本 0.4.0](https://img.shields.io/badge/version-0.4.0-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
 
 ![圖論筆記、已選段落、示範回答與來源引用](docs/assets/readme/reader.webp)
 
-## 分頁
+## 下載
 
-你可以用不同分頁同時開啟課程、文件、Moodle 網頁與線上 AI 對話。使用 Cmd/Ctrl+T 開啟分頁、Cmd/Ctrl+W 關閉分頁、Ctrl+Tab 切換分頁，或 Cmd/Ctrl+1 到 9 選取分頁。切換分頁時，本機對話會繼續產生回覆；關閉該分頁則會停止。背景閱讀器會卸載，每個視窗最多保留四個原生網頁檢視。已釋放的網頁會在選取時重新載入，未送出的網頁表單不會還原。
+| macOS / Windows | |
+| --- | --- |
+| Mac（Apple 晶片） | [下載 .dmg](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg) |
+| Windows x64 | [下載 .exe](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe) |
 
-## 下載與安裝
+Mac 請開啟 DMG，再將 VStudy Pro 拖入「應用程式」。
 
-### Mac（Apple 晶片）
+Windows 請開啟 EXE，依畫面完成安裝。
 
-#### 方法 1 - 下載 DMG（最簡單，不必先裝其他工具）
-
-1. [下載 .dmg 檔案](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg)。
-2. 按兩下下載好的 .dmg 檔案。
-3. 在開啟的視窗中，將 VStudy Pro 拖入「應用程式」。
-4. 在 Finder 退出 VStudy Pro 磁碟映像。
-5. 從「應用程式」或 Launchpad 開啟 VStudy Pro。
-
-<!-- mac-signing-status -->
-> **如果 macOS 顯示無法開啟或無法驗證開發者**
->
-> Mac 版尚未使用 Apple 開發者 ID 簽署，也尚未經 Apple 公證。只有從本專案的版本發布頁下載，且你信任本專案時，才繼續操作。 [專案版本發布頁](https://github.com/ava-apple/vstudy-pro/releases/latest)。
->
-> 1. 先嘗試開啟 VStudy Pro 一次，再關閉警告。
-> 2. 開啟「系統設定 > 隱私權與安全性」，向下捲動至「安全性」。
-> 3. 按「強制打開」，依提示驗證身分，再按「打開」確認。
->
-> 較舊的 macOS 可在「應用程式」中對 VStudy Pro 按右鍵，選「打開」，再按「打開」確認。 校驗碼驗證是選用步驟。 [驗證下載檔案](#選用步驟---驗證下載檔案)。 [Apple 的開啟說明](https://support.apple.com/en-us/102445)。
-<!-- /mac-signing-status -->
-
-#### 方法 2 - 在終端機貼上一行指令（同樣不必先裝其他工具）
-
-按 Command-Space，輸入 Terminal，再按 Return。貼上以下指令並按 Return。
+Mac 也可以在終端機貼上這行指令。
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh | bash
 ```
 
-不需要 Homebrew、npm、Xcode 或 Python。指令只使用 macOS 內建工具。
+想請 AI 智能體代勞？複製安裝指南中的[提示詞](docs/INSTALL.zh-Hant.md#方法-3---請-ai-智能體幫你安裝)。
 
-- 下載最新的 DMG，並驗證 SHA-256 校驗碼。
-- 關閉 VStudy Pro，安裝到「應用程式」。你的文件庫會保留。
-- 只移除此 app 的隔離標記，讓它能開啟。不會使用 sudo。
-
-[先閱讀安裝腳本](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh)。
-
-#### 方法 3 - 請 AI 智能體幫你安裝
-
-將這段提示詞複製給你的 AI 智能體。
-
-```text
-請幫我安裝 VStudy Pro。Apple 晶片 macOS 請先取得並完整閱讀 https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh；Windows x64 請閱讀同目錄的 install.ps1。說明下載頁列出的簽署狀態，以及 Mac 腳本只會移除此 app 的隔離標記。執行已閱讀的腳本，確認 SHA-256 驗證通過，開啟 VStudy Pro，回報安裝路徑與結果。不要使用 sudo、全面停用系統防護或刪除使用者資料。驗證失敗時立即停止。
-```
-
-### Windows x64
-
-1. [下載 EXE 安裝檔](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe)。
-2. 按兩下下載好的 EXE，依照畫面完成安裝。只安裝到你的使用者帳號，不需要管理員權限。
-3. 如果 SmartScreen 顯示警告，在有提供選項時按「其他資訊 > 仍要執行」。只有從本專案的版本發布頁下載，且你信任本專案時，才繼續。學校管理的電腦可能無法使用這個選項。
-
-也可以從「開始」選單開啟 PowerShell，貼上以下指令。指令會先下載並顯示腳本內容，再執行安裝。
-
-```powershell
-Invoke-WebRequest https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.ps1 -OutFile install.ps1
-Get-Content install.ps1
-& .\install.ps1
-```
-
-Intel Mac 與 Windows ARM64 安裝檔仍在規劃中。目前沒有 Linux 安裝檔。
-
-### 更新
-
-先關閉 VStudy Pro。下載新版 DMG，將 VStudy Pro 拖入「應用程式」並選「取代」，或重跑終端機的一行指令。Windows 可執行新版 EXE 或重跑 PowerShell 指令。你的文件庫與讀書計畫會保留。更新前也可以先到「設定 > 儲存空間」匯出備份。
-
-### 解除安裝
-
-Mac 請先關閉 VStudy Pro，再從「應用程式」拖到「垃圾桶」。Windows 請到「設定 > 應用程式 > 已安裝的應用程式」解除安裝。只移除 app 會保留文件庫。若也想刪除資料，請先開啟 VStudy Pro，到「設定 > 隱私權 > 刪除所有資料」操作。
-
-### 選用步驟 - 驗證下載檔案
-
-從同一個版本下載 SHA256SUMS.txt。在終端機或 PowerShell 切換到「下載項目」資料夾，執行對應系統的指令，再與檔案中的完整校驗碼比對。校驗碼相符代表檔案內容一致，不能證明發布者身分。
-
-[SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt)
-
-```sh
-cd ~/Downloads
-shasum -a 256 VStudy-Pro-mac-arm64.dmg
-```
-
-```powershell
-cd $HOME\Downloads
-Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe
-```
-
-[專案版本發布頁](https://github.com/ava-apple/vstudy-pro/releases/latest) · [驗證下載檔案](https://vstudy.vcstudio.app/zh-Hant/download/#verify-download)
-
-### 從原始碼建置
-
-使用 macOS 或 Windows、`.node-version` 指定的 **Node 24.19.0**，以及 `package.json` 指定的 **pnpm 10.28.2**。套件引擎允許 Node >=24.15.0。以下指令從公開儲存庫的根目錄執行。
-
-```sh
-git clone https://github.com/ava-apple/vstudy-pro.git
-cd vstudy-pro
-pnpm install --frozen-lockfile
-pnpm build
-```
-
-`pnpm build` 編譯 app。各架構安裝檔請依[不發布的試跑流程](docs/ENGINEERING.md#prepare-a-release)產生並驗證，憑證設定見[簽署指南](docs/SIGNING.md)。Mac 本機建置不能證明 Windows 可用。
-
-文件轉換需要時，請另行安裝 **uv** 或 **Python 3.10+**。首次轉換會先徵求同意，才從 PyPI 下載以雜湊鎖定的套件；uv 也可能從 GitHub 下載 Python。「**設定 > 隱私權**」提供重試與持續生效的離線模式。Markdown 與文字檔不需要 Python。macOS 額外以系統沙箱禁止轉換器連網；Windows 目前沒有對等的核心層網路封鎖，離線模式與 Python socket 攔截不構成作業系統安全邊界。
+<!-- mac-signing-status -->
+> Mac 版尚未使用 Apple 開發者 ID 簽署，也尚未經 Apple 公證。[查看開啟方式](docs/INSTALL.zh-Hant.md#macapple-晶片)。
+<!-- /mac-signing-status -->
 
 ## 功能介紹
 
-- **課程與期限。** 整合教材、公告、成績、檔案、通知、即將到期的作業與提醒。可取得的資料依學校設定而定。
-- **多校 Moodle。** 搜尋內建學校目錄，或輸入公開的 HTTPS Moodle 網址。多所學校與不同身分的帳號各自獨立，透過官方 Moodle 行動服務進行密碼登入或支援的 SSO 登入。
-- **讀書計畫與課程助理。** 新增任務、目標、考試與讀書時段，依可用時間草擬每日或每週計畫，並匯出行事曆。課程助理以核准卡片提出修改，確認後才寫入。移除課程關聯不會刪除學生自己建立的計畫。
-- **閱讀與 AI 問答。** 匯入每份最大 50 MiB 的 PDF、DOCX、XLSX、PPTX、HTML、CSV、Markdown 或文字檔。用資料夾、標籤、釘選與已儲存篩選整理文件；選取段落提問、回查引用來源，並查看回報或估算的用量與費用。
-- **原始頁面與圖表。** 解析文字保留圖像，可檢視原始 PDF 頁面並將整頁或擷取區域附加至支援圖片的 AI 聊天。macOS 支援的 Office 文件提供首頁預覽。完成轉換後可選用 AI 重新解析。
-- **用量與連接。** 連接 AI 依序引導安裝、登入與測試。側邊欄顯示可取得的 Claude/Codex 訂閱用量；用量設定提供本機每月美元與 token 預算。
-- **佈景主題。** 支援淺色、深色及跟隨系統與九組主題；卡片可選實心、柔和或玻璃效果。可調整對比、玻璃不透明度、文字縮放、密度、閱讀字體與大小，切換英文、繁體中文、日文，預設以閱讀器或系統應用程式開啟文件，並匯入與匯出經驗證的自訂主題。
-- **聊天記錄搜尋。** 搜尋文件、課程與一般對話，依課程、文件、範圍、角色與日期篩選，並重新命名、釘選、封存或刪除對話。
-- **App 內 Moodle 頁面。** 使用學校登入狀態，在各帳號隔離的檢視中開啟支援的教師頁面與公告，提供導覽、縮放與重新載入。
-- **儲存與備份。** 查看空間用量、清除快取或轉換檔、檢查資料庫完整性，以及匯出或還原可攜式備份。備份不含憑證；還原後須重新登入學校。
-- **隱私。** 文件庫與 SQLite 儲存在本機，AI 服務可自由選用，已儲存的憑證會加密，並提供本次執行的網路活動清單。選用的使用分析預設關閉，需要你同意才會啟用，也沒有跨裝置同步。
-- **首次使用與語言。** 提供範例文件、可重播的設定導覽、操作示範與情境提示。介面支援 English（`en`）、繁體中文（`zh-Hant`）與日本語（`ja`）。
-- **透過 MCP 連接全域代理程式。** 以限定帳號、權限與有效期限的授權分享課業。代理程式使用 app 的登入狀態讀取內容，每次寫入都在「設定 > 代理程式」核准。
-
-## 頁面導覽
-
-截圖來自目前建置的 app，使用精心編排的示範課程、本機文件與模擬 AI 對話，不代表真實學校或 AI 服務已通過驗證。[截圖流程與圖片來源](docs/assets/readme/README.md)。
-
-### 首頁
-
-從設定清單開始，匯入文件或試用範例，也能返回最近閱讀的內容並查看學習活動。
-
-![最近閱讀與已完成設定清單的首頁](docs/assets/readme/home.webp)
-
-### 文件庫
-
-瀏覽與搜尋文件，透過資料夾、標籤、釘選、最近開啟、已儲存篩選與轉換狀態找到教材。
-
-![以兩個資料夾整理的英文與繁體中文學習筆記](docs/assets/readme/library.webp)
-
-### 閱讀器與聊天
-
-在轉換後的 Markdown 旁開啟文件對話，選取段落提問、回查引用，並重新開啟同一文件的舊對話。不連接 AI 也能閱讀。
-
-![圖論筆記、已選段落、示範回答與來源引用](docs/assets/readme/reader.webp)
-
-### 課程首頁
-
-連接或重新登入學校、同步帳號、查看未來七天尚未繳交的作業，並切換目前、未來、過去或全部課程。
-
-![以課程藝術封面呈現教師、截止日期與進度](docs/assets/readme/courses.webp)
-
-### 課程頁面
-
-分頁包含**內容、期限、公告、成績、檔案與通知**。可開啟教材、設定期限提醒，或詢問課程助理。學校未開放的功能無法使用。
-
-![演算法與資料結構的本週教材與截止日期](docs/assets/readme/course.webp)
-
-![在獨立 app 面板中開啟的 Moodle 示範教師頁面](docs/assets/readme/webview.webp)
-
-### 今日與讀書計畫
-
-從課程進入讀書計畫，切換今日與本週、新增任務與考試、設定可用時間，確認排程提案後再儲存，也能匯出行事曆檔案。
-
-![今日學習待辦事項與統計期中考](docs/assets/readme/planner.webp)
-
-### 聊天記錄
-
-跨對話搜尋並重新開啟符合的訊息，以篩選條件區分課程、文件與一般聊天，也可保留常用的釘選對話。
-
-![以 Command-K 搜尋已儲存的學習對話](docs/assets/readme/history.webp)
-
-### 設定
-
-「**一般**」切換語言並重開導覽或歡迎頁；「**外觀**」調整主題與對比；「**AI 服務供應商**」連接 AI；「**用量**」查看 token 與費用；「**儲存空間**」管理備份與清理；「**隱私權**」管理轉換器安裝、離線模式、網路活動與資料刪除。
-
-![全介面淺色與深色主題設定](docs/assets/readme/themes.webp)
-
-![原始頁面已附加至問題草稿](docs/assets/readme/capture.webp)
-
-![儲存空間使用量與分類](docs/assets/readme/storage.webp)
-
-### 說明與歡迎頁
-
-「說明」可重開首次設定、圖解或錄製的操作示範，以及鍵盤快捷鍵。歡迎頁介紹 app 並提供範例，不必先準備學校或 AI 帳號。
-
-![閱讀工作區預覽與歡迎導覽](docs/assets/readme/onboarding.webp)
-
-### 鍵盤快捷鍵
-
-Mac 使用 Cmd，Windows 使用 Ctrl。
-
-| 快捷鍵 | 操作 |
-| --- | --- |
-| `Cmd/Ctrl+K` | 開啟全域對話搜尋。 |
-| `Cmd/Ctrl+B` | 展開或收合側邊欄。 |
-| `Cmd/Ctrl+Shift+K` | 針對目前選取的段落提問。 |
-| 方向鍵 / `Shift+方向鍵` | 閱讀器本身取得焦點時，移動或延伸文字選取範圍。 |
-| `Enter` / `Shift+Enter` | 傳送聊天 / 換行，輸入法組字期間除外。 |
-| `Esc` | 關閉對話框或 Moodle 頁面面板。 |
-| `Cmd/Ctrl+R` | 重新載入目前聚焦的 Moodle 頁面面板。 |
-| `Tab` / `Shift+Tab` | 在控制項之間移動焦點。 |
-
-## 連接全域代理程式
-
-原始碼建置包含供 Claude Code、Codex、Antigravity、Claude Desktop 與 Cursor 使用的 MCP 伺服器。代理程式透過 VStudy 既有的登入狀態讀取你選定的 Moodle 帳號。學校憑證留在 app，代理程式取得獨立且會到期的本機授權；所有寫入都必須在 VStudy 逐次核准。
-
-開啟「設定 > 代理程式」，啟用連線，再用連接精靈預覽與安裝用戶端設定。比對配對碼，並選擇帳號與權限。完成原始碼建置後，可先預覽 Codex 設定：
-
-```sh
-node apps/mcp/dist/vstudy-mcp.cjs install --client codex --dry-run
-```
-
-其他用戶端可改用 `claude`、`agy`、`claude-desktop` 或 `cursor`，需要 Node.js 24.11.1 以上。測驗與影片仍由學生親自完成；MCP 不回答或提交測驗，也不偽造活動進度。`save_assignment_draft` 僅將學生自己核准的文字儲存為草稿。最終繳交一律由學生在 Moodle 手動完成。
-
-詳見 [MCP 設定、工具與安全指南](docs/MCP.md)、[用戶端格式與實際驗證範圍](apps/mcp/CLIENT_FORMATS.md)，以及[設計決策](docs/MCP_DESIGN.md)。封裝產物已搭配官方 SDK 與本機 Moodle 測試資料驗證；原生 Windows 整合與真實學校驗收仍需另外完成。
-
-## 運作方式
-
-選擇學校並確認 Moodle 網站後，Main 探索官方行動服務，以學校支援的密碼或 SSO 流程登入，再將各帳號的課程快照存入本機 SQLite。App 會檢查伺服器能力，不假設每所學校都開放相同功能。
-
-匯入時會複製原始檔到以內容雜湊管理的文件庫。Markdown 與文字檔可直接開啟，其他格式交由按需啟動的 Python 轉換器產生 Markdown。轉換器在 macOS 上禁止網路存取，閒置後停止。轉換可能遺失排版，可切換閱讀器的原始檔檢視來核對 PDF 頁面，並附加整頁或擷取區域至聊天。
-
-AI 為選用功能。可從側邊欄的「**連接 AI**」、首次導覽、閱讀器，或「**設定 > AI 服務**」開啟「**連接 AI**」。選擇 Claude Code（`claude`）、Codex（`codex`）或 Antigravity（`agy`），再個別允許執行。未啟用的工具只會檢查檔案，不會啟動。
-
-1. **安裝。** 確認官方下載與專用目的地，再執行操作。內建安裝在執行前，必須以應用程式內固定的雜湊或獨立發行者簽章驗證下載。Claude 與已驗證的 macOS Codex 0.166.0 支援此方式。Antigravity 會顯示「其他安裝方式」，提供在自己終端機執行的官方指令。內建安裝不需要管理員密碼，也不修改 PATH。
-2. **登入。** 在 macOS 的內嵌終端機執行已確認的操作，依照連結或裝置代碼登入，再回到 VStudy。開啟連結前會要求確認。也可複製指令或開啟自己的「終端機」。Windows 與 Linux 的登入採用外部終端機方式。
-3. **測試。** 選擇「**測試**」，透過真實供應商傳送一小段提示，不包含文件文字，但可能計入服務用量。同一畫面提供具體排除方法，以及可複製給老師或資訊人員的求助文字。
-
-側邊欄會顯示版本與更新狀態。「立即檢查」只進行一次版本檢查。「**設定 > 隱私權**」中的背景檢查與閒置時自動更新預設關閉。手動更新會安裝在目前版本旁。進行中的聊天繼續使用原版本，新聊天使用更新版，並保留前一版供還原。VStudy 不會更新另外安裝的 CLI。若改用只供複製的官方安裝指令，畫面會說明如何在供應商設定選擇現有執行檔。
-
-無法獨立驗證來源的更新會顯示「有新版本，請自行安裝」與供應商連結。取消允許供應商，或關閉任一更新選項，都會在執行或啟用前取消尚未完成的自動更新。
-
-VStudy 不附帶 AI 訂閱。帳號資格與免費、付費用量依供應商條款計算。也可使用 Anthropic、OpenAI 或 OpenAI-compatible API 金鑰，儲存或僅供本次執行使用。Codex 需要已驗證的 CLI **0.166.0**、macOS 與 `/usr/bin/sandbox-exec`。內建安裝使用此版本，新版也不能繞過傳輸驗證。詳見 [Codex 傳輸限制](docs/codex-tool-free.md)、[設定設計與驗收限制](docs/AI_CLI_SETUP_DESIGN.md)及[實作證據](docs/AI_CLI_SETUP_REPORT.md)。
-
-Windows 尚無已驗證且等同 macOS 核心沙箱的機制，因此停用 Codex CLI 供應商；Windows 可使用 API 供應商。
-
-提問時會將你的訊息與有大小限制的背景資料組成提示。文件聊天包含中繼資料、對話記錄與選取文字；未選取時會加入大綱與開頭節錄。課程聊天會加入可取得的課程資料、讀書計畫狀態與選定且已轉換完成的文件。回答以串流顯示並存入本機。助理提出的計畫修改須經明確核准，Main 才會套用。請回到原始來源確認日期與答案。
-
-已快取的課程快照與轉換文件可離線閱讀，但期限可能過期。重新同步、開啟學校頁面及遠端 AI 都需要網路。轉換器的離線模式不會讓外部 AI 服務改在本機執行。
-
-### 隱私與網路
-
-VStudy 在你同意之前不會傳送任何分析資料。首次開啟時，你可以選擇是否分享選用、以假名識別的產品使用分析。資料會傳送至美國的 PostHog，預設關閉，隨時可在 **設定 > 隱私權** 關閉，關閉後不影響任何功能。內容僅限使用情形：啟動與實際使用時間、使用過的功能、AI 服務、模型、推理強度與 token 用量、問題的類別與長度、文件與學習操作、去除敏感內容的錯誤類別、你如何得知 VStudy、經驗證的 Moodle 對應所辨識的學校，以及基本的裝置與 app 資訊。內容絕不包含問題、回答、文件、筆記、搜尋字詞、檔名、按鍵、螢幕截圖或 Moodle 身分資料。事件以隨機產生的安裝識別碼串連，這是假名識別，並非匿名。選用的產品更新電子郵件是獨立的選擇，預設不勾選，且絕不會進入分析資料。網站提供隱私權政策與服務條款。學校登入、同步與內容檢視會連線至你選擇的學校。啟用的 API 服務會收到上述問題與背景資料；先前選取的內容可能仍在對話記錄中。CLI 工具可能連線至自己的聊天、模型探索、驗證、額度或遙測服務。App 會為 Claude 設定停用非必要流量與遙測。Python 安裝經同意後可能連線至 PyPI 與 GitHub。
-
-App **不會加密磁碟上的文件、Markdown 與聊天記錄**。儲存的機密資料透過 Mac 鑰匙圈或 Windows DPAPI 加密，本次執行的資料保留在 Main 記憶體。請用系統帳號權限與 FileVault 或 BitLocker 等磁碟加密保護檔案。可攜式備份不含憑證，但仍包含私人學習資料。
-
-「**設定 > 隱私權**」列出本次執行中有數量上限的 app 主動請求與 CLI 啟動記錄，包含 AI 工具版本資料檢查與下載。背景版本檢查須另外同意。這不是封包擷取，無法列出 CLI 或 Chromium 內部的每一個請求，目前也無法得知傳輸位元組數。開啟外部瀏覽器或郵件連結前會要求確認。處理敏感資料前請閱讀[安全模型](docs/SECURITY.md)。
-
-## 專案結構
-
-```text
-apps/desktop/
-  src/
-    main/       Electron 生命週期、IPC、SQLite、Moodle、計畫、AI 與儲存
-    preload/    隔離的 Renderer 與 Main 之間的型別橋接
-    renderer/   React 頁面、閱讀器、聊天、設定與主題
-    shared/     Zod 契約、領域型別、語言檔與主題結構
-  resources/    Python 轉換器與內建範例文件
-  e2e/          真實 Electron 整合測試與測試資料
-  scripts/      建置、封裝、安全與測試工具
-apps/mcp/       Stdio MCP 伺服器、用戶端安裝器、外掛與 SDK 驗證
-docs/           架構、資料、安全、設計與驗證記錄
-scripts/        儲存庫工具、Git hooks 與 README 連結驗證
-.github/        CI 與未經 Developer ID 簽署的標籤發布流程
-```
-
-### 程序模型
-
-```mermaid
-flowchart LR
-  R[React renderer] <--> P[Isolated preload]
-  P <-->|Validated IPC| M[Electron main]
-  M <--> DB[(SQLite)]
-  M <--> L[Library files]
-  M <--> C[Python converter]
-  M <--> K[Account cache]
-  M --> W[Isolated Moodle webview]
-  W <--> S[School Moodle]
-  M <--> A[API or opted-in CLI]
-```
-
-### Moodle 同步
-
-```mermaid
-sequenceDiagram
-  actor Student
-  Student->>Renderer: Choose school and sign in
-  Renderer->>Main: Validated IPC
-  Main->>Moodle: Discover mobile service and authenticate
-  Moodle-->>Main: Token and supported functions
-  Main->>Moodle: Fetch courses and deadlines
-  Moodle-->>Main: Validated responses
-  Main->>SQLite: Save account-scoped snapshot and cache
-  Main-->>Renderer: Courses, deadlines, and sync status
-```
-
-### AI 提問
-
-```mermaid
-sequenceDiagram
-  actor Student
-  Student->>Renderer: Ask with optional selection
-  Renderer->>Main: Validated chat request
-  Main->>SQLite: Read history and course or planner context
-  Main->>Library: Read bounded document context
-  Main->>Provider: Send prompt to enabled API or CLI
-  Provider-->>Main: Stream answer and proposals
-  Main-->>Renderer: Answer, citations, and approval cards
-  Main->>SQLite: Save messages and usage
-  Student->>Main: Explicitly approve a planner proposal
-  Main->>SQLite: Validate and apply approved action
-```
-
-詳見[架構](docs/ARCHITECTURE.md)、[資料模型](docs/DATA_MODEL.md)、[儲存](docs/STORAGE.md)、[安全](docs/SECURITY.md)與[工程指南](docs/ENGINEERING.md)。[文件索引](docs/README.md)區分目前參考資料與歷史稽核記錄。
-
-## 開發
-
-安裝相依套件後，從儲存庫根目錄執行。記憶體有限時，請依序執行各項檢查。
-
-| 指令 | 用途 |
-| --- | --- |
-| `pnpm dev` | 啟動 Electron 與 Vite，以 Ctrl+C 停止。 |
-| `pnpm typecheck` | 檢查 TypeScript 並產生語言型別。 |
-| `pnpm lint` | 檢查 MCP、桌面版與網站。 |
-| `pnpm test --pool=forks --maxWorkers=2` | 以兩個 worker 執行 MCP、對比與桌面版單元測試。 |
-| `pnpm build` | 建置 MCP、本機身分驗證輔助程式、Main、Preload 與 Renderer。 |
-| `pnpm security:static` | 檢查相依套件政策與安全規則。 |
-| `pnpm security:check` | 執行靜態檢查、lint 與單元測試。 |
-| `pnpm e2e` | 建置並依序執行真實 Electron E2E 測試。 |
-| `pnpm smoke` | 建置並啟動真實 Electron 冒煙測試。 |
-| `pnpm package` | 依預設簽署設定建置與封裝。 |
-| `node apps/desktop/scripts/marketing-shots.mjs` | 先執行 `pnpm build`，再產生行銷截圖組合。 |
-| `node scripts/check-readme-links.mjs` | 檢查三份 README 與文件索引的本機連結。 |
-
-E2E 需要 **uv**，或透過 `VSTUDY_CONVERTER_VENV` 指定既有、以雜湊鎖定的轉換器環境。它會準備未簽署的封裝，也可能下載 Python 相依套件。驗證資料預設存於 `/tmp/vstudy-final/e2e`，可用 `VSTUDY_E2E_EVIDENCE` 更改。真實 AI 測試需要明確啟用並登入，略過不代表通過驗證。
-
-提交變更、同步翻譯、建立版本標籤與發布檢查請依 [CONTRIBUTING](CONTRIBUTING.md)。簽署機密資料不可放入 Git。目前儲存庫沒有專案授權檔，相依套件的授權清單不等於本專案授權。
-
-### 已知限制
-
-- macOS 與 Windows 各架構需要分別驗證封裝版。測試結果與簽署狀態以版本說明為準；未簽署版本可能觸發 Gatekeeper 或 SmartScreen。
-- 沒有 OCR，不支援掃描或純影像 PDF。複雜表格、分欄、公式與圖片可能失真。單檔 HTML 與 Markdown 匯入不會複製旁邊的圖片檔。
-- 真實學校功能取決於該校 Moodle 行動服務與權限。需使用公開 HTTPS；不支援僅限區網、自簽 TLS 憑證與 QR 憑證交換。
-- 本機資料沒有跨裝置同步。API 與 CLI 模型需要各自的存取權限，也可能產生費用。
-- 文件完成轉換後，可在閱讀器選用 AI 重新解析。開始前請確認模型、頁面範圍與估價；面板不提供保證的消費上限。詳見 [AI 解析狀態](docs/AI_PARSE.md)。
+- 閱讀 PDF、Word、PowerPoint、Markdown 等課程教材。
+- 選取段落向 AI 提問，並回查引用來源。
+- 在同一處查看 Moodle 課程、作業期限與檔案。
+- 用任務、目標與考試安排每日或每週讀書計畫。
+- 透過分頁同時開啟多個課程、文件與對話。
+- 自行啟用本機 MCP 橋接，讓 Claude Code、Codex 或 Antigravity 讀取指定課程。
+- 在支援的系統連接 Claude 或 Codex CLI，也可使用自己的 API 金鑰。
+- 文件庫留在你的電腦，AI 可自由選用，使用分析預設關閉。
+- 介面支援英文、繁體中文與日文。
+
+## 詳細說明
+
+- [安裝、更新與移除](docs/INSTALL.zh-Hant.md)
+- [功能導覽、AI 設定與隱私](docs/GUIDE.zh-Hant.md)
+- [MCP 智能體設定](docs/MCP.md)
+- [安全說明](docs/SECURITY.md)
+- [工程指南](docs/ENGINEERING.md)
+- [版本說明](docs/releases/0.4.0.md)
+
+## 專案構成
+
+`apps/desktop/` 是 Electron 桌面 app。
+`apps/mcp/` 提供本機智能體橋接。
+`apps/website/` 是網站；`apps/newsletter/` 處理電子報訂閱。
+`docs/` 收錄指南與設計文件。
+`scripts/` 放置儲存庫工具與安裝腳本。

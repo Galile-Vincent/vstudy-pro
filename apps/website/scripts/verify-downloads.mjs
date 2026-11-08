@@ -33,10 +33,18 @@ for (const route of downloadRoutes) {
   for (const installer of installers) {
     const linked = html.includes(`href="${downloadBase}/${installer.file}"`);
     assert.equal(linked, installer.releaseEnabled, `${route} no-JS publication scope ${installer.id}`);
-    assert.ok(html.includes(`data-installer="${installer.id}"`), `${route} lists every target`);
+    assert.equal(html.includes(`data-installer="${installer.id}"`), installer.releaseEnabled, `${route} shows enabled cards`);
   }
   assert.ok(html.includes(`href="${downloadBase}/SHA256SUMS.txt"`), `${route} checksums`);
-  assert.match(html, /<section class="dl-recommend"[^>]*\shidden/, `${route} recommendation stays hidden without JavaScript`);
+  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)[1];
+  const details = [...main.matchAll(/<details\b([^>]*)>/g)];
+  assert.equal(details.length, 7, `${route} has seven help sections`);
+  assert.ok(details.every(match => !/\sopen(?:[=\s]|$)/.test(match[1])), `${route} help starts closed`);
+  assert.ok(main.indexOf('class="dl-cards"') < main.indexOf('<details'), `${route} cards come before help`);
+  assert.deepEqual(details.map(match => match[1].match(/id="([^"]+)"/)[1]), [
+    'mac-first-open', 'dl-script', 'dl-agent', 'windows-smartscreen',
+    'verify-download', 'update-uninstall', 'other-platforms',
+  ], `${route} help order`);
   assert.doesNotMatch(html, /\d+(?:\.\d+)?\s*(?:MB|MiB)\b/, 'No invented installer size');
 }
 /* Every other page points at the download page and carries no installer links of its own. */
