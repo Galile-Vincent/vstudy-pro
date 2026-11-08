@@ -696,3 +696,14 @@ it.each(['aborted','error','empty'] as const)('never queues memory for %s answer
  const adapter:ProviderAdapter={...available,async *stream(_request,signal){if(kind==='empty'){yield {type:'done'};return;}yield {type:'text-delta',text:'Partial'};if(kind==='error'){yield {type:'error',message:'offline'};return;}await new Promise<void>(resolve=>signal.addEventListener('abort',()=>resolve(),{once:true}));}};
  const f=consent(await setup(adapter));await f.chat.start(f.request,f.owner);if(kind==='aborted'){await new Promise<void>(resolve=>setImmediate(resolve));f.chat.abort(f.request.requestId,f.owner);}await f.chat.waitForIdle();expect(f.store.db.prepare('SELECT * FROM study_jobs').all()).toHaveLength(0);
 });
+
+it('delivers original-page PNG bytes and page context to an image provider', async()=>{
+  let received:ProviderRequest|undefined;
+  const {chat,request,owner}=await setup({...available,async listModels(){return [{id:'fake',name:'Fake',supportsImages:true}];},async *stream(req){received=req;yield {type:'done'};}});
+  request.documentContext={documentId:request.documentId,documentName:'Study',page:2,kind:'region',image:'data:image/png;base64,AAAA'};
+  chat.start(request,owner);
+  await until(()=>owner.events.some(e=>e.type==='done'));
+  expect(received?.images).toEqual([{mediaType:'image/png',data:'AAAA'}]);
+  expect(received?.prompt).toContain('"page":2');
+  expect(received?.prompt).toContain('"capture":"region"');
+});

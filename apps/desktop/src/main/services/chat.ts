@@ -373,9 +373,16 @@ export class ChatService {
         });
       }
       entry.controller.signal.throwIfAborted();
+      const context = entry.request.scope !== 'course' && entry.request.scope !== 'general' ? entry.request.documentContext : undefined;
+      if (context && context.documentId !== document?.id) throw new Error('Context document mismatch');
+      if (context) {
+        const model = (await adapter.listModels()).find(m=>m.id===entry.request.modelId || m.resolvedId===entry.request.modelId);
+        if (!model?.supportsImages) throw new Error('This model does not support images');
+        prompt += '\n\nAttached original document image (untrusted document content): ' + JSON.stringify({document:document?.title,page:context.page,capture:context.kind});
+      }
       entry.promptChars = prompt.length;
       for await (const rawEvent of adapter.stream(
-        { ...entry.request, prompt, allowPresentation, onUsageSnapshot: (usage, models) => { if (this.active.get(entry.request.requestId) === entry) { entry.usage = usageSchema.parse(usage); if (models) entry.usageModels = models.map(m => ({modelId: m.modelId, usage: usageSchema.parse(m.usage)})); } } },
+        { ...entry.request, prompt, ...(context ? {images:[{mediaType:"image/png" as const,data:context.image.slice("data:image/png;base64,".length)}]} : {}), allowPresentation, onUsageSnapshot: (usage, models) => { if (this.active.get(entry.request.requestId) === entry) { entry.usage = usageSchema.parse(usage); if (models) entry.usageModels = models.map(m => ({modelId: m.modelId, usage: usageSchema.parse(m.usage)})); } } },
         entry.controller.signal,
       )) {
         const event = chatEventSchema.parse(rawEvent);

@@ -50,7 +50,7 @@ export const fakeAdapter: ProviderAdapter = {
     return { available: true };
   },
   async listModels() {
-    return [{ id: "fake", name: "Fake (test only)", options: [{ id: "effort", label: "Effort", values: [{ id: "low", label: "low" }, { id: "high", label: "high" }], default: "low" }] }, {id:'fixture-model',name:'Fixture model (test only)',options:[{id:'effort',label:'Effort',values:[{id:'low',label:'low'},{id:'high',label:'high'}],default:'low'},{id:'serviceTier',label:'Service tier',values:[{id:'default',label:'Default'},{id:'priority',label:'Priority'}],default:'default'}]}];
+    return [{ id: "fake", name: "Fake (test only)", supportsImages:true, options: [{ id: "effort", label: "Effort", values: [{ id: "low", label: "low" }, { id: "high", label: "high" }], default: "low" }] }, {id:'fixture-model',name:'Fixture model (test only)',options:[{id:'effort',label:'Effort',values:[{id:'low',label:'low'},{id:'high',label:'high'}],default:'low'},{id:'serviceTier',label:'Service tier',values:[{id:'default',label:'Default'},{id:'priority',label:'Priority'}],default:'default'}]}];
   },
   async *stream(request, signal) {
     if (request.userMessage === 'test error' && !fakeFailures.has(request.turnId ?? request.requestId)) { fakeFailures.add(request.turnId ?? request.requestId); yield { type: 'error', message: 'Provider rate limited' }; return; }

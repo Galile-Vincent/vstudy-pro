@@ -1,3 +1,6 @@
+import { DocumentOriginal } from '../document-original';
+import { DocumentContextChip } from '../document-context-chip';
+import type { DocumentContextAttachment } from '../../shared/domain';
 import type { IpcResponse } from '../../shared/ipc';
 import { LoadError } from '../components/load-error';
 import { PaneTabs } from './pane-tabs';
@@ -96,6 +99,9 @@ export function Workspace() {
   activeConversation.current = conversation;
   const [progress, setProgress] = useState<Record<string, string>>({});
   const [readerVersion,setReaderVersion] = useState<'original'|'ai'>('original');
+  const [readerDisplay,setReaderDisplay] = useState<'markdown'|'file'>('markdown');
+  const [documentContext,setDocumentContext] = useState<DocumentContextAttachment | null>(null);
+  useEffect(()=>{setDocumentContext(null);setReaderDisplay('markdown');},[documentId]);
   const [readerRevision,setReaderRevision] = useState(0);
   const [partialSource, setPartialSource] = useState("");
   useEffect(() => {
@@ -398,10 +404,13 @@ export function Workspace() {
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
       <header className="art-reader-chat-header"><div className="chat-source" role="group" aria-label={tr('web-chat:choose')}>{chatSources.map(source => <button key={source} type="button" aria-pressed={chatSource === source} onClick={() => setChatSource(source)}>{source === 'companion' ? <><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</> : tr(`web-chat:${source}`)}</button>)}</div>{chatSource === 'companion' && chatControls}</header>
+      {chatSource !== 'companion' && documentContext && <div><DocumentContextChip context={documentContext} onRemove={()=>setDocumentContext(null)}/><Button onClick={()=>void desktop.invoke('documents:copyContext',documentContext).then(()=>setNotice(tr('library:original.copied'))).catch(report)}>{tr('library:original.copy')}</Button><p>{tr('library:original.paste')}</p></div>}
       {chatSource !== 'companion' && <Suspense fallback={<p role="status">{tr('common:loading')}</p>}><HostedChat key={chatSource} provider={chatSource} compact/></Suspense>}
       <div className="chat-source-body" hidden={chatSource !== 'companion'}>
       {conversationError || historyError ? <LoadError message={conversationError || historyError} retry={() => conversationError ? setConversationRevision(value => value + 1) : setHistoryRevision(value => value + 1)}/> : conversation && history ? (
         <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}>{chatDocument === documentId ? <Chat
+          documentContext={documentContext}
+          onClearDocumentContext={()=>setDocumentContext(null)}
           documentPageCount={documentPageCount}
           documentTitle={doc?.title ?? tr('common:document')}
             onUsage={() => { setSettingsTab("usage"); setShowSettings(true); }}
@@ -426,6 +435,7 @@ export function Workspace() {
           <div className="art-reader-start-content"><ReaderWelcome title={doc?.title ?? tr('common:document')} hasSelection={!!selection} onQuestion={canChat && !busy ? text => { setDraft(text); void newConversation(); } : undefined} />
           {connected && !providers.some(p => p.config.enabled && p.availability.available && p.models.length > 0) && <ReaderOfflineNotice />}
           </div>
+          {documentContext && <DocumentContextChip context={documentContext} onRemove={()=>setDocumentContext(null)}/>}
           {selection && (
             <div className="selection-chip">
               <SelectionPreview selection={selection} />
@@ -459,7 +469,8 @@ export function Workspace() {
         <ContextCoach inline/>
         <span className="eyebrow">{doc?.sourceName ?? tr('common:reading_space')}</span>
         {doc && <button className="icon-button" title={tr('common:delete_document')} aria-label={tr('common:delete_document')} onClick={() => void removeDocument(doc.id)}><Trash2 size={16} /></button>}
-        {doc && <AiParseControls key={doc.id} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
+        {doc?.status==='ready' && <div role="group" aria-label={tr('library:original.view')}><Button variant="ghost" aria-pressed={readerDisplay==='markdown'} onClick={()=>setReaderDisplay('markdown')}>{tr('library:original.markdown')}</Button><Button variant="ghost" aria-pressed={readerDisplay==='file'} onClick={()=>setReaderDisplay('file')}>{tr('library:original.file')}</Button></div>}
+        {doc && readerDisplay==='markdown' && <AiParseControls key={doc.id} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
         <span className="muted">
           {doc?.status === "ready" ? tr('novice:ready_to_read') : ""}
         </span>
@@ -508,7 +519,7 @@ export function Workspace() {
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
-        <><DocumentMarkdown
+        readerDisplay==='file' ? <DocumentOriginal key={doc.id} document={doc} pageCount={documentPageCount} onAttach={context=>{setDocumentContext(context);setCompactPane('chat');setNotice(tr('library:original.attached'));}}/> : <><DocumentMarkdown
           key={`${doc.id}-${readerVersion}-${readerRevision}`}
           version={readerVersion}
           source={source}
