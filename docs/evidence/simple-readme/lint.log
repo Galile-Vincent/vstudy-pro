@@ -1,0 +1,11 @@
+
+> @vstudy/website@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/website
+> astro check
+
+23:22:43 [types] Generated 15ms
+23:22:43 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-1a1dd2a2/apps/website...
+Result (49 files): 
+- 0 errors
+- 0 warnings
+- 0 hints
+

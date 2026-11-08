@@ -1,0 +1,23 @@
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mpre-commit[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+│  lint-staged (skip) no files for inspection
+│  typecheck (skip) no matching staged files
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 0.00 seconds)
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mcommit-msg[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  conventional ❯ 
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 0.53 seconds)
+✓ conventional (0.53 seconds)
+[t3/simple-readme 67e8c6b4] docs: simplify readmes and lead downloads with installer cards
+ 15 files changed, 1416 insertions(+), 1212 deletions(-)
+ create mode 100644 docs/GUIDE.ja.md
+ create mode 100644 docs/GUIDE.md
+ create mode 100644 docs/GUIDE.zh-Hant.md
+ create mode 100644 docs/INSTALL.ja.md
+ create mode 100644 docs/INSTALL.md
+ create mode 100644 docs/INSTALL.zh-Hant.md

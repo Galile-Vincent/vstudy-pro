@@ -1,0 +1,554 @@
+[
+  {
+    "lang": "en",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS (Apple silicon)\nRecommended\nDownload .dmg\n↓",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 156.140625,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 304.9375,
+        "left": 20
+      },
+      {
+        "text": "Windows (x64)\nDownload .exe\n↓",
+        "x": 20,
+        "y": 320.9375,
+        "width": 335,
+        "height": 122,
+        "top": 320.9375,
+        "right": 355,
+        "bottom": 442.9375,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/en-375-light.png"
+  },
+  {
+    "lang": "en",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS (Apple silicon)\nRecommended\nDownload .dmg\n↓",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 156.140625,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 304.9375,
+        "left": 20
+      },
+      {
+        "text": "Windows (x64)\nDownload .exe\n↓",
+        "x": 20,
+        "y": 320.9375,
+        "width": 335,
+        "height": 122,
+        "top": 320.9375,
+        "right": 355,
+        "bottom": 442.9375,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/en-375-dark.png"
+  },
+  {
+    "lang": "en",
+    "width": 1280,
+    "theme": "light",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS (Apple silicon)\nRecommended\nDownload .dmg\n↓",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 632,
+        "bottom": 356.140625,
+        "left": 200
+      },
+      {
+        "text": "Windows (x64)\nDownload .exe\n↓",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 1080,
+        "bottom": 356.140625,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/en-1280-light.png"
+  },
+  {
+    "lang": "en",
+    "width": 1280,
+    "theme": "dark",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS (Apple silicon)\nRecommended\nDownload .dmg\n↓",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 632,
+        "bottom": 356.140625,
+        "left": 200
+      },
+      {
+        "text": "Windows (x64)\nDownload .exe\n↓",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 1080,
+        "bottom": 356.140625,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/en-1280-dark.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS (Apple 晶片)\n建議\n下載 .dmg\n↓",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 156.140625,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 304.9375,
+        "left": 20
+      },
+      {
+        "text": "Windows (x64)\n下載 .exe\n↓",
+        "x": 20,
+        "y": 320.9375,
+        "width": 335,
+        "height": 122,
+        "top": 320.9375,
+        "right": 355,
+        "bottom": 442.9375,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/zh-Hant-375-light.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS (Apple 晶片)\n建議\n下載 .dmg\n↓",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 156.140625,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 304.9375,
+        "left": 20
+      },
+      {
+        "text": "Windows (x64)\n下載 .exe\n↓",
+        "x": 20,
+        "y": 320.9375,
+        "width": 335,
+        "height": 122,
+        "top": 320.9375,
+        "right": 355,
+        "bottom": 442.9375,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/zh-Hant-375-dark.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "light",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS (Apple 晶片)\n建議\n下載 .dmg\n↓",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 632,
+        "bottom": 356.140625,
+        "left": 200
+      },
+      {
+        "text": "Windows (x64)\n下載 .exe\n↓",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 1080,
+        "bottom": 356.140625,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/zh-Hant-1280-light.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "dark",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS (Apple 晶片)\n建議\n下載 .dmg\n↓",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 632,
+        "bottom": 356.140625,
+        "left": 200
+      },
+      {
+        "text": "Windows (x64)\n下載 .exe\n↓",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 1080,
+        "bottom": 356.140625,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/zh-Hant-1280-dark.png"
+  },
+  {
+    "lang": "ja",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS (Apple シリコン)\nおすすめ\nダウンロード .dmg\n↓",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 156.140625,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 304.9375,
+        "left": 20
+      },
+      {
+        "text": "Windows (x64)\nダウンロード .exe\n↓",
+        "x": 20,
+        "y": 320.9375,
+        "width": 335,
+        "height": 122,
+        "top": 320.9375,
+        "right": 355,
+        "bottom": 442.9375,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/ja-375-light.png"
+  },
+  {
+    "lang": "ja",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS (Apple シリコン)\nおすすめ\nダウンロード .dmg\n↓",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 156.140625,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 304.9375,
+        "left": 20
+      },
+      {
+        "text": "Windows (x64)\nダウンロード .exe\n↓",
+        "x": 20,
+        "y": 320.9375,
+        "width": 335,
+        "height": 122,
+        "top": 320.9375,
+        "right": 355,
+        "bottom": 442.9375,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/ja-375-dark.png"
+  },
+  {
+    "lang": "ja",
+    "width": 1280,
+    "theme": "light",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS (Apple シリコン)\nおすすめ\nダウンロード .dmg\n↓",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 632,
+        "bottom": 356.140625,
+        "left": 200
+      },
+      {
+        "text": "Windows (x64)\nダウンロード .exe\n↓",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 1080,
+        "bottom": 356.140625,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/ja-1280-light.png"
+  },
+  {
+    "lang": "ja",
+    "width": 1280,
+    "theme": "dark",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS (Apple シリコン)\nおすすめ\nダウンロード .dmg\n↓",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 632,
+        "bottom": 356.140625,
+        "left": 200
+      },
+      {
+        "text": "Windows (x64)\nダウンロード .exe\n↓",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 180.140625,
+        "top": 176,
+        "right": 1080,
+        "bottom": 356.140625,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 7,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/simple-readme/ja-1280-dark.png"
+  }
+]
