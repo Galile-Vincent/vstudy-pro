@@ -58,8 +58,20 @@ it('finds weak concepts on later pages instead of saying nothing needs review', 
 });
 it('says nothing needs review only after every page has been read', async () => {
   fixture({ masteryPages: [[concept(1, 'watching')], [concept(2, 'candidate')]] });
+  const healthy = invoke.getMockImplementation()!;
+  let releaseLastPage!: () => void;
+  const lastPage = new Promise<void>(resolve => { releaseLastPage = resolve; });
+  invoke.mockImplementation(async (channel: string, input: { cursor?: { id: string } }) => {
+    if (channel === 'review:courses:mastery' && input.cursor) await lastPage;
+    return healthy(channel, input);
+  });
   render(<ReviewView />);
-  fireEvent.mouseDown(await screen.findByRole('tab', { name: en.weak }), { button: 0, ctrlKey: false });
+  await waitFor(() => expect(invoke).toHaveBeenCalledWith('review:courses:mastery', expect.objectContaining({ cursor: expect.anything() })));
+  expect(screen.queryByText(en.weak_empty)).toBeNull();
+  await act(async () => { releaseLastPage(); });
+  // Empty results automatically select Recent. Let that settle before selecting Weak.
+  await waitFor(() => expect(screen.getByRole('tab', { name: en.recent }).getAttribute('aria-selected')).toBe('true'));
+  fireEvent.mouseDown(screen.getByRole('tab', { name: en.weak }), { button: 0, ctrlKey: false });
   expect(await screen.findByText(en.weak_empty)).toBeTruthy();
   expect(invoke.mock.calls.filter(([channel]) => channel === 'review:courses:mastery')).toHaveLength(2);
   expect(screen.queryByRole('button', { name: en.load_more })).toBeNull();

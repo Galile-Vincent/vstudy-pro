@@ -24,7 +24,7 @@ export async function probeVersion(binary: string, provider: CliProvider, expect
   if (!version || expected && version !== expected || provider === 'codex' && version !== '0.166.0') throw new SetupError('wrong-version');
   return version;
 }
-export async function authStatus(provider: CliProvider, plan: TerminalPlan, signal: AbortSignal): Promise<boolean> {
+export async function authStatus(provider: CliProvider, plan: TerminalPlan, signal: AbortSignal, capture = captureCommand): Promise<boolean> {
   if (provider === 'agy') {
     for await (const event of runAgy(plan.executable, agyArgs, plan.cwd, undefined, signal, 15_000)) {
       if (Array.isArray(event)) return true;
@@ -40,7 +40,7 @@ export async function authStatus(provider: CliProvider, plan: TerminalPlan, sign
   recordEgress('ai_cli_status', provider === 'claude' ? 'Anthropic / Claude CLI managed endpoints' : 'OpenAI / Codex CLI managed endpoints');
   // Auth status is machine-readable, not interactive. A PTY makes Claude colour JSON keys,
   // which corrupts JSON even when exitCode is zero. Keep credentials in private pipe capture.
-  const result = await captureCommand(statusPlan, signal);
+  const result = await capture(statusPlan, signal);
   if (provider === 'codex') {
     if (result.exitCode === 0) return true;
     if (result.exitCode === 1) return false;

@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { spawn } from 'node-pty';
 import { cliEnvironment } from '../cli-transport';
 import { captureCommand } from './captured';
+import { authStatus } from './probes';
 import { ActionPty } from './pty';
 import { SetupError } from './types';
 
@@ -49,6 +50,9 @@ export function fixturePty(platform = process.platform) {
     ? new ActionPty((binary, args, options) => { const command = fixtureNodeCommand(binary, args); return spawn(command.executable, command.args, options); })
     : new ActionPty();
 }
+/** Keep the real pipe capture and auth parser; translate only the test PE stub into Node argv. */
+export const fixtureAuthStatus: typeof authStatus = (provider, plan, signal) => authStatus(provider, plan, signal,
+  (statusPlan, statusSignal) => captureCommand({ ...statusPlan, ...fixtureNodeCommand(statusPlan.executable, statusPlan.args) }, statusSignal));
 export async function fixtureVersion(binary: string, _provider: string, expected: string | null, cwd: string, signal: AbortSignal) {
   const command = fixtureNodeCommand(binary, ['--version']);
   const env = Object.fromEntries(Object.entries(cliEnvironment()).filter((entry): entry is [string, string] => typeof entry[1] === 'string'));
