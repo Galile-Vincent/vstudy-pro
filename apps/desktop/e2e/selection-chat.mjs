@@ -251,6 +251,7 @@ try {
     await poll(async()=>await documentCount() === 1);
     await page.getByRole('button',{name:'Open settings',exact:true}).click();
     await page.getByRole('tab',{name:'AI services',exact:true}).click();
+    await page.getByRole('dialog').locator('summary').filter({hasText:'More options'}).click();
     const keyForm = page.locator('.provider-row').filter({hasText:'OpenAI compatible'});
     await keyForm.getByLabel('OpenAI compatible API key',{exact:true}).fill('local-test-key');
     await keyForm.getByRole('button',{name:'Save key',exact:true}).click();

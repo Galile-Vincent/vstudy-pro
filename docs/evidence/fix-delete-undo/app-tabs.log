@@ -1,0 +1,4 @@
+PASS three tabs, workspace strip visible, click and keyboard switching, one panel
+PASS middle click and Cmd/Ctrl+W close with neighbor selection and restored reader mode
+PASS keyboard and pointer reorder, restart restores order and active tab, only active view mounted
+PASS five native tabs stay within four views, retain scroll, protect imports, and disconnect

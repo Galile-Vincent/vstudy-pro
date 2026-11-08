@@ -1,0 +1,32 @@
+Scope: all 5 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1250
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1250, reused 1248, downloaded 0, added 401
+Progress: resolved 1250, reused 1248, downloaded 0, added 975
+Progress: resolved 1250, reused 1248, downloaded 0, added 1250, done
+
+devDependencies:
++ @commitlint/cli 21.2.4
++ @commitlint/config-conventional 21.2.4
++ git-cliff 2.14.2
++ knip 6.44.1
++ lefthook 2.2.2
++ sharp 0.35.5
++ svgo 4.1.0
++ zod 3.24.2
+
+. prepare$ node scripts/ensure-pty-helper.mjs && node apps/desktop/scripts/generate-locales.mjs && node scripts/install-hooks.mjs
+. prepare: Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-82efac76/apps/desktop/src/shared/locales.generated.ts (28 namespaces).
+. prepare: sync hooks: ✔️(pre-push, pre-commit, commit-msg)
+. prepare: Done
+╭ Warning ─────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│   Ignored build scripts: electron-winstaller@5.4.0, lefthook@2.2.2,          │
+│   libxmljs2@0.37.0, workerd@1.20261104.1.                                    │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+│   to run scripts.                                                            │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+Done in 4.4s using pnpm v10.28.2

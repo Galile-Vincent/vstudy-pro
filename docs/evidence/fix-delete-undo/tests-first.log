@@ -1,0 +1,278 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-82efac76/apps/desktop
+
+assignments: 0.35 ms
+base64: 0.09 ms
+identifier: 0.12 ms
+dotted: 0.14 ms
+quotes: 0.59 ms
+FRESHNESS elapsedMs=950 visibleResults=1 searches=2
+(node:85420) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 will-download listeners added to [EventEmitter]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+SNAPSHOT SIGKILL interruptedBytes=57073664 afterCleanupBytes=0
+ ❯ src/renderer/workspace/reader-delete.test.tsx (5 tests | 1 failed) 1200ms
+   × moves focus to Undo after Delete and back to the reader after Undo 1027ms
+SNAPSHOT SIGTERM interruptedBytes=0 afterCleanupBytes=0
+SNAPSHOT worker termination interruptedBytes=0 afterCleanupBytes=0
+CONTENTION documents=2000 maxWriteMs=0.8 maxEventLoopGapMs=31.3 writes=77
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/workspace/reader-delete.test.tsx > moves focus to Undo after Delete and back to the reader after Undo
+AssertionError: expected <section …(4)>…(2)</section> to be <button data-slot="button" …(3)></button> // Object.is equality
+
+Ignored nodes: comments, script, style
+[36m<html[39m
+  [33mdata-reduced-transparency[39m=[32m"false"[39m
+  [33mlang[39m=[32m"en"[39m
+[36m>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"workspace"[39m
+        [33mdata-compact-pane[39m=[32m"reading"[39m
+      [36m>[39m
+        [36m<h1[39m
+          [33mclass[39m=[32m"sr-only"[39m
+        [36m>[39m
+          [0mDocument library[0m
+        [36m</h1>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"app-header"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"row"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Toggle document library"[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9"[39m
+              [33mdata-size[39m=[32m"icon"[39m
+              [33mdata-slot[39m=[32m"button"[39m
+              [33mdata-variant[39m=[32m"ghost"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-panel-left lucide-sidebar"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"18"[39m
+                  [33mrx[39m=[32m"2"[39m
+                  [33mwidth[39m=[32m"18"[39m
+                  [33mx[39m=[32m"3"[39m
+                  [33my[39m=[32m"3"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M9 3v18"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"ghost"[39m
+            [36m>[39m
+              [0mLibrary[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Import document"[39m
+              [33mdata-testid[39m=[32m"import-document"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-plus"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M5 12h14"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 5v14"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-chevron-right art-reader-breadcrumb-separator"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"14"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"14"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m9 18 6-6-6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"muted workspace-title"[39m
+            [36m>[39m
+              [0mYour workspace[0m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"row"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"connection-status motion-sr"[39m
+              [33mdata-testid[39m=[32m"bridge-status"[39m
+            [36m>[39m
+              [0mWorkspace connected[0m
+            [36m</span>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Swap chat side"[39m
+              [33mtitle[39m=[32m"Swap chat side"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-arrow-left-right"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8 3 4 7l4 4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M4 7h16"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m16 21 4-4-4-4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M20 17H4"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Open settings"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-settings"[39m
+     ...
+
+- Expected
++ Received
+
+- <button
+-   class="inline-flex shrink-0 items-center justify-center text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border-0 bg-[color-mix(in_oklab,var(--ink)_7%,var(--surface))] text-foreground shadow-none hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5"
+-   data-size="sm"
+-   data-slot="button"
+-   data-variant="outline"
++ <section
++   aria-label="Document"
++   class="pane reading-pane"
++   id="reading-content"
++   tabindex="-1"
++ >
++   <div
++     class="pane-toolbar"
++   >
++     <span
++       class="eyebrow"
++     >
++       Reading space
++     </span>
++     <span
++       class="muted"
++     />
++   </div>
++   <div
++     class="empty"
+    >
+-   Undo
++     <div
++       class="empty-symbol"
++     >
++       <svg
++         aria-hidden="true"
++         class="lucide lucide-file-text"
++         fill="none"
++         height="28"
++         stroke="currentColor"
++         stroke-linecap="round"
++         stroke-linejoin="round"
++         stroke-width="2"
++         viewBox="0 0 24 24"
++         width="28"
++         xmlns="http://www.w3.org/2000/svg"
++       >
++         <path
++           d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
++         />
++         <path
++           d="M14 2v5a1 1 0 0 0 1 1h5"
++         />
++         <path
++           d="M10 9H8"
++         />
++         <path
++           d="M16 13H8"
++         />
++         <path
++           d="M16 17H8"
++         />
++       </svg>
++     </div>
++     <h3>
++       Your next idea starts here
++     </h3>
++     <p>
++       Import a document to read, select, and ask questions.
++     </p>
++     <button>
++       Import document
+      </button>
++     <small
++       class="muted"
++     >
++       Drop a file anywhere to import it
++     </small>
++   </div>
++ </section>
+
+ ❯ src/renderer/workspace/reader-delete.test.tsx:49:52
+     47|   fireEvent.click(del);
+     48|   const undo=await screen.findByRole('button',{name:tr('library:undo')…
+     49|   await waitFor(()=>expect(document.activeElement).toBe(undo));
+       |                                                    ^
+     50|   fireEvent.click(undo);
+     51|   await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library…
+ ❯ runWithExpensiveErrorDiagnosticsDisabled ../../node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback ../../node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback ../../node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 298 passed | 7 skipped (306)
+      Tests  1 failed | 2694 passed | 20 skipped (2715)
+   Start at  21:23:54
+   Duration  80.62s (transform 3.14s, setup 0ms, import 27.06s, tests 89.06s, environment 15.51s)
+

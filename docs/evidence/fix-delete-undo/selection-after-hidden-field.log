@@ -1,0 +1,123 @@
+Skip to content
+VStudy Pro
+
+Workspace
+
+Home
+AI chats
+Library
+Courses
+Exams
+Review
+History
+
+Your collection
+
+All documents
+Recent
+Pinned
+Unfiled
+Converting / Failed
+Folders
+
+No folders yet
+
+Subscription limits
+Claude
+Not signed in
+5h · Unknown
+Weekly · Unknown
+Codex
+Unsupported
+5h · Unknown
+Weekly · Unknown
+VStudy Pro
+Your personal study space
+Help improve VStudy Pro? Analytics is off until you choose.
+
+Help improve VStudy Pro with usage data. We never collect your name, documents, questions or answers. Studying works the same either way.
+
+What is collected
+Privacy policy
+Terms of use
+No thanks
+Share usage data
+Document library
+Library
+sample
+Help
+Workspace connected
+Reading tip
+sample.md
+Parsed textOriginal file
+Improve with AI
+VStudy fixtureUse this section
+
+Markdown passthrough.Ask about this
+
+Study companion
+Gemini
+ChatGPT
+Claude
+Conversations
+A little curiosity. A new understanding.
+
+Explore the ideas in “sample”.
+
+Summarize this section
+Explain a term
+Quiz me
+Scroll to bottom
+sample
+Socratic mode
+Fake (test only)
+Low
+Low
+High
+Send message
+
+Grounded in your document. Check important details.
+
+Settings
+General
+Appearance
+AI services
+Agents
+Usage
+Storage
+Privacy
+AI services
+AI tools
+
+Connect an account to ask about your reading.
+
+Connect an AI
+More options
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.fill: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('.provider-row').filter({ hasText: 'OpenAI compatible' }).getByLabel('OpenAI compatible API key', { exact: true })[22m
+[2m    - locator resolved to <input value="" type="password" data-slot="input" autocomplete="off" placeholder="Enter API key" aria-label="OpenAI compatible API key" class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-…/>[22m
+[2m    - fill("local-test-key")[22m
+[2m  - attempting fill action[22m
+[2m    2 × waiting for element to be visible, enabled and editable[22m
+[2m      - element is not visible[22m
+[2m    - retrying fill action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and editable[22m
+[2m      - element is not visible[22m
+[2m    - retrying fill action[22m
+[2m      - waiting 100ms[22m
+[2m    60 × waiting for element to be visible, enabled and editable[22m
+[2m       - element is not visible[22m
+[2m     - retrying fill action[22m
+[2m       - waiting 500ms[22m
+
+    at /Users/vc/.t3/worktrees/vstudy-pro/t3-82efac76/apps/desktop/e2e/selection-chat.mjs:255:72 {
+  name: 'TimeoutError'
+}
+
+Node.js v26.9.0

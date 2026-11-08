@@ -1,0 +1,93 @@
+Downloading Electron binary...
+Skip to content
+VStudy Pro
+
+Workspace
+
+Home
+AI chats
+Library
+Courses
+Exams
+Review
+History
+
+Your collection
+
+All documents
+Recent
+Pinned
+Unfiled
+Converting / Failed
+Folders
+
+No folders yet
+
+Subscription limits
+Claude
+Not signed in
+5h · Unknown
+Weekly · Unknown
+Codex
+Unsupported
+5h · Unknown
+Weekly · Unknown
+VStudy Pro
+Your personal study space
+Help improve VStudy Pro? Analytics is off until you choose.
+
+Help improve VStudy Pro with usage data. We never collect your name, documents, questions or answers. Studying works the same either way.
+
+What is collected
+Privacy policy
+Terms of use
+No thanks
+Share usage data
+Document library
+Library
+sample
+Help
+Workspace connected
+Reading tip
+sample.md
+Parsed textOriginal file
+Improve with AI
+VStudy fixtureUse this section
+
+Markdown passthrough.Ask about this
+
+Study companion
+Gemini
+ChatGPT
+Claude
+Conversations
+A little curiosity. A new understanding.
+
+Explore the ideas in “sample”.
+
+Summarize this section
+Explain a term
+Quiz me
+Scroll to bottom
+sample
+Socratic mode
+Fake (test only)
+Low
+Low
+High
+Send message
+
+Grounded in your document. Check important details.
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: 'Undo', exact: true })[22m
+
+    at /Users/vc/.t3/worktrees/vstudy-pro/t3-82efac76/apps/desktop/e2e/selection-chat.mjs:248:67 {
+  name: 'TimeoutError'
+}
+
+Node.js v26.9.0

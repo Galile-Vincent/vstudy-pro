@@ -1,0 +1,19 @@
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mpre-commit[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  lint-staged ❯ 
+
+│  typecheck (skip) no matching staged files
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 0.38 seconds)
+✓ lint-staged (0.38 seconds)
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mcommit-msg[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  conventional ❯ 
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 0.32 seconds)
+✓ conventional (0.32 seconds)
+[t3/fix-delete-undo 305ff8fe] test(desktop): expand API settings before saving key
+ 1 file changed, 1 insertion(+)
