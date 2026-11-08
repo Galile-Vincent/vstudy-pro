@@ -3,6 +3,10 @@
 Generated from Git history with git-cliff. Historical subjects are preserved.
 Pre-baseline changes without a conventional prefix appear under Other changes.
 
+## v0.4.2
+
+### Fixes
+- fix(release): grant Electron its JIT entitlements and prepare v0.4.2 (919b92b)
 ## v0.4.1
 
 ### Documentation

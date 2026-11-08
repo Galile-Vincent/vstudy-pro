@@ -4,7 +4,7 @@ English · [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md)
 
 Read course documents, keep Moodle deadlines together, and turn coursework into a study plan on macOS and Windows.
 
-![Version 0.4.2](https://img.shields.io/badge/version-0.4.2-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
+![Version 0.4.3](https://img.shields.io/badge/version-0.4.3-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
 
 ![Graph traversal notes with a selected passage, demo answer, and source citation](docs/assets/readme/reader.webp)
 
@@ -50,7 +50,7 @@ Give your AI agent the [install prompt](docs/INSTALL.md#option-3---let-an-ai-age
 - [MCP agent setup](docs/MCP.md)
 - [Security](docs/SECURITY.md)
 - [Engineering](docs/ENGINEERING.md)
-- [Release notes](docs/releases/0.4.2.md)
+- [Release notes](docs/releases/0.4.3.md)
 
 ## How it is built
 

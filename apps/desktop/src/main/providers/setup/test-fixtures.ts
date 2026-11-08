@@ -20,7 +20,7 @@ export const fixtureArtifactVerifier: VerifyArtifact = async (release, binary, s
 export const fixtureStore = (root: string, verify: VerifyArtifact = fixtureArtifactVerifier) => new SetupStore(root, verify);
 export function temporaryDirectories() {
   const directories: string[] = [];
-  afterEach(async () => { for (const directory of directories) await rm(directory, { recursive: true, force: true }); directories.length = 0; });
+  afterEach(async () => { for (const directory of directories) await rm(directory, { recursive: true, force: true, maxRetries: 8, retryDelay: 100 }); directories.length = 0; });
   return async () => { const directory = await mkdtemp(join(tmpdir(), 'vstudy-setup-')); directories.push(directory); return directory; };
 }
 export function payloadRelease(payload: Buffer, version = '1.0.0', provider: Release['provider'] = 'claude'): Release {
