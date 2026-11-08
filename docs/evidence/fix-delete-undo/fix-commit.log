@@ -1,0 +1,27 @@
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mpre-commit[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  lint-staged ❯ 
+
+┃  typecheck ❯ 
+
+> vstudy-pro@ typecheck-fast /Users/vc/.t3/worktrees/vstudy-pro/t3-82efac76
+> node apps/desktop/scripts/generate-locales.mjs && pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-82efac76/apps/desktop/src/shared/locales.generated.ts (28 namespaces).
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 3.25 seconds)
+✓ lint-staged (0.66 seconds)
+✓ typecheck (2.59 seconds)
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mcommit-msg[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  conventional ❯ 
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 0.35 seconds)
+✓ conventional (0.35 seconds)
+[t3/fix-delete-undo 409394ec] fix(desktop): preserve document undo across workspace remounts
+ 3 files changed, 48 insertions(+), 27 deletions(-)
+ create mode 100644 apps/desktop/src/renderer/workspace/document-undo.ts

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "selection-after-1",
+    "exit": 0
+  },
+  {
+    "name": "selection-after-2",
+    "exit": 0
+  },
+  {
+    "name": "app-tabs",
+    "exit": 0
+  },
+  {
+    "name": "a11y-regressions",
+    "exit": 0
+  },
+  {
+    "name": "chat-history",
+    "exit": 0
+  },
+  {
+    "name": "history-startup-regressions",
+    "exit": 0
+  }
+]

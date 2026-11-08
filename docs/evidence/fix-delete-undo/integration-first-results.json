@@ -1,0 +1,11 @@
+[
+  {
+    "name": "selection-after-1",
+    "exit": 1
+  },
+  {
+    "name": "selection-after-2",
+    "status": "could not run",
+    "reason": "Another Electron is running"
+  }
+]
