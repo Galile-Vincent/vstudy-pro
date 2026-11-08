@@ -50,3 +50,12 @@ it('merges independent reader and composer checkpoints against the current prese
  expect(chat).toMatchObject({kind:'document',readerMode:'file',page:7,draft:'Unsent'});
  expect(mergeTabPresentation(chat,{kind:'app',scrollTop:0})).toEqual({kind:'app',scrollTop:0});
 });
+it('retries quota failures without inactive drafts and anchors',()=>{
+ let state=home();state=tabReducer(state,{type:'open',tab:createTab(id(2),{view:'home'},0)});
+ state=tabReducer(state,{type:'presentation',id:id(1),presentation:{kind:'document',scrollTop:20,draft:'large draft',anchor:'text',anchorOffset:10}});
+ const stored:string[]=[];
+ const storage={getItem:()=>null,removeItem:()=>{},setItem:(_key:string,value:string)=>{stored.push(value);if(stored.length===1)throw new Error('quota');}};
+ expect(saveTabs(storage,state)).toBe(true);
+ expect(JSON.parse(stored[1]!).tabs[0].presentation).toEqual({kind:'document',scrollTop:20});
+ expect(state.tabs[0]!.presentation).toHaveProperty('draft','large draft');
+});

@@ -84,3 +84,6 @@ describe('Moodle navigation policy',() => {
     expect(moodleWebviewContract['moodle:webview-layout'].request.safeParse({...layout,bounds:{...layout.bounds,x:-1}}).success).toBe(false);
   });
 });
+it('refuses tokenpluginfile paths containing embedded credentials',()=>{
+ expect(webviewNavigation('https://school.example/campus/tokenpluginfile.php/SECRET/42/notes.pdf',policy)).toBe('blocked');
+});

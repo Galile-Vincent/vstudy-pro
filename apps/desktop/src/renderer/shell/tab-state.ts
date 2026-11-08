@@ -59,7 +59,16 @@ export function loadTabs(storage: Storage, id: string): TabSet {
 }
 export function saveTabs(storage: Storage, state: TabSet): boolean {
   try { storage.setItem(TAB_STORAGE_KEY, JSON.stringify(tabSetSchema.parse(state))); return true; }
-  catch { return false; }
+  catch {
+    const tabs=state.tabs.map(tab=>{
+      if(tab.id===state.activeId || !['app','document'].includes(tab.presentation.kind))return tab;
+      const presentation={...tab.presentation};
+      if(presentation.kind==='app' || presentation.kind==='document') delete presentation.draft;
+      if(presentation.kind==='document') {delete presentation.anchor;delete presentation.anchorOffset;}
+      return {...tab,presentation};
+    });
+    try {storage.setItem(TAB_STORAGE_KEY,JSON.stringify(tabSetSchema.parse({...state,tabs})));return true;} catch {return false;}
+  }
 }
 
 export function mergeTabPresentation(current:TabPresentation,patch:Partial<TabPresentation>):TabPresentation {

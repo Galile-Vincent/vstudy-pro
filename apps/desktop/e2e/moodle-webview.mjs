@@ -11,7 +11,7 @@ import { URL, URLSearchParams } from 'node:url';
 import { Buffer } from 'node:buffer';
 
 const directory = await mkdtemp(join(tmpdir(),'vstudy-webview-'));
-const evidence = resolve('../../docs/evidence/app-tabs-native');
+const evidence = resolve(process.env.VSTUDY_NATIVE_UI?'../../docs/evidence/app-tabs-fixes':'../../docs/evidence/app-tabs-native');
 const accountId = '11111111-1111-4111-a111-111111111111';
 const courseId = '22222222-2222-4222-a222-222222222222';
 const issued = new Map();
@@ -90,6 +90,52 @@ try {
   },{accountId,courseId,siteUrl,module:join(directory,'bundle/webview.cjs')});
   };
   await installFixture();
+  if(process.env.VSTUDY_NATIVE_UI) {
+    const tabId='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
+    await page.evaluate(({tabId,accountId})=>{
+      const routes=[1,2].map(id=>({view:'moodle',accountId,target:{kind:'page',url:'https://school.example/course/view.php?id='+id}}));
+      const state={version:1,activeId:tabId,tabs:[{id:tabId,history:{entries:routes,index:0},title:'Moodle',icon:'BookOpen',lastActiveAt:0,presentation:{kind:'app',scrollTop:0}}]};
+      const set=window.Storage.prototype.setItem;set.call(localStorage,'vstudy-tabs-v1',JSON.stringify(state));
+      window.Storage.prototype.setItem=function(key,value){if(key!=='vstudy-tabs-v1')set.call(this,key,value);};
+    },{tabId,accountId});
+    await page.reload();
+    const nativeState=()=>app.evaluate(()=>[...globalThis.webviewManager.panes.values()].map(p=>({url:p.view.webContents.getURL(),visible:p.view.getVisible(),id:p.view.webContents.id})));
+    await page.waitForFunction(()=>document.querySelector('.moodle-webview-header strong')?.textContent==='Week 4 · Moodle');
+    assert.ok((await nativeState())[0].url.endsWith('id=1'));
+    await page.keyboard.press('Meta+]');
+    await page.waitForTimeout(700);
+    assert.ok((await nativeState())[0].url.endsWith(process.env.VSTUDY_MUTATE_NATIVE_UI?'id=999':'id=2'),'same tab displays its new target');
+    await page.locator('.app-tabs-add').click();await page.locator('.app-tabs-menu').waitFor();
+    await page.waitForTimeout(400);assert.equal((await nativeState())[0].visible,false,'picker hides native content');
+    await page.screenshot({path:join(evidence,'native-picker.png')});
+    await page.keyboard.press('Escape');
+    await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.setSize(800,900);window.webContents.setZoomFactor(2);});
+    await page.waitForTimeout(400);
+    if(await page.locator('.shell-sidebar').evaluate(el=>el.hidden)) await page.evaluate(()=>window.dispatchEvent(new Event('vstudy:toggle-sidebar')));
+    await page.waitForTimeout(500);assert.equal((await nativeState())[0].visible,false,'sidebar hides native content');
+    await page.evaluate(()=>window.dispatchEvent(new Event('vstudy:toggle-sidebar')));
+    await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.webContents.setZoomFactor(1);window.setSize(1400,960);});
+    const id=(await nativeState())[0].id;
+    await app.evaluate(async({webContents},id)=>{const contents=webContents.fromId(id);contents.emit('before-mouse-event',{}, {type:'mouseDown'});await contents.executeJavaScript('document.querySelector("#file").click()',true);},id);
+    await page.locator('.app-shell[data-view=workspace]').waitFor();
+    const imports=await app.evaluate(()=>globalThis.webviewImported);
+    await page.keyboard.press('Meta+[');await page.locator('.app-shell[data-view=moodle]').waitFor();
+    await page.waitForTimeout(1200);assert.equal(await page.locator('.app-shell').getAttribute('data-view'),'moodle','Back does not redeliver import');
+    assert.equal(await app.evaluate(()=>globalThis.webviewImported),imports);
+    await page.locator('.app-tabs-add').click();
+    await page.locator('.app-tabs-menu').getByRole('button',{name:'AI chats',exact:true}).click();
+    const children=()=>app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].contentView.children.filter(v=>v.webContents).map(v=>v.webContents.id));
+    const before=await children();
+    await page.locator('#web-chat-tab-gemini').click();await page.locator('.app-shell[data-view=hosted-chat]').waitFor();
+    await page.waitForTimeout(400);const chatId=(await children()).find(id=>!before.includes(id));assert.ok(chatId);
+    for(let i=0;i<3;i++) {
+      await page.locator('.app-tabs-add').click();await page.locator('.app-tabs-menu').getByRole('button',{name:'Home',exact:true}).click();
+      await page.locator('.app-shell[data-view=home]').waitFor();await page.keyboard.press('Meta+w');
+      await page.locator('.app-shell[data-view=hosted-chat]').waitFor();
+    }
+    await page.waitForTimeout(1200);assert.ok((await children()).includes(chatId),'rapid tab changes retain the hosted pane');
+    console.log('PASS real renderer and strict IPC target replacement, picker/sidebar visibility, import Back, hosted sync race');
+  } else
   if(process.env.VSTUDY_MEASURE_NATIVE_TABS) {
     await app.evaluate(({ipcMain})=>{ipcMain.removeHandler('moodle:webview-sync');ipcMain.handle('moodle:webview-sync',()=>({ok:true,tabs:[]}));});
     await page.evaluate(({accountId,siteUrl})=>{
@@ -97,7 +143,7 @@ try {
       const tabSet={version:1,activeId:ids[4],tabs:ids.map((id,index)=>({id,history:{entries:[{view:'moodle',accountId,target:{kind:'page',url:siteUrl+'/course/view.php?id='+index}}],index:0},title:'Moodle '+index,icon:'GraduationCap',lastActiveAt:0,presentation:{kind:'app',scrollTop:0}}))};
       const set=window.Storage.prototype.setItem;
       set.call(localStorage,'vstudy-tabs-v1',JSON.stringify(tabSet));
-      window.Storage.prototype.setItem=function(key,value){if(key!=='vstudy-tabs-v1')set.call(this,key,value);};
+      window.window.Storage.prototype.setItem=function(key,value){if(key!=='vstudy-tabs-v1')set.call(this,key,value);};
     },{accountId,siteUrl});
     await page.reload();
     await page.waitForFunction(()=>document.querySelector('.moodle-webview-header strong')?.textContent==='Week 4 · Moodle');

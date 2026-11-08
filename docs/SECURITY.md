@@ -322,3 +322,5 @@ Views remain alive across tabs and route changes, preserving conversations in me
 | `web-chat:clear` | shared/web-chat contract | M | 600 | 512 KiB | Native confirmation, close provider views, erase saved provider website data |
 
 Offline acceptance: `pnpm build`, then `node e2e/web-chat.mjs` from `apps/desktop`. This intercepts HTTPS in test-only session protocol handlers, uses a temporary profile and never logs into a real account. Origin and strict-contract tests are in `src/main/web-chat/policy.test.ts`.
+
+Tab presentation, including drafts and Moodle page titles, is stored in plaintext localStorage in the local app profile.

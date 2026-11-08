@@ -48,3 +48,7 @@ it('does not count a shared native process twice or evict protected work under p
   expect(first.discard).toHaveBeenCalledOnce();
   expect(second.discard).not.toHaveBeenCalled();
 });
+it('tolerates a process destroyed between metric ticks',()=>{
+ const pool=new NativeTabPool(()=>0);pool.acquire(resource('1',{processId:()=>{throw new Error('destroyed');}}));
+ expect(()=>pool.evaluate([])).not.toThrow();
+});

@@ -1,6 +1,6 @@
 import { TabStrip } from './tab-strip';
 import { mergeTabPresentation, activeTab, currentRoute, createTab, loadTabs, saveTabs, tabReducer, type TabAction } from './tab-state';
-import type { TabSet, TabRoute } from '../../shared/app-tabs';
+import { MAX_APP_TABS, type TabSet, type TabRoute } from '../../shared/app-tabs';
 import { HistorySwipeNavigation, hasNavigationOverlay } from './history-swipe-navigation';
 import { canMoveHistory, historyRoute, type HistoryDirection } from './navigation-history';
 import { ClipboardCheck } from "lucide-react";
@@ -39,7 +39,7 @@ export type Route = Omit<TabRoute, 'view'> & {
   aiParse?: boolean;
   connectSchool?: boolean;
 };
-type Navigation = { updateNativePresentation:(id:string,presentation:Partial<import('../../shared/app-tabs').TabPresentation>,title?:string,expectedRoute?:Route)=>void; tabs: TabSet; activeTabId: string; openTab: (route: Route | View) => void; activateTab: (id: string) => void; closeTab: (id: string) => void; reorderTabs: (ids: string[]) => void; route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void; canGoBack: boolean; canGoForward: boolean; goBack: () => void; goForward: () => void };
+type Navigation = { updateNativePresentation:(id:string,presentation:Partial<import('../../shared/app-tabs').TabPresentation>,title?:string,expectedRoute?:Route)=>void; tabs: TabSet; activeTabId: string; openTab: (route: Route | View) => boolean; activateTab: (id: string) => void; closeTab: (id: string) => void; reorderTabs: (ids: string[]) => void; route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void; canGoBack: boolean; canGoForward: boolean; goBack: () => void; goForward: () => void };
 const NavigationContext = createContext<Navigation | null>(null);
 export function useOptionalNavigation() { return useContext(NavigationContext); }
 export function useNavigate() {
@@ -98,7 +98,7 @@ export function AppShell({
     window.addEventListener('pagehide', flush);
     return () => { clearTimeout(timer); window.removeEventListener('pagehide', flush); };
   }, [tabs]);
-  useEffect(() => {void desktop.invoke('web-chat:sync',{tabIds:tabs.tabs.map(tab=>tab.id)}).catch(()=>{});void desktop.invoke('moodle:webview-sync',{tabIds:tabs.tabs.map(tab=>tab.id)}).catch(()=>{});},[tabs]);
+  useEffect(()=>desktop.onWebChatCleared?.(provider=>{for(const tab of tabsRef.current.tabs)if(tab.presentation.kind==='hosted-chat' && tab.presentation.provider===provider)dispatch({type:'presentation',id:tab.id,presentation:{kind:'hosted-chat',provider,scrollTop:0}});}),[]);
   const capture = () => {
     const tab = activeTab(tabsRef.current);
     if(tab.presentation.kind==='moodle' || tab.presentation.kind==='hosted-chat') return;
@@ -119,8 +119,10 @@ export function AppShell({
     return () => { stop(); clearTimeout(timer); content.removeEventListener('wheel', stop); };
   }, [tabs.activeId]);
   const openTab: Navigation['openTab'] = value => {
+    if(tabsRef.current.tabs.length>=MAX_APP_TABS){window.dispatchEvent(new Event('vstudy:tab-limit'));return false;}
     capture(); setTransientRoute({});
     dispatch({ type: 'open', tab: createTab(crypto.randomUUID(), typeof value === 'string' ? { view: value } : value, Date.now()) });
+    return true;
   };
   const activateTab = (id: string) => { capture(); setTransientRoute({}); dispatch({ type: 'activate', id, now: Date.now() }); };
   const closeTab = (id: string) => { capture(); setTransientRoute({}); dispatch({ type: 'close', id, fallback: createTab(crypto.randomUUID(), { view: 'home' }, Date.now()) }); };

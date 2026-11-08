@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import type { WebviewAction, WebviewState, WebviewTarget, WebviewTheme } from '../../shared/moodle-webview';
 import { useOptionalNavigation } from '../shell';
+import { hasNavigationOverlay } from '../shell/history-swipe-navigation';
 import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
 import { builtinThemes, type ThemeToken } from '../../shared/themes';
@@ -82,13 +83,13 @@ export function MoodleWebviewPane({tabId,accountId,target,onClose,onDocument,onR
       timer = setTimeout(() => {
         if (!id.current || !slot.current) return;
         const rect = slot.current.getBoundingClientRect();
-        void desktop.invoke('moodle:webview-layout',{tabId,id:id.current,generation:generation.current,bounds:{x:Math.max(0,Math.round(rect.x)),y:Math.max(0,Math.round(rect.y)),width:Math.max(0,Math.floor(rect.width)),height:Math.max(0,Math.floor(rect.height))},theme:theme(),visible:document.visibilityState === 'visible' && !failed && !document.querySelector('[role=dialog],[data-state=open][data-radix-popper-content-wrapper]')}).catch(() => setFailed(true));
+        void desktop.invoke('moodle:webview-layout',{tabId,id:id.current,generation:generation.current,bounds:{x:Math.max(0,Math.round(rect.x)),y:Math.max(0,Math.round(rect.y)),width:Math.max(0,Math.floor(rect.width)),height:Math.max(0,Math.floor(rect.height))},theme:theme(),visible:document.visibilityState === 'visible' && !failed && !hasNavigationOverlay()}).catch(() => setFailed(true));
       },120);
     };
     const observer = new ResizeObserver(update);
     if (slot.current) observer.observe(slot.current);
     const mutation = new MutationObserver(update);
-    mutation.observe(document.documentElement,{attributes:true,childList:true,subtree:true,attributeFilter:['class','data-state','data-theme','data-scheme']});
+    mutation.observe(document.documentElement,{attributes:true,childList:true,subtree:true,attributeFilter:['class','data-state','data-theme','data-scheme','data-sidebar-overlay','hidden','aria-hidden','aria-modal','inert']});
     const scheme = window.matchMedia('(prefers-color-scheme: dark)');
     scheme.addEventListener('change',update);
     window.addEventListener('resize',update); document.addEventListener('visibilitychange',update);update();

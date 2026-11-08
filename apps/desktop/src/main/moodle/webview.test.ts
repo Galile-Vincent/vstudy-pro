@@ -271,3 +271,54 @@ it('schedules one account keepalive across sibling views',async()=>{
     expect(timer.mock.calls.filter(([,delay])=>delay===4*60_000)).toHaveLength(1);
   } finally {timer.mockRestore();}
 });
+
+it('replaces a tab when its requested Moodle target changes',async()=>{
+ const {views,owner,tabId,state}=await open();
+ const next=views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=99'},tabId);
+ expect(next.id).not.toBe(state.id);
+ await vi.waitFor(()=>expect(mock.panes.at(-1)!.contents.loadURL).toHaveBeenCalledWith(site+'/course/view.php?id=99'));
+});
+it('delivers an imported document once across reopening',async()=>{
+ const {views,owner,tabId,contents}=await open();
+ click(contents);navigate(contents,file());await settle();
+ const first=views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=2'},tabId);
+ expect(first.documentId).not.toBeNull();
+ expect(views.state(owner,first.id).documentId).toBeNull();
+});
+it('reloads the private committed URL while exposing only its public copy',async()=>{
+ const {views,owner,state,contents}=await open();
+ const url=site+'/course/view.php?id=2&return=lesson';contents.emit('did-navigate',{},url);
+ expect(views.state(owner,state.id).url).not.toContain('return');
+ await views.action(owner,state.id,'reload');await settle();
+ expect(contents.loadURL).toHaveBeenLastCalledWith(url);
+});
+it('keeps owner cleanup after discard until the owner is destroyed',async()=>{
+ const {views,owner,contents,tabId}=await open();
+ contents.emit('render-process-gone');owner.emit('destroyed');
+ expect(views.sync(owner,[tabId])).toEqual([]);
+});
+it('stops account keepalive when its last view closes and restarts it on ensure',async()=>{
+ const clear=vi.spyOn(globalThis,'clearInterval');
+ const {views,owner,state}=await open();
+ await views.action(owner,state.id,'close');expect(clear).toHaveBeenCalled();
+ const interval=vi.spyOn(globalThis,'setInterval');
+ views.open(owner,accountId,{kind:'page',url:site+'/course/view.php?id=2'});
+ expect(interval).toHaveBeenCalledWith(expect.any(Function),240000);
+ clear.mockRestore();interval.mockRestore();
+});
+it('silently reauthenticates after a failed keepalive probe',async()=>{
+ const {probeWebviewSession,exchangeWebviewCookie}=await import('./webview-transport');
+ const {views,owner,state,contents}=await open();contents.emit('did-finish-load');
+ vi.mocked(probeWebviewSession).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+ vi.mocked(exchangeWebviewCookie).mockClear();vi.setSystemTime(Date.now()+7*60000);
+ views.layout(owner,state.id,{x:0,y:0,width:500,height:500},{dark:false,background:'#ffffff',foreground:'#000000',accent:'#0000ff'},true,state.generation);
+ await vi.waitFor(()=>expect(exchangeWebviewCookie).toHaveBeenCalledOnce());
+ expect(views.state(owner,state.id).error).toBeNull();
+});
+it('does not replay an app file import after discard',async()=>{
+ const {views,owner}=await open();const tab=randomUUID();const target={kind:'file' as const,fileId:randomUUID()};
+ const first=views.open(owner,accountId,target,tab);await vi.waitFor(()=>expect(mock.imports).toHaveBeenCalledTimes(1));
+ views.state(owner,first.id);mock.panes.at(-1)!.contents.emit('render-process-gone');
+ views.open(owner,accountId,target,tab);await settle();
+ expect(mock.imports).toHaveBeenCalledTimes(1);
+});

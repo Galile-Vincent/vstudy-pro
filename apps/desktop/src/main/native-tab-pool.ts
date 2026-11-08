@@ -36,17 +36,18 @@ export class NativeTabPool {
     if(!victim) return 'resource-limit';
     this.discard(victim);return 'ready';
   }
+  private processId(resource:NativeResource) {try {return resource.processId();} catch {return -1;}}
   evaluate(metrics: readonly NativeMetric[]) {
     for (const resource of this.eligible()) if (this.now() - resource.lastActiveAt >= NATIVE_IDLE_MS) this.discard(resource);
-    const pids = new Set([...this.resources.values()].map(item => item.processId()));
+    const pids = new Set([...this.resources.values()].map(item => this.processId(item)));
     const memory = new Map(metrics.filter(item => pids.has(item.pid)).map(item => [item.pid,item.memory.workingSetSize * 1024]));
     let total = [...memory.values()].reduce((sum,value) => sum + value,0);
     if (total <= NATIVE_MEMORY_HIGH) return;
     const candidates = this.eligible().sort((a,b) => Number(b.kind === 'web-chat') - Number(a.kind === 'web-chat') || a.lastActiveAt - b.lastActiveAt);
     for (const resource of candidates) {
-      const pid = resource.processId();
+      const pid = this.processId(resource);
       this.discard(resource);
-      if (![...this.resources.values()].some(item => item.processId() === pid)) total -= memory.get(pid) ?? 0;
+      if (![...this.resources.values()].some(item => this.processId(item) === pid)) total -= memory.get(pid) ?? 0;
       if (total <= NATIVE_MEMORY_RECOVERY) break;
     }
   }

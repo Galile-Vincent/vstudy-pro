@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
-import type { BrowserWindow } from 'electron';
+import type { Input, WebContents, BrowserWindow } from 'electron';
 import { expect, it, vi } from 'vitest';
-import { attachNavigationInput } from './navigation-input';
+import { forwardNativeTabShortcut, attachNavigationInput } from './navigation-input';
 import { trackpadEventArgumentsSchema, trackpadScrollBeginChannel, trackpadScrollEndChannel } from '../shared/ipc';
 
 it('forwards only parameterless gesture boundaries from the owning contents', () => {
@@ -33,4 +33,10 @@ it('ignores unrelated app commands and commands while a guest owns focus', () =>
     [{ type: 'keyDown', keyCode: 'Right', modifiers: ['alt'] }],
     [{ type: 'keyUp', keyCode: 'Right', modifiers: ['alt'] }],
   ]);
+});
+
+it.each([['}','BracketRight','next'],['{','BracketLeft','previous']])('forwards shifted bracket %s by physical code',(key,code,expected)=>{
+ const send=vi.fn(),preventDefault=vi.fn();
+ expect(forwardNativeTabShortcut({send} as unknown as WebContents,{preventDefault} as unknown as Electron.Event,{type:'keyDown',key,code,meta:true,shift:true} as Input)).toBe(true);
+ expect(send).toHaveBeenCalledWith(expect.any(String),expected);
 });

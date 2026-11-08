@@ -1,19 +1,20 @@
 /** Main owns persistent, isolated provider views and bounded OAuth child windows. */
 import { BrowserWindow, WebContentsView, session, dialog, type Session, type WebContents } from 'electron';
-import type { WebChatProvider, WebChatState } from '../../shared/web-chat';
+import { webChatClearedChannel, type WebChatProvider, type WebChatState } from '../../shared/web-chat';
 import type { WebviewBounds } from '../../shared/moodle-webview';
 import { webChatProviders, webChatNavigation, webChatResource, safeWebChatUrl } from './policy';
 import { nativeTabPool } from '../native-tab-pool';
 import { forwardNativeTabShortcut } from '../navigation-input';
 import { tr } from '../i18n';
-interface Pane { owner:WebContents; window:BrowserWindow; view:WebContentsView; provider:WebChatProvider; tabId:string; slotId:string; generation:number; status:WebChatState['status']; popup:BrowserWindow|undefined; visible:boolean; active:boolean; pending:boolean; dirty:boolean; gestureAt:number }
+import { draftInput, draftProtected } from '../native-dirty';
+interface Pane { owner:WebContents; window:BrowserWindow; view:WebContentsView; provider:WebChatProvider; tabId:string; slotId:string; generation:number; status:WebChatState['status']; popup:BrowserWindow|undefined; visible:boolean; active:boolean; pending:boolean; dirty:number; gestureAt:number }
 const preferences = {sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,navigateOnDragDrop:false};
 export class WebChats {
   private generation=0;
   private readonly checkpoints=new Map<string,{tabId:string;provider:WebChatProvider;url:string;title:string}>();
   private readonly panes=new Map<string,Pane>();
   private readonly sessions=new Map<WebChatProvider,Session>();
-  private readonly owners=new Map<number,{cleanup:()=>void;navigation:(_event:Electron.Event,_url:string,inPlace:boolean,main:boolean)=>void}>();
+  private readonly owners=new Map<number,{owner:WebContents;cleanup:()=>void;navigation:(_event:Electron.Event,_url:string,inPlace:boolean,main:boolean)=>void}>();
   private readonly clearing=new Set<WebChatProvider>();
   constructor(private readonly external:(owner:WebContents,url:string)=>Promise<void>) {}
   private browser(provider:WebChatProvider) {
@@ -40,17 +41,18 @@ export class WebChats {
     let existing=this.panes.get(this.key(owner,tabId,slotId));
     if(existing && existing.provider!==provider){this.close(existing);this.panes.delete(this.key(owner,tabId,slotId));existing=undefined;}
     for(const other of this.panes.values()) if(other.owner===owner) {other.active=false;this.visibility(other,false);}
-    if (existing) {existing.active=true;existing.generation=++this.generation;return this.state(owner,provider,tabId,slotId);}
+    if (existing) {existing.active=true;existing.generation=++this.generation;if(existing.status==='error')this.load(existing,this.checkpoint(existing).url);return this.state(owner,provider,tabId,slotId);}
     const window=BrowserWindow.fromWebContents(owner);
     if (!window) throw new Error('Missing owner');
-    if(nativeTabPool.makeRoom(owner.id)==='resource-limit') throw new Error('Native view resource limit');
+    if(nativeTabPool.makeRoom(owner.id)==='resource-limit') return {status:'resource-limit',generation:0,url:webChatProviders[provider].url,title:'',canGoBack:false,canGoForward:false};
     const view=new WebContentsView({webPreferences:{...preferences,session:this.browser(provider)}});
-    const pane:Pane={owner,window,view,provider,tabId,slotId,generation:++this.generation,status:'loading',popup:undefined,visible:false,active:true,pending:false,dirty:false,gestureAt:0};
+    const pane:Pane={owner,window,view,provider,tabId,slotId,generation:++this.generation,status:'loading',popup:undefined,visible:false,active:true,pending:false,dirty:0,gestureAt:0};
     const key=this.key(owner,tabId,slotId);
-    if(nativeTabPool.acquire({key,ownerId:owner.id,kind:'web-chat',lastActiveAt:Date.now(),active:()=>pane.active,protected:()=>!!pane.popup || pane.pending || pane.dirty || pane.status==='loading',processId:()=>view.webContents.getOSProcessId(),discard:()=>this.discard(pane)})==='resource-limit') {view.webContents.close({waitForBeforeUnload:false});throw new Error('Native view resource limit');}
+    if(nativeTabPool.acquire({key,ownerId:owner.id,kind:'web-chat',lastActiveAt:Date.now(),active:()=>pane.active,protected:()=>!!pane.popup || pane.pending || draftProtected(pane.dirty) || pane.status==='loading',processId:()=>view.webContents.getOSProcessId(),discard:()=>this.discard(pane)})==='resource-limit') {view.webContents.close({waitForBeforeUnload:false});throw new Error('Native view resource limit');}
     this.panes.set(key,pane);
     window.contentView.addChildView(view);view.setVisible(false);
     this.guard(pane,view.webContents,true);
+    view.webContents.on('did-navigate',()=>{pane.dirty=0;});
     view.webContents.on('did-start-loading',()=>{pane.status='loading';});
     view.webContents.on('did-finish-load',()=>{if(webChatNavigation(provider,view.webContents.getURL())) pane.status='ready';});
     view.webContents.on('did-fail-load',(_event,code,_description,_url,main)=>{if(main && code!==-3) pane.status='error';});
@@ -58,7 +60,7 @@ export class WebChats {
     if (!this.owners.has(owner.id)) {
       const cleanup=()=>this.closeOwner(owner);
       const navigation=(_event:Electron.Event,_url:string,inPlace:boolean,main:boolean)=>{if(main && !inPlace)cleanup();};
-      this.owners.set(owner.id,{cleanup,navigation});owner.once('destroyed',cleanup);owner.on('did-start-navigation',navigation);
+      this.owners.set(owner.id,{owner,cleanup,navigation});owner.once('destroyed',cleanup);owner.on('did-start-navigation',navigation);
     }
     const saved=safeWebChatUrl(restoreUrl ?? '');
     if(saved){saved.search='';saved.hash='';}
@@ -72,7 +74,7 @@ export class WebChats {
   private guard(pane:Pane,contents:WebContents,popups:boolean) {
     contents.on('will-attach-webview',event=>event.preventDefault());
     contents.on('before-mouse-event',(_event,input)=>{if(input.type==='mouseDown') pane.gestureAt=Date.now();});
-    contents.on('before-input-event',(event,input)=>{if(forwardNativeTabShortcut(pane.owner,event,input)) return;if(input.type==='keyDown') {pane.gestureAt=Date.now();if(!input.meta && !input.control && input.key.length===1) pane.dirty=true;}});
+    contents.on('before-input-event',(event,input)=>{if(popups && forwardNativeTabShortcut(pane.owner,event,input)) return;if(input.type==='keyDown') {pane.gestureAt=Date.now();if(draftInput(input)) pane.dirty=Date.now();}});
     const navigate=(event:Electron.Event,url:string)=>{
       if (webChatNavigation(pane.provider,url)) return;
       event.preventDefault();void this.openExternal(pane,url);
@@ -114,7 +116,7 @@ export class WebChats {
     this.visibility(pane,visible && bounds.width>0 && bounds.height>0);
   }
   private visibility(pane:Pane,visible:boolean) {
-    if(visible) nativeTabPool.touch(this.key(pane.owner,pane.tabId,pane.slotId));
+    if(visible || pane.visible) nativeTabPool.touch(this.key(pane.owner,pane.tabId,pane.slotId));
     const changed=pane.visible!==visible;pane.visible=visible;pane.view.setVisible(visible);
     if(changed) {if(!visible) pane.popup?.hide();else pane.popup?.show();}
   }
@@ -142,6 +144,8 @@ export class WebChats {
       for(const [key,pane] of this.panes) if(pane.provider===provider) {this.close(pane);this.panes.delete(key);}
       const browser=this.browser(provider);
       await browser.closeAllConnections();await browser.clearStorageData();await browser.clearCache();await browser.cookies.flushStore();
+      for(const [key,checkpoint] of this.checkpoints)if(checkpoint.provider===provider)this.checkpoints.delete(key);
+      for(const {owner:sender} of this.owners.values()) if(!sender.isDestroyed())sender.send(webChatClearedChannel,provider);
     } finally {this.clearing.delete(provider);}
   }
   private checkpoint(pane:Pane) {
@@ -175,5 +179,5 @@ export class WebChats {
     for(const key of this.checkpoints.keys())if(key.startsWith(`${owner.id}:`))this.checkpoints.delete(key);
     const handlers=this.owners.get(owner.id);if(handlers){owner.removeListener('destroyed',handlers.cleanup);owner.removeListener('did-start-navigation',handlers.navigation);this.owners.delete(owner.id);}
   }
-  async dispose() {for(const pane of [...this.panes.values()]) this.closeOwner(pane.owner);await Promise.all([...this.sessions.values()].map(browser=>browser.cookies.flushStore()));}
+  async dispose() {for(const {owner} of [...this.owners.values()]) this.closeOwner(owner);await Promise.all([...this.sessions.values()].map(browser=>browser.cookies.flushStore()));}
 }

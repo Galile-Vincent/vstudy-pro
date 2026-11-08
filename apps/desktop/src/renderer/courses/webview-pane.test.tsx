@@ -68,3 +68,11 @@ it('hides on unmount and leaves the app root interactive',async()=>{
   expect(invoke.mock.calls.some(([channel,payload])=>channel==='moodle:webview-action' && payload.action==='close')).toBe(false);
   cleanup();
 });
+it('offers one retry control for a resource-limited pane',async()=>{
+ const {render,screen,cleanup}=await import('@testing-library/react');
+ invoke.mockResolvedValue({id:'pane',generation:1,status:'error',url:'https://school.example/',title:'Course',secure:true,zoom:1,error:'resource-limit',documentId:null,retryAt:null,canGoBack:false,canGoForward:false});
+ try {
+ render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" accountId="school" target={{kind:'page',url:'https://school.example/'}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>);
+ await screen.findByRole('alert');expect(screen.getAllByRole('button',{name:'Retry'})).toHaveLength(1);
+ }finally{cleanup();}
+});

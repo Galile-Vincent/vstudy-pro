@@ -41,12 +41,13 @@ export async function exerciseNativeTabs(app,count=5) {
     if(same.id!==restored.id || pane.view.webContents.id!==before) throw Error('Ensure replaced a live view');
     const scroll=await pane.view.webContents.executeJavaScript('window.scrollY');
     if(scroll!==800) throw Error('Tab switch lost scroll');
+    await pane.view.webContents.executeJavaScript('window.scrollTo(0,1200)');
     pane.view.webContents.emit('render-process-gone',{}, {reason:'crashed'});
     const reactivated=manager.open(owner,account.id,{kind:'page',url:account.siteUrl+'/course/view.php?id=0'},tabs[0]);
     await wait(()=>manager.state(owner,reactivated.id).status==='ready');
     const replacement=live().find(pane=>pane.tabId===tabs[0]);
     const discardedScroll=await replacement.view.webContents.executeJavaScript('window.scrollY');
-    if(discardedScroll!==800) throw Error('Discard lost the scroll checkpoint');
+    if(discardedScroll!==800) throw Error('Discard lost the last polled scroll checkpoint');
     let release;
     const gate=new Promise(resolve=>{release=resolve;});
     const original=manager.dependencies.documents.importPath;

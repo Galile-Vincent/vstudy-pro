@@ -22,7 +22,7 @@ export function forwardNativeTabShortcut(owner:WebContents,event:Electron.Event,
   let shortcut:NativeTabShortcut|undefined;
   if(modifier && !input.shift && input.key.toLowerCase()==='t') shortcut='new';
   if(modifier && !input.shift && input.key.toLowerCase()==='w') shortcut='close';
-  if((input.control && input.key==='Tab') || (modifier && input.shift && [']','['].includes(input.key))) shortcut=input.key==='[' || (input.key==='Tab' && input.shift) ? 'previous' : 'next';
+  if((input.control && input.key==='Tab') || (modifier && input.shift && ['BracketRight','BracketLeft'].includes(input.code))) shortcut=input.code==='BracketLeft' || (input.key==='Tab' && input.shift) ? 'previous' : 'next';
   if(modifier && !input.shift && /^[1-9]$/.test(input.key)) shortcut=input.key as NativeTabShortcut;
   if(!shortcut) return false;
   event.preventDefault();owner.send(nativeTabShortcutChannel,shortcut);return true;

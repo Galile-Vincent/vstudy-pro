@@ -28,6 +28,7 @@ export function normalizeWebviewUrl(input: string, policy: WebviewPolicy): URL |
     const url = new URL(input,policy.site.href + '/');
     if (url.username || url.password || url.hostname.endsWith('.') ||
       !(url.protocol === 'https:' || policy.loopback && url.protocol === 'http:' && url.hostname === '127.0.0.1' && url.origin === policy.site.origin)) return null;
+    if (/\/tokenpluginfile\.php(?:\/|$)/i.test(url.pathname)) return null;
     if (/%(?:2f|5c|00)/i.test(url.pathname)) return null;
     if ([...url.searchParams.keys()].some(key => /^(?:wstoken|token|privatetoken|private_token|key|passport)$/i.test(key))) return null;
     if (/\/(?:admin\/tool\/mobile\/(?:autologin|launch)|webservice\/rest\/server)\.php$/i.test(url.pathname)) return null;

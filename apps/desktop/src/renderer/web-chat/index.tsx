@@ -10,9 +10,6 @@ import { Button } from '../components/ui/button';
 import { DesktopChat } from './desktop-chat';
 import './web-chat.css';
 type Tab='desktop'|WebChatProvider;
-function hasChatOverlay() {
-  return hasNavigationOverlay() || [...document.querySelectorAll('[role="menu"],[role="listbox"],[data-slot="popover-content"],[data-slot="dropdown-menu-content"]')].some(element=>element.getClientRects().length>0 && !element.closest('[hidden],[aria-hidden="true"],[data-state="closed"]'));
-}
 const tabs=['desktop','gemini','chatgpt','claude'] as const;
 export function WebChatHub() {
   useTranslation();
@@ -30,7 +27,7 @@ export function WebChatHub() {
 export function HostedChat({provider,compact=false}:{provider:WebChatProvider;compact?:boolean}) {
   const {activeTabId,tabs,updateNativePresentation}=useNavigate();
   const saved=tabs.tabs.find(tab=>tab.id===activeTabId)?.presentation;
-  const initialUrl=useRef(saved?.kind==='hosted-chat'?saved.url:undefined).current;
+  const initialUrl=useRef(saved?.kind==='hosted-chat'?saved.url:undefined);
   const identity={provider,tabId:activeTabId,slotId:compact?'workspace' as const:'page' as const};
   const slot=useRef<HTMLDivElement>(null);
   const [state,setState]=useState<WebChatState>();
@@ -38,19 +35,20 @@ export function HostedChat({provider,compact=false}:{provider:WebChatProvider;co
   useEffect(()=>{
     let live=true,opened=false,polling=false,generation=0;
     const bounds=()=>{const r=slot.current?.getBoundingClientRect();return {x:Math.max(0,Math.round(r?.x??0)),y:Math.max(0,Math.round(r?.y??0)),width:Math.max(0,Math.round(r?.width??0)),height:Math.max(0,Math.round(r?.height??0))};};
-    const layout=()=>{if(opened) void desktop.invoke('web-chat:layout',{...identity,generation,bounds:bounds(),active:live,visible:live && !document.hidden && !hasChatOverlay() && !slot.current?.closest('[inert]'),...(compact?{radius:16}:{})}).catch(()=>{if(live)setFailed(true);});};
+    const layout=()=>{if(opened) void desktop.invoke('web-chat:layout',{...identity,generation,bounds:bounds(),active:live,visible:live && !document.hidden && !hasNavigationOverlay() && !slot.current?.closest('[inert]'),...(compact?{radius:16}:{})}).catch(()=>{if(live)setFailed(true);});};
     const poll=async()=>{if(!opened || polling || !live)return;polling=true;try{const next=await desktop.invoke('web-chat:state',identity);if(live){setState(next);if(!compact)updateNativePresentation(activeTabId,{kind:'hosted-chat',provider,url:next.url,scrollTop:0});}}catch{if(live)setFailed(true);}finally{polling=false;}};
-    void desktop.invoke('web-chat:open',{...identity,...(initialUrl?{url:initialUrl}:{})}).then(next=>{opened=true;generation=next.generation;if(!live){void desktop.invoke('web-chat:hide',{...identity,generation}).catch(()=>{});return;}if(live){setState(next);setFailed(false);}layout();}).catch(()=>{if(live)setFailed(true);});
+    void desktop.invoke('web-chat:open',{...identity,...(initialUrl.current?{url:initialUrl.current}:{})}).then(next=>{opened=next.status!=='resource-limit';generation=next.generation;if(!live){void desktop.invoke('web-chat:hide',{...identity,generation}).catch(()=>{});return;}if(live){setState(next);setFailed(false);}layout();}).catch(()=>{if(live)setFailed(true);});
     const resize=new ResizeObserver(layout);if(slot.current)resize.observe(slot.current);
     const mutation=new MutationObserver(layout);mutation.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','inert','aria-hidden','aria-modal','data-state','data-sidebar-overlay']});
     const timer=setInterval(()=>{layout();void poll();},500);
     window.addEventListener('resize',layout);document.addEventListener('visibilitychange',layout);
     return()=>{live=false;if(opened)void desktop.invoke('web-chat:hide',{...identity,generation}).catch(()=>{});clearInterval(timer);resize.disconnect();mutation.disconnect();window.removeEventListener('resize',layout);document.removeEventListener('visibilitychange',layout);};
   },[provider,revision,compact,activeTabId]);
+  useEffect(()=>desktop.onWebChatCleared?.(cleared=>{if(cleared===provider){initialUrl.current=undefined;setRevision(n=>n+1);}}),[provider]);
   const action=async(action:'back'|'forward'|'reload'|'home'|'focus'|'external')=>{try{setFailed(false);setState(await desktop.invoke('web-chat:action',{...identity,action}));}catch{setFailed(true);}};
   const tool=(actionName:'back'|'forward'|'reload'|'home'|'focus'|'external',Icon:typeof Home,disabled=false)=><Button variant="ghost" size="icon" aria-label={tr(`web-chat:${actionName}`)} title={tr(`web-chat:${actionName}`)} disabled={disabled} onClick={()=>void action(actionName)}><Icon/></Button>;
-  const clear=()=>{setClearing(true);void desktop.invoke('web-chat:clear',identity).then(()=>setRevision(n=>n+1)).catch(()=>setFailed(true)).finally(()=>setClearing(false));};
-  const notice=(failed || state?.status==='error') && <div role="alert" className="web-chat-notice">{tr('web-chat:error')}<Button variant="outline" onClick={()=>{setRevision(n=>n+1);}}>{tr('common:retry')}</Button></div>;
+  const clear=()=>{setClearing(true);void desktop.invoke('web-chat:clear',identity).catch(()=>setFailed(true)).finally(()=>setClearing(false));};
+  const notice=(failed || state?.status==='error' || state?.status==='resource-limit') && <div role="alert" className="web-chat-notice">{tr(state?.status==='resource-limit'?'webview:error_resource-limit':'web-chat:error')}<Button variant="outline" onClick={()=>{setRevision(n=>n+1);}}>{tr('common:retry')}</Button></div>;
   const progress=state?.status==='loading' && <progress aria-label={tr('common:loading')}/>;
   if(compact) return <div className="web-chat-hosted web-chat-compact">
     {notice}{progress}

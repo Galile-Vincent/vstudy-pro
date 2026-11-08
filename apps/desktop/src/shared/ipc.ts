@@ -1,5 +1,5 @@
 import { subscriptionUsageSchema } from './subscription-usage';
-import { webChatContract } from './web-chat';
+import { webChatContract, type WebChatProvider } from './web-chat';
 import { reviewGenerateIpc, type ReviewProgress } from './review-generate';
 import { newsletterContract } from './newsletter';
 import { analyticsContract } from './analytics';
@@ -216,6 +216,7 @@ export const trackpadEventArgumentsSchema = z.tuple([]);
 
 /** Renderer capability boundary. Invoke only declared channels and unsubscribe event listeners on teardown. */
 export interface DesktopApi {
+  onWebChatCleared?(listener:(provider:WebChatProvider)=>void):()=>void;
   onNativeTabShortcut?(listener:(shortcut:NativeTabShortcut)=>void):()=>void;
   onReviewProgress(listener:(event:ReviewProgress)=>void):()=>void;
   onTrackpadScrollBegin?(listener: () => void): () => void;

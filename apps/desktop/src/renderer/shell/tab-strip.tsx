@@ -25,12 +25,14 @@ export function tabLabel(view: string): string {
 export function TabStrip() {
   const { tabs, openTab, closeTab, activateTab, reorderTabs } = useNavigate();
   const [native,setNative]=useState<Record<string,string>>({});
+  const membership=tabs.tabs.map(tab=>tab.id).join(',');
   useEffect(()=>{
     let active=true;
     let timer:ReturnType<typeof setTimeout>;
     const poll=async()=>{
       try {
         const result=await desktop.invoke('moodle:webview-sync',{tabIds:tabs.tabs.map(tab=>tab.id)});
+        if(!active)return;
         const chat=await desktop.invoke('web-chat:sync',{tabIds:tabs.tabs.map(tab=>tab.id)});
         if(active) setNative(Object.fromEntries([...result.tabs,...chat.tabs].map(tab=>[tab.tabId,tab.status])));
       } catch {if(active) setNative({});}
@@ -38,8 +40,9 @@ export function TabStrip() {
     };
     void poll();
     return ()=>{active=false;clearTimeout(timer);};
-  },[tabs.tabs]);
+  },[membership]);
   const [picker, setPicker] = useState(false);
+  useEffect(()=>{const limit=()=>setPicker(true);window.addEventListener('vstudy:tab-limit',limit);return()=>window.removeEventListener('vstudy:tab-limit',limit);},[]);
   const [all, setAll] = useState(false);
   const [search, setSearch] = useState('');
   const [recent, setRecent] = useState<TabRoute[]>([]);
