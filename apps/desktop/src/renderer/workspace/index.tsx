@@ -398,7 +398,7 @@ export function Workspace() {
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
       <header className="art-reader-chat-header"><div className="chat-source" role="group" aria-label={tr('web-chat:choose')}>{chatSources.map(source => <button key={source} type="button" aria-pressed={chatSource === source} onClick={() => setChatSource(source)}>{source === 'companion' ? <><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</> : tr(`web-chat:${source}`)}</button>)}</div>{chatSource === 'companion' && chatControls}</header>
-      {chatSource !== 'companion' && <Suspense fallback={<p role="status">{tr('common:loading')}</p>}><HostedChat key={chatSource} provider={chatSource}/></Suspense>}
+      {chatSource !== 'companion' && <Suspense fallback={<p role="status">{tr('common:loading')}</p>}><HostedChat key={chatSource} provider={chatSource} compact/></Suspense>}
       <div className="chat-source-body" hidden={chatSource !== 'companion'}>
       {conversationError || historyError ? <LoadError message={conversationError || historyError} retry={() => conversationError ? setConversationRevision(value => value + 1) : setHistoryRevision(value => value + 1)}/> : conversation && history ? (
         <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}>{chatDocument === documentId ? <Chat

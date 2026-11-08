@@ -92,10 +92,11 @@ export class WebChats {
     const pane=this.pane(owner,provider),history=pane.view.webContents.navigationHistory;
     return {status:pane.status,canGoBack:history.canGoBack(),canGoForward:history.canGoForward()};
   }
-  layout(owner:WebContents,provider:WebChatProvider,bounds:WebviewBounds,visible:boolean) {
+  layout(owner:WebContents,provider:WebChatProvider,bounds:WebviewBounds,visible:boolean,radius=0) {
     const pane=this.pane(owner,provider),[width=0,height=0]=pane.window.getContentSize(),zoom=owner.getZoomFactor();
     const x=Math.min(width,Math.round(bounds.x*zoom)),y=Math.min(height,Math.round(bounds.y*zoom));
     pane.view.setBounds({x,y,width:Math.min(width-x,Math.round(bounds.width*zoom)),height:Math.min(height-y,Math.round(bounds.height*zoom))});
+    pane.view.setBorderRadius(Math.round(radius*zoom));
     for (const other of this.panes.values()) if(other.owner===owner && other!==pane) this.visibility(other,false);
     this.visibility(pane,visible && bounds.width>0 && bounds.height>0);
   }

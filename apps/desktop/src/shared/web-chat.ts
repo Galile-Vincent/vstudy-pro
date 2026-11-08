@@ -10,7 +10,7 @@ const ack = z.object({ok:z.literal(true)}).strict();
 export const webChatContract = {
   'web-chat:open': {request:z.object({provider}).strict(),response:webChatStateSchema},
   'web-chat:state': {request:z.object({provider}).strict(),response:webChatStateSchema},
-  'web-chat:layout': {request:z.object({provider,bounds:webviewBoundsSchema,visible:z.boolean()}).strict(),response:ack},
+  'web-chat:layout': {request:z.object({provider,bounds:webviewBoundsSchema,visible:z.boolean(),radius:z.number().int().min(0).max(32).optional()}).strict(),response:ack},
   'web-chat:action': {request:z.object({provider,action:z.enum(['back','forward','reload','home','focus','external'])}).strict(),response:webChatStateSchema},
   'web-chat:clear': {request:z.object({provider}).strict(),response:ack},
 } as const;

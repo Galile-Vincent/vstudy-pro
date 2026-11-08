@@ -31,14 +31,14 @@ export function WebChatHub() {
     {tab!=='desktop' && <HostedChat key={tab} provider={tab}/>}
   </section>;
 }
-export function HostedChat({provider}:{provider:WebChatProvider}) {
+export function HostedChat({provider,compact=false}:{provider:WebChatProvider;compact?:boolean}) {
   const slot=useRef<HTMLDivElement>(null);
   const [state,setState]=useState<WebChatState>();
   const [failed,setFailed]=useState(false),[revision,setRevision]=useState(0),[clearing,setClearing]=useState(false);
   useEffect(()=>{
     let live=true,opened=false,polling=false;
     const bounds=()=>{const r=slot.current?.getBoundingClientRect();return {x:Math.max(0,Math.round(r?.x??0)),y:Math.max(0,Math.round(r?.y??0)),width:Math.max(0,Math.round(r?.width??0)),height:Math.max(0,Math.round(r?.height??0))};};
-    const layout=()=>{if(opened) void desktop.invoke('web-chat:layout',{provider,bounds:bounds(),visible:live && !document.hidden && !hasChatOverlay() && !slot.current?.closest('[inert]')}).catch(()=>{if(live)setFailed(true);});};
+    const layout=()=>{if(opened) void desktop.invoke('web-chat:layout',{provider,bounds:bounds(),visible:live && !document.hidden && !hasChatOverlay() && !slot.current?.closest('[inert]'),...(compact?{radius:16}:{})}).catch(()=>{if(live)setFailed(true);});};
     const poll=async()=>{if(!opened || polling || !live)return;polling=true;try{const next=await desktop.invoke('web-chat:state',{provider});if(live)setState(next);}catch{if(live)setFailed(true);}finally{polling=false;}};
     void desktop.invoke('web-chat:open',{provider}).then(next=>{opened=true;if(live){setState(next);setFailed(false);}layout();}).catch(()=>{if(live)setFailed(true);});
     const resize=new ResizeObserver(layout);if(slot.current)resize.observe(slot.current);
@@ -46,15 +46,22 @@ export function HostedChat({provider}:{provider:WebChatProvider}) {
     const timer=setInterval(()=>{layout();void poll();},500);
     window.addEventListener('resize',layout);document.addEventListener('visibilitychange',layout);
     return()=>{live=false;layout();clearInterval(timer);resize.disconnect();mutation.disconnect();window.removeEventListener('resize',layout);document.removeEventListener('visibilitychange',layout);};
-  },[provider,revision]);
+  },[provider,revision,compact]);
   const action=async(action:'back'|'forward'|'reload'|'home'|'focus'|'external')=>{try{setFailed(false);setState(await desktop.invoke('web-chat:action',{provider,action}));}catch{setFailed(true);}};
   const tool=(actionName:'back'|'forward'|'reload'|'home'|'focus'|'external',Icon:typeof Home,disabled=false)=><Button variant="ghost" size="icon" aria-label={tr(`web-chat:${actionName}`)} title={tr(`web-chat:${actionName}`)} disabled={disabled} onClick={()=>void action(actionName)}><Icon/></Button>;
+  const clear=()=>{setClearing(true);void desktop.invoke('web-chat:clear',{provider}).then(()=>setRevision(n=>n+1)).catch(()=>setFailed(true)).finally(()=>setClearing(false));};
+  const notice=(failed || state?.status==='error') && <div role="alert" className="web-chat-notice">{tr('web-chat:error')}<Button variant="outline" onClick={()=>{if(state)void action('reload');else setRevision(n=>n+1);}}>{tr('common:retry')}</Button></div>;
+  const progress=state?.status==='loading' && <progress aria-label={tr('common:loading')}/>;
+  if(compact) return <div className="web-chat-hosted web-chat-compact" role="tabpanel" id={`web-chat-panel-${provider}`}>
+    {notice}{progress}
+    <div ref={slot} className="web-chat-slot" data-testid="web-chat-slot"/>
+    <footer><span>{tr('web-chat:privacy')}</span><span className="web-chat-actions">{tool('reload',RefreshCw)}{tool('external',ExternalLink)}<Button variant="ghost" size="icon" aria-label={tr('web-chat:clear')} title={tr('web-chat:clear')} disabled={clearing} onClick={clear}><LogOut/></Button></span></footer>
+  </div>;
   return <div className="web-chat-hosted" role="tabpanel" id={`web-chat-panel-${provider}`} aria-labelledby={`web-chat-tab-${provider}`}>
     <div className="web-chat-toolbar">{tool('back',ArrowLeft,!state?.canGoBack)}{tool('forward',ArrowRight,!state?.canGoForward)}{tool('reload',RefreshCw)}{tool('home',Home)}{tool('external',ExternalLink)}<span>{tr(`web-chat:${provider}`)}<small>{tr('web-chat:session')}</small></span>
-      <Button variant="ghost" disabled={clearing} onClick={()=>{setClearing(true);void desktop.invoke('web-chat:clear',{provider}).then(()=>setRevision(n=>n+1)).catch(()=>setFailed(true)).finally(()=>setClearing(false));}}><LogOut/>{tr('web-chat:clear')}</Button>
+      <Button variant="ghost" disabled={clearing} onClick={clear}><LogOut/>{tr('web-chat:clear')}</Button>
     </div>
-    {(failed || state?.status==='error') && <div role="alert" className="web-chat-notice">{tr('web-chat:error')}<Button variant="outline" onClick={()=>{if(state)void action('reload');else setRevision(n=>n+1);}}>{tr('common:retry')}</Button></div>}
-    {state?.status==='loading' && <progress aria-label={tr('common:loading')}/>}
+    {notice}{progress}
     <div ref={slot} className="web-chat-slot" data-testid="web-chat-slot"/>
     <footer>{tr('web-chat:privacy')}<Button variant="ghost" onClick={()=>void action('focus')}>{tr('web-chat:focus')}</Button></footer>
   </div>;
