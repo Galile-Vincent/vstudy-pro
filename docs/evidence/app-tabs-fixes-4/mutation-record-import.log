@@ -1,0 +1,138 @@
+{
+  keys: 1,
+  exchanges: 1,
+  requests: [
+    {
+      path: '/webservice/rest/server.php',
+      query: '',
+      cookie: '',
+      referrer: ''
+    },
+    {
+      path: '/admin/tool/mobile/autologin.php',
+      query: '',
+      cookie: '',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=1',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=2',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/pluginfile.php/42/notes.md',
+      query: '',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    }
+  ]
+}
+[
+  {
+    id: undefined,
+    url: 'http://127.0.0.1:59904/admin/tool/mobile/autologin.php',
+    error: 'net::ERR_ABORTED'
+  }
+]
+[
+  {
+    state: {
+      id: '763d506a-639e-417a-a2b2-571a93a0eb23',
+      generation: 4,
+      scrollTop: 0,
+      status: 'ready',
+      url: 'http://127.0.0.1:59904/course/view.php?id=2',
+      title: 'Week 4 · Moodle',
+      secure: false,
+      canGoBack: false,
+      canGoForward: false,
+      zoom: 1,
+      error: null,
+      retryAt: null,
+      documentId: '4ead3646-447f-4e06-b0e7-784ef78c871d',
+      importedDocumentId: '4ead3646-447f-4e06-b0e7-784ef78c871d'
+    },
+    entries: [ [Object] ]
+  }
+]
+Skip to content
+Help improve VStudy Pro? Analytics is off until you choose.
+
+Help improve VStudy Pro with usage data. We never collect your name, documents, questions or answers. Studying works the same either way.
+
+What is collected
+Privacy policy
+Terms of use
+No thanks
+Share usage data
+Document library
+Library
+notes
+Help
+Workspace connected
+Study companion
+Gemini
+ChatGPT
+Claude
+Conversations
+
+Study companion
+
+A little curiosity. A new understanding.
+
+Explore the ideas in “notes”.
+
+Summarize this section
+Explain a term
+Quiz me
+Scroll to bottom
+notes
+Remember your questions for review?
+
+Study memory is stored on this device. While it is on, after each answer in a chat, VStudy sends one extra request to the provider and model you are chatting with. It contains a limited excerpt of the conversation (up to the last 24 messages, including the tutor's replies, which may quote your documents) and your course, unit and concept names. That request uses your own quota or credit. When you create review content, excerpts from your course materials are sent too. Turn this off or erase it any time in Settings > Privacy. Chats you exclude are not recorded. Review budgets cover review calls; chat and document processing have separate limits.
+
+Turn on
+Not now
+Socratic mode
+Fake (test only)
+Low
+Low
+High
+Send message
+
+Grounded in your document. Check important details.
+
+Reading tip
+notes.md
+Parsed textOriginal file
+Improve with AI
+Course notesUse this section
+
+Imported through the authenticated reader pipeline.Ask about this
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Back does not redeliver import
++ actual - expected
+
++ 'workspace'
+- 'moodle'
+
+    at file:///Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/apps/desktop/e2e/moodle-webview.mjs:124:44 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'workspace',
+  expected: 'moodle',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.9.0

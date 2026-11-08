@@ -1,0 +1,239 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/apps/desktop
+
+ ❯ src/renderer/shell/tab-state.test.ts (8 tests | 1 failed) 6ms
+   × does not mark a Moodle page when a linked file is imported 2ms
+ ❯ src/renderer/shell/import-delivery.test.tsx (3 tests | 3 failed) 74ms
+   × acknowledges import only after persistence succeeds, storage failure false 57ms
+   × acknowledges import only after persistence succeeds, storage failure true 10ms
+   × rejects a late import marker after moving to another Moodle entry 6ms
+ ❯ src/renderer/shell/tab-strip.test.tsx (3 tests | 1 failed) 66ms
+   × syncs hosted chats even when Moodle sync fails 3ms
+ ❯ src/main/moodle/webview.test.ts (41 tests | 5 failed) 2619ms
+   × loads the requested target https://school.example/mod/page/view.php?id=2 despite renderer checkpoint URL https://school.example/course/view.php?id=99 57ms
+   × loads the requested target https://school.example/mod/page/view.php?id=2&sesskey=fresh&returnurl=lesson despite renderer checkpoint URL https://school.example/mod/page/view.php?id=2 53ms
+   × ignores completed-file markers on page targets 53ms
+   × opens a completed file while disconnected without ensuring authentication 1ms
+   × offers recovery when stopped before the first document commits 54ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/moodle/webview.test.ts > loads the requested target https://school.example/mod/page/view.php?id=2 despite renderer checkpoint URL https://school.example/course/view.php?id=99
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "https://school.example/mod/page/view.php?id=2",
++   "https://school.example/course/view.php?id=99",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/moodle/webview.test.ts:378:46
+    376|  views.open(owner,accountId,{kind:'page',url},randomUUID(),{accountId,…
+    377|  await settle();
+    378|  expect(mock.panes.at(-1)!.contents.loadURL).toHaveBeenCalledWith(url);
+       |                                              ^
+    379| });
+    380| it('ignores completed-file markers on page targets',async()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > loads the requested target https://school.example/mod/page/view.php?id=2&sesskey=fresh&returnurl=lesson despite renderer checkpoint URL https://school.example/mod/page/view.php?id=2
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "https://school.example/mod/page/view.php?id=2&sesskey=fresh&returnurl=lesson",
++   "https://school.example/mod/page/view.php?id=2",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/moodle/webview.test.ts:378:46
+    376|  views.open(owner,accountId,{kind:'page',url},randomUUID(),{accountId,…
+    377|  await settle();
+    378|  expect(mock.panes.at(-1)!.contents.loadURL).toHaveBeenCalledWith(url);
+       |                                              ^
+    379| });
+    380| it('ignores completed-file markers on page targets',async()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > ignores completed-file markers on page targets
+AssertionError: expected '5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60' to be null
+
+- Expected:
+null
+
++ Received:
+"5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60"
+
+ ❯ src/main/moodle/webview.test.ts:383:35
+    381|  const {views,owner}=await open();
+    382|  const state=views.open(owner,accountId,{kind:'page',url:site+'/mod/pa…
+    383|  expect(state.importedDocumentId).toBeNull();
+       |                                   ^
+    384| });
+    385| it('opens a completed file while disconnected without ensuring authent…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > opens a completed file while disconnected without ensuring authentication
+Error: session-expired
+ ❯ MoodleWebviews.account src/main/moodle/webview.ts:60:47
+     58|   private account(id:string): AccountSession {
+     59|     const account = this.dependencies.account(id);
+     60|     if (account.status !== 'connected') throw new WebviewSessionError(…
+       |                                               ^
+     61|     const existing = this.accounts.get(id);
+     62|     if (existing) return existing;
+ ❯ MoodleWebviews.open src/main/moodle/webview.ts:103:26
+ ❯ src/main/moodle/webview.test.ts:391:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  src/main/moodle/webview.test.ts > offers recovery when stopped before the first document commits
+AssertionError: expected { …(14) } to match object { status: 'error', …(1) }
+(12 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "error": "load-failed",
+-   "status": "error",
++   "error": null,
++   "status": "ready",
+  }
+
+ ❯ src/main/moodle/webview.test.ts:400:18
+    398|  const {views,owner,state,contents}=await open();
+    399|  const stopped=await views.action(owner,state.id,'stop');
+    400|  expect(stopped).toMatchObject({status:'error',error:'load-failed'});
+       |                  ^
+    401|  contents.loadURL.mockClear();await views.action(owner,state.id,'reloa…
+    402| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  src/renderer/shell/import-delivery.test.tsx > acknowledges import only after persistence succeeds, storage failure false
+AssertionError: expected undefined to be '33333333-3333-4333-a333-333333333333' // Object.is equality
+
+- Expected:
+"33333333-3333-4333-a333-333333333333"
+
++ Received:
+undefined
+
+ ❯ src/renderer/shell/import-delivery.test.tsx:37:117
+     35|  expect(navigation!.route.view).toBe('workspace');
+     36|  expect(invoke.mock.calls.some(([channel,payload])=>channel==='moodle:…
+     37|  if(!fail)expect(JSON.parse(localStorage.getItem('vstudy-tabs-v1')!).t…
+       |                                                                                                                     ^
+     38|  }finally{set.mockRestore();invoke.mockClear();}
+     39| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  src/renderer/shell/import-delivery.test.tsx > acknowledges import only after persistence succeeds, storage failure true
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/renderer/shell/import-delivery.test.tsx:36:146
+     34|  await act(async()=>root.render(<AppShell><ImportRoute/></AppShell>));
+     35|  expect(navigation!.route.view).toBe('workspace');
+     36|  expect(invoke.mock.calls.some(([channel,payload])=>channel==='moodle:…
+       |                                                                                                                                                  ^
+     37|  if(!fail)expect(JSON.parse(localStorage.getItem('vstudy-tabs-v1')!).t…
+     38|  }finally{set.mockRestore();invoke.mockClear();}
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  src/renderer/shell/import-delivery.test.tsx > rejects a late import marker after moving to another Moodle entry
+AssertionError: expected undefined to be false // Object.is equality
+
+- Expected:
+false
+
++ Received:
+undefined
+
+ ❯ src/renderer/shell/import-delivery.test.tsx:46:16
+     44|  await act(()=>navigation.navigate({...expected,target:{kind:'file',fi…
+     45|  let saved:unknown;await act(()=>{saved=navigation.recordMoodleImport(…
+     46|  expect(saved).toBe(false);expect(navigation!.route.importedDocumentId…
+       |                ^
+     47| });
+     48|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  src/renderer/shell/tab-state.test.ts > does not mark a Moodle page when a linked file is imported
+AssertionError: expected '00000000-0000-4000-8000-000000000004' to be undefined
+
+- Expected:
+undefined
+
++ Received:
+"00000000-0000-4000-8000-000000000004"
+
+ ❯ src/renderer/shell/tab-state.test.ts:73:105
+     71| it('does not mark a Moodle page when a linked file is imported',()=>{
+     72|  const state=initialTabs(id(1),{view:'moodle',accountId:id(2),target:{…
+     73|  expect(currentRoute(tabReducer(state,{type:'imported',id:id(1),docume…
+       |                                                                                                         ^
+     74| });
+     75|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  src/renderer/shell/tab-strip.test.tsx > syncs hosted chats even when Moodle sync fails
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'web-chat:sync', …(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+@@ -1,7 +1,7 @@
+  [
+-   "web-chat:sync",
++   "moodle:webview-sync",
+    {
+      "tabIds": [
+        "first",
+      ],
+    },
+
+
+Number of calls: 1
+
+ ❯ src/renderer/shell/tab-strip.test.tsx:32:25
+     30|  fixture.invoke.mockClear();fixture.invoke.mockImplementation((channel…
+     31|  render(<TabStrip/>);await act(async()=>{});
+     32|  expect(fixture.invoke).toHaveBeenCalledWith('web-chat:sync',{tabIds:[…
+       |                         ^
+     33| });
+     34|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  10 failed | 45 passed (55)
+   Start at  21:23:13
+   Duration  2.96s (transform 355ms, setup 0ms, import 772ms, tests 2.76s, environment 407ms)
+

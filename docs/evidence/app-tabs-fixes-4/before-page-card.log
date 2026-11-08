@@ -1,0 +1,35 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/apps/desktop
+
+ ❯ src/renderer/courses/webview-pane.test.tsx (8 tests | 1 failed) 213ms
+   × never overlays a completed-file card on a Moodle page 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/courses/webview-pane.test.tsx > never overlays a completed-file card on a Moodle page
+AssertionError: expected <button data-slot="button" …(3)></button> to be null
+
+- Expected:
+null
+
++ Received:
+<button
+  class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+  data-size="default"
+  data-slot="button"
+  data-variant="default"
+>
+  Open document
+</button>
+
+ ❯ src/renderer/courses/webview-pane.test.tsx:92:96
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  21:25:44
+   Duration  1.24s (transform 365ms, setup 0ms, import 768ms, tests 213ms, environment 197ms)
+

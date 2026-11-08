@@ -1,0 +1,33 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/apps/desktop
+
+ ❯ src/renderer/shell/import-delivery.test.tsx (3 tests | 1 failed) 75ms
+   × acknowledges import only after persistence succeeds, storage failure false 59ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/shell/import-delivery.test.tsx > acknowledges import only after persistence succeeds, storage failure false
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/renderer/shell/import-delivery.test.tsx:36:146
+     34|  await act(async()=>root.render(<AppShell><ImportRoute/></AppShell>));
+     35|  expect(navigation!.route.view).toBe('workspace');
+     36|  expect(invoke.mock.calls.some(([channel,payload])=>channel==='moodle:…
+       |                                                                                                                                                  ^
+     37|  if(!fail)expect(JSON.parse(localStorage.getItem('vstudy-tabs-v1')!).t…
+     38|  }finally{set.mockRestore();invoke.mockClear();}
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 54 passed (55)
+   Start at  21:23:46
+   Duration  2.94s (transform 316ms, setup 0ms, import 718ms, tests 2.75s, environment 421ms)
+

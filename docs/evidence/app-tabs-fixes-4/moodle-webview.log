@@ -1,0 +1,9 @@
+PASS. Real WebContentsView autologin POST established an HttpOnly cookie. Remote content has no Node, preload, or desktop bridge.
+PASS. Back navigation works. Same-school window.open reuses the controlled view without another window.
+PASS. An external page prompts for native confirmation with a redacted link. Cancel leaves it inside the current school page. Copied links omit session credentials.
+PASS. The module sheet renders sanitized content before View original page. Closing the native tab returns to the course tab.
+PASS. The school page keeps its own colors and receives no injected app theme. Native content screenshots are separate from Chromium toolbar screenshots.
+PASS. Closing destroys the view. Reopening reuses the account cookie and does not request another autologin key.
+PASS. Another account partition has no school cookie. Simulated Chromium certificate failure displays a non-bypassable error.
+PASS. pluginfile.md is streamed through the real DocumentService, SQLite, and reader without saving to Downloads.
+PASS. Login redirect triggers one session recovery attempt. The six-minute cooldown prevents a second key request and displays Reconnect timing.

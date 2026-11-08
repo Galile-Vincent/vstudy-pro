@@ -1,0 +1,27 @@
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mpre-commit[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  lint-staged ❯ 
+
+┃  typecheck ❯ 
+
+> vstudy-pro@ typecheck-fast /Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af
+> node apps/desktop/scripts/generate-locales.mjs && pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/apps/desktop/src/shared/locales.generated.ts (28 namespaces).
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 8.15 seconds)
+✓ lint-staged (0.70 seconds)
+✓ typecheck (7.46 seconds)
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mcommit-msg[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  conventional ❯ 
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 0.63 seconds)
+✓ conventional (0.63 seconds)
+[t3/app-tabs-fixes-4 072ccbb6] fix(tabs): preserve targets and persist completed file imports
+ 11 files changed, 133 insertions(+), 24 deletions(-)
+ create mode 100644 apps/desktop/src/renderer/shell/import-delivery.test.tsx

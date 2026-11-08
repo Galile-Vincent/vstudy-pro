@@ -1,0 +1,13 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.reload: net::ERR_FILE_NOT_FOUND
+Call log:
+[2m  - waiting for navigation until "load"[22m
+
+    at /Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/apps/desktop/e2e/a11y-regressions.mjs:23:432 {
+  name: 'Error'
+}
+
+Node.js v26.9.0

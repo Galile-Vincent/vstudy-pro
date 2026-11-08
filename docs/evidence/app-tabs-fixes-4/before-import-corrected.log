@@ -1,0 +1,53 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/apps/desktop
+
+ ❯ src/renderer/shell/import-delivery.test.tsx (3 tests | 2 failed) 95ms
+   × acknowledges import only after persistence succeeds, storage failure true 14ms
+   × rejects a late import marker after moving to another Moodle entry 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/renderer/shell/import-delivery.test.tsx > acknowledges import only after persistence succeeds, storage failure true
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/renderer/shell/import-delivery.test.tsx:36:146
+     34|  await act(async()=>root.render(<AppShell><ImportRoute/></AppShell>));
+     35|  expect(navigation!.route.view).toBe('workspace');
+     36|  expect(invoke.mock.calls.some(([channel,payload])=>channel==='moodle:…
+       |                                                                                                                                                  ^
+     37|  if(!fail)expect(JSON.parse(localStorage.getItem('vstudy-tabs-v1')!).t…
+     38|  }finally{set.mockRestore();invoke.mockClear();}
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/renderer/shell/import-delivery.test.tsx > rejects a late import marker after moving to another Moodle entry
+AssertionError: expected undefined to be false // Object.is equality
+
+- Expected:
+false
+
++ Received:
+undefined
+
+ ❯ src/renderer/shell/import-delivery.test.tsx:46:16
+     44|  await act(()=>navigation.navigate({...expected,target:{kind:'file',fi…
+     45|  let saved:unknown;await act(()=>{saved=navigation.recordMoodleImport(…
+     46|  expect(saved).toBe(false);expect(navigation!.route.importedDocumentId…
+       |                ^
+     47| });
+     48|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  21:24:57
+   Duration  731ms (transform 215ms, setup 0ms, import 392ms, tests 95ms, environment 188ms)
+

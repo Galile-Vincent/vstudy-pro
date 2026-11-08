@@ -1,0 +1,36 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/apps/desktop
+
+Error: failed to create directory '/Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/node_modules/.pnpm/electron@42.11.16/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A': File exists (os error 17)
+stdout | src/main/services/chat.test.ts
+Downloading Electron binary...
+
+ ❯ src/main/services/chat.test.ts (0 test)
+assignments: 0.34 ms
+base64: 0.10 ms
+identifier: 0.14 ms
+dotted: 0.15 ms
+quotes: 0.61 ms
+FRESHNESS elapsedMs=950 visibleResults=1 searches=2
+(node:87961) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 will-download listeners added to [EventEmitter]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+SNAPSHOT SIGKILL interruptedBytes=50810880 afterCleanupBytes=0
+SNAPSHOT SIGTERM interruptedBytes=0 afterCleanupBytes=0
+SNAPSHOT worker termination interruptedBytes=0 afterCleanupBytes=0
+CONTENTION documents=2000 maxWriteMs=2.5 maxEventLoopGapMs=32.7 writes=75
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/services/chat.test.ts [ src/main/services/chat.test.ts ]
+Error: Electron failed to install correctly. Please delete `node_modules/electron` and run "npx install-electron --no" manually.
+ ❯ getElectronPath ../../node_modules/.pnpm/electron@42.11.16/node_modules/electron/index.js:43:13
+ ❯ Object.<anonymous> ../../node_modules/.pnpm/electron@42.11.16/node_modules/electron/index.js:52:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 299 passed | 7 skipped (307)
+      Tests  2663 passed | 20 skipped (2683)
+   Start at  21:25:06
+   Duration  92.79s (transform 4.08s, setup 0ms, import 32.41s, tests 104.33s, environment 16.80s)
+

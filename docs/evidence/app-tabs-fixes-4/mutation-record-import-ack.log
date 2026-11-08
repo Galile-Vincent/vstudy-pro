@@ -1,0 +1,179 @@
+{
+  keys: 1,
+  exchanges: 1,
+  requests: [
+    {
+      path: '/webservice/rest/server.php',
+      query: '',
+      cookie: '',
+      referrer: ''
+    },
+    {
+      path: '/admin/tool/mobile/autologin.php',
+      query: '',
+      cookie: '',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=1',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=2',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/pluginfile.php/42/notes.md',
+      query: '',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/course/view.php',
+      query: '?id=88',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    },
+    {
+      path: '/pluginfile.php/42/notes.md',
+      query: '',
+      cookie: 'MoodleSession=fixture_student',
+      referrer: ''
+    }
+  ]
+}
+[
+  {
+    id: undefined,
+    url: 'http://127.0.0.1:59945/admin/tool/mobile/autologin.php',
+    error: 'net::ERR_ABORTED'
+  }
+]
+[
+  {
+    state: {
+      id: 'f206c7ab-17a2-4f7b-85bd-badcc28ef1c0',
+      generation: 1,
+      scrollTop: 0,
+      status: 'ready',
+      url: 'http://127.0.0.1:59945/pluginfile.php/42/notes.md',
+      title: 'Moodle page',
+      secure: false,
+      canGoBack: false,
+      canGoForward: false,
+      zoom: 1,
+      error: null,
+      retryAt: null,
+      documentId: null,
+      importedDocumentId: '451af9f7-edac-4ab1-ba32-a650475c26d2'
+    },
+    entries: []
+  }
+]
+Skip to content
+VStudy Pro
+
+Workspace
+
+Home
+AI chats
+Library
+Courses
+Exams
+Review
+History
+
+Your collection
+
+All documents
+Recent
+Pinned
+Unfiled
+Converting / Failed
+Folders
+
+No folders yet
+
+Subscription limits
+Claude
+Not signed in
+5h · Unknown
+Weekly · Unknown
+Codex
+Unsupported
+5h · Unknown
+Weekly · Unknown
+VStudy Pro
+Your personal study space
+Help improve VStudy Pro? Analytics is off until you choose.
+
+Help improve VStudy Pro with usage data. We never collect your name, documents, questions or answers. Studying works the same either way.
+
+What is collected
+Privacy policy
+Terms of use
+No thanks
+Share usage data
+Document library
+Library
+notes
+Help
+Workspace connected
+Study companion
+Gemini
+ChatGPT
+Claude
+Conversations
+
+Study companion
+
+A little curiosity. A new understanding.
+
+Explore the ideas in “notes”.
+
+Summarize this section
+Explain a term
+Quiz me
+Scroll to bottom
+notes
+Remember your questions for review?
+
+Study memory is stored on this device. While it is on, after each answer in a chat, VStudy sends one extra request to the provider and model you are chatting with. It contains a limited excerpt of the conversation (up to the last 24 messages, including the tutor's replies, which may quote your documents) and your course, unit and concept names. That request uses your own quota or credit. When you create review content, excerpts from your course materials are sent too. Turn this off or erase it any time in Settings > Privacy. Chats you exclude are not recorded. Review budgets cover review calls; chat and document processing have separate limits.
+
+Turn on
+Not now
+Socratic mode
+Fake (test only)
+Low
+Low
+High
+Send message
+
+Grounded in your document. Check important details.
+
+Reading tip
+notes.md
+Parsed textOriginal file
+Improve with AI
+Course notesUse this section
+
+Imported through the authenticated reader pipeline.Ask about this
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: production renderer persisted the real file import marker
+    at file:///Users/vc/.t3/worktrees/vstudy-pro/t3-8cc1b9af/apps/desktop/e2e/moodle-webview.mjs:147:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v26.9.0
