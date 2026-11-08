@@ -120,7 +120,9 @@ it.each(['SIGKILL', 'SIGTERM', 'worker termination'] as const)('cleans snapshot 
     expect(readdirSync(snapshotRoot)).toEqual([]);
   } finally {
     child?.kill('SIGKILL');
-    for (const directory of directories()) rmSync(directory, {recursive:true,force:true});
-    db.close(); rmSync(root, {recursive:true,force:true});
+    db.close();
+    const removal = {recursive:true,force:true,maxRetries:8,retryDelay:100};
+    for (const directory of directories()) rmSync(directory, removal);
+    rmSync(root, removal);
   }
 }, 120000);
