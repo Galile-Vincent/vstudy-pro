@@ -1,0 +1,34 @@
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mpre-commit[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  lint-staged ❯ 
+
+┃  typecheck ❯ 
+
+> vstudy-pro@ typecheck-fast /Users/vc/.t3/worktrees/vstudy-pro/t3-f3f7565f
+> node apps/desktop/scripts/generate-locales.mjs && pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-f3f7565f/apps/desktop/src/shared/locales.generated.ts (28 namespaces).
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 7.89 seconds)
+✓ lint-staged (0.82 seconds)
+✓ typecheck (7.07 seconds)
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mcommit-msg[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  conventional ❯ 
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 0.71 seconds)
+✓ conventional (0.71 seconds)
+[t3/app-tabs-restore d27ca535] feat(desktop): complete hosted and local tab restoration
+ 37 files changed, 579 insertions(+), 177 deletions(-)
+ create mode 100644 apps/desktop/e2e/helpers/tab-route.mjs
+ create mode 100644 apps/desktop/src/main/web-chat/views.test.ts
+ create mode 100644 apps/desktop/src/renderer/chat-session-host.test.tsx
+ create mode 100644 apps/desktop/src/renderer/chat-session-host.tsx
+ create mode 100644 apps/desktop/src/renderer/chat-session-runtime.test.tsx
+ create mode 100644 apps/desktop/src/renderer/tab-presentation.ts
+ create mode 100644 apps/desktop/src/renderer/workspace/reader-position.test.ts
+ create mode 100644 apps/desktop/src/renderer/workspace/reader-position.ts

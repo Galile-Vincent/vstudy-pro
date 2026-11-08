@@ -1,4 +1,5 @@
 export async function seedRoute(page,route) {
+  await page.locator('.app-shell').waitFor();
   await page.evaluate(route=>{
     window.localStorage.removeItem('vstudy-tabs-v1');
     window.localStorage.setItem('vstudy-route',JSON.stringify(route));

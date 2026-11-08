@@ -1,0 +1,22 @@
+Stage 2 d5773364, workspace/index.tsx
+  const removeDocument = async (id: Document["id"]) => {
+    try {
+      await desktop.invoke("library:documents:softDelete", { documentId: id });
+      const list = await desktop.invoke("documents:list", {});
+      setDocuments(list); setDocumentId(list[0]?.id ?? null);
+      if (list[0]) navigate({ view: 'workspace', documentId: list[0].id });
+      const message = tr("library:deleted", { count: 1, formatted: format.number(1) });
+      setNotice(message);
+      setUndo({ message, run: async () => {
+        await desktop.invoke("library:documents:restore", { documentId: id });
+        setDocuments(await desktop.invoke("documents:list", {})); setDocumentId(id);
+        navigate({ view: 'workspace', documentId: id });
+        setNotice("");
+        setUndo(null);
+        requestAnimationFrame(() => document.getElementById('reading-content')?.focus());
+      } });
+    } catch (error) { report(error); }
+  };
+
+Stage 2 app.tsx
+    <Workspace key={route.documentId} />

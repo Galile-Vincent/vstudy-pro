@@ -1,0 +1,1 @@
+PASS hosted tabs have independent views, retain inputs, share provider login, protect OAuth, discard LRU, close, and restore lazily after full restart

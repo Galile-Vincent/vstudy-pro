@@ -1,0 +1,26 @@
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mpre-commit[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  lint-staged ❯ 
+
+┃  typecheck ❯ 
+
+> vstudy-pro@ typecheck-fast /Users/vc/.t3/worktrees/vstudy-pro/t3-f3f7565f
+> node apps/desktop/scripts/generate-locales.mjs && pnpm --filter @vstudy/desktop exec tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/typecheck.tsbuildinfo
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-f3f7565f/apps/desktop/src/shared/locales.generated.ts (28 namespaces).
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 4.26 seconds)
+✓ lint-staged (0.73 seconds)
+✓ typecheck (3.53 seconds)
+[38;2;56;56;56m╭──────────────────────────────────────╮[m
+[38;2;56;56;56m│[m lefthook  v2.2.2   hook:  [1mcommit-msg[m [38;2;56;56;56m│[m
+[38;2;56;56;56m╰──────────────────────────────────────╯[m
+┃  conventional ❯ 
+
+[38;2;56;56;56m  ────────────────────────────────────[m
+summary: (done in 0.33 seconds)
+✓ conventional (0.33 seconds)
+[t3/app-tabs-restore cd299ea4] fix(desktop): merge reader and composer tab checkpoints
+ 4 files changed, 16 insertions(+), 5 deletions(-)
