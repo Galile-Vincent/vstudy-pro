@@ -1,0 +1,6 @@
+Dev Electron bundle branded VStudy Pro. Bundle identifier and data identities retained.
+PASS VStudy Pro: bundle name, display name, executable
+PASS VStudy Pro Helper (GPU): bundle name, display name, executable
+PASS VStudy Pro Helper (Plugin): bundle name, display name, executable
+PASS VStudy Pro Helper (Renderer): bundle name, display name, executable
+PASS VStudy Pro Helper: bundle name, display name, executable

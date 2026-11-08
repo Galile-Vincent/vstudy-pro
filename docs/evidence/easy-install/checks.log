@@ -1,0 +1,255 @@
+[site-typecheck]
+
+> @vstudy/website@0.1.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/website
+> astro check
+
+20:10:15 [types] Generated 25ms
+20:10:15 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/website...
+Result (49 files): 
+- 0 errors
+- 0 warnings
+- 0 hints
+
+
+
+[site-lint]
+
+> @vstudy/website@0.1.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/website
+> astro check
+
+20:10:17 [types] Generated 15ms
+20:10:17 [check] Getting diagnostics for Astro files in /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/website...
+Result (49 files): 
+- 0 errors
+- 0 warnings
+- 0 hints
+
+
+
+[site-build]
+
+> @vstudy/website@0.1.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/website
+> astro build
+
+20:10:20 [types] Generated 15ms
+20:10:20 [build] output: "static"
+20:10:20 [build] mode: "static"
+20:10:20 [build] directory: /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/website/dist/
+20:10:20 [build] Collecting build info...
+20:10:20 [build] ✓ Completed in 23ms.
+20:10:20 [build] Building static entrypoints...
+20:10:20 [vite] ✓ built in 183ms
+20:10:20 [vite] ✓ built in 11ms
+20:10:20 [build] Rearranging server assets...
+
+ generating static routes 
+20:10:20   ├─ /en/docs/getting-started/index.html (+9ms) 
+20:10:20   ├─ /en/docs/connect-your-school/index.html (+1ms) 
+20:10:20   ├─ /en/docs/courses-and-deadlines/index.html (+1ms) 
+20:10:20   ├─ /en/docs/study-planner/index.html (+1ms) 
+20:10:20   ├─ /en/docs/agents-mcp/index.html (+1ms) 
+20:10:20   ├─ /en/docs/usage/index.html (+1ms) 
+20:10:20   ├─ /en/docs/reading-documents/index.html (+1ms) 
+20:10:20   ├─ /en/docs/ai-providers/index.html (+1ms) 
+20:10:20   ├─ /en/docs/themes/index.html (+1ms) 
+20:10:20   ├─ /en/docs/chat-history/index.html (+1ms) 
+20:10:20   ├─ /en/docs/moodle-pages/index.html (+0ms) 
+20:10:20   ├─ /en/docs/data-and-storage/index.html (+0ms) 
+20:10:20   ├─ /en/docs/privacy-and-network/index.html (+0ms) 
+20:10:20   ├─ /en/docs/keyboard-shortcuts/index.html (+0ms) 
+20:10:20   ├─ /en/docs/troubleshooting/index.html (+0ms) 
+20:10:20   ├─ /en/docs/architecture/index.html (+0ms) 
+20:10:20   ├─ /en/docs/development/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/getting-started/index.html (+1ms) 
+20:10:20   ├─ /zh-Hant/docs/connect-your-school/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/courses-and-deadlines/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/study-planner/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/agents-mcp/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/usage/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/reading-documents/index.html (+1ms) 
+20:10:20   ├─ /zh-Hant/docs/ai-providers/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/themes/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/chat-history/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/moodle-pages/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/data-and-storage/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/privacy-and-network/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/keyboard-shortcuts/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/troubleshooting/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/architecture/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/docs/development/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/getting-started/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/connect-your-school/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/courses-and-deadlines/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/study-planner/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/agents-mcp/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/usage/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/reading-documents/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/ai-providers/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/themes/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/chat-history/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/moodle-pages/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/data-and-storage/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/privacy-and-network/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/keyboard-shortcuts/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/troubleshooting/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/architecture/index.html (+0ms) 
+20:10:20   ├─ /ja/docs/development/index.html (+0ms) 
+20:10:20   ├─ /en/download/index.html (+1ms) 
+20:10:20   ├─ /zh-Hant/download/index.html (+0ms) 
+20:10:20   ├─ /ja/download/index.html (+0ms) 
+20:10:20   ├─ /en/privacy/index.html (+1ms) 
+20:10:20   ├─ /zh-Hant/privacy/index.html (+1ms) 
+20:10:20   ├─ /ja/privacy/index.html (+1ms) 
+20:10:20   ├─ /en/search.json (+1ms) 
+20:10:20   ├─ /zh-Hant/search.json (+0ms) 
+20:10:20   ├─ /ja/search.json (+0ms) 
+20:10:20   ├─ /en/terms/index.html (+0ms) 
+20:10:20   ├─ /zh-Hant/terms/index.html (+0ms) 
+20:10:20   ├─ /ja/terms/index.html (+0ms) 
+20:10:20   ├─ /en/index.html (+1ms) 
+20:10:20   ├─ /zh-Hant/index.html (+1ms) 
+20:10:20   ├─ /ja/index.html (+1ms) 
+20:10:20   ├─ /index.html (+1ms) 
+20:10:20 ✓ Completed in 55ms.
+
+ generating optimized images 
+20:10:20   ▶ /_astro/course-page.C8b6jC_E_7ThDt.webp (reused cache entry) (+2ms) (1/34)
+20:10:20   ▶ /_astro/courses-home.CxL3BYef_1eP7O7.webp (reused cache entry) (+2ms) (2/34)
+20:10:20   ▶ /_astro/school.BLJgfh51_Z8FrEl.webp (reused cache entry) (+2ms) (3/34)
+20:10:20   ▶ /_astro/library.2nUWyH0e_Z1HXiKe.webp (reused cache entry) (+2ms) (4/34)
+20:10:20   ▶ /_astro/usage-settings.COiwR6lo_Z1qRuG4.webp (reused cache entry) (+2ms) (5/34)
+20:10:20   ▶ /_astro/onboarding-welcome.Dw59R77W_Z2gMBFu.webp (reused cache entry) (+2ms) (6/34)
+20:10:20   ▶ /_astro/planner-today.B5Lr_qEL_2oj2N.webp (reused cache entry) (+2ms) (7/34)
+20:10:20   ▶ /_astro/original-page.B7BSgGNX_2wE6xk.webp (reused cache entry) (+2ms) (8/34)
+20:10:20   ▶ /_astro/document-figures.Dv7k1hm4_Z1mCLJK.webp (reused cache entry) (+2ms) (9/34)
+20:10:20   ▶ /_astro/capture-to-chat.BZnZ5bw1_Z58K9k.webp (reused cache entry) (+2ms) (10/34)
+20:10:20   ▶ /_astro/connect-ai.D_tkPWMr_1RyLf7.webp (reused cache entry) (+2ms) (11/34)
+20:10:20   ▶ /_astro/reader-chat-with-answer.BTAPTClu_Z201OXJ.webp (reused cache entry) (+2ms) (12/34)
+20:10:20   ▶ /_astro/usage-settings.COiwR6lo_Z297Lrl.webp (reused cache entry) (+1ms) (13/34)
+20:10:20   ▶ /_astro/course-page.C8b6jC_E_Z7eds0.webp (reused cache entry) (+1ms) (14/34)
+20:10:20   ▶ /_astro/capture-to-chat.BZnZ5bw1_Lnja2.webp (reused cache entry) (+1ms) (15/34)
+20:10:20   ▶ /_astro/themes-settings.CQ-btopx_Z2c5BwM.webp (reused cache entry) (+1ms) (16/34)
+20:10:20   ▶ /_astro/history-search.BR0S2hOe_zaXkc.webp (reused cache entry) (+1ms) (17/34)
+20:10:20   ▶ /_astro/themes-settings-grove-light.DRu-mFxy_Z1C3wjp.webp (reused cache entry) (+1ms) (18/34)
+20:10:20   ▶ /_astro/themes-settings-ocean-light.B4xuiW_2_Gm84B.webp (reused cache entry) (+1ms) (19/34)
+20:10:20   ▶ /_astro/themes-settings-ember-light.KlPjIi9M_1SupGD.webp (reused cache entry) (+1ms) (20/34)
+20:10:20   ▶ /_astro/moodle-webview.ji_cKZEz_1I2Rnq.webp (reused cache entry) (+1ms) (21/34)
+20:10:20   ▶ /_astro/themes-settings-iris-light.DgZMTPD9_Z23hi2n.webp (reused cache entry) (+1ms) (22/34)
+20:10:20   ▶ /_astro/connect-ai.D_tkPWMr_Z25fsqW.webp (reused cache entry) (+1ms) (23/34)
+20:10:20   ▶ /_astro/reader-chat-with-answer.BTAPTClu_1d07NQ.webp (reused cache entry) (+2ms) (24/34)
+20:10:20   ▶ /_astro/themes-settings-vstudy-dark.Cd3exL2H_940lD.webp (reused cache entry) (+1ms) (25/34)
+20:10:20   ▶ /_astro/themes-settings-rose-light.DoFrwonz_1lrxSP.webp (reused cache entry) (+1ms) (26/34)
+20:10:20   ▶ /_astro/themes-settings.CQ-btopx_2gNU6A.webp (reused cache entry) (+1ms) (27/34)
+20:10:20   ▶ /_astro/themes-settings-ocean-dark.B87ZrHhq_Zlx8HI.webp (reused cache entry) (+1ms) (28/34)
+20:10:20   ▶ /_astro/moodle-webview.ji_cKZEz_ZIQ18p.webp (reused cache entry) (+1ms) (29/34)
+20:10:20   ▶ /_astro/themes-settings-grove-dark.DSR-LZm1_Z29YiW3.webp (reused cache entry) (+1ms) (30/34)
+20:10:20   ▶ /_astro/themes-settings-ember-dark.DlAksDbI_Z1mptta.webp (reused cache entry) (+1ms) (31/34)
+20:10:20   ▶ /_astro/themes-settings-rose-dark.BdXQu5VW_2orrgu.webp (reused cache entry) (+1ms) (32/34)
+20:10:20   ▶ /_astro/themes-settings-iris-dark.DLrDicU6_6f7j6.webp (reused cache entry) (+1ms) (33/34)
+20:10:20   ▶ /_astro/themes-settings.CQ-btopx_Z2jc9dS.webp (reused cache entry) (+0ms) (34/34)
+20:10:20 ✓ Completed in 5ms.
+
+20:10:20 [build] ✓ Completed in 277ms.
+20:10:20 [build] 64 page(s) built in 336ms
+20:10:20 [build] Complete!
+
+
+[desktop-typecheck]
+
+> @vstudy/desktop@0.3.0 typecheck /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/desktop
+> node scripts/generate-locales.mjs && tsc --noEmit
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/desktop/src/shared/locales.generated.ts (27 namespaces).
+
+
+[desktop-lint]
+
+> @vstudy/desktop@0.3.0 lint /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/desktop
+> eslint .
+
+
+
+[security]
+
+> vstudy-pro@ security:static /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038
+> node apps/desktop/scripts/security-audit.mjs && pnpm --filter @vstudy/desktop exec node scripts/security-lint.mjs
+
+{"vulnerabilities":{"info":0,"low":1,"moderate":4,"high":12,"critical":1},"failures":[]}
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/desktop/src/main/ipc/index.ts
+  92:190  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/desktop/src/main/moodle/sso-protocol.ts
+  14:59  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+/Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/desktop/src/main/moodle/webview.ts
+  232:89  warning  Electron recommendation 15 (Do not use shell.openExternal with untrusted content) requires shell.openExternal URLs to be explicit literals with allowlisted protocols  electron-security/no-open-external-with-dynamic-url
+
+✖ 3 problems (0 errors, 3 warnings)
+
+
+
+[vitest]
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-99bcd038/apps/desktop
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  20:08:01
+   Duration  201ms (transform 93ms, setup 0ms, import 145ms, tests 2ms, environment 0ms)
+
+
+
+[release-tests]
+✔ only a matching stable tag can publish; branch pushes stay dry despite dry_run=false (0.438375ms)
+✔ Mac signing requires both a certificate and one complete notarization method (0.151333ms)
+✔ Windows signing has one backend and rejects every partial credential set (0.12525ms)
+✔ unsigned packaging strips all signing and notarization credentials (0.246916ms)
+✔ Apple API key material is private, restored, and deleted even when signing fails (2.544709ms)
+✔ native converter artifacts retain upstream hashes and reject changed wheels or source locks (2.836375ms)
+✔ native linkage distinguishes the Mach-O self identity from external load dependencies (0.079875ms)
+✔ all native targets retain stable aliases and architecture-specific outputs (0.151667ms)
+✔ afterPack writes hardened fuses to a Windows executable without invoking codesign (1.359459ms)
+✔ packaged smoke rejects wrong architecture, failed DB writes, and invented conversion claims (0.250792ms)
+Packaged smoke passed for mac-arm64; converter availability was probed without download or conversion
+✔ native process runner retains JSON, PNG, stdout, stderr, and nonzero exit diagnostics (245.775875ms)
+✔ all four staged artifacts assemble with correct update hashes, stable aliases, checksums, and unsigned notes (52.622792ms)
+✔ workflow exposes no signing credentials to branch or dry-run steps, and every action is SHA-pinned (0.830208ms)
+✔ branch release planning cannot become publishable from dry_run=false (23.84825ms)
+✔ a stable tag publishes only enabled targets without including qualification candidates (18.766041ms)
+✔ the publisher refuses branches and dry runs before invoking GitHub (39.480083ms)
+✔ the publisher rejects qualification manifests and disabled installer files before invoking GitHub (39.278375ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 462.828167
+
+
+[cask-tests]
+✔ published checksum fixture updates version and hash and rejects absent or duplicate entries (0.413292ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 25.871959
+
+
+[brew-style]
+
+1 file inspected, no offenses detected
+
+
+[brew-audit]
+Error: Cask 'vstudy-pro' is unavailable: No Cask with this name exists.
+
+
+[readme-links]
+Checked 155 local Markdown links across 4 files.

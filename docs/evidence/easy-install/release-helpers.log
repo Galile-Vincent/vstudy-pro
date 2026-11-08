@@ -1,0 +1,20 @@
+/tmp/vstudy-easy-e2e-apps/VStudy Pro.app/Contents/Frameworks/VStudy Pro Helper (GPU).app
+  "CFBundleDisplayName" => "VStudy Pro Helper (GPU)"
+  "CFBundleExecutable" => "VStudy Pro Helper (GPU)"
+  "CFBundleIdentifier" => "com.vstudy.pro.helper.GPU"
+  "CFBundleName" => "Electron Helper (GPU)"
+/tmp/vstudy-easy-e2e-apps/VStudy Pro.app/Contents/Frameworks/VStudy Pro Helper (Plugin).app
+  "CFBundleDisplayName" => "VStudy Pro Helper (Plugin)"
+  "CFBundleExecutable" => "VStudy Pro Helper (Plugin)"
+  "CFBundleIdentifier" => "com.vstudy.pro.helper.Plugin"
+  "CFBundleName" => "Electron Helper (Plugin)"
+/tmp/vstudy-easy-e2e-apps/VStudy Pro.app/Contents/Frameworks/VStudy Pro Helper (Renderer).app
+  "CFBundleDisplayName" => "VStudy Pro Helper (Renderer)"
+  "CFBundleExecutable" => "VStudy Pro Helper (Renderer)"
+  "CFBundleIdentifier" => "com.vstudy.pro.helper.Renderer"
+  "CFBundleName" => "Electron Helper (Renderer)"
+/tmp/vstudy-easy-e2e-apps/VStudy Pro.app/Contents/Frameworks/VStudy Pro Helper.app
+  "CFBundleDisplayName" => "VStudy Pro Helper"
+  "CFBundleExecutable" => "VStudy Pro Helper"
+  "CFBundleIdentifier" => "com.vstudy.pro.helper"
+  "CFBundleName" => "Electron Helper"

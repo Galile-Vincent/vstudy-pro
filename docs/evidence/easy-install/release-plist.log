@@ -1,0 +1,69 @@
+{
+  "CFBundleDisplayName" => "VStudy Pro"
+  "CFBundleExecutable" => "VStudy Pro"
+  "CFBundleIconFile" => "icon.icns"
+  "CFBundleIdentifier" => "com.vstudy.pro"
+  "CFBundleInfoDictionaryVersion" => "6.0"
+  "CFBundleName" => "VStudy Pro"
+  "CFBundlePackageType" => "APPL"
+  "CFBundleShortVersionString" => "0.3.0"
+  "CFBundleURLTypes" => [
+    0 => {
+      "CFBundleTypeRole" => "Editor"
+      "CFBundleURLName" => "VStudy Moodle sign-in"
+      "CFBundleURLSchemes" => [
+        0 => "vstudymoodle"
+      ]
+    }
+  ]
+  "CFBundleVersion" => "0.3.0"
+  "DTCompiler" => "com.apple.compilers.llvm.clang.1_0"
+  "DTSDKBuild" => "24F74"
+  "DTSDKName" => "macosx15.5"
+  "DTXcode" => "1640"
+  "DTXcodeBuild" => "16F6"
+  "ElectronAsarIntegrity" => {
+    "Resources/app.asar" => {
+      "algorithm" => "SHA256"
+      "hash" => "21c277f830332c59a602c48aab4afd9121357e17d74fabb5781e8b1820da1142"
+    }
+  }
+  "LSApplicationCategoryType" => "public.app-category.education"
+  "LSEnvironment" => {
+    "MallocNanoZone" => "0"
+  }
+  "LSMinimumSystemVersion" => "12.0"
+  "NSAppTransportSecurity" => {
+    "NSAllowsArbitraryLoads" => true
+    "NSAllowsLocalNetworking" => true
+    "NSExceptionDomains" => {
+      "127.0.0.1" => {
+        "NSIncludesSubdomains" => false
+        "NSTemporaryExceptionAllowsInsecureHTTPLoads" => true
+        "NSTemporaryExceptionAllowsInsecureHTTPSLoads" => false
+        "NSTemporaryExceptionMinimumTLSVersion" => "1.0"
+        "NSTemporaryExceptionRequiresForwardSecrecy" => false
+      }
+      "localhost" => {
+        "NSIncludesSubdomains" => false
+        "NSTemporaryExceptionAllowsInsecureHTTPLoads" => true
+        "NSTemporaryExceptionAllowsInsecureHTTPSLoads" => false
+        "NSTemporaryExceptionMinimumTLSVersion" => "1.0"
+        "NSTemporaryExceptionRequiresForwardSecrecy" => false
+      }
+    }
+  }
+  "NSAudioCaptureUsageDescription" => "This app needs access to audio capture"
+  "NSBluetoothAlwaysUsageDescription" => "This app needs access to Bluetooth"
+  "NSBluetoothPeripheralUsageDescription" => "This app needs access to Bluetooth"
+  "NSCameraUsageDescription" => "This app needs access to the camera"
+  "NSHighResolutionCapable" => true
+  "NSHumanReadableCopyright" => "Copyright © 2026 vstudy"
+  "NSMainNibFile" => "MainMenu"
+  "NSMicrophoneUsageDescription" => "This app needs access to the microphone"
+  "NSPrefersDisplaySafeAreaCompatibilityMode" => false
+  "NSPrincipalClass" => "AtomApplication"
+  "NSQuitAlwaysKeepsWindows" => false
+  "NSRequiresAquaSystemAppearance" => false
+  "NSSupportsAutomaticGraphicsSwitching" => true
+}

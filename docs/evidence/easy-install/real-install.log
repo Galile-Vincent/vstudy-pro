@@ -1,0 +1,29 @@
+Destination: /tmp/vstudy-easy-e2e-apps/VStudy Pro.app
+Resolving release
+Downloading checksums from https://github.com/ava-apple/vstudy-pro/releases/download/v0.3.0
+SHA-256 verified: e981578a43522926e82baa57fdc4e882ad481f1b84fd0f914683eec87925693e (VStudy-Pro-mac-arm64.dmg)
+Mounting read-only
+hdiutil: WARNING: 'hdiutil attach -nobrowse -readonly -mountpoint ...' is deprecated. Please use 'diskutil image attach --mountOptions nobrowse --readOnly --mountPoint ...' instead.
+/dev/disk12         	GUID_partition_scheme          	
+/dev/disk12s1       	Apple_HFS                      	/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-install.pcdcg9/mount
+Copying app with ditto
+Removing quarantine from this unsigned app only
+Requesting VStudy Pro to quit politely
+Moving verified app into place
+Signing information (unsigned or ad-hoc; not notarized)
+Executable=/private/tmp/vstudy-easy-e2e-apps/VStudy Pro.app/Contents/MacOS/VStudy Pro
+Identifier=com.vstudy.pro
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=295 flags=0x2(adhoc) hashes=3+3 location=embedded
+Signature=adhoc
+Info.plist entries=33
+TeamIdentifier=not set
+Sealed Resources version=2 rules=13 files=237
+Internal requirements count=0 size=12
+Total signatures=1
+Chosen signature=1
+/tmp/vstudy-easy-e2e-apps/VStudy Pro.app: rejected
+Gatekeeper assessment rejected. This app is unsigned/un-notarized; quarantine was removed only from this copy.
+Installed /tmp/vstudy-easy-e2e-apps/VStudy Pro.app. Re-run this script to update.
+hdiutil: WARNING: 'hdiutil detach ...' is deprecated. Please use 'diskutil eject ...' instead.
+"disk12" ejected.

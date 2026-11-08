@@ -1,0 +1,6 @@
+PASS VStudy Pro: bundle name, display name, executable
+PASS VStudy Pro Helper (GPU): bundle name, display name, executable
+PASS VStudy Pro Helper (Plugin): bundle name, display name, executable
+PASS VStudy Pro Helper (Renderer): bundle name, display name, executable
+PASS VStudy Pro Helper: bundle name, display name, executable
+Packaged smoke passed for mac-arm64; converter availability was probed without download or conversion
