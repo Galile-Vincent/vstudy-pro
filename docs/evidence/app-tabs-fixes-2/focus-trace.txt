@@ -1,0 +1,10 @@
+Instrumented real swipe-history run on 993e0eed, using swipe-debug.mjs locally.
+Immediately before emitting app-command browser-backward.
+BrowserWindow.isFocused() = false
+BrowserWindow.webContents.isFocused() = false
+BrowserWindow.listenerCount('app-command') = 1
+document.hasFocus() = true
+document.activeElement.id = shell-content
+Overlay query results = []
+No renderer keydown event was observed after the app-command emission.
+The command timed out at waitView('library').

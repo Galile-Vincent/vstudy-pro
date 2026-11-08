@@ -1,0 +1,77 @@
+[
+  {
+    "name": "typecheck",
+    "command": "pnpm typecheck",
+    "exit": 0
+  },
+  {
+    "name": "lint",
+    "command": "pnpm lint",
+    "exit": 0
+  },
+  {
+    "name": "tests",
+    "command": "pnpm exec vitest run src/renderer src/shared src/main --pool=forks --maxWorkers=2",
+    "exit": 0
+  },
+  {
+    "name": "build",
+    "command": "pnpm build",
+    "exit": 0
+  },
+  {
+    "name": "swipe-history",
+    "command": "node e2e/swipe-history.mjs",
+    "exit": 1
+  },
+  {
+    "name": "app-tabs",
+    "command": "node e2e/app-tabs.mjs",
+    "exit": 0
+  },
+  {
+    "name": "app-tabs-native-ui",
+    "command": "node e2e/app-tabs-native-ui.mjs",
+    "exit": 0
+  },
+  {
+    "name": "moodle-webview",
+    "command": "node e2e/moodle-webview.mjs",
+    "exit": 0
+  },
+  {
+    "name": "a11y-regressions",
+    "command": "node e2e/a11y-regressions.mjs",
+    "exit": 0
+  },
+  {
+    "name": "i18n",
+    "command": "node e2e/i18n.mjs",
+    "exit": 0
+  },
+  {
+    "name": "history-startup-regressions",
+    "command": "node e2e/history-startup-regressions.mjs",
+    "exit": 0
+  },
+  {
+    "name": "chat-history",
+    "command": "node e2e/chat-history.mjs",
+    "exit": 0
+  },
+  {
+    "name": "chat-controls",
+    "command": "node e2e/chat-controls.mjs",
+    "exit": 0
+  },
+  {
+    "name": "measurement",
+    "command": "node scripts/measure-native-tabs.mjs 5",
+    "exit": 0
+  },
+  {
+    "name": "swipe-history-repeat",
+    "command": "node e2e/swipe-history.mjs",
+    "exit": 1
+  }
+]
