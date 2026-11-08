@@ -1,3 +1,4 @@
+import { subscriptionUsageSchema } from './subscription-usage';
 import { webChatContract } from './web-chat';
 import { reviewGenerateIpc, type ReviewProgress } from './review-generate';
 import { newsletterContract } from './newsletter';
@@ -91,6 +92,7 @@ export const ipcContract = {
   "usage:summary": { request: z.object({ period: z.enum(['day', 'month', 'last30days']) }).strict(), response: usageSummarySchema },
   "usage:forConversation": { request: z.object({ conversationId: conversationIdSchema }).strict(), response: z.array(usageRecordSchema) },
   "usage:forDocument": { request: z.object({ documentId: documentIdSchema }).strict(), response: z.array(usageRecordSchema) },
+  "usage:subscriptions": { request: z.object({ refresh: z.boolean().optional(), allowClaudeKeychain: z.boolean().optional() }).strict(), response: z.array(subscriptionUsageSchema) },
   "usage:rateLimits": { request: empty, response: z.array(z.object({ providerId: providerIdSchema, createdAt: z.string().datetime(), rateLimit: rateLimitSchema })) },
   "usage:export": { request: empty, response: z.object({ saved: z.boolean() }).strict() },
   "shell:openExternal": {

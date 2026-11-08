@@ -1,3 +1,5 @@
+import { parseCodexWindows } from './subscription-windows';
+import type { SubscriptionWindow } from '../../shared/subscription-usage';
 /**
  * Probe provider quota state with bounded subprocess and cache lifetimes.
  * Owned by main/providers.
@@ -6,14 +8,13 @@
  */
 import { recordEgress } from '../services/egress';
 import { createInterface } from 'node:readline';
-import { z } from 'zod';
 import { tmpdir } from 'node:os';
 import { ProcessScope } from '../../../resources/converter/process-scope';
 import { cliEnvironment, findCli } from './cli';
 import type { Usage } from '../../shared/domain';
-const windowSchema = z.object({ usedPercent: z.number().min(0).max(100), windowDurationMins: z.number().nullable().optional(), resetsAt: z.number().nullable().optional() });
+
 /** Read Codex quota information through the bounded, opted-in discovery transport. */
-export async function probeCodexRateLimits(binary: string, args = ['app-server'], timeoutMs = 2500): Promise<Usage['rateLimit']> {
+export async function probeCodexWindows(binary: string, args = ['app-server'], timeoutMs = 2500): Promise<SubscriptionWindow[] | undefined> {
   recordEgress('codex_quota', 'OpenAI / Codex CLI managed endpoints');
   const scope = new ProcessScope();
   const child = scope.spawn(binary, args, { cwd: tmpdir(), env: cliEnvironment(), shell: false, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -22,7 +23,7 @@ export async function probeCodexRateLimits(binary: string, args = ['app-server']
   const lines = createInterface({ input: child.stdout! });
   let timer: NodeJS.Timeout | undefined;
   try {
-    return await new Promise<Usage['rateLimit']>(resolve => {
+    return await new Promise<SubscriptionWindow[] | undefined>(resolve => {
       timer = setTimeout(() => resolve(undefined), timeoutMs);
       child.once('error', () => resolve(undefined));
       child.once('close', () => resolve(undefined));
@@ -38,10 +39,7 @@ export async function probeCodexRateLimits(binary: string, args = ['app-server']
             send({ method: 'initialized' });
             send({ id: 2, method: 'account/rateLimits/read', params: null });
           } else if (frame.id === 2) {
-            const result = z.object({ rateLimits: z.object({ primary: windowSchema.nullable().optional(), secondary: windowSchema.nullable().optional() }) }).parse(frame.result);
-            const windows = [result.rateLimits.primary,result.rateLimits.secondary].filter(w => w != null);
-            const w = windows.sort((a,b) => b.usedPercent - a.usedPercent)[0];
-            resolve(w ? { label: `${w.windowDurationMins ?? 'unknown'} minute window`, usedPercent: w.usedPercent, ...(w.resetsAt ? { resetsAt: new Date(w.resetsAt * 1000).toISOString() } : {}) } : undefined);
+            resolve(parseCodexWindows(frame.result));
           }
         } catch { resolve(undefined); }
       });
@@ -58,4 +56,10 @@ export function createRateLimitProbe(load = async () => { if (process.platform !
     if (cached && cached.expires > Date.now()) return Promise.resolve(cached.value);
     return pending ??= load().catch(() => undefined).then(value => { cached = { expires: Date.now() + 60_000, value }; return value; }).finally(() => { pending = undefined; });
   };
+}
+
+export async function probeCodexRateLimits(binary: string, args = ['app-server'], timeoutMs = 2500): Promise<Usage['rateLimit']> {
+  const windows = await probeCodexWindows(binary, args, timeoutMs);
+  const highest = windows?.reduce<SubscriptionWindow | undefined>((a, b) => !a || b.usedPercent > a.usedPercent ? b : a, undefined);
+  return highest ? { label: highest.label === '5h' ? '300 minute window' : '10080 minute window', usedPercent: highest.usedPercent, ...(highest.resetsAt ? { resetsAt: highest.resetsAt } : {}) } : undefined;
 }

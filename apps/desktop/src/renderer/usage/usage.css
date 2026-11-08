@@ -356,3 +356,14 @@
 @media(prefers-contrast:more), (forced-colors:active) {
  .usage-stat-tile { border:1px solid var(--ink); }
 }
+
+.subscription-meters { padding:8px; font-size:12px; min-width:0; }
+.subscription-meters header, .subscription-provider-name { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.subscription-meters header strong { font-size:12px; font-weight:500; }
+.subscription-meters small { color:var(--muted); font-size:10px; }
+.subscription-provider { margin-top:6px; }
+.subscription-windows { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px; }
+.subscription-windows > div { min-width:0; }
+.subscription-window > span { display:flex; justify-content:space-between; gap:4px; font-size:10px; }
+.subscription-window progress { display:block; width:100%; height:4px; accent-color:var(--accent); }
+.subscription-consent { display:flex; align-items:flex-start; gap:8px; margin-top:12px; }

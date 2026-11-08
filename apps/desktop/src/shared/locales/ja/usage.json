@@ -25,5 +25,16 @@
   "budget_help": "トークンは単語の小さな断片です。予算を空欄にすると上限なしになります。警告の割合は月の上限が近いことを知らせます。",
   "advanced_prices": "詳細設定：独自の料金",
   "invalid_prices": "料金のJSONを確認してください。下の例を参考にしてください。",
-  "save_failed": "保存できませんでした。予算の値を確認して再試行してください。"
+  "save_failed": "保存できませんでした。予算の値を確認して再試行してください。",
+  "subscription_limits": "サブスクリプション使用量",
+  "quota_5h": "5時間",
+  "quota_weekly": "週間",
+  "quota_not-signed-in": "未ログイン",
+  "quota_unsupported": "未対応",
+  "quota_unavailable": "取得できません",
+  "quota_stale": "古いデータ",
+  "quota_unknown": "不明",
+  "quota_resets": "リセット",
+  "quota_updated": "更新",
+  "quota_keychain": "このアプリセッション中、macOS キーチェーンから Claude Code の認証情報を読み取ることを許可します。使用量の取得のため api.anthropic.com にのみ送信します。"
 }

@@ -4,7 +4,7 @@ import { ClipboardCheck } from "lucide-react";
 /** Navigation frame and profile-local routes shared by the study views. */
 import { Brand } from '../components/brand';
 import { useScrollChrome } from './use-scroll-chrome';
-import { AiCliInventory } from '../ai-cli/inventory';
+import { SubscriptionMeters } from '../usage/subscriptions';
 import './scroll-chrome.css';
 import { HelpMenu } from "../onboarding/help";
 import { useSidebarOverlay } from './use-sidebar-overlay';
@@ -205,7 +205,7 @@ export function AppShell({
             <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "review" ? "page" : undefined} onClick={() => navigate("review")}><BookOpen/>{tr("review:title")}</SidebarMenuButton></SidebarMenuItem>
             <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "history" ? "page" : undefined} onClick={() => navigate("history")}><HistoryIcon/>{tr("history:title")}</SidebarMenuButton></SidebarMenuItem>
           </SidebarMenu></SidebarGroup>
-          {sidebar}</SidebarContent><SidebarFooter><AiCliInventory compact /><div className="art-reader-profile"><span className="art-reader-avatar" aria-hidden="true">{displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <Brand/>}</span><span><strong>{displayName || tr("library:brand")}</strong><small>{tr("art-reader:local")}</small></span></div><SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings/>{tr("common:settings")}</SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
+          {sidebar}</SidebarContent><SidebarFooter><SubscriptionMeters compact /><div className="art-reader-profile"><span className="art-reader-avatar" aria-hidden="true">{displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <Brand/>}</span><span><strong>{displayName || tr("library:brand")}</strong><small>{tr("art-reader:local")}</small></span><Button variant="ghost" size="icon" aria-label={tr("common:settings")} title={tr("common:settings")} onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings aria-hidden="true"/></Button></div></SidebarFooter>
         </Sidebar>
         <div className="shell-main">
           <header className="shell-topbar">

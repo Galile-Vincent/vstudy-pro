@@ -107,6 +107,12 @@ export function createMockBridge(): DesktopApi {
       case "usage:rateLimits":
         result = [];
         break;
+      case 'usage:subscriptions':
+        result = (['claude', 'codex'] as const).map((provider, index) => ({ provider, status: 'ready', windows: [{ label: '5h', usedPercent: 32 + index * 15, resetsAt: new Date(Date.now() + 7200000).toISOString() }, { label: 'weekly', usedPercent: 58 - index * 20, resetsAt: new Date(Date.now() + 172800000).toISOString() }], fetchedAt: new Date().toISOString(), nextRefreshAt: new Date(Date.now() + 60000).toISOString() }));
+        break;
+      case 'usage:dashboard':
+        result = { summary: { inputTokens: 0, outputTokens: 0, costUsd: 0, calls: 0, unknownPrices: 0, groups: [] }, cacheReadTokens: 0, cacheWriteTokens: 0, reasoningTokens: 0, days: [] };
+        break;
       case "usage:summary":
         result = { inputTokens: 0, outputTokens: 0, costUsd: 0, calls: 0, unknownPrices: 0, groups: [] };
         break;

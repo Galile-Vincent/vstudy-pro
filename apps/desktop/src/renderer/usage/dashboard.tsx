@@ -1,3 +1,4 @@
+import { SubscriptionMeters } from './subscriptions';
 import { Select } from '../components/select';
 import { Button } from '../components/ui/button';
 import { useTranslation } from 'react-i18next';
@@ -235,6 +236,7 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
           </Button>
         </div>
       </div>
+      <SubscriptionMeters />
       {error ? (
         <p role="alert">{error}</p>
       ) : !data ? (
