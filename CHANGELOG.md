@@ -13,6 +13,7 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 
 ### Maintenance
 - chore: merge simplified README and download page (299b243)
+- chore(release): prepare v0.4.1 (571b421)
 
 ### Tests
 - test: record simplified download page verification (6ef7ebd)

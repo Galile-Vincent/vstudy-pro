@@ -342,6 +342,14 @@ test('the release workflow installs the certificate itself and does not pass it 
   assert.doesNotMatch(packaging, /^\s+CSC_KEY_PASSWORD:/m);
 });
 
+test('the hardened Mac runtime keeps the entitlements Electron needs to start', async () => {
+  const plist = await readFile(join(desktop, 'build/entitlements.mac.plist'), 'utf8');
+  for (const key of ['com.apple.security.cs.allow-jit', 'com.apple.security.cs.allow-unsigned-executable-memory']) {
+    assert.match(plist, new RegExp(`<key>${key.replaceAll('.', '\\.')}</key>\\s*<true/>`));
+  }
+  assert.doesNotMatch(plist, /allow-dyld-environment-variables|disable-library-validation|get-task-allow/);
+});
+
 test('branch release planning cannot become publishable from dry_run=false', async t => {
   const root = await temporary(t);
   const output = join(root, 'outputs');
