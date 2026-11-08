@@ -30,6 +30,8 @@ import { resolveModel } from "../model";
 import { ModelControls } from "../model-controls";
 import { SelectionPreview } from "../selection-preview-view";
 const Chat=lazy(()=>import("../chat").then(module=>({default:module.Chat})));
+const HostedChat=lazy(()=>import("../web-chat").then(module=>({default:module.HostedChat})));
+const chatSources=['companion','gemini','chatgpt','claude'] as const;
 import { DocumentMarkdown } from "../lazy-reader";
 import { ConversationList } from "../conversation-list";
 import { ProviderSettings, type Providers } from "../providers";
@@ -392,9 +394,12 @@ export function Workspace() {
         </div>
       </div>
   );
+  const [chatSource, setChatSource] = useState<(typeof chatSources)[number]>('companion');
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
-      <header className="art-reader-chat-header"><span><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</span>{chatControls}</header>
+      <header className="art-reader-chat-header"><div className="chat-source" role="group" aria-label={tr('web-chat:choose')}>{chatSources.map(source => <button key={source} type="button" aria-pressed={chatSource === source} onClick={() => setChatSource(source)}>{source === 'companion' ? <><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</> : tr(`web-chat:${source}`)}</button>)}</div>{chatSource === 'companion' && chatControls}</header>
+      {chatSource !== 'companion' && <Suspense fallback={<p role="status">{tr('common:loading')}</p>}><HostedChat key={chatSource} provider={chatSource}/></Suspense>}
+      <div className="chat-source-body" hidden={chatSource !== 'companion'}>
       {conversationError || historyError ? <LoadError message={conversationError || historyError} retry={() => conversationError ? setConversationRevision(value => value + 1) : setHistoryRevision(value => value + 1)}/> : conversation && history ? (
         <Suspense fallback={<p role="status">{tr("common:loading_conversation")}</p>}>{chatDocument === documentId ? <Chat
           documentPageCount={documentPageCount}
@@ -444,6 +449,7 @@ export function Workspace() {
           </div>
         </div>
       )}
+      </div>
     </section>
   );
   const reading = (

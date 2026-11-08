@@ -31,7 +31,7 @@ export function WebChatHub() {
     {tab!=='desktop' && <HostedChat key={tab} provider={tab}/>}
   </section>;
 }
-function HostedChat({provider}:{provider:WebChatProvider}) {
+export function HostedChat({provider}:{provider:WebChatProvider}) {
   const slot=useRef<HTMLDivElement>(null);
   const [state,setState]=useState<WebChatState>();
   const [failed,setFailed]=useState(false),[revision,setRevision]=useState(0),[clearing,setClearing]=useState(false);
