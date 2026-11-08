@@ -58,6 +58,8 @@ it.each([
     true,
   ],
   [{ type: "calculation", answer: 2, tolerance: 0.01, unit: "m" }, "2e0", true],
+  [{ type: "calculation", answer: 1e-12, tolerance: 1e-18, unit: "C" }, "1.0001e-12 C", false],
+  [{ type: "calculation", answer: 1e-12, tolerance: 1e-18, unit: "C" }, "1e-12 C", true],
   [
     { type: "calculation", answer: 2, tolerance: 0.01, unit: "m" },
     "2 cm",

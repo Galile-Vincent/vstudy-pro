@@ -30,7 +30,7 @@ export function gradeAnswer(
     return (
       Number.isFinite(number) &&
       Math.abs(number - item.answer) <=
-        item.tolerance + Number.EPSILON * Math.max(1, Math.abs(item.answer)) * 4
+        item.tolerance + Number.EPSILON * Math.abs(item.answer) * 4
     );
   }
   return answer === item.answer;

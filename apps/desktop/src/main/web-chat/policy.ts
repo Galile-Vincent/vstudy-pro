@@ -19,6 +19,6 @@ export function webChatResource(raw:string):boolean {
   if (/^(data:|blob:)/.test(raw)) return true;
   const url=safeWebChatUrl(raw.replace(/^wss:/,'https:'));
   if (!url || url.port && url.port!=='443') return false;
-  const host=url.hostname.toLowerCase();
+  const host=url.hostname.toLowerCase().replace(/\.+$/,'');
   return host.includes('.') && !host.endsWith('.localhost') && !host.endsWith('.local') && !host.endsWith('.internal') && !/^[\d.]+$/.test(host) && !host.includes(':');
 }

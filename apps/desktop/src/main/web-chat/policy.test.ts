@@ -16,6 +16,12 @@ describe('hosted chat origin policy',()=>{
     expect(safeWebChatUrl('https://a:b@chatgpt.com')).toBe(null);
   });
 });
+describe('resource policy',()=>{
+  it('refuses absolute-DNS localhost spellings',()=>{
+    for(const u of ['https://localhost./','https://app.localhost./','https://printer.local./','https://127.0.0.1./']) expect(webChatResource(u)).toBe(false);
+    expect(webChatResource('https://cdn.example.com/a.js')).toBe(true);
+  });
+});
 describe('hosted chat contracts',()=>{
   it('accepts provider controls without accepting URLs, partitions or scripts',()=>{
     expect(webChatContract['web-chat:open'].request.parse({provider:'claude'})).toEqual({provider:'claude'});
