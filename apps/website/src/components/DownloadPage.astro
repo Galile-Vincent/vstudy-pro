@@ -1,18 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
 import Logo from './Logo.astro';
-import { path, RELEASES_URL } from '../config';
+import { RELEASES_URL } from '../config';
 import { downloadBase, installers, type InstallerId } from '../data/downloads';
+import { installCopy, macInstall, windowsInstall } from '../data/install-copy';
 import { downloadCopy } from '../data/download-copy';
 import type { Language } from '../data/ui';
 import '../styles/download.css';
 interface Props { language: Language; }
 const { language } = Astro.props;
 const c = downloadCopy[language];
-const groups = [
-  { platform: 'mac', name: c.osMac, hint: c.macHint },
-  { platform: 'win', name: c.osWin, hint: c.winHint },
-] as const;
+const install = installCopy[language];
 const kindLabel = { dmg: c.dmg, exe: c.exe };
 const href = (file: string) => `${downloadBase}/${file}`;
 ---
@@ -23,6 +21,54 @@ const href = (file: string) => `${downloadBase}/${file}`;
       <h1>{c.title}</h1>
       <p class="dl-lead">{c.lead}</p>
     </header>
+
+    <section class="dl-os" aria-labelledby="dl-mac">
+      <h2 id="dl-mac">{install.macTitle}</h2>
+      <p class="dl-hint">{c.arch['mac-arm64'].note} {c.macHint}</p>
+      <h3 id="dl-dmg">{install.dmgTitle}</h3>
+      <ol class="dl-steps">
+        <li><a class="text-link" href={href('VStudy-Pro-mac-arm64.dmg')}>{install.downloadDmg}<span aria-hidden="true">↓</span></a></li>
+        {install.steps.map(step => <li>{step}</li>)}
+      </ol>
+      <aside class="dl-signing" aria-labelledby="dl-signing-title">
+        <h4 id="dl-signing-title">{install.signingStatus.title}</h4>
+        <p>{install.signingStatus.text} <a href={RELEASES_URL}>{install.signingStatus.source}</a></p>
+        <ol class="dl-steps">{install.signingStatus.steps.map(step => <li>{step}</li>)}</ol>
+        <p>{install.signingStatus.older}</p>
+        <p>{install.signingStatus.optional} <a href="#verify-download">{install.signingStatus.verifyLink}</a> · <a href="https://support.apple.com/en-us/102445">{install.signingStatus.apple}</a></p>
+      </aside>
+      <h3 id="dl-script">{install.terminalTitle}</h3>
+      <p>{install.terminalOpen}</p>
+      <div class="code-block">
+        <button type="button" data-install-copy aria-label={`${install.copy} macOS`}>{install.copy}</button>
+        <pre tabindex="0"><code>{macInstall}</code></pre>
+      </div>
+      <p>{install.terminalTools}</p>
+      <ul class="dl-steps">{install.bullets.map(bullet => <li>{bullet}</li>)}</ul>
+      <a class="text-link" href="https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh">{install.read}</a>
+      <h3 id="dl-agent">{install.aiTitle}</h3>
+      <p>{install.aiText}</p>
+      <div class="code-block">
+        <button type="button" data-install-copy aria-label={`${install.copy} ${install.aiTitle}`}>{install.copy}</button>
+        <pre tabindex="0"><code>{install.prompt}</code></pre>
+      </div>
+    </section>
+
+    <section class="dl-os" aria-labelledby="dl-windows">
+      <h2 id="dl-windows">{install.windowsTitle}</h2>
+      <p class="dl-hint">{c.arch['win-x64'].note} {c.winHint}</p>
+      <ol class="dl-steps">
+        <li><a class="text-link" href={href('VStudy-Pro-win-x64.exe')}>{install.downloadExe}<span aria-hidden="true">↓</span></a></li>
+        {install.windowsSteps.map(step => <li>{step}</li>)}
+      </ol>
+      <p>{install.windowsScript}</p>
+      <div class="code-block">
+        <button type="button" data-install-copy aria-label={`${install.copy} PowerShell`}>{install.copy}</button>
+        <pre tabindex="0"><code>{windowsInstall.replaceAll('; ', '\n')}</code></pre>
+      </div>
+      <p class="dl-hint">{install.planned}</p>
+    </section>
+    <p class="sr-only" role="status" data-install-status></p>
 
     <section class="dl-recommend" data-recommend hidden aria-labelledby="dl-rec-title">
       <p class="dl-eyebrow">{c.recommended}</p>
@@ -37,9 +83,28 @@ const href = (file: string) => `${downloadBase}/${file}`;
     </section>
     <p class="dl-unknown" data-unknown hidden>{c.unknown}</p>
 
-    {groups.map(group => (
-      <section class="dl-os" aria-labelledby={`dl-${group.platform}`}>
-        <h2 id={`dl-${group.platform}`}>
+    <section class="dl-info" aria-labelledby="dl-update">
+      <h2 id="dl-update">{install.updateTitle}</h2>
+      <p>{install.update}</p>
+    </section>
+    <section class="dl-info" aria-labelledby="dl-uninstall">
+      <h2 id="dl-uninstall">{install.uninstallTitle}</h2>
+      <p>{install.uninstall}</p>
+    </section>
+    <details class="dl-help" id="verify-download">
+      <summary>{install.verifyTitle}<span aria-hidden="true">+</span></summary>
+      <div class="dl-help-body">
+        <p>{install.verify}</p>
+        <a class="text-link" href={`${downloadBase}/SHA256SUMS.txt`}>{c.checksums}</a>
+        <pre tabindex="0"><code>cd ~/Downloads<br />shasum -a 256 VStudy-Pro-mac-arm64.dmg</code></pre>
+        <pre tabindex="0"><code>cd $HOME\Downloads<br />Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe</code></pre>
+        <a class="text-link" href={RELEASES_URL}>{c.releases}</a>
+      </div>
+    </details>
+
+    {[{ platform: 'mac', name: c.osMac, hint: c.macHint }, { platform: 'win', name: c.osWin, hint: c.winHint }].map(group => (
+      <section class="dl-os" aria-labelledby={`dl-inventory-${group.platform}`}>
+        <h2 id={`dl-inventory-${group.platform}`}>
           {group.platform === 'mac'
             ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2.5 19h19"/></svg>
             : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M12 4v16M3.5 12h17"/></svg>}
@@ -73,14 +138,6 @@ const href = (file: string) => `${downloadBase}/${file}`;
       </section>
     ))}
 
-    <section class="dl-os" aria-labelledby="dl-linux">
-      <h2 id="dl-linux">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m8 10 3 2.5L8 15M13 15h3.5"/></svg>
-        {c.osLinux}
-      </h2>
-      <p class="dl-none">{c.noLinux}</p>
-    </section>
-
     <section class="dl-info" aria-labelledby="dl-req">
       <h2 id="dl-req">{c.requirementsTitle}</h2>
       <p>{c.requirements}</p>
@@ -90,17 +147,25 @@ const href = (file: string) => `${downloadBase}/${file}`;
       </ul>
     </section>
 
-    <details class="dl-help">
-      <summary>{c.safety}<span aria-hidden="true">+</span></summary>
-      <div class="dl-help-body">
-        <p>{c.unsigned}</p><p>{c.mac}</p><p>{c.win}</p><p>{c.signed}</p>
-        <a class="text-link" href={path(`${language}/docs/getting-started/`)}>{c.help}<span aria-hidden="true">→</span></a>
-      </div>
-    </details>
     <p class="dl-status">{c.status}</p>
   </main>
 </Base>
 <script>
+  import { installCopy } from '../data/install-copy';
+  document.querySelectorAll<HTMLButtonElement>('[data-install-copy]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const language = document.documentElement.lang as keyof typeof installCopy;
+      const labels = installCopy[language] ?? installCopy.en;
+      try {
+        await navigator.clipboard.writeText(button.parentElement?.querySelector('code')?.textContent ?? '');
+        button.textContent = labels.copied;
+      } catch {
+        button.textContent = labels.failed;
+      }
+      const status = document.querySelector('[data-install-status]');
+      if (status) status.textContent = button.textContent;
+    });
+  });
   import { detectInstaller } from '../scripts/platform';
   const panel = document.querySelector<HTMLElement>('[data-recommend]');
   const unknown = document.querySelector<HTMLElement>('[data-unknown]');

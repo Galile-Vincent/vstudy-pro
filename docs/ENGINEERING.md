@@ -147,3 +147,29 @@ Vitest runs with `pool: forks`, `maxWorkers: 2`, and `execArgv: ["--no-experimen
 Direct `pnpm exec vitest` also reads this configuration. After adding a namespace, run `pnpm --filter @vstudy/desktop locales:generate` before invoking Vitest directly. Normal install and package scripts already generate the registry. Locale contract tests check translated keys and interpolation names. `en-XA` derives from English at runtime.
 
 Knip does not follow the CSS imports in the current project configuration. Its CSS-only dependency exceptions are enumerated in `knip.json`. `openssl` is a required host binary for local TLS fixtures, not an npm dependency. Never add a blanket source-directory exclusion to silence vendor or dead-code checks.
+
+### Script installation and Homebrew
+
+After publishing a release, run `node scripts/update-cask.mjs VERSION` and commit the updated cask. It reads the versioned DMG entry from the published SHA256SUMS.txt. An optional second argument supplies a checksum fixture. Run `node --test scripts/update-cask.test.mjs`.
+
+The macOS installer is `scripts/install/install.sh`. Run `bash scripts/install/install.test.sh` on Apple silicon macOS. It builds a small real DMG and exercises install, replacement, checksum rejection, uninstall, and dry-run. `VSTUDY_RELEASE_BASE` is a test-only asset-directory URL override, including `file://` fixtures. Never set it in user-facing install commands. The Windows script is `scripts/install/install.ps1`; verify on Windows x64 before claiming native installation works.
+
+The app remains unsigned and un-notarized. The Mac installer and cask remove quarantine from the installed app only. This trusts the repository and release account. SHA-256 verifies consistency with that release, not publisher identity. No global Gatekeeper setting changes. Neither script uses sudo. App removal retains user data. Use Settings > Privacy > Delete all data before uninstalling to remove app data. Re-run the installer for manual updates.
+
+The cask is prepared for `ava-apple/homebrew-vstudy`. It is not published by this change. The owner must run these commands once, from a separate directory with GitHub CLI authentication. Do not advertise the brew install command as available until publication succeeds.
+
+```sh
+gh repo create ava-apple/homebrew-vstudy --public --clone
+mkdir -p homebrew-vstudy/Casks
+cp packaging/homebrew/Casks/vstudy-pro.rb homebrew-vstudy/Casks/
+git -C homebrew-vstudy add Casks/vstudy-pro.rb
+git -C homebrew-vstudy commit -m "feat: add VStudy Pro cask"
+git -C homebrew-vstudy push -u origin HEAD
+brew install --cask ava-apple/vstudy/vstudy-pro
+```
+
+Run the copy command from this repository root, or replace its source with an absolute path. Future releases require copying the updated cask into that tap and committing and pushing it there too. `brew uninstall --cask vstudy-pro` retains app data. `brew uninstall --cask --zap vstudy-pro` removes the paths listed in the cask. The data namespace stays `@vstudy/desktop`, derived from the desktop package name and `app.getPath('userData')`; branding must not rename it or change safeStorage identity.
+
+The current Homebrew release uses declarative `postflight_steps` with `run "/usr/bin/xattr"`, which is its postflight action. `brew style packaging/homebrew/Casks/vstudy-pro.rb` checks it locally. `brew audit --cask --new vstudy-pro` requires a locally available tap; current brew refuses auditing a file path. After publishing, install the tap before running the named audit.
+
+The cask zap removes Chromium caches inside `~/Library/Application Support/@vstudy/desktop` along with the app's data, plus `~/Library/Preferences/com.vstudy.pro.plist`. The latter was observed locally and matches the packaged bundle identifier. No separate `~/Library/Caches` or Saved Application State path was observed for this app, so the cask does not invent one. Keychain entries are deliberately retained.

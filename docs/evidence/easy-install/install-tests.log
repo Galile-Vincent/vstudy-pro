@@ -1,0 +1,57 @@
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/dry/VStudy Pro.app
+Dry run: would quit VStudy Pro and verify-and-install the app. No downloads or changes.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app
+Resolving release
+Downloading checksums from file:///var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/release
+Downloading VStudy-Pro-mac-arm64.dmg
+SHA-256 verified: f8e1072411b99205bdeea000e4aea827c192cea60e01db5ff063bb6ec444557f (VStudy-Pro-mac-arm64.dmg)
+Mounting read-only
+hdiutil: WARNING: 'hdiutil attach -nobrowse -readonly -mountpoint ...' is deprecated. Please use 'diskutil image attach --mountOptions nobrowse --readOnly --mountPoint ...' instead.
+/dev/disk12         	GUID_partition_scheme          	
+/dev/disk12s1       	Apple_HFS                      	/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-install.1wWzPK/mount
+Copying app with ditto
+Removing quarantine from this unsigned app only
+Requesting VStudy Pro to quit politely
+Moving verified app into place
+Signing information (unsigned or ad-hoc; not notarized)
+/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app: bundle format unrecognized, invalid, or unsuitable
+/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app: bundle format unrecognized, invalid, or unsuitable
+Gatekeeper assessment rejected. This app is unsigned/un-notarized; quarantine was removed only from this copy.
+Installed /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app. Re-run this script to update.
+hdiutil: WARNING: 'hdiutil detach ...' is deprecated. Please use 'diskutil eject ...' instead.
+"disk12" ejected.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app
+Resolving release
+Downloading checksums from file:///var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/release
+Downloading VStudy-Pro-mac-arm64.dmg
+SHA-256 verified: f8e1072411b99205bdeea000e4aea827c192cea60e01db5ff063bb6ec444557f (VStudy-Pro-mac-arm64.dmg)
+Mounting read-only
+hdiutil: WARNING: 'hdiutil attach -nobrowse -readonly -mountpoint ...' is deprecated. Please use 'diskutil image attach --mountOptions nobrowse --readOnly --mountPoint ...' instead.
+/dev/disk12         	GUID_partition_scheme          	
+/dev/disk12s1       	Apple_HFS                      	/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-install.vS6ZR6/mount
+Copying app with ditto
+Removing quarantine from this unsigned app only
+Requesting VStudy Pro to quit politely
+Moving verified app into place
+Signing information (unsigned or ad-hoc; not notarized)
+/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app: bundle format unrecognized, invalid, or unsuitable
+/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app: bundle format unrecognized, invalid, or unsuitable
+Gatekeeper assessment rejected. This app is unsigned/un-notarized; quarantine was removed only from this copy.
+Installed /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app. Re-run this script to update.
+hdiutil: WARNING: 'hdiutil detach ...' is deprecated. Please use 'diskutil eject ...' instead.
+"disk12" ejected.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app
+Requesting VStudy Pro to quit politely
+Removing only /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/apps/VStudy Pro.app
+User data retained. Before uninstalling, use Settings > Privacy > Delete all data to delete app data.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/bad/VStudy Pro.app
+Resolving release
+Downloading checksums from file:///var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/release
+Downloading VStudy-Pro-mac-arm64.dmg
+Error: SHA-256 mismatch. Nothing installed.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/missing/VStudy Pro.app
+Resolving release
+Downloading checksums from file:///var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.yZjxnD/release
+Downloading VStudy-Pro-mac-arm64.dmg
+Error: Missing, duplicate, or invalid checksum entry
+PASS: real DMG install, replacement, uninstall, dry-run, mismatch and missing checksum

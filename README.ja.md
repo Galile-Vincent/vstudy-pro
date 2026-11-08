@@ -19,38 +19,93 @@ macOS と Windows で教材を読み、Moodle の締め切りをまとめ、課�
 
 ## ダウンロードとインストール
 
-### アプリを入手する
+### Mac（Apple シリコン）
 
-| プラットフォーム | インストーラー |
-| --- | --- |
-| Apple シリコン Mac | [DMG をダウンロード](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg) |
-| Intel Mac | 予定。資料変換とネイティブのパッケージ検証が必要です。 |
-| Windows x64 | [EXE をダウンロード](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe) |
-| Windows ARM64 | 予定。資料変換とネイティブのインストール検証が必要です。 |
+#### 方法 1 - DMG をダウンロード（いちばん簡単。事前の準備は不要）
 
-同じリリースの [SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt) もダウンロードしてください。固定リンクは最新の公開ファイルを指します。リポジトリは公開されています。404 の場合は[リリースノート](https://github.com/ava-apple/vstudy-pro/releases/latest)で配布対象と検証結果を確認してください。CI の成果物や試行ビルドは公開リリースではありません。リンクだけではバージョン、サイズ、動作確認を保証しません。
+1. [.dmg をダウンロード](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-mac-arm64.dmg)。
+2. ダウンロードした .dmg ファイルをダブルクリックします。
+3. 開いたウインドウで VStudy Pro を「アプリケーション」にドラッグします。
+4. Finder で VStudy Pro のディスクイメージを取り出します。
+5. 「アプリケーション」または Launchpad から VStudy Pro を開きます。
 
-初回の配布対象は Apple シリコン Mac と Windows x64 です。Intel Mac と Windows ARM64 は、資料変換とネイティブのパッケージ検証が終わるまで予定です。資料変換には、Apple シリコンで macOS 14 以降、Intel で macOS 13 以降が必要です。Windows は x64 で Windows 10 以降、ARM64 で Windows 11 以降が必要です。ARM64 版は Windows のエミュレーションで x64 Python を実行します。アプリ自体は macOS 12 で Markdown とテキストを開けますが、変換ツールのネイティブ依存関係には新しい OS が必要です。Mac は「この Mac について」に Intel と表示される場合を除き、Apple シリコンを選びます。Windows は「設定 > システム > バージョン情報 > システムの種類」を確認し、ARM プロセッサーと Intel Mac の利用者は、対応版の公開をお待ちください。Linux 版はありません。AI と学校の同期にはネット接続が必要です。ローカルの Markdown とテキストの閲覧には AI アカウントは不要です。
+<!-- mac-signing-status -->
+> **macOS で「開けない」「開発元を確認できない」と表示されたら**
+>
+> Mac 版は Apple の Developer ID による署名と公証がまだ済んでいません。このプロジェクトのリリースページから入手し、プロジェクトを信頼できる場合のみ続けてください。 [プロジェクトのリリース](https://github.com/ava-apple/vstudy-pro/releases/latest)。
+>
+> 1. VStudy Pro を一度開こうとしてから、警告を閉じます。
+> 2. 「システム設定 > プライバシーとセキュリティ」を開き、「セキュリティ」まで下にスクロールします。
+> 3. 「このまま開く」をクリックし、必要に応じて認証してから「開く」で確定します。
+>
+> 古い macOS では、「アプリケーション」で VStudy Pro を右クリックし、「開く」を選んで、もう一度「開く」で確定できます。 チェックサムの確認は任意です。 [ダウンロードを検証](#任意---ダウンロードを検証)。 [Apple の起動手順](https://support.apple.com/en-us/102445)。
+<!-- /mac-signing-status -->
 
-### 検証して開く
+#### 方法 2 - ターミナルに 1 行貼り付ける（こちらも事前の準備は不要）
 
-1. インストーラーのハッシュ全体を `SHA256SUMS.txt` の同じファイル名の値と比較します。Mac はダウンロード先で `shasum -a 256 VStudy-Pro-mac-arm64.dmg` を実行し、実際のファイル名に置き換えます。Windows は PowerShell で `Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe` を使います。一覧にはほかの成果物も含まれます。自分が取得したファイルを照合してください。チェックサムは改変を検出しますが、発行元の身元は証明しません。
-2. Mac：DMG を開き、**VStudy Pro.app** を「**アプリケーション**」にドラッグします。イメージを取り出し、インストールしたアプリを開きます。未署名やアドホック署名でブロックされたら、一度起動を試します。入手元を信頼できる場合のみ「**システム設定 > プライバシーとセキュリティ**」で、表示される場合に「**このまま開く**」を選びます。Gatekeeper 全体を無効にしないでください。[Apple の初回起動手順](https://support.apple.com/en-us/102445)を参照してください。
-3. Windows：EXE を実行し、現在のユーザー用にインストールします。未署名のファイルで SmartScreen が警告したら、検証後に、表示される場合のみ「**詳細情報 > 実行**」を選びます。組織の方針で禁止される場合もあります。SmartScreen を無効にしないでください。このユーザー用インストーラーが管理者権限を要求したら操作を止めてください。
-4. 署名と公証済みの Mac 版は通常の初回確認で開きます。署名済み Windows 版はファイルの署名詳細で発行元を確認します。ただし署名は SmartScreen の評価を保証しません。実際の署名状態はリリースノートを確認し、[署名の検証](docs/SIGNING.md#verify-the-delivered-artifacts)も参照してください。
-5. 初回ガイドに従うか、サンプル資料を開きます。学校は「**コース**」、任意の AI は「**設定 > AI サービス**」で追加できます。
+Command-Space を押し、Terminal と入力して Return を押します。次のコマンドを貼り付け、Return を押してください。
 
-VStudy は Electron `safeStorage` で保存済み認証情報を暗号化します。macOS はログインキーチェーンのキーを使い、アドホック署名の再ビルド後にはアクセス確認が再表示される場合があります。Windows は現在の Windows ユーザーに結び付いた DPAPI を使い、Mac のキーチェーン確認は表示しません。どちらも再起動後は明示的なロック解除まで復号を待ちます。メイン画面を開くだけでは解除しません。再試行するか、保存せずにセッション中だけキーを使えます。
+```sh
+curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh | bash
+```
 
-### 更新とアンインストール
+Homebrew、npm、Xcode、Python は不要です。macOS に標準搭載されたツールだけで実行できます。
 
-更新は手動です。「**設定 > ストレージ**」でバックアップをエクスポートし、VStudy Pro を終了して、新しいインストーラーを検証します。Mac は「アプリケーション」のコピーを置き換え、Windows は同じユーザーで新版の EXE を実行します。データフォルダーを残せばライブラリと計画は保持されます。データベース更新前には移行用バックアップを作成します。ダウングレードは非対応です。自動更新は署名と公証を検証した後の別の変更です。
+- 最新の DMG をダウンロードし、SHA-256 チェックサムを確認します。
+- VStudy Pro を終了し、「アプリケーション」にインストールします。ライブラリは残ります。
+- このアプリの隔離属性だけを削除して、起動できるようにします。sudo は使いません。
 
-データを削除するには「**設定 > プライバシー > すべてのデータを削除**」で `DELETE` と入力し、システムの確認に同意します。アプリが専用データ領域を削除して終了したら、Mac アプリをゴミ箱に移すか、Windows の「**設定 > アプリ > インストールされているアプリ**」で削除します。アプリだけを削除してもローカルデータは残ります。
+[先にスクリプトを読む](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh)。
 
-Main は Electron `app.getPath('userData')` を使います。現在の名前空間は `@vstudy/desktop` です。既定の場所は Mac が `~/Library/Application Support/@vstudy/desktop`、Windows が `%APPDATA%\@vstudy\desktop` で、`vstudy.sqlite`、`library/`、`secrets.json`、変換器のファイルを含みます。テストでは場所を変更できます。[ストレージの説明](docs/STORAGE.md)を参照してください。
+#### 方法 3 - AI エージェントに任せる
 
-全データ削除でも、ライブラリ外の原本、書き出したバックアップ、CLI の認証情報、共有 Python ダウンロードキャッシュ、独立した OS の認証保管項目は削除しません。バックアップや SSD の安全な消去を保証する操作ではありません。
+このプロンプトを AI エージェントにコピーしてください。
+
+```text
+VStudy Pro をインストールしてください。Apple シリコン macOS では https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh を取得して全文を読んでください。Windows x64 では同じディレクトリの install.ps1 を読んでください。ダウンロードページに記載された署名状況を説明し、Mac スクリプトがこのアプリの隔離属性だけを削除することも伝えてください。読んだスクリプトを実行し、SHA-256 検証の成功を確認して VStudy Pro を開き、インストール先と結果を報告してください。sudo、システム保護の一括無効化、ユーザーデータの削除は禁止です。検証に失敗したら停止してください。
+```
+
+### Windows x64
+
+1. [EXE をダウンロード](https://github.com/ava-apple/vstudy-pro/releases/latest/download/VStudy-Pro-win-x64.exe)。
+2. ダウンロードした EXE をダブルクリックし、画面の案内に従います。自分のユーザー用にインストールされ、管理者権限は不要です。
+3. SmartScreen の警告が出た場合は、表示されていれば「詳細情報 > 実行」を選びます。このプロジェクトのリリースページから入手し、信頼できる場合のみ続けてください。学校が管理するパソコンでは許可されない場合があります。
+
+または、スタートメニューから PowerShell を開いて次のコマンドを貼り付けます。スクリプトをダウンロードして内容を表示してから実行します。
+
+```powershell
+Invoke-WebRequest https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.ps1 -OutFile install.ps1
+Get-Content install.ps1
+& .\install.ps1
+```
+
+Intel Mac 版と Windows ARM64 版は予定しています。Linux 用のインストーラーはまだありません。
+
+### 更新
+
+VStudy Pro を終了します。新しい DMG をダウンロードし、VStudy Pro を「アプリケーション」にドラッグして「置き換える」を選びます。ターミナルの 1 行コマンドを再実行しても更新できます。Windows では新しい EXE か PowerShell コマンドを実行します。ライブラリと学習計画は残ります。必要なら先に「設定 > ストレージ」でバックアップを書き出してください。
+
+### アンインストール
+
+Mac では VStudy Pro を終了し、「アプリケーション」からゴミ箱にドラッグします。Windows では「設定 > アプリ > インストールされているアプリ」から削除します。アプリを削除してもライブラリは残ります。データも削除したい場合は、先に VStudy Pro を開き、「設定 > プライバシー > すべてのデータを削除」を実行してください。
+
+### 任意 - ダウンロードを検証
+
+同じリリースから SHA256SUMS.txt をダウンロードします。ターミナルまたは PowerShell で「ダウンロード」フォルダーに移動し、お使いの OS のコマンドを実行してください。結果全体をファイル内の該当する値と照合します。一致すればファイルの内容を確認できますが、発行元の身元は証明できません。
+
+[SHA256SUMS.txt](https://github.com/ava-apple/vstudy-pro/releases/latest/download/SHA256SUMS.txt)
+
+```sh
+cd ~/Downloads
+shasum -a 256 VStudy-Pro-mac-arm64.dmg
+```
+
+```powershell
+cd $HOME\Downloads
+Get-FileHash -Algorithm SHA256 .\VStudy-Pro-win-x64.exe
+```
+
+[プロジェクトのリリース](https://github.com/ava-apple/vstudy-pro/releases/latest) · [ダウンロードを検証](https://vstudy.vcstudio.app/ja/download/#verify-download)
 
 ### ソースからビルドする
 

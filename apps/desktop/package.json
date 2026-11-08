@@ -6,7 +6,7 @@
   "author": "vstudy",
   "main": "out/main/index.js",
   "scripts": {
-    "dev": "node scripts/generate-locales.mjs && electron-vite dev",
+    "dev": "node scripts/generate-locales.mjs && node ../../scripts/brand-dev-electron.mjs && electron-vite dev",
     "build": "pnpm --filter @vstudy/mcp build && node scripts/build-mcp-platform.mjs && node scripts/generate-locales.mjs && electron-vite build",
     "test": "node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run",
     "contrast:check": "node scripts/check-contrast.mjs",

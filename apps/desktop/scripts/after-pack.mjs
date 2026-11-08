@@ -1,5 +1,7 @@
 
 /** Apply the same hardened fuses to native Mac and Windows package layouts before signing. */
+import { readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 
 export function fuseTarget({ appOutDir, packager, electronPlatformName }) {
@@ -12,6 +14,13 @@ export function fuseTarget({ appOutDir, packager, electronPlatformName }) {
 export default async context => {
   const { flipFuses, FuseVersion, FuseV1Options: F } = await import('@electron/fuses');
   const target = fuseTarget(context);
+  if (context.electronPlatformName === 'darwin') {
+    const frameworks = join(target, 'Contents/Frameworks');
+    for (const helper of readdirSync(frameworks).filter(name => name.endsWith('.app'))) {
+      const plist = join(frameworks, helper, 'Contents/Info.plist');
+      execFileSync('/usr/libexec/PlistBuddy', ['-c', `Set :CFBundleName ${helper.slice(0, -4)}`, plist]);
+    }
+  }
   await flipFuses(target, {
     version: FuseVersion.V1,
     resetAdHocDarwinSignature: context.electronPlatformName === 'darwin',
@@ -27,7 +36,6 @@ export default async context => {
   });
   if (context.electronPlatformName === 'darwin' && process.platform === 'darwin' &&
       !process.env.CSC_LINK && !process.env.CSC_NAME && !context.packager.platformSpecificBuildOptions.identity) {
-    const { execFileSync } = await import('node:child_process');
     execFileSync('/usr/bin/codesign', ['--force', '--deep', '--sign', '-', target]);
   }
 };

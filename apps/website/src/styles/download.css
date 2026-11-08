@@ -62,3 +62,17 @@ a.dl-card-main:hover .dl-go { color:var(--accent); transform:translateY(2px); }
   .dl-cards { grid-template-columns:1fr; }
   .dl-info { margin-top:var(--space-12); }
 }
+
+.dl .code-block { position: relative; margin-block: 1rem; }
+.dl .code-block pre { overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; padding: 1rem; border: 1px solid currentColor; border-radius: .5rem; }
+.dl .code-block button { margin-block: .25rem; cursor: pointer; }
+
+.dl h3 { margin-block:var(--space-8) var(--space-4); font-size:var(--text-lg); line-height:1.4; }
+.dl-steps { padding-inline-start:var(--space-6); margin-block:var(--space-4); }
+.dl-steps li + li { margin-top:var(--space-3); }
+.dl-signing { margin-top:var(--space-6); padding:var(--space-5); border:1px solid var(--line); border-radius:var(--r-lg); background:var(--subtle); font-size:var(--text-sm); }
+.dl-signing p { margin-top:var(--space-3); }
+.dl-signing h4 { font-size:var(--text-base); line-height:1.5; }
+.dl .code-block button { min-height:44px; padding:var(--space-2) var(--space-4); border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); }
+.dl pre { max-width:100%; white-space:pre-wrap; overflow-wrap:anywhere; }
+.dl { overflow-wrap:anywhere; }
