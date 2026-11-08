@@ -142,11 +142,7 @@ export function Chat({
     initialMessages: chatHistoryMessages(history),
   };
   const session=useChatSession(conversation.id,navigation?.activeTabId ?? conversation.id,connection,runtimeOptions);
-  const localRuntime=useLocalRuntime(connection.adapter,runtimeOptions);
-  const runtime=session.runtime ?? localRuntime;
   useEffect(()=>()=>{if(session.standalone)connection.dispose();},[connection,session.standalone]);
-  useEffect(() => { if (!session.standalone && !session.runtime)return; if (promptRequest) { runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}],metadata:{custom:{materials:promptRequest.materials}}}); } }, [promptRequest?.id,session.runtime]);
-  useEffect(() => { if(!session.standalone && !session.runtime)return;runtime.thread.composer.setText(restoredDraft); return runtime.thread.composer.subscribe(() => {composerDraft.current=runtime.thread.composer.getState().text;onDraft(composerDraft.current);}); }, [runtime, onDraft]);
   useEffect(() => {
     if (!jumpMessageId) return;
     let frame=0,remaining=60;
@@ -159,21 +155,36 @@ export function Chat({
   },[jumpMessageId, earlierHistory.length]);
   const statuses = new Map([...earlierHistory, ...history].flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
-  const extensions = {
-    documentContext, onClearDocumentContext, selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
-    picker: <><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
-    documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
+  const renderChat = (runtime: ReturnType<typeof useLocalRuntime>) => {
+    const extensions = {
+      documentContext, onClearDocumentContext, selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
+      picker: <><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
+      documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
+    };
+    return <AssistantRuntimeProvider runtime={runtime}><ChatRuntimeEffects runtime={runtime} promptRequest={promptRequest} restoredDraft={restoredDraft} onDraft={value=>{composerDraft.current=value;onDraft(value);}}/><DocumentChatContext.Provider value={extensions}>
+      <EarlierMessages jumpMessageId={jumpMessageId} runtime={runtime} conversationId={conversation.id} cursor={historyCursor} onLoaded={(messages, nextCursor) => {
+        partialHistory.current = !!nextCursor;
+        setEarlierHistory(current => [...messages, ...current]);
+        for (const message of messages) for (const part of message.parts) if (part.selection) selections.current.set(message.id, part.selection);
+      }}/>
+      <div className="chat-motion" ref={motion}>{imageUnsupported && <p role="status">{tr('library:original.unsupported')}</p>}<Thread components={documentComponents} autoFocus={autoFocus && !document.querySelector('.app-tabs-menu,[role="dialog"]')} /></div>
+      <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
+    </DocumentChatContext.Provider></AssistantRuntimeProvider>;
   };
-  if(!session.standalone && !session.runtime)return null;
-  return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
-    <EarlierMessages jumpMessageId={jumpMessageId} runtime={runtime} conversationId={conversation.id} cursor={historyCursor} onLoaded={(messages, nextCursor) => {
-      partialHistory.current = !!nextCursor;
-      setEarlierHistory(current => [...messages, ...current]);
-      for (const message of messages) for (const part of message.parts) if (part.selection) selections.current.set(message.id, part.selection);
-    }}/>
-    <div className="chat-motion" ref={motion}>{imageUnsupported && <p role="status">{tr('library:original.unsupported')}</p>}<Thread components={documentComponents} autoFocus={autoFocus && !document.querySelector('.app-tabs-menu,[role="dialog"]')} /></div>
-    <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
-  </DocumentChatContext.Provider></AssistantRuntimeProvider>;
+  if(session.standalone)return <StandaloneChatRuntime adapter={connection.adapter} options={runtimeOptions}>{renderChat}</StandaloneChatRuntime>;
+  return session.runtime ? renderChat(session.runtime) : null;
+}
+
+function StandaloneChatRuntime({adapter,options,children}:{adapter:Parameters<typeof useLocalRuntime>[0];options:Parameters<typeof useLocalRuntime>[1];children:(runtime:ReturnType<typeof useLocalRuntime>)=>React.ReactNode}) {
+  const runtime=useLocalRuntime(adapter,options);
+  return children(runtime);
+}
+
+function ChatRuntimeEffects({runtime,promptRequest,restoredDraft,onDraft}:{runtime:ReturnType<typeof useLocalRuntime>;promptRequest:React.ComponentProps<typeof Chat>['promptRequest'];restoredDraft:string;onDraft:(value:string)=>void}) {
+  const onDraftRef=useRef(onDraft);onDraftRef.current=onDraft;
+  useEffect(()=>{if(promptRequest)runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}],metadata:{custom:{materials:promptRequest.materials}}});},[promptRequest?.id]);
+  useEffect(()=>{runtime.thread.composer.setText(restoredDraft);return runtime.thread.composer.subscribe(()=>onDraftRef.current(runtime.thread.composer.getState().text));},[runtime]);
+  return null;
 }
 
 type DocumentChat = {

@@ -1,5 +1,6 @@
 import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
+import { setTimeout as delay } from 'node:timers/promises';
 import { mkdir, mkdtemp, writeFile, rm, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { seedArtCourses } from './fixtures/art-courses.mjs';
@@ -112,7 +113,11 @@ try {
   await page.locator('#shell-content').dispatchEvent('mouseup', { button: 3 }); await waitView('library'); await page.waitForTimeout(350);
   await page.locator('#shell-content').dispatchEvent('mouseup', { button: 4 }); await waitView('courses'); await page.waitForTimeout(350); check('mouse buttons 3 and 4 navigate');
   await app.evaluate(({ app, BrowserWindow }) => { app.focus({ steal: true }); const win = BrowserWindow.getAllWindows()[0]; win.focus(); win.webContents.focus(); });
-  await page.waitForFunction(() => document.hasFocus());
+  const focusDeadline=Date.now()+5000;
+  while(!await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.isFocused())) {
+    assert.ok(Date.now()<focusDeadline,'native shell WebContents acquired focus before app-command');
+    await delay(50);
+  }
   await page.locator('#shell-content').focus();
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].emit('app-command', {}, 'browser-backward')); await waitView('library'); await page.waitForTimeout(350);
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].emit('app-command', {}, 'browser-forward')); await waitView('courses'); await page.waitForTimeout(350); check('native app-command routes Back and Forward through guarded keyboard input');
