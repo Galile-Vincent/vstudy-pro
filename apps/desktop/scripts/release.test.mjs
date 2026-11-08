@@ -14,6 +14,7 @@ import { targets, targetsFor, targetFor, assetNames, packagedExecutable, release
 import { runSmoke, validateSmokeReport } from './distribution-smoke.mjs';
 import { stageAssets, assembleAssets } from './release-assets.mjs';
 import { withAppleApiKey } from './signing-key.mjs';
+import { identityName, certificateBytes, installSigningKeychain } from './signing-keychain.mjs';
 import { assertStaticLinkage, nativeRequirements, verifyNativeConverter } from './converter-native.mjs';
 
 const version = '1.2.3';
@@ -305,7 +306,7 @@ test('workflow exposes no signing credentials to branch or dry-run steps, and ev
   for (const line of workflow.split('\n')) if (line.includes('secrets.')) {
     assert.match(line, /needs\.plan\.outputs\.publish == 'true' && matrix\.platform == '(mac|win)' && secrets\./);
   }
-  const unsigned = workflow.split('- name: Package unsigned')[1].split('- name: Package release')[0];
+  const unsigned = workflow.split('- name: Package unsigned')[1].split('- name: Install the Developer ID')[0];
   assert.doesNotMatch(unsigned, /secrets\.|CSC_|AZURE_|APPLE_|WIN_SIGN/);
   assert.match(unsigned, /--unsigned/);
   for (const file of ['ci.yml', 'release.yml']) {
@@ -313,6 +314,32 @@ test('workflow exposes no signing credentials to branch or dry-run steps, and ev
     assert.doesNotMatch(contents, /\bruns-on:\s*macos-14\b/);
     for (const line of contents.split('\n')) if (line.includes('uses:')) assert.match(line, /@[a-f0-9]{40}\b/);
   }
+});
+
+test('the private keychain step names the Developer ID identity and rejects incomplete credentials', async t => {
+  const listing = '  1) 0700A4E156AD3A5D7B0FB734242AD42AED2DAA24 "Developer ID Application: Test Person (ABCDE12345)"\n     1 valid identities found\n';
+  assert.equal(identityName(listing), 'Test Person (ABCDE12345)');
+  assert.throws(() => identityName('     0 valid identities found\n'), /No Developer ID Application identity/);
+  assert.throws(() => certificateBytes('short'), /base64 P12/);
+  assert.equal(certificateBytes(Buffer.alloc(96, 7).toString('base64')).length, 96);
+  const root = await temporary(t);
+  const env = join(root, 'github-env');
+  assert.equal(installSigningKeychain({ GITHUB_ENV: env }), null);
+  assert.throws(() => installSigningKeychain({ CSC_LINK: 'x', GITHUB_ENV: env }), /Incomplete certificate credentials/);
+  assert.throws(() => installSigningKeychain({ CSC_KEY_PASSWORD: 'x', GITHUB_ENV: env }), /Incomplete certificate credentials/);
+  assert.throws(() => installSigningKeychain({ CSC_LINK: 'x', CSC_KEY_PASSWORD: 'x' }), /GITHUB_ENV is required/);
+});
+
+test('the release workflow installs the certificate itself and does not pass it to electron-builder', async () => {
+  const workflow = await readFile(join(repository, '.github/workflows/release.yml'), 'utf8');
+  const [, afterKeychain] = workflow.split('- name: Install the Developer ID certificate into a private keychain');
+  const [keychain, rest] = afterKeychain.split('- name: Package release with automatic signing');
+  const [packaging] = rest.split('- name: Verify packaged MCP code');
+  assert.match(keychain, /matrix\.platform == 'mac'/);
+  assert.match(keychain, /node scripts\/signing-keychain\.mjs/);
+  assert.match(keychain, /^\s+CSC_LINK:/m);
+  assert.doesNotMatch(packaging, /^\s+CSC_LINK:/m);
+  assert.doesNotMatch(packaging, /^\s+CSC_KEY_PASSWORD:/m);
 });
 
 test('branch release planning cannot become publishable from dry_run=false', async t => {

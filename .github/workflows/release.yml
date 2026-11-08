@@ -92,14 +92,19 @@ jobs:
         run: node scripts/package-release.mjs --target "$TARGET" --unsigned
         env:
           TARGET: ${{ matrix.key }}
+      - name: Install the Developer ID certificate into a private keychain
+        if: matrix.platform == 'mac' && needs.plan.outputs.publish == 'true' && startsWith(github.ref, 'refs/tags/v') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
+        working-directory: apps/desktop
+        run: node scripts/signing-keychain.mjs
+        env:
+          CSC_LINK: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.CSC_KEY_PASSWORD || '' }}
       - name: Package release with automatic signing when credentials are complete
         if: needs.plan.outputs.publish == 'true' && startsWith(github.ref, 'refs/tags/v') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
         working-directory: apps/desktop
         run: node scripts/package-release.mjs --target "$TARGET"
         env:
           TARGET: ${{ matrix.key }}
-          CSC_LINK: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.CSC_LINK || '' }}
-          CSC_KEY_PASSWORD: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.CSC_KEY_PASSWORD || '' }}
           APPLE_API_KEY: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.APPLE_API_KEY || '' }}
           APPLE_API_KEY_ID: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.APPLE_API_KEY_ID || '' }}
           APPLE_API_ISSUER: ${{ needs.plan.outputs.publish == 'true' && matrix.platform == 'mac' && secrets.APPLE_API_ISSUER || '' }}
