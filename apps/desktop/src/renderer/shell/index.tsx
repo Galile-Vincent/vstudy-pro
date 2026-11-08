@@ -30,7 +30,7 @@ import type { Document } from "../../shared";
 import type { LibraryQuery } from "../../shared/library";
 import "./shell.css";
 import "./art-reader.css";
-export type View = "home" | "library" | "workspace" | "welcome" | "courses" | "history" | "review";
+export type View = "ai-chats" | "home" | "library" | "workspace" | "welcome" | "courses" | "history" | "review";
 export type Route = {
   view: View;
   conversationId?: import("../../shared/domain").Conversation["id"] | undefined;
@@ -91,7 +91,7 @@ export function AppShell({
       const saved = JSON.parse(
         localStorage.getItem("vstudy-route") ?? "null",
       ) as Route | null;
-      if (saved && ["home", "library", "workspace", "courses", "history", "review"].includes(saved.view))
+      if (saved && ["home", "library", "workspace", "courses", "history", "review", "ai-chats"].includes(saved.view))
         return historyRoute(saved);
     } catch {
       /* Storage can be unavailable. */
@@ -190,6 +190,7 @@ export function AppShell({
               <Home />
               {tr("library:home")}
             </SidebarMenuButton></SidebarMenuItem>
+            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "ai-chats" ? "page" : undefined} onClick={() => navigate("ai-chats")}><HistoryIcon/>{tr("web-chat:title")}</SidebarMenuButton></SidebarMenuItem>
             <SidebarMenuItem><SidebarMenuButton
               data-parent={!!route.query?.folderId}
               aria-current={route.view === "library" || route.view === "workspace" ? "page" : undefined}
@@ -231,7 +232,7 @@ export function AppShell({
               <span>
                 {route.view === "home"
                   ? tr("library:home")
-                  : route.view === "review" ? tr("review:title") : route.view === "history" ? tr("history:title") : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
+                  : route.view === "ai-chats" ? tr("web-chat:title") : route.view === "review" ? tr("review:title") : route.view === "history" ? tr("history:title") : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
               </span>
             )}
             {route.view !== 'workspace' && status}
