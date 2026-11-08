@@ -27,6 +27,7 @@ export interface SetupDependencies {
   describe?: (provider: CliProvider) => Promise<string | null>;
   createPty?: () => ActionPty;
   version?: typeof probeVersion;
+  auth?: typeof authStatus;
   now?: () => number;
   changed?: () => void;
   loginInterpreters?: readonly string[];
@@ -223,7 +224,7 @@ export class AiCliSetup {
         }
       }
       if (!this.enabled(provider)) throw new SetupError('not-consented');
-      const signedIn = await authStatus(provider, providerPlan, signal);
+      const signedIn = await (this.deps.auth ?? authStatus)(provider, providerPlan, signal);
       assertConsent();
       this.apply(provider, { type: signedIn ? 'ready' : 'unsigned' });
       if (!signedIn) throw new SetupError(verb === 'test' ? 'login-expired' : 'not-signed-in');

@@ -6,7 +6,7 @@ import { createCliAdapter } from '../cli';
 import { AiCliSetup, type SetupDependencies } from './service';
 import { ReleaseSource } from './releases';
 import { payloadNetwork, payloadRelease, fixtureStore } from './test-fixtures';
-import { fixtureBinary, fixturePty, fixtureVersion } from './native-fixtures';
+import { fixtureAuthStatus, fixtureBinary, fixturePty, fixtureVersion } from './native-fixtures';
 export function claudeFixture(root: string, version = '1.0.0', afterRequire = '') {
   return fixtureBinary(`#!${process.execPath}
 const fs=require('fs');
@@ -32,6 +32,6 @@ export function setupFixture(root: string, overrides: Partial<SetupDependencies>
   const pins = new ExecutablePins(join(root, 'pins.json'), async () => false);
   const registry = new ProviderRegistry(); registry.register('claude-cli', createCliAdapter('claude'));
   const service = new AiCliSetup({ store, pins, registry, source, chatBusy: () => false, chatRevision: () => 0, loginInterpreters: [process.execPath], describe: provider => pins.describe(provider),
-    ...(process.platform === 'win32' ? { createPty: fixturePty, version: fixtureVersion } : {}), ...overrides });
+    ...(process.platform === 'win32' ? { createPty: fixturePty, version: fixtureVersion, auth: fixtureAuthStatus } : {}), ...overrides });
   return { service, store, pins, registry, source, payload };
 }
