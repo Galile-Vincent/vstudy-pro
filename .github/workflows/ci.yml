@@ -40,6 +40,8 @@ jobs:
           UV_EXECUTABLE: ${{ steps.uv.outputs.uv-path }}
         run: node apps/desktop/scripts/provision-ci-uv.mjs
       - run: pnpm install --frozen-lockfile
+      - name: Download the Electron binary once before tests run in parallel
+        run: pnpm --filter @vstudy/desktop exec node ./node_modules/electron/install.js
       - name: Prepare verified native converter dependencies when upstream wheels are missing
         run: node apps/desktop/scripts/converter-native.mjs
       - run: pnpm --filter @vstudy/mcp typecheck

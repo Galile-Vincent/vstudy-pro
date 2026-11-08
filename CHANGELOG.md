@@ -3,6 +3,10 @@
 Generated from Git history with git-cliff. Historical subjects are preserved.
 Pre-baseline changes without a conventional prefix appear under Other changes.
 
+## v0.4.3
+
+### Fixes
+- fix(test): retry temp directory cleanup and prepare v0.4.3 (74e339a)
 ## v0.4.2
 
 ### Fixes
