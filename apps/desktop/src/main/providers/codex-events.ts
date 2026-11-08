@@ -6,6 +6,7 @@
  */
 export function assertCodexChatEvent(record: Record<string, unknown>) {
   const item = record.item as { type?: string } | undefined;
-  if (item && !['agent_message', 'reasoning'].includes(item.type ?? ''))
+  // `error` items are non-fatal diagnostics (e.g. a missing optional code-mode host); real failures arrive as `turn.failed` or a top-level `error` record.
+  if (item && !['agent_message', 'reasoning', 'error'].includes(item.type ?? ''))
     throw new Error(`Unexpected Codex item: ${item.type}`);
 }

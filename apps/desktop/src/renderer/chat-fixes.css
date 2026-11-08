@@ -176,7 +176,7 @@
 .workspace .markdown pre { border:0; border-radius:var(--r-md); padding:var(--space-4); }
 .workspace [data-slot=data-table] { border:0; border-radius:var(--r-md); background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
 .workspace .aui-composer-send,
-.workspace .aui-composer-cancel { border-radius:var(--r-sm); }
+.workspace .aui-composer-cancel { border-radius:50%; }
 .workspace .aui-user-message-content {
  padding:var(--space-3) var(--space-4);
  border:0;

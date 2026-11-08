@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import type { CliActionSession, CliFailure } from '../../../shared/ai-cli';
 import type { ActionPlan } from './plans';
 import { ActionPty, TerminalText } from './pty';
+import { log } from '../../logging';
 import { failure, SetupError } from './types';
 export interface SetupOwner {
   isDestroyed(): boolean;
@@ -42,6 +43,7 @@ export class ActionSessions {
       controller.signal.throwIfAborted(); session.phase = 'succeeded'; session.exitCode = 0;
     }).catch(error => {
       const code = controller.signal.aborted ? 'cancelled' : failure(error);
+      if (code !== 'cancelled') log({ phase: 'ai-cli-action-failed', provider: plan.provider, verb: plan.verb, code, error: error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 300) : String(error).slice(0, 300) });
       session.error = code; session.phase = code === 'cancelled' ? 'cancelled' : 'failed'; session.exitCode ??= -1;
       onFailure(code);
     }).finally(() => { action.detach(); if (owner.isDestroyed()) this.actions.delete(session.id); this.changed(); });

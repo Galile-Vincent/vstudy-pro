@@ -2,7 +2,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { expect, it } from 'vitest';
-import { authStatus, tinyTest } from './probes';
+import { agyHasAcp, authStatus, tinyTest } from './probes';
 import { buildPlan } from './plans';
 import { ProviderRegistry } from '../index';
 import { AgyAdapter, agyArgs } from '../agy';
@@ -53,4 +53,8 @@ it('captures Claude auth JSON without a TTY so coloured keys cannot corrupt the 
   await writeFile(script, `if(process.stdout.isTTY) console.log('{\\x1b[32m"loggedIn"\\x1b[0m: true}'); else console.log(JSON.stringify({loggedIn:true}));`);
   const plan = buildPlan('test-claude', root, process.execPath, null, null, Date.now());
   expect(await authStatus('claude', plan, AbortSignal.timeout(5000))).toBe(true);
+});
+it('requires an Antigravity build that ships the acp subcommand', () => {
+  expect(['1.2.10', '1.4.9'].map(agyHasAcp)).toEqual([false, false]);
+  expect(['1.5.0', '1.5.3', '1.10.0', '2.0.0'].map(agyHasAcp)).toEqual([true, true, true, true]);
 });

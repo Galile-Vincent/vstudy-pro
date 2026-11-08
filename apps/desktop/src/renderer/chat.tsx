@@ -1,4 +1,3 @@
-import { CourseChip } from './review/course-chip';
 import { MemoryConsentCard } from './review/memory-consent';
 import { ChatTutorModeControl, useTutorMode } from "./tutor-mode-control";
 import { chatHistoryMessages, EarlierMessages, type MessageCursor } from './chat-history';
@@ -13,7 +12,7 @@ import { tr } from '../shared/i18n';
 import { ModelControls } from "./model-controls";
 export { ModelControls } from "./model-controls";
 import { MessageUsage } from "./usage/chip";
-import { UsageButton, UsageMeter, useUsage, useBudgetGuard } from "./usage/meter";
+import { UsageMeter, useUsage, useBudgetGuard } from "./usage/meter";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   AssistantRuntimeProvider,
@@ -139,7 +138,7 @@ export function Chat({
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
     selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
-    picker: <><CourseChip key={conversation.id} conversationId={conversation.id} /><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
+    picker: <><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
@@ -174,8 +173,6 @@ function ComposerBanner() {
 }
 function ComposerModel() {
   useTranslation(); return useDocumentChat().picker; }
-function ComposerUsage() {
-  useTranslation(); const {usage,onUsage} = useDocumentChat(); return <UsageButton {...usage} onClick={onUsage} />; }
 function MessageSelection() {
   useTranslation();
   const id = useAuiState(s => s.message.id), {selections} = useDocumentChat();
@@ -207,7 +204,7 @@ function DocumentNotice() {
   const { unavailable } = useDocumentChat();
   return unavailable ? <ReaderOfflineNotice/> : null;
 }
-const documentComponents = { Announcement: ChatAnnouncement, CopyAction: CopyAnswerButton, Text: MarkdownText, Welcome:DocumentWelcome, ThreadNotice:DocumentNotice, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, ComposerUsage, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
+const documentComponents = { Announcement: ChatAnnouncement, CopyAction: CopyAnswerButton, Text: MarkdownText, Welcome:DocumentWelcome, ThreadNotice:DocumentNotice, Source:DocumentSource, ToolFallback:DocumentTool, ComposerExtra: ComposerModel, ComposerPrefix: ComposerSelection, ComposerBanner, UserMessagePrefix: MessageSelection, MessageFooter: DocumentMessageFooter, ComposerInput: ChatComposerInput, useComposerBindings };
 
 export function ChatComposerInput() {
   useTranslation();

@@ -21,8 +21,13 @@ export async function probeVersion(binary: string, provider: CliProvider, expect
   const { output, exitCode } = await captureCommand({ executable: binary, args: ['--version'], cwd, env }, signal, 10_000, 8192);
   if (exitCode !== 0) throw new SetupError('wrong-version');
   const version = output.match(/\b(\d+\.\d+\.\d+(?:[-+][a-zA-Z0-9.-]+)?)\b/)?.[1];
-  if (!version || expected && version !== expected || provider === 'codex' && version !== '0.166.0') throw new SetupError('wrong-version');
+  if (!version || expected && version !== expected || provider === 'codex' && version !== '0.166.0' || provider === 'agy' && !agyHasAcp(version)) throw new SetupError('wrong-version');
   return version;
+}
+/** `agy acp` first shipped in 1.5.0; older builds reject the subcommand and the failure surfaced as a misleading "offline". */
+export function agyHasAcp(version: string): boolean {
+  const [major = 0, minor = 0] = version.split(/[.+-]/).map(Number);
+  return major > 1 || major === 1 && minor >= 5;
 }
 export async function authStatus(provider: CliProvider, plan: TerminalPlan, signal: AbortSignal, capture = captureCommand): Promise<boolean> {
   if (provider === 'agy') {

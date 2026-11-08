@@ -31,7 +31,7 @@ export function claudeModels(input: unknown): Model[] {
   const catalog = claudeCatalog.parse(input);
   return catalog.map(m => {
     const options = [
-      ...(m.supportedEffortLevels?.length ? [option('effort', 'Effort', [...m.supportedEffortLevels, ...((patterns as Record<string,string[]>)[m.resolvedModel ?? m.value] ?? [])], m.supportedEffortLevels.includes('high') ? 'high' : m.supportedEffortLevels[0])] : []),
+      ...(m.supportedEffortLevels?.length ? [option('effort', 'Effort', [...m.supportedEffortLevels, ...((patterns as Record<string,string[]>)[m.resolvedModel ?? m.value] ?? [])], m.value === 'sonnet' && m.supportedEffortLevels.includes('medium') ? 'medium' : m.supportedEffortLevels.includes('high') ? 'high' : m.supportedEffortLevels[0])] : []),
       ...(m.supportsFastMode ? [option('fastMode', 'Fast mode', ['false', 'true'], 'false')] : []),
       ...(m.supportsThinkingOff ? [option('thinking', 'Thinking', ['enabled', 'disabled'], 'enabled')] : []),
     ];

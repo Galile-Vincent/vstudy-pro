@@ -39,6 +39,9 @@ it('removes model-selected tools even for an unknown slug', () => {
 for (const type of ['command_execution', 'file_change', 'mcp_tool_call', 'web_search', 'future_tool']) it(`rejects ${type} events`, () => {
   expect(() => assertCodexChatEvent({ type: 'item.started', item: { type } })).toThrow('Unexpected Codex item');
 });
+it('tolerates non-fatal Codex error items such as an unavailable code-mode host', () => {
+  expect(() => assertCodexChatEvent({ type: 'item.completed', item: { type: 'error', message: 'Code Mode is unavailable' } })).not.toThrow();
+});
 it.skipIf(process.platform !== 'darwin')('kernel sandbox prevents creating a child process', async () => {
   const { stdout, stderr } = await promisify(execFile)('/usr/bin/sandbox-exec', ['-p', codexForkProfile, '/bin/sh', '-c', 'echo parent; /bin/echo CHILD_EXECUTED']).catch(error => error);
   expect(stdout).toContain('parent');
