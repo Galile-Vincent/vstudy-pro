@@ -1,0 +1,19 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-b3eeca74/apps/desktop
+
+SNAPSHOT SIGKILL interruptedBytes=77447168 afterCleanupBytes=0
+SNAPSHOT SIGTERM interruptedBytes=0 afterCleanupBytes=0
+SNAPSHOT worker termination interruptedBytes=0 afterCleanupBytes=0
+CONTENTION documents=2000 maxWriteMs=4.2 maxEventLoopGapMs=32.4 writes=86
+FRESHNESS elapsedMs=950 visibleResults=1 searches=2
+assignments: 0.37 ms
+base64: 0.09 ms
+identifier: 0.13 ms
+dotted: 0.17 ms
+quotes: 0.61 ms
+
+ Test Files  292 passed | 7 skipped (299)
+      Tests  2642 passed | 20 skipped (2662)
+   Start at  19:01:55
+   Duration  68.64s (transform 2.99s, setup 0ms, import 24.98s, tests 82.93s, environment 14.56s)
+
