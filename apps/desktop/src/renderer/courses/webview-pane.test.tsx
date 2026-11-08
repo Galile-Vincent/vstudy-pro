@@ -85,3 +85,10 @@ it('offers the imported document after returning to a completed file',async()=>{
  fireEvent.click(await screen.findByRole('button',{name:'Open document'}));expect(onDocument).toHaveBeenCalledWith(documentId);
  }finally{cleanup();}
 });
+it('never overlays a completed-file card on a Moodle page',async()=>{
+ const {render,screen,cleanup}=await import('@testing-library/react');
+ invoke.mockResolvedValue({id:'pane',generation:1,status:'ready',url:'https://school.example/course/view.php?id=1',title:'Course',zoom:1,error:null,documentId:null,importedDocumentId:'5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60'});
+ try{render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" accountId="school" target={{kind:'page',url:'https://school.example/course/view.php?id=1'}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>);
+ await screen.findByText('Course');expect(screen.queryByRole('button',{name:'Open document'})).toBeNull();
+ }finally{cleanup();}
+});

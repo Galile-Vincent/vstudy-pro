@@ -366,3 +366,37 @@ it('never reveals a native view before a document has committed',async()=>{
  views.layout(owner,state.id,{x:0,y:0,width:500,height:500},{dark:false,background:'#ffffff',foreground:'#000000',accent:'#0000ff'},true,state.generation);
  expect(mock.panes.at(-1)!.visible).toBe(false);
 });
+
+it.each([
+  [`${site}/mod/page/view.php?id=2`,`${site}/course/view.php?id=99`],
+  [`${site}/mod/page/view.php?id=2&sesskey=fresh&returnurl=lesson`,`${site}/mod/page/view.php?id=2`],
+])('loads the requested target %s despite renderer checkpoint URL %s',async(url,savedUrl)=>{
+ const {views,owner}=await open();
+ const {publicWebviewUrl}=await import('../../shared/moodle-webview');
+ views.open(owner,accountId,{kind:'page',url},randomUUID(),{accountId,requestedUrl:publicWebviewUrl(url),url:savedUrl,zoom:1.2,scrollTop:50});
+ await settle();
+ expect(mock.panes.at(-1)!.contents.loadURL).toHaveBeenCalledWith(url);
+});
+it('ignores completed-file markers on page targets',async()=>{
+ const {views,owner}=await open();
+ const state=views.open(owner,accountId,{kind:'page',url:site+'/mod/page/view.php?id=3'},randomUUID(),undefined,'5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60');
+ expect(state.importedDocumentId).toBeNull();
+});
+it('opens a completed file while disconnected without ensuring authentication',async()=>{
+ const {MoodleWebviewSession}=await import('./webview-session');
+ const ensure=vi.spyOn(MoodleWebviewSession.prototype,'ensure');
+ const owner=Object.assign(new EventEmitter(),{id:12,isDestroyed:()=>false,getZoomFactor:()=>1}) as unknown as WebContents;
+ const views=new MoodleWebviews({account:()=>({...account,status:'disconnected'}) as never,credentials:vi.fn(),file:()=>({account:account as never,url:file()}),documents:{importPath:vi.fn()} as never});users.push(views);
+ try {
+ const state=views.open(owner,accountId,{kind:'file',fileId:randomUUID()},randomUUID(),undefined,'5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60');
+ expect(state).toMatchObject({status:'ready',error:null,importedDocumentId:'5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60'});
+ expect(ensure).not.toHaveBeenCalled();
+ views.open(owner,accountId,{kind:'file',fileId:randomUUID()},randomUUID(),undefined,'5f0a7a2e-8d4b-4c63-9f0e-1b2c3d4e5f60');expect(ensure).not.toHaveBeenCalled();
+ }finally{ensure.mockRestore();}
+});
+it('offers recovery when stopped before the first document commits',async()=>{
+ const {views,owner,state,contents}=await open();
+ const stopped=await views.action(owner,state.id,'stop');
+ expect(stopped).toMatchObject({status:'error',error:'load-failed'});
+ contents.loadURL.mockClear();await views.action(owner,state.id,'reload');await settle();expect(contents.loadURL).toHaveBeenCalled();
+});

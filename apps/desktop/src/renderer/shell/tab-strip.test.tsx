@@ -25,3 +25,9 @@ it('shows the existing limit message for attempts outside the picker',async()=>{
  const view=render(<TabStrip/>);await act(async()=>{window.dispatchEvent(new Event('vstudy:tab-limit'));});
  expect(view.baseElement.textContent).toContain('30');expect(view.baseElement.querySelector('.app-tabs-menu')).not.toBeNull();
 });
+it('syncs hosted chats even when Moodle sync fails',async()=>{
+ fixture.navigation={tabs:{activeId:'first',tabs:[{id:'first',title:'Home',icon:'Home',history:{entries:[{view:'home'}],index:0}}]},openTab:vi.fn(),activateTab:vi.fn(),closeTab:vi.fn(),reorderTabs:vi.fn()};
+ fixture.invoke.mockClear();fixture.invoke.mockImplementation((channel:string)=>channel==='moodle:webview-sync'?Promise.reject(Error('offline')):Promise.resolve({tabs:[]}));
+ render(<TabStrip/>);await act(async()=>{});
+ expect(fixture.invoke).toHaveBeenCalledWith('web-chat:sync',{tabIds:['first']});
+});

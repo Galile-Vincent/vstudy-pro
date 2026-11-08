@@ -60,7 +60,7 @@ export function MoodleWebviewPane({tabId,accountId,target,onClose,onDocument,onR
       if (!active) return;
       setState(next);
       if(next.url) navigationRef.current?.updateNativePresentation(tabId,{kind:'moodle',accountId,requestedUrl:target.kind==='page'?publicWebviewUrl(target.url):next.url,url:next.url,zoom:next.zoom,scrollTop:next.scrollTop},next.title);
-      if (next.documentId) {navigationRef.current?.recordMoodleImport(tabId,next.documentId);void desktop.invoke('moodle:webview-action',{tabId,id:next.id,action:'ack-document'}).catch(()=>{});closing.current=true;callbacks.current.onDocument(next.documentId);}
+      if (next.documentId) {const persisted=navigationRef.current?.recordMoodleImport(tabId,next.documentId,{view:'moodle',accountId,target});if(persisted)void desktop.invoke('moodle:webview-action',{tabId,id:next.id,action:'ack-document'}).catch(()=>{});closing.current=true;callbacks.current.onDocument(next.documentId);}
       else if (next.status === 'closed') close();
     };
     const poll = async () => {
@@ -117,7 +117,7 @@ export function MoodleWebviewPane({tabId,accountId,target,onClose,onDocument,onR
       {busy && <progress className="moodle-webview-progress" aria-label={tr('webview:loading')} />}
       <div ref={slot} className="moodle-webview-slot" data-testid="moodle-webview-slot">
         {busy && <div className="moodle-webview-message" role="status"><RefreshCw className="moodle-spin" /><p>{tr(state?.status === 'loading' ? 'webview:loading' : 'webview:connecting')}</p></div>}
-        {!busy && !error && state?.importedDocumentId && <div className="moodle-webview-message" role="status"><p>{tr('webview:imported')}</p><Button onClick={()=>callbacks.current.onDocument(state.importedDocumentId!)}>{tr('webview:open_document')}</Button></div>}
+        {!busy && !error && target.kind==='file' && state?.importedDocumentId && <div className="moodle-webview-message" role="status"><p>{tr('webview:imported')}</p><Button onClick={()=>callbacks.current.onDocument(state.importedDocumentId!)}>{tr('webview:open_document')}</Button></div>}
         {error && <div className="moodle-webview-message" role="alert"><ShieldAlert /><h2>{tr(`webview:error_${error}`)}</h2><p>{tr(`webview:hint_${error}`)}</p>
           {state?.retryAt && state.retryAt > Date.now() && <p>{tr('webview:rate_limit',{time:new Date(state.retryAt).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})})}</p>}
           {error==='resource-limit' && <Button onClick={()=>setAttempt(value=>value+1)}>{tr('common:retry')}</Button>}

@@ -11,7 +11,7 @@ import { URL, URLSearchParams } from 'node:url';
 import { Buffer } from 'node:buffer';
 
 const directory = await mkdtemp(join(tmpdir(),'vstudy-webview-'));
-const evidence = resolve(process.env.VSTUDY_NATIVE_UI?'../../docs/evidence/app-tabs-fixes-3':'../../docs/evidence/app-tabs-native');
+const evidence = resolve(process.env.VSTUDY_NATIVE_UI?'../../docs/evidence/app-tabs-fixes-4':'../../docs/evidence/app-tabs-native');
 const accountId = '11111111-1111-4111-a111-111111111111';
 const courseId = '22222222-2222-4222-a222-222222222222';
 const issued = new Map();
@@ -135,16 +135,25 @@ try {
       manager.hide(owner,tabId,state.generation);
       if((await manager.action(owner,state.id,'discard')).status==='discarded')throw Error('Same-document navigation lost draft protection');
     });
-    await page.evaluate(({tabId,accountId,imports})=>{
-      const fileRoute={view:'moodle',accountId,target:{kind:'file',fileId:'bbbbbbbb-bbbb-4bbb-abbb-bbbbbbbbbbbb'},importedDocumentId:imports};
-      localStorage.setItem('vstudy-tabs-v1',JSON.stringify({version:1,activeId:tabId,tabs:[{id:tabId,history:{entries:[fileRoute,{view:'workspace',documentId:imports}],index:1},title:'Imported file',icon:'FileText',lastActiveAt:0,presentation:{kind:'document',scrollTop:0}}]}));
+    await page.evaluate(({tabId,accountId})=>{
+      const fileRoute={view:'moodle',accountId,target:{kind:'file',fileId:'bbbbbbbb-bbbb-4bbb-abbb-bbbbbbbbbbbb'}};
+      localStorage.setItem('vstudy-tabs-v1',JSON.stringify({version:1,activeId:tabId,tabs:[{id:tabId,history:{entries:[fileRoute],index:0},title:'File import',icon:'FileText',lastActiveAt:0,presentation:{kind:'app',scrollTop:0}}]}));
       const set=window.Storage.prototype.setItem;
       window.Storage.prototype.setItem=function(key,value){if(key!=='vstudy-tabs-v1')set.call(this,key,value);};
-    },{tabId,accountId,imports});
+    },{tabId,accountId});
     await app.evaluate(({BrowserWindow})=>globalThis.webviewManager.sync(BrowserWindow.getAllWindows()[0].webContents,[]));
     await page.reload();await page.locator('.app-shell[data-view=workspace]').waitFor();
+    const savedImport=await page.evaluate(()=>JSON.parse(localStorage.getItem('vstudy-tabs-v1')).tabs[0].history.entries[0].importedDocumentId);
+    assert.ok(savedImport,'production renderer persisted the real file import marker');
+    await app.evaluate(()=>{for(const pane of globalThis.webviewManager.panes.values())if(pane.state.documentId)throw Error('persisted import was not acknowledged');});
+    const importedRequests=requests.filter(request=>request.path.startsWith('/pluginfile.php/')).length;
+    await app.close();
+    app=await electron.launch({args:[resolve('.'),`--user-data-dir=${join(directory,'data')}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
+    page=await app.firstWindow();await installFixture();await page.reload();
+    await page.locator('.app-shell[data-view=workspace]').waitFor();
     await page.keyboard.press('Meta+[');await page.getByRole('button',{name:'Open document',exact:true}).waitFor();
     assert.equal(await page.getByText('This file was imported',{exact:true}).count(),1,'restart Back displays imported-file card');
+    assert.equal(requests.filter(request=>request.path.startsWith('/pluginfile.php/')).length,importedRequests,'restart Back does not reimport');
     await app.evaluate(()=>{const manager=globalThis.webviewManager;for(const pane of manager.panes.values())pane.view.webContents.emit('render-process-gone',{}, {reason:'crashed'});});
     await page.reload();await page.getByRole('button',{name:'Open document',exact:true}).waitFor();
     assert.equal((await nativeState())[0].visible,false,'restored file card never reveals blank native view');

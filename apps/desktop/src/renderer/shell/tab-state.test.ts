@@ -68,3 +68,7 @@ it('persists completed Moodle imports on their history entry across restart and 
  expect(saveTabs(storage,state)).toBe(true);state=loadTabs(storage,id(9));state=tabReducer(state,{type:'history',id:id(1),direction:'back'});
  expect(currentRoute(state).importedDocumentId).toBe(id(4));
 });
+it('does not mark a Moodle page when a linked file is imported',()=>{
+ const state=initialTabs(id(1),{view:'moodle',accountId:id(2),target:{kind:'page',url:'https://school.example/mod/page/view.php?id=1'}});
+ expect(currentRoute(tabReducer(state,{type:'imported',id:id(1),documentId:id(4)})).importedDocumentId).toBeUndefined();
+});

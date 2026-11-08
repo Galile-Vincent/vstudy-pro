@@ -55,9 +55,9 @@ export class MoodleWebviews {
   private readonly panes = new Map<string,Pane>();
   private readonly pool:NativeTabPool;
   constructor(private readonly dependencies:MoodleWebviewDependencies) {this.pool=dependencies.pool ?? nativeTabPool;}
-  private account(id:string): AccountSession {
+  private account(id:string,localFile=false): AccountSession {
     const account = this.dependencies.account(id);
-    if (account.status !== 'connected') throw new WebviewSessionError('session-expired');
+    if (!localFile && account.status !== 'connected') throw new WebviewSessionError('session-expired');
     const existing = this.accounts.get(id);
     if (existing) return existing;
     const policy = webviewPolicy(account.siteUrl,this.dependencies.configuredHosts);
@@ -97,10 +97,12 @@ export class MoodleWebviews {
   open(owner:WebContents,accountId:string,target:WebviewTarget,tabId:string = randomUUID(),checkpoint?:{accountId:string;requestedUrl:string;url:string;zoom:number;scrollTop:number},importedDocumentId?:string): WebviewState {
     const window = BrowserWindow.fromWebContents(owner);
     if (!window) throw new Error('Missing app window');
+    const localFile=target.kind==='file' && !!importedDocumentId;
+    if(target.kind!=='file') importedDocumentId=undefined;
     const resourceKey=`${owner.id}:${tabId}`;
-    if(this.errors.has(resourceKey) && this.dependencies.account(accountId).status!=='connected') return {...this.errors.get(resourceKey)!};
+    if(!localFile && this.errors.has(resourceKey) && this.dependencies.account(accountId).status!=='connected') return {...this.errors.get(resourceKey)!};
     this.errors.delete(resourceKey);
-    const account = this.account(accountId);
+    const account = this.account(accountId,localFile);
     const source = target.kind === 'file' ? this.dependencies.file(target.fileId) : null;
     if (source && source.account.id !== accountId) throw new WebviewSessionError('blocked');
     const raw = source?.url ?? (target.kind === 'page' ? target.url : '');
@@ -118,17 +120,17 @@ export class MoodleWebviews {
     for (const pane of this.panes.values()) if(pane.owner.id===owner.id) {pane.visible=false;pane.active=false;pane.view.setVisible(false);}
     let existing = this.panes.get(key);
     if(existing && (existing.account.account.id!==accountId || existing.requestedUrl!==url)) {this.closeResource(key);this.checkpoints.delete(key);existing=undefined;}
-    if (existing) {existing.active=true;existing.state.generation=generation;void existing.account.auth.ensure().catch(error=>this.fail(existing,error));return this.state(owner,existing.state.id);}
+    if (existing) {existing.active=true;existing.state.generation=generation;if(!existing.imported || !webviewFile(existing.target,existing.account.policy)) void existing.account.auth.ensure().catch(error=>this.fail(existing,error));return this.state(owner,existing.state.id);}
     const candidate=this.checkpoints.get(key);
     const previous=candidate?.accountId===accountId && candidate.requestedUrl===url ? candidate : undefined;
-    const saved = previous ?? (checkpoint && checkpoint.accountId===accountId && checkpoint.requestedUrl===publicWebviewUrl(url) ? {state:{url:publicWebviewUrl(checkpoint.url),zoom:checkpoint.zoom},scroll:checkpoint.scrollTop} : undefined);
-    const state:WebviewState = {id:randomUUID(),generation,scrollTop:0,status:'connecting',url:publicWebviewUrl(url),title:tr('webview:title'),secure:false,canGoBack:false,canGoForward:false,zoom:1,error:null,retryAt:null,documentId:previous?.state.documentId ?? null,importedDocumentId:importedDocumentId ? documentIdSchema.parse(importedDocumentId) : previous?.state.importedDocumentId ?? null};
+    const saved = previous ?? (checkpoint && checkpoint.accountId===accountId && checkpoint.requestedUrl===publicWebviewUrl(url) ? {state:{zoom:checkpoint.zoom},scroll:checkpoint.scrollTop} : undefined);
+    const state:WebviewState = {id:randomUUID(),generation,scrollTop:0,status:'connecting',url:publicWebviewUrl(url),title:tr('webview:title'),secure:false,canGoBack:false,canGoForward:false,zoom:1,error:null,retryAt:null,documentId:previous?.state.documentId ?? null,importedDocumentId:target.kind==='file' ? importedDocumentId ? documentIdSchema.parse(importedDocumentId) : previous?.state.importedDocumentId ?? null : null};
     if(this.pool.makeRoom(owner.id)==='resource-limit') return {...state,status:'error',error:'resource-limit'};
     const view = new WebContentsView({webPreferences:{session:account.browser,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,navigateOnDragDrop:false,spellcheck:false}});
     const pane:Pane = {tabId,loaded:false,imported:!!importedDocumentId || !!previous?.imported,requestedUrl:url,dirty:0,scroll:saved?.scroll ?? 0,owner,window,view,account,state,target:url,retries:0,visible:false,active:true,timer:undefined,abort:new AbortController(),importing:false,externalPending:false,gestureAt:0};
     const admission = this.pool.acquire({key,ownerId:owner.id,kind:'moodle',lastActiveAt:Date.now(),active:()=>pane.active,protected:()=>pane.importing || pane.externalPending || draftProtected(pane.dirty) || ['connecting','loading'].includes(pane.state.status),processId:()=>view.webContents.getOSProcessId(),discard:()=>this.discard(key)});
     if (admission === 'resource-limit') {view.webContents.close({waitForBeforeUnload:false});return {...state,status:'error',error:'resource-limit'};}
-    if (saved && webviewNavigation(saved.state.url,account.policy)==='internal' && !webviewFile(saved.state.url,account.policy)) {pane.target=previous?.target ?? saved.state.url;pane.state.zoom=saved.state.zoom;view.webContents.setZoomFactor(saved.state.zoom);}
+    if (saved) {pane.target=previous?.target ?? url;pane.state.zoom=saved.state.zoom;view.webContents.setZoomFactor(saved.state.zoom);}
     this.checkpoints.delete(key);
     this.panes.set(key,pane);
     window.contentView.addChildView(view);
@@ -178,13 +180,13 @@ export class MoodleWebviews {
   private async load(pane:Pane,force = false) {
     pane.state.status = 'connecting'; pane.state.error = null;
     pane.view.setVisible(false);
+    if(pane.imported && webviewFile(pane.target,pane.account.policy)) {pane.state.status='ready';return;}
     try {
       if (this.dependencies.account(pane.account.account.id).status !== 'connected') throw new WebviewSessionError('session-expired');
       await pane.account.auth.ensure(force);
       for(const sibling of this.panes.values()) if(sibling!==pane && sibling.account===pane.account && sibling.state.error==='session-expired') void this.load(sibling);
       if (!pane.abort.signal.aborted) {
-        if(pane.imported && webviewFile(pane.target,pane.account.policy)) pane.state.status='ready';
-        else if (webviewFile(pane.target,pane.account.policy)) await this.importFile(pane,pane.target,true);
+        if (webviewFile(pane.target,pane.account.policy)) await this.importFile(pane,pane.target,true);
         else await this.navigate(pane,pane.target);
       }
     } catch (error) { this.fail(pane,error); }
@@ -233,7 +235,7 @@ export class MoodleWebviews {
     const account=this.accounts.get(id);
     if (!account || account.probing || Date.now()-account.lastProbeAt<4*60_000) return;
     const panes=[...this.panes.values()].filter(pane=>pane.account===account);
-    if (!panes.some(pane=>pane.visible && pane.state.status==='ready')) return;
+    if (!panes.some(pane=>pane.visible && pane.state.status==='ready' && !(pane.imported && webviewFile(pane.target,pane.account.policy)))) return;
     account.probing=true;account.lastProbeAt=Date.now();
     try {
       if (!await probeWebviewSession(account.browser,account.policy,AbortSignal.timeout(15_000))) {
@@ -297,7 +299,7 @@ export class MoodleWebviews {
     if (action === 'forward' && contents.navigationHistory.canGoForward()) contents.navigationHistory.goForward();
     if (action === 'reload') {pane.imported=false;pane.retries = 0;pane.gestureAt = 0;void this.load(pane);}
     if (action === 'reconnect') {pane.imported=false;pane.retries = 0;pane.gestureAt = 0;void this.load(pane,true);}
-    if (action === 'stop') {contents.stop();clearTimeout(pane.timer);if (pane.state.status === 'loading') pane.state.status = 'ready';}
+    if (action === 'stop') {contents.stop();clearTimeout(pane.timer);if (pane.state.status === 'loading') {if(pane.loaded) pane.state.status='ready';else this.fail(pane,new WebviewSessionError('load-failed'));}}
     if (action === 'focus') contents.focus();
     if (action === 'external') await this.external(pane,pane.state.url);
     if (action === 'copy') clipboard.writeText(pane.state.url);
