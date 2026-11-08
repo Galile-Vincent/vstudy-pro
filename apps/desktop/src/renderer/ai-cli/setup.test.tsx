@@ -514,3 +514,10 @@ it('copies the sign-in URL without opening it and rejects control characters in 
     expect(fixture.calls).toHaveLength(0);
   } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
 });
+
+it('shows the device code from real Codex output where it follows an expiry note on the next line', async () => {
+  const output = 'Follow these steps:\n\n1. Open this link\n   https://auth.openai.com/codex/device\n\n2. Enter this one-time code (expires in 15 minutes)\n   600B-FQMFE\n';
+  const session = { id: crypto.randomUUID(), actionId: 'login-codex' as const, phase: 'running' as const, output, truncated: false, exitCode: null, error: null };
+  await mount(<SignInAction session={session} />);
+  expect(document.querySelector('.ai-cli-device-code')?.textContent).toContain('600B-FQMFE');
+});

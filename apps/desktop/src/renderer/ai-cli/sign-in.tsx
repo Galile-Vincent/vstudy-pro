@@ -14,7 +14,7 @@ export function SignInAction({ session }: { session: CliActionSession }) {
   const [error, setError] = useState(false);
   const active = session.phase === 'running';
   const url = outputLinks(session.output)[0];
-  const deviceCode = readableOutput(session.output).match(/(?:device|user|one.time|verification|security)\s+code(?:\s+is)?\s*[:：]?\s*([A-Z0-9]{4,}(?:-[A-Z0-9]{4,})+)/i)?.[1];
+  const deviceCode = readableOutput(session.output).match(/(?:device|user|one.time|verification|security)\s+code(?:\s+is)?(?:\s*\([^)\n]*\))?\s*[:：]?\s*([A-Z0-9]{4,}(?:-[A-Z0-9]{4,})+)/i)?.[1];
   const send = async () => {
     const value = code.trim();
     // A code is one bounded line. Never let a pasted newline submit additional terminal input.
