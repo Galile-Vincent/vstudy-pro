@@ -55,7 +55,6 @@ export function HostedChat({provider,compact=false}:{provider:WebChatProvider;co
   if(compact) return <div className="web-chat-hosted web-chat-compact" role="tabpanel" id={`web-chat-panel-${provider}`}>
     {notice}{progress}
     <div ref={slot} className="web-chat-slot" data-testid="web-chat-slot"/>
-    <footer><span>{tr('web-chat:privacy')}</span><span className="web-chat-actions">{tool('reload',RefreshCw)}{tool('external',ExternalLink)}<Button variant="ghost" size="icon" aria-label={tr('web-chat:clear')} title={tr('web-chat:clear')} disabled={clearing} onClick={clear}><LogOut/></Button></span></footer>
   </div>;
   return <div className="web-chat-hosted" role="tabpanel" id={`web-chat-panel-${provider}`} aria-labelledby={`web-chat-tab-${provider}`}>
     <div className="web-chat-toolbar">{tool('back',ArrowLeft,!state?.canGoBack)}{tool('forward',ArrowRight,!state?.canGoForward)}{tool('reload',RefreshCw)}{tool('home',Home)}{tool('external',ExternalLink)}<span>{tr(`web-chat:${provider}`)}<small>{tr('web-chat:session')}</small></span>
