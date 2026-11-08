@@ -36,7 +36,7 @@ export function useTutorMode(conversationId: string) {
 export function TutorModeControl({mode, onChange, onAnswer, blocked}: {mode: TutorMode; onChange: (mode: TutorMode) => void; onAnswer: () => void; blocked?: string | undefined}) {
   useTranslation();
   const reason = useId();
-  return <span><label title={tr('chat:socratic_description')}><input type="checkbox" checked={mode === 'socratic'} onChange={event => onChange(event.target.checked ? 'socratic' : 'direct')}/>{tr('chat:socratic_mode')}</label>{mode === 'socratic' && <><Button type="button" size="sm" variant="ghost" aria-disabled={blocked ? true : undefined} aria-describedby={blocked ? reason : undefined} title={blocked} onClick={() => { if (!blocked) onAnswer(); }}>{tr('chat:answer_directly')}</Button>{blocked && <span id={reason} className="sr-only">{blocked}</span>}</>}</span>;
+  return <span className="tutor-mode"><label className="tutor-mode-toggle" title={tr('chat:socratic_description')}><input type="checkbox" checked={mode === 'socratic'} onChange={event => onChange(event.target.checked ? 'socratic' : 'direct')}/>{tr('chat:socratic_mode')}</label>{mode === 'socratic' && <><Button type="button" size="sm" variant="ghost" aria-disabled={blocked ? true : undefined} aria-describedby={blocked ? reason : undefined} title={blocked} onClick={() => { if (!blocked) onAnswer(); }}>{tr('chat:answer_directly')}</Button>{blocked && <span id={reason} className="sr-only">{blocked}</span>}</>}</span>;
 }
 
 /** Inside the chat runtime: explains why "Just answer" cannot send right now. */
