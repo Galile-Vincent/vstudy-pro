@@ -1,0 +1,806 @@
+[
+  {
+    "lang": "en",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Download VStudy Pro"
+      },
+      {
+        "level": 2,
+        "text": "Mac (Apple silicon)"
+      },
+      {
+        "level": 3,
+        "text": "Option 1 - Download the DMG (easiest, nothing else needed)"
+      },
+      {
+        "level": 4,
+        "text": "If macOS says it cannot open the app or verify the developer"
+      },
+      {
+        "level": 3,
+        "text": "Option 2 - One line in Terminal (also needs nothing installed)"
+      },
+      {
+        "level": 3,
+        "text": "Option 3 - Let an AI agent do it"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "Update"
+      },
+      {
+        "level": 2,
+        "text": "Uninstall"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "Requirements"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/en-375-light.png"
+  },
+  {
+    "lang": "en",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Download VStudy Pro"
+      },
+      {
+        "level": 2,
+        "text": "Mac (Apple silicon)"
+      },
+      {
+        "level": 3,
+        "text": "Option 1 - Download the DMG (easiest, nothing else needed)"
+      },
+      {
+        "level": 4,
+        "text": "If macOS says it cannot open the app or verify the developer"
+      },
+      {
+        "level": 3,
+        "text": "Option 2 - One line in Terminal (also needs nothing installed)"
+      },
+      {
+        "level": 3,
+        "text": "Option 3 - Let an AI agent do it"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "Update"
+      },
+      {
+        "level": 2,
+        "text": "Uninstall"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "Requirements"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/en-375-dark.png"
+  },
+  {
+    "lang": "en",
+    "width": 1200,
+    "theme": "light",
+    "scrollWidth": 1200,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Download VStudy Pro"
+      },
+      {
+        "level": 2,
+        "text": "Mac (Apple silicon)"
+      },
+      {
+        "level": 3,
+        "text": "Option 1 - Download the DMG (easiest, nothing else needed)"
+      },
+      {
+        "level": 4,
+        "text": "If macOS says it cannot open the app or verify the developer"
+      },
+      {
+        "level": 3,
+        "text": "Option 2 - One line in Terminal (also needs nothing installed)"
+      },
+      {
+        "level": 3,
+        "text": "Option 3 - Let an AI agent do it"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "Update"
+      },
+      {
+        "level": 2,
+        "text": "Uninstall"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "Requirements"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/en-1200-light.png"
+  },
+  {
+    "lang": "en",
+    "width": 1200,
+    "theme": "dark",
+    "scrollWidth": 1200,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Download VStudy Pro"
+      },
+      {
+        "level": 2,
+        "text": "Mac (Apple silicon)"
+      },
+      {
+        "level": 3,
+        "text": "Option 1 - Download the DMG (easiest, nothing else needed)"
+      },
+      {
+        "level": 4,
+        "text": "If macOS says it cannot open the app or verify the developer"
+      },
+      {
+        "level": 3,
+        "text": "Option 2 - One line in Terminal (also needs nothing installed)"
+      },
+      {
+        "level": 3,
+        "text": "Option 3 - Let an AI agent do it"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "Update"
+      },
+      {
+        "level": 2,
+        "text": "Uninstall"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "Requirements"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/en-1200-dark.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "headings": [
+      {
+        "level": 1,
+        "text": "下載 VStudy Pro"
+      },
+      {
+        "level": 2,
+        "text": "Mac（Apple 晶片）"
+      },
+      {
+        "level": 3,
+        "text": "方法 1 - 下載 DMG（最簡單，不必先裝其他工具）"
+      },
+      {
+        "level": 4,
+        "text": "如果 macOS 顯示無法開啟或無法驗證開發者"
+      },
+      {
+        "level": 3,
+        "text": "方法 2 - 在終端機貼上一行指令（同樣不必先裝其他工具）"
+      },
+      {
+        "level": 3,
+        "text": "方法 3 - 請 AI 智能體幫你安裝"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "更新"
+      },
+      {
+        "level": 2,
+        "text": "解除安裝"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "系統需求"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/zh-Hant-375-light.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "headings": [
+      {
+        "level": 1,
+        "text": "下載 VStudy Pro"
+      },
+      {
+        "level": 2,
+        "text": "Mac（Apple 晶片）"
+      },
+      {
+        "level": 3,
+        "text": "方法 1 - 下載 DMG（最簡單，不必先裝其他工具）"
+      },
+      {
+        "level": 4,
+        "text": "如果 macOS 顯示無法開啟或無法驗證開發者"
+      },
+      {
+        "level": 3,
+        "text": "方法 2 - 在終端機貼上一行指令（同樣不必先裝其他工具）"
+      },
+      {
+        "level": 3,
+        "text": "方法 3 - 請 AI 智能體幫你安裝"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "更新"
+      },
+      {
+        "level": 2,
+        "text": "解除安裝"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "系統需求"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/zh-Hant-375-dark.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 1200,
+    "theme": "light",
+    "scrollWidth": 1200,
+    "headings": [
+      {
+        "level": 1,
+        "text": "下載 VStudy Pro"
+      },
+      {
+        "level": 2,
+        "text": "Mac（Apple 晶片）"
+      },
+      {
+        "level": 3,
+        "text": "方法 1 - 下載 DMG（最簡單，不必先裝其他工具）"
+      },
+      {
+        "level": 4,
+        "text": "如果 macOS 顯示無法開啟或無法驗證開發者"
+      },
+      {
+        "level": 3,
+        "text": "方法 2 - 在終端機貼上一行指令（同樣不必先裝其他工具）"
+      },
+      {
+        "level": 3,
+        "text": "方法 3 - 請 AI 智能體幫你安裝"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "更新"
+      },
+      {
+        "level": 2,
+        "text": "解除安裝"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "系統需求"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/zh-Hant-1200-light.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 1200,
+    "theme": "dark",
+    "scrollWidth": 1200,
+    "headings": [
+      {
+        "level": 1,
+        "text": "下載 VStudy Pro"
+      },
+      {
+        "level": 2,
+        "text": "Mac（Apple 晶片）"
+      },
+      {
+        "level": 3,
+        "text": "方法 1 - 下載 DMG（最簡單，不必先裝其他工具）"
+      },
+      {
+        "level": 4,
+        "text": "如果 macOS 顯示無法開啟或無法驗證開發者"
+      },
+      {
+        "level": 3,
+        "text": "方法 2 - 在終端機貼上一行指令（同樣不必先裝其他工具）"
+      },
+      {
+        "level": 3,
+        "text": "方法 3 - 請 AI 智能體幫你安裝"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "更新"
+      },
+      {
+        "level": 2,
+        "text": "解除安裝"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "系統需求"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/zh-Hant-1200-dark.png"
+  },
+  {
+    "lang": "ja",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "headings": [
+      {
+        "level": 1,
+        "text": "VStudy Pro をダウンロード"
+      },
+      {
+        "level": 2,
+        "text": "Mac（Apple シリコン）"
+      },
+      {
+        "level": 3,
+        "text": "方法 1 - DMG をダウンロード（いちばん簡単。事前の準備は不要）"
+      },
+      {
+        "level": 4,
+        "text": "macOS で「開けない」「開発元を確認できない」と表示されたら"
+      },
+      {
+        "level": 3,
+        "text": "方法 2 - ターミナルに 1 行貼り付ける（こちらも事前の準備は不要）"
+      },
+      {
+        "level": 3,
+        "text": "方法 3 - AI エージェントに任せる"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "更新"
+      },
+      {
+        "level": 2,
+        "text": "アンインストール"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "動作環境"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/ja-375-light.png"
+  },
+  {
+    "lang": "ja",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "headings": [
+      {
+        "level": 1,
+        "text": "VStudy Pro をダウンロード"
+      },
+      {
+        "level": 2,
+        "text": "Mac（Apple シリコン）"
+      },
+      {
+        "level": 3,
+        "text": "方法 1 - DMG をダウンロード（いちばん簡単。事前の準備は不要）"
+      },
+      {
+        "level": 4,
+        "text": "macOS で「開けない」「開発元を確認できない」と表示されたら"
+      },
+      {
+        "level": 3,
+        "text": "方法 2 - ターミナルに 1 行貼り付ける（こちらも事前の準備は不要）"
+      },
+      {
+        "level": 3,
+        "text": "方法 3 - AI エージェントに任せる"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "更新"
+      },
+      {
+        "level": 2,
+        "text": "アンインストール"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "動作環境"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/ja-375-dark.png"
+  },
+  {
+    "lang": "ja",
+    "width": 1200,
+    "theme": "light",
+    "scrollWidth": 1200,
+    "headings": [
+      {
+        "level": 1,
+        "text": "VStudy Pro をダウンロード"
+      },
+      {
+        "level": 2,
+        "text": "Mac（Apple シリコン）"
+      },
+      {
+        "level": 3,
+        "text": "方法 1 - DMG をダウンロード（いちばん簡単。事前の準備は不要）"
+      },
+      {
+        "level": 4,
+        "text": "macOS で「開けない」「開発元を確認できない」と表示されたら"
+      },
+      {
+        "level": 3,
+        "text": "方法 2 - ターミナルに 1 行貼り付ける（こちらも事前の準備は不要）"
+      },
+      {
+        "level": 3,
+        "text": "方法 3 - AI エージェントに任せる"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "更新"
+      },
+      {
+        "level": 2,
+        "text": "アンインストール"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "動作環境"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/ja-1200-light.png"
+  },
+  {
+    "lang": "ja",
+    "width": 1200,
+    "theme": "dark",
+    "scrollWidth": 1200,
+    "headings": [
+      {
+        "level": 1,
+        "text": "VStudy Pro をダウンロード"
+      },
+      {
+        "level": 2,
+        "text": "Mac（Apple シリコン）"
+      },
+      {
+        "level": 3,
+        "text": "方法 1 - DMG をダウンロード（いちばん簡単。事前の準備は不要）"
+      },
+      {
+        "level": 4,
+        "text": "macOS で「開けない」「開発元を確認できない」と表示されたら"
+      },
+      {
+        "level": 3,
+        "text": "方法 2 - ターミナルに 1 行貼り付ける（こちらも事前の準備は不要）"
+      },
+      {
+        "level": 3,
+        "text": "方法 3 - AI エージェントに任せる"
+      },
+      {
+        "level": 2,
+        "text": "Windows x64"
+      },
+      {
+        "level": 2,
+        "text": "macOS · Apple silicon"
+      },
+      {
+        "level": 2,
+        "text": "更新"
+      },
+      {
+        "level": 2,
+        "text": "アンインストール"
+      },
+      {
+        "level": 2,
+        "text": "macOS"
+      },
+      {
+        "level": 2,
+        "text": "Windows"
+      },
+      {
+        "level": 2,
+        "text": "動作環境"
+      }
+    ],
+    "anchor": true,
+    "copyButtons": 3,
+    "keyboardCopy": true,
+    "overflow": false,
+    "expandedVerificationOverflow": false,
+    "errors": [],
+    "screenshot": "docs/evidence/download-guide/ja-1200-dark.png"
+  }
+]
