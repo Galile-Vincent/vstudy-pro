@@ -15,6 +15,36 @@
 
 ## 下載與安裝
 
+### 用指令或 AI 智能體安裝
+
+此應用程式未簽署，也未經 Apple 公證。這個指令代表你信任此儲存庫。[請先閱讀腳本](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh)。腳本會解析版本、下載 DMG 與校驗碼、驗證 SHA-256、唯讀掛載、結束 VStudy Pro、複製到 /Applications，並移除此 app 的隔離標記以允許開啟。不會使用 sudo 或刪除使用者資料。校驗碼可偵測檔案變動，不能證明發布者身分。
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh | bash
+```
+
+也可以先下載、閱讀，再執行.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh -o install.sh
+less install.sh
+bash install.sh --open
+```
+
+安裝後開啟可用 `bash install.sh --open`，固定版本用 `--version 0.3.0`，/Applications 無法寫入時用 `--dest ~/Applications`，預覽用 `--dry-run`。Intel Mac 尚未發布。也可使用下方手動 DMG 步驟。
+
+Windows x64（PowerShell）。先下載並閱讀再執行。未簽署的安裝程式僅安裝於目前使用者，可能觸發 SmartScreen，不需要管理員權限。
+
+```powershell
+Invoke-WebRequest https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.ps1 -OutFile install.ps1
+Get-Content install.ps1
+& .\install.ps1
+```
+
+```text
+請幫我安裝 VStudy Pro。Apple 晶片 macOS 請先取得並完整閱讀 https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh；Windows x64 請閱讀同目錄的 install.ps1。說明 app 未簽署，Mac 腳本只會移除此 app 的隔離標記。執行已閱讀的腳本，確認 SHA-256 驗證通過，開啟 VStudy Pro，回報安裝路徑與結果。不要使用 sudo、全面停用系統防護或刪除使用者資料。驗證失敗時立即停止。
+```
+
 ### 取得軟體
 
 | 平台 | 直接下載安裝檔 |
@@ -39,6 +69,8 @@
 VStudy 以 Electron `safeStorage` 加密已儲存憑證。macOS 使用登入鑰匙圈中的金鑰，臨時簽署重新建置後可能再次詢問存取權限。Windows 使用綁定目前 Windows 使用者的 DPAPI，不會顯示 Mac 式鑰匙圈提示。兩個系統都在重新啟動後，等待你明確解鎖才解密已儲存金鑰；開啟主視窗不會自動解鎖。你可重試，或只在本次執行使用金鑰而不儲存。
 
 ### 更新或解除安裝
+
+腳本安裝後，請先匯出備份，再重跑同一行指令更新。僅移除 Mac app 時，依上方方式下載腳本後執行 `bash install.sh --uninstall`，若曾使用 `--dest` 請加上原路徑。要刪除資料，請先在 **設定 > 隱私權 > 刪除所有資料** 操作。Windows 重跑 PowerShell 腳本可更新，解除安裝請用 **設定 > 應用程式 > 已安裝的應用程式**。
 
 目前採手動更新。先到「**設定 > 儲存空間**」匯出備份，結束 VStudy Pro，並驗證新版安裝檔。Mac 取代「應用程式」中的 app；Windows 使用相同帳號執行新版安裝程式。保留資料目錄即可保留文件庫與計畫。資料庫升級會先建立遷移備份，不支援降版。自動更新需等簽署與公證驗證完成後另行實作。
 

@@ -62,3 +62,7 @@ a.dl-card-main:hover .dl-go { color:var(--accent); transform:translateY(2px); }
   .dl-cards { grid-template-columns:1fr; }
   .dl-info { margin-top:var(--space-12); }
 }
+
+.dl .code-block { position: relative; margin-block: 1rem; }
+.dl .code-block pre { overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; padding: 1rem; border: 1px solid currentColor; border-radius: .5rem; }
+.dl .code-block button { margin-block: .25rem; cursor: pointer; }

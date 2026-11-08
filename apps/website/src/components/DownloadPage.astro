@@ -3,12 +3,15 @@ import Base from '../layouts/Base.astro';
 import Logo from './Logo.astro';
 import { path, RELEASES_URL } from '../config';
 import { downloadBase, installers, type InstallerId } from '../data/downloads';
+import { installCopy, macInstall, windowsInstall, reviewedInstall } from '../data/install-copy';
 import { downloadCopy } from '../data/download-copy';
 import type { Language } from '../data/ui';
 import '../styles/download.css';
 interface Props { language: Language; }
 const { language } = Astro.props;
 const c = downloadCopy[language];
+const install = installCopy[language];
+const promptLabel = { en: 'Prompt for your AI agent', 'zh-Hant': '給 AI 智能體的提示詞', ja: 'AI エージェント用のプロンプト' }[language];
 const groups = [
   { platform: 'mac', name: c.osMac, hint: c.macHint },
   { platform: 'win', name: c.osWin, hint: c.winHint },
@@ -23,6 +26,21 @@ const href = (file: string) => `${downloadBase}/${file}`;
       <h1>{c.title}</h1>
       <p class="dl-lead">{c.lead}</p>
     </header>
+
+    <section class="dl-info" aria-labelledby="dl-script">
+      <h2 id="dl-script">{install.title}</h2>
+      <p>{install.text.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')} <a href="https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh">install.sh</a></p>
+      {[{ label: 'macOS', code: macInstall }, { label: install.read, code: reviewedInstall }, { label: install.windows, code: windowsInstall }, { label: promptLabel, code: install.prompt }].map(({ label, code }) => (
+        <div class="code-block">
+          <p>{label}</p>
+          <button type="button" data-install-copy>{install.copy}</button>
+          <pre tabindex="0"><code>{code}</code></pre>
+        </div>
+      ))}
+      <p>{install.options.replace(/`/g, '')}</p>
+      <p>{install.update.replace(/[`*]/g, '')}</p>
+      <p class="sr-only" role="status" data-install-status></p>
+    </section>
 
     <section class="dl-recommend" data-recommend hidden aria-labelledby="dl-rec-title">
       <p class="dl-eyebrow">{c.recommended}</p>
@@ -101,6 +119,21 @@ const href = (file: string) => `${downloadBase}/${file}`;
   </main>
 </Base>
 <script>
+  import { installCopy } from '../data/install-copy';
+  document.querySelectorAll<HTMLButtonElement>('[data-install-copy]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const language = document.documentElement.lang as keyof typeof installCopy;
+      const labels = installCopy[language] ?? installCopy.en;
+      try {
+        await navigator.clipboard.writeText(button.parentElement?.querySelector('code')?.textContent ?? '');
+        button.textContent = labels.copied;
+      } catch {
+        button.textContent = labels.failed;
+      }
+      const status = document.querySelector('[data-install-status]');
+      if (status) status.textContent = button.textContent;
+    });
+  });
   import { detectInstaller } from '../scripts/platform';
   const panel = document.querySelector<HTMLElement>('[data-recommend]');
   const unknown = document.querySelector<HTMLElement>('[data-unknown]');

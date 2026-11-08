@@ -15,6 +15,36 @@ Read course documents, keep Moodle deadlines together, and turn coursework into 
 
 ## Download and install
 
+### Install with a command or an AI agent
+
+The app is unsigned and not notarized. This command trusts this repository. [Read the script first](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh). It resolves the release, downloads the DMG and checksums, verifies SHA-256, mounts read-only, quits VStudy Pro, copies it to /Applications, and removes that app’s quarantine flag to allow it to open. It never uses sudo or deletes user data. A checksum detects changed bytes, not publisher identity.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh | bash
+```
+
+To download, read, then run instead.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh -o install.sh
+less install.sh
+bash install.sh --open
+```
+
+Use `bash install.sh --open` to open after install, `--version 0.3.0` to pin, `--dest ~/Applications` if /Applications is not writable, or `--dry-run` to preview. Intel Mac is not released yet. The manual DMG steps below remain available.
+
+Windows x64 (PowerShell). Download and read before running. The per-user unsigned installer may trigger SmartScreen. It does not require admin.
+
+```powershell
+Invoke-WebRequest https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.ps1 -OutFile install.ps1
+Get-Content install.ps1
+& .\install.ps1
+```
+
+```text
+Install VStudy Pro for me. First fetch and READ https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh on Apple silicon macOS, or install.ps1 in the same directory on Windows x64. Explain that this is unsigned, and that the Mac script removes quarantine only from this app. Run the reviewed script, confirm SHA-256 verification passed, open VStudy Pro, and report the installed path and result. Do not use sudo, disable system protections globally, or delete user data. Stop on any verification failure.
+```
+
 ### Get the app
 
 | Platform | Direct installer |
@@ -39,6 +69,8 @@ The first release targets Apple silicon Mac and Windows x64. Intel Mac and Windo
 VStudy encrypts saved credentials through Electron `safeStorage`. macOS uses a login-Keychain key and may ask for Keychain access, especially after an ad-hoc rebuild. Windows uses DPAPI tied to the Windows user, without a Mac-style Keychain dialog. Both systems defer decryption until you explicitly unlock saved keys after restart. Opening the main window does not unlock them. You can retry or use keys for the session without saving.
 
 ### Update or uninstall
+
+For script installs, export a backup and re-run the same one-liner to update. To uninstall only the Mac app, download the script as above and run `bash install.sh --uninstall` (include your original `--dest` if used). To delete data, use **Settings > Privacy > Delete all data** before uninstalling. On Windows, re-run the PowerShell script to update and use **Settings > Apps > Installed apps** to uninstall.
 
 Updates are manual. Export a backup in **Settings > Storage**, quit VStudy Pro, and verify the new installer. On Mac, replace the app in Applications. On Windows, run the new installer for the same user. Keep the data folder to retain your library and plans. Database upgrades create migration backups. Downgrades are unsupported. Automatic updates remain a later change after signing and notarization are verified.
 

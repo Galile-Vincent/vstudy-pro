@@ -15,6 +15,36 @@ macOS と Windows で教材を読み、Moodle の締め切りをまとめ、課�
 
 ## ダウンロードとインストール
 
+### コマンドまたは AI エージェントでインストール
+
+このアプリは未署名で、Apple の公証もありません。このコマンドはリポジトリを信頼して実行するものです。[先にスクリプトを読んでください](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh)。リリースの解決、DMG とチェックサムの取得、SHA-256 検証、読み取り専用マウント、VStudy Pro の終了、/Applications へのコピーを行い、このアプリの隔離属性を削除して起動できるようにします。sudo の使用やユーザーデータの削除は行いません。チェックサムは変更を検出しますが、発行元の身元を証明しません。
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh | bash
+```
+
+先にダウンロードして読み、その後に実行する方法.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh -o install.sh
+less install.sh
+bash install.sh --open
+```
+
+インストール後に開くには `bash install.sh --open`、バージョン固定には `--version 0.3.0`、/Applications に書き込めない場合は `--dest ~/Applications`、確認のみには `--dry-run` を使います。Intel Mac 版は未公開です。下記の手動 DMG 手順も使えます。
+
+Windows x64（PowerShell）。ダウンロードして読んでから実行します。未署名のユーザー単位インストーラーは SmartScreen の警告が出る場合があります。管理者権限は不要です。
+
+```powershell
+Invoke-WebRequest https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.ps1 -OutFile install.ps1
+Get-Content install.ps1
+& .\install.ps1
+```
+
+```text
+VStudy Pro をインストールしてください。Apple シリコン macOS では https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh を取得して全文を読んでください。Windows x64 では同じディレクトリの install.ps1 を読んでください。アプリが未署名で、Mac スクリプトはこのアプリの隔離属性だけを削除すると説明してください。読んだスクリプトを実行し、SHA-256 検証の成功を確認して VStudy Pro を開き、インストール先と結果を報告してください。sudo、システム保護の一括無効化、ユーザーデータの削除は禁止です。検証に失敗したら停止してください。
+```
+
 ### アプリを入手する
 
 | プラットフォーム | インストーラー |
@@ -39,6 +69,8 @@ macOS と Windows で教材を読み、Moodle の締め切りをまとめ、課�
 VStudy は Electron `safeStorage` で保存済み認証情報を暗号化します。macOS はログインキーチェーンのキーを使い、アドホック署名の再ビルド後にはアクセス確認が再表示される場合があります。Windows は現在の Windows ユーザーに結び付いた DPAPI を使い、Mac のキーチェーン確認は表示しません。どちらも再起動後は明示的なロック解除まで復号を待ちます。メイン画面を開くだけでは解除しません。再試行するか、保存せずにセッション中だけキーを使えます。
 
 ### 更新とアンインストール
+
+スクリプトでインストールした場合は、バックアップを書き出して同じコマンドを再実行すると更新できます。Mac アプリだけを削除するには、上記の方法でスクリプトを取得して `bash install.sh --uninstall` を実行します。`--dest` を使った場合は同じ保存先を指定します。データを削除する場合は、先に **設定 > プライバシー > すべてのデータを削除** を使います。Windows は PowerShell スクリプトを再実行して更新し、**設定 > アプリ > インストールされているアプリ** からアンインストールします。
 
 更新は手動です。「**設定 > ストレージ**」でバックアップをエクスポートし、VStudy Pro を終了して、新しいインストーラーを検証します。Mac は「アプリケーション」のコピーを置き換え、Windows は同じユーザーで新版の EXE を実行します。データフォルダーを残せばライブラリと計画は保持されます。データベース更新前には移行用バックアップを作成します。ダウングレードは非対応です。自動更新は署名と公証を検証した後の別の変更です。
 
