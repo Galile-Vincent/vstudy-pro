@@ -1,0 +1,1274 @@
+[
+  {
+    "lang": "en",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\nRecommended\nApple silicon\nMacs with M1, M2, M3, M4 or newer. macOS 14 or later.\nDMG disk image\nDownload .dmg",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 258.375,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 407.171875,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\nMost Windows PCs. Windows 10 or later.\nEXE installer\nDownload .exe",
+        "x": 20,
+        "y": 423.171875,
+        "width": 335,
+        "height": 235.28125,
+        "top": 423.171875,
+        "right": 355,
+        "bottom": 658.453125,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/en-375-light.png"
+  },
+  {
+    "lang": "en",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\nRecommended\nApple silicon\nMacs with M1, M2, M3, M4 or newer. macOS 14 or later.\nDMG disk image\nDownload .dmg",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 258.375,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 407.171875,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\nMost Windows PCs. Windows 10 or later.\nEXE installer\nDownload .exe",
+        "x": 20,
+        "y": 423.171875,
+        "width": 335,
+        "height": 235.28125,
+        "top": 423.171875,
+        "right": 355,
+        "bottom": 658.453125,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/en-375-dark.png"
+  },
+  {
+    "lang": "en",
+    "width": 1280,
+    "theme": "light",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\nRecommended\nApple silicon\nMacs with M1, M2, M3, M4 or newer. macOS 14 or later.\nDMG disk image\nDownload .dmg",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 267.28125,
+        "top": 176,
+        "right": 632,
+        "bottom": 443.28125,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\nMost Windows PCs. Windows 10 or later.\nEXE installer\nDownload .exe",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 267.28125,
+        "top": 176,
+        "right": 1080,
+        "bottom": 443.28125,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/en-1280-light.png"
+  },
+  {
+    "lang": "en",
+    "width": 1280,
+    "theme": "dark",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\nRecommended\nApple silicon\nMacs with M1, M2, M3, M4 or newer. macOS 14 or later.\nDMG disk image\nDownload .dmg",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 267.28125,
+        "top": 176,
+        "right": 632,
+        "bottom": 443.28125,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\nMost Windows PCs. Windows 10 or later.\nEXE installer\nDownload .exe",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 267.28125,
+        "top": 176,
+        "right": 1080,
+        "bottom": 443.28125,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/en-1280-dark.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\n建議\nApple 晶片\n搭載 M1、M2、M3、M4 或更新晶片的 Mac。需要 macOS 14 以上。\nDMG 磁碟映像\n下載 .dmg",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 258.375,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 407.171875,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\n大多數 Windows 電腦。需要 Windows 10 以上。\nEXE 安裝程式\n下載 .exe",
+        "x": 20,
+        "y": 423.171875,
+        "width": 335,
+        "height": 258.375,
+        "top": 423.171875,
+        "right": 355,
+        "bottom": 681.546875,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/zh-Hant-375-light.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\n建議\nApple 晶片\n搭載 M1、M2、M3、M4 或更新晶片的 Mac。需要 macOS 14 以上。\nDMG 磁碟映像\n下載 .dmg",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 258.375,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 407.171875,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\n大多數 Windows 電腦。需要 Windows 10 以上。\nEXE 安裝程式\n下載 .exe",
+        "x": 20,
+        "y": 423.171875,
+        "width": 335,
+        "height": 258.375,
+        "top": 423.171875,
+        "right": 355,
+        "bottom": 681.546875,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/zh-Hant-375-dark.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "light",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\n建議\nApple 晶片\n搭載 M1、M2、M3、M4 或更新晶片的 Mac。需要 macOS 14 以上。\nDMG 磁碟映像\n下載 .dmg",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 290.375,
+        "top": 176,
+        "right": 632,
+        "bottom": 466.375,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\n大多數 Windows 電腦。需要 Windows 10 以上。\nEXE 安裝程式\n下載 .exe",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 290.375,
+        "top": 176,
+        "right": 1080,
+        "bottom": 466.375,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/zh-Hant-1280-light.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "dark",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\n建議\nApple 晶片\n搭載 M1、M2、M3、M4 或更新晶片的 Mac。需要 macOS 14 以上。\nDMG 磁碟映像\n下載 .dmg",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 290.375,
+        "top": 176,
+        "right": 632,
+        "bottom": 466.375,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\n大多數 Windows 電腦。需要 Windows 10 以上。\nEXE 安裝程式\n下載 .exe",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 290.375,
+        "top": 176,
+        "right": 1080,
+        "bottom": 466.375,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/zh-Hant-1280-dark.png"
+  },
+  {
+    "lang": "ja",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\nおすすめ\nApple シリコン\nM1、M2、M3、M4 以降を搭載した Mac。macOS 14 以降。\nDMG ディスクイメージ\nダウンロード .dmg",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 258.375,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 407.171875,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\nほとんどの Windows パソコン。Windows 10 以降。\nEXE インストーラー\nダウンロード .exe",
+        "x": 20,
+        "y": 423.171875,
+        "width": 335,
+        "height": 258.375,
+        "top": 423.171875,
+        "right": 355,
+        "bottom": 681.546875,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/ja-375-light.png"
+  },
+  {
+    "lang": "ja",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\nおすすめ\nApple シリコン\nM1、M2、M3、M4 以降を搭載した Mac。macOS 14 以降。\nDMG ディスクイメージ\nダウンロード .dmg",
+        "x": 20,
+        "y": 148.796875,
+        "width": 335,
+        "height": 258.375,
+        "top": 148.796875,
+        "right": 355,
+        "bottom": 407.171875,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\nほとんどの Windows パソコン。Windows 10 以降。\nEXE インストーラー\nダウンロード .exe",
+        "x": 20,
+        "y": 423.171875,
+        "width": 335,
+        "height": 258.375,
+        "top": 423.171875,
+        "right": 355,
+        "bottom": 681.546875,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 28.796875,
+      "top": 96,
+      "right": 355,
+      "bottom": 124.796875,
+      "left": 20
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/ja-375-dark.png"
+  },
+  {
+    "lang": "ja",
+    "width": 1280,
+    "theme": "light",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\nおすすめ\nApple シリコン\nM1、M2、M3、M4 以降を搭載した Mac。macOS 14 以降。\nDMG ディスクイメージ\nダウンロード .dmg",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 267.28125,
+        "top": 176,
+        "right": 632,
+        "bottom": 443.28125,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\nほとんどの Windows パソコン。Windows 10 以降。\nEXE インストーラー\nダウンロード .exe",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 267.28125,
+        "top": 176,
+        "right": 1080,
+        "bottom": 443.28125,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/ja-1280-light.png"
+  },
+  {
+    "lang": "ja",
+    "width": 1280,
+    "theme": "dark",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\nおすすめ\nApple シリコン\nM1、M2、M3、M4 以降を搭載した Mac。macOS 14 以降。\nDMG ディスクイメージ\nダウンロード .dmg",
+        "x": 200,
+        "y": 176,
+        "width": 432,
+        "height": 267.28125,
+        "top": 176,
+        "right": 632,
+        "bottom": 443.28125,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\nほとんどの Windows パソコン。Windows 10 以降。\nEXE インストーラー\nダウンロード .exe",
+        "x": 648,
+        "y": 176,
+        "width": 432,
+        "height": 267.28125,
+        "top": 176,
+        "right": 1080,
+        "bottom": 443.28125,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 48,
+      "top": 104,
+      "right": 1080,
+      "bottom": 152,
+      "left": 200
+    },
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-cards/ja-1280-dark.png"
+  },
+  {
+    "home": true,
+    "lang": "en",
+    "width": 375,
+    "theme": "light",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "en",
+    "width": 375,
+    "theme": "dark",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "en",
+    "width": 1280,
+    "theme": "light",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "en",
+    "width": 1280,
+    "theme": "dark",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "Download for macOS",
+        "expected": "Download for macOS",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "light",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "dark",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "light",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "dark",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "下載 macOS 版",
+        "expected": "下載 macOS 版",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "ja",
+    "width": 375,
+    "theme": "light",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "ja",
+    "width": 375,
+    "theme": "dark",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "ja",
+    "width": 1280,
+    "theme": "light",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "ja",
+    "width": 1280,
+    "theme": "dark",
+    "platform": "mac",
+    "buttons": [
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      },
+      {
+        "text": "macOS 版をダウンロード",
+        "expected": "macOS 版をダウンロード",
+        "logos": [
+          "mac"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "en",
+    "width": 375,
+    "theme": "light",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "en",
+    "width": 375,
+    "theme": "dark",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "en",
+    "width": 1280,
+    "theme": "light",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "en",
+    "width": 1280,
+    "theme": "dark",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Download for Windows",
+        "expected": "Download for Windows",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "light",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "dark",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "light",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "dark",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "下載 Windows 版",
+        "expected": "下載 Windows 版",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "ja",
+    "width": 375,
+    "theme": "light",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "ja",
+    "width": 375,
+    "theme": "dark",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "ja",
+    "width": 1280,
+    "theme": "light",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  },
+  {
+    "home": true,
+    "lang": "ja",
+    "width": 1280,
+    "theme": "dark",
+    "platform": "win",
+    "buttons": [
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      },
+      {
+        "text": "Windows 版をダウンロード",
+        "expected": "Windows 版をダウンロード",
+        "logos": [
+          "win"
+        ]
+      }
+    ]
+  }
+]

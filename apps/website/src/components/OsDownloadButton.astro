@@ -1,12 +1,15 @@
 ---
+import PlatformLogo from './PlatformLogo.astro';
 import { path } from '../config';
 import { ui, type Language } from '../data/ui';
-interface Props { language: Language; }
-const { language } = Astro.props;
+interface Props { language: Language; compact?: boolean; current?: boolean; }
+const { language, compact = false, current = false } = Astro.props;
 const t = ui[language];
 ---
-<a class="button os-download" href={path(`${language}/download/`)} data-os-download data-label-mac={t.downloadMac} data-label-win={t.downloadWin}>
-  <span data-os-download-text>{t.download}</span><span aria-hidden="true">↓</span>
+<a class:list={["button", "os-download", { compact, "nav-download": compact }]} aria-current={current ? "page" : undefined} href={path(`${language}/download/`)} data-os-download data-label-default={t.download} data-label-mac={t.downloadMac} data-label-win={t.downloadWin}>
+  <span data-os-logo="mac" hidden><PlatformLogo platform="mac" /></span>
+  <span data-os-logo="win" hidden><PlatformLogo platform="win" /></span>
+  <span data-os-download-text>{t.download}</span>
 </a>
 <script>
   import { detectInstaller } from '../scripts/platform';
@@ -16,7 +19,17 @@ const t = ui[language];
     document.querySelectorAll<HTMLElement>('[data-os-download]').forEach(link => {
       const label = platform && link.dataset[platform === 'mac' ? 'labelMac' : 'labelWin'];
       const text = link.querySelector('[data-os-download-text]');
-      if (label && text) text.textContent = label;
+      if (text) text.textContent = label || link.dataset.labelDefault || '';
+      link.querySelectorAll<HTMLElement>('[data-os-logo]').forEach(logo => {
+        logo.hidden = logo.dataset.osLogo !== platform;
+      });
     });
   });
 </script>
+<style>
+  [data-os-logo] { display:inline-flex; flex-shrink:0; }
+  [data-os-logo][hidden] { display:none; }
+  @media(max-width:767px) {
+    .nav-download { max-width:156px; padding-inline:var(--space-3); font-size:var(--text-xs); }
+  }
+</style>
