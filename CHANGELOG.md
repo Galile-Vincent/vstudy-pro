@@ -3,6 +3,19 @@
 Generated from Git history with git-cliff. Historical subjects are preserved.
 Pre-baseline changes without a conventional prefix appear under Other changes.
 
+## v0.4.1
+
+### Documentation
+- docs: simplify readmes and lead downloads with installer cards (67e8c6b)
+
+### Fixes
+- fix(release): import the Developer ID certificate into a private keychain (a8ff3f2)
+
+### Maintenance
+- chore: merge simplified README and download page (299b243)
+
+### Tests
+- test: record simplified download page verification (6ef7ebd)
 ## v0.4.0
 
 ### Documentation
@@ -270,6 +283,9 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 - fix(tabs): preserve targets and persist completed file imports (072ccbb)
 - fix(desktop): preserve document undo across workspace remounts (409394e)
 - fix: brand macOS helper bundles and development app (c3b4af0)
+- fix(desktop): use theme tokens for tab strip fade and shadow (83b8eb1)
+- fix(ci): tolerate one slow hosted-runner write and ignore electron in knip root (b42f7d6)
+- fix(ci): raise the hosted-runner single-write bound to 3s (8e61c37)
 
 ### Maintenance
 - chore(merge): merge analytics legal pages (465c34e)
@@ -301,6 +317,7 @@ Pre-baseline changes without a conventional prefix appear under Other changes.
 - chore: refresh marketing captures and localized guides (47b6af8)
 - chore: merge document delete Undo fix (a2ee3a3)
 - chore: merge installer scripts and download guide (37a54e4)
+- chore(release): prepare v0.4.0 (b935406)
 
 ### Other changes
 - renderer: send only workspace settings changes (0626148)

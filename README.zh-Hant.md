@@ -4,7 +4,7 @@
 
 在 macOS 與 Windows 上閱讀課程教材、整合 Moodle 作業期限，並把待辦事項排成讀書計畫。
 
-![版本 0.4.0](https://img.shields.io/badge/version-0.4.0-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
+![版本 0.4.1](https://img.shields.io/badge/version-0.4.1-blue) ![macOS and Windows](https://img.shields.io/badge/platform-macOS_%7C_Windows-black)
 
 ![圖論筆記、已選段落、示範回答與來源引用](docs/assets/readme/reader.webp)
 
@@ -50,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/i
 - [MCP 智能體設定](docs/MCP.md)
 - [安全說明](docs/SECURITY.md)
 - [工程指南](docs/ENGINEERING.md)
-- [版本說明](docs/releases/0.4.0.md)
+- [版本說明](docs/releases/0.4.1.md)
 
 ## 專案構成
 
