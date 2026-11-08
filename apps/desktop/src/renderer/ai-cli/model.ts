@@ -19,9 +19,13 @@ export function setupAction(provider: CliProvider, step: SetupStep): CliActionId
 export function terminalDelta(previous: string, next: string) {
   return next.startsWith(previous) ? { reset: false, text: next.slice(previous.length) } : { reset: true, text: next };
 }
+/** Main removes terminal string controls; remove remaining CSI styling for guided text extraction. */
+export function readableOutput(output: string): string {
+  return output.replace(new RegExp(`${String.fromCharCode(27)}\\[[0-?]*[ -/]*[@-~]`, 'g'), '');
+}
 /** Only explicit HTTPS links get a native confirmation; terminal escapes are never HTML. */
 export function outputLinks(output: string): string[] {
-  const printable = [...output].map(char => char.charCodeAt(0) < 32 || (char.charCodeAt(0) >= 127 && char.charCodeAt(0) <= 159) ? ' ' : char).join('');
+  const printable = [...readableOutput(output)].map(char => char.charCodeAt(0) < 32 || (char.charCodeAt(0) >= 127 && char.charCodeAt(0) <= 159) ? ' ' : char).join('');
   return [...new Set(printable.match(/https:\/\/[^\s<>"']+/g) ?? [])].slice(0, 8).map(url => url.replace(/[).,;]+$/, ''));
 }
 

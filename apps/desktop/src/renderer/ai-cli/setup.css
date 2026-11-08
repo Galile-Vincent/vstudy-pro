@@ -89,3 +89,28 @@
 .ai-cli-action-area .ai-cli-preview { margin-top:0; }
 
 button.ai-cli-consent { display:inline-flex; align-items:center; padding:var(--space-3) var(--space-4); }
+
+/* Bound every disclosure to normal flow; raw terminal output has one scrollable home. */
+.ai-cli-scroll>*,.ai-cli-workarea>*,.ai-cli-action-area { min-width:0; }
+.ai-cli-details { margin-top:var(--space-3); min-width:0; }
+.ai-cli-details>summary,.ai-cli-alternatives>summary { cursor:pointer; color:var(--muted); padding-block:var(--space-2); font-size:var(--type-base); }
+.ai-cli-terminal { margin-top:var(--space-2); }
+.ai-cli-xterm { max-height:50dvh; min-height:120px; }
+.ai-cli-preview { background:transparent; padding:0; }
+.ai-cli-preview>.ai-cli-actions { margin-bottom:var(--space-2); }
+.ai-cli-recovery { margin-top:0; padding:var(--space-3) var(--space-4); border-inline-start:2px solid var(--danger); background:var(--subtle); border-radius:var(--r-sm); }
+.ai-cli-recovery p { margin-block:var(--space-1) var(--space-2); }
+.ai-cli-steps li[data-state=done] .ai-cli-step-number { color:var(--success); }
+.ai-cli-steps li[data-state=failed] .ai-cli-step-number { color:var(--danger); }
+.ai-cli-steps li[data-state=running] .ai-cli-step-number { color:var(--accent-color); }
+.ai-cli-sign-in { padding:var(--space-4); margin-top:var(--space-3); border-radius:var(--r-md); background:var(--subtle); min-width:0; }
+.ai-cli-sign-in form { margin-top:var(--space-4); }
+.ai-cli-sign-in label { font-weight:600; font-size:var(--type-base); }
+.ai-cli-sign-in form p { margin-block:var(--space-1) var(--space-2); }
+.ai-cli-code-row { display:flex; flex-wrap:wrap; gap:var(--space-2); }
+.ai-cli-code-row input { flex:1 1 180px; min-width:0; width:100%; padding:var(--space-2) var(--space-3); border:1px solid var(--hairline); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); }
+.ai-cli-device-code { margin-top:var(--space-3)!important; overflow-wrap:anywhere; }
+.ai-cli-device-code code { font-weight:600; user-select:all; }
+.ai-cli-complete { background:var(--subtle); border-radius:var(--r-md); padding:var(--space-4); }
+.ai-cli-complete-icon { color:var(--success); margin-bottom:var(--space-2); }
+.ai-cli-instructions h2 { margin-bottom:var(--space-2); }

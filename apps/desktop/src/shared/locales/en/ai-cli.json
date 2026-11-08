@@ -200,5 +200,20 @@
   "error_next_certificate": "Check your device’s date and network. If it continues, ask your school or network administrator to check the certificate.",
   "pick_hint": "Not sure? Pick Claude Code",
   "first_click_consent": "Selecting {{action}} allows VStudy to use {{provider}}.",
-  "failure_certificate": "The secure connection failed. Check your device’s date and network. If it continues, ask your school or network administrator to check the certificate."
+  "failure_certificate": "The secure connection failed. Check your device’s date and network. If it continues, ask your school or network administrator to check the certificate.",
+  "continue": "Continue",
+  "step_state_done": "Done",
+  "step_state_pending": "Pending",
+  "step_state_running": "In progress",
+  "step_state_failed": "Needs attention",
+  "step_state_next": "Next step",
+  "open_signin": "Open sign-in page",
+  "copy_signin_link": "Copy link",
+  "returned_code": "Code returned by the sign-in page",
+  "returned_code_help": "Only paste a code if the page asks you to return it here. Device codes are entered on the sign-in page.",
+  "send_code": "Submit code",
+  "device_code": "Enter this code on the sign-in page:",
+  "signin_waiting": "Complete sign-in in your browser. Waiting for confirmation…",
+  "signin_preparing": "Preparing sign-in…",
+  "code_sent": "Code submitted. Waiting for sign-in confirmation…"
 }

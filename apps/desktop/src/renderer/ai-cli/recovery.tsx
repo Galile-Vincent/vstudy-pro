@@ -11,7 +11,8 @@ export function SetupRecovery({ failure, tool, session, busy, onAction }: {
   onAction: (action: 'install' | 'login' | null) => void;
 }) {
   const [copied, setCopied] = useState(false), [copyError, setCopyError] = useState(false);
-  const issue = setupErrors[classifySetupError(failure, session?.output)];
+  const classified = classifySetupError(failure, session?.output);
+  const issue = setupErrors[classified];
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(setupDiagnostic({ tool: cliNames[tool.provider], version: tool.version, os: desktopPlatform(), exitCode: session?.exitCode ?? null, error: session?.output || failure }));
@@ -19,9 +20,8 @@ export function SetupRecovery({ failure, tool, session, busy, onAction }: {
     } catch { setCopyError(true); }
   };
   return <div className="ai-cli-recovery" role="alert">
-    <strong>{tr(`ai-cli:error_title_${issue.title}`)}</strong>
+    <strong>{tr(classified === 'unknown' && failure !== 'unknown' ? `ai-cli:failure_${failure}` : `ai-cli:error_title_${issue.title}`)}</strong>
     <p>{tr(`ai-cli:error_next_${issue.next}`)}</p>
-    {['checksum', 'signature', 'unsupported', 'blocked', 'terminal-unavailable'].includes(failure) && <p>{tr(`ai-cli:failure_${failure}`)}</p>}
     <div className="ai-cli-actions"><Button variant="secondary" disabled={busy || !tool.consented} onClick={() => onAction(issue.action)}>{tr('ai-cli:retry')}</Button>
     <Button variant="ghost" onClick={() => void copy()}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_details')}</Button></div>
     {copyError && <p>{tr('ai-cli:copy_error')}</p>}

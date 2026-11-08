@@ -2,7 +2,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { expect, it } from 'vitest';
-import { ActionPty } from './pty';
 import { authStatus, tinyTest } from './probes';
 import { buildPlan } from './plans';
 import { ProviderRegistry } from '../index';
@@ -14,7 +13,7 @@ it.each([0, 1])('uses Codex exit status %s without parsing account text', async 
   const program = `console.log('localized account description');process.exit(${code});\n`;
   await writeFile(script, program);
   const plan = buildPlan('status-codex', root, process.execPath, null, null, Date.now());
-  expect(await authStatus('codex', plan, new ActionPty(), AbortSignal.timeout(5000))).toBe(code === 0);
+  expect(await authStatus('codex', plan, AbortSignal.timeout(5000))).toBe(code === 0);
 });
 it('probes agy using initialize and session/new without authenticate or browser launch', async () => {
   const root = await temporary(), script = join(root, 'acp'), auth = join(root, 'signed-in'), methods = join(root, 'methods');
@@ -30,9 +29,9 @@ else if(r.method==='session/prompt'){send({method:'session/update',params:{sessi
 `;
   await writeFile(script, program);
   const plan = buildPlan('status-agy', root, process.execPath, null, null, Date.now());
-  expect(await authStatus('agy', plan, new ActionPty(), AbortSignal.timeout(5000))).toBe(false);
+  expect(await authStatus('agy', plan, AbortSignal.timeout(5000))).toBe(false);
   await writeFile(auth, 'yes');
-  expect(await authStatus('agy', plan, new ActionPty(), AbortSignal.timeout(5000))).toBe(true);
+  expect(await authStatus('agy', plan, AbortSignal.timeout(5000))).toBe(true);
   const registry = new ProviderRegistry(), adapter = new AgyAdapter({ findBinary: async () => process.execPath, args: [script, ...agyArgs] });
   registry.configure({ kind: 'cli', id: 'agy-cli', enabled: true }); registry.register('agy-cli', adapter);
   try { expect(await tinyTest(registry, 'agy', AbortSignal.timeout(5000))).toBe('AGY_OK'); }
@@ -47,4 +46,11 @@ it('rejects false success and tool calls from an adapter test', async () => {
   const tools = new ProviderRegistry(); tools.configure({ kind: 'cli', id: 'claude-cli', enabled: true });
   tools.register('claude-cli', { async detect() { return { available: true }; }, async listModels() { return []; }, async *stream() { yield { type: 'tool-call', call: { toolCallId: 'tool', toolName: 'shell', args: {} } }; yield { type: 'done' }; } });
   await expect(tinyTest(tools, 'claude', AbortSignal.timeout(5000))).rejects.toMatchObject({ code: 'blocked' });
+});
+
+it('captures Claude auth JSON without a TTY so coloured keys cannot corrupt the status check', async () => {
+  const root = await temporary(), script = join(root, 'auth');
+  await writeFile(script, `if(process.stdout.isTTY) console.log('{\\x1b[32m"loggedIn"\\x1b[0m: true}'); else console.log(JSON.stringify({loggedIn:true}));`);
+  const plan = buildPlan('test-claude', root, process.execPath, null, null, Date.now());
+  expect(await authStatus('claude', plan, AbortSignal.timeout(5000))).toBe(true);
 });

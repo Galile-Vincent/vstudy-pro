@@ -14,7 +14,7 @@ import { cliEnvironment } from '../cli-transport';
 import { agyArgs, runAgy } from '../agy';
 import type { ProviderRegistry } from '../index';
 import { providerId, SetupError } from './types';
-import type { ActionPty, TerminalPlan } from './pty';
+import type { TerminalPlan } from './pty';
 
 export async function probeVersion(binary: string, provider: CliProvider, expected: string | null, cwd: string, signal: AbortSignal) {
   const env = Object.fromEntries(Object.entries(cliEnvironment()).filter((entry): entry is [string, string] => typeof entry[1] === 'string'));
@@ -24,7 +24,7 @@ export async function probeVersion(binary: string, provider: CliProvider, expect
   if (!version || expected && version !== expected || provider === 'codex' && version !== '0.166.0') throw new SetupError('wrong-version');
   return version;
 }
-export async function authStatus(provider: CliProvider, plan: TerminalPlan, pty: ActionPty, signal: AbortSignal, afterLogin = false): Promise<boolean> {
+export async function authStatus(provider: CliProvider, plan: TerminalPlan, signal: AbortSignal): Promise<boolean> {
   if (provider === 'agy') {
     for await (const event of runAgy(plan.executable, agyArgs, plan.cwd, undefined, signal, 15_000)) {
       if (Array.isArray(event)) return true;
@@ -38,7 +38,9 @@ export async function authStatus(provider: CliProvider, plan: TerminalPlan, pty:
   }
   const statusPlan = { ...plan, args: provider === 'claude' ? ['auth', 'status', '--json'] : ['login', 'status'] };
   recordEgress('ai_cli_status', provider === 'claude' ? 'Anthropic / Claude CLI managed endpoints' : 'OpenAI / Codex CLI managed endpoints');
-  const result = afterLogin ? await captureCommand(statusPlan, signal) : await pty.run(statusPlan, signal, () => {}, 15_000);
+  // Auth status is machine-readable, not interactive. A PTY makes Claude colour JSON keys,
+  // which corrupts JSON even when exitCode is zero. Keep credentials in private pipe capture.
+  const result = await captureCommand(statusPlan, signal);
   if (provider === 'codex') {
     if (result.exitCode === 0) return true;
     if (result.exitCode === 1) return false;
