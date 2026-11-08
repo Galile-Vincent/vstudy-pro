@@ -1,3 +1,4 @@
+import { setDocumentUndo, useDocumentUndo } from './document-undo';
 import { captureReaderPosition, restoreReaderPosition } from './reader-position';
 import { useTabPresentation } from '../tab-presentation';
 import { DocumentOriginal } from '../document-original';
@@ -63,7 +64,6 @@ export function Workspace() {
   const [selection, setSelection] = useState<Selection | null>(null),
     [showSettings, setShowSettings] = useState(false),
     [notice, setNotice] = useState(""),
-    [undo, setUndo] = useState<{ message: string; run: () => Promise<void> } | null>(null),
     [busy, setBusy] = useState(false),
     [loadingSource, setLoadingSource] = useState(false);
 
@@ -164,33 +164,28 @@ export function Workspace() {
       ),
     [],
   );
+  const undo = useDocumentUndo();
   const removeDocument = async (id: Document["id"]) => {
     try {
       await desktop.invoke("library:documents:softDelete", { documentId: id });
+      setDocumentUndo({ documentId: id, message: tr("library:deleted", { count: 1, formatted: format.number(1) }) });
       const list = await desktop.invoke("documents:list", {});
       setDocuments(list); setDocumentId(list[0]?.id ?? null);
       if (list[0]) navigate({ view: 'workspace', documentId: list[0].id });
-      const message = tr("library:deleted", { count: 1, formatted: format.number(1) });
-      setNotice(message);
-      setUndo({ message, run: async () => {
-        await desktop.invoke("library:documents:restore", { documentId: id });
-        setDocuments(await desktop.invoke("documents:list", {})); setDocumentId(id);
-        navigate({ view: 'workspace', documentId: id });
-        setNotice("");
-        setUndo(null);
-        requestAnimationFrame(() => document.getElementById('reading-content')?.focus());
-      } });
     } catch (error) { report(error); }
+  };
+  const restoreDocument = async () => {
+    if (!undo) return;
+    await desktop.invoke("library:documents:restore", { documentId: undo.documentId });
+    setDocumentUndo(null);
+    setDocuments(await desktop.invoke("documents:list", {})); setDocumentId(undo.documentId);
+    navigate({ view: 'workspace', documentId: undo.documentId });
+    setNotice("");
+    requestAnimationFrame(() => document.getElementById('reading-content')?.focus());
   };
   const undoButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (!undo) return;
-    undoButton.current?.focus();
-    const timer = setTimeout(() => {
-      setUndo(null);
-      setNotice(current => current === undo.message ? "" : current);
-    }, 30000);
-    return () => clearTimeout(timer);
+    if (undo) undoButton.current?.focus();
   }, [undo]);
   const refreshProviders = useCallback(async () => {
     const list = await desktop.invoke("providers:list", {});
@@ -609,13 +604,13 @@ export function Workspace() {
         </div>
       </header>
       {startupError && <LoadError message={startupError} retry={() => setStartupRevision(value => value + 1)}/>}
-      {notice && (
+      {(notice || undo) && (
         <div className="notice" role="status">
-          <span>{notice}</span>
-          {undo?.message === notice && <Button ref={undoButton} variant="outline" size="sm" onClick={() => void undo.run().catch(report)}>{tr('library:undo')}</Button>}
+          <span>{notice || undo?.message}</span>
+          {undo && <Button ref={undoButton} variant="outline" size="sm" onClick={() => void restoreDocument().catch(report)}>{tr('library:undo')}</Button>}
           <button
             aria-label={tr('common:dismiss_notification')}
-            onClick={() => setNotice("")}
+            onClick={() => { setNotice(""); setDocumentUndo(null); }}
           >
             ×
           </button>
