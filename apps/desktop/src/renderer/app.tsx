@@ -1,7 +1,8 @@
+import { ChatSessionHost } from './chat-session-host';
 import { MoodleWebviewPane } from './courses/webview-pane';
 import { documentIdSchema } from '../shared/domain';
 import { ExamsView } from './exams';
-import { WebChatHub } from './web-chat';
+import { WebChatHub, HostedChat } from './web-chat';
 import { SurfaceErrorBoundary } from './components/surface-error-boundary';
 import { ReviewView } from "./review";
 import { ExistingAnalyticsPrompt } from './analytics-ui';
@@ -42,7 +43,7 @@ function GlobalSettings() {
 }
 function ActiveViews() {
   const { activeTabId, tabs, route } = useNavigate();
-  return <div id="active-tab-panel" data-native={route.view==='moodle'} role={tabs.tabs.length > 1 ? "tabpanel" : undefined} aria-labelledby={tabs.tabs.length > 1 ? `tab-${activeTabId}` : undefined} data-tab-id={activeTabId}><Views key={activeTabId} /></div>;
+  return <div id="active-tab-panel" data-native={route.view==='moodle' || route.view==='hosted-chat'} role={tabs.tabs.length > 1 ? "tabpanel" : undefined} aria-labelledby={tabs.tabs.length > 1 ? `tab-${activeTabId}` : undefined} data-tab-id={activeTabId}><Views key={activeTabId} /></div>;
 }
 function Views() {
   const { route, activeTabId, closeTab, navigate } = useNavigate();
@@ -56,7 +57,7 @@ function Views() {
     const idle = window.requestIdleCallback(() => { void loadWelcome(); });
     return () => window.cancelIdleCallback(idle);
   }, []);
-  return <SurfaceErrorBoundary resetKeys={[JSON.stringify(route)]}>{route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "moodle" && route.accountId && route.target ? (<MoodleWebviewPane tabId={activeTabId} accountId={route.accountId} target={route.target} onClose={()=>closeTab(activeTabId)} onDocument={id=>navigate({view:"workspace",documentId:documentIdSchema.parse(id)})} onReconnect={()=>navigate({view:"courses",connectSchool:true})}/>) : route.view === "workspace" ? (
+  return <SurfaceErrorBoundary resetKeys={[JSON.stringify(route)]}>{route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "moodle" && route.accountId && route.target ? (<MoodleWebviewPane tabId={activeTabId} accountId={route.accountId} target={route.target} onClose={()=>closeTab(activeTabId)} onDocument={id=>navigate({view:"workspace",documentId:documentIdSchema.parse(id)})} onReconnect={()=>navigate({view:"courses",connectSchool:true})}/>) : route.view === "hosted-chat" && route.provider ? (<HostedChat provider={route.provider}/>) : route.view === "workspace" ? (
     <Workspace key={route.documentId} />
   ) : route.view === "ai-chats" ? (<WebChatHub/>) : route.view === "exams" ? (<ExamsView/>) : route.view === "review" ? (<ReviewView/>) : route.view === "history" ? (<HistoryView/>) : route.view === "courses" ? (
     <CoursesView />
@@ -70,7 +71,7 @@ export function App() {
   return (
     <AgentsProvider>
       <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
-        <ExistingAnalyticsPrompt/><ContextCoach /><ActiveViews /><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/><AgentConsent /><AgentNavigation />
+        <ExistingAnalyticsPrompt/><ContextCoach /><ChatSessionHost><ActiveViews /></ChatSessionHost><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/><AgentConsent /><AgentNavigation />
       </AppShell>
     </AgentsProvider>
   );

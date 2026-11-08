@@ -1,3 +1,4 @@
+import { seedRoute } from './helpers/tab-route.mjs';
 /** Real Electron coverage for History search, actions, keyboard navigation and message jumps. */
 import { waitForDocumentStatus } from './helpers/document-status.mjs';
 import { _electron as electron } from 'playwright';
@@ -12,8 +13,9 @@ let app;
 try {
   app=await electron.launch({args:[resolve('.'),'--user-data-dir='+directory],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1',VSTUDY_LOCALE:'en'}});
   const page=await app.firstWindow(),errors=[];
+ await page.evaluate(()=>window.sessionStorage.setItem('vstudy.memoryConsentPostponed','1'));
   page.on('pageerror',e=>errors.push(e.message));
-  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'history'})));await page.reload();
+  await seedRoute(page,{view:'history'});await page.reload();
   await page.getByRole('heading',{name:'History',exact:true}).waitFor();
   await page.getByText('Your conversations will appear here',{exact:true}).waitFor();
   const conversation=await page.evaluate(async()=>{
@@ -62,7 +64,8 @@ try {
   await page.getByRole('dialog').locator('[data-testid=history-result]').waitFor();
   await page.screenshot({path:join(evidence,'history-quick-finder.png'),animations:'disabled'});
   await page.keyboard.press('Escape');
-  await search.fill('nothing matches here');
+  await page.getByRole('button',{name:'Back to history',exact:true}).click();
+  await search.fill('xqzvbnm9081726354');
   await page.getByText('No matching conversations',{exact:true}).waitFor();
   await page.screenshot({path:join(evidence,'history-no-results.png'),animations:'disabled'});
   await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
@@ -76,9 +79,9 @@ try {
       const off=window.desktop.onChatEvent(requestId,event=>{if(event.type==='done'){off();resolve();}if(event.type==='error'){off();reject(Error(event.message));}});
       window.desktop.invoke('chat:start',{documentId:document.id,conversationId:c.id,requestId,providerId:c.providerId,modelId:c.modelId,userMessage:'scoped history 資料'}).catch(reject);
     });
-    window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace',documentId:document.id}));
     return c;
   },importedDocument);
+  await seedRoute(page,{view:'workspace',documentId:importedDocument.id});
   await page.reload();await page.getByRole('button',{name:'Conversations',exact:true}).click();
   await page.getByRole('dialog').getByRole('searchbox').fill('scoped history');
   await page.getByRole('dialog').locator('.history-match').first().click();
@@ -87,7 +90,7 @@ try {
   await page.screenshot({path:join(evidence,'history-scoped-picker.png'),animations:'disabled'});
   const scopedMessages=await page.evaluate(id=>window.desktop.invoke('messages:list',{conversationId:id}),documentConversation.id);
   assert.equal(scopedMessages.length,2);
-  await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'history'})));await page.reload();
+  await seedRoute(page,{view:'history'});await page.reload();
   for(const language of ['zh-Hant','ja']){
     await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language});},language);
     await page.reload();await page.getByRole('searchbox').fill('学習');await page.locator('[data-testid=history-result]').waitFor();

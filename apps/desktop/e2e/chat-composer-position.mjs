@@ -1,3 +1,4 @@
+import { seedRoute } from './helpers/tab-route.mjs';
 import { temporaryPath } from '../scripts/platform.mjs';
 import { Buffer } from 'node:buffer';
 import { _electron as electron } from 'playwright';
@@ -13,17 +14,18 @@ let positions=0, axeScans=0;
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1',VSTUDY_LOCALE:'en'}});
  const page=await app.firstWindow();
+ await page.evaluate(()=>window.sessionStorage.setItem('vstudy.memoryConsentPostponed','1'));
  const shot=async name=>{
   const base64=await app.evaluate(async({BrowserWindow})=>(await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'));
   await writeFile(join(evidence,name),Buffer.from(base64,'base64'));
  };
  const audit=async()=>{const axe=await new AxeBuilder({page}).setLegacyMode(true).include('.chat-pane').analyze();assert.deepEqual(axe.violations.map(v=>v.id),[]);axeScans++;};
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true});});
+ await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true,welcomeSeen:true});});
  await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
  const doc=await page.evaluate(()=>window.desktop.invoke('documents:import',{}));
- await page.evaluate(documentId=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace',documentId})),doc.id);await page.reload();
- const input=page.locator('.aui-composer-input');await input.waitFor();
+ await seedRoute(page,{view:'workspace',documentId:doc.id});await page.reload();
+ const input=page.locator('.aui-composer-input');await input.waitFor().catch(async error=>{console.log(await page.locator('body').innerText());await page.screenshot({path:join(evidence,'failure.png')});throw error;});
  assert.equal(await input.isEditable(),true);
  assert.equal(await page.getByRole('button',{name:'Start a conversation',exact:true}).count(),0);
  const conversations=()=>page.evaluate(documentId=>window.desktop.invoke('conversations:list',{documentId}),doc.id);
@@ -42,8 +44,9 @@ try {
   const tab=page.locator('.workspace-tabs').getByRole('tab',{name:'Chat',exact:true});if(await tab.isVisible())await tab.click();
   await checkPosition();await audit();await shot(`${width}-${theme}.png`);
  }
+ await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setSize(1200,900));
  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2));
- await page.waitForFunction(()=>window.innerWidth<500);
+ await page.waitForFunction(()=>window.innerWidth<700);
  await page.locator('.workspace-tabs').getByRole('tab',{name:'Chat',exact:true}).click();
  await checkPosition();await audit();await shot('200-percent.png');
  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1));

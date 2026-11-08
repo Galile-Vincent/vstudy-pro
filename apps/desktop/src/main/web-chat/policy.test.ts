@@ -24,9 +24,9 @@ describe('resource policy',()=>{
 });
 describe('hosted chat contracts',()=>{
   it('accepts provider controls without accepting URLs, partitions or scripts',()=>{
-    expect(webChatContract['web-chat:open'].request.parse({provider:'claude'})).toEqual({provider:'claude'});
+    expect(webChatContract['web-chat:open'].request.parse({provider:'claude',tabId:'11111111-1111-4111-8111-111111111111'})).toEqual({provider:'claude',tabId:'11111111-1111-4111-8111-111111111111',slotId:'page'});
     for(const request of [{provider:'evil'},{provider:'claude',url:'https://evil.test'},{provider:'claude',partition:'persist:default'},{provider:'claude',preload:'/tmp/evil'}]) expect(webChatContract['web-chat:open'].request.safeParse(request).success).toBe(false);
-    const request={provider:'gemini',visible:true,bounds:{x:0,y:12,width:400,height:600}};
+    const request={provider:'gemini',tabId:'11111111-1111-4111-8111-111111111111',generation:1,visible:true,bounds:{x:0,y:12,width:400,height:600}};
     expect(webChatContract['web-chat:layout'].request.safeParse(request).success).toBe(true);
     for(const bad of [-1,Infinity,NaN,20001,.5]) expect(webChatContract['web-chat:layout'].request.safeParse({...request,bounds:{...request.bounds,x:bad}}).success).toBe(false);
     expect(webChatContract['web-chat:state'].response.safeParse({status:'ready',canGoBack:false,canGoForward:false,cookies:[]}).success).toBe(false);

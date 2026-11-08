@@ -15,6 +15,17 @@ export async function exerciseNativeTabs(app,count=5) {
       samples.push({opened:index+1,liveViews:live().length,processes:app.getAppMetrics().map(metric=>({pid:metric.pid,type:metric.type,workingSetKiB:metric.memory.workingSetSize}))});
       if(live().length>4) throw Error('Native view cap exceeded');
     }
+    const cycles=[];
+    for(let cycle=0;cycle<20;cycle++) {
+      const tabId=process.getBuiltinModule('crypto').randomUUID();
+      const state=manager.open(owner,account.id,{kind:'page',url:account.siteUrl+'/course/view.php?id='+cycle},tabId);
+      await wait(()=>manager.state(owner,state.id).status==='ready');
+      manager.hide(owner,tabId,state.generation);
+      manager.action(owner,state.id,'discard');
+      manager.sync(owner,tabs);
+      const metrics=app.getAppMetrics().filter(metric=>metric.type==='Tab');
+      cycles.push({cycle:cycle+1,liveViews:live().length,rendererWorkingSetKiB:metrics.reduce((sum,metric)=>sum+metric.memory.workingSetSize,0)});
+    }
     const discarded=manager.checkpoints.has(`${owner.id}:${tabs[0]}`);
     const restored=manager.open(owner,account.id,{kind:'page',url:account.siteUrl+'/course/view.php?id=0'},tabs[0]);
     await wait(()=>manager.state(owner,restored.id).status==='ready');
@@ -52,6 +63,6 @@ export async function exerciseNativeTabs(app,count=5) {
     await wait(()=>!live().find(pane=>pane.tabId===importTab)?.importing);
     await manager.disconnect(account.id);
     if(live().length!==0) throw Error('Disconnect retained native views');
-    return {count,discarded,scroll,discardedScroll,samples,importProtected:true,disconnected:true};
+    return {count,discarded,scroll,discardedScroll,samples,cycles,importProtected:true,disconnected:true};
   },count).then(result=>{if(count>4) assert.equal(result.discarded,true);return result;});
 }

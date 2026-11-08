@@ -39,6 +39,8 @@ try {
   assert.equal(await page.getByRole('tab').count(), 3);
   assert.equal(await page.getByRole('tablist').isVisible(), true);
   await page.screenshot({path:join(evidence,'workspace-tabs.png')});
+  await page.getByRole('button',{name:'Original file',exact:true}).click();
+  await page.locator('.original-toolbar').waitFor();
   assert.equal(await page.getByRole('tabpanel').count(), 1);
   assert.equal(await page.locator('.workspace').count(), 1);
   assert.equal(await page.locator('.home-page,.library-view').count(), 0);
@@ -53,7 +55,8 @@ try {
   assert.equal(await page.getByRole('tab').count(), 2);
   await page.keyboard.press(`${modifier}+w`);
   await page.locator('.app-shell[data-view=workspace]').waitFor();
-  results.push('PASS middle click and Cmd/Ctrl+W close with neighbor selection');
+  await page.locator('.original-toolbar').waitFor();
+  results.push('PASS middle click and Cmd/Ctrl+W close with neighbor selection and restored reader mode');
   await page.keyboard.press(`${modifier}+t`);
   await page.locator('.app-tabs-menu').getByRole('button', { name: 'Home', exact: true }).click();
   await page.keyboard.press(`${modifier}+t`);

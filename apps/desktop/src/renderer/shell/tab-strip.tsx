@@ -31,7 +31,8 @@ export function TabStrip() {
     const poll=async()=>{
       try {
         const result=await desktop.invoke('moodle:webview-sync',{tabIds:tabs.tabs.map(tab=>tab.id)});
-        if(active) setNative(Object.fromEntries(result.tabs.map(tab=>[tab.tabId,tab.status])));
+        const chat=await desktop.invoke('web-chat:sync',{tabIds:tabs.tabs.map(tab=>tab.id)});
+        if(active) setNative(Object.fromEntries([...result.tabs,...chat.tabs].map(tab=>[tab.tabId,tab.status])));
       } catch {if(active) setNative({});}
       if(active) timer=setTimeout(()=>void poll(),1000);
     };
@@ -57,7 +58,7 @@ export function TabStrip() {
   useEffect(() => { root.current?.querySelector('[aria-selected="true"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }); }, [tabs.activeId, tabs.tabs.length]);
   useEffect(() => {
     const keyboard = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey || hasNavigationOverlay() || document.activeElement?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]')) return;
+      if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey || hasNavigationOverlay()) return;
       const index = tabs.tabs.findIndex(tab => tab.id === tabs.activeId);
       let target: number | undefined;
       if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === 't') { event.preventDefault(); setPicker(true); return; }
@@ -87,7 +88,7 @@ export function TabStrip() {
     {tabs.tabs.length > 1 && <div className="app-tabs-scroll" role="tablist" aria-label={tr('tabs:title')}>
       {tabs.tabs.map((tab, index) => {
         const Icon = icons[tab.icon];
-        const nativeStatus=native[tab.id] ?? (tab.history.entries[tab.history.index]?.view==='moodle' && tab.id!==tabs.activeId ? 'discarded' : undefined);
+        const nativeStatus=native[tab.id] ?? (['moodle','hosted-chat'].includes(tab.history.entries[tab.history.index]?.view ?? '') && tab.id!==tabs.activeId ? 'discarded' : undefined);
         return <div className="app-tab" key={tab.id} data-active={tab.id === tabs.activeId}
           onPointerDown={event => { if (event.button === 0) drag.current = { id: tab.id, x: event.clientX }; }}
           onPointerUp={event => {

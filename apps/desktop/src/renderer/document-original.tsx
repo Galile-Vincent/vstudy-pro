@@ -5,12 +5,13 @@ import { desktop } from './bridge';
 import { captureRect, type Point } from './document-context';
 import { Button } from './components/ui/button';
 import './document-original.css';
-export function DocumentOriginal({document:doc,pageCount,onAttach}:{document:Document;pageCount:number;onAttach:(context:DocumentContextAttachment)=>void}) {
-  const [page,setPage]=useState(1),[image,setImage]=useState(''),[error,setError]=useState(''),[revision,setRevision]=useState(0);
+export function DocumentOriginal({document:doc,pageCount,onAttach,initialPage=1,onPage}:{document:Document;pageCount:number;initialPage?:number;onPage?:(page:number)=>void;onAttach:(context:DocumentContextAttachment)=>void}) {
+  const [page,setPage]=useState(initialPage),[image,setImage]=useState(''),[error,setError]=useState(''),[revision,setRevision]=useState(0);
   const [previewOnly,setPreviewOnly]=useState(false),[capturing,setCapturing]=useState(false);
   const [drag,setDrag]=useState<{start:Point;end:Point}|null>(null);
   const img=useRef<HTMLImageElement>(null),viewer=useRef<HTMLDivElement>(null);
   useEffect(()=>{if(capturing){const bounds=img.current?.getBoundingClientRect();if(bounds)setDrag({start:{x:bounds.width/4,y:bounds.height/4},end:{x:bounds.width*3/4,y:bounds.height*3/4}});viewer.current?.focus();}else setDrag(null);},[capturing]);
+  useEffect(()=>{onPage?.(page);},[page,onPage]);
   const total=doc.mime==='application/pdf'?Math.max(1,pageCount):1;
   useEffect(()=>{let active=true;setImage('');setError('');setCapturing(false);setDrag(null);
     void desktop.invoke('documents:originalPage',{documentId:doc.id,page}).then(result=>{if(active){setImage(result.image);setPreviewOnly(result.previewOnly);}}).catch(()=>{if(active)setError(tr('library:original.error'));});

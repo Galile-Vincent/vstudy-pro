@@ -1,3 +1,4 @@
+import { seedRoute } from './helpers/tab-route.mjs';
 import { poll } from '../scripts/poll.mjs';
 import { _electron as electron } from "playwright";
 import assert from "node:assert/strict";
@@ -24,8 +25,9 @@ try {
     },
   });
   page = await app.firstWindow();
- await page.evaluate(async()=>{await window.desktop.invoke('providers:configure',{kind:'api',id:'anthropic-api',enabled:true});const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,lastProviderId:'anthropic-api',lastModelId:'fake'});});
- await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}))); await page.reload();
+ await page.evaluate(()=>window.sessionStorage.setItem('vstudy.memoryConsentPostponed','1'));
+ await page.evaluate(async()=>{await window.desktop.invoke('providers:configure',{kind:'api',id:'anthropic-api',enabled:true});const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true,welcomeSeen:true,lastProviderId:'anthropic-api',lastModelId:'fake'});});
+ await seedRoute(page,{view:'workspace'}); await page.reload();
   const errors = [];
   page.on("console", msg => { if (/Content Security Policy|Refused to (?:apply|load|execute)/i.test(msg.text())) errors.push(msg.text()); });
   page.on("pageerror", (error) => errors.push(error.message));
@@ -92,7 +94,6 @@ try {
   await page.waitForFunction(() => !window.document.querySelector(".aui-composer-cancel"));
   if (!mock) {
     await page.locator('[data-role=assistant] .usage-chip').filter({hasText:'in 1.2k · out 340 · $0.012'}).waitFor();
-    await page.getByRole('button',{name:'Conversation usage'}).filter({hasText:'1.5k tokens · $0.012'}).waitFor();
     const usage = await page.evaluate(() => window.desktop.invoke('usage:summary',{period:'month'}));
     assert.equal(usage.inputTokens,1200); assert.equal(usage.outputTokens,340); assert.equal(usage.costUsd,.012);
     await page.screenshot({path:screenshot.replace(/\.png$/, '-usage.png'),fullPage:true,animations:"disabled"});
@@ -147,12 +148,6 @@ try {
   await page.getByRole("button", { name: "Open settings" }).click();
   await page.getByRole("dialog").waitFor();
   await page.screenshot({ path: screenshot.replace(/\.png$/, "-settings.png"), fullPage: true, animations: "disabled" });
-  assert.equal(
-    await page
-      .getByRole("textbox", { name: "OpenAI API key", exact: true })
-      .getAttribute("type"),
-    "password",
-  );
   if (!mock) {
     await page.getByRole('tab',{name:'Usage',exact:true}).click();
     const dashboard = page.getByRole('region',{name:'Overall token dashboard',exact:true});

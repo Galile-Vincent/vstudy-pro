@@ -50,11 +50,12 @@ try {
   await writeFile(entry,`export { MoodleWebviews } from ${JSON.stringify(resolve('src/main/moodle/webview.ts'))}; export { moodleWebviewContract } from ${JSON.stringify(resolve('src/shared/moodle-webview.ts'))}; export { DocumentService } from ${JSON.stringify(resolve('src/main/services/documents.ts'))}; export { openStore } from ${JSON.stringify(resolve('src/main/db/index.ts'))};`);
   await build({configFile:false,logLevel:'error',resolve:{conditions:['node']},build:{outDir:join(directory,'bundle'),lib:{entry,formats:['cjs'],fileName:()=>'webview.cjs'},rollupOptions:{external:['electron',/^node:/]}}});
   app = await electron.launch({args:[resolve('.'),`--user-data-dir=${join(directory,'data')}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
-  const page = await app.firstWindow();
+  let page = await app.firstWindow();
   const errors = [];page.on('pageerror',error => errors.push(error.message));
   await page.waitForFunction(() => !!window.desktop?.invoke);
   if(await page.getByRole('button',{name:'No thanks',exact:true}).count()) await page.getByRole('button',{name:'No thanks',exact:true}).click();
   await page.evaluate(async () => {const settings = await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...settings,welcomeSeen:true,onboardingCompleted:true,language:'en'});});
+  const installFixture=async()=>{
   await app.evaluate(({ipcMain,BrowserWindow,app,dialog},input) => {
     const fixture = process.getBuiltinModule('module').createRequire(process.execPath)(input.module);
     const account = {id:input.accountId,siteUrl:input.siteUrl,siteName:'Mock University',remoteUserId:42,displayName:'Test Student',status:'connected',syncedAt:new Date().toISOString()};
@@ -87,6 +88,8 @@ try {
     }
     BrowserWindow.getAllWindows()[0].setSize(1400,960);
   },{accountId,courseId,siteUrl,module:join(directory,'bundle/webview.cjs')});
+  };
+  await installFixture();
   if(process.env.VSTUDY_MEASURE_NATIVE_TABS) {
     await app.evaluate(({ipcMain})=>{ipcMain.removeHandler('moodle:webview-sync');ipcMain.handle('moodle:webview-sync',()=>({ok:true,tabs:[]}));});
     await page.evaluate(({accountId,siteUrl})=>{
@@ -98,13 +101,21 @@ try {
     },{accountId,siteUrl});
     await page.reload();
     await page.waitForFunction(()=>document.querySelector('.moodle-webview-header strong')?.textContent==='Week 4 · Moodle');
+    assert.equal(await app.evaluate(()=>globalThis.webviewManager.panes.size),1,'native tab is live before process restart');
+    await app.close();
+    app=await electron.launch({args:[resolve('.'),`--user-data-dir=${join(directory,'data')}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
+    page=await app.firstWindow();
+    await installFixture();
+    await page.reload();
+    await page.waitForFunction(()=>document.querySelector('.moodle-webview-header strong')?.textContent==='Week 4 · Moodle');
     assert.equal(await app.evaluate(()=>globalThis.webviewManager.panes.size),1,'restored native tabs load only the active view');
     assert.equal(await page.getByRole('tablist',{name:'Tabs'}).getByRole('tab').count(),5);
     await page.screenshot({path:join(evidence,'native-tabs-restored.png')});
     await page.getByRole('button',{name:'New tab',exact:true}).click();
     await page.getByRole('button',{name:'Home',exact:true}).last().click();
+    await app.evaluate(({ipcMain})=>{ipcMain.removeHandler('moodle:webview-sync');ipcMain.handle('moodle:webview-sync',()=>({ok:true,tabs:[]}));});
     const results=await exerciseNativeTabs(app,Number(process.env.VSTUDY_MEASURE_NATIVE_TABS));
-    results.rendererReloadRestoredTabs=5;results.rendererReloadLiveViews=1;
+    results.fullRestartRestoredTabs=5;results.fullRestartLiveViews=1;
 
     console.log(JSON.stringify(results,null,2));
     await writeFile(join(evidence,'native-pool-results.json'),JSON.stringify(results,null,2));

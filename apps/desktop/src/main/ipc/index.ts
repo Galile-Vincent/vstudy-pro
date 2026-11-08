@@ -93,11 +93,13 @@ export function registerIpc(
   };
   registrar.handle('shell:openExternal', async ({url},event)=>{await confirmExternal(event.sender,url);return {ok:true};});
   const webChats=new WebChats(confirmExternal);
-  for(const channel of ['web-chat:open','web-chat:state','web-chat:layout','web-chat:action','web-chat:clear'] as const) implemented.add(channel);
-  registrar.handle('web-chat:open',({provider},event)=>webChats.open(event.sender,provider));
-  registrar.handle('web-chat:state',({provider},event)=>webChats.state(event.sender,provider));
-  registrar.handle('web-chat:layout',({provider,bounds,visible,radius,active},event)=>{webChats.layout(event.sender,provider,bounds,visible,radius,active);return {ok:true};});
-  registrar.handle('web-chat:action',({provider,action},event)=>webChats.action(event.sender,provider,action));
+  for(const channel of ['web-chat:open','web-chat:state','web-chat:layout','web-chat:action','web-chat:clear','web-chat:hide','web-chat:sync'] as const) implemented.add(channel);
+  registrar.handle('web-chat:sync',({tabIds},event)=>webChats.sync(event.sender,tabIds));
+  registrar.handle('web-chat:hide',({provider,tabId,slotId,generation},event)=>{webChats.hide(event.sender,provider,tabId,slotId,generation);return {ok:true};});
+  registrar.handle('web-chat:open',({provider,tabId,slotId,url},event)=>webChats.open(event.sender,provider,tabId,slotId,url));
+  registrar.handle('web-chat:state',({provider,tabId,slotId},event)=>webChats.state(event.sender,provider,tabId,slotId));
+  registrar.handle('web-chat:layout',({provider,bounds,visible,radius,active,tabId,slotId,generation},event)=>{webChats.layout(event.sender,provider,bounds,visible,radius,active,tabId,slotId,generation);return {ok:true};});
+  registrar.handle('web-chat:action',({provider,action,tabId,slotId},event)=>webChats.action(event.sender,provider,action,tabId,slotId));
   registrar.handle('web-chat:clear',async({provider},event)=>{await webChats.clear(event.sender,provider);return {ok:true};});
   implemented.add('providers:chooseExecutable');
   registrar.handle('providers:chooseExecutable', async ({binary},event) => {

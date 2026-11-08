@@ -1,3 +1,6 @@
+import { useTabPresentation } from './tab-presentation';
+import { useChatSession } from './chat-session-host';
+import { useOptionalNavigation } from './shell';
 import type { DocumentContextAttachment } from '../shared/domain';
 import { DocumentContextChip } from './document-context-chip';
 import { MemoryConsentCard } from './review/memory-consent';
@@ -15,7 +18,7 @@ import { ModelControls } from "./model-controls";
 export { ModelControls } from "./model-controls";
 import { MessageUsage } from "./usage/chip";
 import { UsageMeter, useUsage, useBudgetGuard } from "./usage/meter";
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   AssistantRuntimeProvider,
   WebSpeechSynthesisAdapter,
@@ -80,6 +83,14 @@ export function Chat({
   documentPageCount?: number; documentTitle?: string;
 }) {
   useTranslation();
+  const navigation=useOptionalNavigation();
+  const presentation=useTabPresentation(navigation);
+  const saved=presentation.initial;
+  const restoredDraft=useRef((saved?.kind==='app' || saved?.kind==='document') && saved.conversationId===conversation.id ? saved.draft ?? draft : draft).current;
+  const composerDraft=useRef(restoredDraft);
+  const checkpoint=useRef(()=>{});checkpoint.current=()=>presentation.update({draft:composerDraft.current.slice(0,100_000),conversationId:conversation.id});
+  useLayoutEffect(()=>()=>checkpoint.current(),[]);
+  useEffect(()=>{const flush=()=>checkpoint.current();window.addEventListener('pagehide',flush);return()=>window.removeEventListener('pagehide',flush);},[]);
   const [tutorMode, setTutorMode] = useTutorMode(conversation.id);
   const [earlierHistory, setEarlierHistory] = useState<Message[]>([]);
   const restoredHistory = useMemo(() => [...earlierHistory, ...history], [earlierHistory, history]);
@@ -123,15 +134,19 @@ export function Chat({
       ),
     [],
   );
-  useEffect(() => () => connection.dispose(), [connection]);
+
   const speech = useMemo(() => typeof window !== 'undefined' && 'speechSynthesis' in window ? new WebSpeechSynthesisAdapter() : undefined, []);
   const suggestion = useMemo(() => ({generate: async () => [{prompt:tr('common:which_passages_support_this_answer')},{prompt:tr('common:explain_this_more_simply')}]}), []);
-  const runtime = useLocalRuntime(connection.adapter, {
+  const runtimeOptions = {
     adapters: { suggestion, ...(speech ? {speech} : {}) },
     initialMessages: chatHistoryMessages(history),
-  });
-  useEffect(() => { if (promptRequest) { runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}],metadata:{custom:{materials:promptRequest.materials}}}); } }, [promptRequest?.id]);
-  useEffect(() => { runtime.thread.composer.setText(draft); return runtime.thread.composer.subscribe(() => onDraft(runtime.thread.composer.getState().text)); }, [runtime, onDraft]);
+  };
+  const session=useChatSession(conversation.id,navigation?.activeTabId ?? conversation.id,connection,runtimeOptions);
+  const localRuntime=useLocalRuntime(connection.adapter,runtimeOptions);
+  const runtime=session.runtime ?? localRuntime;
+  useEffect(()=>()=>{if(session.standalone)connection.dispose();},[connection,session.standalone]);
+  useEffect(() => { if (!session.standalone && !session.runtime)return; if (promptRequest) { runtime.thread.append({role:"user",content:[{type:"text",text:promptRequest.text}],metadata:{custom:{materials:promptRequest.materials}}}); } }, [promptRequest?.id,session.runtime]);
+  useEffect(() => { if(!session.standalone && !session.runtime)return;runtime.thread.composer.setText(restoredDraft); return runtime.thread.composer.subscribe(() => {composerDraft.current=runtime.thread.composer.getState().text;onDraft(composerDraft.current);}); }, [runtime, onDraft]);
   useEffect(() => {
     if (!jumpMessageId) return;
     let frame=0,remaining=60;
@@ -149,13 +164,14 @@ export function Chat({
     picker: <><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
+  if(!session.standalone && !session.runtime)return null;
   return <AssistantRuntimeProvider runtime={runtime}><DocumentChatContext.Provider value={extensions}>
     <EarlierMessages jumpMessageId={jumpMessageId} runtime={runtime} conversationId={conversation.id} cursor={historyCursor} onLoaded={(messages, nextCursor) => {
       partialHistory.current = !!nextCursor;
       setEarlierHistory(current => [...messages, ...current]);
       for (const message of messages) for (const part of message.parts) if (part.selection) selections.current.set(message.id, part.selection);
     }}/>
-    <div className="chat-motion" ref={motion}>{imageUnsupported && <p role="status">{tr('library:original.unsupported')}</p>}<Thread components={documentComponents} autoFocus={autoFocus} /></div>
+    <div className="chat-motion" ref={motion}>{imageUnsupported && <p role="status">{tr('library:original.unsupported')}</p>}<Thread components={documentComponents} autoFocus={autoFocus && !document.querySelector('.app-tabs-menu,[role="dialog"]')} /></div>
     <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }

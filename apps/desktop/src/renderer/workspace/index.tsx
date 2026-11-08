@@ -1,3 +1,5 @@
+import { captureReaderPosition, restoreReaderPosition } from './reader-position';
+import { useTabPresentation } from '../tab-presentation';
 import { DocumentOriginal } from '../document-original';
 import { DocumentContextChip } from '../document-context-chip';
 import type { DocumentContextAttachment } from '../../shared/domain';
@@ -18,7 +20,7 @@ import { conversionStatus } from "../../shared/status";
 import { useTranslation } from "react-i18next";
 import { applyLanguage, useFormat } from "../i18n";
 import { tr } from '../../shared/i18n';
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type {
   Conversation,
@@ -40,7 +42,10 @@ import { ConversationList } from "../conversation-list";
 import { ProviderSettings, type Providers } from "../providers";
 
 export function Workspace() {
-  const { route, navigate } = useNavigate();
+  const navigation=useNavigate();
+  const {route,navigate}=navigation;
+  const {initial,update}=useTabPresentation(navigation);
+  const restored=initial?.kind==='document'?initial:undefined;
   useTranslation();
   const format = useFormat();
   const [practice, setPractice] = useState(() => { try { return sessionStorage.getItem('vstudy:practice'); } catch { return null; } });
@@ -76,7 +81,7 @@ export function Workspace() {
     update(); media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
-  const [compactPane, setCompactPane] = useState(() => sessionStorage.getItem("workspace-pane") ?? "reading");
+  const [compactPane, setCompactPane] = useState(() => restored?.pane ?? "reading");
   useEffect(() => { sessionStorage.setItem("workspace-pane",compactPane); }, [compactPane]);
   useEffect(() => {
     const read = () => {
@@ -86,7 +91,7 @@ export function Workspace() {
     window.addEventListener('vstudy:read-without-ai', read);
     return () => window.removeEventListener('vstudy:read-without-ai', read);
   }, []);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(restored?.draft ?? "");
   const [loadedConversationDocument,setLoadedConversationDocument] = useState<Document['id'] | null>(null);
   const [historyJump,setHistoryJump] = useState<string>();
   const [focusChat,setFocusChat] = useState(false);
@@ -98,10 +103,26 @@ export function Workspace() {
   const activeConversation = useRef(conversation);
   activeConversation.current = conversation;
   const [progress, setProgress] = useState<Record<string, string>>({});
-  const [readerVersion,setReaderVersion] = useState<'original'|'ai'>('original');
-  const [readerDisplay,setReaderDisplay] = useState<'markdown'|'file'>('markdown');
+  const [readerVersion,setReaderVersion] = useState<'original'|'ai'>(restored?.version==='ai'?'ai':'original');
+  const [readerDisplay,setReaderDisplay] = useState<'markdown'|'file'>(restored?.readerMode ?? 'markdown');
   const [documentContext,setDocumentContext] = useState<DocumentContextAttachment | null>(null);
-  useEffect(()=>{setDocumentContext(null);setReaderDisplay('markdown');},[documentId]);
+  useEffect(()=>{setDocumentContext(null);setReaderDisplay(restored?.readerMode ?? 'markdown');},[documentId]);
+  const [originalPage,setOriginalPage]=useState(restored?.page ?? 1);
+  const [paneSizes,setPaneSizes]=useState(restored?.paneSizes ?? [58,42]);
+  const selectedVersion=useRef<'original'|'ai'|undefined>(restored?.version==='ai'?'ai':restored?.version==='original'?'original':undefined);
+  const checkpoint=useRef(()=>{});
+  checkpoint.current=()=>update({kind:'document',readerMode:readerDisplay,version:readerVersion,pane:compactPane==='chat'?'chat':'reading',draft:draft.slice(0,100_000),...(conversation?{conversationId:conversation.id}:{}),page:originalPage,paneSizes,...captureReaderPosition(document.getElementById('reading-content'))});
+  useLayoutEffect(()=>()=>checkpoint.current(),[]);
+  useEffect(()=>{const flush=()=>checkpoint.current();window.addEventListener('pagehide',flush);return()=>window.removeEventListener('pagehide',flush);},[]);
+  useEffect(()=>{
+    if(loadingSource || !source || !restored?.readerScrollTop)return;
+    const element=document.getElementById('reading-content');if(!element)return;
+    const restore=()=>restoreReaderPosition(element,restored);
+    restore();const observer=new MutationObserver(restore);observer.observe(element,{childList:true,subtree:true});
+    const stop=()=>{observer.disconnect();element.removeEventListener('load',restore,true);};
+    element.addEventListener('wheel',stop,{once:true});element.addEventListener('pointerdown',stop,{once:true});element.addEventListener('load',restore,true);
+    const timer=setTimeout(stop,5000);return()=>{stop();clearTimeout(timer);element.removeEventListener('wheel',stop);element.removeEventListener('pointerdown',stop);};
+  },[loadingSource,source]);
   const [readerRevision,setReaderRevision] = useState(0);
   const [partialSource, setPartialSource] = useState("");
   useEffect(() => {
@@ -235,7 +256,7 @@ export function Workspace() {
           setLoadedConversationDocument(documentId);
           let remembered: string | null = null;
           try { remembered = localStorage.getItem(`vstudy-conversation:${documentId}`); } catch { /* Persistence is optional when renderer storage is unavailable. */ }
-          const selected = list.find(c => c.id === remembered) ?? list[0] ?? null;
+          const selected = list.find(c => c.id === (restored?.conversationId ?? remembered)) ?? list[0] ?? null;
           setConversation(selected);
           if (selected) setModel(`${selected.providerId}/${selected.modelId}`);
         }
@@ -256,9 +277,9 @@ export function Workspace() {
     if (doc?.status !== "ready") return;
     setLoadingSource(true);
     void desktop
-      .invoke("documents:read", { documentId: doc.id })
+      .invoke("documents:read", { documentId: doc.id,version:selectedVersion.current ?? doc.activeVersion })
       .then((value) => {
-        if (active) {setSource(value);setReaderVersion(doc.activeVersion);}
+        if (active) {setSource(value);setReaderVersion(selectedVersion.current ?? doc.activeVersion);}
       })
       .catch(error => { if (active) setSourceError(errorText(error)); })
       .finally(() => {
@@ -470,7 +491,7 @@ export function Workspace() {
         <span className="eyebrow">{doc?.sourceName ?? tr('common:reading_space')}</span>
         {doc && <button className="icon-button" title={tr('common:delete_document')} aria-label={tr('common:delete_document')} onClick={() => void removeDocument(doc.id)}><Trash2 size={16} /></button>}
         {doc?.status==='ready' && <div role="group" aria-label={tr('library:original.view')}><Button variant="ghost" aria-pressed={readerDisplay==='markdown'} onClick={()=>setReaderDisplay('markdown')}>{tr('library:original.markdown')}</Button><Button variant="ghost" aria-pressed={readerDisplay==='file'} onClick={()=>setReaderDisplay('file')}>{tr('library:original.file')}</Button></div>}
-        {doc && readerDisplay==='markdown' && <AiParseControls key={doc.id} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
+        {doc && readerDisplay==='markdown' && <AiParseControls key={doc.id} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{selectedVersion.current=version;setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
         <span className="muted">
           {doc?.status === "ready" ? tr('novice:ready_to_read') : ""}
         </span>
@@ -519,7 +540,7 @@ export function Workspace() {
         <div className="empty" role="status">
           {tr('common:loading_document')}</div>
       ) : (
-        readerDisplay==='file' ? <DocumentOriginal key={doc.id} document={doc} pageCount={documentPageCount} onAttach={context=>{setDocumentContext(context);setCompactPane('chat');setNotice(tr('library:original.attached'));}}/> : <><DocumentMarkdown
+        readerDisplay==='file' ? <DocumentOriginal key={doc.id} document={doc} initialPage={originalPage} onPage={setOriginalPage} pageCount={documentPageCount} onAttach={context=>{setDocumentContext(context);setCompactPane('chat');setNotice(tr('library:original.attached'));}}/> : <><DocumentMarkdown
           key={`${doc.id}-${readerVersion}-${readerRevision}`}
           version={readerVersion}
           source={source}
@@ -600,9 +621,9 @@ export function Workspace() {
           </button>
         </div>
       )}
-      <PaneTabs value={compactPane} onChange={setCompactPane} />
+      <PaneTabs value={compactPane} onChange={value=>setCompactPane(value==='chat'?'chat':'reading')} />
       <div className="workspace-body">
-        <PanelGroup direction="horizontal" className="panels">
+        <PanelGroup direction="horizontal" className="panels" onLayout={sizes=>setPaneSizes(settings.chatSide==='left'?[...sizes].reverse():sizes)}>
           {(settings.chatSide === "left"
             ? ["chat", "divider", "reading"]
             : ["reading", "divider", "chat"]
@@ -622,7 +643,7 @@ export function Workspace() {
                 tabIndex={compact ? 0 : undefined}
                 order={index}
                 minSize={25}
-                defaultSize={pane === "chat" ? 42 : 58}
+                defaultSize={paneSizes[pane === "chat" ? 1 : 0]}
               >
                 {pane === "chat" ? chat : reading}
               </Panel>

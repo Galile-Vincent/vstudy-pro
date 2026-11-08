@@ -5,9 +5,9 @@ export type HistoryRoute = Omit<Route, 'view' | 'connectSchool' | 'aiParse'> & {
 export type RouteHistory = { entries: readonly HistoryRoute[]; index: number };
 
 export function historyRoute(route: Route): HistoryRoute {
-  const { view, documentId, conversationId, messageId, courseId, query, title, accountId, target } = route;
+  const { view, documentId, conversationId, messageId, courseId, query, title, accountId, target, provider } = route;
   return { view: view === 'welcome' ? 'home' : view, documentId, conversationId, messageId, courseId,
-    accountId, target, query: query ? { ...query } : undefined, title };
+    accountId, target, provider, query: query ? { ...query } : undefined, title };
 }
 
 function routeKey(route: HistoryRoute): string {

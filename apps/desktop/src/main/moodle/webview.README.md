@@ -39,3 +39,9 @@ Every 30 seconds, main samples `app.getAppMetrics()`. The pool sums unique nativ
 `moodle:webview-open` accepts a UUID tab ID and an optional strict checkpoint. State, action, and layout require both the opaque resource ID and tab ID. Main checks sender ownership. Layout and hide carry activation generations so late requests cannot reveal or hide a newer activation. `moodle:webview-sync` accepts at most 30 tab IDs and returns bounded runtime indicators. Remote content has no preload. Guest tab shortcuts pass through a validated enum subscription before Moodle history shortcuts.
 
 Run `node scripts/measure-native-tabs.mjs 5` from `apps/desktop` after building. It owns one local Moodle fixture and Electron process, prints per-process working sets and live-view counts, and writes `docs/evidence/app-tabs-native/native-pool-results.json`. The fixture also exercises retained scroll, idempotent ensure, import protection, and disconnect.
+
+## Hosted chat pool participants
+
+`WebChats` uses the shared native pool with keys built from the sender ID, tab UUID, and fixed page or Workspace slot. Each provider keeps one persistent partition. Ensure reuses a live view. Hide preserves it. Sync destroys resources for closed tabs, and discard keeps only the main-owned safe URL and title. Main accepts restoration only on the provider's primary origin, after removing query and fragment data. OAuth windows remain protected pool work and keep their opener and provider partition. The owner has one navigation cleanup listener, removed on teardown.
+
+`node scripts/measure-native-tabs.mjs 5` also runs twenty open, hide, and discard cycles. Its JSON prints live native counts and summed renderer working sets in KiB. This synthetic run is a memory sanity check, not calibration of the pool thresholds.

@@ -77,8 +77,8 @@ Startup restores order and the active ID, or migrates `vstudy-route` once.
 Malformed storage falls back to one Home tab. Writes are validated and debounced
 by 200 ms, with a final write on page hide. Only the active tab's React view is
 mounted, keyed by tab ID. Switching captures `#shell-content.scrollTop` and
-restores it when content returns. Reader state and chat drafts belong to a later
-stage; native Moodle and hosted chat resources retain their existing lifecycle.
+restores it when content returns. Reader state and chat drafts restore from lightweight tab presentation.
+Moodle and hosted chat resources share the native pool described below.
 
 The strip sits above the header so it remains visible in Workspace. With one
 tab, only the new-tab button appears. The picker opens Home, Courses, Library,
@@ -101,3 +101,11 @@ screenshots and results to `docs/evidence/app-tabs` at the repository root.
 Course and approved agent page links open a `moodle` route with an account ID and page or file target. The active tab mounts a toolbar and a measured native slot inside its panel. It has no modal portal, inert root, focus trap, or Escape-to-close handler. Unmount hides the view. Closing the tab removes its resource through authoritative tab-ID reconciliation.
 
 Moodle presentation contains the account ID, public URL, zoom, and bounded scroll position. Main revalidates all restored URLs. Native runtime indicators stay outside persisted tabs. The strip polls those indicators and labels discarded pages with "Reloads when selected". Only the active page polls its full state. Guest shortcuts use the preload's validated enum subscription. Navigation to or from Moodle skips DOM View Transitions.
+
+## Hosted and local chat tabs
+
+The AI chats picker opens each hosted provider in a new shell tab. Hosted resources use owner, tab ID, and page or Workspace slot identity. Same-provider tabs share login storage and have independent navigation and page state. Unmount hides the resource. Tab reconciliation closes resources for removed tabs. Activation generations reject late layouts and hides. Hosted pages skip DOM View Transitions.
+
+`ChatSessionHost` lives above the active page. It keeps a local runtime while a response runs, without retaining its message components, reader, or page observers. Idle unmounted sessions release their runtime. Returning pages load messages from storage. Closing the owning tab cancels its response.
+
+Document presentation stores reader mode, original page, source version, reader scroll and block anchor, pane selection and sizes, conversation ID, and a bounded composer draft. Pages capture on unmount and pagehide. Reader scroll restores after source readiness with a bounded observer. Native hosted checkpoints contain a provider URL without query or fragment and a bounded title. They never replay form submissions.

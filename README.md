@@ -13,6 +13,10 @@ Read course documents, keep Moodle deadlines together, and turn coursework into 
 
 ![Graph traversal notes with a selected passage, demo answer, and source citation](docs/assets/readme/reader.webp)
 
+## Tabs
+
+Keep courses, documents, Moodle pages, and hosted AI chats open in separate tabs. Use Cmd/Ctrl+T to open a tab, Cmd/Ctrl+W to close it, Ctrl+Tab to switch, and Cmd/Ctrl+1 through 9 to select a tab. Local responses continue while you switch. Closing their tab stops them. Background readers unmount, and the app keeps at most four native web views per window. Discarded pages reload when selected; unsent web forms are not restored.
+
 ## Download and install
 
 ### Get the app

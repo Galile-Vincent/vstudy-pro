@@ -33,13 +33,13 @@ import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
 import "./shell.css";
 import "./art-reader.css";
-export type View = "moodle" | "ai-chats" | "exams" | "home" | "library" | "workspace" | "welcome" | "courses" | "history" | "review";
+export type View = "hosted-chat" | "moodle" | "ai-chats" | "exams" | "home" | "library" | "workspace" | "welcome" | "courses" | "history" | "review";
 export type Route = Omit<TabRoute, 'view'> & {
   view: View;
   aiParse?: boolean;
   connectSchool?: boolean;
 };
-type Navigation = { updateNativePresentation:(id:string,presentation:import('../../shared/app-tabs').TabPresentation,title?:string)=>void; tabs: TabSet; activeTabId: string; openTab: (route: Route | View) => void; activateTab: (id: string) => void; closeTab: (id: string) => void; reorderTabs: (ids: string[]) => void; route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void; canGoBack: boolean; canGoForward: boolean; goBack: () => void; goForward: () => void };
+type Navigation = { updateNativePresentation:(id:string,presentation:import('../../shared/app-tabs').TabPresentation,title?:string,expectedRoute?:Route)=>void; tabs: TabSet; activeTabId: string; openTab: (route: Route | View) => void; activateTab: (id: string) => void; closeTab: (id: string) => void; reorderTabs: (ids: string[]) => void; route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void; canGoBack: boolean; canGoForward: boolean; goBack: () => void; goForward: () => void };
 const NavigationContext = createContext<Navigation | null>(null);
 export function useOptionalNavigation() { return useContext(NavigationContext); }
 export function useNavigate() {
@@ -94,21 +94,21 @@ export function AppShell({
   };
   useEffect(() => {
     const timer = setTimeout(() => saveTabs(localStorage, tabs), 200);
-    const flush = () => { saveTabs(localStorage, tabsRef.current); };
+    const flush = () => { queueMicrotask(()=>saveTabs(localStorage, tabsRef.current)); };
     window.addEventListener('pagehide', flush);
     return () => { clearTimeout(timer); window.removeEventListener('pagehide', flush); };
   }, [tabs]);
-  useEffect(() => {void desktop.invoke('moodle:webview-sync',{tabIds:tabs.tabs.map(tab=>tab.id)}).catch(()=>{});},[tabs]);
+  useEffect(() => {void desktop.invoke('web-chat:sync',{tabIds:tabs.tabs.map(tab=>tab.id)}).catch(()=>{});void desktop.invoke('moodle:webview-sync',{tabIds:tabs.tabs.map(tab=>tab.id)}).catch(()=>{});},[tabs]);
   const capture = () => {
     const tab = activeTab(tabsRef.current);
-    if(tab.presentation.kind==='moodle') return;
+    if(tab.presentation.kind==='moodle' || tab.presentation.kind==='hosted-chat') return;
     dispatch({ type: 'presentation', id: tab.id, presentation: { ...tab.presentation, scrollTop: document.getElementById('shell-content')?.scrollTop ?? 0 } });
   };
   useLayoutEffect(() => {
     const content = document.getElementById('shell-content');
     if (!content) return;
     const presentation=activeTab(tabsRef.current).presentation;
-    if(presentation.kind==='moodle') return;
+    if(presentation.kind==='moodle' || presentation.kind==='hosted-chat') return;
     const top = presentation.scrollTop;
     content.scrollTop = top;
     const observer = new ResizeObserver(() => { content.scrollTop = top; });
@@ -164,7 +164,7 @@ export function AppShell({
     };
     if (next.view === 'welcome' && route.view !== 'welcome') { previous.current = historyRoute(route); returnFocus.current = document.activeElement as HTMLElement; returnSettings.current = !!returnFocus.current?.closest(".settings-dialog"); }
     if (next.view === 'welcome' || route.view === 'welcome') startTransition(apply);
-    else if(next.view==='moodle' || route.view==='moodle') apply();
+    else if(next.view==='moodle' || route.view==='moodle' || next.view==='hosted-chat' || route.view==='hosted-chat') apply();
     else if ((next.view === 'workspace' && next.documentId) || (route.view === 'workspace' && next.view === 'library')) transitionTo(apply, false, true);
     else transitionTo(apply);
   };
@@ -192,7 +192,7 @@ export function AppShell({
     }, 0);
   }, [route.view]);
   return (
-    <NavigationContext.Provider value={{ updateNativePresentation:(id,presentation,title)=>{const tab=tabsRef.current.tabs.find(tab=>tab.id===id);if(tab && (JSON.stringify(tab.presentation)!==JSON.stringify(presentation) || (title!==undefined && title!==tab.title)))dispatch({type:'presentation',id,presentation,...(title ? {title} : {})});}, tabs, activeTabId: tabs.activeId, openTab, activateTab, closeTab, reorderTabs, route, navigate, canGoBack: canMoveHistory(history, 'back'), canGoForward: canMoveHistory(history, 'forward'), goBack: () => goHistory('back'), goForward: () => goHistory('forward'), closeWelcome }}>
+    <NavigationContext.Provider value={{ updateNativePresentation:(id,presentation,title,expectedRoute)=>{const tab=tabsRef.current.tabs.find(tab=>tab.id===id);const current=tab?.history.entries[tab.history.index];if(expectedRoute && (current?.view!==expectedRoute.view || current.documentId!==expectedRoute.documentId))return;if(tab && (JSON.stringify(tab.presentation)!==JSON.stringify(presentation) || (title!==undefined && title!==tab.title)))dispatch({type:'presentation',id,presentation,...(title ? {title} : {})});}, tabs, activeTabId: tabs.activeId, openTab, activateTab, closeTab, reorderTabs, route, navigate, canGoBack: canMoveHistory(history, 'back'), canGoForward: canMoveHistory(history, 'forward'), goBack: () => goHistory('back'), goForward: () => goHistory('forward'), closeWelcome }}>
       <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view} data-sidebar-overlay={sidebarOverlay}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
@@ -255,7 +255,7 @@ export function AppShell({
               <span>
                 {route.view === "home"
                   ? tr("library:home")
-                  : route.view === "ai-chats" ? tr("web-chat:title") : route.view === "exams" ? tr("exams:title") : route.view === "review" ? tr("review:title") : route.view === "history" ? tr("history:title") : route.view === "moodle" ? tr("webview:title") : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
+                  : route.view === "hosted-chat" && route.provider ? tr(`web-chat:${route.provider}`) : route.view === "ai-chats" ? tr("web-chat:title") : route.view === "exams" ? tr("exams:title") : route.view === "review" ? tr("review:title") : route.view === "history" ? tr("history:title") : route.view === "moodle" ? tr("webview:title") : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
               </span>
             )}
             {route.view !== 'workspace' && status}
