@@ -230,6 +230,14 @@ export const providerConfigSchema = z.discriminatedUnion("kind", [
     .strict(),
 ]);
 export type ProviderConfig = z.infer<typeof providerConfigSchema>;
+export const documentContextAttachmentSchema = z.object({
+  documentId: documentIdSchema,
+  documentName: z.string().min(1).max(500),
+  page: z.number().int().min(1).max(10000),
+  kind: z.enum(['page', 'region']),
+  image: z.string().max(6_000_000).regex(/^data:image\/png;base64,[A-Za-z0-9+/]+={0,2}$/),
+}).strict();
+export type DocumentContextAttachment = z.infer<typeof documentContextAttachmentSchema>;
 const chatFields = {
     tutorMode: tutorModeSchema.default("direct"),
     requestId: requestIdSchema,
@@ -243,10 +251,10 @@ const chatFields = {
 };
 /** Bounded chat input whose scope and selected documents must be checked against live main-owned records. */
 export const chatRequestSchema = z.discriminatedUnion("scope", [
- conversationScopeSchema.options[0].extend({...chatFields, selection: selectionSchema.optional()}),
+ conversationScopeSchema.options[0].extend({...chatFields, selection: selectionSchema.optional(), documentContext: documentContextAttachmentSchema.optional()}),
  conversationScopeSchema.options[1].extend({...chatFields, materials: materialRequestSchema.optional()}),
  conversationScopeSchema.options[2].extend(chatFields),
-]).refine(r => r.scope === "course" || r.scope === "general" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document");
+]).refine(r => r.scope === "course" || r.scope === "general" || !r.selection || r.selection.documentId === r.documentId, "Selection belongs to another document").refine(r=>r.scope === "course" || r.scope === "general" || !r.documentContext || r.documentContext.documentId===r.documentId,"Image context belongs to another document");
 // Callers may omit the mode; the validated IPC boundary supplies the default.
 type LegacyChatInput<T> = T extends unknown ? Omit<T, "tutorMode"> & { tutorMode?: TutorMode } : never;
 export type ChatRequest = LegacyChatInput<z.infer<typeof chatRequestSchema>>;

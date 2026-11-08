@@ -1,3 +1,5 @@
+import type { DocumentContextAttachment } from '../shared/domain';
+import { DocumentContextChip } from './document-context-chip';
 import { MemoryConsentCard } from './review/memory-consent';
 import { ChatTutorModeControl, useTutorMode } from "./tutor-mode-control";
 import { chatHistoryMessages, EarlierMessages, type MessageCursor } from './chat-history';
@@ -52,6 +54,8 @@ export function Chat({
   onSettings,
   onProvidersChanged,
   onUsage,
+  documentContext = null,
+  onClearDocumentContext = () => {},
   documentPageCount = 0,
   documentTitle = tr('common:document'),
 }: {
@@ -72,6 +76,7 @@ export function Chat({
   onSettings: () => void;
   onProvidersChanged: () => Promise<void>;
   onUsage: () => void;
+  documentContext?: DocumentContextAttachment | null; onClearDocumentContext?: () => void;
   documentPageCount?: number; documentTitle?: string;
 }) {
   useTranslation();
@@ -86,9 +91,10 @@ export function Chat({
   const usage = useUsage(conversation.id, conversation.modelId);
   const budget = useBudgetGuard(usage.data, conversation.id, draft);
   const available = providers.find(p => p.config.id === conversation.providerId);
-  const unavailable = !available?.config.enabled || !available.availability.available;
-  const current = useRef({ conversation, selection, onClearSelection, onProposals, tutorMode });
-  current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, onClearSelection, onProposals, tutorMode };
+  const imageUnsupported = !!documentContext && !available?.models.some(m=>(m.id===conversation.modelId || m.resolvedId===conversation.modelId) && m.supportsImages);
+  const unavailable = !available?.config.enabled || !available.availability.available || imageUnsupported;
+  const current = useRef({ conversation, selection, documentContext, onClearDocumentContext, onClearSelection, onProposals, tutorMode });
+  current.current = { conversation: { ...conversation, options: effectiveOptions }, selection, documentContext, onClearDocumentContext, onClearSelection, onProposals, tutorMode };
   const partialHistory = useRef(!!historyCursor);
   const connection = useMemo(
     () =>
@@ -103,12 +109,14 @@ export function Chat({
             providerId: c.providerId,
             modelId: c.modelId,
             options: c.options,
+            ...(c.scope !== "course" && c.scope !== "general" && current.current.documentContext ? {documentContext:current.current.documentContext} : {}),
             ...(c.scope !== "course" && s ? { selection: s } : {}),
           };
         },
         id => {
           if (current.current.selection) selections.current.set(id, current.current.selection);
           current.current.onClearSelection();
+          current.current.onClearDocumentContext();
         },
         actions => current.current.onProposals(actions),
         () => partialHistory.current,
@@ -137,7 +145,7 @@ export function Chat({
   const statuses = new Map([...earlierHistory, ...history].flatMap(m => m.parts.flatMap(p => p.status && p.status !== "complete" ? [[m.id, p.status] as const] : [])));
   const selections = useRef(new Map<string, Selection>(history.flatMap(m => m.parts.flatMap(p => p.selection ? [[m.id, p.selection] as const] : []))));
   const extensions = {
-    selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
+    documentContext, onClearDocumentContext, selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
     picker: <><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
     documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
   };
@@ -147,12 +155,13 @@ export function Chat({
       setEarlierHistory(current => [...messages, ...current]);
       for (const message of messages) for (const part of message.parts) if (part.selection) selections.current.set(message.id, part.selection);
     }}/>
-    <div className="chat-motion" ref={motion}><Thread components={documentComponents} autoFocus={autoFocus} /></div>
+    <div className="chat-motion" ref={motion}>{imageUnsupported && <p role="status">{tr('library:original.unsupported')}</p>}<Thread components={documentComponents} autoFocus={autoFocus} /></div>
     <p className="composer-note">{conversation.scope === 'course' ? tr('planner:agent_scope') : tr(conversation.scope==='general'?'history:general_note':'common:grounded_in_your_document_check_important_details')}</p>
   </DocumentChatContext.Provider></AssistantRuntimeProvider>;
 }
 
 type DocumentChat = {
+  documentContext: DocumentContextAttachment | null; onClearDocumentContext: () => void;
   isCourse: boolean; isGeneral: boolean;
   selection: Selection | null; onClearSelection: () => void;
   usage: ReturnType<typeof useUsage>; budget: ReturnType<typeof useBudgetGuard>;
@@ -163,8 +172,8 @@ const DocumentChatContext = createContext<DocumentChat | null>(null);
 const useDocumentChat = () => useContext(DocumentChatContext)!;
 function ComposerSelection() {
   useTranslation();
-  const {selection,onClearSelection,isGeneral,documentTitle} = useDocumentChat();
-  return <><div className="art-reader-context"><FileText size={14} aria-hidden="true"/><span>{isGeneral ? tr('history:general_context') : selection ? tr('library:context_selection') : documentTitle}</span></div>{selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label={tr('common:remove_selection')} onClick={onClearSelection}>×</button></div>}</>;
+  const {documentContext,onClearDocumentContext,selection,onClearSelection,isGeneral,documentTitle} = useDocumentChat();
+  return <>{documentContext && <DocumentContextChip context={documentContext} onRemove={onClearDocumentContext}/>}<div className="art-reader-context"><FileText size={14} aria-hidden="true"/><span>{isGeneral ? tr('history:general_context') : selection ? tr('library:context_selection') : documentTitle}</span></div>{selection && <div className="selection-chip"><SelectionPreview selection={selection} /><button type="button" aria-label={tr('common:remove_selection')} onClick={onClearSelection}>×</button></div>}</>;
 }
 function ComposerBanner() {
   useTranslation();
@@ -211,7 +220,7 @@ export function ChatComposerInput() {
   const context=useContext(DocumentChatContext);
   const selection=context?.selection;
   const input=useRef<HTMLTextAreaElement>(null);
-  useEffect(()=>{if(selection) input.current?.focus();},[selection]);
+  useEffect(()=>{if(selection || context?.documentContext) input.current?.focus();},[selection,context?.documentContext]);
   const composing = useRef(false);
   const expiry = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const clear = () => { composing.current = false; clearTimeout(expiry.current); };
