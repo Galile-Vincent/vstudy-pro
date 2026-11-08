@@ -6,6 +6,9 @@ import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
 import { Button } from "../components/ui/button";
+import { ExamHistory } from "./history";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
 import { TestPlayer } from "../review/test-player";
 import { useReviewPage, type Cursor } from "../review/paging";
 import "../review/artifacts.css";
@@ -36,6 +39,7 @@ export function ExamsView() {
           : "en",
     ),
     [model, setModel] = useState("0");
+  const [mode, setMode] = useState<"setup" | "history">("setup");
   const [artifact, setArtifact] = useState<Artifact | null>(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -137,9 +141,36 @@ export function ExamsView() {
           <h1>{tr("exams:title")}</h1>
           <p>{tr("exams:subtitle")}</p>
         </div>
+        <nav
+          className="exam-view-navigation"
+          aria-label={tr("exams:navigation")}
+        >
+          <Button
+            variant={mode === "setup" && !artifact ? "secondary" : "ghost"}
+            aria-pressed={mode === "setup" && !artifact}
+            onClick={() => {
+              setArtifact(null);
+              setMode("setup");
+              history.retry();
+            }}
+          >
+            {tr("exams:new_exam")}
+          </Button>
+          <Button
+            variant={mode === "history" && !artifact ? "secondary" : "ghost"}
+            aria-pressed={mode === "history" && !artifact}
+            onClick={() => {
+              setArtifact(null);
+              setMode("history");
+              history.retry();
+            }}
+          >
+            {tr("exams:history")}
+          </Button>
+        </nav>
       </header>
       {error && <p role="alert">{error}</p>}
-      {!artifact && (
+      {!artifact && mode === "setup" && (
         <form
           className="exam-setup"
           onSubmit={(e) => {
@@ -180,7 +211,7 @@ export function ExamsView() {
           </fieldset>
           <label>
             {tr("exams:prompt")}
-            <textarea
+            <Textarea
               maxLength={4000}
               rows={3}
               value={prompt}
@@ -194,7 +225,7 @@ export function ExamsView() {
               {Object.entries(counts).map(([type, count]) => (
                 <label key={type}>
                   {tr(`exams:${type}`)}
-                  <input
+                  <Input
                     type="number"
                     min={0}
                     max={40}
@@ -254,6 +285,7 @@ export function ExamsView() {
           </div>
           {!choices.length && <p>{tr("review:choose_provider")}</p>}
           <Button
+            variant="secondary"
             type="submit"
             disabled={
               busy ||
@@ -268,10 +300,11 @@ export function ExamsView() {
         </form>
       )}
       {artifact && (
-        <article className="review-artifact-reader">
-          <div className="review-actions">
+        <article className="exam-active-artifact">
+          <div className="exam-artifact-toolbar">
             <h2>{artifact.title}</h2>
             <Button
+              variant="ghost"
               disabled={busy}
               onClick={() => {
                 setArtifact(null);
@@ -315,86 +348,55 @@ export function ExamsView() {
           )}
         </article>
       )}
-      <section aria-label={tr("exams:history")}>
-        <h2>{tr("exams:history")}</h2>
-        {history.loading && <p role="status">{tr("review:loading")}</p>}
-        {history.error && (
-          <Button onClick={history.retry}>{tr("review:retry")}</Button>
-        )}
-        {!history.items.length && !history.loading && (
-          <p>{tr("exams:history_empty")}</p>
-        )}
-        <ul className="exam-history">
-          {history.items.map(({ artifact: a, attempt }) => (
-            <li key={a.id}>
-              <Button
-                onClick={() =>
-                  void run(async () =>
-                    setArtifact(
-                      await desktop.invoke("review:artifact:get", {
-                        artifactId: a.id,
-                      }),
-                    ),
-                  )
-                }
-              >
-                {a.title} · {new Date(a.createdAt).toLocaleString()}
-              </Button>
-              <p>
-                {a.resolvedScope.documentIds
-                  .map(
-                    (id) =>
-                      a.resolvedScope.sourceTitles?.[id] ??
-                      documents.find((d) => d.id === id)?.title ??
-                      id,
-                  )
-                  .join(" · ")}
-              </p>
-              <span>{tr(`review:artifact_${a.status}`)}</span>
-              {attempt && attempt.phase !== "answering" && (
-                <>
-                  <p>
-                    {tr("exams:score", {
-                      correct: attempt.results.filter((r) => r.correct).length,
-                      total: attempt.results.length,
-                    })}{" "}
-                    ·{" "}
-                    {tr("exams:duration", {
-                      minutes: Math.max(
-                        0,
-                        Math.round(
-                          (Date.parse(
-                            attempt.committedAt ?? attempt.startedAt,
-                          ) -
-                            Date.parse(attempt.startedAt)) /
-                            60000,
-                        ),
-                      ),
-                    })}
-                  </p>
-                  <div>
-                    {Object.keys(initialCounts).map((type) => {
-                      const rows = attempt.results.filter(
-                        (r) => r.type === type,
-                      );
-                      return rows.length ? (
-                        <span className="review-chip" key={type}>
-                          {tr(`exams:${type}`)}{" "}
-                          {rows.filter((r) => r.correct).length}/
-                          {rows.length}{" "}
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
-        {history.cursor && (
-          <Button onClick={history.more}>{tr("review:load_more")}</Button>
-        )}
-      </section>
+      {!artifact && mode === "history" && (
+        <section
+          className="exam-history-section"
+          aria-label={tr("exams:history")}
+        >
+          <h2>{tr("exams:history")}</h2>
+          {history.loading && <p role="status">{tr("review:loading")}</p>}
+          {history.error && (
+            <Button onClick={history.retry}>{tr("review:retry")}</Button>
+          )}
+          {!history.items.length && !history.loading && (
+            <p>{tr("exams:history_empty")}</p>
+          )}
+          <ExamHistory
+            items={history.items}
+            busy={busy}
+            documentTitle={(id) =>
+              documents.find((d) => d.id === id)?.title ?? id
+            }
+            onOpen={(id) =>
+              void run(async () =>
+                setArtifact(
+                  await desktop.invoke("review:artifact:get", {
+                    artifactId: id,
+                  }),
+                ),
+              )
+            }
+            onDelete={async (id) => {
+              setBusy(true);
+              setError("");
+              try {
+                await desktop.invoke("review:artifact:delete", {
+                  artifactId: id,
+                });
+                history.retry();
+              } catch (error) {
+                setError(tr("review:error"));
+                throw error;
+              } finally {
+                setBusy(false);
+              }
+            }}
+          />
+          {history.cursor && (
+            <Button onClick={history.more}>{tr("review:load_more")}</Button>
+          )}
+        </section>
+      )}
       <p className="review-footnote">
         {tr("review:validation_notice")} · {tr("exams:grading_notice")}
       </p>

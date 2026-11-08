@@ -3,6 +3,7 @@ import type { IpcResponse } from '../../shared/ipc';
 import { EXAM_COURSE_ID } from '../../shared/review-artifacts';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
+import { ExamPlayer } from '../exams/player';
 import { Button } from '../components/ui/button';
 
 type Artifact = NonNullable<IpcResponse<'review:artifact:get'>>;
@@ -53,7 +54,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
   if (locked && justSubmitted.current) { justSubmitted.current = false; feedbackRegion.current?.focus(); }
  }, [locked]);
  useEffect(() => {
-  if (!results) return;
+  if (!results || exam) return;
   let active = true;
   void (async () => {
    const found: Record<string, string> = {};
@@ -83,6 +84,18 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
  };
  const missed = attempt?.results.filter(result => result.correct === false && !result.reportedBad) ?? [];
  const reviewed = attempt?.results.filter(result => !result.reportedBad && result.correct !== null) ?? [];
+ const explainItem = (itemId: string) => void run(async () => {
+  if (!attempt) return;
+  const reply = await desktop.invoke('review:attempt:explain', {attemptId: attempt.id, itemId, locale:document.documentElement.lang.startsWith('zh')?'zh-Hant':document.documentElement.lang.startsWith('ja')?'ja':'en'});
+  setExplanations(old => ({...old, [itemId]: reply.text}));
+ });
+ if (exam) return <ExamPlayer
+  artifact={artifact} attempt={attempt} index={index} draft={draft} results={results}
+  busy={busy} failed={failed} explanations={explanations}
+  onDraft={setDraft} onMove={move} onSubmit={submit} onResults={setResults} onExplain={explainItem}
+  onReport={itemId=>{if(attempt)void run(async()=>setAttempt(await desktop.invoke('review:attempt:report-bad',{attemptId:attempt.id,itemId})));}}
+  onRetry={()=>{if(retryAction.current)void run(retryAction.current);}}
+ />;
  return <section className="review-test-player" aria-busy={busy}>
   {failed && <p role="alert">{tr('review:error')} <Button disabled={busy} onClick={() => { if (retryAction.current) void run(retryAction.current); }}>{tr('review:retry')}</Button></p>}
   {!attempt && busy && <p role="status">{tr('review:loading')}</p>}
@@ -119,7 +132,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
   {attempt && results && <>
    <h3 ref={heading} tabIndex={-1}>{tr('review:results_title')}</h3>
    <p>{tr('review:results_counts', { matched: reviewed.filter(result => result.correct).length, reviewed: reviewed.length, revisit: missed.length })}</p>
-   {exam&&<><p>{tr('exams:duration', {minutes:Math.max(0,Math.round((Date.parse(attempt.committedAt??attempt.startedAt)-Date.parse(attempt.startedAt))/60000))})}</p><ul>{[...new Set(items.map(i=>i.type))].map(type=>{const rows=attempt.results.filter(r=>items.find(i=>i.id===r.itemId)?.type===type);return <li key={type}>{tr(`exams:${type}`)}: {rows.filter(r=>r.correct).length}/{rows.length}</li>;})}</ul></>}
+
    <h4>{tr('review:worth_another_look')}</h4>
    <ul>{[...new Set(missed.map(result => result.conceptKey))].map(key => <li key={key}>{tr('review:concept_missed', { label: labels[key] ?? key, count: missed.filter(result => result.conceptKey === key).length })}</li>)}</ul>
    {!exam&&<><p>{tr('review:confirm_notice')}</p>
