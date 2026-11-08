@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { activeTab, currentRoute, createTab, initialTabs, tabReducer, loadTabs, saveTabs } from './tab-state';
+import { mergeTabPresentation, activeTab, currentRoute, createTab, initialTabs, tabReducer, loadTabs, saveTabs } from './tab-state';
 import { TAB_STORAGE_KEY } from '../../shared/app-tabs';
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const home = () => initialTabs(id(1));
@@ -42,4 +42,11 @@ describe('app tabs', () => {
     expect(currentRoute(loadTabs(storage, id(2))).view).toBe('home');
     expect(saveTabs({ ...storage, setItem: () => { throw new Error('unavailable'); } }, state)).toBe(false);
   });
+});
+
+it('merges independent reader and composer checkpoints against the current presentation',()=>{
+ const reader=mergeTabPresentation({kind:'document',scrollTop:0},{readerMode:'file',page:7});
+ const chat=mergeTabPresentation(reader,{draft:'Unsent'});
+ expect(chat).toMatchObject({kind:'document',readerMode:'file',page:7,draft:'Unsent'});
+ expect(mergeTabPresentation(chat,{kind:'app',scrollTop:0})).toEqual({kind:'app',scrollTop:0});
 });

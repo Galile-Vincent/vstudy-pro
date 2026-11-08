@@ -9,7 +9,7 @@ export function useTabPresentation(navigation:ReturnType<typeof useNavigate> | n
   const latest=useRef(navigation);latest.current=navigation;
   const update=(patch:Partial<TabPresentation>)=>{
     const nav=latest.current,tab=nav?.tabs?.tabs.find(tab=>tab.id===id);
-    if(tab)nav?.updateNativePresentation(tab.id,{...tab.presentation,...patch} as TabPresentation,undefined,route);
+    if(tab)nav?.updateNativePresentation(tab.id,patch,undefined,route);
   };
   return {initial,update};
 }

@@ -61,3 +61,7 @@ export function saveTabs(storage: Storage, state: TabSet): boolean {
   try { storage.setItem(TAB_STORAGE_KEY, JSON.stringify(tabSetSchema.parse(state))); return true; }
   catch { return false; }
 }
+
+export function mergeTabPresentation(current:TabPresentation,patch:Partial<TabPresentation>):TabPresentation {
+  return patch.kind && patch.kind!==current.kind ? patch as TabPresentation : {...current,...patch} as TabPresentation;
+}

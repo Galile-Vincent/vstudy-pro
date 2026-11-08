@@ -1,5 +1,5 @@
 import { TabStrip } from './tab-strip';
-import { activeTab, currentRoute, createTab, loadTabs, saveTabs, tabReducer, type TabAction } from './tab-state';
+import { mergeTabPresentation, activeTab, currentRoute, createTab, loadTabs, saveTabs, tabReducer, type TabAction } from './tab-state';
 import type { TabSet, TabRoute } from '../../shared/app-tabs';
 import { HistorySwipeNavigation, hasNavigationOverlay } from './history-swipe-navigation';
 import { canMoveHistory, historyRoute, type HistoryDirection } from './navigation-history';
@@ -39,7 +39,7 @@ export type Route = Omit<TabRoute, 'view'> & {
   aiParse?: boolean;
   connectSchool?: boolean;
 };
-type Navigation = { updateNativePresentation:(id:string,presentation:import('../../shared/app-tabs').TabPresentation,title?:string,expectedRoute?:Route)=>void; tabs: TabSet; activeTabId: string; openTab: (route: Route | View) => void; activateTab: (id: string) => void; closeTab: (id: string) => void; reorderTabs: (ids: string[]) => void; route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void; canGoBack: boolean; canGoForward: boolean; goBack: () => void; goForward: () => void };
+type Navigation = { updateNativePresentation:(id:string,presentation:Partial<import('../../shared/app-tabs').TabPresentation>,title?:string,expectedRoute?:Route)=>void; tabs: TabSet; activeTabId: string; openTab: (route: Route | View) => void; activateTab: (id: string) => void; closeTab: (id: string) => void; reorderTabs: (ids: string[]) => void; route: Route; navigate: (route: Route | View) => void; closeWelcome: () => void; canGoBack: boolean; canGoForward: boolean; goBack: () => void; goForward: () => void };
 const NavigationContext = createContext<Navigation | null>(null);
 export function useOptionalNavigation() { return useContext(NavigationContext); }
 export function useNavigate() {
@@ -192,7 +192,7 @@ export function AppShell({
     }, 0);
   }, [route.view]);
   return (
-    <NavigationContext.Provider value={{ updateNativePresentation:(id,presentation,title,expectedRoute)=>{const tab=tabsRef.current.tabs.find(tab=>tab.id===id);const current=tab?.history.entries[tab.history.index];if(expectedRoute && (current?.view!==expectedRoute.view || current.documentId!==expectedRoute.documentId))return;if(tab && (JSON.stringify(tab.presentation)!==JSON.stringify(presentation) || (title!==undefined && title!==tab.title)))dispatch({type:'presentation',id,presentation,...(title ? {title} : {})});}, tabs, activeTabId: tabs.activeId, openTab, activateTab, closeTab, reorderTabs, route, navigate, canGoBack: canMoveHistory(history, 'back'), canGoForward: canMoveHistory(history, 'forward'), goBack: () => goHistory('back'), goForward: () => goHistory('forward'), closeWelcome }}>
+    <NavigationContext.Provider value={{ updateNativePresentation:(id,presentation,title,expectedRoute)=>{const tab=tabsRef.current.tabs.find(tab=>tab.id===id);const current=tab?.history.entries[tab.history.index];if(expectedRoute && (current?.view!==expectedRoute.view || current.documentId!==expectedRoute.documentId))return;if(!tab)return;const next=mergeTabPresentation(tab.presentation,presentation);if(JSON.stringify(tab.presentation)!==JSON.stringify(next) || (title!==undefined && title!==tab.title))dispatch({type:'presentation',id,presentation:next,...(title ? {title} : {})});}, tabs, activeTabId: tabs.activeId, openTab, activateTab, closeTab, reorderTabs, route, navigate, canGoBack: canMoveHistory(history, 'back'), canGoForward: canMoveHistory(history, 'forward'), goBack: () => goHistory('back'), goForward: () => goHistory('forward'), closeWelcome }}>
       <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view} data-sidebar-overlay={sidebarOverlay}>
         <a className="skip-link" href="#shell-content">
           {tr("common:skip_content")}
