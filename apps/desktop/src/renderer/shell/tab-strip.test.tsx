@@ -55,3 +55,21 @@ it('keeps one tab stop and supports navigation, reordering and Delete', async ()
  expect(closeTab).toHaveBeenCalledWith('first');
  await act(async () => {});
 });
+
+it('ignores held, modified and composing Delete presses', async () => {
+ const tab = (id: string) => ({ id, title: id, icon: 'Home', history: { entries: [{ view: 'home' }], index: 0 } });
+ const closeTab = vi.fn();
+ fixture.navigation = { tabs: { activeId: 'first', tabs: [tab('first'), tab('second')] },
+   closeTab, activateTab: vi.fn(), reorderTabs: vi.fn(), openTab: vi.fn() };
+ fixture.invoke.mockResolvedValue({ tabs: [] });
+ const view = render(<TabStrip />);
+ const first = view.getAllByRole('tab')[0]!;
+ for (const flag of ['repeat', 'ctrlKey', 'metaKey', 'altKey', 'shiftKey', 'isComposing']) {
+   fireEvent.keyDown(first, { key: 'Delete', [flag]: true });
+ }
+ expect(closeTab).not.toHaveBeenCalled();
+ fireEvent.keyDown(first, { key: 'Delete' });
+ for (let i = 0; i < 10; i++) fireEvent.keyDown(first, { key: 'Delete', repeat: true });
+ expect(closeTab).toHaveBeenCalledTimes(1);
+ await act(async () => {});
+});

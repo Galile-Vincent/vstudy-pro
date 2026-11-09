@@ -155,6 +155,8 @@ export function TabStrip() {
               onClick={() => activateTab(tab.id)}
               onKeyDown={(event) => {
                 if (event.key === 'Delete') {
+                  if (event.repeat || event.nativeEvent.isComposing ||
+                    event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
                   event.preventDefault();
                   closeTab(tab.id);
                   return;
