@@ -156,7 +156,7 @@ function WeeklySection({
     <section className="moodle-week" data-current={section.current}>
       <h3 id={`week-heading-${section.id}`} tabIndex={-1}>
       <button
-        className="moodle-week-heading"
+        className="moodle-week-heading flex min-h-14 w-full items-center gap-3 rounded-[var(--r-sm)] bg-[var(--subtle)] px-3 py-2 text-start"
         aria-expanded={section.accessible ? open : false}
         aria-controls={`week-${section.id}`}
         onClick={() => section.accessible && setOpen(!open)}
@@ -168,8 +168,8 @@ function WeeklySection({
           <LockKeyhole />
         )}
         <span>
-          <strong>{section.name}</strong>
-          <small>
+          <span className="block font-medium">{section.name}</span>
+          <small className="block text-[var(--muted)]">
             {section.accessible
               ? tr("moodle:module_count", { count: section.modules.length })
               : tr("moodle:section_locked")}
@@ -263,7 +263,7 @@ export function CourseContent({
           }}>{tr("moodle:jump_current_week")}</Button>
         } />
       }>
-      <div className="moodle-weeks">
+      <div className="moodle-weeks flex flex-col gap-3">
         {detail.sections.length ? (
           detail.sections.map((section) => (
             <WeeklySection
