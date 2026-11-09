@@ -107,9 +107,19 @@ type RowProps = {
   height: number; offset: number; columns: number; tabRow: boolean;
   selected: boolean; folderId: string | null | undefined; place: string;
   language: string; locale: string | undefined; page: number | undefined;
+  measure: (id: string, height: number) => void;
   total: number | undefined; render: () => React.ReactNode;
 };
-const DocumentRow = memo(function DocumentRow({render}: RowProps) {
+const DocumentRow = memo(function DocumentRow({render, item, grid, measure}: RowProps) {
+  useLayoutEffect(() => {
+    if (!grid) return;
+    const element = document.getElementById(`library-document-${item.document.id}`)!;
+    const update = () => measure(item.document.id, element.getBoundingClientRect().height);
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    update();
+    return () => observer.disconnect();
+  }, [grid, item.document.id, measure]);
   return render();
 }, (previous, next) => (Object.keys(previous) as (keyof RowProps)[])
   .every(key => key === "render" || previous[key] === next[key]));
@@ -632,7 +642,13 @@ export function LibraryView() {
     if (height <= 0) return;
     setStatusHeights(current => current[id] === height ? current : {...current, [id]: height});
   }, []);
-  const itemHeight = (item: Item) => rowHeight + (item.document.status === "ready"
+  const [cardHeights, setCardHeights] = useState<Record<string, number>>({});
+  const measureCard = useCallback((id: string, height: number) => {
+    if (height <= 0) return;
+    setCardHeights(current => current[id] === height ? current : {...current, [id]: height});
+  }, []);
+  const itemHeight = (item: Item) => grid && cardHeights[item.document.id]
+    ? cardHeights[item.document.id]! : rowHeight + (item.document.status === "ready"
     ? 0 : statusHeights[item.document.id] ?? 80 * (textScale || 16) / 16);
   const layout = useMemo(() => {
     const offsets = [0];
@@ -643,7 +659,7 @@ export function LibraryView() {
       offsets.push(offsets[offsets.length - 1]! + height);
     }
     return { offsets, heights };
-  }, [shown, columns, rowHeight, statusHeights, textScale]);
+  }, [shown, columns, rowHeight, statusHeights, cardHeights, textScale, grid]);
   const rowContext = useRef({ shown, items, layout, columns, rowHeight, grid, selected, selectedSet });
   rowContext.current = { shown, items, layout, columns, rowHeight, grid, selected, selectedSet };
   const {start, end} = virtualWindow(
@@ -1049,7 +1065,7 @@ export function LibraryView() {
               const height = itemHeight(item);
               const offset = layout.offsets[lane]!;
               return <DocumentRow key={d.id} item={item} index={index}
-                count={shown.length} grid={grid} height={height} offset={offset}
+                count={shown.length} grid={grid} measure={measureCard} height={height} offset={offset}
                 columns={columns} tabRow={tabRow === d.id} selected={selectedSet.has(d.id)}
                 folderId={query.folderId} place={placeOf(item)} language={language}
                 locale={i18n.resolvedLanguage} page={progress[d.id]?.page}
@@ -1071,13 +1087,13 @@ export function LibraryView() {
                   onMouseEnter={() => {  }}
                   className="library-document"
                   style={{
-                    height,
-                    minHeight: height,
+                    height: grid ? undefined : height,
+                    minHeight: grid ? baseHeight : height,
                     rowGap: !grid && d.status !== "ready" ? 0 : undefined,
                     gridTemplateRows: !grid && d.status !== "ready" ? `${rowHeight}px max-content` : undefined,
                     position: "absolute",
                     top: offset,
-                    left: `${((index % columns) * 100) / columns}%`,
+                    insetInlineStart: `${((index % columns) * 100) / columns}%`,
                     width: grid ? `calc(${100 / columns}% - 16px)` : "100%",
                   }}
                   draggable
