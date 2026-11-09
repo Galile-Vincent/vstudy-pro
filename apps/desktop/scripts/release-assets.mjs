@@ -1,9 +1,10 @@
 /** Stage architecture-specific release assets and assemble a complete, checksum-verified release. */
+import { parseUpdateInfo } from 'electron-updater/out/providers/Provider.js';
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { appendFile, copyFile, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { URL, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { assetNames, releaseVersion, targetFor, targetsFor } from './release-contract.mjs';
 import { validateSmokeReport } from './distribution-smoke.mjs';
@@ -51,10 +52,23 @@ export async function stageAssets({ target, version, input, smoke, output, env =
   }
   const date = new Date().toISOString();
   const metadata = target.platform === 'mac' ? 'latest-mac.yml' : 'latest.yml';
-  await copyFile(join(input, metadata), join(output, `latest-${target.key}.yml`));
-  if (target.key === 'mac-arm64' || target.key === 'win-x64') {
-    await copyFile(join(input, metadata), join(output, metadata));
+  const raw = await readFile(join(input,metadata),'utf8');
+  if (raw.length > 65536 || /[&*!]/.test(raw)) throw new Error('Unsafe update metadata');
+  const feed = parseUpdateInfo(raw,metadata,new URL('https://github.com/'));
+  if (feed.version !== version || !Array.isArray(feed.files) || !feed.files.length) throw new Error('Invalid update metadata');
+  for (const file of feed.files) {
+    if (![names.installer,names.archive].includes(file.url) ||
+      file.sha512 !== await digest(join(output,file.url),'sha512','base64') ||
+      file.size !== (await stat(join(output,file.url))).size) throw new Error('Invalid update metadata');
   }
+  const payload = target.platform === 'mac' ? names.archive : names.installer;
+  const selected = feed.files.find(file=>file.url === payload);
+  if (!selected) throw new Error('Missing update payload');
+  const content = JSON.stringify({version,path:payload,sha512:selected.sha512,
+    releaseDate:typeof feed.releaseDate === 'string' ? feed.releaseDate : date,
+    files:[{url:payload,sha512:selected.sha512,size:selected.size}]},null,2) + '\n';
+  await writeFile(join(output,`latest-${target.key}.yml`),content);
+  if (target.key === 'mac-arm64' || target.key === 'win-x64') await writeFile(join(output,metadata),content);
   const label = signing.signed ? 'signed' : 'unsigned';
   const provenance = {
     schemaVersion: 1, version, target: target.key, platform: target.platform, arch: target.arch, signing,
@@ -109,7 +123,16 @@ export async function assembleAssets({ version, input, output, notes, scope = 'r
       if (!(await stat(join(output, file))).size) throw new Error(`Missing update asset: ${file}`);
     }
     const feed = await readFile(join(output, metadata), 'utf8');
-    if (!feed.includes(payload)) throw new Error(`Update feed does not reference ${payload}`);
+    const info = parseUpdateInfo(feed, metadata, new URL('https://github.com/'));
+    const hash = await digest(join(output,payload),'sha512','base64');
+    const size = (await stat(join(output,payload))).size;
+    if (info.version !== version || info.path !== payload || info.sha512 !== hash ||
+      !Array.isArray(info.files) || !info.files.length || info.files.some(file =>
+        file.url !== payload || file.sha512 !== hash || file.size !== size)) {
+      throw new Error(`Invalid update metadata for ${payload}`);
+    }
+    const alias = target.key === 'mac-arm64' ? 'latest-mac.yml' : target.key === 'win-x64' ? 'latest.yml' : null;
+    if (alias && await readFile(join(output,alias),'utf8') !== feed) throw new Error(`Mismatched alias ${alias}`);
   }
   await writeJson(join(output, 'distribution-manifest.json'), { schemaVersion: 1, version, scope, builds });
   const assets = await inventory(output);

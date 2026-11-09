@@ -241,7 +241,7 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
     const updateName = target.platform === 'mac' ? names.archive : names.installer;
     await writeFile(join(input, `${updateName}.blockmap`), 'blockmap');
     const sha512 = createHash('sha512').update(await readFile(join(input, updateName))).digest('base64');
-    await writeFile(join(input, target.platform === 'mac' ? 'latest-mac.yml' : 'latest.yml'), JSON.stringify({ version, path: updateName, sha512, files: [{ url: updateName, sha512 }] }));
+    await writeFile(join(input, target.platform === 'mac' ? 'latest-mac.yml' : 'latest.yml'), JSON.stringify({ version, path: updateName, sha512, files: [{ url: updateName, sha512, size:(await readFile(join(input, updateName))).length }, ...(target.platform === 'mac' ? [{url:names.installer,sha512:createHash('sha512').update(await readFile(join(input,names.installer))).digest('base64'),size:(await readFile(join(input,names.installer))).length}] : [])] }));
     await writeFile(join(input, 'signing.json'), JSON.stringify({ schemaVersion: 1, target: target.key, mode: 'unsigned', signed: false, notarized: false }));
     await writeFile(join(smoke, 'smoke-result.json'), JSON.stringify(smokeReport(target)));
     if (target.platform === 'win') await writeFile(join(smoke, 'installer-smoke.json'), JSON.stringify({
@@ -297,6 +297,18 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
     const [hash, file] = line.split('  ');
     assert.equal(createHash('sha256').update(await readFile(join(output, file))).digest('hex'), hash);
   }
+  const badDirectory = join(releaseInput,'distribution-mac-arm64-unsigned');
+  const badFeed = join(badDirectory,'latest-mac-arm64.yml');
+  const bad = JSON.parse(await readFile(badFeed,'utf8'));
+  bad.files[0].sha512 = 'wrong';
+  await writeFile(badFeed,JSON.stringify(bad));
+  const badManifestPath = join(badDirectory,'target-mac-arm64.json');
+  const badManifest = JSON.parse(await readFile(badManifestPath,'utf8'));
+  const entry = badManifest.assets.find(asset=>asset.file==='latest-mac-arm64.yml');
+  const bytes = await readFile(badFeed);
+  entry.size=bytes.length; entry.sha256=createHash('sha256').update(bytes).digest('hex');
+  await writeFile(badManifestPath,JSON.stringify(badManifest));
+  await assert.rejects(assembleAssets({version,input:releaseInput,output:join(root,'wrong-hash'),notes}), /Invalid update metadata/);
   const target = targets[0];
   await writeFile(join(root, 'artifacts', `distribution-${target.key}-unsigned`, assetNames(target, version).stable), 'corrupted');
   await assert.rejects(assembleAssets({ version, input: join(root, 'artifacts'), output: join(root, 'corrupt'), notes, scope: 'qualification' }), /Checksum mismatch/);
