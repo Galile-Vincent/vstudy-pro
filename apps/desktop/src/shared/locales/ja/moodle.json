@@ -31,7 +31,7 @@
   "reconnect": "再接続",
   "loading": "コースを読み込み中",
   "progress": "コースの進捗",
-  "course_actions": "コース操作",
+  "course_actions": "{{course}}の操作",
   "course_sections": "コースのセクション",
   "overview": "概要",
   "deadlines": "締め切り",
@@ -252,5 +252,6 @@
   "view_list": "リスト",
   "view_cards": "カード",
   "open_file": "ファイルを開く：{{name}}",
-  "course_more": "その他のコース操作"
+  "course_more": "その他のコース操作",
+  "open_course_tab": "{{course}}を新しいタブで開く"
 }

@@ -23,6 +23,7 @@ import {
   Inbox,
   AlarmClock,
   Mail,
+  MoreHorizontal,
   Pin,
   RefreshCw,
   Unplug,
@@ -45,6 +46,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 import { Skeleton } from "../components/ui/skeleton";
 import { useMoodleApi, type MoodleApi } from "./api";
 import { Reminder } from "./reminder";
@@ -910,7 +914,25 @@ function CoursesBody({
                             {attention.next && <time id={`${prefix}-deadline`} dateTime={attention.next.dueAt} title={attention.next.title} data-urgent={urgent}>{urgent && <Clock3 aria-hidden="true" />}{deadlinePhrase(attention.next.dueAt)}</time>}
                           </p>}
                         </div>
-                        <button type="button" aria-label={tr("tabs:open")} onClick={() => navigation?.openTab({view:"courses",courseId:course.id,title:name})}>{tr("tabs:open")}</button>
+                        <Button variant="ghost" size="icon" className="relative z-1"
+                          aria-label={tr("moodle:open_course_tab", { course: name })}
+                          title={tr("moodle:open_course_tab", { course: name })}
+                          onClick={() => navigation?.openTab({view:"courses",courseId:course.id,title:name})}>
+                          <ArrowUpRight aria-hidden="true" />
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="relative z-1"
+                              aria-label={tr("moodle:course_actions", { course: name })}>
+                              <MoreHorizontal aria-hidden="true" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem onSelect={() => navigation?.openTab({
+                              view:"courses", courseId:course.id, title:name,
+                            })}>{tr("moodle:open_course_tab", { course: name })}</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         <div className="course-counts" aria-hidden="true">
                           <span className="course-count course-overdue" data-count={attention.overdue} title={attention.overdue ? tr('moodle:course_overdue_tooltip',{count:attention.overdue}) : undefined}>{attention.overdue>0 && <><AlarmClock />{attention.overdue>99 ? '99+' : attention.overdue}</>}</span>
                           <span className="course-count course-unread-count" data-count={attention.unread} title={attention.unread ? tr('moodle:course_unread_tooltip',{count:attention.unread}) : undefined}>{attention.unread>0 && <><Mail />{attention.unread>99 ? '99+' : attention.unread}</>}</span>

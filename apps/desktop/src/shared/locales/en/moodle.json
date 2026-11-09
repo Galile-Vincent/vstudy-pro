@@ -31,7 +31,7 @@
   "reconnect": "Reconnect",
   "loading": "Loading courses",
   "progress": "Course progress",
-  "course_actions": "Course actions",
+  "course_actions": "Actions for {{course}}",
   "course_sections": "Course sections",
   "overview": "Overview",
   "deadlines": "Deadlines",
@@ -252,5 +252,6 @@
   "view_list": "List",
   "view_cards": "Cards",
   "open_file": "Open file: {{name}}",
-  "course_more": "More course actions"
+  "course_more": "More course actions",
+  "open_course_tab": "Open {{course}} in new tab"
 }

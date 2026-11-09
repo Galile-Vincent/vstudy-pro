@@ -906,3 +906,13 @@ it("C4 moves focus into Planner and restores its invoking button", async () => {
   await act(async () => back.click());
   expect(document.activeElement).toBe(host.querySelector(".planner-entry"));
 });
+it("C2 gives the sibling new-tab icon a course-specific name", async () => {
+  await mount(createMockMoodleApi());
+  const row = host.querySelector(".moodle-course-card")!;
+  const action = getByRole(row as HTMLElement, "button", {
+    name: /Open.*Electronics Laboratory.*new tab/,
+  });
+  expect(action.querySelector("svg")).not.toBeNull();
+  expect(action.closest(".course-open")).toBeNull();
+});
+
