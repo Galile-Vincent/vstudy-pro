@@ -187,6 +187,53 @@ it('shows a cancelled sign-in as one neutral status with retry, not as a failure
   expect(button(i18n.t('ai-cli:continue_reading'))).toBeDefined();
 });
 
+function cancelled(action?: 'install' | 'login' | 'test') {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'error', error: { code: 'cancelled', hint: 'cancelled', ...action && { action } } });
+}
+const current = () => document.querySelector('.ai-cli-steps li[aria-current=step]')?.textContent;
+const previews = () => fixture.calls.filter(call => call.channel === 'ai-cli:preview').map(call => call.payload.actionId);
+
+it('keeps Login current when a cancelled sign-in is reopened without a session', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'installed-not-signed-in' });
+  fixture.hold(true); await mount(); await click('Sign in'); await click('Stop this action');
+  await act(async () => root.unmount()); root = createRoot(host);
+  fixture.calls.length = 0;
+  await mount();
+  expect(fixture.tools[0]).toMatchObject({ status: 'error', error: { hint: 'cancelled', action: 'login' } });
+  expect(current()).toContain(i18n.t('ai-cli:step_login'));
+  expect(previews()).toEqual(['login-claude']);
+  expect(document.querySelectorAll('[role=alert]')).toHaveLength(0);
+});
+
+it('keeps Login current while the retry after a cancelled sign-in is running', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'installed-not-signed-in' });
+  fixture.hold(true); await mount(); await click('Sign in'); await click('Stop this action');
+  await click(i18n.t('ai-cli:retry_signin'));
+  await click('Sign in');
+  expect(runs().map(call => call.payload.actionId)).toEqual(['login-claude', 'login-claude']);
+  expect(current()).toContain(i18n.t('ai-cli:step_login'));
+  expect(previews().filter(id => String(id).startsWith('test-'))).toEqual([]);
+});
+
+it.each([['install', 'step_install'], ['login', 'step_login'], ['test', 'step_test']] as const)('keeps %s current after that action was cancelled', async (action, key) => {
+  cancelled(action); await mount();
+  expect(current()).toContain(i18n.t(`ai-cli:${key}`));
+  expect(previews()).toEqual([`${action}-claude`]);
+});
+
+it('falls back to the status-derived step for an older cancelled error without an action', async () => {
+  cancelled(); await mount();
+  expect(current()).toContain(i18n.t('ai-cli:step_test'));
+});
+
+it('mirrors main: a stopped action records its kind, and a started one clears it', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'installed-not-signed-in' });
+  fixture.hold(true); await mount(); await click('Sign in');
+  expect(fixture.tools[0]).toMatchObject({ status: 'signing-in', error: null });
+  await click('Stop this action');
+  expect(fixture.tools[0]).toMatchObject({ status: 'error', error: { code: 'cancelled', hint: 'cancelled', action: 'login' } });
+});
+
 it('previews compatible updates and one-click rollback without disturbing existing chats', async () => {
   Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.0.0', latestVersion: '2.0.0', status: 'update-available', releaseNotesUrl: 'https://example.com/release' });
   await mount(); await click('Review update to 2.0.0');

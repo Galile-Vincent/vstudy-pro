@@ -24,7 +24,13 @@ export function cliFixture() {
       case 'ai-cli:setPreferences': preferences = payload as CliPreferences; return preferences;
       case 'ai-cli:checkUpdates': return structuredClone(tools);
       case 'ai-cli:preview': return { actionId: payload.actionId, token: '11111111-1111-4111-8111-111111111111', command: String(payload.actionId).startsWith('install') ? 'Download, verify SHA-256, stage official release' : `${payload.actionId} --main-owned`, cwd: '/main/owned/folder', available: compatible || !String(payload.actionId).startsWith('update'), reason: compatible ? null : 'wrong-version', expiresAt: Date.now() + 60000 };
-      case 'ai-cli:run': current = { id: crypto.randomUUID(), actionId: payload.actionId as CliActionId, phase: 'running', output: '', truncated: false, exitCode: null, error: null }; return { ...current };
+      case 'ai-cli:run': {
+        current = { id: crypto.randomUUID(), actionId: payload.actionId as CliActionId, phase: 'running', output: '', truncated: false, exitCode: null, error: null };
+        const running = tools.find(item => item.provider === current.actionId.split('-').at(-1));
+        const status = { install: 'installing', login: 'signing-in' }[current.actionId.split('-')[0]!];
+        if (running && status) Object.assign(running, { status, error: null });
+        return { ...current };
+      }
       case 'ai-cli:read': {
         if (held) return { ...current };
         current = { ...current, phase: failure ? 'failed' : 'succeeded', output, error: failure, exitCode: failure ? 1 : 0 };
@@ -43,7 +49,7 @@ export function cliFixture() {
         if (current?.id === payload.id && current.phase === 'running') {
           current = { ...current, phase: 'cancelled', error: 'cancelled', exitCode: -1 };
           const tool = tools.find(item => item.provider === current.actionId.split('-').at(-1));
-          if (tool) Object.assign(tool, { status: 'error', error: { code: 'cancelled', hint: 'cancelled' } });
+          if (tool) Object.assign(tool, { status: 'error', error: { code: 'cancelled', hint: 'cancelled', action: current.actionId.split('-')[0] } });
         }
         return { ok: true };
       }

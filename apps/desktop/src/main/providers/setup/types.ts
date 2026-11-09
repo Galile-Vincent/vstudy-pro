@@ -4,7 +4,7 @@
  */
 import { setupFailure } from '../../../shared/ai-setup-errors';
 import { z } from 'zod';
-import type { CliFailure, CliProvider, CliToolState } from '../../../shared/ai-cli';
+import type { CliCancelledAction, CliFailure, CliProvider, CliToolState } from '../../../shared/ai-cli';
 
 export const providers = ['claude', 'codex', 'agy'] as const;
 export const versionSchema = z.string().regex(/^\d+\.\d+\.\d+(?:[-+][a-zA-Z0-9.-]+)?$/).max(100);
@@ -32,8 +32,11 @@ export function failure(error: unknown): CliFailure {
   if (error instanceof Error) return setupFailure(`${code ?? ''} ${error.message}`);
   return 'unknown';
 }
+export function cancelledAction(verb: string): CliCancelledAction | undefined {
+  return verb === 'install' || verb === 'login' || verb === 'test' ? verb : undefined;
+}
 export type SetupEvent = { type: 'install' | 'update' | 'login' | 'installed' | 'ready' | 'available' | 'unsigned' | 'missing' }
-  | { type: 'failed'; code: CliFailure };
+  | { type: 'failed'; code: CliFailure; action?: CliCancelledAction | undefined };
 const transitions: Record<Exclude<SetupEvent['type'], 'failed'>, { from: readonly CliToolState['status'][]; to: Exclude<CliToolState['status'], 'error'> }> = {
   install: { from: ['not-installed', 'installed-not-signed-in', 'error'], to: 'installing' },
   update: { from: ['ready', 'update-available', 'installed-not-signed-in', 'error'], to: 'updating' },
@@ -45,7 +48,7 @@ const transitions: Record<Exclude<SetupEvent['type'], 'failed'>, { from: readonl
   missing: { from: ['not-installed', 'installed-not-signed-in', 'ready', 'update-available', 'error'], to: 'not-installed' },
 };
 export function transition(state: CliToolState, event: SetupEvent): CliToolState {
-  if (event.type === 'failed') return { ...state, status: 'error', error: { code: event.code, hint: event.code } };
+  if (event.type === 'failed') return { ...state, status: 'error', error: { code: event.code, hint: event.code, ...event.code === 'cancelled' && event.action && { action: event.action } } };
   const rule = transitions[event.type];
   if (!rule.from.includes(state.status)) throw new SetupError('busy');
   return { ...state, status: rule.to, error: null };

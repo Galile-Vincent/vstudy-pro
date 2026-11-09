@@ -10,6 +10,8 @@ export type CliProvider = z.infer<typeof cliProviderSchema>;
 export const cliStatusSchema = z.enum(['not-installed', 'installing', 'installed-not-signed-in', 'signing-in', 'ready', 'update-available', 'updating', 'error']);
 export const cliFailureSchema = z.enum(['command-not-found', 'rate-limit', 'offline', 'permission-denied', 'disk-full', 'terminal-unavailable', 'manual-install-required', 'blocked', 'wrong-version', 'browser-not-opened', 'login-expired', 'certificate', 'not-signed-in', 'checksum', 'signature', 'unsupported', 'not-consented', 'cancelled', 'busy', 'unknown']);
 export type CliFailure = z.infer<typeof cliFailureSchema>;
+export const cliCancelledActionSchema = z.enum(['install', 'login', 'test']);
+export type CliCancelledAction = z.infer<typeof cliCancelledActionSchema>;
 const stateFields = {
   provider: cliProviderSchema,
   consented: z.boolean(),
@@ -27,7 +29,7 @@ const stateFields = {
 };
 export const cliToolStateSchema = z.discriminatedUnion('status', [
   z.object({ ...stateFields, status: cliStatusSchema.exclude(['error']), error: z.null() }).strict(),
-  z.object({ ...stateFields, status: z.literal('error'), error: z.object({ code: cliFailureSchema, hint: cliFailureSchema }).strict() }).strict(),
+  z.object({ ...stateFields, status: z.literal('error'), error: z.object({ code: cliFailureSchema, hint: cliFailureSchema, action: cliCancelledActionSchema.optional() }).strict() }).strict(),
 ]);
 export type CliToolState = z.infer<typeof cliToolStateSchema>;
 export const cliActionIdSchema = z.enum([

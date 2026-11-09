@@ -38,7 +38,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
   const tool = tools.find(item => item.provider === provider);
   const toolCancelled = tool?.status === 'error' && tool.error.hint === 'cancelled';
   const loginCancelled = runner.session?.phase === 'cancelled' && runner.session.actionId.startsWith('login-');
-  const step = tool ? loginCancelled && toolCancelled ? 'login' : currentStep(tool) : 'install';
+  const step = tool ? currentStep(tool) : 'install';
   const manualStep = !!tool?.manualInstallRequired && step === 'install';
   const running = runner.session?.phase === 'running';
   const busy = running || runner.busy || savingConsent;

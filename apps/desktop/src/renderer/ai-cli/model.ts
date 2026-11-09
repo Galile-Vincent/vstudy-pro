@@ -8,6 +8,7 @@ export const setupSteps: SetupStep[] = ['install', 'login', 'test'];
 export function currentStep(tool: CliToolState): SetupStep {
   if (tool.status === 'error' && ['wrong-version', 'command-not-found'].includes(tool.error.code)) return 'install';
   if (tool.status === 'not-installed' || tool.status === 'installing' || (!tool.version && !tool.path)) return 'install';
+  if (tool.status === 'error' && tool.error.hint === 'cancelled' && tool.error.action) return tool.error.action;
   if (tool.status === 'installed-not-signed-in' || tool.status === 'signing-in' ||
       (tool.status === 'error' && ['login-expired', 'not-signed-in'].includes(tool.error.code))) return 'login';
   return 'test';
