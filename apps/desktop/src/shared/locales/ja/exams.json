@@ -22,6 +22,7 @@
   "back": "設定に戻る",
   "history": "試験履歴",
   "history_empty": "試験はここに表示されます。",
+  "history_error": "試験履歴を読み込めませんでした。",
   "ask_ai": "AIに解説を依頼",
   "duration": "{{minutes}}分",
   "score": "{{correct}} / {{total}}問正解",

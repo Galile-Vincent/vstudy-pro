@@ -22,6 +22,7 @@
   "back": "Back to setup",
   "history": "Exam history",
   "history_empty": "Your exams will appear here.",
+  "history_error": "Your exam history could not be loaded.",
   "ask_ai": "Ask AI to explain",
   "duration": "{{minutes}} min",
   "score": "{{correct}} / {{total}} correct",
