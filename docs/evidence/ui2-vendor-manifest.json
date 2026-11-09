@@ -258,7 +258,7 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/progress.tsx",
       "registrySha256": "cf5de49b1c6d9ba6753d1d2f62820c543935cf426b8af8b49b277cfda6cc2c5b",
-      "patchedSha256": "8a61b1b60ca25beac02305bce36dc0ee0d168a1f3c4d0d5ce6f1dac928da9884",
+      "patchedSha256": "488c06433c2ffe24944bf108e06f9764082513c4e06c0c2d560f97e028dfb5d1",
       "patch": "docs/vendor-patches/ui--progress.tsx.patch",
       "reason": "Resolve the registry cn helper to the existing local utility."
     },
