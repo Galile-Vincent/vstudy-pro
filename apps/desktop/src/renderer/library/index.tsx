@@ -953,7 +953,7 @@ export function LibraryView() {
               const height = layout.heights[lane]!;
               const offset = layout.offsets[lane]!;
               const version = JSON.stringify([
-                item, index, grid, height, offset, columns, tabRow === d.id,
+                item, index, shown.length, grid, height, offset, columns, tabRow === d.id,
                 selected, query, folders, language, i18n.resolvedLanguage, progress[d.id],
               ]);
               return <DocumentRow key={d.id} version={version} render={() => (

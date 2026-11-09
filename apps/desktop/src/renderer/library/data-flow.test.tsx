@@ -182,7 +182,10 @@ it.each([false, true])('keeps recovery outside optional metadata (grid %s)', asy
  const retry = screen.getByRole('button', {name: tr('library:retry')});
  expect(retry.closest('.document-status')).toBeTruthy();
  expect(retry.closest('.document-meta,.document-added')).toBeNull();
- expect(retry.closest<HTMLElement>('.library-document')!.style.height).toBe('auto');
+ const entry=retry.closest<HTMLElement>('.library-document')!;
+ expect(entry.style.position).toBe('absolute');
+ expect(parseFloat(entry.style.height)).toBeGreaterThan(grid ? 300 : 64);
+ expect(entry.style.minHeight).toBe(entry.style.height);
 });
 
 
@@ -218,14 +221,17 @@ it('keeps keyboard focus mounted and a rendered entry point after scrolling', as
  expect(container.querySelectorAll('.library-document[tabindex="0"]')).toHaveLength(1);
 });
 
-it.each([['End',199], ['Home',0], ['PageDown',1], ['PageUp',0]] as const)(
+it.each([['End',199], ['Home',0], ['PageDown',6], ['PageUp',0]] as const)(
  'scrolls and focuses the %s keyboard target', async (key, index) => {
  state.invoke.mockImplementation(async c => c === 'library:documents:list'
   ? {items: Array.from({length:200}, (_, i) => row('doc' + i)), nextCursor:null} : []);
  const {container} = mount(); await screen.findByText('doc0');
  const first = container.querySelector<HTMLElement>('[data-index="0"]')!;
+ const viewport=container.querySelector<HTMLElement>('.library-results')!;
+ Object.defineProperty(viewport,'clientHeight',{configurable:true,value:400});
  act(() => first.focus()); fireEvent.keyDown(first, {key});
  await waitFor(() => expect(document.activeElement?.getAttribute('data-index')).toBe(String(index)));
+ expect(viewport.scrollTop).toBe(index*64);
 });
 
 
@@ -258,11 +264,11 @@ it('exposes Space and range selection through labelled checkboxes', async () => 
  expect(within(first).getByRole('checkbox', {checked:false})).toBeTruthy();
 });
 
-it.each(['delete', 'query', 'refresh'])('bounds selection restoration after %s in 5000 rows', async action => {
+it.each(['delete', 'move', 'query', 'refresh'])('bounds selection restoration after %s in 5000 rows', async action => {
  let departed = false;
  const rows = Array.from({length:5000}, (_, i) => row('doc' + i));
  state.invoke.mockImplementation(async (c, q) => {
-  if(c === 'library:documents:softDelete') { departed = true; return {}; }
+  if(c === 'library:documents:softDelete' || c === 'library:documents:move') { departed = true; return {}; }
   if(c !== 'library:documents:list') return [];
   const filtered = rows.filter(r => !(departed || q.text) || r.document.id !== 'doc0');
   const offset = q.cursor?.sortValue ?? 0;
@@ -273,6 +279,10 @@ it.each(['delete', 'query', 'refresh'])('bounds selection restoration after %s i
  const count = () => state.invoke.mock.calls.filter(([c]) => c === 'library:documents:list').length;
  const before = count();
  if(action === 'delete') fireEvent.click(screen.getByRole('button',{name:tr('library:delete')}));
+ else if(action === 'move') {
+  fireEvent.click(screen.getByRole('button',{name:tr('library:move')}));
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:tr('library:unfiled')}));
+ }
  else if(action === 'query') fireEvent.change(screen.getByRole('textbox',{name:tr('library:search')}),{target:{value:'exclude'}});
  else { departed=true; act(()=>window.dispatchEvent(new Event('library-changed'))); }
  await waitFor(()=>expect(count()).toBeGreaterThan(before));
@@ -341,4 +351,30 @@ it.each([false,true])('falls back when the originating folder disappears (other 
  await waitFor(()=>expect(document.activeElement).toBe(other
   ? screen.getByRole('button',{name:tr('library:openFolder',{name:'Other'})})
   : screen.getByRole('heading',{level:1})));
+});
+
+it('preserves a page two selection on refresh and clears it on a query change', async () => {
+ const rows=Array.from({length:5000},(_,i)=>row('doc'+i));
+ state.invoke.mockImplementation(async(c,q)=>{
+  if(c!=='library:documents:list')return [];
+  const offset=q.cursor?.sortValue??0;
+  const limit=q.limit;
+  return {items:rows.slice(offset,offset+limit),nextCursor:{id:'next',sortValue:offset+limit}};
+ });
+ const {container}=mount(); await screen.findByText('doc0');
+ fireEvent.click(screen.getByRole('button',{name:tr('library:loadMore')}));
+ await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list' && q.cursor)).toBe(true));
+ await waitFor(()=>expect(container.querySelector('[aria-setsize="100"]')).toBeTruthy());
+ const first=container.querySelector<HTMLElement>('[data-index="0"]')!;
+ fireEvent.keyDown(first,{key:'End'});
+ const last=await screen.findByRole('listitem',{name:/doc99/});
+ fireEvent.click(last);
+ const before=state.invoke.mock.calls.filter(([c])=>c==='library:documents:list').length;
+ act(()=>window.dispatchEvent(new Event('library-changed')));
+ await waitFor(()=>expect(state.invoke.mock.calls.filter(([c])=>c==='library:documents:list').length).toBeGreaterThan(before));
+ await waitFor(()=>expect(screen.getByRole('listitem',{name:/doc99.*Selected/})).toBeTruthy());
+ expect(state.invoke.mock.calls.filter(([c])=>c==='library:documents:list').length-before).toBe(1);
+ fireEvent.change(screen.getByRole('textbox',{name:tr('library:search')}),{target:{value:'new query'}});
+ await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list' && q.text)).toBe(true));
+ expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(0);
 });
