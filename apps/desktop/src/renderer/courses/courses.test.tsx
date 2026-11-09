@@ -818,9 +818,9 @@ it('pins without opening a course, exposes pressed state, and keeps the course b
   const target = rows.at(-1)!;
   const open = target.querySelector<HTMLButtonElement>('.course-open')!;
   const pin = target.querySelector<HTMLButtonElement>('.course-pin')!;
-  expect(pin.getAttribute('aria-label')).toBe('Pin course');
+  expect(pin.getAttribute('aria-label')).toBe(`Pin ${open.textContent}`);
   expect(pin.getAttribute('aria-pressed')).toBe('false');
-  expect(pin.title).toBe('Pin course');
+  expect(pin.hasAttribute('title')).toBe(false);
   expect(pin.tabIndex).toBe(0);
   pin.focus();
   await act(async () => pin.click());
@@ -828,7 +828,7 @@ it('pins without opening a course, exposes pressed state, and keeps the course b
   expect(document.activeElement).toBe(pin);
   expect(pin.getAttribute('aria-pressed')).toBe('true');
   expect(pin.querySelector('svg')?.getAttribute('fill')).toBe('currentColor');
-  expect(pin.getAttribute('aria-label')).toBe('Unpin course');
+  expect(pin.getAttribute('aria-label')).toBe(`Unpin ${open.textContent}`);
   expect(host.querySelector('.course-group-label')?.textContent).toBe('Pinned');
   expect((await api.overview()).pinnedCourseIds).toContain(target.getAttribute('data-course-id'));
   await act(async () => pin.click());

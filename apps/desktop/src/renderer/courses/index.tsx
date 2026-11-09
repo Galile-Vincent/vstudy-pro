@@ -1108,9 +1108,9 @@ function CoursesBody({
                                 className="course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--r-sm)] aria-pressed:bg-[var(--active)]"
                                 aria-pressed={pinned}
                                 aria-label={tr(
-                                  pinned ? "moodle:unpin_course" : "moodle:pin_course",
+                                  pinned ? "moodle:unpin_course_named" : "moodle:pin_course_named",
+                                  { course: name },
                                 )}
-                                title={tr(pinned ? "moodle:unpin_course" : "moodle:pin_course")}
                                 aria-disabled={pinBusy === course.id}
                                 onClick={() => {
                                   if (!pinBusy)
