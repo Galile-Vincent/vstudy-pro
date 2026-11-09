@@ -11,15 +11,18 @@ export function createDataDeletion(
 ): () => Promise<void> {
   let started = false;
   return async () => {
-    if (started) return;
+    if (started) throw Error('Deletion already in progress');
     started = true;
     try {
       reviewWorkers.suspend('delete-all');
-      await reviewWorkers.waitForIdle();
-      await stop();
+      await markDeletionPending(root);
+      await quiesce(async () => { await reviewWorkers.waitForIdle(); await stop(); });
       if (process.platform === 'win32') await markDeletionPending(root);
       else {
-        try { await rename(root, `${root}.deleting-${Date.now()}-${randomUUID()}`); }
+        try {
+          await rename(root, `${root}.deleting-${Date.now()}-${randomUUID()}`);
+          await rm(root + '.delete-pending', {force:true});
+        }
         catch (error) { await markDeletionPending(root); await report(error); }
       }
     } catch (error) {
@@ -96,4 +99,13 @@ export async function finishPendingDeletion(
     await rm(root + '.delete-pending', {force:true});
     return true;
   } catch (error) { log({phase:'delete-pending-failed',error}); return false; }
+}
+
+async function quiesce(work: () => Promise<void>): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([work(), new Promise<never>((_resolve, reject) => {
+      timer = setTimeout(() => reject(Error('Deletion quiesce timed out')), 15_000);
+    })]);
+  } finally { clearTimeout(timer); }
 }

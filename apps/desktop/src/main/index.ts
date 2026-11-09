@@ -336,7 +336,10 @@ if (ownsApplication) void app.whenReady().then(async () => {
   }, () => { restartOwnedApp(app); });
   let deleteRequested = false;
   deletion.handle('settings:deleteAllData', async (_request, event) => {
-    if (!await appReady || deleteRequested) return {ok:true};
+    if (deleteRequested) throw Error('VSTUDY_STATUS:' + JSON.stringify({
+      code:'settings.delete_in_progress', params:{},
+    }));
+    if (!await appReady) throw Error('Application is not ready');
     deleteRequested = true;
     try {
       const result = await showAttachedMessage({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 }, event.sender);

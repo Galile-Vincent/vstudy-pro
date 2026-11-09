@@ -116,5 +116,6 @@
   "remove_key_title": "Remove the key for {{name}}?",
   "remove_key_copy": "You will need to enter a key again to use this provider.",
   "provider_action": "{{action}} — {{name}}",
-  "delete_pending": "Some data could not be removed. Deletion will retry when the app restarts."
+  "delete_pending": "Some data could not be removed. Deletion will retry when the app restarts.",
+  "delete_in_progress": "Deletion is already in progress."
 }

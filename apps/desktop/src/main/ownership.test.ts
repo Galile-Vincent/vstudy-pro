@@ -4,7 +4,7 @@
  * Tests own their fixtures and cleanup; live prerequisites must remain explicit.
  * @packageDocumentation
  */
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { acquireOwnership } from './ownership';
 it('quits the losing instance and restores and focuses the owner on second launch', () => {
   const calls:string[]=[]; let second: (()=>void)|undefined;
@@ -38,4 +38,11 @@ it('releases ownership before asking for a restart', async () => {
   restartOwnedApp({releaseSingleInstanceLock:()=>{calls.push('release');},
     relaunch:()=>{calls.push('relaunch');},exit:()=>{calls.push('exit');}});
   expect(calls).toEqual(['release','relaunch','exit']);
+});
+it('exits even if relaunch throws', async () => {
+  const { restartOwnedApp } = await import('./ownership');
+  const exit = vi.fn();
+  expect(() => restartOwnedApp({releaseSingleInstanceLock:vi.fn(),
+    relaunch:()=>{throw Error('restart failed');},exit})).toThrow('restart failed');
+  expect(exit).toHaveBeenCalledOnce();
 });

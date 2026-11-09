@@ -116,5 +116,6 @@
   "remove_key_title": "移除 {{name}} 的金鑰？",
   "remove_key_copy": "您需要重新輸入金鑰才能使用此服務。",
   "provider_action": "{{action}} — {{name}}",
-  "delete_pending": "部分資料無法移除。應用程式重新啟動時會再次嘗試刪除。"
+  "delete_pending": "部分資料無法移除。應用程式重新啟動時會再次嘗試刪除。",
+  "delete_in_progress": "正在刪除資料。"
 }

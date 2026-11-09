@@ -34,6 +34,6 @@ export function restartOwnedApp(app: {
   exit(code?: number): void;
 }, code = 0): void {
   app.releaseSingleInstanceLock();
-  app.relaunch({args:relaunchArguments()});
-  app.exit(code);
+  try { app.relaunch({args:relaunchArguments()}); }
+  finally { app.exit(code); }
 }

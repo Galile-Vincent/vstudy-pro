@@ -116,5 +116,6 @@
   "remove_key_title": "{{name}} のキーを削除しますか？",
   "remove_key_copy": "このプロバイダーを使うにはキーの再入力が必要です。",
   "provider_action": "{{action}} — {{name}}",
-  "delete_pending": "一部のデータを削除できませんでした。アプリの再起動時に再試行します。"
+  "delete_pending": "一部のデータを削除できませんでした。アプリの再起動時に再試行します。",
+  "delete_in_progress": "削除はすでに進行中です。"
 }

@@ -24,15 +24,15 @@ it('quiesces before one atomic rename and relaunches without deleting', async ()
   expect(io.rename).toHaveBeenCalledWith('/owned',expect.stringMatching(/^\/owned\.deleting-/));
   expect(s.stop.mock.invocationCallOrder[0]).toBeLessThan(io.rename.mock.invocationCallOrder[0]!);
   expect(io.rename.mock.invocationCallOrder[0]).toBeLessThan(s.relaunch.mock.invocationCallOrder[0]!);
-  expect(io.rm).not.toHaveBeenCalled();
+  expect(io.rm).toHaveBeenCalledWith('/owned.delete-pending',{force:true});
 });
 it('holds admission across concurrent calls and failures', async () => {
   const s=setup(); let release!:()=>void;
   s.stop.mockImplementationOnce(()=>new Promise<void>(resolve=>{release=resolve;}));
-  const first=s.run(); await s.run();
+  const first=s.run(); await expect(s.run()).rejects.toThrow('already in progress');
   await vi.waitFor(()=>expect(s.stop).toHaveBeenCalledOnce());
   io.rename.mockRejectedValueOnce(new Error('INCOMPLETE'));
-  release(); await first; await s.run();
+  release(); await first; await expect(s.run()).rejects.toThrow('already in progress');
   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'INCOMPLETE'}));
   expect(s.stop).toHaveBeenCalledOnce(); expect(s.relaunch).toHaveBeenCalledOnce();
 });
@@ -50,4 +50,17 @@ it('retries quarantines next startup, including incomplete cleanup', async () =>
   expect(io.rm).toHaveBeenCalledTimes(2);
   expect(io.rm).toHaveBeenCalledWith('/owned.deleting-123',expect.objectContaining({recursive:true}));
   expect(log).toHaveBeenCalledWith(expect.objectContaining({phase:'delete-cleanup-failed'}));
+});
+it.each(['stop','workers'])('bounds a hanging %s and reports before restarting', async kind => {
+  vi.useFakeTimers();
+  try {
+    const s = setup();
+    if (kind === 'stop') s.stop.mockImplementation(() => new Promise(() => {}));
+    else workers.waitForIdle.mockImplementation(() => new Promise(() => {}));
+    const pending = s.run();
+    await vi.advanceTimersByTimeAsync(15_001);
+    await pending;
+    expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'Deletion quiesce timed out'}));
+    expect(s.relaunch).toHaveBeenCalledOnce();
+  } finally { vi.useRealTimers(); }
 });
