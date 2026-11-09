@@ -155,7 +155,9 @@ it('labels every filter above its control and offers one clear action', async ()
   for (const field of fields) {
     const label = field.querySelector('label')!;
     expect(label).toBe(field.firstElementChild);
-    expect(document.getElementById(label.htmlFor)).toBeTruthy();
+    const control = field.querySelector('select, input, [role=checkbox]');
+    expect(control).toBeTruthy();
+    expect(control?.id).toBe(label.htmlFor);
   }
   expect(screen.getAllByRole('button', {name:tr('library:clearFilters')})).toHaveLength(1);
 });
@@ -165,4 +167,13 @@ it('offers Clear beside active chips while filters are closed', async () => {
  await mount(false);
  expect(within(document.querySelector('.filter-chips')! as HTMLElement)
   .getByRole('button', {name:tr('library:clearFilters')})).toBeTruthy();
+});
+
+it('hides Clear without filters and preserves Escape dismissal', async () => {
+ const toolbar = await mount(false);
+ fireEvent.click(within(toolbar).getByTestId('library-filters'));
+ const panel = await screen.findByRole('dialog', {name:tr('library:filters')});
+ expect(within(panel).queryByRole('button', {name:tr('library:clearFilters')})).toBeNull();
+ fireEvent.keyDown(panel, {key:'Escape'});
+ await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 });

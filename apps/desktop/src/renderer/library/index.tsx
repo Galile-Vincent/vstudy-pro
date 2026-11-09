@@ -762,6 +762,7 @@ export function LibraryView() {
           );
       }}
       className="library-view"
+      role="region"
       aria-label={tr("common:library")}
     >
       <PageHeader
