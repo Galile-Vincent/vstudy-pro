@@ -169,6 +169,14 @@ function CoursesBody({
   const disconnectTrigger = useRef<HTMLButtonElement>(null);
   const disconnectSchool = useRef<string | undefined>(undefined);
   const [showPlanner, setShowPlanner] = useState(false);
+  const plannerTrigger = useRef<HTMLButtonElement>(null);
+  const plannerBack = useRef<HTMLButtonElement>(null);
+  const plannerWasOpen = useRef(false);
+  useEffect(() => {
+    if (showPlanner) plannerBack.current?.focus();
+    else if (plannerWasOpen.current) plannerTrigger.current?.focus();
+    plannerWasOpen.current = showPlanner;
+  }, [showPlanner]);
   const openMoodle = useMoodleWebview();
   const [overview, setOverview] = useState<MoodleOverview>();
   const [orderSnapshot,setOrderSnapshot] = useState<{data:MoodleOverview;now:number}>();
@@ -522,7 +530,7 @@ function CoursesBody({
     );
   };
   if (showPlanner) return <main className="moodle-page"><div className="moodle-content">
-    <Button variant="ghost" className="moodle-back" onClick={() => setShowPlanner(false)}><ArrowLeft />{tr("planner:back")}</Button>
+    <Button variant="ghost" ref={plannerBack} className="moodle-back" onClick={() => setShowPlanner(false)}><ArrowLeft />{tr("planner:back")}</Button>
     <Planner courses={overview?.courses ?? []} deadlines={overview?.upcoming ?? []} />
   </div></main>;
   const header = (
@@ -542,7 +550,7 @@ function CoursesBody({
           </div>
           <div className="moodle-header-actions">
           {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry" onClick={() => setShowUpdates(true)}><Inbox />{tr("moodle:updates")}{unreadUpdates > 0 && <span className="updates-count">{unreadUpdates}</span>}</Button>}
-          <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
+          <Button variant="outline" ref={plannerTrigger} className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
           <Button variant="outline" onClick={() => setConnect(true)}>
             <GraduationCap />
             {tr("moodle:connect_school")}
