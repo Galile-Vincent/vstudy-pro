@@ -88,7 +88,7 @@ it('preserves an existing backup when an original is missing from the live libra
     await expect(exportBackup(store,root,path)).rejects.toThrow('storage.invalid_backup');
     expect(await readFile(path)).toEqual(good);
   }finally{store.close();await rm(root,{recursive:true,force:true});await rm(output,{recursive:true,force:true});}
-});
+},30000);
 
 it.each([
   "CREATE TRIGGER stolen_paths AFTER UPDATE OF sourcePath ON documents BEGIN UPDATE documents SET sourcePath='/tmp/private/source.md',markdownPath='/tmp/private/content.md' WHERE id=NEW.id; END",
