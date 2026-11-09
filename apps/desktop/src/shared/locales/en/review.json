@@ -154,5 +154,6 @@
   "bounded_session_other": "Reviewing {{selected}} of {{total}} concepts; {{count}} left for another session",
   "scope_required": "Choose a valid scope to generate. Select 1–100 items or a valid date range.",
   "scope_limit_one": "The session limit is {{count}} concept. Uncheck one to choose another.",
-  "scope_limit_other": "The session limit is {{count}} concepts. Uncheck one to choose another."
+  "scope_limit_other": "The session limit is {{count}} concepts. Uncheck one to choose another.",
+  "row_actions": "Actions for {{concept}}"
 }

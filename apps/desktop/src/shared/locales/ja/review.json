@@ -154,5 +154,6 @@
   "scope_required": "生成するには、1〜100 件の項目または有効な日付範囲を選択してください。",
   "scope_limit_other": "1 回に選べる概念は {{count}} 個までです。他の概念を選ぶには選択を解除してください。",
   "bounded_session_one": "{{total}} 個中 {{selected}} 個の概念を復習します。残り {{count}} 個は次回に復習します",
-  "scope_limit_one": "1 回に選べる概念は {{count}} 個までです。他の概念を選ぶには選択を解除してください。"
+  "scope_limit_one": "1 回に選べる概念は {{count}} 個までです。他の概念を選ぶには選択を解除してください。",
+  "row_actions": "{{concept}} の操作"
 }
