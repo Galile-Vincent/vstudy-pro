@@ -18,7 +18,7 @@ beforeEach(()=>{
   host=document.createElement('div');document.body.append(host);root=createRoot(host);
 });
 afterEach(async()=>{await act(async()=>root.unmount());host.remove();vi.useRealTimers();vi.unstubAllGlobals();});
-function Routes(){const {navigate,closeWelcome,route}=useNavigate();return <><p>{route.view}</p><button id="welcome-entry" onClick={()=>navigate('welcome')}>Welcome</button><button id="close-welcome" onClick={closeWelcome}>Close</button><button id="other" onClick={()=>navigate('library')}>Other route</button><button id="chosen">My focus</button></>;}
+function Routes(){const {navigate,closeWelcome,route,closeTab,openTab}=useNavigate();return <><p>{route.view}</p><button id="welcome-entry" onClick={()=>navigate('welcome')}>Welcome</button><button id="close-welcome" onClick={closeWelcome}>Close</button><button id="other" onClick={()=>navigate('library')}>Other route</button><button id="open-test-tab" onClick={()=>openTab("home")}>New</button><button id="noop-close" onClick={()=>closeTab("missing")}>No-op</button><button id="chosen">My focus</button></>;}
 async function mount(){await act(async()=>root.render(<AppShell><Routes/></AppShell>));await act(async()=>vi.advanceTimersByTime(20));}
 async function click(id:string){await act(async()=>{const button=host.querySelector<HTMLButtonElement>('#'+id)!;button.focus();button.click();});}
 it('cancels Welcome return focus when a newer navigation occurs',async()=>{
@@ -150,4 +150,13 @@ it('focuses the active tab after closing an inactive tab with its close button',
   await act(async () => { close.focus(); close.click(); });
   expect(host.querySelectorAll('[role=tab]')).toHaveLength(2);
   expect(document.activeElement?.id).toBe(`tab-${tabs[0]!.id}`);
+});
+
+it('does not carry no-op close focus into the next new tab', async () => {
+  await mount(); await click('noop-close');
+  const chosen = host.querySelector<HTMLButtonElement>('#chosen')!;
+  chosen.focus();
+  await act(() => host.querySelector<HTMLButtonElement>('#open-test-tab')!.click());
+  expect(host.querySelectorAll('[role=tab]')).toHaveLength(2);
+  expect(document.activeElement).toBe(chosen);
 });

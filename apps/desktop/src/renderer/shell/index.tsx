@@ -127,6 +127,7 @@ export function AppShell({
   const activateTab = (id: string) => { capture(); setTransientRoute({}); dispatch({ type: 'activate', id, now: Date.now() }); };
   const focusAfterClose = useRef(false);
   const closeTab = (id: string) => {
+    if (!tabsRef.current.tabs.some(tab => tab.id === id)) return;
     focusAfterClose.current = true;
     capture();
     setTransientRoute({});
