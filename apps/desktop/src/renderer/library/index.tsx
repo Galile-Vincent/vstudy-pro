@@ -121,6 +121,7 @@ export function LibraryView() {
   });
   const clearFilters = () => {
     setCustomDates(false);
+    setDateDraft({addedAfter:"",addedBefore:""});
     setDateError(false);
     setQuery(q => ({
       ...defaults, sort: q.sort, direction: q.direction,
@@ -693,7 +694,13 @@ export function LibraryView() {
         {filters.map(([key, value]) => (
           <Button variant="outline"
             key={key}
-            onClick={() => setQuery((q) => ({ ...q, [key]: undefined }))}
+            onClick={() => {
+              if (key === 'addedAfter' || key === 'addedBefore') {
+                setDateDraft(draft => ({...draft,[key]:''}));
+                setDateError(false);
+              }
+              setQuery(q => ({...q,[key]:undefined}));
+            }}
           >
             {tr(`library:${key}`)}:{" "}
             {typeof value === "boolean"
