@@ -3,7 +3,7 @@
 .library-view .library-mode > button:hover { color:var(--ink); background:transparent; }
 .library-view .library-mode > button[aria-pressed=true] { color:var(--ink); background:var(--active); }
 .library-mode svg { width:var(--space-4); height:var(--space-4); }
-@container library (width < 40rem) { .library-mode > button { padding-inline:var(--space-2); } }
+@container library-page (width < 40rem) { .library-mode > button { padding-inline:var(--space-2); } }
 
 .library-folders { flex:1; min-height:0; overflow:auto; padding:var(--space-1) var(--space-1) var(--space-6); }
 .folder-grid { list-style:none; margin:0; padding:0; display:grid; grid-auto-rows:1fr; grid-template-columns:repeat(auto-fill,minmax(12rem,1fr)); gap:var(--space-4); }
@@ -99,7 +99,7 @@ html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:f
 .app-shell .library-results[data-view=grid] .document-card .document-meta > span + span::before { position:absolute; inset-inline-start:calc(var(--space-4) / -2 - .25em); margin:0; }
 .library-results[data-view=grid] .document-card .document-title { background:transparent; box-shadow:none; }
 .app-shell .library-results .library-document .document-title { background:transparent; backdrop-filter:none; box-shadow:none; }
-@container library (width < 36rem) { .library-view .library-toolbar { flex-wrap:wrap; } .library-view .library-search { flex-basis:100%; order:3; } }
+@container library-page (width < 36rem) { .library-view .library-toolbar { flex-wrap:wrap; } .library-view .library-search { flex-basis:100%; order:3; } }
 
 .library-view .library-mode { height:auto; min-height:46px; }
 .library-view .library-mode > button { height:auto; min-height:40px; }
