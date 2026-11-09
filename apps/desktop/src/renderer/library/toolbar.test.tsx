@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { SelectHTMLAttributes } from 'react';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
-import { tr } from '../../shared/i18n';
+import { i18n, tr } from '../../shared/i18n';
 const state = vi.hoisted(() => ({ invoke: vi.fn(), route: { view: 'library', query: {} as Record<string, unknown> } }));
 vi.mock('../components/select',()=>({Select:(props:SelectHTMLAttributes<HTMLSelectElement>)=><select {...props}/>}));
 vi.mock('../bridge', () => ({ desktop: { invoke: state.invoke } }));
@@ -14,7 +14,7 @@ const item = { document: { id: 'notes', title: 'notes', sourceName: 'notes.pdf',
 async function mount(compact: boolean) {
   vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: compact, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
   localStorage.setItem('library-mode', 'files');
-  document.documentElement.lang = 'en';
+  document.documentElement.lang = i18n.language;
   document.documentElement.style.fontSize = '16px';
   document.documentElement.style.setProperty('--library-row-height', '4');
   document.documentElement.style.setProperty('--library-search-row-height', '5');
@@ -77,4 +77,16 @@ it('shows a reversed custom range error and never submits an impossible range',a
  fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'2026-11-02'}});
  await waitFor(()=>expect(document.querySelector('.library-live')?.textContent).toContain(tr('library:dateRangeInvalid')));
  for(const [channel,q] of state.invoke.mock.calls){if(channel==='library:documents:list' && q.addedBefore && q.addedAfter)expect(q.addedAfter<=q.addedBefore).toBe(true);}
+});
+
+it.each(['en','zh-Hant','ja'])('localizes converter, dates and sizes in filter chips (%s)',async locale=>{
+ await i18n.changeLanguage(locale);
+ state.route.query={converter:'markitdown',addedAfter:'2026-11-01T00:00:00.000Z',minSize:10000000};
+ await mount(false);document.documentElement.lang=locale;
+ const chips=document.querySelector('.filter-chips')!;
+ expect(chips.textContent).toContain(tr('library:markitdown'));
+ expect(chips.textContent).not.toContain('2026-11-01T');
+ expect(chips.textContent).not.toContain('10000000');
+ expect(chips.textContent).toContain(new Intl.NumberFormat(locale,{style:'unit',unit:'megabyte',unitDisplay:'short'}).format(10));
+ await i18n.changeLanguage('en');
 });

@@ -63,11 +63,11 @@ function folderPath(folders: Folder[], id: string | null | undefined) {
   for (let level = 0; id && level < 8; level++) { const folder = folders.find(f => f.id === id); if (!folder) break; names.unshift(folder.name); id = folder.parentId; }
   return names.join(' › ');
 }
-export function formatSize(bytes: number | null, locale: string) {
+export function formatSize(bytes: number | null, locale: string, short = false) {
     if (bytes === null) return tr("library:unknown_size");
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
   const exponent = Math.min(3, Math.max(0, Math.floor(Math.log10(Math.max(1, bytes)) / 3)));
-  return new Intl.NumberFormat(locale, { style: 'unit', unitDisplay:'long', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
+  return new Intl.NumberFormat(locale, { style: 'unit', unitDisplay:short ? 'short' : 'long', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
 }
 function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpen:(event: React.MouseEvent<HTMLButtonElement>)=>void}) {
  const ref=useRef<HTMLButtonElement>(null);const [visible,setVisible]=useState(false);
@@ -671,7 +671,10 @@ export function LibraryView() {
               ? tr("library:yes")
               : (folders.find((f) => f.id === value)?.name ??
                 tags.find((t) => t.id === value)?.name ??
-                (["status", "type"].includes(key) ? tr(`library:${value}`) : String(value)))}{" "}
+                (["status", "type", "converter"].includes(key) ? tr(`library:${value}`)
+                  : ["addedAfter", "addedBefore"].includes(key) ? format.date(String(value))
+                  : ["minSize", "maxSize"].includes(key) ? formatSize(Number(value), language, true)
+                  : String(value)))}{" "}
             <X size={12} aria-hidden="true" />
           </Button>
         ))}
