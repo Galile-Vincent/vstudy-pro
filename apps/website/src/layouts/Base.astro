@@ -42,7 +42,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <a class="skip" href="#main">{t.skip}</a>
     <header class="site-header">
       <nav class="nav container" aria-label="VStudy Pro">
-        <a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup /></a>
+        <a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup beta /></a>
         <div class="nav-links">
           <a href={path(`${language}/#features`)}>{t.features}</a>
           <a href={path(`${language}/docs/getting-started/`)} aria-current={docs ? 'page' : undefined}>{t.docs}</a>
@@ -78,8 +78,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <slot />
     <footer class="site-footer">
       <div class="container footer-inner">
-        <div><a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup /></a><p>{t.footer}</p>{VERSION && <p><small>{t.version} {VERSION}</small></p>}</div>
-        <div class="footer-links"><a href={path(`${language}/download/`)}>{t.download}</a><a href={path(`${language}/docs/getting-started/`)}>{t.docs}</a><a href={path(`${language}/privacy/`)}>{t.privacy}</a><a href={path(`${language}/terms/`)}>{t.terms}</a><a href={REPO_URL}>{t.source}</a></div>
+        <div><a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup beta /></a><p>{t.footer}</p>{VERSION && <p><small>{t.version} {VERSION}{' '}<span class="beta-badge">{t.beta}</span></small></p>}</div>
+        <div class="footer-links"><a href={path(`${language}/download/`)}>{t.download}</a><a href={path(`${language}/docs/getting-started/`)}>{t.docs}</a><a href={path(`${language}/privacy/`)}>{t.privacy}</a><a href={path(`${language}/terms/`)}>{t.terms}</a><a href={path(`${language}/media/`)}>{t.mediaKit}</a><a href={REPO_URL}>{t.source}</a></div>
         <nav class="footer-contact" aria-label={t.contact}>
           <strong>{t.contact}</strong>
           <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>

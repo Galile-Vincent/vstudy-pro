@@ -23,7 +23,7 @@ const available = installers.filter(installer => installer.releaseEnabled);
   <main id="main" tabindex="-1" class="dl container">
     <header class="dl-head">
       <h1>{c.title}</h1>
-      {release && <p class="dl-release">{labels.version} {release.version} · {labels.updated} <time datetime={release.publishedAt}>{releaseDate}</time></p>}
+      {release && <p class="dl-release"><span class="release-version">{labels.version} {release.version}{' '}<span class="beta-badge">{labels.beta}</span></span> · {labels.updated} <time datetime={release.publishedAt}>{releaseDate}</time></p>}
     </header>
     <ul class="dl-cards">
       {available.map(installer => {
