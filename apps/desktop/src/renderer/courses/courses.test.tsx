@@ -249,9 +249,7 @@ describe("Courses", () => {
     api.sync = async () => {
       throw new Error("offline");
     };
-    const refresh = host.querySelector<HTMLButtonElement>(
-      '[aria-label="Refresh courses"]',
-    )!;
+    const refresh = getByRole(host, 'button', {name: 'Refresh all schools'});
     await act(async () => refresh.click());
     expect(host.querySelector("[role=alert]")?.textContent).toContain(
       "Showing your last synced courses.",
@@ -875,7 +873,7 @@ it("C1 confirms the named school before catalog disconnect", async () => {
   const account = (await api.overview()).accounts[0]!;
   const disconnect = vi.spyOn(api, "disconnect");
   await mount(api);
-  await act(async () => getByRole(host, "button", { name: "Disconnect school" }).click());
+  await act(async () => getByRole(host, "button", { name: `Disconnect ${account.siteName}` }).click());
   expect(disconnect).not.toHaveBeenCalled();
   const dialog = getByRole(document.body, "dialog");
   expect(dialog.textContent).toContain(account.siteName);
@@ -965,7 +963,7 @@ it('shows invalid and absent dates in an explicit final group', async () => {
 it('keeps focus on a surviving target after the last disconnect', async () => {
   const api = createMockMoodleApi();
   await mount(api);
-  await act(async () => getByRole(host, 'button', {name: /^Disconnect school/}).click());
+  await act(async () => getByRole(host, 'button', {name: /^Disconnect /}).click());
   await act(async () => getByRole(document.body, 'dialog').querySelector<HTMLButtonElement>('button[data-variant=destructive]')!.click());
   await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
   expect(document.activeElement).toBe(host.querySelector('[data-slot=page-header] button:last-child'));
@@ -982,4 +980,17 @@ it('shows one Connect school action only after an empty overview loads', async (
   await act(async () => resolve({...overview, accounts: [], courses: []}));
   expect(host.querySelectorAll('h1:empty')).toHaveLength(0);
   expect(getByRole(host, 'button', {name: 'Connect school'})).toBeTruthy();
+});
+
+it('offers shared school actions once and names each disconnect', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const second = {...overview.accounts[0]!, id: 'second', siteName: 'Second school'};
+  api.overview = async () => ({...overview, accounts: [...overview.accounts, second]});
+  const sync = vi.spyOn(api, 'sync');
+  await mount(api);
+  expect(getByRole(host, 'button', {name: 'Connect another school'})).toBeTruthy();
+  await act(async () => getByRole(host, 'button', {name: 'Refresh all schools'}).click());
+  expect(sync).toHaveBeenCalledOnce();
+  expect(getByRole(host, 'button', {name: 'Disconnect Second school'})).toBeTruthy();
 });
