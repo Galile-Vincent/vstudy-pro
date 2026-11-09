@@ -1143,7 +1143,7 @@ function CoursesBody({
                                     void pinCourse(course.accountId, course.id, !pinned);
                                 }}
                               >
-                                <Pin aria-hidden="true" />
+                                <Pin aria-hidden="true" fill={pinned ? "currentColor" : "none"} />
                               </button>
                               {attention.overdue > 0 && (
                                 <span id={`${prefix}-overdue`} className="sr-only">

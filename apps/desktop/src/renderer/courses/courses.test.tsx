@@ -818,6 +818,7 @@ it('pins without opening a course, exposes pressed state, and keeps the course b
   expect(host.querySelector('.course-open')).toBe(open);
   expect(document.activeElement).toBe(pin);
   expect(pin.getAttribute('aria-pressed')).toBe('true');
+  expect(pin.querySelector('svg')?.getAttribute('fill')).toBe('currentColor');
   expect(pin.getAttribute('aria-label')).toBe('Unpin course');
   expect(host.querySelector('.course-group-label')?.textContent).toBe('Pinned');
   expect((await api.overview()).pinnedCourseIds).toContain(target.getAttribute('data-course-id'));
