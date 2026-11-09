@@ -1157,3 +1157,21 @@ it('restores the disconnect trigger and reports a rejected disconnect', async ()
   vi.useRealTimers();
   expect(host.textContent).toContain(i18n.t('moodle:action_error'));
 });
+
+
+it.each([false, true])('waits for courses before choosing the initial term (user choice: %s)', async choose => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  let populated = false;
+  api.overview = async () => ({...overview,
+    accounts: overview.accounts.map(a => ({...a, syncedAt: choose ? a.syncedAt : null})),
+    courses: populated ? overview.courses.map(c => ({...c,
+      identity: {...c.identity, lifecycle: 'past' as const},
+    })) : [],
+  });
+  await mount(api);
+  if (choose) await act(async () => getByRole(host, 'tab', {name: /^All/}).focus());
+  populated = true;
+  await act(async () => getByRole(host, 'button', {name: 'Refresh all schools'}).click());
+  expect(getByRole(host, 'tab', {name: choose ? /^All/ : /^Past/}).getAttribute('aria-selected')).toBe('true');
+});
