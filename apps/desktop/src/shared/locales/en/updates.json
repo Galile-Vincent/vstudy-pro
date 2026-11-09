@@ -24,5 +24,9 @@
   "download_progress": "Downloading update",
   "unavailable": "Automatic updates are unavailable for this build.",
   "continue": "Continue",
-  "install_failed": "Installation did not start. Try again."
+  "install_failed": "Installation did not start. Try again.",
+  "waiting": "Waiting for work to finish",
+  "work_active": "Work is still active",
+  "not_now": "Not now",
+  "restart_now": "Restart now and stop it"
 }

@@ -24,5 +24,9 @@
   "download_progress": "正在下載更新",
   "unavailable": "此版本無法自動更新。",
   "continue": "繼續",
-  "install_failed": "安裝未開始，請再試一次。"
+  "install_failed": "安裝未開始，請再試一次。",
+  "waiting": "正在等待工作完成",
+  "work_active": "仍有工作進行中",
+  "not_now": "暫時不要",
+  "restart_now": "立即重新啟動並停止工作"
 }

@@ -15,6 +15,9 @@ an explicit rollback policy as follow-up; this change does not implement them.
 
 Downloads and installation require attached native confirmation in main. Quitting
 alone never installs: automatic install on quit is disabled to preserve the guard.
+The sidebar shows a cancellable wait for conversions, imports, chat, Moodle, AI
+parsing, review generation and search. After 30 seconds a native dialog offers
+“Restart now and stop it” or “Not now”. The wait holds no storage request slot.
 Restart waits while the app remains functional. Only the normal before-quit event
 starts coordinated shutdown. Installer errors or no quit within 60 seconds restore
 the restart action with Try again; pending native completion handlers are removed. Prereleases such as 1.2.3-rc.1 are

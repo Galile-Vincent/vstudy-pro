@@ -21,11 +21,11 @@ export function UpdateRow() {
   useTranslation();
   const snapshot = useUpdates();
   const state = snapshot?.state;
-  const label = snapshot?.installError ? tr('updates:install_failed') : !state || ['idle', 'unsupported'].includes(state.status) ? '' : state.status === 'available'
+  const label = snapshot?.waiting ? tr('updates:waiting') : snapshot?.installError ? tr('updates:install_failed') : !state || ['idle', 'unsupported'].includes(state.status) ? '' : state.status === 'available'
     ? tr('updates:available', {version:state.version}) : state.status === 'downloading'
       ? tr('updates:downloading', {percent:state.percent}) : tr(`updates:${state.status}`);
   const action = () => {
-    if (snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading') return;
+    if (snapshot?.waiting || snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading') return;
     const channel = state?.status === 'ready' ? 'updates:install'
       : state?.status === 'available' ? 'updates:download' : 'updates:check';
     void desktop.invoke(channel, {}).catch(() => {});
@@ -34,9 +34,11 @@ export function UpdateRow() {
     <span className="sr-only" aria-live="polite" aria-atomic="true">{state?.status === 'downloading' ? tr('updates:download_progress') : label}</span>
     {label && <div className="update-row" data-testid="update-row">
       {<Button variant="ghost" onClick={action} aria-label={state?.status === 'downloading' ? tr('updates:download_progress') : label} title={label}
-          aria-disabled={snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading'}>
+          aria-disabled={snapshot?.waiting || snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading'}>
           <RefreshCw aria-hidden="true" /><span>{label}</span>
         </Button>}
+      {snapshot?.waiting && <Button variant="link" size="sm"
+        onClick={() => void desktop.invoke('updates:cancel', {})}>{tr('common:cancel')}</Button>}
       {state?.status === 'available' && <Button variant="link" size="icon-sm" aria-label={tr('updates:notes')} title={tr('updates:notes')}
         onClick={() => void desktop.invoke('updates:notes', {})}><FileText aria-hidden="true" /></Button>}
       {(state?.status === 'error' || snapshot?.installError) && <Button variant="link" size="sm" onClick={action}>

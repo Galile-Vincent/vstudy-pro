@@ -24,5 +24,9 @@
   "download_progress": "更新をダウンロード中",
   "unavailable": "このビルドでは自動更新を利用できません。",
   "continue": "続ける",
-  "install_failed": "インストールが開始されませんでした。再試行してください。"
+  "install_failed": "インストールが開始されませんでした。再試行してください。",
+  "waiting": "作業の完了を待っています",
+  "work_active": "作業がまだ実行中です",
+  "not_now": "後で",
+  "restart_now": "作業を停止して今すぐ再起動"
 }

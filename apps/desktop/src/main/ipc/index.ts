@@ -1,3 +1,4 @@
+import {storageWorkRevision, waitForStorageRequests} from '../storage/maintenance';
 import { WebChats } from '../web-chat/views';
 import { getReviewAdmission } from '../review/admission';
 import { installReviewAdmission } from '../review/admission-port';
@@ -31,7 +32,7 @@ import { registerStorageIpc } from "./storage";
 import { applyNativeTheme } from '../theme';
 import { registerMoodleIpc } from './moodle';
 import { showAttachedMessage, ownerWindow } from '../dialogs';
-import { disposeSearchWorkers } from '../services/search-runner';
+import { waitForSearchWorkers, disposeSearchWorkers } from '../services/search-runner';
 import { disposeDiscovery } from '../providers/models';
 import { networkActivity, recordEgress } from '../services/egress';
 import { ExecutablePins, setExecutablePins } from '../providers/executable-pins';
@@ -102,28 +103,43 @@ export function registerIpc(
   });
   if (updates) {
     for (const channel of ['updates:state', 'updates:check', 'updates:download',
-      'updates:install', 'updates:setAuto', 'updates:notes'] as const) implemented.add(channel);
+      'updates:install', 'updates:cancel', 'updates:setAuto', 'updates:notes'] as const) implemented.add(channel);
     registrar.handle('updates:state', (_request, event) => {
       for (const prior of updateOwners) if (prior.sender === event.sender) updateOwners.delete(prior);
       updateOwners.add(event); return updates.snapshot();
     });
     registrar.handle('updates:check', () => updates.check());
     const updateConsent = async (event:IpcMainInvokeEvent, action:'download' | 'install') => {
+      const detail = tr('updates:confirm_detail');
       const result = await showAttachedMessage({type:'question',message:tr(`updates:confirm_${action}`),
-        detail:tr('updates:confirm_detail'),buttons:[tr('common:cancel'),tr('updates:continue')],
+        detail,buttons:[tr('common:cancel'),tr('updates:continue')],
         defaultId:0,cancelId:0}, event.sender);
       return result.response === 1 && !event.sender.isDestroyed();
     };
     registrar.handle('updates:download', async (_request,event) =>
       await updateConsent(event,'download') ? updates.download() : updates.snapshot());
+    registrar.handle('updates:cancel', () => updates.cancelWait());
     let installing = false;
     registrar.handle('updates:install', async (_request,event) => {
       if (installing || updates.snapshot().installing || updates.snapshot().state.status !== 'ready') return updates.snapshot();
       installing = true;
       try {
         if (!await updateConsent(event,'install')) return updates.snapshot();
-        await disposeMoodle.waitForIdle(); await chat.waitForIdle();
-        await disposeDocuments.waitForIdle(); await disposeLibrary.waitForIdle();
+        const proceed = await updates.waitForWork(async () => {
+          let revision: number;
+          do {
+            revision = storageWorkRevision();
+            await waitForStorageRequests();
+            await Promise.all([disposeMoodle.waitForIdle(), chat.waitForIdle(),
+              disposeDocuments.waitForIdle(), disposeLibrary.waitForIdle(),
+              reviewWorkers.waitForIdle(), waitForSearchWorkers()]);
+          } while (revision !== storageWorkRevision());
+        }, async () => {
+          const result = await showAttachedMessage({type:'warning', message:tr('updates:work_active'),
+            buttons:[tr('updates:not_now'), tr('updates:restart_now')], defaultId:0, cancelId:0}, event.sender);
+          return result.response === 1 && !event.sender.isDestroyed();
+        });
+        if (!proceed) return updates.snapshot();
         return updates.install();
       } finally { installing = false; }
     });

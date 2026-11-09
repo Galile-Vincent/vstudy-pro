@@ -13,6 +13,7 @@ export const updateStateSchema = z.discriminatedUnion('status', [
 export type UpdateState = z.infer<typeof updateStateSchema>;
 export const updateSnapshotSchema = z.object({ state: updateStateSchema,
   installing: z.boolean().optional(),
+  waiting: z.boolean().optional(),
   installError: z.boolean().optional(),
   result: z.enum(['current', 'checked', 'offline', 'cooldown']).optional(),
   currentVersion: z.string(), lastCheckedAt: z.number().nullable(), automatic: z.boolean() }).strict();
@@ -22,6 +23,7 @@ export const updatesContract = {
   'updates:state': { request: empty, response: updateSnapshotSchema },
   'updates:check': { request: empty, response: updateSnapshotSchema },
   'updates:download': { request: empty, response: updateSnapshotSchema },
+  'updates:cancel': { request: empty, response: updateSnapshotSchema },
   'updates:install': { request: empty, response: updateSnapshotSchema },
   'updates:setAuto': { request: z.object({ enabled: z.boolean() }).strict(), response: updateSnapshotSchema },
   'updates:notes': { request: empty, response: z.object({ ok: z.literal(true) }).strict() },

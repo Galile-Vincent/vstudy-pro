@@ -39,7 +39,7 @@ vi.mock('../mcp/runtime',()=>({createMcpRuntime:(options:{backend:()=>unknown})=
   return {restore:vi.fn(),dispose:vi.fn()};
 }}));
 vi.mock('../services/export-file',()=>({exportText:mocks.write}));
-vi.mock('../services/search-runner',()=>({disposeSearchWorkers:vi.fn()}));
+vi.mock('../services/search-runner',()=>({disposeSearchWorkers:vi.fn(),waitForSearchWorkers:vi.fn(async()=>{})}));
 vi.mock('../providers/models',()=>({disposeDiscovery:vi.fn()}));
 
 const stores:ReturnType<typeof openStore>[]=[];
@@ -109,7 +109,8 @@ it('wires all update channels, filters push owners, confirms notes and protects 
   let listener: (value:unknown)=>void=()=>{};
   const updates={snapshot:()=>snapshot,subscribe:vi.fn(fn=>{listener=fn;return ()=>{};}),
     check:vi.fn(()=>snapshot),download:vi.fn(()=>snapshot),install:vi.fn(()=>snapshot),
-    setAuto:vi.fn(()=>snapshot),dispose:vi.fn()};
+    waitForWork:vi.fn(async (work:()=>Promise<void>)=>{await work();return true;}),
+    cancelWait:vi.fn(()=>snapshot),setAuto:vi.fn(()=>snapshot),dispose:vi.fn()};
   const frame={url:'app://index'};
   const sender={id:1,mainFrame:frame,isDestroyed:()=>false,send:vi.fn()};
   let trusted=true;
@@ -117,7 +118,7 @@ it('wires all update channels, filters push owners, confirms notes and protects 
   const dispose=registerIpc(store,{} as SecretStore,()=>trusted,async()=>undefined,{updates:updates as never});
   const handlers=new Map(vi.mocked(ipcMain.handle).mock.calls);
   try {
-    const channels=['state','check','download','install','setAuto','notes'];
+    const channels=['state','check','download','install','cancel','setAuto','notes'];
     for(const channel of channels)expect(handlers.has(`updates:${channel}`)).toBe(true);
     await handlers.get('updates:state')!(event as never,{});
     listener(snapshot);expect(sender.send).toHaveBeenCalledWith('updates:state',snapshot);
@@ -132,11 +133,21 @@ it('wires all update channels, filters push owners, confirms notes and protects 
     await handlers.get('updates:download')!(event as never,{});expect(updates.download).not.toHaveBeenCalled();
     snapshot.state={status:'ready',version:'0.4.5'} as typeof snapshot.state;
     await handlers.get('updates:install')!(event as never,{});expect(updates.install).not.toHaveBeenCalled();
-    mocks.confirm.mockResolvedValue({response:1});
+    const dialogs = mocks.confirm.mock.calls.length;
+    let consent: (value:{response:number})=>void = ()=>{};
+    mocks.confirm.mockImplementationOnce(()=>new Promise(resolve=>{consent=resolve;}));
     let finish=()=>{};const drain=new Promise<void>(resolve=>{finish=resolve;});
     mocks.idle.mockImplementationOnce(()=>drain);
     const installing=handlers.get('updates:install')!(event as never,{});
     await Promise.resolve();expect(updates.install).not.toHaveBeenCalled();
+    await handlers.get('updates:install')!(event as never,{});
+    expect(mocks.confirm).toHaveBeenCalledTimes(dialogs+1);
+    const {exclusiveStorage}=await import('../storage/maintenance');
+    await expect(exclusiveStorage(async()=>{},async()=>true)).resolves.toBe(true);
+    consent({response:1});
+    await Promise.resolve();await Promise.resolve();
+    await handlers.get('updates:install')!(event as never,{});
+    expect(updates.waitForWork).toHaveBeenCalledOnce();
     finish();await installing;expect(mocks.idle).toHaveBeenCalledTimes(4);
     expect(updates.install).toHaveBeenCalledOnce();
     store.settings.set({autoCheckUpdates:false});

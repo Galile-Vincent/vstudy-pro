@@ -1,3 +1,4 @@
+import {waitForUpdateWork} from './wait';
 import { recordEgress } from '../services/egress';
 import type { AppUpdater } from 'electron-updater';
 import type { UpdateSnapshot, UpdateState } from '../../shared/updates';
@@ -14,6 +15,8 @@ export class Updates {
   private manual = false;
   private checkFailed = false;
   private installing = false;
+  private waiting = false;
+  private waitAbort: AbortController | undefined;
   private installError = false;
   private installTimer: ReturnType<typeof setTimeout> | undefined;
   private quietState: UpdateState | undefined;
@@ -78,7 +81,7 @@ export class Updates {
     return this.automatic;
   }
   snapshot = (): UpdateSnapshot => ({state:this.state.status === 'checking' && this.quietState ? this.quietState : this.state, currentVersion:this.options.version,
-    lastCheckedAt:this.lastCheckedAt, automatic:this.automaticEnabled(), installing:this.installing, installError:this.installError, ...(this.result ? {result:this.result} : {})});
+    lastCheckedAt:this.lastCheckedAt, automatic:this.automaticEnabled(), installing:this.installing, waiting:this.waiting, installError:this.installError, ...(this.result ? {result:this.result} : {})});
   subscribe(listener: (snapshot: UpdateSnapshot) => void) {
     this.listeners.add(listener); return () => { this.listeners.delete(listener); };
   }
@@ -139,6 +142,16 @@ export class Updates {
     void this.updater.downloadUpdate().catch(error => this.dispatch({type:'error', code:updateError(error)}));
     return this.snapshot();
   }
+  cancelWait() { this.waitAbort?.abort(); return this.snapshot(); }
+  async waitForWork(work: () => Promise<void>, confirm: () => Promise<boolean>) {
+    this.waitAbort = new AbortController(); this.waiting = true; this.emit();
+    try {
+      const result = await waitForUpdateWork(work, this.waitAbort.signal);
+      if (result === 'cancelled') return false;
+      if (result === 'timeout') return await confirm() && !this.waitAbort.signal.aborted;
+      return true;
+    } finally { this.waiting = false; this.waitAbort = undefined; this.emit(); }
+  }
   private installFailed() {
     clearTimeout(this.installTimer);
     this.updater.cancelInstall?.();
@@ -160,6 +173,7 @@ export class Updates {
   }
   dispose() {
     this.disposed = true;
+    this.waitAbort?.abort();
     clearTimeout(this.installTimer);
     clearTimeout(this.timer); clearInterval(this.interval); clearInterval(this.monitor);
     for (const [name, callback] of this.events) this.updater.removeListener(name, callback);
