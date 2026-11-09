@@ -110,3 +110,32 @@ it.each([700, 900, 1280])('shares shortcut and toggle state at %ipx', async widt
   await act(async () => toggle.click());
   expect(toggle.getAttribute('aria-expanded')).toBe(initial);
 });
+
+it('anchors overlays below the tabs and restores a visible workspace toggle', async () => {
+  const style = document.createElement('style');
+  style.textContent = '.shell-sidebar { position:absolute; }';
+  document.head.append(style);
+  const rects = vi.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(function (this: HTMLElement) {
+    return (this.classList.contains('shell-toggle') ? [] : [{}]) as unknown as DOMRectList;
+  });
+  const bounds = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+    return { bottom: this.classList.contains('app-tabs') ? 49 : 0 } as DOMRect;
+  });
+  try {
+    await mount();
+    const toggle = host.querySelector<HTMLButtonElement>('.shell-toggle')!;
+    const header = document.createElement('header');
+    header.className = 'app-header';
+    const workspace = document.createElement('div');
+    workspace.className = 'workspace';
+    const visibleToggle = document.createElement('button');
+    visibleToggle.setAttribute('aria-label', toggle.getAttribute('aria-label')!);
+    header.append(visibleToggle); workspace.append(header); host.append(workspace);
+    await act(async () => toggle.click());
+    expect(host.querySelector<HTMLElement>('.shell-sidebar')!.style.getPropertyValue('--sidebar-overlay-top')).toBe('49px');
+    visibleToggle.focus();
+    await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })));
+    expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(true);
+    expect(document.activeElement).toBe(visibleToggle);
+  } finally { style.remove(); rects.mockRestore(); bounds.mockRestore(); }
+});

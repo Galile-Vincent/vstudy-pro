@@ -202,7 +202,7 @@ html[data-reduced-transparency=true] { --art-reader-glass:var(--surface); }
 .app-shell .library-results[data-view=grid] .document-card:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 @media(prefers-reduced-motion:reduce) { .app-shell .library-results[data-view=grid] .document-card { transition:none; } .app-shell .library-results[data-view=grid] .document-card:hover,.app-shell .library-results[data-view=grid] .document-card:active { transform:none; } }
 
-@media(max-width:1199px) { .app-shell[data-view=workspace] .shell-sidebar:not([hidden]) { position:absolute; z-index:40; inset:0 auto 0 0; width:var(--sidebar-width); background:var(--sidebar-surface); box-shadow:var(--glass-shadow-float); } }
+@media(max-width:1199px) { .app-shell[data-view=workspace]:not([data-sidebar-overlay=true]) .shell-sidebar:not([hidden]) { position:absolute; z-index:40; inset:0 auto 0 0; width:var(--sidebar-width); background:var(--sidebar-surface); box-shadow:var(--glass-shadow-float); } }
 html[data-theme=contrast] .art-reader-cover::after { display:none; }
 @media(max-height:780px) {
   .art-reader-welcome { padding-block:var(--space-2) var(--space-3); }
