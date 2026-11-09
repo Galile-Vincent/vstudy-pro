@@ -90,10 +90,10 @@
   "deletePartial": "{{succeeded}} of {{total}} deleted, {{failed}} failed: {{reasons}}",
   "movePartial": "{{succeeded}} of {{total}} moved, {{failed}} failed: {{reasons}}",
   "folder_missing": "Folder not found",
-  "dateRangeInvalid": "Added after must be on or before Added before.",
+  "dateRangeInvalid": "“Added after” must be on or before “Added before”.",
   "undo": "Undo",
   "deleted": "{{formatted}} documents deleted · Undo within 30 seconds",
-  "moved": "Documents moved · Undo within 30 seconds",
+  "moved": "{{formatted}} documents moved · Undo within 30 seconds",
   "open": "Open",
   "tag": "Tag…",
   "reveal": "Reveal in Finder",
@@ -217,5 +217,8 @@
   "document_missing": "Document not found. It may have been permanently deleted.",
   "recoveryDeleted": "{{name}} deleted · Undo within 30 seconds",
   "recoveryMoved": "{{name}} moved · Undo within 30 seconds",
-  "recoveryCount": "{{count}} documents"
+  "recoveryCount": "{{count}} documents",
+  "moved_one": "{{formatted}} document moved · Undo within 30 seconds",
+  "moved_other": "{{formatted}} documents moved · Undo within 30 seconds",
+  "recoveryAction": "Action {{number}}"
 }

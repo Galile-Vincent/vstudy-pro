@@ -90,10 +90,10 @@
   "deletePartial": "已刪除 {{succeeded}} / {{total}} 份，{{failed}} 份失敗：{{reasons}}",
   "movePartial": "已移動 {{succeeded}} / {{total}} 份，{{failed}} 份失敗：{{reasons}}",
   "folder_missing": "找不到資料夾",
-  "dateRangeInvalid": "新增起日必須早於或等於新增迄日。",
+  "dateRangeInvalid": "「加入日期起」必須早於或等於「加入日期迄」。",
   "undo": "復原",
   "deleted": "已刪除 {{formatted}} 份文件，30 秒內可復原",
-  "moved": "已移動文件，30 秒內可復原",
+  "moved": "已移動 {{formatted}} 份文件 · 30 秒內可復原",
   "open": "開啟",
   "tag": "加上標籤…",
   "reveal": "在 Finder 中顯示",
@@ -217,5 +217,8 @@
   "document_missing": "找不到文件，可能已永久刪除。",
   "recoveryDeleted": "已刪除「{{name}}」· 30 秒內可復原",
   "recoveryMoved": "已移動「{{name}}」· 30 秒內可復原",
-  "recoveryCount": "{{count}} 份文件"
+  "recoveryCount": "{{count}} 份文件",
+  "moved_one": "已移動 {{formatted}} 份文件 · 30 秒內可復原",
+  "moved_other": "已移動 {{formatted}} 份文件 · 30 秒內可復原",
+  "recoveryAction": "操作 {{number}}"
 }

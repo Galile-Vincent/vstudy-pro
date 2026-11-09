@@ -313,7 +313,11 @@ export function LibraryView() {
     }
   }, [loading]);
   const recoveries = useSyncExternalStore(recovery.subscribe, recovery.snapshot);
-  const recoveryNotice = recoveries.at(-1)?.message ?? "";
+  const latestRecovery = recoveries.at(-1);
+  const recoveryNotice = latestRecovery ? tr(latestRecovery.key, {
+    ...latestRecovery.params,
+    name: latestRecovery.params.title ?? tr('library:recoveryCount', latestRecovery.params),
+  }) : '';
   const focusAfter = useRef<string | null>(null);
   const [activeRow, setActiveRow] = useState<string>();
   const tabRow = shown.some(item => item.document.id === activeRow) ? activeRow : shown[0]?.document.id;
@@ -404,18 +408,19 @@ export function LibraryView() {
           failures.push(`${title}: ${errorText(error)}`);
         }
       }
-      if (restored.length) recovery.add(tr('library:recoveryDeleted', {
-        name: restored.length === 1
-          ? items.find(item => item.document.id === restored[0])?.document.title ?? restored[0]
-          : tr('library:recoveryCount', {count: restored.length}),
-      }), async () => {
+      if (restored.length) recovery.add('library:recoveryDeleted', async () => {
         try {
           const results = await Promise.allSettled(restored.map(documentId =>
             desktop.invoke('library:documents:restore', {documentId})));
           const failure = results.find(result => result.status === 'rejected');
           if (failure?.status === 'rejected') throw failure.reason;
         } finally { changed(); }
-      }, deadline);
+      }, deadline, {
+        count: restored.length,
+        title: restored.length === 1
+          ? items.find(item => item.document.id === restored[0])?.document.title ?? restored[0]
+          : undefined,
+      });
       setNotice(failures.length ? tr("library:deletePartial", {
         succeeded: format.number(deleted), total: format.number(targets.length),
         failed: format.number(failures.length), reasons: failures.join("; "),
@@ -453,10 +458,7 @@ export function LibraryView() {
         failures.push(`${item.document.title}: ${errorText(error)}`);
       }
     }
-    if (restored.length) recovery.add(tr('library:recoveryMoved', {
-      name: restored.length === 1 ? restored[0]!.document.title
-        : tr('library:recoveryCount', {count: restored.length}),
-    }), async () => {
+    if (restored.length) recovery.add('library:recoveryMoved', async () => {
       try {
         const results = await Promise.allSettled(restored.map(item =>
           desktop.invoke('library:documents:move', {
@@ -465,7 +467,10 @@ export function LibraryView() {
         const failure = results.find(result => result.status === 'rejected');
         if (failure?.status === 'rejected') throw failure.reason;
       } finally { changed(); }
-    }, deadline);
+    }, deadline, {
+      count: restored.length,
+      title: restored.length === 1 ? restored[0]!.document.title : undefined,
+    });
     moveItems.current = remaining;
     setNotice(failures.length ? tr("library:movePartial", {
       succeeded: format.number(moved), total: format.number(targets.length),
@@ -567,6 +572,7 @@ export function LibraryView() {
         {dateError ? tr('library:dateRangeInvalid') : notice || recoveryNotice || tr('library:loaded', {
           count: items.length, formatted: format.number(items.length),
         })}
+        {!dateError && !notice && latestRecovery && ` · ${tr('library:recoveryAction', {number: latestRecovery.sequence})}`}
       </div>
   );
   return (

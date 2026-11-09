@@ -90,10 +90,10 @@
   "deletePartial": "{{total}} 件中 {{succeeded}} 件削除、{{failed}} 件失敗: {{reasons}}",
   "movePartial": "{{total}} 件中 {{succeeded}} 件移動、{{failed}} 件失敗: {{reasons}}",
   "folder_missing": "フォルダーが見つかりません",
-  "dateRangeInvalid": "追加開始日は追加終了日以前にしてください。",
+  "dateRangeInvalid": "「追加日（開始）」は「追加日（終了）」以前にしてください。",
   "undo": "元に戻す",
   "deleted": "{{formatted}} 件を削除しました。30 秒以内に元に戻せます",
-  "moved": "移動しました。30 秒以内に元に戻せます",
+  "moved": "{{formatted}}件のドキュメントを移動しました · 30秒以内に元に戻せます",
   "open": "開く",
   "tag": "タグを付ける…",
   "reveal": "Finder で表示",
@@ -217,5 +217,8 @@
   "document_missing": "ドキュメントが見つかりません。完全に削除された可能性があります。",
   "recoveryDeleted": "「{{name}}」を削除しました · 30秒以内に元に戻せます",
   "recoveryMoved": "「{{name}}」を移動しました · 30秒以内に元に戻せます",
-  "recoveryCount": "{{count}}件のドキュメント"
+  "recoveryCount": "{{count}}件のドキュメント",
+  "moved_one": "{{formatted}}件のドキュメントを移動しました · 30秒以内に元に戻せます",
+  "moved_other": "{{formatted}}件のドキュメントを移動しました · 30秒以内に元に戻せます",
+  "recoveryAction": "操作 {{number}}"
 }

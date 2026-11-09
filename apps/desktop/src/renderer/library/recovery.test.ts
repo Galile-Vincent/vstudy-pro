@@ -5,7 +5,7 @@ it('expires the first recovery without extending it when another is added',async
  vi.useFakeTimers();const first=vi.fn(),second=vi.fn();
  recovery.add('first',first);vi.advanceTimersByTime(20000);
  recovery.add('second',second);vi.advanceTimersByTime(10000);
- expect(recovery.snapshot().map(entry=>entry.message)).toEqual(['second']);
+ expect(recovery.snapshot().map(entry=>entry.key)).toEqual(['second']);
  await recovery.undo();expect(second).toHaveBeenCalledOnce();expect(first).not.toHaveBeenCalled();
  expect(recovery.snapshot()).toEqual([]);
 });

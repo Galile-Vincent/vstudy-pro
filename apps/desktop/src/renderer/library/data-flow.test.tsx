@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testi
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
-import { tr } from '../../shared/i18n';
+import { i18n, tr } from '../../shared/i18n';
 const state=vi.hoisted(()=>({invoke:vi.fn(),route:{view:'library',query:{}}}));
 vi.mock('../bridge',()=>({desktop:{invoke:state.invoke}}));
 vi.mock('../shell',()=>({useNavigate:()=>({route:state.route,navigate:vi.fn()})}));
@@ -159,3 +159,13 @@ it('keeps one persistent live region through the move dialog',async()=>{
 });
 
 beforeEach(() => recovery.reset());
+
+it('translates an existing recovery when the language changes',async()=>{
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[row('first')],nextCursor:null}:[]);
+ mount();fireEvent.click((await screen.findByText('first')).closest('.library-document')!);
+ fireEvent.click(screen.getByRole('button',{name:tr('library:delete')}));
+ await screen.findByRole('button',{name:/Undo.*first/});
+ await act(async()=>{await i18n.changeLanguage('ja');});
+ expect(document.querySelector('.library-toast')?.textContent).toContain('を削除しました');
+ await act(async()=>{await i18n.changeLanguage('en');});
+});
