@@ -114,5 +114,6 @@
   "delete_failed_busy": "無法刪除應用程式資料：檔案使用中，請關閉其他程式後重試。",
   "delete_failed_files": "無法移除所有應用程式資料檔案，請確認磁碟空間後重試。",
   "remove_key_title": "移除 {{name}} 的金鑰？",
-  "remove_key_copy": "您需要重新輸入金鑰才能使用此服務。"
+  "remove_key_copy": "您需要重新輸入金鑰才能使用此服務。",
+  "provider_action": "{{action}} — {{name}}"
 }

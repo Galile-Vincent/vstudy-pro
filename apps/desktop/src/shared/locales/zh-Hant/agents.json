@@ -139,5 +139,6 @@
   "waiting": "等待您的回應",
   "review": "檢視",
   "dismiss": "忽略",
-  "revoke_done": "已撤銷 {{name}} 的存取權。"
+  "revoke_done": "已撤銷 {{name}} 的存取權。",
+  "client_action": "{{action}} — {{name}}"
 }

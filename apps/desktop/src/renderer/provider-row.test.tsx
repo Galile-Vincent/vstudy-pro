@@ -51,3 +51,10 @@ it('asks before deleting a saved key', async () => {
   expect(document.querySelector('[role=dialog]')).toBeTruthy();
  } finally {await act(() => root.unmount());host.remove();}
 });
+it('names provider actions with the provider', async () => {
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ try {
+  await act(() => root.render(<ProviderRow provider={{config:{kind:'api',id:'openai-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>));
+  expect([...host.querySelectorAll('button')].find(b=>b.textContent==='Get a key')?.getAttribute('aria-label')).toContain('OpenAI');
+ } finally {await act(() => root.unmount());host.remove();}
+});

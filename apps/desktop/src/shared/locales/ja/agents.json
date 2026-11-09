@@ -139,5 +139,6 @@
   "waiting": "確認待ち",
   "review": "確認",
   "dismiss": "閉じる",
-  "revoke_done": "{{name}} のアクセスを取り消しました。"
+  "revoke_done": "{{name}} のアクセスを取り消しました。",
+  "client_action": "{{action}} — {{name}}"
 }

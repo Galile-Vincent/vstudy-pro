@@ -53,8 +53,8 @@ export function AgentGrants() {
     {!grants.length && <p className="agents-muted">{tr('agents:no_grants')}</p>}
     {grants.map(grant => <article className="agents-card" data-grant-id={grant.id} key={grant.id}>
       <header className="agents-card-header"><h4>{grant.clientName}</h4><span className="agents-badge">{tr(`agents:${grant.revokedAt ? 'revoked' : Date.parse(grant.expiresAt) <= Date.now() ? 'expired' : 'active'}`)}</span>{!grant.revokedAt && <div className="agents-actions">
-        <Button size="sm" variant="secondary" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => setEditing(grant.id)}>{tr('agents:edit')}</Button>
-        <Button size="sm" variant="ghost" className="agents-danger" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => void agents.act('mcp:revoke', { grantId: grant.id }).then(ok => {if (ok) setMessage(tr('agents:revoke_done',{name:grant.clientName}));})}>{tr('agents:revoke')}</Button>
+        <Button aria-label={tr('agents:client_action',{action:tr('agents:edit'),name:grant.clientName})} size="sm" variant="secondary" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => setEditing(grant.id)}>{tr('agents:edit')}</Button>
+        <Button aria-label={tr('agents:client_action',{action:tr('agents:revoke'),name:grant.clientName})} size="sm" variant="ghost" className="agents-danger" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => void agents.act('mcp:revoke', { grantId: grant.id }).then(ok => {if (ok) setMessage(tr('agents:revoke_done',{name:grant.clientName}));})}>{tr('agents:revoke')}</Button>
       </div>}</header>
       <dl className="agents-details">
         <div><dt>{tr('agents:client_id')}</dt><dd><code>{grant.clientId}</code></dd></div>

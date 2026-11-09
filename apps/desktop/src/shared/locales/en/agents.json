@@ -139,5 +139,6 @@
   "waiting": "Waiting for you",
   "review": "Review",
   "dismiss": "Dismiss",
-  "revoke_done": "Access revoked for {{name}}."
+  "revoke_done": "Access revoked for {{name}}.",
+  "client_action": "{{action}} — {{name}}"
 }
