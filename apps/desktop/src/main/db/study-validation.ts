@@ -82,7 +82,7 @@ export function validateStudyData(db:DatabaseSync):void {
    }
   });
   check('study_attempt_drafts',row=>{
-   const draft=z.object({attemptId:id,itemId:text,draftJson:z.string(),updatedAt:at}).strict().parse(row);
+   const draft=z.object({attemptId:id,itemId:text,draftJson:z.string(),updatedAt:at,seq:z.number().int().nonnegative()}).strict().parse(row);
    const attempt=db.prepare('SELECT artifactId FROM study_attempts WHERE id=?').get(draft.attemptId);
    const item=attempt&&tests.get(String(attempt.artifactId))?.items.find(item=>item.id===draft.itemId);
    if(!item||!isStudyAnswer(item,json(draft.draftJson,8192)))throw new Error('invalid draft');

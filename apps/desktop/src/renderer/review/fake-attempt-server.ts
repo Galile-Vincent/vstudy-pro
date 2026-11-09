@@ -14,12 +14,12 @@ export const fakeArtifact = (exam: boolean) => ({ id: 'artifact', courseId: exam
 export type FakeAttemptServer = ReturnType<typeof fakeAttemptServer>;
 
 export function fakeAttemptServer(options: { commitFailures?: number; draftFailures?: number; failures?: Record<string, number> } = {}) {
- const state = { answers: {} as Record<string, Answer>, drafts: {} as Record<string, Answer>, graded: {} as Record<string, boolean>, commitFailures: options.commitFailures ?? 0, draftFailures: options.draftFailures ?? 0 };
+ const state = { answers: {} as Record<string, Answer>, drafts: {} as Record<string, Answer>, draftSeqs: {} as Record<string, number>, graded: {} as Record<string, boolean>, commitFailures: options.commitFailures ?? 0, draftFailures: options.draftFailures ?? 0 };
  const calls: Array<{ channel: string; request: Request }> = [];
  const failures = { ...options.failures };
  const view = () => ({
   id: 'attempt', artifactId: 'artifact', phase: Object.keys(state.graded).length === fakeTest.items.length ? 'graded' : 'answering',
-  answers: { ...state.answers }, drafts: { ...state.drafts }, startedAt: '2026-11-08T00:00:00.000Z', committedAt: null, confirmedAt: null,
+  answers: { ...state.answers }, drafts: { ...state.drafts }, draftSeqs: { ...state.draftSeqs }, startedAt: '2026-11-08T00:00:00.000Z', committedAt: null, confirmedAt: null,
   results: fakeTest.items.map(item => ({ itemId: item.id, conceptKey: item.conceptKey, correct: item.id in state.graded ? state.graded[item.id]! : null, reportedBad: false, ...(item.id in state.graded ? { feedback: item } : {}) })),
  });
  const invoke = async (channel: string, request: Request = {}) => {
@@ -30,15 +30,21 @@ export function fakeAttemptServer(options: { commitFailures?: number; draftFailu
    case 'review:attempt:start': return { id: 'attempt' };
    case 'review:attempt:answer':
     if (itemId in state.graded) throw new Error('review.answers_locked');
-    state.answers[itemId] = request.answer as Answer; delete state.drafts[itemId]; return view();
-   case 'review:attempt:draft':
+    state.answers[itemId] = request.answer as Answer; delete state.drafts[itemId]; delete state.draftSeqs[itemId]; return view();
+   case 'review:attempt:draft': {
     if (state.draftFailures > 0) { state.draftFailures--; throw new Error('offline'); }
-    if (!(itemId in state.graded)) state.drafts[itemId] = request.answer as Answer;
+    if (!fakeTest.items.some(item => item.id === itemId)) throw new Error('review.item_unavailable');
+    if (view().phase !== 'answering' || itemId in state.graded) return view();
+    const seq = typeof request.seq === 'number' ? request.seq : undefined;
+    if (seq !== undefined && seq < (state.draftSeqs[itemId] ?? -1)) return view();
+    if (seq !== undefined) state.draftSeqs[itemId] = seq;
+    if (request.answer === null) delete state.drafts[itemId]; else state.drafts[itemId] = request.answer as Answer;
     return view();
+   }
    case 'review:attempt:commit': {
     if (state.commitFailures > 0) { state.commitFailures--; throw new Error('offline'); }
     const item = fakeTest.items.find(candidate => candidate.id === itemId)!;
-    state.graded[itemId] = state.answers[itemId] === item.answer; delete state.drafts[itemId];
+    state.graded[itemId] = state.answers[itemId] === item.answer; delete state.drafts[itemId]; delete state.draftSeqs[itemId];
     return view();
    }
    case 'review:concepts:list': return { items: [], nextCursor: null };

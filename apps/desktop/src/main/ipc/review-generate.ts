@@ -124,7 +124,7 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
     registrar.handle('review:attempt:get', ({attemptId}) => attempts.get(attemptId));
     registrar.handle('review:attempt:start', ({ artifactId }) => attempts.start(artifactId));
     registrar.handle('review:attempt:answer', ({ attemptId, itemId, answer }) => attempts.answer(attemptId, itemId, answer));
-    registrar.handle('review:attempt:draft', ({ attemptId, itemId, answer }) => attempts.saveDraft(attemptId, itemId, answer));
+    registrar.handle('review:attempt:draft', ({ attemptId, itemId, answer, seq }) => attempts.saveDraft(attemptId, itemId, answer, seq));
     registrar.handle('review:attempt:commit', ({ attemptId, itemId }) => attempts.commit(attemptId, itemId));
     registrar.handle('review:attempt:confirm', ({ attemptId }) => attempts.confirm(attemptId));
     registrar.handle('review:attempt:report-bad', ({ attemptId, itemId }) => attempts.reportBad(attemptId, itemId));

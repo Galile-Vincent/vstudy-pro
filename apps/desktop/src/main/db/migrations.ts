@@ -116,4 +116,5 @@ export const migrations = [
       FOREIGN KEY(attemptId,itemId) REFERENCES study_attempt_items(attemptId,itemId) ON DELETE CASCADE
     );
   ` },
+  { version:28, sql:`ALTER TABLE study_attempt_drafts ADD COLUMN seq INTEGER NOT NULL DEFAULT 0 CHECK(seq>=0);` },
 ];
