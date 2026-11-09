@@ -95,7 +95,7 @@ export function AppearanceSection() {
     <Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
       <SettingRow label={tr('themes:cardTransparency')} description={tr('themes:cardTransparency_hint')}>
         <SegmentedControl aria-label={tr('themes:cardTransparency')} value={settings.cardTransparency}
-          onValueChange={value => { if (value) void update({cardTransparency:value as Settings['cardTransparency'],material:value === 'solid' ? 'solid' : 'glass'}); }}
+          onValueChange={value => { if (value) void update({cardTransparency:value as Settings['cardTransparency']}); }}
           options={(['solid','soft','glass'] as const).map(value => ({value,label:tr(`themes:card_${value}`)}))} />
       </SettingRow>
       {slider('contrast')}
