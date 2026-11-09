@@ -6,35 +6,10 @@
 fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default; }
 .exam-footer { position:sticky; inset-block-end:0; z-index:1; display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:var(--space-3); padding:var(--space-4); border-radius:var(--r-md); background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
 @media (prefers-contrast:more),(forced-colors:active) { .exam-choice:has(:checked) { outline:thin solid var(--ink); } }
-.exam-active-artifact {
-  min-width: 0;
-}
-.exam-artifact-toolbar {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-.exam-artifact-toolbar h2 {
-  font-size: var(--type-lg);
-  font-weight: 500;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-.exam-player {
-  display: grid;
-  gap: 24px;
-}
+.exam-player { display:grid; gap:var(--space-6); overflow-wrap:anywhere; }
 .exam-player h3:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 4px;
-}
-.exam-player h3,
-.exam-player h4,
-.exam-player h5,
-.exam-player h6 {
-  margin: 0;
 }
 .exam-player h4 {
   font-size: var(--type-base);
@@ -49,121 +24,7 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
   align-items: center;
   gap: 6px;
 }
-.exam-progress-header {
-  display: grid;
-  gap: 12px;
-}
-.exam-progress-header > div:first-child {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-weight: 500;
-}
-.exam-progress-header > p {
-  margin: 0;
-}
-.exam-player [data-slot="progress"] {
-  height: 6px;
-  background: color-mix(in oklab, var(--ink) 9%, transparent);
-}
-.exam-player [data-slot="progress-indicator"] {
-  background: var(--accent-color);
-}
-.exam-question-stem {
-  font-size: clamp(1.15rem, 2vw, 1.45rem);
-  line-height: 1.5;
-  max-width: 65ch;
-  font-weight: 600;
-  padding-block: 8px;
-}
-.exam-answer-form {
-  display: grid;
-  gap: 16px;
-}
-.exams-view .exam-answer-form fieldset {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-.exam-answer-form legend {
-  font-size: var(--type-sm);
-  font-weight: 500;
-}
-.exam-answer-options {
-  display: grid;
-  gap: 10px;
-}
-.exam-option {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  min-height: 60px;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  background: var(--surface);
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    border-color 0.15s;
-}
-.exam-option:hover {
-  background: var(--subtle);
-}
-.exam-option[data-selected="true"] {
-  border-color: var(--accent-color);
-  background: color-mix(in oklab, var(--accent-color) 7%, var(--surface));
-}
-.exam-option input {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  accent-color: var(--accent-color);
-}
-.exam-option-letter {
-  color: var(--muted);
-  font-size: var(--type-sm);
-}
-.exam-option-check {
-  margin-inline-start: auto;
-  color: var(--accent-color);
-  flex-shrink: 0;
-}
-.exam-text-answer {
-  display: grid;
-  gap: 10px;
-  max-width: 520px;
-}
-.exam-input-unit {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.exam-input-unit input {
-  height: 46px;
-  background: var(--surface);
-}
-.exam-input-unit > span {
-  color: var(--muted);
-  white-space: nowrap;
-}
-.exam-commit-notice {
-  margin: 0;
-  max-width: 65ch;
-}
-.exam-answer-form > button {
-  justify-self: end;
-}
-.exam-player-navigation {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 20px;
-  border-top: 1px solid var(--hairline);
-}
+.exam-question-stem { font-size:var(--type-xl); font-weight:500; line-height:1.5; max-inline-size:65ch; }
 .exam-score-header {
   display: flex;
   align-items: center;
@@ -409,9 +270,6 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
     gap: 16px;
     padding: 16px;
   }
-  .exam-artifact-toolbar {
-    align-items: flex-start;
-  }
   .exam-history > li {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 16px;
@@ -423,13 +281,11 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
   }
 }
 @media (forced-colors: active) {
-  .exam-option[data-selected="true"],
   .exam-answer-state {
     border: 1px solid Highlight;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .exam-option,
   .exam-history > li {
     transition: none;
   }
@@ -445,7 +301,6 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
   button[data-slot="button"][data-variant="secondary"]:hover:not(:disabled) {
   background: var(--active);
 }
-
 .exam-source {
   color: var(--muted);
   font-size: var(--type-sm);
@@ -458,7 +313,6 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
   line-height: 1.6;
   color: var(--ink);
 }
-
 .exams-view button[data-slot="button"]:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--focus) 40%, transparent);
@@ -469,10 +323,5 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
     outline-offset: 3px;
   }
 }
-
-.exam-player { overflow-wrap:anywhere; }
-.exam-option > span:not(.exam-option-letter) { min-width:0; overflow-wrap:anywhere; }
 .exam-history-title { max-width:100%; overflow-wrap:anywhere; }
-.exam-answer-form fieldset:disabled .exam-option { opacity:.6; cursor:default; }
-
 .exam-item-feedback:focus-visible { outline:2px solid var(--focus); outline-offset:4px; }

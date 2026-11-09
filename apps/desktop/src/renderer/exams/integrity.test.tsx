@@ -84,3 +84,16 @@ it('keeps an unsent draft across a History round trip', async () => {
  expect(((await screen.findByLabelText(/Beta/)) as HTMLInputElement).checked).toBe(true);
  expect(server.called('review:attempt:commit')).toHaveLength(0);
 });
+
+it('keeps the title, progress and leave action in one toolbar and the commit notice beside submit', async () => {
+ bridge();
+ render(<ExamsView />);
+ fireEvent.click(screen.getByRole('button', { name: 'exams:history' }));
+ fireEvent.click(await screen.findByRole('button', { name: /Practice/ }));
+ await screen.findByRole('heading', { name: 'Question 1' });
+ const toolbar = screen.getByRole('heading', { level: 2, name: 'Practice' }).closest('[data-slot="toolbar"]')!;
+ expect(toolbar.contains(screen.getByRole('progressbar', { name: 'exams:progress' }))).toBe(true);
+ expect(toolbar.contains(screen.getByRole('button', { name: 'exams:back' }))).toBe(true);
+ const footer = screen.getByRole('button', { name: 'review:answer_next' }).closest('footer')!;
+ expect(footer.textContent).toContain('review:commit_notice');
+});

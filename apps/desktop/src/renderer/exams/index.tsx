@@ -13,6 +13,7 @@ import {
   PageContainer,
   PageHeader,
   Section,
+  Toolbar,
 } from "../components/ui";
 import { ExamHistory } from "./history";
 import { Textarea } from "../components/ui/textarea";
@@ -143,6 +144,19 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
     setArtifact(value);
     history.retry();
   };
+  const leave = (
+    <Button
+      variant="ghost"
+      disabled={busy}
+      onClick={() => {
+        setArtifact(null);
+        setMode("setup");
+        history.retry();
+      }}
+    >
+      {tr("exams:back")}
+    </Button>
+  );
   const ready = documents?.filter((d) => d.status === "ready") ?? [];
   return (
     <PageContainer as="main" className="exams-view">
@@ -342,29 +356,25 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
           </fieldset>
         </form>
       )}
-      {artifact && (
-        <article className="exam-active-artifact">
-          <div className="exam-artifact-toolbar">
-            <h2>{artifact.title}</h2>
-            <Button
-              variant="ghost"
-              disabled={busy}
-              onClick={() => {
-                setArtifact(null);
-                setMode("setup");
-                history.retry();
-              }}
-            >
-              {tr("exams:back")}
-            </Button>
-          </div>
-          {artifact.status === "ready" ? (
-            <TestPlayer
-              key={artifact.id}
-              artifact={artifact}
-              onRetake={() => {}}
-            />
-          ) : artifact.status === "generating" ? (
+      {artifact && artifact.status === "ready" && (
+        <TestPlayer
+          key={artifact.id}
+          artifact={artifact}
+          onRetake={() => {}}
+          actions={leave}
+        />
+      )}
+      {artifact && artifact.status !== "ready" && (
+        <>
+          <Toolbar
+            left={
+              <h2 className="text-[length:var(--type-lg)] font-medium">
+                {artifact.title}
+              </h2>
+            }
+            right={leave}
+          />
+          {artifact.status === "generating" ? (
             <div role="status">
               <p>{tr("review:stage_generating")}</p>
               <Button
@@ -390,7 +400,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
               {tr("review:generation_failed")} ({artifact.errorCode})
             </p>
           )}
-        </article>
+        </>
       )}
       {!artifact && mode === "history" && (
         <section

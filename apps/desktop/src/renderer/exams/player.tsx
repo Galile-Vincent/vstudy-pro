@@ -4,18 +4,15 @@ import { tr } from "../../shared/i18n";
 import {
   ArrowLeft,
   ArrowRight,
-  Check,
   CheckCircle2,
   Clock3,
   Sparkles,
   XCircle,
 } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { Input } from "../components/ui/input";
+import { Badge, Button, FormField, Input, Toolbar } from "../components/ui";
 import { Progress } from "../components/ui/progress";
 import { useExamFormat } from "./format";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 type Artifact = NonNullable<IpcResponse<"review:artifact:get">>;
 type Attempt = IpcResponse<"review:attempt:start">;
 type Answer = Attempt["answers"][string];
@@ -93,6 +90,7 @@ export function ExamPlayer({
   onExplain,
   onRetry,
   onReport,
+  actions,
 }: {
   artifact: Artifact;
   attempt: Attempt | null;
@@ -111,6 +109,7 @@ export function ExamPlayer({
   onExplain: (id: string) => void;
   onRetry: () => void;
   onReport: (id: string) => void;
+  actions?: ReactNode;
 }) {
   const format = useExamFormat();
   const items = artifact.test?.items ?? [],
@@ -146,11 +145,42 @@ export function ExamPlayer({
   );
   return (
     <section className="exam-player" aria-busy={busy}>
-      {attempt && (
-        <div role="status">
-          {draftError && <p>{tr("review:draft_save_failed")}</p>}
-        </div>
-      )}
+      <Toolbar
+        left={
+          <h2 className="text-[length:var(--type-lg)] font-medium">
+            {artifact.title}
+          </h2>
+        }
+        center={
+          attempt &&
+          !results &&
+          item && (
+            <>
+              <span className="font-medium">
+                {tr("review:item_progress", {
+                  current: index + 1,
+                  total: items.length,
+                })}
+              </span>
+              <Badge variant="secondary">{tr(`exams:${item.type}`)}</Badge>
+              <Progress
+                className="h-1.5 w-24"
+                value={(committed / items.length) * 100}
+                aria-label={tr("exams:progress")}
+                aria-valuenow={Math.round((committed / items.length) * 100)}
+                aria-valuetext={`${committed}/${items.length}`}
+              />
+              <span className="text-[var(--muted)]">
+                {tr("exams:answered", {
+                  answered: committed,
+                  total: items.length,
+                })}
+              </span>
+            </>
+          )
+        }
+        right={actions}
+      />
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}
@@ -289,177 +319,110 @@ export function ExamPlayer({
         attempt &&
         item && (
           <>
-            <header className="exam-progress-header">
-              <div>
-                <span>
-                  {tr("review:item_progress", {
-                    current: index + 1,
-                    total: items.length,
-                  })}
-                </span>
-                <Badge variant="secondary">{tr(`exams:${item.type}`)}</Badge>
-              </div>
-              <Progress
-                value={(committed / items.length) * 100}
-                aria-label={tr("exams:progress")}
-                aria-valuenow={Math.round((committed / items.length) * 100)}
-                aria-valuetext={`${committed}/${items.length}`}
-              />
-              <p className="exam-muted">
-                {tr("exams:answered", {
-                  answered: committed,
-                  total: items.length,
-                })}
-              </p>
-            </header>
             <h3 ref={heading} tabIndex={-1} className="exam-question-stem">
               {item.stem.replaceAll("{{blank}}", "_____").trim()}
             </h3>
             {!locked ? (
               <form
-                className="exam-answer-form"
+                id="exam-answer"
+                className="max-w-[65ch]"
                 onSubmit={(event) => {
                   event.preventDefault();
                   onSubmit();
                 }}
               >
-                <fieldset disabled={busy}>
-                  <legend>{tr("review:your_answer")}</legend>
-                  {(item.type === "mcq" || item.type === "multi_select") && (
-                    <div className="exam-answer-options">
-                      {item.options.map((option, i) => {
-                        const selected =
-                          item.type === "mcq"
-                            ? draft === i
-                            : Array.isArray(draft) && draft.includes(i);
-                        return (
-                          <label
-                            className="exam-option"
-                            data-selected={selected}
-                            key={i}
-                          >
-                            <input
-                              type={item.type === "mcq" ? "radio" : "checkbox"}
-                              name={`answer-${artifact.id}`}
-                              checked={selected}
-                              onChange={(event) =>
-                                onDraft(
-                                  item.type === "mcq"
-                                    ? i
-                                    : event.target.checked
-                                      ? [
-                                          ...(Array.isArray(draft)
-                                            ? draft
-                                            : []),
-                                          i,
-                                        ]
-                                      : (Array.isArray(draft)
-                                          ? draft
-                                          : []
-                                        ).filter((n) => n !== i),
-                                )
-                              }
-                            />
-                            <span className="exam-option-letter">
-                              {String.fromCharCode(65 + i)}
-                            </span>
-                            <span>{option}</span>
-                            {selected && (
-                              <Check
-                                className="exam-option-check"
-                                size={18}
-                                aria-hidden="true"
-                              />
-                            )}
-                          </label>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {item.type === "true_false" && (
-                    <div className="exam-answer-options">
-                      {[true, false].map((value) => (
-                        <label
-                          className="exam-option"
-                          data-selected={draft === value}
-                          key={String(value)}
-                        >
-                          <input
-                            type="radio"
-                            name={`answer-${artifact.id}`}
-                            checked={draft === value}
-                            onChange={() => onDraft(value)}
-                          />
-                          <span>
-                            {tr(
-                              value
-                                ? "review:answer_true"
-                                : "review:answer_false",
-                            )}
-                          </span>
-                          {draft === value && (
-                            <Check
-                              className="exam-option-check"
-                              size={18}
-                              aria-hidden="true"
-                            />
+                <fieldset
+                  disabled={busy}
+                  className="flex min-w-0 flex-col gap-[var(--space-2)]"
+                >
+                  <legend className="mb-[var(--space-3)] font-medium">
+                    {tr("review:your_answer")}
+                  </legend>
+                  {(item.type === "mcq" || item.type === "multi_select") &&
+                    item.options.map((option, i) => (
+                      <label className="exam-choice" key={i}>
+                        <input
+                          type={item.type === "mcq" ? "radio" : "checkbox"}
+                          name={`answer-${artifact.id}`}
+                          checked={
+                            item.type === "mcq"
+                              ? draft === i
+                              : Array.isArray(draft) && draft.includes(i)
+                          }
+                          onChange={(event) =>
+                            onDraft(
+                              item.type === "mcq"
+                                ? i
+                                : event.target.checked
+                                  ? [...(Array.isArray(draft) ? draft : []), i]
+                                  : (Array.isArray(draft) ? draft : []).filter(
+                                      (n) => n !== i,
+                                    ),
+                            )
+                          }
+                        />
+                        <span className="text-[var(--muted)]">
+                          {String.fromCharCode(65 + i)}
+                        </span>
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  {item.type === "true_false" &&
+                    [true, false].map((value) => (
+                      <label className="exam-choice" key={String(value)}>
+                        <input
+                          type="radio"
+                          name={`answer-${artifact.id}`}
+                          checked={draft === value}
+                          onChange={() => onDraft(value)}
+                        />
+                        <span>
+                          {tr(
+                            value ? "review:answer_true" : "review:answer_false",
                           )}
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                        </span>
+                      </label>
+                    ))}
                   {(item.type === "cloze" || item.type === "calculation") && (
-                    <label className="exam-text-answer">
-                      {tr(
+                    <FormField
+                      label={tr(
                         item.type === "calculation"
                           ? "exams:numeric_answer"
                           : "exams:blank_answer",
                       )}
-                      <div className="exam-input-unit">
-                        <Input
-                          autoComplete="off"
-                          inputMode={
-                            item.type === "calculation" ? "decimal" : "text"
-                          }
-                          maxLength={2000}
-                          value={typeof draft === "string" ? draft : ""}
-                          placeholder={tr(
-                            item.type === "calculation"
-                              ? "exams:numeric_hint"
-                              : "exams:blank_hint",
+                    >
+                      {(field) => (
+                        <div className="flex items-center gap-[var(--space-3)]">
+                          <Input
+                            {...field}
+                            autoComplete="off"
+                            inputMode={
+                              item.type === "calculation" ? "decimal" : "text"
+                            }
+                            maxLength={2000}
+                            value={typeof draft === "string" ? draft : ""}
+                            placeholder={tr(
+                              item.type === "calculation"
+                                ? "exams:numeric_hint"
+                                : "exams:blank_hint",
+                            )}
+                            onChange={(e) => onDraft(e.target.value)}
+                          />
+                          {item.type === "calculation" && item.unit && (
+                            <span className="text-[var(--muted)]">
+                              {item.unit}
+                            </span>
                           )}
-                          onChange={(e) => onDraft(e.target.value)}
-                        />
-                        {item.type === "calculation" && item.unit && (
-                          <span>{item.unit}</span>
-                        )}
-                      </div>
-                    </label>
+                        </div>
+                      )}
+                    </FormField>
                   )}
                   {item.type === "multi_select" && (
-                    <p className="exam-muted">{tr("exams:select_all")}</p>
+                    <p className="text-[var(--muted)]">
+                      {tr("exams:select_all")}
+                    </p>
                   )}
                 </fieldset>
-                <p className="exam-muted exam-commit-notice">
-                  {tr("review:commit_notice")}
-                </p>
-                <Button
-                  variant="secondary"
-                  type="submit"
-                  disabled={
-                    busy ||
-                    draft === null ||
-                    draft === "" ||
-                    (Array.isArray(draft) && !draft.length)
-                  }
-                >
-                  {tr(
-                    index === items.length - 1
-                      ? "review:finish_test"
-                      : "review:answer_next",
-                  )}
-                  <ArrowRight aria-hidden="true" />
-                </Button>
               </form>
             ) : (
               <section
@@ -512,11 +475,15 @@ export function ExamPlayer({
                 )}
               </section>
             )}
-            <nav
-              className="exam-player-navigation"
-              aria-label={tr("exams:question_navigation")}
-            >
+            <footer className="exam-footer">
+              <div className="flex-[1_1_16rem] text-[var(--muted)]">
+                <div role="status">
+                  {draftError && <p>{tr("review:draft_save_failed")}</p>}
+                </div>
+                {!locked && <p>{tr("review:commit_notice")}</p>}
+              </div>
               <Button
+                type="button"
                 variant="ghost"
                 disabled={busy || index === 0}
                 onClick={() => onMove(index - 1)}
@@ -524,19 +491,42 @@ export function ExamPlayer({
                 <ArrowLeft aria-hidden="true" />
                 {tr("review:previous_item")}
               </Button>
-              {locked && index < items.length - 1 && (
-                <Button variant="secondary" onClick={() => onMove(index + 1)}>
-                  {tr("review:next_item")}
-                  <ArrowRight aria-hidden="true" />
-                </Button>
-              )}
               {attempt.phase !== "answering" && (
-                <Button variant="secondary" onClick={() => onResults(true)}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onResults(true)}
+                >
                   {tr("review:view_results")}
                   <ArrowRight aria-hidden="true" />
                 </Button>
               )}
-            </nav>
+              {locked && index < items.length - 1 && (
+                <Button type="button" onClick={() => onMove(index + 1)}>
+                  {tr("review:next_item")}
+                  <ArrowRight aria-hidden="true" />
+                </Button>
+              )}
+              {!locked && (
+                <Button
+                  type="submit"
+                  form="exam-answer"
+                  disabled={
+                    busy ||
+                    draft === null ||
+                    draft === "" ||
+                    (Array.isArray(draft) && !draft.length)
+                  }
+                >
+                  {tr(
+                    index === items.length - 1
+                      ? "review:finish_test"
+                      : "review:answer_next",
+                  )}
+                  <ArrowRight aria-hidden="true" />
+                </Button>
+              )}
+            </footer>
           </>
         )
       )}
