@@ -11,7 +11,7 @@ export function validateFeed(info, suffix) {
     if (file.url !== expected || Object.keys(file).some(key =>
       !['url', 'sha512', 'size', 'blockMapSize'].includes(key)) ||
       !/^[A-Za-z0-9+/]{86}==$/.test(file.sha512) ||
-      !Number.isSafeInteger(file.size) || file.size <= 0) invalid();
+      !Number.isSafeInteger(file.size) || file.size <= 0 || file.size > 2 ** 31) invalid();
   }
   return info;
 }

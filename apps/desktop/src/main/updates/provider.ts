@@ -1,3 +1,4 @@
+import {cappedExecutor} from './feed-request';
 import {parseFeed, validateFeed} from './validate.mjs';
 import { GenericProvider } from 'electron-updater/out/providers/GenericProvider';
 export const updateFeed = 'https://github.com/ava-apple/vstudy-pro/releases/latest/download';
@@ -10,7 +11,7 @@ export class UpdateProvider extends GenericProvider {
     super({provider:'generic', url:updateFeed, useMultipleRangeRequest:false},
       new Proxy(updater, { get(target, key, receiver) {
         return key === 'isAddNoCacheQuery' ? false : Reflect.get(target, key, receiver);
-      } }), runtime);
+      } }), {...runtime,executor:cappedExecutor(runtime.executor)});
     this.platform = runtime.platform;
   }
   override async getLatestVersion() {
