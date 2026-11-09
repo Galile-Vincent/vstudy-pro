@@ -233,8 +233,8 @@ function useComposerBindings() {
   useTranslation(); const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
 function DocumentWelcome() {
   const aui = useAui();
-  const { selection, documentTitle } = useDocumentChat();
-  return <ReaderWelcome title={documentTitle} hasSelection={!!selection} onQuestion={prompt => aui.composer().setText(prompt)}/>;
+  const { selection, documentTitle, isGeneral } = useDocumentChat();
+  return <ReaderWelcome title={documentTitle} hasSelection={!!selection} general={isGeneral} onQuestion={prompt => aui.composer().setText(prompt)}/>;
 }
 function DocumentNotice() {
   const { unavailable } = useDocumentChat();
@@ -253,7 +253,9 @@ export function ChatComposerInput() {
   const clear = () => { composing.current = false; clearTimeout(expiry.current); };
   const refresh = () => { composing.current = true; clearTimeout(expiry.current); expiry.current = setTimeout(clear,1500); };
   useEffect(() => () => clearTimeout(expiry.current), []);
-  return <ComposerPrimitive.Input ref={input} className="aui-composer-input" aria-label={context?.isCourse ? tr('moodle:ask_course') : tr('common:ask_about_your_document')} placeholder={context?.isCourse ? tr('moodle:ask_course') : tr('common:ask_document_placeholder')} rows={2}
+  const label = context?.isCourse ? tr('moodle:ask_course') : context?.isGeneral ? tr('history:general_ask_label') : tr('common:ask_about_your_document');
+  const placeholder = context?.isCourse ? tr('moodle:ask_course') : context?.isGeneral ? tr('history:general_ask_placeholder') : tr('common:ask_document_placeholder');
+  return <ComposerPrimitive.Input ref={input} className="aui-composer-input" aria-label={label} placeholder={placeholder} rows={2}
     onCompositionStart={refresh}
     onCompositionUpdate={refresh}
     onBlur={clear}
