@@ -35,6 +35,11 @@ export function UploadCard({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [announcement, setAnnouncement] = useState(0);
+  const [dropError, setDropError] = useState(false);
+  const clearDropError = () => {
+    if (dropError) { setError(''); setDropError(false); }
+  };
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0);
   const lock = useRef(false);
@@ -60,6 +65,7 @@ export function UploadCard({
     };
   }, []);
   const upload = async (paths?: string[], sample = false) => {
+    clearDropError();
     if (lock.current) return;
     const destination = folders.find((folder) => folder.id === folderId)?.id ?? null;
     resetDrag();
@@ -114,6 +120,7 @@ export function UploadCard({
       className="home-upload min-w-0 p-[var(--space-6)]"
       data-dragging={dragging}
       onDragEnter={(e) => {
+        clearDropError();
         if (busy || !e.dataTransfer.types.includes('Files')) return;
         e.preventDefault();
         dragDepth.current++;
@@ -131,13 +138,14 @@ export function UploadCard({
         e.preventDefault();
         e.stopPropagation();
         resetDrag();
+        setAnnouncement(value => value + 1);
         if (lock.current) {
           setMessage(tr('home:drop_busy'));
           return;
         }
         const paths = Array.from(e.dataTransfer.files, (file) => desktop.getPathForFile?.(file) ?? '');
         if (paths.length && paths.every(Boolean)) void upload(paths);
-        else setError(tr('home:drop_error'));
+        else { setError(tr('home:drop_error')); setDropError(true); }
       }}
     >
       <Section title={
@@ -189,7 +197,10 @@ export function UploadCard({
           />
           <div role="status" className="flex flex-col gap-[var(--space-2)]">
             {busy && <progress aria-label={tr('home:importing')} />}
-            {error || message}
+            <div key={announcement}>
+              {error && <div role="alert">{error}</div>}
+              {message && <div>{message}</div>}
+            </div>
           </div>
         </div>
         {showOpen && imported && navigation && (

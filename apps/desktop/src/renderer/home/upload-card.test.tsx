@@ -123,8 +123,9 @@ it('keeps one persistent status for partial failures', async () => {
   fireEvent.drop(container.firstChild!, { dataTransfer: { files: [new File([''], 'notes.pdf')] } });
   await act(async () => {});
   expect(screen.getAllByRole('status')).toEqual([status]);
-  expect(screen.queryByRole('alert')).toBeNull();
-  expect(status.textContent).not.toBe('Imported');
+  const error = screen.getByRole('alert').textContent;
+  expect(error).toBeTruthy();
+  expect(status.textContent).toBe(error + i18n.t('home:imported'));
 });
 
 it('keeps nested file drags highlighted with null relatedTarget', () => {
@@ -137,4 +138,26 @@ it('keeps nested file drags highlighted with null relatedTarget', () => {
   expect(card.getAttribute('data-dragging')).toBe('true');
   fireEvent.dragLeave(child, { relatedTarget: null });
   expect(card.getAttribute('data-dragging')).toBe('false');
+});
+it.each([false, true])('reannounces identical rejected drops while busy=%s', async busy => {
+  invoke.mockReturnValue(new Promise(() => {}));
+  const { container } = render(<UploadCard />);
+  if (busy) fireEvent.click(screen.getByRole('button', { name: 'Choose a file' }));
+  const drop = () => fireEvent.drop(container.firstChild!, { dataTransfer: { types: ['Files'], files: [] } });
+  drop();
+  await act(async () => {});
+  const status = screen.getByRole('status');
+  const content = status.lastElementChild!;
+  const text = content.textContent;
+  drop();
+  await act(async () => {});
+  expect(status.lastElementChild).not.toBe(content);
+  expect(status.lastElementChild?.textContent).toBe(text);
+});
+it('clears a rejected drop on the next file interaction', () => {
+  const { container } = render(<UploadCard />);
+  fireEvent.drop(container.firstChild!, { dataTransfer: { types: ['Files'], files: [] } });
+  expect(screen.getByRole('alert')).toBeTruthy();
+  fireEvent.dragEnter(container.firstChild!, { dataTransfer: { types: ['Files'] } });
+  expect(screen.queryByRole('alert')).toBeNull();
 });
