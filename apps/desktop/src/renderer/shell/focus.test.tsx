@@ -76,3 +76,14 @@ it('badges the sidebar brand while keeping the profile fallback unbadged', async
   expect(host.querySelector('.art-reader-avatar .vstudy-brand')).not.toBeNull();
   expect(host.querySelector('.art-reader-avatar .beta-badge')).toBeNull();
 });
+
+import { createTab, saveTabs } from './tab-state';
+it.each(['home', 'library', 'last'] as const)('focuses the surviving target after closing into %s', async view => {
+  const first = createTab('00000000-0000-4000-8000-000000000001', { view: view === 'last' ? 'home' : view }, 1);
+  const closing = createTab('00000000-0000-4000-8000-000000000002', { view: 'home' }, 2);
+  saveTabs(localStorage, { version: 1, activeId: closing.id, tabs: view === 'last' ? [closing] : [first, createTab('00000000-0000-4000-8000-000000000003', { view }, 0), closing] });
+  await mount();
+  await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', ctrlKey: true, bubbles: true })));
+  await act(async () => vi.advanceTimersByTime(20));
+  expect(document.activeElement?.id).toEqual(view === 'last' ? 'shell-content' : 'tab-00000000-0000-4000-8000-000000000003');
+});
