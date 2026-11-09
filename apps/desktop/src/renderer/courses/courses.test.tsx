@@ -897,3 +897,12 @@ it("C3 retains sync failure across cached overview reads", async () => {
   expect(host.querySelector('[role="alert"]')).toBeNull();
 });
 
+it("C4 moves focus into Planner and restores its invoking button", async () => {
+  await mount(createMockMoodleApi());
+  const entry = host.querySelector<HTMLButtonElement>(".planner-entry")!;
+  await act(async () => { entry.focus(); entry.click(); });
+  const back = getByRole(host, "button", { name: "Back to courses" });
+  expect(document.activeElement).toBe(back);
+  await act(async () => back.click());
+  expect(document.activeElement).toBe(host.querySelector(".planner-entry"));
+});
