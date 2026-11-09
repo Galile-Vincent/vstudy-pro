@@ -310,7 +310,10 @@ function CoursesBody({
         if (target !== connectTrigger.current) target.tabIndex = -1;
         target.focus();
       }
-    } catch { failure(); }
+    } catch {
+      failure();
+      disconnectTrigger.current?.focus();
+    }
   };
   const openFile = async (fileId: string, action?: DocumentAction) => {
     setOpening(fileId);
