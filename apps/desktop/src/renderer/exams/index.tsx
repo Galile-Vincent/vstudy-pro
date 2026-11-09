@@ -16,6 +16,7 @@ import {
   Toolbar,
 } from "../components/ui";
 import { ExamHistory } from "./history";
+import { useFooterInset } from "./footer-inset";
 import { Textarea } from "../components/ui/textarea";
 import { TestPlayer } from "../review/test-player";
 import { useReviewPage, type Cursor } from "../review/paging";
@@ -32,6 +33,7 @@ const initialCounts = {
 };
 export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
   const { i18n } = useTranslation();
+  const footerInset = useFooterInset();
   const [documents, setDocuments] = useState<IpcResponse<
       "documents:list"
     > | null>(null),
@@ -339,7 +341,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
               </div>
               {!choices.length && <p>{tr("review:choose_provider")}</p>}
             </Section>
-            <div className="exam-footer">
+            <div className="exam-footer" ref={footerInset}>
               <Button
                 type="submit"
                 disabled={

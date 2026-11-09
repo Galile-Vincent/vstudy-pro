@@ -23,6 +23,7 @@ import {
 } from "../components/ui";
 import { Progress } from "../components/ui/progress";
 import { useExamFormat } from "./format";
+import { useFooterInset } from "./footer-inset";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 type Artifact = NonNullable<IpcResponse<"review:artifact:get">>;
 type Attempt = IpcResponse<"review:attempt:start">;
@@ -123,6 +124,7 @@ export function ExamPlayer({
   actions?: ReactNode;
 }) {
   const format = useExamFormat();
+  const footerInset = useFooterInset();
   const items = artifact.test?.items ?? [],
     item = items[index];
   const heading = useRef<HTMLHeadingElement>(null);
@@ -523,7 +525,7 @@ export function ExamPlayer({
                 )}
               </section>
             )}
-            <footer className="exam-footer">
+            <footer className="exam-footer" ref={footerInset}>
               <div className="flex-[1_1_16rem] text-[var(--muted)]">
                 <div role="status">
                   {draftError && <p>{tr("review:draft_save_failed")}</p>}
