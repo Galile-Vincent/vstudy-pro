@@ -153,6 +153,8 @@
   "installation_complete": "Verified installation activated for new chats.",
   "test_complete": "Tool-free test completed.",
   "signin_verified": "Sign-in verified.",
+  "signin_cancelled": "Sign-in cancelled",
+  "retry_signin": "Retry sign-in",
   "manual_install": "Install another way",
   "failure_manual-install-required": "VStudy cannot independently verify this download. Use Install another way to copy the official command and run it in your own terminal. No downloaded program was started.",
   "manual_install_reason": "We can't verify this tool's download automatically, so you install it yourself from the official source.",

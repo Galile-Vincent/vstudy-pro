@@ -153,6 +153,8 @@
   "installation_complete": "已啟用驗證完成的版本，供新聊天使用。",
   "test_complete": "無工具測試已完成。",
   "signin_verified": "已確認登入。",
+  "signin_cancelled": "已取消登入",
+  "retry_signin": "重新登入",
   "manual_install": "改用其他安裝方式",
   "failure_manual-install-required": "VStudy 無法獨立驗證此下載。請展開其他安裝方式，複製官方指令並在自己的終端機執行。未啟動任何下載的程式。",
   "manual_install_reason": "我們無法自動驗證這個工具的下載來源，因此需要你從官方來源自行安裝。",

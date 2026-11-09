@@ -153,6 +153,8 @@
   "installation_complete": "検証済みのバージョンを新しいチャット用に有効にしました。",
   "test_complete": "ツールを使わないテストが完了しました。",
   "signin_verified": "ログインを確認しました。",
+  "signin_cancelled": "ログインをキャンセルしました",
+  "retry_signin": "もう一度ログイン",
   "manual_install": "別の方法でインストール",
   "failure_manual-install-required": "このダウンロードを独立した方法で検証できません。別のインストール方法で公式コマンドをコピーし、自分のターミナルで実行してください。ダウンロードしたプログラムは起動していません。",
   "manual_install_reason": "このツールのダウンロードを自動で検証できないため、公式サイトからご自身でインストールしてください。",

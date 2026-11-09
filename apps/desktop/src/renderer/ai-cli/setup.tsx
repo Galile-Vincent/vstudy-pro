@@ -39,7 +39,8 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
   const manualStep = !!tool?.manualInstallRequired && step === 'install';
   const running = runner.session?.phase === 'running';
   const busy = running || runner.busy || savingConsent;
-  const failed = runner.error ?? (runner.plan && !runner.plan.available ? runner.plan.reason : undefined) ?? (!runner.plan ? runner.session?.error ?? (tool?.status === 'error' ? tool.error.hint : undefined) : undefined);
+  const loginCancelled = runner.session?.phase === 'cancelled' && runner.session.actionId.startsWith('login-');
+  const failed = runner.error ?? (runner.plan && !runner.plan.available ? runner.plan.reason : undefined) ?? (!runner.plan ? (loginCancelled ? undefined : runner.session?.error) ?? (tool?.status === 'error' ? tool.error.hint : undefined) : undefined);
   useEffect(() => {
     if (tool?.consented && !tool.tested && !running && !manualStep && !savingConsent && !runner.session?.error) void runner.preview(setupAction(provider, step));
   }, [provider, step, tool?.consented, tool?.tested, running, manualStep, savingConsent, runner.session?.error, runner.preview]);
@@ -112,10 +113,10 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
             {failed && <SetupRecovery failure={failed} tool={tool} session={runner.session} busy={busy} onAction={action => void runner.preview(action ? `${action}-${provider}` : runner.session?.actionId ?? setupAction(provider, step))} />}
 
             {runner.session?.phase === 'succeeded' && runner.session.actionId === setupAction(provider, step) && <p className="ai-cli-success">{tr(runner.session.actionId.startsWith('test-') ? 'ai-cli:test_success' : 'ai-cli:action_success')}</p>}
-            {runner.session?.phase === 'cancelled' && <p role="status">{tr('ai-cli:phase_cancelled')}</p>}
+            {runner.session?.phase === 'cancelled' && !loginCancelled && <p role="status">{tr('ai-cli:phase_cancelled')}</p>}
             {tool.appliesToNewChats && <p role="status">{tr('ai-cli:new_chats')}</p>}
           </div></div>
-          {runner.session?.actionId.startsWith('login-') && <SignInAction key={runner.session.id} session={runner.session} />}
+          {runner.session?.actionId.startsWith('login-') && <SignInAction key={runner.session.id} session={runner.session} onRetry={() => void runner.preview(`login-${provider}`)} />}
           {runner.session && <details className="ai-cli-details" open={detailsOpen} onToggle={event => setDetailsOpen(event.currentTarget.open)}><summary>{tr('ai-cli:terminal')}</summary>{detailsOpen && <Suspense fallback={null}><CliTerminal session={runner.session} /></Suspense>}</details>}
         </>}
         <details className="ai-cli-more"><summary>{tr('ai-cli:more_options')}</summary><p>{tr('ai-cli:pick_hint')}</p>

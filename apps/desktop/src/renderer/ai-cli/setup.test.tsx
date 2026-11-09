@@ -167,6 +167,21 @@ it('leaves the progress region quiet on failure so only the recovery alert speak
   expect(document.querySelector('[role=alert]')?.classList.contains('ai-cli-recovery')).toBe(true);
 });
 
+it('shows a cancelled sign-in as one neutral status with retry, not as a failure', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'installed-not-signed-in' });
+  fixture.hold(true); await mount(); await click('Sign in');
+  await click('Stop this action');
+  const section = document.querySelector('.ai-cli-sign-in')!;
+  expect(section.querySelector('[role=status]')?.textContent).toBe(i18n.t('ai-cli:signin_cancelled'));
+  expect(document.querySelectorAll('[role=alert]')).toHaveLength(0);
+  expect(document.querySelector('.ai-cli-recovery')).toBeNull();
+  expect(document.body.textContent!.split(i18n.t('ai-cli:phase_cancelled'))).toHaveLength(1);
+  expect(document.querySelector('.ai-cli-steps li[aria-current=step]')?.getAttribute('data-state')).not.toBe('failed');
+  await click(i18n.t('ai-cli:retry_signin'));
+  expect(fixture.calls.at(-1)).toMatchObject({ channel: 'ai-cli:preview', payload: { actionId: 'login-claude' } });
+  expect(button(i18n.t('ai-cli:continue_reading'))).toBeDefined();
+});
+
 it('previews compatible updates and one-click rollback without disturbing existing chats', async () => {
   Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.0.0', latestVersion: '2.0.0', status: 'update-available', releaseNotesUrl: 'https://example.com/release' });
   await mount(); await click('Review update to 2.0.0');
