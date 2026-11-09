@@ -1,5 +1,5 @@
 import {webChatClearedChannel,webChatProviderSchema} from '../shared/web-chat';
-import { reviewProgressChannel, reviewProgressSchema } from '../shared/review-generate';
+import { draftFlushAckChannel, draftFlushIdSchema, draftFlushRequestChannel, reviewProgressChannel, reviewProgressSchema } from '../shared/review-generate';
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 import {
   nativeTabShortcutChannel,nativeTabShortcutSchema,
@@ -49,6 +49,15 @@ const api: DesktopApi = {
     const receive = (_event:Electron.IpcRendererEvent,payload:unknown) => {const parsed=reviewProgressSchema.safeParse(payload);if(parsed.success)listener(parsed.data);};
     ipcRenderer.on(reviewProgressChannel,receive);
     return () => ipcRenderer.removeListener(reviewProgressChannel,receive);
+  },
+  onDraftFlushRequest(listener) {
+    const receive = (_event:Electron.IpcRendererEvent,payload:unknown) => {
+      const id = draftFlushIdSchema.safeParse(payload);
+      if (!id.success) return;
+      void Promise.resolve().then(listener).catch(() => {}).finally(() => ipcRenderer.send(draftFlushAckChannel,id.data));
+    };
+    ipcRenderer.on(draftFlushRequestChannel,receive);
+    return () => ipcRenderer.removeListener(draftFlushRequestChannel,receive);
   },
   onWebChatCleared: listener => {const receive=(_event:Electron.IpcRendererEvent,payload:unknown)=>{const parsed=webChatProviderSchema.safeParse(payload);if(parsed.success)listener(parsed.data);};ipcRenderer.on(webChatClearedChannel,receive);return()=>ipcRenderer.removeListener(webChatClearedChannel,receive);},
   onNativeTabShortcut: listener => {const receive=(_event:Electron.IpcRendererEvent,payload:unknown)=>{const parsed=nativeTabShortcutSchema.safeParse(payload);if(parsed.success) listener(parsed.data);};ipcRenderer.on(nativeTabShortcutChannel,receive);return ()=>{ipcRenderer.removeListener(nativeTabShortcutChannel,receive);};},

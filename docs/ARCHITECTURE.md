@@ -28,6 +28,8 @@ Application and Moodle content windows keep context isolation, sandboxing, and d
 
 `main/shutdown.ts` joins reentrant quit requests. Shutdown removes handlers, aborts and persists chats while SQLite remains open, awaits provider discovery and process cleanup, stops workers and document operations, flushes persistence, and then closes SQLite. A deadline bounds shutdown. Services must expose cleanup to this coordinator rather than leaving detached work.
 
+Test and exam answers are written as drafts as they change (`review:attempt:draft`, leading edge, coalesced per question over about 50 ms). Before it removes handlers, shutdown asks the renderer to write its pending drafts and waits up to two seconds for an acknowledgement (`main/review/draft-flush.ts`). Residual loss window: a selection made in the few milliseconds before the renderer has handed its write to main can still be lost if the process is killed, or if the window is closed on Windows or Linux, where the renderer is already gone when quit begins and only the write sent at page hide can arrive; an unanswered flush request is abandoned after the bound so quitting is never blocked.
+
 ## Persistent ownership
 
 `main/db/index.ts` owns one synchronous `node:sqlite` connection. `db/migrations.ts` contains the ordered forward-only registry through version 21. `db/migrate.ts` checks SQL checksums and backs up an existing disk database before each pending migration. Repositories use bound values, foreign keys, and savepoints for related writes.

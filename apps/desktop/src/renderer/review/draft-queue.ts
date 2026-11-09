@@ -1,7 +1,7 @@
 export type Answer = string | number | boolean | number[] | null;
 type Send = (itemId: string, answer: Answer, seq: number) => Promise<unknown>;
 
-const DRAFT_DELAY_MS = 500;
+const DRAFT_THROTTLE_MS = 50;
 const DRAFT_RETRY_MS = 3000;
 
 /** Writes the latest answer per question, in order; an older write can never replace a newer capture. */
@@ -11,6 +11,7 @@ class DraftQueue {
  private readonly listeners = new Set<(failed: boolean) => void>();
  private running: Promise<void> | null = null;
  private timer: ReturnType<typeof setTimeout> | undefined;
+ private lastSent = 0;
  failed = false;
 
  constructor(private readonly send: Send, private readonly onIdle: () => void) {}
@@ -21,7 +22,9 @@ class DraftQueue {
   const seq = (this.seqs.get(itemId) ?? 0) + 1;
   this.seqs.set(itemId, seq);
   this.pending.set(itemId, { seq, answer });
-  this.schedule(DRAFT_DELAY_MS);
+  if (this.running) return;
+  const wait = this.lastSent + DRAFT_THROTTLE_MS - Date.now();
+  if (wait <= 0) void this.flush(); else this.schedule(wait);
  }
 
  drop(itemId: string) { this.pending.delete(itemId); this.settleIfIdle(); }
@@ -46,16 +49,17 @@ class DraftQueue {
  }
 
  private async pump() {
-  const failedIds = new Set<string>();
+  const failedIds = new Map<string, number>();
   for (;;) {
-   const next = [...this.pending].find(([itemId]) => !failedIds.has(itemId));
+   const next = [...this.pending].find(([itemId, entry]) => failedIds.get(itemId) !== entry.seq);
    if (!next) break;
    const [itemId, { seq, answer }] = next;
+   this.lastSent = Date.now();
    try {
     await this.send(itemId, answer, seq);
     if (this.pending.get(itemId)?.seq === seq) this.pending.delete(itemId);
    } catch {
-    if (this.pending.get(itemId)?.seq === seq) failedIds.add(itemId);
+    if (this.pending.get(itemId)?.seq === seq) failedIds.set(itemId, seq);
    }
   }
   this.running = null;
@@ -88,3 +92,6 @@ export function draftQueue(attemptId: string, send: Send): DraftQueue {
 
 export type { DraftQueue };
 export function resetDraftQueues() { queues.clear(); }
+
+/** Writes every pending draft now; main waits for this before it closes the database. */
+export async function flushDraftQueues() { await Promise.all([...queues.values()].map(queue => queue.flush())); }

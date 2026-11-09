@@ -72,7 +72,6 @@ it.each(modes)('saves a selection as a draft without answering or grading (%s)',
  invoke.mockImplementation(server.invoke);
  render(<TestPlayer artifact={fakeArtifact(exam)} onRetake={vi.fn()} />);
  fireEvent.click(await screen.findByLabelText(/Beta/));
- expect(server.called('review:attempt:draft')).toHaveLength(0);
  await waitFor(() => expect(server.state.drafts.q1).toBe(1), settled);
  expect(server.called('review:attempt:answer')).toHaveLength(0);
  expect(server.called('review:attempt:commit')).toHaveLength(0);

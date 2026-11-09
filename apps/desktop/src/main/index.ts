@@ -18,6 +18,8 @@ import { log, copyDiagnostics } from './logging';
 import { showAttachedMessage, showStartupError, type StartupStage } from './dialogs';
 import { readWindowState, trackWindowState } from './window-state';
 import { coordinateShutdown } from './shutdown';
+import { createDraftFlush } from './review/draft-flush';
+import { draftFlushAckChannel, draftFlushIdSchema, draftFlushRequestChannel } from '../shared/review-generate';
 import { acquireOwnership } from './ownership';
 import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
@@ -343,8 +345,23 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 let quitting = false;
+const flushRendererDrafts = createDraftFlush({
+  send: requestId => {
+    if (!window || window.isDestroyed() || window.webContents.isLoading()) return false;
+    window.webContents.send(draftFlushRequestChannel, requestId);
+    return true;
+  },
+  listen: acknowledged => {
+    const receive = (event: Electron.IpcMainEvent, payload: unknown) => {
+      const id = draftFlushIdSchema.safeParse(payload);
+      if (id.success && !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl)) acknowledged(id.data);
+    };
+    ipcMain.on(draftFlushAckChannel, receive);
+    return () => { ipcMain.removeListener(draftFlushAckChannel, receive); };
+  },
+});
 const shutdown = coordinateShutdown({
-  stopWork: async () => { await disposeIpc?.(); await telemetry?.stop(); },
+  stopWork: async () => { await flushRendererDrafts(); await disposeIpc?.(); await telemetry?.stop(); },
   flush: () => { if (app.isReady()) session.defaultSession.flushStorageData(); },
   close: () => { store?.close(); store = undefined; },
   quit: () => { quitting = true; app.quit(); },

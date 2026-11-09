@@ -5,7 +5,9 @@ import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { ExamPlayer } from '../exams/player';
 import { Button } from '../components/ui/button';
-import { draftQueue, type DraftQueue, type Answer } from './draft-queue';
+import { draftQueue, flushDraftQueues, type DraftQueue, type Answer } from './draft-queue';
+
+desktop.onDraftFlushRequest?.(flushDraftQueues);
 
 type Artifact = NonNullable<IpcResponse<'review:artifact:get'>>;
 type Attempt = IpcResponse<'review:attempt:start'>;

@@ -4,6 +4,9 @@ import { studyScopeSchema, studyResolvedScopeSchema, studyTestSchema, studyAnswe
 import { studyIdSchema as id, studyPageInputSchema, studyCursorSchema } from './review';
 const text = z.string().min(1).max(240), ack = z.object({ ok: z.literal(true) }).strict();
 export const reviewProgressChannel = 'review:progress';
+export const draftFlushRequestChannel = 'review:drafts-flush';
+export const draftFlushAckChannel = 'review:drafts-flushed';
+export const draftFlushIdSchema = z.string().uuid();
 export const reviewProgressSchema = z.object({ requestId: id, artifactId: id, stage: z.enum(['queued', 'resolving', 'generating', 'validating', 'ready', 'failed', 'interrupted']), completed: z.number().int().min(0).max(100), total: z.number().int().min(0).max(100), errorCode: z.string().max(120).nullable() }).strict();
 export type ReviewProgress = z.infer<typeof reviewProgressSchema>;
 export const artifactSchema = z.object({ id, courseId: id, kind: z.enum(['note', 'test']), title: text, scope: studyScopeSchema, resolvedScope: studyResolvedScopeSchema, status: z.enum(['generating', 'ready', 'failed', 'interrupted']), bodyMarkdown: z.string().max(262144).nullable(), test: studyTestSchema.nullable(), providerId: providerIdSchema, modelId: text, errorCode: z.string().max(120).nullable(), createdAt: z.string().datetime() }).strict();
