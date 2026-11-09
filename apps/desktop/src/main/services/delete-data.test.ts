@@ -1,10 +1,10 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { createDataDeletion, cleanupDeletedData } from './delete-data';
-const io = vi.hoisted(() => ({rename:vi.fn(),rm:vi.fn(),readdir:vi.fn(),open:vi.fn()}));
+const io = vi.hoisted(() => ({rename:vi.fn(),rm:vi.fn(),readdir:vi.fn(),open:vi.fn(),lstat:vi.fn()}));
 const workers = vi.hoisted(() => ({suspend:vi.fn(),waitForIdle:vi.fn(),resume:vi.fn()}));
 vi.mock('node:fs/promises', () => io);
 vi.mock('../review/workers', () => ({reviewWorkers:workers}));
-beforeEach(() => {vi.resetAllMocks(); io.open.mockResolvedValue({writeFile:vi.fn(),sync:vi.fn(),close:vi.fn()});});
+beforeEach(() => {vi.resetAllMocks(); io.lstat.mockResolvedValue({isSymbolicLink:()=>false}); io.open.mockResolvedValue({writeFile:vi.fn(),sync:vi.fn(),close:vi.fn()});});
 function setup() {
   const stop=vi.fn(), report=vi.fn(), relaunch=vi.fn();
   return {stop,report,relaunch,run:createDataDeletion('/owned',stop,report,relaunch)};

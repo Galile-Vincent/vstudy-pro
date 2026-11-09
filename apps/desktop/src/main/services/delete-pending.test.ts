@@ -53,6 +53,15 @@ it('leaves a failed owned entry pending and retries with bounded filesystem retr
   remove.mockImplementation(original);
   expect(await finishPendingDeletion(root, async () => {}, vi.fn())).toBe(true);
 });
+it('wipes the resolved symlink root instead of quarantining only the link', async () => {
+  const {root,parent} = await fixture();
+  const link = join(parent,'linked'); await fs.symlink(root,link);
+  await createDataDeletion(link, async () => {}, async () => {}, () => {})();
+  await fs.access(link + '.delete-pending');
+  expect(await finishPendingDeletion(link,async () => {},vi.fn())).toBe(true);
+  await expect(fs.access(join(root,'vstudy.sqlite'))).rejects.toThrow();
+});
+
 it('uses deferred deletion directly on Windows without renaming the root', async () => {
   const {root} = await fixture();
   const platform = Object.getOwnPropertyDescriptor(process,'platform')!;

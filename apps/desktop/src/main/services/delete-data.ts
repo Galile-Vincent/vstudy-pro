@@ -17,7 +17,9 @@ export function createDataDeletion(
       reviewWorkers.suspend('delete-all');
       await markDeletionPending(root);
       await quiesce(async () => { await reviewWorkers.waitForIdle(); await stop(); });
-      if (process.platform === 'win32') await markDeletionPending(root);
+      if (process.platform === 'win32' || (await lstat(root)).isSymbolicLink()) {
+        await realpath(root);
+      }
       else {
         try {
           await rename(root, `${root}.deleting-${Date.now()}-${randomUUID()}`);
