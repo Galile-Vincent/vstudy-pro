@@ -412,7 +412,7 @@ function CoursesBody({
               {d.submitted ? tr("moodle:done") : relative(d.dueAt)}
             </span>}
             actions={<div className="flex flex-wrap items-center gap-2">
-            {d.url && <Button variant="ghost" aria-label={tr('webview:open')} onClick={() => {
+            {d.url && <Button variant="ghost" aria-label={tr('moodle:open_deadline', {title: d.title})} onClick={() => {
               const course = overview?.courses.find(c => c.id === d.courseId);
               if (course && d.url) openMoodle(course.accountId,{kind:'page',url:d.url});
             }}><ArrowUpRight /></Button>}
@@ -451,7 +451,7 @@ function CoursesBody({
             subtitle={<span className="line-clamp-2">{plainText(n.body)}</span>}
             meta={<time dateTime={n.createdAt}>{relative(n.createdAt)}</time>}
             actions={<div className="flex flex-wrap gap-2">
-              {n.url && <Button variant="ghost" onClick={() => openMoodle(n.accountId,{kind:'page',url:n.url!})}>{tr('webview:open')}<ArrowUpRight /></Button>}
+              {n.url && <Button variant="ghost" aria-label={tr("moodle:open_notification", {title: n.subject})} onClick={() => openMoodle(n.accountId,{kind:'page',url:n.url!})}>{tr('webview:open')}<ArrowUpRight /></Button>}
               {!n.read && (
                 <Button
                   variant="ghost"
@@ -515,7 +515,7 @@ function CoursesBody({
                 onClick={() => void openFile(f.id)}
                 meta={<span>{" "}{tr(opening === f.id ? "moodle:converting" : f.documentId ? "moodle:ready" : "moodle:not_opened")}</span>}
                 actions={
-              <Button variant="ghost" size="icon" aria-label={`${tr('webview:open')}: ${f.name}`} title={tr('webview:open')} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})}><ArrowUpRight /></Button>
+              <Button variant="ghost" size="icon" aria-label={tr("moodle:open_original_file", {title: f.name})} title={tr('webview:open')} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})}><ArrowUpRight /></Button>
                 }
               />
             ))}

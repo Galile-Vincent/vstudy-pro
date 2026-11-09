@@ -262,5 +262,8 @@
   "disconnect_school_named": "{{school}}の接続を解除",
   "pin_course_named": "{{course}}をピン留め",
   "unpin_course_named": "{{course}}のピン留めを解除",
-  "jump_current_week": "今週へ移動"
+  "jump_current_week": "今週へ移動",
+  "open_deadline": "締め切りを開く：{{title}}",
+  "open_notification": "通知を開く：{{title}}",
+  "open_original_file": "元のファイルを開く：{{title}}"
 }
