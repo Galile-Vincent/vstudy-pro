@@ -338,7 +338,6 @@ export function LibrarySidebar() {
           >
             <Button
               variant="ghost"
-              size="sm"
               tabIndex={-1}
               aria-label={tr('library:expand')}
               onClick={() => toggle(f.id)}
@@ -369,7 +368,6 @@ export function LibrarySidebar() {
             )}
             <Button
               variant="ghost"
-              size="sm"
               className="folder-link"
               tabIndex={-1}
               onClick={() => go({ folderId: f.id }, f.name)}
@@ -386,7 +384,6 @@ export function LibrarySidebar() {
             </Button>
             <Button
               variant="ghost"
-              size="sm"
               aria-label={tr('library:folderActions', { name: f.name })}
               tabIndex={-1}
               onClick={async () => {
