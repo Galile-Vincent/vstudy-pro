@@ -66,7 +66,7 @@ export function AppShell({
     return () => window.removeEventListener('vstudy:toggle-sidebar', toggle);
   }, []);
   const closeSidebar = useCallback(() => setSidebarVisible(false), []);
-  const sidebarOverlay = useSidebarOverlay(closeSidebar);
+  const sidebarOverlay = useSidebarOverlay(closeSidebar, sidebarVisible);
   useEffect(() => {
     const pointer=()=>{document.documentElement.dataset.inputModality='pointer';};
     const keyboard=(event:KeyboardEvent)=>{if(['Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))document.documentElement.dataset.inputModality='keyboard';};

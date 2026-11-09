@@ -87,3 +87,12 @@ it.each(['home', 'library', 'last'] as const)('focuses the surviving target afte
   await act(async () => vi.advanceTimersByTime(20));
   expect(document.activeElement?.id).toEqual(view === 'last' ? 'shell-content' : 'tab-00000000-0000-4000-8000-000000000003');
 });
+
+it('closes the visible sidebar with Escape and restores toggle focus', async () => {
+  await mount();
+  const toggle = host.querySelector<HTMLButtonElement>('.shell-toggle')!;
+  host.querySelector<HTMLButtonElement>('#chosen')!.focus();
+  await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })));
+  expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(true);
+  expect(document.activeElement).toBe(toggle);
+});
