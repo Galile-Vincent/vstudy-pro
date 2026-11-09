@@ -315,6 +315,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       store?.close();
       store = undefined;
     });
+    app.relaunch();
     app.exit();
     return { ok: true };
   });

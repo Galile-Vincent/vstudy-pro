@@ -108,5 +108,9 @@
   "event_ai_cli_login": "AI ツールへのログイン",
   "event_ai_cli_status": "AI ツールの状態確認",
   "event_moodle_request": "Moodle リクエスト",
-  "event_unknown": "ネットワークリクエスト"
+  "event_unknown": "ネットワークリクエスト",
+  "delete_failed": "アプリデータを削除できませんでした（{{reason}}）。ファイルを使用中の他のアプリを閉じて再試行してください。",
+  "delete_failed_permission": "アプリデータを削除できませんでした。アクセスが拒否されました。ファイルの権限を確認して再試行してください。",
+  "delete_failed_busy": "アプリデータを削除できませんでした。ファイルが使用中です。他のアプリを閉じて再試行してください。",
+  "delete_failed_files": "すべてのアプリデータファイルを削除できませんでした。空き容量を確認して再試行してください。"
 }

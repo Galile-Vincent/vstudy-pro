@@ -108,5 +108,9 @@
   "event_ai_cli_login": "AI tool sign-in",
   "event_ai_cli_status": "AI tool status check",
   "event_moodle_request": "Moodle request",
-  "event_unknown": "Network request"
+  "event_unknown": "Network request",
+  "delete_failed": "Could not delete app data ({{reason}}). Close other apps using these files and try again.",
+  "delete_failed_permission": "Could not delete app data: access was denied. Check file permissions and try again.",
+  "delete_failed_busy": "Could not delete app data: files are in use. Close other apps and try again.",
+  "delete_failed_files": "Could not remove all app data files. Check available disk space and try again."
 }
