@@ -239,3 +239,22 @@ it('associates segmented tabs with their panels and supports arrow navigation', 
   expect(notes.getAttribute('aria-controls')).toBe(panel.id);
   expect(panel.getAttribute('aria-labelledby')).toBe(notes.id);
 });
+
+it('focuses rename after the menu closes and restores the trigger on Escape', async () => {
+  render(<ReviewView />);
+  const trigger = await screen.findByRole('button', { name: 'Actions for Concept 1' });
+  fireEvent.keyDown(trigger, { key: 'Enter' });
+  fireEvent.click(await screen.findByRole('menuitem', { name: en.rename }));
+  const input = await screen.findByLabelText(en.rename);
+  await waitFor(() => expect(document.activeElement).toBe(input));
+  fireEvent.keyDown(input, { key: 'Escape' });
+  await waitFor(() => expect(document.activeElement).toBe(trigger));
+});
+
+it.each(['today', 'make_test'] as const)('moves focus after %s opens Tests', async action => {
+  render(<ReviewView />);
+  const button = await screen.findByRole('button', { name: en[action] });
+  button.focus();
+  fireEvent.click(button);
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('heading', { name: en.tests })));
+});

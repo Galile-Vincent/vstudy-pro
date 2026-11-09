@@ -247,7 +247,7 @@ export function ArtifactPanel({
           : "generation_failed";
   return (
     <section className="review-artifacts">
-      <h2>{tr(kind === "note" ? "review:notes" : "review:tests")}</h2>
+      <h2 id={`review-${kind}-heading`} tabIndex={-1}>{tr(kind === "note" ? "review:notes" : "review:tests")}</h2>
       {selection?.totalConcepts !== undefined &&
         selection.totalConcepts > selection.conceptKeys.length && (
           <p role="status">

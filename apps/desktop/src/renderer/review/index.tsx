@@ -174,7 +174,7 @@ export function ReviewView() {
       .map((id) => document.getElementById(id))
       .find(Boolean)
       ?.focus();
-  }, [revision, busy, weak.loading, weak.items]);
+  }, [revision, busy, weak.loading, weak.items, tab, selection]);
   const open = (conversationId: string, messageId?: string) =>
     navigate({
       view: "history",
@@ -193,6 +193,7 @@ export function ReviewView() {
       labels,
       ...(totalConcepts !== undefined ? { totalConcepts } : {}),
     });
+    pendingFocus.current = [`review-${kind}-heading`];
     setUserTab(kind === "note" ? "notes" : "tests");
   };
   const emptyCourses =
