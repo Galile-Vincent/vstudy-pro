@@ -31,7 +31,13 @@ export function inspect(source, css = true) {
   );
   property(
     'border-radius|borderRadius|border-(?:start|end)-(?:start|end)-radius|border-(?:top|bottom)-(?:left|right)-radius|border(?:Top|Bottom)(?:Left|Right)Radius',
-    (value) => /var\(--r-/.test(value) || !/(?:\d+(?:\.\d+)?px|^\d+(?:\.\d+)?$)/.test(value),
+    (value) => {
+      const lengths = value
+        .replace(/calc\([^)]*var\(--r-[\w-]+\)[^)]*\)/g, '')
+        .replace(/var\(--r-[\w-]+\)/g, '')
+        .match(/-?(?:\d*\.)?\d+(?:px|rem|em|%|vw|vh|vmin|vmax|cm|mm|in|pt|pc|ex|ch)?/g) ?? [];
+      return lengths.every((length) => Number.parseFloat(length) === 0);
+    },
     'radius',
   );
   const namedColors =
@@ -67,7 +73,8 @@ export function inspect(source, css = true) {
         ...match[1].matchAll(/\.[\w-]+-(?:card|panel|tile)(?![\w-])/g),
       ].length;
   } else {
-    counts.radius += [...text.matchAll(/rounded-\[\d+(?:\.\d+)?px\]/g)].length;
+    counts.radius += [...text.matchAll(/rounded-\[((?:\d*\.)?\d+)(?:px|rem|em)?\]/g)]
+      .filter((match) => Number(match[1]) !== 0).length;
     counts.shadow += [...text.matchAll(/shadow-\[(?!var\(--)[^\]]+\]/g)].length;
     counts.backdrop += [...text.matchAll(/backdrop-(?:blur|filter)-\[(?!var\(--)[^\]]+\]/g)].length;
   }
