@@ -1344,3 +1344,19 @@ it.each(["locked", "lazy"])("jumps safely to a %s current week after a tab round
   const panel = document.getElementById(button.getAttribute("aria-controls")!)!;
   expect(panel.hidden).toBe(kind === "locked");
 });
+
+it("neutralizes imported headings in week summaries and module sheets", async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  const current = detail.sections.find(section => section.current)!;
+  current.summaryHtml = "<h2>Imported summary</h2><h3>More summary</h3>";
+  current.modules[0]!.descriptionHtml = "<h2>Imported description</h2><h4>Details</h4>";
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  expect(queryByRole(host, "heading", {name: "Imported summary"})).toBeNull();
+  expect(host.textContent).toContain("Imported summary");
+  await act(async () => host.querySelector<HTMLButtonElement>(".moodle-module button")!.click());
+  const sheet = document.querySelector<HTMLElement>("[data-slot=sheet-content]")!;
+  expect(queryByRole(sheet, "heading", {name: "Imported description"})).toBeNull();
+  expect(sheet.textContent).toContain("Imported description");
+});
