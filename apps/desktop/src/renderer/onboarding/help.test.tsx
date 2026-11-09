@@ -27,6 +27,28 @@ it('closes the checklist on document navigation and has one unique title', async
   warning.mockRestore();
 });
 
+it('shows the dialog checklist as four rows without an inner card', async () => {
+  render(<LearningHelp />);
+  act(() => openLearningHelp('checklist'));
+  const dialog = await screen.findByRole('dialog');
+  expect(dialog.querySelector('[data-slot=card]')).toBeNull();
+  expect(dialog.querySelectorAll('[data-slot=list-row]')).toHaveLength(4);
+  expect(dialog.querySelector('main,[role=main]')).toBeNull();
+});
+
+it('switches walkthrough lessons with tabs', async () => {
+  await i18n.changeLanguage('en');
+  vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
+  render(<LearningHelp />);
+  act(() => openLearningHelp('walkthroughs'));
+  const tab = await screen.findByRole('tab', { name: i18n.t('onboarding:lesson_due') });
+  fireEvent.mouseDown(tab);
+  fireEvent.focus(tab);
+  await waitFor(() => expect(tab.getAttribute('aria-selected')).toBe('true'));
+  vi.unstubAllGlobals();
+  vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
+});
+
 it('uses a single checklist region', () => {
   render(<GettingStarted />);
   expect(screen.getAllByRole('region')).toHaveLength(1);
