@@ -154,13 +154,10 @@ export function UploadCard({
             </>
           }
         />
-        {(busy || message || error) && (
-          <div className="flex flex-col gap-[var(--space-2)]">
-            {busy && <progress aria-label={tr('home:importing')} />}
-            {message && <p role="status">{message}</p>}
-            {error && <p role="alert">{error}</p>}
-          </div>
-        )}
+        <div role="status" className="flex flex-col gap-[var(--space-2)]">
+          {busy && <progress aria-label={tr('home:importing')} />}
+          {error || message}
+        </div>
       </div>
       {showOpen && imported && navigation && (
         <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>
