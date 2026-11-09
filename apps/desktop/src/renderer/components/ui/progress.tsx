@@ -9,11 +9,12 @@ function Progress({
   ...props
 }: React.ComponentProps<typeof ProgressPrimitive.Root>) {
   const limit = Number.isFinite(max) && max > 0 ? max : 100
-  const ratio = typeof value === "number" && Number.isFinite(value)
-    ? Math.min(100, Math.max(0, value / limit * 100)) : 0
+  const bounded = typeof value === "number" && Number.isFinite(value)
+    ? Math.min(limit, Math.max(0, value)) : null
+  const ratio = bounded === null ? 0 : bounded / limit * 100
   return (
     <ProgressPrimitive.Root
-      value={value}
+      value={bounded}
       max={limit}
       data-slot="progress"
       className={cn(

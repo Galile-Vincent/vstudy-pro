@@ -258,7 +258,7 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/progress.tsx",
       "registrySha256": "cf5de49b1c6d9ba6753d1d2f62820c543935cf426b8af8b49b277cfda6cc2c5b",
-      "patchedSha256": "15b9cf9e36d2de3868689b06c2f2b450781ff29f1f8fbe58bbfb6786805e950a",
+      "patchedSha256": "2fd866791c06cdcb6aee5631a6c8e3ff24fe3105f0d2f8e04bdf7c92eccf4dbd",
       "patch": "docs/vendor-patches/ui--progress.tsx.patch",
       "reason": "Resolve the local cn helper and forward determinate value/max with proportional indicator geometry."
     },
