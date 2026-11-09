@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import { CONTACT_EMAIL, VERSION, path } from '../config';
+import type { Language } from '../data/ui';
+import { mediaCopy } from '../data/media-copy';
+import tokens from '../styles/tokens.css?raw';
+import symbol from '../../public/brand/symbol.svg?raw';
+import '../styles/media.css';
+interface Props { language: Language; }
+const { language } = Astro.props;
+const c = mediaCopy[language];
+const token = (name: string) => tokens.match(new RegExp(`--${name}:(#[a-fA-F0-9]+)`))![1];
+const stops = [...symbol.matchAll(/stop-color="(#[a-fA-F0-9]+)"/g)].map(match => match[1]);
+const palette = {accent:token('accent'),ink:token('ink'),paper:token('background'),sky:stops[0],iris:stops[5]};
+const colors = Object.values(palette);
+const kit = (file: string) => path(`brand/kit/${file}`);
+const url = new URL(path('download'), Astro.site).href;
+const config = {copy:c, palette, url, version: VERSION ? `v${VERSION} beta` : 'beta', symbol:kit('symbol.svg'), screenshot:kit('courses-home.png'), language};
+const shots = ['courses-home','capture-to-chat','library','document-figures'];
+---
+<Base {language} title={c.kit} description={c.intro} page="media/">
+  <main id="main" tabindex="-1" class="media container" data-media data-config={JSON.stringify(config)}>
+    <header class="media-head"><p class="media-eyebrow">VStudy Pro / {c.kit}</p><h1>{c.title}</h1><p>{c.intro}</p></header>
+    <section aria-labelledby="media-share-title" class="media-share">
+      <div class="media-editor">
+        <p class="media-eyebrow">01 / {c.shareAction}</p><h2 id="media-share-title">{c.share}</h2><p>{c.shareIntro}</p>
+        <fieldset><legend>{c.format}</legend><div class="media-options">{(['story','square'] as const).map((value,i) => <label><input type="radio" name="format" value={value} checked={i === 0}/><span>{c.formats[i]}<small>{i === 0 ? '1080 × 1920' : '1080 × 1080'}</small></span></label>)}</div></fieldset>
+        <fieldset><legend>{c.look}</legend><div class="media-options">{(['light','dark','aurora'] as const).map((value,i) => <label><input type="radio" name="look" value={value} checked={i === 2}/><span>{c.looks[i]}</span></label>)}</div></fieldset>
+        <div class="media-actions"><button class="media-primary" data-action="download" disabled>{c.download}</button><button data-action="share" hidden>{c.shareAction}</button><button data-copy={url}>{c.copyLink}</button><button data-copy={`${c.caption} ${url} #VStudyPro #StudyWithAI`}>{c.copyCaption}</button></div>
+        <p class="media-status" role="status" aria-live="polite" data-status>{c.loading}</p>
+        <noscript><p>{c.error}</p></noscript>
+      </div>
+      <div class="media-preview"><canvas width="1080" height="1920" role="img" aria-label={`${c.preview}. ${c.headline.join(' ')} ${c.chips.join(', ')}. ${c.free} ${url}`}></canvas></div>
+    </section>
+    <section aria-labelledby="media-assets-title" class="media-section">
+      <p class="media-eyebrow">02 / {c.kit}</p><h2 id="media-assets-title">{c.assets}</h2>
+      <div class="media-assets">{['symbol','lockup-light','lockup-dark'].map((name,i) => <article class="media-card"><div class:list={['media-brand-preview',{'is-dark':i === 2}]}><img src={kit(`${name}.svg`)} alt={i === 0 ? c.symbol : c.lockups[i-1]} width={i === 0 ? 140 : 280} height="110" loading="lazy"/></div><h3>{i === 0 ? c.symbol : c.lockups[i-1]}</h3><div class="media-actions"><a href={kit(`${name}.svg`)} download>SVG</a><a href={kit(`${name}.png`)} download>PNG</a></div></article>)}</div>
+      <h3 class="media-subtitle">{c.screenshots}</h3><div class="media-shots">{shots.map((shot,i) => <a class="media-card" href={kit(`${shot}.png`)} download><img src={kit(`${shot}.png`)} width="2880" height="1800" alt={c.shotNames[i]} loading="lazy"/><span>{c.shotNames[i]} <small>PNG ↓</small></span></a>)}</div>
+    </section>
+    <section class="media-section" aria-labelledby="media-colors-title"><h2 id="media-colors-title">{c.colors}</h2><div class="media-colors">{colors.map((hex,i) => <button data-copy={hex} aria-label={`${c.copy} ${c.colorNames[i]} ${hex}`}><span style={`background:${hex}`} aria-hidden="true"></span><strong>{c.colorNames[i]}</strong><code>{hex}</code></button>)}</div></section>
+    <div class="media-notes"><section class="media-card" aria-labelledby="media-rules-title"><h2 id="media-rules-title">{c.rules}</h2><ul>{c.usage.map(line => <li>{line}</li>)}</ul></section><section class="media-card" aria-labelledby="media-about-title"><h2 id="media-about-title">{c.boilerplate}</h2><p>{c.about}</p><div class="media-actions"><button data-copy={c.about}>{c.copy}</button></div><p class="media-contact">{c.contact} <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p></section></div>
+  </main>
+</Base>
+<script>
+  import { initShareStory } from '../scripts/share-story';
+  initShareStory();
+</script>
