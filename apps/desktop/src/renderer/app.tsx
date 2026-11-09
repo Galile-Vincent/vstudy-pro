@@ -9,6 +9,7 @@ import { ExistingAnalyticsPrompt } from './analytics-ui';
 import { track } from './analytics';
 import { HistoryView, HistoryFinder } from "./history";
 import { lazy, Suspense, useEffect, useMemo, useState, type ComponentType } from "react";
+const DevDesignRoute = import.meta.env.DEV ? lazy(() => import('./design').then(module => ({default:module.DesignRoute}))) : null;
 let loadedWelcome: ComponentType | undefined;
 const loadWelcome = () => import("./welcome").then(module => { loadedWelcome = module.default; return module; });
 const WelcomeView = lazy(loadWelcome);
@@ -67,7 +68,7 @@ function Views() {
     <HomeView />
   )}</SurfaceErrorBoundary>;
 }
-export function App() {
+function Application() {
   return (
     <AgentsProvider>
       <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
@@ -75,4 +76,8 @@ export function App() {
       </AppShell>
     </AgentsProvider>
   );
+}
+
+export function App() {
+  return DevDesignRoute ? <Suspense fallback={null}><DevDesignRoute><Application/></DevDesignRoute></Suspense> : <Application/>;
 }
