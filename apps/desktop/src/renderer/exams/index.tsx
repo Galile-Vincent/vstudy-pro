@@ -159,7 +159,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
   );
   const ready = documents?.filter((d) => d.status === "ready") ?? [];
   return (
-    <PageContainer as="main" className="exams-view">
+    <PageContainer as="main" className="exams-view" data-tab-scroll="">
       <PageHeader
         title={tr("exams:title")}
         description={tr("exams:subtitle")}

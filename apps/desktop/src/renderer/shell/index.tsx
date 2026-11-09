@@ -26,6 +26,7 @@ import {
   useLayoutEffect,
   useRef,
   useEffect,
+  type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from "react";
 import { Home, BookOpen, ArrowLeft, Menu, Settings, GraduationCap, Search, History as HistoryIcon } from "lucide-react";
@@ -47,6 +48,23 @@ export function useNavigate() {
   if (!value) throw new Error("Navigation provider missing");
   return value;
 }
+const tabScroller = () => {
+  const content = document.getElementById('shell-content');
+  return content?.querySelector<HTMLElement>('[data-tab-scroll]') ?? content;
+};
+const scrollKeys: Record<string, (el: HTMLElement) => void> = {
+  PageDown: el => el.scrollBy({ top: el.clientHeight * 0.875 }),
+  PageUp: el => el.scrollBy({ top: -el.clientHeight * 0.875 }),
+  Home: el => el.scrollTo({ top: 0 }),
+  End: el => el.scrollTo({ top: el.scrollHeight }),
+};
+const forwardScrollKeys = (event: ReactKeyboardEvent<HTMLElement>) => {
+  if (event.target !== event.currentTarget || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  const scroller = tabScroller();
+  if (!scroller || scroller === event.currentTarget || !scrollKeys[event.key]) return;
+  event.preventDefault();
+  scrollKeys[event.key]!(scroller);
+};
 export function AppShell({
   children,
   sidebar,
@@ -102,10 +120,10 @@ export function AppShell({
   const capture = () => {
     const tab = activeTab(tabsRef.current);
     if(tab.presentation.kind==='moodle' || tab.presentation.kind==='hosted-chat') return;
-    dispatch({ type: 'presentation', id: tab.id, presentation: { ...tab.presentation, scrollTop: document.getElementById('shell-content')?.scrollTop ?? 0 } });
+    dispatch({ type: 'presentation', id: tab.id, presentation: { ...tab.presentation, scrollTop: tabScroller()?.scrollTop ?? 0 } });
   };
   useLayoutEffect(() => {
-    const content = document.getElementById('shell-content');
+    const content = tabScroller();
     if (!content) return;
     const presentation=activeTab(tabsRef.current).presentation;
     if(presentation.kind==='moodle' || presentation.kind==='hosted-chat') return;
@@ -485,6 +503,7 @@ export function AppShell({
           role={route.view === 'library' ? 'main' : undefined}
           className="shell-content"
           tabIndex={-1}
+          onKeyDown={forwardScrollKeys}
         >
           {children}
           <HistorySwipeNavigation
