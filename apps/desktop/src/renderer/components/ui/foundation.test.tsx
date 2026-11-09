@@ -53,6 +53,8 @@ it('labels sections and preserves page header and toolbar slots', () => {
   expect(screen.getByRole('heading', {level:1}).textContent).toBe('Library');
   expect(screen.getByRole('region', {name:/Recent.*0/})).toBeTruthy();
   expect(screen.getByText('Right')).toBeTruthy();
+  expect(screen.queryByRole('main')).toBeNull();
+  expect(document.querySelector('[data-slot=page-container]')?.tagName).toBe('DIV');
 });
 it('renders caller empty copy, action and stat units and delta', () => {
   render(<><EmptyState title="No files" description="Import one" action={<button>Import</button>}/><Stat label="Time" value={12} unit="min" delta="+2"/></>);

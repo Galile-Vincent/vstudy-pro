@@ -23,6 +23,6 @@ export function Toolbar({ left, center, right, className, ...props }: DivProps &
   return <div {...props} data-slot="toolbar" className={cn('flex flex-wrap items-center gap-[var(--space-3)]', className)}>{left && <div className="flex flex-wrap items-center gap-[var(--space-2)]">{left}</div>}{center && <div className="flex flex-1 flex-wrap items-center justify-center gap-[var(--space-2)]">{center}</div>}{right && <div className="ms-auto flex flex-wrap items-center gap-[var(--space-2)]">{right}</div>}</div>;
 }
 
-export function PageContainer({ className, ...props }: ComponentProps<'main'>) {
-  return <main {...props} data-slot="page-container" className={cn('ui-page-container mx-auto flex w-full flex-col gap-[var(--space-8)] p-[var(--space-8)]', className)} />;
+export function PageContainer({ className, ...props }: ComponentProps<'div'>) {
+  return <div {...props} data-slot="page-container" className={cn('ui-page-container mx-auto flex w-full flex-col gap-[var(--space-8)] p-[var(--space-8)]', className)} />;
 }
