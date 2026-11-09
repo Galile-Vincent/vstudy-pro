@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Card, CardContent, CardHeader } from './card';
 import { PageContainer, PageHeader, Section, Toolbar } from './page-layout';
 import { FormField } from './form-field';
@@ -60,11 +60,14 @@ it('renders caller empty copy, action and stat units and delta', () => {
   expect(screen.getByText('min')).toBeTruthy();
   expect(screen.getByText('+2')).toBeTruthy();
 });
-it('exposes selected tabs and uses roving keyboard focus', () => {
+it('exposes selected tabs and uses roving keyboard focus', async () => {
   render(<Tabs defaultValue="one"><SegmentedTabsList aria-label="Views"><SegmentedTabsTrigger value="one">One</SegmentedTabsTrigger><SegmentedTabsTrigger value="two">Two</SegmentedTabsTrigger><SegmentedTabsTrigger value="three" disabled>Three</SegmentedTabsTrigger></SegmentedTabsList><TabsContent value="one">First</TabsContent><TabsContent value="two">Second</TabsContent></Tabs>);
   expect(screen.getByRole('tab', {name:'One'}).getAttribute('aria-selected')).toBe('true');
   fireEvent.mouseDown(screen.getByRole('tab', {name:'Two'}), {button:0, ctrlKey:false});
   expect(screen.getByRole('tab', {name:'Two'}).getAttribute('aria-selected')).toBe('true');
   expect(screen.getByRole('tabpanel').textContent).toBe('Second');
   expect(screen.getByRole('tab', {name:'Three'}).hasAttribute('disabled')).toBe(true);
+  screen.getByRole('tab', {name:'Two'}).focus();
+  fireEvent.keyDown(screen.getByRole('tab', {name:'Two'}), {key:'ArrowRight'});
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('tab', {name:'One'})));
 });

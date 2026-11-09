@@ -14,7 +14,7 @@ export function PageHeader({ title, description, leading, actions, meta, classNa
   </header>;
 }
 
-export function Section({ title, count, actions, children, className, ...props }: Omit<ComponentProps<'section'>, 'title'> & Pick<Slots, 'title' | 'actions'> & { count?: number }) {
+export function Section({ title, count, actions, children, className, ...props }: Omit<ComponentProps<'section'>, 'title'> & Pick<Slots, 'title' | 'actions'> & { count?: ReactNode }) {
   const id = useId();
   return <section aria-labelledby={id} {...props} data-slot="section" className={cn('flex flex-col gap-[var(--space-4)]', className)}><div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]"><h2 id={id} className="flex items-center gap-[var(--space-2)] text-[length:var(--type-lg)] font-medium">{title}{count !== undefined && <Badge variant="secondary">{count}</Badge>}</h2>{actions}</div>{children}</section>;
 }

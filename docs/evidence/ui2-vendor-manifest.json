@@ -208,7 +208,7 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/card.tsx",
       "registrySha256": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059",
-      "patchedSha256": "e92279d91e21de7d42acce0b9cd93364b64b79ae58f9c035589dfaf1c35d85a9",
+      "patchedSha256": "07c1d9d27f1b9116deeab6a6276e65427628b5e0dbf961a5e0c8b254fad9defb",
       "patch": "docs/vendor-patches/ui--card.tsx.patch",
       "reason": "Use the local cn helper and the translucent card surface tokens with a hairline border. Extend with token-based variants and native interactive targets.",
       "foundationPatch": "docs/vendor-patches/ui--card-foundation.patch"
@@ -373,7 +373,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/foundation.test.tsx",
-      "sha256": "5d659d0293ceb24ef29833dbb4b5cd20c47f092d29cfe4742160281687707cf9",
+      "sha256": "fcb6689df03c5e42e919f2165f2722b8d3cb359080f691ca8fd25b37d4d762cb",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -388,7 +388,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "ba67b9d291614f582ab0575f210f204d6d20368e0f726023bd9aad6735083b08",
+      "sha256": "5bd3b894f712f72ef19071b9ed41b0ce332233a4360d19a7facdd080d896d076",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {

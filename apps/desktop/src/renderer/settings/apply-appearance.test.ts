@@ -6,7 +6,7 @@ import { builtinThemes } from '../../shared/themes';
 
 const state = vi.hoisted(() => ({dark:false,change:()=>{},invoke:vi.fn()}));
 vi.mock('../bridge', () => ({desktop:{invoke:state.invoke}}));
-import { applyAppearance, initializeAppearance } from './apply-appearance';
+import { applyAppearance, initializeAppearance, previewTheme } from './apply-appearance';
 
 beforeEach(() => {
   state.dark=false;state.change=()=>{};state.invoke.mockReset();
@@ -86,4 +86,16 @@ it('restores cached card transparency before settings resolve', async () => {
   resolve({...defaultSettings,cardTransparency:'solid'});
   await initialized;
   expect(document.documentElement.style.getPropertyValue('--surface-opacity')).toBe('100%');
+});
+
+it('restores the authoritative theme and system tracking after a gallery preview', async () => {
+  await initializeAppearance();
+  applyAppearance({...defaultSettings,themeId:'ocean',colorScheme:'system'});
+  const restore = previewTheme({...defaultSettings,themeId:'rose',colorScheme:'dark'});
+  expect(document.documentElement.dataset.theme).toBe('rose');
+  restore();
+  expect(document.documentElement.dataset.theme).toBe('ocean');
+  state.dark=true;state.change();
+  expect(document.documentElement.dataset.scheme).toBe('dark');
+  expect(document.documentElement.dataset.theme).toBe('ocean');
 });

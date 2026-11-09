@@ -8,6 +8,7 @@ import { inspect, regressions, collect, run } from './ui-lint.mjs';
 test('counts unsafe declarations while accepting tokens and focus rings', async () => {
   assert.deepEqual(inspect(await readFile(new URL('./fixtures/ui-lint.css',import.meta.url),'utf8')), {shadow:1,radius:1,color:1,backdrop:1,'surface-class':1});
   assert.equal(inspect('.x { box-shadow: 0 0 0 2px var(--focus), 3px 4px black; }').shadow,1);
+  assert.equal(inspect('const style = {boxShadow: "var(--glass-shadow)", backdropFilter: "var(--glass-blur)"}',false).shadow,0);
   assert.equal(inspect('const style = {borderRadius: "8px", color: "rgb(1,2,3)"}',false).radius,1);
 });
 test('ratchets by file and rule, including new files', () => {

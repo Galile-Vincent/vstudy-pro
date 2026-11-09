@@ -28,6 +28,12 @@ export function applyTheme(preferences: ThemePreferences, preview?: ThemePack): 
   root.style.colorScheme = scheme;
 }
 
+export function previewTheme(preferences: ThemePreferences): () => void {
+  const previous = current;
+  applyTheme(preferences);
+  return () => applyTheme(previous);
+}
+
 /** The cache avoids a default-theme paint while the authoritative SQLite settings load. */
 export function applyAppearance(settings: Settings, animate = false): void {
   const nextKey = JSON.stringify([resolveTheme(settings), settings.colorScheme, settings.contrast, settings.glassOpacity, settings.material, settings.cardTransparency]);
