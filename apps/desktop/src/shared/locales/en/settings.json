@@ -112,5 +112,7 @@
   "delete_failed": "Could not delete app data ({{reason}}). Close other apps using these files and try again.",
   "delete_failed_permission": "Could not delete app data: access was denied. Check file permissions and try again.",
   "delete_failed_busy": "Could not delete app data: files are in use. Close other apps and try again.",
-  "delete_failed_files": "Could not remove all app data files. Check available disk space and try again."
+  "delete_failed_files": "Could not remove all app data files. Check available disk space and try again.",
+  "remove_key_title": "Remove the key for {{name}}?",
+  "remove_key_copy": "You will need to enter a key again to use this provider."
 }

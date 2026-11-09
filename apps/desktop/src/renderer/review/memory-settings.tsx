@@ -42,7 +42,7 @@ export function MemorySettings() {
       {erased && <p role="status">{tr('review:erase_done')}</p>}
       {error && <div role="alert"><p>{tr('review:error')}</p><Button onClick={() => void load()}>{tr('review:retry')}</Button></div>}
       <Dialog open={confirm} onOpenChange={value => { if (!busy) setConfirm(value); }}>
-        <DialogContent><DialogTitle>{tr('review:erase_confirm')}</DialogTitle><DialogDescription>{tr('review:erase_confirm_copy')}</DialogDescription><Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>{tr('review:cancel')}</Button><Button variant="secondary" disabled={busy} onClick={() => void erase()}>{tr('review:erase_confirm')}</Button></DialogContent>
+        <DialogContent><DialogTitle>{tr('review:erase_confirm')}</DialogTitle><DialogDescription>{tr('review:erase_confirm_copy')}</DialogDescription><Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>{tr('review:cancel')}</Button><Button variant="destructive" disabled={busy} onClick={() => void erase()}>{tr('review:erase_confirm')}</Button></DialogContent>
       </Dialog>
     </SettingsRow>
   </SettingsGroup>;

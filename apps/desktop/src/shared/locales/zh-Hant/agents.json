@@ -138,5 +138,6 @@
   "unavailable": "此平台或建置版本無法使用代理程式存取功能",
   "waiting": "等待您的回應",
   "review": "檢視",
-  "dismiss": "忽略"
+  "dismiss": "忽略",
+  "revoke_done": "已撤銷 {{name}} 的存取權。"
 }

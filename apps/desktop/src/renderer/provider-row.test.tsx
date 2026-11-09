@@ -40,3 +40,14 @@ it('explains unavailable Codex isolation on Windows and disables its launch cont
   expect(Array.from(host.querySelectorAll('button')).every(button=>button.disabled)).toBe(true);
  } finally {await act(async()=>root.unmount());host.remove();hostPlatform.mockRestore();}
 });
+
+it('asks before deleting a saved key', async () => {
+ const {desktop} = await import('./bridge');
+ vi.mocked(desktop.invoke).mockResolvedValueOnce({hasKey:true} as never);
+ const host=document.createElement('div'); document.body.append(host); const root=createRoot(host);
+ try {
+  await act(() => root.render(<ProviderRow provider={{config:{kind:'api',id:'openai-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>));
+  await act(() => [...host.querySelectorAll('button')].find(b=>b.textContent==='Remove')!.click());
+  expect(document.querySelector('[role=dialog]')).toBeTruthy();
+ } finally {await act(() => root.unmount());host.remove();}
+});

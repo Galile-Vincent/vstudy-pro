@@ -138,5 +138,6 @@
   "unavailable": "Agent access is unavailable on this platform/build",
   "waiting": "Waiting for you",
   "review": "Review",
-  "dismiss": "Dismiss"
+  "dismiss": "Dismiss",
+  "revoke_done": "Access revoked for {{name}}."
 }

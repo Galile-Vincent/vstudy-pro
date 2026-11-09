@@ -138,3 +138,9 @@ it('lists pending requests with a review action', async () => {
   expect(view.host.textContent).toContain('Waiting for you');
   expect(button('Review')).toBeTruthy();
 });
+
+it('announces successful revocation inline', async () => {
+  state.grants = [grantFixture()];
+  await mount(); await click('Revoke access');
+  expect(view.host.querySelector('[role=status]')?.textContent).toContain('Access revoked');
+});
