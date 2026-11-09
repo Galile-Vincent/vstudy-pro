@@ -708,11 +708,16 @@ html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
   margin: 0;
 }
 
-.settings-pane .usage-settings .settings-control textarea {
-  flex: 1;
-  min-width: 0;
-  width: 100%;
-  font: var(--type-sm) var(--font-mono);
+.settings-pane .usage-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-4);
+}
+
+.settings-pane .usage-prices {
+  display: grid;
+  gap: var(--space-4);
+  padding-block-start: var(--space-3);
 }
 
 .settings-pane .usage-settings .settings-card > .row {

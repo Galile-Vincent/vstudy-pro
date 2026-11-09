@@ -31,7 +31,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
           <i className="usage-key input" />
           {tr('common:input')}
           <i className="usage-key output" />
-          {tr('common:output_peak')}
+          {tr('common:output_peak')}{' '}
           {compactTokens(
             max === 1 && days.every((d) => !d.inputTokens && !d.outputTokens) ? 0 : max,
           )}
