@@ -49,7 +49,7 @@ export function createIpcRegistrar(
         else if (++budget.count > policy.requests) throw new Error('IPC rate limited');
         let release = () => {};
         try {
-          release = channel.startsWith('storage:') ? () => {} : enterStorageRequest();
+          release = (channel.startsWith('storage:') || ['updates:install', 'updates:cancel', 'updates:download'].includes(channel)) ? () => {} : enterStorageRequest();
           const request = ipcContract[channel].request.parse(payload) as IpcRequest<C>;
           const response = await handler(request, event);
           if (channel.startsWith('review:') && Buffer.byteLength(JSON.stringify(response) ?? '') > 512 * 1024) throw new Error('review.response_limit');

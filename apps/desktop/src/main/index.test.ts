@@ -37,6 +37,7 @@ const electron = await vi.hoisted(async () => {
 vi.mock('electron', () => electron);
 vi.mock('node:fs', async importOriginal => ({...await importOriginal<typeof import('node:fs')>(), mkdirSync:vi.fn()}));
 vi.mock('./db', () => ({ openStore: () => ({ settings: { get: () => ({}) }, close: mocks.closeStore }) }));
+vi.mock('./updates/runtime', () => ({createUpdates: vi.fn(async () => undefined)}));
 vi.mock('./ipc', () => ({ registerIpc: (...args:unknown[]) => mocks.registerIpc(...args) }));
 vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn() }) }));
 vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
