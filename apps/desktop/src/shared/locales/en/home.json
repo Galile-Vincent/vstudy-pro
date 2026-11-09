@@ -59,5 +59,6 @@
   "how_to_use": "How to use",
   "open_imported": "Open {{title}}",
   "file_help": "Choose a PDF, EPUB, text or Office file. Office files must be under 50 MB. Scanned PDFs may need text recognition first.",
-  "drop_to_import": "Drop to import"
+  "drop_to_import": "Drop to import",
+  "resume": "Resume"
 }
