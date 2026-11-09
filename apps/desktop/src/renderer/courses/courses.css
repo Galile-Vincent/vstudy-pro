@@ -819,3 +819,13 @@
 @media (prefers-contrast: more), (forced-colors: active) {
 .moodle-course-chat [data-slot="aui_composer-shell"] { border: 1px solid var(--ink); }
 }
+
+:root[data-theme="contrast"] .moodle-week-heading {
+  outline: 1px solid var(--ink);
+}
+@media (prefers-contrast: more) {
+  .moodle-week-heading { outline: 1px solid var(--ink); }
+}
+@media (forced-colors: active) {
+  .moodle-week-heading { outline: 1px solid ButtonText; }
+}

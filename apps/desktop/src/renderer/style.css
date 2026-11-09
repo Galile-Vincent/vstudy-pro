@@ -980,4 +980,4 @@ html:not([data-input-modality=keyboard]) :is(input[data-slot],textarea[data-slot
 .library-search:focus-within,[data-slot=command-input-wrapper]:focus-within { box-shadow:none; }
 html[data-input-modality=keyboard] :is(.library-search,[data-slot=command-input-wrapper]):has(:focus-visible) { outline:2px solid var(--composer-focus-ring); outline-offset:2px; }
 
-:root :is(.moodle-panel,.moodle-week,.document-card:not(:hover):not([data-selected=true])) { background:var(--surface-card); }
+:root :is(.moodle-panel,.document-card:not(:hover):not([data-selected=true])) { background:var(--surface-card); }
