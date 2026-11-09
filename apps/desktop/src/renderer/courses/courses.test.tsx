@@ -994,3 +994,17 @@ it('offers shared school actions once and names each disconnect', async () => {
   expect(sync).toHaveBeenCalledOnce();
   expect(getByRole(host, 'button', {name: 'Disconnect Second school'})).toBeTruthy();
 });
+
+it('chooses Past initially and preserves a later user choice on refresh', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, courses: overview.courses.map(c => ({
+    ...c, identity: {...c.identity, lifecycle: 'past'},
+  }))});
+  await mount(api);
+  const tabs = [...host.querySelectorAll<HTMLButtonElement>('.moodle-term-tabs [role=tab]')];
+  expect(tabs[2]!.getAttribute('aria-selected')).toBe('true');
+  await act(async () => tabs[3]!.focus());
+  await act(async () => getByRole(host, 'button', {name: /Refresh/}).click());
+  expect(tabs[3]!.getAttribute('aria-selected')).toBe('true');
+});

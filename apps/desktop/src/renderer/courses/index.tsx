@@ -216,6 +216,14 @@ function CoursesBody({
   useEffect(() => {if (reconnect) {setConnect(true);onReconnected?.();}},[reconnect,onReconnected]);
   const [tab, setTab] = useState<Tab>("content");
   const [term, setTerm] = useState<MoodleTermFilter>("current");
+  const termInitialized = useRef(false);
+  useEffect(() => {
+    if (!overview || termInitialized.current) return;
+    termInitialized.current = true;
+    setTerm(termFilters.find(filter =>
+      overview.courses.some(course => matchesTerm(course, filter)),
+    ) ?? 'current');
+  }, [overview]);
   const lang = i18n.resolvedLanguage || "en";
   const [opening, setOpening] = useState<string>();
   const [agentRequest, setAgentRequest] = useState(0);
