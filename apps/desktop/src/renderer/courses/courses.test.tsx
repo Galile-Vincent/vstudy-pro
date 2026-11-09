@@ -1095,7 +1095,7 @@ it('caps overdue at five recent items even when upcoming is expanded', async () 
   expect(titles()).not.toContain('Overdue 5');
 });
 
-it('supplies no empty heading during course loading or unavailable states', async () => {
+it('names the unavailable page with one h1 after course loading', async () => {
   const api = createMockMoodleApi();
   const id = (await api.overview()).courses[0]!.id;
   let resolve!: (value: Awaited<ReturnType<MoodleApi['course']>>) => void;
@@ -1103,7 +1103,8 @@ it('supplies no empty heading during course loading or unavailable states', asyn
   await mount(api, id);
   expect(queryByRole(host, 'heading', {level: 1})).toBeNull();
   await act(async () => resolve(undefined as unknown as Awaited<ReturnType<MoodleApi['course']>>));
-  expect(queryByRole(host, 'heading', {level: 1})).toBeNull();
+  expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
+  expect(getByRole(host, 'heading', {level: 1, name: 'This course is unavailable.'})).toBeTruthy();
   expect(host.querySelectorAll('main')).toHaveLength(1);
 });
 
