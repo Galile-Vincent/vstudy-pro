@@ -22,6 +22,7 @@
   "back": "返回設定",
   "history": "考試紀錄",
   "history_empty": "完成的考試會顯示在這裡。",
+  "history_error": "無法載入考試紀錄。",
   "ask_ai": "請 AI 解釋",
   "duration": "{{minutes}} 分鐘",
   "score": "答對 {{correct}} / {{total}} 題",

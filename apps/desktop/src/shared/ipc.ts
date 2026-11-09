@@ -222,6 +222,7 @@ export interface DesktopApi {
   onWebChatCleared?(listener:(provider:WebChatProvider)=>void):()=>void;
   onNativeTabShortcut?(listener:(shortcut:NativeTabShortcut)=>void):()=>void;
   onReviewProgress(listener:(event:ReviewProgress)=>void):()=>void;
+  onDraftFlushRequest?(listener:()=>Promise<'clean' | 'pending'>):()=>void;
   onTrackpadScrollBegin?(listener: () => void): () => void;
   onTrackpadScrollEnd?(listener: () => void): () => void;
   onMoodleProgress?(listener:(event:MoodleProgress)=>void):()=>void;

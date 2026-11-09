@@ -308,6 +308,7 @@ export function ExamsView() {
               disabled={busy}
               onClick={() => {
                 setArtifact(null);
+                setMode("setup");
                 history.retry();
               }}
             >
@@ -356,9 +357,12 @@ export function ExamsView() {
           <h2>{tr("exams:history")}</h2>
           {history.loading && <p role="status">{tr("review:loading")}</p>}
           {history.error && (
-            <Button onClick={history.retry}>{tr("review:retry")}</Button>
+            <p role="alert">
+              {tr("exams:history_error")}{" "}
+              <Button onClick={history.retry}>{tr("review:retry")}</Button>
+            </p>
           )}
-          {!history.items.length && !history.loading && (
+          {!history.items.length && !history.loading && !history.error && (
             <p>{tr("exams:history_empty")}</p>
           )}
           <ExamHistory

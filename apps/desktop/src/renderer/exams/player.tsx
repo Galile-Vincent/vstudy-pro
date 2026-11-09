@@ -14,6 +14,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Progress } from "../components/ui/progress";
+import { useExamFormat } from "./format";
 import { useEffect, useRef } from "react";
 type Artifact = NonNullable<IpcResponse<"review:artifact:get">>;
 type Attempt = IpcResponse<"review:attempt:start">;
@@ -82,7 +83,9 @@ export function ExamPlayer({
   results,
   busy,
   failed,
+  draftError,
   explanations,
+  gradedEarlier,
   onDraft,
   onMove,
   onSubmit,
@@ -98,7 +101,9 @@ export function ExamPlayer({
   results: boolean;
   busy: boolean;
   failed: boolean;
+  draftError: boolean;
   explanations: Record<string, string>;
+  gradedEarlier: boolean;
   onDraft: (value: Answer) => void;
   onMove: (index: number) => void;
   onSubmit: () => void;
@@ -107,16 +112,16 @@ export function ExamPlayer({
   onRetry: () => void;
   onReport: (id: string) => void;
 }) {
+  const format = useExamFormat();
   const items = artifact.test?.items ?? [],
     item = items[index];
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     heading.current?.focus();
-  }, [index, results]);
+  }, [index, results, attempt?.id]);
   const committed =
     attempt?.results.filter((r) => r.correct !== null).length ?? 0;
   const correct = attempt?.results.filter((r) => r.correct).length ?? 0;
-  const percent = items.length ? Math.round((correct / items.length) * 100) : 0;
   const feedback = attempt?.results.find((r) => r.itemId === item?.id);
   const locked = feedback?.correct !== null && feedback?.correct !== undefined;
   const feedbackRegion=useRef<HTMLElement>(null);
@@ -141,6 +146,11 @@ export function ExamPlayer({
   );
   return (
     <section className="exam-player" aria-busy={busy}>
+      {attempt && (
+        <div role="status">
+          {draftError && <p>{tr("review:draft_save_failed")}</p>}
+        </div>
+      )}
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}
@@ -149,7 +159,7 @@ export function ExamPlayer({
           </Button>
         </p>
       )}
-      {!attempt && <p role="status">{tr("review:loading")}</p>}
+      {!attempt && !failed && <p role="status">{tr("review:loading")}</p>}
       {attempt && results ? (
         <>
           <header className="exam-score-header">
@@ -176,8 +186,15 @@ export function ExamPlayer({
             </div>
             <div className="exam-score-value">
               <strong>
-                {percent}
-                <span>%</span>
+                {format
+                  .percentParts(items.length ? correct / items.length : 0)
+                  .map((part, i) =>
+                    part.type === "percentSign" ? (
+                      <span key={i}>{part.value}</span>
+                    ) : (
+                      part.value
+                    ),
+                  )}
               </strong>
               <span>{tr("exams:accuracy")}</span>
             </div>
@@ -192,16 +209,17 @@ export function ExamPlayer({
                   (r) => items.find((i) => i.id === r.itemId)?.type === type,
                 ),
                 matched = rows.filter((r) => r.correct).length,
-                value = rows.length
-                  ? Math.round((matched / rows.length) * 100)
-                  : 0;
+                ratio = rows.length ? matched / rows.length : 0,
+                value = Math.round(ratio * 100);
               return (
                 <div className="exam-accuracy-row" key={type}>
                   <div>
                     <span>{tr(`exams:${type}`)}</span>
                     <span>
                       {matched}/{rows.length}{" "}
-                      <span className="exam-muted">· {value}%</span>
+                      <span className="exam-muted">
+                        · {format.percent(ratio)}
+                      </span>
                     </span>
                   </div>
                   <Progress
@@ -451,6 +469,9 @@ export function ExamPlayer({
                 aria-label={tr("review:item_feedback")}
               >
                 <State correct={feedback?.correct ?? null} />
+                {gradedEarlier && (
+                  <p className="exam-muted">{tr("review:graded_earlier")}</p>
+                )}
                 {feedback?.feedback && (
                   <>
                     <AnswerReview
