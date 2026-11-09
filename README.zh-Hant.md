@@ -28,7 +28,7 @@ curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/i
 想請 AI 智能體代勞？複製安裝指南中的[提示詞](docs/INSTALL.zh-Hant.md#方法-3---請-ai-智能體幫你安裝)。
 
 <!-- mac-signing-status -->
-> Mac 版尚未使用 Apple 開發者 ID 簽署，也尚未經 Apple 公證。[查看開啟方式](docs/INSTALL.zh-Hant.md#macapple-晶片)。
+> Mac 版已使用 Apple 開發者 ID 簽署，並通過 Apple 公證，可像其他 Mac app 一樣開啟。Windows 安裝程式尚未簽署，首次執行時 SmartScreen 可能會顯示警告。 [安裝指南](docs/INSTALL.zh-Hant.md#macapple-晶片)。
 <!-- /mac-signing-status -->
 
 ## 功能介紹

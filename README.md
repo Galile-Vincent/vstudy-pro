@@ -28,7 +28,7 @@ curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/i
 Give your AI agent the [install prompt](docs/INSTALL.md#option-3---let-an-ai-agent-do-it).
 
 <!-- mac-signing-status -->
-> The Mac app is not yet signed with an Apple Developer ID or notarized by Apple. [How to open it](docs/INSTALL.md#mac-apple-silicon).
+> The Mac app is signed with an Apple Developer ID and notarized by Apple. It opens like any other Mac app. The Windows installer is not signed yet, so SmartScreen may warn on first run. [Install guide](docs/INSTALL.md#mac-apple-silicon).
 <!-- /mac-signing-status -->
 
 ## What it does

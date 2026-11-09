@@ -31,16 +31,28 @@
 5. 「アプリケーション」または Launchpad から VStudy Pro を開きます。
 
 <!-- mac-signing-status -->
-> Mac 版は Apple の Developer ID による署名と公証がまだ済んでいません。このプロジェクトのリリースページから入手し、プロジェクトを信頼できる場合のみ続けてください。 [プロジェクトのリリース](https://github.com/ava-apple/vstudy-pro/releases/latest)。
+> Mac 版は Apple の Developer ID で署名され、Apple の公証も受けています。他の Mac アプリと同じように開けます。Windows インストーラーはまだ未署名のため、初回実行時に SmartScreen の警告が表示される場合があります。 [インストールガイド](#macapple-シリコン)。
 <!-- /mac-signing-status -->
 
-**macOS で「開けない」「開発元を確認できない」と表示されたら**
+**Mac で初めて開くとき**
 
-1. VStudy Pro を一度開こうとしてから、警告を閉じます。
-2. 「システム設定 > プライバシーとセキュリティ」を開き、「セキュリティ」まで下にスクロールします。
-3. 「このまま開く」をクリックし、必要に応じて認証してから「開く」で確定します。
+署名と公証が済んだバージョンでは、通常、セキュリティの警告は表示されません。初回起動時は、インターネットからダウンロードしたアプリを開くかどうか macOS が確認します。「開く」をクリックしてください。
 
-古い macOS では、「アプリケーション」で VStudy Pro を右クリックし、「開く」を選んで、もう一度「開く」で確定できます。 チェックサムの確認は任意です。 [ダウンロードを検証](#任意---ダウンロードを検証)。 [Apple の起動手順](https://support.apple.com/en-us/102445)。
+<details>
+<summary>macOS が引き続きブロックする場合</summary>
+
+v0.3.0 以前の未署名の Mac 版では、「システム設定 > プライバシーとセキュリティ」で「このまま開く」を選ぶ必要がありました。現在のバージョンでもブロックされる場合は、プロジェクトのリリースから再ダウンロードし、署名を検証してから続けてください。
+
+</details>
+
+#### 署名を検証する
+
+```sh
+codesign --verify --deep --strict --verbose=2 "/Applications/VStudy Pro.app"
+spctl -a -t exec -vv "/Applications/VStudy Pro.app"
+```
+
+Gatekeeper が `accepted` と `source=Notarized Developer ID` を表示することを確認してください。
 
 #### 方法 2 - ターミナルに 1 行貼り付ける（こちらも事前の準備は不要）
 
@@ -54,7 +66,7 @@ Homebrew、npm、Xcode、Python は不要です。macOS に標準搭載された
 
 - 最新の DMG をダウンロードし、SHA-256 チェックサムを確認します。
 - VStudy Pro を終了し、「アプリケーション」にインストールします。ライブラリは残ります。
-- このアプリの隔離属性だけを削除して、起動できるようにします。sudo は使いません。
+- インストールしたアプリの署名と Apple の公証を検証します。検証済みのバージョンの隔離属性は保持します。sudo は使いません。
 
 [先にスクリプトを読む](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh)。
 
@@ -63,7 +75,7 @@ Homebrew、npm、Xcode、Python は不要です。macOS に標準搭載された
 このプロンプトを AI エージェントにコピーしてください。
 
 ```text
-VStudy Pro をインストールしてください。Apple シリコン macOS では https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh を取得して全文を読んでください。Windows x64 では同じディレクトリの install.ps1 を読んでください。ダウンロードページに記載された署名状況を説明し、Mac スクリプトがこのアプリの隔離属性だけを削除することも伝えてください。読んだスクリプトを実行し、SHA-256 検証の成功を確認して VStudy Pro を開き、インストール先と結果を報告してください。sudo、システム保護の一括無効化、ユーザーデータの削除は禁止です。検証に失敗したら停止してください。
+VStudy Pro をインストールしてください。Apple シリコン macOS では https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh を取得して全文を読んでください。Windows x64 では同じディレクトリの install.ps1 を読んでください。Mac 版は署名と公証が済んでおり、Windows インストーラーは未署名であることを説明してください。Mac の署名と公証の検証が成功したことを確認してください。読んだスクリプトを実行し、SHA-256 検証の成功を確認して VStudy Pro を開き、インストール先と結果を報告してください。sudo、システム保護の一括無効化、ユーザーデータの削除は禁止です。検証に失敗したら停止してください。
 ```
 
 ### Windows x64
@@ -131,4 +143,4 @@ Apple シリコンでは macOS 14 以降、Windows x64 では Windows 10 以降�
 
 「**設定 > プライバシー**」は、そのセッションでアプリが開始したリクエストと CLI 起動を件数上限付きで表示します。AI ツールのバージョン情報とダウンロードも含みます。定期的なバージョン確認には別の同意が必要です。パケットキャプチャではなく、CLI や Chromium 内部のすべての通信は把握できません。通信バイト数も不明です。外部ブラウザーやメールのリンクを開く前には確認を求めます。機密資料を扱う前に[セキュリティモデル](SECURITY.md)を確認してください。
 
-safeStorage は Mac キーチェーンまたは Windows DPAPI で認証情報を暗号化します。未署名の Mac 版から更新すると、キーチェーンが再びアクセス許可を求める場合があります。信頼するアプリであることを確認し、「常に許可」を選んでください。[ストレージの詳細](STORAGE.md)。
+safeStorage は Mac キーチェーンまたは Windows DPAPI で認証情報を暗号化します。未署名の Mac 版（v0.3.0 以前）から署名済みのバージョンに更新すると、macOS が「VStudy Pro Safe Storage」へのアクセスを一度だけ確認します。「常に許可」を選んでください。保存済みのキーは失われません。[ストレージの詳細](STORAGE.md)。

@@ -31,16 +31,28 @@
 5. 從「應用程式」或 Launchpad 開啟 VStudy Pro。
 
 <!-- mac-signing-status -->
-> Mac 版尚未使用 Apple 開發者 ID 簽署，也尚未經 Apple 公證。只有從本專案的版本發布頁下載，且你信任本專案時，才繼續操作。 [專案版本發布頁](https://github.com/ava-apple/vstudy-pro/releases/latest)。
+> Mac 版已使用 Apple 開發者 ID 簽署，並通過 Apple 公證，可像其他 Mac app 一樣開啟。Windows 安裝程式尚未簽署，首次執行時 SmartScreen 可能會顯示警告。 [安裝指南](#macapple-晶片)。
 <!-- /mac-signing-status -->
 
-**如果 macOS 顯示無法開啟或無法驗證開發者**
+**第一次在 Mac 開啟**
 
-1. 先嘗試開啟 VStudy Pro 一次，再關閉警告。
-2. 開啟「系統設定 > 隱私權與安全性」，向下捲動至「安全性」。
-3. 按「強制打開」，依提示驗證身分，再按「打開」確認。
+已簽署並公證的版本通常不會顯示安全性警告。首次開啟時，macOS 會詢問是否要開啟從網際網路下載的 app，按「打開」即可。
 
-較舊的 macOS 可在「應用程式」中對 VStudy Pro 按右鍵，選「打開」，再按「打開」確認。 校驗碼驗證是選用步驟。 [驗證下載檔案](#選用步驟---驗證下載檔案)。 [Apple 的開啟說明](https://support.apple.com/en-us/102445)。
+<details>
+<summary>如果 macOS 仍阻擋開啟</summary>
+
+v0.3.0 與更早的未簽署 Mac 版本需要到「系統設定 > 隱私權與安全性」按「強制打開」。如果目前版本仍被阻擋，請從專案版本發布頁重新下載，並先驗證簽章再繼續。
+
+</details>
+
+#### 驗證簽章
+
+```sh
+codesign --verify --deep --strict --verbose=2 "/Applications/VStudy Pro.app"
+spctl -a -t exec -vv "/Applications/VStudy Pro.app"
+```
+
+Gatekeeper 應顯示 `accepted` 和 `source=Notarized Developer ID`。
 
 #### 方法 2 - 在終端機貼上一行指令（同樣不必先裝其他工具）
 
@@ -54,7 +66,7 @@ curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/i
 
 - 下載最新的 DMG，並驗證 SHA-256 校驗碼。
 - 關閉 VStudy Pro，安裝到「應用程式」。你的文件庫會保留。
-- 只移除此 app 的隔離標記，讓它能開啟。不會使用 sudo。
+- 驗證已安裝 app 的簽章與 Apple 公證，並保留通過驗證版本的隔離標記。不會使用 sudo。
 
 [先閱讀安裝腳本](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh)。
 
@@ -63,7 +75,7 @@ curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/i
 將這段提示詞複製給你的 AI 智能體。
 
 ```text
-請幫我安裝 VStudy Pro。Apple 晶片 macOS 請先取得並完整閱讀 https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh；Windows x64 請閱讀同目錄的 install.ps1。說明下載頁列出的簽署狀態，以及 Mac 腳本只會移除此 app 的隔離標記。執行已閱讀的腳本，確認 SHA-256 驗證通過，開啟 VStudy Pro，回報安裝路徑與結果。不要使用 sudo、全面停用系統防護或刪除使用者資料。驗證失敗時立即停止。
+請幫我安裝 VStudy Pro。Apple 晶片 macOS 請先取得並完整閱讀 https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh；Windows x64 請閱讀同目錄的 install.ps1。說明 Mac 版已簽署並公證，Windows 安裝程式尚未簽署。確認 Mac 簽章與公證驗證通過。執行已閱讀的腳本，確認 SHA-256 驗證通過，開啟 VStudy Pro，回報安裝路徑與結果。不要使用 sudo、全面停用系統防護或刪除使用者資料。驗證失敗時立即停止。
 ```
 
 ### Windows x64
@@ -131,4 +143,4 @@ App **不會加密磁碟上的文件、Markdown 與聊天記錄**。儲存的機
 
 「**設定 > 隱私權**」列出本次執行中有數量上限的 app 主動請求與 CLI 啟動記錄，包含 AI 工具版本資料檢查與下載。背景版本檢查須另外同意。這不是封包擷取，無法列出 CLI 或 Chromium 內部的每一個請求，目前也無法得知傳輸位元組數。開啟外部瀏覽器或郵件連結前會要求確認。處理敏感資料前請閱讀[安全模型](SECURITY.md)。
 
-safeStorage 透過 Mac 鑰匙圈或 Windows DPAPI 加密儲存的憑證。從未簽署的 Mac 版本更新後，鑰匙圈可能再次要求授權。確認是你信任的 app 後，選擇「永遠允許」。[儲存說明](STORAGE.md)。
+safeStorage 透過 Mac 鑰匙圈或 Windows DPAPI 加密儲存的憑證。從未簽署的 Mac 版本（v0.3.0 或更早）更新至已簽署版本後，macOS 會詢問一次是否允許存取「VStudy Pro Safe Storage」。請選「永遠允許」。已儲存的金鑰不會遺失。[儲存說明](STORAGE.md)。

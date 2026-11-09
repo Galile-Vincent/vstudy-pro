@@ -45,8 +45,8 @@ export const guides: Guide[] = [
         id: 'first-launch',
         title: 'Open a trusted build',
         paragraphs: [
-          'Without signing credentials, Mac builds have an ad-hoc signature without Developer ID or notarization. Windows builds are unsigned. Verify the download and trust its source before accepting an exception. Do not disable Gatekeeper or SmartScreen globally.',
-          'Signed and notarized Mac releases normally use the usual first-open confirmation. Signed Windows releases show the verified publisher, but SmartScreen can still warn while reputation develops. Check the actual signing status in the release notes.',
+          'The published Mac app is signed with an Apple Developer ID and notarized by Apple. The Windows installer is unsigned and SmartScreen may warn. Verify the download and trust its source before continuing.',
+          'Mac releases normally use the usual first-open confirmation. Click Open. Unsigned Mac builds v0.3.0 and earlier needed Open Anyway in System Settings > Privacy & Security.',
         ],
         steps: [
           'Mac: if blocked, try opening once, then open System Settings > Privacy & Security. Choose Open Anyway only if offered and you trust the verified app. Authenticate if requested.',
@@ -169,7 +169,7 @@ export const guides: Guide[] = [
     slug:'troubleshooting',title:'Troubleshooting',group:'Reference',source:'README.md',
     description:'Recover school connections, conversions, provider access, and local storage.',
     sections:[
-      {id:'launch',title:'macOS blocks the app',paragraphs:['Current local builds are not notarized. Review the source and the release before using Open Anyway in System Settings > Privacy & Security. Do not disable system protections globally. A corrupt download or incompatible release requires a new trusted artifact.']},
+      {id:'launch',title:'macOS blocks the app',paragraphs:['The published Mac app is signed and notarized. Normally, click Open in the standard first-launch confirmation. Unsigned Mac builds v0.3.0 and earlier needed Open Anyway in System Settings > Privacy & Security. If the current build is blocked, download it again and verify its signature.']},
       {id:'school',title:'School connection or refresh fails',paragraphs:['Confirm the public HTTPS Moodle URL. Check whether the school allows mobile web services and third-party access. Maintenance and disabled services need school-side resolution. An absent directory entry can still be entered as a URL.','Reconnect expired accounts with the same identity. A cached course view can be older than the school’s current data. Open the school website to verify urgent work.']},
       {id:'conversion',title:'Document conversion fails',paragraphs:['Check the 50 MB import limit and the document format. A scanned PDF has no selectable text and needs OCR elsewhere. A complex PDF layout may convert with missing or reordered content.','The first conversion needs consent for package downloads and an available uv or Python environment. Settings > Privacy offers Retry and converter Offline mode. Cold startup can take several seconds. Test Markdown or plain text to separate conversion setup from library access.']},
       {id:'provider',title:'AI or Keychain access fails',paragraphs:['Enable the intended provider and select an available model. Unlock saved keys after restart. If Keychain access is denied or times out, retry after granting access or choose Use without saving keys for the session.','For a CLI provider, sign in outside VStudy and confirm its resolved executable. Codex must match the pinned verified version. Never include an API key, token, private document, or full diagnostic URL in a bug report.']},

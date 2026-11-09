@@ -28,7 +28,7 @@ curl -fsSL https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/i
 AI エージェントに任せる場合は、インストールガイドの[プロンプト](docs/INSTALL.ja.md#方法-3---ai-エージェントに任せる)をコピーしてください。
 
 <!-- mac-signing-status -->
-> Mac 版は Apple の Developer ID による署名と公証がまだ済んでいません。[起動手順を見る](docs/INSTALL.ja.md#macapple-シリコン)。
+> Mac 版は Apple の Developer ID で署名され、Apple の公証も受けています。他の Mac アプリと同じように開けます。Windows インストーラーはまだ未署名のため、初回実行時に SmartScreen の警告が表示される場合があります。 [インストールガイド](docs/INSTALL.ja.md#macapple-シリコン)。
 <!-- /mac-signing-status -->
 
 ## 主な機能

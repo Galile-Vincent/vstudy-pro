@@ -146,6 +146,20 @@ If accepted, agree on project, artifact configuration, signing policy, authorize
 
 ## Verify the delivered artifacts
 
+### Delivered artifacts verified
+
+The owner verified the published v0.4.4 Mac DMG against `SHA256SUMS.txt`. The app is signed by Developer ID Application Hung-Yeh Chiang, Team `X3AX6U5NLA`, with hardened runtime. Apple notarized it and the ticket is stapled. The DMG container itself is not signed. The Windows EXE remains unsigned.
+
+```sh
+shasum -a 256 VStudy-Pro-mac-arm64.dmg
+codesign --verify --deep --strict --verbose=2 "/Applications/VStudy Pro.app"
+xcrun stapler validate "/Applications/VStudy Pro.app"
+xcrun stapler validate VStudy-Pro-mac-arm64.dmg
+spctl -a -t exec -vv "/Applications/VStudy Pro.app"
+```
+
+The checksum matches the release entry. Signature verification reports a valid app. Stapler reports a valid ticket. Gatekeeper reports `accepted` and `source=Notarized Developer ID`. These are the owner's delivery checks, not a new verification run from this documentation change.
+
 An owner-authorized signing verification run must retain the exact signed artifacts. The initial branch-only dry run remains unsigned. Download them rather than verifying a different local build. Compare SHA-256 against that run's checksums. For public releases, also download the stable asset aliases and compare their bytes with the versioned assets.
 
 On Mac, mount the DMG and copy the app to a disposable verification location. These commands inspect the installed copy and delivered DMG. Adjust paths for the architecture.

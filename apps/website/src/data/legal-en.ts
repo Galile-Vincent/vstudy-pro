@@ -293,7 +293,7 @@ export const legalEn: LegalPack = {
         {
           id: 'installing', title: 'Installing, updating, and your data',
           blocks: [
-            { type: 'p', text: 'Some builds are unsigned or not notarized, and your operating system may warn you when you open them. Check the download against the published checksums and follow the installation guide before you accept any exception. Updates are manual for now.' },
+            { type: 'p', text: 'The Mac app is signed with an Apple Developer ID and notarized by Apple. The Windows installer is unsigned, so SmartScreen may warn on first run. Check the download against the published checksums and follow the installation guide before you accept any exception. Updates are manual for now.' },
             { type: 'p', text: 'We do not promise any release schedule, support, or availability, and features may change or be removed. The data on your device is your responsibility, so make backups and use disk encryption.' },
           ],
         },

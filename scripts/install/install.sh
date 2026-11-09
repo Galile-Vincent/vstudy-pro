@@ -1,4 +1,5 @@
 #!/bin/bash
+# Install VStudy Pro on Apple silicon macOS.
 set -euo pipefail
 
 dest=/Applications
@@ -18,7 +19,7 @@ while (($#)); do
     --uninstall) uninstall=true; shift ;;
     --dry-run) dry_run=true; shift ;;
     --help)
-      echo 'Install VStudy Pro (unsigned) on Apple silicon macOS.'
+      echo 'Install VStudy Pro on Apple silicon macOS.'
       echo 'Usage: bash install.sh [--dest DIR] [--version X] [--open] [--uninstall] [--dry-run]'
       echo 'Default destination: /Applications. No sudo. Use --dest ~/Applications if needed.'
       echo 'VSTUDY_VERSION pins a release. VSTUDY_RELEASE_BASE overrides the asset directory for tests only.'
@@ -95,8 +96,6 @@ if ! $uninstall; then
   stage=$(mktemp -d "$dest/.vstudy-install.XXXXXX")
   echo 'Copying app with ditto'
   ditto "$work/mount/VStudy Pro.app" "$stage/VStudy Pro.app"
-  echo 'Removing quarantine from this unsigned app only'
-  xattr -dr com.apple.quarantine "$stage/VStudy Pro.app"
 fi
 echo 'Requesting VStudy Pro to quit politely'
 osascript -e 'if application id "com.vstudy.pro" is running then tell application id "com.vstudy.pro" to quit'
@@ -117,12 +116,22 @@ if [[ -e "$app" ]]; then
 fi
 echo 'Moving verified app into place'
 mv "$stage/VStudy Pro.app" "$app"
-echo 'Signing information (unsigned or ad-hoc; not notarized)'
-codesign -dv --verbose=2 "$app" 2>&1 || true
-if spctl --assess --type execute --verbose "$app"; then
-  echo 'Gatekeeper assessment accepted.'
+signature_valid=false
+if codesign --verify --deep --strict "$app"; then signature_valid=true; fi
+if assessment=$(/usr/sbin/spctl -a -t exec -vv "$app" 2>&1) && $signature_valid && [[ "$assessment" == *"source=Notarized Developer ID"* ]]; then
+  identity=$(codesign -dv --verbose=2 "$app" 2>&1)
+  authority=$(printf '%s\n' "$identity" | sed -n 's/^Authority=//p' | head -n 1)
+  team=$(printf '%s\n' "$identity" | sed -n 's/^TeamIdentifier=//p')
+  echo "Verified: signed by $authority ($team) and notarized by Apple"
 else
-  echo 'Gatekeeper assessment rejected. This app is unsigned/un-notarized; quarantine was removed only from this copy.'
+  case "${version#v}" in
+    0.[0-2].*|0.3.0)
+      echo 'Legacy unsigned Mac build (v0.3.0 or earlier). Removing quarantine from this app only.'
+      xattr -dr com.apple.quarantine "$app" ;;
+    *)
+      rm -rf "$app"
+      fail 'Signature or notarization verification failed. Previous app restored if present.' ;;
+  esac
 fi
 echo "Installed $app. Re-run this script to update."
 if $launch; then echo 'Opening VStudy Pro'; open "$app"; fi
