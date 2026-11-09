@@ -1,4 +1,5 @@
 {
+  "rowName": "{{title}}, {{selection}}",
   "conversion_pages": "Converting page {{page}} of {{total}}",
   "conversion_complete": "Conversion complete",
   "conversion_preparing": "Preparing text reader…",
@@ -220,5 +221,10 @@
   "recoveryCount": "{{count}} documents",
   "moved_one": "{{formatted}} document moved · Undo within 30 seconds",
   "moved_other": "{{formatted}} documents moved · Undo within 30 seconds",
-  "recoveryAction": "Action {{number}}"
+  "recoveryAction": "Action {{number}}",
+  "itemSelected": "Selected",
+  "itemUnselected": "Not selected",
+  "selectDocument": "Select {{name}}",
+  "selectedMissing": "{{count}} selected documents no longer exist",
+  "failedInstructions": "Failed. Press Enter to retry; Shift+Enter to open."
 }

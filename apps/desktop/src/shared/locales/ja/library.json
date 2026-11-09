@@ -1,4 +1,5 @@
 {
+  "rowName": "{{title}}、{{selection}}",
   "conversion_pages": "{{total}} ページ中 {{page}} ページを変換中",
   "conversion_complete": "変換が完了しました",
   "conversion_preparing": "文章の読み取りを準備中…",
@@ -220,5 +221,10 @@
   "recoveryCount": "{{count}}件のドキュメント",
   "moved_one": "{{formatted}}件のドキュメントを移動しました · 30秒以内に元に戻せます",
   "moved_other": "{{formatted}}件のドキュメントを移動しました · 30秒以内に元に戻せます",
-  "recoveryAction": "操作 {{number}}"
+  "recoveryAction": "操作 {{number}}",
+  "itemSelected": "選択済み",
+  "itemUnselected": "未選択",
+  "selectDocument": "{{name}}を選択",
+  "selectedMissing": "選択した {{count}} 件のドキュメントは存在しません",
+  "failedInstructions": "変換に失敗しました。Enter で再試行、Shift+Enter で開きます。"
 }

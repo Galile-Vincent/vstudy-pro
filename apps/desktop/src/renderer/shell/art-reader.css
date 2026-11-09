@@ -103,7 +103,7 @@
 .art-reader-reading-info > .art-reader-kicker { color:var(--muted); }
 .app-shell .library-view { background:transparent; }
 .app-shell .library-toolbar { background:transparent; }
-.app-shell .library-results[data-view=grid] .document-card { padding:0; height:calc(var(--art-reader-card-height) - 16px); border:0; border-radius:var(--art-reader-radius); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden; }
+.app-shell .library-results[data-view=grid] .document-card { padding:0; min-height:calc(var(--art-reader-card-height) - 16px); border:0; border-radius:var(--art-reader-radius); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden; }
 .library-results[data-view=grid] .document-card > .art-reader-cover { height:104px; min-height:104px; flex:none; }
 .library-results[data-view=grid] .document-card > .document-cell { display:flex; padding:var(--space-4); align-items:start; gap:var(--space-2); }
 .library-results[data-view=grid] .document-glyph { display:none; }
