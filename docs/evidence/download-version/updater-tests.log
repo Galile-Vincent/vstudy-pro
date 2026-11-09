@@ -1,0 +1,13 @@
+✔ published stable assets supply exact bytes and version (1.041834ms)
+✔ draft, prerelease, and unknown publication state are rejected (0.1415ms)
+✔ missing, duplicate, incomplete, and invalid assets are rejected (0.104ms)
+✔ publication date normalizes to UTC across the date boundary (0.070833ms)
+✔ site hides all metadata when the snapshot is missing or invalid (0.127542ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 88.25125

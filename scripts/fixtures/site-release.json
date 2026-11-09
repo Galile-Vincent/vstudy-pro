@@ -1,0 +1,18 @@
+{
+  "assets": [
+    {
+      "name": "VStudy-Pro-mac-arm64.dmg",
+      "size": 123600629,
+      "state": "uploaded"
+    },
+    {
+      "name": "VStudy-Pro-win-x64.exe",
+      "size": 111704642,
+      "state": "uploaded"
+    }
+  ],
+  "isDraft": false,
+  "isPrerelease": false,
+  "publishedAt": "2026-11-06T08:50:42Z",
+  "tagName": "v0.3.0"
+}

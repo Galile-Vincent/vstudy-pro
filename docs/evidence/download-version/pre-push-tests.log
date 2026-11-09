@@ -1,0 +1,103 @@
+╭────────────────────────────────────╮
+│ lefthook  v2.2.2   hook:  pre-push │
+╰────────────────────────────────────╯
+┃  readme-links ❯
+Checked 262 local Markdown links across 10 files.
+
+┃  test ❯
+
+> vstudy-pro@ test /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031
+> pnpm --filter @vstudy/mcp test && pnpm --filter @vstudy/desktop test && pnpm --filter @vstudy/newsletter test --pool=forks --maxWorkers=2
+
+
+> @vstudy/mcp@0.2.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/mcp
+> pnpm build && vitest run --pool=forks --maxWorkers=2
+
+
+> @vstudy/mcp@0.2.0 build /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/mcp
+> node scripts/build.mjs
+
+
+  dist/vstudy-mcp.cjs   825.3kb
+  dist/installer.cjs    254.7kb
+  dist/windows-acl.cjs  143.7kb
+
+⚡ Done in 25ms
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/mcp
+
+
+ Test Files  14 passed | 2 skipped (16)
+      Tests  132 passed | 3 skipped (135)
+   Start at  08:03:29
+   Duration  5.49s (transform 99ms, setup 0ms, import 389ms, tests 9.18s, environment 0ms)
+
+
+> @vstudy/desktop@0.4.4 test /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/desktop
+> node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run
+
+Locale registry ready at /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/desktop/src/shared/locales.generated.ts (28 namespaces).
+(node:93461) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/desktop/src/shared/themes/index.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/desktop/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+VStudy light: WCAG AA passed at every contrast setting
+VStudy dark: WCAG AA passed at every contrast setting
+Ocean light: WCAG AA passed at every contrast setting
+Ocean dark: WCAG AA passed at every contrast setting
+Grove light: WCAG AA passed at every contrast setting
+Grove dark: WCAG AA passed at every contrast setting
+Ember light: WCAG AA passed at every contrast setting
+Ember dark: WCAG AA passed at every contrast setting
+Iris light: WCAG AA passed at every contrast setting
+Iris dark: WCAG AA passed at every contrast setting
+Rose light: WCAG AA passed at every contrast setting
+Rose dark: WCAG AA passed at every contrast setting
+Slate light: WCAG AA passed at every contrast setting
+Slate dark: WCAG AA passed at every contrast setting
+Paper light: WCAG AA passed at every contrast setting
+Paper dark: WCAG AA passed at every contrast setting
+High contrast light: WCAG AA passed at every contrast setting
+High contrast dark: WCAG AA passed at every contrast setting
+Translucent surfaces: minimum text contrast 4.96:1
+Quiet glass over the page field: minimum text contrast 4.71:1 (paper dark 100% muted on #524d40)
+46 renderer CSS files use semantic theme tokens
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/desktop
+
+SNAPSHOT SIGKILL interruptedBytes=72474624 afterCleanupBytes=0
+SNAPSHOT SIGTERM interruptedBytes=0 afterCleanupBytes=0
+SNAPSHOT worker termination interruptedBytes=0 afterCleanupBytes=0
+CONTENTION documents=2000 maxWriteMs=2.1 maxEventLoopGapMs=32.4 writes=74
+FRESHNESS elapsedMs=950 visibleResults=1 searches=2
+assignments: 0.35 ms
+base64: 0.09 ms
+identifier: 0.14 ms
+dotted: 0.15 ms
+quotes: 0.59 ms
+(node:95924) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 will-download listeners added to [EventEmitter]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  301 passed | 7 skipped (308)
+      Tests  2707 passed | 20 skipped (2727)
+   Start at  08:03:35
+   Duration  77.22s (transform 2.87s, setup 0ms, import 24.74s, tests 88.28s, environment 14.27s)
+
+
+> @vstudy/newsletter@0.1.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/newsletter
+> vitest run --pool=forks --maxWorkers=2
+
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-d0273031/apps/newsletter
+
+
+ Test Files  1 passed (1)
+      Tests  25 passed (25)
+   Start at  08:04:53
+   Duration  144ms (transform 17ms, setup 0ms, import 24ms, tests 25ms, environment 0ms)
+
+
+  ────────────────────────────────────
+summary: (done in 84.94 seconds)
+✓ readme-links (0.11 seconds)
+✓ test (84.84 seconds)

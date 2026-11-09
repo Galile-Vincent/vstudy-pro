@@ -78,7 +78,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <slot />
     <footer class="site-footer">
       <div class="container footer-inner">
-        <div><a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup /></a><p>{t.footer}</p><p><small>{t.version} {VERSION}</small></p></div>
+        <div><a class="brand" aria-label="VStudy Pro" href={path(`${language}/`)}><Logo lockup /></a><p>{t.footer}</p>{VERSION && <p><small>{t.version} {VERSION}</small></p>}</div>
         <div class="footer-links"><a href={path(`${language}/download/`)}>{t.download}</a><a href={path(`${language}/docs/getting-started/`)}>{t.docs}</a><a href={path(`${language}/privacy/`)}>{t.privacy}</a><a href={path(`${language}/terms/`)}>{t.terms}</a><a href={REPO_URL}>{t.source}</a></div>
         <nav class="footer-contact" aria-label={t.contact}>
           <strong>{t.contact}</strong>
