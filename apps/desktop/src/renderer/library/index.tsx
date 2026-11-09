@@ -120,6 +120,7 @@ export function LibraryView() {
   });
   const clearFilters = () => {
     setCustomDates(false);
+    setDateError(false);
     setQuery(q => ({
       ...defaults, sort: q.sort, direction: q.direction,
       view: q.view, folderId: q.folderId, subfolders: q.subfolders,
@@ -127,6 +128,22 @@ export function LibraryView() {
     }));
   };
   const [customDates,setCustomDates] = useState(false);
+  const [dateDraft, setDateDraft] = useState({
+    addedAfter: query.addedAfter?.slice(0, 10) ?? "",
+    addedBefore: query.addedBefore?.slice(0, 10) ?? "",
+  });
+  const [dateError, setDateError] = useState(false);
+  const updateDate = (key: "addedAfter" | "addedBefore", value: string) => {
+    const next = { ...dateDraft, [key]: value };
+    setDateDraft(next);
+    const invalid = !!(next.addedAfter && next.addedBefore && next.addedAfter > next.addedBefore);
+    setDateError(invalid);
+    if (!invalid) setQuery(q => ({
+      ...q,
+      addedAfter: next.addedAfter ? new Date(next.addedAfter).toISOString() : undefined,
+      addedBefore: next.addedBefore ? new Date(next.addedBefore).toISOString() : undefined,
+    }));
+  };
   const [filtersOpen,setFiltersOpen] = useState(false);
   const compactToolbar = useCompactToolbar();
   useEffect(() => {
@@ -519,6 +536,7 @@ export function LibraryView() {
           formatted: format.number(items.length),
         })}
         {notice || recoveryNotice}
+        {dateError && tr("library:dateRangeInvalid")}
       </div>
   );
   return (
@@ -628,10 +646,11 @@ export function LibraryView() {
                 {tr(`library:${key}`)}
               </label>
             ))}
-            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setCustomDates(true);return;} setCustomDates(false); setQuery(q => ({...q, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
+            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:query.addedAfter?.slice(0,10) ?? "",addedBefore:query.addedBefore?.slice(0,10) ?? ""});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
             </Select></label>
-            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} value={query[key]?.slice(0,10) ?? ''} onChange={e => setQuery(q => ({...q,[key]:e.target.value ? new Date(e.target.value).toISOString() : undefined}))}/></label>)}
+            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} aria-invalid={dateError} value={dateDraft[key]} onChange={e => updateDate(key,e.target.value)}/></label>)}
+            {dateError && <p role="alert">{tr("library:dateRangeInvalid")}</p>}
             <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select></label>

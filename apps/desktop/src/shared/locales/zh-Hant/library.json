@@ -90,6 +90,7 @@
   "deletePartial": "已刪除 {{succeeded}} / {{total}} 份，{{failed}} 份失敗：{{reasons}}",
   "movePartial": "已移動 {{succeeded}} / {{total}} 份，{{failed}} 份失敗：{{reasons}}",
   "folder_missing": "找不到資料夾",
+  "dateRangeInvalid": "新增起日必須早於或等於新增迄日。",
   "undo": "復原",
   "deleted": "已刪除 {{formatted}} 份文件，30 秒內可復原",
   "moved": "已移動文件，30 秒內可復原",

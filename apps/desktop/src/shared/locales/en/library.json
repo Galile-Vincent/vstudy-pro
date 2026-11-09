@@ -90,6 +90,7 @@
   "deletePartial": "{{succeeded}} of {{total}} deleted, {{failed}} failed: {{reasons}}",
   "movePartial": "{{succeeded}} of {{total}} moved, {{failed}} failed: {{reasons}}",
   "folder_missing": "Folder not found",
+  "dateRangeInvalid": "Added after must be on or before Added before.",
   "undo": "Undo",
   "deleted": "{{formatted}} documents deleted · Undo within 30 seconds",
   "moved": "Documents moved · Undo within 30 seconds",

@@ -90,6 +90,7 @@
   "deletePartial": "{{total}} 件中 {{succeeded}} 件削除、{{failed}} 件失敗: {{reasons}}",
   "movePartial": "{{total}} 件中 {{succeeded}} 件移動、{{failed}} 件失敗: {{reasons}}",
   "folder_missing": "フォルダーが見つかりません",
+  "dateRangeInvalid": "追加開始日は追加終了日以前にしてください。",
   "undo": "元に戻す",
   "deleted": "{{formatted}} 件を削除しました。30 秒以内に元に戻せます",
   "moved": "移動しました。30 秒以内に元に戻せます",
