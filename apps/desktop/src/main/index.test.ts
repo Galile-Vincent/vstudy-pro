@@ -398,3 +398,17 @@ it('flushes default cookies without opening partition contexts during deletion',
   expect(electron.session.defaultSession.cookies.flushStore).toHaveBeenCalled();
   window.webContents.emit('did-finish-load');
 });
+
+it('bounds startup session deletion even when Chromium never responds', async () => {
+  const window = await start();
+  const {finishPendingDeletion} = await import('./services/delete-data');
+  const clear=vi.mocked(finishPendingDeletion).mock.calls[0]![1];
+  electron.session.defaultSession.clearStorageData.mockImplementationOnce(() => new Promise(() => {}));
+  vi.useFakeTimers();
+  try {
+    let settled=false;
+    void clear([]).catch(() => {}).finally(() => {settled=true;});
+    await vi.advanceTimersByTimeAsync(12_001);
+    expect(settled).toBe(true);
+  } finally {vi.useRealTimers();window.webContents.emit('did-finish-load');}
+});

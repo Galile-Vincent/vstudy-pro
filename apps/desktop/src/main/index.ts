@@ -1,3 +1,4 @@
+import { clearDeletionSession } from './services/delete-session';
 import { attachNavigationInput } from './navigation-input';
 import { initializeAnalytics } from './analytics/runtime';
 import { analytics } from './analytics/service';
@@ -246,13 +247,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
   startupStage = 'recovery';
   const userData = app.getPath("userData");
   const deletionFinished = await finishPendingDeletion(userData, async () => {
-    const current = session.defaultSession;
-    await current.clearStorageData();
-    await current.clearCache();
-    await current.clearAuthCache();
-    await current.closeAllConnections();
-    current.flushStorageData();
-    await current.cookies.flushStore();
+    await clearDeletionSession(session.defaultSession);
   }, log);
   const cleanupFinished = await cleanupDeletedData(userData, log);
   mkdirSync(userData, { recursive: true });
