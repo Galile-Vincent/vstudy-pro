@@ -1,9 +1,10 @@
 import { SubscriptionMeters } from './subscriptions';
 import { Select } from '../components/select';
 import { Button } from '../components/ui/button';
+import { Stat, Toolbar } from '../components/ui';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { IpcResponse, UsagePeriod, UsageSummary } from '../../shared';
 import { useFormat } from '../i18n';
 import { desktop } from '../bridge';
@@ -15,6 +16,8 @@ type Dashboard = IpcResponse<'usage:dashboard'>;
 export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
   useTranslation();
   const format = useFormat();
+  const day = (date: string) => format.date(date, { dateStyle: 'medium', timeZone: 'UTC' });
+  const hatch = `usage-hatch-${useId().replace(/\W/g, '')}`;
   const max = Math.max(1, ...days.map((d) => d.inputTokens + d.outputTokens));
   const width = 720,
     height = 124,
@@ -28,7 +31,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
           <i className="usage-key input" />
           {tr('common:input')}
           <i className="usage-key output" />
-          {tr('common:output_peak')}
+          {tr('common:output_peak')}{' '}
           {compactTokens(
             max === 1 && days.every((d) => !d.inputTokens && !d.outputTokens) ? 0 : max,
           )}
@@ -41,6 +44,12 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
           'common:daily_input_and_output_tokens_exact_values_are_available_in_the_daily_totals_table',
         )}
       >
+        <defs>
+          <pattern id={hatch} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="6" height="6" className="usage-hatch-ground" />
+            <rect width="3" height="6" className="usage-hatch-line" />
+          </pattern>
+        </defs>
         <line x1="0" x2={width} y1={height - 1} y2={height - 1} className="usage-axis" />
         {days.map((d, i) => {
           const input = (d.inputTokens / max) * (height - 8);
@@ -49,13 +58,14 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
             <g key={d.date}>
               <title>
                 {tr('usage:daily_description', {
-                  date: d.date,
+                  date: day(d.date),
                   input: format.number(d.inputTokens),
                   output: format.number(d.outputTokens),
                 })}
               </title>
               <rect
                 className="usage-bar-input"
+                fill={`url(#${hatch})`}
                 x={i * column + column * 0.17}
                 width={column * 0.66}
                 y={height - 1 - input}
@@ -73,8 +83,8 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
         })}
       </svg>
       <div className="usage-axis-labels">
-        <span>{days[0]?.date}</span>
-        <span>{days.at(-1)?.date}</span>
+        <span>{days[0] && day(days[0].date)}</span>
+        <span>{days.length > 0 && day(days[days.length - 1]!.date)}</span>
       </div>
       <details className="usage-trend-details">
         <summary>{tr('common:daily_totals')}</summary>
@@ -93,7 +103,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
                 .filter((d) => d.inputTokens > 0 || d.outputTokens > 0)
                 .map((d) => (
                   <tr key={d.date}>
-                    <td>{d.date}</td>
+                    <td>{day(d.date)}</td>
                     <td>{format.number(d.inputTokens)}</td>
                     <td>{format.number(d.outputTokens)}</td>
                     <td>{format.number(d.inputTokens + d.outputTokens)}</td>
@@ -111,41 +121,42 @@ export function UsageOverview({ data }: { data: Dashboard }) {
   useTranslation();
   const format = useFormat();
   const { summary: s } = data;
+  const details: [string, number][] = [
+    [tr('common:input'), s.inputTokens],
+    [tr('common:output'), s.outputTokens],
+    [tr('common:cache_read'), data.cacheReadTokens],
+    [tr('common:cache_write'), data.cacheWriteTokens],
+    [tr('common:reasoning'), data.reasoningTokens],
+  ];
 
   return (
     <div className="usage-overview">
-      <div className="usage-token-total usage-stat-tile">
-        <span className="usage-stat-label">{tr('common:total_tokens')}</span>
-        <strong className="usage-stat-value">{format.number(s.inputTokens + s.outputTokens)}</strong>
-        <span className="usage-stat-meta">
-          {format.number(s.calls)} {tr('common:recorded_model_calls')}
-        </span>
+      <div className="usage-summary">
+        <Stat
+          className="usage-token-total"
+          label={tr('common:total_tokens')}
+          value={format.number(s.inputTokens + s.outputTokens)}
+          delta={`${format.number(s.calls)} ${tr('common:recorded_model_calls')}`}
+        />
+        <Stat
+          className="usage-cost-total"
+          label={tr('common:recorded_cost')}
+          value={money(s.costUsd ?? (s.calls ? undefined : 0))}
+          delta={
+            s.unknownPrices
+              ? tr('usage:unknown_calls', { count: s.unknownPrices })
+              : tr('common:reported_and_estimated_costs')
+          }
+        />
       </div>
-      <div className="usage-token-details-tile usage-stat-tile">
-        <dl className="usage-token-details">
-          {[
-            [tr('common:input'), s.inputTokens],
-            [tr('common:output'), s.outputTokens],
-            [tr('common:cache_read'), data.cacheReadTokens],
-            [tr('common:cache_write'), data.cacheWriteTokens],
-            [tr('common:reasoning'), data.reasoningTokens],
-          ].map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{format.number(Number(value))}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-      <div className="usage-cost-total usage-stat-tile">
-        <span className="usage-stat-label">{tr('common:recorded_cost')}</span>
-        <strong className="usage-stat-value">{money(s.costUsd ?? (s.calls ? undefined : 0))}</strong>
-        <span className="usage-stat-meta">
-          {s.unknownPrices
-            ? tr('usage:unknown_calls', { count: s.unknownPrices })
-            : tr('common:reported_and_estimated_costs')}
-        </span>
-      </div>
+      <dl className="usage-token-details">
+        {details.map(([label, value]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{format.number(value)}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }
@@ -213,100 +224,112 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
 
   return (
     <section className="usage-dashboard" aria-label={tr('common:overall_token_dashboard')}>
-      <div className="usage-dashboard-toolbar">
+      <div className="usage-block">
         <div>
-          <h3>{tr('common:overall_usage')}</h3>
+          <h3 className="text-[length:var(--type-md)] font-semibold leading-snug">
+            {tr('common:overall_usage')}
+          </h3>
           <p className="muted">
             {tr('common:all_providers_and_documents_recorded_by_vstudy_on_this_device')}
           </p>
         </div>
-        <div className="row">
-          <Select
-            aria-label={tr('common:usage_period')}
-            value={period}
-            onChange={(e) => setPeriod(e.target.value as UsagePeriod)}
-          >
-            <option value="all">{tr('common:all_time')}</option>
-            <option value="month">{tr('common:this_month')}</option>
-            <option value="last30days">{tr('common:last_30_days')}</option>
-            <option value="day">{tr('common:today')}</option>
-          </Select>
-          <Button variant="secondary" size="sm" onClick={() => setRevision((r) => r + 1)}>
-            {tr('common:refresh_usage')}
-          </Button>
-        </div>
+        <Toolbar
+          left={
+            <>
+              <Select
+                aria-label={tr('common:usage_period')}
+                value={period}
+                onChange={(e) => setPeriod(e.target.value as UsagePeriod)}
+              >
+                <option value="all">{tr('common:all_time')}</option>
+                <option value="month">{tr('common:this_month')}</option>
+                <option value="last30days">{tr('common:last_30_days')}</option>
+                <option value="day">{tr('common:today')}</option>
+              </Select>
+              <Button variant="secondary" size="sm" onClick={() => setRevision((r) => r + 1)}>
+                {tr('common:refresh_usage')}
+              </Button>
+            </>
+          }
+        />
       </div>
-      <SubscriptionMeters />
       {error ? (
         <p role="alert">{error}</p>
       ) : !data ? (
         <p role="status">{tr('common:loading_dashboard')}</p>
       ) : (
         <>
-          <UsageOverview data={data} />
-          {!data.summary.calls && (
-            <p className="muted">
+          <div className="usage-block">
+            <UsageOverview data={data} />
+            {!data.summary.calls && (
+              <p className="muted">
+                {tr('common:no_model_usage_recorded_in_this_period_send_a_chat_to_start_tracking')}
+              </p>
+            )}
+            <p className="usage-count-note muted">
               {tr(
-                'common:no_model_usage_recorded_in_this_period_send_a_chat_to_start_tracking',
+                'common:input_includes_cache_reads_and_writes_output_includes_reasoning_cli_costs_are_api_equivalent_subscription_not_subscription_charges',
               )}
             </p>
-          )}
-          <p className="usage-count-note muted">
-            {tr(
-              'common:input_includes_cache_reads_and_writes_output_includes_reasoning_cli_costs_are_api_equivalent_subscription_not_subscription_charges',
-            )}
-          </p>
-          <UsageTrend days={data.days} />
-          {period === 'all' && (
-            <p className="muted">
-              {tr('common:totals_cover_all_time_the_chart_shows_the_last_30_calendar_days')}
-            </p>
-          )}
-          <div className="usage-breakdown-heading">
-            <strong>{tr('common:breakdown')}</strong>
-            <Select
-              aria-label={tr('common:group_usage_by')}
-              value={by}
-              onChange={(e) => setBy(e.target.value as typeof by)}
-            >
-              <option value="provider">{tr('common:provider')}</option>
-              <option value="model">{tr('common:model')}</option>
-              <option value="document">{tr('common:document')}</option>
-            </Select>
           </div>
-          <div className="usage-breakdown">
-            <table>
-              <thead>
-                <tr>
-                  <th>
-                    {by === 'provider'
-                      ? tr('common:provider')
-                      : by === 'model'
-                      ? tr('common:provider_model')
-                      : tr('common:document')}
-                  </th>
-                  <th>{tr('common:tokens')}</th>
-                  <th>{tr('common:calls')}</th>
-                  <th>{tr('common:cost')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {groupRows(data.summary, by, documents).map(([key, r]) => (
-                  <tr key={key}>
-                    <td>{r.label}</td>
-                    <td>{format.number(r.tokens)}</td>
-                    <td>{r.calls}</td>
-                    <td>
-                      {money(r.costUsd)}
-                      {r.unknown > 0 && r.costUsd !== undefined && tr('common:unknown_suffix')}
-                    </td>
+          <div className="usage-block">
+            <UsageTrend days={data.days} />
+            {period === 'all' && (
+              <p className="muted">
+                {tr('common:totals_cover_all_time_the_chart_shows_the_last_30_calendar_days')}
+              </p>
+            )}
+          </div>
+          <div className="usage-block">
+            <Toolbar
+              left={<strong>{tr('common:breakdown')}</strong>}
+              right={
+                <Select
+                  aria-label={tr('common:group_usage_by')}
+                  value={by}
+                  onChange={(e) => setBy(e.target.value as typeof by)}
+                >
+                  <option value="provider">{tr('common:provider')}</option>
+                  <option value="model">{tr('common:model')}</option>
+                  <option value="document">{tr('common:document')}</option>
+                </Select>
+              }
+            />
+            <div className="usage-breakdown">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      {by === 'provider'
+                        ? tr('common:provider')
+                        : by === 'model'
+                        ? tr('common:provider_model')
+                        : tr('common:document')}
+                    </th>
+                    <th>{tr('common:tokens')}</th>
+                    <th>{tr('common:calls')}</th>
+                    <th>{tr('common:cost')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {groupRows(data.summary, by, documents).map(([key, r]) => (
+                    <tr key={key}>
+                      <td>{r.label}</td>
+                      <td>{format.number(r.tokens)}</td>
+                      <td>{format.number(r.calls)}</td>
+                      <td>
+                        {money(r.costUsd)}
+                        {r.unknown > 0 && r.costUsd !== undefined && tr('common:unknown_suffix')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
+      <SubscriptionMeters />
     </section>
   );
 }

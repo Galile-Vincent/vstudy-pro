@@ -1,4 +1,5 @@
-import { SettingsGroup, SettingsRow } from '../settings/layout';
+import { SettingsGroup } from '../settings/layout';
+import { FormField } from '../components/ui/form-field';
 import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -132,63 +133,77 @@ export function UsageSettings() {
         <>
           <SettingsGroup title={tr('settings:budgets')}>
             <p>{tr('usage:budget_help')}</p>
-            <SettingsRow label={tr('common:monthly_budget_usd')}>
-              <Input
-                aria-label={tr('common:monthly_budget_usd')}
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={settings.monthlyBudgetUsd ?? ''}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    monthlyBudgetUsd: e.target.value ? Number(e.target.value) : undefined,
-                  })
-                }
-              />
-            </SettingsRow>
-            <SettingsRow label={tr('common:monthly_token_cap')}>
-              <Input
-                aria-label={tr('common:monthly_token_cap')}
-                type="number"
-                min="1"
-                step="1"
-                value={settings.monthlyTokenBudget ?? ''}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    monthlyTokenBudget: e.target.value ? Number(e.target.value) : undefined,
-                  })
-                }
-              />
-            </SettingsRow>
-            <SettingsRow label={tr('common:warn_at')}>
-              <Input
-                aria-label={tr('common:warn_at')}
-                type="number"
-                min="1"
-                max="100"
-                value={settings.warnAtPercent}
-                onChange={(e) => setSettings({ ...settings, warnAtPercent: Number(e.target.value) })}
-              />
-            </SettingsRow>
-            <details><summary>{tr('usage:advanced_prices')}</summary>
-            <SettingsRow stack label={tr('common:price_overrides_usd_per_1m_tokens')}>
-              <Textarea
-                aria-label={tr('common:price_overrides')}
-                rows={5}
-                value={overrides}
-                onChange={(e) => setOverrides(e.target.value)}
-                spellCheck={false}
-              />
-            </SettingsRow>
-            <p className="muted">
-              {tr('common:json_keyed_by_exact_model_id_e_g')}
-              {`{"my-model":{"input":2,"output":10,"cacheRead":0.1,"cacheWrite":2.5}}`}
-              {tr(
-                'common:standard_global_defaults_verified_nov_3_2026_estimates_exclude_taxes_tools_and_special_service_tiers_cache_writes_assume_5_minutes_cli_costs_are_api_equivalent_subscription_not_subscription_charges',
-              )}
-            </p>
+            <div className="usage-fields">
+              <FormField label={tr('common:monthly_budget_usd')}>
+                {(field) => (
+                  <Input
+                    {...field}
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={settings.monthlyBudgetUsd ?? ''}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        monthlyBudgetUsd: e.target.value ? Number(e.target.value) : undefined,
+                      })
+                    }
+                  />
+                )}
+              </FormField>
+              <FormField label={tr('common:monthly_token_cap')}>
+                {(field) => (
+                  <Input
+                    {...field}
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={settings.monthlyTokenBudget ?? ''}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        monthlyTokenBudget: e.target.value ? Number(e.target.value) : undefined,
+                      })
+                    }
+                  />
+                )}
+              </FormField>
+              <FormField label={tr('common:warn_at')}>
+                {(field) => (
+                  <Input
+                    {...field}
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={settings.warnAtPercent}
+                    onChange={(e) => setSettings({ ...settings, warnAtPercent: Number(e.target.value) })}
+                  />
+                )}
+              </FormField>
+            </div>
+            <details>
+              <summary>{tr('usage:advanced_prices')}</summary>
+              <div className="usage-prices">
+                <FormField label={tr('common:price_overrides_usd_per_1m_tokens')}>
+                  {(field) => (
+                    <Textarea
+                      {...field}
+                      rows={5}
+                      className="font-mono text-[length:var(--type-sm)]"
+                      value={overrides}
+                      onChange={(e) => setOverrides(e.target.value)}
+                      spellCheck={false}
+                    />
+                  )}
+                </FormField>
+                <p className="muted">
+                  {tr('common:json_keyed_by_exact_model_id_e_g')}
+                  {`{"my-model":{"input":2,"output":10,"cacheRead":0.1,"cacheWrite":2.5}}`}
+                  {tr(
+                    'common:standard_global_defaults_verified_nov_3_2026_estimates_exclude_taxes_tools_and_special_service_tiers_cache_writes_assume_5_minutes_cli_costs_are_api_equivalent_subscription_not_subscription_charges',
+                  )}
+                </p>
+              </div>
             </details>
             <div className="row">
               <Button variant="default" size="sm" onClick={() => void save()}>
