@@ -32,14 +32,14 @@ it.each(['Choose a file', 'Try a sample document'])('holds one lock while %s is 
   const { container } = render(<UploadCard />);
   fireEvent.click(screen.getByRole('button', { name }));
   fireEvent.drop(container.firstChild!, {
-    dataTransfer: { files: [new File(['notes'], 'notes.pdf')] },
+    dataTransfer: { types: ['Files'], files: [new File(['notes'], 'notes.pdf')] },
   });
   expect(invoke.mock.calls.map(call => call[0])).toEqual([name === 'Choose a file' ? 'documents:import' : 'documents:importSample']);
   expect(screen.getByRole('button', { name: 'Choose a file' }).hasAttribute('disabled')).toBe(true);
   await act(async () => finish(null));
   invoke.mockResolvedValue([]);
   fireEvent.drop(container.firstChild!, {
-    dataTransfer: { files: [new File(['notes'], 'notes.pdf')] },
+    dataTransfer: { types: ['Files'], files: [new File(['notes'], 'notes.pdf')] },
   });
   await act(async () => {});
   expect(invoke).toHaveBeenLastCalledWith('documents:importPaths', {
@@ -85,7 +85,7 @@ it('rejects a busy drag visibly without highlighting', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Choose a file' }));
   fireEvent.dragEnter(container.firstChild!, { dataTransfer: { types: ['Files'] } });
   expect(container.firstElementChild!.getAttribute('data-dragging')).toBe('false');
-  fireEvent.drop(container.firstChild!, { dataTransfer: { files: [] } });
+  fireEvent.drop(container.firstChild!, { dataTransfer: { types: ['Files'], files: [] } });
   expect(screen.getByRole('status').textContent).toContain('Wait');
 });
 it('releases the picker lock after an error and accepts a drop', async () => {
@@ -93,7 +93,7 @@ it('releases the picker lock after an error and accepts a drop', async () => {
   const { container } = render(<UploadCard />);
   fireEvent.click(screen.getByRole('button', { name: 'Choose a file' }));
   await act(async () => {});
-  fireEvent.drop(container.firstChild!, { dataTransfer: { files: [new File([''], 'notes.pdf')] } });
+  fireEvent.drop(container.firstChild!, { dataTransfer: { types: ['Files'], files: [new File([''], 'notes.pdf')] } });
   await act(async () => {});
   expect(invoke.mock.calls.map(call => call[0])).toEqual(['documents:import', 'documents:importPaths']);
 });
@@ -120,7 +120,7 @@ it('keeps one persistent status for partial failures', async () => {
     { ok: false, error: 'errors.disk_full' }]);
   const { container } = render(<UploadCard />);
   const status = screen.getByRole('status');
-  fireEvent.drop(container.firstChild!, { dataTransfer: { files: [new File([''], 'notes.pdf')] } });
+  fireEvent.drop(container.firstChild!, { dataTransfer: { types: ['Files'], files: [new File([''], 'notes.pdf')] } });
   await act(async () => {});
   expect(screen.getAllByRole('status')).toEqual([status]);
   const error = screen.getByRole('alert').textContent;
@@ -160,4 +160,12 @@ it('clears a rejected drop on the next file interaction', () => {
   expect(screen.getByRole('alert')).toBeTruthy();
   fireEvent.dragEnter(container.firstChild!, { dataTransfer: { types: ['Files'] } });
   expect(screen.queryByRole('alert')).toBeNull();
+});
+it('does not accept text dragover or drop', () => {
+  const { container } = render(<UploadCard />);
+  const dataTransfer = { types: ['text/plain'], files: [] };
+  expect(fireEvent.dragOver(container.firstChild!, { dataTransfer })).toBe(true);
+  expect(fireEvent.drop(container.firstChild!, { dataTransfer })).toBe(true);
+  expect(screen.getByRole('status').textContent).toBe('');
+  expect(invoke).not.toHaveBeenCalled();
 });
