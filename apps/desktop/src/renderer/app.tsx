@@ -9,6 +9,8 @@ import { ExistingAnalyticsPrompt } from './analytics-ui';
 import { track } from './analytics';
 import { HistoryView, HistoryFinder } from "./history";
 import { lazy, Suspense, useEffect, useMemo, useState, type ComponentType } from "react";
+const DevGallery = import.meta.env.DEV ? lazy(() => import('./design')) : null;
+const galleryHash = '#/design';
 let loadedWelcome: ComponentType | undefined;
 const loadWelcome = () => import("./welcome").then(module => { loadedWelcome = module.default; return module; });
 const WelcomeView = lazy(loadWelcome);
@@ -67,7 +69,7 @@ function Views() {
     <HomeView />
   )}</SurfaceErrorBoundary>;
 }
-export function App() {
+function Application() {
   return (
     <AgentsProvider>
       <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
@@ -75,4 +77,15 @@ export function App() {
       </AppShell>
     </AgentsProvider>
   );
+}
+
+export function App() {
+  const [gallery, setGallery] = useState(() => location.hash === galleryHash);
+  useEffect(() => {
+    if (!DevGallery) return;
+    const update = () => setGallery(location.hash === galleryHash);
+    window.addEventListener('hashchange', update);
+    return () => window.removeEventListener('hashchange', update);
+  }, []);
+  return DevGallery && gallery ? <Suspense fallback={null}><DevGallery/></Suspense> : <Application/>;
 }

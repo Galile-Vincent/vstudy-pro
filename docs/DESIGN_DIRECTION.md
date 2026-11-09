@@ -3,10 +3,10 @@
 References: t3.codes, pingdotgg/t3code, assistant-ui.com. Calm, dense, typographic, tonal.
 
 ## Rules
-1. No decorative borders on cards, panels, list rows, inputs or buttons. Separate surfaces by tone (`color-mix(in oklab, var(--ink) 4-6%, var(--surface))`), spacing, and type weight. Hairlines are allowed only for table rules, a sticky header over scrolling content, and focus rings.
+1. No decorative borders on cards, panels, list rows, inputs or buttons. Separate surfaces by tone (`color-mix(in oklab, var(--ink) 4-6%, var(--surface))`), spacing, and type weight. A 1px card ring is allowed. Hairlines are allowed only for table rules, a sticky header over scrolling content, and focus rings.
 2. Radius scale only: `--r-xs 6`, `--r-sm 8` (controls, rows), `--r-md 12` (cards, popovers), `--r-lg 16` (large panels, composer), `--r-xl 24` (hero), `--r-pill`. Nested radius = outer radius minus inset (concentric). No raw px radii.
 3. Spacing from `--space-*` on a 4px grid. Group with whitespace before adding a container. Page gutters >= `--space-8` on desktop.
-4. Elevation only for floating layers (popover, dialog, composer). Cards are flat.
+4. Use two shadow tiers. Resting surfaces use a 1px ring plus a centered 2px edge. Floating layers (popover, dialog, composer) use a ring plus a centered 12px blur. Shadows never have an offset.
 5. Motion: `--motion-*` and `--ease-*` tokens, 120-320ms, opacity/transform only, respect reduced motion. Hover = tone shift, not outline.
 6. Use assistant-ui components (`components/assistant-ui/elements/*`, `@assistant-ui/react` primitives) wherever a chat, thread list, suggestion, attachment, reasoning, sources, tool, or citation surface exists.
 7. Keep every existing a11y attribute, i18n key (en, zh-Hant, ja), data-testid, and focus ring. Focus indicator stays visible.
@@ -54,3 +54,15 @@ Theme keys map to CSS properties of the same name. `sidebar` maps to `--sidebar-
 `pnpm --filter @vstudy/desktop contrast:check` checks every pack and scheme at every contrast step. It checks text at 4.5:1 and control boundaries, focus indicators, and chart colors at 3:1. It also audits every renderer CSS file for fixed colors, old numbered palette tokens, and direct OS color-scheme overrides. `pnpm test` runs this check before Vitest, so CI test runs fail on regressions.
 
 `node e2e/themes.mjs` from `apps/desktop` runs one production Electron instance and closes it afterward. It captures four packs in both schemes across Library, Courses, Reader and Chat, and Appearance. It checks the editor, JSON validation, keyboard interaction, persistence, native scheme, and Appearance accessibility. Courses use deterministic Moodle fixtures. Evidence is in `docs/evidence/themes/`.
+
+## Component library
+
+An `interactive` Card is one whole-card action. Its content must be text only: no headings, nested buttons, or links.
+
+Shared components live in `apps/desktop/src/renderer/components/ui` and export from its index. Pages compose Card, PageHeader, Section, Toolbar, ListRow, EmptyState, Stat, FormField and segmented tabs. PageContainer owns desktop gutters and the content measure. Pages do not restyle cards or create feature card, panel or tile classes. Row actions stay outside the row button. FormField supplies control attributes through its child function. Spread those attributes onto the labeled control.
+
+Add a component when multiple pages repeat the same structure. Keep its API small. Use theme, spacing, radius and type tokens. Supply visible copy from the caller. Add behavior tests and a gallery example. Update the reviewed vendor manifest for library changes. Existing pages migrate in separate changes.
+
+Run `pnpm dev` and open `#/design` in development. The gallery controls scheme, theme pack, material and contrast without saving settings. Production excludes this route and its code.
+
+Run `pnpm --filter @vstudy/desktop ui:check` or desktop lint. The ratchet scans CSS and TSX outside the shared libraries and tokens. It rejects increases in fixed shadows, pixel radii, hex or RGB colors, untokenized backdrop filters and feature surface classes. Token shadows, none and simple focus rings are allowed. Run `pnpm --filter @vstudy/desktop ui:check --update-baseline` after removing violations. Updates refuse increases. Run `pnpm --filter @vstudy/desktop ui:test` for the fixture tests.

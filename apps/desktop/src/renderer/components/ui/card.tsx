@@ -1,18 +1,66 @@
+import { cva } from "class-variance-authority"
+import "./ui.css"
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+export type CardProps =
+  | (React.ComponentProps<"div"> & { variant?: "flat" | "raised" })
+  | (React.ComponentProps<"button"> & { variant: "interactive"; href?: never })
+  | (React.ComponentProps<"a"> & { variant: "interactive"; href: string; disabled?: boolean })
+
+function Card(props: CardProps) {
+  if (props.variant === "interactive" && props.href !== undefined) {
+    const { variant, className, disabled, href, onClick, ...rest } = props
+    return (
+      <a
+        {...rest}
+        data-slot="card"
+        data-variant={variant}
+        className={cn(cardVariants({ variant }), className)}
+        href={disabled ? undefined : href}
+        aria-disabled={disabled || undefined}
+        tabIndex={disabled ? -1 : rest.tabIndex}
+        onClick={disabled ? undefined : onClick}
+      />
+    )
+  }
+  if (props.variant === "interactive") {
+    const { variant, className, ...rest } = props
+    return (
+      <button
+        type="button"
+        {...rest}
+        data-slot="card"
+        data-variant={variant}
+        className={cn(cardVariants({ variant }), className)}
+      />
+    )
+  }
+  const { className, variant = "raised", ...rest } = props
   return (
     <div
+      {...rest}
       data-slot="card"
-      className={cn(
-        "flex flex-col gap-6 rounded-[var(--r-lg)] bg-[color-mix(in_oklab,var(--ink)_4%,var(--surface))] py-6 text-card-foreground",
-        className
-      )}
-      {...props}
+      data-variant={variant}
+      className={cn(cardVariants({ variant }), className)}
     />
   )
 }
+
+const cardVariants = cva(
+  "flex flex-col rounded-[var(--r-lg)] bg-[color-mix(in_oklab,var(--ink)_4%,var(--surface))] text-card-foreground",
+  {
+    variants: {
+      variant: {
+        flat: "gap-[var(--space-6)] py-[var(--space-6)]",
+        raised: "gap-6 py-6",
+        interactive:
+          "gap-[var(--space-6)] py-[var(--space-6)] text-start cursor-pointer disabled:opacity-[var(--opacity-disabled)]",
+      },
+    },
+    defaultVariants: { variant: "raised" },
+  },
+)
 
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
