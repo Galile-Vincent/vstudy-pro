@@ -165,14 +165,20 @@ export default function DesignGallery() {
                 key={variant}
                 {...(variant === 'interactive' ? { variant, onClick: () => {} } : { variant })}
               >
-                <CardHeader>
-                  <CardTitle>{variant}</CardTitle>
-                  <CardDescription>{copy.hint}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Stat label={copy.stats} value={42} unit={copy.unit} delta="+12%" />
-                </CardContent>
-                {variant !== 'interactive' && <CardFooter>{action}</CardFooter>}
+                {variant === 'interactive' ? (
+                  <span className="px-[var(--space-6)]">{variant}: {copy.hint}</span>
+                ) : (
+                  <>
+                    <CardHeader>
+                      <CardTitle>{variant}</CardTitle>
+                      <CardDescription>{copy.hint}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Stat label={copy.stats} value={42} unit={copy.unit} delta="+12%" />
+                    </CardContent>
+                    <CardFooter>{action}</CardFooter>
+                  </>
+                )}
               </Card>
             ))}
             {(['rest', 'hover', 'focus', 'disabled'] as const).map((state) => (
