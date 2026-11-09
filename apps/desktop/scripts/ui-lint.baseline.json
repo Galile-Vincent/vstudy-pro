@@ -55,13 +55,6 @@
     "backdrop": 0,
     "surface-class": 5
   },
-  "onboarding/onboarding.css": {
-    "shadow": 1,
-    "radius": 0,
-    "color": 0,
-    "backdrop": 0,
-    "surface-class": 0
-  },
   "settings/agents.css": {
     "shadow": 0,
     "radius": 0,

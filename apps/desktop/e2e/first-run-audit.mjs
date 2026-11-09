@@ -4,6 +4,7 @@ import { _electron as electron } from 'playwright';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { onboardingForward, onboardingConsent } from './helpers/onboarding.mjs';
 const directory = await mkdtemp(join(tmpdir(), 'vstudy-onboarding-audit-'));
 const evidence = resolve('../../docs/evidence/onboarding');
 await mkdir(evidence, { recursive: true });
@@ -22,8 +23,8 @@ try {
     await page.screenshot({ path });
     screens.push({ path, text: await page.locator('.onboarding').innerText() });
     if (!baseline && i === 7) await page.locator('.onboarding-content > button').click();
-    if (!baseline && i === 4) await page.locator('.analytics-choices button').last().click();
-    else await page.locator('.onboarding footer .primary').click();
+    if (!baseline && i === 4) await onboardingConsent(page).click();
+    else await onboardingForward(page).click();
   }
   await page.locator('.onboarding').waitFor({ state: 'detached' });
   if (!baseline) {
