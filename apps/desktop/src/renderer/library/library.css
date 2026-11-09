@@ -72,9 +72,6 @@ html[data-input-modality=keyboard] .library-view .library-search:has(:focus-visi
 .library-toast { position:absolute; bottom:var(--space-8); align-self:center; display:flex; align-items:center; gap:var(--space-4); padding:var(--space-3) var(--space-4); border:0; background:var(--surface); border-radius:var(--r-md); box-shadow:var(--elevation-floating); z-index:30; }
 .library-skeleton { display:grid; gap:var(--space-3); }
 .library-skeleton > div { height:var(--library-row-height); border-radius:var(--r-md); background:color-mix(in oklab, var(--ink) 6%, var(--surface)); }
-.library-empty { flex:1; border:0; border-radius:var(--r-md); background:color-mix(in oklab, var(--ink) 3%, var(--surface)); }
-.library-empty > svg { width:var(--space-8); height:var(--space-8); color:var(--muted); }
-.library-empty h2 { font-size:var(--type-xl); font-weight:600; color:var(--ink); }
 .document-menu,.folder-picker { display:grid; gap:var(--space-2); }
 .document-menu button,.folder-picker button { text-align:start; }
 .folder-picker { max-height:50vh; overflow:auto; }
@@ -183,3 +180,6 @@ mark { background:var(--active); color:var(--ink); font-weight:600; }
 
 .filter-panel :is(button,input) { min-height:40px; }
 .filter-panel input[type=checkbox] { min-height:0; }
+
+.library-empty { max-width:32rem; align-self:center; margin-top:clamp(var(--space-4), 10vh, 6rem); }
+.library-empty > :is(h2,p) { max-width:28rem; }

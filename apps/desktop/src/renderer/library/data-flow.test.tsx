@@ -600,3 +600,14 @@ it.each([null, 'false', 'true'])('uses list by default and retains saved grid pr
   fireEvent.click(screen.getByRole('button', {name:tr('library:viewToggle')}));
   expect(results.getAttribute('data-view')).toBe(preference === 'true' ? 'list' : 'grid');
 });
+
+it('composes an empty library with one primary import and a sample action', async () => {
+  state.invoke.mockImplementation(async channel => channel === 'library:documents:list'
+    ? {items:[], nextCursor:null} : []);
+  mount();
+  const title = await screen.findByRole('heading', {level:2, name:tr('library:empty_library')});
+  const empty = title.closest('[data-slot=empty-state]')! as HTMLElement;
+  expect(within(empty).getByRole('button', {name:tr('common:import_document')})).toBeTruthy();
+  expect(within(empty).getByRole('button', {name:tr('onboarding:sample')})).toBeTruthy();
+  expect(within(empty).getAllByRole('button')).toHaveLength(2);
+});

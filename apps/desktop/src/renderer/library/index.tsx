@@ -3,9 +3,8 @@ import { virtualWindow } from './window';
 import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
-import { Brand } from '../components/brand';
 import type { CSSProperties } from 'react';
-import { PageContainer, PageHeader, Toolbar, FormField } from '../components/ui';
+import { PageContainer, PageHeader, Toolbar, FormField, EmptyState } from '../components/ui';
 import { Badge } from '../components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
 import './ui3.css';
@@ -956,15 +955,16 @@ export function LibraryView() {
           ))}
         </div>
       ) : !items.length ? (
-        <div className="empty library-empty">
-          <Brand/>
-          <h2>
-            {tr(
-              `library:empty_${text ? "search" : filters.length ? "filter" : query.folderId ? "folder" : "library"}`,
-              { query: text })}
-          </h2>
-          <p>{tr(text ? "library:searchHint" : filters.length ? "library:filterHint" : "library:emptyHint")}</p>
-          <Button variant="outline"
+        <EmptyState
+          className="library-empty"
+          headingLevel={2}
+          title={tr(
+            `library:empty_${text ? "search" : filters.length ? "filter" : query.folderId ? "folder" : "library"}`,
+            {query:text},
+          )}
+          description={tr(text ? "library:searchHint" : filters.length ? "library:filterHint" : "library:emptyHint")}
+          action={<>
+          <Button
             onClick={() =>
               text
                 ? setText("")
@@ -982,7 +982,8 @@ export function LibraryView() {
             )}
           </Button>
           {!text && !filters.length && <Button variant="outline" className="ghost" onClick={() => void run(async () => { await desktop.invoke('documents:importSample',{language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}); changed(); })}>{tr('onboarding:sample')}</Button>}
-        </div>
+          </>}
+        />
       ) : showFolders ? (
         <div className="library-folders">
           <FolderGrid groups={groups} formatNumber={format.number} onOpen={selectFolder} />
