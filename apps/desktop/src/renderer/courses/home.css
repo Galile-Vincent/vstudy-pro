@@ -18,10 +18,6 @@
 .moodle-due-row[data-urgent="true"] time { color:var(--warning); font-weight:600; }
 .due-show-all { padding-inline:0; font-size:var(--type-xs); margin-top:var(--space-2); }
 .moodle-grid-heading { margin-bottom:var(--space-1); }
-.moodle-term-tabs { gap:var(--space-1); }
-.moodle-term-tabs [role="tablist"] { background:transparent; padding:0; border-radius:0; gap:var(--space-4); flex-wrap:wrap; }
-.moodle-term-tabs [role="tab"] { padding:var(--space-2) 0; min-height:36px; font-size:var(--type-sm); border-radius:0; border:0; }
-.moodle-term-tabs [role="tab"][data-state="active"] { background:transparent; box-shadow:inset 0 -1px var(--hairline); font-weight:600; }
 .moodle-grid { display:flex; flex-direction:column; gap:0; padding:0; margin:0 -.75rem; list-style:none; }
 .moodle-empty,.moodle-banner[role="alert"] { background:var(--surface); }
 [data-scroll-fade="true"] { scrollbar-width:none; --mask-start:-40px; --mask-end:0px; mask-image:linear-gradient(to right,transparent,color-mix(in srgb,CanvasText 65%,transparent) 12px,CanvasText 40px),linear-gradient(to left,transparent,color-mix(in srgb,CanvasText 65%,transparent) 12px,CanvasText 40px); mask-size:calc(100% + 40px) 100%; mask-repeat:no-repeat; mask-composite:intersect; mask-position:var(--mask-start) 0,var(--mask-end) 0; transition:mask-position 180ms ease-out; }
@@ -58,7 +54,6 @@
 .update-reader h2:focus { outline:none; }
 
 
-.course-list-toolbar { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); }
 .moodle-page .course-sort { border:0; background:transparent; box-shadow:none; color:var(--muted); font-size:var(--type-xs); padding-inline:var(--space-2); }
 
 @media(max-width:1199px) {
@@ -67,7 +62,6 @@
   .moodle-due-section { border-left:0; padding-left:0; margin-bottom:0; }
 }
 
-.course-list-controls { display:flex; align-items:center; gap:var(--space-2); }
 .course-view-switch { --sw-hover:light-dark(color-mix(in srgb,var(--ink) 4%,var(--background)),color-mix(in srgb,var(--ink) 5%,var(--background))); --sw-on:light-dark(color-mix(in srgb,var(--ink) 10%,var(--background)),color-mix(in srgb,var(--ink) 14%,var(--background))); --sw-press:light-dark(color-mix(in srgb,var(--ink) 15%,var(--background)),color-mix(in srgb,var(--ink) 20%,var(--background))); display:flex; gap:2px; height:2.25rem; padding:2px; }
 .course-view-switch button { display:grid; place-items:center; width:2rem; height:2rem; padding:0; border:0; border-radius:var(--r-xs); background:transparent; color:var(--muted); cursor:pointer; }
 .course-view-switch button svg { width:1rem; height:1rem; stroke-width:1.75; }

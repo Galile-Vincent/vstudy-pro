@@ -1,6 +1,6 @@
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
-import { ListRow } from "../components/ui";
+import { ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
 import { Brand } from '../components/brand';
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
@@ -320,8 +320,8 @@ function CoursesBody({
     .sort((a, b) => a.dueAt.localeCompare(b.dueAt));
   const updates = [...new Map([...homeDetails.flatMap(detail => detail.notifications), ...(overview?.otherNotifications ?? [])].map(item => [item.id,item])).values()];
   const unreadUpdates = updates.filter(item => !item.read).length;
-  const availableTerms = termFilters.filter(filter => overview?.courses.some(course => matchesTerm(course,filter)) && (filter !== 'all' || new Set(overview.courses.map(course => course.identity.lifecycle)).size > 1));
-  const selectedTerm = availableTerms.includes(term) ? term : availableTerms[0] ?? 'all';
+  const availableTerms = termFilters;
+  const selectedTerm = term;
   const sort = sortPreferences[selectedTerm] ?? (selectedTerm === 'current' ? 'smart' : 'name');
   const orderedCourses = useMemo(() => {
     if (!orderSnapshot) return [];
@@ -890,11 +890,11 @@ function CoursesBody({
                 <h2 id="courses-title">{tr("moodle:your_courses")}<span className="courses-total">{overview.courses.length}</span></h2>
               </div>
               <Tabs value={selectedTerm} onValueChange={value => {prepareMovement.current();setTerm(value as MoodleTermFilter);}} className="moodle-term-tabs">
-                <div className="course-list-toolbar"><TabsList aria-label={tr("moodle:term_filter")}>
-                  {availableTerms.map(filter => <TabsTrigger key={filter} value={filter}>{tr(`moodle:term_${filter}`)}<span className="moodle-chip">{overview.courses.filter(course => matchesTerm(course,filter)).length}</span></TabsTrigger>)}
-                </TabsList><div className="course-list-controls"><Select value={sort} onValueChange={value => void changeSort(value)}><SelectTrigger className="course-sort" size="sm" aria-label={tr("moodle:sort_courses")}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="smart">{tr("moodle:sort_smart")}</SelectItem><SelectItem value="name">{tr("moodle:sort_name")}</SelectItem></SelectContent></Select><CourseViewSwitch value={view} onChange={changeView} /></div></div>
+                <Toolbar left={<SegmentedTabsList aria-label={tr("moodle:term_filter")}>
+                  {availableTerms.map(filter => <SegmentedTabsTrigger key={filter} value={filter}>{tr(`moodle:term_${filter}`)}<span className="moodle-chip">{overview.courses.filter(course => matchesTerm(course,filter)).length}</span></SegmentedTabsTrigger>)}
+                </SegmentedTabsList>} right={<><Select value={sort} onValueChange={value => void changeSort(value)}><SelectTrigger className="course-sort" size="sm" aria-label={tr("moodle:sort_courses")}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="smart">{tr("moodle:sort_smart")}</SelectItem><SelectItem value="name">{tr("moodle:sort_name")}</SelectItem></SelectContent></Select><CourseViewSwitch value={view} onChange={changeView} /></>} />
                 {termFilters.map(filter => <TabsContent key={filter} value={filter}>
-                  {!overview.courses.some(course => matchesTerm(course,filter)) && <p className="moodle-empty-inline">{tr("moodle:no_term_courses")}</p>}
+                  {!overview.courses.some(course => matchesTerm(course,filter)) && <EmptyState title={tr("moodle:no_term_courses")} />}
                   {pinsVisible && orderedCourses.some(item => item.pinned && matchesTerm(item.course,filter)) && <div className="course-group-label"><h3>{tr("moodle:pinned_courses")}</h3></div>}
                   <ul className="moodle-grid" data-view={view} role="list">
                     {orderedCourses.filter(item => matchesTerm(item.course,filter)).map(({course,pinned},index,items) => {
@@ -923,7 +923,7 @@ function CoursesBody({
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="relative z-1"
-                              aria-label={tr("moodle:course_actions", { course: name })}>
+                              aria-label={tr("moodle:catalog_course_actions", { course: name })}>
                               <MoreHorizontal aria-hidden="true" />
                             </Button>
                           </DropdownMenuTrigger>
