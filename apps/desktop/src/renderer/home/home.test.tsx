@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { getRoles, getByRole } from '@testing-library/react';
 import { renderToStaticMarkup as render } from 'react-dom/server';
 import { TooltipProvider } from '../components/ui/tooltip';
 const renderToStaticMarkup = (node:React.ReactNode) => render(<TooltipProvider>{node}</TooltipProvider>);
@@ -51,7 +52,11 @@ it('uses one Resume action and at most five recent rows without a nested main', 
   })) as Dashboard['recentDocuments'];
   const markup = renderToStaticMarkup(<Home initialData={{ ...empty, recentDocuments }}
     navigate={() => {}} onUsage={() => {}}/>);
-  expect(markup).not.toContain('<main');
+  const dom = document.createElement('div');
+  dom.innerHTML = markup;
+  expect(getRoles(dom).main).toBeUndefined();
+  const resume = dom.querySelector('button[aria-label]')!;
+  expect(getByRole(dom, 'button', { name: new RegExp(`^${resume.textContent!.trim()}`) })).toBe(resume);
   expect(markup.match(/data-slot="list-row"/g)).toHaveLength(5);
   expect(markup).toContain('Resume');
   expect(markup).not.toContain('Notes 6');
