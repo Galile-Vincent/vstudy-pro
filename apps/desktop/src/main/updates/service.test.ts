@@ -78,7 +78,8 @@ it('handles download rejection, offline consent, malformed metadata and illegal 
   await service.check(); updater.emit('update-available', {version:'0.4.5'});
   updater.downloadUpdate.mockRejectedValueOnce({code:'ENOTFOUND'});
   await service.download(); await Promise.resolve(); expect(service.snapshot().state).toEqual({status:'error',code:'network'});
-  await service.check(); expect(updater.downloadUpdate).toHaveBeenCalledTimes(2);
+  expect(updater.autoInstallOnAppQuit).toBe(false);
+  await service.check(); expect(updater.downloadUpdate).toHaveBeenCalledTimes(1);
   expect(reduceUpdate({status:'idle'}, {type:'ready',version:'0.4.5'})).toEqual({status:'idle'});
   expect(reduceUpdate({status:'idle'}, {type:'progress',percent:50})).toEqual({status:'idle'});
   expect(reduceUpdate({status:'downloading',percent:42}, {type:'progress',percent:NaN})).toEqual({status:'downloading',percent:42});

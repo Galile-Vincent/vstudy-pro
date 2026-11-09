@@ -6,7 +6,6 @@ type Updater = Pick<AppUpdater, 'on' | 'removeListener' | 'checkForUpdates' | 'd
   | 'quitAndInstall' | 'autoDownload' | 'allowDowngrade' | 'allowPrerelease' | 'autoInstallOnAppQuit'>;
 export class Updates {
   private state: UpdateState;
-  private offered: Extract<UpdateState, {status:'available'}> | undefined;
   private lastCheckedAt: number | null = null;
   private automatic: boolean;
   private listeners = new Set<(snapshot: UpdateSnapshot) => void>();
@@ -44,13 +43,10 @@ export class Updates {
   private dispatch(event: UpdateEvent) {
     try { this.state = reduceUpdate(this.state, event); }
     catch { this.state = {status:'error', code:'failed'}; }
-    if (this.state.status === 'available') this.offered = this.state;
+    if (event.type === 'error') this.updater.autoInstallOnAppQuit = false;
     this.emit();
   }
   async check() {
-    if (this.state.status === 'error' && this.offered && this.updater.autoInstallOnAppQuit) {
-      this.state = this.offered; return this.download();
-    }
     if (!['idle', 'error', 'available'].includes(this.state.status)) return this.snapshot();
     if (!this.options.online()) return this.snapshot();
     const now = (this.options.now ?? Date.now)();
