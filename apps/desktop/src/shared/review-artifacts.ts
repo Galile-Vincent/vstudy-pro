@@ -3,10 +3,11 @@ import { z } from 'zod';
 const id=z.string().uuid(), text=z.string().min(1).max(240), hash=z.string().regex(/^[a-f0-9]{64}$/), at=z.string().datetime();
 const date=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value=>{const parsed=new Date(value);return Number.isFinite(parsed.getTime())&&parsed.toISOString().slice(0,10)===value;});
 const zone=z.string().min(1).max(100).refine(value=>{try{new Intl.DateTimeFormat('en',{timeZone:value});return true;}catch{return false;}});
+export const MAX_REVIEW_CONCEPTS = 100;
 export const studyScopeSchema=z.discriminatedUnion('kind',[
  z.object({kind:z.literal('units'),unitIds:z.array(id).min(1).max(100)}).strict(),
  z.object({kind:z.literal('documents'),documentIds:z.array(id).min(1).max(100)}).strict(),
- z.object({kind:z.literal('concepts'),conceptKeys:z.array(text).min(1).max(100)}).strict(),
+ z.object({kind:z.literal('concepts'),conceptKeys:z.array(text).min(1).max(MAX_REVIEW_CONCEPTS)}).strict(),
  z.object({kind:z.literal('dates'),fromDate:date,toDate:date,timeZone:zone}).strict(),
  z.object({kind:z.literal('weak')}).strict(),
 ]);
@@ -18,6 +19,8 @@ export const examConfigSchema=z.object({
  difficulty:z.enum(['easy','medium','hard']),
 }).strict();
 export const studyResolvedScopeSchema=z.object({
+ totalConcepts:z.number().int().min(0).optional(),
+ omittedConcepts:z.number().int().min(0).optional(),
  sourceTitles:z.record(id,text).refine(v=>Object.keys(v).length<=8).optional(),
  exam:examConfigSchema.optional(),
  size:z.enum(['short','standard','long']).optional(),
@@ -51,4 +54,14 @@ export function isStudyAnswer(item: StudyTest['items'][number], answer: unknown)
  if(item.type==='mcq')return typeof answer==='number'&&Number.isInteger(answer)&&answer>=0&&answer<item.options.length;
  if(item.type==='true_false')return typeof answer==='boolean';
  return typeof answer==='string'&&answer.length<=2000;
+}
+
+export function compareReviewUrgency(
+ a: { key: string; createdAt: string; mastery: { risk: number; nextReviewAt: string | null } },
+ b: { key: string; createdAt: string; mastery: { risk: number; nextReviewAt: string | null } },
+) {
+ return b.mastery.risk - a.mastery.risk
+  || (a.mastery.nextReviewAt ?? '~').localeCompare(b.mastery.nextReviewAt ?? '~')
+  || a.createdAt.localeCompare(b.createdAt)
+  || a.key.localeCompare(b.key);
 }

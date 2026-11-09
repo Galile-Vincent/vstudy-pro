@@ -2,9 +2,10 @@ import { randomUUID } from 'node:crypto';
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { artifactSchema, generationRequestSchema, type GenerationRequest } from '../../shared/review-generate';
 import { studyPageInputSchema, type StudyPageInput } from '../../shared/review';
-import { EXAM_COURSE_ID, type StudyResolvedScope, type StudyTest } from '../../shared/review-artifacts';
+import { compareReviewUrgency, EXAM_COURSE_ID, type StudyResolvedScope, type StudyTest } from '../../shared/review-artifacts';
 import { PROMPT_VERSION } from './prompts';
 import { eligibleSourceSql } from './eligibility';
+import { ReviewRepository } from './repository';
 import { dateRange, type ScopeInputs } from './scope';
 export class ArtifactRepository {
     constructor(readonly db: DatabaseSync, readonly clock = Date.now) { }
@@ -60,9 +61,11 @@ export class ArtifactRepository {
             if(documents.length!==new Set(scope.documentIds).size)throw new Error('review.source_unavailable');
             return {units:[],documents,concepts:documents.map(id=>({key:id,unitId:null})),observations:[]};
         }
+        const mastery = new ReviewRepository(this.db).computeCourseMastery(courseId, this.clock()).sort(compareReviewUrgency);
+        weakKeys ??= new Set(mastery.filter(c => c.userState !== 'dismissed' && c.mastery.state === 'needs_review').map(c => c.key));
         const json = (values: readonly string[]) => JSON.stringify(values);
-        const unitsWhere = (where: string, ...values: SQLInputValue[]) => this.db.prepare(`SELECT * FROM study_units su WHERE su.courseId=? AND ${where} ORDER BY su.ordinal,su.id LIMIT 101`).all(courseId, ...values);
-        const conceptsWhere = (where: string, ...values: SQLInputValue[]) => this.db.prepare(`SELECT key,unitId FROM study_concepts WHERE courseId=? AND userState!='dismissed' AND ${where} LIMIT 101`).all(courseId, ...values);
+        const unitsWhere = (where: string, ...values: SQLInputValue[]) => this.db.prepare(`SELECT * FROM study_units su WHERE su.courseId=? AND ${where} ORDER BY su.ordinal,su.id`).all(courseId, ...values);
+        const conceptsWhere = (where: string, ...values: SQLInputValue[]) => this.db.prepare(`SELECT key,unitId FROM study_concepts WHERE courseId=? AND userState!='dismissed' AND ${where}`).all(courseId, ...values);
         const unitIdsOf = (rows: Record<string, unknown>[], column: string) => json(rows.flatMap(row => row[column] ? [String(row[column])] : []));
         let units: Record<string, unknown>[], concepts: Record<string, unknown>[] | undefined, observations: ScopeInputs['observations'] = [];
         if (scope.kind === 'units')
@@ -72,20 +75,17 @@ export class ArtifactRepository {
         else if (scope.kind === 'concepts' || scope.kind === 'weak') {
             const keys = scope.kind === 'concepts' ? scope.conceptKeys : [...weakKeys ?? []];
             concepts = conceptsWhere('key IN (SELECT value FROM json_each(?))', json(keys));
-            units = concepts.length > 100 ? [] : unitsWhere('su.id IN (SELECT value FROM json_each(?))', unitIdsOf(concepts, 'unitId'));
+            units = unitsWhere('su.id IN (SELECT value FROM json_each(?))', unitIdsOf(concepts, 'unitId'));
         }
         else {
             const range = dateRange(scope.fromDate, scope.toDate, scope.timeZone);
             const inRange = `FROM study_observations o JOIN study_jobs j ON j.id=o.jobId JOIN conversations c ON c.id=j.conversationId LEFT JOIN documents d ON d.id=c.documentId JOIN messages u ON u.id=j.userMessageId JOIN messages a ON a.id=j.assistantMessageId JOIN study_chat_links l ON l.conversationId=c.id WHERE o.courseId=? AND (${eligibleSourceSql}) AND j.occurredAt>=? AND j.occurredAt<?`;
             units = unitsWhere(`((coalesce(su.startsAt,'')!='' AND coalesce(su.endsAt,'')!='' AND su.startsAt<? AND su.endsAt>?) OR ((coalesce(su.startsAt,'')='' OR coalesce(su.endsAt,'')='') AND su.id IN (SELECT o.unitId ${inRange})))`, range.to, range.from, courseId, range.from, range.to);
-            if (units.length <= 100)
-                observations = this.db.prepare(`SELECT o.unitId,min(j.occurredAt) occurredAt ${inRange} AND o.unitId IN (SELECT value FROM json_each(?)) GROUP BY o.unitId`).all(courseId, range.from, range.to, unitIdsOf(units, 'id')) as unknown as ScopeInputs['observations'];
+            observations = this.db.prepare(`SELECT o.unitId,min(j.occurredAt) occurredAt ${inRange} AND o.unitId IN (SELECT value FROM json_each(?)) GROUP BY o.unitId`).all(courseId, range.from, range.to, unitIdsOf(units, 'id')) as unknown as ScopeInputs['observations'];
         }
-        if (units.length > 100)
-            throw new Error('review.scope_limit');
         concepts ??= conceptsWhere('(unitId IS NULL OR unitId IN (SELECT value FROM json_each(?)))', unitIdsOf(units, 'id'));
         const links = this.db.prepare('SELECT du.unitId,du.documentId FROM study_document_units du JOIN documents d ON d.id=du.documentId WHERE du.courseId=? AND d.deletedAt IS NULL AND d.status=\'ready\' AND du.unitId IN (SELECT value FROM json_each(?)) LIMIT 1001').all(courseId, unitIdsOf(units, 'id'));
-        if (concepts.length > 100 || links.length > 1000)
+        if (links.length > 1000)
             throw new Error('review.scope_limit');
         // Unitless concepts belong to the whole course, so their sources are every ready document.
         const courseDocuments = (scope.kind === 'concepts' || scope.kind === 'weak') && concepts.some(c => c.unitId === null)
@@ -93,6 +93,8 @@ export class ArtifactRepository {
             : [];
         if (courseDocuments.length > 1000)
             throw new Error('review.scope_limit');
+        const order = new Map(mastery.map((c, i) => [c.key, i]));
+        concepts.sort((a, b) => (order.get(String(a.key)) ?? 0) - (order.get(String(b.key)) ?? 0));
         return { units: units.map(u => ({ id: String(u.id), startsAt: u.startsAt as string | null, endsAt: u.endsAt as string | null, documentIds: links.filter(l => l.unitId === u.id).map(l => String(l.documentId)) })), documents: [...new Set([...links.map(l => String(l.documentId)), ...courseDocuments])], concepts: concepts.map(c => ({ key: String(c.key), unitId: c.unitId as string | null, ...(scope.kind === 'weak' ? { weak: true } : {}) })), observations };
     }
     sourceTitles(ids:readonly string[]):Record<string,string>{

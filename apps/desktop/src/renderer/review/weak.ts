@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { IpcResponse } from '../../shared/ipc';
+import { compareReviewUrgency } from '../../shared/review-artifacts';
 import { desktop } from '../bridge';
 
 export type WeakConcept = IpcResponse<'review:courses:mastery'>['items'][number];
@@ -26,7 +27,7 @@ export function useWeakConcepts(courseId: string, revision: number) {
         cursor = response.nextCursor ?? undefined;
         if (!cursor) break;
       }
-      if (active) setResult({ courseId, key, items: found, error: false });
+      if (active) setResult({ courseId, key, items: found.sort(compareReviewUrgency), error: false });
     })().catch(() => { if (active) setResult({ courseId, key, items: [], error: true }); });
     return () => { active = false; };
   }, [courseId, revision, attempt]);
