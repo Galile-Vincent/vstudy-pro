@@ -523,3 +523,13 @@ it('measures a tall status block without stretching ready grid neighbours', asyn
  expect(parseFloat(screen.getByText('next',{selector:'button'}).closest<HTMLElement>('.library-document')!.style.top)).toBeGreaterThanOrEqual(480);
  vi.stubGlobal('ResizeObserver',class{observe(){}unobserve(){}disconnect(){}});
 });
+
+it('clears the range anchor on query change', async () => {
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'
+  ? {items:[row('first'),row('second'),row('third')],nextCursor:null}:[]);
+ mount();fireEvent.click((await screen.findByText('first')).closest('.library-document')!);
+ fireEvent.change(screen.getByRole('textbox',{name:tr('library:search')}),{target:{value:'new'}});
+ await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list'&&q.text==='new')).toBe(true));
+ fireEvent.click(screen.getByText('third').closest('.library-document')!,{shiftKey:true});
+ expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(1);
+});

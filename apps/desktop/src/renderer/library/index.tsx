@@ -264,6 +264,7 @@ export function LibraryView() {
   const selectFolder = (key: string | null) => {
     folderFocus.current = key === openKey ? null : key ? "heading" : openKey;
     setOpenKey(key);
+    anchor.current = "";
     setActiveRow(undefined);
     setSelected([]);
     restoreTop.current = 0;
@@ -344,6 +345,7 @@ export function LibraryView() {
       restoreTop.current = scroller.current?.scrollTop ?? restoreTop.current;
     } else {
       setSelected([]);
+      anchor.current = "";
       selectedIds.current = [];
       restoreTop.current = 0;
       previousQuery.current = JSON.stringify(query);
@@ -388,7 +390,8 @@ export function LibraryView() {
           page.nextCursor = next.nextCursor;
         }
         setItems(current => retainItems(current, rows));
-        const available = new Set(rows.map(item => item.document.id));
+        const available = new Set<string>(rows.map(item => item.document.id));
+        if (anchor.current && !available.has(anchor.current)) anchor.current = "";
         if (provesExistence(query, page.nextCursor)) {
           const missing = selectedIds.current.filter(id => !available.has(id));
           if (missing.length) {
