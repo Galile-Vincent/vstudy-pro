@@ -558,7 +558,7 @@ function CoursesBody({
         </Button>}
         <Button ref={plannerTrigger} variant="outline" className="planner-entry"
           onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
-        {!overview?.accounts.length && <Button ref={connectTrigger} variant="outline" onClick={() => setConnect(true)}>
+        {overview && !overview.accounts.length && <Button ref={connectTrigger} variant="outline" onClick={() => setConnect(true)}>
           <GraduationCap />{tr("moodle:connect_school")}
         </Button>}
       </div>} />
@@ -1229,10 +1229,7 @@ function CoursesBody({
                 ? overview.accounts.some(account => !account.syncedAt)
                   ? "moodle:syncing" : "moodle:no_courses"
                 : "moodle:empty_title",
-            )} description={!overview?.accounts.length ? tr("moodle:empty_description") : undefined}
-              action={!overview?.accounts.length && <Button onClick={() => setConnect(true)}>
-                {tr("moodle:connect_school")}
-              </Button>} />
+            )} description={!overview?.accounts.length ? tr("moodle:empty_description") : undefined} />
           )
         )}
         <Dialog open={!!confirmDisconnect} onOpenChange={open => { if (!open) setConfirmDisconnect(undefined); }}>
