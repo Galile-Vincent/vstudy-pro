@@ -1,3 +1,4 @@
+import { FormField } from '../components/ui/form-field';
 import { Button } from '../components/ui/button';
 import { Select } from "../components/select";
 import { useEffect, useRef, useState } from 'react';
@@ -43,7 +44,13 @@ export function UploadCard({ folders = [], onImported, showSample = true, showOp
   }}>
     <Upload aria-hidden="true"/><p>{tr('home:upload_hint')}</p>
     <p>{tr('onboarding:file_help')}</p>
-    <label>{tr('home:destination')}<Select value={folderId} onChange={e => setFolderId(e.target.value)} disabled={busy}><option value="">{tr('library:unfiled')}</option>{folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</Select></label>
+    {!!folders.length && <FormField label={tr('home:destination')}>
+      {control => <Select {...control} aria-label={tr('home:destination')}
+        value={folderId} onChange={e => setFolderId(e.target.value)} disabled={busy}>
+        <option value="">{tr('library:unfiled')}</option>
+        {folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+      </Select>}
+    </FormField>}
     <Button variant="outline" className="primary" disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</Button>
     {showSample && <Button variant="outline" className="ghost" disabled={busy} onClick={() => { setError(''); setMessage(''); setBusy(true); void desktop.invoke('documents:importSample', {language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}).then(d => { setImported(d); onImported?.(d); setMessage(tr('home:imported')); window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</Button>}
 
