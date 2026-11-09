@@ -18,6 +18,7 @@ function ConsentFrame({ id, expiresAt, pairing, canApprove, approve, deny, dismi
   const remaining = useAgentDeadline(expiresAt);
   const attempted = agents.attempted.has(id);
   const unavailable = agents.connection !== 'ready';
+  const previousFocus = useRef<HTMLElement | null>(null);
   const denyRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const blocked = agents.pending || attempted || !remaining || unavailable || !agents.state?.enabled;
@@ -27,7 +28,10 @@ function ConsentFrame({ id, expiresAt, pairing, canApprove, approve, deny, dismi
     else deny();
   };
   return <Dialog open onOpenChange={open => { if (!open) reject(); }}>
-    <DialogContent className="agents-dialog agents-consent-dialog" data-testid="agent-consent" data-request-id={id} data-request-kind={pairing ? 'pairing' : 'proposal'} showCloseButton={false} onInteractOutside={event => event.preventDefault()} onEscapeKeyDown={event => { if (agents.pending) event.preventDefault(); }} onOpenAutoFocus={event => {
+    <DialogContent className="agents-dialog agents-consent-dialog" data-testid="agent-consent" data-request-id={id} data-request-kind={pairing ? 'pairing' : 'proposal'} showCloseButton={false} onInteractOutside={event => event.preventDefault()} onEscapeKeyDown={event => { if (agents.pending) event.preventDefault(); }} onCloseAutoFocus={event => {
+      if (previousFocus.current?.isConnected) {event.preventDefault();previousFocus.current.focus();}
+    }} onOpenAutoFocus={event => {
+      previousFocus.current = document.activeElement as HTMLElement | null;
       event.preventDefault();
       (denyRef.current?.disabled ? closeRef.current : denyRef.current)?.focus();
     }}>
@@ -97,6 +101,15 @@ export function AgentConsent() {
     ...state.proposals.map(request => ({ kind: 'proposal' as const, request })),
     ...state.pairings.map(request => ({ kind: 'pairing' as const, request })),
   ].filter(item => !dismissed.has(item.request.id)) : [];
+  useEffect(() => {
+    const review = (event: Event) => {
+      const id = (event as CustomEvent<string>).detail;
+      setDismissed(previous => new Set([...previous].filter(value => value !== id)));
+      setActiveId(id);
+    };
+    window.addEventListener('vstudy:review-agent', review);
+    return () => window.removeEventListener('vstudy:review-agent', review);
+  }, []);
   const active = requests.find(item => item.request.id === activeId) ?? requests[0];
   useEffect(() => { setActiveId(active?.request.id); }, [active?.request.id]);
   if (!active) return null;
