@@ -1,12 +1,12 @@
 {
-  "version": "0.3.0",
-  "publishedAt": "2026-11-06T08:50:42.000Z",
+  "version": "0.4.4",
+  "publishedAt": "2026-11-09T00:11:00.000Z",
   "assets": {
     "mac-arm64": {
-      "bytes": 123600629
+      "bytes": 123997374
     },
     "win-x64": {
-      "bytes": 111704642
+      "bytes": 111724362
     }
   }
 }

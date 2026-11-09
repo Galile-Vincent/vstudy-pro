@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 cask "vstudy-pro" do
-  version "0.3.0"
-  sha256 "e981578a43522926e82baa57fdc4e882ad481f1b84fd0f914683eec87925693e"
+  version "0.4.4"
+  sha256 "5d18dce4f8244b9771c0e28c0f60d6bed09e74dd8080c22b7b647bdc3e5b53a6"
 
   url "https://github.com/ava-apple/vstudy-pro/releases/download/v#{version}/VStudy-Pro-#{version}-mac-arm64.dmg"
   name "VStudy Pro"
