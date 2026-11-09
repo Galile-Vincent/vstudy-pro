@@ -9,11 +9,8 @@
 .review-toolbar {margin-block:var(--space-6);}
 .review-page label {display:inline-flex;gap:var(--space-3);align-items:center;flex-wrap:wrap;}
 .review-page select,.review-page input {border:0;border-radius:var(--r-sm);padding:var(--space-2) var(--space-3);background:var(--subtle);color:var(--ink);max-width:100%;}
-.review-page button {background:var(--subtle);color:var(--ink);border:0;box-shadow:none;border-radius:var(--r-sm);transition:opacity var(--motion-fast) var(--ease-standard);}
 .review-page :is(button,input,select,summary):focus-visible {outline:2px solid var(--focus);outline-offset:2px;}
 .review-page summary {cursor:pointer;color:var(--muted);padding-block:var(--space-3);}
-.review-page [role=tablist] {margin-top:var(--space-6);max-width:100%;overflow-x:auto;justify-content:flex-start;}
-.review-page [role=tab] {box-shadow:none;border:0;}
 .review-list {list-style:none;margin:0;padding:0;display:grid;gap:var(--space-3);}
 .review-list>li {padding:var(--space-5);background:color-mix(in oklab,var(--ink) 4%,var(--surface));border-radius:var(--r-md);overflow-wrap:anywhere;}
 .review-list time,.review-chip {font-size:var(--type-sm);color:var(--muted);margin-inline-end:var(--space-3);}
@@ -24,10 +21,8 @@
 .review-help {margin-bottom:var(--space-5);}
 .review-actions {margin-block:var(--space-3);}
 @media (max-width:720px) {.review-page{padding:var(--space-4);}.review-section-heading{flex-direction:column;}}
-@media (prefers-reduced-motion:reduce) {.review-page button{transition:none;}}
 @media (prefers-contrast:more) {.review-list>li,.review-page input,.review-page select {outline:1px solid var(--ink);}}
 
-.review-page button:hover:not(:disabled) {background:var(--active);}
 
 .review-consent {margin-block:var(--space-5);padding:var(--space-5);border-radius:var(--r-md);background:color-mix(in oklab,var(--ink) 4%,var(--surface));}
 .review-consent h2 {margin-top:0;}

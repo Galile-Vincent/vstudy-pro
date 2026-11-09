@@ -9,7 +9,7 @@ import { desktop } from '../bridge';
 import { useNavigate } from '../shell';
 import { Button } from '../components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
+import { Tabs, SegmentedTabsList, SegmentedTabsTrigger, TabsContent } from '../components/ui/segmented-tabs';
 import { useReviewPage, type Cursor } from './paging';
 import type { ReviewSelection } from './review-selection';
 import { ArtifactPanel } from './artifacts';
@@ -66,7 +66,7 @@ export function ReviewView() {
  <div className="review-toolbar"><label>{tr('review:course_picker')}<select aria-label={tr('review:course_picker')} value={courseId} onChange={e=>selectCourse(e.target.value)}><option value="">{tr('review:unsorted')}</option>{courses.items.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></label></div>
  <PageState page={courses}/><CourseTools course={course} open={emptyCourses} refresh={()=>{courses.retry();reload();}} onCreated={selectCourse}/>
  {actionError&&<p role="alert">{tr('review:error')} <Button onClick={()=>{if(failedAction.current)void mutate(failedAction.current);}}>{tr('review:retry')}</Button></p>}
- {!courseId ? <Inbox key={revision} courses={courses.items} open={open}/> : <Tabs value={tab} onValueChange={setUserTab}><TabsList aria-label={tr('review:title')}>{['recent','weak','notes','tests'].map(t=><TabsTrigger key={t} value={t}>{tr(`review:${t}`)}</TabsTrigger>)}</TabsList>
+ {!courseId ? <Inbox key={revision} courses={courses.items} open={open}/> : <Tabs value={tab} onValueChange={setUserTab}><SegmentedTabsList aria-label={tr('review:title')}>{['recent','weak','notes','tests'].map(t=><SegmentedTabsTrigger key={t} value={t} className="whitespace-normal text-start">{tr(`review:${t}`)}</SegmentedTabsTrigger>)}</SegmentedTabsList>
  <TabsContent value="recent"><Recent key={courseId+revision} course={course} courseId={courseId} open={open} mutate={mutate} busy={busy}/></TabsContent>
  <TabsContent value="weak"><Weak key={courseId} weak={weak} open={open} mutate={mutate} busy={busy} artifacts={artifacts}/></TabsContent>
  <TabsContent value="notes" forceMount hidden={tab!=='notes'}><ArtifactPanel key={courseId+'note'} courseId={courseId} kind="note" selection={selection}/></TabsContent><TabsContent value="tests" forceMount hidden={tab!=='tests'}><ArtifactPanel key={courseId+'test'} courseId={courseId} kind="test" selection={selection} onConfirmed={reload}/></TabsContent></Tabs>}

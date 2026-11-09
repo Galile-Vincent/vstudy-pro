@@ -225,3 +225,17 @@ it('refreshes parent mastery after confirming a session', async () => {
   expect(await screen.findByText(en.weak_empty)).toBeTruthy();
   expect(screen.queryByText('Concept 1')).toBeNull();
 });
+
+it('associates segmented tabs with their panels and supports arrow navigation', async () => {
+  render(<ReviewView />);
+  await screen.findByText('Concept 1');
+  const weak = screen.getByRole('tab', { name: en.weak });
+  weak.focus();
+  fireEvent.keyDown(weak, { key: 'ArrowRight' });
+  const notes = screen.getByRole('tab', { name: en.notes });
+  await waitFor(() => expect(document.activeElement).toBe(notes));
+  expect(notes.getAttribute('aria-selected')).toBe('true');
+  const panel = screen.getByRole('tabpanel', { name: en.notes });
+  expect(notes.getAttribute('aria-controls')).toBe(panel.id);
+  expect(panel.getAttribute('aria-labelledby')).toBe(notes.id);
+});
