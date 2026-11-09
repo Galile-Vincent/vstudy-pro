@@ -26,7 +26,7 @@ it('offers Undo for the first deletion when the next deletion fails',async()=>{
     .toContain(tr('library:deletePartial',{
       succeeded:'1',total:'2',failed:'1',reasons:`second: ${tr('errors:generic')}`,
     })));
-  fireEvent.click(await screen.findByRole('button',{name:tr('library:undo')}));
+  fireEvent.click(await screen.findByRole('button',{name:/Undo/}));
   await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:restore',{documentId:'first'}));
   expect(state.invoke).not.toHaveBeenCalledWith('library:documents:restore',{documentId:'second'});
 });
@@ -92,8 +92,18 @@ it.each([false,true])('reports failed moves truthfully and keeps the picker open
    expect(document.querySelector('.library-live')?.textContent).toContain('2 of 3 moved, 1 failed');
    fireEvent.click(screen.getByRole('button',{name:/Undo/}));
    await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:move',{documentIds:['second'],folderId:null}));
-   fireEvent.click(screen.getByRole('button',{name:/Undo/}));
    await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:move',{documentIds:['first'],folderId:null}));
    expect(state.invoke).not.toHaveBeenCalledWith('library:documents:move',{documentIds:['third'],folderId:null});
  }else expect(screen.queryByRole('button',{name:/Undo/})).toBeNull();
+});
+
+it('groups a bulk delete as one titled recovery action',async()=>{
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[row('first'),row('second')],nextCursor:null}:[]);
+ const {container}=mount();await screen.findByText('first');
+ fireEvent.keyDown(container.querySelector('.library-results')!,{key:'a',ctrlKey:true});
+ fireEvent.click(screen.getByRole('button',{name:tr('library:delete')}));
+ const undo=await screen.findByRole('button',{name:/Undo.*2 documents/});
+ expect(undo.textContent).toBe('Undo');
+ fireEvent.click(undo);
+ await waitFor(()=>expect(state.invoke.mock.calls.filter(([c])=>c==='library:documents:restore')).toHaveLength(2));
 });

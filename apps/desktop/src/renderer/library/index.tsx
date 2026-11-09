@@ -385,22 +385,31 @@ export function LibraryView() {
   const remove = async (targets: Item["document"]["id"][]) => {
     await run(async () => {
       const failures: string[] = [];
+      const restored: Item["document"]["id"][] = [];
+      const deadline = Date.now() + 30000;
       let deleted = 0;
       for (const documentId of targets) {
-        const deadline = Date.now() + 30000;
         try {
           await desktop.invoke("library:documents:softDelete", { documentId });
           deleted++;
-          recovery.add(tr("library:deleted", { count: 1, formatted: format.number(1) }),
-            async () => {
-              await desktop.invoke("library:documents:restore", { documentId });
-              changed();
-            }, deadline);
+          restored.push(documentId);
         } catch (error) {
           const title = items.find(item => item.document.id === documentId)?.document.title ?? documentId;
           failures.push(`${title}: ${errorText(error)}`);
         }
       }
+      if (restored.length) recovery.add(tr('library:recoveryDeleted', {
+        name: restored.length === 1
+          ? items.find(item => item.document.id === restored[0])?.document.title ?? restored[0]
+          : tr('library:recoveryCount', {count: restored.length}),
+      }), async () => {
+        try {
+          const results = await Promise.allSettled(restored.map(documentId =>
+            desktop.invoke('library:documents:restore', {documentId})));
+          const failure = results.find(result => result.status === 'rejected');
+          if (failure?.status === 'rejected') throw failure.reason;
+        } finally { changed(); }
+      }, deadline);
       setNotice(failures.length ? tr("library:deletePartial", {
         succeeded: format.number(deleted), total: format.number(targets.length),
         failed: format.number(failures.length), reasons: failures.join("; "),
@@ -417,6 +426,8 @@ export function LibraryView() {
     const targets = moveItems.current;
     const failures: string[] = [];
     const remaining: Item[] = [];
+    const restored: Item[] = [];
+    const deadline = Date.now() + 30000;
     let moved = 0;
     for (const item of targets) {
       try {
@@ -424,17 +435,25 @@ export function LibraryView() {
           documentIds: [item.document.id], folderId,
         });
         moved++;
-        recovery.add(tr("library:moved"), async () => {
-          await desktop.invoke("library:documents:move", {
-            documentIds: [item.document.id], folderId: item.folderId,
-          });
-          changed();
-        });
+        restored.push(item);
       } catch (error) {
         remaining.push(item);
         failures.push(`${item.document.title}: ${errorText(error)}`);
       }
     }
+    if (restored.length) recovery.add(tr('library:recoveryMoved', {
+      name: restored.length === 1 ? restored[0]!.document.title
+        : tr('library:recoveryCount', {count: restored.length}),
+    }), async () => {
+      try {
+        const results = await Promise.allSettled(restored.map(item =>
+          desktop.invoke('library:documents:move', {
+            documentIds: [item.document.id], folderId: item.folderId,
+          })));
+        const failure = results.find(result => result.status === 'rejected');
+        if (failure?.status === 'rejected') throw failure.reason;
+      } finally { changed(); }
+    }, deadline);
     moveItems.current = remaining;
     setNotice(failures.length ? tr("library:movePartial", {
       succeeded: format.number(moved), total: format.number(targets.length),
@@ -1092,6 +1111,7 @@ export function LibraryView() {
           {notice || recoveryNotice}
           {recoveries.length > 0 && (
             <Button variant="outline"
+              aria-label={`${tr("library:undo")}: ${recoveryNotice}`}
               onClick={() =>
                 void run(async () => {
                   await recovery.undo();
