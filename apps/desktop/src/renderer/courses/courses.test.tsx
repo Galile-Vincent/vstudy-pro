@@ -219,9 +219,13 @@ describe("Courses", () => {
     expect((await api.course(courseId)).notifications[0]!.read).toBe(true);
     expect(host.querySelectorAll(".moodle-unread")).toHaveLength(1);
     await click("Explain what I need to prepare");
-    expect(host.querySelector(".moodle-agent")?.textContent).toContain(
+    expect(document.querySelector(".moodle-agent")?.textContent).toContain(
       "Explain what I need to prepare",
     );
+    const assistant = document.querySelector(".moodle-assistant")!;
+    expect(assistant.parentElement).toBe(document.body);
+    expect(document.querySelector(".moodle-assistant-panel")?.hasAttribute("hidden")).toBe(false);
+    expect(document.activeElement).toBe(assistant.querySelector(".moodle-assistant-close"));
     await tab("Deadlines");
     expect(host.querySelector(".moodle-deadline-group")?.textContent).toContain(
       "Weekly reflection",
@@ -679,16 +683,16 @@ it("strips active HTML and token-bearing images from module sheets", async () =>
 it("keeps the assistant mounted across tabs and returns focus on Escape", async () => {
   const api = createMockMoodleApi();
   await mount(api, (await api.overview()).courses[0]!.id);
-  const button = host.querySelector<HTMLButtonElement>(".moodle-chat-button")!;
+  const button = document.querySelector<HTMLButtonElement>(".moodle-chat-button")!;
   expect(button.getAttribute("aria-expanded")).toBe("false");
   await act(async () => button.click());
   expect(button.getAttribute("aria-expanded")).toBe("true");
   expect(document.activeElement?.getAttribute("aria-label")).toBe(
     "Close course assistant",
   );
-  const panel = host.querySelector(".moodle-agent");
+  const panel = document.querySelector(".moodle-agent");
   await tab("Grades");
-  expect(host.querySelector(".moodle-agent")).toBe(panel);
+  expect(document.querySelector(".moodle-agent")).toBe(panel);
   const nestedEscape = new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
   nestedEscape.preventDefault();
   await act(async () => { document.dispatchEvent(nestedEscape); });

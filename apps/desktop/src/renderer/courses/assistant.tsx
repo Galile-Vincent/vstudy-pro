@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { createPortal } from "react-dom";
 import { MessageCircle, X } from "lucide-react";
 import { tr } from "../../shared/i18n";
 import { Button, Card } from "../components/ui";
@@ -59,7 +60,7 @@ export function CourseAssistant(
     document.addEventListener("keydown", escape);
     return () => document.removeEventListener("keydown", escape);
   }, [open]);
-  return (
+  return createPortal(
     <div className="moodle-assistant">
       <Card variant="raised"
         id="course-assistant-panel"
@@ -95,6 +96,7 @@ export function CourseAssistant(
           />
         )}
       </Button>
-    </div>
+    </div>,
+    document.body,
   );
 }
