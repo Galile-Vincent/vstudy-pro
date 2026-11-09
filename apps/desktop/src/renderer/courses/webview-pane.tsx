@@ -104,6 +104,7 @@ export function MoodleWebviewPane({tabId,accountId,target,onClose,onDocument,onR
   return <main ref={pane} data-testid="moodle-webview" className="moodle-webview-pane moodle-tab-page" onKeyDown={event => {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'r') {event.preventDefault();void action('reload');}
   }}>
+      <div className="moodle-webview-chrome">
       <PageHeader className="moodle-webview-header"
         title={<span id="moodle-webview-title">{state?.title || tr('webview:title')}</span>}
         description={<span id="moodle-webview-description">{tr('webview:session_hint')}</span>}
@@ -116,6 +117,7 @@ export function MoodleWebviewPane({tabId,accountId,target,onClose,onDocument,onR
         {tool('copy',Copy,!state?.url)}{tool('external',ExternalLink,!state?.url)}
       </>} />
       {busy && <progress className="moodle-webview-progress" aria-label={tr('webview:loading')} />}
+      </div>
       <div ref={slot} className="moodle-webview-slot" data-testid="moodle-webview-slot">
         {busy && <div className="moodle-webview-message" role="status"><RefreshCw className="moodle-spin" /><p>{tr(state?.status === 'loading' ? 'webview:loading' : 'webview:connecting')}</p></div>}
         {!busy && !error && target.kind==='file' && state?.importedDocumentId && <div className="moodle-webview-message" role="status"><p>{tr('webview:imported')}</p><Button onClick={()=>callbacks.current.onDocument(state.importedDocumentId!)}>{tr('webview:open_document')}</Button></div>}
