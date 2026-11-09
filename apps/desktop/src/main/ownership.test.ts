@@ -32,3 +32,10 @@ it('filters background startup while preserving the explicit data directory', as
   expect(relaunchArguments(['electron','app','--mcp-background','--user-data-dir=/owned']))
     .toEqual(['app','--user-data-dir=/owned']);
 });
+it('releases ownership before asking for a restart', async () => {
+  const { restartOwnedApp } = await import('./ownership');
+  const calls: string[] = [];
+  restartOwnedApp({releaseSingleInstanceLock:()=>{calls.push('release');},
+    relaunch:()=>{calls.push('relaunch');},exit:()=>{calls.push('exit');}});
+  expect(calls).toEqual(['release','relaunch','exit']);
+});

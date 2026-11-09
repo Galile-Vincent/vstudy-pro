@@ -18,7 +18,7 @@ import { log, copyDiagnostics, stopFileLogging } from './logging';
 import { showAttachedMessage, showStartupError, type StartupStage } from './dialogs';
 import { readWindowState, trackWindowState } from './window-state';
 import { coordinateShutdown } from './shutdown';
-import { acquireOwnership, relaunchArguments } from './ownership';
+import { acquireOwnership, restartOwnedApp } from './ownership';
 import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -333,7 +333,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
     const reason = error instanceof Error ? error.message : String(error);
     log({phase:'delete-quarantine-failed',error});
     dialog.showErrorBox(tr('settings:delete_title'), tr('settings:delete_failed',{reason}));
-  }, () => { app.relaunch({args:relaunchArguments()}); app.exit(); });
+  }, () => { restartOwnedApp(app); });
   let deleteRequested = false;
   deletion.handle('settings:deleteAllData', async (_request, event) => {
     if (!await appReady || deleteRequested) return {ok:true};
@@ -365,7 +365,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
   try {
     await disposeIpc?.();
     store?.close(); store = undefined;
-    if (await rollbackRestoreStartup(app.getPath('userData'))) app.relaunch({args:relaunchArguments()});
+    if (await rollbackRestoreStartup(app.getPath('userData'))) restartOwnedApp(app, 1);
   } catch (cleanupError) { log({phase:'startup-cleanup-failed', error:cleanupError}); }
   finally { app.exit(1); }
 });

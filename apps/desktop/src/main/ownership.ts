@@ -27,3 +27,13 @@ export function acquireOwnership(app: OwnershipApp, window: () => OwnedWindow | 
 export function relaunchArguments(argv: string[] = process.argv): string[] {
   return argv.slice(1).filter(arg => arg !== '--mcp-background');
 }
+
+export function restartOwnedApp(app: {
+  releaseSingleInstanceLock(): void;
+  relaunch(options: {args:string[]}): void;
+  exit(code?: number): void;
+}, code = 0): void {
+  app.releaseSingleInstanceLock();
+  app.relaunch({args:relaunchArguments()});
+  app.exit(code);
+}
