@@ -6,7 +6,7 @@ import type { MoodleAccount, MoodleSchool, MoodleSiteCheck } from '../../shared/
 import { moodleSiteCheckSchema } from '../../shared/moodle';
 import { tr } from '../../shared/i18n';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
+import { Input, FormField, ListRow } from '../components/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../components/ui/dialog';
 import type { MoodleApi } from './api';
 
@@ -120,19 +120,16 @@ export function ConnectDialog({open,onOpenChange,api,onConnected,accounts = []}:
       </div> : flow.step === 'find' ? <>
         <SchoolPicker schools={schools} recent={recent} accounts={accounts} input={input} onInput={value => {setInput(value);setError('');}} busy={!!busy} onFind={url => void find(url)} />
       </> : <>
-        <div className="moodle-site-result" role="status">
-          <SchoolLogo name={flow.site.siteName} icon={flow.site.iconUrl} />
-          <div><h3>{flow.site.siteName}</h3><p>{new URL(flow.site.siteUrl).host}{new URL(flow.site.siteUrl).pathname.replace(/\/$/,'')}</p></div>
-          <ShieldCheck aria-hidden="true" />
-          <small>{tr(`moodle:method_${plan!.kind}`)}</small>
-        </div>
+        <ListRow className="moodle-site-result" role="status" leading={<SchoolLogo name={flow.site.siteName} icon={flow.site.iconUrl} />}
+          title={flow.site.siteName} subtitle={new URL(flow.site.siteUrl).host + new URL(flow.site.siteUrl).pathname.replace(/\/$/,'')}
+          meta={<><ShieldCheck aria-hidden="true" />{tr(`moodle:method_${plan!.kind}`)}</>} />
         {plan?.kind === 'unavailable' ? <div role="alert" className="moodle-connect-unavailable"><strong>{tr(plan.reason === 'unsupported-login' ? 'schools:unsupported_login' : `moodle:unavailable_${plan.reason}`)}</strong><p>{tr(plan.reason === 'unsupported-login' ? 'schools:unsupported_login_next' : `moodle:next_${plan.reason}`)}</p></div> : flow.step === 'result' ? <Button disabled={!!busy} onClick={() => void prepare()}><ArrowRight />{tr(error === 'moodle:keychain_error' ? 'moodle:keychain_retry' : 'moodle:continue_sign_in')}</Button> : plan?.kind === 'password' ? <form className="moodle-connect-form" onSubmit={event => {
           event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
           const username = String(data.get('username') ?? ''); const password = String(data.get('password') ?? '');
           form.reset(); void connect(undefined,{username,password});
         }}>
-          <label htmlFor="moodle-username">{tr('moodle:username')}</label><Input id="moodle-username" name="username" autoComplete="username" required maxLength={256} disabled={!!busy} />
-          <label htmlFor="moodle-password">{tr('moodle:password')}</label><Input id="moodle-password" name="password" type="password" autoComplete="current-password" required maxLength={4096} disabled={!!busy} />
+          <FormField controlId="moodle-username" label={tr('moodle:username')} children={field => <Input {...field} name="username" autoComplete="username" required maxLength={256} disabled={!!busy} />} />
+          <FormField controlId="moodle-password" label={tr('moodle:password')} children={field => <Input {...field} name="password" type="password" autoComplete="current-password" required maxLength={4096} disabled={!!busy} />} />
           <Button type="submit" disabled={!!busy}>{busy && <LoaderCircle className="moodle-spin" />}{tr(busy ? 'moodle:connecting' : 'moodle:password_sign_in')}</Button>
           <small>{tr('moodle:password_hint')}</small>
         </form> : <div className="moodle-connect-form">

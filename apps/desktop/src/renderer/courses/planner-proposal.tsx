@@ -3,13 +3,13 @@ import type { MoodleAgentAction, MoodleCourse, MoodleDeadline, MoodleFile } from
 import type { PlannerSnapshot } from "../../shared/planner";
 import { i18n, tr } from "../../shared/i18n";
 import { displayTitle } from "../../shared/moodle-course-display";
-import { Button } from "../components/ui/button";
+import { Button, Card } from "../components/ui";
 export function plannerDate(value: string, timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone) {
   return new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { timeZone, dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
-export function PlannerProposal({ action, snapshot, courses, deadlines, files = [], busy, onApprove, onDismiss }: {
+export function PlannerProposal({ action, snapshot, courses, deadlines, files = [], busy, onApprove, onDismiss, headingLevel = 3 }: {
   action: MoodleAgentAction; snapshot: PlannerSnapshot; courses: MoodleCourse[]; deadlines: MoodleDeadline[]; files?: MoodleFile[];
-  busy: boolean; onApprove: () => void; onDismiss: () => void;
+  headingLevel?: 2 | 3; busy: boolean; onApprove: () => void; onDismiss: () => void;
 }) {
   const course = (id: string | null) => {
     const c = courses.find(c => c.id === id);
@@ -19,9 +19,11 @@ export function PlannerProposal({ action, snapshot, courses, deadlines, files = 
   const documentName = (id: string) => files.find(f => f.documentId === id)?.name ?? tr("planner:unknown_item");
   const isMaterials = action.type === "summarize-course-materials" || action.type === "generate-practice-quiz";
   const blocks = action.type === "make-study-plan" || action.type === "plan-today" ? action.blocks : action.type === "schedule-study-block" ? [action.block] : [];
-  return <article className="planner-proposal moodle-proposal" aria-label={tr("planner:confirm")}>
+  const Heading = headingLevel === 2 ? "h2" : "h3";
+  const Subheading = headingLevel === 2 ? "h3" : "h4";
+  return <Card variant="flat" role="article" className="planner-proposal moodle-proposal p-6" aria-label={tr("planner:confirm")}>
     <p className="moodle-eyebrow">{tr(action.type === "create-reminder" || action.type === "export-calendar" ? "moodle:confirm_action" : "planner:confirm")}</p>
-    <h3>{tr(`planner:action_${action.type}`)}</h3>
+    <Heading>{tr(`planner:action_${action.type}`)}</Heading>
     {action.type === "create-task" && <>
       <strong>{action.task.title}</strong><p>{course(action.task.courseId)}</p>
       <p>{action.task.dueAt ? plannerDate(action.task.dueAt) : tr("planner:no_due")} · {tr("planner:minutes", { minutes: action.task.estimateMinutes })}</p>
@@ -43,7 +45,7 @@ export function PlannerProposal({ action, snapshot, courses, deadlines, files = 
       <ul>{action.exam.materialIds.map(id => <li key={id}>{documentName(id)}</li>)}</ul>
     </>}
     {(action.type === "make-study-plan" || action.type === "plan-today") && <>
-      <strong>{action.title}</strong><h4>{tr("planner:assumptions")}</h4>
+      <strong>{action.title}</strong><Subheading>{tr("planner:assumptions")}</Subheading>
       <ul>{action.assumptions.map((assumption, i) => <li key={i}>{assumption}</li>)}</ul>
     </>}
     {(action.type === "make-study-plan" || action.type === "plan-today" || action.type === "schedule-study-block") && <p>{tr("planner:capacity", { minutes: action.dailyBudgetMinutes, zone: action.timeZone })}</p>}
@@ -70,5 +72,5 @@ export function PlannerProposal({ action, snapshot, courses, deadlines, files = 
       <Button disabled={busy} onClick={onApprove}>{action.type === "create-reminder" || action.type === "export-calendar" ? tr("moodle:approve") : tr(isMaterials ? "planner:approve_materials" : "planner:approve")}</Button>
       <Button disabled={busy} variant="ghost" onClick={onDismiss}>{tr("moodle:dismiss")}</Button>
     </div>
-  </article>;
+  </Card>;
 }

@@ -3,7 +3,7 @@ import { Bell, BellRing } from "lucide-react";
 import type { MoodleDeadline, MoodleReminder } from "../../shared/moodle";
 import { tr } from "../../shared/i18n";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+import { Input, FormField, ListRow } from "../components/ui";
 import {
   Popover,
   PopoverContent,
@@ -85,9 +85,7 @@ export function Reminder({
             </Button>
           ))}
         </div>
-        <label>
-          {tr("moodle:custom_time")}
-          <Input
+        <FormField label={tr("moodle:custom_time")} children={field => <Input {...field}
             type="datetime-local"
             value={custom}
             onChange={(e) => {
@@ -95,16 +93,12 @@ export function Reminder({
               setInvalid(false);
             }}
             aria-invalid={invalid}
-          />
-        </label>
-        <label>
-          {tr("moodle:note")}
-          <Input
+          />} />
+        <FormField label={tr("moodle:note")} children={field => <Input {...field}
             maxLength={280}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-          />
-        </label>
+          />} />
         {invalid && <p role="alert">{tr("moodle:future_time")}</p>}
         <Button
           disabled={busy || !custom}
@@ -113,13 +107,13 @@ export function Reminder({
           {tr("moodle:save_reminder")}
         </Button>
         {existing.map((r) => (
-          <div className="moodle-saved-reminder" key={r.id}>
+          <ListRow key={r.id} title={<>
             <time dateTime={r.remindAt}>
               {new Date(r.remindAt).toLocaleString(
                 document.documentElement.lang || "en",
               )}
             </time>
-            <Button
+            </>} actions={<Button
               variant="ghost"
               disabled={busy}
               onClick={async () => {
@@ -135,8 +129,7 @@ export function Reminder({
               }}
             >
               {tr("moodle:remove")}
-            </Button>
-          </div>
+            </Button>} />
         ))}
       </PopoverContent>
     </Popover>
