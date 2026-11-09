@@ -19,7 +19,7 @@ function setup(unsupported?: 'unsigned') {
     online:() => online, now:() => now, saveAutomatic,
   });
   services.push(service);
-  return {updater, service, saveAutomatic, offline:() => {online = false;}, advance:() => {now += 600_000;}};
+  return {updater, service, saveAutomatic, offline:() => {online = false;}, advance:(milliseconds=600_000) => {now += milliseconds;}};
 }
 it('checks, offers, downloads with consent, clamps progress, and installs only when ready', async () => {
   const {service, updater} = setup();
@@ -27,7 +27,7 @@ it('checks, offers, downloads with consent, clamps progress, and installs only w
   expect(updater.allowDowngrade).toBe(false);
   expect(updater.allowPrerelease).toBe(false);
   expect(updater.autoInstallOnAppQuit).toBe(false);
-  service.install(); await service.download(); expect(updater.quitAndInstall).not.toHaveBeenCalled();
+  await service.install(); await service.download(); expect(updater.quitAndInstall).not.toHaveBeenCalled();
   await service.check(); expect(service.snapshot().state.status).toBe('checking');
   updater.emit('update-available', {version:'0.4.5'});
   expect(service.snapshot().state).toEqual({status:'available', version:'0.4.5',
@@ -37,7 +37,7 @@ it('checks, offers, downloads with consent, clamps progress, and installs only w
   updater.emit('download-progress', {percent:120}); expect(service.snapshot().state).toEqual({status:'downloading',percent:100});
   updater.emit('update-downloaded', {version:'0.4.5'});
   expect(service.snapshot().state).toEqual({status:'ready',version:'0.4.5'});
-  service.install(); expect(updater.quitAndInstall).toHaveBeenCalledOnce();
+  await service.install(); expect(updater.quitAndInstall).toHaveBeenCalledOnce();
 });
 it('reports offline manual checks and keeps successful timestamps', async () => {
   const {service, updater, offline, advance} = setup();
@@ -63,7 +63,7 @@ it('schedules at 15 seconds and six hours, persists opt-out, and disposes', asyn
 });
 it('quietly disables unsupported builds', async () => {
   const {service, updater} = setup('unsigned');
-  await service.check(); await service.download(); service.install();
+  await service.check(); await service.download(); await service.install();
   expect(service.snapshot().state).toEqual({status:'unsupported',reason:'unsigned'});
   expect(updater.checkForUpdates).not.toHaveBeenCalled();
 });
@@ -92,19 +92,17 @@ it('handles download rejection, offline consent, malformed metadata and illegal 
 });
 
 it('manual checks bypass automatic interval after a short cooldown', async () => {
-  const {service,updater} = setup();
+  const {service,updater,advance} = setup();
   await service.check(); updater.emit('update-not-available');
-  vi.spyOn(Date, 'now').mockReturnValue(1_010_000);
-  Reflect.set(service, 'lastManualAttempt', 0);
+  advance(4000);
   await service.check(); expect(updater.checkForUpdates).toHaveBeenCalledTimes(2);
-  vi.restoreAllMocks();
 });
 
 it('registers installation only once until a result', async () => {
   const {service,updater} = setup();
   await service.check(); updater.emit('update-available',{version:'0.4.5'});
   await service.download(); updater.emit('update-downloaded',{version:'0.4.5'});
-  service.install(); service.install(); expect(updater.quitAndInstall).toHaveBeenCalledOnce();
+  await service.install(); await service.install(); expect(updater.quitAndInstall).toHaveBeenCalledOnce();
 });
 
 it('waits for onboarding and checks on reconnect using persisted opt-out', async () => {
@@ -131,4 +129,31 @@ it('treats prerelease-only feeds as no stable update',async()=>{
   updater.checkForUpdates.mockRejectedValueOnce({code:'NO_STABLE_UPDATE'});
   await service.check(); expect(service.snapshot().state).toEqual({status:'idle'});
   expect(service.snapshot().result).toBe('current');
+});
+
+it('keeps background checks and failures quiet without downloading',async()=>{
+  const {service,updater}=setup();
+  const seen:string[]=[];service.subscribe(value=>seen.push(value.state.status));
+  updater.checkForUpdates.mockRejectedValueOnce(new Error('net::ERR_TIMED_OUT'));
+  await service.check(false);
+  expect(service.snapshot().state).toEqual({status:'idle'});
+  expect(service.snapshot().lastCheckedAt).toBeNull();
+  expect(seen).not.toContain('checking');expect(seen).not.toContain('error');
+  expect(updater.downloadUpdate).not.toHaveBeenCalled();
+});
+it('does not record malformed release metadata as a successful check',async()=>{
+  const {service,updater}=setup();
+  await service.check();updater.emit('update-available',{version:'../bad'});
+  expect(service.snapshot().lastCheckedAt).toBeNull();
+});
+
+it('waits for coordinated shutdown before invoking the native installer',async()=>{
+  const {service,updater}=setup();
+  await service.check();updater.emit('update-available',{version:'0.4.5'});
+  await service.download();updater.emit('update-downloaded',{version:'0.4.5'});
+  let finish=()=>{};const drain=new Promise<void>(resolve=>{finish=resolve;});
+  const installing=service.install(()=>drain);
+  expect(service.snapshot().installing).toBe(true);
+  await service.install();expect(updater.quitAndInstall).not.toHaveBeenCalled();
+  finish();await installing;expect(updater.quitAndInstall).toHaveBeenCalledOnce();
 });

@@ -17,6 +17,7 @@ export class Updates {
   private listeners = new Set<(snapshot: UpdateSnapshot) => void>();
   private timer: ReturnType<typeof setTimeout>;
   private monitor: ReturnType<typeof setInterval>;
+  private disposed = false;
   private firstCheck = false;
   private wasOnline = false;
   private interval: ReturnType<typeof setInterval>;
@@ -46,6 +47,7 @@ export class Updates {
     await this.check(false);
   }
   initialize(updater: Updater, unsupported?: Extract<UpdateState, {status:'unsupported'}>['reason']) {
+    if (this.disposed) return;
     for (const [name, callback] of this.events) this.updater.removeListener(name, callback);
     this.events = [];
     this.updater = updater;
@@ -66,22 +68,28 @@ export class Updates {
     on('update-downloaded', (info: {version:string}) => this.dispatch({type:'ready', version:info.version}));
     on('error', (error: Error) => this.failed(error));
   }
+  private automaticEnabled() {
+    try { this.automatic = this.options.getAutomatic?.() ?? this.automatic; }
+    catch { /* Shutdown may already have closed the settings store. */ }
+    return this.automatic;
+  }
   snapshot = (): UpdateSnapshot => ({state:this.state.status === 'checking' && this.quietState ? this.quietState : this.state, currentVersion:this.options.version,
-    lastCheckedAt:this.lastCheckedAt, automatic:this.options.getAutomatic?.() ?? this.automatic, installing:this.installing, ...(this.result ? {result:this.result} : {})});
+    lastCheckedAt:this.lastCheckedAt, automatic:this.automaticEnabled(), installing:this.installing, ...(this.result ? {result:this.result} : {})});
   subscribe(listener: (snapshot: UpdateSnapshot) => void) {
     this.listeners.add(listener); return () => { this.listeners.delete(listener); };
   }
   private emit() { for (const listener of this.listeners) listener(this.snapshot()); }
   private dispatch(event: UpdateEvent) {
-    if (event.type === 'available' || event.type === 'current') {
-      this.lastCheckedAt = (this.options.now ?? Date.now)();
-      if (this.manual) this.result = event.type === 'current' ? 'current' : 'checked';
-    }
     if (event.type === 'error' && !this.manual && this.state.status === 'checking') {
       this.state = this.quietState ?? {status:'idle'}; this.quietState = undefined; this.emit(); return;
     }
     try { this.state = reduceUpdate(this.state, event); }
     catch { this.state = {status:'error', code:'failed'}; }
+    if ((event.type === 'available' && this.state.status === 'available') ||
+      (event.type === 'current' && this.state.status === 'idle')) {
+      this.lastCheckedAt = (this.options.now ?? Date.now)();
+      if (this.manual) this.result = event.type === 'current' ? 'current' : 'checked';
+    }
     if (event.type === 'error') this.updater.autoInstallOnAppQuit = false;
     this.emit();
   }
@@ -113,7 +121,7 @@ export class Updates {
   }
   async download() {
     if (this.state.status !== 'available') return this.snapshot();
-    this.manual = true; this.quietState = undefined;
+    this.manual = true; this.quietState = undefined; this.result = undefined;
     if (!this.options.online()) { this.dispatch({type:'error', code:'offline'}); return this.snapshot(); }
     recordEgress('app_update_download', 'https://github.com/ava-apple/vstudy-pro/releases/latest/download');
     this.updater.autoInstallOnAppQuit = false;
@@ -121,10 +129,10 @@ export class Updates {
     void this.updater.downloadUpdate().catch(error => this.dispatch({type:'error', code:updateError(error)}));
     return this.snapshot();
   }
-  install() {
+  async install(prepare?: () => Promise<void>) {
     if (this.state.status === 'ready' && !this.installing) {
       this.installing = true; this.emit();
-      try { this.updater.quitAndInstall(); }
+      try { if (prepare) await prepare(); this.updater.quitAndInstall(); }
       catch { this.dispatch({type:'error',code:'integrity'}); }
     }
     return this.snapshot();
@@ -133,6 +141,7 @@ export class Updates {
     this.options.saveAutomatic(enabled); this.automatic = enabled; this.emit(); return this.snapshot();
   }
   dispose() {
+    this.disposed = true;
     clearTimeout(this.timer); clearInterval(this.interval); clearInterval(this.monitor);
     for (const [name, callback] of this.events) this.updater.removeListener(name, callback);
     this.listeners.clear();

@@ -24,6 +24,12 @@ it('downloads, exposes notes, announces progress, then offers restart', async ()
   const live = view.container.querySelector('[aria-live]');
   mock.listener?.({state:{status:'downloading',percent:42},currentVersion:'0.4.4',automatic:true,lastCheckedAt:null});
   await screen.findByRole('progressbar');
+  expect(live?.textContent).not.toContain('42');
+  const downloading=screen.getByRole('button');downloading.focus();
+  mock.listener?.({state:{status:'downloading',percent:43},currentVersion:'0.4.4',automatic:true,lastCheckedAt:null});
+  await waitFor(()=>expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('43'));
+  expect(document.activeElement).toBe(downloading);
+  expect(live?.textContent).not.toContain('43');
   expect(view.container.querySelector('[aria-live]')).toBe(live);
   mock.listener?.({state:{status:'ready',version:'0.4.5'},currentVersion:'0.4.4',automatic:true,lastCheckedAt:null});
   await waitFor(() => expect(screen.queryByRole('progressbar')).toBeNull());

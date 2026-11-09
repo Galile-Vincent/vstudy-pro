@@ -27,7 +27,9 @@ cooldown; automatic checks retain a ten-minute interval. Last checked records su
 Metadata uses github.com/ava-apple/vstudy-pro/releases/latest/download/latest-mac.yml
 (or latest.yml for signed Windows). Payload names are fixed relative versioned ZIP
 or EXE names. GitHub redirects can contact release-assets.githubusercontent.com,
-objects.githubusercontent.com and github-releases.githubusercontent.com. No API,
+objects.githubusercontent.com and github-releases.githubusercontent.com. These
+are expected destinations, not an enforced redirect-host allowlist. Squirrel also
+uses a temporary authenticated HTTP server on 127.0.0.1 for the local ZIP. No API,
 account data or staging header is sent. electron-updater still writes .updaterId
 locally; the provider strips that identifier from requests.
 

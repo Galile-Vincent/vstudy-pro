@@ -1,3 +1,4 @@
+import { parseUpdateInfo } from 'electron-updater/out/providers/Provider';
 import { EventEmitter } from 'node:events';
 import { app, net } from 'electron';
 import { execFile } from 'node:child_process';
@@ -5,12 +6,28 @@ import { promisify } from 'node:util';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { Store } from '../db';
-import { UpdateProvider } from './provider';
+import { UpdateProvider, updateFeed } from './provider';
 import { Updates } from './service';
+function updateConfig(raw: string) {
+  if (raw.length > 65536 || /[&*!]/.test(raw)) throw new Error('Invalid updater config');
+  const config = parseUpdateInfo(raw, 'app-update.yml', new URL(updateFeed)) as unknown as {
+    provider?:unknown; url?:unknown; publisherName?:unknown;
+  };
+  if (config?.provider !== 'generic' || config.url !== updateFeed) throw new Error('Invalid updater config');
+  return config;
+}
+export function windowsUpdateSupport(raw: string, arch: string, installed: boolean) {
+  if (arch !== 'x64') return 'platform';
+  const publisher = updateConfig(raw).publisherName;
+  const names = Array.isArray(publisher) ? publisher : [publisher];
+  if (!names.length || !names.every(name=>typeof name === 'string' && name.trim().length > 0)) return 'unsigned';
+  return installed ? undefined : 'portable';
+}
 async function setupUpdater() {
   const { autoUpdater } = await import('electron-updater');
   let unsupported: 'development' | 'unsigned' | 'platform' | 'portable' | undefined;
   if (!app.isPackaged) unsupported = 'development';
+  else if (process.platform === 'darwin' && process.arch !== 'arm64') unsupported = 'platform';
   else if (process.platform === 'darwin') {
     try {
       await promisify(execFile)('/usr/bin/codesign', ['--verify', '--strict',
@@ -21,17 +38,13 @@ async function setupUpdater() {
     } catch { unsupported = 'unsigned'; }
   } else if (process.platform === 'win32') {
     const root = dirname(app.getPath('exe'));
-    if (process.arch !== 'x64') unsupported = 'platform';
-    else if (!/^publisherName:\s*\S+/m.test(
-      readFileSync(join(process.resourcesPath, 'app-update.yml'), 'utf8'))) unsupported = 'unsigned';
-    if (!existsSync(join(process.resourcesPath, 'app-update.yml')) ||
-      !existsSync(join(root, 'Uninstall VStudy Pro.exe'))) unsupported = 'portable';
+    unsupported = windowsUpdateSupport(
+      readFileSync(join(process.resourcesPath,'app-update.yml'),'utf8'), process.arch,
+      existsSync(join(root,'Uninstall VStudy Pro.exe')));
   } else unsupported = 'platform';
   if (!unsupported) {
     try {
-      const config = readFileSync(join(process.resourcesPath, 'app-update.yml'), 'utf8');
-      if (!/^provider: generic$/m.test(config) ||
-        !/^url: ['"]?https:\/\/github.com\/ava-apple\/vstudy-pro\/releases\/latest\/download['"]?$/m.test(config)) unsupported = 'portable';
+      updateConfig(readFileSync(join(process.resourcesPath,'app-update.yml'),'utf8'));
     } catch { unsupported = 'portable'; }
   }
   autoUpdater.setFeedURL({ provider:'custom', updateProvider:UpdateProvider });

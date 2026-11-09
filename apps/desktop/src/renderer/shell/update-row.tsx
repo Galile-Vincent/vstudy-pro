@@ -33,7 +33,7 @@ export function UpdateRow() {
   return <>
     <span className="sr-only" aria-live="polite" aria-atomic="true">{state?.status === 'downloading' ? tr('updates:download_progress') : label}</span>
     {label && <div className="update-row" data-testid="update-row">
-      {<Button variant="ghost" onClick={action} aria-label={label} title={label}
+      {<Button variant="ghost" onClick={action} aria-label={state?.status === 'downloading' ? tr('updates:download_progress') : label} title={label}
           aria-disabled={snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading'}>
           <RefreshCw aria-hidden="true" /><span>{label}</span>
         </Button>}
@@ -41,7 +41,8 @@ export function UpdateRow() {
         onClick={() => void desktop.invoke('updates:notes', {})}><FileText aria-hidden="true" /></Button>}
       {state?.status === 'error' && <Button variant="link" size="sm" onClick={action}>
         {tr('updates:retry')}</Button>}
-      {state?.status === 'downloading' && <Progress value={state.percent} aria-label={label} />}
+      {state?.status === 'downloading' && <Progress value={state.percent} aria-valuenow={state.percent} aria-valuemin={0} aria-valuemax={100}
+        aria-label={tr('updates:download_progress')} />}
     </div>}
   </>;
 }

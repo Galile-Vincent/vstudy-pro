@@ -330,7 +330,7 @@ without identifiers or user content. Automatic checks default on; disable them i
 Settings > General. Downloads require a click and fetch release assets via GitHub
 and its CDN. See [update privacy](PRIVACY.md) and [updates](UPDATES.md).
 
-Update network allowlist: metadata begins only at
+Update request destinations: metadata begins only at
 https://github.com/ava-apple/vstudy-pro/releases/latest/download/latest-mac.yml
 or latest.yml. Explicit payload downloads use that release's assets and GitHub's
 release CDN redirects. The generic provider uses no authentication, API calls,
@@ -342,3 +342,7 @@ correctly signed build newer than the installed version. SHA-512 is not publishe
 authentication or rollback protection. Windows updates remain disabled until
 publisherName is configured, and require x64 NSIS. Recommend ed25519-signed feed
 files and an explicit rollback policy as follow-up. See UPDATES.md for egress hosts.
+
+The GitHub/CDN host list in UPDATES.md describes expected redirects, not an
+enforced redirect-host allowlist. On macOS, Squirrel also fetches the downloaded
+ZIP through a temporary authenticated HTTP server on 127.0.0.1 (no remote egress).

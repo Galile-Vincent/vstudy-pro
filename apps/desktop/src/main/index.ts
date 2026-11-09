@@ -300,7 +300,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
     restoreMainWindow,
-    { updates: createUpdates(store, updaterReady), ...(process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {}) },
+    { updates: createUpdates(store, updaterReady), prepareUpdateInstall:async()=>{ updateShutdown = true; await shutdown(); }, ...(process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {}) },
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deleteAllData');
@@ -347,11 +347,12 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 let quitting = false;
+let updateShutdown = false;
 const shutdown = coordinateShutdown({
   stopWork: async () => { await disposeIpc?.(); await telemetry?.stop(); },
   flush: () => { if (app.isReady()) session.defaultSession.flushStorageData(); },
   close: () => { store?.close(); store = undefined; },
-  quit: () => { quitting = true; app.quit(); },
+  quit: () => { quitting = true; if (!updateShutdown) app.quit(); },
   forceExit: () => app.exit(),
 });
 app.on("before-quit", (event) => {

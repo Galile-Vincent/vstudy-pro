@@ -21,3 +21,21 @@ it.each(['https://evil.test/a.zip', 'http://github.com/a.zip', '../evil.zip',
     {platform:'darwin',executor:{} as never,isUseMultipleRangeRequest:false});
   expect(() => provider.resolveFiles({version:'0.4.5',path:url,sha512:'abc',releaseDate:'',files:[{url,sha512:'abc',size:1}]})).toThrow();
 });
+
+it.each([
+  'version: 0.4.5\nfiles: [{url: "https://evil.test/payload", sha512: abc, size: 1}]',
+  'version: 0.4.5\nfiles: [{url: "http://github.com/payload", sha512: abc, size: 1}]',
+  'version: 0.4.5\nfiles: [{url: "https://github.com/payload", sha512: abc, size: 1}]',
+  ['a0: &a0 [x,x,x]',...Array.from({length:25},(_,index)=>
+    `a${index+1}: &a${index+1} [*a${index},*a${index},*a${index}]`)].join('\n'),
+  `version: 0.4.5\nfiles:\n - url: VStudy-Pro-0.4.5-mac-arm64.zip\n   sha512: ${'a'.repeat(86)}==\n   size: 1\n   isAdminRightsRequired: true`,
+])('rejects malicious metadata before resolving payloads: %s',async raw=>{
+  const provider=new UpdateProvider({provider:'custom'},{} as never,
+    {platform:'darwin',executor:{request:async()=>raw} as never,isUseMultipleRangeRequest:false});
+  await expect(provider.getLatestVersion()).rejects.toThrow();
+});
+it('ignores prerelease metadata explicitly',async()=>{
+  const provider=new UpdateProvider({provider:'custom'},{} as never,
+    {platform:'darwin',executor:{request:async()=> 'version: 1.2.3-rc.1'} as never,isUseMultipleRangeRequest:false});
+  await expect(provider.getLatestVersion()).rejects.toMatchObject({code:'NO_STABLE_UPDATE'});
+});
