@@ -76,7 +76,7 @@ export function GettingStarted({ detailed = false }: { detailed?: boolean }) {
       </Button>
     </div>;
   }
-  return <Card variant="flat" className="getting-started min-w-0 p-[var(--space-6)]"><Section title={<span id="getting-started-title">{tr('onboarding:checklist')}</span>} actions={<span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>}><p>{tr('onboarding:checklist_body')}</p>
+  return <Card variant="flat" role="region" aria-labelledby="getting-started-title" className="getting-started min-w-0 p-[var(--space-6)]"><Section title={<span id="getting-started-title">{tr('onboarding:checklist')}</span>} actions={<span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>}><p>{tr('onboarding:checklist_body')}</p>
     <Progress className="art-reader-setup-progress" aria-label={tr('onboarding:checklist')} value={progress.done.length / items.length * 100}/><ol>{items.map(item => <li key={item} data-complete={progress.done.includes(item)}><span aria-hidden="true">{progress.done.includes(item) ? <Check size={16}/> : null}</span><Button variant="ghost" onClick={() => item === 'document' ? navigate('library') : openLearningHelp(item === 'walkthrough' ? 'walkthroughs' : item === 'help' ? 'shortcuts' : 'setup')}>{tr(`onboarding:check_${item}`)}{progress.done.includes(item) && <small>{tr('onboarding:completed')}</small>}</Button></li>)}</ol>
     {progress.status === 'paused' && <Button variant="outline" onClick={() => { try { saveProgress({ status: 'active' }); openLearningHelp('setup'); } catch { setError(tr('onboarding:save_error')); } }}>{tr('onboarding:resume')}</Button>}
     {error && <p role="alert">{error}</p>}
