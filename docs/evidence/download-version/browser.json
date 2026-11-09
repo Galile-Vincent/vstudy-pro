@@ -1,0 +1,566 @@
+[
+  {
+    "lang": "en",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\nRecommended\nApple silicon\nMacs with M1, M2, M3, M4 or newer. macOS 14 or later.\nDMG disk image · 123.6 MB\nDownload .dmg",
+        "x": 20,
+        "y": 179.890625,
+        "width": 335,
+        "height": 258.375,
+        "top": 179.890625,
+        "right": 355,
+        "bottom": 438.265625,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\nMost Windows PCs. Windows 10 or later.\nEXE installer · 111.7 MB\nDownload .exe",
+        "x": 20,
+        "y": 454.265625,
+        "width": 335,
+        "height": 235.28125,
+        "top": 454.265625,
+        "right": 355,
+        "bottom": 689.546875,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 59.890625,
+      "top": 96,
+      "right": 355,
+      "bottom": 155.890625,
+      "left": 20
+    },
+    "releaseText": "Version 0.3.0 · Updated Nov 6, 2026",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/en-375-light.png"
+  },
+  {
+    "lang": "en",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\nRecommended\nApple silicon\nMacs with M1, M2, M3, M4 or newer. macOS 14 or later.\nDMG disk image · 123.6 MB\nDownload .dmg",
+        "x": 20,
+        "y": 179.890625,
+        "width": 335,
+        "height": 258.375,
+        "top": 179.890625,
+        "right": 355,
+        "bottom": 438.265625,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\nMost Windows PCs. Windows 10 or later.\nEXE installer · 111.7 MB\nDownload .exe",
+        "x": 20,
+        "y": 454.265625,
+        "width": 335,
+        "height": 235.28125,
+        "top": 454.265625,
+        "right": 355,
+        "bottom": 689.546875,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 59.890625,
+      "top": 96,
+      "right": 355,
+      "bottom": 155.890625,
+      "left": 20
+    },
+    "releaseText": "Version 0.3.0 · Updated Nov 6, 2026",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/en-375-dark.png"
+  },
+  {
+    "lang": "en",
+    "width": 1280,
+    "theme": "light",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\nRecommended\nApple silicon\nMacs with M1, M2, M3, M4 or newer. macOS 14 or later.\nDMG disk image · 123.6 MB\nDownload .dmg",
+        "x": 200,
+        "y": 207.09375,
+        "width": 432,
+        "height": 267.28125,
+        "top": 207.09375,
+        "right": 632,
+        "bottom": 474.375,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\nMost Windows PCs. Windows 10 or later.\nEXE installer · 111.7 MB\nDownload .exe",
+        "x": 648,
+        "y": 207.09375,
+        "width": 432,
+        "height": 267.28125,
+        "top": 207.09375,
+        "right": 1080,
+        "bottom": 474.375,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 79.09375,
+      "top": 104,
+      "right": 1080,
+      "bottom": 183.09375,
+      "left": 200
+    },
+    "releaseText": "Version 0.3.0 · Updated Nov 6, 2026",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/en-1280-light.png"
+  },
+  {
+    "lang": "en",
+    "width": 1280,
+    "theme": "dark",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\nRecommended\nApple silicon\nMacs with M1, M2, M3, M4 or newer. macOS 14 or later.\nDMG disk image · 123.6 MB\nDownload .dmg",
+        "x": 200,
+        "y": 207.09375,
+        "width": 432,
+        "height": 267.28125,
+        "top": 207.09375,
+        "right": 632,
+        "bottom": 474.375,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\nMost Windows PCs. Windows 10 or later.\nEXE installer · 111.7 MB\nDownload .exe",
+        "x": 648,
+        "y": 207.09375,
+        "width": 432,
+        "height": 267.28125,
+        "top": 207.09375,
+        "right": 1080,
+        "bottom": 474.375,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 79.09375,
+      "top": 104,
+      "right": 1080,
+      "bottom": 183.09375,
+      "left": 200
+    },
+    "releaseText": "Version 0.3.0 · Updated Nov 6, 2026",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/en-1280-dark.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\n建議\nApple 晶片\n搭載 M1、M2、M3、M4 或更新晶片的 Mac。需要 macOS 14 以上。\nDMG 磁碟映像 · 123.6 MB\n下載 .dmg",
+        "x": 20,
+        "y": 179.890625,
+        "width": 335,
+        "height": 258.375,
+        "top": 179.890625,
+        "right": 355,
+        "bottom": 438.265625,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\n大多數 Windows 電腦。需要 Windows 10 以上。\nEXE 安裝程式 · 111.7 MB\n下載 .exe",
+        "x": 20,
+        "y": 454.265625,
+        "width": 335,
+        "height": 258.375,
+        "top": 454.265625,
+        "right": 355,
+        "bottom": 712.640625,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 59.890625,
+      "top": 96,
+      "right": 355,
+      "bottom": 155.890625,
+      "left": 20
+    },
+    "releaseText": "版本 0.3.0 · 更新日期 2026年11月6日",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/zh-Hant-375-light.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\n建議\nApple 晶片\n搭載 M1、M2、M3、M4 或更新晶片的 Mac。需要 macOS 14 以上。\nDMG 磁碟映像 · 123.6 MB\n下載 .dmg",
+        "x": 20,
+        "y": 179.890625,
+        "width": 335,
+        "height": 258.375,
+        "top": 179.890625,
+        "right": 355,
+        "bottom": 438.265625,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\n大多數 Windows 電腦。需要 Windows 10 以上。\nEXE 安裝程式 · 111.7 MB\n下載 .exe",
+        "x": 20,
+        "y": 454.265625,
+        "width": 335,
+        "height": 258.375,
+        "top": 454.265625,
+        "right": 355,
+        "bottom": 712.640625,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 59.890625,
+      "top": 96,
+      "right": 355,
+      "bottom": 155.890625,
+      "left": 20
+    },
+    "releaseText": "版本 0.3.0 · 更新日期 2026年11月6日",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/zh-Hant-375-dark.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "light",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\n建議\nApple 晶片\n搭載 M1、M2、M3、M4 或更新晶片的 Mac。需要 macOS 14 以上。\nDMG 磁碟映像 · 123.6 MB\n下載 .dmg",
+        "x": 200,
+        "y": 207.09375,
+        "width": 432,
+        "height": 290.375,
+        "top": 207.09375,
+        "right": 632,
+        "bottom": 497.46875,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\n大多數 Windows 電腦。需要 Windows 10 以上。\nEXE 安裝程式 · 111.7 MB\n下載 .exe",
+        "x": 648,
+        "y": 207.09375,
+        "width": 432,
+        "height": 290.375,
+        "top": 207.09375,
+        "right": 1080,
+        "bottom": 497.46875,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 79.09375,
+      "top": 104,
+      "right": 1080,
+      "bottom": 183.09375,
+      "left": 200
+    },
+    "releaseText": "版本 0.3.0 · 更新日期 2026年11月6日",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/zh-Hant-1280-light.png"
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 1280,
+    "theme": "dark",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\n建議\nApple 晶片\n搭載 M1、M2、M3、M4 或更新晶片的 Mac。需要 macOS 14 以上。\nDMG 磁碟映像 · 123.6 MB\n下載 .dmg",
+        "x": 200,
+        "y": 207.09375,
+        "width": 432,
+        "height": 290.375,
+        "top": 207.09375,
+        "right": 632,
+        "bottom": 497.46875,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\n大多數 Windows 電腦。需要 Windows 10 以上。\nEXE 安裝程式 · 111.7 MB\n下載 .exe",
+        "x": 648,
+        "y": 207.09375,
+        "width": 432,
+        "height": 290.375,
+        "top": 207.09375,
+        "right": 1080,
+        "bottom": 497.46875,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 79.09375,
+      "top": 104,
+      "right": 1080,
+      "bottom": 183.09375,
+      "left": 200
+    },
+    "releaseText": "版本 0.3.0 · 更新日期 2026年11月6日",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/zh-Hant-1280-dark.png"
+  },
+  {
+    "lang": "ja",
+    "width": 375,
+    "theme": "light",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\nおすすめ\nApple シリコン\nM1、M2、M3、M4 以降を搭載した Mac。macOS 14 以降。\nDMG ディスクイメージ · 123.6 MB\nダウンロード .dmg",
+        "x": 20,
+        "y": 179.890625,
+        "width": 335,
+        "height": 258.375,
+        "top": 179.890625,
+        "right": 355,
+        "bottom": 438.265625,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\nほとんどの Windows パソコン。Windows 10 以降。\nEXE インストーラー · 111.7 MB\nダウンロード .exe",
+        "x": 20,
+        "y": 454.265625,
+        "width": 335,
+        "height": 258.375,
+        "top": 454.265625,
+        "right": 355,
+        "bottom": 712.640625,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 59.890625,
+      "top": 96,
+      "right": 355,
+      "bottom": 155.890625,
+      "left": 20
+    },
+    "releaseText": "バージョン 0.3.0 · 更新日 2026年11月6日",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/ja-375-light.png"
+  },
+  {
+    "lang": "ja",
+    "width": 375,
+    "theme": "dark",
+    "scrollWidth": 375,
+    "cards": [
+      {
+        "text": "macOS\nおすすめ\nApple シリコン\nM1、M2、M3、M4 以降を搭載した Mac。macOS 14 以降。\nDMG ディスクイメージ · 123.6 MB\nダウンロード .dmg",
+        "x": 20,
+        "y": 179.890625,
+        "width": 335,
+        "height": 258.375,
+        "top": 179.890625,
+        "right": 355,
+        "bottom": 438.265625,
+        "left": 20
+      },
+      {
+        "text": "Windows\nx64\nほとんどの Windows パソコン。Windows 10 以降。\nEXE インストーラー · 111.7 MB\nダウンロード .exe",
+        "x": 20,
+        "y": 454.265625,
+        "width": 335,
+        "height": 258.375,
+        "top": 454.265625,
+        "right": 355,
+        "bottom": 712.640625,
+        "left": 20
+      }
+    ],
+    "heading": {
+      "x": 20,
+      "y": 96,
+      "width": 335,
+      "height": 59.890625,
+      "top": 96,
+      "right": 355,
+      "bottom": 155.890625,
+      "left": 20
+    },
+    "releaseText": "バージョン 0.3.0 · 更新日 2026年11月6日",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/ja-375-dark.png"
+  },
+  {
+    "lang": "ja",
+    "width": 1280,
+    "theme": "light",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\nおすすめ\nApple シリコン\nM1、M2、M3、M4 以降を搭載した Mac。macOS 14 以降。\nDMG ディスクイメージ · 123.6 MB\nダウンロード .dmg",
+        "x": 200,
+        "y": 207.09375,
+        "width": 432,
+        "height": 267.28125,
+        "top": 207.09375,
+        "right": 632,
+        "bottom": 474.375,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\nほとんどの Windows パソコン。Windows 10 以降。\nEXE インストーラー · 111.7 MB\nダウンロード .exe",
+        "x": 648,
+        "y": 207.09375,
+        "width": 432,
+        "height": 267.28125,
+        "top": 207.09375,
+        "right": 1080,
+        "bottom": 474.375,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 79.09375,
+      "top": 104,
+      "right": 1080,
+      "bottom": 183.09375,
+      "left": 200
+    },
+    "releaseText": "バージョン 0.3.0 · 更新日 2026年11月6日",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/ja-1280-light.png"
+  },
+  {
+    "lang": "ja",
+    "width": 1280,
+    "theme": "dark",
+    "scrollWidth": 1280,
+    "cards": [
+      {
+        "text": "macOS\nおすすめ\nApple シリコン\nM1、M2、M3、M4 以降を搭載した Mac。macOS 14 以降。\nDMG ディスクイメージ · 123.6 MB\nダウンロード .dmg",
+        "x": 200,
+        "y": 207.09375,
+        "width": 432,
+        "height": 267.28125,
+        "top": 207.09375,
+        "right": 632,
+        "bottom": 474.375,
+        "left": 200
+      },
+      {
+        "text": "Windows\nx64\nほとんどの Windows パソコン。Windows 10 以降。\nEXE インストーラー · 111.7 MB\nダウンロード .exe",
+        "x": 648,
+        "y": 207.09375,
+        "width": 432,
+        "height": 267.28125,
+        "top": 207.09375,
+        "right": 1080,
+        "bottom": 474.375,
+        "left": 648
+      }
+    ],
+    "heading": {
+      "x": 200,
+      "y": 104,
+      "width": 880,
+      "height": 79.09375,
+      "top": 104,
+      "right": 1080,
+      "bottom": 183.09375,
+      "left": 200
+    },
+    "releaseText": "バージョン 0.3.0 · 更新日 2026年11月6日",
+    "closed": true,
+    "keyboardSections": 6,
+    "clipboardMatches": 3,
+    "firstOpenLink": true,
+    "errors": [],
+    "screenshot": "docs/evidence/download-version/ja-1280-dark.png"
+  }
+]
