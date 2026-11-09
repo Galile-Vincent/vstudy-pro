@@ -1,13 +1,21 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
 import { recovery } from './recovery';
+import type { ComponentProps } from 'react';
+import type { Card } from '../components/ui';
 import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
 import { i18n, tr } from '../../shared/i18n';
-const state=vi.hoisted(()=>({invoke:vi.fn(),art:vi.fn(),open:vi.fn(),route:{view:'library',query:{}}}));
-vi.mock('../shell/document-art',()=>({DocumentArt:({id}:{id:string})=>{state.art(id);return <span/>;}}));
+const state=vi.hoisted(()=>({invoke:vi.fn(),cardRender:vi.fn(),open:vi.fn(),route:{view:'library',query:{}}}));
+vi.mock('../components/ui', async importOriginal => {
+ const actual = await importOriginal<typeof import('../components/ui')>();
+ return {...actual, Card:(props:ComponentProps<typeof Card>) => {
+   state.cardRender(props.id?.replace('library-document-', ''));
+   return <actual.Card {...props}/>;
+ }};
+});
 vi.mock('../document-open',()=>({openDocument:async(id:string,open:()=>void)=>{state.open(id);open();}}));
 vi.mock('../bridge',()=>({desktop:{invoke:state.invoke}}));
 vi.mock('../shell',()=>({useNavigate:()=>({route:state.route,navigate:vi.fn()})}));
@@ -176,7 +184,6 @@ it('translates an existing recovery when the language changes',async()=>{
 
 it.each([false, true])('keeps recovery outside optional metadata (grid %s)', async grid => {
  localStorage.setItem('library-grid', String(grid));
- document.documentElement.style.setProperty('--art-reader-card-height', '300');
  const failed = row('Broken notes'); failed.document.status = 'failed';
  state.invoke.mockImplementation(async c => c === 'library:documents:list'
   ? {items: [failed], nextCursor: null} : []);
@@ -186,8 +193,13 @@ it.each([false, true])('keeps recovery outside optional metadata (grid %s)', asy
  expect(retry.closest('.document-meta,.document-added')).toBeNull();
  const entry=retry.closest<HTMLElement>('.library-document')!;
  expect(entry.style.position).toBe('absolute');
- expect(parseFloat(entry.style.height)).toBeGreaterThan(grid ? 300 : 64);
- expect(entry.style.minHeight).toBe(entry.style.height);
+ if (grid) {
+  expect(entry.style.height).toBe('');
+  expect(parseFloat(entry.style.minHeight)).toBe(160);
+ } else {
+  expect(parseFloat(entry.style.height)).toBeGreaterThan(64);
+  expect(entry.style.minHeight).toBe(entry.style.height);
+ }
 });
 
 
@@ -296,7 +308,6 @@ it.each(['delete', 'move', 'query', 'refresh'])('bounds selection restoration af
 
 it.each([false,true])('windows 5000 documents with a failed item (grid %s)', async grid => {
  localStorage.setItem('library-grid',String(grid));
- document.documentElement.style.setProperty('--art-reader-card-height','300');
  const rows=Array.from({length:5000},(_,i)=>row('doc'+i));
  rows[1]!.document.status='failed';
  state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:rows,nextCursor:null}:[]);
@@ -306,22 +317,20 @@ it.each([false,true])('windows 5000 documents with a failed item (grid %s)', asy
 
 it('renders only the changed card on a conversion refresh', async () => {
  localStorage.setItem('library-grid','true');
- document.documentElement.style.setProperty('--art-reader-card-height','300');
  let rows=Array.from({length:200},(_,i)=>row('doc'+i));
  rows[1]!.document.status='converting';
  state.invoke.mockImplementation(async c=>c==='library:documents:list'
   ? {items:structuredClone(rows),nextCursor:null}:[]);
  mount(); await screen.findByText('doc0');
- state.art.mockClear();
+ state.cardRender.mockClear();
  rows=structuredClone(rows); rows[1]!.document.title='Updated';
  act(()=>window.dispatchEvent(new Event('library-changed')));
  await screen.findByText('Updated');
- expect(state.art.mock.calls.map(([id])=>id)).toEqual(['doc1']);
+ expect(state.cardRender.mock.calls.map(([id])=>id)).toEqual(['doc1']);
 });
 
 it.each([false,true])('retries a failed row with Enter without nested tab stops (grid %s)', async grid => {
  localStorage.setItem('library-grid',String(grid));
- document.documentElement.style.setProperty('--art-reader-card-height','300');
  const failed=row('failed'); failed.document.status='failed';
  state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[failed],nextCursor:null}:[]);
  mount(); const title=await screen.findByText('failed',{selector:'button'});
@@ -492,15 +501,14 @@ it('uses nearest scrolling for arrows within and beyond the viewport', async () 
 
 it('rerenders only affected cards when selection changes among 5000 IDs', async () => {
  localStorage.setItem('library-grid','true');
- document.documentElement.style.setProperty('--art-reader-card-height','300');
  state.invoke.mockImplementation(async c=>c==='library:documents:list'
   ? {items:Array.from({length:5000},(_,i)=>row('doc'+i)),nextCursor:null}:[]);
  const {container}=mount(); await screen.findByText('doc0');
  fireEvent.keyDown(container.querySelector('.library-results')!,{key:'a',ctrlKey:true});
  await waitFor(()=>expect(container.querySelector('.bulk-bar')?.textContent).toContain('5,000'));
- state.art.mockClear();
+ state.cardRender.mockClear();
  fireEvent.click(screen.getByText('doc1').closest('.library-document')!,{ctrlKey:true});
- expect(state.art.mock.calls.map(([id])=>id)).toEqual(['doc1']);
+ expect(state.cardRender.mock.calls.map(([id])=>id)).toEqual(['doc1']);
 });
 
 it('measures a tall status block without stretching ready grid neighbours', async () => {
@@ -511,18 +519,22 @@ it('measures a tall status block without stretching ready grid neighbours', asyn
   disconnect(){} unobserve(){}
  });
  localStorage.setItem('library-grid','true');
- document.documentElement.style.setProperty('--art-reader-card-height','300');
  const failed=row('failed');failed.document.status='failed';
  state.invoke.mockImplementation(async c=>c==='library:documents:list'
   ? {items:[failed,row('ready'),row('next')],nextCursor:null}:[]);
  mount();await screen.findByText('failed',{selector:'button'});
  const status=document.querySelector('.document-status')!;
- vi.spyOn(status,'getBoundingClientRect').mockReturnValue({height:180} as DOMRect);
- act(()=>observers.find(observer=>observer.target===status)?.callback());
  const failedRow=status.closest<HTMLElement>('.library-document')!;
- expect(parseFloat(failedRow.style.height)).toBe(480);
- expect(parseFloat(screen.getByText('ready',{selector:'button'}).closest<HTMLElement>('.library-document')!.style.height)).toBe(300);
- expect(parseFloat(screen.getByText('next',{selector:'button'}).closest<HTMLElement>('.library-document')!.style.top)).toBeGreaterThanOrEqual(480);
+ const readyRow=screen.getByText('ready',{selector:'button'}).closest<HTMLElement>('.library-document')!;
+ vi.spyOn(failedRow,'getBoundingClientRect').mockReturnValue({height:390} as DOMRect);
+ act(()=>observers.find(observer=>observer.target===failedRow)?.callback());
+ expect(failedRow.style.height).toBe('');
+ expect(readyRow.style.height).toBe('');
+ const nextRow=screen.getByText('next',{selector:'button'}).closest<HTMLElement>('.library-document')!;
+ expect(parseFloat(nextRow.style.top)).toBe(406);
+ vi.spyOn(readyRow,'getBoundingClientRect').mockReturnValue({height:420} as DOMRect);
+ act(()=>observers.find(observer=>observer.target===readyRow)?.callback());
+ expect(parseFloat(nextRow.style.top)).toBe(436);
  vi.stubGlobal('ResizeObserver',class{observe(){}unobserve(){}disconnect(){}});
 });
 
@@ -576,6 +588,7 @@ it('places each named container above the elements its rules style', async () =>
  }
  const covered=new Set<string>();
  for(const query of css.matchAll(/@container\s+([\w-]+)\s*\([^{}]+\)\s*\{/g)){
+  expect([...owners.values()].some(names => names.includes(query[1]!))).toBe(true);
   let depth=1,end=query.index!+query[0].length;
   const start=end;
   while(depth&&end<css.length){if(css[end]==='{')depth++;if(css[end]==='}')depth--;end++;}
@@ -587,5 +600,43 @@ it('places each named container above the elements its rules style', async () =>
    }
   }
  }
- expect([...covered].sort()).toEqual(['docs','library-page']);
+ expect([...covered].sort()).toEqual(['library-page','library-results']);
+});
+
+it.each([null, 'false', 'true'])('uses list by default and retains saved grid preference %s', async preference => {
+  if (preference !== null) localStorage.setItem('library-grid', preference);
+  state.invoke.mockImplementation(async channel => channel === 'library:documents:list'
+    ? {items:[row('Document')], nextCursor:null} : []);
+  mount();
+  const results = await screen.findByRole('list', {name:tr('library:documents')});
+  expect(results.getAttribute('data-view')).toBe(preference === 'true' ? 'grid' : 'list');
+  fireEvent.click(screen.getByRole('button', {name:tr('library:viewToggle')}));
+  expect(results.getAttribute('data-view')).toBe(preference === 'true' ? 'list' : 'grid');
+});
+
+it('composes an empty library with one primary import and a sample action', async () => {
+  state.invoke.mockImplementation(async channel => channel === 'library:documents:list'
+    ? {items:[], nextCursor:null} : []);
+  mount();
+  const title = await screen.findByRole('heading', {level:2, name:tr('library:empty_library')});
+  const empty = title.closest('[data-slot=empty-state]')! as HTMLElement;
+  expect(within(empty).getByRole('button', {name:tr('common:import_document')})).toBeTruthy();
+  expect(within(empty).getByRole('button', {name:tr('onboarding:sample')})).toBeTruthy();
+  expect(within(empty).getAllByRole('button')).toHaveLength(2);
+});
+
+it('exposes the labelled Library region', async () => {
+ state.invoke.mockImplementation(async c => c === 'library:documents:list'
+  ? {items:[row('Notes')],nextCursor:null} : []);
+ mount(); await screen.findByText('Notes');
+ expect(screen.getByRole('region', {name:tr('common:library')})).toBeTruthy();
+});
+
+it('names the pinned indicator in grid cards', async () => {
+ localStorage.setItem('library-grid','true');
+ const pinned=row('Pinned notes'); pinned.pinned=true;
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'
+  ? {items:[pinned],nextCursor:null}:[]);
+ mount(); await screen.findByText('Pinned notes');
+ expect(screen.getByRole('img', {name:tr('library:pinned')})).toBeTruthy();
 });

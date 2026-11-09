@@ -79,6 +79,13 @@ it('shows a reversed custom range error and never submits an impossible range',a
  await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list' && q.addedAfter && q.addedBefore)).toBe(true));
  fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'2026-11-02'}});
  await waitFor(()=>expect(document.querySelector('.library-live')?.textContent).toContain(tr('library:dateRangeInvalid')));
+ const alerts = within(panel).getAllByRole('alert');
+ expect(alerts).toHaveLength(2);
+ for (const key of ['addedAfter', 'addedBefore']) {
+  const input = within(panel).getByLabelText(tr(`library:${key}`), {selector:'input'});
+  expect(input.getAttribute('aria-invalid')).toBe('true');
+  expect(alerts.some(alert => alert.id === input.getAttribute('aria-describedby'))).toBe(true);
+ }
  for(const [channel,q] of state.invoke.mock.calls){if(channel==='library:documents:list' && q.addedBefore && q.addedAfter)expect(q.addedAfter<=q.addedBefore).toBe(true);}
 });
 
@@ -136,4 +143,37 @@ it('rejects a five digit year without breaking rendering',async()=>{
  fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'20261-11-01'}});
  expect(document.querySelector('.library-live')?.textContent).toBe(tr('library:dateRangeInvalid'));
  expect(screen.getByText('notes')).toBeTruthy();
+});
+
+it('labels every filter above its control and offers one clear action', async () => {
+  state.route.query = {status:'ready'};
+  const toolbar = await mount(false);
+  fireEvent.click(within(toolbar).getByTestId('library-filters'));
+  const panel = await screen.findByRole('dialog', {name:tr('library:filters')});
+  const fields = panel.querySelectorAll('[data-slot=form-field]');
+  expect(fields).toHaveLength(10);
+  for (const field of fields) {
+    const label = field.querySelector('label')!;
+    expect(label).toBe(field.firstElementChild);
+    const control = field.querySelector('select, input, [role=checkbox]');
+    expect(control).toBeTruthy();
+    expect(control?.id).toBe(label.htmlFor);
+  }
+  expect(screen.getAllByRole('button', {name:tr('library:clearFilters')})).toHaveLength(1);
+});
+
+it('offers Clear beside active chips while filters are closed', async () => {
+ state.route.query = {status:'ready'};
+ await mount(false);
+ expect(within(document.querySelector('.filter-chips')! as HTMLElement)
+  .getByRole('button', {name:tr('library:clearFilters')})).toBeTruthy();
+});
+
+it('hides Clear without filters and preserves Escape dismissal', async () => {
+ const toolbar = await mount(false);
+ fireEvent.click(within(toolbar).getByTestId('library-filters'));
+ const panel = await screen.findByRole('dialog', {name:tr('library:filters')});
+ expect(within(panel).queryByRole('button', {name:tr('library:clearFilters')})).toBeNull();
+ fireEvent.keyDown(panel, {key:'Escape'});
+ await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 });

@@ -9,7 +9,7 @@ vi.mock('react-i18next',()=>({useTranslation:()=>({i18n:{language:'en'}})}));
 vi.mock('../markdown',()=>({DocumentMarkdown:({source}:{source:string})=><article>{source}</article>}));
 vi.mock('./scope-picker',()=>({ScopePicker:({onChange}:{onChange:(s:unknown)=>void})=><button onClick={()=>onChange({kind:'weak'})}>scope</button>}));
 vi.mock('./test-player',()=>({TestPlayer:()=>null}));
-const artifact={id:'artifact',courseId:'course',kind:'note',title:'A note',status:'ready',bodyMarkdown:'# Osmosis',test:null,scope:{kind:'weak'},resolvedScope:{unitIds:['unit'],documentIds:['doc'],conceptKeys:['osmosis'],sources:[{documentId:'doc',version:'original',excerptHash:'hash'}],assumptions:['based on when you asked'],timeZone:'Asia/Taipei',from:null,to:null},errorCode:null};
+const artifact={createdAt:'2026-11-06T00:00:00.000Z',id:'artifact',courseId:'course',kind:'note',title:'A note',status:'ready',bodyMarkdown:'# Osmosis',test:null,scope:{kind:'weak'},resolvedScope:{unitIds:['unit'],documentIds:['doc'],conceptKeys:['osmosis'],sources:[{documentId:'doc',version:'original',excerptHash:'hash'}],assumptions:['based on when you asked'],timeZone:'Asia/Taipei',from:null,to:null},errorCode:null};
 function setup(status='ready',errorCode:string|null=null){
  subscribe.mockReturnValue(vi.fn());
  invoke.mockImplementation(async(channel:string)=>{

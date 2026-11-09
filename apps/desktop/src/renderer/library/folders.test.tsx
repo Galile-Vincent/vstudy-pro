@@ -50,6 +50,8 @@ describe('library folders view', () => {
       tr('library:openFolder', { name: 'Circuits' }), tr('library:openFolder', { name: 'Logic' }), tr('library:openFolder', { name: tr('library:unfiled') }),
     ]);
     expect(screen.queryByRole('list', { name: tr('library:documents') })).toBeNull();
+    expect(folders.querySelectorAll('.folder-row')).toHaveLength(3);
+    expect(folders.querySelector('.folder-art')).toBeNull();
     fireEvent.click(within(folders).getByRole('button', { name: tr('library:openFolder', { name: 'Circuits' }) }));
     const results = await screen.findByRole('list', { name: tr('library:documents') });
     expect(within(results).getAllByRole('listitem')).toHaveLength(2);
@@ -87,7 +89,7 @@ describe('library folders view', () => {
     const results = await screen.findByRole('list', { name: tr('library:documents') });
     const courses = Array.from(results.querySelectorAll('.document-course')).map((e) => e.textContent);
     expect(courses).toEqual(['電子電路', '電子電路', '邏輯設計', tr('library:unfiled')]);
-    const first = results.querySelector<HTMLElement>('.document-card')!;
+    const first = results.querySelector<HTMLElement>('[data-slot=card]')!;
     expect(first.textContent).toContain(tr('library:pages', { count: 3, formatted: '3' }));
     first.focus();
     fireEvent.keyDown(first, { key: 'ArrowRight' });

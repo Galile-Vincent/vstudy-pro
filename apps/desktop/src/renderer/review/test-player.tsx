@@ -12,7 +12,7 @@ desktop.onDraftFlushRequest?.(flushDraftQueues);
 type Artifact = NonNullable<IpcResponse<'review:artifact:get'>>;
 type Attempt = IpcResponse<'review:attempt:start'>;
 
-export function TestPlayer({ artifact, onRetake, actions }: { artifact: Artifact; onRetake: (attemptId: string) => void; actions?: ReactNode }) {
+export function TestPlayer({ artifact, onRetake, onConfirmed, actions }: { artifact: Artifact; onRetake: (attemptId: string) => void; onConfirmed?: (() => void) | undefined; actions?: ReactNode }) {
  const [attempt, setAttempt] = useState<Attempt | null>(null);
  const [index, setIndex] = useState(0);
  const [drafts, setDrafts] = useState<Record<string, Answer>>({});
@@ -177,7 +177,10 @@ export function TestPlayer({ artifact, onRetake, actions }: { artifact: Artifact
    <h4>{tr('review:worth_another_look')}</h4>
    <ul>{[...new Set(missed.map(result => result.conceptKey))].map(key => <li key={key}>{tr('review:concept_missed', { label: labels[key] ?? key, count: missed.filter(result => result.conceptKey === key).length })}</li>)}</ul>
    {!exam&&<><p>{tr('review:confirm_notice')}</p>
-   {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button disabled={busy} onClick={() => void run(async () => setAttempt(await desktop.invoke('review:attempt:confirm', { attemptId: attempt.id })))}>{tr('review:update_review_list')}</Button>}
+   {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button disabled={busy} onClick={() => void run(async () => {
+    setAttempt(await desktop.invoke('review:attempt:confirm', { attemptId: attempt.id }));
+    onConfirmed?.();
+   })}>{tr('review:update_review_list')}</Button>}
    </>}
    <div className="review-actions">{!exam&&<Button disabled={busy || attempt.phase !== 'confirmed' || !missed.length} onClick={() => onRetake(attempt.id)}>{tr('review:retake_missed')}</Button>}<Button onClick={() => setResults(false)}>{tr('review:review_answers')}</Button></div>
   </>}

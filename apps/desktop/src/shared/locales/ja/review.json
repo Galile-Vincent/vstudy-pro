@@ -147,9 +147,12 @@
   "consent_not_now": "今はしない",
   "consent_done": "学習メモリーをオンにしました。設定 > プライバシーでいつでも変更できます。",
   "item_feedback": "この問題のフィードバック",
-  "concept_missed_one": "{{label}}：{{count}} 問をもう一度確認",
   "concept_missed_other": "{{label}}：{{count}} 問をもう一度確認",
   "assumption_sources_omitted": "サイズの上限に収めるため、一部の資料は含まれていません。",
   "assumption_excerpt_limited": "{{document}} は先頭部分のみ使用しました。",
-  "assumption_undated_units": "日付のない単元は、質問した日時で位置づけました：{{units}}"
+  "assumption_undated_units": "日付のない単元は、質問した日時で位置づけました：{{units}}",
+  "bounded_session_other": "{{total}} 個中 {{selected}} 個の概念を復習します。残り {{count}} 個は次回に復習します",
+  "scope_required": "生成するには、1〜{{max}} 件の項目または有効な日付範囲を選択してください。",
+  "scope_limit_other": "1 回に選べる概念は {{count}} 個までです。他の概念を選ぶには選択を解除してください。",
+  "row_actions": "{{concept}} の操作"
 }

@@ -121,7 +121,7 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
       keychainAllowed = allowClaudeKeychain;
       setKeychain(allowClaudeKeychain);
       setLoading(true);
-      void desktop.invoke('usage:subscriptions', { allowClaudeKeychain, refresh: true }).then(setRows).catch(() => setError(true)).finally(() => setLoading(false));
+      void desktop.invoke('usage:subscriptions', { allowClaudeKeychain, refresh: true }).then(value => { setRows(value); setError(false); }).catch(() => setError(true)).finally(() => setLoading(false));
     }}/>{tr('usage:quota_keychain')}</label>}
     </div>
   </section>;
