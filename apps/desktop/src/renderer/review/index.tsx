@@ -12,6 +12,7 @@ import {
   PageHeader,
   Toolbar,
   ListRow,
+  Section,
   EmptyState,
 } from "../components/ui";
 import {
@@ -794,15 +795,8 @@ function Weak({
   const remove = (index: number, action: () => Promise<unknown>) =>
     void mutate(action, neighbour(index));
   return (
-    <section>
-      <div className="review-section-heading">
-        <div>
-          <h2 id="review-weak-heading" tabIndex={-1}>
-            {tr("review:needs_review")}
-          </h2>
-          <p>{tr("review:weak_help")}</p>
-        </div>
-        <Button variant="default"
+    <Section title={<span id="review-weak-heading" tabIndex={-1}>{tr("review:needs_review")}</span>}
+      actions={<Button variant="default"
           disabled={!items.length}
           onClick={() =>
             artifacts(
@@ -814,8 +808,9 @@ function Weak({
           }
         >
           {tr("review:today")}
-        </Button>
-      </div>
+        </Button>}
+    >
+      <p>{tr("review:weak_help")}</p>
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="ghost" className="review-help">
@@ -837,13 +832,11 @@ function Weak({
               }
               actions={
                 <div className="review-actions">
-                  <Button variant="secondary" onClick={() => artifacts("note", [c.key], [c.label])}>
-                    {tr("review:make_note")}
-                  </Button>
-                  <Button variant="secondary" onClick={() => artifacts("test", [c.key], [c.label])}>
+                  <Evidence courseId={c.courseId} conceptKey={c.key} open={open} />
+                        <Button variant="secondary" onClick={() => artifacts("test", [c.key], [c.label])}>
                     {tr("review:make_test")}
                   </Button>
-                  <Button variant="secondary"
+                  <Button variant="ghost"
                     disabled={busy}
                     onClick={() =>
                       remove(index, () =>
@@ -874,6 +867,9 @@ function Weak({
                         renameInput.current?.focus();
                       }
                     }}>
+                      <DropdownMenuItem onSelect={() => artifacts("note", [c.key], [c.label])}>
+                        {tr("review:make_note")}
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         onSelect={() => {
                           renameTarget.current = c.id;
@@ -934,7 +930,6 @@ function Weak({
                 </Button>
               </form>
             )}
-            <Evidence courseId={c.courseId} conceptKey={c.key} open={open} />
           </li>
         ))}
       </ul>
@@ -952,7 +947,7 @@ function Weak({
           title={tr("review:weak_empty")}
         />
       )}
-    </section>
+    </Section>
   );
 }
 function Evidence({
@@ -966,7 +961,7 @@ function Evidence({
 }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <details onToggle={(e) => setExpanded(e.currentTarget.open)}>
+    <details className="review-evidence" onToggle={(e) => setExpanded(e.currentTarget.open)}>
       <summary>{tr("review:evidence")}</summary>
       {expanded && (
         <EvidencePage courseId={courseId} conceptKey={conceptKey} open={open} />
