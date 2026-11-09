@@ -8,3 +8,8 @@ it('associates the visible row label with its control', () => {
   expect(screen.getByLabelText('Idle minutes')).toBe(screen.getByRole('spinbutton'));
   expect(screen.queryByRole('group')).toBeNull();
 });
+
+it('names rows containing only plain buttons as a group', () => {
+  render(<SettingsRow label="Converter mode"><button>Enable downloads</button><button>Offline</button></SettingsRow>);
+  expect(screen.getByRole('group',{name:'Converter mode'})).toBe(screen.getByRole('button',{name:'Offline'}).parentElement?.parentElement);
+});

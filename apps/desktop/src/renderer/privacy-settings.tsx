@@ -64,8 +64,8 @@ export function PrivacySettings() {
           </Button>
         </SettingsRow>
         {events.length ? (
-          events.map(event => (
-            <div className="network-event" key={JSON.stringify(event)}>
+          events.map((event,index) => (
+            <div className="network-event" key={`${index}-${event.at}`}>
               <time dateTime={event.at}>
                 {fmt.date(event.at,{dateStyle:'medium',timeStyle:'short'})}
               </time>

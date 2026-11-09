@@ -48,9 +48,10 @@ export function ThemeEditor({theme,settings,onClose,onSave}: ThemeActions & { th
     } catch (error) { setError(themeError(error)); }
     finally { setSaving(false); }
   };
+  const fieldError = error === tr('themes:invalid_name');
   return <Dialog open onOpenChange={open => {if (!open) onClose();}}><DialogContent className="theme-editor" style={controlStyle}>
     <DialogTitle>{tr('themes:editor')}</DialogTitle><DialogDescription>{tr('themes:editor_hint')}</DialogDescription>
-    <label className="theme-field">{tr('themes:name')}<input aria-invalid={!!error} aria-describedby={error ? errorId : undefined} value={draft.name} maxLength={60} onChange={e => setDraft({...draft,name:e.target.value})}/></label>
+    <label className="theme-field">{tr('themes:name')}<input aria-invalid={fieldError} aria-describedby={fieldError ? errorId : undefined} value={draft.name} maxLength={60} onChange={e => setDraft({...draft,name:e.target.value})}/></label>
     <div className="theme-editor-schemes">{(['light','dark'] as const).map(s => <button type="button" key={s} aria-pressed={scheme===s} onClick={() => setScheme(s)}>{tr(`themes:${s}`)}</button>)}</div>
     <ThemePreview theme={draft} scheme={scheme}/>
     <div className="theme-color-fields">{tokenNames.map(key => <label key={key}><span>{tr(`themes:token_${key}`)}</span><input type="color" aria-label={tr(`themes:token_${key}`)} value={draft[scheme][key]}
@@ -82,6 +83,7 @@ export function ThemeTransfer({theme,onClose,onSave,existing=[]}: ThemeActions &
     catch (error) { setError(themeError(error)); }
     finally { setSaving(false); }
   };
+  const fieldError = ['invalid_json','unknown_field','invalid_id','invalid_name','invalid','reserved_id','too_large'].some(key => error === tr(`themes:${key}`));
   return <Dialog open onOpenChange={open => {if (!open) onClose();}}><DialogContent className="theme-transfer">
     <DialogTitle>{tr(exporting?'themes:export':'themes:add')}</DialogTitle><DialogDescription>{tr('themes:json_hint')}</DialogDescription>
     {!exporting && <label className="theme-field">{tr('themes:choose_file')}<input type="file" accept=".json,application/json" onChange={e => {
@@ -89,7 +91,7 @@ export function ThemeTransfer({theme,onClose,onSave,existing=[]}: ThemeActions &
       if (file.size>32768) {setError(tr('themes:too_large')); return;}
       void file.text().then(value => {setJson(value);setError('');}).catch(() => setError(tr('themes:read_failed')));
     }}/></label>}
-    <label className="theme-field">{tr('themes:json')}<textarea aria-invalid={!!error} aria-describedby={error ? errorId : undefined} aria-label={tr('themes:json')} value={json} readOnly={exporting} maxLength={32768} rows={14} onChange={e => {setJson(e.target.value);setError('');}}/></label>
+    <label className="theme-field">{tr('themes:json')}<textarea aria-invalid={fieldError} aria-describedby={fieldError ? errorId : undefined} aria-label={tr('themes:json')} value={json} readOnly={exporting} maxLength={32768} rows={14} onChange={e => {setJson(e.target.value);setError('');}}/></label>
     {limited && <p role="status">{tr('themes:limit')}</p>}
     {overwrite && <Dialog open onOpenChange={open => {if (!open) setOverwrite(undefined);}}>
       <DialogContent><DialogTitle>{tr('themes:overwrite',{name:overwrite.name})}</DialogTitle>

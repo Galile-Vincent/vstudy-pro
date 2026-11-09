@@ -50,6 +50,7 @@ it('asks before deleting a saved key', async () => {
   await act(() => root.render(<ProviderRow provider={{config:{kind:'api',id:'openai-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>));
   await act(() => [...host.querySelectorAll('button')].find(b=>b.textContent==='Remove')!.click());
   expect(document.querySelector('[role=dialog]')).toBeTruthy();
+  expect(vi.mocked(desktop.invoke).mock.calls.filter(([channel])=>channel==='secrets:delete')).toHaveLength(0);
  } finally {await act(() => root.unmount());host.remove();}
 });
 it('names provider actions with the provider', async () => {

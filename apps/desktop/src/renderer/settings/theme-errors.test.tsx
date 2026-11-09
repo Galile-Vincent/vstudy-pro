@@ -19,3 +19,13 @@ it.each([
   expect(field.getAttribute('aria-invalid')).toBe('true');
   expect(field.getAttribute('aria-describedby')).toBe(error.id);
 });
+
+it('does not mark valid JSON invalid when persistence fails', async () => {
+  render(<ThemeTransfer theme="import" onClose={vi.fn()} onSave={vi.fn().mockResolvedValue(undefined)}/>);
+  const field=screen.getByRole('textbox');
+  fireEvent.change(field,{target:{value:JSON.stringify({...builtinThemes[0],id:'custom-ok'})}});
+  fireEvent.click(screen.getByRole('button',{name:tr('themes:import')}));
+  expect((await screen.findByRole('alert')).textContent).toBe(tr('themes:save_failed'));
+  expect(field.getAttribute('aria-invalid')).toBe('false');
+  expect(field.hasAttribute('aria-describedby')).toBe(false);
+});
