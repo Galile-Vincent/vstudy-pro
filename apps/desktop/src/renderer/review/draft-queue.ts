@@ -13,6 +13,7 @@ class DraftQueue {
  private timer: ReturnType<typeof setTimeout> | undefined;
  private lastSent = 0;
  private retryUntil = 0;
+ private terminalFailure = false;
  failed = false;
 
  constructor(private readonly send: Send, private readonly onIdle: () => void) {}
@@ -73,11 +74,15 @@ class DraftQueue {
    try {
     await this.send(itemId, answer, seq);
     if (this.pending.get(itemId)?.seq === seq) this.pending.delete(itemId);
-   } catch {
-    if (this.pending.get(itemId)?.seq === seq) failedIds.set(itemId, seq);
+   } catch (error) {
+    if (this.pending.get(itemId)?.seq !== seq) continue;
+    if (isTerminalDraftError(error)) {
+     this.pending.delete(itemId);
+     this.terminalFailure = true;
+    } else failedIds.set(itemId, seq);
    }
   }
-  this.setFailed(failedIds.size > 0);
+  this.setFailed(this.terminalFailure || failedIds.size > 0);
   if (failedIds.size && this.timer === undefined) this.schedule(DRAFT_RETRY_MS);
   this.settleIfIdle();
  }
@@ -87,9 +92,21 @@ class DraftQueue {
  }
 
  private setFailed(failed: boolean) {
+  if (this.failed === failed) return;
   this.failed = failed;
   for (const listener of this.listeners) listener(failed);
  }
+}
+
+const terminalCodes = new Set([
+ 'review.attempt_unavailable', 'review.item_unavailable', 'review.invalid_answer',
+ 'review.invalid_sequence', 'review.answers_locked', 'review.attempt_committed',
+]);
+
+function isTerminalDraftError(error: unknown): boolean {
+ if (!(error instanceof Error)) return false;
+ const code = error.message.match(/review\.[a-z_]+/)?.[0];
+ return code !== undefined && terminalCodes.has(code);
 }
 
 const queues = new Map<string, DraftQueue>();

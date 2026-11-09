@@ -60,6 +60,38 @@ it('reports pending when permanent failures exhaust the shutdown allowance', asy
  expect(queue.answers()).toEqual({ q1: 1 });
 });
 
+it.each(['attempt_unavailable', 'item_unavailable', 'invalid_answer', 'invalid_sequence', 'answers_locked', 'attempt_committed'])(
+ 'stops retries and evicts after terminal review.%s', async code => {
+ vi.useFakeTimers();
+ const send = vi.fn().mockRejectedValueOnce(new Error('offline'))
+  .mockRejectedValue(new Error('Error invoking remote method: VSTUDY_STATUS:' + JSON.stringify({ code: 'review.' + code, params: {} })));
+ const queue = draftQueue('attempt', send);
+ const notice = vi.fn();
+ const unsubscribe = queue.subscribe(notice);
+ queue.set('q1', 1);
+ await queue.flush();
+ await vi.advanceTimersByTimeAsync(3000);
+ expect(queue.answers()).toEqual({});
+ expect(queue.failed).toBe(true);
+ const notifications = notice.mock.calls.length;
+ await queue.flush();
+ expect(notice).toHaveBeenCalledTimes(notifications);
+ await vi.advanceTimersByTimeAsync(9000);
+ expect(send).toHaveBeenCalledTimes(2);
+ unsubscribe();
+ expect(draftQueue('attempt', send)).not.toBe(queue);
+});
+
+it('mirrors production deletion of the draft sequence and its admitted stale-write limit', async () => {
+ const { fakeAttemptServer } = await import('./fake-attempt-server');
+ const server = fakeAttemptServer();
+ await server.invoke('review:attempt:draft', { itemId: 'q1', answer: 1, seq: 4 });
+ await server.invoke('review:attempt:draft', { itemId: 'q1', answer: null, seq: 5 });
+ expect(server.state.draftSeqs.q1).toBeUndefined();
+ await server.invoke('review:attempt:draft', { itemId: 'q1', answer: 0, seq: 4 });
+ expect(server.state.drafts.q1).toBe(0);
+});
+
 it('reports a hung write as pending within the renderer allowance', async () => {
  vi.useFakeTimers();
  const queue = draftQueue('attempt', () => new Promise(() => {}));

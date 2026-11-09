@@ -144,3 +144,21 @@ it.each(modes)('waits for a write that is already in flight when main asks to fl
  closed = true;
  expect(server.state.drafts.q1).toBe(0);
 });
+
+it('shows the existing warning once and stops retrying a deleted attempt', async () => {
+ const server = fakeAttemptServer();
+ invoke.mockImplementation(async (channel: string, request: Record<string, unknown>) => {
+  if (channel === 'review:attempt:draft') throw new Error('review.attempt_unavailable');
+  return server.invoke(channel, request);
+ });
+ const view = render(<TestPlayer artifact={fakeArtifact(true)} onRetake={vi.fn()} />);
+ const beta = await screen.findByLabelText(/Beta/);
+ vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+ fireEvent.click(beta);
+ await tick(0);
+ expect(screen.getAllByText('review:draft_save_failed')).toHaveLength(1);
+ await tick(9000);
+ expect(invoke.mock.calls.filter(([channel]) => channel === 'review:attempt:draft')).toHaveLength(1);
+ view.unmount();
+ await tick(0);
+});

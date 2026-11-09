@@ -67,3 +67,5 @@ First-run onboarding explains local storage, conversion consent, optional provid
 Unit tests cover schemas, prompt construction, migrations, repositories, provider fixtures, cancellation, and security boundaries. Tests use a fork pool with two workers and disable Node's process-wide Web Storage so jsdom owns its window storage. Optional converter and live-provider integration tests require their documented environment and credentials. A skipped live test is not a live-provider acceptance result.
 
 `pnpm build` produces the Electron artifact. `pnpm smoke` and `pnpm e2e` launch real Electron instances and close them afterward. Run GUI checks sequentially on memory-constrained machines. [Engineering](ENGINEERING.md) lists current commands and extension procedures.
+
+A stale draft write after a cleared draft can resurrect it because clearing deletes its sequence; the single serialized renderer queue prevents this ordering in the supported flow.

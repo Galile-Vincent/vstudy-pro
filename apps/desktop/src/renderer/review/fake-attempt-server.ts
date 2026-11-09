@@ -38,7 +38,9 @@ export function fakeAttemptServer(options: { commitFailures?: number; draftFailu
     const seq = typeof request.seq === 'number' ? request.seq : undefined;
     if (seq !== undefined && seq < (state.draftSeqs[itemId] ?? -1)) return view();
     if (seq !== undefined) state.draftSeqs[itemId] = seq;
-    if (request.answer === null) delete state.drafts[itemId]; else state.drafts[itemId] = request.answer as Answer;
+    if (request.answer === null) {
+     delete state.drafts[itemId]; delete state.draftSeqs[itemId];
+    } else state.drafts[itemId] = request.answer as Answer;
     return view();
    }
    case 'review:attempt:commit': {
