@@ -124,7 +124,7 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
           const blocks = snapshot.blocks.filter(b => localDay(b.startsAt, zone) === day);
           return <section className="planner-day" key={day}><h3>{new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(day + "T12:00:00Z"))}</h3>
             <span className="planner-muted">{tr("planner:reserved", { minutes: blocks.reduce((n, b) => n + b.durationMinutes, 0) })}</span>
-            <ol>{blocks.map(b => <li key={b.id}><strong>{b.title}</strong><span>{courseTitle(b.courseId)}</span><time dateTime={b.startsAt}>{tr("planner:duration_window", { start: new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { hour: "numeric", minute: "2-digit", timeZone: zone }).format(new Date(b.startsAt)), minutes: b.durationMinutes })}</time></li>)}</ol>
+            <ol>{blocks.map(b => <li key={b.id}><ListRow title={b.title} subtitle={courseTitle(b.courseId)} meta={<time dateTime={b.startsAt}>{tr("planner:duration_window", { start: new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { hour: "numeric", minute: "2-digit", timeZone: zone }).format(new Date(b.startsAt)), minutes: b.durationMinutes })}</time>} /></li>)}</ol>
           </section>;
         })}
       </Card></section></div>}</TabsContent>)}</Tabs>

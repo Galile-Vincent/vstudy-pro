@@ -43,6 +43,7 @@ it("shows draft assumptions and dates without writing until approval, and suppor
   await click("Plan my week");
   expect(host.querySelector(".planner-proposal")?.textContent).toContain("Assumptions");
   expect(host.querySelectorAll(".planner-proposed-blocks time").length).toBeGreaterThan(0);
+  expect(host.querySelector(".planner-proposed-blocks li [data-slot=list-row]")).not.toBeNull();
   expect(repo.snapshot().blocks).toEqual([]);
   await click("Dismiss", host.querySelector(".planner-proposal")!);
   expect(repo.snapshot().blocks).toEqual([]);
@@ -51,6 +52,7 @@ it("shows draft assumptions and dates without writing until approval, and suppor
   await act(async () => { button.click(); button.click(); });
   expect(approve).toHaveBeenCalledTimes(1);
   expect(repo.snapshot().blocks.length).toBeGreaterThan(0);
+  expect(host.querySelector(".planner-week li [data-slot=list-row]")).not.toBeNull();
   expect(host.querySelector(".planner-proposal")).toBeNull();
   await act(async () => [...host.querySelectorAll<HTMLButtonElement>("[role=tab]")].find(b => b.textContent === "Next 7 days")!.focus());
   expect(host.querySelectorAll(".planner-day")).toHaveLength(7);

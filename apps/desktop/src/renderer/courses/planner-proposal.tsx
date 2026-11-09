@@ -3,7 +3,7 @@ import type { MoodleAgentAction, MoodleCourse, MoodleDeadline, MoodleFile } from
 import type { PlannerSnapshot } from "../../shared/planner";
 import { i18n, tr } from "../../shared/i18n";
 import { displayTitle } from "../../shared/moodle-course-display";
-import { Button, Card } from "../components/ui";
+import { Button, Card, ListRow } from "../components/ui";
 export function plannerDate(value: string, timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone) {
   return new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { timeZone, dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
@@ -50,8 +50,7 @@ export function PlannerProposal({ action, snapshot, courses, deadlines, files = 
     </>}
     {(action.type === "make-study-plan" || action.type === "plan-today" || action.type === "schedule-study-block") && <p>{tr("planner:capacity", { minutes: action.dailyBudgetMinutes, zone: action.timeZone })}</p>}
     {blocks.length > 0 && <ol className="planner-proposed-blocks">{blocks.map((block, i) => <li key={i}>
-      <strong>{block.title}</strong><span>{course(block.courseId)}</span>
-      <time dateTime={block.startsAt}>{tr("planner:duration_window", { start: plannerDate(block.startsAt, "timeZone" in action ? action.timeZone : undefined), minutes: block.durationMinutes })}</time>
+      <ListRow title={block.title} subtitle={course(block.courseId)} meta={<time dateTime={block.startsAt}>{tr("planner:duration_window", { start: plannerDate(block.startsAt, "timeZone" in action ? action.timeZone : undefined), minutes: block.durationMinutes })}</time>} />
     </li>)}</ol>}
     {(action.type === "create-reminder" || action.type === "set-reminder") && <>
       <strong>{action.type === "create-reminder" ? targetTitle("deadline", action.deadlineId) : targetTitle(action.target.kind, action.target.id)}</strong>
