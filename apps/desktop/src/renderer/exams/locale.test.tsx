@@ -45,6 +45,6 @@ it.each(languages)('formats the results percentages with the app language (%s)',
  render(<ExamPlayer artifact={fakeArtifact(true)} attempt={attempt} index={0} draft={null} results busy={false} failed={false} draftError={false}
   explanations={{}} gradedEarlier={false} onDraft={vi.fn()} onMove={vi.fn()} onSubmit={vi.fn()} onResults={vi.fn()} onExplain={vi.fn()} onRetry={vi.fn()} onReport={vi.fn()} />);
  const percent = new Intl.NumberFormat(lang, { style: 'percent' }).format(2 / 3);
- expect(document.querySelector('.exam-score-value strong')!.textContent).toBe(percent);
- expect(document.querySelector('.exam-accuracy-row')!.textContent).toContain(new Intl.NumberFormat(lang, { style: 'percent' }).format(2 / 3));
+ expect(document.querySelector('[data-slot="stat"]')!.textContent).toContain(percent);
+ expect(screen.getByRole('progressbar', { name: 'exams:mcq' }).parentElement!.textContent).toContain(percent);
 });

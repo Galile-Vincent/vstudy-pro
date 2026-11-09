@@ -5,14 +5,25 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  Clock3,
+  ChevronDown,
   Sparkles,
   XCircle,
 } from "lucide-react";
-import { Badge, Button, FormField, Input, Toolbar } from "../components/ui";
+import {
+  Badge,
+  Button,
+  FormField,
+  Input,
+  SegmentedTabsList,
+  SegmentedTabsTrigger,
+  Stat,
+  Tabs,
+  TabsContent,
+  Toolbar,
+} from "../components/ui";
 import { Progress } from "../components/ui/progress";
 import { useExamFormat } from "./format";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 type Artifact = NonNullable<IpcResponse<"review:artifact:get">>;
 type Attempt = IpcResponse<"review:attempt:start">;
 type Answer = Attempt["answers"][string];
@@ -115,6 +126,7 @@ export function ExamPlayer({
   const items = artifact.test?.items ?? [],
     item = items[index];
   const heading = useRef<HTMLHeadingElement>(null);
+  const [filter, setFilter] = useState<"all" | "incorrect">("all");
   useEffect(() => {
     heading.current?.focus();
   }, [index, results, attempt?.id]);
@@ -192,48 +204,48 @@ export function ExamPlayer({
       {!attempt && !failed && <p role="status">{tr("review:loading")}</p>}
       {attempt && results ? (
         <>
-          <header className="exam-score-header">
-            <div>
-              <h3 ref={heading} tabIndex={-1}>
-                {tr("exams:results")}
-              </h3>
-              <p className="exam-score-copy">
-                {tr("exams:score_summary", { correct, total: items.length })}
-              </p>
-              <p className="exam-muted exam-duration">
-                <Clock3 size={15} aria-hidden="true" />
-                {tr("exams:duration", {
-                  minutes: Math.max(
-                    0,
-                    Math.round(
-                      (Date.parse(attempt.committedAt ?? attempt.startedAt) -
-                        Date.parse(attempt.startedAt)) /
-                        60000,
-                    ),
+          <h3
+            ref={heading}
+            tabIndex={-1}
+            className="text-[length:var(--type-xl)] font-medium"
+          >
+            {tr("exams:results")}
+          </h3>
+          <div className="flex flex-wrap gap-x-[var(--space-8)] gap-y-[var(--space-4)]">
+            <Stat
+              label={tr("exams:accuracy")}
+              value={format
+                .percentParts(items.length ? correct / items.length : 0)
+                .map((part, i) =>
+                  part.type === "percentSign" ? (
+                    <span key={i}>{part.value}</span>
+                  ) : (
+                    part.value
                   ),
-                })}
-              </p>
-            </div>
-            <div className="exam-score-value">
-              <strong>
-                {format
-                  .percentParts(items.length ? correct / items.length : 0)
-                  .map((part, i) =>
-                    part.type === "percentSign" ? (
-                      <span key={i}>{part.value}</span>
-                    ) : (
-                      part.value
-                    ),
-                  )}
-              </strong>
-              <span>{tr("exams:accuracy")}</span>
-            </div>
-          </header>
+                )}
+            />
+            <Stat
+              label={tr("exams:correct_count")}
+              value={correct}
+              unit={`/ ${items.length}`}
+            />
+            <Stat
+              label={tr("exams:duration_label")}
+              value={tr("exams:duration", {
+                minutes: format.minutes(
+                  attempt.startedAt,
+                  attempt.committedAt ?? attempt.startedAt,
+                ),
+              })}
+            />
+          </div>
           <section
-            className="exam-type-accuracy"
+            className="flex flex-col gap-[var(--space-3)]"
             aria-label={tr("exams:accuracy_by_type")}
           >
-            <h4>{tr("exams:accuracy_by_type")}</h4>
+            <h4 className="text-[length:var(--type-lg)] font-medium">
+              {tr("exams:accuracy_by_type")}
+            </h4>
             {[...new Set(items.map((i) => i.type))].map((type) => {
               const rows = attempt.results.filter(
                   (r) => items.find((i) => i.id === r.itemId)?.type === type,
@@ -242,73 +254,109 @@ export function ExamPlayer({
                 ratio = rows.length ? matched / rows.length : 0,
                 value = Math.round(ratio * 100);
               return (
-                <div className="exam-accuracy-row" key={type}>
-                  <div>
-                    <span>{tr(`exams:${type}`)}</span>
-                    <span>
-                      {matched}/{rows.length}{" "}
-                      <span className="exam-muted">
-                        · {format.percent(ratio)}
-                      </span>
-                    </span>
-                  </div>
+                <div
+                  className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-1)]"
+                  key={type}
+                >
+                  <span className="flex-[1_1_8rem]">{tr(`exams:${type}`)}</span>
                   <Progress
+                    className="flex-[2_1_12rem] [&>[data-slot=progress-indicator]]:bg-[var(--success)]"
                     value={value}
                     aria-label={tr(`exams:${type}`)}
                     aria-valuenow={value}
                     aria-valuetext={`${matched}/${rows.length}`}
                   />
+                  <span className="min-w-[8ch] text-end tabular-nums">
+                    {matched}/{rows.length}{" "}
+                    <span className="text-[var(--muted)]">
+                      · {format.percent(ratio)}
+                    </span>
+                  </span>
                 </div>
               );
             })}
           </section>
           <section
-            className="exam-question-results"
+            className="flex flex-col gap-[var(--space-3)]"
             aria-label={tr("exams:question_breakdown")}
           >
-            <h4>{tr("exams:question_breakdown")}</h4>
-            <ol>
-              {items.map((question, i) => {
-                const result = attempt.results.find(
-                    (r) => r.itemId === question.id,
-                  ),
-                  full = result?.feedback;
-                return (
-                  <li key={question.id}>
-                    <article>
-                      <header>
-                        <span className="exam-muted">
-                          {tr("exams:question_number", { number: i + 1 })} ·{" "}
-                          {tr(`exams:${question.type}`)}
-                        </span>
-                        <State correct={result?.correct ?? null} />
-                      </header>
-                      <h5>
-                        {question.stem.replaceAll("{{blank}}", "_____").trim()}
-                      </h5>
-                      {full && (
-                        <>
-                          <AnswerReview
-                            item={full}
-                            answer={attempt.answers[question.id]}
-                            correct={result?.correct ?? null}
-                          />
-                          <div className="exam-built-in">
-                            <h6>{tr("exams:explanation")}</h6>
-                            <p>{full.explanation}</p>
-                          </div>
-                          {explain(question.id)}
-                        </>
-                      )}
-                    </article>
-                  </li>
-                );
-              })}
-            </ol>
+            <h4 className="text-[length:var(--type-lg)] font-medium">
+              {tr("exams:question_breakdown")}
+            </h4>
+            <Tabs
+              value={filter}
+              onValueChange={(value) => setFilter(value as typeof filter)}
+              className="gap-[var(--space-3)]"
+            >
+              <SegmentedTabsList>
+                <SegmentedTabsTrigger value="all">
+                  {tr("exams:filter_all")}
+                </SegmentedTabsTrigger>
+                <SegmentedTabsTrigger value="incorrect">
+                  {tr("exams:filter_incorrect")}
+                </SegmentedTabsTrigger>
+              </SegmentedTabsList>
+              <TabsContent value={filter}>
+                <ol className="exam-breakdown">
+                  {items.map((question, i) => {
+                    const result = attempt.results.find(
+                        (r) => r.itemId === question.id,
+                      ),
+                      full = result?.feedback;
+                    if (filter === "incorrect" && result?.correct !== false)
+                      return null;
+                    return (
+                      <li key={question.id}>
+                        <details className="group">
+                          <summary>
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-[var(--muted)]">
+                                {tr("exams:question_number", { number: i + 1 })}{" "}
+                                · {tr(`exams:${question.type}`)}
+                              </span>
+                              <span className="block font-medium">
+                                {question.stem
+                                  .replaceAll("{{blank}}", "_____")
+                                  .trim()}
+                              </span>
+                            </span>
+                            <State correct={result?.correct ?? null} />
+                            <ChevronDown
+                              className="size-4 shrink-0 group-open:rotate-180"
+                              aria-hidden="true"
+                            />
+                          </summary>
+                          {full && (
+                            <div>
+                              <AnswerReview
+                                item={full}
+                                answer={attempt.answers[question.id]}
+                                correct={result?.correct ?? null}
+                              />
+                              <div className="exam-built-in">
+                                <h5>{tr("exams:explanation")}</h5>
+                                <p>{full.explanation}</p>
+                              </div>
+                              {explain(question.id)}
+                            </div>
+                          )}
+                        </details>
+                      </li>
+                    );
+                  })}
+                </ol>
+                {filter === "incorrect" &&
+                  !attempt.results.some((r) => r.correct === false) && (
+                    <p className="text-[var(--muted)]">
+                      {tr("exams:no_incorrect")}
+                    </p>
+                  )}
+              </TabsContent>
+            </Tabs>
           </section>
           <Button
             variant="secondary"
-            className="exam-review-navigation"
+            className="justify-self-start"
             onClick={() => onResults(false)}
           >
             <ArrowLeft aria-hidden="true" />
@@ -433,7 +481,7 @@ export function ExamPlayer({
               >
                 <State correct={feedback?.correct ?? null} />
                 {gradedEarlier && (
-                  <p className="exam-muted">{tr("review:graded_earlier")}</p>
+                  <p className="text-[var(--muted)]">{tr("review:graded_earlier")}</p>
                 )}
                 {feedback?.feedback && (
                   <>

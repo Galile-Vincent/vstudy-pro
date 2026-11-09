@@ -167,7 +167,7 @@ it("reopens saved results with source documents, score, duration and per-type ac
   fireEvent.click(screen.getByRole("button", { name: "exams:history" }));
   fireEvent.click(await screen.findByRole("button", { name: /Practice/ }));
   expect(await screen.findByText("exams:results")).toBeTruthy();
-  expect(screen.getAllByText(/exams:score_summary/).length).toBeGreaterThan(0);
+  expect(screen.getAllByText(/exams:correct_count/).length).toBeGreaterThan(0);
   expect(screen.getAllByText(/exams:duration/).length).toBeGreaterThan(0);
   fireEvent.click(
     screen.getByRole("button", { name: "review:review_answers" }),
@@ -290,7 +290,7 @@ it("shows an incorrect answer beside the expected answer on results", async () =
   expect(await screen.findByText("exams:incorrect")).toBeTruthy();
   expect(screen.getByText("Second")).toBeTruthy();
   expect(screen.getByText("First · Third")).toBeTruthy();
-  expect(screen.getByText("0")).toBeTruthy();
+  expect(screen.getAllByText("0").length).toBeGreaterThan(0);
 });
 
 it("keeps a failed deletion recoverable inside the dialog", async () => {
@@ -332,4 +332,19 @@ it("guides to the Library and hides configuration until a document is ready", as
   expect(screen.queryByLabelText("exams:prompt")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "common:library" }));
   expect(onOpenLibrary).toHaveBeenCalledTimes(1);
+});
+
+it("keeps explanations collapsed until a breakdown row opens and filters incorrect answers", async () => {
+  setup(true);
+  render(<ExamsView />);
+  fireEvent.click(screen.getByRole("button", { name: "exams:history" }));
+  fireEvent.click(await screen.findByRole("button", { name: /Practice/ }));
+  const row = (await screen.findByText("Pick two")).closest("details")!;
+  expect(row.open).toBe(false);
+  fireEvent.click(row.querySelector("summary")!);
+  expect(row.open).toBe(true);
+  expect(within(row).getByText("First and third follow from the source.")).toBeTruthy();
+  fireEvent.mouseDown(screen.getByRole("tab", { name: "exams:filter_incorrect" }), { button: 0 });
+  expect(await screen.findByText("exams:no_incorrect")).toBeTruthy();
+  expect(screen.queryByText("Pick two")).toBeNull();
 });
