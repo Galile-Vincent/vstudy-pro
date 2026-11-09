@@ -31,13 +31,17 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
   const [undo, setUndo] = useState<{
     id: ChatHit['id'];
     patch: ChatPatch;
+    restore?: { hit: ChatHit; index: number; filters: ChatSearch };
   } | null>(null);
   const [renaming, setRenaming] = useState<ChatHit | null>(null), [title, setTitle] = useState('');
   const [grouped, setGrouped] = useState(false);
   const serial = useRef(0), host = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null), undoButton = useRef<HTMLButtonElement>(null);
-  const afterDelete = useRef<{ id: string; neighbours: string[]; after: number; ready: boolean } | null>(null);
+  const afterDelete = useRef<{ id: string; neighbours: string[]; ready: boolean } | null>(null);
   const resultsList = useRef<HTMLDivElement>(null);
+  const pages = useRef({ filters: null as ChatSearch | null, count: 1 });
+  const current = useRef(filters);
+  current.current = filters;
   const focusFallback = () => { if (onFocusFallback) onFocusFallback(); else searchInput.current?.focus(); };
   const leaveUndo = () => { if (document.activeElement === undoButton.current) focusFallback(); };
   const set = (patch: Partial<ChatSearch>) => { afterDelete.current = null; setFilters(f => ({ ...f, ...patch, cursor: undefined })); };
@@ -46,11 +50,22 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
     setError(true); }); return () => { live = false; }; }, [revision]);
   useEffect(() => {
     const generation = ++serial.current;
+    const want = pages.current.filters === filters ? pages.current.count : 1;
     setLoading(true);
     setError(false);
-    const timer = setTimeout(() => { void desktop.invoke('chats:search', filters).then(v => { if (generation === serial.current) {
-      if (afterDelete.current && generation > afterDelete.current.after) afterDelete.current.ready = true;
-      setPage(v);
+    const load = async () => {
+      let result = await desktop.invoke('chats:search', filters), loaded = 1;
+      while (loaded < want && result.nextCursor && generation === serial.current) {
+        const next = await desktop.invoke('chats:search', { ...filters, cursor: result.nextCursor });
+        const seen = new Set(result.items.map(h => h.id));
+        result = { items: [...result.items, ...next.items.filter(h => !seen.has(h.id))], nextCursor: next.nextCursor };
+        loaded++;
+      }
+      return { result, loaded };
+    };
+    const timer = setTimeout(() => { void load().then(({ result, loaded }) => { if (generation === serial.current) {
+      pages.current = { filters, count: loaded };
+      setPage(result);
     } }).catch(() => { if (generation === serial.current)
       setError(true); }).finally(() => { if (generation === serial.current)
       setLoading(false); }); }, 120);
@@ -74,19 +89,26 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
   useEffect(() => {
     const pending = afterDelete.current;
     if (!pending?.ready) return;
-    afterDelete.current = null;
-    const active = document.activeElement;
-    if (active && active !== document.body && !resultsList.current?.contains(active)) return;
     const rows = Array.from(host.current?.querySelectorAll<HTMLElement>('[data-history-id]') ?? []);
     const find = (id: string) => rows.find(row => row.dataset.historyId === id);
     if (find(pending.id)) return;
+    afterDelete.current = null;
+    const active = document.activeElement;
+    if (active && active !== document.body && !resultsList.current?.contains(active)) return;
     const target = pending.neighbours.map(find).find(Boolean) ?? undoButton.current;
     if (target) target.focus(); else focusFallback();
   }, [page]);
   useEffect(() => { onSummary?.(loading && !page.items.length || error || !page.items.length ? null : { count: page.items.length, more: !!page.nextCursor }); }, [page, loading, error]);
+  const restoreRow = (restore: NonNullable<typeof undo>['restore']) => {
+    if (!restore || restore.filters !== current.current) return;
+    setPage(p => p.items.some(h => h.id === restore.hit.id) ? p : { ...p, items: [...p.items.slice(0, restore.index), restore.hit, ...p.items.slice(restore.index)] });
+  };
   const update = async (hit: ChatHit, patch: ChatPatch) => {
     const ids = patch.deleted ? Array.from(host.current?.querySelectorAll<HTMLElement>('[data-history-id]') ?? [], row => row.dataset.historyId!) : [];
     const at = ids.indexOf(hit.id);
+    const handoff = patch.deleted ? { id: hit.id, neighbours: [ids[at + 1], ids[at - 1]].filter((id): id is string => !!id && at >= 0), ready: false } : null;
+    const restore = { hit, index: Math.max(0, page.items.findIndex(h => h.id === hit.id)), filters: current.current };
+    if (handoff) afterDelete.current = handoff;
     try {
       await desktop.invoke('chats:update', { conversationId: hit.id, patch });
       const previous: ChatPatch = {};
@@ -98,8 +120,12 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
         previous.archived = hit.archived;
       if (patch.deleted !== undefined)
         previous.deleted = false;
-      setUndo({ id: hit.id, patch: previous });
-      if (patch.deleted) afterDelete.current = { id: hit.id, neighbours: [ids[at + 1], ids[at - 1]].filter((id): id is string => !!id && at >= 0), after: serial.current, ready: false };
+      setUndo({ id: hit.id, patch: previous, ...(patch.deleted ? { restore } : {}) });
+      if (handoff) {
+        handoff.ready = true;
+        setPage(p => ({ ...p, items: p.items.filter(h => h.id !== hit.id) }));
+        setRevision(n => n + 1);
+      }
       window.dispatchEvent(new Event('vstudy:history-changed'));
     }
     catch {
@@ -113,8 +139,10 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
     setLoading(true);
     try {
       const next = await desktop.invoke('chats:search', { ...filters, cursor: page.nextCursor });
-      if (generation === serial.current)
+      if (generation === serial.current) {
+        pages.current.count++;
         setPage(p => ({ items: [...p.items, ...next.items.filter(h => !p.items.some(old => old.id === h.id))], nextCursor: next.nextCursor }));
+      }
     }
     catch {
       if (generation === serial.current)
@@ -161,7 +189,7 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
    <label className="history-check"><input type="checkbox" checked={!!filters.hasCitations} onChange={e => set({ hasCitations: e.target.checked ? true : undefined })}/>{tr('history:citations')}</label>
    <label className="history-check"><input type="checkbox" checked={grouped} onChange={e => setGrouped(e.target.checked)}/>{tr('history:group_courses')}</label>
   </div></details>
-  {undo && <div role="status" className="history-undo">{tr('history:updated')}<button ref={undoButton} onClick={() => { afterDelete.current = null; void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { leaveUndo(); setUndo(null); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}>{tr('history:undo')}</button></div>}
+  {undo && <div role="status" className="history-undo">{tr('history:updated')}<button ref={undoButton} onClick={() => { afterDelete.current = null; void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { leaveUndo(); setUndo(null); restoreRow(undo.restore); setRevision(n => n + 1); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}>{tr('history:undo')}</button></div>}
   {error && <p role="alert">{tr('history:error')} <button onClick={() => setRevision(n => n + 1)}>{tr('common:retry')}</button></p>}
   <div className="history-results" ref={resultsList} aria-busy={loading}>
    <p role="status">{loading && !page.items.length ? tr('history:searching') : ''}</p>

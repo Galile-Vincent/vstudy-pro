@@ -26,16 +26,19 @@ afterEach(async () => {
 });
 const held: (() => void)[] = [];
 let hold = false;
+let holdUpdate = false;
 async function setup(count: number, fallback?: () => void) {
   vi.useFakeTimers();
   hold = false;
+  holdUpdate = false;
   held.length = 0;
   let items = Array.from({ length: count }, (_, i) => make(i + 1));
   invoke.mockImplementation(async (channel, payload) => {
     if (channel === 'chats:facets') return { courses: [], documents: [], models: [] };
     if (channel === 'chats:update') {
-      if (payload.patch.deleted) items = items.filter(h => h.id !== payload.conversationId);
-      return { ok: true };
+      const apply = () => { if (payload.patch.deleted) items = items.filter(h => h.id !== payload.conversationId); return { ok: true }; };
+      if (!holdUpdate) return apply();
+      return new Promise(resolve => { held.push(() => resolve(apply())); });
     }
     const result = { items: [...items], nextCursor: null };
     if (!hold) return result;
@@ -130,11 +133,31 @@ it('does not pull focus back into the list when the deletion refresh lands after
   await release();
   expect(document.activeElement?.matches('[data-history-result]')).toBe(false);
 });
+it('keeps focus in the input when the delete response arrives after the user started typing', async () => {
+  const host = await setup(3);
+  holdUpdate = true;
+  const row = host.querySelectorAll<HTMLElement>('[data-testid=history-result]')[1]!;
+  const trigger = row.querySelector<HTMLButtonElement>('button[aria-haspopup=menu]')!;
+  trigger.focus();
+  await act(async () => { trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+  await act(async () => { [...document.querySelectorAll<HTMLElement>('[role=menuitem]')].find(i => i.textContent === 'Delete')!.click(); });
+  const input = await type(host, 'chat');
+  holdUpdate = false;
+  await release();
+  expect(document.activeElement).toBe(input);
+});
 it('hands focus to the newest delete only', async () => {
   const host = await setup(4);
-  hold = true;
-  await deleteRow(host, 0);
+  holdUpdate = true;
+  const first = host.querySelectorAll<HTMLElement>('[data-testid=history-result]')[0]!;
+  const trigger = first.querySelector<HTMLButtonElement>('button[aria-haspopup=menu]')!;
+  trigger.focus();
+  await act(async () => { trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+  await act(async () => { [...document.querySelectorAll<HTMLElement>('[role=menuitem]')].find(i => i.textContent === 'Delete')!.click(); });
+  await act(() => vi.advanceTimersByTimeAsync(50));
+  holdUpdate = false;
   await deleteRow(host, 2);
+  expect(focusedTitle()).toContain('Chat 4');
   await release();
   expect(focusedTitle()).toContain('Chat 4');
 });
