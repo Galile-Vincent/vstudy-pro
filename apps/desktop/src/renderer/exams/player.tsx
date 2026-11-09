@@ -83,6 +83,7 @@ export function ExamPlayer({
   busy,
   failed,
   explanations,
+  gradedEarlier,
   onDraft,
   onMove,
   onSubmit,
@@ -99,6 +100,7 @@ export function ExamPlayer({
   busy: boolean;
   failed: boolean;
   explanations: Record<string, string>;
+  gradedEarlier: boolean;
   onDraft: (value: Answer) => void;
   onMove: (index: number) => void;
   onSubmit: () => void;
@@ -451,6 +453,9 @@ export function ExamPlayer({
                 aria-label={tr("review:item_feedback")}
               >
                 <State correct={feedback?.correct ?? null} />
+                {gradedEarlier && (
+                  <p className="exam-muted">{tr("review:graded_earlier")}</p>
+                )}
                 {feedback?.feedback && (
                   <>
                     <AnswerReview
