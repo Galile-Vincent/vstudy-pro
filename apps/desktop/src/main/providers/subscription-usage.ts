@@ -47,17 +47,21 @@ export function createSubscriptionReader(
   now = Date.now,
   codexEnabled = () => true,
 ) {
-  const cache = new Map<SubscriptionUsage['provider'], { value: SubscriptionUsage; failures: number }>();
-  let pending: Promise<SubscriptionUsage[]> | undefined;
+  type Entry = { value: SubscriptionUsage; failures: number; consent: boolean };
+  const cache = new Map<SubscriptionUsage['provider'], Entry>();
+  let pending: { consent: boolean; promise: Promise<SubscriptionUsage[]> } | undefined;
   let allowKeychain = false;
+  let generation = 0;
   return (options: { refresh?: boolean | undefined; allowClaudeKeychain?: boolean | undefined } = {}): Promise<SubscriptionUsage[]> => {
-    const consentChanged = options.allowClaudeKeychain !== undefined && options.allowClaudeKeychain !== allowKeychain;
     if (options.allowClaudeKeychain !== undefined) allowKeychain = options.allowClaudeKeychain;
-    return pending ??= Promise.all((['claude', 'codex'] as const).map(async provider => {
+    const consent = allowKeychain;
+    if (pending?.consent === consent) return pending.promise;
+    const mine = ++generation;
+    const promise: Promise<SubscriptionUsage[]> = Promise.all((['claude', 'codex'] as const).map(async provider => {
       const previous = cache.get(provider);
-      if (previous && !consentChanged && (!options.refresh || previous.failures > 0) && Date.parse(previous.value.nextRefreshAt) > now()) return previous.value;
-      const result = provider === 'codex' && !codexEnabled() ? { status: 'unsupported' as const, windows: [] } : await load(provider, allowKeychain).catch((): Result => ({ status: 'unavailable', windows: [] }));
-      const failures = result.status === 'unavailable' ? (previous?.failures ?? 0) + 1 : 0;
+      if (previous && previous.consent === consent && (!options.refresh || previous.failures > 0) && Date.parse(previous.value.nextRefreshAt) > now()) return previous.value;
+      const result = provider === 'codex' && !codexEnabled() ? { status: 'unsupported' as const, windows: [] } : await load(provider, consent).catch((): Result => ({ status: 'unavailable', windows: [] }));
+      const failures = result.status === 'unavailable' ? (previous?.consent === consent ? previous.failures : 0) + 1 : 0;
       const stale = failures > 0 && !!previous?.value.windows.length;
       const value: SubscriptionUsage = {
         provider, status: stale ? 'stale' : result.status,
@@ -65,8 +69,10 @@ export function createSubscriptionReader(
         fetchedAt: stale ? previous!.value.fetchedAt : result.status === 'ready' ? new Date(now()).toISOString() : null,
         nextRefreshAt: new Date(now() + Math.min(900000, 60000 * 2 ** Math.min(failures, 4))).toISOString(),
       };
-      cache.set(provider, { value, failures });
+      if (mine === generation) cache.set(provider, { value, failures, consent });
       return value;
-    })).finally(() => { pending = undefined; });
+    })).finally(() => { if (pending?.promise === promise) pending = undefined; });
+    pending = { consent, promise };
+    return promise;
   };
 }
