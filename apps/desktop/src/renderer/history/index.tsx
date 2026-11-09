@@ -67,7 +67,7 @@ function HistoryContent() {
     messages: IpcResponse<'messages:page'>;
   } | null>(null);
   const [providers, setProviders] = useState<Providers>([]), [draft, setDraft] = useState(''), [failed, setFailed] = useState(''), [modelError, setModelError] = useState(false);
-  const [revision, setRevision] = useState(0);
+  const [revision, setRevision] = useState(0), heading = useRef<HTMLHeadingElement>(null);
   const [providersFailed, setProvidersFailed] = useState(false);
   const refreshProviders = useCallback(async () => {
     try { setProviders(await desktop.invoke('providers:list', {})); setProvidersFailed(false); }
@@ -111,8 +111,8 @@ function HistoryContent() {
     }
   };
   const settings = () => window.dispatchEvent(new Event('vstudy:open-settings'));
-  return <main className="history-page"><header><h1>{tr('history:title')}</h1><p>{tr('history:subtitle')}</p></header><div className="history-layout">
-  <section className="history-browser" aria-label={tr('history:title')}><HistorySearch onOpen={open}/></section>
+  return <main className="history-page"><header><h1 ref={heading} tabIndex={-1}>{tr('history:title')}</h1><p>{tr('history:subtitle')}</p></header><div className="history-layout">
+  <section className="history-browser" aria-label={tr('history:title')}><HistorySearch onOpen={open} onFocusFallback={() => heading.current?.focus()}/></section>
   {route.conversationId && <section className="history-conversation chat-pane" aria-label={tr('common:chat')}><button className="history-back" onClick={() => navigate('history')}>{tr('history:back')}</button>
    {providersFailed && <LoadError message={tr('history:providers_error')} retry={() => void refreshProviders()}/>}
    {modelError && <p role="alert">{tr('history:model_change_error')}</p>}

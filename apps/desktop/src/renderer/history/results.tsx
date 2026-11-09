@@ -36,7 +36,7 @@ function Result() {
   const group = hit.courseTitle || hit.documentTitle || tr('history:' + hit.scope);
   const first = context.firstInGroup.has(id);
   return <>{context.groupByCourse && first && <h2 className="history-group">{group}</h2>}<ThreadListItemPrimitive.Root className="history-result" data-testid="history-result">
-  <ThreadListItemPrimitive.Trigger asChild><button className="history-result-title" data-history-result>
+  <ThreadListItemPrimitive.Trigger asChild><button className="history-result-title" data-history-result data-history-id={hit.id}>
    <strong><HistorySnippet text={hit.titleSnippet || tr('common:new_chat')}/></strong>
    {hit.pinned && <Pin size={13} aria-label={tr('history:pinned')}/>}
    <time dateTime={hit.updatedAt}>{new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(hit.updatedAt))}</time>

@@ -15,11 +15,12 @@ type HistorySearchProps = {
   documentId?: ChatSearch['documentId'];
   courseId?: string | undefined;
   compact?: boolean;
+  onFocusFallback?: () => void;
 };
 export function HistorySearch(props: HistorySearchProps) {
   return <SurfaceErrorBoundary><SearchContent {...props}/></SurfaceErrorBoundary>;
 }
-function SearchContent({ onOpen, documentId, courseId, compact = false }: HistorySearchProps) {
+function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusFallback }: HistorySearchProps) {
   useTranslation();
   const [filters, setFilters] = useState<ChatSearch>({ scope: 'all', limit: 30, query: '', ...(documentId ? { documentId } : {}), ...(courseId ? { courseIds: [courseId] } : {}) });
   const [page, setPage] = useState<IpcResponse<'chats:search'>>({ items: [], nextCursor: null });
@@ -32,6 +33,10 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
   const [renaming, setRenaming] = useState<ChatHit | null>(null), [title, setTitle] = useState('');
   const [grouped, setGrouped] = useState(false);
   const serial = useRef(0), host = useRef<HTMLDivElement>(null);
+  const searchInput = useRef<HTMLInputElement>(null), undoButton = useRef<HTMLButtonElement>(null);
+  const afterDelete = useRef<{ id: string; neighbours: string[]; after: number; ready: boolean } | null>(null);
+  const focusFallback = () => { if (onFocusFallback) onFocusFallback(); else searchInput.current?.focus(); };
+  const leaveUndo = () => { if (document.activeElement === undoButton.current) focusFallback(); };
   const set = (patch: Partial<ChatSearch>) => setFilters(f => ({ ...f, ...patch, cursor: undefined }));
   useEffect(() => { let live = true; void desktop.invoke('chats:facets', {}).then(v => { if (live)
     setFacets(v); }).catch(() => { if (live)
@@ -40,8 +45,10 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
     const generation = ++serial.current;
     setLoading(true);
     setError(false);
-    const timer = setTimeout(() => { void desktop.invoke('chats:search', filters).then(v => { if (generation === serial.current)
-      setPage(v); }).catch(() => { if (generation === serial.current)
+    const timer = setTimeout(() => { void desktop.invoke('chats:search', filters).then(v => { if (generation === serial.current) {
+      if (afterDelete.current && generation > afterDelete.current.after) afterDelete.current.ready = true;
+      setPage(v);
+    } }).catch(() => { if (generation === serial.current)
       setError(true); }).finally(() => { if (generation === serial.current)
       setLoading(false); }); }, 120);
     return () => { clearTimeout(timer); serial.current++; };
@@ -60,8 +67,20 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
     return () => { clearTimeout(timer); window.removeEventListener('focus', refresh); window.removeEventListener('vstudy:history-changed', refresh); };
   }, []);
   useEffect(() => { if (!undo)
-    return; const timer = setTimeout(() => setUndo(null), 30000); return () => clearTimeout(timer); }, [undo]);
+    return; const timer = setTimeout(() => { leaveUndo(); setUndo(null); }, 30000); return () => clearTimeout(timer); }, [undo]);
+  useEffect(() => {
+    const pending = afterDelete.current;
+    if (!pending?.ready) return;
+    afterDelete.current = null;
+    const rows = Array.from(host.current?.querySelectorAll<HTMLElement>('[data-history-id]') ?? []);
+    const find = (id: string) => rows.find(row => row.dataset.historyId === id);
+    if (find(pending.id)) return;
+    const target = pending.neighbours.map(find).find(Boolean) ?? undoButton.current;
+    if (target) target.focus(); else focusFallback();
+  }, [page]);
   const update = async (hit: ChatHit, patch: ChatPatch) => {
+    const ids = patch.deleted ? Array.from(host.current?.querySelectorAll<HTMLElement>('[data-history-id]') ?? [], row => row.dataset.historyId!) : [];
+    const at = ids.indexOf(hit.id);
     try {
       await desktop.invoke('chats:update', { conversationId: hit.id, patch });
       const previous: ChatPatch = {};
@@ -74,6 +93,7 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
       if (patch.deleted !== undefined)
         previous.deleted = false;
       setUndo({ id: hit.id, patch: previous });
+      if (patch.deleted) afterDelete.current = { id: hit.id, neighbours: [ids[at + 1], ids[at - 1]].filter((id): id is string => !!id && at >= 0), after: serial.current, ready: false };
       window.dispatchEvent(new Event('vstudy:history-changed'));
     }
     catch {
@@ -114,7 +134,7 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
         next.focus();
       }
     }}>
-  <label className="history-input"><Search size={18}/><input type="search" autoFocus={compact} aria-label={tr('history:search')} placeholder={tr('history:placeholder')} value={filters.query ?? ''} onChange={e => set({ query: e.target.value })}/></label>
+  <label className="history-input"><Search size={18}/><input ref={searchInput} type="search" autoFocus={compact} aria-label={tr('history:search')} placeholder={tr('history:placeholder')} value={filters.query ?? ''} onChange={e => set({ query: e.target.value })}/></label>
   <div className="history-chips" aria-label={tr('history:filters')}>
    {(['all', 'courses', 'documents', 'general', 'pinned'] as const).map(chip => <button key={chip} aria-pressed={chip === 'pinned' ? !!filters.pinned : (filters.scope ?? 'all') === chip && !filters.pinned} onClick={() => set(chip === 'pinned' ? { pinned: filters.pinned ? undefined : true } : { scope: chip, pinned: undefined, courseIds: courseId ? [courseId] : undefined, documentId })}>{tr('history:' + chip)}</button>)}
   </div>
@@ -131,7 +151,7 @@ function SearchContent({ onOpen, documentId, courseId, compact = false }: Histor
    <label><input type="checkbox" checked={!!filters.hasCitations} onChange={e => set({ hasCitations: e.target.checked ? true : undefined })}/>{tr('history:citations')}</label>
    <label><input type="checkbox" checked={grouped} onChange={e => setGrouped(e.target.checked)}/>{tr('history:group_courses')}</label>
   </div></details>
-  {undo && <div role="status" className="history-undo">{tr('history:updated')}<button onClick={() => { void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { setUndo(null); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}>{tr('history:undo')}</button></div>}
+  {undo && <div role="status" className="history-undo">{tr('history:updated')}<button ref={undoButton} onClick={() => { void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { leaveUndo(); setUndo(null); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}>{tr('history:undo')}</button></div>}
   {error && <p role="alert">{tr('history:error')} <button onClick={() => setRevision(n => n + 1)}>{tr('common:retry')}</button></p>}
   <div className="history-results" aria-busy={loading}>
    <p role="status">{loading && !page.items.length ? tr('history:searching') : ''}</p>
