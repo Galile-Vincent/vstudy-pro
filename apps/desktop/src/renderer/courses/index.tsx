@@ -193,6 +193,28 @@ function CoursesBody({
   const [connect, setConnect] = useState(!!connectOnMount);
   const [confirmDisconnect, setConfirmDisconnect] = useState<string>();
   useEffect(() => {if (reconnect) {setConnect(true);onReconnected?.();}},[reconnect,onReconnected]);
+  const [weekState, setWeekState] = useState<{
+    courseId: string;
+    open: Set<string>;
+    current: string;
+  }>({courseId: "", open: new Set(), current: ""});
+  const currentWeeks = detail?.sections.filter(section => section.current) ?? [];
+  const currentWeekKey = JSON.stringify(currentWeeks.map(section => section.id));
+  if (detail && (weekState.courseId !== detail.course.id || weekState.current !== currentWeekKey)) {
+    setWeekState({
+      courseId: detail.course.id,
+      current: currentWeekKey,
+      open: new Set([
+        ...(weekState.courseId === detail.course.id ? weekState.open : []),
+        ...currentWeeks.map(section => section.id),
+      ]),
+    });
+  }
+  const setWeekOpen = (id: string, open: boolean) => setWeekState(previous => {
+    const weeks = new Set(previous.open);
+    if (open) weeks.add(id); else weeks.delete(id);
+    return {...previous, open: weeks};
+  });
   const [tab, setTab] = useState<Tab>("content");
   const [term, setTerm] = useState<MoodleTermFilter>("current");
   const termInitialized = useRef(false);
@@ -678,6 +700,8 @@ function CoursesBody({
                     {detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}
                     <CourseContent
                       detail={detail}
+                      openWeeks={weekState.open}
+                      setWeekOpen={setWeekOpen}
                       openFile={openFile}
                       onError={failure}
                     />

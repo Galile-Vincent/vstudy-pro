@@ -1252,3 +1252,24 @@ it.each(["material", "announcement"])("restores focus after Escape closes the %s
   });
   await waitFor(() => expect(document.activeElement).toBe(trigger));
 });
+
+it("preserves opened weeks across tabs and opens a new current week", async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  api.course = async () => structuredClone(detail);
+  await mount(api, detail.course.id);
+  for (const index of [2, 4]) {
+    await act(async () => host.querySelectorAll<HTMLButtonElement>(".moodle-week-heading")[index]!.click());
+  }
+  await tab("Deadlines");
+  await tab("Content");
+  for (const index of [2, 4]) {
+    expect(host.querySelectorAll(".moodle-week-heading")[index]!.getAttribute("aria-expanded")).toBe("true");
+  }
+  detail.sections.forEach((section, index) => { section.current = index === 1; });
+  await act(async () => getByRole(host, "button", {name: "Refresh courses"}).click());
+  for (const index of [1, 2, 4]) {
+    expect(host.querySelectorAll(".moodle-week-heading")[index]!.getAttribute("aria-expanded")).toBe("true");
+  }
+});
+
