@@ -21,3 +21,8 @@ it('closes the checklist on document navigation and has one unique title', async
   expect(navigate).toHaveBeenCalledWith('library');
   expect(screen.queryByRole('dialog')).toBeNull();
 });
+
+it('uses a single checklist region', () => {
+  render(<GettingStarted />);
+  expect(screen.getAllByRole('region')).toHaveLength(1);
+});

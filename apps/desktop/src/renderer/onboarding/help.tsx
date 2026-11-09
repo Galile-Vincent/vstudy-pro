@@ -95,8 +95,6 @@ export function GettingStarted({ detailed = false, titleId, onNavigate }: {
   return (
     <Card
       variant="flat"
-      role="region"
-      aria-labelledby="getting-started-title"
       className="getting-started min-w-0 p-[var(--space-6)]"
     >
       <Section
