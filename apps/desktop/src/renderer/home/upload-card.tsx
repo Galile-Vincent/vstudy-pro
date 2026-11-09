@@ -9,7 +9,7 @@ import { Upload } from 'lucide-react';
 import type { Document } from '../../shared';
 import type { z } from 'zod';
 import type { folderSchema } from '../../shared/library';
-import { tr } from '../../shared/i18n';
+import { tr, systemLanguage } from '../../shared/i18n';
 import { useOptionalNavigation } from '../shell';
 import { desktop } from '../bridge';
 import { errorText, statusText } from '../status';
@@ -79,11 +79,7 @@ export function UploadCard({
         : [
             await (sample
               ? desktop.invoke('documents:importSample', {
-                  language: document.documentElement.lang.startsWith('ja')
-                    ? 'ja'
-                    : document.documentElement.lang.startsWith('zh')
-                      ? 'zh-Hant'
-                      : 'en',
+                  language: systemLanguage(document.documentElement.lang),
                 })
               : desktop.invoke('documents:import', {
                   folderId: destination,
@@ -112,65 +108,10 @@ export function UploadCard({
       lock.current = false;
     }
   };
-  const Root = title ? Card : 'div';
-  const content = (
-    <>
-      <Upload aria-hidden="true" />
-      <p>{tr('home:upload_hint')}</p>
-      <p>{tr('onboarding:file_help')}</p>
-      {!!folders.length && (
-        <FormField label={tr('home:destination')}>
-          {(control) => (
-            <Select
-              {...control}
-              aria-label={tr('home:destination')}
-              value={folderId}
-              onChange={(e) => setFolderId(e.target.value)}
-              disabled={busy}
-            >
-              <option value="">{tr('library:unfiled')}</option>
-              {folders.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                </option>
-              ))}
-            </Select>
-          )}
-        </FormField>
-      )}
-      <div className="flex flex-col gap-[var(--space-2)]">
-        <Toolbar
-          className="gap-[var(--space-2)]"
-          left={
-            <>
-              <Button disabled={busy} onClick={() => void upload()}>
-                {tr('home:choose_file')}
-              </Button>
-              {showSample && (
-                <Button variant="ghost" disabled={busy} onClick={() => void upload(undefined, true)}>
-                  {tr('onboarding:sample')}
-                </Button>
-              )}
-            </>
-          }
-        />
-        <div role="status" className="flex flex-col gap-[var(--space-2)]">
-          {busy && <progress aria-label={tr('home:importing')} />}
-          {error || message}
-        </div>
-      </div>
-      {showOpen && imported && navigation && (
-        <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>
-          {tr('home:open_imported', { title: imported.title })}
-        </Button>
-      )}
-      {footer}
-    </>
-  );
   return (
-    <Root
-      {...(title ? { variant: 'flat' as const } : {})}
-      className={title ? 'home-upload min-w-0 p-[var(--space-6)]' : 'home-upload'}
+    <Card
+      variant="flat"
+      className="home-upload min-w-0 p-[var(--space-6)]"
       data-dragging={dragging}
       onDragEnter={(e) => {
         if (busy || !e.dataTransfer.types.includes('Files')) return;
@@ -200,22 +141,65 @@ export function UploadCard({
         else setError(tr('home:drop_error'));
       }}
     >
-      {title ? (
-        <Section
-          title={
-            <span className="grid">
-              <span className={dragging ? 'invisible [grid-area:1/1]' : '[grid-area:1/1]'}>{title}</span>
-              <span className={dragging ? '[grid-area:1/1]' : 'invisible [grid-area:1/1]'} aria-hidden={!dragging}>
-                {tr('home:drop_to_import')}
-              </span>
-            </span>
-          }
-        >
-          {content}
-        </Section>
-      ) : (
-        content
-      )}
-    </Root>
+      <Section title={
+        <span className="grid">
+          <span className={dragging ? 'invisible [grid-area:1/1]' : '[grid-area:1/1]'}>{title ?? tr('home:upload')}</span>
+          <span className={dragging ? '[grid-area:1/1]' : 'invisible [grid-area:1/1]'} aria-hidden={!dragging}>
+            {tr('home:drop_to_import')}
+          </span>
+        </span>
+      }>
+        <Upload aria-hidden="true" />
+        <p>{tr('home:upload_hint')}</p>
+        <p>{tr('onboarding:file_help')}</p>
+        {!!folders.length && (
+          <FormField label={tr('home:destination')}>
+            {(control) => (
+              <Select
+                {...control}
+                aria-label={tr('home:destination')}
+                value={folderId}
+                onChange={(e) => setFolderId(e.target.value)}
+                disabled={busy}
+              >
+                <option value="">{tr('library:unfiled')}</option>
+                {folders.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </FormField>
+        )}
+        <div className="flex flex-col gap-[var(--space-2)]">
+          <Toolbar
+            className="gap-[var(--space-2)]"
+            left={
+              <>
+                <Button disabled={busy} onClick={() => void upload()}>
+                  {tr('home:choose_file')}
+                </Button>
+                {showSample && (
+                  <Button variant="ghost" disabled={busy} onClick={() => void upload(undefined, true)}>
+                    {tr('onboarding:sample')}
+                  </Button>
+                )}
+              </>
+            }
+          />
+          <div role="status" className="flex flex-col gap-[var(--space-2)]">
+            {busy && <progress aria-label={tr('home:importing')} />}
+            {error || message}
+          </div>
+        </div>
+        {showOpen && imported && navigation && (
+          <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>
+            {tr('home:open_imported', { title: imported.title })}
+          </Button>
+        )}
+        {footer}
+      </Section>
+    </Card>
   );
 }

@@ -234,7 +234,7 @@ export function Home({
   );
   const displayName = name ?? settings?.displayName;
   return (
-    <PageContainer role={undefined} className="home-page">
+    <PageContainer className="home-page">
       <div className="home-content">
         <PageHeader
           leading={<Brand />}
@@ -340,7 +340,7 @@ export function Home({
               />
               {guidance}
             </div>
-            <div className="home-secondary" data-empty={!data.recentDocuments.length}>
+            <div className="home-secondary">
               {!!data.month.calls && (
                 <Card title={tr('home:usage')}>
                   <Stat
@@ -416,7 +416,6 @@ export function Home({
               <section className="home-activity" aria-label={tr('home:activity')}>
                 <details>
                   <summary>{tr('home:activity')}</summary>
-                  {data.recentActivity.length ? (
                     <ul className="home-list">
                       {data.recentActivity.slice(0, 5).map((a) => (
                         <li key={a.id}>
@@ -433,9 +432,6 @@ export function Home({
                         </li>
                       ))}
                     </ul>
-                  ) : (
-                    <p className="home-empty">{tr('home:no_activity')}</p>
-                  )}
                 </details>
               </section>
             )}

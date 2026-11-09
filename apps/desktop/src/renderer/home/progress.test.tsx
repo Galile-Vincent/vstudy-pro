@@ -16,7 +16,7 @@ it('scales a custom maximum', () => {
     .toContain('translateX(-50%)');
 });
 
-it.each([[50, 0, '-50%'], [200, 100, '0%']])('bounds value %s with max %s', (value, max, offset) => {
+it.each([[50, 0, '-50%'], [200, 100, '-0%']])('bounds value %s with max %s', (value, max, offset) => {
   render(<Progress value={value} max={max} />);
   expect(document.querySelector('[data-slot=progress-indicator]')?.getAttribute('style'))
     .toContain(`translateX(${offset})`);
