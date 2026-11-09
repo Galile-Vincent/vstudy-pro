@@ -1077,7 +1077,12 @@ export function LibraryView() {
                       }
                       return;
                     }
-                    if (e.key === "Enter") open(item, e.metaKey || e.ctrlKey);
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (d.status === "failed") void run(() =>
+                        desktop.invoke("documents:retry", {documentId:d.id}));
+                      else open(item, e.metaKey || e.ctrlKey);
+                    }
                     if (e.key === " ") {
                       e.preventDefault();
                       anchor.current = d.id;
@@ -1187,7 +1192,7 @@ export function LibraryView() {
                       {d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}
                       {tr(`library:${d.status}`)}
                     </span>
-                    {d.status === 'failed' && <Button variant="outline"
+                    {d.status === 'failed' && <Button variant="outline" tabIndex={-1}
                       onClick={() => void run(() => desktop.invoke('documents:retry', {documentId:d.id}))}>
                       {tr('library:retry')}
                     </Button>}

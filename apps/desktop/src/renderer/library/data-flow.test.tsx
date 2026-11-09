@@ -305,3 +305,15 @@ it('renders only the changed card on a conversion refresh', async () => {
  await screen.findByText('Updated');
  expect(state.art.mock.calls.map(([id])=>id)).toEqual(['doc1']);
 });
+
+it.each([false,true])('retries a failed row with Enter without nested tab stops (grid %s)', async grid => {
+ localStorage.setItem('library-grid',String(grid));
+ document.documentElement.style.setProperty('--art-reader-card-height','300');
+ const failed=row('failed'); failed.document.status='failed';
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[failed],nextCursor:null}:[]);
+ mount(); const title=await screen.findByText('failed',{selector:'button'});
+ const entry=title.closest<HTMLElement>('.library-document')!;
+ for(const button of entry.querySelectorAll('button,input')) expect(button.getAttribute('tabindex')).toBe('-1');
+ act(()=>entry.focus()); fireEvent.keyDown(entry,{key:'Enter'});
+ await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('documents:retry',{documentId:'failed'}));
+});
