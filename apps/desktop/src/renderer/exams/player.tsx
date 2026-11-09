@@ -82,6 +82,7 @@ export function ExamPlayer({
   results,
   busy,
   failed,
+  draftError,
   explanations,
   gradedEarlier,
   onDraft,
@@ -99,6 +100,7 @@ export function ExamPlayer({
   results: boolean;
   busy: boolean;
   failed: boolean;
+  draftError: boolean;
   explanations: Record<string, string>;
   gradedEarlier: boolean;
   onDraft: (value: Answer) => void;
@@ -143,6 +145,11 @@ export function ExamPlayer({
   );
   return (
     <section className="exam-player" aria-busy={busy}>
+      {attempt && (
+        <div role="status">
+          {draftError && <p>{tr("review:draft_save_failed")}</p>}
+        </div>
+      )}
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}

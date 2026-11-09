@@ -109,4 +109,11 @@ export const migrations = [
   { version:24, sql:studyMigration },
   { version:25, sql:chatHistoryRowidMigration },
   { version:26, sql:`CREATE INDEX study_exam_history ON study_attempts(artifactId,startedAt DESC,id DESC);` },
+  { version:27, sql:`
+    CREATE TABLE study_attempt_drafts (
+      attemptId TEXT NOT NULL, itemId TEXT NOT NULL, draftJson TEXT NOT NULL CHECK(json_valid(draftJson) AND length(CAST(draftJson AS BLOB))<=8192),
+      updatedAt TEXT NOT NULL, PRIMARY KEY(attemptId,itemId),
+      FOREIGN KEY(attemptId,itemId) REFERENCES study_attempt_items(attemptId,itemId) ON DELETE CASCADE
+    );
+  ` },
 ];

@@ -6,6 +6,9 @@ import { desktop } from '../bridge';
 import { ExamPlayer } from '../exams/player';
 import { Button } from '../components/ui/button';
 
+const DRAFT_DELAY_MS = 500;
+const DRAFT_RETRY_MS = 3000;
+
 type Artifact = NonNullable<IpcResponse<'review:artifact:get'>>;
 type Attempt = IpcResponse<'review:attempt:start'>;
 type Answer = string | number | boolean | number[] | null;
@@ -15,6 +18,12 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
  const [index, setIndex] = useState(0);
  const [drafts, setDrafts] = useState<Record<string, Answer>>({});
  const draftsRef = useRef<Record<string, Answer>>({});
+ const [draftError, setDraftError] = useState(false);
+ const unsent = useRef<Record<string, Answer>>({});
+ const draftTimer = useRef<number | undefined>(undefined);
+ const draftQueue = useRef<Promise<void>>(Promise.resolve());
+ const attemptId = useRef<string | null>(null);
+ const mounted = useRef(false);
  const [gradedEarlier, setGradedEarlier] = useState<string | null>(null);
  const exam = artifact.courseId === EXAM_COURSE_ID;
  const [explanations,setExplanations]=useState<Record<string,string>>({});
@@ -31,11 +40,38 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
  const items = artifact.test?.items ?? [];
  const item = items[index];
  const draft = item ? drafts[item.id] ?? null : null;
+ const flushDrafts = useRef(() => {});
+ flushDrafts.current = () => {
+  window.clearTimeout(draftTimer.current); draftTimer.current = undefined;
+  const id = attemptId.current, batch = Object.entries(unsent.current);
+  if (!id || !batch.length) return;
+  unsent.current = {};
+  draftQueue.current = draftQueue.current.then(async () => {
+   let failed = false;
+   for (const [itemId, answer] of batch) {
+    try { await desktop.invoke('review:attempt:draft', { attemptId: id, itemId, answer }); }
+    catch { failed = true; if (!(itemId in unsent.current)) unsent.current[itemId] = answer; }
+   }
+   if (!mounted.current) return;
+   setDraftError(failed);
+   if (failed && !draftTimer.current) draftTimer.current = window.setTimeout(() => flushDrafts.current(), DRAFT_RETRY_MS);
+  });
+ };
  const setDraft = (value: Answer) => {
   if (!item) return;
   draftsRef.current = { ...draftsRef.current, [item.id]: value };
   setDrafts(draftsRef.current);
+  unsent.current = { ...unsent.current, [item.id]: value === '' || Array.isArray(value) && !value.length ? null : value };
+  window.clearTimeout(draftTimer.current);
+  draftTimer.current = window.setTimeout(() => flushDrafts.current(), DRAFT_DELAY_MS);
  };
+ useEffect(() => {
+  mounted.current = true;
+  const leave = () => flushDrafts.current();
+  const hide = () => { if (document.visibilityState === 'hidden') leave(); };
+  window.addEventListener('pagehide', leave); document.addEventListener('visibilitychange', hide);
+  return () => { mounted.current = false; window.removeEventListener('pagehide', leave); document.removeEventListener('visibilitychange', hide); leave(); };
+ }, []);
  const result = attempt?.results.find(result => result.itemId === item?.id);
  const feedback = result?.feedback;
  const locked = result?.correct !== null && result?.correct !== undefined;
@@ -50,7 +86,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
    if (!opening.current || opening.current.id !== artifact.id) opening.current = { id: artifact.id, promise: desktop.invoke('review:attempt:start', { artifactId: artifact.id }).then(value=>desktop.invoke('review:attempt:get',{attemptId:value.id})) };
    let next: Attempt;
    try { next = await opening.current.promise; } catch (error) { opening.current = null; throw error; }
-   if (active) { if(exam&&next.phase!=='answering')setResults(true); setAttempt(next); draftsRef.current = { ...next.answers }; setDrafts(draftsRef.current); }
+   if (active) { if(exam&&next.phase!=='answering')setResults(true); setAttempt(next); attemptId.current = next.id; draftsRef.current = { ...next.answers, ...next.drafts }; setDrafts(draftsRef.current); }
   };
   retryAction.current = load; setBusy(true); setFailed(false);
   void load().catch(() => { if (active) setFailed(true); }).finally(() => { if (active) setBusy(false); });
@@ -83,6 +119,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
   void run(async () => {
    const send = async () => {
     const answer = draftsRef.current[itemId] ?? null;
+    unsent.current = Object.fromEntries(Object.entries(unsent.current).filter(([key]) => key !== itemId));
     justSubmitted.current = true;
     try {
      let saved: Attempt;
@@ -112,12 +149,13 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
  });
  if (exam) return <ExamPlayer
   artifact={artifact} attempt={attempt} index={index} draft={draft} results={results}
-  busy={busy} failed={failed} explanations={explanations} gradedEarlier={gradedEarlier === item?.id}
+  busy={busy} failed={failed} draftError={draftError} explanations={explanations} gradedEarlier={gradedEarlier === item?.id}
   onDraft={setDraft} onMove={move} onSubmit={submit} onResults={setResults} onExplain={explainItem}
   onReport={itemId=>{if(attempt)void run(async()=>setAttempt(await desktop.invoke('review:attempt:report-bad',{attemptId:attempt.id,itemId})));}}
   onRetry={()=>{if(retryAction.current)void run(retryAction.current);}}
  />;
  return <section className="review-test-player" aria-busy={busy}>
+  {attempt && <div role="status">{draftError && <p>{tr('review:draft_save_failed')}</p>}</div>}
   {failed && <p role="alert">{tr('review:error')} <Button disabled={busy} onClick={() => { if (retryAction.current) void run(retryAction.current); }}>{tr('review:retry')}</Button></p>}
   {!attempt && busy && <p role="status">{tr('review:loading')}</p>}
   {attempt && item && !results && <>

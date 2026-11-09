@@ -81,6 +81,12 @@ export function validateStudyData(db:DatabaseSync):void {
     if(raw.appliedAt!==null&&String(raw.appliedAt)<attempt.confirmedAt!)throw new Error('invalid application chronology');
    }
   });
+  check('study_attempt_drafts',row=>{
+   const draft=z.object({attemptId:id,itemId:text,draftJson:z.string(),updatedAt:at}).strict().parse(row);
+   const attempt=db.prepare('SELECT artifactId FROM study_attempts WHERE id=?').get(draft.attemptId);
+   const item=attempt&&tests.get(String(attempt.artifactId))?.items.find(item=>item.id===draft.itemId);
+   if(!item||!isStudyAnswer(item,json(draft.draftJson,8192)))throw new Error('invalid draft');
+  });
   check('study_attempt_items',row=>z.object({attemptId:id,itemId:text,conceptKey:text,correct:bit.nullable(),selfGrade:z.enum(['correct','partial','incorrect']).nullable(),appliedAt:at.nullable(),reportedBad:bit}).strict().parse(row));
   const prefs=db.prepare("SELECT value FROM settings WHERE key='studyPrefs'").get();if(prefs)studyPrefsSchema.parse(json(prefs.value,8192));
   if(db.prepare('PRAGMA foreign_key_check').all().length)throw new Error('invalid references');
