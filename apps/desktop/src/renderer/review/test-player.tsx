@@ -10,7 +10,7 @@ type Artifact = NonNullable<IpcResponse<'review:artifact:get'>>;
 type Attempt = IpcResponse<'review:attempt:start'>;
 type Answer = string | number | boolean | number[] | null;
 
-export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetake: (attemptId: string) => void }) {
+export function TestPlayer({ artifact, onRetake, onConfirmed }: { artifact: Artifact; onRetake: (attemptId: string) => void; onConfirmed?: (() => void) | undefined }) {
  const [attempt, setAttempt] = useState<Attempt | null>(null);
  const [index, setIndex] = useState(0);
  const [draft, setDraft] = useState<Answer>(null);
@@ -136,7 +136,10 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
    <h4>{tr('review:worth_another_look')}</h4>
    <ul>{[...new Set(missed.map(result => result.conceptKey))].map(key => <li key={key}>{tr('review:concept_missed', { label: labels[key] ?? key, count: missed.filter(result => result.conceptKey === key).length })}</li>)}</ul>
    {!exam&&<><p>{tr('review:confirm_notice')}</p>
-   {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button disabled={busy} onClick={() => void run(async () => setAttempt(await desktop.invoke('review:attempt:confirm', { attemptId: attempt.id })))}>{tr('review:update_review_list')}</Button>}
+   {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button disabled={busy} onClick={() => void run(async () => {
+    setAttempt(await desktop.invoke('review:attempt:confirm', { attemptId: attempt.id }));
+    onConfirmed?.();
+   })}>{tr('review:update_review_list')}</Button>}
    </>}
    <div className="review-actions">{!exam&&<Button disabled={busy || attempt.phase !== 'confirmed' || !missed.length} onClick={() => onRetake(attempt.id)}>{tr('review:retake_missed')}</Button>}<Button onClick={() => setResults(false)}>{tr('review:review_answers')}</Button></div>
   </>}

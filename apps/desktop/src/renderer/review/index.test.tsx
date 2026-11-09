@@ -7,6 +7,8 @@ import { ReviewView } from './index';
 const { invoke, navigate, nav, moodleListeners } = vi.hoisted(() => ({ invoke: vi.fn(), navigate: vi.fn(), nav: { route: { view: 'review' } as { view: string; courseId?: string } }, moodleListeners: [] as Array<(event: { state: string }) => void> }));
 vi.mock('../bridge', () => ({ desktop: { invoke, onMoodleProgress: (listener: (event: { state: string }) => void) => { moodleListeners.push(listener); return () => { moodleListeners.splice(moodleListeners.indexOf(listener), 1); }; } } }));
 vi.mock('../shell', () => ({ useNavigate: () => ({ navigate, route: nav.route }) }));
+vi.mock('./test-player', () => ({ TestPlayer: ({ onConfirmed }: { onConfirmed?: () => void }) =>
+  <button onClick={onConfirmed}>Confirm fixture session</button> }));
 const uuid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const course = (n: number, title: string) => ({ id: uuid(n), title, aliases: [], moodleCourseId: null, createdAt: `2026-11-0${n}T00:00:00.000Z`, archivedAt: null });
 const concept = (n: number, state: string) => ({ id: uuid(100 + n), courseId: uuid(1), key: `k${n}`, label: `Concept ${n}`, source: 'heading', unitId: null, userState: 'none', note: null, createdAt: `2026-11-0${n}T00:00:00.000Z`, mastery: { state, risk: 0, negative: 0, positive: 0, episodeCount: 0, nextReviewAt: null } });
@@ -203,3 +205,23 @@ it('bounds Review today to 100 concepts from 100+20 mastery pages and explains t
   await waitFor(() => expect((screen.getByRole('button', { name: en.generate_test }) as HTMLButtonElement).disabled).toBe(false));
 });
 
+it('refreshes parent mastery after confirming a session', async () => {
+  const respond = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (channel: string, input: never) => {
+    if (channel === 'review:artifact:list') return { items: [{ id: 'saved', kind: 'test',
+      title: 'Saved test', status: 'ready', createdAt: '2026-11-06T00:00:00Z' }], nextCursor: null };
+    if (channel === 'review:artifact:get') return { id: 'saved', kind: 'test', title: 'Saved test',
+      status: 'ready', courseId: uuid(1), resolvedScope: { unitIds: [], documentIds: [],
+        assumptions: [], sources: [] } };
+    return respond(channel, input);
+  });
+  render(<ReviewView />);
+  await screen.findByText('Concept 1');
+  fireEvent.mouseDown(screen.getByRole('tab', { name: en.tests }), { button: 0 });
+  fireEvent.click(await screen.findByRole('button', { name: 'Saved test' }));
+  state.masteryPages = [[]];
+  fireEvent.click(await screen.findByRole('button', { name: 'Confirm fixture session' }));
+  fireEvent.mouseDown(screen.getByRole('tab', { name: en.weak }), { button: 0 });
+  expect(await screen.findByText(en.weak_empty)).toBeTruthy();
+  expect(screen.queryByText('Concept 1')).toBeNull();
+});

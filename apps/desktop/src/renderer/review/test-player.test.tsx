@@ -97,3 +97,14 @@ it('resumes saved answers and committed feedback via get after remount',async()=
  expect((await screen.findByRole('textbox') as HTMLInputElement).value).toBe('draft');
  expect(screen.queryByText('Second explanation')).toBeNull();
 });
+it('notifies the parent only after review confirmation succeeds', async () => {
+ fixture();
+ const onConfirmed = vi.fn();
+ render(<TestPlayer artifact={artifact} onRetake={vi.fn()} onConfirmed={onConfirmed} />);
+ await answerAll();
+ fireEvent.click(screen.getByRole('button', { name: 'review:view_results' }));
+ expect(onConfirmed).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole('button', { name: 'review:update_review_list' }));
+ await screen.findByText('review:review_list_updated');
+ expect(onConfirmed).toHaveBeenCalledTimes(1);
+});

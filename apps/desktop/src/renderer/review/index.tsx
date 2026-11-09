@@ -69,7 +69,7 @@ export function ReviewView() {
  {!courseId ? <Inbox key={revision} courses={courses.items} open={open}/> : <Tabs value={tab} onValueChange={setUserTab}><TabsList aria-label={tr('review:title')}>{['recent','weak','notes','tests'].map(t=><TabsTrigger key={t} value={t}>{tr(`review:${t}`)}</TabsTrigger>)}</TabsList>
  <TabsContent value="recent"><Recent key={courseId+revision} course={course} courseId={courseId} open={open} mutate={mutate} busy={busy}/></TabsContent>
  <TabsContent value="weak"><Weak key={courseId} weak={weak} open={open} mutate={mutate} busy={busy} artifacts={artifacts}/></TabsContent>
- <TabsContent value="notes" forceMount hidden={tab!=='notes'}><ArtifactPanel key={courseId+'note'} courseId={courseId} kind="note" selection={selection}/></TabsContent><TabsContent value="tests" forceMount hidden={tab!=='tests'}><ArtifactPanel key={courseId+'test'} courseId={courseId} kind="test" selection={selection}/></TabsContent></Tabs>}
+ <TabsContent value="notes" forceMount hidden={tab!=='notes'}><ArtifactPanel key={courseId+'note'} courseId={courseId} kind="note" selection={selection}/></TabsContent><TabsContent value="tests" forceMount hidden={tab!=='tests'}><ArtifactPanel key={courseId+'test'} courseId={courseId} kind="test" selection={selection} onConfirmed={reload}/></TabsContent></Tabs>}
  </div></main>;
 }
 function CourseTools({course,open,refresh,onCreated}:{course:Course|undefined;open:boolean;refresh:()=>void;onCreated:(id:string)=>void}) {
