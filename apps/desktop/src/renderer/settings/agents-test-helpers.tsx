@@ -39,7 +39,7 @@ export async function mountAgents(children: ReactNode) {
   return { host, root, unmount: async () => { await act(() => root.unmount()); host.remove(); } };
 }
 export function button(name: string, scope: ParentNode = document) {
-  const value = [...scope.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent?.trim() === name || item.getAttribute('aria-label') === name);
+  const value = [...scope.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent?.trim() === name || item.getAttribute('aria-label') === name || !!item.id && [...scope.querySelectorAll('label')].some(label => label.htmlFor === item.id && label.textContent?.trim() === name));
   expect(value, `button ${name}`).toBeDefined();
   return value!;
 }

@@ -11,6 +11,6 @@ it.each([0,1])('shows no completion message when cleanup %s is cancelled',async 
   try {
     await act(()=>root.render(<StorageSettings/>));
     await act(()=>host.querySelectorAll<HTMLButtonElement>('button')[index]!.click());
-    expect(host.querySelector('[role=status]')?.textContent).toBe('');
+    expect(host.querySelector('[role=status]')).toBeNull();
   }finally{await act(()=>root.unmount());host.remove();}
 });
