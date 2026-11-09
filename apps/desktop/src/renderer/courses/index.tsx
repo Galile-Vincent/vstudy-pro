@@ -1,6 +1,6 @@
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
-import { Section, ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
+import { PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
 import { Brand } from '../components/brand';
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
@@ -166,7 +166,7 @@ function CoursesBody({
 }) {
   useTranslation("moodle");
   const navigation = useOptionalNavigation();
-  const pageRef = useRef<HTMLElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
   useScrollFades(pageRef);
   const [showUpdates, setShowUpdates] = useState(false);
   const [allDue, setAllDue] = useState(false);
@@ -537,38 +537,28 @@ function CoursesBody({
       <p className="moodle-empty-inline">{tr("moodle:no_files")}</p>
     );
   };
-  if (showPlanner) return <main className="moodle-page"><div className="moodle-content">
+  if (showPlanner) return <PageContainer className="h-full overflow-auto">
     <Button variant="ghost" ref={plannerBack} className="moodle-back" onClick={() => setShowPlanner(false)}><ArrowLeft />{tr("planner:back")}</Button>
     <Planner courses={overview?.courses ?? []} deadlines={overview?.upcoming ?? []} />
-  </div></main>;
+  </PageContainer>;
   const header = (
-        <header className="moodle-header">
-          <div>
-            {courseId && (
-              <Button
-                className="moodle-back"
-                variant="ghost"
-                onClick={() => onCourse()}
-              >
-                <ArrowLeft />
-                {tr("moodle:all_courses")}
-              </Button>
-            )}
-            {!courseId && <h1>{tr("moodle:courses")}</h1>}
-          </div>
-          <div className="moodle-header-actions">
-          {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry" onClick={() => setShowUpdates(true)}><Inbox />{tr("moodle:updates")}{unreadUpdates > 0 && <span className="updates-count">{unreadUpdates}</span>}</Button>}
-          <Button variant="outline" ref={plannerTrigger} className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
-          <Button variant="outline" onClick={() => setConnect(true)}>
-            <GraduationCap />
-            {tr("moodle:connect_school")}
-          </Button>
-          </div>
-        </header>
+    <PageHeader title={!courseId ? tr("moodle:courses") : undefined}
+      className="[&_h1]:whitespace-nowrap"
+      actions={<div className="flex flex-wrap gap-2 [&_button]:min-h-9 [&_button]:h-auto">
+        {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry"
+          onClick={() => setShowUpdates(true)}>
+          <Inbox />{tr("moodle:updates")}{unreadUpdates > 0 && <span>{unreadUpdates}</span>}
+        </Button>}
+        <Button ref={plannerTrigger} variant="outline" className="planner-entry"
+          onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
+        {!overview?.accounts.length && <Button variant="outline" onClick={() => setConnect(true)}>
+          <GraduationCap />{tr("moodle:connect_school")}
+        </Button>}
+      </div>} />
   );
   return (
-    <main ref={pageRef} className="moodle-page" data-course={Boolean(detail)}>
-      <div className="moodle-content">
+    <div ref={pageRef} className={courseId ? "moodle-page" : "h-full overflow-auto text-[var(--ink)]"} data-course={Boolean(detail)}>
+      <PageContainer className={courseId ? "pt-0" : undefined}>
         {!detail && !showUpdates && header}
         <div role="status" aria-live="polite">
           {notice && (
@@ -596,18 +586,14 @@ function CoursesBody({
           </div>
         )}
         {!!overview?.accounts.length && !showUpdates && (!courseId || overview.accounts.some(account => account.status === "expired" || account.signInStorage)) && (
-          <div className="moodle-accounts">
+          <div className="flex flex-col gap-2">
             {overview.accounts.map((account) => (
-              <div key={account.id} className="moodle-account">
-                <span className="moodle-avatar">
-                  <GraduationCap />
-                </span>
-                <div>
-                  <strong>{account.displayName}</strong>
-                  <span>
-                    {account.siteName} · {new URL(account.siteUrl).host}
-                  </span>
-                </div>
+              <div key={account.id} className="flex flex-wrap items-center gap-2">
+                <ListRow className="min-w-0 flex-1" title={account.displayName}
+                  subtitle={`${account.siteName} · ${new URL(account.siteUrl).host}`} />
+                <Button variant="ghost" onClick={() => setConnect(true)}>
+                  <GraduationCap />{tr("moodle:connect_school")}
+                </Button>
                 <small>
                   {account.syncedAt
                     ? tr("moodle:synced", { time: relative(account.syncedAt) })
@@ -1023,7 +1009,7 @@ function CoursesBody({
           api={api}
           onConnected={() => refresh(true)}
         />
-      </div>
-    </main>
+      </PageContainer>
+    </div>
   );
 }

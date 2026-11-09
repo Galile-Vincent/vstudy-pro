@@ -1,14 +1,5 @@
 .moodle-page { background:transparent; }
-.moodle-header h1 { font-size:var(--type-display); line-height:1.3; margin:0; }
-.moodle-header { margin-bottom:var(--space-3); }
-.moodle-header-actions { gap:var(--space-2); }
-.moodle-account { padding:var(--space-2) 0; border-radius:0; background:transparent; box-shadow:none; backdrop-filter:none; border-bottom:1px solid var(--hairline); }
-.moodle-account .moodle-avatar { width:24px; height:24px; background:transparent; color:var(--muted); }
-.moodle-accounts { margin-bottom:var(--space-4); }
-.moodle-account strong { font-size:var(--type-sm); font-weight:500; }
 .updates-count { display:grid; place-items:center; min-width:20px; padding:0 var(--space-1); border-radius:var(--r-sm); background:var(--ink); color:var(--background); font-size:var(--type-xs); font-variant-numeric:tabular-nums; }
-.courses-total { color:var(--muted); font-size:var(--type-sm); font-weight:400; font-variant-numeric:tabular-nums; }
-.moodle-grid-heading { margin-bottom:var(--space-1); }
 .moodle-grid { display:flex; flex-direction:column; gap:0; padding:0; margin:0 -.75rem; list-style:none; }
 .moodle-empty,.moodle-banner[role="alert"] { background:var(--surface); }
 [data-scroll-fade="true"] { scrollbar-width:none; --mask-start:-40px; --mask-end:0px; mask-image:linear-gradient(to right,transparent,color-mix(in srgb,CanvasText 65%,transparent) 12px,CanvasText 40px),linear-gradient(to left,transparent,color-mix(in srgb,CanvasText 65%,transparent) 12px,CanvasText 40px); mask-size:calc(100% + 40px) 100%; mask-repeat:no-repeat; mask-composite:intersect; mask-position:var(--mask-start) 0,var(--mask-end) 0; transition:mask-position 180ms ease-out; }
@@ -21,13 +12,8 @@
 .moodle-hero { min-height:0; background:var(--background); color:var(--ink); }
 .moodle-hero > div.moodle-hero-body { width:100%; max-width:none; padding-top:var(--space-3); }
 @media(max-width:1000px) {
-  .moodle-header { flex-direction:row; align-items:center; }
-  .moodle-header-actions { width:auto; }
-  .moodle-header-actions > button { flex:none; padding:var(--space-2) var(--space-3); }
 }
 @media(max-width:719px) {
-  .moodle-header { flex-direction:column; align-items:start; }
-  .moodle-account { display:flex; }
 }
 
 .moodle-page .updates-empty { padding:var(--space-8) var(--space-4); min-height:220px; align-content:center; }
