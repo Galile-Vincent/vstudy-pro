@@ -29,8 +29,9 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
     await page.screenshot({path:join(evidence,`${language}-${colorScheme}-consent.png`)});
     await page.getByRole('button',{name:copy.decline,exact:true}).click();
     await page.locator('.onboarding footer').getByRole('button',{name:onboarding.back,exact:true}).click();
-    assert.equal(await page.getByRole('button',{name:copy.share,exact:true}).isDisabled(),true);
-    assert.equal(await page.getByRole('button',{name:copy.decline,exact:true}).isDisabled(),true);
+    await page.getByRole('button',{name:copy.open_privacy,exact:true}).waitFor();
+    assert.equal(await page.getByRole('button',{name:copy.share,exact:true}).count(),0,'a saved choice is not offered again');
+    assert.equal(await page.getByRole('button',{name:copy.decline,exact:true}).count(),0,'a saved choice is not offered again');
     await onboardingForward(page).click();
     await page.getByRole('button',{name:onboarding.later,exact:true}).click();
     await page.locator('.onboarding').waitFor({state:'detached'});

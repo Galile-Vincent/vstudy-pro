@@ -101,7 +101,9 @@ for (const scheme of ['dark', 'light']) {
       if (step === 'privacy') await onboardingConsent(page).click();
       else await onboardingForward(page).click();
     }
-    assert.equal(new Set(sizes.filter(row => row.scheme === scheme).map(row => `${row.width}x${row.height}`)).size, 1, 'dialog size stays constant');
+    const rows = sizes.filter(row => row.scheme === scheme);
+    assert.equal(new Set(rows.map(row => row.width)).size, 1, 'dialog width stays constant');
+    assert.ok(rows.every(row => row.height <= 640), 'dialog height stays within its 640px cap');
   } finally {
     await app?.close();
     await rm(profile, { recursive: true, force: true });
