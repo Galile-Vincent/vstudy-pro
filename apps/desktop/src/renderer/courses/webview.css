@@ -4,35 +4,53 @@
 .moodle-webview-pane[data-full=true] { inset:var(--space-4); max-width:none; }
 .moodle-webview-header { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-3) var(--space-4); }
 .moodle-webview-header > div { flex:1; min-width:0; display:flex; flex-direction:column; gap:var(--space-1); }
-.moodle-webview-header strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; }
-.moodle-webview-header small,.moodle-webview-footer { color:var(--muted); font-size:12px; }
+.moodle-webview-header h1 { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; }
+.moodle-webview-header p,.moodle-webview-footer { color:var(--muted); font-size:12px; }
 .moodle-webview-toolbar { display:flex; align-items:center; gap:var(--space-1); padding:var(--space-2) var(--space-4); background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
 .moodle-webview-location { flex:1; display:flex; align-items:center; justify-content:center; min-width:0; gap:var(--space-2); font-size:12px; }
 .moodle-webview-location span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .moodle-webview-location svg { width:14px; height:14px; flex-shrink:0; }
 .moodle-webview-slot { position:relative; flex:1; min-height:0; }
-.moodle-webview-progress { position:absolute; z-index:1; top:116px; width:100%; height:2px; accent-color:var(--accent-color); }
+.moodle-webview-progress { position:absolute; z-index:1; bottom:0; width:100%; height:2px; accent-color:var(--accent-color); }
 .moodle-webview-message { display:flex; height:100%; flex-direction:column; align-items:center; justify-content:center; gap:var(--space-4); padding:var(--space-8); text-align:center; }
 .moodle-webview-message p { color:var(--muted); max-width:48ch; }
 .moodle-webview-message h2 { font-size:18px; font-weight:600; }
 .moodle-webview-footer { display:flex; align-items:center; gap:var(--space-1); padding:var(--space-2) var(--space-3); }
-.moodle-webview-footer > span { flex:1; }
+.moodle-webview-footer > div > span { flex:1; }
 .moodle-webview-resize { position:absolute; left:0; top:0; bottom:0; width:8px; cursor:col-resize; z-index:2; touch-action:none; }
 .moodle-webview-resize:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 .moodle-file-actions { display:flex; align-items:center; gap:var(--space-1); }
 .moodle-file-actions > .moodle-file-row { flex:1; min-width:0; }
-@media (max-width:760px) { .moodle-webview-pane,.moodle-webview-pane[data-full=true] { inset:0; width:100%!important; max-width:none; border-radius:0; } .moodle-webview-footer > span { display:none; } .moodle-webview-header small { font-size:11px; } }
-.moodle-webview-pane { border-radius:var(--course-radius); box-shadow:var(--course-shadow); }
+@media (max-width:760px) { .moodle-webview-pane,.moodle-webview-pane[data-full=true] { inset:0; width:100%!important; max-width:none; border-radius:0; } .moodle-webview-footer > div > span { display:none; } .moodle-webview-header p { font-size:11px; } }
+.moodle-webview-pane { border-radius:var(--r-lg); box-shadow:var(--elevation-raised); }
 .moodle-webview-header { min-height:72px; padding:16px 24px; background:radial-gradient(ellipse at 100% 0%,var(--active),transparent 75%),var(--surface); }
-.moodle-webview-header strong { font-size:17px; line-height:22px; letter-spacing:-.015em; }
-.moodle-webview-toolbar { padding:8px 16px; gap:4px; background:var(--course-glass); backdrop-filter:blur(16px); }
+.moodle-webview-header h1 { font-size:17px; line-height:22px; letter-spacing:-.015em; }
+.moodle-webview-toolbar { padding:8px 16px; gap:4px; background:var(--material-sheet); backdrop-filter:var(--glass-blur); }
 .moodle-webview-location { min-height:36px; border-radius:var(--r-pill); background:var(--subtle); margin-inline:8px; }
-.moodle-webview-pane button { min-width:44px; min-height:44px; border-radius:var(--course-control-radius); }
+.moodle-webview-pane button { min-width:44px; min-height:44px; }
 .moodle-webview-footer { padding:8px 16px; background:var(--subtle); }
-.moodle-webview-progress { top:132px; }
+.moodle-webview-chrome { position:relative; flex:none; }
 @media(max-width:760px) { .moodle-webview-pane { border-radius:0; } .moodle-webview-header { padding:12px 16px; } .moodle-webview-toolbar { flex-wrap:wrap; } .moodle-webview-location { order:-1; flex-basis:100%; margin:0; } }
 
 .moodle-webview-pane.moodle-tab-page { position:relative; inset:auto; width:100%; max-width:none; height:100%; min-height:0; border-radius:0; box-shadow:none; }
 
 .shell-content:has(> #active-tab-panel[data-native=true]) { display:flex; flex-direction:column; }
 #active-tab-panel[data-native=true] { display:block; flex:1; min-height:0; }
+
+.moodle-webview-header[data-slot="page-header"] { display:block; }
+.moodle-webview-header[data-slot="page-header"] > div { flex-direction:row; flex-wrap:nowrap; gap:var(--space-2); }
+.moodle-webview-header h1 { margin:0; font-weight:700; }
+.moodle-webview-header p { margin-top:var(--space-1); line-height:normal; }
+.moodle-webview-toolbar[data-slot="toolbar"],
+.moodle-webview-footer[data-slot="toolbar"] { flex-wrap:nowrap; }
+.moodle-webview-pane > footer { flex:none; }
+
+.moodle-webview-toolbar[data-slot="toolbar"] > div,
+.moodle-webview-footer[data-slot="toolbar"] > div { display:contents; }
+
+@media(max-width:760px) {
+  .moodle-webview-toolbar[data-slot="toolbar"] { flex-wrap:wrap; }
+}
+
+.moodle-webview-header[data-slot="page-header"] > div > div:first-child { flex:1; min-width:0; }
+.moodle-webview-header[data-slot="page-header"] > div > div:last-child { flex-shrink:0; }

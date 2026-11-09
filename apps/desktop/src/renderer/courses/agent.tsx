@@ -18,7 +18,7 @@ import type {
 } from "../../shared/moodle";
 import { moodleAgentActionSchema } from "../../shared/moodle";
 import { tr } from "../../shared/i18n";
-import { Button } from "../components/ui/button";
+import { Button, Card, Toolbar } from "../components/ui";
 import { Suggestions } from "../components/assistant-ui/elements/suggestions";
 import type { MoodleApi } from "./api";
 
@@ -174,7 +174,7 @@ export function CourseAgentPanel({
       onError();
     }
   };
-  const panel = useRef<HTMLElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   useEffect(() => { if (status === "done") panel.current?.focus(); }, [status]);
   const approve = async (proposal: { id: string; action: MoodleAgentAction }) => {
     const { action } = proposal;
@@ -213,11 +213,11 @@ export function CourseAgentPanel({
     }
   };
   return (
-    <aside ref={panel} tabIndex={-1} className="moodle-agent" data-conversation={!!conversation} aria-label={tr("moodle:course_assistant")}>
-      <div className="moodle-agent-heading">
+    <Card variant="flat" role="complementary" ref={panel} tabIndex={-1} className="moodle-agent gap-0 py-0" data-conversation={!!conversation} aria-label={tr("moodle:course_assistant")}>
+      <Toolbar className="moodle-agent-heading" left={<>
         <Sparkles />
         <h2>{tr("moodle:course_assistant")}</h2>
-      </div>
+      </>} />
       <div className="moodle-agent-body">
         <span className="moodle-agent-symbol">
           <Sparkles />
@@ -330,6 +330,6 @@ export function CourseAgentPanel({
           busy={status === "busy"} onApprove={() => void approve(proposal)} onDismiss={() => setActions(current => current.filter(item => item.id !== proposal.id))} />)}
       </div>
       <footer>{tr("planner:agent_scope")}</footer>
-    </aside>
+    </Card>
   );
 }

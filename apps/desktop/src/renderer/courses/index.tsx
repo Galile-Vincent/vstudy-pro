@@ -55,9 +55,7 @@ import {
   matchesTerm,
 } from "../../shared/moodle-course-display";
 import type { MoodleTermFilter } from "../../shared/moodle-course";
-import "./art/tokens.css";
 import "./courses.css";
-import "./art/surfaces.css";
 import { ConnectDialog } from "./connect";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Planner } from "./planner";
