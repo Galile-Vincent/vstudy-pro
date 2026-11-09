@@ -211,7 +211,7 @@
 }
 
 .usage-key.input {
-  background: repeating-linear-gradient(45deg, var(--ink) 0 2px, var(--muted) 2px 4px);
+  background: repeating-linear-gradient(45deg, var(--ink) 0 3px, var(--surface) 3px 6px);
 }
 
 .usage-key.output,
@@ -221,16 +221,16 @@
 }
 
 .usage-hatch-ground {
-  fill: var(--muted);
+  fill: var(--ink);
 }
 
 .usage-hatch-line {
-  fill: var(--ink);
+  fill: var(--surface);
 }
 
 @media (forced-colors: active) {
   .usage-key.input {
-    background: repeating-linear-gradient(45deg, CanvasText 0 2px, Canvas 2px 4px);
+    background: repeating-linear-gradient(45deg, CanvasText 0 3px, Canvas 3px 6px);
     border: 1px solid CanvasText;
   }
   .usage-key.output,
@@ -242,10 +242,10 @@
     stroke: CanvasText;
   }
   .usage-hatch-ground {
-    fill: Canvas;
+    fill: CanvasText;
   }
   .usage-hatch-line {
-    fill: CanvasText;
+    fill: Canvas;
   }
 }
 

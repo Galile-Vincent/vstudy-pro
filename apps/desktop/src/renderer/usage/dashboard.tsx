@@ -47,7 +47,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
         <defs>
           <pattern id={hatch} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <rect width="6" height="6" className="usage-hatch-ground" />
-            <rect width="2" height="6" className="usage-hatch-line" />
+            <rect width="3" height="6" className="usage-hatch-line" />
           </pattern>
         </defs>
         <line x1="0" x2={width} y1={height - 1} y2={height - 1} className="usage-axis" />
