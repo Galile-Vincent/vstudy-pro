@@ -4,6 +4,7 @@ import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { useExamFormat } from "./format";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ export function ExamHistory({
   onOpen: (id: string) => void;
   onDelete: (id: string) => Promise<void>;
 }) {
+  const format = useExamFormat();
   const [deleteFailed, setDeleteFailed] = useState(false);
   const [deleting, setDeleting] = useState<Row | null>(null);
   return (
@@ -49,10 +51,7 @@ export function ExamHistory({
                   </Button>
                 </h3>
                 <time dateTime={artifact.createdAt}>
-                  {new Date(artifact.createdAt).toLocaleString(undefined, {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
+                  {format.dateTime(artifact.createdAt)}
                 </time>
                 <p className="exam-history-sources">
                   <FileText size={15} aria-hidden="true" />
@@ -71,7 +70,7 @@ export function ExamHistory({
                 {graded ? (
                   <>
                     <strong>
-                      {Math.round((correct / Math.max(1, total)) * 100)}%
+                      {format.percent(correct / Math.max(1, total))}
                     </strong>
                     <span>{tr("exams:score_summary", { correct, total })}</span>
                     <span className="exam-duration">
