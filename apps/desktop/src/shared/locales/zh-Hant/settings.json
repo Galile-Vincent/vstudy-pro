@@ -1,4 +1,5 @@
 {
+  "section_picker": "設定分類",
   "app_version": "v{{version}}",
   "api_key": "{{provider}} API 金鑰",
   "privacy": "隱私",
