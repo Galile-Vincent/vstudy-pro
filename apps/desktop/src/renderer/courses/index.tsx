@@ -1,5 +1,8 @@
+import { flushSync } from 'react-dom';
+import { catalogDeadlines } from './deadline-groups';
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
+import { Card, PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
 import { Brand } from '../components/brand';
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
@@ -122,7 +125,6 @@ export function CoursesView() {
   const { route, navigate } = useNavigate();
   return (
     <Courses
-      key={route.courseId ?? "home"}
       api={api}
       courseId={route.courseId}
       connectOnMount={route.connectSchool}
@@ -161,14 +163,23 @@ function CoursesBody({
 }) {
   useTranslation("moodle");
   const navigation = useOptionalNavigation();
-  const pageRef = useRef<HTMLElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
   useScrollFades(pageRef);
   const [showUpdates, setShowUpdates] = useState(false);
   const [allDue, setAllDue] = useState(false);
   const updatesTrigger = useRef<HTMLButtonElement>(null);
+  const connectTrigger = useRef<HTMLButtonElement>(null);
   const disconnectTrigger = useRef<HTMLButtonElement>(null);
   const disconnectSchool = useRef<string | undefined>(undefined);
   const [showPlanner, setShowPlanner] = useState(false);
+  const plannerTrigger = useRef<HTMLButtonElement>(null);
+  const plannerBack = useRef<HTMLButtonElement>(null);
+  const plannerWasOpen = useRef(false);
+  useEffect(() => {
+    if (showPlanner) plannerBack.current?.focus();
+    else if (plannerWasOpen.current) plannerTrigger.current?.focus();
+    plannerWasOpen.current = showPlanner;
+  }, [showPlanner]);
   const openMoodle = useMoodleWebview();
   const [overview, setOverview] = useState<MoodleOverview>();
   const [orderSnapshot,setOrderSnapshot] = useState<{data:MoodleOverview;now:number}>();
@@ -189,27 +200,41 @@ function CoursesBody({
   useEffect(() => {if (reconnect) {setConnect(true);onReconnected?.();}},[reconnect,onReconnected]);
   const [tab, setTab] = useState<Tab>("content");
   const [term, setTerm] = useState<MoodleTermFilter>("current");
+  const termInitialized = useRef(false);
+  useEffect(() => {
+    if (!overview || termInitialized.current) return;
+    if (!overview.courses.length &&
+      (syncing || overview.accounts.some(account => !account.syncedAt))) return;
+    termInitialized.current = true;
+    setTerm(termFilters.find(filter =>
+      overview.courses.some(course => matchesTerm(course, filter)),
+    ) ?? 'current');
+  }, [overview, syncing]);
   const lang = i18n.resolvedLanguage || "en";
   const [opening, setOpening] = useState<string>();
   const [agentRequest, setAgentRequest] = useState(0);
   const refreshSequence = useRef(0);
-  const refresh = useCallback(async (reorder = false) => {
+  const refresh = useCallback(async (reorder = false, immediate = false) => {
     const sequence = ++refreshSequence.current;
     const [next, course] = await Promise.all([
       api.overview(),
-      courseId ? api.course(courseId) : Promise.resolve(undefined),
+      courseId && !immediate ? api.course(courseId) : Promise.resolve(undefined),
     ]);
     const summaries = next.summaries ?? [];
     if (sequence !== refreshSequence.current) return;
-    if (reorder) {prepareMovement.current();setOrderSnapshot({data:next,now:Date.now()});}
-    setOverview(next);
-    setDetail(course);
-    setHomeDetails(summaries);
-    setError(false);
+    const update = () => {
+      if (reorder) {prepareMovement.current();setOrderSnapshot({data:next,now:Date.now()});}
+      setOverview(next);
+      setDetail(course);
+      setHomeDetails(summaries);
+    };
+    if (immediate) flushSync(update);
+    else update();
+    return next;
   }, [api, courseId]);
   useEffect(() => {
     let current = true;
-    setLoading(true);
+    setLoading(!!courseId || !overview);
     setDetail(undefined);
     setTab("content");
     setAgentRequest(0);
@@ -234,6 +259,7 @@ function CoursesBody({
     if (event.courseId && event.courseId !== courseId) return;
     if (!event.courseId) {setProgress(event);setSyncing(event.state === 'loading');}
     if (event.state === 'error') setError(true);
+    else if (event.state === 'idle' && event.completed === event.total) setError(false);
     reorder ||= event.state === 'idle' && event.completed === event.total;
     if (!timer) timer=setTimeout(() => {timer=undefined;const completed=reorder;reorder=false;void refresh(completed).catch(() => setError(true));},50);
     });
@@ -278,9 +304,18 @@ function CoursesBody({
     setConfirmDisconnect(undefined);
     try {
       await api.disconnect(accountId);
-      if (courseId) onCourse();
-      else await refresh(true);
-    } catch { failure(); }
+      const next = await refresh(true, true);
+      if (courseId) flushSync(() => onCourse());
+      const target = !next?.accounts.length ? connectTrigger.current
+        : pageRef.current?.querySelector(courseId ? 'h2' : 'h1');
+      if (target instanceof HTMLElement) {
+        if (target !== connectTrigger.current) target.tabIndex = -1;
+        target.focus();
+      }
+    } catch {
+      failure();
+      disconnectTrigger.current?.focus();
+    }
   };
   const openFile = async (fileId: string, action?: DocumentAction) => {
     setOpening(fileId);
@@ -297,18 +332,13 @@ function CoursesBody({
       setOpening(undefined);
     }
   };
-  const dueSoon = (overview?.upcoming ?? [])
-    .filter(
-      (d) =>
-        !d.submitted && !d.orphaned &&
-        Date.parse(d.dueAt) >= Date.now() &&
-        Date.parse(d.dueAt) <= Date.now() + week,
-    )
-    .sort((a, b) => a.dueAt.localeCompare(b.dueAt));
+  const { overdue, dueSoon, undated } = catalogDeadlines(
+    overview?.upcoming ?? [], Date.now(),
+  );
   const updates = [...new Map([...homeDetails.flatMap(detail => detail.notifications), ...(overview?.otherNotifications ?? [])].map(item => [item.id,item])).values()];
   const unreadUpdates = updates.filter(item => !item.read).length;
-  const availableTerms = termFilters.filter(filter => overview?.courses.some(course => matchesTerm(course,filter)) && (filter !== 'all' || new Set(overview.courses.map(course => course.identity.lifecycle)).size > 1));
-  const selectedTerm = availableTerms.includes(term) ? term : availableTerms[0] ?? 'all';
+  const availableTerms = termFilters;
+  const selectedTerm = term;
   const sort = sortPreferences[selectedTerm] ?? (selectedTerm === 'current' ? 'smart' : 'name');
   const orderedCourses = useMemo(() => {
     if (!orderSnapshot) return [];
@@ -338,7 +368,7 @@ function CoursesBody({
       deadline={deadline}
       reminders={reminders}
       api={api}
-      onChange={refresh}
+      onChange={async () => { await refresh(); }}
       onError={failure}
     />
   );
@@ -521,40 +551,30 @@ function CoursesBody({
       <p className="moodle-empty-inline">{tr("moodle:no_files")}</p>
     );
   };
-  if (showPlanner) return <main className="moodle-page"><div className="moodle-content">
-    <Button variant="ghost" className="moodle-back" onClick={() => setShowPlanner(false)}><ArrowLeft />{tr("planner:back")}</Button>
+  if (showPlanner) return <PageContainer as="main" className="h-full overflow-auto">
+    <Button variant="ghost" ref={plannerBack} className="moodle-back" onClick={() => setShowPlanner(false)}><ArrowLeft />{tr("planner:back")}</Button>
     <Planner courses={overview?.courses ?? []} deadlines={overview?.upcoming ?? []} />
-  </div></main>;
+  </PageContainer>;
   const header = (
-        <header className="moodle-header">
-          <div>
-            {courseId && (
-              <Button
-                className="moodle-back"
-                variant="ghost"
-                onClick={() => onCourse()}
-              >
-                <ArrowLeft />
-                {tr("moodle:all_courses")}
-              </Button>
-            )}
-            {!courseId && <h1>{tr("moodle:courses")}</h1>}
-          </div>
-          <div className="moodle-header-actions">
-          {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry" onClick={() => setShowUpdates(true)}><Inbox />{tr("moodle:updates")}{unreadUpdates > 0 && <span className="updates-count">{unreadUpdates}</span>}</Button>}
-          <Button variant="outline" className="planner-entry" onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
-          <Button variant="outline" onClick={() => setConnect(true)}>
-            <GraduationCap />
-            {tr("moodle:connect_school")}
-          </Button>
-          </div>
-        </header>
+    <PageHeader title={!courseId ? tr("moodle:courses") : undefined}
+      className="[&_h1]:whitespace-nowrap [&>div>div:last-child]:max-[1000px]:w-full"
+      actions={<div className="flex flex-wrap gap-2 [&_button]:min-h-9 [&_button]:h-auto">
+        {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry"
+          onClick={() => setShowUpdates(true)}>
+          <Inbox />{tr("moodle:updates")}{unreadUpdates > 0 && <span>{unreadUpdates}</span>}
+        </Button>}
+        <Button ref={plannerTrigger} variant="outline" className="planner-entry"
+          onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
+        {overview && !overview.accounts.length && <Button ref={connectTrigger} variant="outline" onClick={() => setConnect(true)}>
+          <GraduationCap />{tr("moodle:connect_school")}
+        </Button>}
+      </div>} />
   );
   return (
-    <main ref={pageRef} className="moodle-page" data-course={Boolean(detail)}>
-      <div className="moodle-content">
+    <div ref={pageRef} className={courseId ? "moodle-page" : "h-full overflow-auto text-[var(--ink)] [&_svg]:size-4 [&_button]:cursor-pointer [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-[var(--focus)]"} data-course={Boolean(detail)}>
+      <PageContainer as="main" className={courseId ? "pt-0" : undefined}>
         {!detail && !showUpdates && header}
-        <div role="status" aria-live="polite">
+        {(notice || courseId) && <div role="status" aria-live="polite">
           {notice && (
             <div className="moodle-banner">
               {notice}
@@ -563,9 +583,9 @@ function CoursesBody({
               </Button>
             </div>
           )}
-        </div>
+        </div>}
         {error && (
-          <div className="moodle-banner" role="alert">
+          <div className={courseId ? "moodle-banner" : "flex flex-wrap items-center gap-3"} role="alert">
             <WifiOff />
             <span>
               {tr(overview ? "moodle:offline_stale" : "moodle:load_error")}
@@ -577,21 +597,24 @@ function CoursesBody({
             >
               {tr("moodle:retry")}
             </Button>
+            <Button variant="ghost" onClick={() => setError(false)}>{tr("moodle:dismiss")}</Button>
           </div>
         )}
         {!!overview?.accounts.length && !showUpdates && (!courseId || overview.accounts.some(account => account.status === "expired" || account.signInStorage)) && (
-          <div className="moodle-accounts">
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button variant="ghost" onClick={() => setConnect(true)}>
+                <GraduationCap />{tr("moodle:connect_another_school")}
+              </Button>
+              <Button variant="ghost" disabled={syncing} onClick={() => void sync()}>
+                <RefreshCw className={syncing ? "moodle-spin" : ""} />
+                {tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools")}
+              </Button>
+            </div>
             {overview.accounts.map((account) => (
-              <div key={account.id} className="moodle-account">
-                <span className="moodle-avatar">
-                  <GraduationCap />
-                </span>
-                <div>
-                  <strong>{account.displayName}</strong>
-                  <span>
-                    {account.siteName} · {new URL(account.siteUrl).host}
-                  </span>
-                </div>
+              <div key={account.id} className="flex flex-wrap items-center gap-2">
+                <ListRow className="min-w-0 flex-[1_1_100%] min-[1200px]:flex-[1_1_12rem] [&_.ui-row-target]:break-words" title={account.displayName}
+                  subtitle={`${account.siteName} · ${new URL(account.siteUrl).host}`} />
                 <small>
                   {account.syncedAt
                     ? tr("moodle:synced", { time: relative(account.syncedAt) })
@@ -600,17 +623,12 @@ function CoursesBody({
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label={tr("moodle:refresh")}
-                  disabled={syncing}
-                  onClick={() => void sync()}
-                >
-                  <RefreshCw className={syncing ? "moodle-spin" : ""} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={tr("moodle:disconnect")}
-                  onClick={() => void disconnect(account.id)}
+                  aria-label={tr("moodle:disconnect_school_named", { school: account.siteName })}
+                  onClick={event => {
+                    disconnectTrigger.current = event.currentTarget;
+                    disconnectSchool.current = account.siteName;
+                    setConfirmDisconnect(account.id);
+                  }}
                 >
                   <Unplug />
                 </Button>
@@ -623,7 +641,7 @@ function CoursesBody({
                 {account.status === "expired" && (
                   <div className="moodle-expired" role="alert">
                     {tr("moodle:expired")}
-                    <Button variant="outline" onClick={() => setConnect(true)}>
+                    <Button ref={connectTrigger} variant="outline" onClick={() => setConnect(true)}>
                       {tr("moodle:reconnect")}
                     </Button>
                   </div>
@@ -852,7 +870,7 @@ function CoursesBody({
                   detail={detail}
                   api={api}
                   requested={agentRequest}
-                  onChange={refresh}
+                  onChange={async () => { await refresh(); }}
                   onError={failure}
                 />
               </div>
@@ -860,103 +878,336 @@ function CoursesBody({
           ) : (
             <div className="moodle-empty">
               <Brand/>
-              <h2>{tr("moodle:course_unavailable")}</h2>
+              <h1>{tr("moodle:course_unavailable")}</h1>
               <Button variant="outline" onClick={() => onCourse()}>
                 {tr("moodle:all_courses")}
               </Button>
             </div>
           )
-        ) : overview?.courses.length ? (
-          <div className="courses-home-layout">
-            <section className="courses-catalog" aria-labelledby="courses-title">
-              <div className="moodle-section-heading moodle-grid-heading">
-                <h2 id="courses-title">{tr("moodle:your_courses")}<span className="courses-total">{overview.courses.length}</span></h2>
-              </div>
-              <Tabs value={selectedTerm} onValueChange={value => {prepareMovement.current();setTerm(value as MoodleTermFilter);}} className="moodle-term-tabs">
-                <div className="course-list-toolbar"><TabsList aria-label={tr("moodle:term_filter")}>
-                  {availableTerms.map(filter => <TabsTrigger key={filter} value={filter}>{tr(`moodle:term_${filter}`)}<span className="moodle-chip">{overview.courses.filter(course => matchesTerm(course,filter)).length}</span></TabsTrigger>)}
-                </TabsList><div className="course-list-controls"><Select value={sort} onValueChange={value => void changeSort(value)}><SelectTrigger className="course-sort" size="sm" aria-label={tr("moodle:sort_courses")}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="smart">{tr("moodle:sort_smart")}</SelectItem><SelectItem value="name">{tr("moodle:sort_name")}</SelectItem></SelectContent></Select><CourseViewSwitch value={view} onChange={changeView} /></div></div>
-                {termFilters.map(filter => <TabsContent key={filter} value={filter}>
-                  {!overview.courses.some(course => matchesTerm(course,filter)) && <p className="moodle-empty-inline">{tr("moodle:no_term_courses")}</p>}
-                  <div className="course-heading-row" aria-hidden="true">{[false,true].map(repeat => <div key={String(repeat)} className="course-column-headings" data-repeat={repeat}><span>{tr("moodle:overdue_column")}</span><span>{tr("moodle:unread_column")}</span></div>)}</div>
-                  {pinsVisible && orderedCourses.some(item => item.pinned && matchesTerm(item.course,filter)) && <div className="course-group-label"><h3>{tr("moodle:pinned_courses")}</h3></div>}
-                  <ul className="moodle-grid" data-view={view} role="list">
-                    {orderedCourses.filter(item => matchesTerm(item.course,filter)).map(({course,pinned},index,items) => {
-                      const attention = courseAttention(course.id, overview.upcoming, updates);
-                      const name = displayTitle(course.identity,lang,course.fullName);
-                      const teacher = displayTeachers(course.identity,lang);
-                      const prefix = `course-${course.id}`;
-                      const labels = [`${prefix}-title`, ...(teacher ? [`${prefix}-teacher`] : []), ...(attention.overdue ? [`${prefix}-overdue`] : []), ...(attention.unread ? [`${prefix}-unread`] : []), ...(attention.next ? [`${prefix}-deadline`] : [])];
-                      const tooltip = [course.fullName, attention.overdue ? tr('moodle:course_overdue_tooltip',{count:attention.overdue}) : '', attention.unread ? tr('moodle:course_unread_tooltip',{count:attention.unread}) : ''].filter(Boolean).join('\n');
-                      const urgent = !!attention.next && Date.parse(attention.next.dueAt)-Date.now()<86400000;
-                      return <li key={course.id} className="moodle-course-card" title={course.fullName} data-course-id={course.id} data-pinned={pinned} data-group-start={pinsVisible && !pinned && index>0 && items[index-1]!.pinned}>
-                        <div className="moodle-card-body">
-                          <h3><button className="course-open" type="button" title={tooltip} aria-labelledby={labels.join(' ')} aria-describedby={`${prefix}-raw`} onAuxClick={event => {if(event.button === 1) {event.preventDefault();navigation?.openTab({view:"courses",courseId:course.id,title:name});}}} onClick={event => event.metaKey || event.ctrlKey ? navigation?.openTab({view:"courses",courseId:course.id,title:name}) : onCourse(course.id)}><span className="course-title" id={`${prefix}-title`}>{name}</span></button></h3>
-                          {(teacher || attention.next) && <p className="course-meta">
-                            {teacher && <span id={`${prefix}-teacher`}>{teacher}</span>}
-                            {teacher && attention.next && <span className="course-meta-separator" aria-hidden="true">·</span>}
-                            {attention.next && <time id={`${prefix}-deadline`} dateTime={attention.next.dueAt} title={attention.next.title} data-urgent={urgent}>{urgent && <Clock3 aria-hidden="true" />}{deadlinePhrase(attention.next.dueAt)}</time>}
-                          </p>}
-                        </div>
-                        <button type="button" aria-label={tr("tabs:open")} onClick={() => navigation?.openTab({view:"courses",courseId:course.id,title:name})}>{tr("tabs:open")}</button>
-                        <div className="course-counts" aria-hidden="true">
-                          <span className="course-count course-overdue" data-count={attention.overdue} title={attention.overdue ? tr('moodle:course_overdue_tooltip',{count:attention.overdue}) : undefined}>{attention.overdue>0 && <><AlarmClock />{attention.overdue>99 ? '99+' : attention.overdue}</>}</span>
-                          <span className="course-count course-unread-count" data-count={attention.unread} title={attention.unread ? tr('moodle:course_unread_tooltip',{count:attention.unread}) : undefined}>{attention.unread>0 && <><Mail />{attention.unread>99 ? '99+' : attention.unread}</>}</span>
-                        </div>
-                        <button type="button" className="course-pin" aria-pressed={pinned} aria-label={tr(pinned ? 'moodle:unpin_course' : 'moodle:pin_course')} title={tr(pinned ? 'moodle:unpin_course' : 'moodle:pin_course')} aria-disabled={pinBusy === course.id} onClick={() => {if(!pinBusy)void pinCourse(course.accountId,course.id,!pinned);}}><Pin aria-hidden="true" /></button>
-                        {attention.overdue>0 && <span id={`${prefix}-overdue`} className="sr-only">{tr('moodle:course_overdue',{count:attention.overdue})}</span>}
-                        {attention.unread>0 && <span id={`${prefix}-unread`} className="sr-only">{tr('moodle:course_unread',{count:attention.unread})}</span>}
-                        <span id={`${prefix}-raw`} className="sr-only">{course.fullName}{course.identity.lifecycle === 'unknown' && ` · ${tr('moodle:dates_unavailable')}`}</span>
-                      </li>;
-
-                    })}
-                  </ul>
-                </TabsContent>)}
-              </Tabs>
+        ) : overview && (overview.courses.length > 0 || overview.accounts.some(account => account.syncedAt)) ? (
+          <div className="flex min-w-0 flex-col gap-6">
+    <Section title={tr("moodle:your_courses")} count={overview.courses.length}>
+      <Tabs
+        value={selectedTerm}
+        onValueChange={(value) => {
+          prepareMovement.current();
+          termInitialized.current = true;
+          setTerm(value as MoodleTermFilter);
+        }}
+        className="moodle-term-tabs"
+      >
+        <Toolbar
+          left={
+            <SegmentedTabsList aria-label={tr("moodle:term_filter")}>
+              {availableTerms.map((filter) => (
+                <SegmentedTabsTrigger key={filter} value={filter}>
+                  {tr(`moodle:term_${filter}`)}
+                  <span className="moodle-chip">
+                    {overview.courses.filter((course) => matchesTerm(course, filter)).length}
+                  </span>
+                </SegmentedTabsTrigger>
+              ))}
+            </SegmentedTabsList>
+          }
+          right={
+            <>
+              <Select value={sort} onValueChange={(value) => void changeSort(value)}>
+                <SelectTrigger
+                  className="course-sort"
+                  size="sm"
+                  aria-label={tr("moodle:sort_courses")}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="smart">{tr("moodle:sort_smart")}</SelectItem>
+                  <SelectItem value="name">{tr("moodle:sort_name")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <CourseViewSwitch value={view} onChange={changeView} />
+            </>
+          }
+        />
+        {termFilters.map((filter) => (
+          <TabsContent key={filter} value={filter}>
+            {!overview.courses.some((course) => matchesTerm(course, filter)) && (
+              <EmptyState title={tr("moodle:no_term_courses")} />
+            )}
+            {pinsVisible &&
+              orderedCourses.some((item) => item.pinned && matchesTerm(item.course, filter)) && (
+                <div className="course-group-label py-2 text-sm text-[var(--muted)]">
+                  <h3>{tr("moodle:pinned_courses")}</h3>
+                </div>
+              )}
+            <ul
+              className={
+                view === "cards"
+                  ? "moodle-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,22rem),1fr))] gap-3 p-0 list-none"
+                  : "moodle-grid flex flex-col p-0 list-none"
+              }
+              data-view={view}
+              role="list"
+            >
+              {orderedCourses
+                .filter((item) => matchesTerm(item.course, filter))
+                .map(({ course, pinned }, index, items) => {
+                  const attention = courseAttention(course.id, overview.upcoming, updates);
+                  const name = displayTitle(course.identity, lang, course.fullName);
+                  const teacher = displayTeachers(course.identity, lang);
+                  const prefix = `course-${course.id}`;
+                  const labels = [
+                    `${prefix}-title`,
+                    ...(teacher ? [`${prefix}-teacher`] : []),
+                    ...(attention.overdue ? [`${prefix}-overdue`] : []),
+                    ...(attention.unread ? [`${prefix}-unread`] : []),
+                    ...(attention.next ? [`${prefix}-deadline`] : []),
+                  ];
+                  const tooltip = [
+                    course.fullName,
+                    attention.overdue
+                      ? tr("moodle:course_overdue_tooltip", { count: attention.overdue })
+                      : "",
+                    attention.unread
+                      ? tr("moodle:course_unread_tooltip", { count: attention.unread })
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join("\n");
+                  const Surface = view === "cards" ? Card : "div";
+                  const urgent =
+                    !!attention.next && Date.parse(attention.next.dueAt) - Date.now() < 86400000;
+                  return (
+                    <li
+                      key={course.id}
+                      className="moodle-course-card min-w-0"
+                      title={course.fullName}
+                      data-course-id={course.id}
+                      data-pinned={pinned}
+                      data-group-start={
+                        pinsVisible && !pinned && index > 0 && items[index - 1]!.pinned
+                      }
+                    >
+                      <Surface
+                        {...(view === "cards" ? { variant: "flat" as const } : {})}
+                        className="py-0"
+                      >
+                        <ListRow
+                          className="w-full min-h-14 flex-wrap gap-3 [&>.ui-row-target]:py-2 [&>.ui-row-target]:min-w-[min(100%,14rem)]"
+                          title={
+                            <button
+                              className="course-open block w-full text-start whitespace-normal break-words"
+                              type="button"
+                              title={tooltip}
+                              aria-labelledby={labels.join(" ")}
+                              aria-describedby={`${prefix}-raw`}
+                              onAuxClick={(event) => {
+                                if (event.button === 1) {
+                                  event.preventDefault();
+                                  navigation?.openTab({
+                                    view: "courses",
+                                    courseId: course.id,
+                                    title: name,
+                                  });
+                                }
+                              }}
+                              onClick={(event) =>
+                                event.metaKey || event.ctrlKey
+                                  ? navigation?.openTab({
+                                      view: "courses",
+                                      courseId: course.id,
+                                      title: name,
+                                    })
+                                  : onCourse(course.id)
+                              }
+                            >
+                              <span className="course-title" id={`${prefix}-title`}>
+                                {name}
+                              </span>
+                            </button>
+                          }
+                          subtitle={
+                            (teacher || attention.next) && (
+                              <span className="course-meta flex flex-wrap items-baseline gap-x-2 text-sm">
+                                {teacher && <span id={`${prefix}-teacher`}>{teacher}</span>}
+                                {teacher && attention.next && (
+                                  <span className="course-meta-separator" aria-hidden="true">
+                                    ·
+                                  </span>
+                                )}
+                                {attention.next && (
+                                  <time
+                                    id={`${prefix}-deadline`}
+                                    dateTime={attention.next.dueAt}
+                                    title={attention.next.title}
+                                    data-urgent={urgent}
+                                  >
+                                    {urgent && <Clock3 aria-hidden="true" className="me-1 inline align-middle" />}
+                                    {deadlinePhrase(attention.next.dueAt)}
+                                  </time>
+                                )}
+                              </span>
+                            )
+                          }
+                          actions={
+                            <div className="flex items-center gap-1">
+                              {navigation?.openTab && <Button
+                                variant="ghost"
+                                size="icon"
+                                className="relative z-1"
+                                aria-label={tr("moodle:open_course_tab", { course: name })}
+                                title={tr("moodle:open_course_tab", { course: name })}
+                                onClick={() =>
+                                  navigation?.openTab({
+                                    view: "courses",
+                                    courseId: course.id,
+                                    title: name,
+                                  })
+                                }
+                              >
+                                <ArrowUpRight aria-hidden="true" />
+                              </Button>}
+                              <div
+                                className="course-counts flex items-center gap-2"
+                                aria-hidden="true"
+                              >
+                                <span
+                                  className="course-count course-overdue w-[calc(var(--space-4)*3.5)] shrink-0 inline-flex items-center gap-1 text-[var(--danger)]"
+                                  data-count={attention.overdue}
+                                  title={
+                                    attention.overdue
+                                      ? tr("moodle:course_overdue_tooltip", {
+                                          count: attention.overdue,
+                                        })
+                                      : undefined
+                                  }
+                                >
+                                  {attention.overdue > 0 && (
+                                    <>
+                                      <AlarmClock />
+                                      {attention.overdue > 99 ? "99+" : attention.overdue}
+                                    </>
+                                  )}
+                                </span>
+                                <span
+                                  className="course-count course-unread-count w-[calc(var(--space-4)*3.5)] shrink-0 inline-flex items-center gap-1 text-[var(--muted)]"
+                                  data-count={attention.unread}
+                                  title={
+                                    attention.unread
+                                      ? tr("moodle:course_unread_tooltip", {
+                                          count: attention.unread,
+                                        })
+                                      : undefined
+                                  }
+                                >
+                                  {attention.unread > 0 && (
+                                    <>
+                                      <Mail />
+                                      {attention.unread > 99 ? "99+" : attention.unread}
+                                    </>
+                                  )}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                className="course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--r-sm)] aria-pressed:bg-[var(--active)]"
+                                aria-pressed={pinned}
+                                aria-label={tr(
+                                  pinned ? "moodle:unpin_course_named" : "moodle:pin_course_named",
+                                  { course: name },
+                                )}
+                                aria-disabled={pinBusy === course.id}
+                                onClick={() => {
+                                  if (!pinBusy)
+                                    void pinCourse(course.accountId, course.id, !pinned);
+                                }}
+                              >
+                                <Pin aria-hidden="true" fill={pinned ? "currentColor" : "none"} />
+                              </button>
+                              {attention.overdue > 0 && (
+                                <span id={`${prefix}-overdue`} className="sr-only">
+                                  {tr("moodle:course_overdue", { count: attention.overdue })}
+                                </span>
+                              )}
+                              {attention.unread > 0 && (
+                                <span id={`${prefix}-unread`} className="sr-only">
+                                  {tr("moodle:course_unread", { count: attention.unread })}
+                                </span>
+                              )}
+                              <span id={`${prefix}-raw`} className="sr-only">
+                                {course.fullName}
+                                {course.identity.lifecycle === "unknown" &&
+                                  ` · ${tr("moodle:dates_unavailable")}`}
+                              </span>
+                            </div>
+                          }
+                        />
+                      </Surface>
+                    </li>
+                  );
+                })}
+            </ul>
+          </TabsContent>
+        ))}
+      </Tabs>
+    </Section>
+    <Section title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length + undated.length}>
+      {([overdue, dueSoon, undated] as const).map(
+        (items, group) =>
+          items.length > 0 && (
+            <section key={group} className="flex flex-col gap-4">
+              <h3 className="font-medium">
+                {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
+              </h3>
+              <ul className="moodle-due-list list-none p-0">
+                {items.slice(0, allDue ? undefined : 5).map((d) => {
+                  const course = overview.courses.find((c) => c.id === d.courseId);
+                  return (
+                    <li key={d.id}>
+                      <ListRow
+                        className="min-h-16"
+                        title={
+                          <button
+                            className="moodle-due-link text-start"
+                            onClick={() => onCourse(d.courseId)}
+                          >
+                            {d.title}
+                          </button>
+                        }
+                        subtitle={
+                          course
+                            ? displayTitle(course.identity, lang, course.fullName)
+                            : tr("moodle:school")
+                        }
+                        meta={group !== 2 &&
+                          <time dateTime={d.dueAt} title={date(d.dueAt)}>
+                            {relative(d.dueAt)}
+                          </time>
+                        }
+                        actions={group !== 2 && remind(d)}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
             </section>
-            <section className="moodle-due-section" aria-labelledby="due-title">
-              <div className="moodle-section-heading">
-                <h2 id="due-title"><Clock3 />{tr("moodle:due_soon")}<span className="courses-total">{dueSoon.length || ''}</span></h2>
-                <span>{tr("moodle:next_seven_days")}</span>
-              </div>
-              {dueSoon.length ? <>
-                <ul className="moodle-due-list">
-                  {dueSoon.slice(0,allDue ? undefined : 5).map(d => {
-                    const course = overview.courses.find(c => c.id === d.courseId);
-                    return <li key={d.id} className="moodle-due-row" data-urgent={Date.parse(d.dueAt)-Date.now()<86400000}>
-                      <span className="moodle-due-course" title={course?.fullName}>{course ? displayTitle(course.identity,lang,course.fullName) : tr("moodle:school")}</span>
-                      <button className="moodle-due-link" title={d.title} onClick={() => onCourse(d.courseId)}>{d.title}</button>
-                      <time dateTime={d.dueAt} title={date(d.dueAt)}>{relative(d.dueAt)}</time>
-                      {remind(d)}
-                    </li>;
-                  })}
-                </ul>
-                {dueSoon.length>5 && <Button variant="ghost" className="due-show-all" aria-expanded={allDue} onClick={() => setAllDue(!allDue)}>{tr(allDue ? "moodle:show_less" : "moodle:show_all")}</Button>}
-              </> : <p className="moodle-empty-inline">{tr("moodle:all_caught_up")}</p>}
-            </section>
-          </div>
+          ),
+      )}
+      {!error && overdue.length + dueSoon.length + undated.length === 0 && <p className="text-[var(--muted)]">{tr("moodle:all_caught_up")}</p>}
+      {Math.max(overdue.length, dueSoon.length, undated.length) > 5 && (
+        <Button variant="ghost" aria-expanded={allDue} onClick={() => setAllDue(!allDue)}>
+          {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
+        </Button>
+      )}
+    </Section>
+  </div>
         ) : (
           !error && (
-            <div className="moodle-empty">
-              <GraduationCap />
-              <h2>
-                {tr(
-                  overview?.accounts.length
-                    ? overview.accounts.some((account) => !account.syncedAt)
-                      ? "moodle:syncing"
-                      : "moodle:no_courses"
-                    : "moodle:empty_title",
-                )}
-              </h2>
-              {!overview?.accounts.length && (
-                <p>{tr("moodle:empty_description")}</p>
-              )}
-              {!overview?.accounts.length && (
-                <Button onClick={() => setConnect(true)}>
-                  {tr("moodle:connect_school")}
-                </Button>
-              )}
-            </div>
+            <EmptyState headingLevel={2} icon={<GraduationCap />} title={tr(
+              overview?.accounts.length
+                ? overview.accounts.some(account => !account.syncedAt)
+                  ? "moodle:syncing" : "moodle:no_courses"
+                : "moodle:empty_title",
+            )} description={!overview?.accounts.length ? tr("moodle:empty_description") : undefined} />
           )
         )}
         <Dialog open={!!confirmDisconnect} onOpenChange={open => { if (!open) setConfirmDisconnect(undefined); }}>
@@ -976,9 +1227,9 @@ function CoursesBody({
           open={connect}
           onOpenChange={setConnect}
           api={api}
-          onConnected={() => refresh(true)}
+          onConnected={async () => { await refresh(true); }}
         />
-      </div>
-    </main>
+      </PageContainer>
+    </div>
   );
 }

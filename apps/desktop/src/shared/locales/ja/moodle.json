@@ -13,7 +13,7 @@
   "connecting": "学校へのログインを待っています…",
   "sign_in_hint": "学校の安全なウィンドウでログインします。ここで学校のパスワードを入力する必要はありません。",
   "all_courses": "すべてのコース",
-  "all_caught_up": "今後 7 日間の締め切りはありません。余裕を持って準備できます。",
+  "all_caught_up": "今後7日以内に期限を迎える項目はありません。",
   "action_error": "操作を完了できませんでした。もう一度お試しください。",
   "calendar_exported": "カレンダーのエクスポートをリクエストしました。",
   "offline_stale": "更新できません。前回同期したコースを表示しています。",
@@ -252,5 +252,14 @@
   "view_list": "リスト",
   "view_cards": "カード",
   "open_file": "ファイルを開く：{{name}}",
-  "course_more": "その他のコース操作"
+  "course_more": "その他のコース操作",
+  "open_course_tab": "{{course}}を新しいタブで開く",
+  "catalog_course_actions": "{{course}}の操作",
+  "connect_another_school": "別の学校を接続",
+  "no_due_date": "期限なし",
+  "refresh_this_course": "このコースを更新",
+  "refresh_all_schools": "すべての学校を更新",
+  "disconnect_school_named": "{{school}}の接続を解除",
+  "pin_course_named": "{{course}}をピン留め",
+  "unpin_course_named": "{{course}}のピン留めを解除"
 }

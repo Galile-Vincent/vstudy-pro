@@ -13,7 +13,7 @@
   "connecting": "Waiting for school sign-in…",
   "sign_in_hint": "Sign-in continues in a secure school window. VStudy never asks for your school password here.",
   "all_courses": "All courses",
-  "all_caught_up": "Nothing due in the next seven days. You have room to get ahead.",
+  "all_caught_up": "No deadlines due in the next 7 days.",
   "action_error": "That action could not be completed. Please try again.",
   "calendar_exported": "Calendar export requested.",
   "offline_stale": "Could not refresh. Showing your last synced courses.",
@@ -252,5 +252,14 @@
   "view_list": "List",
   "view_cards": "Cards",
   "open_file": "Open file: {{name}}",
-  "course_more": "More course actions"
+  "course_more": "More course actions",
+  "open_course_tab": "Open {{course}} in new tab",
+  "catalog_course_actions": "Actions for {{course}}",
+  "connect_another_school": "Connect another school",
+  "no_due_date": "No due date",
+  "refresh_this_course": "Refresh this course",
+  "refresh_all_schools": "Refresh all schools",
+  "disconnect_school_named": "Disconnect {{school}}",
+  "pin_course_named": "Pin {{course}}",
+  "unpin_course_named": "Unpin {{course}}"
 }

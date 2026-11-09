@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { act } from "react";
-import { getByRole } from "@testing-library/dom";
+import { act, useState } from "react";
+import { getByRole, getAllByRole, queryByRole, waitFor } from "@testing-library/dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Courses, deadlineGroup } from "./index";
@@ -10,6 +10,12 @@ import { i18n } from "../../shared/i18n";
 import { displayTitle } from "../../shared/moodle-course-display";
 import type { MoodleApi } from "./api";
 import type { MoodleAgentAction } from "../../shared/moodle";
+
+const navigationMock = vi.hoisted(() => ({ value: null as null | {openTab: ReturnType<typeof vi.fn>} }));
+vi.mock('../shell', async importOriginal => ({
+  ...await importOriginal<typeof import('../shell')>(),
+  useOptionalNavigation: () => navigationMock.value,
+}));
 
 vi.stubGlobal(
   "ResizeObserver",
@@ -25,6 +31,7 @@ let host: HTMLDivElement;
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
 beforeEach(async () => {
+  navigationMock.value = null;
   vi.stubGlobal("matchMedia",vi.fn(() => ({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})));
   await i18n.changeLanguage("en");
   host = document.createElement("div");
@@ -34,6 +41,7 @@ beforeEach(async () => {
 afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();
+  vi.useRealTimers();
 });
 async function mount(api: MoodleApi, courseId?: string, onDocument = vi.fn()) {
   await act(async () =>
@@ -87,7 +95,7 @@ describe("Courses", () => {
     });
     await mount(api);
     expect(host.querySelector(".moodle-due-link")?.textContent).toBe(
-      "Amplifier lab report",
+      "Weekly reflection",
     );
     expect(host.querySelectorAll(".moodle-course-card")).toHaveLength(1);
     expect(host.querySelector(".moodle-course-card")?.textContent).toContain(
@@ -95,8 +103,22 @@ describe("Courses", () => {
     );
     expect(host.querySelector(".moodle-course-card progress")).toBeNull();
     expect(host.querySelector('.moodle-course-card [id$="-unread"]')?.textContent).toBe('2 unread');
-    expect(host.querySelector(".moodle-due-list")?.textContent).toContain('Amplifier lab report');
+    expect(host.textContent).toContain('Amplifier lab report');
     expect(host.textContent).not.toContain('No deadlines this week');
+  });
+  it("renders exactly one main in catalog, detail, Updates and Planner", async () => {
+    const api = createMockMoodleApi();
+    await mount(api);
+    expect(host.querySelectorAll('main')).toHaveLength(1);
+    await act(async () => getByRole(host, 'button', {name: /^Updates/}).click());
+    expect(host.querySelectorAll('main')).toHaveLength(1);
+    await act(async () => root.unmount());
+    root = createRoot(host);
+    await mount(api, (await api.overview()).courses[0]!.id);
+    expect(host.querySelectorAll('main')).toHaveLength(1);
+    await mount(api);
+    await act(async () => host.querySelector<HTMLButtonElement>('.planner-entry')!.click());
+    expect(host.querySelectorAll('main')).toHaveLength(1);
   });
   it("groups course header actions behind one primary action, refresh and an overflow menu", async () => {
     const api = createMockMoodleApi();
@@ -130,7 +152,8 @@ describe("Courses", () => {
     expect(refresh.disabled).toBe(false);
     await mount(api);
     expect(host.querySelector(".planner-entry")).not.toBeNull();
-    expect(host.querySelector(".moodle-header")?.textContent).toContain("Connect school");
+    expect(host.querySelector("[data-slot=page-header]")?.textContent).not.toContain("Connect school");
+    expect(host.textContent).toContain("Connect another school");
   });
   it("preserves detail tab selection, arrow navigation, and panel associations", async () => {
     const api = createMockMoodleApi();
@@ -244,9 +267,7 @@ describe("Courses", () => {
     api.sync = async () => {
       throw new Error("offline");
     };
-    const refresh = host.querySelector<HTMLButtonElement>(
-      '[aria-label="Refresh courses"]',
-    )!;
+    const refresh = getByRole(host, 'button', {name: 'Refresh all schools'});
     await act(async () => refresh.click());
     expect(host.querySelector("[role=alert]")?.textContent).toContain(
       "Showing your last synced courses.",
@@ -779,9 +800,12 @@ it('keeps empty count slots, caps the visible number, and orders the accessible 
   await mount(api);
   expect(host.querySelector('.course-unread-count')?.textContent).toBe('99+');
   expect(host.querySelector('.course-unread-count')?.getAttribute('title')).toBe('120 unread updates');
-  expect(host.querySelector('.course-counts')?.children).toHaveLength(2);
-  expect(host.querySelector('.course-heading-row')?.getAttribute('aria-hidden')).toBe('true');
-  expect(host.querySelector('.course-column-headings')?.textContent).toBe('OverdueUnread');
+  for (const slot of ['.course-overdue', '.course-unread-count']) {
+    expect(host.querySelector(slot)?.classList.contains('w-[calc(var(--space-4)*3.5)]')).toBe(true);
+    expect(host.querySelector(slot)?.classList.contains('shrink-0')).toBe(true);
+  }
+  expect(host.querySelector('.course-pin')?.classList.contains('size-[calc(var(--space-3)*3)]')).toBe(true);
+  expect(host.querySelector('.course-heading-row')).toBeNull();
   const button = host.querySelector<HTMLButtonElement>('.course-open')!;
   const labels = button.getAttribute('aria-labelledby')!.split(' ').map(id=>document.getElementById(id)!.textContent);
   expect(labels[0]).toBe(displayTitle(course.identity,'en',course.fullName));
@@ -805,16 +829,17 @@ it('pins without opening a course, exposes pressed state, and keeps the course b
   const target = rows.at(-1)!;
   const open = target.querySelector<HTMLButtonElement>('.course-open')!;
   const pin = target.querySelector<HTMLButtonElement>('.course-pin')!;
-  expect(pin.getAttribute('aria-label')).toBe('Pin course');
+  expect(pin.getAttribute('aria-label')).toBe(`Pin ${open.textContent}`);
   expect(pin.getAttribute('aria-pressed')).toBe('false');
-  expect(pin.title).toBe('Pin course');
+  expect(pin.hasAttribute('title')).toBe(false);
   expect(pin.tabIndex).toBe(0);
   pin.focus();
   await act(async () => pin.click());
   expect(host.querySelector('.course-open')).toBe(open);
   expect(document.activeElement).toBe(pin);
   expect(pin.getAttribute('aria-pressed')).toBe('true');
-  expect(pin.getAttribute('aria-label')).toBe('Unpin course');
+  expect(pin.querySelector('svg')?.getAttribute('fill')).toBe('currentColor');
+  expect(pin.getAttribute('aria-label')).toBe(`Unpin ${open.textContent}`);
   expect(host.querySelector('.course-group-label')?.textContent).toBe('Pinned');
   expect((await api.overview()).pinnedCourseIds).toContain(target.getAttribute('data-course-id'));
   await act(async () => pin.click());
@@ -860,8 +885,329 @@ describe("Courses view switch", () => {
 
   it("keeps the repeated column labels out of the accessibility tree", async () => {
     await mount(createMockMoodleApi());
-    const row = host.querySelector(".course-heading-row")!;
-    expect(row.getAttribute("aria-hidden")).toBe("true");
-    expect(row.querySelectorAll(".course-column-headings")).toHaveLength(2);
+    expect(host.querySelector(".course-heading-row")).toBeNull();
   });
+});
+
+
+it("C1 confirms the named school before catalog disconnect", async () => {
+  const api = createMockMoodleApi();
+  const account = (await api.overview()).accounts[0]!;
+  const disconnect = vi.spyOn(api, "disconnect");
+  await mount(api);
+  await act(async () => getByRole(host, "button", { name: `Disconnect ${account.siteName}` }).click());
+  expect(disconnect).not.toHaveBeenCalled();
+  const dialog = getByRole(document.body, "dialog");
+  expect(dialog.textContent).toContain(account.siteName);
+  await act(async () => getByRole(dialog, "button", { name: "Disconnect school" }).click());
+  expect(disconnect).toHaveBeenCalledExactlyOnceWith(account.id);
+});
+
+it("C3 retains sync failure across cached overview reads", async () => {
+  const api = createMockMoodleApi();
+  let listener: Parameters<NonNullable<MoodleApi["onProgress"]>>[0];
+  api.onProgress = value => { listener = value; return () => {}; };
+  await mount(api);
+  await act(async () => {
+    listener!({ accountId: (await api.overview()).accounts[0]!.id, state: "error", completed: 0, total: 1 });
+    await new Promise(resolve => setTimeout(resolve, 70));
+  });
+  expect(host.querySelector('[role="alert"]')).not.toBeNull();
+  await act(async () => {
+    listener!({ accountId: (await api.overview()).accounts[0]!.id, state: "idle", completed: 1, total: 1 });
+    await new Promise(resolve => setTimeout(resolve, 70));
+  });
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+});
+
+it("C4 moves focus into Planner and restores its invoking button", async () => {
+  await mount(createMockMoodleApi());
+  const entry = host.querySelector<HTMLButtonElement>(".planner-entry")!;
+  await act(async () => { entry.focus(); entry.click(); });
+  const back = getByRole(host, "button", { name: "Back to courses" });
+  expect(document.activeElement).toBe(back);
+  await act(async () => back.click());
+  expect(document.activeElement).toBe(host.querySelector(".planner-entry"));
+});
+it("C2 gives the sibling new-tab icon a course-specific name", async () => {
+  const openTab = vi.fn();
+  navigationMock.value = {openTab};
+  await mount(createMockMoodleApi());
+  const row = host.querySelector(".moodle-course-card")!;
+  const action = getByRole(row as HTMLElement, "button", {
+    name: /Open.*Electronics Laboratory.*new tab/,
+  });
+  expect(action.querySelector("svg")).not.toBeNull();
+  expect(action.closest(".course-open")).toBeNull();
+  await act(async () => action.click());
+  const expected = openTab.mock.calls[0];
+  const title = row.querySelector('.course-open')!;
+  for (const modifier of [{ctrlKey: true}, {metaKey: true}]) {
+    await act(async () => title.dispatchEvent(new MouseEvent('click', {bubbles: true, ...modifier})));
+    expect(openTab.mock.calls.at(-1)).toEqual(expected);
+  }
+  await act(async () => title.dispatchEvent(new MouseEvent('auxclick', {bubbles: true, button: 1})));
+  expect(openTab.mock.calls.at(-1)).toEqual(expected);
+  expect(openTab).toHaveBeenCalledTimes(4);
+});
+
+it('hides unavailable new-tab controls and the duplicate menu', async () => {
+  await mount(createMockMoodleApi());
+  const row = host.querySelector('.moodle-course-card')!;
+  expect(row.querySelector('[aria-label*=new]')).toBeNull();
+  expect(row.querySelector('[aria-haspopup=menu]')).toBeNull();
+});
+
+
+it("keeps all four filters with zero counts and associated empty panels", async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, courses: [overview.courses[0]!]});
+  await mount(api);
+  const tabs = [...host.querySelectorAll<HTMLButtonElement>('.moodle-term-tabs [role=tab]')];
+  expect(tabs).toHaveLength(4);
+  expect(tabs[1]!.textContent).toBe("Upcoming0");
+  await act(async () => tabs[1]!.focus());
+  expect(host.querySelector('[role=tabpanel] [data-slot=empty-state]')).not.toBeNull();
+  expect(tabs[1]!.getAttribute('aria-controls')).toBe(host.querySelector('[role=tabpanel][data-state=active]')?.id);
+  await act(async () => root.unmount());
+  root = createRoot(host);
+  api.overview = async () => ({...overview, courses: []});
+  await mount({...api});
+  expect(host.querySelectorAll('.moodle-term-tabs [role=tab]')).toHaveLength(4);
+  expect(host.querySelector('[data-slot=empty-state]')).not.toBeNull();
+});
+
+it("retains a one-column grid fallback and separate course actions", async () => {
+  await mount(createMockMoodleApi());
+  const grid = host.querySelector<HTMLElement>(".moodle-grid[data-view]")!;
+  await act(async () => getByRole(host, "button", { name: "Cards" }).click());
+  expect(grid.className).toContain("min(100%,22rem)");
+  const card = grid.querySelector('[data-slot=card]')!;
+  expect(card.getAttribute("data-variant")).toBe("flat");
+  expect(card.tagName).toBe("DIV");
+  expect(card.querySelector("button button")).toBeNull();
+  expect(host.querySelector('[data-slot=page-header] h1')?.className).not.toContain("break-all");
+});
+
+it('shows invalid and absent dates in an explicit final group', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, upcoming: [
+    {...overview.upcoming[0]!, id: 'missing', title: 'Undated work', dueAt: ''},
+    {...overview.upcoming[0]!, id: 'invalid', title: 'Invalid date work', dueAt: 'bad'},
+  ]});
+  await mount(api);
+  expect(host.textContent).toContain('No due date');
+  expect(host.textContent).toContain('Undated work');
+  expect(host.textContent).toContain('Invalid date work');
+});
+
+it('keeps focus on a surviving target after the last disconnect', async () => {
+  const api = createMockMoodleApi();
+  await mount(api);
+  await act(async () => getByRole(host, 'button', {name: /^Disconnect /}).click());
+  await act(async () => getByRole(getByRole(document.body, 'dialog'), 'button', {name: 'Disconnect school'}).click());
+  await waitFor(() => expect(document.activeElement).toBe(getByRole(host, 'button', {name: 'Connect school'})));
+});
+
+it('shows one Connect school action only after an empty overview loads', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  let resolve!: (value: typeof overview) => void;
+  api.overview = () => new Promise(done => { resolve = done; });
+  await mount(api);
+  expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
+  expect(getByRole(host, 'heading', {level: 1, name: 'Courses'})).toBeTruthy();
+  expect(host.textContent).not.toContain('Connect school');
+  await act(async () => resolve({...overview, accounts: [], courses: []}));
+  expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
+  expect(getByRole(host, 'heading', {level: 1, name: 'Courses'})).toBeTruthy();
+  expect(getByRole(host, 'button', {name: 'Connect school'})).toBeTruthy();
+});
+
+it('offers shared school actions once and names each disconnect', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const second = {...overview.accounts[0]!, id: 'second', siteName: 'Second school'};
+  api.overview = async () => ({...overview, accounts: [...overview.accounts, second]});
+  const sync = vi.spyOn(api, 'sync');
+  await mount(api);
+  expect(getByRole(host, 'button', {name: 'Connect another school'})).toBeTruthy();
+  await act(async () => getByRole(host, 'button', {name: 'Refresh all schools'}).click());
+  expect(sync).toHaveBeenCalledOnce();
+  expect(getByRole(host, 'button', {name: 'Disconnect Second school'})).toBeTruthy();
+});
+
+it('chooses Past initially and preserves a later user choice on refresh', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, courses: overview.courses.map(c => ({
+    ...c, identity: {...c.identity, lifecycle: 'past'},
+  }))});
+  await mount(api);
+  const tabs = [...host.querySelectorAll<HTMLButtonElement>('.moodle-term-tabs [role=tab]')];
+  expect(tabs[2]!.getAttribute('aria-selected')).toBe('true');
+  await act(async () => tabs[3]!.focus());
+  await act(async () => getByRole(host, 'button', {name: /Refresh/}).click());
+  expect(tabs[3]!.getAttribute('aria-selected')).toBe('true');
+});
+
+it('uses level three deadline groups below Due soon and body empty copy', async () => {
+  const api = createMockMoodleApi();
+  await mount(api);
+  const section = getByRole(host, 'heading', {name: /^Due soon/, level: 2}).closest('section')!;
+  expect(section.querySelectorAll('h2')).toHaveLength(1);
+  expect(section.querySelector('h3')).toBeTruthy();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, upcoming: []});
+  await mount({...api});
+  expect(getByRole(host, 'heading', {name: /^Due soon/}).closest('section')?.querySelector('p')?.textContent)
+    .toBe('No deadlines due in the next 7 days.');
+});
+
+it('retains a rejected sync error after a successful cached read', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = vi.fn(async () => ({...overview, upcoming: []}));
+  api.sync = vi.fn().mockRejectedValue(new Error('offline'));
+  await mount(api);
+  await act(async () => getByRole(host, 'button', {name: 'Refresh all schools'}).click());
+  expect(api.overview).toHaveBeenCalledTimes(2);
+  expect(host.querySelector('[role=alert]')?.textContent).toContain('Showing your last synced courses.');
+  expect(host.textContent).not.toContain('No deadlines due in the next 7 days.');
+});
+
+it('expands overdue alongside upcoming and restores the five-row cap', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const now = Date.now();
+  const deadlines = (past: boolean) => Array.from({length: 7}, (_, i) => ({
+    ...overview.upcoming[0]!, id: `${past}-${i}`, title: `${past ? 'Overdue' : 'Next'} ${i}`,
+    submitted: false, dueAt: new Date(now + (past ? -1 : 1) * (i + 1) * 3600000).toISOString(),
+  }));
+  api.overview = async () => ({...overview, upcoming: [...deadlines(true).reverse(), ...deadlines(false)]});
+  await mount(api);
+  const titles = () => [...host.querySelectorAll('.moodle-due-link')].map(n => n.textContent);
+  expect(titles().slice(0, 5)).toEqual(['Overdue 0', 'Overdue 1', 'Overdue 2', 'Overdue 3', 'Overdue 4']);
+  await click('Show all');
+  expect(titles()).toHaveLength(14);
+  expect(titles()).toContain('Overdue 5');
+  await click('Show less');
+  expect(titles()).toHaveLength(10);
+});
+
+it('names the unavailable page with one h1 after course loading', async () => {
+  const api = createMockMoodleApi();
+  const id = (await api.overview()).courses[0]!.id;
+  let resolve!: (value: Awaited<ReturnType<MoodleApi['course']>>) => void;
+  api.course = () => new Promise(done => {resolve = done;});
+  await mount(api, id);
+  expect(queryByRole(host, 'heading', {level: 1})).toBeNull();
+  await act(async () => resolve(undefined as unknown as Awaited<ReturnType<MoodleApi['course']>>));
+  expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
+  expect(getByRole(host, 'heading', {level: 1, name: 'This course is unavailable.'})).toBeTruthy();
+  expect(host.querySelectorAll('main')).toHaveLength(1);
+});
+
+
+it('focuses Courses after a multi-account disconnect without stealing later focus', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  overview.accounts.push({...overview.accounts[0]!, id: 'second', siteName: 'Second'});
+  api.overview = async () => overview;
+  api.disconnect = async id => { overview.accounts = overview.accounts.filter(a => a.id !== id); };
+  await mount(api);
+  await act(async () => getByRole(host, 'button', {name: 'Disconnect Second'}).click());
+  await click('Disconnect school', getByRole(document.body, 'dialog'));
+  await waitFor(() => expect(document.activeElement).toBe(getByRole(host, 'heading', {level: 1, name: 'Courses'})));
+  const search = document.createElement('input');
+  host.append(search);
+  search.focus();
+  await act(async () => getByRole(host, 'button', {name: 'Refresh all schools'}).click());
+  expect(document.activeElement).toBe(search);
+});
+
+it('focuses the course list after disconnecting from course detail', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  overview.accounts.push({...overview.accounts[0]!, id: 'second', siteName: 'Second'});
+  api.overview = async () => overview;
+  api.disconnect = async () => { overview.accounts = overview.accounts.slice(1); };
+  function RoutedCourses() {
+    const [id, setId] = useState<string | undefined>(overview.courses[0]!.id);
+    return <Courses api={api} courseId={id} onCourse={setId} onDocument={() => {}} />;
+  }
+  await act(async () => root.render(<RoutedCourses />));
+  await chooseDisconnect();
+  await click('Disconnect school', getByRole(document.body, 'dialog'));
+  await waitFor(() => expect(document.activeElement).toBe(getByRole(host, 'heading', {level: 2, name: /Your courses/})));
+});
+
+
+it('restores the disconnect trigger and reports a rejected disconnect', async () => {
+  const api = createMockMoodleApi();
+  let reject!: (reason: Error) => void;
+  api.disconnect = () => new Promise((_, fail) => { reject = fail; });
+  await mount(api);
+  const trigger = getByRole(host, 'button', {name: /^Disconnect /});
+  vi.useFakeTimers();
+  await act(async () => trigger.click());
+  await click('Disconnect school', getByRole(document.body, 'dialog'));
+  await act(async () => vi.runOnlyPendingTimersAsync());
+  expect(queryByRole(document.body, 'dialog')).toBeNull();
+  await act(async () => reject(new Error('offline')));
+  expect(document.activeElement).toBe(trigger);
+  vi.useRealTimers();
+  expect(host.textContent).toContain(i18n.t('moodle:action_error'));
+});
+
+
+it.each([false, true])('waits for courses before choosing the initial term (user choice: %s)', async choose => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  let populated = false;
+  api.overview = async () => ({...overview,
+    accounts: overview.accounts.map(a => ({...a, syncedAt: choose ? a.syncedAt : null})),
+    courses: populated ? overview.courses.map(c => ({...c,
+      identity: {...c.identity, lifecycle: 'past' as const},
+    })) : [],
+  });
+  await mount(api);
+  if (choose) await act(async () => getByRole(host, 'tab', {name: /^All/}).focus());
+  populated = true;
+  await act(async () => getByRole(host, 'button', {name: 'Refresh all schools'}).click());
+  expect(getByRole(host, 'tab', {name: choose ? /^All/ : /^Past/}).getAttribute('aria-selected')).toBe('true');
+});
+
+
+it('labels course refresh for its single-course behavior', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, accounts: overview.accounts.map(a => ({...a, status: 'expired'}))});
+  const course = vi.spyOn(api, 'course');
+  const sync = vi.spyOn(api, 'sync');
+  const id = overview.courses[0]!.id;
+  await mount(api, id);
+  expect(queryByRole(host, 'button', {name: 'Refresh all schools'})).toBeNull();
+  await act(async () => getByRole(host, 'button', {name: 'Refresh this course'}).click());
+  expect(course).toHaveBeenCalledWith(id, true);
+  expect(sync).not.toHaveBeenCalled();
+});
+
+
+it('offers Show all when only overdue has more than five items', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, upcoming: Array.from({length: 12}, (_, i) => ({
+    ...overview.upcoming[0]!, id: `overdue-${i}`, title: `Overdue task ${i}`,
+    submitted: false, dueAt: new Date(Date.now() - (i + 1) * 3600000).toISOString(),
+  }))});
+  await mount(api);
+  const section = getByRole(host, 'heading', {level: 2, name: /^Due soon/}).closest('section')!;
+  expect(section.querySelectorAll('.moodle-due-link')).toHaveLength(5);
+  expect(getByRole(section, 'heading', {level: 2}).textContent).toContain('12');
+  await act(async () => getByRole(section, 'button', {name: 'Show all'}).click());
+  expect(section.querySelectorAll('.moodle-due-link')).toHaveLength(12);
+  expect(getByRole(section, 'button', {name: 'Show less'}).getAttribute('aria-expanded')).toBe('true');
 });

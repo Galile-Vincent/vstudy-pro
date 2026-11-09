@@ -13,7 +13,7 @@
   "connecting": "等待學校登入中…",
   "sign_in_hint": "登入將在學校的安全視窗中進行。VStudy 絕不會在此詢問你的學校密碼。",
   "all_courses": "所有課程",
-  "all_caught_up": "未來 7 天沒有即將截止的作業，可以提早準備。",
+  "all_caught_up": "未來 7 天內沒有到期項目。",
   "action_error": "無法完成操作，請再試一次。",
   "calendar_exported": "已送出行事曆匯出要求。",
   "offline_stale": "無法更新，目前顯示上次同步的課程。",
@@ -252,5 +252,14 @@
   "view_list": "清單",
   "view_cards": "卡片",
   "open_file": "開啟檔案：{{name}}",
-  "course_more": "更多課程操作"
+  "course_more": "更多課程操作",
+  "open_course_tab": "在新分頁開啟 {{course}}",
+  "catalog_course_actions": "{{course}}的動作",
+  "connect_another_school": "連結其他學校",
+  "no_due_date": "無截止日期",
+  "refresh_this_course": "重新整理此課程",
+  "refresh_all_schools": "重新整理所有學校",
+  "disconnect_school_named": "中斷連結{{school}}",
+  "pin_course_named": "釘選{{course}}",
+  "unpin_course_named": "取消釘選{{course}}"
 }
