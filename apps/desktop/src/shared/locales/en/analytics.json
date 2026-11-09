@@ -28,6 +28,7 @@
   "contact_instructions": "Follow the returned publisher instructions below. The repository is only a way to find the publisher, not a public deletion form.",
   "publisher": "Find publisher",
   "retry": "Try again",
+  "checking": "Checking your saved choice…",
   "email": "Email (optional)",
   "email_hint": "Entering an email does not subscribe you. Product updates have separate consent and can be unsubscribed from independently.",
   "updates": "Send me product updates",

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Onboarding } from './onboarding';
 import { defaultSettings } from '../../shared';
 import { tr } from '../../shared/i18n';
@@ -31,9 +31,25 @@ it('returns focus to the opener when setup closes with Escape', async () => {
   opener.remove();
 });
 
+type Gate = { resolve: () => void; reject: () => void };
+function fakeMain(initial: Record<string, unknown>, gate?: { current?: Gate }) {
+  const stored = { enabled: false, consent_decided: false, onboarding_completed: false, onboarding: null, installation_id_present: true, acquisition_source: null, deletion_pending: false, ...initial };
+  invoke.mockImplementation(async (channel: string, request: { enabled?: boolean }) => {
+    if (channel === 'settings:get') return defaultSettings;
+    if (channel === 'settings:systemLocale') return 'en-US';
+    if (channel === 'analytics:getState') {
+      if (gate) await new Promise<void>((resolve, reject) => { gate.current = { resolve, reject: () => reject(new Error('unavailable')) }; });
+      return { ...stored };
+    }
+    if (channel === 'analytics:setConsent') { stored.consent_decided = true; stored.enabled = request.enabled!; return { ...stored }; }
+    if (channel === 'analytics:completeOnboarding') { stored.onboarding_completed = true; return { ...stored }; }
+    return {};
+  });
+  return stored;
+}
 function replay(state: Record<string, unknown>) {
   saveProgress({ step: 'privacy', status: 'active' });
-  invoke.mockImplementation(async channel => channel === 'settings:get' ? defaultSettings : channel === 'settings:systemLocale' ? 'en-US' : channel === 'analytics:getState' ? state : {});
+  fakeMain(state);
 }
 const consentCalls = () => invoke.mock.calls.filter(([channel]) => String(channel).startsWith('analytics:set') || channel === 'analytics:completeOnboarding');
 
@@ -63,4 +79,79 @@ it('keeps equal accept and decline choices for an undecided user', async () => {
   expect(share.dataset.variant).toBe(decline.dataset.variant);
   expect(screen.queryByText(/Usage sharing:/)).toBeNull();
   saveProgress({ step: 'welcome' });
+});
+
+const choiceButtons = () => [tr('analytics:share'), tr('analytics:decline')].flatMap(name => screen.queryAllByRole('button', { name }));
+
+describe.each([
+  ['Escape', () => fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' })],
+  ['Later', () => fireEvent.click(screen.getByRole('button', { name: tr('onboarding:later') }))],
+] as const)('leaving a replay before the saved choice is known (%s)', (_name, leave) => {
+  it('never writes consent while the state is still loading', async () => {
+    saveProgress({ step: 'privacy', status: 'active' });
+    const gate: { current?: Gate } = {};
+    const stored = fakeMain({ enabled: true, consent_decided: true, onboarding_completed: true }, gate);
+    const onComplete = vi.fn();
+    render(<Onboarding onComplete={onComplete} />);
+    await screen.findByText(tr('analytics:checking'));
+    expect(choiceButtons()).toEqual([]);
+    leave();
+    await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
+    gate.current!.resolve();
+    expect(consentCalls()).toEqual([]);
+    expect(stored.enabled).toBe(true);
+  });
+
+  it('never writes consent after the state failed to load', async () => {
+    saveProgress({ step: 'privacy', status: 'active' });
+    const gate: { current?: Gate } = {};
+    const stored = fakeMain({ enabled: true, consent_decided: true, onboarding_completed: true }, gate);
+    const onComplete = vi.fn();
+    render(<Onboarding onComplete={onComplete} />);
+    await screen.findByText(tr('analytics:checking'));
+    gate.current!.reject();
+    await screen.findByRole('alert');
+    expect(choiceButtons()).toEqual([]);
+    leave();
+    await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
+    expect(consentCalls()).toEqual([]);
+    expect(stored.enabled).toBe(true);
+  });
+});
+
+it('shows neutral loading, then the saved choice, when resuming at privacy', async () => {
+  saveProgress({ step: 'privacy', status: 'active' });
+  const gate: { current?: Gate } = {};
+  fakeMain({ enabled: true, consent_decided: true, onboarding_completed: true }, gate);
+  render(<Onboarding onComplete={() => {}} />);
+  await screen.findByText(tr('analytics:checking'));
+  expect(choiceButtons()).toEqual([]);
+  expect(screen.queryByRole('button', { name: tr('onboarding:next') })).toBeNull();
+  gate.current!.resolve();
+  expect(await screen.findByText(tr('analytics:saved_state', { state: tr('analytics:state_on') }))).toBeTruthy();
+  expect(choiceButtons()).toEqual([]);
+});
+
+it('offers a retry when the saved choice could not be read', async () => {
+  saveProgress({ step: 'privacy', status: 'active' });
+  const gate: { current?: Gate } = {};
+  fakeMain({ enabled: false, consent_decided: false }, gate);
+  render(<Onboarding onComplete={() => {}} />);
+  await screen.findByText(tr('analytics:checking'));
+  gate.current!.reject();
+  fireEvent.click(await screen.findByRole('button', { name: tr('analytics:retry') }));
+  await screen.findByText(tr('analytics:checking'));
+  gate.current!.resolve();
+  expect(await screen.findByRole('button', { name: tr('analytics:share') })).toBeTruthy();
+  expect(consentCalls()).toEqual([]);
+});
+
+it('does not write consent when an undecided user leaves without choosing', async () => {
+  replay({ onboarding_completed: false, consent_decided: false });
+  const onComplete = vi.fn();
+  render(<Onboarding onComplete={onComplete} />);
+  await screen.findByRole('button', { name: tr('analytics:share') });
+  fireEvent.click(screen.getByRole('button', { name: tr('onboarding:later') }));
+  await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
+  expect(consentCalls()).toEqual([]);
 });

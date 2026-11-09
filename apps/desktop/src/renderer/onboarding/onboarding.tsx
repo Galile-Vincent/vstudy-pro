@@ -40,6 +40,8 @@ function ChoiceCard({ name, value, checked, disabled, onChange, onReselect, titl
 
 const typeSample = 'Aa';
 
+type Consent = { kind: 'loading' } | { kind: 'failed' } | { kind: 'undecided' } | { kind: 'decided'; enabled: boolean };
+
 export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { onComplete: () => void; onCloseAutoFocus?: (event: Event) => void; onOpenPrivacy?: () => void }) {
   useTranslation();
   const [opener] = useState(() => document.activeElement);
@@ -47,8 +49,8 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
   const started = useRef(Date.now());
   const [source, setSource] = useState<AcquisitionSource>();
   const newsletterConsent = useRef({email_provided:false, updates_opted_in:false});
-  const [consentDone, setConsentDone] = useState(false);
-  const [savedConsent, setSavedConsent] = useState<boolean>();
+  const [consent, setConsent] = useState<Consent>({ kind: 'loading' });
+  const chosen = useRef<boolean | undefined>(undefined);
   const onNewsletter = useCallback((email_provided:boolean, updates_opted_in:boolean) => { newsletterConsent.current = {email_provided, updates_opted_in}; }, []);
   const consentLock = useRef(false);
   const completeConsent = async (enabled:boolean) => {
@@ -56,8 +58,15 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
     consentLock.current=true;
     try { await completeAnalyticsOnboarding(enabled, {acquisition_source:source ?? acquisitionSource.enum.prefer_not_to_say,...newsletterConsent.current,duration_ms:Math.min(86400000,Date.now()-started.current)}); }
     catch (error) {consentLock.current=false;throw error;}
-    setConsentDone(true); setSavedConsent(enabled);
+    setConsent({ kind: 'decided', enabled });
   };
+  const loadConsent = useCallback(() => {
+    setConsent({ kind: 'loading' });
+    void desktop.invoke('analytics:getState', {}).then(state => {
+      setConsent(state.onboarding_completed && state.consent_decided ? { kind: 'decided', enabled: state.enabled } : { kind: 'undecided' });
+      if (state.acquisition_source) setSource(state.acquisition_source);
+    }).catch(() => setConsent({ kind: 'failed' }));
+  }, []);
   useEffect(() => { track('onboarding_started', {onboarding_version:1}); }, []);
   const navigation = useOptionalNavigation();
   const progress = useLearningProgress();
@@ -72,7 +81,7 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
   const heading = useRef<HTMLHeadingElement>(null);
   const index = steps.indexOf(step);
   useEffect(() => {
-    void desktop.invoke('analytics:getState', {}).then(state => { setConsentDone(state.onboarding_completed); setSavedConsent(state.consent_decided ? state.enabled : undefined); if (state.acquisition_source) setSource(state.acquisition_source); }).catch(() => {});
+    loadConsent();
     void desktop.invoke('settings:get', {}).then(s => { setLanguage(s.language); setSettings(s); }).catch(e => setError(errorText(e)));
     void desktop.invoke('settings:systemLocale', {}).then(locale => setDetected(systemLanguage(locale))).catch(e => setError(errorText(e)));
     if (progress.documentId) void desktop.invoke('documents:get', { documentId: progress.documentId }).then(doc => { if (doc) setImported(doc); }).catch(e => setError(errorText(e)));
@@ -86,7 +95,7 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
     setBusy(true); setError('');
     leaving.current = action;
     try {
-      if (!consentDone) { try { await completeConsent(false); } catch { /* Optional analytics must never block entry. */ } }
+      if (consent.kind === 'undecided' && chosen.current !== undefined) { try { await completeConsent(chosen.current); } catch { /* Optional analytics must never block entry. */ } }
       if (!complete) track('onboarding_skipped', {onboarding_version:1});
       const settings = await desktop.invoke('settings:get', {});
       await desktop.invoke('settings:set', { ...settings, onboardingCompleted: true });
@@ -148,7 +157,7 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
         </>}
         {step === 'appearance' && settings && <fieldset className="onboarding-choices onboarding-schemes"><legend className="motion-sr">{tr('themes:scheme')}</legend>{(['system', 'light', 'dark'] as const).map(value => <ChoiceCard key={value} name="onboarding-scheme" value={value} checked={settings.colorScheme === value} disabled={busy} onChange={() => void chooseAppearance({ colorScheme: value })} title={tr(`themes:${value}`)}><ThemePreview theme={resolveTheme(settings)} scheme={value}/></ChoiceCard>)}</fieldset>}
         {step === 'acquisition' && <><fieldset className="analytics-sources"><legend className="motion-sr">{tr('analytics:acquisition')}</legend>{acquisitionSource.options.map(value => <label key={value}><input type="radio" name="acquisition" checked={source === value} onChange={() => setSource(value)}/>{tr(`analytics:source_${value}`)}</label>)}</fieldset><Newsletter onConsent={onNewsletter}/></>}
-        {step === 'privacy' && <><AnalyticsDisclosure/>{consentDone && savedConsent !== undefined ? <ConsentSaved enabled={savedConsent} busy={busy} onOpenPrivacy={() => void exit(false, 'privacy')}/> : <ConsentChoice busy={busy} onChoose={enabled => { setBusy(true); void completeConsent(enabled).then(() => move('goal')).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}/>}</>}
+        {step === 'privacy' && <><AnalyticsDisclosure/>{consent.kind === 'loading' ? <p role="status">{tr('analytics:checking')}</p> : consent.kind === 'failed' ? <div role="alert"><p>{tr('errors:generic')}</p><Button variant="secondary" onClick={loadConsent}>{tr('analytics:retry')}</Button></div> : consent.kind === 'decided' ? <ConsentSaved enabled={consent.enabled} busy={busy} onOpenPrivacy={() => void exit(false, 'privacy')}/> : <ConsentChoice busy={busy} onChoose={enabled => { chosen.current = enabled; setBusy(true); void completeConsent(enabled).then(() => move('goal')).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}/>}</>}
         {step === 'goal' && <fieldset className="onboarding-choices onboarding-goals"><legend className="motion-sr">{tr('onboarding:step_goal')}</legend>{goals.map(goal => <ChoiceCard key={goal} name="onboarding-goal" value={goal} checked={progress.goal === goal} title={tr(`onboarding:goal_${goal}`)} description={tr(`onboarding:goal_${goal}_body`)} onChange={() => { try { saveProgress({ goal, documentId: undefined }); setImported(undefined); } catch { setError(tr('onboarding:save_error')); } }}/>)}</fieldset>}
         {step === 'start' && <>
           <p>{tr(`onboarding:before_${progress.goal}`)}</p>
@@ -159,7 +168,7 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
       </div>
       {imported && <p role="status">{tr('onboarding:ready_to_open', { title: imported.title })}</p>}
       {error && <p role="alert">{error}</p>}
-      <footer>{index > 0 && <Button className="onboarding-back" variant="ghost" disabled={busy} onClick={() => move(steps[index - 1]!)}>{tr('onboarding:back')}</Button>}{(step !== 'privacy' || consentDone) && <Button className="primary" disabled={busy || (step === 'start' && progress.goal === 'sample' && !imported)} onClick={() => step === 'start' ? void exit(true, 'goal') : move(steps[index + 1]!)}>{tr(step === 'start' ? progress.goal === 'school' ? 'onboarding:open_courses' : imported || progress.goal === 'sample' ? 'onboarding:open_document' : 'onboarding:open_library' : 'onboarding:next')}</Button>}</footer>
+      <footer>{index > 0 && <Button className="onboarding-back" variant="ghost" disabled={busy} onClick={() => move(steps[index - 1]!)}>{tr('onboarding:back')}</Button>}{(step !== 'privacy' || consent.kind === 'decided') && <Button className="primary" disabled={busy || (step === 'start' && progress.goal === 'sample' && !imported)} onClick={() => step === 'start' ? void exit(true, 'goal') : move(steps[index + 1]!)}>{tr(step === 'start' ? progress.goal === 'school' ? 'onboarding:open_courses' : imported || progress.goal === 'sample' ? 'onboarding:open_document' : 'onboarding:open_library' : 'onboarding:next')}</Button>}</footer>
     </DialogContent>
   </Dialog>;
 }
