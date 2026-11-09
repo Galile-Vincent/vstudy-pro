@@ -5,11 +5,11 @@ import { TestPlayer } from './test-player';
 import { resetDraftQueues } from './draft-queue';
 import { fakeArtifact, fakeAttemptServer } from './fake-attempt-server';
 const { invoke, flushRequest } = vi.hoisted(() => {
- const flushRequest = { listener: null as null | (() => Promise<void>) };
+ const flushRequest = { listener: null as null | (() => Promise<'clean' | 'pending'>) };
  return { invoke: vi.fn(), flushRequest };
 });
 vi.mock('../bridge', () => ({
- desktop: { invoke, onDraftFlushRequest: (listener: () => Promise<void>) => { flushRequest.listener = listener; return () => {}; } },
+ desktop: { invoke, onDraftFlushRequest: (listener: () => Promise<'clean' | 'pending'>) => { flushRequest.listener = listener; return () => {}; } },
 }));
 vi.mock('../../shared/i18n', () => ({ tr: (key: string) => key }));
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.resetAllMocks(); resetDraftQueues(); });

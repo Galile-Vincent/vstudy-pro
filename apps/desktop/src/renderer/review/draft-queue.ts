@@ -12,6 +12,7 @@ class DraftQueue {
  private running: Promise<void> | null = null;
  private timer: ReturnType<typeof setTimeout> | undefined;
  private lastSent = 0;
+ private retryUntil = 0;
  failed = false;
 
  constructor(private readonly send: Send, private readonly onIdle: () => void) {}
@@ -38,7 +39,8 @@ class DraftQueue {
   return () => { this.listeners.delete(listener); this.settleIfIdle(); };
  }
 
- flush(): Promise<void> {
+ flush(allowanceMs = 0): Promise<void> {
+  this.retryUntil = Math.max(this.retryUntil, Date.now() + allowanceMs);
   clearTimeout(this.timer); this.timer = undefined;
   if (!this.running) {
    this.running = Promise.resolve().then(() => this.pump()).finally(() => {
@@ -58,7 +60,14 @@ class DraftQueue {
   const failedIds = new Map<string, number>();
   for (;;) {
    const next = [...this.pending].find(([itemId, entry]) => failedIds.get(itemId) !== entry.seq);
-   if (!next) break;
+   if (!next) {
+    const remaining = this.retryUntil - Date.now();
+    if (!this.pending.size || remaining <= 0) break;
+    await new Promise(resolve => setTimeout(resolve, Math.min(100, remaining)));
+    if (Date.now() >= this.retryUntil) break;
+    failedIds.clear();
+    continue;
+   }
    const [itemId, { seq, answer }] = next;
    this.lastSent = Date.now();
    try {
@@ -99,4 +108,14 @@ export type { DraftQueue };
 export function resetDraftQueues() { queues.clear(); }
 
 /** Writes every pending draft now; main waits for this before it closes the database. */
-export async function flushDraftQueues() { await Promise.all([...queues.values()].map(queue => queue.flush())); }
+export async function flushDraftQueues(): Promise<'clean' | 'pending'> {
+ const snapshot = [...queues.values()];
+ let timer: ReturnType<typeof setTimeout> | undefined;
+ try {
+  await Promise.race([
+   Promise.all(snapshot.map(queue => queue.flush(1800))),
+   new Promise(resolve => { timer = setTimeout(resolve, 1800); }),
+  ]);
+  return snapshot.some(queue => Object.keys(queue.answers()).length) ? 'pending' : 'clean';
+ } finally { clearTimeout(timer); }
+}

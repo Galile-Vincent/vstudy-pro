@@ -19,7 +19,7 @@ import { showAttachedMessage, showStartupError, type StartupStage } from './dial
 import { readWindowState, trackWindowState } from './window-state';
 import { coordinateShutdown } from './shutdown';
 import { coordinateDraftClose, createDraftFlush } from './review/draft-flush';
-import { draftFlushAckChannel, draftFlushIdSchema, draftFlushRequestChannel } from '../shared/review-generate';
+import { draftFlushAckChannel, draftFlushAckSchema, draftFlushRequestChannel } from '../shared/review-generate';
 import { acquireOwnership } from './ownership';
 import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
@@ -355,13 +355,16 @@ function flushWindowDrafts(target: BrowserWindow) {
   },
   listen: acknowledged => {
     const receive = (event: Electron.IpcMainEvent, payload: unknown) => {
-      const id = draftFlushIdSchema.safeParse(payload);
-      if (id.success && !target.isDestroyed() && event.sender === target.webContents && event.senderFrame === target.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl)) acknowledged(id.data);
+      const id = draftFlushAckSchema.safeParse(payload);
+      if (id.success && !target.isDestroyed() && event.sender === target.webContents && event.senderFrame === target.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl)) acknowledged(id.data.requestId, id.data.status);
     };
     ipcMain.on(draftFlushAckChannel, receive);
     return () => { ipcMain.removeListener(draftFlushAckChannel, receive); };
   },
- })();
+ })().then(outcome => {
+  log({ phase: 'draft-flush', outcome });
+  return outcome;
+ });
 }
 const flushRendererDrafts = () => Promise.all(BrowserWindow.getAllWindows().map(flushWindowDrafts));
 const shutdown = coordinateShutdown({

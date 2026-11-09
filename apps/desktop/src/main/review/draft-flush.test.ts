@@ -47,3 +47,14 @@ it('asks the renderer to flush before IPC is disposed and the store is closed', 
  await shutdown();
  expect(calls).toEqual(['ask renderer', 'waiting', 'renderer wrote', 'dispose IPC', 'flush', 'close', 'quit']);
 });
+
+it('accounts for acknowledged unsaved drafts', async () => {
+ let id = '';
+ let ack: (id: string, status: 'clean' | 'pending') => void = () => {};
+ const pending = createDraftFlush({
+  send: request => { id = request; return true; },
+  listen: listener => { ack = listener; return () => {}; },
+ })();
+ ack(id, 'pending');
+ expect(await pending).toBe('pending');
+});

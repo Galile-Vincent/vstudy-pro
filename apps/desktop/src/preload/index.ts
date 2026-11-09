@@ -54,7 +54,10 @@ const api: DesktopApi = {
     const receive = (_event:Electron.IpcRendererEvent,payload:unknown) => {
       const id = draftFlushIdSchema.safeParse(payload);
       if (!id.success) return;
-      void Promise.resolve().then(listener).catch(() => {}).finally(() => ipcRenderer.send(draftFlushAckChannel,id.data));
+      void Promise.resolve().then(listener).then(
+        status => ipcRenderer.send(draftFlushAckChannel, { requestId: id.data, status }),
+        () => ipcRenderer.send(draftFlushAckChannel, { requestId: id.data, status: 'pending' }),
+      );
     };
     ipcRenderer.on(draftFlushRequestChannel,receive);
     return () => ipcRenderer.removeListener(draftFlushRequestChannel,receive);

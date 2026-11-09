@@ -35,3 +35,38 @@ it('flushes the latest value after an in-flight write before acknowledging', asy
  expect(send.mock.calls.map(call => call[1])).toEqual([0, 1]);
  expect(queue.answers()).toEqual({});
 });
+
+it('retries transient failures during the shutdown allowance', async () => {
+ vi.useFakeTimers();
+ const send = vi.fn().mockRejectedValueOnce(new Error('offline')).mockResolvedValue(undefined);
+ const queue = draftQueue('attempt', send);
+ queue.set('q1', 1);
+ const flush = queue.flush(1800);
+ await vi.advanceTimersByTimeAsync(100);
+ await flush;
+ expect(send).toHaveBeenCalledTimes(2);
+ expect(queue.answers()).toEqual({});
+});
+it('reports pending when permanent failures exhaust the shutdown allowance', async () => {
+ vi.useFakeTimers();
+ const send = vi.fn().mockRejectedValue(new Error('offline'));
+ const queue = draftQueue('attempt', send);
+ queue.set('q1', 1);
+ const { flushDraftQueues } = await import('./draft-queue');
+ const flush = flushDraftQueues();
+ await vi.advanceTimersByTimeAsync(1800);
+ expect(await flush).toBe('pending');
+ expect(send.mock.calls.length).toBeGreaterThan(1);
+ expect(queue.answers()).toEqual({ q1: 1 });
+});
+
+it('reports a hung write as pending within the renderer allowance', async () => {
+ vi.useFakeTimers();
+ const queue = draftQueue('attempt', () => new Promise(() => {}));
+ queue.set('q1', 1);
+ const { flushDraftQueues } = await import('./draft-queue');
+ const flush = flushDraftQueues();
+ await vi.advanceTimersByTimeAsync(1800);
+ expect(await flush).toBe('pending');
+ expect(queue.answers()).toEqual({ q1: 1 });
+});
