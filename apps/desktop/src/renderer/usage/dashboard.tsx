@@ -15,6 +15,7 @@ type Dashboard = IpcResponse<'usage:dashboard'>;
 export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
   useTranslation();
   const format = useFormat();
+  const day = (date: string) => format.date(date, { dateStyle: 'medium', timeZone: 'UTC' });
   const hatch = `usage-hatch-${useId().replace(/\W/g, '')}`;
   const max = Math.max(1, ...days.map((d) => d.inputTokens + d.outputTokens));
   const width = 720,
@@ -56,7 +57,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
             <g key={d.date}>
               <title>
                 {tr('usage:daily_description', {
-                  date: d.date,
+                  date: day(d.date),
                   input: format.number(d.inputTokens),
                   output: format.number(d.outputTokens),
                 })}
@@ -81,8 +82,8 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
         })}
       </svg>
       <div className="usage-axis-labels">
-        <span>{days[0]?.date}</span>
-        <span>{days.at(-1)?.date}</span>
+        <span>{days[0] && day(days[0].date)}</span>
+        <span>{days.length > 0 && day(days[days.length - 1]!.date)}</span>
       </div>
       <details className="usage-trend-details">
         <summary>{tr('common:daily_totals')}</summary>
@@ -101,7 +102,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
                 .filter((d) => d.inputTokens > 0 || d.outputTokens > 0)
                 .map((d) => (
                   <tr key={d.date}>
-                    <td>{d.date}</td>
+                    <td>{day(d.date)}</td>
                     <td>{format.number(d.inputTokens)}</td>
                     <td>{format.number(d.outputTokens)}</td>
                     <td>{format.number(d.inputTokens + d.outputTokens)}</td>
@@ -303,7 +304,7 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
                   <tr key={key}>
                     <td>{r.label}</td>
                     <td>{format.number(r.tokens)}</td>
-                    <td>{r.calls}</td>
+                    <td>{format.number(r.calls)}</td>
                     <td>
                       {money(r.costUsd)}
                       {r.unknown > 0 && r.costUsd !== undefined && tr('common:unknown_suffix')}
