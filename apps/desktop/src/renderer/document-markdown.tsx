@@ -39,6 +39,7 @@ export function CodeBlock({children, ...props}: React.ComponentProps<'pre'>) {
     return () => observer.disconnect();
   }, [children]);
   return <pre {...props} ref={ref} style={{...props.style, overflowX: 'auto', maxWidth: '100%'}}
+    role={overflow ? 'region' : undefined}
     tabIndex={overflow ? 0 : undefined}
     aria-label={overflow ? tr('common:scrollable_code') : undefined}>{children}</pre>;
 }

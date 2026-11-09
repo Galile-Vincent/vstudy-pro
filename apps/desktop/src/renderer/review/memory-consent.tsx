@@ -20,7 +20,7 @@ export function MemoryConsentCard() {
   const [state, setState] = useState<'ask' | 'done' | 'hidden'>(() => isPostponed() ? 'hidden' : 'ask');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
-  const card = useRef<HTMLElement>(null);
+  const card = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (isPostponed()) return;
     let active = true;
@@ -41,7 +41,7 @@ export function MemoryConsentCard() {
   }
   if (state === 'done') return <p role="status" className="review-consent-done">{tr('review:consent_done')}</p>;
   if (state === 'hidden' || !prefs || !prefs.memoryEnabled || prefs.consentAcknowledged) return null;
-  return <section ref={card} className="review-consent" aria-labelledby="review-consent-title">
+  return <div ref={card} className="review-consent">
     <div className="review-consent-body" role="region" aria-labelledby="review-consent-title" tabIndex={0}>
     <h2 id="review-consent-title">{tr('review:consent_title')}</h2>
     <p>{tr('review:memory_disclosure')}</p>
@@ -51,5 +51,5 @@ export function MemoryConsentCard() {
       <Button type="button" variant="ghost" disabled={busy} onClick={() => { postpone(); leave('hidden'); }}>{tr('review:consent_not_now')}</Button>
     </div>
     {error && <p role="alert">{tr('review:error')}</p>}
-  </section>;
+  </div>;
 }
