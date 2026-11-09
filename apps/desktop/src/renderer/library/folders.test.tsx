@@ -50,6 +50,8 @@ describe('library folders view', () => {
       tr('library:openFolder', { name: 'Circuits' }), tr('library:openFolder', { name: 'Logic' }), tr('library:openFolder', { name: tr('library:unfiled') }),
     ]);
     expect(screen.queryByRole('list', { name: tr('library:documents') })).toBeNull();
+    expect(folders.querySelectorAll('.folder-row')).toHaveLength(3);
+    expect(folders.querySelector('.folder-art')).toBeNull();
     fireEvent.click(within(folders).getByRole('button', { name: tr('library:openFolder', { name: 'Circuits' }) }));
     const results = await screen.findByRole('list', { name: tr('library:documents') });
     expect(within(results).getAllByRole('listitem')).toHaveLength(2);
