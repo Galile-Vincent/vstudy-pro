@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { i18n } from '../../shared/i18n';
 import { SubscriptionWindowMeter } from './meter';
 import { SubscriptionMeters } from './subscriptions';
 import { desktop } from '../bridge';
@@ -42,9 +44,13 @@ it('expands and collapses with pointer, exposes every window and refresh, and pe
   expect(localStorage.getItem(key)).toBe('false');
 });
 it('uses Usage and an unknown value when no current data exists', async () => {
-  vi.mocked(desktop.invoke).mockResolvedValue([]);
+  let resolve!: (rows: SubscriptionUsage[]) => void;
+  vi.mocked(desktop.invoke).mockReturnValue(new Promise<SubscriptionUsage[]>(done => { resolve = done; }));
+  localStorage.setItem(key, 'true');
   render(<SubscriptionMeters compact />);
-  await waitFor(() => expect(document.querySelector('[aria-busy=false]')).toBeTruthy());
+  expect(screen.getByRole('status').textContent).toBe('Usage…');
+  await act(async () => resolve([]));
+  await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
   expect(screen.getByText('Usage')).toBeTruthy();
   expect(screen.getByText('—')).toBeTruthy();
   expect(screen.getByRole('progressbar').getAttribute('aria-valuetext')).toBe('Unknown');
@@ -122,4 +128,95 @@ it('preserves the full text of truncated summary and window labels', async () =>
   expect(screen.getByText('Codex · 5h').getAttribute('title')).toBe('Codex · 5h');
   expect(screen.getByText(label).getAttribute('title')).toBe(label);
   expect(screen.getByRole('progressbar', { name: label })).toBeTruthy();
+});
+
+it.each(['stale', 'not-signed-in', 'unsupported', 'unavailable'] as const)(
+  'shows a non-color indicator for a %s provider', async status => {
+    vi.mocked(desktop.invoke).mockResolvedValue([
+      { ...usage('claude', [99]), status }, usage('codex', [10]),
+    ]);
+    render(<SubscriptionMeters compact />);
+    expect(await screen.findByText('1 unavailable')).toBeTruthy();
+    expect(screen.getByRole('progressbar', { name: 'Codex · 5h' })
+      .getAttribute('aria-valuenow')).toBe('10');
+  },
+);
+it('counts every provider without current data', async () => {
+  vi.mocked(desktop.invoke).mockResolvedValue([
+    { ...usage('claude', []), status: 'unavailable' },
+    { ...usage('codex', []), status: 'stale' },
+  ]);
+  render(<SubscriptionMeters compact />);
+  expect(await screen.findByText('2 unavailable')).toBeTruthy();
+  expect(screen.getByText('—')).toBeTruthy();
+});
+it('shows an unavailable summary when the initial request fails', async () => {
+  vi.mocked(desktop.invoke).mockRejectedValue(new Error('offline'));
+  render(<SubscriptionMeters compact />);
+  expect(await screen.findByText('Unavailable', { selector: '.subscription-summary-unavailable' })).toBeTruthy();
+  expect(screen.getByText('—')).toBeTruthy();
+  expect(screen.getByRole('progressbar').getAttribute('aria-valuetext')).toBe('Unknown');
+});
+it('clears the current summary after a failed refresh and recovers', async () => {
+  render(<SubscriptionMeters compact />);
+  await screen.findByText('85%', { selector: '.subscription-summary-percent' });
+  vi.mocked(desktop.invoke).mockRejectedValueOnce(new Error('offline'));
+  act(() => window.dispatchEvent(new Event('subscription-refresh')));
+  await screen.findByText('Unavailable', { selector: '.subscription-summary-unavailable' });
+  expect(screen.getByText('—')).toBeTruthy();
+  expect(screen.getByRole('progressbar').hasAttribute('aria-valuenow')).toBe(false);
+  act(() => window.dispatchEvent(new Event('subscription-refresh')));
+  await screen.findByText('85%', { selector: '.subscription-summary-percent' });
+  expect(screen.queryByText('Unavailable')).toBeNull();
+});
+it.each([false, true])('uses a stable tie rule with reversed providers: %s', async reverse => {
+  const rows = [usage('codex', [85, 85]), usage('claude', [85, 85])];
+  vi.mocked(desktop.invoke).mockResolvedValue(reverse ? rows.reverse() : rows);
+  render(<SubscriptionMeters compact />);
+  expect(await screen.findByRole('progressbar', { name: 'Claude · 5h' })).toBeTruthy();
+});
+it('identifies a weekly window in the summary and accessible value', async () => {
+  vi.mocked(desktop.invoke).mockResolvedValue([usage('claude', [10, 85])]);
+  render(<SubscriptionMeters compact />);
+  const bar = await screen.findByRole('progressbar', { name: 'Claude · Weekly' });
+  expect(bar.getAttribute('aria-valuetext')).toBe('Claude · Weekly: 85% used');
+});
+it('keeps the details target mounted and visible when compact becomes false', async () => {
+  const { container, rerender } = render(<SubscriptionMeters compact />);
+  const id = screen.getByRole('button', { name: 'Expand subscription usage' }).getAttribute('aria-controls')!;
+  rerender(<SubscriptionMeters compact={false} />);
+  await screen.findByRole('progressbar', { name: 'Codex 5h' });
+  expect(document.getElementById(id)?.hidden).toBe(false);
+  for (const control of container.querySelectorAll('[aria-controls]')) {
+    expect(document.getElementById(control.getAttribute('aria-controls')!)).toBeTruthy();
+  }
+  expect(screen.queryByRole('button', { name: 'Expand subscription usage' })).toBeNull();
+});
+it('exposes an expanded localized summary label without shrinking its percentage', async () => {
+  const original = i18n.getResource('en', 'usage', 'quota_window_label');
+  const pattern = '{{provider}} subscription usage over the entire {{window}} window';
+  i18n.addResource('en', 'usage', 'quota_window_label', pattern);
+  try {
+    render(<SubscriptionMeters compact />);
+    const label = await screen.findByText('Codex subscription usage over the entire 5h window');
+    expect(label.getAttribute('title')).toBe(label.textContent);
+    expect(screen.getByText('85%', { selector: '.subscription-summary-percent' })).toBeTruthy();
+  } finally {
+    i18n.addResource('en', 'usage', 'quota_window_label', original);
+  }
+});
+it('mirrors the track in RTL while preserving the usage value', () => {
+  const style = document.createElement('style');
+  style.textContent = readFileSync('src/renderer/usage/usage.css', 'utf8');
+  document.head.append(style);
+  try {
+    const { container } = render(<div dir="rtl"><SubscriptionWindowMeter label="Weekly" usedPercent={30} /></div>);
+    const bar = screen.getByRole('progressbar', { name: 'Weekly' });
+    expect(getComputedStyle(bar).transform).toBe('scaleX(-1)');
+    expect(bar.getAttribute('aria-valuenow')).toBe('30');
+    expect(container.querySelector('[data-slot=progress-indicator]')?.getAttribute('style'))
+      .toContain('translateX(-70%)');
+  } finally {
+    style.remove();
+  }
 });
