@@ -27,7 +27,7 @@ export function PageHeader({
           <h1 className="text-[length:var(--type-display)] font-medium">{title}</h1>
           {description && <p className="text-[var(--muted)]">{description}</p>}
         </div>
-        {actions && <div>{actions}</div>}
+        {actions && <div className="min-w-0 max-w-full">{actions}</div>}
       </div>
       {meta && <div>{meta}</div>}
     </header>
@@ -79,14 +79,18 @@ export function Toolbar({
       data-slot="toolbar"
       className={cn('flex flex-wrap items-center gap-[var(--space-3)]', className)}
     >
-      {left && <div className="flex flex-wrap items-center gap-[var(--space-2)]">{left}</div>}
+      {left && (
+        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-[var(--space-2)]">
+          {left}
+        </div>
+      )}
       {center && (
-        <div className="flex flex-1 flex-wrap items-center justify-center gap-[var(--space-2)]">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-[var(--space-2)]">
           {center}
         </div>
       )}
       {right && (
-        <div className="ms-auto flex flex-wrap items-center gap-[var(--space-2)]">{right}</div>
+        <div className="ms-auto flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">{right}</div>
       )}
     </div>
   );

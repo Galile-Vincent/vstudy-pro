@@ -21,7 +21,7 @@ export function WebChatHub() {
   const label=(value:Tab)=>tr(`web-chat:${value}`);
   const launcher=<div className="web-chat-tabs" role="group" aria-label={tr('web-chat:choose')}>{tabs.map(value=><button key={value} id={`web-chat-tab-${value}`} aria-pressed={value===tab} onClick={()=>choose(value)}>{label(value)}</button>)}</div>;
   return <PageContainer as="main" className="web-chat-hub" aria-label={tr('web-chat:title')}>
-    <PageHeader title={tr('web-chat:title')} description={tr('web-chat:subtitle')} actions={<div ref={setToolbar}/>}/>
+    <PageHeader title={tr('web-chat:title')} description={tr('web-chat:subtitle')} actions={<div ref={setToolbar} className="min-w-0 max-w-full"/>}/>
     <DesktopChat active launcher={launcher} toolbarSlot={toolbar}/>
   </PageContainer>;
 }
