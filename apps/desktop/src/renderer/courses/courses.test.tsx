@@ -1176,3 +1176,18 @@ it.each([false, true])('waits for courses before choosing the initial term (user
   await act(async () => getByRole(host, 'button', {name: 'Refresh all schools'}).click());
   expect(getByRole(host, 'tab', {name: choose ? /^All/ : /^Past/}).getAttribute('aria-selected')).toBe('true');
 });
+
+
+it('labels course refresh for its single-course behavior', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, accounts: overview.accounts.map(a => ({...a, status: 'expired'}))});
+  const course = vi.spyOn(api, 'course');
+  const sync = vi.spyOn(api, 'sync');
+  const id = overview.courses[0]!.id;
+  await mount(api, id);
+  expect(queryByRole(host, 'button', {name: 'Refresh all schools'})).toBeNull();
+  await act(async () => getByRole(host, 'button', {name: 'Refresh this course'}).click());
+  expect(course).toHaveBeenCalledWith(id, true);
+  expect(sync).not.toHaveBeenCalled();
+});

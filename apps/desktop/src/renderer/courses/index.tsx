@@ -608,7 +608,7 @@ function CoursesBody({
               </Button>
               <Button variant="ghost" disabled={syncing} onClick={() => void sync()}>
                 <RefreshCw className={syncing ? "moodle-spin" : ""} />
-                {tr("moodle:refresh_all_schools")}
+                {tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools")}
               </Button>
             </div>
             {overview.accounts.map((account) => (

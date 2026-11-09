@@ -257,6 +257,7 @@
   "catalog_course_actions": "{{course}}の操作",
   "connect_another_school": "別の学校を接続",
   "no_due_date": "期限なし",
+  "refresh_this_course": "このコースを更新",
   "refresh_all_schools": "すべての学校を更新",
   "disconnect_school_named": "{{school}}の接続を解除",
   "pin_course_named": "{{course}}をピン留め",
