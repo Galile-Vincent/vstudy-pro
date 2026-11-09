@@ -26,7 +26,8 @@ export function failure(error: unknown): CliFailure {
   if (error instanceof SetupError) return error.code;
   const code = (error as NodeJS.ErrnoException | undefined)?.code;
   if (code === 'EACCES' || code === 'EPERM') return 'permission-denied';
-  if (code === 'ENOSPC' || code === 'EROFS') return 'blocked';
+  if (code === 'ENOSPC' || code === 'EDQUOT') return 'disk-full';
+  if (code === 'EROFS') return 'blocked';
   if (error instanceof Error && error.name === 'AbortError') return 'cancelled';
   if (error instanceof Error) return setupFailure(`${code ?? ''} ${error.message}`);
   return 'unknown';

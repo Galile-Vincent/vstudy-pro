@@ -487,6 +487,34 @@ it('copies redacted details beside the failed action and offers sign-in recovery
   } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
 });
 
+it('tells a student to free disk space and keeps the cause in copied details', async () => {
+  fixture.hold(true); await mount(); await click('Install');
+  fixture.fail('unknown'); fixture.output('ENOSPC: no space left on device, write'); fixture.hold(false);
+  const writeText = vi.fn<(text: string) => Promise<void>>(async () => {});
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+  try {
+    await wait(400);
+    const recovery = document.querySelector('.ai-cli-recovery')!;
+    expect(recovery.textContent).toContain(i18n.t('ai-cli:error_title_disk_full'));
+    expect(recovery.textContent).toContain(i18n.t('ai-cli:error_next_disk_full'));
+    expect(recovery.textContent).not.toContain(i18n.t('ai-cli:error_title_unknown'));
+    await click('Copy details');
+    expect(writeText.mock.calls[0]?.[0]).toContain('Last error: disk-full');
+  } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
+});
+
+it('keeps a permission cause in copied details when only the failure code is known', async () => {
+  fixture.hold(true); await mount(); await click('Install');
+  fixture.fail('permission-denied'); fixture.output(''); fixture.hold(false);
+  const writeText = vi.fn<(text: string) => Promise<void>>(async () => {});
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+  try {
+    await wait(400);
+    await click('Copy details');
+    expect(writeText.mock.calls[0]?.[0]).toContain('Last error: permission-denied');
+  } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
+});
+
 it('previews only the detected recommendation when another tool already has consent', async () => {
   fixture.tools[0]!.consented = true;
   Object.assign(fixture.tools[1]!, { consented: true, version: '0.166.0', status: 'installed-not-signed-in' });
