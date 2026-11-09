@@ -420,6 +420,11 @@
       "path": "apps/desktop/src/renderer/components/ui/segmented-control.test.tsx",
       "sha256": "29ee8f5f9832861a4ebfc3d1ed57091835ebd8f84f4db97c9ec2450ad34f216a",
       "reason": "Shared settings row and radio choice, with keyboard behavior coverage."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/setting-row.test.tsx",
+      "sha256": "fad6388e7f047f0dc41d4425fbf94adf6435a37766acf3720546412414985037",
+      "reason": "Shared settings label activation and group semantics regression coverage."
     }
   ]
 }

@@ -57,7 +57,7 @@ export function AnalyticsSettings() {
   const load = () => { setError(false); void Promise.all([desktop.invoke('analytics:getState', {}), desktop.invoke('analytics:getInstallationId', {})]).then(([s,i]) => {setState(s); setId(i.installation_id);}).catch(() => setError(true)); };
   useEffect(load, []);
   return <Section level={3} title={tr('analytics:title')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-    <SettingRow label={tr('analytics:enabled')} description={tr('analytics:off_hint')}><Switch aria-label={tr('analytics:enabled')} checked={state?.enabled ?? false} disabled={!state || busy} onCheckedChange={enabled => {
+    <SettingRow htmlFor="analytics-enabled" label={tr('analytics:enabled')} description={tr('analytics:off_hint')}><Switch id="analytics-enabled" checked={state?.enabled ?? false} disabled={!state || busy} onCheckedChange={enabled => {
       setBusy(true); setError(false);
       void desktop.invoke('analytics:setConsent', {enabled}).then(async next => {
         setState(next);

@@ -87,11 +87,12 @@ export function PrivacySettings() {
         {modeStatus && <p role="status">{modeStatus}</p>}
         {loaded && invalidIdle && <p id={idleErrorId} role="alert">{tr('settings:idle_range')}</p>}
         <SettingRow
+          htmlFor="converter-idle-minutes"
           label={tr('settings:idle_minutes')}
           description={tr('settings:converter_copy')}
         >
           <Input
-            aria-label={tr('settings:idle_minutes')}
+            id="converter-idle-minutes"
             type="number"
             min={1}
             max={60}
@@ -119,7 +120,7 @@ export function PrivacySettings() {
           className="gap-[var(--space-4)] p-[var(--space-4)] bg-[color-mix(in_oklab,var(--danger)_7%,var(--surface))] text-[var(--danger)]">
           <p>{tr('settings:delete_copy')}</p>
           <SettingRow label={tr('settings:confirm')} htmlFor="delete-confirmation">
-            <Input id="delete-confirmation" aria-label={tr('settings:confirm')}
+            <Input id="delete-confirmation"
               placeholder={tr('settings:deletePlaceholder')} value={confirmation}
               onChange={e => setConfirmation(e.target.value)} autoComplete="off" />
             <Button size="sm" variant="destructive" disabled={confirmation !== 'DELETE'}

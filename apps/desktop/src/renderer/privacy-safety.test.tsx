@@ -14,6 +14,9 @@ it('commits idle minutes on blur and associates invalid input errors', async () 
   render(<PrivacySettings/>);
   const field = await screen.findByRole('spinbutton');
   await waitFor(() => expect((field as HTMLInputElement).disabled).toBe(false));
+  const label = screen.getByText(tr('settings:idle_minutes'), {selector:'label'}) as HTMLLabelElement;
+  expect(label.control).toBe(field);
+  expect(screen.getByLabelText(tr('settings:idle_minutes'))).toBe(field);
   fireEvent.change(field,{target:{value:'4'}});
   fireEvent.change(field,{target:{value:'45'}});
   expect(invoke.mock.calls.filter(([c]) => c === 'settings:set')).toHaveLength(0);

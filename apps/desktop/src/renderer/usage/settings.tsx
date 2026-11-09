@@ -133,9 +133,9 @@ export function UsageSettings() {
         <>
           <Section level={3} title={tr('settings:budgets')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
             <p>{tr('usage:budget_help')}</p>
-            <SettingRow label={tr('common:monthly_budget_usd')}>
+            <SettingRow htmlFor="usage-monthly_budget_usd" label={tr('common:monthly_budget_usd')}>
               <Input
-                aria-label={tr('common:monthly_budget_usd')}
+                id="usage-monthly_budget_usd"
                 type="number"
                 min="0.01"
                 step="0.01"
@@ -148,9 +148,9 @@ export function UsageSettings() {
                 }
               />
             </SettingRow>
-            <SettingRow label={tr('common:monthly_token_cap')}>
+            <SettingRow htmlFor="usage-monthly_token_cap" label={tr('common:monthly_token_cap')}>
               <Input
-                aria-label={tr('common:monthly_token_cap')}
+                id="usage-monthly_token_cap"
                 type="number"
                 min="1"
                 step="1"
@@ -163,9 +163,9 @@ export function UsageSettings() {
                 }
               />
             </SettingRow>
-            <SettingRow label={tr('common:warn_at')}>
+            <SettingRow htmlFor="usage-warn_at" label={tr('common:warn_at')}>
               <Input
-                aria-label={tr('common:warn_at')}
+                id="usage-warn_at"
                 type="number"
                 min="1"
                 max="100"
@@ -174,9 +174,9 @@ export function UsageSettings() {
               />
             </SettingRow>
             <details><summary>{tr('usage:advanced_prices')}</summary>
-            <SettingRow stack label={tr('common:price_overrides_usd_per_1m_tokens')}>
+            <SettingRow stack htmlFor="usage-price_overrides_usd_per_1m_tokens" label={tr('common:price_overrides_usd_per_1m_tokens')}>
               <Textarea
-                aria-label={tr('common:price_overrides')}
+                id="usage-price_overrides_usd_per_1m_tokens"
                 rows={5}
                 value={overrides}
                 onChange={(e) => setOverrides(e.target.value)}

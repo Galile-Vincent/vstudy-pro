@@ -15,6 +15,7 @@ export function Select({
   value?: string;
   onChange: (event: { target: { value: string } }) => void;
   disabled?: boolean;
+  id?: string;
   'aria-label'?: string;
   className?: string;
   position?: 'item-aligned' | 'popper';

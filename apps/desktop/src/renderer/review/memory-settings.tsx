@@ -38,8 +38,8 @@ export function MemorySettings() {
     finally { setBusy(false); }
   }
   return <Section level={3} title={tr('review:memory_title')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-    <SettingRow label={tr('review:memory_enabled')} description={tr('review:memory_disclosure')} stack>
-      {prefs && <Switch aria-label={tr('review:memory_enabled')} checked={studyMemoryActive(prefs)} disabled={busy} onCheckedChange={checked => void save(checked ? {memoryEnabled:true,consentAcknowledged:true} : {memoryEnabled:false})} />}
+    <SettingRow htmlFor="memory-enabled" label={tr('review:memory_enabled')} description={tr('review:memory_disclosure')} stack>
+      {prefs && <Switch id="memory-enabled" checked={studyMemoryActive(prefs)} disabled={busy} onCheckedChange={checked => void save(checked ? {memoryEnabled:true,consentAcknowledged:true} : {memoryEnabled:false})} />}
       <Button variant="secondary" disabled={!prefs || busy} onClick={() => setConfirm(true)}>{tr('review:erase_memory')}</Button>
       {erased && <p role="status">{tr('review:erase_done')}</p>}
       {error && <div role="alert"><p>{tr('review:error')}</p><Button onClick={() => void load()}>{tr('review:retry')}</Button></div>}
