@@ -23,7 +23,6 @@
 .home-upload { display:grid; gap:var(--space-4); border:0; border-radius:var(--r-lg); }
 .home-upload > svg { width:var(--space-6); height:var(--space-6); stroke-width:1.5; }
 .home-upload p { color:var(--muted); max-width:65ch; }
-.home-upload label { display:none; }
 .home-upload .primary,.home-upload .ghost { justify-self:start; }
 .home-page .home-upload .primary { background:var(--ink); color:var(--surface); padding-inline:var(--space-5); }
 .home-page .home-upload .primary:hover { opacity:.85; }
