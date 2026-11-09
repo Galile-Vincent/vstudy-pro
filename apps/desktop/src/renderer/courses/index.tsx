@@ -530,7 +530,7 @@ function CoursesBody({
     <Planner courses={overview?.courses ?? []} deadlines={overview?.upcoming ?? []} />
   </PageContainer>;
   const header = (
-    <PageHeader title={!courseId ? tr("moodle:courses") : loading ? tr("moodle:loading") : undefined}
+    <PageHeader title={!courseId ? tr("moodle:courses") : loading ? <span role="status">{tr("moodle:loading")}</span> : undefined}
       className="[&_h1]:whitespace-nowrap [&>div>div:last-child]:max-[1000px]:w-full"
       actions={<div className="flex flex-wrap gap-2 [&_button]:min-h-9 [&_button]:h-auto">
         {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry"
@@ -635,7 +635,7 @@ function CoursesBody({
             await refresh().catch(() => setError(true));
           }}
         /> : loading ? (
-          <EmptyState headingLevel={2} role="status" title={tr("moodle:loading")} />
+          <div aria-busy="true">{!courseId && <p role="status">{tr("moodle:loading")}</p>}</div>
         ) : courseId ? (
           detail ? (
             <>

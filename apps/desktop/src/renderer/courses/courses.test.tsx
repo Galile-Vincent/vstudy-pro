@@ -300,7 +300,7 @@ describe("Courses", () => {
         resolve = done;
       });
     await mount(api);
-    expect(host.querySelector("[data-slot=empty-state][role=status]")).not.toBeNull();
+    expect(getByRole(host, "status", {name: ""}).textContent).toContain("Loading courses");
     await act(async () =>
       resolve({
         ...overview,
@@ -1360,3 +1360,14 @@ it("neutralizes imported headings in week summaries and module sheets", async ()
   expect(queryByRole(sheet, "heading", {name: "Imported description"})).toBeNull();
   expect(sheet.textContent).toContain("Imported description");
 });
+
+it("announces initial course loading once with exactly one heading", async () => {
+  const api = createMockMoodleApi();
+  api.course = () => new Promise(() => {});
+  await mount(api, (await api.overview()).courses[0]!.id);
+  expect(getAllByRole(host, "main")).toHaveLength(1);
+  expect(getAllByRole(host, "heading")).toHaveLength(1);
+  expect(getByRole(host, "heading", {level: 1, name: "Loading courses"})).not.toBeNull();
+  expect(getAllByRole(host, "status").filter(status => status.textContent?.includes("Loading"))).toHaveLength(1);
+});
+
