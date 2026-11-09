@@ -178,10 +178,7 @@
   padding-bottom: var(--space-2);
 }
 .moodle-agent {
-  background: color-mix(in oklab, var(--ink) 4%, var(--surface));
-  border: 0;
-  border-radius: var(--r-md);
-  overflow: hidden;
+  overflow:hidden;
   position: sticky;
   top: 0;
 }
@@ -510,23 +507,13 @@
   overflow-x: auto;
 }
 .moodle-assistant {
-  position: fixed;
-  bottom: var(--space-8);
-  right: var(--space-8);
-  z-index: 30;
+  position:relative;
+  display:flex;
+  justify-content:flex-end;
+  padding-top:var(--space-4);
+  z-index:30;
 }
-.moodle-chat-button {
-  display: grid;
-  place-items: center;
-  position: relative;
-  margin-left: auto;
-  width: 56px;
-  height: 56px;
-  border-radius: var(--r-pill);
-  background: var(--ink);
-  color: var(--surface);
-  box-shadow: var(--elevation-floating);
-}
+.moodle-chat-button { margin-left:auto; min-height:var(--space-12); }
 .moodle-proposal-dot {
   position: absolute;
   width: 10px;
@@ -538,6 +525,9 @@
   border-radius: var(--r-pill);
 }
 .moodle-assistant-panel {
+  position:absolute;
+  bottom:100%;
+  right:0;
   width: 380px;
   height: min(560px, calc(100dvh - 130px));
   min-width: 320px;
@@ -547,9 +537,7 @@
   overflow: auto;
   margin-bottom: var(--space-3);
   border: 0;
-  background: color-mix(in oklab, var(--ink) 4%, var(--surface));
-  border-radius: var(--r-lg);
-  box-shadow: var(--elevation-floating);
+
 }
 .moodle-assistant-panel[hidden] {
   display: none;
@@ -562,7 +550,7 @@
 .moodle-assistant-close {
   position: absolute;
   right: var(--space-4);
-  top: var(--space-5);
+  top: var(--space-2);
   z-index: 1;
   color: var(--muted);
 }
@@ -591,10 +579,7 @@
   outline-offset: var(--space-1);
 }
 @media (max-width: 760px) {
-.moodle-assistant {
-    right: var(--space-4);
-    bottom: var(--space-4);
-  }
+
 .moodle-assistant-panel {
     position: fixed;
     inset: 0;

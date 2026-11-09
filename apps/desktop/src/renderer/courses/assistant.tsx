@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { tr } from "../../shared/i18n";
+import { Button, Card } from "../components/ui";
 import { CourseAgentPanel } from "./agent";
 
 export function CourseAssistant(
@@ -60,24 +61,24 @@ export function CourseAssistant(
   }, [open]);
   return (
     <div className="moodle-assistant">
-      <div
+      <Card variant="raised"
         id="course-assistant-panel"
-        className="moodle-assistant-panel"
+        className="moodle-assistant-panel gap-0 py-0"
         hidden={!open}
         role="region"
         aria-label={tr("moodle:course_assistant")}
       >
-        <button
+        <Button variant="ghost" size="icon"
           ref={close}
           className="moodle-assistant-close"
           onClick={collapse}
           aria-label={tr("moodle:close_assistant")}
         >
           <X />
-        </button>
+        </Button>
         <CourseAgentPanel {...props} onPendingChange={setPending} />
-      </div>
-      <button
+      </Card>
+      <Button
         ref={button}
         className="moodle-chat-button"
         onClick={() => (open ? collapse() : setOpen(true))}
@@ -93,7 +94,7 @@ export function CourseAssistant(
             role="img"
           />
         )}
-      </button>
+      </Button>
     </div>
   );
 }

@@ -438,7 +438,7 @@ describe("Courses", () => {
       "agent",
     );
     expect(host.textContent).toContain("Action completed.");
-    expect(document.activeElement?.className).toBe("moodle-agent");
+    expect(document.activeElement?.getAttribute("aria-label")).toBe("Course assistant");
   });
 });
 
