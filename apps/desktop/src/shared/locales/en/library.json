@@ -212,5 +212,7 @@
   "original.copy": "Copy image and page context",
   "original.copied": "Image copied. Paste it into the web chat.",
   "original.paste": "Press Ctrl/⌘ V in the web chat to paste the image and include the document name and page.",
-  "original.unsupported": "Choose an image-capable model or remove the page attachment to send."
+  "original.unsupported": "Choose an image-capable model or remove the page attachment to send.",
+  "undo_expired": "Undo expired. The document can no longer be restored.",
+  "document_missing": "Document not found. It may have been permanently deleted."
 }

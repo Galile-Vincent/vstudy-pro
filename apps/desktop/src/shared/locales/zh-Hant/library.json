@@ -212,5 +212,7 @@
   "original.copy": "複製圖片與頁面資訊",
   "original.copied": "圖片已複製。請貼到網頁聊天。",
   "original.paste": "在網頁聊天按 Ctrl/⌘ V 貼上圖片，並註明文件名稱與頁碼。",
-  "original.unsupported": "請選擇支援圖片的模型，或移除頁面附件後傳送。"
+  "original.unsupported": "請選擇支援圖片的模型，或移除頁面附件後傳送。",
+  "undo_expired": "復原期限已過，無法復原文件。",
+  "document_missing": "找不到文件，可能已永久刪除。"
 }
