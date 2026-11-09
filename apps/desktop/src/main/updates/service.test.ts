@@ -149,7 +149,7 @@ it('does not record malformed release metadata as a successful check',async()=>{
   expect(service.snapshot().lastCheckedAt).toBeNull();
 });
 
-it('waits for coordinated shutdown before invoking the native installer',async()=>{
+it('serializes install requests while preparation is pending',async()=>{
   const {service,updater}=setup();
   await service.check();updater.emit('update-available',{version:'0.4.5'});
   await service.download();updater.emit('update-downloaded',{version:'0.4.5'});

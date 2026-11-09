@@ -300,15 +300,25 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
   const badDirectory = join(releaseInput,'distribution-mac-arm64-unsigned');
   const badFeed = join(badDirectory,'latest-mac-arm64.yml');
   const bad = JSON.parse(await readFile(badFeed,'utf8'));
-  bad.files[0].sha512 = 'wrong';
-  await writeFile(badFeed,JSON.stringify(bad));
   const badManifestPath = join(badDirectory,'target-mac-arm64.json');
-  const badManifest = JSON.parse(await readFile(badManifestPath,'utf8'));
-  const entry = badManifest.assets.find(asset=>asset.file==='latest-mac-arm64.yml');
-  const bytes = await readFile(badFeed);
-  entry.size=bytes.length; entry.sha256=createHash('sha256').update(bytes).digest('hex');
-  await writeFile(badManifestPath,JSON.stringify(badManifest));
-  await assert.rejects(assembleAssets({version,input:releaseInput,output:join(root,'wrong-hash'),notes}), /Invalid update metadata/);
+  const originalManifest = JSON.parse(await readFile(badManifestPath,'utf8'));
+  for (const [name, mutate] of [
+    ['hash', info => {info.files[0].sha512 = 'wrong';}],
+    ['version', info => {info.version = '9.9.9';}],
+    ['size', info => {info.files[0].size = 2 ** 31 + 1;}],
+    ['url', info => {info.files[0].url = 'https://evil.test/payload';}],
+    ['alias', () => {}],
+  ]) {
+    const changed = JSON.parse(JSON.stringify(bad)); mutate(changed);
+    await writeFile(badFeed,JSON.stringify(changed));
+    const manifest = JSON.parse(JSON.stringify(originalManifest));
+    const entry = manifest.assets.find(asset=>asset.file==='latest-mac-arm64.yml');
+    const bytes = await readFile(badFeed);
+    entry.size=bytes.length; entry.sha256=createHash('sha256').update(bytes).digest('hex');
+    await writeFile(badManifestPath,JSON.stringify(manifest));
+    await assert.rejects(assembleAssets({version,input:releaseInput,output:join(root,`wrong-${name}`),notes}),
+      /Invalid update metadata|Mismatched alias/);
+  }
   const target = targets[0];
   await writeFile(join(root, 'artifacts', `distribution-${target.key}-unsigned`, assetNames(target, version).stable), 'corrupted');
   await assert.rejects(assembleAssets({ version, input: join(root, 'artifacts'), output: join(root, 'corrupt'), notes, scope: 'qualification' }), /Checksum mismatch/);
