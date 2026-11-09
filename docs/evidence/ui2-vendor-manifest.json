@@ -403,7 +403,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/ui.css",
-      "sha256": "b092c84875e06e933a640854cb774aaaf5ccc0a4c9ca60efdbc89658838db3b6",
+      "sha256": "f0bfb95a7edf9385d2303e0d81913b52b87a10c898e5ad57bcd38b1abd47cb71",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {

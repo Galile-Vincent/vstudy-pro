@@ -715,3 +715,6 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
     transition: none;
   }
 }
+
+html:is([data-theme=contrast],[data-contrast=more]) :is(.settings-card,.settings-row,.settings-disclosure) { outline:1px solid var(--hairline); outline-offset:0; }
+html:is([data-theme=contrast],[data-contrast=more]) .settings-pane { mask-image:none; }

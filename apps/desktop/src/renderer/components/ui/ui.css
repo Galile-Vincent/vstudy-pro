@@ -31,3 +31,8 @@ html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=se
 @media (forced-colors:active), (prefers-contrast:more) {
  [data-slot=segmented-control] > [data-state=checked] { outline:thin solid var(--ink); }
 }
+
+html:is([data-theme=contrast],[data-contrast=more]) :is([data-slot=card],[data-slot=setting-row],[data-slot=segmented-control]) { outline:1px solid var(--hairline); outline-offset:0; }
+@media (prefers-contrast:more), (forced-colors:active) {
+ :is([data-slot=card],[data-slot=setting-row],[data-slot=segmented-control]) { outline:1px solid var(--hairline); outline-offset:0; }
+}
