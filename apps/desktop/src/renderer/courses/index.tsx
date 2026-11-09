@@ -1,6 +1,6 @@
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
-import { ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
+import { Section, ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
 import { Brand } from '../components/brand';
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
@@ -310,6 +310,9 @@ function CoursesBody({
       setOpening(undefined);
     }
   };
+  const overdue = (overview?.upcoming ?? []).filter(d =>
+    !d.submitted && !d.orphaned && Date.parse(d.dueAt) < Date.now(),
+  ).sort((a, b) => a.dueAt.localeCompare(b.dueAt));
   const dueSoon = (overview?.upcoming ?? [])
     .filter(
       (d) =>
@@ -884,7 +887,7 @@ function CoursesBody({
             </div>
           )
         ) : overview?.courses.length ? (
-          <div className="courses-home-layout">
+          <div className="flex min-w-0 flex-col gap-6">
             <section className="courses-catalog" aria-labelledby="courses-title">
               <div className="moodle-section-heading moodle-grid-heading">
                 <h2 id="courses-title">{tr("moodle:your_courses")}<span className="courses-total">{overview.courses.length}</span></h2>
@@ -950,26 +953,32 @@ function CoursesBody({
                 </TabsContent>)}
               </Tabs>
             </section>
-            <section className="moodle-due-section" aria-labelledby="due-title">
-              <div className="moodle-section-heading">
-                <h2 id="due-title"><Clock3 />{tr("moodle:due_soon")}<span className="courses-total">{dueSoon.length || ''}</span></h2>
-                <span>{tr("moodle:next_seven_days")}</span>
-              </div>
-              {dueSoon.length ? <>
-                <ul className="moodle-due-list">
-                  {dueSoon.slice(0,allDue ? undefined : 5).map(d => {
-                    const course = overview.courses.find(c => c.id === d.courseId);
-                    return <li key={d.id} className="moodle-due-row" data-urgent={Date.parse(d.dueAt)-Date.now()<86400000}>
-                      <span className="moodle-due-course" title={course?.fullName}>{course ? displayTitle(course.identity,lang,course.fullName) : tr("moodle:school")}</span>
-                      <button className="moodle-due-link" title={d.title} onClick={() => onCourse(d.courseId)}>{d.title}</button>
-                      <time dateTime={d.dueAt} title={date(d.dueAt)}>{relative(d.dueAt)}</time>
-                      {remind(d)}
-                    </li>;
-                  })}
-                </ul>
-                {dueSoon.length>5 && <Button variant="ghost" className="due-show-all" aria-expanded={allDue} onClick={() => setAllDue(!allDue)}>{tr(allDue ? "moodle:show_less" : "moodle:show_all")}</Button>}
-              </> : <p className="moodle-empty-inline">{tr("moodle:all_caught_up")}</p>}
-            </section>
+            <Section title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length}>
+              {([overdue, dueSoon] as const).map((items, group) => items.length > 0 && (
+                <Section key={group} title={tr(group === 0 ? "moodle:overdue_column" : "moodle:next_seven_days")}>
+                  <ul className="list-none p-0">
+                    {items.slice(0, allDue ? undefined : 5).map(d => {
+                      const course = overview.courses.find(c => c.id === d.courseId);
+                      return <li key={d.id}>
+                        <ListRow className="min-h-16" title={
+                          <button className="moodle-due-link text-start" onClick={() => onCourse(d.courseId)}>
+                            {d.title}
+                          </button>
+                        } subtitle={course ? displayTitle(course.identity,lang,course.fullName) : tr("moodle:school")}
+                          meta={<time dateTime={d.dueAt} title={date(d.dueAt)}>{relative(d.dueAt)}</time>}
+                          actions={remind(d)} />
+                      </li>;
+                    })}
+                  </ul>
+                </Section>
+              ))}
+              {overdue.length + dueSoon.length === 0 && <EmptyState title={tr("moodle:all_caught_up")} />}
+              {Math.max(overdue.length, dueSoon.length) > 5 && (
+                <Button variant="ghost" aria-expanded={allDue} onClick={() => setAllDue(!allDue)}>
+                  {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
+                </Button>
+              )}
+            </Section>
           </div>
         ) : (
           !error && (
