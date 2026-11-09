@@ -16,7 +16,7 @@ it.each(['EACCES','EPERM','EBUSY'])('preserves all data on rename failure %s and
   expect(s.stop).toHaveBeenCalledOnce();
   expect(io.rm).not.toHaveBeenCalled();
   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({code}),true);
-  expect(io.open).toHaveBeenCalledWith('/owned.delete-pending','w',0o600);
+  expect(io.open).toHaveBeenCalledWith('/owned.delete-pending',expect.any(Number),0o600);
   expect(s.relaunch).toHaveBeenCalledOnce();
 });
 it('quiesces before one atomic rename and relaunches without deleting', async () => {

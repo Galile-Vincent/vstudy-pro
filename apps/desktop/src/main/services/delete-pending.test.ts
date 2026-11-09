@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createDataDeletion, finishPendingDeletion } from './delete-data';
+import { createDataDeletion, finishPendingDeletion, markDeletionPending } from './delete-data';
 vi.mock('node:fs/promises', async importOriginal => {
   const actual = await importOriginal<typeof fs>();
   return {...actual, rename:vi.fn(actual.rename), rm:vi.fn(actual.rm)};
@@ -19,7 +19,7 @@ it('removes interrupted atomic writes of private configuration', async () => {
   const {root} = await fixture();
   const name = 'secrets.json.12345678-1234-1234-1234-123456789abc.tmp';
   await fs.writeFile(join(root,name),'private');
-  await fs.writeFile(root + '.delete-pending','{}');
+  await fs.writeFile(root + '.delete-pending',JSON.stringify({timestamp:Date.now()}));
   expect(await finishPendingDeletion(root,async () => {},vi.fn())).toBe(true);
   await expect(fs.access(join(root,name))).rejects.toThrow();
 });
@@ -33,7 +33,7 @@ it('retries partial deletion after a crash and does not follow owned symlinks', 
   const {root,parent} = await fixture();
   await fs.writeFile(join(parent, 'outside'), 'keep');
   await fs.symlink(parent, join(root, 'library'));
-  await fs.writeFile(root + '.delete-pending', '{}');
+  await fs.writeFile(root + '.delete-pending', JSON.stringify({timestamp:Date.now()}));
   const clear = vi.fn().mockRejectedValueOnce(Error('crash')).mockResolvedValue(undefined);
   const log = vi.fn();
   expect(await finishPendingDeletion(root, clear, log)).toBe(false);
@@ -45,7 +45,7 @@ it('retries partial deletion after a crash and does not follow owned symlinks', 
   expect(clear).toHaveBeenCalledTimes(2);
 });
 it('leaves a failed owned entry pending and retries with bounded filesystem retries', async () => {
-  const {root} = await fixture(); await fs.writeFile(root + '.delete-pending', '{}');
+  const {root} = await fixture(); await fs.writeFile(root + '.delete-pending', JSON.stringify({timestamp:Date.now()}));
   const original = (await vi.importActual<typeof fs>('node:fs/promises')).rm;
   const remove = vi.spyOn(fs, 'rm').mockRejectedValue(Error('locked'));
   expect(await finishPendingDeletion(root, async () => {}, vi.fn())).toBe(false);
@@ -78,7 +78,7 @@ it('clears every persisted partition and deletes unknown profile entries', async
   await fs.mkdir(join(root,'Partitions','moodle-old'),{recursive:true});
   await fs.mkdir(join(root,'converter-python'));
   await fs.writeFile(join(root,'unknown'),'keep');
-  await fs.writeFile(root + '.delete-pending','{}');
+  await fs.writeFile(root + '.delete-pending',JSON.stringify({timestamp:Date.now()}));
   const clear = vi.fn();
   expect(await finishPendingDeletion(root,clear,vi.fn())).toBe(true);
   expect(clear).toHaveBeenCalledWith([]);
@@ -96,7 +96,7 @@ it('deletes all writer artifacts and unknown entries except Chromium bookkeeping
   const kept = ['Local State', 'lockfile', 'SingletonLock', 'SingletonCookie',
     'SingletonSocket', 'Network', 'Preferences'];
   for (const name of [...removed, ...kept]) await fs.writeFile(join(root,name),'private');
-  await fs.writeFile(root + '.delete-pending','{}');
+  await fs.writeFile(root + '.delete-pending',JSON.stringify({timestamp:Date.now()}));
   expect(await finishPendingDeletion(root,async () => {},vi.fn())).toBe(true);
   for (const name of removed) await expect(fs.access(join(root,name))).rejects.toThrow();
   for (const name of kept) await fs.access(join(root,name));
@@ -107,7 +107,7 @@ it('continues past a locked converter and prioritizes secrets and migration copi
   for (const name of ['converter-venv','secrets.json','providers.json','vstudy.sqlite.before-v2.bak']) {
     await fs.writeFile(join(root,name),'private');
   }
-  await fs.writeFile(root + '.delete-pending','{}');
+  await fs.writeFile(root + '.delete-pending',JSON.stringify({timestamp:Date.now()}));
   const actual = await vi.importActual<typeof fs>('node:fs/promises');
   const remove = vi.spyOn(fs,'rm').mockImplementation(async (path, options) => {
     if (String(path).endsWith('converter-venv')) throw Error('locked');
@@ -119,4 +119,33 @@ it('continues past a locked converter and prioritizes secrets and migration copi
     await expect(fs.access(join(root,name))).rejects.toThrow();
   }
   expect(remove.mock.calls[0]?.[0]).toBe(join(await fs.realpath(root),'providers.json'));
+});
+
+it('ignores an expired marker without wiping newer data', async () => {
+  const {root} = await fixture();
+  await fs.writeFile(root + '.delete-pending',JSON.stringify({timestamp:Date.now()-86_400_001}));
+  const log=vi.fn();
+  expect(await finishPendingDeletion(root,vi.fn(),log)).toBe(false);
+  await fs.access(join(root,'vstudy.sqlite'));
+  expect(log).toHaveBeenCalledWith(expect.objectContaining({phase:'delete-marker-expired'}));
+});
+it('never follows or overwrites a marker symlink', async () => {
+  const {root,parent} = await fixture();
+  const outside=join(parent,'outside'); await fs.writeFile(outside,'keep');
+  await fs.symlink(outside,root + '.delete-pending');
+  await expect(markDeletionPending(root)).rejects.toThrow();
+  expect(await fs.readFile(outside,'utf8')).toBe('keep');
+  expect(await finishPendingDeletion(root,vi.fn(),vi.fn())).toBe(false);
+  await fs.access(join(root,'vstudy.sqlite'));
+});
+it('retries marker removal after a transient lock', async () => {
+  const {root} = await fixture(); await markDeletionPending(root);
+  const actual=await vi.importActual<typeof fs>('node:fs/promises');
+  let attempts=0;
+  vi.spyOn(fs,'rm').mockImplementation(async (path,options) => {
+    if (String(path)===root+'.delete-pending' && attempts++===0) throw Error('locked');
+    return actual.rm(path,options);
+  });
+  expect(await finishPendingDeletion(root,vi.fn(),vi.fn())).toBe(true);
+  expect(attempts).toBe(2);
 });

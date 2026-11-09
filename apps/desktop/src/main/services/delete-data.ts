@@ -2,6 +2,7 @@ import { stopStorageForDeletion } from '../storage/maintenance';
 import { reviewWorkers } from '../review/workers';
 import { rename, readdir, rm, open, lstat, realpath } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
+import { constants } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 
 export function createDataDeletion(
@@ -27,12 +28,12 @@ export function createDataDeletion(
       if (process.platform === 'win32' || (await lstat(root)).isSymbolicLink()) {
         const failures = await deleteOwnedEntries(await realpath(root));
         if (failures.length) await report(failures[0]!.error, true);
-        else await rm(root + '.delete-pending', {force:true});
+        else await removeDeletionMarker(root);
       }
       else {
         try {
           await rename(root, `${root}.deleting-${Date.now()}-${randomUUID()}`);
-          await rm(root + '.delete-pending', {force:true});
+          await removeDeletionMarker(root);
           await cleanupDeletedData(root, event => { void report(event.error, true); });
         }
         catch (error) { await report(error, scheduled); }
@@ -106,10 +107,20 @@ export async function deleteOwnedEntries(
   }
   return failed;
 }
+async function removeDeletionMarker(root: string): Promise<void> {
+  for (const delay of [0,100,300,700]) {
+    if (delay) await new Promise(resolve => setTimeout(resolve,delay));
+    try { await rm(root + '.delete-pending',{force:true}); return; }
+    catch (error) { if (delay === 700) throw error; }
+  }
+}
 export async function markDeletionPending(root: string): Promise<void> {
   const marker = root + '.delete-pending';
+  let created = false;
   try {
-    const file = await open(marker, 'w', 0o600);
+    const file = await open(marker, constants.O_WRONLY | constants.O_CREAT
+      | constants.O_EXCL | (constants.O_NOFOLLOW ?? 0), 0o600);
+    created = true;
     try {
       await file.writeFile(JSON.stringify({token:randomUUID(), timestamp:Date.now()}));
       await file.sync();
@@ -122,7 +133,7 @@ export async function markDeletionPending(root: string): Promise<void> {
       } finally { await parent.close(); }
     }
   } catch (error) {
-    await rm(marker,{force:true});
+    if (created) await removeDeletionMarker(root);
     throw error;
   }
 }
@@ -131,8 +142,22 @@ export async function finishPendingDeletion(
   clearSessions: (partitions: string[]) => Promise<void>,
   log: (event: {phase:string;error:unknown}) => void,
 ): Promise<boolean> {
-  try { await lstat(root + '.delete-pending'); }
-  catch (error) {
+  try {
+    const marker = await open(root + '.delete-pending',
+      constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+    let timestamp: unknown;
+    try {
+      const stat = await marker.stat();
+      if (!stat.isFile() || stat.size > 4096) throw Error('Unsafe deletion marker');
+      timestamp = JSON.parse(await marker.readFile('utf8')).timestamp;
+    } finally { await marker.close(); }
+    if (typeof timestamp !== 'number' || !Number.isFinite(timestamp)
+      || Date.now() - timestamp > 86_400_000 || timestamp > Date.now()) {
+      await removeDeletionMarker(root);
+      log({phase:'delete-marker-expired',error:Error('Deletion request expired; confirm again')});
+      return false;
+    }
+  } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return true;
     log({phase:'delete-pending-failed',error}); return false;
   }
@@ -147,7 +172,7 @@ export async function finishPendingDeletion(
       for (const failure of failures) log({phase:'delete-pending-failed',error:failure.error});
       return false;
     }
-    await rm(root + '.delete-pending', {force:true});
+    await removeDeletionMarker(root);
     return true;
   } catch (error) { log({phase:'delete-pending-failed',error}); return false; }
 }
