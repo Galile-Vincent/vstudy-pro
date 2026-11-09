@@ -24,6 +24,18 @@ export class Updates {
   }) {
     this.state = options.unsupported ? {status:'unsupported', reason:options.unsupported} : {status:'idle'};
     this.automatic = options.automatic;
+    this.attach(updater);
+    this.timer = setTimeout(() => { if (this.automatic) void this.check(false); }, 15_000);
+    this.interval = setInterval(() => { if (this.automatic) void this.check(false); }, 6 * 60 * 60_000);
+  }
+  initialize(updater: Updater, unsupported?: Extract<UpdateState, {status:'unsupported'}>['reason']) {
+    for (const [name, callback] of this.events) this.updater.removeListener(name, callback);
+    this.events = [];
+    this.updater = updater;
+    this.state = unsupported ? {status:'unsupported',reason:unsupported} : {status:'idle'};
+    this.attach(updater); this.emit();
+  }
+  private attach(updater: Updater) {
     updater.autoDownload = false;
     updater.allowDowngrade = false;
     updater.allowPrerelease = false;
@@ -36,8 +48,6 @@ export class Updates {
     on('download-progress', (info: {percent:number}) => this.dispatch({type:'progress', percent:info.percent}));
     on('update-downloaded', (info: {version:string}) => this.dispatch({type:'ready', version:info.version}));
     on('error', (error: Error) => this.dispatch({type:'error', code:updateError(error)}));
-    this.timer = setTimeout(() => { if (this.automatic) void this.check(false); }, 15_000);
-    this.interval = setInterval(() => { if (this.automatic) void this.check(false); }, 6 * 60 * 60_000);
   }
   snapshot = (): UpdateSnapshot => ({state:this.state, currentVersion:this.options.version,
     lastCheckedAt:this.lastCheckedAt, automatic:this.automatic, installing:this.installing, ...(this.result ? {result:this.result} : {})});

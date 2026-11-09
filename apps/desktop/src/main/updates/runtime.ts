@@ -1,3 +1,4 @@
+import { EventEmitter } from 'node:events';
 import { app, net } from 'electron';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -6,16 +7,16 @@ import { dirname, join } from 'node:path';
 import type { Store } from '../db';
 import { UpdateProvider } from './provider';
 import { Updates } from './service';
-export async function createUpdates(store: Store) {
+async function setupUpdater() {
   const { autoUpdater } = await import('electron-updater');
   let unsupported: 'development' | 'unsigned' | 'platform' | 'portable' | undefined;
   if (!app.isPackaged) unsupported = 'development';
   else if (process.platform === 'darwin') {
     try {
       await promisify(execFile)('/usr/bin/codesign', ['--verify', '--strict',
-        dirname(dirname(dirname(app.getPath('exe'))))]);
+        dirname(dirname(dirname(app.getPath('exe'))))], {timeout:3000});
       const result = await promisify(execFile)('/usr/bin/codesign',
-        ['-d', '--verbose=4', dirname(dirname(dirname(app.getPath('exe'))))]);
+        ['-d', '--verbose=4', dirname(dirname(dirname(app.getPath('exe'))))], {timeout:3000});
       if (!/Authority=Developer ID Application:/.test(result.stdout + result.stderr)) unsupported = 'unsigned';
     } catch { unsupported = 'unsigned'; }
   } else if (process.platform === 'win32') {
@@ -36,7 +37,25 @@ export async function createUpdates(store: Store) {
   autoUpdater.setFeedURL({ provider:'custom', updateProvider:UpdateProvider });
   autoUpdater.disableWebInstaller = true;
   autoUpdater.disableDifferentialDownload = true;
-  return new Updates(autoUpdater, {unsupported, version:app.getVersion(),
-    automatic:store.settings.get().autoCheckUpdates, online:() => net.isOnline(),
-    saveAutomatic:enabled => {store.settings.set({autoCheckUpdates:enabled});} });
+  return {autoUpdater,unsupported};
+}
+export function createUpdates(store: Store, shown: Promise<void> = Promise.resolve()) {
+  const fallback = Object.assign(new EventEmitter(), {autoDownload:false,allowDowngrade:false,
+    allowPrerelease:false,autoInstallOnAppQuit:false,checkForUpdates:async()=>null,
+    downloadUpdate:async()=>[],quitAndInstall:()=>{}});
+  const service = new Updates(fallback as unknown as ConstructorParameters<typeof Updates>[0], {
+    unsupported:'platform',version:app.getVersion(),automatic:store.settings.get().autoCheckUpdates,
+    online:()=>net.isOnline(),saveAutomatic:enabled=>{store.settings.set({autoCheckUpdates:enabled});},
+  });
+  void shown.then(async () => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const result = await Promise.race([setupUpdater(), new Promise<never>((_resolve,reject)=>{
+        timer = setTimeout(()=>reject(new Error('Updater setup timeout')), 7000);
+      })]);
+      service.initialize(result.autoUpdater,result.unsupported);
+    } catch { service.initialize(fallback as unknown as ConstructorParameters<typeof Updates>[0],'unsigned'); }
+    finally { clearTimeout(timer); }
+  });
+  return service;
 }

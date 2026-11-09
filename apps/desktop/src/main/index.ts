@@ -289,6 +289,8 @@ if (ownsApplication) void app.whenReady().then(async () => {
       },
     }),
   );
+  let updaterWindowShown = () => {};
+  const updaterReady = new Promise<void>(resolve => { updaterWindowShown = resolve; });
   disposeIpc = registerIpc(
     store,
     secrets,
@@ -298,7 +300,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
     restoreMainWindow,
-    { updates: await createUpdates(store), ...(process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {}) },
+    { updates: createUpdates(store, updaterReady), ...(process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {}) },
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deleteAllData');
@@ -325,6 +327,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
   });
   startupStage = 'window';
   await createWindow(!process.argv.includes('--mcp-background'));
+  updaterWindowShown();
   analytics()?.track('app_performance_sample',{startup_ms:Math.round(performance.now()-analyticsStartup)});
   if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
