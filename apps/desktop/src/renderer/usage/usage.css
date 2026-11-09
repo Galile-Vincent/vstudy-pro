@@ -255,16 +255,40 @@
   margin: 0 4px 0 8px;
 }
 
-.usage-key.input,
-.usage-bar-input {
-  background: color-mix(in oklab, var(--ink) 35%, transparent);
-  fill: color-mix(in oklab, var(--ink) 35%, transparent);
+.usage-key.input {
+  background: repeating-linear-gradient(45deg, var(--ink) 0 2px, var(--muted) 2px 4px);
 }
 
 .usage-key.output,
 .usage-bar-output {
   background: var(--ink);
   fill: var(--ink);
+}
+
+.usage-hatch-ground {
+  fill: var(--muted);
+}
+
+.usage-hatch-line {
+  fill: var(--ink);
+}
+
+@media (forced-colors: active) {
+  .usage-key.input {
+    background: repeating-linear-gradient(45deg, CanvasText 0 2px, Canvas 2px 4px);
+    border: 1px solid CanvasText;
+  }
+  .usage-key.output,
+  .usage-bar-output {
+    background: CanvasText;
+    fill: CanvasText;
+  }
+  .usage-hatch-ground {
+    fill: Canvas;
+  }
+  .usage-hatch-line {
+    fill: CanvasText;
+  }
 }
 
 .usage-axis {

@@ -3,7 +3,7 @@ import { Select } from '../components/select';
 import { Button } from '../components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { IpcResponse, UsagePeriod, UsageSummary } from '../../shared';
 import { useFormat } from '../i18n';
 import { desktop } from '../bridge';
@@ -15,6 +15,7 @@ type Dashboard = IpcResponse<'usage:dashboard'>;
 export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
   useTranslation();
   const format = useFormat();
+  const hatch = `usage-hatch-${useId().replace(/\W/g, '')}`;
   const max = Math.max(1, ...days.map((d) => d.inputTokens + d.outputTokens));
   const width = 720,
     height = 124,
@@ -41,6 +42,12 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
           'common:daily_input_and_output_tokens_exact_values_are_available_in_the_daily_totals_table',
         )}
       >
+        <defs>
+          <pattern id={hatch} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="6" height="6" className="usage-hatch-ground" />
+            <rect width="2" height="6" className="usage-hatch-line" />
+          </pattern>
+        </defs>
         <line x1="0" x2={width} y1={height - 1} y2={height - 1} className="usage-axis" />
         {days.map((d, i) => {
           const input = (d.inputTokens / max) * (height - 8);
@@ -56,6 +63,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
               </title>
               <rect
                 className="usage-bar-input"
+                fill={`url(#${hatch})`}
                 x={i * column + column * 0.17}
                 width={column * 0.66}
                 y={height - 1 - input}
