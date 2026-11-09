@@ -1225,3 +1225,14 @@ it("D1 exposes week headings and labelled disclosure regions", async () => {
     expect(panel?.getAttribute("aria-labelledby")).toBe(heading.id);
   }
 });
+it("D3 opens at the top and explicitly jumps with focus and reduced motion", async () => {
+  const scroll = vi.fn();
+  HTMLElement.prototype.scrollIntoView = scroll;
+  const api = createMockMoodleApi();
+  await mount(api, (await api.overview()).courses[0]!.id);
+  expect(scroll).not.toHaveBeenCalled();
+  await act(async () => getByRole(host, "button", { name: "Jump to current week" }).click());
+  const heading = host.querySelector(".moodle-week[data-current=true] h3");
+  expect(document.activeElement).toBe(heading);
+  expect(scroll).toHaveBeenCalledWith({ block: "start", behavior: "instant" });
+});
