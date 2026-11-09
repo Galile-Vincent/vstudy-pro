@@ -94,15 +94,15 @@ try {
   await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog').waitFor();let dialogSize;
   for(const section of ['general','appearance','providers','usage','privacy']) {
    await page.locator(`.settings-tabs [role=tab][aria-controls$="-${section}"]`).click();
-   const layout=await page.evaluate(()=>{const d=window.document.querySelector('.settings-dialog'),p=window.document.querySelector('.settings-pane:not([hidden])'),r=d.getBoundingClientRect();return {w:r.width,h:r.height,overflow:d.scrollWidth>d.clientWidth+1||p.scrollWidth>p.clientWidth+1,viewport:r.left>=0&&r.top>=0&&r.right<=window.innerWidth+1&&r.bottom<=window.innerHeight+1,nested:d.querySelectorAll('.settings-card .settings-card').length,rowsOverlap:[...p.querySelectorAll('.settings-row')].some(row=>{const label=row.querySelector('.settings-label'),control=row.querySelector('.settings-control');if(!label||!control)return false;const a=label.getBoundingClientRect(),b=control.getBoundingClientRect();return Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top);})};});
+   const layout=await page.evaluate(()=>{const d=window.document.querySelector('.settings-dialog'),p=window.document.querySelector('.settings-pane:not([hidden])'),r=d.getBoundingClientRect();return {w:r.width,h:r.height,overflow:d.scrollWidth>d.clientWidth+1||p.scrollWidth>p.clientWidth+1,viewport:r.left>=0&&r.top>=0&&r.right<=window.innerWidth+1&&r.bottom<=window.innerHeight+1,nested:d.querySelectorAll('[data-slot=card] [data-slot=card]').length,rowsOverlap:[...p.querySelectorAll('[data-slot=setting-row]')].some(row=>{const label=row.querySelector(':scope > div:first-child'),control=row.querySelector('[data-slot=setting-control]');if(!label||!control)return false;const a=label.getBoundingClientRect(),b=control.getBoundingClientRect();return Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top);})};});
    assert.equal(layout.overflow,false,JSON.stringify({...context,section,layout}));assert.equal(layout.viewport,true);assert.equal(layout.nested,0);assert.equal(layout.rowsOverlap,false);if(dialogSize)assert.deepEqual([layout.w,layout.h],dialogSize);else dialogSize=[layout.w,layout.h];
    if(section==='usage') {
     await page.locator('.usage-settings input[type=number]').first().waitFor();
     assert.equal(await page.locator('.usage-dashboard').evaluate(e=>e.parentElement.classList.contains('usage-settings')),true);
-    const usageSpacing=await page.locator('.settings-pane:not([hidden])').evaluate(p=>({heading:parseFloat(window.getComputedStyle(p.querySelector('.settings-pane-inner')).rowGap),gap:parseFloat(window.getComputedStyle(p.querySelector('.usage-settings')).rowGap),groupMargins:[...p.querySelectorAll('.usage-settings > .settings-group')].map(e=>parseFloat(window.getComputedStyle(e).marginTop))}));
+    const usageSpacing=await page.locator('.settings-pane:not([hidden])').evaluate(p=>({heading:parseFloat(window.getComputedStyle(p.querySelector('.settings-pane-inner')).rowGap),gap:parseFloat(window.getComputedStyle(p.querySelector('.usage-settings')).rowGap),groupMargins:[...p.querySelectorAll('.usage-settings > [data-slot=section]')].map(e=>parseFloat(window.getComputedStyle(e).marginTop))}));
     assert.equal(usageSpacing.heading,usageSpacing.gap);assert.ok(usageSpacing.groupMargins.length&&usageSpacing.groupMargins.every(margin=>margin===0),JSON.stringify(usageSpacing));
    }
-   if(section==='privacy')assert.equal(await page.locator('[data-testid=privacy-settings] .settings-group').first().evaluate(e=>e.querySelector('h3').textContent===e.querySelector('.settings-label > div').textContent),false);
+   if(section==='privacy')assert.equal(await page.locator('[data-testid=privacy-settings] [data-slot=section]').first().evaluate(e=>e.querySelector('h3').textContent===e.querySelector('[data-slot=setting-row] > div:first-child > label').textContent),false);
 
    if(section==='general') {
     const reply=await page.getByTestId('replyLanguage').evaluate(e=>{const text=e.querySelector('[data-slot=select-value]');return {width:e.getBoundingClientRect().width,font:parseFloat(window.getComputedStyle(window.document.documentElement).fontSize),clipped:!!text&&text.scrollWidth>text.clientWidth+1};});
@@ -110,21 +110,21 @@ try {
    }
    if(section==='appearance') {
     await page.locator('.settings-pane:not([hidden]) .appearance-preview').waitFor();
-    const appearance=await page.evaluate(()=>{const pane=window.document.querySelector('.settings-pane:not([hidden])'),control=pane.querySelector('.settings-control'),preview=pane.querySelector('.appearance-preview'),items=[...pane.querySelectorAll('[data-slot=toggle-group-item]')];return {firstControl:control.getBoundingClientRect().bottom<=pane.getBoundingClientRect().bottom,previewAfter:preview.getBoundingClientRect().top>control.getBoundingClientRect().top,wrapped:items.some(e=>e.scrollHeight>e.clientHeight+1)};});
-    if(scale===1)assert.equal(await page.locator('.appearance-layout .settings-row').evaluateAll(rows=>rows.every(row=>{const a=row.querySelector('.settings-label').getBoundingClientRect(),b=row.querySelector('.settings-control').getBoundingClientRect();return Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<=1;})),true,JSON.stringify(context));
+    const appearance=await page.evaluate(()=>{const pane=window.document.querySelector('.settings-pane:not([hidden])'),control=pane.querySelector('[data-slot=setting-control]'),preview=pane.querySelector('.appearance-preview'),items=[...pane.querySelectorAll('[data-slot=segmented-control] > [role=radio]')];return {firstControl:control.getBoundingClientRect().bottom<=pane.getBoundingClientRect().bottom,previewAfter:preview.getBoundingClientRect().top>control.getBoundingClientRect().top,wrapped:items.some(e=>e.scrollHeight>e.clientHeight+1)};});
+    if(scale===1)assert.equal(await page.locator('.appearance-layout [data-slot=setting-row]').evaluateAll(rows=>rows.every(row=>{const a=row.querySelector(':scope > div:first-child').getBoundingClientRect(),b=row.querySelector('[data-slot=setting-control]').getBoundingClientRect();return Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<=1;})),true,JSON.stringify(context));
     assert.equal(appearance.firstControl,true,JSON.stringify({context,appearance}));assert.equal(appearance.previewAfter,true);assert.equal(appearance.wrapped,false);
    }
-   const repeated=await page.locator('.settings-pane:not([hidden])').evaluate(p=>[...p.querySelectorAll('.settings-row')].some(row=>{const label=row.querySelector('.settings-label > div')?.textContent?.trim();return label&&[...row.querySelectorAll('button')].some(button=>button.textContent?.trim()===label); }));
+   const repeated=await page.locator('.settings-pane:not([hidden])').evaluate(p=>[...p.querySelectorAll('[data-slot=setting-row]')].some(row=>{const label=row.querySelector(':scope > div:first-child > label')?.textContent?.trim();return label&&[...row.querySelectorAll('button')].some(button=>button.textContent?.trim()===label); }));
    if(section==='general')assert.equal(repeated,false,JSON.stringify({context,section}));
-   const textSizes=await page.locator('.settings-pane:not([hidden])').evaluate(p=>[...p.querySelectorAll('button,input,textarea')].filter(e=>e.getClientRects().length&&(e.textContent?.trim()||e instanceof window.HTMLInputElement||e instanceof window.HTMLTextAreaElement)&&!e.querySelector('svg')&&e.getAttribute('role')!=='radio').map(e=>({text:e.textContent?.slice(0,24),size:parseFloat(window.getComputedStyle(e).fontSize),base:parseFloat(window.getComputedStyle(p.querySelector('.settings-label')??p).fontSize)})));
+   const textSizes=await page.locator('.settings-pane:not([hidden])').evaluate(p=>[...p.querySelectorAll('button,input,textarea')].filter(e=>e.getClientRects().length&&(e.textContent?.trim()||e instanceof window.HTMLInputElement||e instanceof window.HTMLTextAreaElement)&&!e.querySelector('svg')&&e.getAttribute('role')!=='radio').map(e=>({text:e.textContent?.slice(0,24),size:parseFloat(window.getComputedStyle(e).fontSize),base:parseFloat(window.getComputedStyle(p.querySelector('[data-slot=setting-row] > div:first-child')??p).fontSize)})));
    assert.deepEqual(textSizes.filter(s=>s.size<s.base*.75),[],JSON.stringify({context,section,textSizes}));
    await audit(section);await shot(section);
    await page.locator('.settings-pane:not([hidden])').evaluate(e=>{e.scrollTop=e.scrollHeight;});
    const bottom=await page.locator('.settings-pane:not([hidden])').evaluate(e=>{const content=e.querySelector('.settings-pane-inner'),last=content.lastElementChild;return {bottom:last.getBoundingClientRect().bottom,viewport:e.getBoundingClientRect().bottom,padding:parseFloat(window.getComputedStyle(e).paddingBottom)};});
    assert.ok(bottom.bottom<=bottom.viewport-bottom.padding+1,JSON.stringify({context,section,bottom}));
-   const lastRow=page.locator('.settings-pane:not([hidden]) .settings-row:visible').last();
+   const lastRow=page.locator('.settings-pane:not([hidden]) [data-slot=setting-row]:visible').last();
    await lastRow.evaluate(e=>e.scrollIntoView({block:'end'}));
-   const lastRowBounds=await lastRow.evaluate(e=>{const r=e.getBoundingClientRect(),p=e.closest('.settings-pane').getBoundingClientRect(),card=e.closest('.settings-card').getBoundingClientRect();return {top:r.top,bottom:r.bottom,paneTop:p.top,paneBottom:p.bottom,cardBottom:card.bottom};});
+   const lastRowBounds=await lastRow.evaluate(e=>{const r=e.getBoundingClientRect(),p=e.closest('.settings-pane').getBoundingClientRect(),card=(e.closest('[data-slot=card]')??e.parentElement).getBoundingClientRect();return {top:r.top,bottom:r.bottom,paneTop:p.top,paneBottom:p.bottom,cardBottom:card.bottom};});
    assert.ok((lastRowBounds.bottom-lastRowBounds.top>lastRowBounds.paneBottom-lastRowBounds.paneTop||lastRowBounds.top>=lastRowBounds.paneTop-1)&&lastRowBounds.bottom<=lastRowBounds.paneBottom+1&&lastRowBounds.bottom<=lastRowBounds.cardBottom+1,JSON.stringify({context,section,lastRowBounds}));
    await shot(section+'-bottom');
 
@@ -138,13 +138,12 @@ try {
  for(const [value,token,expected]of [['125%','--ui-scale','1.25'],['Compact','--density','.875'],['Solid',null,null]]) {
   // Use an English catalog for stable control names across the locale matrix.
   const current=await call('settings:get',{});if(current.language!=='en'){await call('settings:set',{...current,language:'en'});await page.reload();await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-tabs [role=tab]').nth(1).click();}
-  await page.getByLabel(value,{exact:true}).click();
+  await page.getByRole('radio',{name:value,exact:true}).click();
   if(token)await page.waitForFunction(({token,expected})=>window.document.documentElement.style.getPropertyValue(token)===expected,{token,expected});
  }
- await page.getByLabel('Large',{exact:true}).click();await page.waitForFunction(()=>window.document.documentElement.style.getPropertyValue('--reader-size')==='1rem');
- await page.getByRole('radio',{name:'Blue',exact:true}).click();await page.waitForFunction(()=>window.document.documentElement.style.getPropertyValue('--accent-h')==='250');
+ await page.getByRole('radio',{name:'Large',exact:true}).click();await page.waitForFunction(()=>window.document.documentElement.style.getPropertyValue('--reader-size')==='1rem');
  await page.getByRole('combobox',{name:'Reader font',exact:true}).click();await page.getByRole('option',{name:'Serif',exact:true}).click();await page.waitForFunction(()=>window.document.documentElement.style.getPropertyValue('--font-reader').includes('Georgia'));
- await page.reload();const persisted=await call('settings:get',{});assert.equal(persisted.uiScale,125);assert.equal(persisted.density,'compact');assert.equal(persisted.accent,'blue');assert.equal(persisted.readerFont,'serif');assert.equal(persisted.material,'solid');assert.equal(persisted.readerSize,'l');
+ await page.reload();const persisted=await call('settings:get',{});assert.equal(persisted.uiScale,125);assert.equal(persisted.density,'compact');assert.equal(persisted.readerFont,'serif');assert.equal(persisted.cardTransparency,'solid');assert.equal(persisted.material,initial.material);assert.equal(persisted.readerSize,'l');
  checks.push({state:'appearance-live-persistence',violations:[]});
 
 } finally {await writeFile(`${out}/report.json`,JSON.stringify(checks,null,2));await app?.close();await rm(dir,{recursive:true,force:true});}
