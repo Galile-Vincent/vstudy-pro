@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { scopeSchema, type Grant } from '../../shared/mcp';
 import { tr } from '../../shared/i18n';
+import { Card, ListRow, EmptyState } from '../components/ui';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../components/ui/dialog';
@@ -50,12 +51,12 @@ export function AgentGrants() {
   const grant = grants.find(grant => grant.id === editing);
   return <section aria-labelledby="agents-grants-title" className="agents-section">
     <h3 id="agents-grants-title">{tr('agents:grants')}</h3>
-    {!grants.length && <p className="agents-muted">{tr('agents:no_grants')}</p>}
-    {grants.map(grant => <article className="agents-card" data-grant-id={grant.id} key={grant.id}>
-      <header className="agents-card-header"><h4>{grant.clientName}</h4><span className="agents-badge">{tr(`agents:${grant.revokedAt ? 'revoked' : Date.parse(grant.expiresAt) <= Date.now() ? 'expired' : 'active'}`)}</span>{!grant.revokedAt && <div className="agents-actions">
+    {!grants.length && <EmptyState headingLevel={4} title={tr('agents:no_grants')} />}
+    {grants.map(grant => <Card variant="flat" className="gap-[var(--space-2)] p-[var(--space-3)]" data-grant-id={grant.id} key={grant.id}>
+      <ListRow className="flex-wrap" title={<h4>{grant.clientName}</h4>} subtitle={<><span className="agents-badge">{tr(`agents:${grant.revokedAt ? 'revoked' : Date.parse(grant.expiresAt) <= Date.now() ? 'expired' : 'active'}`)}</span>{messages[grant.id] && <span role="status">{messages[grant.id]}</span>}</>} actions={!grant.revokedAt && <div className="agents-actions">
         <Button aria-label={tr('agents:client_action',{action:tr('agents:edit'),name:grant.clientName})} size="sm" variant="secondary" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => setEditing(grant.id)}>{tr('agents:edit')}</Button>
         <Button aria-label={tr('agents:client_action',{action:tr('agents:revoke'),name:grant.clientName})} size="sm" variant="ghost" className="agents-danger" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => void agents.act('mcp:revoke', { grantId: grant.id }).then(ok => {if (ok) setMessages(previous => ({...previous,[grant.id]:tr('agents:revoke_done',{name:grant.clientName})}));})}>{tr('agents:revoke')}</Button>
-      </div>}{messages[grant.id] && <span role="status">{messages[grant.id]}</span>}</header>
+      </div>} />
       <dl className="agents-details">
         <div><dt>{tr('agents:client_id')}</dt><dd><code>{grant.clientId}</code></dd></div>
         <div><dt>{tr('agents:scopes')}</dt><dd className="agents-scopes">{grant.scopes.map(scope => <span className="agents-scope" key={scope} title={scope}>{tr(`agents:scope_${scope.replace(':', '_')}`)}</span>)}</dd></div>
@@ -64,7 +65,7 @@ export function AgentGrants() {
         <div><dt>{tr('agents:last_used')}</dt><dd><AgentDate value={grant.lastUsedAt} /></dd></div>
         <div><dt>{tr('agents:expiry')}</dt><dd><AgentDate value={grant.expiresAt} /></dd></div>
       </dl>
-    </article>)}
+    </Card>)}
     {grant && <GrantEditor key={grant.id} grant={grant} onClose={() => setEditing(null)} />}
   </section>;
 }

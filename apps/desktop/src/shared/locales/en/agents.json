@@ -1,4 +1,5 @@
 {
+  "latest_activity": "Showing the latest 20",
   "title": "Agents",
   "description": "Connect a global agent to your coursework through VStudy. You choose its accounts and permissions. Every write needs your approval.",
   "master": "Allow agent connections",
