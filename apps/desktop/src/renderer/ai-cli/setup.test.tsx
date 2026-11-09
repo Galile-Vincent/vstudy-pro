@@ -239,7 +239,7 @@ it('checks installed files again and moves to sign-in without running the newly 
   Object.assign(fixture.tools[2]!, { consented: true, manualInstallRequired: true });
   await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
   await click('Check again');
-  expect(document.body.textContent).toContain("We haven't found it yet.");
+  expect(live()).toBe(i18n.t('ai-cli:manual_not_found'));
   Object.assign(fixture.tools[2]!, { path: '/newly/installed/agy', status: 'installed-not-signed-in' });
   const checks = fixture.calls.filter(call => call.channel === 'ai-cli:list').length;
   await click('Check again');
@@ -247,6 +247,26 @@ it('checks installed files again and moves to sign-in without running the newly 
   expect(document.querySelector('.ai-cli-steps [aria-current=step]')?.textContent).toContain('Sign in');
   expect(fixture.calls.at(-1)?.payload.actionId).toBe('login-agy');
   expect(runs()).toHaveLength(0);
+});
+
+const live = () => [...document.querySelectorAll('.ai-cli-manual [role=status]')].map(node => node.textContent).join('|');
+
+it('announces that a ready tool was found when it is checked again', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.2.3', path: '/bin/claude', status: 'ready' });
+  await mount(<AiCliSetup initialProvider="claude" onClose={close} />);
+  await click('Check again');
+  expect(live()).toBe(i18n.t('ai-cli:manual_found_version', { version: '1.2.3' }));
+  expect(document.body.textContent).not.toContain(i18n.t('ai-cli:manual_not_found'));
+});
+
+it('announces that the check could not run instead of claiming the tool is missing', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.2.3', path: '/bin/claude', status: 'ready' });
+  await mount(<AiCliSetup initialProvider="claude" onClose={close} />);
+  bridge.invoke.mockImplementation(async (channel, payload) => { if (channel === 'ai-cli:list') throw new Error('offline'); return fixture.invoke(channel, payload); });
+  await click('Check again');
+  expect(live()).toBe(i18n.t('ai-cli:manual_check_failed'));
+  expect(document.body.textContent).not.toContain(i18n.t('ai-cli:manual_not_found'));
+  expect(document.querySelector('[role=alert]')?.textContent).toContain(i18n.t('ai-cli:load_error'));
 });
 
 it('keeps other Unix terminal instructions platform-neutral and Codex unavailable outside macOS', async () => {

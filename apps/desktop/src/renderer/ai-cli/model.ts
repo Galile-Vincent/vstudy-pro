@@ -33,3 +33,9 @@ export function recommendedProvider(tools: CliToolState[]): CliProvider {
   const score = (tool: CliToolState) => tool.tested && tool.consented ? 4 : tool.status === 'ready' ? 3 : tool.path || tool.version ? 2 : tool.manualInstallRequired ? 0 : 1;
   return [...tools].sort((a, b) => score(b) - score(a))[0]?.provider ?? 'claude';
 }
+
+export type CliDetection = { kind: 'found'; version: string | null } | { kind: 'not-found' } | { kind: 'failed'; reason: string };
+export function detectTool(tools: CliToolState[], provider: CliProvider): CliDetection {
+  const tool = tools.find(item => item.provider === provider);
+  return tool && tool.status !== 'not-installed' && (tool.version || tool.path) ? { kind: 'found', version: tool.version } : { kind: 'not-found' };
+}
