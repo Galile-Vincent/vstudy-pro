@@ -18,7 +18,7 @@ import { markLearned, saveProgress, useLearningProgress } from './progress';
 import { lessons, Walkthrough, type Lesson } from './walkthrough';
 import './guidance.css';
 
-type HelpView = 'setup' | 'walkthroughs' | 'shortcuts';
+type HelpView = 'setup' | 'walkthroughs' | 'shortcuts' | 'checklist';
 export function openLearningHelp(view: HelpView) {
   window.dispatchEvent(new CustomEvent('vstudy:learning-help', { detail: view }));
 }
@@ -40,13 +40,19 @@ export function LearningHelp() {
     return () => window.removeEventListener('vstudy:learning-help', show);
   }, []);
   if (view === 'setup') return <Onboarding onComplete={() => setView(undefined)}/>;
+  if (view === 'checklist') return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}>
+    <DialogContent aria-describedby={undefined}>
+      <DialogTitle>{tr('onboarding:checklist')}</DialogTitle>
+      <GettingStarted detailed/>
+    </DialogContent>
+  </Dialog>;
   if (!view) return null;
   return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}><DialogContent className="learning-dialog" aria-describedby={undefined} showCloseButton={false}>
     <Brand lockup/><header><DialogTitle>{tr(`onboarding:help_${view}`)}</DialogTitle><Button variant="ghost" size="icon" aria-label={tr('common:close')} onClick={() => setView(undefined)}><X size={18}/></Button></header>
     {view === 'walkthroughs' ? <><p>{tr('onboarding:walkthroughs_body')}</p><nav className="learning-lessons" aria-label={tr('onboarding:help_walkthroughs')}>{lessons.map(item => <Button variant={lesson === item ? 'secondary' : 'ghost'} aria-pressed={lesson === item} key={item} onClick={() => setLesson(item)}>{tr(`onboarding:lesson_${item}`)}</Button>)}</nav><Walkthrough key={lesson} lesson={lesson}/></> : <><p>{tr('onboarding:shortcuts_body')}</p><dl className="learning-shortcuts">{['selection', 'sidebar', 'send', 'newline', 'dismiss', 'navigate'].map(key => <div key={key}><dt>{tr(`onboarding:shortcut_${key}`)}</dt><dd><kbd>{tr(`onboarding:keys_${key}`)}</kbd></dd></div>)}</dl></>}
   </DialogContent></Dialog>;
 }
-export function GettingStarted() {
+export function GettingStarted({ detailed = false }: { detailed?: boolean }) {
   useTranslation();
   const progress = useLearningProgress();
   const { navigate } = useNavigate();
@@ -60,6 +66,16 @@ export function GettingStarted() {
     return () => { window.removeEventListener('library-changed', refresh); unsubscribe?.(); };
   }, [hasDocument]);
   const items = ['setup', 'document', 'walkthrough', 'help'] as const;
+  if (!detailed && items.every(item => progress.done.includes(item))) {
+    return <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] p-[var(--space-3)]">
+      <span className="flex items-center gap-[var(--space-2)]">
+        <Check size={16} aria-hidden="true"/>{tr('onboarding:setup_complete')}
+      </span>
+      <Button variant="ghost" onClick={() => openLearningHelp('checklist')}>
+        {tr('onboarding:setup_help')}
+      </Button>
+    </div>;
+  }
   return <Card variant="flat" className="getting-started min-w-0 p-[var(--space-6)]"><Section title={<span id="getting-started-title">{tr('onboarding:checklist')}</span>} actions={<span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>}><p>{tr('onboarding:checklist_body')}</p>
     <Progress className="art-reader-setup-progress" aria-label={tr('onboarding:checklist')} value={progress.done.length / items.length * 100}/><ol>{items.map(item => <li key={item} data-complete={progress.done.includes(item)}><span aria-hidden="true">{progress.done.includes(item) ? <Check size={16}/> : null}</span><Button variant="ghost" onClick={() => item === 'document' ? navigate('library') : openLearningHelp(item === 'walkthrough' ? 'walkthroughs' : item === 'help' ? 'shortcuts' : 'setup')}>{tr(`onboarding:check_${item}`)}{progress.done.includes(item) && <small>{tr('onboarding:completed')}</small>}</Button></li>)}</ol>
     {progress.status === 'paused' && <Button variant="outline" onClick={() => { try { saveProgress({ status: 'active' }); openLearningHelp('setup'); } catch { setError(tr('onboarding:save_error')); } }}>{tr('onboarding:resume')}</Button>}
