@@ -15,18 +15,34 @@ export class Updates {
   private installing = false;
   private listeners = new Set<(snapshot: UpdateSnapshot) => void>();
   private timer: ReturnType<typeof setTimeout>;
+  private monitor: ReturnType<typeof setInterval>;
+  private firstCheck = false;
+  private wasOnline = false;
   private interval: ReturnType<typeof setInterval>;
   private events: [Parameters<Updater['on']>[0], (...args: never[]) => void][] = [];
   constructor(private updater: Updater, private options: {
     unsupported?: Extract<UpdateState, {status:'unsupported'}>['reason'] | undefined;
     version: string; automatic: boolean; online: () => boolean;
+    getAutomatic?: () => boolean; ready?: () => boolean;
     saveAutomatic: (enabled: boolean) => void; now?: () => number;
   }) {
     this.state = options.unsupported ? {status:'unsupported', reason:options.unsupported} : {status:'idle'};
     this.automatic = options.automatic;
     this.attach(updater);
-    this.timer = setTimeout(() => { if (this.automatic) void this.check(false); }, 15_000);
-    this.interval = setInterval(() => { if (this.automatic) void this.check(false); }, 6 * 60 * 60_000);
+    this.timer = setTimeout(() => { void this.automaticCheck(); }, 15_000);
+    this.monitor = setInterval(() => {
+      const online = this.options.online();
+      if (!this.firstCheck || online && !this.wasOnline) void this.automaticCheck();
+      this.wasOnline = online;
+    }, 15_000);
+    this.interval = setInterval(() => { void this.automaticCheck(); }, 6 * 60 * 60_000);
+  }
+  private async automaticCheck() {
+    if (!(this.options.getAutomatic?.() ?? this.automatic) ||
+      !(this.options.ready?.() ?? true) || !this.options.online()) return;
+    if (this.state.status === 'unsupported') return;
+    this.firstCheck = true;
+    await this.check(false);
   }
   initialize(updater: Updater, unsupported?: Extract<UpdateState, {status:'unsupported'}>['reason']) {
     for (const [name, callback] of this.events) this.updater.removeListener(name, callback);
@@ -50,7 +66,7 @@ export class Updates {
     on('error', (error: Error) => this.dispatch({type:'error', code:updateError(error)}));
   }
   snapshot = (): UpdateSnapshot => ({state:this.state, currentVersion:this.options.version,
-    lastCheckedAt:this.lastCheckedAt, automatic:this.automatic, installing:this.installing, ...(this.result ? {result:this.result} : {})});
+    lastCheckedAt:this.lastCheckedAt, automatic:this.options.getAutomatic?.() ?? this.automatic, installing:this.installing, ...(this.result ? {result:this.result} : {})});
   subscribe(listener: (snapshot: UpdateSnapshot) => void) {
     this.listeners.add(listener); return () => { this.listeners.delete(listener); };
   }
@@ -107,7 +123,7 @@ export class Updates {
     this.options.saveAutomatic(enabled); this.automatic = enabled; this.emit(); return this.snapshot();
   }
   dispose() {
-    clearTimeout(this.timer); clearInterval(this.interval);
+    clearTimeout(this.timer); clearInterval(this.interval); clearInterval(this.monitor);
     for (const [name, callback] of this.events) this.updater.removeListener(name, callback);
     this.listeners.clear();
   }

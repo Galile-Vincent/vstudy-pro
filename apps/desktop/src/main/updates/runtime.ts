@@ -45,6 +45,8 @@ export function createUpdates(store: Store, shown: Promise<void> = Promise.resol
     downloadUpdate:async()=>[],quitAndInstall:()=>{}});
   const service = new Updates(fallback as unknown as ConstructorParameters<typeof Updates>[0], {
     unsupported:'platform',version:app.getVersion(),automatic:store.settings.get().autoCheckUpdates,
+    ready:()=>store.settings.get().onboardingCompleted === true,
+    getAutomatic:()=>store.settings.get().autoCheckUpdates,
     online:()=>net.isOnline(),saveAutomatic:enabled=>{store.settings.set({autoCheckUpdates:enabled});},
   });
   void shown.then(async () => {

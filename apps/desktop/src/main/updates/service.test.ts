@@ -106,3 +106,16 @@ it('registers installation only once until a result', async () => {
   await service.download(); updater.emit('update-downloaded',{version:'0.4.5'});
   service.install(); service.install(); expect(updater.quitAndInstall).toHaveBeenCalledOnce();
 });
+
+it('waits for onboarding and checks on reconnect using persisted opt-out', async () => {
+  vi.useFakeTimers();
+  let ready=false, online=false, automatic=true;
+  const updater=new FakeUpdater();
+  const service=new Updates(updater as never,{version:'0.4.4',automatic:true,
+    ready:()=>ready,online:()=>online,getAutomatic:()=>automatic,saveAutomatic:()=>{}});
+  services.push(service);
+  await vi.advanceTimersByTimeAsync(15000); expect(updater.checkForUpdates).not.toHaveBeenCalled();
+  ready=true; await vi.advanceTimersByTimeAsync(15000); expect(updater.checkForUpdates).not.toHaveBeenCalled();
+  online=true; await vi.advanceTimersByTimeAsync(15000); expect(updater.checkForUpdates).toHaveBeenCalledOnce();
+  automatic=false; expect(service.snapshot().automatic).toBe(false);
+});
