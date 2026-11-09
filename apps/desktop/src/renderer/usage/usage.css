@@ -238,6 +238,9 @@
     background: CanvasText;
     fill: CanvasText;
   }
+  .usage-bar-input {
+    stroke: CanvasText;
+  }
   .usage-hatch-ground {
     fill: Canvas;
   }
