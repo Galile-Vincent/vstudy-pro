@@ -68,7 +68,7 @@ it('quietly disables unsupported builds', async () => {
   expect(updater.checkForUpdates).not.toHaveBeenCalled();
 });
 it.each([['ENOTFOUND','network'],['ECONNRESET','network'],['ETIMEDOUT','network'],
-  ['ERR_UPDATER_INVALID_SIGNATURE','integrity'],['ERR_UPDATER_INVALID_SHA512','integrity'],['secret raw message','failed']])(
+  ['ERR_UPDATER_INVALID_SIGNATURE','integrity'],['ERR_CHECKSUM_MISMATCH','integrity'],['secret raw message','failed']])(
   'maps %s without exposing messages', async (code, expected) => {
     const {service, updater} = setup();
     updater.checkForUpdates.mockRejectedValueOnce({code});
@@ -118,4 +118,10 @@ it('waits for onboarding and checks on reconnect using persisted opt-out', async
   ready=true; await vi.advanceTimersByTimeAsync(15000); expect(updater.checkForUpdates).not.toHaveBeenCalled();
   online=true; await vi.advanceTimersByTimeAsync(15000); expect(updater.checkForUpdates).toHaveBeenCalledOnce();
   automatic=false; expect(service.snapshot().automatic).toBe(false);
+});
+
+it.each([['net::ERR_INTERNET_DISCONNECTED','offline'],['net::ERR_NAME_NOT_RESOLVED','network'],
+  ['net::ERR_CONNECTION_RESET','network'],['net::ERR_TIMED_OUT','network'],
+  ['ERR_CHECKSUM_MISMATCH','integrity']])('maps Electron error message %s', (message,code)=>{
+  expect(updateError(new Error(message))).toBe(code);
 });
