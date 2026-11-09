@@ -177,7 +177,7 @@ it("reopens saved results with source documents, score, duration and per-type ac
   ).toBeTruthy();
 });
 
-it("shows answer comparisons, explanations and an AI action on the results page", async () => {
+it("shows answer comparisons, explanations and an AI action once a result row opens", async () => {
   setup(true);
   render(<ExamsView />);
   fireEvent.click(screen.getByRole("button", { name: "exams:history" }));
@@ -185,15 +185,21 @@ it("shows answer comparisons, explanations and an AI action on the results page"
   expect(await screen.findByText("exams:results")).toBeTruthy();
   expect(screen.getByText("100")).toBeTruthy();
   expect(screen.getByText("exams:correct")).toBeTruthy();
-  expect(screen.getByText("review:your_answer")).toBeTruthy();
-  expect(screen.getByText("review:correct_answer")).toBeTruthy();
-  expect(screen.getByText("First · Third")).toBeTruthy();
   expect(
     screen
       .getByRole("progressbar", { name: "exams:multi_select" })
       .getAttribute("aria-valuenow"),
   ).toBe("100");
-  fireEvent.click(screen.getByRole("button", { name: "exams:ask_ai" }));
+  const row = screen.getByText("review:your_answer").closest("details")!;
+  expect(row.open).toBe(false);
+  fireEvent.click(row.querySelector("summary")!);
+  expect(row.open).toBe(true);
+  const review = within(row);
+  expect(review.getByText("review:your_answer")).toBeTruthy();
+  expect(review.getByText("review:correct_answer")).toBeTruthy();
+  expect(review.getByText("First · Third")).toBeTruthy();
+  expect(review.getByText("First and third follow from the source.")).toBeTruthy();
+  fireEvent.click(review.getByRole("button", { name: "exams:ask_ai" }));
   expect(await screen.findByText("AI follow-up reasoning")).toBeTruthy();
 });
 it("confirms deletion and calls the existing artifact deletion channel", async () => {
