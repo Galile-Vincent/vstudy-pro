@@ -15,3 +15,15 @@ it('scales a custom maximum', () => {
   expect(document.querySelector('[data-slot=progress-indicator]')?.getAttribute('style'))
     .toContain('translateX(-50%)');
 });
+
+it.each([[50, 0, '-50%'], [200, 100, '0%']])('bounds value %s with max %s', (value, max, offset) => {
+  render(<Progress value={value} max={max} />);
+  expect(document.querySelector('[data-slot=progress-indicator]')?.getAttribute('style'))
+    .toContain(`translateX(${offset})`);
+});
+
+it.each([null, NaN, -1, Infinity])('keeps invalid value %s indeterminate', value => {
+  render(<Progress value={value} />);
+  expect(screen.getByRole('progressbar').getAttribute('data-state')).toBe('indeterminate');
+  expect(document.querySelector('[data-slot=progress-indicator]')?.getAttribute('style')).not.toContain('NaN');
+});
