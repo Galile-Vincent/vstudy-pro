@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, useState } from "react";
-import { getByRole, waitFor } from "@testing-library/dom";
+import { getByRole, queryByRole, waitFor } from "@testing-library/dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Courses, deadlineGroup } from "./index";
@@ -41,6 +41,7 @@ beforeEach(async () => {
 afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();
+  vi.useRealTimers();
 });
 async function mount(api: MoodleApi, courseId?: string, onDocument = vi.fn()) {
   await act(async () =>
@@ -1137,4 +1138,22 @@ it('focuses the course list after disconnecting from course detail', async () =>
   await chooseDisconnect();
   await click('Disconnect school', getByRole(document.body, 'dialog'));
   await waitFor(() => expect(document.activeElement).toBe(getByRole(host, 'heading', {level: 2, name: /Your courses/})));
+});
+
+
+it('restores the disconnect trigger and reports a rejected disconnect', async () => {
+  const api = createMockMoodleApi();
+  let reject!: (reason: Error) => void;
+  api.disconnect = () => new Promise((_, fail) => { reject = fail; });
+  await mount(api);
+  const trigger = getByRole(host, 'button', {name: /^Disconnect /});
+  vi.useFakeTimers();
+  await act(async () => trigger.click());
+  await click('Disconnect school', getByRole(document.body, 'dialog'));
+  await act(async () => vi.runOnlyPendingTimersAsync());
+  expect(queryByRole(document.body, 'dialog')).toBeNull();
+  await act(async () => reject(new Error('offline')));
+  expect(document.activeElement).toBe(trigger);
+  vi.useRealTimers();
+  expect(host.textContent).toContain(i18n.t('moodle:action_error'));
 });
