@@ -21,7 +21,8 @@ export function ListRow({
   leading,
   meta,
   actions,
-  selected = false,
+  selected,
+  'aria-current': current,
   divider = false,
   onClick,
   href,
@@ -54,7 +55,7 @@ export function ListRow({
           className={classes}
           href={disabled ? undefined : href}
           aria-disabled={disabled || undefined}
-          aria-current={selected ? 'page' : undefined}
+          aria-current={current ?? (selected ? 'page' : undefined)}
           tabIndex={disabled ? -1 : undefined}
         >
           {content}
@@ -65,7 +66,8 @@ export function ListRow({
           className={classes}
           disabled={disabled}
           onClick={onClick}
-          aria-pressed={selected}
+          aria-current={current}
+          aria-pressed={current ? undefined : selected}
         >
           {content}
         </button>
