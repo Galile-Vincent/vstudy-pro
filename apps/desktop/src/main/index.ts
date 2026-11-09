@@ -14,7 +14,7 @@ import { confirmRestoreStartup, rollbackRestoreStartup } from "./storage/restore
 import { recoverRestore } from "./storage/backup";
 import { applyNativeTheme, nativeBackground } from './theme';
 import { initializeMoodleProtocol } from './moodle/sso-protocol';
-import { log, copyDiagnostics, stopFileLogging } from './logging';
+import { log, copyDiagnostics, stopFileLogging, logDeletionFailure } from './logging';
 import { showAttachedMessage, showStartupError, type StartupStage } from './dialogs';
 import { readWindowState, trackWindowState } from './window-state';
 import { coordinateShutdown } from './shutdown';
@@ -333,7 +333,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
     store = undefined;
   }, async (error, scheduled) => {
     const reason = error instanceof Error ? error.message : String(error);
-    log({phase:'delete-quarantine-failed',error});
+    logDeletionFailure(error);
     dialog.showErrorBox(tr('settings:delete_title'), tr(scheduled ? 'settings:delete_failed' : 'settings:delete_not_scheduled',{reason}));
   }, () => { restartOwnedApp(app); });
   let deleteRequested = false;

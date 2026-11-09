@@ -55,3 +55,10 @@ export function copyDiagnostics(): void {
   if (!lines.length) lines = recent;
   clipboard.writeText(`VStudy Pro ${app.getVersion()}\nOS ${process.platform} ${release()}\nArch ${process.arch}\n${lines.slice(-100).map(redact).join('\n')}`);
 }
+
+export function logDeletionFailure(error: unknown): void {
+  const previous = fileLogging;
+  fileLogging = true;
+  try { log({phase:'delete-failed',error}); }
+  finally { fileLogging = previous; }
+}

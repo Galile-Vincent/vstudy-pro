@@ -195,3 +195,10 @@ it('does not recreate data through diagnostics after quiescing file writes', () 
   log({phase:'main-exit'});
   expect(fs.existsSync(mocks.root)).toBe(false);
 });
+it('persists deletion diagnostics after the sink was stopped', async () => {
+  const directory = fixture();
+  stopFileLogging();
+  const { logDeletionFailure } = await import('./logging');
+  logDeletionFailure(Error('DELETE_LOCKED'));
+  expect(readFileSync(join(directory,'main.log'),'utf8')).toContain('DELETE_LOCKED');
+});
