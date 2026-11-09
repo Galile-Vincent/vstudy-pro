@@ -1,3 +1,4 @@
+import { catalogDeadlines } from './deadline-groups';
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
 import { Card, PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
@@ -310,17 +311,9 @@ function CoursesBody({
       setOpening(undefined);
     }
   };
-  const overdue = (overview?.upcoming ?? []).filter(d =>
-    !d.submitted && !d.orphaned && Date.parse(d.dueAt) < Date.now(),
-  ).sort((a, b) => a.dueAt.localeCompare(b.dueAt));
-  const dueSoon = (overview?.upcoming ?? [])
-    .filter(
-      (d) =>
-        !d.submitted && !d.orphaned &&
-        Date.parse(d.dueAt) >= Date.now() &&
-        Date.parse(d.dueAt) <= Date.now() + week,
-    )
-    .sort((a, b) => a.dueAt.localeCompare(b.dueAt));
+  const { overdue, dueSoon, undated } = catalogDeadlines(
+    overview?.upcoming ?? [], Date.now(),
+  );
   const updates = [...new Map([...homeDetails.flatMap(detail => detail.notifications), ...(overview?.otherNotifications ?? [])].map(item => [item.id,item])).values()];
   const unreadUpdates = updates.filter(item => !item.read).length;
   const availableTerms = termFilters;
@@ -1165,16 +1158,16 @@ function CoursesBody({
         ))}
       </Tabs>
     </Section>
-    <Section title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length}>
-      {([overdue, dueSoon] as const).map(
+    <Section title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length + undated.length}>
+      {([overdue, dueSoon, undated] as const).map(
         (items, group) =>
           items.length > 0 && (
             <Section
               key={group}
-              title={tr(group === 0 ? "moodle:overdue_column" : "moodle:next_seven_days")}
+              title={tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
             >
               <ul className="moodle-due-list list-none p-0">
-                {items.slice(0, allDue ? undefined : 5).map((d) => {
+                {items.slice(0, group === 0 || !allDue ? 5 : undefined).map((d) => {
                   const course = overview.courses.find((c) => c.id === d.courseId);
                   return (
                     <li key={d.id}>
@@ -1193,12 +1186,12 @@ function CoursesBody({
                             ? displayTitle(course.identity, lang, course.fullName)
                             : tr("moodle:school")
                         }
-                        meta={
+                        meta={group !== 2 &&
                           <time dateTime={d.dueAt} title={date(d.dueAt)}>
                             {relative(d.dueAt)}
                           </time>
                         }
-                        actions={remind(d)}
+                        actions={group !== 2 && remind(d)}
                       />
                     </li>
                   );
@@ -1207,8 +1200,8 @@ function CoursesBody({
             </Section>
           ),
       )}
-      {overdue.length + dueSoon.length === 0 && <EmptyState title={tr("moodle:all_caught_up")} />}
-      {Math.max(overdue.length, dueSoon.length) > 5 && (
+      {!error && overdue.length + dueSoon.length + undated.length === 0 && <EmptyState title={tr("moodle:all_caught_up")} />}
+      {Math.max(dueSoon.length, undated.length) > 5 && (
         <Button variant="ghost" aria-expanded={allDue} onClick={() => setAllDue(!allDue)}>
           {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
         </Button>

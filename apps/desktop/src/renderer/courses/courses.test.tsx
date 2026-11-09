@@ -947,3 +947,16 @@ it("retains a one-column grid fallback and separate course actions", async () =>
   expect(card.querySelector("button button")).toBeNull();
   expect(host.querySelector('[data-slot=page-header] h1')?.className).not.toContain("break-all");
 });
+
+it('shows invalid and absent dates in an explicit final group', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, upcoming: [
+    {...overview.upcoming[0]!, id: 'missing', title: 'Undated work', dueAt: ''},
+    {...overview.upcoming[0]!, id: 'invalid', title: 'Invalid date work', dueAt: 'bad'},
+  ]});
+  await mount(api);
+  expect(host.textContent).toContain('No due date');
+  expect(host.textContent).toContain('Undated work');
+  expect(host.textContent).toContain('Invalid date work');
+});
